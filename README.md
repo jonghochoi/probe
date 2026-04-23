@@ -65,11 +65,10 @@ probe/
 │
 ├── docs/
 │   ├── INTRO_KO.md                # Korean onboarding + operations manual
+│   ├── STYLE_GUIDE.md             # Formatting rules — emoji system, link
+│   │                              # format, Korean translation principles
+│   │                              # (single source of truth for output format)
 │   └── LOGO.png                   # Project logo
-│
-├── STYLE_GUIDE.md                 # Formatting rules — emoji system, link
-│                                  # format, Korean translation principles
-│                                  # (single source of truth for output format)
 │
 ├── brand.py                       # ASCII art, sigils, color constants
 └── README.md                      # ← you are here
@@ -203,7 +202,7 @@ manipulation RL.
 CONTEXT (read-only):
 - research_context.md  (attached)
 - research_log/<last 2 weeks>.md  (attached)
-- STYLE_GUIDE.md  (attached) — formatting, emoji system, translation rules
+- docs/STYLE_GUIDE.md  (attached) — formatting, emoji system, translation rules
 
 TASK:
 Produce a Scouting Report for week <YYYY-WXX>.
@@ -233,7 +232,7 @@ OUTPUT — English file (YYYY-WXX.md)
 
 Follow research_log/_TEMPLATE.md exactly. Top 3–5 papers only.
 
-### Emoji rules (STYLE_GUIDE.md §2)
+### Emoji rules (docs/STYLE_GUIDE.md §2)
 Apply emojis to section and subsection headers only — never inside body text.
 
 Section-level (##):
@@ -254,7 +253,7 @@ Subsection-level (###), same across all papers:
   ⚠️  (d) Failure mode to probe first
   📌  All sub-sections within Context Suggestions
 
-### Link rules (STYLE_GUIDE.md §3)
+### Link rules (docs/STYLE_GUIDE.md §3)
 Every paper entry must include a direct link:
   - arXiv → [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)
   - DOI   → [DOI](https://doi.org/...)
@@ -276,7 +275,7 @@ For each paper, state:
 OUTPUT — Korean file (YYYY-WXX-KO.md)
 
 Produce a faithful Korean translation of the English file immediately
-after the English file is complete. Follow STYLE_GUIDE.md §4 exactly.
+after the English file is complete. Follow docs/STYLE_GUIDE.md §4 exactly.
 
 Key rules:
   - Paper titles: keep original English title.
@@ -483,7 +482,7 @@ If none of those are true after a month, the prompt is drifting or the pinned li
 | Document | Description |
 |---|---|
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
-| [`STYLE_GUIDE.md`](STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean translation |
+| [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean translation |
 | [`research_context.md`](research_context.md) | Live research context — questions, hypotheses, pinned literature |
 | [`research_log/_TEMPLATE.md`](research_log/_TEMPLATE.md) | Weekly Scouting Report template |
 | [`research_log/2026-W16_EXAMPLE.md`](research_log/2026-W16_EXAMPLE.md) | Reference report — output-quality bar |
