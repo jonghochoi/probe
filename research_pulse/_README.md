@@ -38,6 +38,7 @@ research_pulse/
    (export chat as HTML/JSON). Save the file under
    `research_pulse/inbox/YYYY-WXX_<channel>.<ext>`. Anything under `inbox/`
    is gitignored — team chat is assumed private.
+   → Step-by-step guide (KR): [`EXPORT_GUIDE_KO.md`](EXPORT_GUIDE_KO.md).
 2. **Run the digest.** Open Claude (desktop, CLI, or claude.ai) with this
    repo attached. Paste `.claude/prompts/pulse-digest.md` and point it at
    the inbox file. Claude produces `research_pulse/YYYY-WXX.md` following
