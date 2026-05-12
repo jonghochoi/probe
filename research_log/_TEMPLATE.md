@@ -13,10 +13,11 @@
 ## 📋 Scout Methodology
 
 <!--
-Summarize the three retrieval passes in 3–5 bullets. Weight: Author Watch > Citation-Graph > Keyword Sweep.
-  · Author Watch — N researchers from research_context.md §5, date range
-  · Citation-Graph Expansion — M pinned papers from §4, citation window
+Summarize the retrieval passes in 3–5 bullets. Weight: Author Watch > Citation-Graph > Keyword Sweep; add Competitor Monitoring as a dedicated pass.
+  · Author Watch — N researchers from research_context.md §9, date range
+  · Citation-Graph Expansion — M pinned papers from §8 (Tracked Literature, 5×8), citation window
   · Keyword Sweep — queries, cs.RO + cs.LG window, anti-topic filter from §7
+  · Competitor Monitoring — §10 watch list scan (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage)
 If any tool call failed, state the error verbatim. Do not fabricate.
 -->
 
@@ -27,8 +28,8 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
 
-### 🎯 (a) Q# / H# touched
-<!-- Which Active Question(s) or Hypothesis(es) from research_context.md does this address? -->
+### 🎯 (a) P# / D# touched
+<!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D15) from research_context.md does this address? Mention CP1–CP5 in body if it lands at a specific Checkpoint. Also note any Identity tension/support and any §10 Competitor implication. -->
 
 ### ✨ (b) What is genuinely new
 <!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->
@@ -47,7 +48,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### 🎯 (a) Q# / H# touched
+### 🎯 (a) P# / D# touched
 ### ✨ (b) What is genuinely new
 ### ⚙️ (c) Decision implication
 ### ⚠️ (d) Failure mode to probe first
@@ -59,7 +60,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### 🎯 (a) Q# / H# touched
+### 🎯 (a) P# / D# touched
 ### ✨ (b) What is genuinely new
 ### ⚙️ (c) Decision implication
 ### ⚠️ (d) Failure mode to probe first
@@ -68,12 +69,12 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ## 🌱 Paper 4 — CROSS-POLLINATION (monthly only)
 
-<!-- Include once per month. Rotate target field per research_context.md §8 (Cross-pollination Budget). -->
+<!-- Include once per month. Rotate target field per research_context.md §12 (Cross-pollination Budget). -->
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...>
 
-### 🎯 (a) Q# / H# touched
+### 🎯 (a) P# / D# touched
 ### ✨ (b) What is genuinely new
 ### ⚙️ (c) Decision implication
 ### ⚠️ (d) Failure mode to probe first
@@ -106,17 +107,20 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 <!-- Agent proposes edits to research_context.md. Human decides. Agent must NOT edit research_context.md directly. -->
 
-### 📌 Pinned literature
-<!-- Replace / add / remove pinned paper. Include arXiv link. -->
+### 📌 Tracked literature
+<!-- Replace / add / remove a pinned paper within a Pillar's 8-paper cap (§8.1–§8.5). Include arXiv link and target Pillar. -->
 
-### 📌 Hypotheses
-<!-- Narrow / strengthen / weaken / retire H#. State which evidence this week moved it. -->
+### 📌 Decision Log
+<!-- Trigger an existing deferred candidate (cite D# + checkpoint), revise a v1 default's rationale, or propose a new decision. State which evidence this week moved it. -->
 
 ### 📌 Anti-topics
 <!-- Candidate new exclusion rule surfaced by this week's filter set. -->
 
 ### 📌 Researchers to follow
-<!-- Add / remove authors based on signal this week. -->
+<!-- Add / remove authors based on signal this week (§9). -->
+
+### 📌 Competitor / Kindred monitoring
+<!-- Any new release from §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage)? Differentiation vehicle still intact? -->
 
 ---
 
@@ -126,7 +130,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 Self-check against the last 2 weeks of research_log/:
   · Papers already covered? (list, or "none")
   · Contradictions with last 2 weeks' findings?
-  · Open questions partially answered this week?
+  · Decision-Log triggers / falsifier evidence observed this week?
   · Month-trend note (only on first week of month).
   · Anti-topics filter health — count of papers excluded.
 -->
