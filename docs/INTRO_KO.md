@@ -34,9 +34,11 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
 ```
                   ┌──────────────────────────────┐
                   │     research_context.md      │  ← 정적. 사람이 관리.
-                  │  • Active Questions (Q1–Q5)  │
-                  │  • Hypotheses (H1–H5)        │
-                  │  • Pinned Literature (≤8)    │
+                  │  • Identity & Purpose        │
+                  │  • Pillars (P1–P5)           │
+                  │  • Decision Log (D1–D15)     │
+                  │  • Tracked Literature (5×8)  │
+                  │  • Competitor Monitoring     │
                   │  • Researchers to Follow     │
                   │  • Anti-topics               │
                   └──────────────┬───────────────┘
@@ -49,12 +51,14 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   │  1. Author Watch             │  ← 가장 효율적
                   │  2. Citation-graph Expansion │  ← 의미 기반 탐색
                   │  3. Keyword Sweep            │  ← 보조 (노이즈 多)
+                  │  4. Competitor Monitoring    │  ← §10 watch list
                   │                              │
                   │  Score each candidate:       │
-                  │  · Q#/H# relevance           │
-                  │  · Novelty vs. pinned        │
-                  │  · Reproducibility           │
-                  │  · Sim2Real evidence         │
+                  │  • P# / D# 연관성            │
+                  │  • Identity 정합성           │
+                  │  • Novelty vs. tracked       │
+                  │  • Reproducibility           │
+                  │  • Sim2Real evidence         │
                   └──────────────┬───────────────┘
                                  │ writes
                                  ▼
@@ -62,7 +66,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   │  research_log/YYYY-W##.md    │  ← Scouting Report
                   │                              │
                   │  Top 3–5 papers only         │
-                  │  • Connects to: Q# / H#      │
+                  │  • Connects to: P# / D#      │
                   │  • What's genuinely new      │
                   │  • Decision implication      │  ← 핵심
                   │  • Failure mode to probe     │  ← 핵심
@@ -72,9 +76,9 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   ┌──────────────────────────────┐
                   │           Human              │
                   │                              │
-                  │  · Read, judge, discard      │
-                  │  · Update context.md (월 1회) │
-                  │  · Record feedback (월 1회)   │
+                  │  • Read, judge, discard      │
+                  │  • Update context.md         │
+                  │  • Record feedback           │
                   └──────────────────────────────┘
 ```
 
@@ -87,14 +91,14 @@ Probe는 탐사선이다. 전투는 하지 않는다.
 
 | 역할 | 구체적 행동 |
 |---|---|
-| **방향 설정** | Active Questions의 우선순위 결정 (Q1이 정말 가장 중요한가?) |
-| **가설 정제** | 에이전트가 찾아온 논문이 H# 중 하나를 흔들면, 가설을 수정 또는 강화 |
-| **평가 프로토콜** | Sim2real gap을 측정할 객관적 기준을 정의 (없으면 어떤 리포트도 의미 없음) |
-| **맥락 갱신** | 월 1회 `research_context.md` 업데이트 — 실험 결과, 방향 전환, 새 가설 반영 |
+| **방향 설정** | Identity 명제 점검 + Pillar 우선순위 결정 (P1이 정말 가장 중요한가?) |
+| **Decision 정제** | 에이전트가 찾아온 논문이 D# 중 하나의 v1 default를 흔들거나 deferred 트리거를 점등시키면, Decision Log 업데이트 |
+| **평가 프로토콜** | D13 (P5 skeleton)의 falsifier 임계값·메트릭을 유지·강화 — 없으면 어떤 리포트도 의미 없음 |
+| **맥락 갱신** | Revisit Checkpoint(CP1–CP5) 도래 시 `research_context.md` 업데이트 — 실험 결과, deferred 트리거, 새 evidence 반영 |
 | **피드백 루프** | Scouting Report를 실제로 읽고, 실험 설계에 반영된 것을 기록 |
 
 > "에이전트가 잘 작동하고 있는가"는 에이전트 스스로 판단할 수 없다.
-> Section 9 (Feedback Loop)를 매월 채우는 것이 유일한 측정 수단이다.
+> Section 13 (Feedback Loop)를 매월 채우는 것이 유일한 측정 수단이다.
 
 ---
 
@@ -104,12 +108,13 @@ Probe는 탐사선이다. 전투는 하지 않는다.
 
 | 태스크 | 방법 |
 |---|---|
-| **Author watch** | Pinned 연구자의 최근 14일 arXiv 제출 감시 |
-| **Citation-graph expansion** | Pinned literature를 인용한 신규 논문 탐색 (키워드 없이 의미 기반) |
-| **Keyword sweep** | cs.RO + cs.LG 검색, Anti-topics 필터 적용 |
-| **Scoring** | Q#/H# 연관성, 재현 가능성, Sim2Real 증거 점수화 |
-| **Anti-topic filtering** | 모바일 매니퓰레이션·로코모션·parallel gripper 등 자동 제거 |
-| **Cross-pollination** | 월 1회 인접 분야(접촉 최적화, 촉각 신경과학 등)에서 강제 1편 픽업 |
+| **Author watch** | §9 연구자의 최근 14일 arXiv 제출 감시 |
+| **Citation-graph expansion** | §8 Tracked Literature(5×8)를 인용한 신규 논문 탐색 (키워드 없이 의미 기반) |
+| **Keyword sweep** | cs.RO + cs.LG 검색, §7 Anti-topics 필터 적용 |
+| **Competitor monitoring** | §10 watch list(DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage) 신규 릴리스 점검 |
+| **Scoring** | P# / D# 연관성, Identity 정합/긴장, 재현 가능성, Sim2Real 증거 점수화 |
+| **Anti-topic filtering** | 모바일 매니퓰레이션·로코모션·parallel gripper·router-based MoE(DexReMoE 제외) 자동 제거 |
+| **Cross-pollination** | 월 1회 인접 분야(§12 로테이션)에서 강제 1편 픽업 |
 | **Self-check** | 지난 2주 로그와 중복 여부, Anti-topics 필터 적용 횟수 자체 검증 |
 
 에이전트가 **절대 하지 않는 것**: `research_context.md` 수정.
@@ -135,8 +140,8 @@ probe/
 모든 것을 한 파일에 쌓으면 6주 안에 context가 부풀어
 에이전트가 이미 다뤘던 논문을 재추천하거나 오래된 pinned literature를 망각한다.
 
-- **Pinned literature: 최대 8편.** 추가만 하지 말고, 교체 기준으로 관리.
-- **Active Questions: 5개 고정.** 늘리면 scoring이 희석된다.
+- **Tracked literature: Pillar당 8편 hard cap (5×8 = 40편).** 추가만 하지 말고, 교체 기준으로 관리(§8).
+- **Pillars: 5개 고정.** 늘리면 scoring이 희석된다. Tracked items만 CP에서 진화시킨다.
 - **Scouting Report: 직전 2주 로그만 읽는다.** 그 이전은 에이전트 context에서 제외.
 
 ---
@@ -167,7 +172,7 @@ probe/
 ### Echo chamber 방지
 
 Citation-graph만 쓰면 본인 관심사 주변에서만 맴돈다.
-`research_context.md` Section 8의 Cross-pollination 로테이션이 이를 막는다.
+`research_context.md` Section 12의 Cross-pollination 로테이션이 이를 막는다.
 월 1회 인접 분야(접촉 최적화, FEM 시뮬레이션, 촉각 신경과학 등)에서
 강제로 1편을 픽업하는 것이 의외로 가장 가치 있는 발견의 소스가 된다.
 
@@ -203,17 +208,18 @@ output:
 ### 지속 가능성의 핵심: 월간 리뷰
 
 자동화됐다고 방치하면 에이전트가 잘 작동하는지 알 수 없다.
-`research_context.md` Section 9 (Feedback Loop)를 월 1회 직접 채운다.
+`research_context.md` Section 13 (Feedback Loop)를 월 1회 직접 채운다.
 
 | 채울 것 | 질문 |
 |---|---|
 | Papers surfaced | 이번 달 Probe가 올린 총 논문 수 |
 | Actually read | 실제로 정독한 것 |
-| Influenced a decision | 실험 설계나 가설 수정에 반영된 것 |
+| Influenced a decision | 실험 설계나 Decision Log 수정에 반영된 것 |
 
 이 세 숫자의 **비율**이 Probe의 실효성 지표다.
-3개월마다 "내 Q1–Q5에 대한 생각이 실제로 바뀌었는가?"를 자문한다.
+3개월마다 "내 Identity 명제 또는 어느 Pillar에 대한 생각이 실제로 바뀌었는가?"를 자문한다.
 바뀌지 않았다면 retrieval 파이프라인을 재점검한다.
+추가로 매 Checkpoint마다 §10 Competitor 동향과 D1–D15 deferred 트리거를 함께 점검한다.
 
 ---
 

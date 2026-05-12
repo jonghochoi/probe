@@ -43,7 +43,7 @@ These four emojis are used consistently across **all** paper entries:
 
 | Emoji | Subsection |
 |-------|------------|
-| 🎯 | (a) Q# / H# touched |
+| 🎯 | (a) P# / D# touched |
 | ✨ | (b) What is genuinely new |
 | ⚙️ | (c) Decision implication |
 | ⚠️ | (d) Failure mode to probe first |
@@ -64,15 +64,15 @@ Context Suggestions subsections use a single emoji:
 #### Correct example
 ```markdown
 ## 🥇 Paper 1 — PRIORITY ★★★
-### 🎯 (a) Q# / H# touched
+### 🎯 (a) P# / D# touched
 ### ✨ (b) What is genuinely new
 ```
 
 #### Incorrect example
 ```markdown
-## Paper 1 — PRIORITY ★★★ 🥇        ← emoji at end, wrong
-### (a) 🎯 Q# / H# touched           ← emoji inside text, wrong
-The policy achieved ✨ great results.  ← emoji in body text, wrong
+## Paper 1 — PRIORITY ★★★ 🥇              ← emoji at end, wrong
+### (a) 🎯 P# / D# touched                  ← emoji inside text, wrong
+The policy achieved ✨ great results.       ← emoji in body text, wrong
 ```
 
 ---
@@ -105,7 +105,7 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
-| Q#, H# tags | Keep verbatim (`Q3`, `H6`, etc.) |
+| P#, D#, CP# tags | Keep verbatim (`P2`, `D11`, `CP3`, etc.) |
 | arXiv links | Keep identical to English version |
 | Emojis | Keep identical — same position, same emoji |
 | Section headers | Translate header text; keep emoji prefix |
@@ -154,7 +154,7 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | 🚫 Candidate Papers That Did Not Pass Filter | 🚫 필터 통과 실패 후보 논문 |
 | 💡 Context Suggestions | 💡 컨텍스트 제안 |
 | 🔄 Week-over-Week Synthesis | 🔄 주차별 종합 |
-| 🎯 (a) Q# / H# touched | 🎯 (a) 관련 Q# / H# |
+| 🎯 (a) P# / D# touched | 🎯 (a) 관련 Pillar / Decision (P# / D#) |
 | ✨ (b) What is genuinely new | ✨ (b) 진정으로 새로운 점 |
 | ⚙️ (c) Decision implication | ⚙️ (c) 의사결정 함의 |
 | ⚠️ (d) Failure mode to probe first | ⚠️ (d) 먼저 검증해야 할 실패 모드 |
@@ -174,3 +174,4 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | Version | Date | Change |
 |---------|------|--------|
 | v1.0 | 2026-04-22 | Initial version — emoji system, link rules, Korean translation principles |
+| v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed), matching `research_context.md` v4.0 |

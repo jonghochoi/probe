@@ -51,9 +51,11 @@ Summaries are cheap. PROBE produces **decision material**.
 probe/
 │
 ├── research_context.md            # Static context — human-maintained
-│                                  #   Active Questions (Q1–Q5)
-│                                  #   Working Hypotheses (H1–H5)
-│                                  #   Pinned Literature (≤ 8)
+│                                  #   Identity & Purpose
+│                                  #   Pillars (P1–P5)
+│                                  #   Decision Log (D1–D15)
+│                                  #   Tracked Literature (5 × 8)
+│                                  #   Competitor Monitoring
 │                                  #   Researchers to Follow
 │                                  #   Anti-topics (noise filter)
 │
@@ -90,9 +92,11 @@ Shove everything into one file and within six weeks the context bloats, the agen
 ```
               ┌──────────────────────────────┐
               │     research_context.md      │  static · human-owned
-              │  • Active Questions (Q1–Q5)  │
-              │  • Hypotheses (H1–H5)        │
-              │  • Pinned Literature (≤ 8)   │
+              │  • Identity & Purpose        │
+              │  • Pillars (P1–P5)           │
+              │  • Decision Log (D1–D15)     │
+              │  • Tracked Literature (5 × 8)│
+              │  • Competitor Monitoring     │
               │  • Researchers to Follow     │
               │  • Anti-topics               │
               └──────────────┬───────────────┘
@@ -105,10 +109,12 @@ Shove everything into one file and within six weeks the context bloats, the agen
               │  1. Author Watch             │  ← highest signal
               │  2. Citation-Graph Expansion │  ← semantic, not keyword
               │  3. Keyword Sweep            │  ← noisy, last resort
+              │  4. Competitor Monitoring    │  ← §10 watch list
               │                              │
               │  Score every candidate on:   │
-              │    · Q# / H# relevance       │
-              │    · Novelty vs. pinned      │
+              │    · P# / D# relevance       │
+              │    · Identity align/tension  │
+              │    · Novelty vs. tracked     │
               │    · Reproducibility         │
               │    · Sim2Real evidence       │
               └──────────────┬───────────────┘
@@ -118,7 +124,7 @@ Shove everything into one file and within six weeks the context bloats, the agen
               │  research_log/YYYY-W##.md    │  Scouting Report
               │                              │
               │  Top 3–5 papers only         │
-              │    · Connects to Q# / H#     │
+              │    · Connects to P#/D#       │
               │    · What's genuinely new    │
               │    · Decision implication    │  ← the point
               │    · Failure mode to probe   │  ← the point
@@ -142,12 +148,12 @@ PROBE is a scout. It does not fight. The human still owns every judgement call.
 
 | Human owns | Agent owns |
 |---|---|
-| **Direction** — is Q1 really the most important question? | **Author watch** — last 14 days of submissions from pinned researchers |
-| **Hypothesis refinement** — if a paper shakes H3, rewrite it | **Citation-graph expansion** — semantic neighbors of pinned papers |
-| **Evaluation protocol** — without this, no report matters | **Anti-topic filtering** — drop mobile-manip, locomotion, parallel grippers |
-| **Monthly context update** — pinned papers, new hypotheses | **Scoring** — Q#/H# fit, novelty, reproducibility, Sim2Real evidence |
-| **Feedback loop** — did any scouted paper change an experiment? | **Cross-pollination** — forced monthly pick from an adjacent field |
-| **Discarding** — most papers won't matter, that's fine | **Self-check** — compare against last 2 weeks, no duplicate recs |
+| **Direction** — is the Identity claim still load-bearing? Is P1 really the most important Pillar? | **Author watch** — last 14 days of submissions from §9 researchers |
+| **Decision Log curation** — if a paper shakes a v1 default or trips a deferred trigger, update D# | **Citation-graph expansion** — semantic neighbors of §8 tracked literature (5 × 8) |
+| **Evaluation protocol** — D13's falsifier thresholds; without these, no report matters | **Anti-topic filtering** — drop mobile-manip, locomotion, parallel grippers, router-MoE (DexReMoE excepted) |
+| **CP-driven context update** — Tracked Literature, Decision Log, Competitor monitoring at every CP | **Scoring** — P#/D# fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
+| **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced monthly pick from §12 rotation |
+| **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage) |
 
 The agent **never** edits `research_context.md`. It can *propose* changes in the report. The human decides.
 
@@ -160,7 +166,7 @@ git clone https://github.com/jonghochoi/probe.git
 cd probe
 ```
 
-1. Open `research_context.md` and fill in **your** robot, stack, questions, hypotheses, and pinned papers. Shipping defaults are a Sharpa Hand / Isaac Lab template — useful as an example, not a universal config.
+1. Open `research_context.md` and fill in **your** Identity, Pillars, Decision Log defaults, Tracked Literature, and Competitor watch list. Shipping defaults are a Sharpa Hand / Isaac Lab template — useful as an example, not a universal config.
 2. Decide how you want to run the agent — manually in a Claude.ai conversation, or fully scheduled via Claude Code Routines. See [Agent Setup Guide](#-agent-setup-guide) below.
 3. Generate your first Scouting Report. Review it ruthlessly. Tune the prompt. Commit.
 
@@ -212,17 +218,19 @@ Every weekly scouting run produces TWO output files:
 
 PROCESS (in this order):
 1. Author Watch — check last 14 days of arXiv submissions from
-   every researcher listed in Section 5 of research_context.md.
-2. Citation-Graph Expansion — for each Pinned paper in Section 4,
-   list new papers (past 8 weeks) that cite it. Rank by semantic
-   relevance to the Active Questions (Section 2), not keyword overlap.
+   every researcher listed in Section 9 of research_context.md.
+2. Citation-Graph Expansion — for each pinned paper in Section 8
+   (Tracked Literature; 5 Pillars × 8 papers = 40 anchors), list
+   new papers (past 8 weeks) that cite it. Rank by semantic
+   relevance to the Pillars (Section 5) and active Decisions
+   (Section 6), not keyword overlap.
 3. Keyword Sweep — cs.RO + cs.LG, last 14 days, filter against
    the Anti-topics list (Section 7). This is the noisiest source;
    weight it lowest.
 
 For every candidate paper, score on a 0–3 scale:
-  · Relevance     — which Q# / H# does it touch?
-  · Novelty       — genuinely new, or a delta over pinned work?
+  · Relevance     — which P# / D# does it touch?
+  · Novelty       — genuinely new, or a delta over tracked work?
   · Reproducibility — code / data / hardware details?
   · Sim2Real      — real-robot evidence, or sim-only?
 
@@ -247,7 +255,7 @@ Section-level (##):
   🔄  Week-over-Week Synthesis
 
 Subsection-level (###), same across all papers:
-  🎯  (a) Q# / H# touched
+  🎯  (a) P# / D# touched
   ✨  (b) What is genuinely new
   ⚙️  (c) Decision implication
   ⚠️  (d) Failure mode to probe first
@@ -263,7 +271,7 @@ table, and inline in Context Suggestions. Do not fabricate arXiv IDs.
 
 ### Per-paper required sections
 For each paper, state:
-  (a) which Q# or H# it touches,
+  (a) which P# / D# it touches,
   (b) what is *genuinely* new,
   (c) decision implication — what changes in MY Isaac Lab pipeline
       next week if this paper is right? Be concrete (config name,
@@ -281,7 +289,7 @@ Key rules:
   - Paper titles: keep original English title.
   - Technical terms: Korean + English in parentheses on first occurrence;
     Korean only thereafter. Use the glossary in STYLE_GUIDE.md §4-2.
-  - Config / code names, formulas, Q#/H# tags, arXiv links: keep verbatim.
+  - Config / code names, formulas, P#/D# tags, arXiv links: keep verbatim.
   - Emojis: identical position and symbol as the English file.
   - Section headers: translate text, keep emoji prefix.
     Use the header translation table in STYLE_GUIDE.md §4-3.
@@ -296,7 +304,7 @@ RULES (both files):
   write the suggestion under 💡 Context Suggestions.
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.
 - Once per month, force-include one paper from an adjacent field
-  per Section 8 of research_context.md (Cross-pollination).
+  per Section 12 of research_context.md (Cross-pollination Budget).
 - Every paper link must be verified to resolve correctly before
   inclusion. Do not fabricate arXiv IDs.
 ```
@@ -416,7 +424,7 @@ Inspect the dry-run output like you inspected the Stage 1 reports. If it's good,
 
 **Step 5 — Monthly human review**
 
-Automation is not the finish line. Once a month, open `research_context.md` Section 9 (Feedback Loop) and fill in three numbers:
+Automation is not the finish line. Once a month, open `research_context.md` Section 13 (Feedback Loop) and fill in three numbers:
 
 | Field | Question |
 |---|---|
@@ -455,12 +463,12 @@ The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — 
 
 ## 📡 Signals That PROBE Is Actually Working
 
-- At least **one paper per week** triggers a concrete change in your experiment design.
+- At least **one paper per week** triggers a concrete change in your experiment design or in a Decision Log entry.
 - The Anti-topics filter catches **≥ 10 papers/week** — that's the healthy exclusion rate.
 - The agent reports "no paper scored ≥ 2 this week" without padding.
-- Every 3 months, you can point at a line in `research_context.md` that moved because of a scouted paper.
+- Every Checkpoint (CP1–CP5), you can point at a line in `research_context.md` Decision Log that moved because of a scouted paper.
 
-If none of those are true after a month, the prompt is drifting or the pinned literature is stale. Fix the static context first, the prompt second. The model is almost never the problem.
+If none of those are true after a month, the prompt is drifting or the Tracked Literature is stale. Fix the static context first, the prompt second. The model is almost never the problem.
 
 ---
 
@@ -483,7 +491,7 @@ If none of those are true after a month, the prompt is drifting or the pinned li
 |---|---|
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
 | [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean translation |
-| [`research_context.md`](research_context.md) | Live research context — questions, hypotheses, pinned literature |
+| [`research_context.md`](research_context.md) | Live research context — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | [`research_log/_TEMPLATE.md`](research_log/_TEMPLATE.md) | Weekly Scouting Report template |
 | [`research_log/2026-W16_EXAMPLE.md`](research_log/2026-W16_EXAMPLE.md) | Reference report — output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
