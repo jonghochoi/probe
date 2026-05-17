@@ -1,0 +1,19 @@
+name: probe-p1-synthesis
+description: Monthly P1 narrative brief — connects the pinned literature to D1–D9.
+
+trigger:
+  cron: "0 9 1 * *"            # 1st of each month, 09:00
+  timezone: Asia/Seoul
+
+model: claude-sonnet-4-6
+
+context_files:
+  - research_context_P1.md      # P1-only scope; reads §4 + §6 only
+
+prompt_file: .claude/prompts/synthesis.md
+
+output:
+  mode: github_pr
+  branch: probe/synthesis-YYYY-MM
+  path:   synthesis/P1_BRIEF.md
+  title:  "chore(probe): P1 synthesis brief YYYY-MM"
