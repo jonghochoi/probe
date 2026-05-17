@@ -1,6 +1,6 @@
 # 🛸 Probe
 
-> Automated research scouting for dexterous manipulation RL —
+> Automated research scouting for dexterous manipulation —
 > citation-graph expansion, author watch, and arXiv triage
 > distilled into weekly decision-grade Scouting Reports.
 

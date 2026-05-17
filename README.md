@@ -23,7 +23,7 @@
 
 ## 📌 Why PROBE?
 
-Running dexterous manipulation RL is a full-time job. You tune reward curves, debug tactile pipelines, chase Sim-to-Real gaps — and somewhere between the hardware and the gradient logs, arXiv slips off the map.
+Running dexterous manipulation research is a full-time job. You tune reward curves, debug tactile pipelines, chase Sim-to-Real gaps — and somewhere between the hardware and the gradient logs, arXiv slips off the map.
 
 The field does not wait. **50–100 new papers land on `cs.RO` + `cs.LG` every day.** Of those, maybe 3–5 per week actually touch hand-centric dexterous manipulation plus Sim-to-Real. That's a 3–5% signal rate in a firehose, and the cost of missing the right paper is re-solving a problem someone already published — the most expensive mistake a researcher can make.
 
@@ -203,7 +203,7 @@ Goal: produce two consecutive Scouting Reports that you'd actually read. Nothing
 
 ```
 You are PROBE — a research scout for hand-centric dexterous
-manipulation RL.
+manipulation.
 
 CONTEXT (read-only):
 - research_context.md  (attached)
@@ -375,7 +375,7 @@ Create `.claude/routines/probe-weekly.yaml`:
 
 ```yaml
 name: probe-weekly-scout
-description: Weekly arXiv scouting for hand-centric dexterous manipulation RL.
+description: Weekly arXiv scouting for hand-centric dexterous manipulation.
 
 trigger:
   cron: "0 9 * * 1,4"          # Mon & Thu 09:00
