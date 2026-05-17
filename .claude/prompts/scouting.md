@@ -20,28 +20,56 @@ Every weekly scouting run produces TWO output files:
   1. `research_log/YYYY-WXX.md`    — English (primary)
   2. `research_log/YYYY-WXX-KO.md` — Korean translation (produced immediately after)
 
-RETRIEVAL — use MCP tools, never built-in web search:
-1. Author Watch — for every researcher in Section 7 of
-   research_context_P1.md, call `semantic-scholar.get_author_papers`
-   and inspect submissions from the last 14 days.
-2. Citation-Graph Expansion — for each pinned paper in Section 6
-   (P1 Tracked Literature), call
-   `semantic-scholar.get_paper_citations` and list new papers
-   (past 8 weeks) that cite it. Rank by semantic relevance to
-   Pillar P1 (Section 2) and active Decisions D1–D9 (Section 4),
-   not keyword overlap.
-3. Keyword Sweep & topic-watch — call `arxiv.search_papers` over
-   cs.RO + cs.LG, last 14 days, filtered against the P1 Anti-topics
-   list (Section 5). This is the noisiest source; weight it lowest.
-4. Competitor Monitoring — check the Section 8 watch list for new
-   releases via `arxiv.search_papers` and
-   `semantic-scholar.get_author_papers`.
+RETRIEVAL — use the Bash tool with `curl` against the public REST
+APIs below. Do NOT use built-in web search, and do NOT assume any
+MCP server: this routine runs in the cloud where local MCP servers
+are unreachable. Parse arXiv responses (Atom XML) and Semantic
+Scholar responses (JSON, via `jq`) directly.
 
-Never fabricate a citation or an arXiv ID. If any MCP tool call
-fails, do NOT silently skip it: include the error verbatim in the
-report (under 📋 Scout Methodology) and continue with the sources
-that did succeed. An empty or padded report is worse than an honest
-partial one.
+Endpoints:
+- arXiv:  `http://export.arxiv.org/api/query`
+- Semantic Scholar Graph: `https://api.semanticscholar.org/graph/v1`
+  Send the API key header when the env var is set:
+  `-H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY"` (omit the header if the
+  variable is empty — the API still works, just rate-limited).
+- Be polite to rate limits: sleep ~3s between Semantic Scholar
+  calls; on HTTP 429 or 5xx, wait and retry up to 3 times with
+  backoff. Always pass `--fail --silent --show-error` and inspect
+  the HTTP status.
+
+1. Author Watch — for every researcher in Section 7 of
+   research_context_P1.md:
+     a. resolve the author id:
+        `curl --fail -sS -H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY" \
+          "https://api.semanticscholar.org/graph/v1/author/search?query=<URL-encoded name>&fields=name,authorId"`
+     b. list recent papers:
+        `.../graph/v1/author/{authorId}/papers?fields=title,year,publicationDate,externalIds,abstract&limit=100`
+   Keep only papers with `publicationDate` within the last 14 days.
+2. Citation-Graph Expansion — for each pinned paper in Section 6
+   (P1 Tracked Literature), use its arXiv id directly as the paper
+   id:
+     `.../graph/v1/paper/arXiv:XXXX.XXXXX/citations?fields=title,year,publicationDate,externalIds,abstract&limit=100`
+   List citing papers from roughly the past 8 weeks. Rank by
+   semantic relevance to Pillar P1 (Section 2) and active
+   Decisions D1–D9 (Section 4), not keyword overlap.
+3. Keyword Sweep & topic-watch — query arXiv for cs.RO + cs.LG,
+   newest first, e.g.:
+     `curl --fail -sS "http://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`
+   Keep entries whose `<published>` is within the last 14 days,
+   then filter against the P1 Anti-topics list (Section 5). This is
+   the noisiest source; weight it lowest.
+4. Competitor Monitoring — check the Section 8 watch list for new
+   releases via the same arXiv keyword query and Semantic Scholar
+   author lookup as above.
+
+Never fabricate a citation or an arXiv ID; every link must come
+from an actual API response you received. If any curl call fails
+(non-zero exit, HTTP error, empty body after retries), do NOT
+silently skip it and do NOT invent results: record the exact
+command and the error/HTTP status verbatim in the report (under
+📋 Scout Methodology) and continue with the sources that did
+succeed. An empty or honestly-partial report is far better than a
+padded or fabricated one.
 
 For every candidate paper, score on a 0–3 scale:
   · Relevance       — which P# / D# does it touch?
@@ -121,5 +149,5 @@ RULES (both files):
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.
 - Every paper link must be verified to resolve correctly before
   inclusion. Do not fabricate arXiv IDs.
-- If any MCP tool fails, include the error verbatim; never substitute
-  invented results.
+- If any curl call fails, include the exact command and error/HTTP
+  status verbatim; never substitute invented results.
