@@ -354,9 +354,9 @@ Papers matching these are excluded from weekly digest unless they have an unusua
 - Mobile manipulation / whole-body humanoid (unless dexterous hand performs contact-rich learning)
 - Locomotion / quadruped / bipedal gait (RMA family is exception — P4 anchor)
 - 2-finger parallel-jaw grippers only
-- Pure teleoperation without learning component (shared autonomy *with* RL/residual learning allowed)
-- Pure imitation from human video with no RL / physics-informed / closed-loop component
-- VLA papers: in scope only if (a) low-level dexterous control component, (b) bridge/residual architecture with RL expert, (c) tactile/force modality injection. Exclude pick-and-place-only.
+- Pure teleoperation without learning component (shared autonomy *with* a learning component allowed)
+- Pure imitation from human video with no learning / physics-informed / closed-loop component
+- VLA papers: in scope only if (a) low-level dexterous control component, (b) bridge/residual architecture with a learned low-level expert, (c) tactile/force modality injection. Exclude pick-and-place-only.
 - Grasping-only (lift-and-hold, no in-hand reorientation/contact-rich interaction) — but pre-grasp / nominal-pose papers in scope for D14
 - Soft robotics hardware design without learning
 - Survey / position papers (read manually, not via agent)
