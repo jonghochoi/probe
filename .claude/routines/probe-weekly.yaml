@@ -1,0 +1,25 @@
+name: probe-weekly-scout
+description: Weekly arXiv scouting for hand-centric dexterous manipulation.
+
+trigger:
+  cron: "0 9 * * 1,4"          # Mon & Thu 09:00
+  timezone: Asia/Seoul
+
+model: claude-sonnet-4-6
+
+mcp_servers:
+  - arxiv
+  - semantic-scholar
+
+context_files:
+  - research_context_P1.md      # P1-only scope (this branch)
+  - research_log/_TEMPLATE.md
+  - research_log/*.md           # last 2 weeks auto-truncated by the agent
+
+prompt_file: .claude/prompts/scouting.md
+
+output:
+  mode: github_pr
+  branch: probe/weekly-YYYY-W##
+  path:   research_log/YYYY-W##.md
+  title:  "chore(probe): scouting report YYYY-W##"
