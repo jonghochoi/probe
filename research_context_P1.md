@@ -1,16 +1,12 @@
 # Research Context — P1: Heterogeneous Body/Hand Action Expert
 
-> **Derived from `research_context.md` v5.0 (2026-05-19) — P1 scope only.**
-> Narrowed extract focused solely on **Pillar 1 (Heterogeneous Body/Hand
-> Action Expert)**. The full multi-pillar document `research_context.md` is the
-> single source of truth; P2–P5 content lives there, not here.
+> **P1 scope extract of `research_context.md` (single source of truth).**
+> Narrowed to **Pillar 1 (Heterogeneous Body/Hand Action Expert)**; P2–P5
+> content lives in the full document, not here. P1 owns **D1–D7**.
 > **Agent usage**: *static* context. The retrieval agent reads (never writes)
 > this file. Weekly findings go to `research_log/YYYY-WW.md`.
 > **Formatting & translation rules**: `docs/STYLE_GUIDE.md` (single source of
 > truth — agent must read it before producing output).
-> **v5.0 note**: VLA-level pivot. RL is demoted to the System0 module (P3, full
-> doc) and is out of P1 scope. P1 is now the VLA-level Body/Hand action-expert
-> decoder. Decision IDs renumbered in v5.0; P1 owns **D1–D7**.
 
 ---
 
@@ -57,8 +53,7 @@
 
 ## 4. Decision Log — P1 (D1–D7) [LIVING] [AGENT-INPUT]
 
-Options / v1 / rationale / deferred (trigger + checkpoint). Append-only from v5.0.
-*carry-forward* tags trace surviving v4.0 rationale.
+Options / v1 / rationale / deferred (trigger + checkpoint). Append-only.
 
 > P1 covers **D1–D7**. P2 (D8–D12), P3/System0 (D13–D18), P4 (D19–D23),
 > P5 (D24–D26) are out of scope here — see `research_context.md`.
@@ -72,7 +67,7 @@ Options / v1 / rationale / deferred (trigger + checkpoint). Append-only from v5.
 #### [D2] Body output space (P1)
 - **Options**: (a) both-wrist / tool-flange pose (Cartesian), (b) joint-space minus wrist, (c) delta Cartesian, (d) split
 - **v1**: (a) both-wrist / tool-flange pose
-- **Rationale**: embodiment-transfer easing; flange pose decouples Body expert from arm kinematics. *carry-forward*: v4.0 D2 v1 was joint-space (B-1) → demoted to comparison group
+- **Rationale**: embodiment-transfer easing; flange pose decouples Body expert from arm kinematics (joint-space is the comparison group)
 - **Deferred**: (b) joint-space → trigger: flange-pose Body unstable vs joint-space ("Demystifying Action Space Design": joint=stability, task=generalization) / **CP1**; (c) delta Cartesian → trigger: absolute-pose learnability poor / **CP1**
 
 #### [D3] Hand output space (P1)
@@ -85,7 +80,7 @@ Options / v1 / rationale / deferred (trigger + checkpoint). Append-only from v5.
 - **Options (mechanism)**: (A) shared latent, (B) cross-attention, (C) mutual conditioning, (D) routing/gating, (E) action/history sharing, (F) FiLM
 - **Options (what flows)**: (i) $a_b$ only, (ii) body hidden state, (iii) both
 - **v1**: (F) FiLM with $a_b$ → ($\gamma,\beta$) modulating hand head input, single point
-- **Rationale**: MLP-style hand head + minimum delta + sufficient first-experiment expressivity. *carry-forward*: v4.0 D8
+- **Rationale**: MLP-style hand head + minimum delta + sufficient first-experiment expressivity
 - **Deferred**: (B) cross-attention → trigger: FiLM bottleneck OR hand head → transformer (cf. LaMP gated cross-attn, TwinBrainVLA AsyMoT) / **CP1**; (ii) hidden-state → trigger: D6 v2 / **CP1**; multi-layer depth → trigger: single-point info bottleneck (cf. MolmoAct2 per-layer KV) / **CP1**
 
 #### [D5] Input-modality + control-rate separation (P1)
@@ -98,13 +93,13 @@ Options / v1 / rationale / deferred (trigger + checkpoint). Append-only from v5.
 #### [D6] Coordination direction & flow (P1)
 - **Options**: body→hand / hand→body / iterative / bidirectional; flow = (a) hierarchical (body K-step → $a_b$ → hand conditioned), (b) coupled denoising, (c) coupled single net, (d) independent
 - **v1**: body→hand, (a) hierarchical flow
-- **Rationale**: literal sequential conditioning; clean interface; training stability. *carry-forward*: v4.0 D1 + D7
+- **Rationale**: literal sequential conditioning; clean interface; training stability
 - **Deferred**: iterative/bidirectional + (b) coupled → trigger: slip fails to reshape arm motion in time / **CP1+CP2**; (c) single net → trigger: latency budget pressure / **CP3**
 
 #### [D7] π backbone integration / partition (P1)
 - **Options**: (i) slice π0 action expert + FT both sides, (ii) repurpose π expert as Hand + add new Body, (iii) both re-init, (iv) distillation from monolithic π
 - **v1**: (i) slice partition + FT
-- **Rationale**: maximally preserves π manipulation prior; cleanest split-vs-monolithic baseline. *carry-forward*: v4.0 D3. Sub-reading **Repurpose vs Subdivide** unresolved → §9.B, decide at CP1 code entry
+- **Rationale**: maximally preserves π manipulation prior; cleanest split-vs-monolithic baseline. Sub-reading **Repurpose vs Subdivide** unresolved → §9.B, decide at CP1 code entry
 - **Deferred**: (ii) repurpose → trigger: Body re-init acceptable / **CP4**; (iv) distillation → trigger: π surgery overhead prohibitive / **CP1**
 - **Note**: tightly coupled to full-doc P4 (D19 freeze strategy) — VLM prior preservation
 
@@ -194,7 +189,6 @@ Architectural siblings of the P1 Body/Hand split — review at every CP, ordered
 |---|---|---|---|
 | π variant (π0 / π0.5 / π0.7) | 🟡 open | π0 (most stable) | CP1 code start |
 | Code base (JAX openpi / HF PyTorch / open-pi-zero) | 🟡 open | PyTorch port | CP1 code start |
-| arXiv IDs (Demystifying Action Space Design → 2602.23408, MolmoAct2 → 2605.02881) | ✅ resolved 2026-05-19 | — | — |
 | Compute budget — GPU mem for D7 slice + FT | 🟡 unknown | Smaller env-count fallback | Before CP1 exec |
 
 ### 9.B — Architectural sub-unclarity (D7 / P1 core)
@@ -212,6 +206,6 @@ Architectural siblings of the P1 Body/Hand split — review at every CP, ordered
 
 ---
 
-*P1 scope extract of `research_context.md` v5.0. For P2–P5, decisions D8–D26,
+*P1 scope extract of `research_context.md`. For P2–P5, decisions D8–D26,
 full §7 anti-topics, §9 researchers, §10 monitoring, §14 dependency graph,
 and Appendix C, consult the full document.*

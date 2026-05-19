@@ -180,4 +180,4 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 |---------|------|--------|
 | v1.0 | 2026-04-22 | Initial version — emoji system, link rules, Korean translation principles |
 | v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed) |
-| v1.2 | 2026-05-19 | Glossary §4-2 extended with v5.0 canonical terms (System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching); aligned with `research_context.md` v5.0 |
+| v1.2 | 2026-05-19 | Glossary §4-2 extended with canonical terms: System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching |
