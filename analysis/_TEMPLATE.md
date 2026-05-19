@@ -67,14 +67,14 @@
 
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
-<!-- research_context.md 기준. 어떤 P1–P5 / D1–D26 / CP1–CP5 를 건드리는지,
+<!-- context/MASTER.md 기준. 어떤 P1–P5 / D1–D26 / CP1–CP5 를 건드리는지,
      Identity 긴장/지지, §10 경쟁자 함의. 없으면 없다고 명시(연결 날조 금지). -->
 
 ---
 
 ## ✨ 핀 논문 대비 델타
 
-<!-- research_context.md §8 Tracked Literature 의 어떤 핀 논문 대비
+<!-- context/MASTER.md §8 Tracked Literature 의 어떤 핀 논문 대비
      무엇이 진정으로 새로운지(핀 논문 이름 명시). -->
 
 ---
@@ -95,4 +95,4 @@
 ## 💡 컨텍스트 제안
 
 <!-- 핀 교체/추가, Decision/deferred trigger 이동 후보를 사람에게 제안만.
-     research_context.md 는 절대 수정하지 않습니다. 없으면 "없음". -->
+     context/MASTER.md 는 절대 수정하지 않습니다. 없으면 "없음". -->

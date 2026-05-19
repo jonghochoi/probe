@@ -18,7 +18,7 @@ STYLE_GUIDE.md §3-1 is authoritative. Summary:
   · ONLY P#/D#/CP# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc) → CP# (asc), one per distinct code.
   · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning (Korean).
-  · Meaning source (do not invent), from research_context_P#.md:
+  · Meaning source (do not invent), from context/P#.md:
       P#  → §2 heading "Pillar P# — <name>"           → "<name> (pillar)"
       D#  → §4 "#### [D#] <title>" + its v1 line       → "<title> — v1 choice (≤~12 words)"
       CP# → §3 bullet "- **CP#**: <desc>"              → "Checkpoint #: <desc>"
@@ -38,8 +38,8 @@ STYLE_GUIDE.md §3-1 is authoritative. Summary:
 ## 📋 스카우트 방법론
 
 <!--
-Section numbers below are for the full research_context.md. The cloud
-scouting routine instead reads a per-pillar extract research_context_P#.md,
+Section numbers below are for the full context/MASTER.md. The cloud
+scouting routine instead reads a per-pillar extract context/P#.md,
 where the same content is renumbered: Researchers=§7, Tracked Literature=§6,
 Anti-topics=§5, Competitor=§8. Use whichever the active prompt points at.
 
@@ -59,7 +59,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
 
 ### 🎯 (a) 관련 Pillar / Decision (P# / D#)
-<!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D15) from research_context.md does this address? Mention CP1–CP5 in body if it lands at a specific Checkpoint. Also note any Identity tension/support and any §10 Competitor implication. -->
+<!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D15) from context/MASTER.md does this address? Mention CP1–CP5 in body if it lands at a specific Checkpoint. Also note any Identity tension/support and any §10 Competitor implication. -->
 
 ### ✨ (b) 진정으로 새로운 점
 <!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->
@@ -99,7 +99,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ## 🌱 논문 4 — 크로스폴리네이션 (월 1회)
 
-<!-- Include once per month. Rotate target field per research_context.md §12 (Cross-pollination Budget). -->
+<!-- Include once per month. Rotate target field per context/MASTER.md §12 (Cross-pollination Budget). -->
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...>
@@ -135,7 +135,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ## 💡 컨텍스트 제안
 
-<!-- Agent proposes edits to research_context.md. Human decides. Agent must NOT edit research_context.md directly. -->
+<!-- Agent proposes edits to context/MASTER.md. Human decides. Agent must NOT edit context/MASTER.md directly. -->
 
 ### 📌 Tracked literature
 <!-- Replace / add / remove a pinned paper within a Pillar's 8-paper cap (§8.1–§8.5). Include arXiv link and target Pillar. -->
@@ -158,7 +158,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 <!--
 Self-check against this pillar's recent reports (last ~2 weeks, ~4 files
-research_log/YYYY-MM-DD-P#.md):
+scouting/YYYY-MM-DD-P#.md):
   · Papers already covered? (list, or "none")
   · Contradictions with recent findings?
   · Decision-Log triggers / falsifier evidence observed this run?

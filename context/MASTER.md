@@ -7,7 +7,7 @@
 
 > **Last updated**: 2026-05-19
 > **Maintainer**: \<your-name\>
-> **Agent usage**: This is the *static* context. The retrieval agent reads (never writes) this file. Findings go to `research_log/YYYY-MM-DD-P#.md` (one file per run, per pillar) instead.
+> **Agent usage**: This is the *static* context. The retrieval agent reads (never writes) this file. Findings go to `scouting/YYYY-MM-DD-P#.md` (one file per run, per pillar) instead.
 
 ---
 

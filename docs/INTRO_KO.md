@@ -33,7 +33,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
 
 ```
                   ┌──────────────────────────────┐
-                  │     research_context.md      │  ← 정적. 사람이 관리.
+                  │  context/MASTER.md           │  ← 정적. 사람이 관리.
                   │  • Identity & Purpose        │
                   │  • Pillars (P1–P5)           │
                   │  • Decision Log (D1–D26)     │
@@ -63,7 +63,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                                  │ writes
                                  ▼
                   ┌──────────────────────────────┐
-                  │  research_log/YYYY-MM-DD-P#.md│  ← Scouting Report
+                  │  scouting/YYYY-MM-DD-P#.md   │  ← Scouting Report
                   │                              │
                   │  Top 3–5 papers only         │
                   │  • Connects to: P# / D#      │
@@ -82,7 +82,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   └──────────────────────────────┘
 ```
 
-> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`research_context.md`](../research_context.md) §5. Pillar별 좁힌 추출본은 `research_context_P{1..4}.md` (파이프라인이 읽는 파일).
+> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`context/MASTER.md`](../context/MASTER.md) §5. Pillar별 좁힌 추출본은 `context/P{1..4}.md` (파이프라인이 읽는 파일).
 
 ---
 
@@ -96,7 +96,7 @@ Probe는 탐사선이다. 전투는 하지 않는다.
 | **방향 설정** | Identity 명제 점검 + Pillar 우선순위 결정 (P1이 정말 가장 중요한가?) |
 | **Decision 정제** | 에이전트가 찾아온 논문이 D# 중 하나의 v1 default를 흔들거나 deferred 트리거를 점등시키면, Decision Log 업데이트 |
 | **평가 프로토콜** | D25 (P5)의 falsifier(4-contribution ablation) 임계값·메트릭을 유지·강화 — 없으면 어떤 리포트도 의미 없음 |
-| **맥락 갱신** | Revisit Checkpoint(CP1–CP5) 도래 시 `research_context.md` 업데이트 — 실험 결과, deferred 트리거, 새 evidence 반영 |
+| **맥락 갱신** | Revisit Checkpoint(CP1–CP5) 도래 시 `context/MASTER.md` 업데이트 — 실험 결과, deferred 트리거, 새 evidence 반영 |
 | **피드백 루프** | Scouting Report를 실제로 읽고, 실험 설계에 반영된 것을 기록 |
 
 > "에이전트가 잘 작동하고 있는가"는 에이전트 스스로 판단할 수 없다.
@@ -119,7 +119,7 @@ Probe는 탐사선이다. 전투는 하지 않는다.
 | **Cross-pollination** | 월 1회 인접 분야(§12 로테이션)에서 강제 1편 픽업 |
 | **Self-check** | 지난 2주 로그와 중복 여부, Anti-topics 필터 적용 횟수 자체 검증 |
 
-에이전트가 **절대 하지 않는 것**: `research_context.md` 수정.
+에이전트가 **절대 하지 않는 것**: `context/MASTER.md` 수정.
 Scouting Report 말미에 *수정 제안*만 하고, 실제 반영은 사람이 결정한다.
 
 ---
@@ -128,19 +128,20 @@ Scouting Report 말미에 *수정 제안*만 하고, 실제 반영은 사람이 
 
 ```
 probe/
+├── CLAUDE.md                # 기여 규칙 — commit & 문서 스타일
 ├── README.md
-├── research_context.md          # 정적 단일 진실원 (P1–P5). 사람이 관리.
-├── research_context_P{1..4}.md  # pillar별 좁힌 추출본 (파이프라인이 읽음)
-├── .claude/prompts/             # scouting-P{1..4}.md · synthesis-P{1..4}.md
-├── synthesis/                   # P{1..4}_BRIEF.md (월간 재생성 서사)
-└── research_log/
+├── context/MASTER.md        # 정적 단일 진실원 (P1–P5). 사람이 관리.
+├── context/P{1..4}.md       # pillar별 좁힌 추출본 (파이프라인이 읽음)
+├── .claude/prompts/         # scouting-P{1..4}.md · synthesis-P{1..4}.md
+├── synthesis/               # P{1..4}_BRIEF.md (월간 재생성 서사)
+└── scouting/
     ├── _TEMPLATE.md             # 에이전트가 실행마다 복사해서 채우는 양식
     └── YYYY-MM-DD-P#.md         # 한글 리포트 — 실행(월·목)·필러(P1–P4)별 1개
 ```
 
 ### 핵심 원칙: 정적 vs 동적 분리
 
-`research_context.md`와 `research_log/`를 **절대 섞지 않는다.**
+`context/MASTER.md`와 `scouting/`를 **절대 섞지 않는다.**
 모든 것을 한 파일에 쌓으면 6주 안에 context가 부풀어
 에이전트가 이미 다뤘던 논문을 재추천하거나 오래된 pinned literature를 망각한다.
 
@@ -157,7 +158,7 @@ probe/
 자동화 → 나쁜 프롬프트 → 매주 쓰레기 로그 자동 생성.
 **반드시 수동 실행 1 ~ 2주로 프롬프트를 검증한 뒤** Routine에 등록한다.
 
-수동 실행: 새 Claude 대화 → `research_context.md` 업로드 → 에이전트 프롬프트 실행 → 결과 검토 → 프롬프트 수정 반복.
+수동 실행: 새 Claude 대화 → `context/MASTER.md` 업로드 → 에이전트 프롬프트 실행 → 결과 검토 → 프롬프트 수정 반복.
 
 ### 초반에 반드시 나타나는 문제 3가지
 
@@ -176,7 +177,7 @@ probe/
 ### Echo chamber 방지
 
 Citation-graph만 쓰면 본인 관심사 주변에서만 맴돈다.
-`research_context.md` Section 12의 Cross-pollination 로테이션이 이를 막는다.
+`context/MASTER.md` Section 12의 Cross-pollination 로테이션이 이를 막는다.
 월 1회 인접 분야(접촉 최적화, FEM 시뮬레이션, 촉각 신경과학 등)에서
 강제로 1편을 픽업하는 것이 의외로 가장 가치 있는 발견의 소스가 된다.
 
@@ -210,7 +211,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 ### 지속 가능성의 핵심: 월간 리뷰
 
 자동화됐다고 방치하면 에이전트가 잘 작동하는지 알 수 없다.
-`research_context.md` Section 13 (Feedback Loop)를 월 1회 직접 채운다.
+`context/MASTER.md` Section 13 (Feedback Loop)를 월 1회 직접 채운다.
 
 | 채울 것 | 질문 |
 |---|---|
@@ -234,7 +235,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 | **논문 검색** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) — `curl` 직접 호출 |
 | **인용 추적** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON `jq`) — 키 선택 |
 | **출력 저장** | GitHub PR (자동) — 변경 이력 = 리서치 로그 |
-| **컨텍스트 관리** | `research_context.md` (정적, 사람 관리) + `research_log/` (동적, 에이전트 생성) |
+| **컨텍스트 관리** | `context/MASTER.md` (정적, 사람 관리) + `scouting/` (동적, 에이전트 생성) |
 
 ---
 

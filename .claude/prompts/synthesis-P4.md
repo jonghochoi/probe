@@ -5,7 +5,7 @@ read what is already pinned and re-state the narrative that connects
 it, so a human can hold the P4 architecture in their head.
 
 CONTEXT (read-only):
-- research_context_P4.md — source of truth, P4 scope only.
+- context/P4.md — source of truth, P4 scope only.
   Use ONLY two sections:
     · §4 Decision Log — P4 (D19–D23)
     · §6 P4 Tracked Literature (8 pinned + methodology base)
@@ -22,7 +22,7 @@ STRUCTURE:
 
 1. Header block:
    - Title: `# P4 Synthesis Brief — VLM Pretraining Preservation`
-   - One line: regeneration date + `P4 scope extract of research_context.md`.
+   - One line: regeneration date + `P4 scope extract of context/MASTER.md`.
 
 2. Body — one subsection per Decision, D19 through D23, in order.
    `## D# — <decision title from §4>`
@@ -55,7 +55,7 @@ HARD RULES:
 - Tone: formal Korean (합니다/됩니다 체). Keep verbatim per
   docs/STYLE_GUIDE.md §4: D#/CP# tags, arXiv links, config/code
   names, formulas, and pinned paper titles (original English).
-- Do not edit research_context_P4.md. If the pool itself looks
+- Do not edit context/P4.md. If the pool itself looks
   wrong (a Decision with zero support, a stale pin), state it in
   the closing block as something the human should resolve — do not
   change the source file.

@@ -16,7 +16,7 @@ human pinned a specific vN). If the argument is empty or unparseable,
 stop and say so — do not guess a paper.
 
 CONTEXT (read-only):
-- research_context.md        — full source of truth. A single paper
+- context/MASTER.md        — full source of truth. A single paper
                                often spans multiple pillars, so read
                                the FULL doc, not a per-pillar extract.
                                Identity & Purpose, Pillars P1–P5,
@@ -25,7 +25,7 @@ CONTEXT (read-only):
 - docs/STYLE_GUIDE.md        — §5 (Paper Analysis doc) + §4 (Korean
                                terms/tone/glossary).
 - analysis/_TEMPLATE.md      — the form this document follows exactly.
-Never edit any context file. research_context.md is human-owned; if
+Never edit any context file. context/MASTER.md is human-owned; if
 this paper implies a pinned-literature or Decision change, write it
 under 💡 컨텍스트 제안 and stop there.
 
@@ -78,8 +78,8 @@ better than a fabricated one. Math/tables/figures degrade in text
 extraction — quote numbers as found; never infer or "correct" them.
 
 TASK:
-Produce ONE Korean document at `analysis/<id>-KO.md`
-(non-arXiv input: `analysis/<human-or-title-slug>-KO.md`).
+Produce ONE Korean document at `analysis/<id>.md`
+(non-arXiv input: `analysis/<human-or-title-slug>.md`).
 Overwrite on re-run — this is a regenerable snapshot, not append-only.
 Follow `analysis/_TEMPLATE.md` exactly and `docs/STYLE_GUIDE.md` §5.
 This is a single Korean document — not a translation of an English
@@ -102,12 +102,12 @@ STRUCTURE — two parts, in this order:
   ⚖️ 한계              — author-stated weaknesses + obvious gaps.
   ♻️ 재현성            — code / data / hardware availability.
 
-(B) PROBE 연동 — decision-grade, anchored to research_context.md:
+(B) PROBE 연동 — decision-grade, anchored to context/MASTER.md:
   🎯 관련 Pillar / Decision (P#/D#) — which P1–P5 / D1–D26 / CP1–CP5
        this paper touches, with Identity tension/support and any §10
        competitor implication.
   ✨ 핀 논문 대비 델타  — what is genuinely new vs. the Tracked
-       Literature already in research_context.md (name the pinned paper).
+       Literature already in context/MASTER.md (name the pinned paper).
   ⚙️ 의사결정 함의     — what changes in MY Isaac Lab pipeline if this
        paper is right? Name the exact config key / hyperparameter /
        metric. Vague is failure.
@@ -115,11 +115,11 @@ STRUCTURE — two parts, in this order:
        Cheapest sanity check first.
   💡 컨텍스트 제안      — if a pin should change or a Decision/deferred
        trigger moves, state it here for the human. Do NOT edit
-       research_context.md.
+       context/MASTER.md.
 
 HARD RULES:
 - Single Korean document. No English-primary file. KO-only filename.
-- Anchor (B) strictly to research_context.md — cite real P#/D#/CP#
+- Anchor (B) strictly to context/MASTER.md — cite real P#/D#/CP#
   with their meaning from the doc; do not invent a connection. If the
   paper does not touch a given Decision, say so plainly.
 - 초록 only → mark every (B) section (본문 미확보 — 잠정).
