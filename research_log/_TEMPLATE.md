@@ -1,23 +1,23 @@
-# Probe Scouting Report — Week YYYY-WXX
+# Probe 스카우트 리포트 — YYYY-MM-DD · Pillar P#
 
 **Run date:** YYYY-MM-DD
 **Agent version:** v0.1
 **Papers scanned:** <N from arXiv> + <M from citation graph> + <K from author watch>
 **Papers surfaced (every dimension ≥ 2):** <count>
 
-> Agent fills every section below. Emoji, link, and translation rules are defined in `STYLE_GUIDE.md` — follow it exactly.
-> Every weekly run produces **two** files: `YYYY-WXX.md` (English, primary) and `YYYY-WXX-KO.md` (Korean translation).
-> The first textual occurrence of every P#/D#/CP# code in each section is linked to the 🔑 Reference Legend below.
+> 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE_GUIDE.md`에 정의되어 있으니 정확히 따릅니다.
+> 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`YYYY-MM-DD-P#.md`)를 산출합니다.
+> 각 섹션에서 처음 등장하는 P#/D#/CP# 코드는 아래 🔑 참조 약어 풀이로 링크합니다.
 
 ---
 
-## 🔑 Reference Legend
+## 🔑 참조 약어 풀이
 
 <!--
 STYLE_GUIDE.md §3-1 is authoritative. Summary:
   · ONLY P#/D#/CP# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc) → CP# (asc), one per distinct code.
-  · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning.
+  · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning (Korean).
   · Meaning source (do not invent), from research_context_P#.md:
       P#  → §2 heading "Pillar P# — <name>"           → "<name> (pillar)"
       D#  → §4 "#### [D#] <title>" + its v1 line       → "<title> — v1 choice (≤~12 words)"
@@ -35,7 +35,7 @@ STYLE_GUIDE.md §3-1 is authoritative. Summary:
 
 ---
 
-## 📋 Scout Methodology
+## 📋 스카우트 방법론
 
 <!--
 Section numbers below are for the full research_context.md. The cloud
@@ -53,65 +53,65 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ---
 
-## 🥇 Paper 1 — PRIORITY ★★★
+## 🥇 논문 1 — 우선순위 ★★★
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
 
-### 🎯 (a) P# / D# touched
+### 🎯 (a) 관련 Pillar / Decision (P# / D#)
 <!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D15) from research_context.md does this address? Mention CP1–CP5 in body if it lands at a specific Checkpoint. Also note any Identity tension/support and any §10 Competitor implication. -->
 
-### ✨ (b) What is genuinely new
+### ✨ (b) 진정으로 새로운 점
 <!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->
 
-### ⚙️ (c) Decision implication
+### ⚙️ (c) 의사결정 함의
 <!-- What changes in MY Isaac Lab pipeline next week if this paper is right?
      Name the exact config key, hyperparameter, or metric. Vague = failure. -->
 
-### ⚠️ (d) Failure mode to probe first
+### ⚠️ (d) 먼저 검증해야 할 실패 모드
 <!-- Why might this NOT transfer to our stack? What is the cheapest sanity check? -->
 
 ---
 
-## 🥈 Paper 2 — PRIORITY ★★
+## 🥈 논문 2 — 우선순위 ★★
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### 🎯 (a) P# / D# touched
-### ✨ (b) What is genuinely new
-### ⚙️ (c) Decision implication
-### ⚠️ (d) Failure mode to probe first
+### 🎯 (a) 관련 Pillar / Decision (P# / D#)
+### ✨ (b) 진정으로 새로운 점
+### ⚙️ (c) 의사결정 함의
+### ⚠️ (d) 먼저 검증해야 할 실패 모드
 
 ---
 
-## 🥉 Paper 3 — PRIORITY ★
+## 🥉 논문 3 — 우선순위 ★
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### 🎯 (a) P# / D# touched
-### ✨ (b) What is genuinely new
-### ⚙️ (c) Decision implication
-### ⚠️ (d) Failure mode to probe first
+### 🎯 (a) 관련 Pillar / Decision (P# / D#)
+### ✨ (b) 진정으로 새로운 점
+### ⚙️ (c) 의사결정 함의
+### ⚠️ (d) 먼저 검증해야 할 실패 모드
 
 ---
 
-## 🌱 Paper 4 — CROSS-POLLINATION (monthly only)
+## 🌱 논문 4 — 크로스폴리네이션 (월 1회)
 
 <!-- Include once per month. Rotate target field per research_context.md §12 (Cross-pollination Budget). -->
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...>
 
-### 🎯 (a) P# / D# touched
-### ✨ (b) What is genuinely new
-### ⚙️ (c) Decision implication
-### ⚠️ (d) Failure mode to probe first
+### 🎯 (a) 관련 Pillar / Decision (P# / D#)
+### ✨ (b) 진정으로 새로운 점
+### ⚙️ (c) 의사결정 함의
+### ⚠️ (d) 먼저 검증해야 할 실패 모드
 
 ---
 
-## 📊 Scoring Summary
+## 📊 점수 요약
 
 | # | Paper | Link | Relevance (0–3) | Novelty (0–3) | Reproducibility (0–3) | Sim2Real (0–3) | Total (/12) |
 |---|-------|------|:---:|:---:|:---:|:---:|:---:|
@@ -123,7 +123,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ---
 
-## 🚫 Candidate Papers That Did Not Pass Filter
+## 🚫 필터 통과 실패 후보 논문
 
 | Paper | Link | Reason dropped |
 |-------|------|----------------|
@@ -133,7 +133,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ---
 
-## 💡 Context Suggestions
+## 💡 컨텍스트 제안
 
 <!-- Agent proposes edits to research_context.md. Human decides. Agent must NOT edit research_context.md directly. -->
 
@@ -154,13 +154,14 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ---
 
-## 🔄 Week-over-Week Synthesis
+## 🔄 직전 리포트 대비 종합
 
 <!--
-Self-check against the last 2 weeks of research_log/:
+Self-check against this pillar's recent reports (last ~2 weeks, ~4 files
+research_log/YYYY-MM-DD-P#.md):
   · Papers already covered? (list, or "none")
-  · Contradictions with last 2 weeks' findings?
-  · Decision-Log triggers / falsifier evidence observed this week?
-  · Month-trend note (only on first week of month).
+  · Contradictions with recent findings?
+  · Decision-Log triggers / falsifier evidence observed this run?
+  · Month-trend note (only on the first run of the month).
   · Anti-topics filter health — count of papers excluded.
 -->

@@ -5,9 +5,10 @@ CONTEXT (read-only):
 - research_context_P1.md        — source of truth, P1 scope only
                                    (Pillar P1, Decisions D1–D7, Tracked
                                    Literature, Researchers, Anti-topics)
-- docs/STYLE_GUIDE.md           — formatting, emoji system, translation rules
+- docs/STYLE_GUIDE.md           — formatting, emoji system, Korean authoring rules
 - research_log/_TEMPLATE.md     — the form every report follows
-- research_log/<last 2 weeks>.md — recent reports, for de-duplication only
+- research_log/YYYY-MM-DD-P1.md — this pillar's recent reports (last
+                                   ~2 weeks, ~4 files), for de-duplication only
 
 This branch operates in P1-only scope: read research_context_P1.md,
 not the full research_context.md. Never edit any context file.
@@ -15,10 +16,10 @@ research_context_P1.md is human-owned; if a pinned paper should
 change, write it under 💡 Context Suggestions and stop there.
 
 TASK:
-Produce a Scouting Report for week <YYYY-WXX>.
-Every weekly scouting run produces TWO output files:
-  1. `research_log/YYYY-WXX.md`    — English (primary)
-  2. `research_log/YYYY-WXX-KO.md` — Korean translation (produced immediately after)
+Produce a Scouting Report for <YYYY-MM-DD> · Pillar P1.
+This routine runs twice a week — every Monday and Thursday.
+Each run produces ONE Korean output file:
+  `research_log/YYYY-MM-DD-P1.md` — Korean (use the run date)
 
 RETRIEVAL — use the Bash tool with `curl` against the public REST
 APIs below. Do NOT use built-in web search, and do NOT assume any
@@ -79,9 +80,14 @@ For every candidate paper, score on a 0–3 scale:
 
 ---
 
-OUTPUT — English file (YYYY-WXX.md)
+OUTPUT — Korean report (`YYYY-MM-DD-P1.md`)
 
-Follow research_log/_TEMPLATE.md exactly. Top 3–5 papers only.
+Write the report directly in Korean, following research_log/_TEMPLATE.md
+exactly. Top 3–5 papers only. Apply docs/STYLE_GUIDE.md §4 (Korean
+authoring rules): all prose is formal Korean (합니다/됩니다 체), while
+paper titles, config / code names, formulas, P#/D#/CP# tags, arXiv
+links, emojis and `<a id="ref-…">` anchors stay verbatim in their
+original form. Use the §4-2 glossary and §4-3 header table.
 
 ### Emoji rules (docs/STYLE_GUIDE.md §2)
 Apply emojis to section and subsection headers only — never inside body text.
@@ -95,7 +101,7 @@ Section-level (##):
   📊  Scoring Summary
   🚫  Candidate Papers That Did Not Pass Filter
   💡  Context Suggestions
-  🔄  Week-over-Week Synthesis
+  🔄  Run-over-Run Synthesis
 
 Subsection-level (###), same across all papers:
   🎯  (a) P# / D# touched
@@ -140,29 +146,9 @@ after the intro blockquote and right before `## 📋 Scout Methodology`.
 
 ---
 
-OUTPUT — Korean file (YYYY-WXX-KO.md)
-
-Produce a faithful Korean translation of the English file immediately
-after the English file is complete. Follow docs/STYLE_GUIDE.md §4 exactly.
-
-Key rules:
-  - Paper titles: keep original English title.
-  - Technical terms: Korean + English in parentheses on first occurrence;
-    Korean only thereafter. Use the glossary in STYLE_GUIDE.md §4-2.
-  - Config / code names, formulas, P#/D# tags, arXiv links: keep verbatim.
-  - Reference Legend: reproduce the section; translate the Meaning
-    column only; codes, `<a id="ref-…">` anchors and `[CODE](#ref-CODE)`
-    links verbatim so KO links resolve within the KO file.
-  - Emojis: identical position and symbol as the English file.
-  - Section headers: translate text, keep emoji prefix.
-    Use the header translation table in STYLE_GUIDE.md §4-3.
-  - Tone: formal Korean (합니다/됩니다 체).
-  - Bold emphasis (**text**) and inline code (`text`): preserve.
-
----
-
-RULES (both files):
-- Do not recommend any paper already in research_log/ (last 2 weeks).
+RULES:
+- Do not recommend any paper already covered in this pillar's recent
+  reports — the last ~2 weeks (~4 files `research_log/YYYY-MM-DD-P1.md`).
 - Do not edit research_context_P1.md. If a pinned paper should be
   replaced, write the suggestion under 💡 Context Suggestions.
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.

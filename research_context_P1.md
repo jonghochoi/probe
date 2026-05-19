@@ -4,8 +4,8 @@
 > Narrowed to **Pillar 1 (Heterogeneous Body/Hand Action Expert)**; P2–P5
 > content lives in the full document, not here. P1 owns **D1–D7**.
 > **Agent usage**: *static* context. The retrieval agent reads (never writes)
-> this file. Weekly findings go to `research_log/YYYY-WW.md`.
-> **Formatting & translation rules**: `docs/STYLE_GUIDE.md` (single source of
+> this file. Findings go to `research_log/YYYY-MM-DD-P1.md` (one per run).
+> **Formatting & authoring rules**: `docs/STYLE_GUIDE.md` (single source of
 > truth — agent must read it before producing output).
 
 ---

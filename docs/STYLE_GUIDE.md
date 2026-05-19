@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.3 (2026-05-19) · **Scope:** All files under `research_log/`
+> **Version:** v1.4 (2026-05-19) · **Scope:** All files under `research_log/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -7,14 +7,17 @@
 
 ## 1. Output File Convention
 
-Every weekly scouting report is produced as **two files**:
+The scouting routine runs **twice a week (Monday & Thursday)**, once per
+pillar. Each run produces **one Korean file**:
 
 | File | Language | Purpose |
 |------|----------|---------|
-| `research_log/YYYY-WXX.md` | English | Primary record; used by the agent for citation-graph search and future retrieval |
-| `research_log/YYYY-WXX-KO.md` | Korean | Human-readable version; produced immediately after the English file |
+| `research_log/YYYY-MM-DD-P#.md` | Korean | The scouting report. `YYYY-MM-DD` is the run date; `P#` is the pillar (P1–P4). Used by the agent for de-duplication and future retrieval. |
 
-The English file is always written first. The Korean file is a faithful translation of the English file, produced in the same session.
+The report is written directly in Korean (no separate English file).
+Paper titles, arXiv links, and `P#/D#/CP#` tags stay verbatim in their
+original form (see §4-1), so de-duplication across previous reports
+works on those verbatim tokens regardless of prose language.
 
 ---
 
@@ -36,7 +39,7 @@ They are **never** used inside body text, bullet points, table cells, or code bl
 | 📊 | Scoring Summary |
 | 🚫 | Candidate Papers That Did Not Pass Filter |
 | 💡 | Context Suggestions |
-| 🔄 | Week-over-Week Synthesis |
+| 🔄 | Run-over-Run Synthesis |
 
 ### 2-2. Subsection-level (`###`) Emojis
 
@@ -60,7 +63,7 @@ Context Suggestions subsections use a single emoji:
 - One emoji per header, placed at the **start** of the header text, after `##` or `###` and a space.
 - Do not add emojis to the report title (`#`) or to table headers.
 - Do not use any emoji not listed in this guide.
-- The Korean file uses the **identical** emoji system — emojis are not translated.
+- Emojis are not translated — use the symbols exactly as listed.
 
 #### Correct example
 ```markdown
@@ -147,22 +150,27 @@ not linked. The legend rows themselves are not self-linked.
 
 ---
 
-## 4. Korean Translation Principles
+## 4. Korean Authoring Principles
 
-### 4-1. What to translate vs. keep in English
+The report is written directly in Korean. There is no English source
+file to translate from — but the same rules apply for which tokens stay
+verbatim in their original form versus which prose is Korean.
+
+### 4-1. What to write in Korean vs. keep verbatim
 
 | Category | Treatment |
 |----------|-----------|
+| Body prose | Korean (formal 합니다/됩니다 체) |
 | Paper titles | Keep original English title; add Korean description if helpful |
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
 | P#, D#, CP# tags | Keep verbatim (`P2`, `D11`, `CP3`, etc.) |
-| Reference Legend | Reproduce the section; translate the Meaning column only; codes + `<a id="ref-…">` anchors verbatim |
-| Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — KO links resolve within the KO file |
-| arXiv links | Keep identical to English version |
+| Reference Legend | Meaning column in Korean; codes + `<a id="ref-…">` anchors verbatim |
+| Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
+| arXiv links | Keep verbatim |
 | Emojis | Keep identical — same position, same emoji |
-| Section headers | Translate header text; keep emoji prefix |
+| Section headers | Korean header text (see §4-3); keep emoji prefix |
 
 ### 4-2. Technical term glossary (standard translations)
 
@@ -213,19 +221,19 @@ not linked. The legend rows themselves are not self-linked.
 | 📊 Scoring Summary | 📊 점수 요약 |
 | 🚫 Candidate Papers That Did Not Pass Filter | 🚫 필터 통과 실패 후보 논문 |
 | 💡 Context Suggestions | 💡 컨텍스트 제안 |
-| 🔄 Week-over-Week Synthesis | 🔄 주차별 종합 |
+| 🔄 Run-over-Run Synthesis | 🔄 직전 리포트 대비 종합 |
 | 🎯 (a) P# / D# touched | 🎯 (a) 관련 Pillar / Decision (P# / D#) |
 | ✨ (b) What is genuinely new | ✨ (b) 진정으로 새로운 점 |
 | ⚙️ (c) Decision implication | ⚙️ (c) 의사결정 함의 |
 | ⚠️ (d) Failure mode to probe first | ⚠️ (d) 먼저 검증해야 할 실패 모드 |
-| 📌 (sub-sections) | 📌 (동일 주제 한글 번역) |
+| 📌 (sub-sections) | 📌 (하위 섹션) |
 
 ### 4-4. Tone and style
 
 - Use formal Korean (합니다/됩니다 체).
-- Maintain the analytical density of the English version — do not simplify.
-- When the English uses bold for emphasis (`**text**`), preserve bold in Korean.
-- Code blocks and inline code (`` `text` ``) are preserved unchanged.
+- Maintain full analytical density — do not simplify or summarize away detail.
+- Use bold (`**text**`) for emphasis where it aids the reader.
+- Code blocks and inline code (`` `text` ``) are kept verbatim.
 
 ---
 
@@ -237,3 +245,4 @@ not linked. The legend rows themselves are not self-linked.
 | v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed) |
 | v1.2 | 2026-05-19 | Glossary §4-2 extended with canonical terms: System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching |
 | v1.3 | 2026-05-19 | Added §3-1 Reference Legend (cited-code glossary) + in-body `#ref-` anchor links; 🔑 section emoji; KO mirroring rules (§4-1, §4-3) |
+| v1.4 | 2026-05-19 | Single Korean file per run named `YYYY-MM-DD-P#.md` (date + pillar); English file retired; Mon & Thu cadence; §1 + §4 reworked from "translation" to direct Korean authoring |

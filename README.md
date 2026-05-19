@@ -77,13 +77,13 @@ probe/
 │
 ├── research_log/                  # Dynamic output — agent-generated
 │   ├── _TEMPLATE.md               # Scouting Report form
-│   ├── YYYY-MM-DD.md              # Dated reports (English) + -KO.md twin
-│   └── YYYY-W##.md                # ISO-week reports (English) + -KO.md twin
+│   └── YYYY-MM-DD-P#.md           # Korean reports — one per run (Mon/Thu),
+│                                  #   one per pillar (P1–P4)
 │
 ├── docs/
 │   ├── INTRO_KO.md                # Korean onboarding + operations manual
 │   ├── STYLE_GUIDE.md             # Formatting rules — emoji system, link
-│   │                              # format, Korean translation principles
+│   │                              # format, Korean authoring principles
 │   │                              # (single source of truth for output format)
 │   └── LOGO.png                   # Project logo
 │
@@ -100,7 +100,7 @@ probe/
 `research_context.md` and `research_log/` exist for one reason: to keep the agent's context lean.
 
 - **Static** (`research_context.md`) changes monthly at most. The agent *reads* it, never writes.
-- **Dynamic** (`research_log/`) is append-only. Each week is one file. The agent only reads the **last 2 weeks** when generating a new report.
+- **Dynamic** (`research_log/`) is append-only. Each run produces one file per pillar (`YYYY-MM-DD-P#.md`). The agent only reads that pillar's **last ~2 weeks** when generating a new report.
 
 Shove everything into one file and within six weeks the context bloats, the agent re-recommends last month's papers, and the pinned literature drifts into a mess.
 
@@ -140,7 +140,7 @@ Shove everything into one file and within six weeks the context bloats, the agen
                              │ writes
                              ▼
               ┌──────────────────────────────┐
-              │  research_log/YYYY-W##.md    │  Scouting Report
+              │  research_log/YYYY-MM-DD-P#.md│  Scouting Report
               │                              │
               │  Top 3–5 papers only         │
               │    · Connects to P#/D#       │
@@ -213,9 +213,9 @@ Goal: produce two consecutive Scouting Reports that you'd actually read. Nothing
 
 1. Open a new [Claude.ai](https://claude.ai) conversation with **Claude Sonnet** or **Opus**.
 2. Upload (or paste) `research_context.md` as a project file.
-3. Paste the **Scouting Prompt** (see below). Fill in the week marker.
+3. Paste the **Scouting Prompt** (see below). Fill in the run date and pillar.
 4. Read the output against `research_log/_TEMPLATE.md`. If it fails the template, the prompt is the problem — not the agent.
-5. Save the output as `research_log/YYYY-W##.md`, commit, repeat next week.
+5. Save the output as `research_log/YYYY-MM-DD-P#.md`, commit, repeat on the next run (Mon/Thu).
 
 <details>
 <summary><b>📋 Scouting Prompt (copy-paste)</b></summary>
@@ -226,14 +226,14 @@ manipulation.
 
 CONTEXT (read-only):
 - research_context.md  (attached)
-- research_log/<last 2 weeks>.md  (attached)
-- docs/STYLE_GUIDE.md  (attached) — formatting, emoji system, translation rules
+- research_log/<this pillar's last ~2 weeks>.md  (attached)
+- docs/STYLE_GUIDE.md  (attached) — formatting, emoji system, Korean authoring rules
 
 TASK:
-Produce a Scouting Report for week <YYYY-WXX>.
-Every weekly scouting run produces TWO output files:
-  1. `research_log/YYYY-WXX.md`    — English (primary)
-  2. `research_log/YYYY-WXX-KO.md` — Korean translation (produced immediately after)
+Produce a Scouting Report for <YYYY-MM-DD> · Pillar P#.
+This routine runs twice a week — every Monday and Thursday.
+Each run produces ONE Korean output file:
+  `research_log/YYYY-MM-DD-P#.md` — Korean (use the run date)
 
 PROCESS (in this order):
 1. Author Watch — check last 14 days of arXiv submissions from
@@ -255,9 +255,13 @@ For every candidate paper, score on a 0–3 scale:
 
 ---
 
-OUTPUT — English file (YYYY-WXX.md)
+OUTPUT — Korean report (`YYYY-MM-DD-P#.md`)
 
-Follow research_log/_TEMPLATE.md exactly. Top 3–5 papers only.
+Write the report directly in Korean, following research_log/_TEMPLATE.md
+exactly. Top 3–5 papers only. Apply docs/STYLE_GUIDE.md §4 (Korean
+authoring rules): all prose is formal Korean (합니다/됩니다 체), while
+paper titles, config / code names, formulas, P#/D#/CP# tags, arXiv
+links, emojis and `<a id="ref-…">` anchors stay verbatim.
 
 ### Emoji rules (docs/STYLE_GUIDE.md §2)
 Apply emojis to section and subsection headers only — never inside body text.
@@ -271,7 +275,7 @@ Section-level (##):
   📊  Scoring Summary
   🚫  Candidate Papers That Did Not Pass Filter
   💡  Context Suggestions
-  🔄  Week-over-Week Synthesis
+  🔄  Run-over-Run Synthesis
 
 Subsection-level (###), same across all papers:
   🎯  (a) P# / D# touched
@@ -299,26 +303,9 @@ For each paper, state:
 
 ---
 
-OUTPUT — Korean file (YYYY-WXX-KO.md)
-
-Produce a faithful Korean translation of the English file immediately
-after the English file is complete. Follow docs/STYLE_GUIDE.md §4 exactly.
-
-Key rules:
-  - Paper titles: keep original English title.
-  - Technical terms: Korean + English in parentheses on first occurrence;
-    Korean only thereafter. Use the glossary in STYLE_GUIDE.md §4-2.
-  - Config / code names, formulas, P#/D# tags, arXiv links: keep verbatim.
-  - Emojis: identical position and symbol as the English file.
-  - Section headers: translate text, keep emoji prefix.
-    Use the header translation table in STYLE_GUIDE.md §4-3.
-  - Tone: formal Korean (합니다/됩니다 체).
-  - Bold emphasis (**text**) and inline code (`text`): preserve.
-
----
-
-RULES (both files):
-- Do not recommend any paper already in research_log/ (last 2 weeks).
+RULES:
+- Do not recommend any paper already covered in this pillar's recent
+  reports — the last ~2 weeks (~4 files `research_log/YYYY-MM-DD-P#.md`).
 - Do not edit research_context.md. If a pinned paper should be replaced,
   write the suggestion under 💡 Context Suggestions.
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.
@@ -339,11 +326,11 @@ Goal: the agent runs on a schedule, but tools/MCP are not yet wired. You're lett
 Use **Claude Desktop → Scheduled Tasks**:
 
 1. Open Claude Desktop → Settings → Scheduled Tasks.
-2. Create task: `PROBE weekly scout`.
-3. Trigger: every Monday 09:00 Asia/Seoul.
+2. Create task: `PROBE scout`.
+3. Trigger: every Monday and Thursday 09:00 Asia/Seoul.
 4. Prompt: the same Scouting Prompt from Stage 1.
-5. Attach `research_context.md` + last two `research_log/*.md` files.
-6. Action: save the result to `research_log/YYYY-W##.md` (copy manually, or use the desktop's file-export hook).
+5. Attach `research_context.md` + this pillar's last two `research_log/*-P#.md` files.
+6. Action: save the result to `research_log/YYYY-MM-DD-P#.md` (copy manually, or use the desktop's file-export hook).
 
 Limitation: your laptop has to be awake and Claude Desktop has to be running. Good enough for a month; not good enough forever.
 
@@ -550,7 +537,7 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | Document | Description |
 |---|---|
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
-| [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean translation |
+| [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`research_context.md`](research_context.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `research_context_P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
