@@ -130,9 +130,14 @@ convention** — it does not strip emoji.
 `README.md`, `docs/INTRO_KO.md`. Headers may carry **one leading thematic
 emoji**, placed at the start of the header text, after the `#`s and a space
 (`# 🛸 …`, `## 📌 …`, `### 🪜 …`). Exactly one emoji, at the start — never at
-the end, never inside body text. One H1 per document. This preserves probe's
-README tone and is intentional, not a violation of the "default to no emoji"
-guidance.
+the end, never inside body text. One H1 per document.
+
+**Internal consistency per level (hard rule).** Each header level used in a
+document must be uniformly emoji or uniformly plain — no mixing within the
+same level in the same doc. The canonical narrative pattern in this repo is
+**emoji at H1 and H2, plain at H3 and below**, used by both `README.md` and
+`docs/INTRO_KO.md`. If you add a new H3 to either, it stays plain; outliers
+must be brought into line, not left as exceptions.
 
 ### Reference / structural docs
 
@@ -164,6 +169,36 @@ apply to:
 Path correctness is **not** exempt: when a path moves, references inside
 prompts and context files are still updated even though their formatting is
 not governed here.
+
+## When adding a new top-level doc
+
+Probe has no cross-link automation — every doc reference is hand-maintained.
+A new doc that is only added to the filesystem without updating the index
+becomes a silent orphan (the last restructure produced one before this
+checklist existed). Walk this list every time:
+
+- [ ] **Classify the doc** — narrative/onboarding (emoji headers allowed) or
+      reference/structural (plain headers). Pick one consistently per the
+      table above and do not mix levels.
+- [ ] **Pick the location** — folder READMEs sit next to what they describe
+      (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`);
+      onboarding / formatting guides live under `docs/`; contributor /
+      governance docs sit at the repo root next to `CLAUDE.md`.
+- [ ] **Add it to `README.md` → "Further Reading" table.** This is the only
+      index in the repo. Match the existing row format (`[`path`](path) |
+      one-line description`).
+- [ ] **If it is a folder README**, confirm the three output-track READMEs
+      (`scouting/`, `synthesis/`, `analysis/`) and the new one remain
+      structurally symmetric — each opens with `# foldername/`, names its
+      file convention, its generator, and what it reads from `context/`.
+- [ ] **If it introduces a new top-level path**, add a row to the
+      "Repository map" table in this file (`CLAUDE.md`).
+- [ ] **If it pins paths that live elsewhere** (templates, prompts, output
+      files), grep the new doc against the current layout — every
+      referenced path must resolve after the latest restructure.
+- [ ] **Run a final `grep -rn '<new-doc-basename>' .`** — at least one
+      inbound link (typically Further Reading) must exist. Zero inbound
+      links = orphan.
 
 ## Where to read more
 

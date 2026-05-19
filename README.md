@@ -210,7 +210,7 @@ You do **not** skip stages. The prompt that survives Stage 1 is the prompt you d
 
 ---
 
-### 🪜 Stage 1 — Manual run (Week 1–2)
+### Stage 1 — Manual run (Week 1–2)
 
 Goal: produce two consecutive Scouting Reports that you'd actually read. Nothing is automated yet.
 
@@ -322,7 +322,7 @@ RULES:
 
 ---
 
-### 🧩 Stage 2 — Semi-auto (Week 3–4)
+### Stage 2 — Semi-auto (Week 3–4)
 
 Goal: the agent runs on a schedule, but tools/MCP are not yet wired. You're letting Claude re-generate reports automatically, still using its built-in web search for retrieval.
 
@@ -339,7 +339,7 @@ Limitation: your laptop has to be awake and Claude Desktop has to be running. Go
 
 ---
 
-### 🛰️ Stage 3 — Full agent via Claude Code Routines (Week 5+)
+### Stage 3 — Full agent via Claude Code Routines (Week 5+)
 
 This is the endgame: cloud-scheduled, commits its own reports via pull request. No laptop, no reminders, no "did I run PROBE this week?"
 
@@ -498,7 +498,7 @@ Network note: the slash command's full-text fetch needs the session environment 
 
 ---
 
-### 🧰 Troubleshooting
+### Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -556,10 +556,12 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 
 | Document | Description |
 |---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Contributor rules — commit-message style + document Markdown style |
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
 | [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
+| [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
