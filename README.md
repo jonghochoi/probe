@@ -53,7 +53,7 @@ probe/
 ├── research_context.md            # Static context — human-maintained
 │                                  #   Identity & Purpose
 │                                  #   Pillars (P1–P5)
-│                                  #   Decision Log (D1–D15)
+│                                  #   Decision Log (D1–D26)
 │                                  #   Tracked Literature (5 × 8)
 │                                  #   Competitor Monitoring
 │                                  #   Researchers to Follow
@@ -76,6 +76,8 @@ probe/
 └── README.md                      # ← you are here
 ```
 
+> **Pillars (v5.0)**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`research_context.md`](research_context.md) §5.
+
 ### Core principle: static vs. dynamic, never mixed
 
 `research_context.md` and `research_log/` exist for one reason: to keep the agent's context lean.
@@ -94,7 +96,7 @@ Shove everything into one file and within six weeks the context bloats, the agen
               │     research_context.md      │  static · human-owned
               │  • Identity & Purpose        │
               │  • Pillars (P1–P5)           │
-              │  • Decision Log (D1–D15)     │
+              │  • Decision Log (D1–D26)     │
               │  • Tracked Literature (5 × 8)│
               │  • Competitor Monitoring     │
               │  • Researchers to Follow     │

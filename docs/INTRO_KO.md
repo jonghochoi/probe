@@ -36,7 +36,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   │     research_context.md      │  ← 정적. 사람이 관리.
                   │  • Identity & Purpose        │
                   │  • Pillars (P1–P5)           │
-                  │  • Decision Log (D1–D15)     │
+                  │  • Decision Log (D1–D26)     │
                   │  • Tracked Literature (5×8)  │
                   │  • Competitor Monitoring     │
                   │  • Researchers to Follow     │
@@ -82,6 +82,8 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   └──────────────────────────────┘
 ```
 
+> **Pillars (v5.0)**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`research_context.md`](../research_context.md) §5.
+
 ---
 
 ## 🧑‍🔬 인간이 집중해야 할 것
@@ -93,7 +95,7 @@ Probe는 탐사선이다. 전투는 하지 않는다.
 |---|---|
 | **방향 설정** | Identity 명제 점검 + Pillar 우선순위 결정 (P1이 정말 가장 중요한가?) |
 | **Decision 정제** | 에이전트가 찾아온 논문이 D# 중 하나의 v1 default를 흔들거나 deferred 트리거를 점등시키면, Decision Log 업데이트 |
-| **평가 프로토콜** | D13 (P5 skeleton)의 falsifier 임계값·메트릭을 유지·강화 — 없으면 어떤 리포트도 의미 없음 |
+| **평가 프로토콜** | D25 (P5)의 falsifier(4-contribution ablation) 임계값·메트릭을 유지·강화 — 없으면 어떤 리포트도 의미 없음 |
 | **맥락 갱신** | Revisit Checkpoint(CP1–CP5) 도래 시 `research_context.md` 업데이트 — 실험 결과, deferred 트리거, 새 evidence 반영 |
 | **피드백 루프** | Scouting Report를 실제로 읽고, 실험 설계에 반영된 것을 기록 |
 
@@ -219,7 +221,7 @@ output:
 이 세 숫자의 **비율**이 Probe의 실효성 지표다.
 3개월마다 "내 Identity 명제 또는 어느 Pillar에 대한 생각이 실제로 바뀌었는가?"를 자문한다.
 바뀌지 않았다면 retrieval 파이프라인을 재점검한다.
-추가로 매 Checkpoint마다 §10 Competitor 동향과 D1–D15 deferred 트리거를 함께 점검한다.
+추가로 매 Checkpoint마다 §10 Competitor 동향과 D1–D26 deferred 트리거를 함께 점검한다.
 
 ---
 
