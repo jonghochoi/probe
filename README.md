@@ -353,7 +353,7 @@ Only **three** things change versus Stage 1/2:
 
 - **Execution location** — your laptop → the cloud (runs Mon & Thu 09:00 even with the laptop off).
 - **Retrieval** — Claude's built-in web search → direct `curl` calls to public REST APIs (arXiv + Semantic Scholar Graph). Same data sources, better citation accuracy and reproducibility. **No MCP server is involved** — cloud routine sessions cannot reach a local MCP server, so retrieval is plain `curl`.
-- **Output** — manual copy → automatic GitHub PR (commit history *is* the research log).
+- **Output** — manual copy → the prompt itself commits & pushes the report file, then the RemoteTrigger/harness opens the GitHub PR from that branch (commit history *is* the research log).
 
 The repo's durable asset is the **prompt** (`.claude/prompts/scouting-P{1..4}.md`), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
 
@@ -429,7 +429,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 
 **Step 3 — The externalized prompts already exist**
 
-`.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md` are committed — one scouting + one synthesis prompt per pillar. They are the Stage-1 prompt with **only the retrieval instructions** swapped from built-in web search to explicit `curl` REST:
+`.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md` are committed — one scouting + one synthesis prompt per pillar. They are the Stage-1 prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
 
 | Retrieval step | Stage 1/2 | Stage 3 (`curl` REST) |
 |---|---|---|
@@ -438,7 +438,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 | Keyword Sweep / topic-watch | built-in web search | arXiv `export.arxiv.org/api/query` |
 | Competitor Monitoring | built-in web search | arXiv query + S2 author lookup |
 
-S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt records the exact command and HTTP status verbatim under 📋 Scout Methodology and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, EN+KO two-file output, the `research_context_P#.md` never-modify guard) is unchanged from Stage 1.
+S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt records the exact command and HTTP status verbatim under 📋 Scout Methodology and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. After the report is written the prompt resolves the run date (`TZ=Asia/Seoul`) and runs `git add`/`commit`/`push` for that single report file — the only addition beyond retrieval; PR creation is left to the RemoteTrigger/harness. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, the `research_context_P#.md` never-modify guard) is unchanged from Stage 1.
 
 > The P1-scoped prompt intentionally **drops the monthly Cross-pollination rule** — its source section (full `research_context.md` §12) does not exist in the P1 extract. Do not be surprised diffing it against the Stage-1 prompt above.
 

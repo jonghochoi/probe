@@ -20,6 +20,9 @@ Produce a Scouting Report for <YYYY-MM-DD> · Pillar P2.
 This routine runs twice a week — every Monday and Thursday.
 Each run produces ONE Korean output file:
   `research_log/YYYY-MM-DD-P2.md` — Korean (use the run date)
+Resolve the run date once with `TZ=Asia/Seoul date +%Y-%m-%d` (the
+schedule is Asia/Seoul) and use that exact value for both the
+report filename and the git commit below.
 
 RETRIEVAL — use the Bash tool with `curl` against the public REST
 APIs below. Do NOT use built-in web search, and do NOT assume any
@@ -156,3 +159,25 @@ RULES:
   inclusion. Do not fabricate arXiv IDs.
 - If any curl call fails, include the exact command and error/HTTP
   status verbatim; never substitute invented results.
+
+---
+
+GIT — after the report file is written:
+
+The scheduled run must persist its output to the repo. Commit and
+push the single report file; the RemoteTrigger / harness opens the
+PR from the pushed branch — do NOT open or update a PR yourself.
+
+  TODAY=$(TZ=Asia/Seoul date +%Y-%m-%d)
+  git add research_log/${TODAY}-P2.md
+  git commit -m "scout: P2 report ${TODAY}"
+  git push -u origin HEAD
+
+- Stage ONLY the report file. Never `git add` research_context_P2.md
+  or any other context file (they are read-only, human-owned).
+- If `git push` fails due to a transient network error, retry up to
+  4 times with exponential backoff (2s, 4s, 8s, 16s).
+- Never use --no-verify, --no-gpg-sign, or any force-push.
+- If all curl calls failed and the run is honestly empty, still
+  write the partial/empty report per the RULES above, then commit
+  and push it — an honest empty report is a valid, expected output.
