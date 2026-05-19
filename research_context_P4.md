@@ -1,0 +1,179 @@
+# Research Context — P4: VLM Pretraining Preservation
+
+> **P4 scope extract of `research_context.md` (single source of truth).**
+> Narrowed to **Pillar 4 (VLM Pretraining Preservation)**; P1–P3/P5
+> content lives in the full document, not here. P4 owns **D19–D23**.
+> **Agent usage**: *static* context. The retrieval agent reads (never writes)
+> this file. Weekly findings go to `research_log/YYYY-WW.md`.
+> **Formatting & translation rules**: `docs/STYLE_GUIDE.md` (single source of
+> truth — agent must read it before producing output).
+
+---
+
+## 1. Identity [STABLE] [AGENT-INPUT]
+
+> Generalization / situation-understanding originates in the VLM backbone. Full fine-tuning on deploy data over-specializes and erodes the pretrained prior — which would make the whole VLA-level pivot self-defeating. P4 protects the ceiling the identity rests on: decide VLM fine-tuning range, prior-preservation strategy, staged training recipe, multi-embodiment pretraining data, and the action-representation × VLM-preservation relationship. Task specification stays goal-centric (arm-hand integrated).
+
+**Decomposition (P4-relevant)**
+- *Antagonist*: action-only papers ignoring backbone preservation; full-FT VLAs that over-specialize and forget; pick-and-place-only VLA with no forgetting/over-specialization analysis
+- *Protagonist (P4 owns)*: frozen/PEFT-bounded VLM with action-side adapters; staged recipe gated by insufficiency; flow-matching action head keeping the VLM in its semantic role
+- *Coupling*: the P1 split heads (D4/D7) *are* the action-side adapter; preservation choices gate everything downstream (see full doc P1)
+
+> **Note**: P4 owns the backbone-preservation half. The decoder split (P1),
+> structured input (P2), System0 (P3), evaluation (P5) are out of scope here —
+> see `research_context.md`.
+
+---
+
+## 2. Pillar P4 — VLM Pretraining Preservation [STABLE structure, LIVING content] [AGENT-INPUT]
+
+**Scope**: generalization/situation-understanding originates in the VLM backbone; full fine-tuning on deploy data over-specializes and erodes the pretrained prior. Decide VLM FT range (freeze / partial / LoRA-adapter / full), prior-preservation strategy, staged training recipe, multi-embodiment pretraining data, and the action-representation × VLM-preservation relationship.
+
+**Identity tie**: protects the VLA ceiling that the whole identity rests on; without it, the VLA-level pivot self-defeats.
+
+**Tracked items**: VLM FT range (D19), prior-preservation strategy (D20), staged training recipe (D21), multi-embodiment pretraining data (D22), action-representation × VLM-preservation (D23).
+
+**Anti-topics**: action-only papers ignoring backbone preservation; pick-and-place-only VLA without forgetting/over-specialization analysis.
+
+**Literature anchor**: π0/π0.5, VLM2VLA (LoRA + NL-action, forgetting mitigation), RT-2 (web/robot co-FT), VLA-Adapter (Bridge Attention), PriorVLA (prior-preserving adaptation), multi-embodiment data survey [arXiv:2506.19121], MolmoAct2 (per-layer KV-cache conditioning). See §6.
+
+---
+
+## 3. Revisit Checkpoints (CP1–CP5) [LIVING]
+
+- **CP1**: v1 first ablation analysis (4-contribution ablation on in-hand rotation, sim)
+- **CP2**: in-hand rotation first real-world demo result analysis
+- **CP3**: tool articulation demo entry (phase 2; 5-tool evaluation set)
+- **CP4**: hardware transition (Sharpa → xhand → in-house)
+- **CP5**: cross-object generalization phase entry
+
+**CP1→CP3 relevance**: staged FT entry (D21 Stage 3/4) and the LoRA/co-FT escalations (D19/D20) are gated by Stage-2 in-distribution plateau with generalization loss.
+
+---
+
+## 4. Decision Log — P4 / VLM Preservation (D19–D23) [LIVING] [AGENT-INPUT]
+
+Options / v1 / rationale / deferred (trigger + checkpoint). Append-only.
+
+> P4 covers **D19–D23**. P1 (D1–D7), P2 (D8–D12), P3/System0 (D13–D18),
+> P5 (D24–D26) are out of scope here — see `research_context.md`.
+
+#### [D19] VLM fine-tuning range (P4)
+- **Options**: (a) full VLM freeze + action experts only, (b) vision encoder freeze + partial language/decoder, (c) selective layer unfreeze, (d) LoRA/adapter PEFT, (e) full-FT baseline
+- **v1**: (a) full freeze + action experts only
+- **Rationale**: late tactile/structured-input fusion → backbone sees π-trained modalities only → no adaptation pressure; minimum delta; maximal prior preservation
+- **Deferred**: (d) LoRA → trigger: frozen backbone representation insufficient for new modality combos / **CP1**; (c) selective unfreeze → trigger: LoRA still insufficient / **CP1**
+
+#### [D20] Prior-preservation strategy (P4)
+- **Options**: LoRA-minimal (VLM2VLA, NL-style action), web/robot co-FT (RT-2), action-side adapter (VLA-Adapter Bridge Attention), prior-preserving adaptation (PriorVLA)
+- **v1**: action-side adapter (D4/D7 split heads *are* the action-side adapter; backbone untouched)
+- **Rationale**: consistent with D19(a) full-freeze; no backbone re-train burden
+- **Deferred**: LoRA-minimal → trigger: D19 moves to (d) / **CP1**; web/robot co-FT → trigger: deploy data distribution-shift severe (see D-analysis) / **CP3**
+
+#### [D21] Staged training recipe (P4)
+- **v1**: Stage 1 keep VLM alignment (no-op: use openpi weights) → Stage 2 VLM-freeze, train Body/Hand experts → Stage 3 (deferred) LoRA/adapter/top-layer limited FT → Stage 4 (deferred) small-LR full-FT + prior-preserving regularization
+- **Rationale**: each stage gated by the prior stage's insufficiency, minimizing forgetting risk
+- **Deferred**: Stage 3/4 entry → trigger: Stage 2 in-distribution plateau with generalization loss / **CP1→CP3**
+
+#### [D22] Multi-embodiment pretraining data (P4)
+- **v1**: rely on π pretrained prior only (no extra multi-embodiment co-training) for first experiment
+- **Action item**: list-up leading-lab multi-embodiment datasets; select performance-critical subsets ([arXiv:2506.19121])
+- **Deferred**: add multi-embodiment co-training → trigger: π prior coverage insufficient for target tasks / **CP3**
+
+#### [D23] Action representation × VLM preservation (P4)
+- **Options**: (i) discrete action token, (ii) NL-style action representation, (iii) continuous flow-matching action head
+- **v1**: (iii) continuous flow-matching head (π-consistent; backbone not used as action token predictor → less prior disturbance)
+- **Rationale**: keeps VLM in semantic role, action experts carry control
+- **Deferred**: (ii) NL-style → trigger: D20 moves to LoRA-minimal/VLM2VLA path / **CP1**
+
+---
+
+## 5. P4 Anti-topics (Noise Filter) [AGENT-INPUT]
+
+Excluded from the weekly digest unless an unusually strong tie to P4 or a P4 Decision (D19–D23):
+
+- Action-only papers ignoring backbone preservation
+- Pick-and-place-only VLA without forgetting / over-specialization analysis
+- Full-FT VLA results with no prior-retention / generalization measurement
+- Survey / position papers (read manually, not via agent)
+- Continual-learning / PEFT outside the VLA-preservation context (cross-pollination only — full doc §12)
+
+---
+
+## 6. P4 Tracked Literature [LIVING] [AGENT-INPUT]
+
+> Hard cap 8 pinned. Rebalance quarterly; replace, don't append.
+> **Format rule**: every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs. Canonical: `docs/STYLE_GUIDE.md` §3.
+
+### 6.1 P4 Pinned — VLM Pretraining Preservation
+| Paper | arXiv | Year | Role |
+|---|---|---|---|
+| π0 | [arXiv:2410.24164](https://arxiv.org/abs/2410.24164) | 2024 | Frozen-backbone + action-expert pattern (D19) |
+| π0.5 | [arXiv:2504.16054](https://arxiv.org/abs/2504.16054) | 2025 | Co-training / hierarchical (D21/D22) |
+| VLM2VLA | [arXiv:2509.22195](https://arxiv.org/abs/2509.22195) | 2025 | LoRA + NL-action, forgetting mitigation (D20) |
+| RT-2 | [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) | 2023 | Web/robot co-FT prior retention (D20) |
+| VLA-Adapter | [arXiv:2509.09372](https://arxiv.org/abs/2509.09372) | 2025 | Bridge Attention action-side adapter (D20) |
+| PriorVLA | [arXiv:2605.10925](https://arxiv.org/abs/2605.10925) | 2026 | Prior-preserving downstream adaptation; frozen Prior Expert + Adaptation Expert (D20) |
+| Multi-Embodiment Pretraining Data | [arXiv:2506.19121](https://arxiv.org/abs/2506.19121) | 2025 | Dataset selection (D22) |
+| MolmoAct2 | [arXiv:2605.02881](https://arxiv.org/abs/2605.02881) | 2026 | Per-layer KV-cache conditioning preserves VLM (D19/D23) |
+
+---
+
+## 7. P4 Researchers & Groups to Follow [LIVING]
+
+> Ordered by proximity to the P4 anchor (VLM-prior preservation through VLA fine-tuning).
+
+### 7.1 Individuals
+- **Physical Intelligence π team** — Kevin Black, Danny Driess, Karl Pertsch, Lucy Xiaoyang Shi, Allen Z. Ren — frozen-backbone + action-expert pattern (D19/D21)
+- **RT-2 / Brohan–Driess lineage** — web/robot co-FT prior retention (D20)
+- **VLM2VLA / VLA-Adapter / PriorVLA authors** — preservation strategies (verify)
+- **MolmoAct authors (Allen AI)** — per-layer KV-cache conditioning (D19/D23)
+
+### 7.2 Labs / groups (watch code releases)
+- **Physical Intelligence (π team)** — backbone, action-expert pattern
+- **Allen AI** — MolmoAct lineage
+- **Berkeley BAIR / RAIL** — VLA preservation / adapter work
+- **Google DeepMind robotics (RT-2 lineage)** — web/robot co-FT
+
+---
+
+## 8. P4 Competitor / Kindred Monitoring [LIVING] [AGENT-INPUT]
+
+VLM-preservation siblings — review at every CP, ordered by closeness.
+
+| Work | arXiv | Overlap | Difference vs P4 | Watch trigger |
+|---|---|---|---|---|
+| **VLM2VLA** | [2509.22195](https://arxiv.org/abs/2509.22195) | LoRA + NL-action forgetting mitigation | Data-level NL action vs frozen + action-side adapter | Forgetting-mitigation benchmark results |
+| **VLA-Adapter** | [2509.09372](https://arxiv.org/abs/2509.09372) | Bridge Attention action-side adapter | Tiny-scale adapter vs our split-heads-as-adapter | New adapter-paradigm results |
+| **PriorVLA** | [2605.10925](https://arxiv.org/abs/2605.10925) | Frozen Prior Expert + Adaptation Expert | Explicit two-expert prior source vs frozen-backbone | Prior-preservation eval; param-budget claims |
+| **MolmoAct2** | [2605.02881](https://arxiv.org/abs/2605.02881) | Per-layer KV-cache conditioning preserves VLM | Layered KV conditioning vs late-fusion freeze | Continuous-action + preservation release |
+| **Genesis AI** | — | VLA-only strong performer | Tests whether explicit preservation is even needed | Any VLA-only generalization result |
+
+*Differentiation hypothesis*: a fully frozen backbone with split-heads-as-adapter + flow-matching action head preserves the prior with **minimum delta**; full-FT or heavy-adapter approaches risk over-specialization on deploy data.
+
+---
+
+## 9. P4 Open Items & Cross-pillar Coupling [LIVING] [AGENT-INPUT]
+
+### 9.A — Open implementation decisions
+
+> Resolved: π weights public via openpi (π0, π0.5, π0-FAST, Apache 2.0; PyTorch port + open-pi-zero re-impl).
+
+| Item | Status | Default if unresolved | Deadline |
+|---|---|---|---|
+| π variant (π0 / π0.5 / π0.7) | 🟡 open | π0 (most stable) | CP1 code start |
+| Code base (JAX openpi / HF PyTorch / open-pi-zero) | 🟡 open | PyTorch port | CP1 code start |
+| Multi-embodiment pretraining data access (D22) | 🟡 unknown | π prior only (D22 v1) | CP3 |
+| Stage 3/4 FT entry condition | 🟡 open | Stay Stage 2 (freeze) until plateau | CP1→CP3 |
+
+### 9.B — Cross-pillar coupling
+
+> Maps to §14 dependency graph in the full `research_context.md`.
+
+P4 is tightly coupled to **P1 D7** (π backbone integration / partition) and **P1 D19↔D4/D7**: the split heads *are* the action-side adapter, so the freeze choice (D19) directly constrains the P1 partition sub-reading (full doc §14.C, Repurpose vs Subdivide). D23 flow-matching head must stay π-consistent so P1 decoding does not disturb the prior. Multi-embodiment data (D22) is plan-stage, gated at **CP3**.
+
+---
+
+*P4 scope extract of `research_context.md`. For other pillars, decisions
+D1–D18 / D24–D26, full §7 anti-topics, §9 researchers, §10 monitoring,
+§14 dependency graph, and Appendix C, consult the full document.*

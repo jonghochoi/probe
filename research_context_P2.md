@@ -1,0 +1,185 @@
+# Research Context — P2: Structured Input-Modality Binding
+
+> **P2 scope extract of `research_context.md` (single source of truth).**
+> Narrowed to **Pillar 2 (Structured Input-Modality Binding)**; P1/P3–P5
+> content lives in the full document, not here. P2 owns **D8–D12**.
+> **Agent usage**: *static* context. The retrieval agent reads (never writes)
+> this file. Weekly findings go to `research_log/YYYY-WW.md`.
+> **Formatting & translation rules**: `docs/STYLE_GUIDE.md` (single source of
+> truth — agent must read it before producing output).
+
+---
+
+## 1. Identity [STABLE] [AGENT-INPUT]
+
+> Most VLA-style policies feed sensing as a **flat concat / token-append** of vision-dominant streams, leaving finger-wise contact semantics implicit. Dexterous **hand** manipulation needs the *observation* elevated, not just the decoder: per-finger proprio-tactile binding, topology-aware encoding, a hand-level aggregation encoder, and multi-camera pre-fusion *before* the VLM. Structured binding makes "which finger/palm produced this contact" explicit instead of implicitly learned. Task specification stays goal-centric (arm-hand integrated).
+
+**Decomposition (P2-relevant)**
+- *Antagonist*: vision-only manipulation; flat-concat multimodal fusion without per-finger attribution; pure tactile-only without structured binding
+- *Protagonist (P2 owns)*: structured finger/palm-bound proprio-tactile tokens + topology-aware encoding + hand-level aggregation + multi-camera spatial pre-fusion
+- *Downstream context*: structured tokens feed the heterogeneous Body/Hand decoder (P1 D4/D8) under a preserved VLM prior (full doc P4)
+
+> **Note**: P2 owns the input-binding half. The decoder split (P1), System0
+> (P3), VLM preservation (P4), evaluation (P5) are out of scope here — see
+> `research_context.md`.
+
+---
+
+## 2. Pillar P2 — Structured Input-Modality Binding [STABLE structure, LIVING content] [AGENT-INPUT]
+
+**Scope**: replace simple concat/token-append with finger/palm-bound structured tokens. Each finger's joint state + that finger's tactile feature → one local embedding (~10 finger + 2 palm tokens). Topology-aware encoding (finger/hand identity, palm-relative fingertip pose, kinematic chain). Hand-level aggregation encoder. Multi-camera vision pre-fusion (cross-attention fuser → unified spatial embedding) before the VLM.
+
+**Identity tie**: hand-level "observation elevation" — finger-wise contact semantics made explicit, not implicitly learned.
+
+**Tracked items**: finger/palm structured token construction (D8), topology-aware encoding (D9), hand-level aggregation encoder (D10), visuotactile/proprio-tactile encoder candidate (D11), multi-camera pre-fusion (D12).
+
+**Anti-topics**: vision-only manipulation; pure tactile-only without structured binding; flat-concat fusion without per-finger attribution.
+
+**Literature anchor**: SaTA (Sharpa hardware), TacFiLM, Sparsh, ViTacFormer, DexViTac (kinematic-grounded tactile), Touch Dreaming (latent tactile prediction), AdapTac, XL-VLA. See §6.
+
+---
+
+## 3. Revisit Checkpoints (CP1–CP5) [LIVING]
+
+- **CP1**: v1 first ablation analysis (4-contribution ablation on in-hand rotation, sim)
+- **CP2**: in-hand rotation first real-world demo result analysis
+- **CP3**: tool articulation demo entry (phase 2; 5-tool evaluation set)
+- **CP4**: hardware transition (Sharpa → xhand → in-house)
+- **CP5**: cross-object generalization phase entry
+
+**CP4 relevance**: D11 swappable sensor head + common token format is the P2 mechanism that absorbs the hardware change.
+
+---
+
+## 4. Decision Log — P2 (D8–D12) [LIVING] [AGENT-INPUT]
+
+Options / v1 / rationale / deferred (trigger + checkpoint). Append-only.
+
+> P2 covers **D8–D12**. P1 (D1–D7), P3/System0 (D13–D18), P4 (D19–D23),
+> P5 (D24–D26) are out of scope here — see `research_context.md`.
+
+#### [D8] Finger/palm structured token construction (P2)
+- **Options**: (i) per-finger {joint state + that finger's tactile} → one token (~10 finger + 2 palm tokens), (ii) per-fingertip only, (iii) flat concat (baseline/ablation)
+- **v1**: (i) per-finger proprio-tactile binding, 10 finger + 2 palm tokens (both hands)
+- **Rationale**: makes finger-wise contact semantics explicit instead of implicitly learned
+- **Deferred**: finer sub-finger tokenization → trigger: per-finger token too coarse for in-hand rotation / **CP2**
+
+#### [D9] Topology-aware encoding (P2)
+- **Options**: (i) raw sensor vector, (ii) + finger/left-right identity, (iii) + palm-relative fingertip pose + kinematic-chain embedding
+- **v1**: (iii) full topology-aware
+- **Rationale**: "which hand's which finger/palm produced this contact" must be explicit for cross-hand portability
+- **Deferred**: learned topology embedding → trigger: hand-coded topology insufficient at CP4 hardware change / **CP4**
+
+#### [D10] Hand-level aggregation encoder (P2)
+- **Options**: (A) mean/sum pool, (B) self-attention, (C) graph attention, (D) lightweight transformer
+- **v1**: (B) self-attention over finger/palm tokens
+- **Rationale**: recovers inter-finger interaction lost by per-finger separation; lighter than full transformer
+- **Deferred**: (C) graph attention → trigger: kinematic-chain structure underused / **CP2**; (D) transformer → trigger: self-attn capacity insufficient / **CP3**
+
+#### [D11] Visuotactile / proprio-tactile encoder candidate (P2)
+- **Encoder v1**: hardware-specific CNN on Deform Map → per-fingertip feature → fed into D8 finger token; swappable sensor head + common token format; contact-binary + slip-binary aux heads (light)
+- **Tactile feature options**: tactile image / resultant force vector / pressure distribution / contact map — compared
+- **Proprio scope options**: joint position / velocity / torque / motor current — compared
+- **Deferred**: force-prediction aux (AdapTac, arXiv:2505.13982) → trigger: contact/slip-binary saturation / **CP1**; Sparsh/T3 pretraining → trigger: random-init encoder underperforms / **CP1**; latent tactile prediction (Touch Dreaming) → trigger: inference-time tactile dropout robustness needed / **CP2**
+- **Non-negotiable**: (1) no Sharpa lock-in, (2) preserve contact-relevant features
+
+#### [D12] Multi-camera vision pre-fusion (P2)
+- **Options**: (i) N camera features fed raw to VLM, (ii) cross-attention fuser → unified spatial vision embedding → VLM, (iii) learned camera-token selection
+- **v1**: (ii) cross-attention fuser → unified spatial embedding
+- **Rationale**: stable spatial context; avoids VLM token bloat from N cameras
+- **Deferred**: (iii) selection → trigger: fuser loses viewpoint-specific contact cues / **CP3**
+
+---
+
+## 5. P2 Anti-topics (Noise Filter) [AGENT-INPUT]
+
+Excluded from the weekly digest unless an unusually strong tie to P2 or a P2 Decision (D8–D12):
+
+- Vision-only manipulation; flat-concat multimodal fusion without per-finger attribution
+- Pure tactile-only without structured binding
+- 2-finger parallel-jaw grippers only
+- Tactile sensing hardware design without a learned representation / encoder
+- Survey / position papers (read manually, not via agent)
+- Router-based MoE for action selection (different pattern; DexReMoE monitoring is the full-doc §10 exception)
+
+---
+
+## 6. P2 Tracked Literature [LIVING] [AGENT-INPUT]
+
+> Hard cap 8 pinned. Rebalance quarterly; replace, don't append.
+> **Format rule**: every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs. Canonical: `docs/STYLE_GUIDE.md` §3.
+
+### 6.1 P2 Pinned — Structured Input-Modality Binding
+| Paper | arXiv | Year | Role |
+|---|---|---|---|
+| SaTA (uses Sharpa Wave) | [arXiv:2510.14647](https://arxiv.org/abs/2510.14647) | 2025 | *Top*: Sharpa hardware + FiLM spatial-tactile (D11) |
+| TacFiLM | [arXiv:2603.14604](https://arxiv.org/abs/2603.14604) | 2026 | FiLM tactile fusion (D11) |
+| Sparsh (Meta FAIR) | [arXiv:2410.24090](https://arxiv.org/abs/2410.24090) | 2024 | Tactile foundation model (D11 pretraining deferred) |
+| ViTacFormer (Berkeley) | [arXiv:2506.15953](https://arxiv.org/abs/2506.15953) | 2025 | Cross-attention visuotactile (D10/D12) |
+| DexViTac | [arXiv:2603.17851](https://arxiv.org/abs/2603.17851) | 2026 | Kinematic-grounded tactile encoding (D8/D9) |
+| Touch Dreaming | [arXiv:2604.13015](https://arxiv.org/abs/2604.13015) | 2026 | Latent tactile prediction aux (D11 deferred) |
+| AdapTac | [arXiv:2505.13982](https://arxiv.org/abs/2505.13982) | 2025 | Force-guided attention + future-force aux (D11 deferred) |
+| XL-VLA | [arXiv:2603.10158](https://arxiv.org/abs/2603.10158) | 2026 | Cross-hand latent (D9 portability) |
+
+**Methodology base (non-pinned)**
+| Paper | arXiv | Relevance |
+|---|---|---|
+| FiLM (Perez et al. 2018) | [arXiv:1709.07871](https://arxiv.org/abs/1709.07871) | Conditioning-layer building block (D11 tactile FiLM) |
+
+---
+
+## 7. P2 Researchers & Groups to Follow [LIVING]
+
+> Ordered by proximity to the P2 anchor (structured input-modality binding).
+
+### 7.1 Individuals
+- **Carolina Higuera, Akash Sharma, Mustafa Mukadam, Mike Lambeta (Meta FAIR)** — Sparsh tactile foundation model (D11)
+- **Haoran Geng (Berkeley)** — ViTacFormer cross-attention visuotactile (D10/D12)
+- **Nathan Lepora (Bristol)** — tactile sensing / representation
+- **Wenzhen Yuan (UIUC)** — tactile perception
+- **SaTA authors** — Sharpa-hardware FiLM spatial-tactile (verify)
+
+### 7.2 Labs / groups (watch code releases)
+- **Meta FAIR Robotics** — tactile foundation models (Sparsh)
+- **Berkeley BAIR / RAIL** — visuotactile cross-attention
+- **Bristol Tactile Robotics (Lepora)** — tactile encoders
+- **Sharpa Robotics (Singapore)** — hardware vendor + competitor (Deform Map, Sharpa Wave)
+
+---
+
+## 8. P2 Competitor / Kindred Monitoring [LIVING] [AGENT-INPUT]
+
+Structured-binding / tactile-encoder siblings — review at every CP, ordered by closeness.
+
+| Work | arXiv | Overlap | Difference vs P2 | Watch trigger |
+|---|---|---|---|---|
+| **SaTA** | [2510.14647](https://arxiv.org/abs/2510.14647) | Uses Sharpa Wave; FiLM spatial-tactile | Single-task adapter vs full-system structured binding | Any Sharpa-hardware encoder release |
+| **ViTacFormer** | [2506.15953](https://arxiv.org/abs/2506.15953) | Cross-attention visuotactile fusion | Not per-finger token-bound | New visuotactile fuser results |
+| **Sharpa Robotics VTLA** | — | Same tactile hardware lineage | Vendor full-stack vs our swappable-head binding | Any release/demo |
+| **CATFA** | [2509.23075](https://arxiv.org/abs/2509.23075) | Tactile-paired articulated-tool tasks | Frozen-base adapter vs structured input binding | CP3 baseline; tactile encoder details |
+
+*Differentiation hypothesis*: explicit per-finger proprio-tactile binding + topology-aware encoding wins on **contact attribution / cross-hand portability**; flat or vision-dominant fusion loses finger-wise contact semantics.
+
+---
+
+## 9. P2 Open Items & Cross-pillar Coupling [LIVING] [AGENT-INPUT]
+
+### 9.A — Open implementation decisions
+
+| Item | Status | Default if unresolved | Deadline |
+|---|---|---|---|
+| Sharpa Deform Map sim-side rendering protocol | 🟡 open | Akinola Isaac Gym lib + Chen et al. 2024 lineage | End of CP1 (CP2 prereq) |
+| Custom hand spec (2H 2026) | 🟡 unknown — maintainer-side | Continue Sharpa; D11 swappable head allows encoder swap | 2H 2026 / CP4 |
+| Tactile feature form (image / force / pressure / contact-map) | 🟡 open | Compared at CP1 | CP1 |
+
+### 9.B — Cross-pillar coupling
+
+> Maps to §14 dependency graph in the full `research_context.md`.
+
+P2 structured tokens feed the heterogeneous decoder: D8 finger tokens are consumed by **P1 D4** (Body↔Hand information sharing) and the **P1 Hand head (D3)**; the multi-camera fuser (D12) sits before the **P4-preserved VLM backbone**. D11 encoder must stay swappable so a **CP4** hardware change does not force P1/P4 retraining.
+
+---
+
+*P2 scope extract of `research_context.md`. For other pillars, decisions
+D1–D7 / D13–D26, full §7 anti-topics, §9 researchers, §10 monitoring,
+§14 dependency graph, and Appendix C, consult the full document.*
