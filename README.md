@@ -564,6 +564,7 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` |
+| [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 
