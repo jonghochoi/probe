@@ -195,20 +195,18 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 
 ### Claude Code Routines 설정 (Week 5+)
 
-```yaml
-name: probe-weekly-scout
-trigger:
-  cron: "0 9 * * 1,4"          # 월/목 오전 9시 (주 2회)
-  timezone: Asia/Seoul
-mcp_servers:
-  - arxiv-mcp-server
-  - semantic-scholar-fastmcp
-output:
-  - path: research_log/YYYY-W##.md
-    via: github-pr             # git log = research history
-```
+루틴은 `.claude/routines/*.yaml` 로 자동 등록되지 **않습니다.** 실제
+스케줄링은 [claude.ai/code/routines](https://claude.ai/code/routines)
+의 **RemoteTrigger 폼**(또는 CLI `/schedule`)으로 만듭니다 — 폼에
+`.claude/prompts/scouting-P#.md` 전문을 붙여넣고, 레포·스케줄(월·목
+09:00)·환경을 지정합니다. 클라우드 루틴은 로컬 MCP 서버에 도달할 수
+없으므로 검색은 **MCP가 아니라 `curl`로 공개 REST API**(arXiv
+`export.arxiv.org` + Semantic Scholar Graph)를 직접 호출합니다. 환경의
+**Network access = Custom** 으로 두 도메인을 허용해야 하며,
+`SEMANTIC_SCHOLAR_API_KEY` 는 환경변수(선택)입니다. 단계별 절차·검증·
+트러블슈팅은 `README.md` §Agent Setup Guide → Stage 3 를 따릅니다.
 
-> Pro 플랜: 5회/일 한도. 주 2회 실행이면 충분히 여유 있음.
+> Pro 플랜: 일일 한도가 주 2회 실행을 충분히 커버합니다.
 
 ### 지속 가능성의 핵심: 월간 리뷰
 
@@ -234,8 +232,8 @@ output:
 |---|---|
 | **에이전트 엔진** | Claude (Sonnet) via Claude Code Routines |
 | **스케줄러** | Claude Code Routines — cloud-managed cron, GitHub webhook 지원 |
-| **논문 검색** | `blazickjp/arxiv-mcp-server` — arXiv search + topic-watch + citation-graph |
-| **인용 추적** | `zongmin-yu/semantic-scholar-fastmcp` — citation/reference graph, author search |
+| **논문 검색** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) — `curl` 직접 호출 |
+| **인용 추적** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON `jq`) — 키 선택 |
 | **출력 저장** | GitHub PR (자동) — 변경 이력 = 리서치 로그 |
 | **컨텍스트 관리** | `research_context.md` (정적, 사람 관리) + `research_log/` (동적, 에이전트 생성) |
 

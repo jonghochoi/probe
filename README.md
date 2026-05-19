@@ -12,7 +12,8 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
-[![arXiv MCP](https://img.shields.io/badge/arXiv-MCP-B31B1B?logo=arxiv&logoColor=white)](https://github.com/blazickjp/arxiv-mcp-server)
+[![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
+[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 📖 팀 온보딩 한글 문서: [`docs/INTRO_KO.md`](docs/INTRO_KO.md)
@@ -75,14 +76,12 @@ probe/
 │   └── P{1..4}_BRIEF.md           #   living per-pillar narrative (regen)
 │
 ├── research_log/                  # Dynamic output — agent-generated
-│   ├── _TEMPLATE.md               # Weekly Scouting Report form
-│   ├── YYYY-W##.md                # Real weekly reports (English)
-│   └── YYYY-W##-KO.md             # Korean translation of each report
+│   ├── _TEMPLATE.md               # Scouting Report form
+│   ├── YYYY-MM-DD.md              # Dated reports (English) + -KO.md twin
+│   └── YYYY-W##.md                # ISO-week reports (English) + -KO.md twin
 │
 ├── docs/
 │   ├── INTRO_KO.md                # Korean onboarding + operations manual
-│   ├── STAGE3_KO.md               # Korean Stage-3 deployment guide
-│   │                              #   (RemoteTrigger — authoritative)
 │   ├── STYLE_GUIDE.md             # Formatting rules — emoji system, link
 │   │                              # format, Korean translation principles
 │   │                              # (single source of truth for output format)
@@ -354,92 +353,115 @@ Limitation: your laptop has to be awake and Claude Desktop has to be running. Go
 
 This is the endgame: cloud-scheduled, commits its own reports via pull request. No laptop, no reminders, no "did I run PROBE this week?"
 
-> ⚠️ **Authoritative procedure: [`docs/STAGE3_KO.md`](docs/STAGE3_KO.md).** Claude Code does **not** auto-register routines from a `.claude/routines/*.yaml` file — routines are registered through the **RemoteTrigger form** at `claude.ai/code/routines` (paste the prompt body, pick repo/schedule). The YAML and `claude routine` CLI shown below are an **illustrative spec only** (fields you will enter in the form), not an executable config. The canonical prompts are `.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md`; the cloud scout uses public REST APIs via `curl` (arXiv + Semantic Scholar) — **no MCP server is required in the cloud**. The MCP setup below is optional, only for local Stage-1/2 experimentation.
+Only **three** things change versus Stage 1/2:
+
+- **Execution location** — your laptop → the cloud (runs Mon & Thu 09:00 even with the laptop off).
+- **Retrieval** — Claude's built-in web search → direct `curl` calls to public REST APIs (arXiv + Semantic Scholar Graph). Same data sources, better citation accuracy and reproducibility. **No MCP server is involved** — cloud routine sessions cannot reach a local MCP server, so retrieval is plain `curl`.
+- **Output** — manual copy → automatic GitHub PR (commit history *is* the research log).
+
+The repo's durable asset is the **prompt** (`.claude/prompts/scouting-P{1..4}.md`), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
+
+> This guide uses **P1** as the worked example. For another pillar, swap `scouting-P1.md` → `scouting-P{2,3,4}.md`, `research_context_P1.md` → `research_context_P{2,3,4}.md`, output `synthesis/P1_BRIEF.md` → `synthesis/P{2,3,4}_BRIEF.md`, and register one routine per pillar.
 
 **Prerequisites**
 
-- [Claude Code](https://claude.com/claude-code) Pro plan (Routines requires cloud execution).
-- GitHub repo connected to Claude Code (this repo).
-- Two MCP servers installed:
-  - [`blazickjp/arxiv-mcp-server`](https://github.com/blazickjp/arxiv-mcp-server) — arXiv search, topic watch, citation graph
-  - [`zongmin-yu/semantic-scholar-fastmcp`](https://github.com/zongmin-yu/semantic-scholar-fastmcp) — citation/reference graph, author search
+| Item | Note |
+|---|---|
+| Claude Code Pro plan | Routines need cloud execution. The Pro daily cap easily covers 2 runs/week. |
+| GitHub repo connected to Claude Code | Required for PR output (this repo). |
+| Outbound network policy | The routine's cloud environment must allow `export.arxiv.org` and `api.semanticscholar.org` — see Step 1. |
+| `SEMANTIC_SCHOLAR_API_KEY` | Optional. Set as an environment variable (there is no secret store). See Step 1. |
+| MCP servers | **Not required** — MCP is unreachable from cloud sessions; retrieval is `curl` REST. |
 
-**Step 1 — Install MCP servers**
+**Step 1 — Environment & network setup**
 
-Add to your `~/.claude/mcp.json` (or project-local `.mcp.json`):
+Retrieval is `curl` against two public APIs (no install needed):
 
-```json
-{
-  "mcpServers": {
-    "arxiv": {
-      "command": "uvx",
-      "args": ["arxiv-mcp-server"]
-    },
-    "semantic-scholar": {
-      "command": "uvx",
-      "args": ["semantic-scholar-fastmcp"],
-      "env": { "SEMANTIC_SCHOLAR_API_KEY": "<optional-but-recommended>" }
-    }
-  }
-}
+- arXiv — `http://export.arxiv.org/api/query` (Atom XML, no key)
+- Semantic Scholar Graph — `https://api.semanticscholar.org/graph/v1` (JSON via `jq`, key optional)
+
+**Network access (the real blocker).** A cloud environment defaults to the **Trusted** network policy, which allows only package registries and GitHub — every other host is rejected with `HTTP 403`, response header `x-deny-reason: host_not_allowed`. The fix is environment-side:
+
+1. [claude.ai/code/routines](https://claude.ai/code/routines) → the routine → **Edit routine**.
+2. Click the **cloud icon** (environment name) below the Instructions box.
+3. Hover the environment → the **gear/settings icon** → **Update cloud environment**.
+4. **Network access → Custom**. In **Allowed domains**, one per line:
+   ```
+   export.arxiv.org
+   arxiv.org
+   api.semanticscholar.org
+   ```
+   Keep **"Also include default list of common package managers"** checked (unchecking it breaks GitHub/registry access).
+5. **Save changes.** Network policy changes apply to **new sessions only** — a scheduled routine run is a fresh session, so the next run picks it up.
+
+**`SEMANTIC_SCHOLAR_API_KEY` (optional — and currently, prefer keyless).** Set it in the *same* dialog under **Environment variables**, `.env` format, one line, **no quotes**:
+
+```
+SEMANTIC_SCHOLAR_API_KEY=your_key_here
 ```
 
-Verify locally first:
+Referenced from `curl` as `$SEMANTIC_SCHOLAR_API_KEY`. Important nuance: Semantic Scholar no longer issues new keys to free-domain emails or third-party apps, and an **invalid/unapproved key makes the API return 403 *with* the header while it works keyless (200)**. Unless you already hold a valid approved key, **run keyless** — the prompts omit the header when the variable is empty and already sleep ~3 s between calls with backoff on HTTP 429. There is no dedicated secret store; environment variables are visible to anyone who can edit the environment (fine for a personal-tier key, but be aware).
+
+> **Two different 403s — do not confuse them:**
+> - `x-deny-reason: host_not_allowed` → **network layer** (the security proxy). Fix: the Custom allowlist above.
+> - Semantic Scholar 403 *only when the key header is sent* → **API auth** (invalid/unapproved key). Fix: drop the key and run keyless.
+
+Verify from a fresh session (keyless → expect `200`; bad key → `403`):
 
 ```bash
-claude mcp list
-# should show: arxiv ✓  semantic-scholar ✓
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  "https://api.semanticscholar.org/graph/v1/author/search?query=Kevin+Black&fields=name,authorId"
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  "http://export.arxiv.org/api/query?search_query=cat:cs.RO&max_results=1"
 ```
 
-**Step 2 — Define the Routine**
+**Step 2 — Create the RemoteTrigger routine**
 
-Create `.claude/routines/probe-weekly.yaml`:
+There is no YAML and no `claude routine register`. Create the schedule in the [claude.ai/code/routines](https://claude.ai/code/routines) web form (or the `/schedule` CLI). The fields:
 
-```yaml
-name: probe-weekly-scout
-description: Weekly arXiv scouting for hand-centric dexterous manipulation.
+| Form field | Value |
+|---|---|
+| Name | `probe-weekly-scout` |
+| Prompt (Instructions) | Paste the full body of `.claude/prompts/scouting-P1.md`. Model selector → **Sonnet**. |
+| Repositories | This repo. Output is pushed to a `claude/`-prefixed branch and reviewed via PR. |
+| Environment | The Step 1 environment (`SEMANTIC_SCHOLAR_API_KEY` if used + Network access = Custom). |
+| Trigger (Schedule) | Mon & Thu 09:00 (the form takes local time → UTC; min interval 1 h). For exact cron, after creating run the CLI `/schedule update` with `0 9 * * 1,4`. |
+| Connectors | None — remove all (retrieval is `curl`, not an MCP connector). |
+| Permissions | Default (`claude/` branch push) is sufficient — PR output needs no unrestricted push. |
 
-trigger:
-  cron: "0 9 * * 1,4"          # Mon & Thu 09:00
-  timezone: Asia/Seoul
-
-model: claude-sonnet-4-6
-
-mcp_servers:
-  - arxiv
-  - semantic-scholar
-
-context_files:
-  - research_context.md
-  - research_log/_TEMPLATE.md
-  - research_log/*.md           # last 2 weeks auto-truncated by the agent
-
-prompt_file: .claude/prompts/scouting-P1.md   # one routine per pillar:
-                                              # scouting-P{1..4}.md
-
-output:
-  mode: github_pr
-  branch: probe/weekly-YYYY-W##
-  path:   research_log/YYYY-W##.md
-  title:  "chore(probe): scouting report YYYY-W##"
-```
+The prompt is the routine body and is **self-contained**: it names its own context files (`research_context_P1.md`, the last 2 weeks of `research_log/`), the `curl` procedure, output rules and guards. The form has no `context_files` field — the agent clones the repo and reads files per the prompt. The prompt is **pillar-scoped**: it reads the `research_context_P#.md` extract (skeleton §1–§9; Pillar=§2, Decision Log=§4, Anti-topics=§5, Tracked Literature=§6, Researchers=§7, Competitor=§8, Open Items=§9; no Cross-pollination/Feedback-Loop sections), never the full doc.
 
 **Step 3 — The externalized prompts already exist**
 
-The prompts are committed at `.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md` — one scouting + one synthesis prompt per pillar. They already use public REST APIs via `curl` (arXiv `export.arxiv.org` + Semantic Scholar Graph), so the cloud routine needs **no MCP server**. Pick the pillar you want a routine for and paste that prompt body into the RemoteTrigger form (per `docs/STAGE3_KO.md`). To scout multiple pillars, register one routine per pillar with the matching prompt file and a distinct output path.
+`.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md` are committed — one scouting + one synthesis prompt per pillar. They are the Stage-1 prompt with **only the retrieval instructions** swapped from built-in web search to explicit `curl` REST:
 
-**Step 4 — Register and dry-run**
+| Retrieval step | Stage 1/2 | Stage 3 (`curl` REST) |
+|---|---|---|
+| Author Watch | built-in web search | S2 `/author/search` → `/author/{id}/papers` |
+| Citation-Graph expansion | built-in web search | S2 `/paper/arXiv:XXXX.XXXXX/citations` |
+| Keyword Sweep / topic-watch | built-in web search | arXiv `export.arxiv.org/api/query` |
+| Competitor Monitoring | built-in web search | arXiv query + S2 author lookup |
 
-```bash
-claude routine register .claude/routines/probe-weekly.yaml
-claude routine run probe-weekly-scout --dry-run
-```
+S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt records the exact command and HTTP status verbatim under 📋 Scout Methodology and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, EN+KO two-file output, the `research_context_P#.md` never-modify guard) is unchanged from Stage 1.
 
-Inspect the dry-run output like you inspected the Stage 1 reports. If it's good, you're done — the routine will now run itself, push a PR each Monday and Thursday, and the PR description is your weekly changelog.
+> The P1-scoped prompt intentionally **drops the monthly Cross-pollination rule** — its source section (full `research_context.md` §12) does not exist in the P1 extract. Do not be surprised diffing it against the Stage-1 prompt above.
+
+**Step 4 — First run & verification**
+
+There is no `--dry-run`. On the routine detail page use **Run now** — it opens a fresh session and executes once. A green run status only means "exited without an infra error", **not** that the prompt succeeded — open the session transcript and inspect the actual output (blocked network requests show up there). Check it with Stage-1 rigor:
+
+- Follows `research_log/_TEMPLATE.md` + `docs/STYLE_GUIDE.md`.
+- Both the English and Korean files were produced.
+- Every paper link resolves (no fabricated arXiv IDs).
+- 📋 Scout Methodology has **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
+- Decision implications are concrete (named Isaac Lab config key / metric, not "tune DR wider").
+- The Anti-topics filter actually fired (an empty "did not pass filter" section is suspicious).
+
+If it is unsatisfactory, fix `scouting-P1.md` (or `research_context_P1.md`) and re-run — do not leave automation on with a bad prompt.
 
 **Step 5 — Monthly human review**
 
-Automation is not the finish line. Once a month, open `research_context.md` Section 13 (Feedback Loop) and fill in three numbers:
+Automation is not the finish line. Once a month fill in three numbers. The P1 extract has no Feedback Loop section, so record this human review in the full multi-pillar `research_context.md` Section 13 (the agent reads only the extract; the feedback record lives in the source of truth).
 
 | Field | Question |
 |---|---|
@@ -447,7 +469,25 @@ Automation is not the finish line. Once a month, open `research_context.md` Sect
 | Actually read | Of those, how many did *you* read? |
 | Influenced a decision | Of those, how many changed an experiment? |
 
-The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — not the model.
+The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — not the model; re-check Anti-topics (§5) and Pillar P1 (§2) in `research_context_P1.md`.
+
+**Bonus — P1 Synthesis Brief**
+
+Where weekly scouting looks *outward* for new papers, this output looks *inward*: it compresses what the already-pinned papers are collectively saying — what props up each Decision and what shakes it — into a prose narrative so you can carry the P1 architecture in your head. Run it as a **second, fully separate** RemoteTrigger routine:
+
+| Form field | Value |
+|---|---|
+| Name | `probe-p1-synthesis` |
+| Prompt | Paste `.claude/prompts/synthesis-P1.md`, model Sonnet |
+| Repositories | This repo |
+| Environment | Default is fine — **no search → no custom domains needed** |
+| Trigger | Monthly (exact cron via `/schedule update` `0 9 1 * *`) |
+| Connectors | None |
+| Input | `research_context_P1.md` §4 (D1–D7) + §6 (pinned papers) only |
+| Output | `synthesis/P1_BRIEF.md` — Korean, overwritten each run (living snapshot) |
+| Retrieval | **None** — no MCP/web/`curl`, pure static-file compression (zero citation-fabrication risk) |
+
+When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
 ---
 
@@ -455,11 +495,15 @@ The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — 
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Papers recommended are in your Anti-topics list | Anti-topics are too vague | Rewrite Section 7 with concrete exclusions (e.g. "any paper whose primary task is locomotion") |
-| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add: "name the exact Isaac Lab config key and range" |
-| Same paper recommended two weeks in a row | Agent skipped the last-2-weeks context | Confirm `research_log/*.md` glob is resolving and not empty |
-| Agent silently edits `research_context.md` | Prompt guard missing | Re-add: "do NOT modify research_context.md under any circumstance" |
-| Routine runs but PR is empty | MCP tool failure, swallowed | Check the routine run log; add "if any tool fails, include the error verbatim" to the prompt |
+| Papers recommended are in your Anti-topics list | Anti-topics are too vague | Rewrite `research_context_P#.md` §5 with concrete exclusions (e.g. "any paper whose primary task is locomotion") |
+| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add to `scouting-P#.md`: "name the exact Isaac Lab config key and range" |
+| Same paper recommended two weeks in a row | Agent skipped the last-2-weeks context | Confirm the prompt's read-only "last 2 weeks of `research_log/`" reference is intact and those files exist |
+| `claude routine register` / a `.claude/routines/*.yaml` does nothing | That is not the execution mechanism | Register via the RemoteTrigger form ([claude.ai/code/routines](https://claude.ai/code/routines)) — Step 2/4 |
+| Agent silently edits `research_context_P#.md` | Prompt guard missing | Re-add the hard "never modify `research_context_P#.md`" guard (currently present in `scouting-P#.md` — do not remove it) |
+| Routine ran but PR is empty / every `curl` fails | Outbound network policy blocking the API domains | Set Network access = Custom and allow `export.arxiv.org` / `arxiv.org` / `api.semanticscholar.org`; check the verbatim error under 📋 Scout Methodology |
+| Citation graph only partially filled / frequent HTTP 429 | Semantic Scholar rate-limited | Run keyless (recommended) or add a *valid approved* key; keep the ~3 s sleep + backoff. See the two-403 note in Step 1 |
+| Semantic Scholar returns 403 even with a key set | Invalid/unapproved key (free-domain emails no longer get keys) | Remove the `SEMANTIC_SCHOLAR_API_KEY` env var and run keyless (works at 200) |
+| `scouting-P#.md` tries to call MCP tools | Stale prompt (MCP residue) | Confirm the RETRIEVAL section is `curl` REST — MCP is unreachable from cloud sessions |
 
 ---
 
@@ -468,11 +512,12 @@ The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — 
 | Component | Technology |
 |---|---|
 | **Agent engine** | Claude (Sonnet 4.6 / Opus 4.7) via Claude Code Routines |
-| **Scheduler** | Claude Code Routines — cloud-managed cron, GitHub webhook output |
-| **Paper search** | [`arxiv-mcp-server`](https://github.com/blazickjp/arxiv-mcp-server) — arXiv search + topic-watch + citation graph |
-| **Citation graph** | [`semantic-scholar-fastmcp`](https://github.com/zongmin-yu/semantic-scholar-fastmcp-mcp-server) — citation/reference graph, author search |
+| **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, GitHub PR output |
+| **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
+| **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) |
 | **Output** | GitHub PR — commit history *is* the research log |
-| **Context** | `research_context.md` (static, human) + `research_log/` (dynamic, agent) |
+| **Context** | `research_context_P{1..4}.md` (static, human, per-pillar) + `research_log/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
 ---
 
@@ -505,7 +550,6 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | Document | Description |
 |---|---|
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
-| [`docs/STAGE3_KO.md`](docs/STAGE3_KO.md) | Korean Stage-3 deployment guide — RemoteTrigger registration (authoritative) |
 | [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean translation |
 | [`research_context.md`](research_context.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `research_context_P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
