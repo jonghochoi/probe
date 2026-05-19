@@ -11,3 +11,7 @@ venv/
 .idea/
 *.swp
 .DS_Store
+
+# Pulse PoC — raw chat exports are private; only the digested hint is committed
+research_pulse/inbox/*
+!research_pulse/inbox/_README.md
