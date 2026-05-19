@@ -122,6 +122,22 @@ For each paper, state:
       hyperparameter, specific metric). Vague is failure.
   (d) failure mode to probe first.
 
+### Reference Legend (docs/STYLE_GUIDE.md §3-1)
+Open the report with a `## 🔑 Reference Legend` section, placed right
+after the intro blockquote and right before `## 📋 Scout Methodology`.
+  - Include ONLY the P#/D#/CP# codes this report actually cites. No
+    other codes; no competitor codenames / Identity / falsifier.
+  - One table, rows ordered P# → D# (ascending) → CP# (ascending), one
+    row per distinct cited code. Omit the section if none are cited.
+  - Each row: `| <a id="ref-CODE"></a>**CODE** | <one-line meaning> |`.
+  - Derive the meaning from research_context_P1.md (do not invent):
+    P# = §2 "Pillar P# — <name>" → "<name> (pillar)"; D# = §4
+    "#### [D#] <title>" + its v1 line → "<title> — v1 choice in
+    ≤~12 words"; CP# = §3 "- **CP#**: <desc>" → "Checkpoint #: <desc>".
+  - In the body, link the FIRST occurrence of each code per top-level
+    `##` section as `[CODE](#ref-CODE)`; later same-section occurrences
+    stay plain. Do not link codes inside tables or code blocks.
+
 ---
 
 OUTPUT — Korean file (YYYY-WXX-KO.md)
@@ -134,6 +150,9 @@ Key rules:
   - Technical terms: Korean + English in parentheses on first occurrence;
     Korean only thereafter. Use the glossary in STYLE_GUIDE.md §4-2.
   - Config / code names, formulas, P#/D# tags, arXiv links: keep verbatim.
+  - Reference Legend: reproduce the section; translate the Meaning
+    column only; codes, `<a id="ref-…">` anchors and `[CODE](#ref-CODE)`
+    links verbatim so KO links resolve within the KO file.
   - Emojis: identical position and symbol as the English file.
   - Section headers: translate text, keep emoji prefix.
     Use the header translation table in STYLE_GUIDE.md §4-3.

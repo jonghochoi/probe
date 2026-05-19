@@ -51,6 +51,7 @@ Summaries are cheap. PROBE produces **decision material**.
 probe/
 │
 ├── research_context.md            # Static context — human-maintained
+│                                  #   single source of truth (P1–P5)
 │                                  #   Identity & Purpose
 │                                  #   Pillars (P1–P5)
 │                                  #   Decision Log (D1–D26)
@@ -59,14 +60,29 @@ probe/
 │                                  #   Researchers to Follow
 │                                  #   Anti-topics (noise filter)
 │
+├── research_context_P1.md         # Per-pillar narrowed extracts of the
+├── research_context_P2.md         #   above — one pillar each, identical
+├── research_context_P3.md         #   §1–§9 skeleton. The scouting /
+├── research_context_P4.md         #   synthesis pipeline reads these,
+│                                  #   never the full doc (lean context).
+│
+├── .claude/prompts/               # Externalized agent prompts
+│   ├── scouting-P{1..4}.md        #   weekly scout, one per pillar
+│   └── synthesis-P{1..4}.md       #   monthly synthesis brief, per pillar
+│
+├── synthesis/                     # Synthesis output
+│   ├── README.md                  #   pipeline summary
+│   └── P{1..4}_BRIEF.md           #   living per-pillar narrative (regen)
+│
 ├── research_log/                  # Dynamic output — agent-generated
 │   ├── _TEMPLATE.md               # Weekly Scouting Report form
-│   ├── 2026-W16_EXAMPLE.md        # Output-quality reference
 │   ├── YYYY-W##.md                # Real weekly reports (English)
 │   └── YYYY-W##-KO.md             # Korean translation of each report
 │
 ├── docs/
 │   ├── INTRO_KO.md                # Korean onboarding + operations manual
+│   ├── STAGE3_KO.md               # Korean Stage-3 deployment guide
+│   │                              #   (RemoteTrigger — authoritative)
 │   ├── STYLE_GUIDE.md             # Formatting rules — emoji system, link
 │   │                              # format, Korean translation principles
 │   │                              # (single source of truth for output format)
@@ -76,7 +92,9 @@ probe/
 └── README.md                      # ← you are here
 ```
 
-> **Pillars (v5.0)**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`research_context.md`](research_context.md) §5.
+> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`research_context.md`](research_context.md) §5.
+>
+> **Full doc vs. per-pillar extract**: `research_context.md` is the single source of truth (all five pillars, D1–D26). Each `research_context_P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§9 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
 
 ### Core principle: static vs. dynamic, never mixed
 
@@ -152,7 +170,7 @@ PROBE is a scout. It does not fight. The human still owns every judgement call.
 |---|---|
 | **Direction** — is the Identity claim still load-bearing? Is P1 really the most important Pillar? | **Author watch** — last 14 days of submissions from §9 researchers |
 | **Decision Log curation** — if a paper shakes a v1 default or trips a deferred trigger, update D# | **Citation-graph expansion** — semantic neighbors of §8 tracked literature (5 × 8) |
-| **Evaluation protocol** — D13's falsifier thresholds; without these, no report matters | **Anti-topic filtering** — drop mobile-manip, locomotion, parallel grippers, router-MoE (DexReMoE excepted) |
+| **Evaluation protocol** — D25's 4-contribution falsifier thresholds; without these, no report matters | **Anti-topic filtering** — drop mobile-manip, locomotion, parallel grippers, router-MoE (DexReMoE excepted) |
 | **CP-driven context update** — Tracked Literature, Decision Log, Competitor monitoring at every CP | **Scoring** — P#/D# fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
 | **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced monthly pick from §12 rotation |
 | **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage) |
@@ -334,7 +352,9 @@ Limitation: your laptop has to be awake and Claude Desktop has to be running. Go
 
 ### 🛰️ Stage 3 — Full agent via Claude Code Routines (Week 5+)
 
-This is the endgame: cloud-scheduled, tool-equipped, commits its own reports via pull request. No laptop, no reminders, no "did I run PROBE this week?"
+This is the endgame: cloud-scheduled, commits its own reports via pull request. No laptop, no reminders, no "did I run PROBE this week?"
+
+> ⚠️ **Authoritative procedure: [`docs/STAGE3_KO.md`](docs/STAGE3_KO.md).** Claude Code does **not** auto-register routines from a `.claude/routines/*.yaml` file — routines are registered through the **RemoteTrigger form** at `claude.ai/code/routines` (paste the prompt body, pick repo/schedule). The YAML and `claude routine` CLI shown below are an **illustrative spec only** (fields you will enter in the form), not an executable config. The canonical prompts are `.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md`; the cloud scout uses public REST APIs via `curl` (arXiv + Semantic Scholar) — **no MCP server is required in the cloud**. The MCP setup below is optional, only for local Stage-1/2 experimentation.
 
 **Prerequisites**
 
@@ -394,7 +414,8 @@ context_files:
   - research_log/_TEMPLATE.md
   - research_log/*.md           # last 2 weeks auto-truncated by the agent
 
-prompt_file: .claude/prompts/scouting.md
+prompt_file: .claude/prompts/scouting-P1.md   # one routine per pillar:
+                                              # scouting-P{1..4}.md
 
 output:
   mode: github_pr
@@ -403,17 +424,9 @@ output:
   title:  "chore(probe): scouting report YYYY-W##"
 ```
 
-**Step 3 — Externalize the prompt**
+**Step 3 — The externalized prompts already exist**
 
-Copy the Scouting Prompt from Stage 1 into `.claude/prompts/scouting.md`. Replace built-in web search instructions with explicit MCP tool calls:
-
-```
-Use the `arxiv.search_papers` tool for keyword sweeps and
-topic-watch. Use `semantic-scholar.get_paper_citations` and
-`semantic-scholar.get_author_papers` for citation-graph expansion
-and author watch. Never fabricate a citation — if a tool call
-fails, say so in the report.
-```
+The prompts are committed at `.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md` — one scouting + one synthesis prompt per pillar. They already use public REST APIs via `curl` (arXiv `export.arxiv.org` + Semantic Scholar Graph), so the cloud routine needs **no MCP server**. Pick the pillar you want a routine for and paste that prompt body into the RemoteTrigger form (per `docs/STAGE3_KO.md`). To scout multiple pillars, register one routine per pillar with the matching prompt file and a distinct output path.
 
 **Step 4 — Register and dry-run**
 
@@ -492,10 +505,12 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | Document | Description |
 |---|---|
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
+| [`docs/STAGE3_KO.md`](docs/STAGE3_KO.md) | Korean Stage-3 deployment guide — RemoteTrigger registration (authoritative) |
 | [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean translation |
-| [`research_context.md`](research_context.md) | Live research context — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
-| [`research_log/_TEMPLATE.md`](research_log/_TEMPLATE.md) | Weekly Scouting Report template |
-| [`research_log/2026-W16_EXAMPLE.md`](research_log/2026-W16_EXAMPLE.md) | Reference report — output-quality bar |
+| [`research_context.md`](research_context.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
+| `research_context_P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
+| [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
+| [`research_log/_TEMPLATE.md`](research_log/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 
 ---

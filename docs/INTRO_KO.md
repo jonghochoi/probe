@@ -82,7 +82,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                   └──────────────────────────────┘
 ```
 
-> **Pillars (v5.0)**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`research_context.md`](../research_context.md) §5.
+> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`research_context.md`](../research_context.md) §5. Pillar별 좁힌 추출본은 `research_context_P{1..4}.md` (파이프라인이 읽는 파일).
 
 ---
 
@@ -129,11 +129,14 @@ Scouting Report 말미에 *수정 제안*만 하고, 실제 반영은 사람이 
 ```
 probe/
 ├── README.md
-├── research_context.md        # 정적 컨텍스트. 사람이 관리.
+├── research_context.md          # 정적 단일 진실원 (P1–P5). 사람이 관리.
+├── research_context_P{1..4}.md  # pillar별 좁힌 추출본 (파이프라인이 읽음)
+├── .claude/prompts/             # scouting-P{1..4}.md · synthesis-P{1..4}.md
+├── synthesis/                   # P{1..4}_BRIEF.md (월간 재생성 서사)
 └── research_log/
-    ├── _TEMPLATE.md           # 에이전트가 매주 복사해서 채우는 양식
-    ├── YYYY-W##.md            # 실제 Scouting Reports (에이전트 생성)
-    └── 2026-W16_EXAMPLE.md    # 출력 품질 기준 예시 (실운영 전 삭제)
+    ├── _TEMPLATE.md             # 에이전트가 매주 복사해서 채우는 양식
+    ├── YYYY-W##.md              # 실제 Scouting Reports (에이전트 생성)
+    └── YYYY-W##-KO.md           # 각 리포트의 한글 번역
 ```
 
 ### 핵심 원칙: 정적 vs 동적 분리

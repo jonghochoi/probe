@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.2 (2026-05-19) · **Scope:** All files under `research_log/`
+> **Version:** v1.3 (2026-05-19) · **Scope:** All files under `research_log/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -27,6 +27,7 @@ They are **never** used inside body text, bullet points, table cells, or code bl
 
 | Emoji | Section |
 |-------|---------|
+| 🔑 | Reference Legend |
 | 📋 | Scout Methodology |
 | 🥇 | Paper N — PRIORITY ★★★ |
 | 🥈 | Paper N — PRIORITY ★★ |
@@ -93,6 +94,57 @@ Links must appear:
 
 Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 
+### 3-1. Reference Legend & cross-reference links
+
+The report opens with a **Reference Legend** — a one-line glossary of the
+`P#` / `D#` / `CP#` codes, so a reader who does not have the codes
+memorized can decode the report without opening `research_context_P#.md`.
+
+**Scope.** Only `P#` (Pillar), `D#` (Decision), `CP#` (Checkpoint) codes.
+**Only codes actually cited in this report.** Never list a code the body
+does not use; never list competitor codenames, Identity, or the falsifier.
+
+**Placement.** A single `## 🔑 Reference Legend` section, immediately
+after the top intro blockquote and immediately before `## 📋 Scout
+Methodology`. It is the first content section of the report.
+
+**Format.** One compact table, rows ordered `P#` → `D#` (ascending) →
+`CP#` (ascending), one row per distinct cited code:
+
+```markdown
+## 🔑 Reference Legend
+
+| Code | Meaning |
+|------|---------|
+| <a id="ref-P1"></a>**P1** | Heterogeneous Body/Hand Action Expert (pillar) |
+| <a id="ref-D4"></a>**D4** | Body↔Hand information sharing — v1 FiLM; cross-attn/hidden-state deferred |
+| <a id="ref-CP1"></a>**CP1** | Checkpoint 1: v1 first ablation (4-contribution, in-hand rotation, sim) |
+```
+
+If the body cites no such code (rare), omit the section entirely.
+
+**Meaning source** (deterministic — derive from `research_context_P#.md`,
+which the agent already reads; do not invent):
+
+| Code | Source in `research_context_P#.md` | Meaning string |
+|------|-----------------------------------|----------------|
+| `P#` | §2 heading `Pillar P# — <name>` | `<name>` + `(pillar)` |
+| `D#` | §4 `#### [D#] <title>` + its v1 line | `<title>` — v1 choice in ≤ ~12 words |
+| `CP#` | §3 bullet `- **CP#**: <desc>` | `Checkpoint #: <desc>` (compressed) |
+
+**Anchor convention.** Each legend row carries an explicit HTML anchor
+`<a id="ref-<CODE>"></a>` placed before the bold code. `<CODE>` is the
+verbatim code (`P1`, `D4`, `CP2` — case preserved; GitHub matches explicit
+`id=` attributes verbatim).
+
+**In-body links (first occurrence per section).** Within each top-level
+`##` section (each Paper N, 📋, 📊, 🚫, 💡, 🔄), the **first** textual
+occurrence of each distinct code is written as `[D4](#ref-D4)`. Later
+occurrences of that same code **in the same section** stay plain text.
+Each new `##` section links the first occurrence again, so any section is
+self-contained for jump-back. Codes inside table cells and code blocks are
+not linked. The legend rows themselves are not self-linked.
+
 ---
 
 ## 4. Korean Translation Principles
@@ -106,6 +158,8 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
 | P#, D#, CP# tags | Keep verbatim (`P2`, `D11`, `CP3`, etc.) |
+| Reference Legend | Reproduce the section; translate the Meaning column only; codes + `<a id="ref-…">` anchors verbatim |
+| Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — KO links resolve within the KO file |
 | arXiv links | Keep identical to English version |
 | Emojis | Keep identical — same position, same emoji |
 | Section headers | Translate header text; keep emoji prefix |
@@ -150,6 +204,7 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 
 | English header | Korean header |
 |----------------|--------------|
+| 🔑 Reference Legend | 🔑 참조 약어 풀이 |
 | 📋 Scout Methodology | 📋 스카우트 방법론 |
 | 🥇 Paper N — PRIORITY ★★★ | 🥇 논문 N — 우선순위 ★★★ |
 | 🥈 Paper N — PRIORITY ★★ | 🥈 논문 N — 우선순위 ★★ |
@@ -181,3 +236,4 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | v1.0 | 2026-04-22 | Initial version — emoji system, link rules, Korean translation principles |
 | v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed) |
 | v1.2 | 2026-05-19 | Glossary §4-2 extended with canonical terms: System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching |
+| v1.3 | 2026-05-19 | Added §3-1 Reference Legend (cited-code glossary) + in-body `#ref-` anchor links; 🔑 section emoji; KO mirroring rules (§4-1, §4-3) |

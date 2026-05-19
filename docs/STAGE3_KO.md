@@ -52,9 +52,15 @@ RemoteTrigger 폼으로 등록 — Step 2 참고):
 ```
 .claude/
 └── prompts/
-    ├── scouting.md     # weekly 스카우팅 루틴의 프롬프트 본문 (Step 2·3)
-    └── synthesis.md    # 월간 P1 Synthesis Brief 루틴의 프롬프트 본문 (보너스)
+    ├── scouting-P{1..4}.md   # weekly 스카우팅 루틴 프롬프트 (pillar별 1개)
+    └── synthesis-P{1..4}.md  # 월간 Synthesis Brief 루틴 프롬프트 (pillar별 1개)
 ```
+
+> 이 가이드는 **P1** 을 작업 예시로 씁니다. 다른 pillar는
+> `scouting-P1.md`→`scouting-P{2,3,4}.md`, `research_context_P1.md`→
+> `research_context_P{2,3,4}.md`, 출력 `synthesis/P1_BRIEF.md`→
+> `synthesis/P{2,3,4}_BRIEF.md` 로 바꿔 동일하게 등록합니다 (pillar당
+> 별도 루틴 1개).
 
 따라서 새로 작성할 필요는 없고, **프롬프트를 이해·검증한 뒤 RemoteTrigger
 폼에 붙여넣어 등록**하면 됩니다.
@@ -149,13 +155,13 @@ https://code.claude.com/docs/en/routines#environments-and-network-access)
 > 자동 등록/실행하는 기능이 **없습니다.** 실제 스케줄링은
 > [claude.ai/code/routines](https://claude.ai/code/routines) 의
 > **RemoteTrigger** 폼(또는 CLI `/schedule`)으로 만듭니다. 이 레포가
-> 제공하는 핵심 자산은 yaml이 아니라 **프롬프트(`scouting.md`)와 P1
+> 제공하는 핵심 자산은 yaml이 아니라 **프롬프트(`scouting-P1.md`)와 P1
 > 스코프 로직**입니다. 아래 표는 그 폼에 넣을 값의 명세입니다.
 
 | 폼 항목 | 넣을 값 |
 |---|---|
 | Name | `probe-weekly-scout` |
-| Prompt (Instructions) | `.claude/prompts/scouting.md` 전문을 그대로 붙여넣기. 모델은 폼의 모델 선택기에서 **Sonnet** |
+| Prompt (Instructions) | `.claude/prompts/scouting-P1.md` 전문을 그대로 붙여넣기. 모델은 폼의 모델 선택기에서 **Sonnet** |
 | Repositories | 이 레포. 산출물은 `claude/`-prefixed 브랜치로 푸시되고 PR로 검토 |
 | Environment | Step 1의 환경: `SEMANTIC_SCHOLAR_API_KEY` 환경변수 + Network access **Custom** (`export.arxiv.org`, `api.semanticscholar.org` 허용) |
 | Trigger (Schedule) | 주 2회(월·목) 09:00. 폼은 로컬 시각 입력→UTC 자동 변환. 최소 간격 1시간. 정밀 cron이 필요하면 생성 후 CLI `/schedule update` 로 `0 9 * * 1,4` 지정 |
@@ -164,16 +170,18 @@ https://code.claude.com/docs/en/routines#environments-and-network-access)
 
 해설:
 
-- **프롬프트가 루틴의 본문입니다.** `scouting.md` 안에 컨텍스트
+- **프롬프트가 루틴의 본문입니다.** `scouting-P1.md` 안에 컨텍스트
   파일 경로(`research_context_P1.md`, `research_log/` 직전 2주),
   curl 절차, 산출물 규칙, 가드가 모두 자기완결적으로 들어 있어야
   합니다. 폼에는 별도 `context_files` 필드가 없으므로, 에이전트가
   레포를 클론한 뒤 프롬프트 지시에 따라 파일을 읽습니다.
-- **P1 전용 스코프** — 프롬프트가 전체 `research_context.md` 가
-  아니라 P1 추출본 `research_context_P1.md` 를 읽도록 지시합니다. 이
-  파일은 섹션 번호가 다릅니다(Pillar P1=§2, Decision D1–D9=§4,
-  Anti-topics=§5, Tracked Literature=§6, Researchers=§7,
-  Competitor=§8; Cross-pollination·Feedback Loop 섹션 없음).
+- **Pillar 전용 스코프** — 프롬프트가 전체 `research_context.md` 가
+  아니라 해당 pillar 추출본 `research_context_P#.md` 를 읽도록
+  지시합니다. 추출본은 full doc과 섹션 번호가 다릅니다(Pillar=§2,
+  Decision Log=§4, Anti-topics=§5, Tracked Literature=§6,
+  Researchers=§7, Competitor=§8, Open Items=§9;
+  Cross-pollination·Feedback Loop 섹션 없음). 모든 추출본의
+  §1–§9 골격은 동일하므로 프롬프트의 섹션 참조는 pillar 불문 유효합니다.
 - **출력** — 별도 출력 모드 설정이 없습니다. 에이전트가 변경을
   `claude/`-prefixed 브랜치에 커밋하고, 그 run 세션에서 PR을
   만듭니다. 프롬프트가 산출 경로(`research_log/YYYY-W##.md` +
@@ -184,11 +192,14 @@ https://code.claude.com/docs/en/routines#environments-and-network-access)
 
 ---
 
-## 📝 Step 3 — 프롬프트 외부화 (`.claude/prompts/scouting.md`)
+## 📝 Step 3 — 외부화된 프롬프트 (`.claude/prompts/scouting-P{1..4}.md`)
 
-이 파일은 Stage 1의 Scouting Prompt를 그대로 옮기되, **검색 지시문만** 내장
-웹 검색에서 **명시적 `curl` REST 호출**로 교체한 버전입니다 (클라우드
-Routine은 로컬 MCP에 도달 불가하므로).
+프롬프트는 이미 레포에 커밋돼 있습니다 (pillar별 `scouting-P#.md` /
+`synthesis-P#.md`). 새로 작성할 필요 없이 등록하려는 pillar의 파일
+본문을 RemoteTrigger 폼에 붙여넣으면 됩니다. 이 파일은 Stage 1의
+Scouting Prompt와 동일하되 **검색 지시문만** 내장 웹 검색에서
+**명시적 `curl` REST 호출**로 교체돼 있습니다 (클라우드 Routine은
+로컬 MCP에 도달 불가하므로).
 
 | 검색 단계 | Stage 1·2 | Stage 3 (curl REST) |
 |---|---|---|
@@ -233,7 +244,7 @@ Routine은 로컬 MCP에 도달 불가하므로).
 1. [claude.ai/code/routines](https://claude.ai/code/routines) →
    **New routine**
 2. **Name / Prompt**: 이름 `probe-weekly-scout`, Instructions에
-   `.claude/prompts/scouting.md` 전문 붙여넣기, 모델 **Sonnet**
+   `.claude/prompts/scouting-P1.md` 전문 붙여넣기, 모델 **Sonnet**
 3. **Repositories**: 이 레포 선택 (기본 `claude/` 브랜치 푸시 권한)
 4. **Environment**: Step 1에서 만든 환경 선택 — `SEMANTIC_SCHOLAR_API_KEY`
    환경변수 + Network access **Custom** (두 API 도메인 허용) 확인
@@ -261,7 +272,7 @@ Routine은 로컬 MCP에 도달 불가하므로).
 - Anti-topics 필터가 실제로 동작했는가 (필터 통과 실패 후보가 비면 의심)
 
 만족스러우면 끝 — 스케줄대로 월·목 자동 실행되며 매번 PR을 올립니다.
-만족스럽지 않으면 **자동화 켜둔 채 방치하지 말고** `scouting.md` (또는
+만족스럽지 않으면 **자동화 켜둔 채 방치하지 말고** `scouting-P1.md` (또는
 `research_context_P1.md`)를 손본 뒤 다시 Run now 로 반복합니다.
 
 ---
@@ -281,7 +292,7 @@ P1 추출본만 읽지만, 사람의 피드백 기록은 원본에서 관리).
 | Influenced a decision | 그중 실험 설계나 Decision Log를 바꾼 수 |
 
 이 세 숫자의 **비율**이 PROBE의 진짜 KPI입니다. 비율이 0으로 수렴하면
-모델이 아니라 **프롬프트가 드리프트**한 것입니다 — `scouting.md` 와
+모델이 아니라 **프롬프트가 드리프트**한 것입니다 — `scouting-P1.md` 와
 `research_context_P1.md` 의 Anti-topics(§5)·Pillar P1(§2)을 재점검합니다.
 
 ---
@@ -299,12 +310,12 @@ P1 추출본만 읽지만, 사람의 피드백 기록은 원본에서 관리).
 | 폼 항목 | 값 |
 |---|---|
 | Name | `probe-p1-synthesis` |
-| Prompt | `.claude/prompts/synthesis.md` 전문 붙여넣기, 모델 Sonnet |
+| Prompt | `.claude/prompts/synthesis-P1.md` 전문 붙여넣기, 모델 Sonnet |
 | Repositories | 이 레포 |
 | Environment | 기본 환경으로 충분 (검색 없음 → 커스텀 도메인 불필요) |
 | Trigger | Schedule, 월 1회 (정밀 cron은 CLI `/schedule update` 로 `0 9 1 * *`) |
 | Connectors | 전부 제거 |
-| 입력 | `research_context_P1.md` §4(D1–D9) + §6(핀 논문)만 |
+| 입력 | `research_context_P1.md` §4(D1–D7) + §6(핀 논문)만 |
 | 출력 | `synthesis/P1_BRIEF.md` (Korean, 매번 덮어쓰는 living snapshot) |
 | 검색 | **없음** — MCP·웹·curl 없이 정적 파일 압축만 (인용 조작 위험 0) |
 
@@ -336,13 +347,13 @@ P1 추출본만 읽지만, 사람의 피드백 기록은 원본에서 관리).
 | 증상 | 추정 원인 | 처방 |
 |---|---|---|
 | 추천 논문이 Anti-topics 목록에 가까움 | Anti-topics가 너무 모호함 | `research_context_P1.md` §5(P1 Anti-topics)를 구체적 배제 규칙으로 재작성 (예: "주 태스크가 locomotion인 논문 전부 제외") |
-| "의사결정 함의"가 generic ("DR을 넓혀라") | 프롬프트가 구체성을 강제하지 않음 | `scouting.md` 에 "정확한 Isaac Lab config 키와 범위를 지목하라" 추가 |
-| 같은 논문이 2주 연속 추천됨 | 직전 2주 로그를 안 읽음 | `scouting.md` 의 "직전 2주 `research_log/*.md` read-only 참조" 지시가 살아 있는지, 레포에 해당 로그가 실제로 있는지 확인 |
+| "의사결정 함의"가 generic ("DR을 넓혀라") | 프롬프트가 구체성을 강제하지 않음 | `scouting-P1.md` 에 "정확한 Isaac Lab config 키와 범위를 지목하라" 추가 |
+| 같은 논문이 2주 연속 추천됨 | 직전 2주 로그를 안 읽음 | `scouting-P1.md` 의 "직전 2주 `research_log/*.md` read-only 참조" 지시가 살아 있는지, 레포에 해당 로그가 실제로 있는지 확인 |
 | `claude routine register` / yaml 파일이 안 먹힘 | `.claude/routines/*.yaml` 은 실행 메커니즘이 아님 | RemoteTrigger 폼([claude.ai/code/routines](https://claude.ai/code/routines))으로 등록 — Step 2·4 |
-| 에이전트가 `research_context_P1.md` 를 무단 수정 | 프롬프트 가드 누락 | `scouting.md` 에 "어떤 경우에도 research_context_P1.md를 수정하지 말 것" 재삽입 (현재 포함돼 있음 — 제거 금지) |
+| 에이전트가 `research_context_P1.md` 를 무단 수정 | 프롬프트 가드 누락 | `scouting-P1.md` 에 "어떤 경우에도 research_context_P1.md를 수정하지 말 것" 재삽입 (현재 포함돼 있음 — 제거 금지) |
 | Routine은 돌았는데 PR이 비어 있음 / 모든 curl 실패 | 아웃바운드 네트워크 정책이 API 도메인 차단 | 환경 네트워크 정책에서 `export.arxiv.org` / `api.semanticscholar.org` 허용 확인. 📋 Scout Methodology 의 에러 원문 확인 |
 | Citation-Graph가 부분적으로만 채워짐 / HTTP 429 빈발 | Semantic Scholar API 키 없음 → rate limit | 환경 환경변수에 `SEMANTIC_SCHOLAR_API_KEY=<key>` 추가(시크릿 문법 없음). 프롬프트의 호출 간 sleep·백오프 유지 확인 |
-| `scouting.md` 가 MCP 도구를 호출하려 함 | 구버전 프롬프트(MCP 잔재) | `scouting.md` RETRIEVAL 섹션이 curl REST 기반인지 확인 (MCP 서버는 클라우드에서 도달 불가) |
+| `scouting-P1.md` 가 MCP 도구를 호출하려 함 | 구버전 프롬프트(MCP 잔재) | `scouting-P1.md` RETRIEVAL 섹션이 curl REST 기반인지 확인 (MCP 서버는 클라우드에서 도달 불가) |
 | (로컬 대화형) MCP `✘ failed` `-32000` / 간헐 실패 | Step 1 접힌 섹션 참고 — 구버전 캐시 또는 `:8000` 브리지 충돌 | 클라우드 Routine과 무관. 로컬 테스트 시에만 해당 — Step 1 `<details>` 의 검증된 설정 적용 |
 
 ---
@@ -351,12 +362,13 @@ P1 추출본만 읽지만, 사람의 피드백 기록은 원본에서 관리).
 
 - **자동화는 결승선이 아니다.** 월간 Feedback Loop를 채우지 않으면 PROBE가
   잘 도는지 알 방법이 없습니다.
-- **정적/동적 분리를 유지한다.** `research_context_P1.md`(사람 관리)와
+- **정적/동적 분리를 유지한다.** `research_context_P#.md`(사람 관리)와
   `research_log/`(에이전트 생성)를 절대 섞지 않습니다. 섞으면 6주 안에
   컨텍스트가 부풀어 재추천·망각이 발생합니다.
-- **이 브랜치는 P1 전용 스코프.** 에이전트는 `research_context_P1.md` 만
-  읽습니다. 전체 `research_context.md`(P1–P5)는 멀티필러 원본으로 별도
-  유지되며, P2–P5 콘텐츠는 거기에만 존재합니다.
+- **루틴은 pillar 전용 스코프.** 각 루틴은 자신의
+  `research_context_P#.md` 하나만 읽습니다. 전체 `research_context.md`
+  (P1–P5, D1–D26)가 단일 진실원이며 추출본은 거기서 재생성합니다 — 역방향
+  편집 금지.
 - **Tracked literature는 추가만 하지 말고 교체 기준으로 관리.**
 - **Scouting Report는 직전 2주 로그만 읽는다.** 그 이전은 컨텍스트에서 제외.
 - **단계를 건너뛰지 않는다.** Stage 1에서 검증된 프롬프트만 Stage 3로.
@@ -370,7 +382,7 @@ P1 추출본만 읽지만, 사람의 피드백 기록은 원본에서 관리).
 | `README.md` §Agent Setup Guide | Stage 1→3 전체 요약 |
 | `docs/INTRO_KO.md` | 한글 온보딩 (왜 존재하는가 / 파이프라인) |
 | `docs/STYLE_GUIDE.md` | 출력 포맷·이모지·한글 번역 규칙 (에이전트 필독) |
-| `research_context_P1.md` | **이 브랜치가 읽는** P1 전용 정적 컨텍스트 |
-| `research_context.md` | 멀티필러 원본 (P1–P5, Feedback Loop §13) |
+| `research_context_P{1..4}.md` | 루틴이 읽는 pillar 전용 정적 컨텍스트 (§1–§9 동일 골격) |
+| `research_context.md` | 멀티필러 단일 진실원 (P1–P5, D1–D26, Feedback Loop §13) |
 | `research_log/_TEMPLATE.md` | 매주 채우는 리포트 양식 |
-| `synthesis/P1_BRIEF.md` | 월 1회 재생성되는 P1 연결고리 서사 (사람이 다시 읽는 직관 도구) |
+| `synthesis/P{1..4}_BRIEF.md` | 월 1회 재생성되는 pillar 연결고리 서사 (사람이 다시 읽는 직관 도구) |
