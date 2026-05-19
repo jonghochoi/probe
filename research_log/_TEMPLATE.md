@@ -7,17 +7,47 @@
 
 > Agent fills every section below. Emoji, link, and translation rules are defined in `STYLE_GUIDE.md` — follow it exactly.
 > Every weekly run produces **two** files: `YYYY-WXX.md` (English, primary) and `YYYY-WXX-KO.md` (Korean translation).
+> The first textual occurrence of every P#/D#/CP# code in each section is linked to the 🔑 Reference Legend below.
+
+---
+
+## 🔑 Reference Legend
+
+<!--
+STYLE_GUIDE.md §3-1 is authoritative. Summary:
+  · ONLY P#/D#/CP# codes that this report actually cites. No others.
+  · One table, rows ordered P# → D# (asc) → CP# (asc), one per distinct code.
+  · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning.
+  · Meaning source (do not invent), from research_context_P#.md:
+      P#  → §2 heading "Pillar P# — <name>"           → "<name> (pillar)"
+      D#  → §4 "#### [D#] <title>" + its v1 line       → "<title> — v1 choice (≤~12 words)"
+      CP# → §3 bullet "- **CP#**: <desc>"              → "Checkpoint #: <desc>"
+  · In the body, link only the FIRST occurrence of each code per ## section
+    as [CODE](#ref-CODE); later same-section occurrences stay plain.
+  · If the report cites no P#/D#/CP# code, delete this whole section.
+-->
+
+| Code | Meaning |
+|------|---------|
+| <a id="ref-P#"></a>**P#** | <pillar name> (pillar) |
+| <a id="ref-D#"></a>**D#** | <decision title> — <v1 choice, ≤~12 words> |
+| <a id="ref-CP#"></a>**CP#** | Checkpoint #: <checkpoint description> |
 
 ---
 
 ## 📋 Scout Methodology
 
 <!--
+Section numbers below are for the full research_context.md. The cloud
+scouting routine instead reads a per-pillar extract research_context_P#.md,
+where the same content is renumbered: Researchers=§7, Tracked Literature=§6,
+Anti-topics=§5, Competitor=§8. Use whichever the active prompt points at.
+
 Summarize the retrieval passes in 3–5 bullets. Weight: Author Watch > Citation-Graph > Keyword Sweep; add Competitor Monitoring as a dedicated pass.
-  · Author Watch — N researchers from research_context.md §9, date range
-  · Citation-Graph Expansion — M pinned papers from §8 (Tracked Literature, 5×8), citation window
-  · Keyword Sweep — queries, cs.RO + cs.LG window, anti-topic filter from §7
-  · Competitor Monitoring — §10 watch list scan (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage)
+  · Author Watch — N researchers (full §9 / extract §7), date range
+  · Citation-Graph Expansion — M pinned papers (full §8 / extract §6, Tracked Literature), citation window
+  · Keyword Sweep — queries, cs.RO + cs.LG window, anti-topic filter (full §7 / extract §5)
+  · Competitor Monitoring — watch-list scan (full §10 / extract §8)
 If any tool call failed, state the error verbatim. Do not fabricate.
 -->
 
