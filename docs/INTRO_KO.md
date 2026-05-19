@@ -63,7 +63,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
                                  │ writes
                                  ▼
                   ┌──────────────────────────────┐
-                  │  research_log/YYYY-W##.md    │  ← Scouting Report
+                  │  research_log/YYYY-MM-DD-P#.md│  ← Scouting Report
                   │                              │
                   │  Top 3–5 papers only         │
                   │  • Connects to: P# / D#      │
@@ -134,9 +134,8 @@ probe/
 ├── .claude/prompts/             # scouting-P{1..4}.md · synthesis-P{1..4}.md
 ├── synthesis/                   # P{1..4}_BRIEF.md (월간 재생성 서사)
 └── research_log/
-    ├── _TEMPLATE.md             # 에이전트가 매주 복사해서 채우는 양식
-    ├── YYYY-W##.md              # 실제 Scouting Reports (에이전트 생성)
-    └── YYYY-W##-KO.md           # 각 리포트의 한글 번역
+    ├── _TEMPLATE.md             # 에이전트가 실행마다 복사해서 채우는 양식
+    └── YYYY-MM-DD-P#.md         # 한글 리포트 — 실행(월·목)·필러(P1–P4)별 1개
 ```
 
 ### 핵심 원칙: 정적 vs 동적 분리

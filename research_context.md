@@ -7,7 +7,7 @@
 
 > **Last updated**: 2026-05-19
 > **Maintainer**: \<your-name\>
-> **Agent usage**: This is the *static* context. The retrieval agent reads (never writes) this file. Weekly findings are appended to `research_log/YYYY-WW.md` instead.
+> **Agent usage**: This is the *static* context. The retrieval agent reads (never writes) this file. Findings go to `research_log/YYYY-MM-DD-P#.md` (one file per run, per pillar) instead.
 
 ---
 
@@ -25,8 +25,8 @@
 - Tracked Literature: rebalanced quarterly. Hard cap 8 pinned per pillar; replace, don't append
 - Competitor/Kindred Monitoring: review at every CP
 
-**Output formatting & translation rules**
-All formatting rules (emoji system, link format, Korean translation principles) are consolidated in **`docs/STYLE_GUIDE.md`** — the single source of truth. The agent must read `docs/STYLE_GUIDE.md` before producing any output. Do not duplicate formatting rules here; edit `docs/STYLE_GUIDE.md` instead.
+**Output formatting & authoring rules**
+All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`docs/STYLE_GUIDE.md`** — the single source of truth. The agent must read `docs/STYLE_GUIDE.md` before producing any output. Do not duplicate formatting rules here; edit `docs/STYLE_GUIDE.md` instead.
 
 **Audience**: maintainer (self, future-self) + AI retrieval agent + future collaborators. Keep terminology accessible without sacrificing precision.
 

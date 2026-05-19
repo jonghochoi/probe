@@ -4,8 +4,8 @@
 > Narrowed to **Pillar 3 (Hand-level System0 Module, RL-scoped)**; P1/P2/P4/P5
 > content lives in the full document, not here. P3 owns **D13–D18**.
 > **Agent usage**: *static* context. The retrieval agent reads (never writes)
-> this file. Weekly findings go to `research_log/YYYY-WW.md`.
-> **Formatting & translation rules**: `docs/STYLE_GUIDE.md` (single source of
+> this file. Findings go to `research_log/YYYY-MM-DD-P3.md` (one per run).
+> **Formatting & authoring rules**: `docs/STYLE_GUIDE.md` (single source of
 > truth — agent must read it before producing output).
 
 ---
