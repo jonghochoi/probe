@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.0 (2026-04-22) · **Scope:** All files under `research_log/`
+> **Version:** v1.2 (2026-05-19) · **Scope:** All files under `research_log/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -140,6 +140,11 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | Citation-graph expansion | Citation-Graph 확장 |
 | Author Watch | Author Watch (저자 추적) |
 | Keyword Sweep | Keyword Sweep (키워드 스윕) |
+| System0 / System1 | System0 / System1 (저수준 안정화 / 고수준 정책 계층) |
+| Structured input-modality binding | 구조적 입력-모달리티 결합 |
+| VLM pretraining preservation | VLM 사전학습 보존 |
+| Action expert | 액션 전문가 |
+| Flow matching | 플로우 매칭 |
 
 ### 4-3. Header translation reference
 
@@ -174,4 +179,5 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 | Version | Date | Change |
 |---------|------|--------|
 | v1.0 | 2026-04-22 | Initial version — emoji system, link rules, Korean translation principles |
-| v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed), matching `research_context.md` v4.0 |
+| v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed) |
+| v1.2 | 2026-05-19 | Glossary §4-2 extended with v5.0 canonical terms (System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching); aligned with `research_context.md` v5.0 |

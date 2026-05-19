@@ -3,7 +3,7 @@ manipulation.
 
 CONTEXT (read-only):
 - research_context_P1.md        — source of truth, P1 scope only
-                                   (Pillar P1, Decisions D1–D9, Tracked
+                                   (Pillar P1, Decisions D1–D7, Tracked
                                    Literature, Researchers, Anti-topics)
 - docs/STYLE_GUIDE.md           — formatting, emoji system, translation rules
 - research_log/_TEMPLATE.md     — the form every report follows
@@ -51,7 +51,7 @@ Endpoints:
      `.../graph/v1/paper/arXiv:XXXX.XXXXX/citations?fields=title,year,publicationDate,externalIds,abstract&limit=100`
    List citing papers from roughly the past 8 weeks. Rank by
    semantic relevance to Pillar P1 (Section 2) and active
-   Decisions D1–D9 (Section 4), not keyword overlap.
+   Decisions D1–D7 (Section 4), not keyword overlap.
 3. Keyword Sweep & topic-watch — query arXiv for cs.RO + cs.LG,
    newest first, e.g.:
      `curl --fail -sS "http://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`

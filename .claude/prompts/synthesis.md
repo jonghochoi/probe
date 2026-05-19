@@ -7,7 +7,7 @@ it, so a human can hold the P1 architecture in their head.
 CONTEXT (read-only):
 - research_context_P1.md — source of truth, P1 scope only.
   Use ONLY two sections:
-    · §4 Decision Log — P1 (D1–D9)
+    · §4 Decision Log — P1 (D1–D7)
     · §6 P1 Tracked Literature (8 pinned + methodology base)
 - docs/STYLE_GUIDE.md   — §4 Korean rules (verbatim tokens, tone)
 
@@ -21,11 +21,11 @@ append-only log. It is written to be RE-READ, not skimmed once.
 STRUCTURE:
 
 1. Header block:
-   - Title: `# P1 Synthesis Brief — Heterogeneous Action Decoder`
+   - Title: `# P1 Synthesis Brief — Heterogeneous Body/Hand Action Expert`
    - One line: regeneration date + the research_context_P1.md version
-     string from its top banner (e.g. "v4.0 (2026-05-12) — P1 scope").
+     string from its top banner (e.g. "v5.0 (2026-05-19) — P1 scope").
 
-2. Body — one subsection per Decision, D1 through D9, in order.
+2. Body — one subsection per Decision, D1 through D7, in order.
    `## D# — <decision title from §4>`
    For each Decision, write 2–3 sentences of Korean prose covering:
      (1) the v1 choice and which PINNED paper(s) from §6 ground its
@@ -42,7 +42,7 @@ STRUCTURE:
    A short list — as many lines as are genuinely load-bearing, no
    fixed count (roughly 3–6 is typical; never pad to hit a number).
    Each line is one self-contained sentence: the through-lines
-   across D1–D9, the sharpest unresolved tension, and what a single
+   across D1–D7, the sharpest unresolved tension, and what a single
    new paper would have to show to move the picture. No sub-bullets.
 
 HARD RULES:
