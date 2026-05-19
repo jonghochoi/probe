@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.5 (2026-05-19) · **Scope:** All files under `research_log/` and `analysis/`
+> **Version:** v1.6 (2026-05-19) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -12,7 +12,7 @@ pillar. Each run produces **one Korean file**:
 
 | File | Language | Purpose |
 |------|----------|---------|
-| `research_log/YYYY-MM-DD-P#.md` | Korean | The scouting report. `YYYY-MM-DD` is the run date; `P#` is the pillar (P1–P4). Used by the agent for de-duplication and future retrieval. |
+| `scouting/YYYY-MM-DD-P#.md` | Korean | The scouting report. `YYYY-MM-DD` is the run date; `P#` is the pillar (P1–P4). Used by the agent for de-duplication and future retrieval. |
 
 The report is written directly in Korean (no separate English file).
 Paper titles, arXiv links, and `P#/D#/CP#` tags stay verbatim in their
@@ -101,7 +101,7 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 
 The report opens with a **Reference Legend** — a one-line glossary of the
 `P#` / `D#` / `CP#` codes, so a reader who does not have the codes
-memorized can decode the report without opening `research_context_P#.md`.
+memorized can decode the report without opening `context/P#.md`.
 
 **Scope.** Only `P#` (Pillar), `D#` (Decision), `CP#` (Checkpoint) codes.
 **Only codes actually cited in this report.** Never list a code the body
@@ -126,10 +126,10 @@ Methodology`. It is the first content section of the report.
 
 If the body cites no such code (rare), omit the section entirely.
 
-**Meaning source** (deterministic — derive from `research_context_P#.md`,
+**Meaning source** (deterministic — derive from `context/P#.md`,
 which the agent already reads; do not invent):
 
-| Code | Source in `research_context_P#.md` | Meaning string |
+| Code | Source in `context/P#.md` | Meaning string |
 |------|-----------------------------------|----------------|
 | `P#` | §2 heading `Pillar P# — <name>` | `<name>` + `(pillar)` |
 | `D#` | §4 `#### [D#] <title>` + its v1 line | `<title>` — v1 choice in ≤ ~12 words |
@@ -240,20 +240,20 @@ verbatim in their original form versus which prose is Korean.
 ## 5. Paper Analysis Document (`analysis/`)
 
 The `/analyze-paper` slash command (prompt: `.claude/prompts/paper-analysis.md`)
-produces a deep-dive on **one** paper at `analysis/<arxiv-id>-KO.md`.
+produces a deep-dive on **one** paper at `analysis/<arxiv-id>.md`.
 
 ### 5-1. File convention
 
 - **Korean single document.** Like every other PROBE output, a paper
   analysis is a single Korean document — there is no English source
   file. It is written natively in Korean per §4 (tone, glossary,
-  verbatim tokens), not translated. The `-KO` filename suffix simply
-  marks it as the human-readable Korean deep-dive.
-- Filename: `analysis/<arxiv-id>-KO.md` (e.g. `analysis/2401.12345-KO.md`);
+  verbatim tokens), not translated. The filename carries no language
+  suffix — every PROBE output is Korean, so marking it is redundant.
+- Filename: `analysis/<arxiv-id>.md` (e.g. `analysis/2401.12345.md`);
   non-arXiv PDF input uses a human-chosen slug.
 - Regenerable snapshot — re-running overwrites the file, never appends.
 - The document follows `analysis/_TEMPLATE.md` exactly: part (A) a
-  neutral structured summary, part (B) `research_context.md`-anchored
+  neutral structured summary, part (B) `context/MASTER.md`-anchored
   decision-grade implications.
 
 ### 5-2. Emoji system
@@ -309,3 +309,4 @@ substituted.
 | v1.3 | 2026-05-19 | Added §3-1 Reference Legend (cited-code glossary) + in-body `#ref-` anchor links; 🔑 section emoji; KO mirroring rules (§4-1, §4-3) |
 | v1.4 | 2026-05-19 | Single Korean file per run named `YYYY-MM-DD-P#.md` (date + pillar); English file retired; Mon & Thu cadence; §1 + §4 reworked from "translation" to direct Korean authoring |
 | v1.5 | 2026-05-19 | Scope extended to `analysis/`; added §5 Paper Analysis Document (Korean-single deep-dive, emoji set, body-acquisition honesty); Changelog renumbered §6 |
+| v1.6 | 2026-05-19 | Path migration: `research_log/` → `scouting/`, `research_context*.md` → `context/MASTER.md` + `context/P{1..4}.md`; dropped redundant `-KO` filename suffix in `analysis/` (output is always Korean) |

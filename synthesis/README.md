@@ -1,16 +1,16 @@
 # synthesis/
 
-주간 스카우팅(`research_log/`)과 **분리된** 산출물 경로입니다.
+주간 스카우팅(`scouting/`)과 **분리된** 산출물 경로입니다.
 
 새 논문을 찾는 곳이 아니라, 이미 핀된 논문들 사이의 **핵심 연결고리를
 서사로 압축**해 사람이 머릿속에 계속 들고 다닐 수 있게 하는 곳입니다.
 
 | 파일 | 생성 주체 | 성격 |
 |---|---|---|
-| `P1_BRIEF.md` | `probe-p1-synthesis` Routine (월 1회) | `research_context_P1.md` §4(D1–D7) + §6(핀 논문)만 읽고 재생성 |
-| `P2_BRIEF.md` | `probe-p2-synthesis` Routine (월 1회) | `research_context_P2.md` §4(D8–D12) + §6 |
-| `P3_BRIEF.md` | `probe-p3-synthesis` Routine (월 1회) | `research_context_P3.md` §4(D13–D18) + §6 |
-| `P4_BRIEF.md` | `probe-p4-synthesis` Routine (월 1회) | `research_context_P4.md` §4(D19–D23) + §6 |
+| `P1_BRIEF.md` | `probe-p1-synthesis` Routine (월 1회) | `context/P1.md` §4(D1–D7) + §6(핀 논문)만 읽고 재생성 |
+| `P2_BRIEF.md` | `probe-p2-synthesis` Routine (월 1회) | `context/P2.md` §4(D8–D12) + §6 |
+| `P3_BRIEF.md` | `probe-p3-synthesis` Routine (월 1회) | `context/P3.md` §4(D13–D18) + §6 |
+| `P4_BRIEF.md` | `probe-p4-synthesis` Routine (월 1회) | `context/P4.md` §4(D19–D23) + §6 |
 
 각 `P#_BRIEF.md` 는 append가 아니라 매번 덮어쓰는 living snapshot입니다.
 `probe-p#-synthesis` 는 [claude.ai/code/routines](https://claude.ai/code/routines)

@@ -1,5 +1,5 @@
 ---
-description: arXiv id / URL 또는 PDF URL 한 편을 심층 분석해 한글 문서(analysis/<id>-KO.md) 생성
+description: arXiv id / URL 또는 PDF URL 한 편을 심층 분석해 한글 문서(analysis/<id>.md) 생성
 argument-hint: <arXiv id | arXiv url | pdf url>
 ---
 
