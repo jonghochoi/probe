@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.4 (2026-05-19) · **Scope:** All files under `research_log/`
+> **Version:** v1.5 (2026-05-19) · **Scope:** All files under `research_log/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -237,7 +237,69 @@ verbatim in their original form versus which prose is Korean.
 
 ---
 
-## 5. Changelog
+## 5. Paper Analysis Document (`analysis/`)
+
+The `/analyze-paper` slash command (prompt: `.claude/prompts/paper-analysis.md`)
+produces a deep-dive on **one** paper at `analysis/<arxiv-id>-KO.md`.
+
+### 5-1. File convention
+
+- **Korean single document.** Like every other PROBE output, a paper
+  analysis is a single Korean document — there is no English source
+  file. It is written natively in Korean per §4 (tone, glossary,
+  verbatim tokens), not translated. The `-KO` filename suffix simply
+  marks it as the human-readable Korean deep-dive.
+- Filename: `analysis/<arxiv-id>-KO.md` (e.g. `analysis/2401.12345-KO.md`);
+  non-arXiv PDF input uses a human-chosen slug.
+- Regenerable snapshot — re-running overwrites the file, never appends.
+- The document follows `analysis/_TEMPLATE.md` exactly: part (A) a
+  neutral structured summary, part (B) `research_context.md`-anchored
+  decision-grade implications.
+
+### 5-2. Emoji system
+
+Same rule as §2: one emoji at the **start** of each `##` / `###`
+header, never in body text. Section (`##`) emojis for this document
+type — these are the only emojis permitted here in addition to §2:
+
+| Emoji | Section | Part |
+|-------|---------|------|
+| 📄 | 논문 메타 | A |
+| 🧭 | 한 줄 요약 (TL;DR) | A |
+| ❓ | 문제 정의 / 동기 | A |
+| 🧩 | 핵심 기여 | A |
+| 🔬 | 방법론 | A |
+| 📊 | 실험 설정과 결과 | A |
+| ⚖️ | 한계 | A |
+| ♻️ | 재현성 | A |
+| 🎯 | 관련 Pillar / Decision (P# / D#) | B |
+| ✨ | 핀 논문 대비 델타 | B |
+| ⚙️ | 의사결정 함의 | B |
+| ⚠️ | 먼저 검증할 실패 모드 | B |
+| 💡 | 컨텍스트 제안 | B |
+
+Part (B) reuses the existing 🎯 ✨ ⚙️ ⚠️ 💡 semantics from §2-2 / §2-1.
+Do not use any emoji not listed in §2 or here.
+
+### 5-3. Korean & verbatim rules
+
+§4 applies in full. Specifically: original English paper title,
+config/code names, formulas, arXiv links, and `P#`/`D#`/`CP#` tags
+are kept verbatim; technical terms use the §4-2 glossary; tone is
+formal 합니다/됩니다 체.
+
+### 5-4. Body-acquisition honesty
+
+The 📄 메타 header MUST state the actual full-text level reached
+(`전문(arXiv HTML)` / `전문(ar5iv)` / `PDF 텍스트(pdftotext)` /
+`초록 only`). If only the abstract was obtained, every part (B)
+section is prefixed **(본문 미확보 — 잠정)**. Failed `curl` calls are
+recorded verbatim (command + HTTP status); fabricated content is never
+substituted.
+
+---
+
+## 6. Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
@@ -246,3 +308,4 @@ verbatim in their original form versus which prose is Korean.
 | v1.2 | 2026-05-19 | Glossary §4-2 extended with canonical terms: System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching |
 | v1.3 | 2026-05-19 | Added §3-1 Reference Legend (cited-code glossary) + in-body `#ref-` anchor links; 🔑 section emoji; KO mirroring rules (§4-1, §4-3) |
 | v1.4 | 2026-05-19 | Single Korean file per run named `YYYY-MM-DD-P#.md` (date + pillar); English file retired; Mon & Thu cadence; §1 + §4 reworked from "translation" to direct Korean authoring |
+| v1.5 | 2026-05-19 | Scope extended to `analysis/`; added §5 Paper Analysis Document (Korean-single deep-dive, emoji set, body-acquisition honesty); Changelog renumbered §6 |

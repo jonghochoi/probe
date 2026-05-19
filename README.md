@@ -67,13 +67,22 @@ probe/
 ├── research_context_P4.md         #   synthesis pipeline reads these,
 │                                  #   never the full doc (lean context).
 │
-├── .claude/prompts/               # Externalized agent prompts
-│   ├── scouting-P{1..4}.md        #   weekly scout, one per pillar
-│   └── synthesis-P{1..4}.md       #   monthly synthesis brief, per pillar
+├── .claude/
+│   ├── prompts/                   # Externalized agent prompts
+│   │   ├── scouting-P{1..4}.md    #   weekly scout, one per pillar
+│   │   ├── synthesis-P{1..4}.md   #   monthly synthesis brief, per pillar
+│   │   └── paper-analysis.md      #   on-demand single-paper deep-dive
+│   └── commands/                  # Slash commands (on-demand)
+│       └── analyze-paper.md       #   /analyze-paper <id|url|pdf>
 │
 ├── synthesis/                     # Synthesis output
 │   ├── README.md                  #   pipeline summary
 │   └── P{1..4}_BRIEF.md           #   living per-pillar narrative (regen)
+│
+├── analysis/                      # Paper deep-dive output (on-demand)
+│   ├── README.md                  #   purpose + filename convention
+│   ├── _TEMPLATE.md               #   Korean deep-dive form
+│   └── <arxiv-id>-KO.md           #   single Korean analysis (regen)
 │
 ├── research_log/                  # Dynamic output — agent-generated
 │   ├── _TEMPLATE.md               # Scouting Report form
@@ -476,6 +485,23 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 
 When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
+**Bonus — On-demand paper deep-dive (`/analyze-paper`)**
+
+Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `research_context.md` §8 that you have not fully internalized) and leaves a Korean deep-dive. It is **not a scheduled routine** — no RemoteTrigger. It is an on-demand slash command you invoke when you need it, in a local or web session.
+
+| Item | Value |
+|---|---|
+| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` |
+| Slash command | `.claude/commands/analyze-paper.md` (thin wrapper) |
+| Canonical prompt | `.claude/prompts/paper-analysis.md` (single source) |
+| Input context | full `research_context.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
+| Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
+| Output | `analysis/<arxiv-id>-KO.md` — single Korean document, overwritten each run |
+| Structure | (A) formatted neutral summary + (B) `research_context.md`-anchored decision-grade implications |
+| Retrieval | full-text `curl` only (no Semantic Scholar / MCP) |
+
+Network note: the slash command's full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE_GUIDE.md` §5.
+
 ---
 
 ### 🧰 Troubleshooting
@@ -502,7 +528,7 @@ When the pinned literature (§6) changes, don't wait for the monthly run — hit
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, GitHub PR output |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` (on-demand) |
 | **Output** | GitHub PR — commit history *is* the research log |
 | **Context** | `research_context_P{1..4}.md` (static, human, per-pillar) + `research_log/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
@@ -541,6 +567,7 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | [`research_context.md`](research_context.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `research_context_P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>-KO.md` |
 | [`research_log/_TEMPLATE.md`](research_log/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 
