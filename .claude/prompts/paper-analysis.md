@@ -108,9 +108,9 @@ STRUCTURE — two parts, in this order:
        competitor implication.
   ✨ 핀 논문 대비 델타  — what is genuinely new vs. the Tracked
        Literature already in context/MASTER.md (name the pinned paper).
-  ⚙️ 의사결정 함의     — what changes in MY Isaac Lab pipeline if this
-       paper is right? Name the exact config key / hyperparameter /
-       metric. Vague is failure.
+  ⚙️ 의사결정 함의     — what changes in MY training/evaluation pipeline
+       if this paper is right? Name a specific config key / hyperparameter /
+       metric / loss term. Vague is failure.
   ⚠️ 먼저 검증할 실패 모드 — why might this NOT transfer to our stack?
        Cheapest sanity check first.
   💡 컨텍스트 제안      — if a pin should change or a Decision/deferred

@@ -21,7 +21,7 @@ Project story:
     It watches the authors you care about, follows citation chains
     out from your pinned literature, filters the noise, and pings
     back a short decision-grade Scouting Report: *if this paper is
-    right, here is what you change in Isaac Lab next week.*
+    right, here is what you change in your training pipeline next week.*
 
     The scout does not decide. The researcher still judges, still
     discards, still chooses the direction. But the scout covers
