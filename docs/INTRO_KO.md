@@ -9,7 +9,7 @@
 ## 🧭 Why this exists
 
 로보틱스 연구자의 하루는 이미 빡빡하다.
-Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석하다 보면
+모델을 학습시키고, 하드웨어를 디버깅하고, 결과를 분석하다 보면
 **arXiv는 자연스럽게 뒤로 밀린다.**
 
 문제는 arXiv `cs.RO` + `cs.LG`에 매일 50 ~ 100편이 새로 올라온다는 것이다.
@@ -24,7 +24,7 @@ Isaac Lab 실험을 돌리고, 하드웨어를 디버깅하고, 결과를 분석
 
 **Probe는 그 3 ~ 5%를 대신 찾아온다.**
 그리고 "이 논문이 흥미롭다"가 아니라
-**"이 논문이 맞다면 지금 Isaac Lab 파이프라인에서 무엇을 바꿔야 하는가"** 를 묻는다.
+**"이 논문이 맞다면 지금 내 학습·평가 파이프라인에서 무엇을 바꿔야 하는가"** 를 묻는다.
 요약이 아니라 의사결정 재료를 만드는 것이 Probe의 역할이다.
 
 ---
@@ -146,9 +146,11 @@ probe/
 │   │   ├── scouting-P{1..4}.md     #   주간 스카우트 (pillar별 1개)
 │   │   ├── synthesis-P{1..4}.md    #   월간 synthesis brief
 │   │   ├── paper-analysis.md       #   온디맨드 단일 논문 심층분석
+│   │   ├── paper-reproduction.md   #   온디맨드 재현 가이드 (분석 후속)
 │   │   └── pulse-digest.md         #   채팅 → pillar별 힌트 (PoC)
 │   └── commands/                   # 슬래시 커맨드 (온디맨드)
-│       └── analyze-paper.md        #   /analyze-paper <id|url|pdf>
+│       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
+│       └── reproduce-paper.md      #   /reproduce-paper <id>
 │
 ├── scouting/                       # 동적 산출 — 주간 (월·목)
 │   ├── README.md                   #   파이프라인 요약
@@ -171,7 +173,15 @@ probe/
 ├── analysis/                       # 단일 논문 심층 (온디맨드)
 │   ├── README.md                   #   목적 + 파일명 컨벤션
 │   ├── _TEMPLATE.md                #   한글 deep-dive 양식
-│   └── <arxiv-id>.md               #   단일 한글 분석 (재생성)
+│   ├── _TEMPLATE_IMPL.md           #   한글 재현 가이드 양식
+│   ├── <arxiv-id>.md               #   단일 한글 분석 (재생성)
+│   ├── <arxiv-id>_impl.md          #   재현 가이드 (재생성)
+│   └── <arxiv-id>_impl.patch       #   vendor baseline 대비 unified diff
+│
+├── vendor/                         # 읽기 전용 외부 코드
+│   └── lerobot/                    #   pinned lerobot 스냅샷 —
+│                                   #   6개 baseline policy + configs,
+│                                   #   _impl.patch 의 적용 대상
 │
 └── docs/
     ├── INTRO_KO.md                 # 한글 온보딩 + 운영 매뉴얼
@@ -234,7 +244,7 @@ Scouting Report 말미에 *수정 제안*만 하고, 실제 반영은 사람이 
 | 증상 | 원인 | 처방 |
 |---|---|---|
 | 추천 논문이 Anti-topic에 가까움 | Anti-topics 목록이 느슨함 | 더 공격적으로 구체화 |
-| Decision implication이 generic ("DR range를 넓혀야 함") | 프롬프트가 약함 | "구체적 Isaac Lab config 변경을 지목하라" 강화 |
+| Decision implication이 generic ("DR range를 넓혀야 함") | 프롬프트가 약함 | "구체적 config 키 / 하이퍼파라미터 / 메트릭을 지목하라" 강화 |
 | 같은 논문이 매주 재추천됨 | 이전 로그를 읽지 않음 | 직전 2주 로그를 read-only로 첨부하는 프로세스 추가 |
 
 ### Probe가 잘 작동하고 있다는 신호
@@ -258,7 +268,7 @@ Citation-graph만 쓰면 본인 관심사 주변에서만 맴돈다.
 
 ```
 Week 1–2:  수동 실행     새 대화 → context.md 업로드 → 프롬프트 실행
-Week 3–4:  반자동화      Claude Cowork Scheduled Task (데스크톱 앱 오픈 시)
+Week 3–4:  반자동화      Claude Desktop Scheduled Tasks (데스크톱 앱 오픈 시)
 Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼도 실행)
 ```
 
@@ -299,7 +309,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 
 | 컴포넌트 | 기술 |
 |---|---|
-| **에이전트 엔진** | Claude (Sonnet) via Claude Code Routines |
+| **에이전트 엔진** | Claude (Sonnet 4.6 / Opus 4.7) via Claude Code Routines |
 | **스케줄러** | Claude Code Routines — cloud-managed cron, GitHub webhook 지원 |
 | **논문 검색** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) — `curl` 직접 호출 |
 | **인용 추적** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON `jq`) — 키 선택 |

@@ -16,9 +16,24 @@
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-📖 팀 온보딩 한글 문서: [`docs/INTRO_KO.md`](docs/INTRO_KO.md)
+📖 팀 온보딩 한글 문서: [`docs/probe_guide.html`](docs/probe_guide.html) · [`docs/INTRO_KO.md`](docs/INTRO_KO.md)
 
 </div>
+
+---
+
+> ### 📖 New here? Start with the onboarding guide.
+>
+> **한글 시각 가이드 (Korean visual onboarding):** [`docs/probe_guide.html`](docs/probe_guide.html)
+> — download and open in a browser for a full visual walkthrough of PROBE.
+>
+> ```bash
+> git clone https://github.com/jonghochoi/probe.git
+> open probe/docs/probe_guide.html         # macOS
+> # xdg-open probe/docs/probe_guide.html   # Linux
+> ```
+>
+> Operations manual (한글, 마크다운): [`docs/INTRO_KO.md`](docs/INTRO_KO.md) — 동기, 파이프라인, 운영 노하우, 월간 리뷰 KPI.
 
 ---
 
@@ -32,7 +47,7 @@ The field does not wait. **50–100 new papers land on `cs.RO` + `cs.LG` every d
 
 But it does not stop at "here are some interesting papers." It asks the only question that matters:
 
-> *"If this paper is right, what do I change in the Isaac Lab pipeline next week?"*
+> *"If this paper is right, what do I change in my training/evaluation pipeline next week?"*
 
 Summaries are cheap. PROBE produces **decision material**.
 
@@ -341,9 +356,9 @@ table, and inline in Context Suggestions. Do not fabricate arXiv IDs.
 For each paper, state:
   (a) which P# / D# it touches,
   (b) what is *genuinely* new,
-  (c) decision implication — what changes in MY Isaac Lab pipeline
-      next week if this paper is right? Be concrete (config name,
-      hyperparameter, specific metric). Vague is failure.
+  (c) decision implication — what changes in MY training/evaluation
+      pipeline next week if this paper is right? Be concrete (config
+      key, hyperparameter, specific metric, loss term). Vague is failure.
   (d) failure mode to probe first.
 
 ---
@@ -486,7 +501,7 @@ There is no `--dry-run`. On the routine detail page use **Run now** — it opens
 - Both the English and Korean files were produced.
 - Every paper link resolves (no fabricated arXiv IDs).
 - 📋 Scout Methodology has **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
-- Decision implications are concrete (named Isaac Lab config key / metric, not "tune DR wider").
+- Decision implications are concrete (a specific config key / hyperparameter / metric, not "tune DR wider").
 - The Anti-topics filter actually fired (an empty "did not pass filter" section is suspicious).
 
 If it is unsatisfactory, fix `scouting-P1.md` (or `context/P1.md`) and re-run — do not leave automation on with a bad prompt.
@@ -545,7 +560,7 @@ Network note: the slash command's full-text fetch needs the session environment 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Papers recommended are in your Anti-topics list | Anti-topics are too vague | Rewrite `context/P#.md` §5 with concrete exclusions (e.g. "any paper whose primary task is locomotion") |
-| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add to `scouting-P#.md`: "name the exact Isaac Lab config key and range" |
+| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add to `scouting-P#.md`: "name a specific config key / hyperparameter / metric (not a hand-wave like 'tune X wider')" |
 | Same paper recommended two weeks in a row | Agent skipped the last-2-weeks context | Confirm the prompt's read-only "last 2 weeks of `scouting/`" reference is intact and those files exist |
 | `claude routine register` / a `.claude/routines/*.yaml` does nothing | That is not the execution mechanism | Register via the RemoteTrigger form ([claude.ai/code/routines](https://claude.ai/code/routines)) — Step 2/4 |
 | Agent silently edits `context/P#.md` | Prompt guard missing | Re-add the hard "never modify `context/P#.md`" guard (currently present in `scouting-P#.md` — do not remove it) |
@@ -599,6 +614,7 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | Document | Description |
 |---|---|
 | [`CLAUDE.md`](CLAUDE.md) | Contributor rules — commit-message style + document Markdown style |
+| [`docs/probe_guide.html`](docs/probe_guide.html) | **Korean onboarding guide** — download and open locally for a visual walkthrough |
 | [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
 | [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |

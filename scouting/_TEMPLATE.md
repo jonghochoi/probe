@@ -65,8 +65,8 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 <!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->
 
 ### ⚙️ (c) 의사결정 함의
-<!-- What changes in MY Isaac Lab pipeline next week if this paper is right?
-     Name the exact config key, hyperparameter, or metric. Vague = failure. -->
+<!-- What changes in MY training/evaluation pipeline next week if this paper is right?
+     Name a specific config key, hyperparameter, metric, or loss term. Vague = failure. -->
 
 ### ⚠️ (d) 먼저 검증해야 할 실패 모드
 <!-- Why might this NOT transfer to our stack? What is the cheapest sanity check? -->

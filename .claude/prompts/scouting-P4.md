@@ -126,9 +126,9 @@ verify every link resolves before inclusion.
 For each paper, state:
   (a) which P# / D# it touches,
   (b) what is *genuinely* new,
-  (c) decision implication — what changes in MY Isaac Lab pipeline
-      next week if this paper is right? Be concrete (config name,
-      hyperparameter, specific metric). Vague is failure.
+  (c) decision implication — what changes in MY training/evaluation
+      pipeline next week if this paper is right? Be concrete (config
+      key, hyperparameter, specific metric, loss term). Vague is failure.
   (d) failure mode to probe first.
 
 ### Reference Legend (docs/STYLE_GUIDE.md §3-1)
