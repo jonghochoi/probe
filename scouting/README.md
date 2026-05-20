@@ -20,6 +20,9 @@ arXiv·Citation Graph·Author Watch를 훑고 의사결정 등급 후보만 추�
   리포트뿐 — 컨텍스트를 가볍게 유지합니다. `context/` 는 **절대 수정하지
   않습니다**. 핀/Decision 변경 제안은 리포트의 💡 컨텍스트 제안 섹션에만
   적습니다.
+- 옵션 입력: `pulse/*-P#.md`(같은 pillar 의 최신 1개) — PoC 단계의
+  채팅 힌트로, retrieval-weight nudge 로만 작용합니다. 정적 `context/`
+  가 충돌 시 항상 승리합니다. 없으면 무시.
 - 폼은 `scouting/_TEMPLATE.md`, 형식·이모지·용어·링크 규칙은
   `docs/STYLE_GUIDE.md` 를 정확히 따릅니다.
 - `probe-weekly-scout` 는 [claude.ai/code/routines](https://claude.ai/code/routines)

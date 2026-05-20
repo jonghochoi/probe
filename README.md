@@ -46,6 +46,96 @@ Summaries are cheap. PROBE produces **decision material**.
 
 ---
 
+## 🧭 The Pipeline
+
+PROBE has **three output tracks** sharing one static context — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). Each answers a different question, runs on a different cadence, and writes to its own folder; together they keep the research log honest. A fourth track, **`pulse/`** (PoC), is a chat-to-scout *input-aid* layer — not a human-facing output — described in the sidebar after the diagram.
+
+> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
+>
+> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§9 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
+
+```
+   ┌───────────────────────────────────────────────────────────────────┐
+   │ context/  (static · human-owned · read-only every run)            │
+   │                                                                   │
+   │ MASTER.md   · Identity / Pillars (P1–P5) / Decision Log (D1–D26)  │
+   │             · Tracked Literature (5 × 8) / Researchers /          │
+   │               Competitor Monitoring / Anti-topics                 │
+   │ P{1..4}.md  · per-pillar history-free extracts (§1–§9 skeleton)   │
+   └─────────────────────────────────┬─────────────────────────────────┘
+                                     │ read-only (every run)
+                                     ▼
+   ┌───────────────────────────────────────────────────────────────────┐
+   │                             P R O B E                             │
+   └───────────┬─────────────────────┬──────────────────────┬──────────┘
+               │                     │                      │
+               ▼                     ▼                      ▼
+   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
+   │   OUTWARD           │ │   INWARD           │ │   FOCUSED          │
+   │   Weekly Scouting   │ │   Monthly Synth.   │ │   On-demand Anal.  │
+   │                     │ │                    │ │                    │
+   │   Mon/Thu · per P#  │ │   monthly · per P# │ │   /analyze-paper   │
+   │                     │ │                    │ │                    │
+   │ · Author Watch      │ │ · compress the     │ │ · one paper —      │
+   │ · Citation-Graph    │ │   pinned set       │ │   full-text first  │
+   │ · Keyword Sweep     │ │ · connect dots:    │ │ · neutral summary  │
+   │ · Competitor watch  │ │   D# ↔ §6 pins     │ │   + decision-      │
+   │                     │ │                    │ │   grade implic.    │
+   │ in: P#.md +         │ │ in: P#.md §4 + §6  │ │ in: MASTER.md      │
+   │     last ~2 wk      │ │     (D# + pins)    │ │     + paper body   │
+   │                     │ │                    │ │                    │
+   │ curl: arXiv + S2    │ │ no retrieval —     │ │ curl: arxiv/html   │
+   │                     │ │ static compress    │ │ → ar5iv → abstract │
+   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
+              │ writes new           │ overwrites           │ overwrites
+              ▼                      ▼                      ▼
+   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
+   │ scouting/           │ │ synthesis/         │ │ analysis/          │
+   │ YYYY-MM-DD-P#.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
+   │                     │ │                    │ │                    │
+   │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
+   │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │
+   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
+              │                      │                      │
+              └──────────────────────┼──────────────────────┘
+                                     │ informs
+                                     ▼
+                    ┌─────────────────────────────────┐
+                    │             Human               │
+                    │                                 │
+                    │  · Read, judge, discard         │
+                    │  · Update context (monthly)     │
+                    │  · Log feedback   (monthly)     │
+                    └─────────────────────────────────┘
+```
+
+### Sidebar: pulse — chat-to-scout input layer (PoC)
+
+`pulse/` is a sidecar to the OUTWARD column above, not a fourth peer. It distills team chat exports into short per-pillar hint files that the next `scouting/` run reads as a retrieval-weight nudge. Static `context/` always wins on conflict, and pulse never edits any `context/` file.
+
+```
+   pulse/inbox/      ──►  .claude/prompts/      ──►  pulse/YYYY-MM-DD-P#.md
+   (chat exports,         pulse-digest.md            (per-pillar hint,
+    gitignored)           (manual, ~1/week)           up to 4 files/run)
+                                                              │
+                                                              ▼
+                                                    scouting/ retrieval
+                                                    (nudge only)
+```
+
+Status: Tier A PoC — manual, no automation, 2-week trial. See [`pulse/README.md`](pulse/README.md) for the schema and [`pulse/EXPORT_GUIDE_KO.md`](pulse/EXPORT_GUIDE_KO.md) for the chat-export playbook.
+
+### Core principle: static vs. dynamic, never mixed
+
+The split between `context/` (static) and the output tracks (dynamic) exists for one reason: to keep the agent's context lean.
+
+- **Static** (`context/`) changes monthly at most. The agent *reads* it, never writes.
+- **Dynamic** — agent-written. `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks). `synthesis/` and `analysis/` are overwrite-snapshots — no history, regenerate on demand. `pulse/` (PoC sidecar) follows the scouting filename convention — its hint files feed back into `scouting/` rather than out to a human.
+
+Shove everything into one file and within six weeks the context bloats, the agent re-recommends last month's papers, and the pinned literature drifts into a mess.
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -68,7 +158,8 @@ probe/
 │   ├── prompts/                    # Externalized agent prompts
 │   │   ├── scouting-P{1..4}.md     #   weekly scout, one per pillar
 │   │   ├── synthesis-P{1..4}.md    #   monthly synthesis brief, per pillar
-│   │   └── paper-analysis.md       #   on-demand single-paper deep-dive
+│   │   ├── paper-analysis.md       #   on-demand single-paper deep-dive
+│   │   └── pulse-digest.md         #   chat → per-pillar hints (PoC)
 │   └── commands/                   # Slash commands (on-demand)
 │       └── analyze-paper.md        #   /analyze-paper <id|url|pdf>
 │
@@ -77,6 +168,15 @@ probe/
 │   ├── _TEMPLATE.md                #   Scouting Report form
 │   └── YYYY-MM-DD-P#.md            #   Korean reports — one per run (Mon/Thu),
 │                                   #   one per pillar (P1–P4)
+│
+├── pulse/                          # Chat-to-scout input layer (PoC sidecar)
+│   ├── README.md                   #   purpose + Tier A status
+│   ├── _TEMPLATE.md                #   hint schema (per-pillar)
+│   ├── _EXAMPLE.md                 #   reference example (illustrative)
+│   ├── EXPORT_GUIDE_KO.md          #   Slack / Telegram export playbook
+│   ├── inbox/                      #   raw chat exports (gitignored except README)
+│   │   └── README.md
+│   └── YYYY-MM-DD-P#.md            #   per-pillar hint — manual ~1/week
 │
 ├── synthesis/                      # Monthly synthesis output
 │   ├── README.md                   #   pipeline summary
@@ -94,74 +194,6 @@ probe/
     └── LOGO.png                    # Project logo
 ```
 
-> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
->
-> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§9 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
-
-### Core principle: static vs. dynamic, never mixed
-
-`context/MASTER.md` and `scouting/` exist for one reason: to keep the agent's context lean.
-
-- **Static** (`context/MASTER.md`) changes monthly at most. The agent *reads* it, never writes.
-- **Dynamic** (`scouting/`) is append-only. Each run produces one file per pillar (`YYYY-MM-DD-P#.md`). The agent only reads that pillar's **last ~2 weeks** when generating a new report.
-
-Shove everything into one file and within six weeks the context bloats, the agent re-recommends last month's papers, and the pinned literature drifts into a mess.
-
----
-
-## 🧭 The Pipeline
-
-```
-              ┌──────────────────────────────┐
-              │  context/MASTER.md           │  static · human-owned
-              │  • Identity & Purpose        │
-              │  • Pillars (P1–P5)           │
-              │  • Decision Log (D1–D26)     │
-              │  • Tracked Literature (5 × 8)│
-              │  • Competitor Monitoring     │
-              │  • Researchers to Follow     │
-              │  • Anti-topics               │
-              └──────────────┬───────────────┘
-                             │ read-only (every run)
-                             ▼
-              ┌──────────────────────────────┐
-              │           P R O B E          │
-              │        (Claude Agent)        │
-              │                              │
-              │  1. Author Watch             │  ← highest signal
-              │  2. Citation-Graph Expansion │  ← semantic, not keyword
-              │  3. Keyword Sweep            │  ← noisy, last resort
-              │  4. Competitor Monitoring    │  ← §10 watch list
-              │                              │
-              │  Score every candidate on:   │
-              │    · P# / D# relevance       │
-              │    · Identity align/tension  │
-              │    · Novelty vs. tracked     │
-              │    · Reproducibility         │
-              │    · Sim2Real evidence       │
-              └──────────────┬───────────────┘
-                             │ writes
-                             ▼
-              ┌──────────────────────────────┐
-              │  scouting/YYYY-MM-DD-P#.md   │  Scouting Report
-              │                              │
-              │  Top 3–5 papers only         │
-              │    · Connects to P#/D#       │
-              │    · What's genuinely new    │
-              │    · Decision implication    │  ← the point
-              │    · Failure mode to probe   │  ← the point
-              └──────────────┬───────────────┘
-                             │ informs
-                             ▼
-              ┌──────────────────────────────┐
-              │           Human              │
-              │                              │
-              │  · Read, judge, discard      │
-              │  · Update context (monthly)  │
-              │  · Log feedback  (monthly)   │
-              └──────────────────────────────┘
-```
-
 ---
 
 ## 🧑‍🔬 Division of Labor
@@ -170,12 +202,12 @@ PROBE is a scout. It does not fight. The human still owns every judgement call.
 
 | Human owns | Agent owns |
 |---|---|
-| **Direction** — is the Identity claim still load-bearing? Is P1 really the most important Pillar? | **Author watch** — last 14 days of submissions from §9 researchers |
-| **Decision Log curation** — if a paper shakes a v1 default or trips a deferred trigger, update D# | **Citation-graph expansion** — semantic neighbors of §8 tracked literature (5 × 8) |
-| **Evaluation protocol** — D25's 4-contribution falsifier thresholds; without these, no report matters | **Anti-topic filtering** — drop mobile-manip, locomotion, parallel grippers, router-MoE (DexReMoE excepted) |
-| **CP-driven context update** — Tracked Literature, Decision Log, Competitor monitoring at every CP | **Scoring** — P#/D# fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
-| **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced monthly pick from §12 rotation |
-| **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage) |
+| **Direction** — is the Identity claim still load-bearing? Is the top Pillar still the right priority? | **Author watch** — recent submissions from the Researchers list |
+| **Decision Log curation** — if a paper shakes a default or trips a deferred trigger, update the relevant Decision | **Citation-graph expansion** — semantic neighbors of the Tracked Literature anchors |
+| **Evaluation protocol** — own the falsifier thresholds the active Decision Log defines; without these, no report matters | **Anti-topic filtering** — drop whatever the Anti-topics list excludes |
+| **CP-driven context update** — refresh Tracked Literature, Decision Log, and Competitor Monitoring at every Checkpoint | **Scoring** — Pillar / Decision fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
+| **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced periodic pick from the cross-pollination rotation |
+| **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — work through the Competitor watch list |
 
 The agent **never** edits `context/MASTER.md`. It can *propose* changes in the report. The human decides.
 
@@ -522,7 +554,7 @@ Network note: the slash command's full-text fetch needs the session environment 
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, GitHub PR output |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` (on-demand) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
 | **Output** | GitHub PR — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
