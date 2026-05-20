@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.6 (2026-05-19) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.7 (2026-05-20) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -297,9 +297,90 @@ section is prefixed **(본문 미확보 — 잠정)**. Failed `curl` calls are
 recorded verbatim (command + HTTP status); fabricated content is never
 substituted.
 
+### 5-5. Reproduction follow-up line
+
+When the analyzed paper builds on one of the six baselines vendored at
+`vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`,
+the analysis ends with exactly one blockquote line as its very last
+line:
+
+```markdown
+> 💡 이 논문은 `pi0` 기반으로 보입니다. 구현 가이드는 `/reproduce-paper 2401.12345` 로 생성하실 수 있습니다.
+```
+
+`<base>` is the verbatim vendor directory name. If the baseline cannot
+be matched to one of the six with reasonable confidence, the line is
+omitted — never speculated, never pointed at an outside-of-vendor
+baseline.
+
 ---
 
-## 6. Changelog
+## 6. Paper Reproduction Document (`analysis/<id>_impl.md`)
+
+The `/reproduce-paper` slash command (prompt:
+`.claude/prompts/paper-reproduction.md`) consumes an existing
+`analysis/<id>.md` and produces two files:
+
+- `analysis/<id>_impl.md`    — Korean reproduction guide.
+- `analysis/<id>_impl.patch` — unified diff against `vendor/lerobot/`.
+
+### 6-1. File convention
+
+- Korean single document, written natively per §4 (formal 합니다/됩니다
+  체, glossary §4-2, verbatim tokens).
+- Filename is the analysis filename with `_impl` appended before the
+  extension (`<id>_impl.md`, `<id>_impl.patch`). No language suffix.
+- Regenerable snapshot — re-running overwrites both files.
+- The document follows `analysis/_TEMPLATE_IMPL.md` exactly. Six `##`
+  sections in this order: 📄 가이드 메타, 🧱 베이스 모델 식별, 🪛 변경
+  지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의, 🚧 미해결 / 잠정.
+
+### 6-2. Emoji system
+
+Same rule as §2: one emoji at the start of each `##` / `###` header,
+never in body. Section (`##`) emojis specific to this document type
+(added on top of §2 and §5-2):
+
+| Emoji | Section |
+|-------|---------|
+| 📄 | 가이드 메타 |
+| 🧱 | 베이스 모델 식별 |
+| 🪛 | 변경 지점 매핑 |
+| ⚙️ | 핵심 변경 (diff) |
+| 🧪 | 실무 구현 주의 |
+| 🚧 | 미해결 / 잠정 |
+
+📄 and ⚙️ are reused from §5-2 / §2-2 — same emoji, document-local
+meaning. 🧱 🪛 🧪 🚧 are introduced by this section and used nowhere
+else in PROBE outputs.
+
+### 6-3. Vendor coordinate rule
+
+Every code reference points inside `vendor/lerobot/` and follows the
+form `vendor/lerobot/policies/<base>/<file>:<line>` (line numbers
+optional but recommended). Coordinates are bound to the pinned commit
+recorded in `vendor/lerobot/README.md` — the guide's 📄 가이드 메타
+table MUST cite the same SHA. Bumping the snapshot invalidates every
+existing `_impl.patch`; see `vendor/lerobot/README.md` for the refresh
+procedure.
+
+### 6-4. Honesty rules carried over
+
+- If `analysis/<id>.md` was produced from abstract-only, every guide
+  `##` section first line is prefixed **(본문 미확보 — 잠정)** and
+  no patch file is produced — only the markdown.
+- If `git apply --check` fails on the generated patch, the failure is
+  recorded verbatim in the 📄 가이드 메타 table and at the end of
+  ⚙️ 핵심 변경 (diff). Affected hunks are downgraded to 🪛 + 🚧 entries
+  instead of being silently forged.
+- If the paper's baseline cannot be matched to one of the six vendored
+  policies, **neither** `_impl.md` nor `_impl.patch` is produced. The
+  agent appends one line to `analysis/<id>.md`:
+  `> 🚧 재현 가이드 미생성 — 베이스 모델이 vendor 범위 밖입니다.`
+
+---
+
+## 7. Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
@@ -310,3 +391,4 @@ substituted.
 | v1.4 | 2026-05-19 | Single Korean file per run named `YYYY-MM-DD-P#.md` (date + pillar); English file retired; Mon & Thu cadence; §1 + §4 reworked from "translation" to direct Korean authoring |
 | v1.5 | 2026-05-19 | Scope extended to `analysis/`; added §5 Paper Analysis Document (Korean-single deep-dive, emoji set, body-acquisition honesty); Changelog renumbered §6 |
 | v1.6 | 2026-05-19 | Path migration: `research_log/` → `scouting/`, `research_context*.md` → `context/MASTER.md` + `context/P{1..4}.md`; dropped redundant `-KO` filename suffix in `analysis/` (output is always Korean) |
+| v1.7 | 2026-05-20 | Added §5-5 (reproduction follow-up line) and new §6 (Paper Reproduction Document — `_impl.md` + `_impl.patch` against `vendor/lerobot/`); introduced section emojis 🧱 🪛 🧪 🚧; Changelog renumbered §7 |

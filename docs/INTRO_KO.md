@@ -108,6 +108,10 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
 
 상태: Tier A PoC — 수동, 자동화 없음, 2주 trial. 스키마는 [`pulse/README.md`](../pulse/README.md), 채팅 export 운영 가이드는 [`pulse/EXPORT_GUIDE_KO.md`](../pulse/EXPORT_GUIDE_KO.md) 참조.
 
+### 사이드바: reproduction — 분석 후속 구현 가이드 (on-demand)
+
+위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/reproduce-paper <id>` 는 "어디를 / 어떻게"를 채웁니다. 이미 작성된 `analysis/<id>.md` 를 입력으로 받아, 논문이 베이스로 삼은 lerobot 정책(`pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` 중 하나)을 식별하고, 그 baseline 대비 변경 지점을 한글 가이드 `analysis/<id>_impl.md` 와 unified diff `analysis/<id>_impl.patch` 로 산출합니다. baseline 은 `vendor/lerobot/` 에 byte-stable 스냅샷으로 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. vendor 범위 밖 모델이면 가이드를 만들지 않고 분석 문서 말미에 한 줄만 남깁니다. 자세한 형식은 [`docs/STYLE_GUIDE.md`](STYLE_GUIDE.md) §6, vendor 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
+
 ### 핵심 원칙: 정적 vs 동적 분리
 
 `context/` (정적)와 산출물 트랙들(동적) 사이의 분리는 단 하나의 이유로 존재합니다 — 에이전트 컨텍스트를 가볍게 유지하기 위해서입니다.
