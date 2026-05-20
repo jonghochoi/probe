@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.7 (2026-05-20) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.8 (2026-05-20) · **Scope:** All files under `scouting/`, `analysis/`, and `experiments/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -380,7 +380,129 @@ procedure.
 
 ---
 
-## 7. Changelog
+## 7. Experiments Documents (`experiments/`)
+
+The `/hypothesize`, `/implement-hypothesis`, and `/validate-hypothesis`
+slash commands (prompts: `.claude/prompts/hypothesize.md` ·
+`implement-hypothesis.md` · `validate-hypothesis.md`) produce a
+hypothesis-implementation-validation cycle under
+`experiments/H###-<slug>/`.
+
+### 7-1. File convention
+
+- **Korean single documents.** Like every other PROBE output,
+  `H###.md`, `I###.md`, and `V###.md` are single Korean documents —
+  written natively per §4 (tone, glossary, verbatim tokens). No
+  English-primary file. No language suffix on the filename.
+- Folder name: `experiments/H###-<slug>/` — `H###` is zero-padded to
+  three digits and the slug is kebab-case ASCII derived from the
+  hypothesis title (or supplied by the human at `/hypothesize` time).
+  The same numeric ID is reused for `I###`, `I###.patch`, and `V###`
+  inside that folder.
+- `H###.md` is **immutable** once written by `/hypothesize` (the only
+  later addition is a single 🚧 blockquote line if
+  `/implement-hypothesis` finds the baseline out-of-vendor). To revise
+  a hypothesis, start a new `H###`.
+- `I###.md` + `I###.patch` are **regenerable snapshots** — re-running
+  `/implement-hypothesis` overwrites both.
+- `V###.md` is a **regenerable snapshot** — re-running
+  `/validate-hypothesis` overwrites it.
+- `manifest.yaml` is the **only** jointly written file: agents update
+  `validation.*`, `implementation.*`, and (when all checks pass)
+  `status: draft → validated`. The transitions `→ adopted` and
+  `→ rejected` plus the `adopted:` date are **human-only**.
+- The `experiments/` folder follows `_TEMPLATE_H.md` / `_TEMPLATE_I.md`
+  / `_TEMPLATE_V.md` exactly.
+
+### 7-2. Emoji system
+
+Same rule as §2: one emoji at the **start** of each `##` / `###`
+header, never in body text. Section (`##`) emojis specific to this
+document family (added on top of §2, §5-2, §6-2):
+
+| Emoji | Section | Document |
+|-------|---------|----------|
+| 📄 | 가설 메타 · 가이드 메타 · 검증 메타 | H · I · V (reused from §5-2 / §6-2) |
+| 🧭 | 한 줄 요약 (TL;DR) | H (reused from §5-2) |
+| ❓ | 출발 갭 | H (reused from §5-2) |
+| 🧩 | 가설 진술 | H (reused from §5-2) |
+| 🔬 | Falsifiable Test 설계 | H (reused from §5-2) |
+| 🎯 | 관련 Pillar / Decision (P# / D#) | H (reused from §5-2 / §2-2) |
+| ✨ | 핀 논문 대비 델타 | H (reused from §5-2 / §2-2) |
+| ⚠️ | 먼저 검증할 실패 모드 | H (reused from §5-2 / §2-2) |
+| 💡 | 컨텍스트 제안 · 후속 호출 안내 | H · V (reused from §5-2 / §2-1) |
+| 🧱 | 베이스 모델 식별 | I (reused from §6-2) |
+| 🪛 | 변경 지점 매핑 | I (reused from §6-2) |
+| ⚙️ | 핵심 변경 (diff) | I (reused from §6-2) |
+| 🧪 | 실무 구현 주의 · 시그니처·하이퍼파라미터 일치 | I · V (reused from §6-2) |
+| 🚧 | 미해결 / 잠정 | I · V (reused from §6-2) |
+| 📚 | 문헌 대조 | V (new) |
+| 🔍 | 패치 정합성 | V (new) |
+| 📐 | 식·표 일치 | V (new) |
+| ⚖️ | 종합 판정 | V (new) |
+
+📚 🔍 📐 ⚖️ are introduced by this section and used nowhere else in
+PROBE outputs. Do not use any emoji not listed in §2, §5, §6, or here.
+
+### 7-3. `manifest.yaml` schema
+
+`manifest.yaml` is YAML with two-space indentation, no surrounding
+fences. Field enums (verbatim values only):
+
+| Field | Type | Allowed values |
+|-------|------|----------------|
+| `id` | string | `H###` (3-digit zero-padded) |
+| `pillar` | string | `P1` / `P2` / `P3` / `P4` |
+| `slug` | string | kebab-case ASCII, 2–5 words |
+| `title` | string | one-line; may contain Korean |
+| `status` | enum | `draft` / `validated` / `adopted` / `rejected` |
+| `created` | date | `YYYY-MM-DD` (`TZ=Asia/Seoul`) |
+| `adopted` | date / null | `YYYY-MM-DD` once human transitions to `adopted`; `null` otherwise |
+| `related_decisions` | list of strings | `[D#, D#, …]` — codes that actually exist in `context/MASTER.md` §6 |
+| `related_analyses` | list of strings | `[<arxiv-id>, …]` — slugs of existing `analysis/<id>.md` files; `[]` if none |
+| `related_baseline` | enum / null | `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` / `null` |
+| `relations[].kind` | enum | `supports` / `conflicts` / `extends` / `refines` |
+| `relations[].target` | string | a `D#` or another `H###` |
+| `implementation.patch` | string / null | `I###.patch` once `/implement-hypothesis` runs |
+| `implementation.apply_check` | string / null | `pass` / `fail — <stderr first line>` / `n/a — base out of vendor` |
+| `validation.literature` | enum / null | `pass` / `fail` / `partial` |
+| `validation.patch_consistency` | enum / null | `pass` / `fail` |
+| `validation.signature_check` | enum / null | `pass` / `fail` / `partial` |
+
+`relations` must be non-empty — every hypothesis has at least one
+stated relationship to a Decision. `null` (not `~`, not empty string)
+is used for fields not yet known.
+
+### 7-4. Honesty rules carried over
+
+- If `git apply --check` fails for `I###.patch`, the failure is
+  recorded verbatim in `I###.md` 📄 가이드 메타 + `manifest.yaml`
+  `implementation.apply_check`, and `/validate-hypothesis` records it
+  again under V###.md §🔍 with the live re-run output. Affected hunks
+  are downgraded to 🪛 + 🚧 entries in `I###.md` — never silently
+  forged. **A `patch_consistency: fail` blocks `status` graduation,
+  regardless of literature/signature outcomes.**
+- The validator (`/validate-hypothesis`) only graduates
+  `draft → validated`. It NEVER writes `adopted` or `rejected`. A
+  `manifest.status: adopted` written by an agent is a bug — those
+  values exist solely so the human can mark a hypothesis as decided.
+- Hypotheses sourced from a Pillar code (`P#`) carry an empty
+  `related_analyses: []`. Validation `literature` is `pass` only when
+  the hypothesis explicitly identifies itself as pillar-internal (no
+  paper claimed); a paper-implying hypothesis with no analyses is
+  `partial`, not `pass`.
+
+### 7-5. Korean & verbatim rules
+
+§4 applies in full. Specifically: original English paper title (when
+cited in `H###.md` ✨ 핀 논문 대비 델타 or `V###.md` 📚 문헌 대조),
+config/code names, `file:line` coordinates, formulas, arXiv links, and
+`P#`/`D#`/`CP#`/`H###` codes are kept verbatim; technical terms use
+the §4-2 glossary; tone is formal 합니다/됩니다 체.
+
+---
+
+## 8. Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
@@ -392,3 +514,4 @@ procedure.
 | v1.5 | 2026-05-19 | Scope extended to `analysis/`; added §5 Paper Analysis Document (Korean-single deep-dive, emoji set, body-acquisition honesty); Changelog renumbered §6 |
 | v1.6 | 2026-05-19 | Path migration: `research_log/` → `scouting/`, `research_context*.md` → `context/MASTER.md` + `context/P{1..4}.md`; dropped redundant `-KO` filename suffix in `analysis/` (output is always Korean) |
 | v1.7 | 2026-05-20 | Added §5-5 (reproduction follow-up line) and new §6 (Paper Reproduction Document — `_impl.md` + `_impl.patch` against `vendor/lerobot/`); introduced section emojis 🧱 🪛 🧪 🚧; Changelog renumbered §7 |
+| v1.8 | 2026-05-20 | Scope extended to `experiments/`; added §7 (Experiments Documents — `H###.md` + `I###.md` + `I###.patch` + `V###.md` + `manifest.yaml`); introduced section emojis 📚 🔍 📐 ⚖️; manifest schema + honesty rules (validator never writes `adopted`/`rejected`); Changelog renumbered §8 |
