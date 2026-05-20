@@ -178,9 +178,13 @@ nor by the harness.
 - If `git push` fails due to a transient network error, retry up to
   4 times with exponential backoff (2s, 4s, 8s, 16s).
 - If push is rejected as non-fast-forward (another run pushed first),
-  run `git pull --rebase origin main` and retry the push ONCE. If the
-  rebase produces conflicts, STOP — do not resolve them automatically;
-  report the conflict and exit.
+  run `git pull --rebase origin main` and retry the push. Repeat this
+  rebase-and-retry loop up to 5 times with exponential backoff (1s, 2s,
+  4s, 8s, 16s between attempts) — concurrent scheduled runs write
+  different files (different P# / different date), so the rebase is
+  clean and the loop converges. If the rebase produces conflicts (the
+  same file was written by another run), STOP — do not resolve them
+  automatically; report the conflict and exit.
 - Never use --no-verify, --no-gpg-sign, or any force-push.
 - If all curl calls failed and the run is honestly empty, still
   write the partial/empty report per the RULES above, then commit

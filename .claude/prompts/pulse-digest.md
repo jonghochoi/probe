@@ -165,8 +165,11 @@ Persist the output by pushing directly to `main`. No PR is created.
   `git add` anything under `context/` or `vendor/`. No `git add .`,
   no `git add -A`, no `commit -a`, no path globs.
 - If push is rejected as non-fast-forward, run `git pull --rebase
-  origin main` and retry the push ONCE. On rebase conflict, STOP and
-  report — do not resolve automatically.
+  origin main` and retry the push. Repeat this rebase-and-retry loop
+  up to 5 times with exponential backoff (1s, 2s, 4s, 8s, 16s between
+  attempts) — concurrent runs writing different files do not conflict,
+  so the loop converges. On rebase conflict (same file written by
+  another run), STOP and report — do not resolve automatically.
 - On transient network failure, retry push up to 4 times with
   exponential backoff (2s, 4s, 8s, 16s).
 - Never use --no-verify, --no-gpg-sign, or any force-push.
