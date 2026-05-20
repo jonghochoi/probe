@@ -149,3 +149,25 @@ If the baseline cannot be tied to one of the six vendored policies with
 reasonable confidence, OMIT this line entirely — do NOT speculate, do
 NOT suggest an outside-of-vendor baseline. Never auto-invoke
 `/reproduce-paper` from this prompt; the human decides.
+
+---
+
+GIT — after `analysis/<id>.md` is written:
+
+Persist the output by pushing directly to `main`. No PR is created.
+
+  git add analysis/<id>.md
+  git commit -m "analysis: add <id> deep-dive"
+  git push origin HEAD:main
+
+`<id>` is the same arXiv id / slug used for the analysis filename.
+
+- Stage ONLY `analysis/<id>.md`. Never `git add` anything under
+  `context/` or `vendor/`. No `git add .`, no `git add -A`, no
+  `commit -a`.
+- If push is rejected as non-fast-forward, run `git pull --rebase
+  origin main` and retry the push ONCE. On rebase conflict, STOP and
+  report — do not resolve automatically.
+- On transient network failure, retry push up to 4 times with
+  exponential backoff (2s, 4s, 8s, 16s).
+- Never use --no-verify, --no-gpg-sign, or any force-push.

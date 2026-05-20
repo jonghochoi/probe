@@ -112,3 +112,29 @@ HARD RULES:
 - Vendor pinned commit in the meta header MUST equal what
   `vendor/lerobot/README.md` currently records. A mismatch means the
   snapshot was refreshed but the guide was not — stop and tell the human.
+
+---
+
+GIT — after the guide file(s) are written:
+
+Persist the output by pushing directly to `main`. No PR is created.
+
+  git add analysis/<id>_impl.md
+  # Add the patch file ONLY if it was actually generated. If the
+  # analysis was abstract-only and no patch exists, skip this line.
+  git add analysis/<id>_impl.patch
+  git commit -m "analysis: add <id> reproduction guide"
+  git push origin HEAD:main
+
+`<id>` is the same arXiv id / slug used for the guide filename.
+
+- Stage ONLY `analysis/<id>_impl.md` and (when generated)
+  `analysis/<id>_impl.patch`. Never `git add` anything under
+  `context/` or `vendor/`. No `git add .`, no `git add -A`, no
+  `commit -a`.
+- If push is rejected as non-fast-forward, run `git pull --rebase
+  origin main` and retry the push ONCE. On rebase conflict, STOP and
+  report — do not resolve automatically.
+- On transient network failure, retry push up to 4 times with
+  exponential backoff (2s, 4s, 8s, 16s).
+- Never use --no-verify, --no-gpg-sign, or any force-push.
