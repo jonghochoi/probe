@@ -31,7 +31,34 @@ Literature 의 핀/기준 논문)을 깊게 읽고, 그 한 편에 대한 한글
     `.claude/prompts/paper-analysis.md`. cloud 에서 `curl` 로 본문을
     전문 우선 확보하되, 실패하면 ar5iv → 초록 only 로 단계적 폴백하고
     **확보 수준을 문서 헤더에 명시**합니다. 본문 미확보 시 (B) 섹션은
-    잠정으로 표기합니다.
+    잠정으로 표기합니다. 호출 경로는 세 가지이며 모두 동일한 슬래시
+    커맨드를 호출해 동일한 `analysis/<id>.md` 를 생성합니다:
+
+    ```bash
+    # (a) 로컬 인터랙티브 — repo 루트에서 Claude Code 세션을 열고,
+    #     슬래시 커맨드를 입력합니다 (이어지는 턴에도 그대로 호출 가능)
+    cd ~/work/probe
+    claude
+    > /analyze-paper 2410.07864
+    > /analyze-paper https://arxiv.org/abs/2410.07864
+    > /analyze-paper https://some.lab/paper.pdf
+    ```
+
+    ```bash
+    # (b) 로컬 원샷 — 인터랙티브 세션 없이 한 번 실행하고 종료
+    claude -p "/analyze-paper 2410.07864"
+    ```
+
+    ```text
+    # (c) 웹 — claude.ai/code, 이 repo 를 attach 한 뒤 슬래시 커맨드 입력
+    > /analyze-paper 2410.07864
+    ```
+
+    (a) 가 일상적인 경로, (b) 는 셸 스크립트에 끼우기 좋은 형태,
+    (c) 는 브라우저만 있으면 어디서든 가능한 형태입니다. 셋 다
+    **셸 CLI 가 아니라** Claude Code 의 슬래시 커맨드
+    (`.claude/commands/analyze-paper.md`) 이며, `PATH` 위의
+    실행 파일이 아닙니다.
   - `/reproduce-paper <id>` — 정식 프롬프트
     `.claude/prompts/paper-reproduction.md`. 선결 조건은
     `analysis/<id>.md` 의 존재이며, 베이스 모델이 vendor 6종(`pi0`,
