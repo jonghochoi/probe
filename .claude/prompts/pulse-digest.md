@@ -143,3 +143,30 @@ most recent matching `pulse/*-P#.md` and applies its *Scouting Bias* section
 as a retrieval-weight nudge only. On any conflict with `context/P#.md`,
 static context wins. You do not need to anticipate scout behavior beyond
 filling *Scouting Bias* clearly per pillar.
+
+---
+
+## GIT — after the pulse file(s) are written
+
+Persist the output by pushing directly to `main`. No PR is created.
+
+  TODAY=$(TZ=Asia/Seoul date +%Y-%m-%d)
+  # Add ONLY the per-pillar files that were actually written this run.
+  # If only P1 and P3 were produced, add only those two paths — never
+  # use a wildcard like `pulse/${TODAY}-P*.md`.
+  git add pulse/${TODAY}-P1.md   # include only if written
+  git add pulse/${TODAY}-P2.md   # include only if written
+  git add pulse/${TODAY}-P3.md   # include only if written
+  git add pulse/${TODAY}-P4.md   # include only if written
+  git commit -m "pulse: ${TODAY} bias digest"
+  git push origin HEAD:main
+
+- Stage ONLY the `pulse/${TODAY}-P#.md` files this run produced. Never
+  `git add` anything under `context/` or `vendor/`. No `git add .`,
+  no `git add -A`, no `commit -a`, no path globs.
+- If push is rejected as non-fast-forward, run `git pull --rebase
+  origin main` and retry the push ONCE. On rebase conflict, STOP and
+  report — do not resolve automatically.
+- On transient network failure, retry push up to 4 times with
+  exponential backoff (2s, 4s, 8s, 16s).
+- Never use --no-verify, --no-gpg-sign, or any force-push.

@@ -318,7 +318,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 | **스케줄러** | Claude Code Routines — cloud-managed cron, GitHub webhook 지원 |
 | **논문 검색** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) — `curl` 직접 호출 |
 | **인용 추적** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON `jq`) — 키 선택 |
-| **출력 저장** | GitHub PR (자동) — 변경 이력 = 리서치 로그 |
+| **출력 저장** | `main` 직접 push (PR 없음) — 변경 이력 = 리서치 로그 |
 | **컨텍스트 관리** | `context/MASTER.md` (정적, 사람 관리) + `scouting/` (동적, 에이전트 생성) |
 
 ---

@@ -164,19 +164,23 @@ RULES:
 
 GIT — after the report file is written:
 
-The scheduled run must persist its output to the repo. Commit and
-push the single report file; the RemoteTrigger / harness opens the
-PR from the pushed branch — do NOT open or update a PR yourself.
+The scheduled run must persist its output by pushing the single
+report file directly to `main`. No PR is created — neither by you
+nor by the harness.
 
   TODAY=$(TZ=Asia/Seoul date +%Y-%m-%d)
   git add scouting/${TODAY}-P3.md
   git commit -m "scout: P3 report ${TODAY}"
-  git push -u origin HEAD
+  git push origin HEAD:main
 
-- Stage ONLY the report file. Never `git add` context/P3.md
-  or any other context file (they are read-only, human-owned).
+- Stage ONLY the report file. Never `git add` context/P3.md or any
+  other file. No `git add .`, no `git add -A`, no `commit -a`.
 - If `git push` fails due to a transient network error, retry up to
   4 times with exponential backoff (2s, 4s, 8s, 16s).
+- If push is rejected as non-fast-forward (another run pushed first),
+  run `git pull --rebase origin main` and retry the push ONCE. If the
+  rebase produces conflicts, STOP — do not resolve them automatically;
+  report the conflict and exit.
 - Never use --no-verify, --no-gpg-sign, or any force-push.
 - If all curl calls failed and the run is honestly empty, still
   write the partial/empty report per the RULES above, then commit

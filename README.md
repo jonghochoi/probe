@@ -263,7 +263,7 @@ This section walks you from zero to a scheduled, self-running PROBE agent. Three
 ```
 Stage 1 (Week 1–2)  Manual      — paste context into Claude.ai, iterate on the prompt
 Stage 2 (Week 3–4)  Semi-auto   — Claude desktop Scheduled Tasks (laptop must be open)
-Stage 3 (Week 5+)   Full agent  — Claude Code Routines (cloud-scheduled, commits via PR)
+Stage 3 (Week 5+)   Full agent  — Claude Code Routines (cloud-scheduled, commits direct to main)
 ```
 
 You do **not** skip stages. The prompt that survives Stage 1 is the prompt you deploy in Stage 3.
@@ -401,13 +401,13 @@ Limitation: your laptop has to be awake and Claude Desktop has to be running. Go
 
 ### Stage 3 — Full agent via Claude Code Routines (Week 5+)
 
-This is the endgame: cloud-scheduled, commits its own reports via pull request. No laptop, no reminders, no "did I run PROBE this week?"
+This is the endgame: cloud-scheduled, commits its own reports directly to `main`. No laptop, no reminders, no "did I run PROBE this week?"
 
 Only **three** things change versus Stage 1/2:
 
 - **Execution location** — your laptop → the cloud (runs Mon & Thu 09:00 even with the laptop off).
 - **Retrieval** — Claude's built-in web search → direct `curl` calls to public REST APIs (arXiv + Semantic Scholar Graph). Same data sources, better citation accuracy and reproducibility. **No MCP server is involved** — cloud routine sessions cannot reach a local MCP server, so retrieval is plain `curl`.
-- **Output** — manual copy → the prompt itself commits & pushes the report file, then the RemoteTrigger/harness opens the GitHub PR from that branch (commit history *is* the research log).
+- **Output** — manual copy → the prompt itself commits the report file and pushes directly to `main` with `git push origin HEAD:main` (no PR is created; commit history *is* the research log). To prevent concurrent runs from racing on the shared branch, configure the RemoteTrigger to allow at most one active session per environment, and the prompt retains a `git pull --rebase origin main` retry as an in-prompt safety net.
 
 The repo's durable asset is the **prompt** (`.claude/prompts/scouting-P{1..4}.md`), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
 
@@ -492,7 +492,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 | Keyword Sweep / topic-watch | built-in web search | arXiv `export.arxiv.org/api/query` |
 | Competitor Monitoring | built-in web search | arXiv query + S2 author lookup |
 
-S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt records the exact command and HTTP status verbatim under 📋 Scout Methodology and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. After the report is written the prompt resolves the run date (`TZ=Asia/Seoul`) and runs `git add`/`commit`/`push` for that single report file — the only addition beyond retrieval; PR creation is left to the RemoteTrigger/harness. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, the `context/P#.md` never-modify guard) is unchanged from Stage 1.
+S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt records the exact command and HTTP status verbatim under 📋 Scout Methodology and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. After the report is written the prompt resolves the run date (`TZ=Asia/Seoul`) and runs `git add` / `commit` / `git push origin HEAD:main` for that single report file — the only addition beyond retrieval; no PR is created. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, the `context/P#.md` never-modify guard) is unchanged from Stage 1.
 
 > The P1-scoped prompt intentionally **drops the monthly Cross-pollination rule** — its source section (full `context/MASTER.md` §12) does not exist in the P1 extract. Do not be surprised diffing it against the Stage-1 prompt above.
 
@@ -579,11 +579,11 @@ Network note: the slash command's full-text fetch needs the session environment 
 | Component | Technology |
 |---|---|
 | **Agent engine** | Claude (Sonnet 4.6 / Opus 4.7) via Claude Code Routines |
-| **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, GitHub PR output |
+| **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
 | **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
-| **Output** | GitHub PR — commit history *is* the research log |
+| **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
 ---
