@@ -43,21 +43,24 @@ Running dexterous manipulation research is a full-time job. You tune reward curv
 
 The field does not wait. **50–100 new papers land on `cs.RO` + `cs.LG` every day.** Of those, maybe 3–5 per week actually touch hand-centric dexterous manipulation plus Sim-to-Real. That's a 3–5% signal rate in a firehose, and the cost of missing the right paper is re-solving a problem someone already published — the most expensive mistake a researcher can make.
 
-**PROBE finds those 3–5 for you.**
+**PROBE finds those 3–5 for you — and won't let them die in your downloads folder.**
 
 But it does not stop at "here are some interesting papers." It asks the only question that matters:
 
 > *"If this paper is right, what do I change in my training/evaluation pipeline next week?"*
 
-Summaries are cheap. PROBE produces **decision material**.
+Summaries are cheap. PROBE produces **decision material** across three tracks — outward (find), inward (compress), focused (reproduce).
 
 | Without PROBE | With PROBE |
 |---|---|
-| "I'll check arXiv this weekend" → never happens | Weekly Scouting Report lands in your repo |
+| "I'll check arXiv this weekend" → never happens | Weekly Scouting Report lands in your repo (Mon/Thu, per pillar) |
 | 50–100 papers/day → skim titles, remember none | 3–5 papers/week → scored, tied to your open questions |
 | Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
+| Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
+| "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive anchored to your Decision Log |
+| "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` ships a unified-diff patch against the pinned `vendor/lerobot/` baseline |
 
 ---
 
