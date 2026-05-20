@@ -624,6 +624,19 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 
 ---
 
+## 🙏 Upstream References
+
+PROBE depends on two external repositories. Code and specs vendored from
+these repos are kept in sync with their upstream rather than rewritten —
+the references below are the exact sources.
+
+| Repo | What PROBE borrows |
+|---|---|
+| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`, `experiments/`) passes the strict 4-agent pipeline (detector → rewriter → [fidelity ∥ naturalness]) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) §4-5. |
+| **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot vendored at `vendor/lerobot/` — six baseline policies (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`) plus configs and the processor. `analysis/<id>_impl.patch` and `experiments/H###-*/I###.patch` are unified diffs against this snapshot; the pinned commit and refresh procedure live in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
+
+---
+
 ## 📚 Further Reading
 
 | Document | Description |
