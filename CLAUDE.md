@@ -20,7 +20,8 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`) and reproduction guides (`<arxiv-id>_impl.md` + `<arxiv-id>_impl.patch`) |
 | `pulse/` | agent + human input | Chat-to-scout bias PoC — weekly `YYYY-MM-DD-P#.md` retrieval-weight nudges; `inbox/` is human-fed raw chat (gitignored) |
-| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; target of `_impl.patch`. Refresh procedure in its own `README.md` |
+| `experiments/` | agent + human input | Team-internal hypothesis cycles — `H###-<slug>/{H,I,V}###.md` + `I###.patch` + `manifest.yaml`. Agent runs `draft → validated`; human runs `→ adopted` / `→ rejected` |
+| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; target of `_impl.patch` and `I###.patch`. Refresh procedure in its own `README.md` |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE_GUIDE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
@@ -31,10 +32,20 @@ never the reverse.
 
 `vendor/lerobot/` is read-only to **both** the agent and contributors. It is
 a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the
-target of every `analysis/<id>_impl.patch`. Hand-editing files inside it
-would silently invalidate existing patches and break attribution. The only
-way it changes is the wholesale refresh procedure in
-`vendor/lerobot/README.md`; nothing else.
+target of every `analysis/<id>_impl.patch` and `experiments/H###-*/I###.patch`.
+Hand-editing files inside it would silently invalidate existing patches and
+break attribution. The only way it changes is the wholesale refresh
+procedure in `vendor/lerobot/README.md`; nothing else.
+
+`experiments/` follows a split-ownership rule. Each `H###-<slug>/` folder is
+fully append-only at the file level once a stage runs (`H###.md` after
+`/hypothesize`, `I###.md`/`I###.patch` after `/implement-hypothesis`,
+`V###.md` after `/validate-hypothesis`) — those files are regenerable
+snapshots but never hand-edited. The `manifest.yaml` is the **only** file in
+the folder that is jointly written: agents update validation/implementation
+fields and may graduate `status: draft → validated`, but the transitions
+`→ adopted` and `→ rejected` belong to the human, who edits
+`manifest.status` and `manifest.adopted` directly.
 
 ## Commit message style
 

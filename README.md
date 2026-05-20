@@ -210,10 +210,22 @@ probe/
 │   ├── <arxiv-id>_impl.md          #   reproduction guide (regen)
 │   └── <arxiv-id>_impl.patch       #   unified diff vs. vendor baseline
 │
+├── experiments/                    # Team-internal hypothesis cycles
+│   ├── README.md                   #   purpose + filename / state-transition
+│   ├── _TEMPLATE_H.md              #   Korean hypothesis form
+│   ├── _TEMPLATE_I.md              #   Korean implementation-guide form
+│   ├── _TEMPLATE_V.md              #   Korean validation-report form
+│   └── H###-<slug>/                #   one folder per hypothesis
+│       ├── H###.md                 #     hypothesis (immutable once written)
+│       ├── I###.md, I###.patch     #     implementation guide + diff (regen)
+│       ├── V###.md                 #     validation report (regen)
+│       └── manifest.yaml           #     hypothesis state metadata
+│
 ├── vendor/                         # Read-only reference code
 │   └── lerobot/                    #   pinned lerobot snapshot —
 │                                   #   6 baseline policies + configs +
 │                                   #   processor, target of _impl.patch
+│                                   #   and experiments/ I###.patch
 │
 └── docs/
     ├── INTRO_KO.md                 # Korean onboarding + operations manual
@@ -626,6 +638,7 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md`; follow-up `/reproduce-paper <id>` → `<id>_impl.md` + `<id>_impl.patch` against `vendor/lerobot/` |
 | [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
+| [`experiments/README.md`](experiments/README.md) | Team-internal hypothesis cycles — `/hypothesize` → `/implement-hypothesis` → `/validate-hypothesis`. One folder per `H###` with hypothesis + implementation + validation + manifest |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot used as baseline for reproduction patches — pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
