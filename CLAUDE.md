@@ -18,8 +18,9 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
 | `scouting/` | agent | Weekly Scouting Reports (`YYYY-MM-DD-P#.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
-| `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`) |
+| `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`) and reproduction guides (`<arxiv-id>_impl.md` + `<arxiv-id>_impl.patch`) |
 | `pulse/` | agent + human input | Chat-to-scout bias PoC — weekly `YYYY-MM-DD-P#.md` retrieval-weight nudges; `inbox/` is human-fed raw chat (gitignored) |
+| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; target of `_impl.patch`. Refresh procedure in its own `README.md` |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE_GUIDE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
@@ -27,6 +28,13 @@ for **commit hygiene and document style** so the repo stays consistent.
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
 never the reverse.
+
+`vendor/lerobot/` is read-only to **both** the agent and contributors. It is
+a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the
+target of every `analysis/<id>_impl.patch`. Hand-editing files inside it
+would silently invalidate existing patches and break attribution. The only
+way it changes is the wholesale refresh procedure in
+`vendor/lerobot/README.md`; nothing else.
 
 ## Commit message style
 

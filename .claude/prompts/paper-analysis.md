@@ -127,3 +127,25 @@ HARD RULES:
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - Emoji/header system per docs/STYLE_GUIDE.md §5 — one emoji at the
   start of each `##`/`###` header, none in body text.
+
+FINAL STEP — reproduction follow-up suggestion:
+After the document body is complete, decide whether the paper builds on
+a baseline that PROBE has vendored at `vendor/lerobot/policies/<base>/`
+(currently: `pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`).
+Signals: explicit naming in the paper (e.g. "we fine-tune π0"),
+unmistakable architectural fingerprints (PaliGemma + flow matching →
+pi0 family; action chunking + transformer enc/dec → ACT; DDPM/DDIM
+head → Diffusion Policy; small VLM + action expert → SmolVLA).
+
+If yes, append exactly one blockquote line as the very last line of the
+file, after the existing final section:
+
+> 💡 이 논문은 `<base>` 기반으로 보입니다. 구현 가이드는 `/reproduce-paper <id>` 로 생성하실 수 있습니다.
+
+`<base>` is the verbatim vendor directory name (one of the six above).
+`<id>` is the same arXiv id / slug the analysis file uses.
+
+If the baseline cannot be tied to one of the six vendored policies with
+reasonable confidence, OMIT this line entirely — do NOT speculate, do
+NOT suggest an outside-of-vendor baseline. Never auto-invoke
+`/reproduce-paper` from this prompt; the human decides.

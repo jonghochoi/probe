@@ -159,9 +159,11 @@ probe/
 │   │   ├── scouting-P{1..4}.md     #   weekly scout, one per pillar
 │   │   ├── synthesis-P{1..4}.md    #   monthly synthesis brief, per pillar
 │   │   ├── paper-analysis.md       #   on-demand single-paper deep-dive
+│   │   ├── paper-reproduction.md   #   on-demand reproduction guide
 │   │   └── pulse-digest.md         #   chat → per-pillar hints (PoC)
 │   └── commands/                   # Slash commands (on-demand)
-│       └── analyze-paper.md        #   /analyze-paper <id|url|pdf>
+│       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
+│       └── reproduce-paper.md      #   /reproduce-paper <id>
 │
 ├── scouting/                       # Dynamic output — agent-generated (weekly)
 │   ├── README.md                   #   pipeline summary
@@ -184,8 +186,16 @@ probe/
 │
 ├── analysis/                       # Paper deep-dive output (on-demand)
 │   ├── README.md                   #   purpose + filename convention
-│   ├── _TEMPLATE.md                #   Korean deep-dive form
-│   └── <arxiv-id>.md               #   single Korean analysis (regen)
+│   ├── _TEMPLATE.md                #   Korean deep-dive form (analysis)
+│   ├── _TEMPLATE_IMPL.md           #   Korean reproduction-guide form
+│   ├── <arxiv-id>.md               #   single Korean analysis (regen)
+│   ├── <arxiv-id>_impl.md          #   reproduction guide (regen)
+│   └── <arxiv-id>_impl.patch       #   unified diff vs. vendor baseline
+│
+├── vendor/                         # Read-only reference code
+│   └── lerobot/                    #   pinned lerobot snapshot —
+│                                   #   6 baseline policies + configs +
+│                                   #   processor, target of _impl.patch
 │
 └── docs/
     ├── INTRO_KO.md                 # Korean onboarding + operations manual
@@ -595,8 +605,9 @@ If none of those are true after a month, the prompt is drifting or the Tracked L
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md`; follow-up `/reproduce-paper <id>` → `<id>_impl.md` + `<id>_impl.patch` against `vendor/lerobot/` |
 | [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
+| [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot used as baseline for reproduction patches — pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 
