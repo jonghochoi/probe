@@ -2,7 +2,8 @@
 
 > Automated research scouting for dexterous manipulation —
 > citation-graph expansion, author watch, and arXiv triage
-> distilled into weekly decision-grade Scouting Reports.
+> distilled into weekly Scouting Reports, monthly synthesis
+> briefs, and on-demand deep-dives with reproduction patches.
 
 ---
 
@@ -22,10 +23,14 @@
 놓친 논문 때문에 이미 누군가 풀어놓은 문제를 다시 푸는 건
 연구자 입장에서 가장 비싼 실수 중 하나다.
 
-**Probe는 그 3 ~ 5%를 대신 찾아온다.**
-그리고 "이 논문이 흥미롭다"가 아니라
-**"이 논문이 맞다면 지금 내 학습·평가 파이프라인에서 무엇을 바꿔야 하는가"** 를 묻는다.
-요약이 아니라 의사결정 재료를 만드는 것이 Probe의 역할이다.
+**Probe는 그 3 ~ 5%를 대신 찾아온다 — 그리고 다운로드 폴더에서 죽게 두지 않는다.**
+"이 논문이 흥미롭다"가 아니라
+**"이 논문이 맞다면 지금 내 학습·평가 파이프라인에서 무엇을 바꿔야 하는가"** 를 묻고,
+요약이 아니라 **세 갈래로 의사결정 재료**를 만든다 — outward (찾기), inward (압축), focused (재현):
+
+- **주간 Scouting Report** (outward) — 월·목, pillar 별 3 ~ 5편. 점수화된 후보 + 너의 open question 에 묶인 decision implication.
+- **월간 Synthesis Brief** (inward) — pillar 별 핀된 문헌(§6 8편)이 시간이 지나면 머릿속에서 흐려지는 걸 막는다. 짧고 정직한 산문 압축.
+- **온디맨드 Analysis + Reproduction** (focused) — `/analyze-paper` 가 한 편을 한국어 deep-dive 로 읽고, `/reproduce-paper` 가 `vendor/lerobot/` 베이스라인 대비 unified diff 패치까지 떠먹여 준다.
 
 ---
 
