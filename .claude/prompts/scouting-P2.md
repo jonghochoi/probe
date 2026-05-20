@@ -162,6 +162,47 @@ RULES:
 
 ---
 
+HUMANIZE — Korean post-processing (mandatory before commit):
+
+After the Korean output file is written and BEFORE `git add`, invoke
+the `humanize-korean` skill on that file:
+
+  Skill:  `.claude/skills/humanize-korean/SKILL.md`
+  Mode:   strict — 4-agent pipeline
+          (`ai-tell-detector` → `korean-style-rewriter` →
+          [`content-fidelity-auditor` ∥ `naturalness-reviewer`]).
+          Phase C runs the two reviewers in parallel: fidelity guards
+          meaning, naturalness guards residual AI tells and
+          over-polish. The monolith fast-path is not used in PROBE.
+  Input:  the path of the file just written
+  Output: in-place rewrite of the same file
+
+Hard rules for this stage:
+  - `fidelity_audit` verdict `fail` → ROLLBACK the rewrite; commit the
+    pre-humanize content; report the failure under your final summary.
+  - `naturalness_review` verdict `rewrite_round_2` → run Phase B
+    again on the residual findings; `rollback_and_rewrite` → restore
+    the over-polished spans from the original, then re-run Phase B.
+    Max 3 Phase B rounds total; afterward `hold_and_report` and keep
+    the original.
+  - Change rate > 30% → automatic rework round; > 50% → abort the
+    rewrite and keep the original.
+  - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
+    humanization. Violation of any invariant (verbatim tokens, emoji
+    placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
+    accuracy, P#/D#/CP#/H### tag form, §4-2 glossary translations)
+    is treated as a fidelity fail → rollback.
+  - The humanize pass NEVER adds, removes, or changes facts; it only
+    rewrites Korean prose style (translation-ese, mechanical
+    parallelism, AI signature phrases, hedging, etc.) per
+    `.claude/skills/humanize-korean/references/ai-tell-taxonomy.md`
+    and `.claude/skills/humanize-korean/references/rewriting-playbook.md`.
+
+Then proceed with `git add` / `git commit` / `git push` on the
+humanized (or rolled-back) file per the GIT section below.
+
+---
+
 GIT — after the report file is written:
 
 The scheduled run must persist its output by pushing the single

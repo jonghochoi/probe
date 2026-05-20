@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.8 (2026-05-20) · **Scope:** All files under `scouting/`, `analysis/`, and `experiments/`
+> **Version:** v1.10 (2026-05-20) · **Scope:** All files under `scouting/`, `analysis/`, and `experiments/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -160,7 +160,7 @@ verbatim in their original form versus which prose is Korean.
 
 | Category | Treatment |
 |----------|-----------|
-| Body prose | Korean (formal 합니다/됩니다 체) |
+| Body prose | Korean — tone fully governed by §4-5 (humanize-korean) |
 | Paper titles | Keep original English title; add Korean description if helpful |
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
@@ -228,12 +228,85 @@ verbatim in their original form versus which prose is Korean.
 | ⚠️ (d) Failure mode to probe first | ⚠️ (d) 먼저 검증해야 할 실패 모드 |
 | 📌 (sub-sections) | 📌 (하위 섹션) |
 
-### 4-4. Tone and style
+### 4-4. Tone and style — delegated to humanize-korean
 
-- Use formal Korean (합니다/됩니다 체).
-- Maintain full analytical density — do not simplify or summarize away detail.
+PROBE no longer carries its own Korean tone rules. Every Korean output
+passes through the `humanize-korean` skill (§4-5) immediately before
+commit, and that skill is the sole authority on register, rhythm,
+density, sentence-length distribution, conjunction frequency, hedging
+level, and visual-ornament usage. Authoring agents draft freely; the
+post-processing pass normalizes the prose.
+
+The two surface conventions that still live here, because they are
+markdown rather than tone:
+
 - Use bold (`**text**`) for emphasis where it aids the reader.
-- Code blocks and inline code (`` `text` ``) are kept verbatim.
+- Code blocks and inline code (`` `text` ``) are kept verbatim — see
+  the §4-5 invariants list.
+
+### 4-5. Humanize-korean post-processing (mandatory tail step)
+
+Every Korean output in PROBE (`scouting/`, `synthesis/`, `analysis/`,
+`experiments/`) passes through the `humanize-korean` skill
+(`.claude/skills/humanize-korean/SKILL.md`, ported from
+[`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai))
+immediately before `git add`. The skill detects and rewrites the
+"AI tell" patterns catalogued at
+`.claude/skills/humanize-korean/references/ai-tell-taxonomy.md` —
+translation-ese, mechanical parallelism, AI signature phrases,
+hedging chains, formal-noun overuse, visual-ornament overuse —
+into natural Korean prose. **Content is never touched.**
+
+**In-scope rewrites.** Categories A (translation-ese), C (mechanical
+parallelism / colon-subtitle headings), D (AI signature phrases like
+"결론적으로 / ~할 수 있다 / 시사하는 바가 크다"), E (uniform rhythm),
+F (over-modification), G (hedging), H (conjunction overuse), I
+(formal-noun overuse), J (visual ornament) in the taxonomy are all
+in-scope. This skill is also the authority on **register** — every
+PROBE Korean output is normalized to formal 합니다/됩니다 정중체
+regardless of what the authoring agent produced. STYLE_GUIDE no longer
+encodes its own tone rules; if the desired register changes, the
+upstream taxonomy is the single point of edit.
+
+**Forbidden by `content-fidelity-auditor` (rollback on violation).**
+Anything that would change meaning — facts, claims, numbers, dates,
+direct quotations, citation polarity, causal direction, hedging level
+(단정 ↔ 추측), enumeration order, omitted or added information — is
+forbidden. PROBE-specific invariants the auditor MUST also treat as
+rollback triggers:
+
+- Paper titles in original English (see §4-1)
+- Config / code names (`env_cfg.py`, `ObservationManager`, etc.)
+- Formulas and numbers (`ε = 0.1`, `±2σ`, `< 15%`)
+- `P#` / `D#` / `CP#` / `H###` tags
+- `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` intra-doc links
+- arXiv / DOI links
+- Emoji set, position, and the one-emoji-per-header rule (see §2)
+- §4-2 glossary translations for technical terms (no resynonymization
+  to a non-glossary word)
+
+**Operational guards.** Change rate `> 30%` triggers an automatic
+rework round; `> 50%` aborts the rewrite and keeps the original. A
+`fidelity_audit` verdict of `fail` always rolls back to the
+pre-humanize content; that content is what gets committed.
+`humanize-korean` is the LAST step before `git add` — never run it
+before the agent has finished writing the output file.
+
+**Pipeline.** PROBE uses the `--strict` 4-agent pipeline:
+`ai-tell-detector` → `korean-style-rewriter` →
+[`content-fidelity-auditor` ∥ `naturalness-reviewer`]. The two
+reviewers run in parallel and are orthogonal — the fidelity auditor
+asks only "is the meaning preserved?", the naturalness reviewer asks
+only "did the AI tells actually disappear, and was the rewrite not
+over-polished?". A `fail` from fidelity always rolls back; a
+`rewrite_round_2` or `rollback_and_rewrite` from naturalness triggers
+a second pass (max 3 rounds, then `hold_and_report` for human review).
+The monolith fast-path from `im-not-ai` upstream is not used here.
+
+This subsection is the single source of truth that the
+`humanize-korean` skill must respect when run against any PROBE
+output. The skill's own taxonomy and playbook are upstream defaults;
+this section overrides them on conflict.
 
 ---
 
@@ -515,3 +588,5 @@ the §4-2 glossary; tone is formal 합니다/됩니다 체.
 | v1.6 | 2026-05-19 | Path migration: `research_log/` → `scouting/`, `research_context*.md` → `context/MASTER.md` + `context/P{1..4}.md`; dropped redundant `-KO` filename suffix in `analysis/` (output is always Korean) |
 | v1.7 | 2026-05-20 | Added §5-5 (reproduction follow-up line) and new §6 (Paper Reproduction Document — `_impl.md` + `_impl.patch` against `vendor/lerobot/`); introduced section emojis 🧱 🪛 🧪 🚧; Changelog renumbered §7 |
 | v1.8 | 2026-05-20 | Scope extended to `experiments/`; added §7 (Experiments Documents — `H###.md` + `I###.md` + `I###.patch` + `V###.md` + `manifest.yaml`); introduced section emojis 📚 🔍 📐 ⚖️; manifest schema + honesty rules (validator never writes `adopted`/`rejected`); Changelog renumbered §8 |
+| v1.9 | 2026-05-20 | Added §4-5 — `humanize-korean` post-processing tail step (ported from [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai)); every Korean output passes the `ai-tell-detector` → `korean-style-rewriter` → `content-fidelity-auditor` pipeline before commit. PROBE invariants (paper titles, P#/D#/CP#/H### tags, `<a id="ref-…">` anchors, arXiv/DOI links, emoji rules, §4-2 glossary) codified as rollback triggers. §4-4 (Tone and style) deleted — tone, register, rhythm, density, hedging, and visual-ornament rules are now fully delegated to the upstream `humanize-korean` taxonomy; STYLE_GUIDE no longer carries its own tone spec |
+| v1.10 | 2026-05-20 | §4-5 pipeline expanded from 3-stage to 4-agent — `naturalness-reviewer` reintroduced as a parallel second-stage check next to `content-fidelity-auditor`. The two reviewers are orthogonal: fidelity guards meaning, naturalness guards "did AI tells actually disappear + was the rewrite not over-polished". Verdict matrix combines both; `rewrite_round_2` / `rollback_and_rewrite` from naturalness triggers up to 2 additional Phase B rounds before `hold_and_report` |
