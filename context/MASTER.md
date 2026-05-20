@@ -125,7 +125,7 @@ Five pillars.
 
 **Anti-topics**: monolithic decoders without arm-hand split; router-based MoE (different pattern; DexReMoE monitoring exception); post-hoc correction/residual-on-frozen-VLA without addressing distribution-bound limitation.
 
-**Literature anchor**: π0/π0.5 (backbone); TwinBrainVLA (AsyMoT frozen-generalist + trainable-specialist), DexterityGen (bounded coarse→fine precedent), LaMP / HEX (dual-expert), RLDX-1, Demystifying Action Space Design (D2 evidence). See §8.1.
+**Literature anchor**: π0/π0.5 (backbone); TwinBrainVLA (AsyMoT frozen-generalist + trainable-specialist), DexterityGen (bounded coarse→fine precedent), LaMP / HEX (dual-expert), Shared-Autonomy Arm-Hand VLA / DexGrasp-VLA (anatomical arm/hand split), Demystifying Action Space Design (D2 evidence). See §8.1.
 
 ### P2. Structured Input-Modality Binding
 **Scope**: replace simple concat/token-append with finger/palm-bound structured tokens. Each finger's joint state + that finger's tactile feature → one local embedding (~10 finger + 2 palm tokens). Topology-aware encoding (finger/hand identity, palm-relative fingertip pose, kinematic chain). Hand-level aggregation encoder. Multi-camera vision pre-fusion (cross-attention fuser → unified spatial embedding) before the VLM.
@@ -393,7 +393,7 @@ Excluded from weekly digest unless unusually strong tie to a Pillar/Decision:
 | DexterityGen (Yin et al.) | [arXiv:2502.04307](https://arxiv.org/abs/2502.04307) | 2025 | Bounded coarse→fine precedent (D6); antagonist evidence |
 | LaMP | [arXiv:2603.25399](https://arxiv.org/abs/2603.25399) | 2026 | Dual-expert gated cross-attention (D4 deferred) |
 | HEX | [arXiv:2604.07993](https://arxiv.org/abs/2604.07993) | 2026 | MoE + residual-gated cross-embodiment decoder (D4) |
-| RLDX-1 | [arXiv:2605.03269](https://arxiv.org/abs/2605.03269) | 2026 | Multi-Stream Action Transformer; cross-modal joint self-attn (D4) |
+| Shared-Autonomy Arm-Hand VLA (DexGrasp-VLA) | [arXiv:2511.00139](https://arxiv.org/abs/2511.00139) | 2025 | Anatomical arm/hand split (macro VR-teleop arm + autonomous hand VLA) + Arm-Hand Feature Enhancement module (D1/D4); shared-autonomy data collection |
 | Demystifying Action Space Design | [arXiv:2602.23408](https://arxiv.org/abs/2602.23408) | 2026 | 13k+ real rollouts; joint=stability/task=generalization (D2 evidence) |
 
 **Methodology base**: FiLM [arXiv:1709.07871](https://arxiv.org/abs/1709.07871) (D4); PCGrad [arXiv:2001.06782](https://arxiv.org/abs/2001.06782) (D1 gradient-conflict deferred); DQ-RISE [arXiv:2605.03363](https://arxiv.org/abs/2605.03363) (arm-hand action-space decoupling).
@@ -485,6 +485,7 @@ Review at every CP.
 - **LaMP** ([arXiv:2603.25399](https://arxiv.org/abs/2603.25399)) — two-expert gated cross-attn; split axis = scene-flow, not anatomical. CP1 architecture comparison.
 - **TwinBrainVLA** ([arXiv:2601.14133](https://arxiv.org/abs/2601.14133)) — AsyMoT frozen+trainable; closest analog. Watch real-robot validation.
 - **HEX** ([arXiv:2604.07993](https://arxiv.org/abs/2604.07993)) / **DexReMoE** ([arXiv:2508.01695](https://arxiv.org/abs/2508.01695)) — embodiment/object routing vs anatomical split.
+- **Shared-Autonomy Arm-Hand VLA / DexGrasp-VLA** ([arXiv:2511.00139](https://arxiv.org/abs/2511.00139)) — anatomical arm/hand split at *both* the data-collection layer (VR-teleop arm + autonomous hand VLA) and the decoder layer (Arm-Hand Feature Enhancement). Closest published analog to P1's anatomical claim. *Watch trigger*: any extension to in-hand reorientation or articulated-tool tasks (would intersect CP2/CP3 directly).
 
 ### 10.4 CP3 baseline & hardware-paired
 - **CATFA** ([arXiv:2509.23075](https://arxiv.org/abs/2509.23075)) — frozen base + cross-attn adapter vs our split-both-trained; CP3 baseline.
