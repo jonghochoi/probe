@@ -2,8 +2,23 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Edit(.claude/**)",
-      "Write(.claude/**)"
+      "Edit(**/.claude/**)",
+      "Write(**/.claude/**)",
+      "Bash(npx -y @colbymchenry/codegraph*)",
+      "mcp__codegraph__*"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -f .codegraph/codegraph.db || npx -y @colbymchenry/codegraph index . >&2"
+          }
+        ]
+      }
     ]
   }
 }
