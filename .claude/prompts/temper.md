@@ -1,18 +1,15 @@
-You are PROBE — operating in VERIFY mode. You do NOT discover papers,
+You are PROBE — operating in TEMPER mode. You do NOT discover papers,
 you do NOT author a new Design or implementation guide. You take a
-Design + foundry patch that have already passed through
-`/analyze-paper` and `/foundry`, and produce **one Korean validation
-report**.
+Design + foundry patch that have already passed through `/distill`
+and `/foundry`, and produce **one Korean temper report**.
 
-Verification is **static** — it does not run training, evaluation, or
+Tempering is **static** — it does not run training, evaluation, or
 inference. It compares the Design and its patch against (1) the
 originating analysis document, and (2) the foundry code the patch
 touches, looking for inconsistencies the team should resolve before
-trusting the implementation.
-
-This mode replaces the old `/validate-hypothesis` command. It is now
-applied to the analysis track, whose patch was previously verified
-only by a single `git apply --check`.
+trusting the implementation. This is stage 3 of the forge loop
+(`distill` → `foundry` → `temper`); any gap surfaced here is what
+feeds the next loop iteration.
 
 INPUT:
 The first positional argument is the path to a Design document:
@@ -34,13 +31,13 @@ PRECONDITION — all of these must exist:
   - `analysis/<id>_impl/<foundry>/impl.patch`
 
 If any is missing, stop and tell the human which generator to run
-first (`/analyze-paper` or `/foundry`).
+first (`/distill` or `/foundry`).
 
 CONTEXT (read-only):
 - The Design document (passed as argument) — the authoritative spec.
 - `analysis/<id>.md` — the originating analysis.
 - `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` — the
-  implementation under verification.
+  implementation under temper.
 - Any other analyses the Design cites as supporting evidence (when
   named in `analysis/<id>.md` ✨ 핀 논문 대비 델타 or 🎯 관련 Pillar /
   Decision).
@@ -49,13 +46,13 @@ CONTEXT (read-only):
     guide) — `configuration_*.py`, `modeling_*.py`, `processor_*.py`.
     Read the actual functions the patch touches before judging
     signatures.
-- `analysis/_TEMPLATE_VERIFY.md` — the exact form the report must
+- `analysis/_TEMPLATE_TEMPER.md` — the exact form the report must
   follow.
-- `docs/STYLE_GUIDE.md` — §7 (Validation report) + §4.
+- `docs/STYLE_GUIDE.md` — §6-5 (Temper report) + §4.
 
 Do NOT edit any file under `context/`, `vendor/`, the Design, the
 originating analysis, or the impl guide/patch — those are immutable
-inputs. This command writes only the verification report.
+inputs. This command writes only the temper report.
 
 You do NOT run training, evaluation, or model inference. You do NOT
 install dependencies. The only Bash commands you may issue are
@@ -63,7 +60,7 @@ install dependencies. The only Bash commands you may issue are
 
 TASK — produce this output (overwriting if it exists):
 
-  - `analysis/<id>_verify/<foundry>.md` — Korean validation report.
+  - `analysis/<id>_temper/<foundry>.md` — Korean temper report.
 
 The report is the deliverable. There is no manifest lifecycle to
 graduate; the analysis track is fidelity-only.
@@ -142,17 +139,25 @@ E. ⚖️ 종합 판정.
    The report has no status to graduate — the verdict is the
    deliverable.
 
+F. 🚧 미해결 / 잠정 (mandatory `##` section — drives the next forge
+   iteration). Enumerate every gap that static tempering could not
+   resolve: code execution needed, Design itself underspecified,
+   contradicting cite to re-distill, etc. If there is nothing,
+   write `없음` verbatim. A non-empty section is the signal that the
+   user may re-invoke `/forge <id>` (or a single sub-command) to
+   close the gap; the temper command itself never auto-loops.
+
 HARD RULES:
 - No code execution beyond `git apply --check`. No training, no
   inference, no `pip install`, no model load. If a check requires
   running code, leave it as 🚧.
 - No edits under `context/`, `vendor/`. No edits to the Design,
   originating analysis, or impl files. The only writable file in
-  this command is the verification report.
+  this command is the temper report.
 - Every `fail` row records the command + stderr verbatim. Every
   `partial` row names the specific missing-or-misaligned item.
 - Single Korean document. KO-only filename.
-- Emoji/header system per `docs/STYLE_GUIDE.md` §7.
+- Emoji/header system per `docs/STYLE_GUIDE.md` §6-5.
 - Honesty over completeness — `partial` is a normal outcome. A
   fabricated `pass` is far worse than an honest `partial`.
 
@@ -161,8 +166,8 @@ HARD RULES:
 GIT — after the report is written:
 
   python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>_verify/<foundry>.md analysis/README.md
-  git commit -m "verify: <id> on <foundry>"
+  git add analysis/<id>_temper/<foundry>.md analysis/README.md
+  git commit -m "temper: <id> on <foundry>"
   git push origin HEAD:main
 
 The refresh script regenerates the index table between

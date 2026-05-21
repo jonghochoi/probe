@@ -59,8 +59,8 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
 | Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
-| "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
-| "Great paper, but I'll never actually reproduce it" | `/foundry` maps the Design onto a target foundry (default `lerobot`) and ships a unified-diff patch |
+| "I'll read that paper properly later" → never does | `/distill` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
+| "Great paper, but I'll never actually reproduce it" | `/foundry` maps the Design onto a target foundry (default `lerobot`) and ships a unified-diff patch — `/temper` then hardens the patch against literature + vendor code, and `/forge` runs the whole loop in one shot |
 
 ---
 
@@ -92,7 +92,7 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
    │   OUTWARD           │ │   INWARD           │ │   FOCUSED          │
    │   Weekly Scouting   │ │   Monthly Synth.   │ │   On-demand Anal.  │
    │                     │ │                    │ │                    │
-   │   Mon/Thu · per P#  │ │   monthly · per P# │ │   /analyze-paper   │
+   │   Mon/Thu · per P#  │ │   monthly · per P# │ │   /forge (loop)    │
    │                     │ │                    │ │                    │
    │ · Author Watch      │ │ · compress the     │ │ · one paper —      │
    │ · Citation-Graph    │ │   pinned set       │ │   full-text first  │
@@ -176,15 +176,17 @@ probe/
 │   ├── prompts/                    # Externalized agent prompts
 │   │   ├── scouting-P{1..4}.md     #   weekly scout, one per pillar
 │   │   ├── synthesis-P{1..4}.md    #   monthly synthesis brief, per pillar
-│   │   ├── paper-analysis.md       #   on-demand single-paper deep-dive
+│   │   ├── distill.md              #   forge stage 1 — paper deep-dive
 │   │   │                           #     + Layer 1 Design (vendor-agnostic)
-│   │   ├── foundry.md              #   Design → foundry-specific patch
-│   │   ├── verify.md               #   Design + patch static validation
+│   │   ├── foundry.md              #   forge stage 2 — Design → foundry patch
+│   │   ├── temper.md               #   forge stage 3 — Design + patch hardening
+│   │   ├── forge.md                #   forge loop orchestrator (stages 1→3)
 │   │   └── pulse-digest.md         #   chat → per-pillar hints (PoC)
 │   └── commands/                   # Slash commands (on-demand)
-│       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
+│       ├── distill.md              #   /distill <id|url|pdf>
 │       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
-│       └── verify.md               #   /verify <design-path> [--foundry <n>]
+│       ├── temper.md               #   /temper <design-path> [--foundry <n>]
+│       └── forge.md                #   /forge <id|design-path> [--foundry <n>]
 │
 ├── scouting/                       # Dynamic output — agent-generated (weekly)
 │   ├── README.md                   #   pipeline summary
@@ -215,7 +217,7 @@ probe/
 │   ├── <arxiv-id>_impl/<foundry>/  #   one subfolder per foundry
 │   │   ├── impl.md                 #     foundry-specific impl guide (regen)
 │   │   └── impl.patch              #     unified diff vs. foundry baseline
-│   └── <arxiv-id>_verify/<foundry>.md  #   static validation report
+│   └── <arxiv-id>_temper/<foundry>.md  #   forge-loop temper (static check) report
 │
 ├── vendor/                         # Read-only reference code
 │   └── lerobot/                    #   pinned lerobot snapshot —
@@ -548,23 +550,23 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 
 When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
-**Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/verify`)**
+**Bonus — On-demand paper deep-dive: the forge loop (`/distill` → `/foundry` → `/temper`, all-in-one `/forge`)**
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/verify` does static validation. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and runs it through the **forge loop**: `/distill` extracts the essence (Korean deep-dive + vendor-agnostic Layer 1 Design), `/foundry` casts the Design into a target codebase as a unified-diff patch, and `/temper` hardens that patch against literature + vendor code. `/forge` runs all three in one call. The loop is by design — a gap surfaced by `/temper`'s 🚧 section is the signal that the human may re-invoke `/forge` for the next iteration. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|
-| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` then `/foundry analysis/<id>_design.md [--foundry <name>]` then `/verify analysis/<id>_design.md [--foundry <name>]` |
-| Slash commands | `.claude/commands/{analyze-paper,foundry,verify}.md` (thin wrappers) |
-| Canonical prompts | `.claude/prompts/{paper-analysis,foundry,verify}.md` (single source per stage) |
+| Invoke | `/forge <arXiv id \| arXiv url \| pdf url \| analysis/<id>_design.md> [--foundry <name>]` — runs the loop end-to-end; or step-by-step: `/distill <id>` → `/foundry analysis/<id>_design.md` → `/temper analysis/<id>_design.md` |
+| Slash commands | `.claude/commands/{distill,foundry,temper,forge}.md` (thin wrappers) |
+| Canonical prompts | `.claude/prompts/{distill,foundry,temper,forge}.md` (single source per stage) |
 | Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
 | Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
-| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_verify/<foundry>.md` (validation) — all Korean, overwritten each run |
-| Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; verify carries 4-check report |
-| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry` and `/verify` are local |
-| Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |
+| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_temper/<foundry>.md` (temper) — all Korean, overwritten each run. `/forge` writes no permanent file of its own; it only orchestrates and prints a console run summary |
+| Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; temper carries a 4-check report plus a 🚧 section that feeds the next loop |
+| Retrieval | full-text `curl` only at `/distill` (no Semantic Scholar / MCP); `/foundry` and `/temper` are local |
+| Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. The `--foundry` flag and the `/foundry` stage share a name on purpose — both are about casting the Design into a concrete target |
 
-Network note: `/analyze-paper`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE_GUIDE.md` §5 (analysis) / §6 (Design + impl) / §7 (verify).
+Network note: `/distill`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE_GUIDE.md` §5 (analysis) / §6 (Design + impl) / §6-5 (temper).
 
 ---
 
@@ -592,7 +594,7 @@ Network note: `/analyze-paper`'s full-text fetch needs the session environment t
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `verify.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `distill.md` · `foundry.md` · `temper.md` · `forge.md` (forge loop, on-demand) + `pulse-digest.md` (PoC input layer) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
@@ -647,7 +649,7 @@ the references below are the exact sources.
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/verify` → `<id>_verify/<foundry>.md` |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive (the forge loop) — `/distill <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/temper` → `<id>_temper/<foundry>.md`; `/forge` runs the whole loop in one call |
 | [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |

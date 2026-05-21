@@ -1,15 +1,17 @@
-# Validation Report — <one-line English-friendly title> on `<foundry>`
+# Temper Report — <one-line English-friendly title> on `<foundry>`
 
-> PROBE verify 모드 산출물. 한글 단일 문서이며, sibling Design + 한
-> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>.md`) 와
-> foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
-> 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
-> `docs/STYLE_GUIDE.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
+> PROBE temper 모드 산출물 (forge 루프 3단계). 한글 단일 문서이며,
+> sibling Design + 한 foundry 의 impl 가이드/패치를 원천 분석 문서
+> (`analysis/<id>.md`) 와 foundry 코드에 대조해 단련한 정적 검증
+> 결과입니다. 코드는 실행하지 않습니다 (`git apply --check` 만
+> 허용). 마지막 🚧 섹션이 비어있지 않다면 그 항목들이 다음 forge
+> 라운드의 입력이 됩니다. 형식·이모지·용어 규칙은
+> `docs/STYLE_GUIDE.md` §6-5 / §4 를 정확히 따릅니다. 재실행 시 이
 > 파일을 덮어씁니다.
 
 ---
 
-## 📄 검증 메타
+## 📄 temper 메타
 
 | 항목 | 내용 |
 |------|------|
@@ -17,7 +19,7 @@
 | Originating analysis | [`../<id>.md`](../<id>.md) |
 | Foundry | `lerobot` (또는 다른 등록된 foundry 이름) |
 | 구현 가이드 | [`../<id>_impl/<foundry>/impl.md`](../<id>_impl/<foundry>/impl.md) · [`../<id>_impl/<foundry>/impl.patch`](../<id>_impl/<foundry>/impl.patch) |
-| 검증 생성일 | YYYY-MM-DD (`TZ=Asia/Seoul`) |
+| temper 생성일 | YYYY-MM-DD (`TZ=Asia/Seoul`) |
 | 📚 문헌 대조 | `pass` / `fail` / `partial` |
 | 🔍 패치 정합성 | `pass` / `fail` |
 | 🧪 시그니처·하이퍼파라미터 | `pass` / `fail` / `partial` |
@@ -111,8 +113,12 @@ $ cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.pat
 
 ## 🚧 미해결 / 잠정
 
-<!-- 정적 검증으로 결론 낼 수 없어 사람의 후속 판단이 필요한 항목.
+<!-- 정적 단련으로 결론 낼 수 없어 사람의 후속 판단이 필요한 항목.
      코드 실행이 필요한 체크 (학습/평가), Design 본문이 너무 모호해
-     식·표 매핑이 안 되는 항목 등. 없음이면 "없음" 으로 명시. -->
+     식·표 매핑이 안 되는 항목 등. 없음이면 "없음" 으로 명시.
+     이 섹션이 비어있지 않다면 그 항목이 곧 다음 forge 라운드의
+     입력이 됩니다 — `/forge <id>` 로 다시 호출하시거나, 갭 유형에
+     따라 `/distill` (정수 재증류) 또는 `/foundry` (좌표 재매핑)
+     하나만 다시 돌리실 수 있습니다. -->
 
-- (예) Design 의 §🔬 ② 체크는 실제 학습 결과 비교가 필요해 정적 검증으로 결론 불가
+- (예) Design 의 §🔬 ② 체크는 실제 학습 결과 비교가 필요해 정적 단련으로 결론 불가

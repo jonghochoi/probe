@@ -14,4 +14,4 @@ If `$ARGUMENTS` is empty, ask the user for a Design path
 `lerobot`) and stop — do not pick one yourself.
 
 Precondition: the Design document must already exist. If it does not,
-stop and instruct the user to run `/analyze-paper <id>` first.
+stop and instruct the user to run `/distill <id>` first.

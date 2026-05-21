@@ -314,8 +314,9 @@ this section overrides them on conflict.
 
 ## 5. Paper Analysis Document (`analysis/`)
 
-The `/analyze-paper` slash command (prompt: `.claude/prompts/paper-analysis.md`)
-produces a deep-dive on **one** paper at `analysis/<arxiv-id>.md`.
+The `/distill` slash command (prompt: `.claude/prompts/distill.md`) —
+stage 1 of the forge loop — produces a deep-dive on **one** paper at
+`analysis/<arxiv-id>.md`.
 
 ### 5-1. File convention
 
@@ -513,11 +514,12 @@ conventions below codify both.
 
 `analysis/README.md` carries a generated index of every deep-dive in
 the folder, refreshed by `scripts/refresh-analysis-index.py`. The
-script is invoked automatically by the GIT step of `/analyze-paper`,
-`/foundry`, and `/verify`, so any run that adds or refreshes an
-analysis (or its downstream impl/verify artifacts) updates the index
-in the same commit. This is the first intentional exception to the
-"every doc reference is hand-maintained" rule recorded in `CLAUDE.md`.
+script is invoked automatically by the GIT step of `/distill`,
+`/foundry`, and `/temper` (and indirectly via `/forge`), so any run
+that adds or refreshes an analysis (or its downstream impl/temper
+artifacts) updates the index in the same commit. This is the first
+intentional exception to the "every doc reference is hand-maintained"
+rule recorded in `CLAUDE.md`.
 
 The script rewrites only the block between these fixed markers in
 `analysis/README.md`; the rest of the file is preserved verbatim:
@@ -554,12 +556,14 @@ idempotent — re-running with no underlying change produces no diff.
 
 ## 6. Design + Foundry Implementation Documents
 
-The `/analyze-paper` slash command emits a **Layer 1 Design**
+The `/distill` slash command emits a **Layer 1 Design**
 (vendor-agnostic) alongside the analysis. The `/foundry` slash command
 (prompt: `.claude/prompts/foundry.md`) consumes that Design and
 produces a **Layer 2** foundry-specific implementation. The two-layer
 split exists so the same Design can serve multiple foundries (the v0
-foundry is `lerobot`).
+foundry is `lerobot`). The `/temper` slash command then statically
+checks the patch against the literature + vendor code, and `/forge`
+orchestrates the whole loop in one call.
 
 Outputs:
 
@@ -569,9 +573,9 @@ Outputs:
                                                the foundry's code
                                                root (for lerobot:
                                                `vendor/lerobot/`).
-- `analysis/<id>_verify/<foundry>.md`        — Korean static
-                                               validation report
-                                               (`/verify`).
+- `analysis/<id>_temper/<foundry>.md`        — Korean static
+                                               temper report
+                                               (`/temper`).
 
 ### 6-1. File convention
 
@@ -660,11 +664,12 @@ refresh procedure.
   reason, and appends one line to `analysis/<id>.md`:
   `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
-### 6-5. Verify report (`/verify` output)
+### 6-5. Temper report (`/temper` output)
 
-The verify report is the static check of a Design + foundry patch
-against the originating analysis and the foundry code. It is the
-single deliverable — there is no manifest, no graduated status.
+The temper report is the static check of a Design + foundry patch
+against the originating analysis and the foundry code — stage 3 of
+the forge loop. It is the single deliverable — there is no manifest,
+no graduated status.
 
 Four `##` sections drive the verdict (`pass` / `fail` / `partial` per
 section), followed by ⚖️ 종합 판정 summarising whether the analysis
@@ -678,8 +683,10 @@ can rely on this implementation:
 - 📐 식·표 일치 — formulas and tables cited in the Design or analyses
   must either be implemented in the patch or explicitly deferred to 🚧.
 
-The verifier executes no code beyond `git apply --check`. `partial` is
-a normal outcome and far better than a fabricated `pass`.
+The temper run executes no code beyond `git apply --check`. `partial`
+is a normal outcome and far better than a fabricated `pass`. The
+trailing 🚧 미해결 / 잠정 section is mandatory and is the input to
+the next forge iteration when non-empty.
 
 ---
 
@@ -701,3 +708,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 introduced experiments track at `/hypothesize` → `/foundry` → `/verify` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation requires every registered foundry to pass |
 | v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/verify`) with the verify report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |
 | v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/verify` |
+| v1.14 | 2026-05-21 | Rename the on-demand pipeline to the **forge loop**: `/analyze-paper` → `/distill`, `/verify` → `/temper`, plus new `/forge` loop-orchestrator command. `/foundry` keeps its name. Three-stage shape now reads as one metallurgical family (distill = essence, foundry = cast, temper = harden); shape is a loop, not a pipeline — `/temper`'s mandatory 🚧 section feeds the next round. Artifact path renamed `_verify/` → `_temper/` (zero existing artifacts to migrate). §6-5 title changed from "Verify report" to "Temper report". `analysis/_TEMPLATE_VERIFY.md` renamed to `_TEMPLATE_TEMPER.md`; `scripts/refresh-analysis-index.py` filter tuple updated from `_verify` to `_temper`. Prompt files `paper-analysis.md` and `verify.md` renamed to `distill.md` and `temper.md`; new `forge.md` prompt + command added |

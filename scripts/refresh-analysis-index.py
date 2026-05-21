@@ -6,8 +6,9 @@ Scans every deep-dive `analysis/<id>.md`, pulls metadata from its
 rewrites the table between fixed markers in `analysis/README.md`.
 
 Idempotent: re-running with no underlying change produces no diff.
-Invoked from the GIT step of `/analyze-paper`, `/foundry`, and
-`/verify`. Safe to run manually from the repo root:
+Invoked from the GIT step of `/distill`, `/foundry`, and `/temper`
+(and indirectly via `/forge`, which calls those three in sequence).
+Safe to run manually from the repo root:
 
     python3 scripts/refresh-analysis-index.py
 
@@ -39,7 +40,7 @@ WARN = "⚠️ metadata"
 
 
 def find_analyses() -> list[Path]:
-    """Return deep-dive analysis paths (not templates, designs, impls, verifies)."""
+    """Return deep-dive analysis paths (not templates, designs, impls, tempers)."""
     out: list[Path] = []
     for path in sorted(ANALYSIS_DIR.glob("*.md")):
         name = path.name
@@ -48,7 +49,7 @@ def find_analyses() -> list[Path]:
         if name in {"README.md"}:
             continue
         stem = path.stem
-        if any(stem.endswith(suffix) for suffix in ("_design", "_impl", "_verify")):
+        if any(stem.endswith(suffix) for suffix in ("_design", "_impl", "_temper")):
             continue
         # Accept arXiv ids or arbitrary slug filenames (PDF-input analyses).
         out.append(path)

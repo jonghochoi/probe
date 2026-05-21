@@ -1,7 +1,7 @@
 # vendor/lerobot/
 
 Read-only reference snapshot of selected `lerobot` policy code. PROBE itself
-is a Korean paper-analysis + scouting framework and does not run this code —
+is a Korean paper-distillation + scouting framework and does not run this code —
 it is vendored as the **v0 foundry**, so the `/foundry` command can map a
 Design (Layer 1, vendor-agnostic) onto **concrete file/line locations** of a
 known baseline, and emit an implementation guide
@@ -76,10 +76,10 @@ Procedure:
 5. Re-run `/foundry <design-path> --foundry lerobot` for every Design that
    already has an `impl.md` under `*/lerobot/`, and verify the regenerated
    `impl.patch` still applies cleanly to the new snapshot. Then re-run
-   `/verify <design-path> --foundry lerobot` so `manifest.implementation.
-   lerobot.apply_check` and `manifest.validation.lerobot.*` reflect the
-   refreshed state. Patches that no longer apply must be rebuilt; their
-   guide files keep `(잠정)` markers until they are.
+   `/temper <design-path> --foundry lerobot` so the 🔍 패치 정합성 and
+   🧪 시그니처·하이퍼파라미터 checks in `<id>_temper/lerobot.md` reflect
+   the refreshed state. Patches that no longer apply must be rebuilt;
+   their guide files keep `(잠정)` markers until they are.
 
 ## License & attribution
 
