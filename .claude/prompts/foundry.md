@@ -48,9 +48,21 @@ CONTEXT (read-only):
   - `vendor/lerobot/README.md` — pinned commit SHA; the `impl.md` meta
     header MUST cite the same SHA.
   - `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`
-    — the candidate baselines. Read the `configuration_*.py`,
-    `modeling_*.py`, `processor_*.py` of the chosen base in full
-    before mapping.
+    — the candidate baselines. A CodeGraph MCP server indexes
+    `vendor/lerobot/` at session start (see CLAUDE.md → "CodeGraph").
+    Before reading any `.py` file in full, use the MCP tools to
+    assemble the minimum file:line surface you actually need:
+      * `codegraph_files` to enumerate the chosen base's files,
+      * `codegraph_search` / `codegraph_node` to locate symbols and
+        get their exact spans,
+      * `codegraph_context <change-intent>` to pull the connected
+        slice of the graph in one call.
+    Trust the codegraph results — do not re-grep or re-count lines.
+    Full-file reads of `configuration_*.py` / `modeling_*.py` /
+    `processor_*.py` are still allowed when a symbol-level view is
+    insufficient (e.g. understanding control flow across a whole
+    `forward()`), but should be the exception. If the MCP server is
+    not reachable, fall back to reading those files directly.
 
 Do NOT edit any file under `context/`, `vendor/`, or the Design
 document itself. Do NOT modify `analysis/<id>.md` (immutable input)
@@ -97,6 +109,16 @@ B. Ground the Design in foundry coordinates.
    ("wholly new training objective"), say so verbatim
    (`baseline에 대응 없음 — 신규 추가`) rather than fabricating one.
 
+   For `--foundry lerobot`, the mapping workflow SHOULD use codegraph
+   to ground file:line, in order: (1) `codegraph_search <symbol>` to
+   find the candidate, (2) `codegraph_node` for its exact span,
+   (3) `codegraph_callers` / `codegraph_callees` to confirm it is the
+   right binding site (a same-named method on a different policy is a
+   common false positive), (4) record `file:line` from the node span.
+   File:line coordinates SHOULD come from the codegraph node, not from
+   manually counting lines in a Read result — manual counting is the
+   single biggest source of patch drift across vendor refreshes.
+
 C. Construct the patch.
    Build `impl.patch` as a single unified diff against the files
    under the foundry's code root (for lerobot:
@@ -105,6 +127,16 @@ C. Construct the patch.
    Implement only what the Design describes concretely (with
    equations, hyperparameters, or pseudocode anchoring it). Sketched
    methodology → 🪛 + 🚧 entry, omit from patch.
+
+   Before finalizing each hunk on `--foundry lerobot`, run
+   `codegraph_impact` on every modified symbol. If the impact radius
+   surfaces a caller outside the chosen base directory
+   (`vendor/lerobot/policies/<base>/`) — for example a shared module
+   under `vendor/lerobot/policies/pi_gemma.py` or
+   `vendor/lerobot/processor/` — either expand the patch to cover
+   that caller or downgrade the hunk to a 🪛 + 🚧 entry. Silent
+   cross-base breakage (an edit that compiles in one base and breaks
+   a sibling) is the failure mode this guards against.
 
 D. Verify the patch.
    Validate via `git apply --check` (do not actually apply). Run from
@@ -139,7 +171,12 @@ HARD RULES:
   🚧 blockquote in §A.
 - Never fabricate `file:line` coordinates. If unsure, re-read the
   foundry file; if still unsure, mark the row `위치 잠정` and add a
-  🚧 row.
+  🚧 row. On `--foundry lerobot`, "re-read" means `codegraph_node`
+  first (cheap, exact), then a direct file Read only if the node
+  span doesn't give you what you need. If `git apply --check` fails
+  for a hunk due to context drift, fetch the current span from
+  `codegraph_node` before rewriting the hunk — do not eyeball line
+  numbers from a stale Read.
 - Single Korean document for `impl.md`. KO-only filenames.
 - For `--foundry lerobot`: vendor pinned commit in the meta header
   MUST equal what `vendor/lerobot/README.md` currently records. A

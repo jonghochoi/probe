@@ -1,0 +1,8 @@
+# Built at session start by the SessionStart hook in .claude/settings.json.
+# Only config.json (defining scope=vendor/lerobot) is committed.
+*.db
+*.db-wal
+*.db-shm
+cache/
+*.log
+.dirty

@@ -21,6 +21,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_verify/<foundry>.md`) |
 | `pulse/` | agent + human input | Chat-to-scout bias PoC — weekly `YYYY-MM-DD-P#.md` retrieval-weight nudges; `inbox/` is human-fed raw chat (gitignored) |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
+| `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built at session start. See the "CodeGraph" section below |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE_GUIDE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
@@ -37,6 +38,31 @@ foundry — the target of every `foundry=lerobot` impl patch under
 silently invalidate existing patches and break attribution. The only way it
 changes is the wholesale refresh procedure in `vendor/lerobot/README.md`;
 nothing else.
+
+## CodeGraph
+
+`vendor/lerobot/` is indexed by
+[CodeGraph](https://github.com/colbymchenry/codegraph) and exposed to every
+session over MCP. The SessionStart hook in `.claude/settings.json` builds
+`.codegraph/codegraph.db` on first session start (typically under a second
+for the current 58 vendored `.py` files), and the file watcher inside the
+MCP server keeps it fresh after vendor refreshes — no manual rebuild step.
+Only `.codegraph/config.json` (defining `scope=vendor/lerobot`) is committed;
+the DB is per-checkout and gitignored.
+
+For any `/foundry` run, or any time you need to ground a Design row in
+`file:line` coordinates inside `vendor/lerobot/`, prefer the MCP tools over
+reading full `.py` files:
+
+- `codegraph_search <symbol>` / `codegraph_node <id>` — exact spans without
+  manual line-counting.
+- `codegraph_context <task>` — minimum file:line surface for the change set.
+- `codegraph_callers` / `codegraph_callees` — confirm the binding site before
+  patching.
+- `codegraph_impact` — surface cross-file consumers a patch would break.
+
+If the MCP server is unreachable (sandbox without `npx`, offline clone), fall
+back to direct file reads — `/foundry` should still complete.
 
 ## Commit message style
 
