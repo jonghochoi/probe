@@ -3,7 +3,7 @@ description: Design + foundry patch 를 문헌 / vendor 코드 정합성으로 �
 argument-hint: <design-path> [--foundry <name>]
 ---
 
-Read `.claude/prompts/verify.md` and execute it exactly as written.
+Read `.claude/prompts/audit.md` and execute it exactly as written.
 That file is the single source of truth for this command — do not
 duplicate or paraphrase its logic here.
 

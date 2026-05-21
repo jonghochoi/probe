@@ -30,7 +30,7 @@
 
 - **주간 Scouting Report** (outward) — 월·목, pillar 별 3 ~ 5편. 점수화된 후보 + 너의 open question 에 묶인 decision implication.
 - **월간 Synthesis Brief** (inward) — pillar 별 핀된 문헌(§6 8편)이 시간이 지나면 머릿속에서 흐려지는 걸 막는다. 짧고 정직한 산문 압축.
-- **온디맨드 Analysis + Foundry + Verify** (focused) — `/analyze-paper` 가 한 편을 한국어 deep-dive + Layer 1 Design (vendor-agnostic) 으로 읽고, `/foundry` 가 그 Design 을 target foundry (기본 `lerobot`) 좌표계로 매핑한 unified diff 패치를 떠먹여 주며, `/verify` 가 Design + 패치 + 분석 문서를 정적 대조해 검증 보고서를 만든다.
+- **온디맨드 Analysis + Foundry + Verify** (focused) — `/analyze-paper` 가 한 편을 한국어 deep-dive + Layer 1 Design (vendor-agnostic) 으로 읽고, `/foundry` 가 그 Design 을 target foundry (기본 `lerobot`) 좌표계로 매핑한 unified diff 패치를 떠먹여 주며, `/audit` 가 Design + 패치 + 분석 문서를 정적 대조해 검증 보고서를 만든다.
 
 ---
 
@@ -115,7 +115,7 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
 
 ### 사이드바: foundry + verify — 분석 후속 구현·검증 (on-demand)
 
-위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/foundry` 가 "어디를 / 어떻게"를 채우고 `/verify` 가 "정합한가"를 따집니다. 두 층 모델로 분리되어 있습니다 — Layer 1 Design (vendor-agnostic) 은 `/analyze-paper` 가 분석 문서와 함께 산출하며, Layer 2 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 가 target foundry (기본 `lerobot`) 좌표계로 옮겨 `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` 를 산출합니다. baseline 은 foundry 의 byte-stable 스냅샷 (lerobot 의 경우 `vendor/lerobot/`) 에 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. Design 이 foundry 좌표계로 매핑되지 않으면 `UNMAPPABLE.md` 와 분석 문서 말미의 `> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 남깁니다 — Design 자체는 항상 산출됩니다. `/verify analysis/<id>_design.md [--foundry <name>]` 는 Design + 패치 + 분석 문서를 4 단계 정적 체크 (📚 문헌 · 🔍 패치 · 🧪 시그니처 · 📐 식·표) 로 대조해 `analysis/<id>_verify/<foundry>.md` 를 산출합니다. 분석 트랙은 manifest 라이프사이클이 없으므로 보고서 자체가 산출물입니다. 자세한 형식은 [`docs/STYLE_GUIDE.md`](STYLE_GUIDE.md) §6 / §7, foundry 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
+위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/foundry` 가 "어디를 / 어떻게"를 채우고 `/audit` 가 "정합한가"를 따집니다. 두 층 모델로 분리되어 있습니다 — Layer 1 Design (vendor-agnostic) 은 `/analyze-paper` 가 분석 문서와 함께 산출하며, Layer 2 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 가 target foundry (기본 `lerobot`) 좌표계로 옮겨 `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` 를 산출합니다. baseline 은 foundry 의 byte-stable 스냅샷 (lerobot 의 경우 `vendor/lerobot/`) 에 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. Design 이 foundry 좌표계로 매핑되지 않으면 `UNMAPPABLE.md` 와 분석 문서 말미의 `> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 남깁니다 — Design 자체는 항상 산출됩니다. `/audit analysis/<id>_design.md [--foundry <name>]` 는 Design + 패치 + 분석 문서를 4 단계 정적 체크 (📚 문헌 · 🔍 패치 · 🧪 시그니처 · 📐 식·표) 로 대조해 `analysis/<id>_audit/<foundry>.md` 를 산출합니다. 분석 트랙은 manifest 라이프사이클이 없으므로 보고서 자체가 산출물입니다. 자세한 형식은 [`docs/STYLE_GUIDE.md`](STYLE_GUIDE.md) §6 / §7, foundry 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
 
 ### 핵심 원칙: 정적 vs 동적 분리
 
@@ -153,12 +153,12 @@ probe/
 │   │   ├── paper-analysis.md       #   온디맨드 단일 논문 심층분석
 │   │   │                           #     + Layer 1 Design (vendor-agnostic)
 │   │   ├── foundry.md              #   Design → foundry 별 구현 패치
-│   │   ├── verify.md               #   Design + 패치 정적 검증
+│   │   ├── audit.md               #   Design + 패치 정적 검증
 │   │   └── pulse-digest.md         #   채팅 → pillar별 힌트 (PoC)
 │   └── commands/                   # 슬래시 커맨드 (온디맨드)
 │       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
 │       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
-│       └── verify.md               #   /verify <design-path> [--foundry <n>]
+│       └── audit.md               #   /audit <design-path> [--foundry <n>]
 │
 ├── scouting/                       # 동적 산출 — 주간 (월·목)
 │   ├── README.md                   #   파이프라인 요약
@@ -188,7 +188,7 @@ probe/
 │   ├── <arxiv-id>_impl/<foundry>/  #   foundry별 서브폴더
 │   │   ├── impl.md                 #     foundry-specific 구현 가이드
 │   │   └── impl.patch              #     foundry baseline 대비 unified diff
-│   └── <arxiv-id>_verify/<foundry>.md  #   정적 검증 보고서
+│   └── <arxiv-id>_audit/<foundry>.md  #   정적 검증 보고서
 │
 ├── vendor/                         # 읽기 전용 외부 코드
 │   └── lerobot/                    #   pinned lerobot 스냅샷 —

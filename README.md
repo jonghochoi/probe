@@ -127,6 +127,64 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
                     └─────────────────────────────────┘
 ```
 
+### Sidebar: analysis convergence loop
+
+The FOCUSED column drills deeper than the main diagram shows. A
+single `/analyze-paper` call produces the *analysis* and a *Layer 1
+Design*; the Design is then mapped onto a target *foundry* by
+`/foundry`, and the resulting impl is statically validated by
+`/audit`. When the audit report comes back `partial`, the
+next-action choice (reanalyze vs refoundry vs stop) is deterministic
+from the four verdict cells — so `/reproduce-paper` orchestrates the whole
+thing as an **iterative loop with two nested cycles**:
+
+```
+   Initial pass (round 0):
+
+       /analyze-paper ──→ Design ──→ /foundry ──→ impl ──→ /audit ──→ verdict
+
+
+   Branch on verdict (round 1..N):
+
+       ⚖️  pass                       ──→  done
+
+       🔍 / 🧪 / 📐  fail/partial      ──→  inner loop (current)
+                                              /foundry --feedback <audit-path>
+                                              Design fixed; surgical patch update
+
+       📚  fail/partial                ──→  outer loop (future)
+                                              /analyze-paper --focus <section>
+                                              Design itself needs rework;
+                                              currently emits hold_and_report
+```
+
+- **Inner loop (current).** The Design is a vendor-agnostic single
+  source of truth, so we avoid touching it. Impl-side gaps —
+  🔍 patch-apply failures, 🧪 signature/constant mismatches, and
+  📐 silent-skip rows (which surface as 🧪 partial) — get filled in
+  surgically by `/foundry --feedback <audit-path>`, which treats the
+  prior round's `impl.md` + `impl.patch` as a starting point. Passing
+  hunks are preserved; every new hunk traces 1-to-1 to a specific row
+  in the audit report (the honesty guard against fabrication).
+- **Outer loop (future).** A `fail` or `partial` on the 📚 verdict
+  means the Design itself disagrees with the paper body, which would
+  call for `/analyze-paper --focus <section>` to re-extract the
+  affected sections and refresh the Design. Layer-1 has a large
+  blast radius (every registered foundry's impl is invalidated the
+  moment the Design moves), so this step stays manual for now —
+  `/reproduce-paper` exits with `hold_and_report` on 📚 verdicts and the
+  user explicitly decides whether to rerun `/analyze-paper`.
+- **Honest partial termination.** When the audit report stabilises
+  byte-identical to the previous round, `/reproduce-paper` exits as
+  `stable_partial` — gaps the paper body itself never pins down stay
+  as 🚧 permanently. The last audit report is the closure note;
+  nothing else is appended.
+
+The full branch matrix and termination conditions are specified in
+[`.claude/prompts/reproduce-paper.md`](.claude/prompts/reproduce-paper.md) and
+[`.claude/prompts/foundry.md`](.claude/prompts/foundry.md) §F (Update
+mode).
+
 ### Sidebar: pulse — chat-to-scout input layer (PoC)
 
 `pulse/` is a sidecar to the OUTWARD column above, not a fourth peer. It distills team chat exports into short per-pillar hint files that the next `scouting/` run reads as a retrieval-weight nudge. Static `context/` always wins on conflict, and pulse never edits any `context/` file.
@@ -179,12 +237,12 @@ probe/
 │   │   ├── paper-analysis.md       #   on-demand single-paper deep-dive
 │   │   │                           #     + Layer 1 Design (vendor-agnostic)
 │   │   ├── foundry.md              #   Design → foundry-specific patch
-│   │   ├── verify.md               #   Design + patch static validation
+│   │   ├── audit.md               #   Design + patch static validation
 │   │   └── pulse-digest.md         #   chat → per-pillar hints (PoC)
 │   └── commands/                   # Slash commands (on-demand)
 │       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
 │       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
-│       └── verify.md               #   /verify <design-path> [--foundry <n>]
+│       └── audit.md               #   /audit <design-path> [--foundry <n>]
 │
 ├── scouting/                       # Dynamic output — agent-generated (weekly)
 │   ├── README.md                   #   pipeline summary
@@ -215,7 +273,7 @@ probe/
 │   ├── <arxiv-id>_impl/<foundry>/  #   one subfolder per foundry
 │   │   ├── impl.md                 #     foundry-specific impl guide (regen)
 │   │   └── impl.patch              #     unified diff vs. foundry baseline
-│   └── <arxiv-id>_verify/<foundry>.md  #   static validation report
+│   └── <arxiv-id>_audit/<foundry>.md  #   static validation report
 │
 ├── vendor/                         # Read-only reference code
 │   └── lerobot/                    #   pinned lerobot snapshot —
@@ -548,20 +606,20 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 
 When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
-**Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/verify`)**
+**Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/audit`)**
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/verify` does static validation. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/audit` does static validation. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|
-| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` then `/foundry analysis/<id>_design.md [--foundry <name>]` then `/verify analysis/<id>_design.md [--foundry <name>]` |
+| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` then `/foundry analysis/<id>_design.md [--foundry <name>]` then `/audit analysis/<id>_design.md [--foundry <name>]` |
 | Slash commands | `.claude/commands/{analyze-paper,foundry,verify}.md` (thin wrappers) |
 | Canonical prompts | `.claude/prompts/{paper-analysis,foundry,verify}.md` (single source per stage) |
 | Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
 | Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
-| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_verify/<foundry>.md` (validation) — all Korean, overwritten each run |
+| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_audit/<foundry>.md` (validation) — all Korean, overwritten each run |
 | Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; verify carries 4-check report |
-| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry` and `/verify` are local |
+| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry` and `/audit` are local |
 | Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |
 
 Network note: `/analyze-paper`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE_GUIDE.md` §5 (analysis) / §6 (Design + impl) / §7 (verify).
@@ -592,7 +650,7 @@ Network note: `/analyze-paper`'s full-text fetch needs the session environment t
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `verify.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `audit.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
@@ -647,7 +705,7 @@ the references below are the exact sources.
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/verify` → `<id>_verify/<foundry>.md` |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/audit` → `<id>_audit/<foundry>.md` |
 | [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
