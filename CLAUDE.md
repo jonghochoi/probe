@@ -19,12 +19,11 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scouting/` | agent | Weekly Scouting Reports (`YYYY-MM-DD-P#.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_audit/<foundry>.md`) |
-| `pulse/` | agent + human input | Chat-to-scout bias PoC — weekly `YYYY-MM-DD-P#.md` retrieval-weight nudges; `inbox/` is human-fed raw chat (gitignored) |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built at session start. See the "CodeGraph" section below |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
-| `docs/STYLE_GUIDE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
+| `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` 📑 Index table; invoked by `/analyze-paper`, `/foundry`, `/audit` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
@@ -102,7 +101,7 @@ Hard rules:
    PR number automatically on squash-merge; adding it manually duplicates it.
 6. **Write the commit message in English** — subject *and* body. Document
    content (`.md`, prompts, reports) is Korean or English per
-   `docs/STYLE_GUIDE.md`, but the commit message itself is always English so
+   `docs/STYLE.md`, but the commit message itself is always English so
    `git log` stays uniformly grep-able and consistent with this repo's
    history. Do not switch to Korean even when the body explains
    Korean-authored content; describe it in English.
@@ -186,10 +185,10 @@ must be brought into line, not left as exceptions.
 
 ### Reference / structural docs
 
-`CLAUDE.md`, `docs/STYLE_GUIDE.md`, `scouting/README.md`,
+`CLAUDE.md`, `docs/STYLE.md`, `scouting/README.md`,
 `synthesis/README.md`, `analysis/README.md`. Plain headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
-`STYLE_GUIDE.md`. A folder README's H1 is the folder name (`# scouting/`).
+`STYLE.md`. A folder README's H1 is the folder name (`# scouting/`).
 
 ### Shared rules (both families)
 
@@ -208,7 +207,7 @@ apply to:
 - `.claude/prompts/**`, `.claude/commands/**` — agent prompts, free-form.
 - Agent-generated output and its templates — `scouting/_TEMPLATE.md`,
   `analysis/_TEMPLATE.md`, dated reports, `*_BRIEF.md`, `analysis/<id>.md`.
-  These follow `docs/STYLE_GUIDE.md`'s own emoji system (emoji on `##`/`###`
+  These follow `docs/STYLE.md`'s own emoji system (emoji on `##`/`###`
   headers is *required* there — the opposite of structural docs).
 
 Path correctness is **not** exempt: when a path moves, references inside
@@ -224,26 +223,25 @@ Use this rule as the single source of truth for "which language should a
 new doc be in?":
 
 - **Default — Korean (한글).** All agent outputs (`scouting/`, `synthesis/`,
-  `analysis/`, `pulse/`) and the folder READMEs that describe them
-  (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`,
-  `pulse/README.md`) are Korean. Templates that those folders ship
-  (`_TEMPLATE*.md`) are Korean as well.
+  `analysis/`) and the folder READMEs that describe them
+  (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`) are
+  Korean. Templates that those folders ship (`_TEMPLATE*.md`) are Korean
+  as well.
 - **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
-  `docs/STYLE_GUIDE.md`. The audience is anyone reading PRs or
+  `docs/STYLE.md`. The audience is anyone reading PRs or
   history; English keeps that surface grep-able and consistent with the
   enforced English commit-message rule.
 - **Exception 2 — Project front door in English.** `README.md`. The
   GitHub-rendered top page is the public-facing entry, and the
   hand-tuned Korean onboarding lives one click away at
   `docs/INTRO.md` + `docs/probe_guide.html`.
-- **Korean onboarding docs stay Korean.** `docs/INTRO.md` and
-  `pulse/EXPORT_GUIDE.md` are Korean even though they sit alongside the
-  English contributor docs — their folder location plus the Korean H1
-  on line 1 are enough to identify them.
+- **Korean onboarding docs stay Korean.** `docs/INTRO.md` is Korean even
+  though it sits alongside the English contributor docs — its folder
+  location plus the Korean H1 on line 1 are enough to identify it.
 
 **No `_KO` / `_EN` filename suffix.** Location (the folder rule above) plus
 the H1 on line 1 are sufficient — `head -1 <file>` tells you the language
-in one command. When `docs/` ends up holding both `STYLE_GUIDE.md` (en) and
+in one command. When `docs/` ends up holding both `STYLE.md` (en) and
 `INTRO.md` (ko), that mix is intentional and documented here. Do not add a
 language suffix to a new document just to disambiguate; if the rule above
 does not place the doc unambiguously, the doc is in the wrong folder.
@@ -288,7 +286,7 @@ mapping by hand drifts immediately, so it is regenerated by
 `scripts/refresh-analysis-index.py` from the GIT step of
 `/analyze-paper`, `/foundry`, and `/audit`. The script reads each
 analysis's 📄 논문 메타 table (the load-bearing rows are documented in
-`docs/STYLE_GUIDE.md` §5-7), inspects the filesystem for foundry
+`docs/STYLE.md` §5-7), inspects the filesystem for foundry
 artifacts (`<id>_impl/<foundry>/impl.md` vs `UNMAPPABLE.md`), and
 rewrites only the block between
 
@@ -309,7 +307,7 @@ the script by hand from the repo root with
 
 - `README.md` — motivation, repository structure, full Stage 1–3 agent setup.
 - `docs/INTRO.md` — Korean onboarding + operations manual.
-- `docs/STYLE_GUIDE.md` — the single source of truth for agent **output**
+- `docs/STYLE.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
 - `scouting/README.md`, `synthesis/README.md`, `analysis/README.md` — what
   each output track is and how it is produced.

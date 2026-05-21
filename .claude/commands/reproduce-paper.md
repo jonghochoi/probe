@@ -3,7 +3,7 @@ description: 논문 한 편을 분석 → foundry 매핑 → 정적 audit 의 �
 argument-hint: <arXiv id | analysis/<id>_design.md> [--foundry <name>] [--max-rounds N]
 ---
 
-Read `.claude/prompts/reproduce-paper.md` and execute it exactly as
+Read `.claude/prompts/paper-reproduction.md` and execute it exactly as
 written. That file is the single source of truth for this command —
 do not duplicate or paraphrase its logic here.
 

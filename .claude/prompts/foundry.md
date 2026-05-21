@@ -54,7 +54,7 @@ CONTEXT (read-only):
 - `analysis/<id>.md` — the originating analysis. Read for context only;
   the Design is the contract.
 - `analysis/_TEMPLATE_IMPL.md` — the exact form `impl.md` must follow.
-- `docs/STYLE_GUIDE.md` — §6 (Implementation guide) + §4 (Korean tone,
+- `docs/STYLE.md` — §6 (Implementation guide) + §4 (Korean tone,
   glossary, verbatim).
 - For `--foundry lerobot`:
   - `vendor/lerobot/README.md` — pinned commit SHA; the `impl.md` meta
@@ -167,7 +167,7 @@ D. Verify the patch.
 
 E. Write the guide.
    Follow `analysis/_TEMPLATE_IMPL.md` exactly. Korean throughout,
-   formal 합니다/됩니다 체. Verbatim tokens per `docs/STYLE_GUIDE.md`
+   formal 합니다/됩니다 체. Verbatim tokens per `docs/STYLE.md`
    §4-1: original English paper titles (when cited), config/code
    names, `file:line` coordinates, formulas, arXiv links,
    `P#`/`D#`/`CP#` codes. Emoji per §6 — one at the start of each

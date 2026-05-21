@@ -1,7 +1,7 @@
 # Paper Analysis — <Original English Title>
 
 > PROBE paper-analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
-> 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE_GUIDE.md` §5 / §4 를
+> 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE.md` §5 / §4 를
 > 정확히 따릅니다. 재실행 시 이 파일을 덮어씁니다.
 
 ---
@@ -81,12 +81,12 @@
      출력됩니다. `\(…\)` / `\[…\]` 는 GitHub 에서 렌더되지 않으므로
      사용 금지. arXiv HTML 본문은 MathML + alttext 로 옵니다 —
      `alttext="X"` 에서 LaTeX 를 그대로 꺼내 위 표기로 감싸면
-     됩니다(STYLE_GUIDE §5-6). 변수 정의도 본문 표기와 일치. 분량
+     됩니다(STYLE §5-6). 변수 정의도 본문 표기와 일치. 분량
      압축이 아니라 디테일 보존이 목표입니다. 절 번호가 식별되지
      않으면 `(§?)` 로 두고 추정하지 않습니다.
 
      아키텍처 하위절에 논문의 pipeline overview / architecture
-     diagram 1장을 STYLE_GUIDE §5-6 figure-citation 형식으로 끼워
+     diagram 1장을 STYLE §5-6 figure-citation 형식으로 끼워
      넣는 것을 권장합니다 (arXiv HTML 가 있을 때만; hotlink only). -->
 
 ---

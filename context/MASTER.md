@@ -26,7 +26,7 @@
 - Competitor/Kindred Monitoring: review at every CP
 
 **Output formatting & authoring rules**
-All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`docs/STYLE_GUIDE.md`** — the single source of truth. The agent must read `docs/STYLE_GUIDE.md` before producing any output. Do not duplicate formatting rules here; edit `docs/STYLE_GUIDE.md` instead.
+All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`docs/STYLE.md`** — the single source of truth. The agent must read `docs/STYLE.md` before producing any output. Do not duplicate formatting rules here; edit `docs/STYLE.md` instead.
 
 **Audience**: maintainer (self, future-self) + AI retrieval agent + future collaborators. Keep terminology accessible without sacrificing precision.
 
@@ -382,7 +382,7 @@ Excluded from weekly digest unless unusually strong tie to a Pillar/Decision:
 ## 8. Tracked Literature [LIVING] [AGENT-INPUT]
 
 > 5 pillars × ≤8 pinned + methodology base. Rebalance quarterly; replace, don't append.
-> **Format rule** (canonical: `docs/STYLE_GUIDE.md` §3): every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs — verify resolution before pinning.
+> **Format rule** (canonical: `docs/STYLE.md` §3): every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs — verify resolution before pinning.
 
 ### 8.1 P1 Pinned — Heterogeneous Body/Hand Action Expert
 | Paper | arXiv | Year | Role |

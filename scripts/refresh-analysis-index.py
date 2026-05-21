@@ -11,7 +11,7 @@ Invoked from the GIT step of `/analyze-paper`, `/foundry`, and
 
     python3 scripts/refresh-analysis-index.py
 
-Specification: docs/STYLE_GUIDE.md §5-7.
+Specification: docs/STYLE.md §5-7.
 """
 
 from __future__ import annotations

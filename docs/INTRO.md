@@ -36,7 +36,7 @@
 
 ## 🧭 파이프라인
 
-PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출물**입니다 — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌고, 자기 폴더에 씁니다. 셋이 합쳐져 연구 로그를 정직하게 유지합니다. 네 번째 트랙 **`pulse/`** (PoC) 는 채팅→스카우트 *입력 보조* 레이어로, 사람이 읽는 산출물이 아닙니다 — 다이어그램 직후 사이드바에서 설명합니다.
+PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출물**입니다 — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌고, 자기 폴더에 씁니다. 셋이 합쳐져 연구 로그를 정직하게 유지합니다.
 
 > **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`context/MASTER.md`](../context/MASTER.md) §5.
 >
@@ -97,111 +97,18 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
                     └─────────────────────────────────┘
 ```
 
-### 사이드바: pulse — 채팅→스카우트 입력 보조 (PoC)
-
-`pulse/` 는 위 OUTWARD 컬럼의 사이드카이지 4번째 peer 가 아닙니다. 팀 채팅 export 를 짧은 pillar별 힌트 파일로 증류해, 다음 `scouting/` 실행의 retrieval-weight nudge 로만 작동합니다. 정적 `context/` 가 충돌 시 항상 승리하며, pulse 는 어떤 `context/` 파일도 수정하지 않습니다.
-
-```
-   pulse/inbox/      ──►  .claude/prompts/      ──►  pulse/YYYY-MM-DD-P#.md
-   (채팅 export,          pulse-digest.md            (pillar별 힌트,
-    gitignored)           (수동, ~주 1회)             실행당 최대 4개 파일)
-                                                              │
-                                                              ▼
-                                                    scouting/ retrieval
-                                                    (nudge 전용)
-```
-
-상태: Tier A PoC — 수동, 자동화 없음, 2주 trial. 스키마는 [`pulse/README.md`](../pulse/README.md), 채팅 export 운영 가이드는 [`pulse/EXPORT_GUIDE.md`](../pulse/EXPORT_GUIDE.md) 참조.
-
 ### 사이드바: foundry + verify — 분석 후속 구현·검증 (on-demand)
 
-위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/foundry` 가 "어디를 / 어떻게"를 채우고 `/audit` 가 "정합한가"를 따집니다. 두 층 모델로 분리되어 있습니다 — Layer 1 Design (vendor-agnostic) 은 `/analyze-paper` 가 분석 문서와 함께 산출하며, Layer 2 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 가 target foundry (기본 `lerobot`) 좌표계로 옮겨 `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` 를 산출합니다. baseline 은 foundry 의 byte-stable 스냅샷 (lerobot 의 경우 `vendor/lerobot/`) 에 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. Design 이 foundry 좌표계로 매핑되지 않으면 `UNMAPPABLE.md` 와 분석 문서 말미의 `> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 남깁니다 — Design 자체는 항상 산출됩니다. `/audit analysis/<id>_design.md [--foundry <name>]` 는 Design + 패치 + 분석 문서를 4 단계 정적 체크 (📚 문헌 · 🔍 패치 · 🧪 시그니처 · 📐 식·표) 로 대조해 `analysis/<id>_audit/<foundry>.md` 를 산출합니다. 분석 트랙은 manifest 라이프사이클이 없으므로 보고서 자체가 산출물입니다. 자세한 형식은 [`docs/STYLE_GUIDE.md`](STYLE_GUIDE.md) §6 / §7, foundry 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
+위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/foundry` 가 "어디를 / 어떻게"를 채우고 `/audit` 가 "정합한가"를 따집니다. 두 층 모델로 분리되어 있습니다 — Layer 1 Design (vendor-agnostic) 은 `/analyze-paper` 가 분석 문서와 함께 산출하며, Layer 2 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 가 target foundry (기본 `lerobot`) 좌표계로 옮겨 `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` 를 산출합니다. baseline 은 foundry 의 byte-stable 스냅샷 (lerobot 의 경우 `vendor/lerobot/`) 에 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. Design 이 foundry 좌표계로 매핑되지 않으면 `UNMAPPABLE.md` 와 분석 문서 말미의 `> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 남깁니다 — Design 자체는 항상 산출됩니다. `/audit analysis/<id>_design.md [--foundry <name>]` 는 Design + 패치 + 분석 문서를 4 단계 정적 체크 (📚 문헌 · 🔍 패치 · 🧪 시그니처 · 📐 식·표) 로 대조해 `analysis/<id>_audit/<foundry>.md` 를 산출합니다. 분석 트랙은 manifest 라이프사이클이 없으므로 보고서 자체가 산출물입니다. 자세한 형식은 [`docs/STYLE.md`](STYLE.md) §6 / §7, foundry 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
 
 ### 핵심 원칙: 정적 vs 동적 분리
 
 `context/` (정적)와 산출물 트랙들(동적) 사이의 분리는 단 하나의 이유로 존재합니다 — 에이전트 컨텍스트를 가볍게 유지하기 위해서입니다.
 
 - **정적** (`context/`) — 월 단위로 한 번 정도 바뀝니다. 에이전트는 *읽기만* 하고, 절대 쓰지 않습니다.
-- **동적** — 에이전트가 씁니다. `scouting/` 는 append-only 입니다 (실행마다 pillar별 새 dated 파일 1개; 다음 실행은 해당 pillar 의 직전 ~2주분만 읽습니다). `synthesis/` 와 `analysis/` 는 매 실행마다 덮어쓰는 living snapshot 입니다 — 이력 없음, 필요 시 재생성. `pulse/` (PoC 사이드카) 는 scouting 의 파일명 컨벤션을 따르되, 힌트 파일이 사람이 아닌 다음 `scouting/` 실행으로 흘러갑니다.
+- **동적** — 에이전트가 씁니다. `scouting/` 는 append-only 입니다 (실행마다 pillar별 새 dated 파일 1개; 다음 실행은 해당 pillar 의 직전 ~2주분만 읽습니다). `synthesis/` 와 `analysis/` 는 매 실행마다 덮어쓰는 living snapshot 입니다 — 이력 없음, 필요 시 재생성.
 
 모든 것을 한 파일에 쌓으면 몇 주 안에 context 가 부풀어 에이전트가 이미 다뤘던 논문을 재추천하거나 핀된 literature 가 망각됩니다.
-
----
-
-## 🗂️ 파일 구조
-
-```
-probe/
-│
-├── CLAUDE.md                       # 기여 규칙 — commit & 문서 스타일
-├── README.md                       # ← 대문
-├── brand.py                        # ASCII 아트, sigil, 컬러 상수
-│
-├── context/                        # 정적 입력 — 사람이 관리
-│   ├── MASTER.md                   #   단일 진실원 (P1–P5):
-│   │                               #   Identity, Pillars, Decision Log,
-│   │                               #   Tracked Literature,
-│   │                               #   Competitor / Researchers / Anti-topics
-│   └── P{1..4}.md                  #   pillar별 history-free 추출본 —
-│                                   #   §1–§9 동일 골격; 파이프라인은
-│                                   #   추출본 하나만 읽음
-│
-├── .claude/
-│   ├── prompts/                    # 외부화된 에이전트 프롬프트
-│   │   ├── scouting-P{1..4}.md     #   주간 스카우트 (pillar별 1개)
-│   │   ├── synthesis-P{1..4}.md    #   월간 synthesis brief
-│   │   ├── paper-analysis.md       #   온디맨드 단일 논문 심층분석
-│   │   │                           #     + Layer 1 Design (vendor-agnostic)
-│   │   ├── foundry.md              #   Design → foundry 별 구현 패치
-│   │   ├── audit.md               #   Design + 패치 정적 검증
-│   │   └── pulse-digest.md         #   채팅 → pillar별 힌트 (PoC)
-│   └── commands/                   # 슬래시 커맨드 (온디맨드)
-│       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
-│       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
-│       └── audit.md               #   /audit <design-path> [--foundry <n>]
-│
-├── scouting/                       # 동적 산출 — 주간 (월·목)
-│   ├── README.md                   #   파이프라인 요약
-│   ├── _TEMPLATE.md                #   Scouting Report 양식
-│   └── YYYY-MM-DD-P#.md            #   한글 리포트 — 실행·pillar별 1개
-│
-├── pulse/                          # 채팅→스카우트 입력 보조 (PoC 사이드카)
-│   ├── README.md                   #   목적 + Tier A 상태
-│   ├── _TEMPLATE.md                #   힌트 스키마 (pillar별)
-│   ├── _EXAMPLE.md                 #   참조 예시
-│   ├── EXPORT_GUIDE.md          #   Slack / Telegram export 운영 가이드
-│   ├── inbox/                      #   원시 채팅 export (README 외 gitignored)
-│   │   └── README.md
-│   └── YYYY-MM-DD-P#.md            #   pillar별 힌트 — 수동 ~주 1회
-│
-├── synthesis/                      # 월간 종합 산출
-│   ├── README.md                   #   파이프라인 요약
-│   └── P{1..4}_BRIEF.md            #   pillar별 living narrative (재생성)
-│
-├── analysis/                       # 단일 논문 심층 (온디맨드)
-│   ├── README.md                   #   목적 + 파일명 컨벤션
-│   ├── _TEMPLATE.md                #   한글 deep-dive 양식
-│   ├── _TEMPLATE_DESIGN.md         #   한글 Layer 1 Design 양식
-│   ├── _TEMPLATE_IMPL.md           #   한글 foundry-impl 가이드 양식
-│   ├── <arxiv-id>.md               #   단일 한글 분석 (재생성)
-│   ├── <arxiv-id>_design.md        #   Layer 1 Design (vendor-agnostic)
-│   ├── <arxiv-id>_impl/<foundry>/  #   foundry별 서브폴더
-│   │   ├── impl.md                 #     foundry-specific 구현 가이드
-│   │   └── impl.patch              #     foundry baseline 대비 unified diff
-│   └── <arxiv-id>_audit/<foundry>.md  #   정적 검증 보고서
-│
-├── vendor/                         # 읽기 전용 외부 코드
-│   └── lerobot/                    #   pinned lerobot 스냅샷 —
-│                                   #   6개 baseline policy + configs,
-│                                   #   v0 foundry (foundry=lerobot 의
-│                                   #   impl.patch 적용 대상)
-│
-└── docs/
-    ├── INTRO.md                 # 한글 온보딩 + 운영 매뉴얼
-    ├── STYLE_GUIDE.md              # 산출물 포맷 규칙 (이모지, 링크,
-    │                               #   한글 작성) — 리포트 SSOT
-    └── LOGO.png                    # 프로젝트 로고
-```
 
 ---
 
@@ -245,13 +152,6 @@ Scouting Report 말미에 *수정 제안*만 하고, 실제 반영은 사람이 
 
 ## 🛠️ 운영 노하우
 
-### 자동화 전에 수동 실행부터
-
-자동화 → 나쁜 프롬프트 → 매주 쓰레기 로그 자동 생성.
-**반드시 수동 실행 1 ~ 2주로 프롬프트를 검증한 뒤** Routine에 등록한다.
-
-수동 실행: 새 Claude 대화 → `context/MASTER.md` 업로드 → 에이전트 프롬프트 실행 → 결과 검토 → 프롬프트 수정 반복.
-
 ### 초반에 반드시 나타나는 문제 3가지
 
 | 증상 | 원인 | 처방 |
@@ -277,15 +177,10 @@ Citation-graph만 쓰면 본인 관심사 주변에서만 맴돈다.
 
 ## 🔁 실행 유지 방법
 
-### 3단계 점진적 전환
-
-```
-Week 1–2:  수동 실행     새 대화 → context.md 업로드 → 프롬프트 실행
-Week 3–4:  반자동화      Claude Desktop Scheduled Tasks (데스크톱 앱 오픈 시)
-Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼도 실행)
-```
-
-### Claude Code Routines 설정 (Week 5+)
+Probe 는 **Claude Code Routines 클라우드 스케줄링 단일 운영 모드**로
+돌립니다. 수동·반자동 단계는 더 이상 운영 옵션이 아닙니다 — 노트북이
+꺼져 있어도 월·목 09:00 에 루틴이 자동으로 돌아 리포트를 `main` 에
+직접 커밋합니다.
 
 루틴은 `.claude/routines/*.yaml` 로 자동 등록되지 **않습니다.** 실제
 스케줄링은 [claude.ai/code/routines](https://claude.ai/code/routines)
@@ -296,8 +191,12 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 `export.arxiv.org` + Semantic Scholar Graph)를 직접 호출합니다. 환경의
 **Network access = Custom** 으로 두 도메인을 허용해야 하며,
 `SEMANTIC_SCHOLAR_API_KEY` 는 환경변수(선택)입니다. 단계별 절차·검증·
-트러블슈팅은 `README.md` §Agent Setup Guide → Stage 3 를 따릅니다.
+트러블슈팅은 [`docs/AGENT_SETUP.md`](AGENT_SETUP.md) 를 따릅니다.
 
+> 프롬프트 검증은 루틴 등록 전 같은 프롬프트를 한 번 **Run now** 로
+> 돌려 산출물을 검토하는 방식으로 갈음합니다. 별도의 수동 실행 기간을
+> 두지 않습니다.
+>
 > Pro 플랜: 일일 한도가 주 2회 실행을 충분히 커버합니다.
 
 ### 지속 가능성의 핵심: 월간 리뷰
