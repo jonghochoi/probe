@@ -60,7 +60,7 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 | Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
 | Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
 | "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
-| "Great paper, but I'll never actually reproduce it" | `/foundry` maps the Design onto a target foundry (default `lerobot`) and ships a unified-diff patch |
+| "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` takes the Design, drives `/foundry` → `/audit` in a converging loop, and ships a unified-diff patch against a target foundry (default `lerobot`) |
 
 ---
 
@@ -230,7 +230,7 @@ cd probe
 
 ## 🤖 Agent Setup Guide
 
-Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/foundry` → `/audit`), and troubleshooting. Run the prompts in `.claude/prompts/scouting-P{1..4}.md` by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine.
+Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/foundry` → `/audit`) and its `/reproduce-paper` orchestrator, and troubleshooting. Run the prompts in `.claude/prompts/scouting-P{1..4}.md` by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine.
 
 ---
 
@@ -242,7 +242,7 @@ Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) —
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `audit.md` (on-demand) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `audit.md` · `paper-reproduction.md` (on-demand) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
@@ -299,7 +299,7 @@ the references below are the exact sources.
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/audit` → `<id>_audit/<foundry>.md` |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/audit` → `<id>_audit/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |

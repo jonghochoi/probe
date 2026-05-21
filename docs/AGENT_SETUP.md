@@ -146,21 +146,23 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 
 When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
-### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/audit`)
+### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/audit`, orchestrated by `/reproduce-paper`)
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/audit` does static validation. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/audit` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|
-| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` then `/foundry analysis/<id>_design.md [--foundry <name>]` then `/audit analysis/<id>_design.md [--foundry <name>]` |
-| Slash commands | `.claude/commands/{analyze-paper,foundry,audit}.md` (thin wrappers) |
-| Canonical prompts | `.claude/prompts/{paper-analysis,foundry,audit}.md` (single source per stage) |
+| Invoke (orchestrated) | `/reproduce-paper <arXiv id \| analysis/<id>_design.md> [--foundry <name>] [--max-rounds N]` — runs analyze → foundry → audit, then loops `/foundry --feedback <prev-audit>` + `/audit` until the audit verdict stabilises or the round cap is reached |
+| Invoke (step-by-step) | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` → `/foundry analysis/<id>_design.md [--foundry <name>]` → `/audit analysis/<id>_design.md [--foundry <name>]` |
+| Slash commands | `.claude/commands/{analyze-paper,foundry,audit,reproduce-paper}.md` (thin wrappers) |
+| Canonical prompts | `.claude/prompts/{paper-analysis,foundry,audit,paper-reproduction}.md` (single source per stage) |
 | Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
 | Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
-| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_audit/<foundry>.md` (validation) — all Korean, overwritten each run |
+| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_audit/<foundry>.md` (validation), plus per-round audit copies `analysis/<id>_audit/<foundry>.round_<N>.md` when run via `/reproduce-paper` — all Korean, overwritten each run |
 | Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; audit carries 4-check report |
-| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry` and `/audit` are local |
+| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry`, `/audit`, `/reproduce-paper` are local |
 | Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |
+| Termination | `/reproduce-paper` exits on one of `all_pass` / `unmappable` / `stable_partial` / `hold_and_report` (📚 verdict — outer loop deferred) / `max_rounds_exhausted`. `partial` stabilisation counts as a clean exit; gaps the paper body never pins down stay as 🚧 permanently. |
 
 Network note: `/analyze-paper`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE.md` §5 (analysis) / §6 (Design + impl) / §7 (audit).
 
