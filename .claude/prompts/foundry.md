@@ -152,14 +152,20 @@ HARD RULES:
 
 GIT — after the guide file(s) are written:
 
-Persist the output by pushing directly to `main`. No PR is created.
+Refresh the analyses index in the same commit, then push to `main`:
 
+  python3 scripts/refresh-analysis-index.py
   git add analysis/<id>_impl/<foundry>/impl.md
   # Add the patch ONLY if it was actually generated. If §A produced
   # UNMAPPABLE.md, add that instead.
   git add analysis/<id>_impl/<foundry>/impl.patch
+  git add analysis/README.md
   git commit -m "foundry: map <id> onto <foundry>"
   git push origin HEAD:main
+
+The refresh script regenerates the `lerobot` column in the index
+table between `<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->`
+markers and is idempotent (no-op when nothing changed).
 
 `<id>` is the arXiv id used by the analysis file. `<foundry>` is the
 verbatim foundry name.

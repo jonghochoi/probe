@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.12 (2026-05-21) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
+> **Version:** v1.13 (2026-05-21) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -281,6 +281,8 @@ rollback triggers:
 - `P#` / `D#` / `CP#` tags
 - `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` intra-doc links
 - arXiv / DOI links
+- arXiv figure hotlinks and their accompanying English caption
+  blockquotes (see §5-6 figure-citation block)
 - Emoji set, position, and the one-emoji-per-header rule (see §2)
 - §4-2 glossary translations for technical terms (no resynonymization
   to a non-glossary word)
@@ -385,68 +387,168 @@ target foundry (and emits a clean `🚧 매핑 불가 (<foundry>)` line if
 not). The analysis prompt never speculates about base matching — that
 decision belongs to Layer 2.
 
-### 5-6. 원문 인용 · 개조식 · 키워드 규약
+### 5-6. Quotation, bullet-form, keyword, math, and figure conventions
 
-방법론(🔬)·실험 결과(📊) 섹션은 본문 근거를 추적 가능하게 두고,
-문제 정의(❓)·기술 키워드(🔑) 섹션은 스캔성을 높이기 위해 다음
-규약을 따릅니다.
+🔬 방법론 and 📊 실험 결과 must keep the source body traceable;
+❓ 문제 정의 / 동기 and 🔑 기술 키워드 must stay scannable. The
+conventions below codify both.
 
-- **원문 blockquote 인용** — 핵심 설계 문장(앵커 클레임), 모든 수식,
-  핵심 수치 주장은 `>` blockquote 에 영문 원문을 verbatim 으로 두고
-  바로 아래 줄에 한글 해설을 답니다. 형식 고정:
+- **English-verbatim blockquote citation** — Anchor claims (the
+  sentence that nails the design intent), every formula, and every
+  key numeric claim sit inside a `>` blockquote with the English
+  source text verbatim and a Korean explanation line directly below.
+  Fixed format:
 
   ```markdown
   > "We model the action distribution with conditional flow matching." (§3.2)
   (한글 해설 — 이 문장이 왜 핵심인지.)
   ```
 
-  출처 표기는 `(§n)` 또는 `(§n, Table k)`. 본문에서 절 번호가
-  식별되지 않으면 `(§?)` 로 두고 추정하지 않습니다. 영문은 절대
-  paraphrase 하지 않으며, `humanize-korean` 패스도 이 blockquote
-  내부를 verbatim 토큰으로 취급해 손대지 않습니다(§4-5 invariants
-  확장).
+  Source marker is `(§n)` or `(§n, Table k)`. If the section number
+  is unclear in the source body, write `(§?)` — do not guess. The
+  English text is never paraphrased; the `humanize-korean` pass
+  treats the entire blockquote as a verbatim token (§4-5 invariants
+  extension).
 
-- **수식 verbatim + GitHub KaTeX 렌더링** — LaTeX/유니코드 표기를
-  원문 그대로 유지하며, paraphrase·기호 치환·줄임 금지. 변수 정의는
-  본문 표기와 일치시킵니다. github.com 의 Markdown 렌더러는
-  2022-05 부터 KaTeX 를 지원하므로, 본문에 넣는 수식은 다음 표기로
-  감쌉니다 — inline 은 `$…$`, display 는 별도 줄의 `$$…$$`.
-  `\(…\)` / `\[…\]` 는 GitHub 에서 렌더링되지 않으므로 사용하지
-  않습니다. arXiv HTML(LaTeXML) 본문에서 수식을 가져올 때는 다음
-  절차로 변환합니다.
+- **Formula verbatim + GitHub KaTeX rendering** — Keep the original
+  LaTeX / Unicode notation. No paraphrasing, symbol substitution, or
+  shortening. Variable definitions match the source body.
+  github.com's Markdown renderer supports KaTeX (since 2022-05), so
+  PROBE wraps math as **`` $`X`$ `` for inline (backticks INSIDE the
+  dollars) and `$$X$$` on its own line for display**. `\(…\)` /
+  `\[…\]` do not render on GitHub and are forbidden. From arXiv HTML
+  (LaTeXML) source, follow this extraction recipe:
 
-  1. `<math display="inline" … alttext="X">` → `` `$X$` `` — inline
-     수식은 **반드시 백틱으로 감싼 `` `$X$` `` 형태**로 적습니다.
-     GitHub Markdown 파서가 KaTeX 보다 먼저 동작하면서 `$…$` 안의
-     `_` 를 italic 으로 잘라먹는 알려진 한계를 우회하기 위함입니다
-     (`x_{t}` 같은 첨자가 거의 모든 식에 등장하므로 사실상 모든
-     inline 식에 적용). GitHub 공식 권장 표기입니다.
-  2. `<math display="block" … alttext="X">` 또는 `class="ltx_equation*"`
-     컨테이너 안쪽의 alttext → 별도 줄의 `$$X$$`. 선행 `\displaystyle`
-     과 후행 콤마는 제거할 수 있습니다. display 는 블록으로 인식되어
-     underscore 문제가 없으므로 백틱이 필요하지 않습니다.
-  3. HTML 엔티티 디코딩 — `&gt;` → `>`, `&lt;` → `<`, `&amp;` → `&`.
-  4. KaTeX 미지원 매크로(`\bm`, 일부 `\xrightarrow` 변형, 저자 정의
-     `\newcommand` 등)는 임의 치환 금지. 그대로 두면 GitHub 에서 빨간
-     에러로 표시되며, 이는 정직성 원칙(§5-4)에 부합합니다.
-  5. 본문 산문에 일반 달러 기호가 등장하면 `\$` 로 escape 해 수식
-     시작으로 오해되지 않도록 합니다.
+  1. `<math display="inline" … alttext="X">` → `` $`X`$ `` —
+     **inline math MUST use the inside-dollar backtick form**
+     `` $`X`$ ``. GitHub Markdown's italic pass runs before KaTeX
+     and otherwise captures the `_` in subscripts like `x_{t}`
+     (which appears in practically every inline span). With multiple
+     such spans on the same line, the italic toggle cascades and
+     breaks every math boundary on the line. The inside-dollar
+     backtick form is GitHub's official recommendation and PROBE's
+     only allowed inline form. **The outside-dollar form `` `$X$` ``
+     is FORBIDDEN** — it becomes an inline-code span, so KaTeX
+     never runs. The two forms differ only in character order and
+     produce opposite results.
+  2. **Inline math boundary rule** — GitHub's KaTeX inline parser
+     only recognises a `$` when its neighbours are non-word. The
+     opener `$` must be preceded by start-of-line, whitespace, or
+     one of `(` `[` `{` `<`. The closer `$` must be followed by
+     end-of-line, whitespace, or one of `.` `,` `;` `:` `!` `?`
+     `)` `]` `}` `>`. CJK middle-dot `·`, bold markers `*`/`**`, or
+     Hangul syllables glued directly to a `$` make that boundary
+     invisible and the source leaks through. Failures → fixes:
+     - `$X$·$Y$` (two math spans joined by middle-dot) →
+       `$X$ · $Y$` (one space on each side).
+     - `**$X$ Y**` (math glued inside bold) → `$X$ **Y**` or
+       `X **Y**` — move the math outside the bold marker so the
+       `$` never touches a `*`.
+     - `의$X$` / `$X$를` (Hangul touching `$`) → always one space
+       between Hangul and `$`.
+  3. `<math display="block" … alttext="X">` or any
+     `class="ltx_equation*"` container's `alttext` → its own `$$X$$`
+     line. Leading `\displaystyle` and trailing commas may be
+     stripped. Display blocks are recognised as their own line
+     blocks, so they have no underscore / boundary problem and need
+     no backticks.
+  4. Decode HTML entities: `&gt;` → `>`, `&lt;` → `<`, `&amp;` →
+     `&`.
+  5. Do not silently substitute KaTeX-unsupported macros (`\bm`,
+     certain `\xrightarrow` variants, author-defined `\newcommand`).
+     Leaving them in place surfaces a visible render error on
+     GitHub, which aligns with the honesty principle (§5-4).
+  6. Escape a literal `$` in prose as `\$` so it isn't mistaken for
+     a math opener.
 
-- **개조식(❓ 문제 정의 / 동기)** — 단일 산문 문단을 쓰지 않고 4–6
-  항목의 굵은 라벨 + 1–2문장 형태로 작성합니다. 권장 라벨:
-  `풀고자 하는 문제`, `기존 접근의 한계`, `본 논문의 가설`,
-  `왜 지금 중요한가`.
+- **Bullet form (❓ 문제 정의 / 동기)** — Do not write a single
+  paragraph. Use 4–6 items, each a bold label + 1–2 sentences.
+  Recommended Korean labels (verbatim): `풀고자 하는 문제`,
+  `기존 접근의 한계`, `본 논문의 가설`, `왜 지금 중요한가`.
 
-- **🔑 기술 키워드** — 본 논문 이해에 필요한 핵심 용어 5–10개를
-  `- **<원어 / 약어>** — <비유적 한 줄 설명>` 형식으로 정리합니다.
-  §4-2 글로서리에 등재된 용어는 글로서리 번역을 그대로 사용하되,
-  비유 한 줄을 곁들입니다. 비유는 사실 왜곡이 없는 선에서만
-  허용되며, 적절한 비유가 없으면 평이한 정의로만 적습니다.
+- **🔑 기술 키워드** — 5–10 key terms needed to read the paper,
+  each formatted as `- **<original / abbrev>** — <one-line analogy
+  or plain definition>`. For terms in the §4-2 glossary, use the
+  glossary translation as the head and add a short analogy.
+  Analogies are allowed only when they do not distort the paper's
+  claim; when no faithful analogy fits, write a plain definition.
 
-- **방법론 분해** — 🔬 방법론 은 가능하면 `### 직관`, `### 아키텍처`,
-  `### 학습 목표 / 손실`, `### 학습 셋업` 4 하위절로 분해해 디테일
-  보존을 우선합니다. `### ` 하위 헤더에는 이모지를 두지 않습니다
-  (§2 의 H3 plain 규칙과 동일).
+- **Methodology decomposition** — Split 🔬 방법론 into four H3
+  subsections wherever possible, with verbatim Korean headers:
+  `### 직관`, `### 아키텍처`, `### 학습 목표 / 손실`,
+  `### 학습 셋업`. Detail preservation comes first. H3 headers
+  carry no emoji (same as the §2 H3-plain rule).
+
+- **arXiv figure hotlink + English caption verbatim** — Insert 1–3
+  high-value figures, typically one architecture / pipeline diagram
+  under the methodology and one or two key ablation figures under
+  the results. PROBE never copies figures into the repo; it
+  hotlinks the arXiv HTML source URL (avoiding both copyright
+  republication and `_assets/` size bloat). Fixed format:
+
+  ```markdown
+  ![Figure N — short label](https://arxiv.org/html/<id>/figs/<file>)
+
+  > "Figure N: <English caption verbatim>" (§n)
+  (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
+  ```
+
+  - URL must be the arXiv HTML `<img src>` resolved to an absolute
+    path (`https://arxiv.org/html/<id>/<src>`). ar5iv mirrors,
+    author project pages, and cached hotlinks are out — too much
+    link-rot risk. Do not pin a version (`<id>v2/...`); arXiv
+    auto-maps the unversioned URL to the latest figure.
+  - The alt text follows `Figure N — <short English label>` so the
+    figure number survives even when the image fails to load.
+  - The English caption blockquote is a verbatim token (§4-5
+    invariants extension); the humanize-korean pass leaves it
+    untouched.
+  - Abstract-only acquisition, or a non-arXiv-HTML source
+    (PDF-only), means no figure URLs are available — omit the
+    figure citations entirely. No placeholders, no guessing.
+  - Cap: never more than 3 figures per analysis. This is a decision
+    tool, not a slide deck.
+
+### 5-7. Auto-maintained analysis index
+
+`analysis/README.md` carries a generated index of every deep-dive in
+the folder, refreshed by `scripts/refresh-analysis-index.py`. The
+script is invoked automatically by the GIT step of `/analyze-paper`,
+`/foundry`, and `/verify`, so any run that adds or refreshes an
+analysis (or its downstream impl/verify artifacts) updates the index
+in the same commit. This is the first intentional exception to the
+"every doc reference is hand-maintained" rule recorded in `CLAUDE.md`.
+
+The script rewrites only the block between these fixed markers in
+`analysis/README.md`; the rest of the file is preserved verbatim:
+
+```markdown
+<!-- ANALYSIS_INDEX:START -->
+... auto-generated table ...
+<!-- ANALYSIS_INDEX:END -->
+```
+
+The table has six columns: `#`, `Analysis` (relative hotlink),
+`arXiv` (link to the arXiv abstract), `Title` (the paper's English
+title), `Refreshed` (ISO date), `lerobot` (✅ if
+`<id>_impl/lerobot/impl.md` exists, 🚧 if `UNMAPPABLE.md` exists,
+`—` if `/foundry` has not been run for the lerobot foundry).
+Sort: `Refreshed` descending, ties broken by arXiv id descending.
+
+Load-bearing 📄 논문 메타 rows the script reads from every
+`analysis/<id>.md`:
+
+| Row label | Required format |
+|---|---|
+| `원문 제목 (영문)` | Plain English title |
+| `링크` | `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` |
+| `분석 생성일` | `YYYY-MM-DD` |
+
+If any of these rows is missing or malformed, the script writes
+`⚠️ metadata` in the affected cell rather than aborting, so one
+broken file cannot break the whole index. Running
+`python3 scripts/refresh-analysis-index.py` by hand is safe and
+idempotent — re-running with no underlying change produces no diff.
 
 ---
 
@@ -598,3 +700,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.10 | 2026-05-20 | §4-5 pipeline expanded from 3-stage to 4-agent — `naturalness-reviewer` reintroduced as a parallel second-stage check next to `content-fidelity-auditor`. The two reviewers are orthogonal: fidelity guards meaning, naturalness guards "did AI tells actually disappear + was the rewrite not over-polished". Verdict matrix combines both; `rewrite_round_2` / `rollback_and_rewrite` from naturalness triggers up to 2 additional Phase B rounds before `hold_and_report` |
 | v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 introduced experiments track at `/hypothesize` → `/foundry` → `/verify` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation requires every registered foundry to pass |
 | v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/verify`) with the verify report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |
+| v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/verify` |
