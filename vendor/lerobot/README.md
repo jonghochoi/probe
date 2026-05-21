@@ -2,10 +2,12 @@
 
 Read-only reference snapshot of selected `lerobot` policy code. PROBE itself
 is a Korean paper-analysis + scouting framework and does not run this code —
-it is vendored so the `/reproduce-paper` command can map a paper's claimed
-changes onto **concrete file/line locations** of a known baseline, and emit
-an implementation guide (`analysis/<id>_impl.md`) plus a unified-diff patch
-(`analysis/<id>_impl.patch`) against this snapshot.
+it is vendored as the **v0 foundry**, so the `/foundry` command can map a
+Design (Layer 1, vendor-agnostic) onto **concrete file/line locations** of a
+known baseline, and emit an implementation guide
+(`analysis/<id>_impl/lerobot/impl.md` for the analysis 트랙,
+`experiments/H###-*/I###/lerobot/impl.md` for the experiments 트랙) plus a
+unified-diff patch (`impl.patch` next to it) against this snapshot.
 
 ## Provenance
 
@@ -47,18 +49,19 @@ pinned commit instead of relying on this directory.
 
 ## Why it is here
 
-`/reproduce-paper` reads `analysis/<id>.md`, identifies whether the paper's
-baseline is one of the six policies above, then produces a Korean
-implementation guide whose code references point inside this directory. The
-patch (`<id>_impl.patch`) is generated against the current state of this
-snapshot, so the snapshot itself must stay byte-stable until the patch is
-regenerated.
+`/foundry` reads a Layer 1 Design (`analysis/<id>_design.md` or
+`experiments/H###-*/D###.md`), identifies whether the Design can ground in
+one of the six policies above (the `foundry=lerobot` case), then produces a
+Korean implementation guide whose code references point inside this
+directory. The patch (`impl.patch`) is generated against the current state
+of this snapshot, so the snapshot itself must stay byte-stable until the
+patch is regenerated.
 
 ## Refreshing the snapshot
 
-Bumping the pinned commit invalidates every existing `_impl.patch`. The
-intended cadence is **rare**: only when an upstream `lerobot` change is
-needed to support a new paper's baseline.
+Bumping the pinned commit invalidates every existing `impl.patch` under
+`*/lerobot/impl.patch`. The intended cadence is **rare**: only when an
+upstream `lerobot` change is needed to support a new Design's baseline.
 
 Procedure:
 
@@ -71,10 +74,13 @@ Procedure:
 3. Replace `LICENSE` if upstream changed it (it has not, at the pinned
    commit, but check).
 4. Update **Pinned commit** and **Vendor date** in the table above.
-5. Re-run `/reproduce-paper <id>` for every paper that already has an
-   `_impl.md`, and verify the regenerated `_impl.patch` still applies
-   cleanly to the new snapshot. Patches that no longer apply must be
-   rebuilt; their guide files keep `(잠정)` markers until they are.
+5. Re-run `/foundry <design-path> --foundry lerobot` for every Design that
+   already has an `impl.md` under `*/lerobot/`, and verify the regenerated
+   `impl.patch` still applies cleanly to the new snapshot. Then re-run
+   `/verify <design-path> --foundry lerobot` so `manifest.implementation.
+   lerobot.apply_check` and `manifest.validation.lerobot.*` reflect the
+   refreshed state. Patches that no longer apply must be rebuilt; their
+   guide files keep `(잠정)` markers until they are.
 
 ## License & attribution
 

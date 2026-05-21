@@ -23,8 +23,9 @@
 | 상태 | `draft` (`manifest.yaml` 가 단일 진실) |
 
 <!-- 시드가 Pillar 인 경우 "관련 분석" 은 보통 "없음" 입니다. 시드가
-     analysis 인 경우 해당 슬러그가 반드시 들어갑니다. 후보 베이스가
-     `null` 이면 `/implement-hypothesis` 가 거절할 수 있습니다. -->
+     analysis 인 경우 해당 슬러그가 반드시 들어갑니다. 후보 베이스는
+     선택 — `null` 이어도 `/foundry` 가 Design 으로부터 직접 추론합니다
+     (실패 시 `🚧 매핑 불가 (<foundry>)` 한 줄을 남김). -->
 
 ---
 

@@ -371,21 +371,19 @@ section is prefixed **(본문 미확보 — 잠정)**. Failed `curl` calls are
 recorded verbatim (command + HTTP status); fabricated content is never
 substituted.
 
-### 5-5. Reproduction follow-up line
+### 5-5. Foundry follow-up line
 
-When the analyzed paper builds on one of the six baselines vendored at
-`vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`,
-the analysis ends with exactly one blockquote line as its very last
-line:
+The analysis always ends with exactly one blockquote line as its very
+last line, regardless of whether a baseline can be matched:
 
 ```markdown
-> 💡 이 논문은 `pi0` 기반으로 보입니다. 구현 가이드는 `/reproduce-paper 2401.12345` 로 생성하실 수 있습니다.
+> 💡 base 매핑은 `/foundry analysis/2401.12345_design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 ```
 
-`<base>` is the verbatim vendor directory name. If the baseline cannot
-be matched to one of the six with reasonable confidence, the line is
-omitted — never speculated, never pointed at an outside-of-vendor
-baseline.
+`/foundry` itself decides whether the Design can be grounded in the
+target foundry (and emits a clean `🚧 매핑 불가 (<foundry>)` line if
+not). The analysis prompt never speculates about base matching — that
+decision belongs to Layer 2.
 
 ### 5-6. 원문 인용 · 개조식 · 키워드 규약
 
@@ -452,104 +450,151 @@ baseline.
 
 ---
 
-## 6. Paper Reproduction Document (`analysis/<id>_impl.md`)
+## 6. Design + Foundry Implementation Documents
 
-The `/reproduce-paper` slash command (prompt:
-`.claude/prompts/paper-reproduction.md`) consumes an existing
-`analysis/<id>.md` and produces two files:
+The `/analyze-paper` and `/hypothesize` slash commands emit a **Layer 1
+Design** (vendor-agnostic) alongside the analysis or hypothesis. The
+`/foundry` slash command (prompt: `.claude/prompts/foundry.md`)
+consumes that Design and produces a **Layer 2** foundry-specific
+implementation. The two-layer split exists so the same Design can
+serve multiple foundries (the v0 foundry is `lerobot`).
 
-- `analysis/<id>_impl.md`    — Korean reproduction guide.
-- `analysis/<id>_impl.patch` — unified diff against `vendor/lerobot/`.
+Outputs per track:
+
+- 논문 트랙:
+  - `analysis/<id>_design.md`                  — Layer 1 Design.
+  - `analysis/<id>_impl/<foundry>/impl.md`     — Korean impl guide.
+  - `analysis/<id>_impl/<foundry>/impl.patch`  — unified diff against
+                                                 the foundry's code
+                                                 root (for lerobot:
+                                                 `vendor/lerobot/`).
+- 가설 트랙:
+  - `experiments/H###-*/D###.md`               — Layer 1 Design.
+  - `experiments/H###-*/I###/<foundry>/impl.md` + `impl.patch`.
 
 ### 6-1. File convention
 
 - Korean single document, written natively per §4 (formal 합니다/됩니다
   체, glossary §4-2, verbatim tokens).
-- Filename is the analysis filename with `_impl` appended before the
-  extension (`<id>_impl.md`, `<id>_impl.patch`). No language suffix.
-- Regenerable snapshot — re-running overwrites both files.
-- The document follows `analysis/_TEMPLATE_IMPL.md` exactly. Six `##`
-  sections in this order: 📄 가이드 메타, 🧱 베이스 모델 식별, 🪛 변경
-  지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의, 🚧 미해결 / 잠정.
+- Filenames: see the per-track paths above. No language suffix.
+- Both Design and impl are **regenerable snapshots** — re-running the
+  generator overwrites them.
+- The Design document follows `analysis/_TEMPLATE_DESIGN.md` (논문) or
+  `experiments/_TEMPLATE_D.md` (가설) — 9 `##` sections in this order:
+  📄 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스, ⛓️ 불변식·가정,
+  📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도, 🔌 Foundry
+  힌트, 🚧 미해결 / 잠정.
+- The impl document follows `analysis/_TEMPLATE_IMPL.md` (or
+  `experiments/_TEMPLATE_I.md`) exactly. Six `##` sections in this
+  order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표 식별, 🪛 변경 지점
+  매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의, 🚧 미해결 / 잠정.
 
 ### 6-2. Emoji system
 
 Same rule as §2: one emoji at the start of each `##` / `###` header,
-never in body. Section (`##`) emojis specific to this document type
+never in body. Section (`##`) emojis specific to this document family
 (added on top of §2 and §5-2):
 
-| Emoji | Section |
-|-------|---------|
-| 📄 | 가이드 메타 |
-| 🧱 | 베이스 모델 식별 |
-| 🪛 | 변경 지점 매핑 |
-| ⚙️ | 핵심 변경 (diff) |
-| 🧪 | 실무 구현 주의 |
-| 🚧 | 미해결 / 잠정 |
+| Emoji | Section | Document |
+|-------|---------|----------|
+| 📄 | Design 메타 · 가이드 메타 | Design · impl (reused from §5-2) |
+| 🧮 | 데이터 계약 | Design (new) |
+| 🧰 | 모듈 인터페이스 | Design (new) |
+| ⛓️ | 불변식·가정 | Design (new) |
+| 📊 | 하이퍼파라미터·손실 | Design (reused from §5-2) |
+| 🎯 | 평가 메트릭 | Design (reused from §5-2 / §2-2) |
+| ✨ | 변경 의도 | Design (reused from §5-2 / §2-2) |
+| 🔌 | Foundry 힌트 | Design (new) |
+| 🧱 | 베이스 / 코드 좌표 식별 | impl |
+| 🪛 | 변경 지점 매핑 | impl |
+| ⚙️ | 핵심 변경 (diff) | impl |
+| 🧪 | 실무 구현 주의 | impl |
+| 🚧 | 미해결 / 잠정 | Design · impl |
 
-📄 and ⚙️ are reused from §5-2 / §2-2 — same emoji, document-local
-meaning. 🧱 🪛 🧪 🚧 are introduced by this section and used nowhere
-else in PROBE outputs.
+🧮 🧰 ⛓️ 🔌 are introduced by this section (Design). 🧱 🪛 🧪 are
+introduced for impl. 🚧 is reused across both. None appear elsewhere
+in PROBE outputs outside §6 and §7.
 
-### 6-3. Vendor coordinate rule
+### 6-3. Vendor-agnostic Design vs. foundry-bound impl
 
-Every code reference points inside `vendor/lerobot/` and follows the
-form `vendor/lerobot/policies/<base>/<file>:<line>` (line numbers
-optional but recommended). Coordinates are bound to the pinned commit
-recorded in `vendor/lerobot/README.md` — the guide's 📄 가이드 메타
-table MUST cite the same SHA. Bumping the snapshot invalidates every
-existing `_impl.patch`; see `vendor/lerobot/README.md` for the refresh
-procedure.
+The Design contains **no `file:line` coordinates** from
+`vendor/lerobot/` or any other codebase. Its module-interface section
+records function signatures and contracts, not source locations. This
+keeps the Design portable across foundries.
+
+Every impl-document code reference, in contrast, points inside the
+chosen foundry's code root and follows the form
+`<foundry-root>/<path>:<line>` (line numbers optional but recommended;
+for `lerobot` the prefix is `vendor/lerobot/policies/<base>/`).
+Coordinates are bound to the foundry's pinned snapshot — for lerobot
+the SHA in `vendor/lerobot/README.md`, which the impl's 📄 가이드 메타
+table MUST cite verbatim. Bumping the snapshot invalidates every
+existing `*/lerobot/impl.patch`; see `vendor/lerobot/README.md` for the
+refresh procedure.
 
 ### 6-4. Honesty rules carried over
 
-- If `analysis/<id>.md` was produced from abstract-only, every guide
-  `##` section first line is prefixed **(본문 미확보 — 잠정)** and
-  no patch file is produced — only the markdown.
+- If `analysis/<id>.md` was produced from abstract-only, every Design
+  section is prefixed **(본문 미확보 — 잠정)** and most fields will be
+  `(원문에 명시 없음 — 가정으로 메움)`. The impl document, when
+  generated, also prefixes every `##` section first line with
+  **(본문 미확보 — 잠정)** and no patch file is produced — only the
+  markdown.
+- Sparse Design > fabricated Design. Any field the source does not pin
+  down is left as `(원문에 명시 없음 — 가정으로 메움)` (논문 트랙) or
+  `(가설에 명시 없음 — 가정으로 메움)` (가설 트랙).
 - If `git apply --check` fails on the generated patch, the failure is
   recorded verbatim in the 📄 가이드 메타 table and at the end of
   ⚙️ 핵심 변경 (diff). Affected hunks are downgraded to 🪛 + 🚧 entries
   instead of being silently forged.
-- If the paper's baseline cannot be matched to one of the six vendored
-  policies, **neither** `_impl.md` nor `_impl.patch` is produced. The
-  agent appends one line to `analysis/<id>.md`:
-  `> 🚧 재현 가이드 미생성 — 베이스 모델이 vendor 범위 밖입니다.`
+- If the Design cannot ground in the target foundry, **neither**
+  `impl.md` nor `impl.patch` is produced. Instead `/foundry` writes
+  `<impl-root>/<foundry>/UNMAPPABLE.md` with one paragraph of reason,
+  and appends one line to the originating document
+  (`analysis/<id>.md` or `experiments/H###-*/H###.md`):
+  `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
 ---
 
 ## 7. Experiments Documents (`experiments/`)
 
-The `/hypothesize`, `/implement-hypothesis`, and `/validate-hypothesis`
-slash commands (prompts: `.claude/prompts/hypothesize.md` ·
-`implement-hypothesis.md` · `validate-hypothesis.md`) produce a
-hypothesis-implementation-validation cycle under
-`experiments/H###-<slug>/`.
+The `/hypothesize`, `/foundry`, and `/verify` slash commands (prompts:
+`.claude/prompts/hypothesize.md` · `foundry.md` · `verify.md`) produce
+a hypothesis-design-implementation-validation cycle under
+`experiments/H###-<slug>/`. Design + impl formats are governed by §6;
+this section covers the experiments-specific lifecycle and the
+validation report.
 
 ### 7-1. File convention
 
 - **Korean single documents.** Like every other PROBE output,
-  `H###.md`, `I###.md`, and `V###.md` are single Korean documents —
-  written natively per §4 (tone, glossary, verbatim tokens). No
-  English-primary file. No language suffix on the filename.
+  `H###.md`, `D###.md`, `I###/<foundry>/impl.md`, and
+  `V###/<foundry>.md` are single Korean documents — written natively
+  per §4 (tone, glossary, verbatim tokens). No English-primary file.
+  No language suffix on the filename.
 - Folder name: `experiments/H###-<slug>/` — `H###` is zero-padded to
   three digits and the slug is kebab-case ASCII derived from the
   hypothesis title (or supplied by the human at `/hypothesize` time).
-  The same numeric ID is reused for `I###`, `I###.patch`, and `V###`
-  inside that folder.
-- `H###.md` is **immutable** once written by `/hypothesize` (the only
-  later addition is a single 🚧 blockquote line if
-  `/implement-hypothesis` finds the baseline out-of-vendor). To revise
-  a hypothesis, start a new `H###`.
-- `I###.md` + `I###.patch` are **regenerable snapshots** — re-running
-  `/implement-hypothesis` overwrites both.
-- `V###.md` is a **regenerable snapshot** — re-running
-  `/validate-hypothesis` overwrites it.
+  The same numeric ID is reused for `D###`, `I###`, and `V###` inside
+  that folder. Per-foundry impl/verify outputs live one level deeper
+  under `I###/<foundry>/` and `V###/<foundry>.md`.
+- `H###.md` and `D###.md` are **immutable** once written by
+  `/hypothesize` (the only later addition is a single 🚧 blockquote
+  line on `H###.md` if `/foundry` finds the Design unmappable for
+  some foundry). To revise a hypothesis, start a new `H###`.
+- `I###/<foundry>/impl.md` + `impl.patch` are **regenerable
+  snapshots** — re-running `/foundry --foundry <name>` overwrites both
+  for that foundry only. Other foundries' outputs are untouched.
+- `V###/<foundry>.md` is a **regenerable snapshot** — re-running
+  `/verify --foundry <name>` overwrites it.
 - `manifest.yaml` is the **only** jointly written file: agents update
-  `validation.*`, `implementation.*`, and (when all checks pass)
-  `status: draft → validated`. The transitions `→ adopted` and
-  `→ rejected` plus the `adopted:` date are **human-only**.
-- The `experiments/` folder follows `_TEMPLATE_H.md` / `_TEMPLATE_I.md`
-  / `_TEMPLATE_V.md` exactly.
+  foundry-keyed `implementation.<foundry>.*` and
+  `validation.<foundry>.*`, and graduate `status: draft → validated`
+  only when **every registered foundry** has all three validation
+  checks at `pass`. The transitions `→ adopted` and `→ rejected` plus
+  the `adopted:` date are **human-only**.
+- The `experiments/` folder follows `_TEMPLATE_H.md` / `_TEMPLATE_D.md`
+  / `_TEMPLATE_I.md` / `_TEMPLATE_V.md` exactly.
 
 ### 7-2. Emoji system
 
@@ -600,11 +645,13 @@ fences. Field enums (verbatim values only):
 | `related_baseline` | enum / null | `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` / `null` |
 | `relations[].kind` | enum | `supports` / `conflicts` / `extends` / `refines` |
 | `relations[].target` | string | a `D#` or another `H###` |
-| `implementation.patch` | string / null | `I###.patch` once `/implement-hypothesis` runs |
-| `implementation.apply_check` | string / null | `pass` / `fail — <stderr first line>` / `n/a — base out of vendor` |
-| `validation.literature` | enum / null | `pass` / `fail` / `partial` |
-| `validation.patch_consistency` | enum / null | `pass` / `fail` |
-| `validation.signature_check` | enum / null | `pass` / `fail` / `partial` |
+| `implementation` | map | foundry-keyed dict. Each subkey is a foundry name (e.g. `lerobot`); `/foundry` adds one entry per run. |
+| `implementation.<foundry>.patch` | string | `I###/<foundry>/impl.patch` once `/foundry --foundry <foundry>` runs |
+| `implementation.<foundry>.apply_check` | string | `pass` / `fail — <stderr first line>` / `n/a — unmappable` |
+| `validation` | map | foundry-keyed dict. Each subkey is a foundry name; `/verify` adds one entry per run. |
+| `validation.<foundry>.literature` | enum | `pass` / `fail` / `partial` |
+| `validation.<foundry>.patch_consistency` | enum | `pass` / `fail` / `partial` |
+| `validation.<foundry>.signature_check` | enum | `pass` / `fail` / `partial` |
 
 `relations` must be non-empty — every hypothesis has at least one
 stated relationship to a Decision. `null` (not `~`, not empty string)
@@ -612,17 +659,20 @@ is used for fields not yet known.
 
 ### 7-4. Honesty rules carried over
 
-- If `git apply --check` fails for `I###.patch`, the failure is
-  recorded verbatim in `I###.md` 📄 가이드 메타 + `manifest.yaml`
-  `implementation.apply_check`, and `/validate-hypothesis` records it
-  again under V###.md §🔍 with the live re-run output. Affected hunks
-  are downgraded to 🪛 + 🚧 entries in `I###.md` — never silently
-  forged. **A `patch_consistency: fail` blocks `status` graduation,
-  regardless of literature/signature outcomes.**
-- The validator (`/validate-hypothesis`) only graduates
-  `draft → validated`. It NEVER writes `adopted` or `rejected`. A
-  `manifest.status: adopted` written by an agent is a bug — those
-  values exist solely so the human can mark a hypothesis as decided.
+- If `git apply --check` fails for `I###/<foundry>/impl.patch`, the
+  failure is recorded verbatim in that impl.md 📄 가이드 메타 +
+  `manifest.implementation.<foundry>.apply_check`, and `/verify`
+  records it again under `V###/<foundry>.md` §🔍 with the live re-run
+  output. Affected hunks are downgraded to 🪛 + 🚧 entries in impl.md
+  — never silently forged. **A `patch_consistency: fail` for any
+  registered foundry blocks `status` graduation, regardless of
+  literature/signature outcomes on other foundries.**
+- The verifier (`/verify`) only graduates `draft → validated`, and
+  only when **every registered foundry** has all three checks at
+  `pass`. A single foundry passing is not enough. The verifier NEVER
+  writes `adopted` or `rejected`. A `manifest.status: adopted`
+  written by an agent is a bug — those values exist solely so the
+  human can mark a hypothesis as decided.
 - Hypotheses sourced from a Pillar code (`P#`) carry an empty
   `related_analyses: []`. Validation `literature` is `pass` only when
   the hypothesis explicitly identifies itself as pillar-internal (no
@@ -632,10 +682,10 @@ is used for fields not yet known.
 ### 7-5. Korean & verbatim rules
 
 §4 applies in full. Specifically: original English paper title (when
-cited in `H###.md` ✨ 핀 논문 대비 델타 or `V###.md` 📚 문헌 대조),
-config/code names, `file:line` coordinates, formulas, arXiv links, and
-`P#`/`D#`/`CP#`/`H###` codes are kept verbatim; technical terms use
-the §4-2 glossary; tone is formal 합니다/됩니다 체.
+cited in `H###.md` ✨ 핀 논문 대비 델타 or `V###/<foundry>.md` 📚 문헌
+대조), config/code names, `file:line` coordinates, formulas, arXiv
+links, and `P#`/`D#`/`CP#`/`H###` codes are kept verbatim; technical
+terms use the §4-2 glossary; tone is formal 합니다/됩니다 체.
 
 ---
 
@@ -654,3 +704,4 @@ the §4-2 glossary; tone is formal 합니다/됩니다 체.
 | v1.8 | 2026-05-20 | Scope extended to `experiments/`; added §7 (Experiments Documents — `H###.md` + `I###.md` + `I###.patch` + `V###.md` + `manifest.yaml`); introduced section emojis 📚 🔍 📐 ⚖️; manifest schema + honesty rules (validator never writes `adopted`/`rejected`); Changelog renumbered §8 |
 | v1.9 | 2026-05-20 | Added §4-5 — `humanize-korean` post-processing tail step (ported from [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai)); every Korean output passes the `ai-tell-detector` → `korean-style-rewriter` → `content-fidelity-auditor` pipeline before commit. PROBE invariants (paper titles, P#/D#/CP#/H### tags, `<a id="ref-…">` anchors, arXiv/DOI links, emoji rules, §4-2 glossary) codified as rollback triggers. §4-4 (Tone and style) deleted — tone, register, rhythm, density, hedging, and visual-ornament rules are now fully delegated to the upstream `humanize-korean` taxonomy; STYLE_GUIDE no longer carries its own tone spec |
 | v1.10 | 2026-05-20 | §4-5 pipeline expanded from 3-stage to 4-agent — `naturalness-reviewer` reintroduced as a parallel second-stage check next to `content-fidelity-auditor`. The two reviewers are orthogonal: fidelity guards meaning, naturalness guards "did AI tells actually disappear + was the rewrite not over-polished". Verdict matrix combines both; `rewrite_round_2` / `rollback_and_rewrite` from naturalness triggers up to 2 additional Phase B rounds before `hold_and_report` |
+| v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 retargeted at `/hypothesize` → `/foundry` → `/verify` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation now requires every registered foundry to pass |

@@ -18,10 +18,10 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
 | `scouting/` | agent | Weekly Scouting Reports (`YYYY-MM-DD-P#.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
-| `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`) and reproduction guides (`<arxiv-id>_impl.md` + `<arxiv-id>_impl.patch`) |
+| `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_verify/<foundry>.md`) |
 | `pulse/` | agent + human input | Chat-to-scout bias PoC — weekly `YYYY-MM-DD-P#.md` retrieval-weight nudges; `inbox/` is human-fed raw chat (gitignored) |
-| `experiments/` | agent + human input | Team-internal hypothesis cycles — `H###-<slug>/{H,I,V}###.md` + `I###.patch` + `manifest.yaml`. Agent runs `draft → validated`; human runs `→ adopted` / `→ rejected` |
-| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; target of `_impl.patch` and `I###.patch`. Refresh procedure in its own `README.md` |
+| `experiments/` | agent + human input | Team-internal hypothesis cycles — `H###-<slug>/{H,D}###.md`, `I###/<foundry>/{impl.md,impl.patch}`, `V###/<foundry>.md`, `manifest.yaml`. Agent runs `draft → validated`; human runs `→ adopted` / `→ rejected` |
+| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE_GUIDE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
@@ -31,20 +31,24 @@ never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
 never the reverse.
 
 `vendor/lerobot/` is read-only to **both** the agent and contributors. It is
-a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the
-target of every `analysis/<id>_impl.patch` and `experiments/H###-*/I###.patch`.
-Hand-editing files inside it would silently invalidate existing patches and
-break attribution. The only way it changes is the wholesale refresh
-procedure in `vendor/lerobot/README.md`; nothing else.
+a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the v0
+foundry — the target of every `foundry=lerobot` impl patch under
+`analysis/<id>_impl/lerobot/impl.patch` and
+`experiments/H###-*/I###/lerobot/impl.patch`. Hand-editing files inside it
+would silently invalidate existing patches and break attribution. The only
+way it changes is the wholesale refresh procedure in
+`vendor/lerobot/README.md`; nothing else.
 
 `experiments/` follows a split-ownership rule. Each `H###-<slug>/` folder is
-fully append-only at the file level once a stage runs (`H###.md` after
-`/hypothesize`, `I###.md`/`I###.patch` after `/implement-hypothesis`,
-`V###.md` after `/validate-hypothesis`) — those files are regenerable
-snapshots but never hand-edited. The `manifest.yaml` is the **only** file in
-the folder that is jointly written: agents update validation/implementation
-fields and may graduate `status: draft → validated`, but the transitions
-`→ adopted` and `→ rejected` belong to the human, who edits
+fully append-only at the file level once a stage runs (`H###.md` and
+`D###.md` after `/hypothesize`, `I###/<foundry>/impl.md` +
+`I###/<foundry>/impl.patch` after `/foundry`, `V###/<foundry>.md` after
+`/verify`) — those files are regenerable snapshots but never hand-edited.
+The `manifest.yaml` is the **only** file in the folder that is jointly
+written: agents update foundry-keyed `implementation.<foundry>` and
+`validation.<foundry>` fields and may graduate `status: draft → validated`
+when every registered foundry has all three validation checks at `pass`, but
+the transitions `→ adopted` and `→ rejected` belong to the human, who edits
 `manifest.status` and `manifest.adopted` directly.
 
 ## Commit message style

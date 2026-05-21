@@ -1,5 +1,5 @@
 ---
-description: 입력(P# 또는 analysis/<id>)에서 falsifiable 가설을 도출해 experiments/H###-<slug>/ 에 단일 한글 문서 + manifest 를 생성
+description: 입력(P# 또는 analysis/<id>)에서 falsifiable 가설을 도출해 experiments/H###-<slug>/ 에 한글 가설 문서(H###.md) + Layer 1 Design 문서(D###.md) + manifest 를 생성
 argument-hint: <P# | analysis-slug> [slug]
 ---
 

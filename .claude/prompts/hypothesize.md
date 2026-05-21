@@ -41,6 +41,8 @@ CONTEXT (read-only):
 - `analysis/<id>.md` (if seeded)    — the authoritative source for what the
                                       paper says. Read in full.
 - `experiments/_TEMPLATE_H.md`      — the exact form `H###.md` must follow.
+- `experiments/_TEMPLATE_D.md`      — the exact form `D###.md` (Layer 1
+                                      Design, vendor-agnostic) must follow.
 - `docs/STYLE_GUIDE.md`             — §7 (Experiments Documents) + §4 (Korean
                                       tone, glossary, verbatim tokens).
 
@@ -48,16 +50,20 @@ Do NOT edit any file under `context/`, `vendor/`, `analysis/`,
 `scouting/`, `synthesis/`, or `pulse/`. This command writes only inside
 `experiments/`.
 
-TASK — produce these files, atomically (do not write H###.md without
-also writing manifest.yaml, and vice versa):
+TASK — produce these files, atomically (do not write any one without
+the others):
 
 1. `experiments/H###-<slug>/H###.md`     — Korean hypothesis document,
                                             following `_TEMPLATE_H.md`
                                             exactly.
-2. `experiments/H###-<slug>/manifest.yaml` — machine-readable metadata
+2. `experiments/H###-<slug>/D###.md`     — Korean Layer 1 Design
+                                            (vendor-agnostic), following
+                                            `_TEMPLATE_D.md` exactly.
+                                            The numeric suffix matches
+                                            the parent `H###`.
+3. `experiments/H###-<slug>/manifest.yaml` — machine-readable metadata
                                               the live artifacts and
-                                              `/validate-hypothesis`
-                                              read.
+                                              `/foundry` / `/verify` read.
 
 PROCEDURE:
 
@@ -115,14 +121,17 @@ D. Identify related Decisions and analyses.
      informs this hypothesis. The analysis-seed slug is always
      included here. Pillar seeds may include none.
 
-E. Identify the candidate vendor baseline (optional).
-   Look at `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,
-   diffusion}/`. If the hypothesis clearly targets one (e.g. "add FiLM
-   modulation to the action expert" → `pi05`; "swap the diffusion
-   head" → `diffusion`), record it as `related_baseline`. If the
-   hypothesis is upstream of any specific policy (e.g. about data
-   pipeline or evaluation protocol), leave it `null`. Never speculate
-   — `/implement-hypothesis` will fail loudly if the baseline is wrong.
+E. Identify the candidate foundry hint (optional).
+   The hypothesis lives at Layer 1 — it does not name foundry
+   coordinates. Still, an early hint helps `/foundry` pick a base. For
+   foundry `lerobot`, look at
+   `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`.
+   If the hypothesis clearly targets one (e.g. "add FiLM modulation to
+   the action expert" → `pi05`; "swap the diffusion head" →
+   `diffusion`), record it as `related_baseline`. If the hypothesis is
+   upstream of any specific policy (e.g. about data pipeline or
+   evaluation protocol), leave it `null`. Never speculate — `/foundry`
+   will emit a clean `🚧 매핑 불가` line if the hint is wrong.
 
 F. Write the hypothesis document.
    Follow `experiments/_TEMPLATE_H.md` exactly. Korean throughout,
@@ -130,6 +139,18 @@ F. Write the hypothesis document.
    §4-1: paper titles (original English), config/code names, formulas,
    arXiv links, `P#`/`D#`/`CP#` codes. Emoji per §7 — one at the start
    of each `##` header, never in body.
+
+F-bis. Write the Design document.
+   Follow `experiments/_TEMPLATE_D.md` exactly. This is the Layer 1
+   spec — vendor-agnostic, no `file:line` coordinates. Derive every
+   section from the hypothesis you just wrote — the Design must be
+   self-consistent with `H###.md` (especially the §🔬 Falsifiable Test
+   metrics, which appear verbatim in 🎯 평가 메트릭).
+
+   Honesty over completeness: any field the hypothesis does not pin
+   down must be left as `(가설에 명시 없음 — 가정으로 메움)` rather
+   than fabricated. A sparse Design is acceptable; a fabricated one is
+   not.
 
 G. Write the manifest.
    Use the schema below verbatim. YAML, two-space indentation, no
@@ -152,13 +173,17 @@ G. Write the manifest.
        target: D#               # D# from MASTER.md OR another H### (rare)
      - kind: extends
        target: D#
-   implementation:
-     patch: null                # set by /implement-hypothesis
-     apply_check: null          # set by /implement-hypothesis
-   validation:
-     literature: null           # set by /validate-hypothesis
-     patch_consistency: null
-     signature_check: null
+   implementation: {}           # /foundry adds one subkey per foundry:
+                                #   implementation:
+                                #     lerobot:
+                                #       patch: I###/lerobot/impl.patch
+                                #       apply_check: pass | fail — … | n/a — unmappable
+   validation: {}               # /verify adds one subkey per foundry:
+                                #   validation:
+                                #     lerobot:
+                                #       literature: pass | fail | partial
+                                #       patch_consistency: pass | fail | partial
+                                #       signature_check: pass | fail | partial
    ```
 
    `relations` must be non-empty — every hypothesis has at least one
@@ -177,18 +202,35 @@ HARD RULES:
   `TZ=Asia/Seoul date +%Y-%m-%d` — verbatim, never hand-typed.
 - Status starts at `draft`. Do not write `validated`, `adopted`, or
   `rejected` from this command — state transitions belong elsewhere
-  (`/validate-hypothesis` for `validated`, the human for the rest).
+  (`/verify` for `validated`, the human for the rest).
+- The Design (`D###.md`) is **vendor-agnostic**. It must not contain
+  `file:line` coordinates from `vendor/lerobot/` or any other
+  codebase. Mapping belongs to `/foundry`.
 - Emoji/header system per `docs/STYLE_GUIDE.md` §7. One emoji at the
   start of each `##` / `###` header, none in body text.
 - Honesty over completeness — if the seed cannot support a falsifiable
   test, surface that and stop. A missing hypothesis is better than a
   vacuous one.
 
-FINAL STEP — implementation follow-up suggestion:
-After writing both files, if `related_baseline` is non-null, append
-exactly one blockquote line as the very last line of `H###.md`:
+FINAL STEP — foundry follow-up suggestion:
+After writing all three files, append exactly one blockquote line as
+the very last line of `H###.md`:
 
-> 💡 이 가설은 `<base>` 기반 구현이 자연스러워 보입니다. 구현 가이드는 `/implement-hypothesis H###` 로 생성하실 수 있습니다.
+> 💡 base 매핑은 `/foundry experiments/H###-<slug>/D###.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
-If `related_baseline` is null, omit this line entirely — do NOT
-speculate, do NOT point at an outside-of-vendor baseline.
+The line is added unconditionally — `/foundry` itself decides whether
+the Design can be mapped to a given foundry (and emits a clean
+`🚧 매핑 불가` if not). Never auto-invoke `/foundry`; the human decides.
+
+---
+
+GIT — after all three files are written:
+
+  git add experiments/H###-<slug>/H###.md \
+          experiments/H###-<slug>/D###.md \
+          experiments/H###-<slug>/manifest.yaml
+  git commit -m "hypothesize: add H### + design (<slug>)"
+  git push origin HEAD:main
+
+Standard rebase-and-retry / network-retry rules. Never `--no-verify`,
+never force-push.
