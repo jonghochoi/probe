@@ -22,9 +22,12 @@ CONTEXT (read-only):
                                Identity & Purpose, Pillars P1–P5,
                                Decision Log D1–D26, Tracked Literature,
                                Competitor list, Researchers, Anti-topics.
-- docs/STYLE_GUIDE.md        — §5 (Paper Analysis doc) + §4 (Korean
+- docs/STYLE_GUIDE.md        — §5 (Paper Analysis doc) + §6 (Design /
+                               Implementation guide) + §4 (Korean
                                terms/tone/glossary).
-- analysis/_TEMPLATE.md      — the form this document follows exactly.
+- analysis/_TEMPLATE.md      — the form for the analysis document.
+- analysis/_TEMPLATE_DESIGN.md — the form for the Layer 1 Design
+                               document (vendor-agnostic).
 Never edit any context file. context/MASTER.md is human-owned; if
 this paper implies a pinned-literature or Decision change, write it
 under 💡 컨텍스트 제안 and stop there.
@@ -78,16 +81,27 @@ better than a fabricated one. Math/tables/figures degrade in text
 extraction — quote numbers as found; never infer or "correct" them.
 
 TASK:
-Produce ONE Korean document at `analysis/<id>.md`
-(non-arXiv input: `analysis/<human-or-title-slug>.md`).
-Overwrite on re-run — this is a regenerable snapshot, not append-only.
-Follow `analysis/_TEMPLATE.md` exactly and `docs/STYLE_GUIDE.md` §5.
-This is a single Korean document — not a translation of an English
-file. Write it natively in Korean per STYLE_GUIDE §4 (formal
-합니다/됩니다 체, glossary §4-2, verbatim tokens: paper title in
-original English, config/code names, formulas, arXiv links, P#/D#/CP#).
+Produce TWO Korean documents in the same run:
 
-STRUCTURE — two parts, in this order:
+  1. `analysis/<id>.md`           — the analysis document
+                                    (non-arXiv input:
+                                     `analysis/<human-or-title-slug>.md`)
+  2. `analysis/<id>_design.md`    — the Layer 1 Design (vendor-agnostic)
+
+Both are regenerable snapshots — overwrite on re-run. Follow
+`analysis/_TEMPLATE.md` (analysis) and `analysis/_TEMPLATE_DESIGN.md`
+(Design) exactly, and `docs/STYLE_GUIDE.md` §5 / §6. Both are single
+Korean documents — not translations of English files. Write natively
+in Korean per STYLE_GUIDE §4 (formal 합니다/됩니다 체, glossary §4-2,
+verbatim tokens: paper title in original English, config/code names,
+formulas, arXiv links, P#/D#/CP#).
+
+The Design is **vendor-agnostic** — it must not contain `file:line`
+coordinates of any foundry (vendor/lerobot or otherwise). Its purpose
+is to capture *what the algorithm is*, not *where it lives in any
+codebase*. Base mapping happens later in `/foundry`.
+
+STRUCTURE of `analysis/<id>.md` — two parts, in this order:
 
 (A) 중립 논문 정리 — what the paper says, on its own terms:
   📄 논문 메타        — original English title, authors, arXiv link,
@@ -131,17 +145,41 @@ STRUCTURE — two parts, in this order:
        trigger moves, state it here for the human. Do NOT edit
        context/MASTER.md.
 
+STRUCTURE of `analysis/<id>_design.md` — Layer 1 only:
+
+Follow `analysis/_TEMPLATE_DESIGN.md` exactly. The 7 sections are:
+📄 Design 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스, ⛓️ 불변식·가정,
+📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도, 🔌 Foundry 힌트
+(선택), 🚧 미해결 / 잠정.
+
+Sources: derive from the analysis document you just wrote (§🔬 방법론,
+§📊 실험 설정과 결과, §⚖️ 한계, §♻️ 재현성). Do NOT re-fetch the paper
+text — the analysis document is your single source for the Design.
+
+Honesty over completeness: any field the paper does not specify must
+be left as `(원문에 명시 없음 — 가정으로 메움)` rather than fabricated.
+A sparse Design is acceptable; a fabricated one is not. The Design
+should still be useful enough that a downstream `/foundry` call has a
+real spec to ground.
+
 HARD RULES:
-- Single Korean document. No English-primary file. KO-only filename.
-- Anchor (B) strictly to context/MASTER.md — cite real P#/D#/CP#
-  with their meaning from the doc; do not invent a connection. If the
-  paper does not touch a given Decision, say so plainly.
-- 초록 only → mark every (B) section (본문 미확보 — 잠정).
+- Two Korean documents. No English-primary file. KO-only filenames.
+- Anchor (B) of the analysis strictly to context/MASTER.md — cite real
+  P#/D#/CP# with their meaning from the doc; do not invent a
+  connection. If the paper does not touch a given Decision, say so
+  plainly.
+- 초록 only → mark every (B) section (본문 미확보 — 잠정). The Design
+  is also generated, but every section is prefixed (본문 미확보 — 잠정)
+  and most fields will be "(원문에 명시 없음 — 가정으로 메움)".
 - Never fabricate an arXiv id, a number, a citation, or a result.
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
-- Emoji/header system per docs/STYLE_GUIDE.md §5 — one emoji at the
-  start of each `##`/`###` header, none in body text. §5-6 governs the
-  quote/개조식/keyword conventions below.
+- The Design is **vendor-agnostic**. It must not contain `file:line`
+  coordinates from `vendor/lerobot/` or any other codebase. Mapping
+  belongs to `/foundry`.
+- Emoji/header system per docs/STYLE_GUIDE.md §5 (analysis) and §6
+  (Design) — one emoji at the start of each `##`/`###` header, none
+  in body text. §5-6 governs the quote/개조식/keyword conventions
+  below.
 - ❓ 문제 정의 / 동기 는 반드시 개조식(굵은 라벨 + 1–2문장의 4–6 항목).
   단일 산문 문단 금지.
 - 🔬 방법론, 📊 실험 결과 의 원문 인용은 아래 형식 고정:
@@ -171,34 +209,25 @@ HARD RULES:
   옮긴다" 가 기본값. 단, 본문 미확보(초록 only)일 때는 (본문 미확보 —
   잠정) 마킹 후 추측 금지.
 
-FINAL STEP — reproduction follow-up suggestion:
-After the document body is complete, decide whether the paper builds on
-a baseline that PROBE has vendored at `vendor/lerobot/policies/<base>/`
-(currently: `pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`).
-Signals: explicit naming in the paper (e.g. "we fine-tune π0"),
-unmistakable architectural fingerprints (PaliGemma + flow matching →
-pi0 family; action chunking + transformer enc/dec → ACT; DDPM/DDIM
-head → Diffusion Policy; small VLM + action expert → SmolVLA).
+FINAL STEP — foundry follow-up suggestion:
+After both documents are complete, append exactly one blockquote line
+as the very last line of `analysis/<id>.md`:
 
-If yes, append exactly one blockquote line as the very last line of the
-file, after the existing final section:
+> 💡 base 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
-> 💡 이 논문은 `<base>` 기반으로 보입니다. 구현 가이드는 `/reproduce-paper <id>` 로 생성하실 수 있습니다.
-
-`<base>` is the verbatim vendor directory name (one of the six above).
-`<id>` is the same arXiv id / slug the analysis file uses.
-
-If the baseline cannot be tied to one of the six vendored policies with
-reasonable confidence, OMIT this line entirely — do NOT speculate, do
-NOT suggest an outside-of-vendor baseline. Never auto-invoke
-`/reproduce-paper` from this prompt; the human decides.
+`<id>` is the same arXiv id / slug the analysis file uses. The line
+is added unconditionally — `/foundry` itself decides whether the
+Design can be mapped to a given foundry (and emits a clean
+`🚧 매핑 불가` if not). Never auto-invoke `/foundry` from this prompt;
+the human decides.
 
 ---
 
 HUMANIZE — Korean post-processing (mandatory before commit):
 
-After the Korean output file is written and BEFORE `git add`, invoke
-the `humanize-korean` skill on that file:
+After both Korean output files (`analysis/<id>.md` and
+`analysis/<id>_design.md`) are written and BEFORE `git add`, invoke
+the `humanize-korean` skill once per file:
 
   Skill:  `.claude/skills/humanize-korean/SKILL.md`
   Mode:   strict — 4-agent pipeline
@@ -207,7 +236,8 @@ the `humanize-korean` skill on that file:
           Phase C runs the two reviewers in parallel: fidelity guards
           meaning, naturalness guards residual AI tells and
           over-polish. The monolith fast-path is not used in PROBE.
-  Input:  the path of the file just written
+  Input:  the path of each file just written (run the pipeline once
+          per file)
   Output: in-place rewrite of the same file
 
 Hard rules for this stage:
@@ -221,10 +251,10 @@ Hard rules for this stage:
   - Change rate > 30% → automatic rework round; > 50% → abort the
     rewrite and keep the original.
   - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
-    humanization. Violation of any invariant (verbatim tokens, emoji
-    placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
-    accuracy, P#/D#/CP#/H### tag form, §4-2 glossary translations)
-    is treated as a fidelity fail → rollback.
+    humanization for both files. Violation of any invariant (verbatim
+    tokens, emoji placement, `<a id="ref-…">` anchors, arXiv / DOI
+    links, citation accuracy, P#/D#/CP#/H### tag form, §4-2 glossary
+    translations) is treated as a fidelity fail → rollback.
   - blockquote 안의 영문 원문 인용·`(§n)` 출처·수식은 humanize 대상에서
     제외됩니다(verbatim 토큰과 동일 취급, §5-6). 위반 시 fidelity fail.
   - The humanize pass NEVER adds, removes, or changes facts; it only
@@ -234,23 +264,23 @@ Hard rules for this stage:
     and `.claude/skills/humanize-korean/references/rewriting-playbook.md`.
 
 Then proceed with `git add` / `git commit` / `git push` on the
-humanized (or rolled-back) file per the GIT section below.
+humanized (or rolled-back) files per the GIT section below.
 
 ---
 
-GIT — after `analysis/<id>.md` is written:
+GIT — after both files are written:
 
-Persist the output by pushing directly to `main`. No PR is created.
+Persist the outputs by pushing directly to `main`. No PR is created.
 
-  git add analysis/<id>.md
-  git commit -m "analysis: add <id> deep-dive"
+  git add analysis/<id>.md analysis/<id>_design.md
+  git commit -m "analysis: add <id> deep-dive + design"
   git push origin HEAD:main
 
 `<id>` is the same arXiv id / slug used for the analysis filename.
 
-- Stage ONLY `analysis/<id>.md`. Never `git add` anything under
-  `context/` or `vendor/`. No `git add .`, no `git add -A`, no
-  `commit -a`.
+- Stage ONLY `analysis/<id>.md` and `analysis/<id>_design.md`. Never
+  `git add` anything under `context/` or `vendor/`. No `git add .`,
+  no `git add -A`, no `commit -a`.
 - If push is rejected as non-fast-forward, run `git pull --rebase
   origin main` and retry the push. Repeat this rebase-and-retry loop
   up to 5 times with exponential backoff (1s, 2s, 4s, 8s, 16s between

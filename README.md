@@ -59,8 +59,8 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
 | Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
-| "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive anchored to your Decision Log |
-| "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` ships a unified-diff patch against the pinned `vendor/lerobot/` baseline |
+| "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
+| "Great paper, but I'll never actually reproduce it" | `/foundry` maps the Design onto a target foundry (default `lerobot`) and ships a unified-diff patch |
 
 ---
 
@@ -177,11 +177,16 @@ probe/
 │   │   ├── scouting-P{1..4}.md     #   weekly scout, one per pillar
 │   │   ├── synthesis-P{1..4}.md    #   monthly synthesis brief, per pillar
 │   │   ├── paper-analysis.md       #   on-demand single-paper deep-dive
-│   │   ├── paper-reproduction.md   #   on-demand reproduction guide
+│   │   │                           #     + Layer 1 Design (vendor-agnostic)
+│   │   ├── hypothesize.md          #   team-internal hypothesis + Design
+│   │   ├── foundry.md              #   Design → foundry-specific patch
+│   │   ├── verify.md               #   Design + patch static validation
 │   │   └── pulse-digest.md         #   chat → per-pillar hints (PoC)
 │   └── commands/                   # Slash commands (on-demand)
 │       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
-│       └── reproduce-paper.md      #   /reproduce-paper <id>
+│       ├── hypothesize.md          #   /hypothesize <P# | analysis-slug>
+│       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
+│       └── verify.md               #   /verify <design-path> [--foundry <n>]
 │
 ├── scouting/                       # Dynamic output — agent-generated (weekly)
 │   ├── README.md                   #   pipeline summary
@@ -205,27 +210,36 @@ probe/
 ├── analysis/                       # Paper deep-dive output (on-demand)
 │   ├── README.md                   #   purpose + filename convention
 │   ├── _TEMPLATE.md                #   Korean deep-dive form (analysis)
-│   ├── _TEMPLATE_IMPL.md           #   Korean reproduction-guide form
+│   ├── _TEMPLATE_DESIGN.md         #   Korean Layer 1 Design form
+│   ├── _TEMPLATE_IMPL.md           #   Korean foundry-impl guide form
 │   ├── <arxiv-id>.md               #   single Korean analysis (regen)
-│   ├── <arxiv-id>_impl.md          #   reproduction guide (regen)
-│   └── <arxiv-id>_impl.patch       #   unified diff vs. vendor baseline
+│   ├── <arxiv-id>_design.md        #   Layer 1 Design (vendor-agnostic)
+│   ├── <arxiv-id>_impl/<foundry>/  #   one subfolder per foundry
+│   │   ├── impl.md                 #     foundry-specific impl guide (regen)
+│   │   └── impl.patch              #     unified diff vs. foundry baseline
+│   └── <arxiv-id>_verify/<foundry>.md  #   static validation report
 │
 ├── experiments/                    # Team-internal hypothesis cycles
 │   ├── README.md                   #   purpose + filename / state-transition
 │   ├── _TEMPLATE_H.md              #   Korean hypothesis form
-│   ├── _TEMPLATE_I.md              #   Korean implementation-guide form
+│   ├── _TEMPLATE_D.md              #   Korean Layer 1 Design form
+│   ├── _TEMPLATE_I.md              #   Korean foundry-impl guide form
 │   ├── _TEMPLATE_V.md              #   Korean validation-report form
 │   └── H###-<slug>/                #   one folder per hypothesis
 │       ├── H###.md                 #     hypothesis (immutable once written)
-│       ├── I###.md, I###.patch     #     implementation guide + diff (regen)
-│       ├── V###.md                 #     validation report (regen)
+│       ├── D###.md                 #     Layer 1 Design (immutable)
+│       ├── I###/<foundry>/         #     one subfolder per foundry
+│       │   ├── impl.md, impl.patch #       impl guide + diff (regen)
+│       ├── V###/<foundry>.md       #     validation report (regen)
 │       └── manifest.yaml           #     hypothesis state metadata
+│                                   #     (foundry-keyed impl/validation)
 │
 ├── vendor/                         # Read-only reference code
 │   └── lerobot/                    #   pinned lerobot snapshot —
 │                                   #   6 baseline policies + configs +
-│                                   #   processor, target of _impl.patch
-│                                   #   and experiments/ I###.patch
+│                                   #   processor, the v0 foundry —
+│                                   #   target of every foundry=lerobot
+│                                   #   impl patch
 │
 └── docs/
     ├── INTRO_KO.md                 # Korean onboarding + operations manual
@@ -551,22 +565,23 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 
 When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
-**Bonus — On-demand paper deep-dive (`/analyze-paper`)**
+**Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/verify`)**
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive. It is **not a scheduled routine** — no RemoteTrigger. It is an on-demand slash command you invoke when you need it, in a local or web session.
+Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/verify` does static validation. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|
-| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` |
-| Slash command | `.claude/commands/analyze-paper.md` (thin wrapper) |
-| Canonical prompt | `.claude/prompts/paper-analysis.md` (single source) |
+| Invoke | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` then `/foundry analysis/<id>_design.md [--foundry <name>]` then `/verify analysis/<id>_design.md [--foundry <name>]` |
+| Slash commands | `.claude/commands/{analyze-paper,foundry,verify}.md` (thin wrappers) |
+| Canonical prompts | `.claude/prompts/{paper-analysis,foundry,verify}.md` (single source per stage) |
 | Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
 | Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
-| Output | `analysis/<arxiv-id>.md` — single Korean document, overwritten each run |
-| Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications |
-| Retrieval | full-text `curl` only (no Semantic Scholar / MCP) |
+| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_verify/<foundry>.md` (validation) — all Korean, overwritten each run |
+| Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; verify carries 4-check report |
+| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry` and `/verify` are local |
+| Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |
 
-Network note: the slash command's full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE_GUIDE.md` §5.
+Network note: `/analyze-paper`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE_GUIDE.md` §5 (analysis) / §6 (Design + impl) / §7 (verify).
 
 ---
 
@@ -594,7 +609,7 @@ Network note: the slash command's full-text fetch needs the session environment 
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `hypothesize.md` · `foundry.md` · `verify.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
@@ -649,10 +664,10 @@ the references below are the exact sources.
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md`; follow-up `/reproduce-paper <id>` → `<id>_impl.md` + `<id>_impl.patch` against `vendor/lerobot/` |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/verify` → `<id>_verify/<foundry>.md` |
 | [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
-| [`experiments/README.md`](experiments/README.md) | Team-internal hypothesis cycles — `/hypothesize` → `/implement-hypothesis` → `/validate-hypothesis`. One folder per `H###` with hypothesis + implementation + validation + manifest |
-| [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot used as baseline for reproduction patches — pinned commit, refresh procedure, license |
+| [`experiments/README.md`](experiments/README.md) | Team-internal hypothesis cycles — `/hypothesize` (H### + D###) → `/foundry` (`I###/<foundry>/impl.*`) → `/verify` (`V###/<foundry>.md`). One folder per `H###` with hypothesis + Design + foundry impls + validations + foundry-keyed manifest |
+| [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 

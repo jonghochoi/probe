@@ -30,7 +30,7 @@
 
 - **주간 Scouting Report** (outward) — 월·목, pillar 별 3 ~ 5편. 점수화된 후보 + 너의 open question 에 묶인 decision implication.
 - **월간 Synthesis Brief** (inward) — pillar 별 핀된 문헌(§6 8편)이 시간이 지나면 머릿속에서 흐려지는 걸 막는다. 짧고 정직한 산문 압축.
-- **온디맨드 Analysis + Reproduction** (focused) — `/analyze-paper` 가 한 편을 한국어 deep-dive 로 읽고, `/reproduce-paper` 가 `vendor/lerobot/` 베이스라인 대비 unified diff 패치까지 떠먹여 준다.
+- **온디맨드 Analysis + Foundry + Verify** (focused) — `/analyze-paper` 가 한 편을 한국어 deep-dive + Layer 1 Design (vendor-agnostic) 으로 읽고, `/foundry` 가 그 Design 을 target foundry (기본 `lerobot`) 좌표계로 매핑한 unified diff 패치를 떠먹여 주며, `/verify` 가 Design + 패치 + 분석 문서를 정적 대조해 검증 보고서를 만든다.
 
 ---
 
@@ -113,9 +113,9 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
 
 상태: Tier A PoC — 수동, 자동화 없음, 2주 trial. 스키마는 [`pulse/README.md`](../pulse/README.md), 채팅 export 운영 가이드는 [`pulse/EXPORT_GUIDE_KO.md`](../pulse/EXPORT_GUIDE_KO.md) 참조.
 
-### 사이드바: reproduction — 분석 후속 구현 가이드 (on-demand)
+### 사이드바: foundry + verify — 분석 후속 구현·검증 (on-demand)
 
-위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/reproduce-paper <id>` 는 "어디를 / 어떻게"를 채웁니다. 이미 작성된 `analysis/<id>.md` 를 입력으로 받아, 논문이 베이스로 삼은 lerobot 정책(`pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` 중 하나)을 식별하고, 그 baseline 대비 변경 지점을 한글 가이드 `analysis/<id>_impl.md` 와 unified diff `analysis/<id>_impl.patch` 로 산출합니다. baseline 은 `vendor/lerobot/` 에 byte-stable 스냅샷으로 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. vendor 범위 밖 모델이면 가이드를 만들지 않고 분석 문서 말미에 한 줄만 남깁니다. 자세한 형식은 [`docs/STYLE_GUIDE.md`](STYLE_GUIDE.md) §6, vendor 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
+위 FOCUSED 컬럼의 후속 트랙입니다. `/analyze-paper` 가 "왜 / 무엇을"이라면, `/foundry` 가 "어디를 / 어떻게"를 채우고 `/verify` 가 "정합한가"를 따집니다. 두 층 모델로 분리되어 있습니다 — Layer 1 Design (vendor-agnostic) 은 `/analyze-paper` 가 분석 문서와 함께 산출하며, Layer 2 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 가 target foundry (기본 `lerobot`) 좌표계로 옮겨 `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` 를 산출합니다. baseline 은 foundry 의 byte-stable 스냅샷 (lerobot 의 경우 `vendor/lerobot/`) 에 보관되며, 패치는 그 스냅샷에 `git apply --check` 로 검증됩니다. Design 이 foundry 좌표계로 매핑되지 않으면 `UNMAPPABLE.md` 와 분석 문서 말미의 `> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 남깁니다 — Design 자체는 항상 산출됩니다. `/verify analysis/<id>_design.md [--foundry <name>]` 는 Design + 패치 + 분석 문서를 4 단계 정적 체크 (📚 문헌 · 🔍 패치 · 🧪 시그니처 · 📐 식·표) 로 대조해 `analysis/<id>_verify/<foundry>.md` 를 산출합니다. 분석 트랙은 manifest 라이프사이클이 없으므로 보고서 자체가 산출물입니다. 자세한 형식은 [`docs/STYLE_GUIDE.md`](STYLE_GUIDE.md) §6 / §7, foundry 스냅샷 갱신 절차는 [`vendor/lerobot/README.md`](../vendor/lerobot/README.md) 참조.
 
 ### 핵심 원칙: 정적 vs 동적 분리
 
@@ -151,11 +151,16 @@ probe/
 │   │   ├── scouting-P{1..4}.md     #   주간 스카우트 (pillar별 1개)
 │   │   ├── synthesis-P{1..4}.md    #   월간 synthesis brief
 │   │   ├── paper-analysis.md       #   온디맨드 단일 논문 심층분석
-│   │   ├── paper-reproduction.md   #   온디맨드 재현 가이드 (분석 후속)
+│   │   │                           #     + Layer 1 Design (vendor-agnostic)
+│   │   ├── hypothesize.md          #   가설 + Layer 1 Design
+│   │   ├── foundry.md              #   Design → foundry 별 구현 패치
+│   │   ├── verify.md               #   Design + 패치 정적 검증
 │   │   └── pulse-digest.md         #   채팅 → pillar별 힌트 (PoC)
 │   └── commands/                   # 슬래시 커맨드 (온디맨드)
 │       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
-│       └── reproduce-paper.md      #   /reproduce-paper <id>
+│       ├── hypothesize.md          #   /hypothesize <P# | analysis-slug>
+│       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
+│       └── verify.md               #   /verify <design-path> [--foundry <n>]
 │
 ├── scouting/                       # 동적 산출 — 주간 (월·목)
 │   ├── README.md                   #   파이프라인 요약
@@ -178,15 +183,34 @@ probe/
 ├── analysis/                       # 단일 논문 심층 (온디맨드)
 │   ├── README.md                   #   목적 + 파일명 컨벤션
 │   ├── _TEMPLATE.md                #   한글 deep-dive 양식
-│   ├── _TEMPLATE_IMPL.md           #   한글 재현 가이드 양식
+│   ├── _TEMPLATE_DESIGN.md         #   한글 Layer 1 Design 양식
+│   ├── _TEMPLATE_IMPL.md           #   한글 foundry-impl 가이드 양식
 │   ├── <arxiv-id>.md               #   단일 한글 분석 (재생성)
-│   ├── <arxiv-id>_impl.md          #   재현 가이드 (재생성)
-│   └── <arxiv-id>_impl.patch       #   vendor baseline 대비 unified diff
+│   ├── <arxiv-id>_design.md        #   Layer 1 Design (vendor-agnostic)
+│   ├── <arxiv-id>_impl/<foundry>/  #   foundry별 서브폴더
+│   │   ├── impl.md                 #     foundry-specific 구현 가이드
+│   │   └── impl.patch              #     foundry baseline 대비 unified diff
+│   └── <arxiv-id>_verify/<foundry>.md  #   정적 검증 보고서
+│
+├── experiments/                    # 팀 내부 가설 사이클 (온디맨드)
+│   ├── README.md                   #   목적 + 파일명/상태 전이
+│   ├── _TEMPLATE_H.md              #   한글 가설 양식
+│   ├── _TEMPLATE_D.md              #   한글 Layer 1 Design 양식
+│   ├── _TEMPLATE_I.md              #   한글 foundry-impl 가이드 양식
+│   ├── _TEMPLATE_V.md              #   한글 검증 보고서 양식
+│   └── H###-<slug>/                #   가설 1개당 폴더 1개
+│       ├── H###.md                 #     가설 (작성 후 불변)
+│       ├── D###.md                 #     Layer 1 Design (불변)
+│       ├── I###/<foundry>/         #     foundry별 서브폴더
+│       │   ├── impl.md, impl.patch #       impl 가이드 + diff (재생성)
+│       ├── V###/<foundry>.md       #     검증 보고서 (재생성)
+│       └── manifest.yaml           #     foundry-keyed impl/validation
 │
 ├── vendor/                         # 읽기 전용 외부 코드
 │   └── lerobot/                    #   pinned lerobot 스냅샷 —
 │                                   #   6개 baseline policy + configs,
-│                                   #   _impl.patch 의 적용 대상
+│                                   #   v0 foundry (foundry=lerobot 의
+│                                   #   impl.patch 적용 대상)
 │
 └── docs/
     ├── INTRO_KO.md                 # 한글 온보딩 + 운영 매뉴얼
