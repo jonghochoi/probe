@@ -83,6 +83,12 @@ Hard rules:
    does, not why (the why goes in the body).
 5. **Do NOT include `(#NN)` in the local commit subject** — GitHub appends the
    PR number automatically on squash-merge; adding it manually duplicates it.
+6. **Write the commit message in English** — subject *and* body. Document
+   content (`.md`, prompts, reports) is Korean or English per
+   `docs/STYLE_GUIDE.md`, but the commit message itself is always English so
+   `git log` stays uniformly grep-able and consistent with this repo's
+   history. Do not switch to Korean even when the body explains
+   Korean-authored content; describe it in English.
 
 Good (from this repo's history):
 
@@ -136,6 +142,8 @@ one logical area or needs context to be reviewable. When present:
       not past tense).
 - [ ] Description is lowercase, ≲ 72 chars, no trailing period.
 - [ ] No `(#NN)` PR-number suffix in the subject.
+- [ ] Subject and body are in English (regardless of the language of the
+      files being changed).
 - [ ] Body (if any) leads with *why*, wraps at ~72, uses `─` dividers (not
       `-`/`=`) for big commits, and uses em dash `—` for label/explanation
       joins.

@@ -93,12 +93,26 @@ STRUCTURE — two parts, in this order:
   📄 논문 메타        — original English title, authors, arXiv link,
                         발행일/버전, 본문 확보 수준, 분석 생성일.
   🧭 한 줄 요약 (TL;DR) — 1–2 sentences.
-  ❓ 문제 정의 / 동기   — what problem, why it matters.
+  ❓ 문제 정의 / 동기   — 개조식만 허용. 단일 산문 문단 금지. 4–6 항목,
+                        각 항목은 굵은 라벨 + 1–2문장. 권장 라벨:
+                        **풀고자 하는 문제**, **기존 접근의 한계**,
+                        **본 논문의 가설**, **왜 지금 중요한가**.
   🧩 핵심 기여         — 3–6 bullets.
-  🔬 방법론            — architecture, training setup, key formulas
-                        (formulas verbatim).
-  📊 실험 설정과 결과   — benchmarks/metrics/numbers quoted from the
-                        text, not paraphrased loosely.
+  🔑 기술 키워드        — 본 논문 이해에 필요한 핵심 용어 5–10개. 각 항목은
+                        `- **<원어 / 약어>** — <비유적 한 줄 설명>` 형식.
+                        §4-2 글로서리에 등재된 용어는 글로서리 번역을
+                        그대로 쓰되 비유 한 줄을 곁들이고, 적절한 비유가
+                        없으면 평이한 정의로만 적습니다(사실 왜곡 금지).
+  🔬 방법론            — 압축이 아니라 디테일 보존이 목표. 가능하면
+                        `### 직관`, `### 아키텍처`, `### 학습 목표 / 손실`,
+                        `### 학습 셋업` 4 하위절로 분해. 앵커 클레임(설계
+                        의도를 못 박는 원문 문장)과 모든 수식은 영문 원문
+                        verbatim blockquote + `(§n)` 출처 + 한글 해설
+                        형식으로 인용. 수식은 LaTeX 표기 그대로.
+  📊 실험 설정과 결과   — 가능한 한 마크다운 표 1개 이상으로 핵심 수치
+                        정리. 본문의 핵심 수치 주장 문장은 영문 원문
+                        blockquote + `(§n, Table k)` 출처 + 한글 해설
+                        형식으로 인용. 추론·보정·반올림 금지.
   ⚖️ 한계              — author-stated weaknesses + obvious gaps.
   ♻️ 재현성            — code / data / hardware availability.
 
@@ -126,7 +140,36 @@ HARD RULES:
 - Never fabricate an arXiv id, a number, a citation, or a result.
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - Emoji/header system per docs/STYLE_GUIDE.md §5 — one emoji at the
-  start of each `##`/`###` header, none in body text.
+  start of each `##`/`###` header, none in body text. §5-6 governs the
+  quote/개조식/keyword conventions below.
+- ❓ 문제 정의 / 동기 는 반드시 개조식(굵은 라벨 + 1–2문장의 4–6 항목).
+  단일 산문 문단 금지.
+- 🔬 방법론, 📊 실험 결과 의 원문 인용은 아래 형식 고정:
+    > "<English verbatim>" (§n[, Table k])
+    (한글 해설.)
+  영문은 절대 paraphrase 하지 않습니다. 출처 표기가 본문에서 명확하지
+  않으면 `(§?)` 로 두고 추정하지 않습니다.
+- 모든 수식·기호는 원문 LaTeX/유니코드 표기 그대로. 변수 정의는 본문
+  표기와 일치. GitHub KaTeX 렌더링을 위해 inline 은 `` `$X$` ``
+  (백틱 래핑 필수 — `_{t}` 같은 첨자가 italic 으로 잘리는 GitHub
+  Markdown 한계 우회), display 는 별도 줄의 `$$X$$`. 수식 토큰은 절대
+  paraphrase 하지 않습니다. arXiv HTML 본문(LaTeXML 산출물)은 `\(…\)`
+  / `\[…\]` 가 아니라 `<math display="inline|block" alttext="…">`
+  MathML + LaTeX alttext 로 옵니다. 추출 절차:
+    1. `<math … display="inline" … alttext="X">` → `` `$X$` ``
+       (백틱 래핑)
+    2. `<math … display="block" … alttext="X">` 또는 `class="ltx_equation*"`
+       컨테이너의 alttext → 별도 줄의 `$$X$$` (선행 `\displaystyle`,
+       후행 콤마는 제거 가능, 백틱 불필요).
+    3. HTML 엔티티는 디코딩: `&gt;` → `>`, `&lt;` → `<`, `&amp;` → `&`.
+    4. KaTeX 미지원 매크로(예: `\bm`)는 함부로 치환하지 않습니다.
+       그대로 두어 렌더 실패가 보이도록 두는 편이 정직성 원칙(§5-4)에
+       부합합니다. 본문에 일반 달러 기호가 등장하면 `\$` 로 escape.
+- 🔑 기술 키워드 의 비유는 사실 왜곡 금지. 비유가 논문 주장과 어긋날
+  여지가 있으면 비유를 빼고 평이한 정의로만 기술합니다.
+- 방법론은 압축이 아니라 보존을 우선. "디테일이 본문에 있으면
+  옮긴다" 가 기본값. 단, 본문 미확보(초록 only)일 때는 (본문 미확보 —
+  잠정) 마킹 후 추측 금지.
 
 FINAL STEP — reproduction follow-up suggestion:
 After the document body is complete, decide whether the paper builds on
@@ -182,6 +225,8 @@ Hard rules for this stage:
     placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
     accuracy, P#/D#/CP#/H### tag form, §4-2 glossary translations)
     is treated as a fidelity fail → rollback.
+  - blockquote 안의 영문 원문 인용·`(§n)` 출처·수식은 humanize 대상에서
+    제외됩니다(verbatim 토큰과 동일 취급, §5-6). 위반 시 fidelity fail.
   - The humanize pass NEVER adds, removes, or changes facts; it only
     rewrites Korean prose style (translation-ese, mechanical
     parallelism, AI signature phrases, hedging, etc.) per

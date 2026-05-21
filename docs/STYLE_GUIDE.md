@@ -341,6 +341,7 @@ type — these are the only emojis permitted here in addition to §2:
 | 🧭 | 한 줄 요약 (TL;DR) | A |
 | ❓ | 문제 정의 / 동기 | A |
 | 🧩 | 핵심 기여 | A |
+| 🔑 | 기술 키워드 | A |
 | 🔬 | 방법론 | A |
 | 📊 | 실험 설정과 결과 | A |
 | ⚖️ | 한계 | A |
@@ -385,6 +386,69 @@ line:
 be matched to one of the six with reasonable confidence, the line is
 omitted — never speculated, never pointed at an outside-of-vendor
 baseline.
+
+### 5-6. 원문 인용 · 개조식 · 키워드 규약
+
+방법론(🔬)·실험 결과(📊) 섹션은 본문 근거를 추적 가능하게 두고,
+문제 정의(❓)·기술 키워드(🔑) 섹션은 스캔성을 높이기 위해 다음
+규약을 따릅니다.
+
+- **원문 blockquote 인용** — 핵심 설계 문장(앵커 클레임), 모든 수식,
+  핵심 수치 주장은 `>` blockquote 에 영문 원문을 verbatim 으로 두고
+  바로 아래 줄에 한글 해설을 답니다. 형식 고정:
+
+  ```markdown
+  > "We model the action distribution with conditional flow matching." (§3.2)
+  (한글 해설 — 이 문장이 왜 핵심인지.)
+  ```
+
+  출처 표기는 `(§n)` 또는 `(§n, Table k)`. 본문에서 절 번호가
+  식별되지 않으면 `(§?)` 로 두고 추정하지 않습니다. 영문은 절대
+  paraphrase 하지 않으며, `humanize-korean` 패스도 이 blockquote
+  내부를 verbatim 토큰으로 취급해 손대지 않습니다(§4-5 invariants
+  확장).
+
+- **수식 verbatim + GitHub KaTeX 렌더링** — LaTeX/유니코드 표기를
+  원문 그대로 유지하며, paraphrase·기호 치환·줄임 금지. 변수 정의는
+  본문 표기와 일치시킵니다. github.com 의 Markdown 렌더러는
+  2022-05 부터 KaTeX 를 지원하므로, 본문에 넣는 수식은 다음 표기로
+  감쌉니다 — inline 은 `$…$`, display 는 별도 줄의 `$$…$$`.
+  `\(…\)` / `\[…\]` 는 GitHub 에서 렌더링되지 않으므로 사용하지
+  않습니다. arXiv HTML(LaTeXML) 본문에서 수식을 가져올 때는 다음
+  절차로 변환합니다.
+
+  1. `<math display="inline" … alttext="X">` → `` `$X$` `` — inline
+     수식은 **반드시 백틱으로 감싼 `` `$X$` `` 형태**로 적습니다.
+     GitHub Markdown 파서가 KaTeX 보다 먼저 동작하면서 `$…$` 안의
+     `_` 를 italic 으로 잘라먹는 알려진 한계를 우회하기 위함입니다
+     (`x_{t}` 같은 첨자가 거의 모든 식에 등장하므로 사실상 모든
+     inline 식에 적용). GitHub 공식 권장 표기입니다.
+  2. `<math display="block" … alttext="X">` 또는 `class="ltx_equation*"`
+     컨테이너 안쪽의 alttext → 별도 줄의 `$$X$$`. 선행 `\displaystyle`
+     과 후행 콤마는 제거할 수 있습니다. display 는 블록으로 인식되어
+     underscore 문제가 없으므로 백틱이 필요하지 않습니다.
+  3. HTML 엔티티 디코딩 — `&gt;` → `>`, `&lt;` → `<`, `&amp;` → `&`.
+  4. KaTeX 미지원 매크로(`\bm`, 일부 `\xrightarrow` 변형, 저자 정의
+     `\newcommand` 등)는 임의 치환 금지. 그대로 두면 GitHub 에서 빨간
+     에러로 표시되며, 이는 정직성 원칙(§5-4)에 부합합니다.
+  5. 본문 산문에 일반 달러 기호가 등장하면 `\$` 로 escape 해 수식
+     시작으로 오해되지 않도록 합니다.
+
+- **개조식(❓ 문제 정의 / 동기)** — 단일 산문 문단을 쓰지 않고 4–6
+  항목의 굵은 라벨 + 1–2문장 형태로 작성합니다. 권장 라벨:
+  `풀고자 하는 문제`, `기존 접근의 한계`, `본 논문의 가설`,
+  `왜 지금 중요한가`.
+
+- **🔑 기술 키워드** — 본 논문 이해에 필요한 핵심 용어 5–10개를
+  `- **<원어 / 약어>** — <비유적 한 줄 설명>` 형식으로 정리합니다.
+  §4-2 글로서리에 등재된 용어는 글로서리 번역을 그대로 사용하되,
+  비유 한 줄을 곁들입니다. 비유는 사실 왜곡이 없는 선에서만
+  허용되며, 적절한 비유가 없으면 평이한 정의로만 적습니다.
+
+- **방법론 분해** — 🔬 방법론 은 가능하면 `### 직관`, `### 아키텍처`,
+  `### 학습 목표 / 손실`, `### 학습 셋업` 4 하위절로 분해해 디테일
+  보존을 우선합니다. `### ` 하위 헤더에는 이모지를 두지 않습니다
+  (§2 의 H3 plain 규칙과 동일).
 
 ---
 
