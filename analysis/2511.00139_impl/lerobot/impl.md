@@ -55,7 +55,7 @@ KV-share 구조는 본 논문 범위 밖).
 | 1 | `vendor/lerobot/policies/pi0/configuration_pi0.py:87` (직후) | 필드 추가 | Design §📊, §🚧 | `enhancement_enabled`, `enhancement_aux_loss_weight (λ)`, `enhancement_arm_indices`, `enhancement_hand_indices` 4 개 필드를 dataclass 끝부분에 추가. 기본값은 OFF 라 기존 동작은 변경 없음 |
 | 2 | `vendor/lerobot/policies/pi0/modeling_pi0.py:554` (직전) | 클래스 추가 | Design §🧰 `arm_hand_feature_enhancement` / `aux_heads` / `pi_uni_main_head`, Design §📊 §7.3 | 새 `ArmHandFeatureEnhancement(nn.Module)` 클래스. 2-layer Mish MLP × 2 (`arm_mlp`, `hand_mlp`), 단일-linear 보조 헤드 × 2 (`aux_arm`, `aux_hand`), `main_proj` 가 fused concat 을 expert width 로 환원해 기존 `action_out_proj` 가 그대로 받음 |
 | 3 | `vendor/lerobot/policies/pi0/modeling_pi0.py:585` (직후) | 수정 (init wire) | Design §🧰, Design §🚧 (잠정 dim) | `PI0Pytorch.__init__` 끝부분에서 `config.enhancement_enabled` 가 켜져 있을 때만 enhancement 모듈을 인스턴스화. OFF 면 `self.enhancement = None` |
-| 4 | `vendor/lerobot/policies/pi0/modeling_pi0.py:791` 부근 | 수정 (forward) | Design §🧰 `pi_uni_main_head`, §📊 식 (9) | `PI0Pytorch.forward` 의 `suffix_out → action_out_proj` 경로에 enhancement 분기 추가. ON 시 `(fused, aux_arm, aux_hand) = enhancement(suffix_out)` → `v_t = action_out_proj(fused)`. 단 보조 손실 합성은 아직 미연결 (→ §🚧 #1) |
+| 4 | `vendor/lerobot/policies/pi0/modeling_pi0.py:791` 부근 | 수정 (forward) | Design §🧰 `pi_uni_main_head`, §📊 식 (9)-(12) | `PI0Pytorch.forward` 의 `suffix_out → action_out_proj` 경로에 enhancement 분기 추가. ON 시 `(fused, aux_arm, aux_hand) = enhancement(suffix_out)` → `v_t = action_out_proj(fused)`. 식 (10)-(12) 의 보조 손실은 `enhancement_arm_indices` / `enhancement_hand_indices` 에 한정한 MSE 를 λ 가중으로 합산해 `losses` 텐서의 해당 열에 `index_add` 로 누적합니다 (라운드 1 추가) |
 | 5 | `vendor/lerobot/policies/pi0/modeling_pi0.py:923` 부근 | 수정 (denoise_step) | Design §🧰 inference 일관성 | `PI0Pytorch.denoise_step` 도 동일하게 enhancement 분기 추가. 학습 시 fused latent 로 디코딩했다면 추론도 같은 경로여야 함 |
 | 6 | (없음) | — | Design §🧮 §3.2.2 | 촉각 인코더 (CAE + MLP projection + fingertip-token 주입) — baseline 에 대응 없음 — 신규 추가 필요. 본 패치 범위 밖 (→ §🚧 #2) |
 | 7 | (없음) | — | Design §🧰 `corrective_sft`, §📊 식 (14) | 비축적 corrective SFT 루프 — 학습 스크립트 영역이며 modeling 계층 변경 없음. 본 패치 범위 밖 (→ §🚧 #3) |
@@ -141,17 +141,7 @@ KV-share 구조는 본 논문 범위 밖).
 
 ## 🚧 미해결 / 잠정
 
-1. **보조 손실 합성 미연결** — 본 패치는 enhancement 모듈을 forward 에
-   배선만 했고 `aux_arm`, `aux_hand` 출력을 main loss 텐서에 합치지
-   않습니다 (`_aux_arm`, `_aux_hand` 가 underscore 로 받힙니다).
-   Design §📊 식 (10)–(12) 의 `L_total = L_main + λ(L_hand + L_arm)`
-   selective-DoF supervision 을 완전히 구현하려면 `PI0Policy.forward`
-   에서 model.forward 반환 시 aux 출력을 함께 받아 selective MSE 를
-   `enhancement_arm_indices` / `enhancement_hand_indices` 에 한정해
-   계산한 뒤 `losses` 에 가중치 `λ` 로 더해야 합니다. 본 라운드는
-   `losses` 텐서 형상 (B, T, D) 의 의미를 깨지 않기 위해 보류했으며,
-   다음 라운드에서 별도 hunk 로 승격 예정.
-2. **촉각 인코더 (CAE + MLP projection)** — Design §3.2.2 의
+1. **촉각 인코더 (CAE + MLP projection)** — Design §3.2.2 의
    `(16,16,3)` zero-pad 후 `[32,64,128]` filter `3×3, stride 2` CAE
    (latent_dim 128 / fingertip) 와 fingertip raw 합력 `(5,3)` →
    MLP projection 모듈은 lerobot baseline 에 대응이 없으며, `pi0/`
@@ -160,19 +150,28 @@ KV-share 구조는 본 논문 범위 밖).
    `PI0Pytorch.embed_suffix` 수정) 로 승격해야 하며 본 라운드 범위
    밖. 본문의 토큰 정렬 (state · time · action 다음 위치 vs. prefix
    끝) 이 명시되지 않아 첫 라운드부터 가정값으로 시작해야 합니다.
-3. **비축적 corrective SFT 루프 (식 14)** — `π_uni^{(k+1)} =
+2. **비축적 corrective SFT 루프 (식 14)** — `π_uni^{(k+1)} =
    SFT(π_0; D_uni ∪ D^{(k)})` 는 lerobot 의 학습 스크립트 영역
    (`lerobot/scripts/train.py` 의 외부 루프) 입니다. modeling 계층
    변경 없음. 재현 시 별도 wrapper 스크립트가 필요합니다 (`pi0` 체크포인트
    초기 가중치 → corrective dataset 교체 → 새 체크포인트 → 반복).
-4. **LSTM admittance 정책** — Design §3.2.1 의 hidden_dim 256,
+3. **LSTM admittance 정책** — Design §3.2.1 의 hidden_dim 256,
    input_dim 39 (24 proprio + 15 tactile) LSTM 정책은 자율 데이터
    부트스트랩 단계 도구이며 lerobot 의 6 baseline 어디에도 직접
    매핑되지 않습니다. `lerobot.policies` 에 새 `lstm_admittance`
    정책을 신설하는 옵션은 본 patch 범위 밖.
-5. **잠정 하이퍼파라미터** — Design §🚧 가 명시하듯 $`\lambda`$,
+4. **잠정 하이퍼파라미터** — Design §🚧 가 명시하듯 $`\lambda`$,
    $`d_s`$, action chunk $`H`$, $`τ_{\text{contact}}`$, corrective
    분류 규칙은 본문에 절대값이 없습니다. 본 패치는 $`d_s`$ =
    action_expert_config.width (Gemma 300m → `1024`), $`H`$ =
    `chunk_size=50` (`PI0Config` 기본값), $`\lambda`$ = `1.0` 으로
    가정합니다. 모두 학습 config 로 override 가능합니다.
+
+---
+
+### 🔁 변경 사유 (feedback 모드)
+
+- **라운드 1 (입력 verify: [`../../2511.00139_audit/lerobot.round_0.md`](../../2511.00139_audit/lerobot.round_0.md)):**
+  - 갭 `§🧪 row "상수 λ = 1.0 (Design §📊·§🚧, Eq. 12)" → ⚠️ "필드는 추가됐으나 forward() 내부에서 실제 가중치로 곱해지지 않음"` → 액션 `§F-2 §🧪 행 ⚠️ (인용은 됐으나 패치 누락) → 해당 상수를 patch 의 적절한 위치에 추가` → 결과 `impl.patch 의 modeling_pi0.py forward 분기에 라인 추가: aux_arm / aux_hand 의 selective-DoF MSE 를 λ 가중으로 losses 텐서 해당 열에 index_add 로 누적 (해시 caca179 이전 라운드 0 패치의 _aux_arm / _aux_hand underscore 디스카드를 실손실 합성으로 승격)`
+  - 갭 `§📐 Eq. (10) / Eq. (11) / Eq. (12) → 유보 (§🚧 #1)` → 액션 `§F-2 §📐 silent-skip → 식·표를 구현하는 새 hunk 추가` → 결과 `§🪛 행 #4 의 요약을 "보조 손실 합성 미연결" → "λ 가중 selective-DoF MSE 를 index_add 로 누적" 으로 갱신, §🚧 #1 (보조 손실 합성 미연결) 항목을 삭제하고 후속 항목 번호를 #2→#1, #3→#2, #4→#3, #5→#4 로 시프트`
+  - 갭 (이전 통과 hunk 의 의미 보존 확인) → 라운드 0 의 §🪛 #1, #2, #3, #5 행 모두 새 patch 의 §🪛 표에 동일 좌표로 보존됨 (F-6).

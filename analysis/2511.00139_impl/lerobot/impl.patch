@@ -90,27 +90,42 @@
          # Initialize gradient checkpointing flag
          self.gradient_checkpointing_enabled = False
  
-@@ -791,10 +846,16 @@
+@@ -791,6 +846,34 @@
          suffix_out = suffix_out[:, -self.config.chunk_size :]
          suffix_out = suffix_out.to(dtype=torch.float32)
  
--        def action_out_proj_func(suffix_out):
--            return self.action_out_proj(suffix_out)
 +        if self.enhancement is not None:
-+            fused, _aux_arm, _aux_hand = self.enhancement(suffix_out)
++            fused, aux_arm, aux_hand = self.enhancement(suffix_out)
 +            v_t = self.action_out_proj(fused)
-+            # NOTE: auxiliary losses on _aux_arm / _aux_hand are not yet wired
-+            # into the returned tensor; see impl.md §🚧.
-+        else:
-+            def action_out_proj_func(suffix_out):
-+                return self.action_out_proj(suffix_out)
++            losses = F.mse_loss(u_t, v_t, reduction="none")
++            # Eq. (10)-(12): selective-DoF auxiliary supervision on z_arm /
++            # z_hand. Regress per-limb auxiliary heads onto the same flow-
++            # matching velocity target u_t restricted to the limb's DoF
++            # indices, weighted by λ. Loss is added back into the
++            # corresponding columns of `losses` so the downstream
++            # `losses.mean()` reduction in PI0Policy.forward inherits the
++            # total objective without any extra plumbing.
++            lam = self.config.enhancement_aux_loss_weight
++            arm_idx = self.config.enhancement_arm_indices
++            hand_idx = self.config.enhancement_hand_indices
++            if arm_idx:
++                arm_idx_t = torch.as_tensor(arm_idx, device=losses.device, dtype=torch.long)
++                arm_sub = (
++                    aux_arm.index_select(-1, arm_idx_t) - u_t.index_select(-1, arm_idx_t)
++                ) ** 2
++                losses = losses.index_add(-1, arm_idx_t, lam * arm_sub)
++            if hand_idx:
++                hand_idx_t = torch.as_tensor(hand_idx, device=losses.device, dtype=torch.long)
++                hand_sub = (
++                    aux_hand.index_select(-1, hand_idx_t) - u_t.index_select(-1, hand_idx_t)
++                ) ** 2
++                losses = losses.index_add(-1, hand_idx_t, lam * hand_sub)
++            return losses
++
+         def action_out_proj_func(suffix_out):
+             return self.action_out_proj(suffix_out)
  
--        v_t = self._apply_checkpoint(action_out_proj_func, suffix_out)
-+            v_t = self._apply_checkpoint(action_out_proj_func, suffix_out)
- 
-         return F.mse_loss(u_t, v_t, reduction="none")
- 
-@@ -920,6 +981,9 @@
+@@ -920,6 +1003,9 @@
          suffix_out = outputs_embeds[1]
          suffix_out = suffix_out[:, -self.config.chunk_size :]
          suffix_out = suffix_out.to(dtype=torch.float32)
