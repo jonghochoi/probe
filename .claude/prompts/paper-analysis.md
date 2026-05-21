@@ -22,7 +22,7 @@ CONTEXT (read-only):
                                Identity & Purpose, Pillars P1–P5,
                                Decision Log D1–D26, Tracked Literature,
                                Competitor list, Researchers, Anti-topics.
-- docs/STYLE_GUIDE.md        — §5 (Paper Analysis doc) + §6 (Design /
+- docs/STYLE.md        — §5 (Paper Analysis doc) + §6 (Design /
                                Implementation guide) + §4 (Korean
                                terms/tone/glossary).
 - analysis/_TEMPLATE.md      — the form for the analysis document.
@@ -101,9 +101,9 @@ Produce TWO Korean documents in the same run:
 
 Both are regenerable snapshots — overwrite on re-run. Follow
 `analysis/_TEMPLATE.md` (analysis) and `analysis/_TEMPLATE_DESIGN.md`
-(Design) exactly, and `docs/STYLE_GUIDE.md` §5 / §6. Both are single
+(Design) exactly, and `docs/STYLE.md` §5 / §6. Both are single
 Korean documents — not translations of English files. Write natively
-in Korean per STYLE_GUIDE §4 (formal 합니다/됩니다 체, glossary §4-2,
+in Korean per STYLE §4 (formal 합니다/됩니다 체, glossary §4-2,
 verbatim tokens: paper title in original English, config/code names,
 formulas, arXiv links, P#/D#/CP#).
 
@@ -188,7 +188,7 @@ HARD RULES:
 - The Design is **vendor-agnostic**. It must not contain `file:line`
   coordinates from `vendor/lerobot/` or any other codebase. Mapping
   belongs to `/foundry`.
-- Emoji/header system per docs/STYLE_GUIDE.md §5 (analysis) and §6
+- Emoji/header system per docs/STYLE.md §5 (analysis) and §6
   (Design) — one emoji at the start of each `##`/`###` header, none
   in body text. §5-6 governs the quote / bullet-form / keyword
   conventions below.
@@ -246,7 +246,7 @@ HARD RULES:
   abstract-only acquisition, mark **(본문 미확보 — 잠정)** and do not
   speculate.
 - Hotlink 1–3 arXiv figures into the analysis body (see
-  `docs/STYLE_GUIDE.md` §5-6 figure-citation block). Fixed format:
+  `docs/STYLE.md` §5-6 figure-citation block). Fixed format:
 
       ![Figure N — short label](https://arxiv.org/html/<id>/figs/<file>)
 
@@ -302,7 +302,7 @@ Hard rules for this stage:
     the original.
   - Change rate > 30% → automatic rework round; > 50% → abort the
     rewrite and keep the original.
-  - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
+  - The §4-5 invariants in `docs/STYLE.md` MUST survive
     humanization for both files. Violation of any invariant (verbatim
     tokens, emoji placement, `<a id="ref-…">` anchors, arXiv / DOI
     links, citation accuracy, P#/D#/CP# tag form, §4-2 glossary

@@ -51,7 +51,7 @@ CONTEXT (read-only):
     signatures.
 - `analysis/_TEMPLATE_AUDIT.md` — the exact form the report must
   follow.
-- `docs/STYLE_GUIDE.md` — §7 (Audit report) + §4.
+- `docs/STYLE.md` — §7 (Audit report) + §4.
 
 Do NOT edit any file under `context/`, `vendor/`, the Design, the
 originating analysis, or the impl guide/patch — those are immutable
@@ -110,7 +110,7 @@ C. 🧪 시그니처·하이퍼파라미터 일치.
        it explicitly?)
      - **하이퍼파라미터 / 상수** — Does every numeric or string
        constant the Design or impl guide cites (verbatim per
-       STYLE_GUIDE §4-1: `ε = 0.1`, `chunk_size = 50`, etc.) match
+       STYLE §4-1: `ε = 0.1`, `chunk_size = 50`, etc.) match
        what the patch actually sets? Constants named in the Design
        but absent from the patch → `partial`.
      - **import 경로** — Are new imports valid against the foundry
@@ -152,7 +152,7 @@ HARD RULES:
 - Every `fail` row records the command + stderr verbatim. Every
   `partial` row names the specific missing-or-misaligned item.
 - Single Korean document. KO-only filename.
-- Emoji/header system per `docs/STYLE_GUIDE.md` §7.
+- Emoji/header system per `docs/STYLE.md` §7.
 - Honesty over completeness — `partial` is a normal outcome. A
   fabricated `pass` is far worse than an honest `partial`.
 

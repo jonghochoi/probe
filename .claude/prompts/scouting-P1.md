@@ -5,7 +5,7 @@ CONTEXT (read-only):
 - context/P1.md        — source of truth, P1 scope only
                                    (Pillar P1, Decisions D1–D7, Tracked
                                    Literature, Researchers, Anti-topics)
-- docs/STYLE_GUIDE.md           — formatting, emoji system, Korean authoring rules
+- docs/STYLE.md           — formatting, emoji system, Korean authoring rules
 - scouting/_TEMPLATE.md     — the form every report follows
 - scouting/YYYY-MM-DD-P1.md — this pillar's recent reports (last
                                    ~2 weeks, ~4 files), for de-duplication only
@@ -86,13 +86,13 @@ For every candidate paper, score on a 0–3 scale:
 OUTPUT — Korean report (`YYYY-MM-DD-P1.md`)
 
 Write the report directly in Korean, following scouting/_TEMPLATE.md
-exactly. Top 3–5 papers only. Apply docs/STYLE_GUIDE.md §4 (Korean
+exactly. Top 3–5 papers only. Apply docs/STYLE.md §4 (Korean
 authoring rules): all prose is formal Korean (합니다/됩니다 체), while
 paper titles, config / code names, formulas, P#/D#/CP# tags, arXiv
 links, emojis and `<a id="ref-…">` anchors stay verbatim in their
 original form. Use the §4-2 glossary and §4-3 header table.
 
-### Emoji rules (docs/STYLE_GUIDE.md §2)
+### Emoji rules (docs/STYLE.md §2)
 Apply emojis to section and subsection headers only — never inside body text.
 
 Section-level (##):
@@ -113,7 +113,7 @@ Subsection-level (###), same across all papers:
   ⚠️  (d) Failure mode to probe first
   📌  All sub-sections within Context Suggestions
 
-### Link rules (docs/STYLE_GUIDE.md §3)
+### Link rules (docs/STYLE.md §3)
 Every paper entry must include a direct link:
   - arXiv → [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)
   - DOI   → [DOI](https://doi.org/...)
@@ -131,7 +131,7 @@ For each paper, state:
       key, hyperparameter, specific metric, loss term). Vague is failure.
   (d) failure mode to probe first.
 
-### Reference Legend (docs/STYLE_GUIDE.md §3-1)
+### Reference Legend (docs/STYLE.md §3-1)
 Open the report with a `## 🔑 Reference Legend` section, placed right
 after the intro blockquote and right before `## 📋 Scout Methodology`.
   - Include ONLY the P#/D#/CP# codes this report actually cites. No
@@ -187,7 +187,7 @@ Hard rules for this stage:
     the original.
   - Change rate > 30% → automatic rework round; > 50% → abort the
     rewrite and keep the original.
-  - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
+  - The §4-5 invariants in `docs/STYLE.md` MUST survive
     humanization. Violation of any invariant (verbatim tokens, emoji
     placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
     accuracy, P#/D#/CP# tag form, §4-2 glossary translations)

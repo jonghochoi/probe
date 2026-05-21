@@ -9,7 +9,7 @@ CONTEXT (read-only):
   Use ONLY two sections:
     · §4 Decision Log — P3 (D13–D18)
     · §6 P3 Tracked Literature (8 pinned + methodology base)
-- docs/STYLE_GUIDE.md   — §4 Korean rules (verbatim tokens, tone)
+- docs/STYLE.md   — §4 Korean rules (verbatim tokens, tone)
 
 Never edit any context file.
 
@@ -53,7 +53,7 @@ HARD RULES:
 - Keep it to roughly one page. Decision subsections are 2–3
   sentences each. Length is failure; density is the goal.
 - Tone: formal Korean (합니다/됩니다 체). Keep verbatim per
-  docs/STYLE_GUIDE.md §4: D#/CP# tags, arXiv links, config/code
+  docs/STYLE.md §4: D#/CP# tags, arXiv links, config/code
   names, formulas, and pinned paper titles (original English).
 - Do not edit context/P3.md. If the pool itself looks
   wrong (a Decision with zero support, a stale pin), state it in
@@ -87,7 +87,7 @@ Hard rules for this stage:
     the original.
   - Change rate > 30% → automatic rework round; > 50% → abort the
     rewrite and keep the original.
-  - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
+  - The §4-5 invariants in `docs/STYLE.md` MUST survive
     humanization. Violation of any invariant (verbatim tokens, emoji
     placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
     accuracy, P#/D#/CP# tag form, §4-2 glossary translations)

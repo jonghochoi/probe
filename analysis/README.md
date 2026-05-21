@@ -24,7 +24,7 @@
 같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
 편집하지 마십시오. `lerobot` 컬럼은 `<id>_impl/lerobot/impl.md`
 존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
-규칙은 `docs/STYLE_GUIDE.md` §5-7 에 정리돼 있습니다.
+규칙은 `docs/STYLE.md` §5-7 에 정리돼 있습니다.
 
 <!-- ANALYSIS_INDEX:START -->
 
@@ -111,7 +111,7 @@ foundry 이며, 회사 코드용 foundry 가 추후 추가되면 같은 Design �
   진행합니다.
 - 한글 단일 문서 (영문 1차 파일 없음). 같은 논문 재실행 시 append 가
   아니라 **덮어쓰는** 재생성 스냅샷입니다.
-- 분석 문서 구조는 `docs/STYLE_GUIDE.md` §5 + `analysis/_TEMPLATE.md`,
+- 분석 문서 구조는 `docs/STYLE.md` §5 + `analysis/_TEMPLATE.md`,
   Design 문서는 §6 + `analysis/_TEMPLATE_DESIGN.md`, 구현 가이드는
   §6 + `analysis/_TEMPLATE_IMPL.md`, 검증 보고서는 §6-5 +
   `analysis/_TEMPLATE_AUDIT.md` 를 정확히 따릅니다.

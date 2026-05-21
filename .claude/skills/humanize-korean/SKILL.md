@@ -6,7 +6,7 @@ description: AI(ChatGPT·Claude·Gemini 등)가 쓴 한글 텍스트를 "사람�
 
 # Humanize Korean — AI 한글 티 제거 오케스트레이터 (v1.5)
 
-> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식됐다. PROBE 운용에서는 항상 **strict 모드 4 인 파이프라인(`ai-tell-detector` → `korean-style-rewriter` → [`content-fidelity-auditor` ∥ `naturalness-reviewer`])** 만 사용한다. monolith fast-path 는 PROBE 산출물(decision-grade 한글 문서)의 의미 보존 요건과 맞지 않아 비활성. 입력은 항상 파일 경로(`scouting/*.md`, `synthesis/*.md`, `analysis/*.md`)이며 출력은 in-place 갱신. `docs/STYLE_GUIDE.md` §4-5 가 본 스킬의 PROBE 측 invariants(롤백 트리거) 단일 출처이다.
+> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식됐다. PROBE 운용에서는 항상 **strict 모드 4 인 파이프라인(`ai-tell-detector` → `korean-style-rewriter` → [`content-fidelity-auditor` ∥ `naturalness-reviewer`])** 만 사용한다. monolith fast-path 는 PROBE 산출물(decision-grade 한글 문서)의 의미 보존 요건과 맞지 않아 비활성. 입력은 항상 파일 경로(`scouting/*.md`, `synthesis/*.md`, `analysis/*.md`)이며 출력은 in-place 갱신. `docs/STYLE.md` §4-5 가 본 스킬의 PROBE 측 invariants(롤백 트리거) 단일 출처이다.
 
 ## Phase 0: 컨텍스트 확인
 
@@ -35,7 +35,7 @@ humanize-korean (PROBE strict) / target: {file_path}
 입력:
 - 원문 파일 경로
 - Phase A 의 detection JSON
-- `options.preserve_formatting`: `true` (PROBE 산출물의 헤딩·이모지·테이블 구조는 STYLE_GUIDE 가 강제하므로 유지)
+- `options.preserve_formatting`: `true` (PROBE 산출물의 헤딩·이모지·테이블 구조는 STYLE 가 강제하므로 유지)
 
 출력: in-place 후보 rewrite + `03_rewrite_diff.json` (메모리 상)
 
@@ -64,9 +64,9 @@ humanize-korean (PROBE strict) / target: {file_path}
 - `over_polish_findings[]`: 부자연스러운 문학체·어색한 리듬·억지 윤문 의심 구간
 - `verdict` ∈ {`accept`, `accept_with_note`, `rewrite_round_2`, `rollback_and_rewrite`}
 
-### PROBE 측 STYLE_GUIDE invariant 검사
+### PROBE 측 STYLE invariant 검사
 
-`content-fidelity-auditor` 의 13항 체크리스트에 더해, PROBE 에서는 다음을 fidelity fail 로 동일 취급한다 (`docs/STYLE_GUIDE.md` §4-5 단일 출처):
+`content-fidelity-auditor` 의 13항 체크리스트에 더해, PROBE 에서는 다음을 fidelity fail 로 동일 취급한다 (`docs/STYLE.md` §4-5 단일 출처):
 
 - 원문 영어 논문 제목 변형
 - 코드/설정명 (예: `env_cfg.py`, `ObservationManager`) 변형
@@ -75,7 +75,7 @@ humanize-korean (PROBE strict) / target: {file_path}
 - `<a id="ref-…">` 앵커 또는 `[CODE](#ref-CODE)` 링크 변형
 - arXiv / DOI 링크 변형
 - 이모지 종류·위치·"헤더당 1개" 규칙 위반
-- `docs/STYLE_GUIDE.md` §4-2 용어집 외 임의 동의어로 기술 용어 치환
+- `docs/STYLE.md` §4-2 용어집 외 임의 동의어로 기술 용어 치환
 - 합니다/됩니다 정중체 이탈
 
 위 항목이 단 하나라도 변형되면 `audit_verdict = fail` 처리.
@@ -125,7 +125,7 @@ detection JSON
     ↓ [korean-style-rewriter]
 후보 rewrite + diff JSON
     ↓ [Phase C 병렬 검증]
-    ├→ [content-fidelity-auditor + STYLE_GUIDE §4-5 invariants] → fidelity verdict
+    ├→ [content-fidelity-auditor + STYLE §4-5 invariants] → fidelity verdict
     └→ [naturalness-reviewer]                                    → naturalness verdict
     ↓ [Phase D 종합 매트릭스]
     ├ 최종 승인 / 승인+메모 → in-place 기록
@@ -160,4 +160,4 @@ Phase C 의 fidelity-auditor 와 naturalness-reviewer 는 **반드시 병렬**�
 
 - 분류 체계: [`references/ai-tell-taxonomy.md`](references/ai-tell-taxonomy.md) — 10 대분류 × 40+ 패턴 전수
 - 윤문 처방: [`references/rewriting-playbook.md`](references/rewriting-playbook.md) — 카테고리별 치환 레시피
-- PROBE invariants 단일 출처: `docs/STYLE_GUIDE.md` §4-5
+- PROBE invariants 단일 출처: `docs/STYLE.md` §4-5

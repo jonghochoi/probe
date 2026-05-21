@@ -5,7 +5,7 @@
 **Papers scanned:** <N from arXiv> + <M from citation graph> + <K from author watch>
 **Papers surfaced (every dimension ≥ 2):** <count>
 
-> 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE_GUIDE.md`에 정의되어 있으니 정확히 따릅니다.
+> 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE.md`에 정의되어 있으니 정확히 따릅니다.
 > 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`YYYY-MM-DD-P#.md`)를 산출합니다.
 > 각 섹션에서 처음 등장하는 P#/D#/CP# 코드는 아래 🔑 참조 약어 풀이로 링크합니다.
 
@@ -14,7 +14,7 @@
 ## 🔑 참조 약어 풀이
 
 <!--
-STYLE_GUIDE.md §3-1 is authoritative. Summary:
+STYLE.md §3-1 is authoritative. Summary:
   · ONLY P#/D#/CP# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc) → CP# (asc), one per distinct code.
   · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning (Korean).

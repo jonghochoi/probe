@@ -645,7 +645,7 @@
   <section id="pipeline">
     <h2>파이프라인 — 세 갈래 + 사이드카 한 개</h2>
     <p>
-      PROBE는 <strong>하나의 정적 컨텍스트를 공유하는 세 갈래의 산출물</strong>입니다 — outward (<code>scouting/</code>), inward (<code>synthesis/</code>), focused (<code>analysis/</code>). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌며, 자기 폴더에 씁니다. 네 번째 트랙 <code>pulse/</code>는 사람이 읽는 산출물이 아니라 채팅→스카우트 입력 보조 사이드카입니다.
+      PROBE는 <strong>하나의 정적 컨텍스트를 공유하는 세 갈래의 산출물</strong>입니다 — outward (<code>scouting/</code>), inward (<code>synthesis/</code>), focused (<code>analysis/</code>). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌며, 자기 폴더에 씁니다.
     </p>
 
     <div class="pipe-grid">
@@ -697,19 +697,6 @@
         </div>
       </div>
     </div>
-
-    <h3>사이드카: pulse (Tier A PoC)</h3>
-    <p>
-      <code>pulse/</code>는 OUTWARD 컬럼의 사이드카이지 네 번째 peer가 아닙니다. 팀 채팅 export를 짧은 pillar별 힌트 파일로 증류해, 다음 <code>scouting/</code> 실행의 <em>retrieval-weight nudge</em>로만 작동합니다. 정적 <code>context/</code>가 충돌 시 항상 승리하며, pulse는 <code>context/</code>의 어떤 파일도 수정하지 않습니다.
-    </p>
-    <pre>pulse/inbox/      ──►  .claude/prompts/      ──►  pulse/YYYY-MM-DD-P#.md
-(채팅 export,         pulse-digest.md            (pillar별 힌트,
- gitignored)          (수동, ~주 1회)             실행당 최대 4개 파일)
-                                                          │
-                                                          ▼
-                                                scouting/ retrieval
-                                                (nudge 전용)</pre>
-    <p class="text-muted">상태: Tier A PoC — 수동, 자동화 없음, 2주 trial.</p>
 
     <h3>사이드카: reproduction (on-demand)</h3>
     <p>
@@ -872,7 +859,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
   <!-- ── Output example ──────────────────────────────────────────── -->
   <section id="output">
     <h2>출력 예시 — Scouting Report의 모양</h2>
-    <p>모든 산출물은 <a href="../docs/STYLE_GUIDE.md"><code>docs/STYLE_GUIDE.md</code></a>의 단일 형식 규칙을 따릅니다. 이모지는 섹션/서브섹션 헤더에만 — 본문 인라인 금지. 한글 prose는 합니다/됩니다 체, 논문 제목/config·코드 이름/수식/P#·D#·CP# 태그/arXiv 링크/이모지/anchor는 verbatim.</p>
+    <p>모든 산출물은 <a href="../docs/STYLE.md"><code>docs/STYLE.md</code></a>의 단일 형식 규칙을 따릅니다. 이모지는 섹션/서브섹션 헤더에만 — 본문 인라인 금지. 한글 prose는 합니다/됩니다 체, 논문 제목/config·코드 이름/수식/P#·D#·CP# 태그/arXiv 링크/이모지/anchor는 verbatim.</p>
 
     <h3>섹션 이모지 시스템</h3>
     <div class="table-wrap">
@@ -1023,7 +1010,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting-P{1..4}.md</code> · <code>synthesis-P{1..4}.md</code> · <code>paper-analysis.md</code> · <code>paper-reproduction.md</code> · <code>pulse-digest.md</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting-P{1..4}.md</code> · <code>synthesis-P{1..4}.md</code> · <code>paper-analysis.md</code> · <code>paper-reproduction.md</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
           <tr><td>컨텍스트</td>    <td><code>context/P{1..4}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트) + <code>synthesis/P{1..4}_BRIEF.md</code>(월 스냅샷)</td></tr>
           <tr><td>vendor</td>      <td><code>vendor/lerobot/</code> — byte-stable 스냅샷, 6개 baseline policy + configs (재현 패치의 적용 대상)</td></tr>
@@ -1042,20 +1029,27 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">README</span>
         <div>
           <div class="doc-title">README.md</div>
-          <div class="doc-desc">동기 · 파이프라인 · Stage 1–3 에이전트 셋업 · Troubleshooting (English)</div>
+          <div class="doc-desc">동기 · 파이프라인 · 업스트림 레퍼런스 · Further Reading (English)</div>
         </div>
       </a>
-      <a class="doc-item" href="INTRO_KO.md">
+      <a class="doc-item" href="AGENT_SETUP.md">
+        <span class="doc-tag">SETUP</span>
+        <div>
+          <div class="doc-title">docs/AGENT_SETUP.md</div>
+          <div class="doc-desc">Claude Code Routines 셋업 · 네트워크 허용 · `/analyze-paper`·`/foundry`·`/audit` · 트러블슈팅 (English)</div>
+        </div>
+      </a>
+      <a class="doc-item" href="INTRO.md">
         <span class="doc-tag">한글</span>
         <div>
-          <div class="doc-title">docs/INTRO_KO.md</div>
+          <div class="doc-title">docs/INTRO.md</div>
           <div class="doc-desc">한글 온보딩 + 운영 매뉴얼 — 마크다운 텍스트 버전</div>
         </div>
       </a>
-      <a class="doc-item" href="STYLE_GUIDE.md">
+      <a class="doc-item" href="STYLE.md">
         <span class="doc-tag">STYLE</span>
         <div>
-          <div class="doc-title">docs/STYLE_GUIDE.md</div>
+          <div class="doc-title">docs/STYLE.md</div>
           <div class="doc-desc">산출물 포맷 SSOT — 이모지 시스템, 링크 규칙, 한글 작성 규약</div>
         </div>
       </a>
@@ -1092,20 +1086,6 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <div>
           <div class="doc-title">analysis/README.md</div>
           <div class="doc-desc">on-demand FOCUSED 트랙 — <code>/analyze-paper</code> · <code>/reproduce-paper</code></div>
-        </div>
-      </a>
-      <a class="doc-item" href="../pulse/README.md">
-        <span class="doc-tag">PoC</span>
-        <div>
-          <div class="doc-title">pulse/README.md</div>
-          <div class="doc-desc">채팅→스카우트 입력 보조 — Tier A PoC, 스키마와 운영</div>
-        </div>
-      </a>
-      <a class="doc-item" href="../pulse/EXPORT_GUIDE_KO.md">
-        <span class="doc-tag">CHAT</span>
-        <div>
-          <div class="doc-title">pulse/EXPORT_GUIDE_KO.md</div>
-          <div class="doc-desc">Slack / Telegram 채팅 export 운영 가이드</div>
         </div>
       </a>
       <a class="doc-item" href="../vendor/lerobot/README.md">

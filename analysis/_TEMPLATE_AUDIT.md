@@ -4,7 +4,7 @@
 > foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
-> `docs/STYLE_GUIDE.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
+> `docs/STYLE.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
 > 파일을 덮어씁니다.
 
 ---
