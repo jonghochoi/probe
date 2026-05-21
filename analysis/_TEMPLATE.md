@@ -71,14 +71,23 @@
        (한글 해설 — 이 문장이 왜 핵심인지, 어떻게 작동하는지.)
 
      수식은 원문 LaTeX 표기 그대로 + GitHub KaTeX 렌더링을 위해
-     inline 은 `` `$X$` `` (백틱 래핑 필수 — 첨자 `_{t}` 가 italic
-     으로 잘리는 GitHub Markdown 한계 우회), display 는 별도 줄의
-     `$$X$$` 로 감쌉니다. `\(…\)` / `\[…\]` 는 GitHub 에서 렌더되지
-     않으므로 사용 금지. arXiv HTML 본문은 MathML + alttext 로 옵니다 —
+     **inline 은 `` $`X`$ `` (dollar 안쪽 백틱), display 는 별도
+     줄의 `$$X$$`**. `` `$X$` `` (백틱이 dollar 바깥) 은 인라인
+     코드로 굳어 KaTeX 가 닿지 못하므로 절대 금지 — 글자 순서만
+     다르고 결과가 정반대입니다. 또한 inline `$` 의 양쪽 경계 문자는
+     공백 또는 `( [ { <` (opener) / `. , ; : ! ? ) ] } >` (closer)
+     중 하나여야 합니다. CJK 가운데점 `·`, 굵게 마커 `*`·`**`,
+     한글 음절이 `$` 에 직접 붙으면 그 경계가 무시되어 소스가 그대로
+     출력됩니다. `\(…\)` / `\[…\]` 는 GitHub 에서 렌더되지 않으므로
+     사용 금지. arXiv HTML 본문은 MathML + alttext 로 옵니다 —
      `alttext="X"` 에서 LaTeX 를 그대로 꺼내 위 표기로 감싸면
      됩니다(STYLE_GUIDE §5-6). 변수 정의도 본문 표기와 일치. 분량
      압축이 아니라 디테일 보존이 목표입니다. 절 번호가 식별되지
-     않으면 `(§?)` 로 두고 추정하지 않습니다. -->
+     않으면 `(§?)` 로 두고 추정하지 않습니다.
+
+     아키텍처 하위절에 논문의 pipeline overview / architecture
+     diagram 1장을 STYLE_GUIDE §5-6 figure-citation 형식으로 끼워
+     넣는 것을 권장합니다 (arXiv HTML 가 있을 때만; hotlink only). -->
 
 ---
 

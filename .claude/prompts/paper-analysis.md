@@ -72,6 +72,17 @@ Record the actual level reached, verbatim, in the 📄 메타 header:
   still produced, but every (B) decision-grade section is prefixed
   **(본문 미확보 — 잠정)** and analysis is limited to the abstract.
 
+FIGURE URLs (optional, only when 전문 was obtained from arXiv HTML or
+ar5iv): while parsing the HTML, also collect `<figure>` blocks. From
+each `<figure id="...">` extract (a) the `<img src="figs/...">` path
+and (b) the `<figcaption>` text starting with `Figure N:`. Build an
+absolute URL `https://arxiv.org/html/<id>/<src>` (or the ar5iv
+equivalent if that was the source). Keep this list in scratch; the
+analysis HARD RULES below describe which 1–3 figures to drop into the
+analysis. PROBE never downloads or commits image binaries — hotlink
+only. If retrieval level was `PDF 텍스트` or `초록 only`, skip figure
+collection entirely (no placeholders).
+
 Never fabricate. Every quoted number, benchmark, or claim must come
 from text you actually received. If a curl call fails (non-zero exit,
 HTTP error, empty body after retries), do NOT invent content: record
@@ -168,9 +179,10 @@ HARD RULES:
   P#/D#/CP# with their meaning from the doc; do not invent a
   connection. If the paper does not touch a given Decision, say so
   plainly.
-- 초록 only → mark every (B) section (본문 미확보 — 잠정). The Design
-  is also generated, but every section is prefixed (본문 미확보 — 잠정)
-  and most fields will be "(원문에 명시 없음 — 가정으로 메움)".
+- Abstract-only acquisition → prefix every (B) section of the analysis
+  with the verbatim marker **(본문 미확보 — 잠정)**. The Design is
+  still generated but every section carries the same prefix and most
+  fields are filled with `(원문에 명시 없음 — 가정으로 메움)`.
 - Never fabricate an arXiv id, a number, a citation, or a result.
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - The Design is **vendor-agnostic**. It must not contain `file:line`
@@ -178,36 +190,76 @@ HARD RULES:
   belongs to `/foundry`.
 - Emoji/header system per docs/STYLE_GUIDE.md §5 (analysis) and §6
   (Design) — one emoji at the start of each `##`/`###` header, none
-  in body text. §5-6 governs the quote/개조식/keyword conventions
-  below.
-- ❓ 문제 정의 / 동기 는 반드시 개조식(굵은 라벨 + 1–2문장의 4–6 항목).
-  단일 산문 문단 금지.
-- 🔬 방법론, 📊 실험 결과 의 원문 인용은 아래 형식 고정:
-    > "<English verbatim>" (§n[, Table k])
-    (한글 해설.)
-  영문은 절대 paraphrase 하지 않습니다. 출처 표기가 본문에서 명확하지
-  않으면 `(§?)` 로 두고 추정하지 않습니다.
-- 모든 수식·기호는 원문 LaTeX/유니코드 표기 그대로. 변수 정의는 본문
-  표기와 일치. GitHub KaTeX 렌더링을 위해 inline 은 `` `$X$` ``
-  (백틱 래핑 필수 — `_{t}` 같은 첨자가 italic 으로 잘리는 GitHub
-  Markdown 한계 우회), display 는 별도 줄의 `$$X$$`. 수식 토큰은 절대
-  paraphrase 하지 않습니다. arXiv HTML 본문(LaTeXML 산출물)은 `\(…\)`
-  / `\[…\]` 가 아니라 `<math display="inline|block" alttext="…">`
-  MathML + LaTeX alttext 로 옵니다. 추출 절차:
-    1. `<math … display="inline" … alttext="X">` → `` `$X$` ``
-       (백틱 래핑)
-    2. `<math … display="block" … alttext="X">` 또는 `class="ltx_equation*"`
-       컨테이너의 alttext → 별도 줄의 `$$X$$` (선행 `\displaystyle`,
-       후행 콤마는 제거 가능, 백틱 불필요).
-    3. HTML 엔티티는 디코딩: `&gt;` → `>`, `&lt;` → `<`, `&amp;` → `&`.
-    4. KaTeX 미지원 매크로(예: `\bm`)는 함부로 치환하지 않습니다.
-       그대로 두어 렌더 실패가 보이도록 두는 편이 정직성 원칙(§5-4)에
-       부합합니다. 본문에 일반 달러 기호가 등장하면 `\$` 로 escape.
-- 🔑 기술 키워드 의 비유는 사실 왜곡 금지. 비유가 논문 주장과 어긋날
-  여지가 있으면 비유를 빼고 평이한 정의로만 기술합니다.
-- 방법론은 압축이 아니라 보존을 우선. "디테일이 본문에 있으면
-  옮긴다" 가 기본값. 단, 본문 미확보(초록 only)일 때는 (본문 미확보 —
-  잠정) 마킹 후 추측 금지.
+  in body text. §5-6 governs the quote / bullet-form / keyword
+  conventions below.
+- ❓ 문제 정의 / 동기 must be bullet form (bold label + 1–2 sentences,
+  4–6 items). Single-paragraph prose is forbidden.
+- 🔬 방법론 and 📊 실험 결과 use a fixed citation form for source
+  text:
+
+      > "<English verbatim>" (§n[, Table k])
+      (한글 해설.)
+
+  Never paraphrase the English. If the section number is not clear in
+  the source body, write `(§?)` — do not guess.
+- All formulas keep their original LaTeX / Unicode notation. Variable
+  definitions match the source. For GitHub KaTeX rendering use
+  **`` $`X`$ `` for inline (backticks INSIDE the dollars) and a
+  separate `$$X$$` line for display**. The opposite form `` `$X$` ``
+  (backticks OUTSIDE the dollars) is FORBIDDEN — it becomes inline
+  code and KaTeX never runs. The two patterns differ only in
+  character order and produce opposite results. Inner-backtick form
+  is required because GitHub Markdown's italic pass runs before
+  KaTeX and would otherwise capture the `_` in subscripts like
+  `_{t}`, destroying the delimiters; with multiple such inline spans
+  on a line, the italic toggle cascades and breaks the whole line.
+  arXiv HTML (LaTeXML output) emits math as
+  `<math display="inline|block" alttext="…">` MathML + LaTeX
+  alttext, not `\(…\)` / `\[…\]`. Extraction recipe:
+    1. `<math … display="inline" … alttext="X">` → `` $`X`$ ``
+       (backticks inside dollars).
+    2. **Inline math boundary check** — opener `$` must be preceded
+       by start-of-line, whitespace, or one of `(` `[` `{` `<`;
+       closer `$` must be followed by end-of-line, whitespace, or
+       one of `.` `,` `;` `:` `!` `?` `)` `]` `}` `>`. CJK
+       middle-dot `·`, bold markers `*`/`**`, or Hangul syllables
+       glued to a `$` make that boundary invisible and the source
+       leaks through. Fixes:
+       - `$X$·$Y$` → `$X$ · $Y$` (whitespace on both sides)
+       - `**$X$ Y**` → `$X$ **Y**` (move math out of bold)
+       - `의$X$` / `$X$를` → always one space between Hangul and `$`
+    3. `<math … display="block" … alttext="X">` or any
+       `class="ltx_equation*"` container's `alttext` → its own
+       `$$X$$` line (leading `\displaystyle` and trailing commas may
+       be stripped; no backticks needed for display).
+    4. Decode HTML entities: `&gt;` → `>`, `&lt;` → `<`, `&amp;` →
+       `&`.
+    5. Do not substitute KaTeX-unsupported macros (`\bm`, certain
+       `\xrightarrow` variants, author-defined `\newcommand`). Leave
+       them as-is so the render failure is visible — this respects
+       the honesty principle (§5-4). Escape a literal `$` in prose
+       as `\$` to avoid being mistaken for a math opener.
+- 🔑 기술 키워드 analogies must not distort the paper. If a faithful
+  analogy doesn't exist, fall back to a plain definition.
+- Methodology favours preservation over compression. Default: if the
+  detail is in the body, move it over. Exception: under
+  abstract-only acquisition, mark **(본문 미확보 — 잠정)** and do not
+  speculate.
+- Hotlink 1–3 arXiv figures into the analysis body (see
+  `docs/STYLE_GUIDE.md` §5-6 figure-citation block). Fixed format:
+
+      ![Figure N — short label](https://arxiv.org/html/<id>/figs/<file>)
+
+      > "Figure N: <English caption verbatim>" (§n)
+      (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
+
+  URL must be the arXiv HTML `<img src>` resolved to an absolute
+  path. Author project pages, ar5iv mirrors, and cached hotlinks are
+  out (link-rot risk). Cap: 3 figures per analysis — this is a
+  decision tool, not a slide deck. Abstract-only / PDF-only
+  retrieval → omit the figure citations entirely (no placeholders).
+  The English caption blockquote is a verbatim token; the
+  humanize-korean pass must leave it untouched.
 
 FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
@@ -255,8 +307,10 @@ Hard rules for this stage:
     tokens, emoji placement, `<a id="ref-…">` anchors, arXiv / DOI
     links, citation accuracy, P#/D#/CP# tag form, §4-2 glossary
     translations) is treated as a fidelity fail → rollback.
-  - blockquote 안의 영문 원문 인용·`(§n)` 출처·수식은 humanize 대상에서
-    제외됩니다(verbatim 토큰과 동일 취급, §5-6). 위반 시 fidelity fail.
+  - English-verbatim quotes inside a `>` blockquote, their `(§n)`
+    source markers, and any formula are excluded from humanize
+    rewriting (treated as verbatim tokens, §5-6). Touching them is a
+    fidelity fail.
   - The humanize pass NEVER adds, removes, or changes facts; it only
     rewrites Korean prose style (translation-ese, mechanical
     parallelism, AI signature phrases, hedging, etc.) per
@@ -270,11 +324,17 @@ humanized (or rolled-back) files per the GIT section below.
 
 GIT — after both files are written:
 
-Persist the outputs by pushing directly to `main`. No PR is created.
+Refresh the analyses index in the same commit, then push to `main`:
 
-  git add analysis/<id>.md analysis/<id>_design.md
+  python3 scripts/refresh-analysis-index.py
+  git add analysis/<id>.md analysis/<id>_design.md analysis/README.md
   git commit -m "analysis: add <id> deep-dive + design"
   git push origin HEAD:main
+
+The refresh script regenerates the table between the
+`<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->` markers
+in `analysis/README.md` and is idempotent (no-op when nothing
+changed).
 
 `<id>` is the same arXiv id / slug used for the analysis filename.
 

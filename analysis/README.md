@@ -17,6 +17,23 @@
 | `<arxiv-id>_impl/<foundry>/UNMAPPABLE.md` | `/foundry` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
 | `<arxiv-id>_verify/<foundry>.md` | `/verify` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 정적 대조한 한글 검증 보고서 |
 
+## 📑 Index
+
+아래 표는 `scripts/refresh-analysis-index.py` 가 자동 관리합니다 —
+`/analyze-paper`, `/foundry`, `/verify` 가 자기 산출물을 커밋할 때
+같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
+편집하지 마십시오. `lerobot` 컬럼은 `<id>_impl/lerobot/impl.md`
+존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
+규칙은 `docs/STYLE_GUIDE.md` §5-7 에 정리돼 있습니다.
+
+<!-- ANALYSIS_INDEX:START -->
+
+| # | Analysis | arXiv | Title | Refreshed | lerobot |
+|---|---|---|---|---|---|
+| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | — |
+
+<!-- ANALYSIS_INDEX:END -->
+
 ## 호출
 
 `/analyze-paper <arXiv id | url | pdf url>` — 정식 프롬프트는
