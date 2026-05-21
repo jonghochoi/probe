@@ -1,0 +1,122 @@
+--- a/vendor/lerobot/policies/pi0/configuration_pi0.py
++++ b/vendor/lerobot/policies/pi0/configuration_pi0.py
+@@ -86,6 +86,18 @@
+     freeze_vision_encoder: bool = False  # Freeze only the vision encoder
+     train_expert_only: bool = False  # Freeze entire VLM, train only action expert and projections
+ 
++    # Arm-Hand Feature Enhancement (arXiv:2511.00139, §7.3 / Eq. (10)-(12)).
++    # Disabled by default. When enabled, the π0 expert's shared latent is
++    # split into per-limb latents (z_arm, z_hand) via 2-layer Mish MLPs,
++    # routed through single-linear auxiliary heads (selective DoF
++    # supervision), and concatenated with z_share before the main flow-
++    # matching head. Selective-supervision wiring of the aux loss is not
++    # included in this patch; see impl.md §🚧.
++    enhancement_enabled: bool = False
++    enhancement_aux_loss_weight: float = 1.0  # λ in Eq. (12); not specified in the paper
++    enhancement_arm_indices: list[int] = field(default_factory=list)
++    enhancement_hand_indices: list[int] = field(default_factory=list)
++
+     # Optimizer settings: see openpi `AdamW``
+     optimizer_lr: float = 2.5e-5  # see openpi `CosineDecaySchedule: peak_lr`
+     optimizer_betas: tuple[float, float] = (0.9, 0.95)
+--- a/vendor/lerobot/policies/pi0/modeling_pi0.py
++++ b/vendor/lerobot/policies/pi0/modeling_pi0.py
+@@ -551,6 +551,54 @@
+         return [prefix_output, suffix_output], prefix_past_key_values
+ 
+ 
++class ArmHandFeatureEnhancement(nn.Module):
++    """Arm-Hand Feature Enhancement (arXiv:2511.00139, §7.3).
++
++    Splits the π0 expert's shared latent ``z_share`` (per-chunk, width=W)
++    into per-limb latents ``z_arm``, ``z_hand`` (width=W/2) via two
++    2-layer MLPs with Mish activation, attaches single-linear auxiliary
++    heads for selective DoF supervision, and produces a fused latent
++    ``concat([z_share, z_arm, z_hand])`` projected back to width W so the
++    existing π0 ``action_out_proj`` flow-matching head can consume it
++    without further changes.
++    """
++
++    def __init__(self, width: int, max_action_dim: int):
++        super().__init__()
++        half = width // 2
++        self.half = half
++        self.arm_mlp = nn.Sequential(
++            nn.Linear(width, width),
++            nn.Mish(),
++            nn.Linear(width, half),
++            nn.Mish(),
++        )
++        self.hand_mlp = nn.Sequential(
++            nn.Linear(width, width),
++            nn.Mish(),
++            nn.Linear(width, half),
++            nn.Mish(),
++        )
++        self.aux_arm = nn.Linear(half, max_action_dim)
++        self.aux_hand = nn.Linear(half, max_action_dim)
++        self.main_proj = nn.Linear(width + 2 * half, width)
++
++    def forward(self, z_share: Tensor) -> tuple[Tensor, Tensor, Tensor]:
++        """Return ``(fused, aux_arm, aux_hand)``.
++
++        - ``fused``: (B, T, W) — projected back to expert width.
++        - ``aux_arm``: (B, T, max_action_dim) — auxiliary arm sub-action prediction.
++        - ``aux_hand``: (B, T, max_action_dim) — auxiliary hand sub-action prediction.
++        """
++        z_arm = self.arm_mlp(z_share)
++        z_hand = self.hand_mlp(z_share)
++        fused = torch.cat([z_share, z_arm, z_hand], dim=-1)
++        fused = self.main_proj(fused)
++        aux_arm = self.aux_arm(z_arm)
++        aux_hand = self.aux_hand(z_hand)
++        return fused, aux_arm, aux_hand
++
++
+ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+     """Core PI0 PyTorch model."""
+ 
+@@ -584,6 +632,13 @@
+         self.action_time_mlp_in = nn.Linear(2 * action_expert_config.width, action_expert_config.width)
+         self.action_time_mlp_out = nn.Linear(action_expert_config.width, action_expert_config.width)
+ 
++        # Arm-Hand Feature Enhancement (arXiv:2511.00139, §7.3).
++        self.enhancement = None
++        if getattr(config, "enhancement_enabled", False):
++            self.enhancement = ArmHandFeatureEnhancement(
++                width=action_expert_config.width, max_action_dim=config.max_action_dim
++            )
++
+         # Initialize gradient checkpointing flag
+         self.gradient_checkpointing_enabled = False
+ 
+@@ -791,10 +846,16 @@
+         suffix_out = suffix_out[:, -self.config.chunk_size :]
+         suffix_out = suffix_out.to(dtype=torch.float32)
+ 
+-        def action_out_proj_func(suffix_out):
+-            return self.action_out_proj(suffix_out)
++        if self.enhancement is not None:
++            fused, _aux_arm, _aux_hand = self.enhancement(suffix_out)
++            v_t = self.action_out_proj(fused)
++            # NOTE: auxiliary losses on _aux_arm / _aux_hand are not yet wired
++            # into the returned tensor; see impl.md §🚧.
++        else:
++            def action_out_proj_func(suffix_out):
++                return self.action_out_proj(suffix_out)
+ 
+-        v_t = self._apply_checkpoint(action_out_proj_func, suffix_out)
++            v_t = self._apply_checkpoint(action_out_proj_func, suffix_out)
+ 
+         return F.mse_loss(u_t, v_t, reduction="none")
+ 
+@@ -920,6 +981,9 @@
+         suffix_out = outputs_embeds[1]
+         suffix_out = suffix_out[:, -self.config.chunk_size :]
+         suffix_out = suffix_out.to(dtype=torch.float32)
++        if self.enhancement is not None:
++            fused, _aux_arm, _aux_hand = self.enhancement(suffix_out)
++            return self.action_out_proj(fused)
+         return self.action_out_proj(suffix_out)
+ 
+ 

@@ -31,7 +31,7 @@
 
 | # | Analysis | arXiv | Title | Refreshed | lerobot |
 |---|---|---|---|---|---|
-| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | — |
+| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ |
 
 <!-- ANALYSIS_INDEX:END -->
 
