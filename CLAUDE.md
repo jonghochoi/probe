@@ -20,7 +20,6 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_verify/<foundry>.md`) |
 | `pulse/` | agent + human input | Chat-to-scout bias PoC — weekly `YYYY-MM-DD-P#.md` retrieval-weight nudges; `inbox/` is human-fed raw chat (gitignored) |
-| `experiments/` | agent + human input | Team-internal hypothesis cycles — `H###-<slug>/{H,D}###.md`, `I###/<foundry>/{impl.md,impl.patch}`, `V###/<foundry>.md`, `manifest.yaml`. Agent runs `draft → validated`; human runs `→ adopted` / `→ rejected` |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
@@ -33,23 +32,10 @@ never the reverse.
 `vendor/lerobot/` is read-only to **both** the agent and contributors. It is
 a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the v0
 foundry — the target of every `foundry=lerobot` impl patch under
-`analysis/<id>_impl/lerobot/impl.patch` and
-`experiments/H###-*/I###/lerobot/impl.patch`. Hand-editing files inside it
-would silently invalidate existing patches and break attribution. The only
-way it changes is the wholesale refresh procedure in
-`vendor/lerobot/README.md`; nothing else.
-
-`experiments/` follows a split-ownership rule. Each `H###-<slug>/` folder is
-fully append-only at the file level once a stage runs (`H###.md` and
-`D###.md` after `/hypothesize`, `I###/<foundry>/impl.md` +
-`I###/<foundry>/impl.patch` after `/foundry`, `V###/<foundry>.md` after
-`/verify`) — those files are regenerable snapshots but never hand-edited.
-The `manifest.yaml` is the **only** file in the folder that is jointly
-written: agents update foundry-keyed `implementation.<foundry>` and
-`validation.<foundry>` fields and may graduate `status: draft → validated`
-when every registered foundry has all three validation checks at `pass`, but
-the transitions `→ adopted` and `→ rejected` belong to the human, who edits
-`manifest.status` and `manifest.adopted` directly.
+`analysis/<id>_impl/lerobot/impl.patch`. Hand-editing files inside it would
+silently invalidate existing patches and break attribution. The only way it
+changes is the wholesale refresh procedure in `vendor/lerobot/README.md`;
+nothing else.
 
 ## Commit message style
 
@@ -159,7 +145,7 @@ convention** — it does not strip emoji.
 
 ### Narrative / onboarding docs
 
-`README.md`, `docs/INTRO_KO.md`. Headers may carry **one leading thematic
+`README.md`, `docs/INTRO.md`. Headers may carry **one leading thematic
 emoji**, placed at the start of the header text, after the `#`s and a space
 (`# 🛸 …`, `## 📌 …`, `### 🪜 …`). Exactly one emoji, at the start — never at
 the end, never inside body text. One H1 per document.
@@ -168,7 +154,7 @@ the end, never inside body text. One H1 per document.
 document must be uniformly emoji or uniformly plain — no mixing within the
 same level in the same doc. The canonical narrative pattern in this repo is
 **emoji at H1 and H2, plain at H3 and below**, used by both `README.md` and
-`docs/INTRO_KO.md`. If you add a new H3 to either, it stays plain; outliers
+`docs/INTRO.md`. If you add a new H3 to either, it stays plain; outliers
 must be brought into line, not left as exceptions.
 
 ### Reference / structural docs
@@ -201,6 +187,39 @@ apply to:
 Path correctness is **not** exempt: when a path moves, references inside
 prompts and context files are still updated even though their formatting is
 not governed here.
+
+## Document language convention
+
+PROBE is a Korean-first repository — most outputs are decision-grade Korean
+prose for an internal team — but the contributor-facing surface stays in
+English so `git log`, PR threads, and external collaborators read uniformly.
+Use this rule as the single source of truth for "which language should a
+new doc be in?":
+
+- **Default — Korean (한글).** All agent outputs (`scouting/`, `synthesis/`,
+  `analysis/`, `pulse/`) and the folder READMEs that describe them
+  (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`,
+  `pulse/README.md`) are Korean. Templates that those folders ship
+  (`_TEMPLATE*.md`) are Korean as well.
+- **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
+  `docs/STYLE_GUIDE.md`. The audience is anyone reading PRs or
+  history; English keeps that surface grep-able and consistent with the
+  enforced English commit-message rule.
+- **Exception 2 — Project front door in English.** `README.md`. The
+  GitHub-rendered top page is the public-facing entry, and the
+  hand-tuned Korean onboarding lives one click away at
+  `docs/INTRO.md` + `docs/probe_guide.html`.
+- **Korean onboarding docs stay Korean.** `docs/INTRO.md` and
+  `pulse/EXPORT_GUIDE.md` are Korean even though they sit alongside the
+  English contributor docs — their folder location plus the Korean H1
+  on line 1 are enough to identify them.
+
+**No `_KO` / `_EN` filename suffix.** Location (the folder rule above) plus
+the H1 on line 1 are sufficient — `head -1 <file>` tells you the language
+in one command. When `docs/` ends up holding both `STYLE_GUIDE.md` (en) and
+`INTRO.md` (ko), that mix is intentional and documented here. Do not add a
+language suffix to a new document just to disambiguate; if the rule above
+does not place the doc unambiguously, the doc is in the wrong folder.
 
 ## When adding a new top-level doc
 
@@ -235,7 +254,7 @@ checklist existed). Walk this list every time:
 ## Where to read more
 
 - `README.md` — motivation, repository structure, full Stage 1–3 agent setup.
-- `docs/INTRO_KO.md` — Korean onboarding + operations manual.
+- `docs/INTRO.md` — Korean onboarding + operations manual.
 - `docs/STYLE_GUIDE.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
 - `scouting/README.md`, `synthesis/README.md`, `analysis/README.md` — what

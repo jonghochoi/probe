@@ -111,7 +111,7 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
                                                     (nudge 전용)
 ```
 
-상태: Tier A PoC — 수동, 자동화 없음, 2주 trial. 스키마는 [`pulse/README.md`](../pulse/README.md), 채팅 export 운영 가이드는 [`pulse/EXPORT_GUIDE_KO.md`](../pulse/EXPORT_GUIDE_KO.md) 참조.
+상태: Tier A PoC — 수동, 자동화 없음, 2주 trial. 스키마는 [`pulse/README.md`](../pulse/README.md), 채팅 export 운영 가이드는 [`pulse/EXPORT_GUIDE.md`](../pulse/EXPORT_GUIDE.md) 참조.
 
 ### 사이드바: foundry + verify — 분석 후속 구현·검증 (on-demand)
 
@@ -152,13 +152,11 @@ probe/
 │   │   ├── synthesis-P{1..4}.md    #   월간 synthesis brief
 │   │   ├── paper-analysis.md       #   온디맨드 단일 논문 심층분석
 │   │   │                           #     + Layer 1 Design (vendor-agnostic)
-│   │   ├── hypothesize.md          #   가설 + Layer 1 Design
 │   │   ├── foundry.md              #   Design → foundry 별 구현 패치
 │   │   ├── verify.md               #   Design + 패치 정적 검증
 │   │   └── pulse-digest.md         #   채팅 → pillar별 힌트 (PoC)
 │   └── commands/                   # 슬래시 커맨드 (온디맨드)
 │       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
-│       ├── hypothesize.md          #   /hypothesize <P# | analysis-slug>
 │       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
 │       └── verify.md               #   /verify <design-path> [--foundry <n>]
 │
@@ -171,7 +169,7 @@ probe/
 │   ├── README.md                   #   목적 + Tier A 상태
 │   ├── _TEMPLATE.md                #   힌트 스키마 (pillar별)
 │   ├── _EXAMPLE.md                 #   참조 예시
-│   ├── EXPORT_GUIDE_KO.md          #   Slack / Telegram export 운영 가이드
+│   ├── EXPORT_GUIDE.md          #   Slack / Telegram export 운영 가이드
 │   ├── inbox/                      #   원시 채팅 export (README 외 gitignored)
 │   │   └── README.md
 │   └── YYYY-MM-DD-P#.md            #   pillar별 힌트 — 수동 ~주 1회
@@ -192,20 +190,6 @@ probe/
 │   │   └── impl.patch              #     foundry baseline 대비 unified diff
 │   └── <arxiv-id>_verify/<foundry>.md  #   정적 검증 보고서
 │
-├── experiments/                    # 팀 내부 가설 사이클 (온디맨드)
-│   ├── README.md                   #   목적 + 파일명/상태 전이
-│   ├── _TEMPLATE_H.md              #   한글 가설 양식
-│   ├── _TEMPLATE_D.md              #   한글 Layer 1 Design 양식
-│   ├── _TEMPLATE_I.md              #   한글 foundry-impl 가이드 양식
-│   ├── _TEMPLATE_V.md              #   한글 검증 보고서 양식
-│   └── H###-<slug>/                #   가설 1개당 폴더 1개
-│       ├── H###.md                 #     가설 (작성 후 불변)
-│       ├── D###.md                 #     Layer 1 Design (불변)
-│       ├── I###/<foundry>/         #     foundry별 서브폴더
-│       │   ├── impl.md, impl.patch #       impl 가이드 + diff (재생성)
-│       ├── V###/<foundry>.md       #     검증 보고서 (재생성)
-│       └── manifest.yaml           #     foundry-keyed impl/validation
-│
 ├── vendor/                         # 읽기 전용 외부 코드
 │   └── lerobot/                    #   pinned lerobot 스냅샷 —
 │                                   #   6개 baseline policy + configs,
@@ -213,7 +197,7 @@ probe/
 │                                   #   impl.patch 적용 대상)
 │
 └── docs/
-    ├── INTRO_KO.md                 # 한글 온보딩 + 운영 매뉴얼
+    ├── INTRO.md                 # 한글 온보딩 + 운영 매뉴얼
     ├── STYLE_GUIDE.md              # 산출물 포맷 규칙 (이모지, 링크,
     │                               #   한글 작성) — 리포트 SSOT
     └── LOGO.png                    # 프로젝트 로고

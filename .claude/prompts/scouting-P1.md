@@ -190,7 +190,7 @@ Hard rules for this stage:
   - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
     humanization. Violation of any invariant (verbatim tokens, emoji
     placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
-    accuracy, P#/D#/CP#/H### tag form, §4-2 glossary translations)
+    accuracy, P#/D#/CP# tag form, §4-2 glossary translations)
     is treated as a fidelity fail → rollback.
   - The humanize pass NEVER adds, removes, or changes facts; it only
     rewrites Korean prose style (translation-ese, mechanical

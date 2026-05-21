@@ -5,10 +5,6 @@
 > 받아 한 foundry 의 좌표계 위에서 변경 지점을 매핑합니다. 형식·이모지
 > ·용어 규칙은 `docs/STYLE_GUIDE.md` §6 / §4 를 정확히 따릅니다.
 > 재실행 시 이 파일과 sibling `impl.patch` 를 덮어씁니다.
->
-> 같은 템플릿이 가설 트랙
-> (`experiments/H###-*/I###/<foundry>/impl.md`) 에도 적용됩니다 —
-> 경로만 다르고 구조는 동일합니다.
 
 ---
 
@@ -16,13 +12,13 @@
 
 | 항목 | 내용 |
 |------|------|
-| 원문 / 가설 제목 | <Original English Title> 또는 가설 한 줄 제목 |
-| 링크 | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) (가설 트랙은 "없음") |
-| 상위 Design | [`./<id>_design.md`](./<id>_design.md) 또는 [`./D###.md`](./D###.md) |
+| 원문 제목 | <Original English Title> |
+| 링크 | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) |
+| 상위 Design | [`../<id>_design.md`](../<id>_design.md) |
 | Foundry | `lerobot` (또는 다른 등록된 foundry 이름) |
 | Foundry pinned commit | `999e77a…` (lerobot 의 경우 `vendor/lerobot/README.md` 와 일치 필수) |
 | 베이스 모델 / 코드 좌표 | `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` (lerobot 의 경우), 또는 foundry 별 등가물 |
-| 본문 확보 수준 | 전문(arXiv HTML) / 전문(ar5iv) / PDF 텍스트(pdftotext) / 초록 only / 가설 트랙 — N/A |
+| 본문 확보 수준 | 전문(arXiv HTML) / 전문(ar5iv) / PDF 텍스트(pdftotext) / 초록 only |
 | 패치 파일 | [`./impl.patch`](./impl.patch) — `git apply --check` <통과 / 실패> |
 | 가이드 생성일 | YYYY-MM-DD |
 
@@ -78,8 +74,8 @@
 
 ## 🧪 실무 구현 주의
 
-<!-- 가이드 사용자가 실제로 이 foundry 에서 reproduction / 가설 시도를
-     할 때 부딪힐 수 있는 부분. 의존성 (huggingface hub 모델 다운로드
+<!-- 가이드 사용자가 실제로 이 foundry 에서 reproduction 을 할 때
+     부딪힐 수 있는 부분. 의존성 (huggingface hub 모델 다운로드
      포함), 데이터셋 포맷, 학습 하이퍼파라미터, 평가 hook, 메모리/연산
      비용. 모호한 추정은 (잠정). -->
 

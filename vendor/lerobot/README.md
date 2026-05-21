@@ -5,9 +5,8 @@ is a Korean paper-analysis + scouting framework and does not run this code —
 it is vendored as the **v0 foundry**, so the `/foundry` command can map a
 Design (Layer 1, vendor-agnostic) onto **concrete file/line locations** of a
 known baseline, and emit an implementation guide
-(`analysis/<id>_impl/lerobot/impl.md` for the analysis 트랙,
-`experiments/H###-*/I###/lerobot/impl.md` for the experiments 트랙) plus a
-unified-diff patch (`impl.patch` next to it) against this snapshot.
+(`analysis/<id>_impl/lerobot/impl.md`) plus a unified-diff patch
+(`impl.patch` next to it) against this snapshot.
 
 ## Provenance
 
@@ -49,9 +48,9 @@ pinned commit instead of relying on this directory.
 
 ## Why it is here
 
-`/foundry` reads a Layer 1 Design (`analysis/<id>_design.md` or
-`experiments/H###-*/D###.md`), identifies whether the Design can ground in
-one of the six policies above (the `foundry=lerobot` case), then produces a
+`/foundry` reads a Layer 1 Design (`analysis/<id>_design.md`), identifies
+whether the Design can ground in one of the six policies above (the
+`foundry=lerobot` case), then produces a
 Korean implementation guide whose code references point inside this
 directory. The patch (`impl.patch`) is generated against the current state
 of this snapshot, so the snapshot itself must stay byte-stable until the
