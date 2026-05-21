@@ -15,12 +15,12 @@
 | `<arxiv-id>_impl/<foundry>/impl.md` | `/foundry` 슬래시 커맨드 | 위 Design 을 한 foundry (기본 `lerobot`) 의 좌표계로 매핑한 한글 구현 가이드 |
 | `<arxiv-id>_impl/<foundry>/impl.patch` | `/foundry` 슬래시 커맨드 | 같은 foundry 에 적용 가능한 unified diff (`git apply --check` 검증) |
 | `<arxiv-id>_impl/<foundry>/UNMAPPABLE.md` | `/foundry` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
-| `<arxiv-id>_verify/<foundry>.md` | `/verify` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 정적 대조한 한글 검증 보고서 |
+| `<arxiv-id>_audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 정적 대조한 한글 검증 보고서 |
 
 ## 📑 Index
 
 아래 표는 `scripts/refresh-analysis-index.py` 가 자동 관리합니다 —
-`/analyze-paper`, `/foundry`, `/verify` 가 자기 산출물을 커밋할 때
+`/analyze-paper`, `/foundry`, `/audit` 가 자기 산출물을 커밋할 때
 같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
 편집하지 마십시오. `lerobot` 컬럼은 `<id>_impl/lerobot/impl.md`
 존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
@@ -78,12 +78,12 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
 (<foundry>) — …` 한 줄만 추가하고 멈춥니다. 기본 foundry 는 `lerobot`
 (= `vendor/lerobot/` 의 6 종 정책).
 
-`/verify analysis/<id>_design.md [--foundry <name>]` — 정식 프롬프트는
-`.claude/prompts/verify.md`. Design + impl 패치 + 분석 문서를 정적으로
-대조해 `<id>_verify/<foundry>.md` 를 산출합니다. 보고서 자체가
+`/audit analysis/<id>_design.md [--foundry <name>]` — 정식 프롬프트는
+`.claude/prompts/audit.md`. Design + impl 패치 + 분석 문서를 정적으로
+대조해 `<id>_audit/<foundry>.md` 를 산출합니다. 보고서 자체가
 산출물이며 상태 격상 같은 라이프사이클은 없습니다.
 
-**다중 foundry.** `<id>_impl/` 와 `<id>_verify/` 아래의 `<foundry>`
+**다중 foundry.** `<id>_impl/` 와 `<id>_audit/` 아래의 `<foundry>`
 서브폴더가 다중 foundry 를 폴더 레벨에서 수용합니다. `lerobot` 이 v0
 foundry 이며, 회사 코드용 foundry 가 추후 추가되면 같은 Design 을
 그대로 두고 `/foundry` 만 `--foundry <new-name>` 으로 다시 호출하면
@@ -114,4 +114,4 @@ foundry 이며, 회사 코드용 foundry 가 추후 추가되면 같은 Design �
 - 분석 문서 구조는 `docs/STYLE_GUIDE.md` §5 + `analysis/_TEMPLATE.md`,
   Design 문서는 §6 + `analysis/_TEMPLATE_DESIGN.md`, 구현 가이드는
   §6 + `analysis/_TEMPLATE_IMPL.md`, 검증 보고서는 §6-5 +
-  `analysis/_TEMPLATE_VERIFY.md` 를 정확히 따릅니다.
+  `analysis/_TEMPLATE_AUDIT.md` 를 정확히 따릅니다.

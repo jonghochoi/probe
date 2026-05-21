@@ -1,6 +1,6 @@
-# Validation Report — <one-line English-friendly title> on `<foundry>`
+# Audit Report — <one-line English-friendly title> on `<foundry>`
 
-> PROBE verify 모드 산출물. 한글 단일 문서이며, sibling Design + 한
+> PROBE audit 모드 산출물. 한글 단일 문서이며, sibling Design + 한
 > foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은

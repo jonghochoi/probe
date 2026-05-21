@@ -1,6 +1,6 @@
 ---
 description: Layer 1 Design 을 target foundry (기본 vendor/lerobot) 좌표계로 매핑해 한글 구현 가이드(impl.md) + unified diff(impl.patch)를 생성
-argument-hint: <design-path> [--foundry <name>]
+argument-hint: <design-path> [--foundry <name>] [--feedback <verify-path>]
 ---
 
 Read `.claude/prompts/foundry.md` and execute it exactly as written.

@@ -514,8 +514,8 @@ conventions below codify both.
 `analysis/README.md` carries a generated index of every deep-dive in
 the folder, refreshed by `scripts/refresh-analysis-index.py`. The
 script is invoked automatically by the GIT step of `/analyze-paper`,
-`/foundry`, and `/verify`, so any run that adds or refreshes an
-analysis (or its downstream impl/verify artifacts) updates the index
+`/foundry`, and `/audit`, so any run that adds or refreshes an
+analysis (or its downstream impl/audit artifacts) updates the index
 in the same commit. This is the first intentional exception to the
 "every doc reference is hand-maintained" rule recorded in `CLAUDE.md`.
 
@@ -569,9 +569,9 @@ Outputs:
                                                the foundry's code
                                                root (for lerobot:
                                                `vendor/lerobot/`).
-- `analysis/<id>_verify/<foundry>.md`        — Korean static
+- `analysis/<id>_audit/<foundry>.md`        — Korean static
                                                validation report
-                                               (`/verify`).
+                                               (`/audit`).
 
 ### 6-1. File convention
 
@@ -588,7 +588,7 @@ Outputs:
   `##` sections in this order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표
   식별, 🪛 변경 지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의,
   🚧 미해결 / 잠정.
-- The verify report follows `analysis/_TEMPLATE_VERIFY.md` — six `##`
+- The audit report follows `analysis/_TEMPLATE_AUDIT.md` — six `##`
   sections: 📄 검증 메타, 📚 문헌 대조, 🔍 패치 정합성, 🧪 시그니처
   ·하이퍼파라미터 일치, 📐 식·표 일치, ⚖️ 종합 판정, 🚧 미해결 /
   잠정.
@@ -660,9 +660,9 @@ refresh procedure.
   reason, and appends one line to `analysis/<id>.md`:
   `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
-### 6-5. Verify report (`/verify` output)
+### 6-5. Verify report (`/audit` output)
 
-The verify report is the static check of a Design + foundry patch
+The audit report is the static check of a Design + foundry patch
 against the originating analysis and the foundry code. It is the
 single deliverable — there is no manifest, no graduated status.
 
@@ -698,6 +698,7 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.8 | 2026-05-20 | Scope extended to `experiments/`; added §7 (Experiments Documents — `H###.md` + `I###.md` + `I###.patch` + `V###.md` + `manifest.yaml`); introduced section emojis 📚 🔍 📐 ⚖️; manifest schema + honesty rules (validator never writes `adopted`/`rejected`); Changelog renumbered §8 |
 | v1.9 | 2026-05-20 | Added §4-5 — `humanize-korean` post-processing tail step (ported from [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai)); every Korean output passes the `ai-tell-detector` → `korean-style-rewriter` → `content-fidelity-auditor` pipeline before commit. PROBE invariants (paper titles, P#/D#/CP# tags, `<a id="ref-…">` anchors, arXiv/DOI links, emoji rules, §4-2 glossary) codified as rollback triggers. §4-4 (Tone and style) deleted — tone, register, rhythm, density, hedging, and visual-ornament rules are now fully delegated to the upstream `humanize-korean` taxonomy; STYLE_GUIDE no longer carries its own tone spec |
 | v1.10 | 2026-05-20 | §4-5 pipeline expanded from 3-stage to 4-agent — `naturalness-reviewer` reintroduced as a parallel second-stage check next to `content-fidelity-auditor`. The two reviewers are orthogonal: fidelity guards meaning, naturalness guards "did AI tells actually disappear + was the rewrite not over-polished". Verdict matrix combines both; `rewrite_round_2` / `rollback_and_rewrite` from naturalness triggers up to 2 additional Phase B rounds before `hold_and_report` |
-| v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 introduced experiments track at `/hypothesize` → `/foundry` → `/verify` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation requires every registered foundry to pass |
-| v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/verify`) with the verify report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |
-| v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/verify` |
+| v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 introduced experiments track at `/hypothesize` → `/foundry` → `/audit` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation requires every registered foundry to pass |
+| v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/audit`) with the audit report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |
+| v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/audit` |
+| v1.14 | 2026-05-21 | New `/reproduce-paper` orchestrator command (`.claude/commands/reproduce-paper.md` + `.claude/prompts/reproduce-paper.md`) drives `/analyze-paper → /foundry → /audit` as an iterative loop with verdict-cell parsing and honest-partial stable termination. Inner-loop refinement uses `/foundry --feedback <audit-path>` to update the prior round's impl surgically; outer-loop refinement (Design-side update) is deferred — 📚 fail/partial currently exits as `hold_and_report` for manual intervention. `/verify` renamed to `/audit` (noun form); output paths `<id>_verify/` → `<id>_audit/`, template `_TEMPLATE_VERIFY.md` → `_TEMPLATE_AUDIT.md` |
