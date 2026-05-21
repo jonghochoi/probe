@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.10 (2026-05-20) · **Scope:** All files under `scouting/`, `analysis/`, and `experiments/`
+> **Version:** v1.12 (2026-05-21) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -246,8 +246,8 @@ markdown rather than tone:
 
 ### 4-5. Humanize-korean post-processing (mandatory tail step)
 
-Every Korean output in PROBE (`scouting/`, `synthesis/`, `analysis/`,
-`experiments/`) passes through the `humanize-korean` skill
+Every Korean output in PROBE (`scouting/`, `synthesis/`, `analysis/`)
+passes through the `humanize-korean` skill
 (`.claude/skills/humanize-korean/SKILL.md`, ported from
 [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai))
 immediately before `git add`. The skill detects and rewrites the
@@ -278,7 +278,7 @@ rollback triggers:
 - Paper titles in original English (see §4-1)
 - Config / code names (`env_cfg.py`, `ObservationManager`, etc.)
 - Formulas and numbers (`ε = 0.1`, `±2σ`, `< 15%`)
-- `P#` / `D#` / `CP#` / `H###` tags
+- `P#` / `D#` / `CP#` tags
 - `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` intra-doc links
 - arXiv / DOI links
 - Emoji set, position, and the one-emoji-per-header rule (see §2)
@@ -452,25 +452,24 @@ decision belongs to Layer 2.
 
 ## 6. Design + Foundry Implementation Documents
 
-The `/analyze-paper` and `/hypothesize` slash commands emit a **Layer 1
-Design** (vendor-agnostic) alongside the analysis or hypothesis. The
-`/foundry` slash command (prompt: `.claude/prompts/foundry.md`)
-consumes that Design and produces a **Layer 2** foundry-specific
-implementation. The two-layer split exists so the same Design can
-serve multiple foundries (the v0 foundry is `lerobot`).
+The `/analyze-paper` slash command emits a **Layer 1 Design**
+(vendor-agnostic) alongside the analysis. The `/foundry` slash command
+(prompt: `.claude/prompts/foundry.md`) consumes that Design and
+produces a **Layer 2** foundry-specific implementation. The two-layer
+split exists so the same Design can serve multiple foundries (the v0
+foundry is `lerobot`).
 
-Outputs per track:
+Outputs:
 
-- 논문 트랙:
-  - `analysis/<id>_design.md`                  — Layer 1 Design.
-  - `analysis/<id>_impl/<foundry>/impl.md`     — Korean impl guide.
-  - `analysis/<id>_impl/<foundry>/impl.patch`  — unified diff against
-                                                 the foundry's code
-                                                 root (for lerobot:
-                                                 `vendor/lerobot/`).
-- 가설 트랙:
-  - `experiments/H###-*/D###.md`               — Layer 1 Design.
-  - `experiments/H###-*/I###/<foundry>/impl.md` + `impl.patch`.
+- `analysis/<id>_design.md`                  — Layer 1 Design.
+- `analysis/<id>_impl/<foundry>/impl.md`     — Korean impl guide.
+- `analysis/<id>_impl/<foundry>/impl.patch`  — unified diff against
+                                               the foundry's code
+                                               root (for lerobot:
+                                               `vendor/lerobot/`).
+- `analysis/<id>_verify/<foundry>.md`        — Korean static
+                                               validation report
+                                               (`/verify`).
 
 ### 6-1. File convention
 
@@ -479,15 +478,18 @@ Outputs per track:
 - Filenames: see the per-track paths above. No language suffix.
 - Both Design and impl are **regenerable snapshots** — re-running the
   generator overwrites them.
-- The Design document follows `analysis/_TEMPLATE_DESIGN.md` (논문) or
-  `experiments/_TEMPLATE_D.md` (가설) — 9 `##` sections in this order:
-  📄 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스, ⛓️ 불변식·가정,
-  📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도, 🔌 Foundry
-  힌트, 🚧 미해결 / 잠정.
-- The impl document follows `analysis/_TEMPLATE_IMPL.md` (or
-  `experiments/_TEMPLATE_I.md`) exactly. Six `##` sections in this
-  order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표 식별, 🪛 변경 지점
-  매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의, 🚧 미해결 / 잠정.
+- The Design document follows `analysis/_TEMPLATE_DESIGN.md` — 9 `##`
+  sections in this order: 📄 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스,
+  ⛓️ 불변식·가정, 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경
+  의도, 🔌 Foundry 힌트, 🚧 미해결 / 잠정.
+- The impl document follows `analysis/_TEMPLATE_IMPL.md` exactly. Six
+  `##` sections in this order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표
+  식별, 🪛 변경 지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의,
+  🚧 미해결 / 잠정.
+- The verify report follows `analysis/_TEMPLATE_VERIFY.md` — six `##`
+  sections: 📄 검증 메타, 📚 문헌 대조, 🔍 패치 정합성, 🧪 시그니처
+  ·하이퍼파라미터 일치, 📐 식·표 일치, ⚖️ 종합 판정, 🚧 미해결 /
+  잠정.
 
 ### 6-2. Emoji system
 
@@ -497,7 +499,7 @@ never in body. Section (`##`) emojis specific to this document family
 
 | Emoji | Section | Document |
 |-------|---------|----------|
-| 📄 | Design 메타 · 가이드 메타 | Design · impl (reused from §5-2) |
+| 📄 | Design 메타 · 가이드 메타 · 검증 메타 | Design · impl · verify (reused from §5-2) |
 | 🧮 | 데이터 계약 | Design (new) |
 | 🧰 | 모듈 인터페이스 | Design (new) |
 | ⛓️ | 불변식·가정 | Design (new) |
@@ -508,12 +510,16 @@ never in body. Section (`##`) emojis specific to this document family
 | 🧱 | 베이스 / 코드 좌표 식별 | impl |
 | 🪛 | 변경 지점 매핑 | impl |
 | ⚙️ | 핵심 변경 (diff) | impl |
-| 🧪 | 실무 구현 주의 | impl |
-| 🚧 | 미해결 / 잠정 | Design · impl |
+| 🧪 | 실무 구현 주의 · 시그니처·하이퍼파라미터 일치 | impl · verify |
+| 📚 | 문헌 대조 | verify (new) |
+| 🔍 | 패치 정합성 | verify (new) |
+| 📐 | 식·표 일치 | verify (new) |
+| ⚖️ | 종합 판정 | verify (new) |
+| 🚧 | 미해결 / 잠정 | Design · impl · verify |
 
-🧮 🧰 ⛓️ 🔌 are introduced by this section (Design). 🧱 🪛 🧪 are
-introduced for impl. 🚧 is reused across both. None appear elsewhere
-in PROBE outputs outside §6 and §7.
+🧮 🧰 ⛓️ 🔌 are introduced by Design. 🧱 🪛 are introduced for impl.
+📚 🔍 📐 ⚖️ are introduced for verify. 🧪 🚧 are reused across
+documents. None appear elsewhere in PROBE outputs outside §6.
 
 ### 6-3. Vendor-agnostic Design vs. foundry-bound impl
 
@@ -541,155 +547,41 @@ refresh procedure.
   **(본문 미확보 — 잠정)** and no patch file is produced — only the
   markdown.
 - Sparse Design > fabricated Design. Any field the source does not pin
-  down is left as `(원문에 명시 없음 — 가정으로 메움)` (논문 트랙) or
-  `(가설에 명시 없음 — 가정으로 메움)` (가설 트랙).
+  down is left as `(원문에 명시 없음 — 가정으로 메움)`.
 - If `git apply --check` fails on the generated patch, the failure is
   recorded verbatim in the 📄 가이드 메타 table and at the end of
   ⚙️ 핵심 변경 (diff). Affected hunks are downgraded to 🪛 + 🚧 entries
   instead of being silently forged.
 - If the Design cannot ground in the target foundry, **neither**
   `impl.md` nor `impl.patch` is produced. Instead `/foundry` writes
-  `<impl-root>/<foundry>/UNMAPPABLE.md` with one paragraph of reason,
-  and appends one line to the originating document
-  (`analysis/<id>.md` or `experiments/H###-*/H###.md`):
+  `analysis/<id>_impl/<foundry>/UNMAPPABLE.md` with one paragraph of
+  reason, and appends one line to `analysis/<id>.md`:
   `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
----
+### 6-5. Verify report (`/verify` output)
 
-## 7. Experiments Documents (`experiments/`)
+The verify report is the static check of a Design + foundry patch
+against the originating analysis and the foundry code. It is the
+single deliverable — there is no manifest, no graduated status.
 
-The `/hypothesize`, `/foundry`, and `/verify` slash commands (prompts:
-`.claude/prompts/hypothesize.md` · `foundry.md` · `verify.md`) produce
-a hypothesis-design-implementation-validation cycle under
-`experiments/H###-<slug>/`. Design + impl formats are governed by §6;
-this section covers the experiments-specific lifecycle and the
-validation report.
+Four `##` sections drive the verdict (`pass` / `fail` / `partial` per
+section), followed by ⚖️ 종합 판정 summarising whether the analysis
+can rely on this implementation:
 
-### 7-1. File convention
+- 📚 문헌 대조 — Design vs cited analyses (일치 / 충돌 / 확장 / 무관).
+- 🔍 패치 정합성 — re-run `git apply --check` against the current
+  foundry tree.
+- 🧪 시그니처·하이퍼파라미터 일치 — function signatures, hyperparameter
+  constants, and import paths must match between patch and foundry.
+- 📐 식·표 일치 — formulas and tables cited in the Design or analyses
+  must either be implemented in the patch or explicitly deferred to 🚧.
 
-- **Korean single documents.** Like every other PROBE output,
-  `H###.md`, `D###.md`, `I###/<foundry>/impl.md`, and
-  `V###/<foundry>.md` are single Korean documents — written natively
-  per §4 (tone, glossary, verbatim tokens). No English-primary file.
-  No language suffix on the filename.
-- Folder name: `experiments/H###-<slug>/` — `H###` is zero-padded to
-  three digits and the slug is kebab-case ASCII derived from the
-  hypothesis title (or supplied by the human at `/hypothesize` time).
-  The same numeric ID is reused for `D###`, `I###`, and `V###` inside
-  that folder. Per-foundry impl/verify outputs live one level deeper
-  under `I###/<foundry>/` and `V###/<foundry>.md`.
-- `H###.md` and `D###.md` are **immutable** once written by
-  `/hypothesize` (the only later addition is a single 🚧 blockquote
-  line on `H###.md` if `/foundry` finds the Design unmappable for
-  some foundry). To revise a hypothesis, start a new `H###`.
-- `I###/<foundry>/impl.md` + `impl.patch` are **regenerable
-  snapshots** — re-running `/foundry --foundry <name>` overwrites both
-  for that foundry only. Other foundries' outputs are untouched.
-- `V###/<foundry>.md` is a **regenerable snapshot** — re-running
-  `/verify --foundry <name>` overwrites it.
-- `manifest.yaml` is the **only** jointly written file: agents update
-  foundry-keyed `implementation.<foundry>.*` and
-  `validation.<foundry>.*`, and graduate `status: draft → validated`
-  only when **every registered foundry** has all three validation
-  checks at `pass`. The transitions `→ adopted` and `→ rejected` plus
-  the `adopted:` date are **human-only**.
-- The `experiments/` folder follows `_TEMPLATE_H.md` / `_TEMPLATE_D.md`
-  / `_TEMPLATE_I.md` / `_TEMPLATE_V.md` exactly.
-
-### 7-2. Emoji system
-
-Same rule as §2: one emoji at the **start** of each `##` / `###`
-header, never in body text. Section (`##`) emojis specific to this
-document family (added on top of §2, §5-2, §6-2):
-
-| Emoji | Section | Document |
-|-------|---------|----------|
-| 📄 | 가설 메타 · 가이드 메타 · 검증 메타 | H · I · V (reused from §5-2 / §6-2) |
-| 🧭 | 한 줄 요약 (TL;DR) | H (reused from §5-2) |
-| ❓ | 출발 갭 | H (reused from §5-2) |
-| 🧩 | 가설 진술 | H (reused from §5-2) |
-| 🔬 | Falsifiable Test 설계 | H (reused from §5-2) |
-| 🎯 | 관련 Pillar / Decision (P# / D#) | H (reused from §5-2 / §2-2) |
-| ✨ | 핀 논문 대비 델타 | H (reused from §5-2 / §2-2) |
-| ⚠️ | 먼저 검증할 실패 모드 | H (reused from §5-2 / §2-2) |
-| 💡 | 컨텍스트 제안 · 후속 호출 안내 | H · V (reused from §5-2 / §2-1) |
-| 🧱 | 베이스 모델 식별 | I (reused from §6-2) |
-| 🪛 | 변경 지점 매핑 | I (reused from §6-2) |
-| ⚙️ | 핵심 변경 (diff) | I (reused from §6-2) |
-| 🧪 | 실무 구현 주의 · 시그니처·하이퍼파라미터 일치 | I · V (reused from §6-2) |
-| 🚧 | 미해결 / 잠정 | I · V (reused from §6-2) |
-| 📚 | 문헌 대조 | V (new) |
-| 🔍 | 패치 정합성 | V (new) |
-| 📐 | 식·표 일치 | V (new) |
-| ⚖️ | 종합 판정 | V (new) |
-
-📚 🔍 📐 ⚖️ are introduced by this section and used nowhere else in
-PROBE outputs. Do not use any emoji not listed in §2, §5, §6, or here.
-
-### 7-3. `manifest.yaml` schema
-
-`manifest.yaml` is YAML with two-space indentation, no surrounding
-fences. Field enums (verbatim values only):
-
-| Field | Type | Allowed values |
-|-------|------|----------------|
-| `id` | string | `H###` (3-digit zero-padded) |
-| `pillar` | string | `P1` / `P2` / `P3` / `P4` |
-| `slug` | string | kebab-case ASCII, 2–5 words |
-| `title` | string | one-line; may contain Korean |
-| `status` | enum | `draft` / `validated` / `adopted` / `rejected` |
-| `created` | date | `YYYY-MM-DD` (`TZ=Asia/Seoul`) |
-| `adopted` | date / null | `YYYY-MM-DD` once human transitions to `adopted`; `null` otherwise |
-| `related_decisions` | list of strings | `[D#, D#, …]` — codes that actually exist in `context/MASTER.md` §6 |
-| `related_analyses` | list of strings | `[<arxiv-id>, …]` — slugs of existing `analysis/<id>.md` files; `[]` if none |
-| `related_baseline` | enum / null | `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` / `null` |
-| `relations[].kind` | enum | `supports` / `conflicts` / `extends` / `refines` |
-| `relations[].target` | string | a `D#` or another `H###` |
-| `implementation` | map | foundry-keyed dict. Each subkey is a foundry name (e.g. `lerobot`); `/foundry` adds one entry per run. |
-| `implementation.<foundry>.patch` | string | `I###/<foundry>/impl.patch` once `/foundry --foundry <foundry>` runs |
-| `implementation.<foundry>.apply_check` | string | `pass` / `fail — <stderr first line>` / `n/a — unmappable` |
-| `validation` | map | foundry-keyed dict. Each subkey is a foundry name; `/verify` adds one entry per run. |
-| `validation.<foundry>.literature` | enum | `pass` / `fail` / `partial` |
-| `validation.<foundry>.patch_consistency` | enum | `pass` / `fail` / `partial` |
-| `validation.<foundry>.signature_check` | enum | `pass` / `fail` / `partial` |
-
-`relations` must be non-empty — every hypothesis has at least one
-stated relationship to a Decision. `null` (not `~`, not empty string)
-is used for fields not yet known.
-
-### 7-4. Honesty rules carried over
-
-- If `git apply --check` fails for `I###/<foundry>/impl.patch`, the
-  failure is recorded verbatim in that impl.md 📄 가이드 메타 +
-  `manifest.implementation.<foundry>.apply_check`, and `/verify`
-  records it again under `V###/<foundry>.md` §🔍 with the live re-run
-  output. Affected hunks are downgraded to 🪛 + 🚧 entries in impl.md
-  — never silently forged. **A `patch_consistency: fail` for any
-  registered foundry blocks `status` graduation, regardless of
-  literature/signature outcomes on other foundries.**
-- The verifier (`/verify`) only graduates `draft → validated`, and
-  only when **every registered foundry** has all three checks at
-  `pass`. A single foundry passing is not enough. The verifier NEVER
-  writes `adopted` or `rejected`. A `manifest.status: adopted`
-  written by an agent is a bug — those values exist solely so the
-  human can mark a hypothesis as decided.
-- Hypotheses sourced from a Pillar code (`P#`) carry an empty
-  `related_analyses: []`. Validation `literature` is `pass` only when
-  the hypothesis explicitly identifies itself as pillar-internal (no
-  paper claimed); a paper-implying hypothesis with no analyses is
-  `partial`, not `pass`.
-
-### 7-5. Korean & verbatim rules
-
-§4 applies in full. Specifically: original English paper title (when
-cited in `H###.md` ✨ 핀 논문 대비 델타 or `V###/<foundry>.md` 📚 문헌
-대조), config/code names, `file:line` coordinates, formulas, arXiv
-links, and `P#`/`D#`/`CP#`/`H###` codes are kept verbatim; technical
-terms use the §4-2 glossary; tone is formal 합니다/됩니다 체.
+The verifier executes no code beyond `git apply --check`. `partial` is
+a normal outcome and far better than a fabricated `pass`.
 
 ---
 
-## 8. Changelog
+## 7. Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
@@ -702,6 +594,7 @@ terms use the §4-2 glossary; tone is formal 합니다/됩니다 체.
 | v1.6 | 2026-05-19 | Path migration: `research_log/` → `scouting/`, `research_context*.md` → `context/MASTER.md` + `context/P{1..4}.md`; dropped redundant `-KO` filename suffix in `analysis/` (output is always Korean) |
 | v1.7 | 2026-05-20 | Added §5-5 (reproduction follow-up line) and new §6 (Paper Reproduction Document — `_impl.md` + `_impl.patch` against `vendor/lerobot/`); introduced section emojis 🧱 🪛 🧪 🚧; Changelog renumbered §7 |
 | v1.8 | 2026-05-20 | Scope extended to `experiments/`; added §7 (Experiments Documents — `H###.md` + `I###.md` + `I###.patch` + `V###.md` + `manifest.yaml`); introduced section emojis 📚 🔍 📐 ⚖️; manifest schema + honesty rules (validator never writes `adopted`/`rejected`); Changelog renumbered §8 |
-| v1.9 | 2026-05-20 | Added §4-5 — `humanize-korean` post-processing tail step (ported from [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai)); every Korean output passes the `ai-tell-detector` → `korean-style-rewriter` → `content-fidelity-auditor` pipeline before commit. PROBE invariants (paper titles, P#/D#/CP#/H### tags, `<a id="ref-…">` anchors, arXiv/DOI links, emoji rules, §4-2 glossary) codified as rollback triggers. §4-4 (Tone and style) deleted — tone, register, rhythm, density, hedging, and visual-ornament rules are now fully delegated to the upstream `humanize-korean` taxonomy; STYLE_GUIDE no longer carries its own tone spec |
+| v1.9 | 2026-05-20 | Added §4-5 — `humanize-korean` post-processing tail step (ported from [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai)); every Korean output passes the `ai-tell-detector` → `korean-style-rewriter` → `content-fidelity-auditor` pipeline before commit. PROBE invariants (paper titles, P#/D#/CP# tags, `<a id="ref-…">` anchors, arXiv/DOI links, emoji rules, §4-2 glossary) codified as rollback triggers. §4-4 (Tone and style) deleted — tone, register, rhythm, density, hedging, and visual-ornament rules are now fully delegated to the upstream `humanize-korean` taxonomy; STYLE_GUIDE no longer carries its own tone spec |
 | v1.10 | 2026-05-20 | §4-5 pipeline expanded from 3-stage to 4-agent — `naturalness-reviewer` reintroduced as a parallel second-stage check next to `content-fidelity-auditor`. The two reviewers are orthogonal: fidelity guards meaning, naturalness guards "did AI tells actually disappear + was the rewrite not over-polished". Verdict matrix combines both; `rewrite_round_2` / `rollback_and_rewrite` from naturalness triggers up to 2 additional Phase B rounds before `hold_and_report` |
-| v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 retargeted at `/hypothesize` → `/foundry` → `/verify` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation now requires every registered foundry to pass |
+| v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 introduced experiments track at `/hypothesize` → `/foundry` → `/verify` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation requires every registered foundry to pass |
+| v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/verify`) with the verify report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |

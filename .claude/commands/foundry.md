@@ -10,10 +10,8 @@ duplicate or paraphrase its logic here.
 The Design path and optional foundry flag are: $ARGUMENTS
 
 If `$ARGUMENTS` is empty, ask the user for a Design path
-(`analysis/<id>_design.md` 또는 `experiments/H###-*/D###.md`) and
-optional `--foundry <name>` (기본 `lerobot`) and stop — do not pick
-one yourself.
+(`analysis/<id>_design.md`) and optional `--foundry <name>` (기본
+`lerobot`) and stop — do not pick one yourself.
 
 Precondition: the Design document must already exist. If it does not,
-stop and instruct the user to run `/analyze-paper <id>` (논문 트랙)
-또는 `/hypothesize <seed>` (가설 트랙) first.
+stop and instruct the user to run `/analyze-paper <id>` first.

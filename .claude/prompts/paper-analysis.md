@@ -253,7 +253,7 @@ Hard rules for this stage:
   - The §4-5 invariants in `docs/STYLE_GUIDE.md` MUST survive
     humanization for both files. Violation of any invariant (verbatim
     tokens, emoji placement, `<a id="ref-…">` anchors, arXiv / DOI
-    links, citation accuracy, P#/D#/CP#/H### tag form, §4-2 glossary
+    links, citation accuracy, P#/D#/CP# tag form, §4-2 glossary
     translations) is treated as a fidelity fail → rollback.
   - blockquote 안의 영문 원문 인용·`(§n)` 출처·수식은 humanize 대상에서
     제외됩니다(verbatim 토큰과 동일 취급, §5-6). 위반 시 fidelity fail.

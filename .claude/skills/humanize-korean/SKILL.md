@@ -6,7 +6,7 @@ description: AI(ChatGPT·Claude·Gemini 등)가 쓴 한글 텍스트를 "사람�
 
 # Humanize Korean — AI 한글 티 제거 오케스트레이터 (v1.5)
 
-> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식됐다. PROBE 운용에서는 항상 **strict 모드 4 인 파이프라인(`ai-tell-detector` → `korean-style-rewriter` → [`content-fidelity-auditor` ∥ `naturalness-reviewer`])** 만 사용한다. monolith fast-path 는 PROBE 산출물(decision-grade 한글 문서)의 의미 보존 요건과 맞지 않아 비활성. 입력은 항상 파일 경로(`scouting/*.md`, `synthesis/*.md`, `analysis/*.md`, `experiments/**/*.md`)이며 출력은 in-place 갱신. `docs/STYLE_GUIDE.md` §4-5 가 본 스킬의 PROBE 측 invariants(롤백 트리거) 단일 출처이다.
+> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식됐다. PROBE 운용에서는 항상 **strict 모드 4 인 파이프라인(`ai-tell-detector` → `korean-style-rewriter` → [`content-fidelity-auditor` ∥ `naturalness-reviewer`])** 만 사용한다. monolith fast-path 는 PROBE 산출물(decision-grade 한글 문서)의 의미 보존 요건과 맞지 않아 비활성. 입력은 항상 파일 경로(`scouting/*.md`, `synthesis/*.md`, `analysis/*.md`)이며 출력은 in-place 갱신. `docs/STYLE_GUIDE.md` §4-5 가 본 스킬의 PROBE 측 invariants(롤백 트리거) 단일 출처이다.
 
 ## Phase 0: 컨텍스트 확인
 
@@ -71,7 +71,7 @@ humanize-korean (PROBE strict) / target: {file_path}
 - 원문 영어 논문 제목 변형
 - 코드/설정명 (예: `env_cfg.py`, `ObservationManager`) 변형
 - 수식·숫자 (예: `ε = 0.1`, `±2σ`) 변형
-- `P#` / `D#` / `CP#` / `H###` 태그 변형
+- `P#` / `D#` / `CP#` 태그 변형
 - `<a id="ref-…">` 앵커 또는 `[CODE](#ref-CODE)` 링크 변형
 - arXiv / DOI 링크 변형
 - 이모지 종류·위치·"헤더당 1개" 규칙 위반

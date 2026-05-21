@@ -16,7 +16,7 @@
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-📖 팀 온보딩 한글 문서: [`docs/probe_guide.html`](docs/probe_guide.html) · [`docs/INTRO_KO.md`](docs/INTRO_KO.md)
+📖 팀 온보딩 한글 문서: [`docs/probe_guide.html`](docs/probe_guide.html) · [`docs/INTRO.md`](docs/INTRO.md)
 
 </div>
 
@@ -33,7 +33,7 @@
 > # xdg-open probe/docs/probe_guide.html   # Linux
 > ```
 >
-> Operations manual (한글, 마크다운): [`docs/INTRO_KO.md`](docs/INTRO_KO.md) — 동기, 파이프라인, 운영 노하우, 월간 리뷰 KPI.
+> Operations manual (한글, 마크다운): [`docs/INTRO.md`](docs/INTRO.md) — 동기, 파이프라인, 운영 노하우, 월간 리뷰 KPI.
 
 ---
 
@@ -141,7 +141,7 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
                                                     (nudge only)
 ```
 
-Status: Tier A PoC — manual, no automation, 2-week trial. See [`pulse/README.md`](pulse/README.md) for the schema and [`pulse/EXPORT_GUIDE_KO.md`](pulse/EXPORT_GUIDE_KO.md) for the chat-export playbook.
+Status: Tier A PoC — manual, no automation, 2-week trial. See [`pulse/README.md`](pulse/README.md) for the schema and [`pulse/EXPORT_GUIDE.md`](pulse/EXPORT_GUIDE.md) for the chat-export playbook.
 
 ### Core principle: static vs. dynamic, never mixed
 
@@ -178,13 +178,11 @@ probe/
 │   │   ├── synthesis-P{1..4}.md    #   monthly synthesis brief, per pillar
 │   │   ├── paper-analysis.md       #   on-demand single-paper deep-dive
 │   │   │                           #     + Layer 1 Design (vendor-agnostic)
-│   │   ├── hypothesize.md          #   team-internal hypothesis + Design
 │   │   ├── foundry.md              #   Design → foundry-specific patch
 │   │   ├── verify.md               #   Design + patch static validation
 │   │   └── pulse-digest.md         #   chat → per-pillar hints (PoC)
 │   └── commands/                   # Slash commands (on-demand)
 │       ├── analyze-paper.md        #   /analyze-paper <id|url|pdf>
-│       ├── hypothesize.md          #   /hypothesize <P# | analysis-slug>
 │       ├── foundry.md              #   /foundry <design-path> [--foundry <n>]
 │       └── verify.md               #   /verify <design-path> [--foundry <n>]
 │
@@ -198,7 +196,7 @@ probe/
 │   ├── README.md                   #   purpose + Tier A status
 │   ├── _TEMPLATE.md                #   hint schema (per-pillar)
 │   ├── _EXAMPLE.md                 #   reference example (illustrative)
-│   ├── EXPORT_GUIDE_KO.md          #   Slack / Telegram export playbook
+│   ├── EXPORT_GUIDE.md          #   Slack / Telegram export playbook
 │   ├── inbox/                      #   raw chat exports (gitignored except README)
 │   │   └── README.md
 │   └── YYYY-MM-DD-P#.md            #   per-pillar hint — manual ~1/week
@@ -219,21 +217,6 @@ probe/
 │   │   └── impl.patch              #     unified diff vs. foundry baseline
 │   └── <arxiv-id>_verify/<foundry>.md  #   static validation report
 │
-├── experiments/                    # Team-internal hypothesis cycles
-│   ├── README.md                   #   purpose + filename / state-transition
-│   ├── _TEMPLATE_H.md              #   Korean hypothesis form
-│   ├── _TEMPLATE_D.md              #   Korean Layer 1 Design form
-│   ├── _TEMPLATE_I.md              #   Korean foundry-impl guide form
-│   ├── _TEMPLATE_V.md              #   Korean validation-report form
-│   └── H###-<slug>/                #   one folder per hypothesis
-│       ├── H###.md                 #     hypothesis (immutable once written)
-│       ├── D###.md                 #     Layer 1 Design (immutable)
-│       ├── I###/<foundry>/         #     one subfolder per foundry
-│       │   ├── impl.md, impl.patch #       impl guide + diff (regen)
-│       ├── V###/<foundry>.md       #     validation report (regen)
-│       └── manifest.yaml           #     hypothesis state metadata
-│                                   #     (foundry-keyed impl/validation)
-│
 ├── vendor/                         # Read-only reference code
 │   └── lerobot/                    #   pinned lerobot snapshot —
 │                                   #   6 baseline policies + configs +
@@ -242,7 +225,7 @@ probe/
 │                                   #   impl patch
 │
 └── docs/
-    ├── INTRO_KO.md                 # Korean onboarding + operations manual
+    ├── INTRO.md                 # Korean onboarding + operations manual
     ├── STYLE_GUIDE.md              # Output formatting rules (emoji, links,
     │                               #   Korean authoring) — SSOT for reports
     └── LOGO.png                    # Project logo
@@ -609,7 +592,7 @@ Network note: `/analyze-paper`'s full-text fetch needs the session environment t
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `hypothesize.md` · `foundry.md` · `verify.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
+| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `verify.md` (on-demand) + `pulse-digest.md` (PoC input layer) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
@@ -647,8 +630,8 @@ the references below are the exact sources.
 
 | Repo | What PROBE borrows |
 |---|---|
-| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`, `experiments/`) passes the strict 4-agent pipeline (detector → rewriter → [fidelity ∥ naturalness]) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) §4-5. |
-| **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot vendored at `vendor/lerobot/` — six baseline policies (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`) plus configs and the processor. `analysis/<id>_impl.patch` and `experiments/H###-*/I###.patch` are unified diffs against this snapshot; the pinned commit and refresh procedure live in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
+| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes the strict 4-agent pipeline (detector → rewriter → [fidelity ∥ naturalness]) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) §4-5. |
+| **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot vendored at `vendor/lerobot/` — six baseline policies (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`) plus configs and the processor. `analysis/<id>_impl/<foundry>/impl.patch` is a unified diff against this snapshot; the pinned commit and refresh procedure live in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
 
 ---
 
@@ -658,7 +641,7 @@ the references below are the exact sources.
 |---|---|
 | [`CLAUDE.md`](CLAUDE.md) | Contributor rules — commit-message style + document Markdown style |
 | [`docs/probe_guide.html`](docs/probe_guide.html) | **Korean onboarding guide** — download and open locally for a visual walkthrough |
-| [`docs/INTRO_KO.md`](docs/INTRO_KO.md) | Korean onboarding — motivation, pipeline, operations manual |
+| [`docs/INTRO.md`](docs/INTRO.md) | Korean onboarding — motivation, pipeline, operations manual |
 | [`docs/STYLE_GUIDE.md`](docs/STYLE_GUIDE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
@@ -666,7 +649,6 @@ the references below are the exact sources.
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → Korean `analysis/<id>.md` + Layer 1 `<id>_design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>_impl/<foundry>/{impl.md,impl.patch}`; `/verify` → `<id>_verify/<foundry>.md` |
 | [`pulse/README.md`](pulse/README.md) | Chat-to-scout bias PoC — weekly team chat distilled into `YYYY-MM-DD-P#.md` retrieval-weight nudges |
-| [`experiments/README.md`](experiments/README.md) | Team-internal hypothesis cycles — `/hypothesize` (H### + D###) → `/foundry` (`I###/<foundry>/impl.*`) → `/verify` (`V###/<foundry>.md`). One folder per `H###` with hypothesis + Design + foundry impls + validations + foundry-keyed manifest |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
