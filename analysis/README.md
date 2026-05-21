@@ -16,6 +16,7 @@
 | `<arxiv-id>_impl/<foundry>/impl.patch` | `/foundry` 슬래시 커맨드 | 같은 foundry 에 적용 가능한 unified diff (`git apply --check` 검증) |
 | `<arxiv-id>_impl/<foundry>/UNMAPPABLE.md` | `/foundry` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
 | `<arxiv-id>_audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 정적 대조한 한글 검증 보고서 |
+| `<arxiv-id>_audit/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 audit 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
 
 ## 📑 Index
 
@@ -83,11 +84,69 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
 대조해 `<id>_audit/<foundry>.md` 를 산출합니다. 보고서 자체가
 산출물이며 상태 격상 같은 라이프사이클은 없습니다.
 
+`/reproduce-paper <arXiv id | analysis/<id>_design.md> [--foundry <name>] [--max-rounds N]` —
+정식 프롬프트는 `.claude/prompts/paper-reproduction.md`. 위 세 슬래시
+커맨드를 **재구현하지 않고 그대로 위임 호출**하며, audit verdict 가
+안정화되거나 라운드 상한에 도달할 때까지 자동 수렴시키는 상위 호환
+오케스트레이터입니다. 분석부터 매핑·검증까지 한 번에 돌리고 싶다면
+대부분의 경우 이 명령이 진입점입니다 — 손으로 세 단계를 이어 돌리는
+대신 한 줄로 끝납니다. 기본 `--max-rounds 3`, `--foundry lerobot`.
+
+- **Round 0 — gate.** Design 이 없으면 `/analyze-paper` 를 먼저 돌려
+  생성한 뒤, `/foundry` 1 회 + `/audit` 1 회로 첫 verdict 튜플을
+  얻습니다. foundry 매핑이 불가하면 (`UNMAPPABLE.md` 생성) 즉시 정상
+  종료합니다.
+- **Round 1..N — inner loop (Design 고정).** audit 보고서 메타 헤더의
+  📚 / 🔍 / 🧪 / ⚖️ verdict 셀을 파싱해 분기 매트릭스로 다음 액션을
+  결정합니다. 우선순위 **📚 > 🔍 > 🧪 > 📐**. impl-side gap (🔍 patch
+  apply 실패, 🧪 시그니처/상수 불일치, 📐 silent-skip → 🧪 partial) 은
+  `/foundry <design> --feedback <prev-audit>` 로 외과적 갱신 → `/audit`
+  재실행 순으로 매 라운드 자동 반복합니다. `--feedback` 모드의 foundry
+  는 직전 라운드의 `impl.md` + `impl.patch` 를 시작점으로 삼아 통과한
+  hunk 는 보존하고 새 hunk 는 audit 행과 1-to-1 추적합니다 (정식 규칙은
+  `.claude/prompts/foundry.md` §F 참조).
+- **Outer loop — 현재는 hold_and_report.** 📚 (literature) verdict 가
+  `fail`/`partial` 이면 Design 자체가 본문과 어긋난 신호로, 본문 재추출
+  (`/analyze-paper --focus <섹션>`) 이 필요합니다. blast radius 가 커서
+  현재는 자동화하지 않고 마지막 audit 보고서를 그대로 남기며 사용자가
+  수동으로 결정합니다.
+- **종료 사유.** `all_pass` · `unmappable` · `stable_partial` (라운드
+  N 과 N-1 의 verdict 튜플 + 🪛 변경 지점 표 + 🚧 미해결 표가
+  byte-identical 이고 어떤 verdict 도 fail 이 아닐 때) · `hold_and_report`
+  (📚 fail/partial 또는 max-rounds 소진) · `max_rounds_exhausted`.
+  `partial` 안정화도 정상 종료이며, 본문이 채우지 않는 빈칸은 영구
+  🚧 로 남고 마지막 audit 보고서가 그대로 사유 보고서입니다.
+- **라운드 추적.** 각 라운드 끝에 audit 보고서가
+  `<id>_audit/<foundry>.round_<N>.md` 로 복사돼 git 에 들어갑니다 (N
+  은 0-indexed). 라운드별 분리 commit 이라 사후 부분 롤백 가능합니다.
+
+```bash
+# (a) 새 논문을 분석부터 검증까지 한 번에 — 가장 흔한 경로
+> /reproduce-paper 2410.07864
+
+# (b) Design 이 이미 있고 (직전 /analyze-paper 출력) 매핑·검증만 자동 수렴
+> /reproduce-paper analysis/2410.07864_design.md --foundry lerobot
+
+# (c) 단발로만 (Round 0 = 게이트만 돌고 종료, 현재 수동 워크플로우와 동치)
+> /reproduce-paper 2410.07864 --max-rounds 1
+```
+
 **다중 foundry.** `<id>_impl/` 와 `<id>_audit/` 아래의 `<foundry>`
 서브폴더가 다중 foundry 를 폴더 레벨에서 수용합니다. `lerobot` 이 v0
 foundry 이며, 회사 코드용 foundry 가 추후 추가되면 같은 Design 을
-그대로 두고 `/foundry` 만 `--foundry <new-name>` 으로 다시 호출하면
-됩니다 — Design 은 한 번 만들면 여러 foundry 에서 재사용됩니다.
+그대로 두고 `/foundry` (또는 `/reproduce-paper`) 만 `--foundry
+<new-name>` 으로 다시 호출하면 됩니다 — Design 은 한 번 만들면 여러
+foundry 에서 재사용됩니다.
+
+**언제 어떤 커맨드를 쓰나.**
+
+| 의도 | 권장 커맨드 |
+|---|---|
+| 분석 문서·Design 만 새로 만들고 끝 | `/analyze-paper` |
+| 기존 Design 을 한 foundry 에 한 번만 매핑 | `/foundry` |
+| 기존 impl 의 정합성을 한 번만 점검 | `/audit` |
+| 새 논문을 분석부터 audit 안정화까지 자동 수렴 | **`/reproduce-paper`** |
+| 직전 audit 의 gap 을 inner loop 로 외과적으로 채우기 | **`/reproduce-paper analysis/<id>_design.md`** |
 
 ## 다른 산출물·컨텍스트와의 관계
 
