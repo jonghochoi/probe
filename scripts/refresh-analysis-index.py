@@ -105,6 +105,29 @@ def lerobot_state(stem: str) -> str:
     return "—"
 
 
+# 🧬 execution-verification verdict, read from the audit report meta header.
+EXEC_ROW_RE = re.compile(r"^\|\s*🧬[^|]*\|\s*`?(pass|fail|skipped)`?\s*\|\s*$")
+
+
+def lerobot_exec(stem: str) -> str:
+    """Return the 🧬 실행 검증 verdict for the lerobot audit (pass/fail/skipped/—).
+
+    Reads the `| 🧬 실행 검증 | <verdict> |` row from the audit report meta
+    header. `—` when no audit report exists or the row is absent (older
+    reports predating the execution tier).
+    """
+    audit = ANALYSIS_DIR / f"{stem}_audit" / "lerobot.md"
+    try:
+        text = audit.read_text(encoding="utf-8")
+    except OSError:
+        return "—"
+    for line in text.splitlines():
+        m = EXEC_ROW_RE.match(line)
+        if m:
+            return m.group(1)
+    return "—"
+
+
 # §🔎 §🚧 bucket counts come from the audit report's machine marker.
 BUCKETS_START = "<!-- ANALYSIS_BUCKETS:START -->"
 BUCKETS_END = "<!-- ANALYSIS_BUCKETS:END -->"
@@ -160,11 +183,11 @@ def sort_key(row: dict[str, str]) -> tuple[str, str]:
 
 def build_table(rows: list[dict[str, str]]) -> str:
     header = (
-        "| # | Analysis | arXiv | Title | Refreshed | lerobot | 🔎 vr/pe/sd/se/ob |\n"
-        "|---|---|---|---|---|---|---|\n"
+        "| # | Analysis | arXiv | Title | Refreshed | lerobot | 🧬 | 🔎 vr/pe/sd/se/ob |\n"
+        "|---|---|---|---|---|---|---|---|\n"
     )
     if not rows:
-        return header + "| — | _no deep-dives yet_ | — | — | — | — | — |\n"
+        return header + "| — | _no deep-dives yet_ | — | — | — | — | — | — |\n"
     out = [header]
     for i, row in enumerate(rows, 1):
         link = f"[`{row['stem']}.md`]({row['stem']}.md)"
@@ -174,7 +197,7 @@ def build_table(rows: list[dict[str, str]]) -> str:
             arxiv = f"`{row['arxiv_id']}`" if row["arxiv_id"] != WARN else WARN
         out.append(
             f"| {i} | {link} | {arxiv} | {row['title']} | {row['refreshed']} "
-            f"| {row['lerobot']} | {row['buckets']} |\n"
+            f"| {row['lerobot']} | {row['exec']} | {row['buckets']} |\n"
         )
     return "".join(out)
 
@@ -205,6 +228,7 @@ def main() -> int:
         meta = extract_meta(path)
         meta["stem"] = path.stem
         meta["lerobot"] = lerobot_state(path.stem)
+        meta["exec"] = lerobot_exec(path.stem)
         meta["buckets"] = lerobot_buckets(path.stem)
         rows.append(meta)
     rows.sort(key=sort_key, reverse=True)

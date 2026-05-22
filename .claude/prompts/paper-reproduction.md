@@ -49,9 +49,10 @@ CONTEXT (read-only):
   as-is whenever a round requires re-mapping the foundry.
 - `.claude/prompts/audit.md` — the `/audit` prompt body. Invoke it once
   at the end of each round to update the verdict cells.
-- `analysis/_TEMPLATE_AUDIT.md:21-24` — the machine-parseable verdict cell
-  format (📚 / 🔍 / 🧪 + ⚖️). Cell values are `pass` / `fail` /
-  `partial` (🔍 is pass/fail only).
+- `analysis/_TEMPLATE_AUDIT.md` meta header — the machine-parseable
+  verdict cell format (📚 / 🔍 / 🧪 / 🧬 + ⚖️). Cell values are
+  `pass` / `fail` / `partial` (🔍 is pass/fail only; 🧬 is
+  pass/fail/skipped).
 
 This prompt does **not redefine** the logic of the three prompts above.
 Each round simply executes those prompts as-is. Because analyze / foundry
@@ -87,7 +88,13 @@ A. Round 0 — Gate.
       | 📚 문헌 대조 | `pass` / `fail` / `partial` |
       | 🔍 패치 정합성 | `pass` / `fail` |
       | 🧪 시그니처·하이퍼파라미터 | `pass` / `fail` / `partial` |
+      | 🧬 실행 검증 | `pass` / `fail` / `skipped` |
       | ⚖️ 종합 판정 | one-line summary text |
+
+      🧬 `skipped` means the runtime could not be built (offline / install
+      failure) or no sibling test ships; convergence treats it the same
+      as `pass` (the patch was not falsified by execution, not that any
+      consistency check failed).
 
       Also record the row count of the §🪛 변경 지점 매핑 table and the
       §🚧 미해결 / 잠정 table (for stabilisation checking).
@@ -99,16 +106,17 @@ B. Round 1..N — Branch matrix (inner + outer combined).
    Design itself via focused re-extraction. Both steps share the same
    round counter; `--max-rounds N` is the combined cap.
 
-   Read the audit report's verdict tuple (📚 / 🔍 / 🧪) together with
+   Read the audit report's verdict tuple (📚 / 🔍 / 🧪 / 🧬) together with
    §🔎 §🚧 classification machine markers
    (`<!-- ANALYSIS_BUCKETS:... -->`) to select the action.
 
    | Previous round state | Next action |
    |------------------|-----------|
    | `taxonomy-gap` row exists in §🔎 | Terminate (`hold_and_report`) — a row that fits no bucket requires human judgement |
-   | ⚖️ all `pass` ∧ no `paper-extractable` / `taxonomy-gap` / honest-defer rows in §🔎 | Terminate (success) — exit reason `all_pass` |
+   | ⚖️ all `pass` (🧬 either `pass` or `skipped`) ∧ no `paper-extractable` / `taxonomy-gap` / honest-defer rows in §🔎 | Terminate (success) — exit reason `all_pass` |
    | 📚 `fail` or `partial` | **outer step** — `/analyze-paper <id> --focus "<focus-hint>"` (§B-out) |
    | 🔍 `fail` | **inner step** — `/foundry <design> --feedback <prev-audit>` |
+   | 🧬 `fail` (execution test falsified the patch) | **inner step** — `/foundry <design> --feedback <prev-audit>` (foundry §G corrects signatures / seam to match the test) |
    | 🧪 `fail` or `partial` (only when the gap is in-scope — see note below) | **inner step** — `/foundry <design> --feedback <prev-audit>` |
    | §📐 silent-skip present (surfaces as 🧪 partial) | **inner step** — `/foundry <design> --feedback <prev-audit>` |
    | `vendor-resolved` or `paper-silent-defaultable` row exists in §🔎 | **inner step** — `/foundry <design> --feedback <prev-audit>` (foundry §F-2 lifts/promotes the bucket) |
@@ -207,9 +215,10 @@ C. Stabilisation check.
 D. Termination.
    Terminate when any of the following occurs:
 
-   - **success** — at Round 0 or any later round, ⚖️ all `pass` and §🔎
-     has no `paper-extractable`, `taxonomy-gap`, or honest-defer
-     (`paper-silent-experimental` / `out-of-base-scope`) rows.
+   - **success** — at Round 0 or any later round, ⚖️ all `pass` (🧬 either
+     `pass` or `skipped`) and §🔎 has no `paper-extractable`,
+     `taxonomy-gap`, or honest-defer (`paper-silent-experimental` /
+     `out-of-base-scope`) rows.
    - **unmappable** — Round 0 produced `UNMAPPABLE.md`.
    - **stable_partial** — §C stabilisation condition met (verdict + table
      + bucket set identical, no `fail`). Remaining §🚧/§🔎 are honest-defer
@@ -226,7 +235,7 @@ D. Termination.
      `out-of-base-scope` incorrectly labelled `paper-extractable`. Instruct
      the user to re-classify §🔎 against the impl.md §🧱 scope declaration.
    - **hold_and_report (taxonomy-gap)** — audit found a row that honestly
-     fits no bucket and marked it `taxonomy-gap` (audit §F no-force-fit).
+     fits no bucket and marked it `taxonomy-gap` (audit §G no-force-fit).
      A human needs to decide whether to extend the classification taxonomy.
    - **max_rounds_exhausted** — at the end of Round (max-rounds), `fail`
      remains or stabilisation has not been reached. Re-record the last
@@ -279,7 +288,7 @@ HARD RULES:
   `<foundry>.round_<N>.md` filenames follow the same index.
 - If max-rounds is 1, exit immediately after Round 0 (do not enter the
   loop).
-- Branch matrix priority: 📚 > 🔍 > 🧪 > 📐. When multiple cells are
+- Branch matrix priority: 📚 > 🔍 > 🧬 > 🧪 > 📐. When multiple cells are
   abnormal simultaneously, process only the highest-priority one.
 - Honesty over completeness — stable_partial is a normal exit, and the
   last audit report is the rationale report.

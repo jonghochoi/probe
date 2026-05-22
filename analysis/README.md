@@ -14,8 +14,9 @@
 | `<arxiv-id>_design.md` | `/analyze-paper` 슬래시 커맨드 | 위 분석에서 추출한 **Layer 1 Design** — 데이터 계약·모듈 인터페이스·불변식·하이퍼·평가 메트릭. **base 좌표 없음** (vendor-agnostic) |
 | `<arxiv-id>_impl/<foundry>/impl.md` | `/foundry` 슬래시 커맨드 | 위 Design 을 한 foundry (기본 `lerobot`) 의 좌표계로 매핑한 한글 구현 가이드 |
 | `<arxiv-id>_impl/<foundry>/impl.patch` | `/foundry` 슬래시 커맨드 | 같은 foundry 에 적용 가능한 unified diff (`git apply --check` 검증) |
+| `<arxiv-id>_impl/<foundry>/test_*.py` | `/foundry` 슬래시 커맨드 | subclass-seam 매핑의 실행 가능한 smoke test — `impl.patch` 의 runnable counterpart. `/audit §🧬` 가 설치된 foundry 에서 실행 |
 | `<arxiv-id>_impl/<foundry>/UNMAPPABLE.md` | `/foundry` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
-| `<arxiv-id>_audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 정적 대조한 한글 검증 보고서 |
+| `<arxiv-id>_audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 대조한 한글 검증 보고서 (정적 4-체크 + §🧬 실행 검증) |
 | `<arxiv-id>_audit/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 audit 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
 
 ## 📑 Index
@@ -25,6 +26,8 @@
 같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
 편집하지 마십시오. `lerobot` 컬럼은 `<id>_impl/lerobot/impl.md`
 존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
+`🧬` 컬럼은 `lerobot` audit 메타 헤더의 🧬 실행 검증 verdict
+(`pass`/`fail`/`skipped`, audit 없거나 구버전이면 —) 입니다.
 `🔎 vr/pe/sd/se/ob` 컬럼은 `lerobot` audit 의 §🔎 §🚧 분류 마커에서
 vendor-resolved / paper-extractable / paper-silent-defaultable /
 paper-silent-experimental / out-of-base-scope 행 수를 읽어 옵니다
@@ -34,9 +37,9 @@ foundry base 좌표계 밖이라 본 매핑에서 제외된 모듈 수입니다.
 
 <!-- ANALYSIS_INDEX:START -->
 
-| # | Analysis | arXiv | Title | Refreshed | lerobot | 🔎 vr/pe/sd/se/ob |
-|---|---|---|---|---|---|---|
-| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | 0/0/0/0/4 |
+| # | Analysis | arXiv | Title | Refreshed | lerobot | 🧬 | 🔎 vr/pe/sd/se/ob |
+|---|---|---|---|---|---|---|---|
+| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
 
 <!-- ANALYSIS_INDEX:END -->
 
@@ -102,8 +105,8 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
   얻습니다. foundry 매핑이 불가하면 (`UNMAPPABLE.md` 생성) 즉시 정상
   종료합니다.
 - **Round 1..N — 분기 매트릭스 (inner + outer).** audit 보고서 메타 헤더의
-  📚 / 🔍 / 🧪 / ⚖️ verdict 셀 + §🔎 bucket 마커를 파싱해 다음 액션을
-  결정합니다. 우선순위 **📚 > 🔍 > 🧪 > 📐**. impl-side gap (🔍 patch
+  📚 / 🔍 / 🧪 / 🧬 / ⚖️ verdict 셀 + §🔎 bucket 마커를 파싱해 다음 액션을
+  결정합니다. 우선순위 **📚 > 🔍 > 🧬 > 🧪 > 📐**. impl-side gap (🔍 patch
   apply 실패, 🧪 시그니처/상수 불일치, 📐 silent-skip → 🧪 partial) 은
   `/foundry <design> --feedback <prev-audit>` 로 외과적 갱신 → `/audit`
   재실행 순으로 매 라운드 자동 반복합니다. `--feedback` 모드의 foundry
