@@ -22,7 +22,7 @@
 | 🔍 패치 정합성 | `pass` |
 | 🧪 시그니처·하이퍼파라미터 | `pass` |
 | ⚖️ 종합 판정 | in-scope (π_uni enhancement) 정합 — 촉각/LSTM/corrective 는 base 밖 honest defer |
-| 🔎 §🚧 분류 | `vendor-resolved` 2 / `paper-extractable` 0 / `paper-silent-defaultable` 1 / `paper-silent-experimental` 0 / `out-of-base-scope` 4 (다음 액션: inner step) |
+| 🔎 §🚧 분류 | `vendor-resolved` 0 / `paper-extractable` 0 / `paper-silent-defaultable` 0 / `paper-silent-experimental` 0 / `out-of-base-scope` 4 (다음 액션: honest defer — 추가 라운드 무의미) |
 
 ---
 
@@ -61,6 +61,8 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 | `F.pad` 슬라이스 zero-pad | torch `F` (functional) | `F.pad(arm_loss, (0, d-a))` / `F.pad(hand_loss, (a, d-a-h))` | ✅ |
 | 상수 `enhancement_lambda = 1.0` | `2511.00139_design.md §📊` (λ, paper-silent default) | `configuration_pi0.py` hunk + `# NOTE` 주석 | ✅ |
 | 상수 `enhancement_arm_dim = 6` / `enhancement_hand_dim = 12` | Design §🧮 데이터 계약 (arm 6-DoF / hand 12-DoF) | config hunk + forward slice `[..., :a]` / `[..., a:a+h]` | ✅ |
+| 상수 $`d_s`$ = `action_expert_config.width` (vendor-resolved) | `vendor/lerobot/policies/pi0/modeling_pi0.py:580` | `__init__` hunk `_w = action_expert_config.width` | ✅ |
+| 상수 $`H`$ = `chunk_size = 50` (vendor-resolved) | `vendor/lerobot/policies/pi0/configuration_pi0.py:36` | forward/denoise `self.config.chunk_size` | ✅ |
 | `denoise_step` 추론 경로 정합 | `modeling_pi0.py:920–923` | denoise hunk가 동일 `_enhancement_main` 사용 | ✅ |
 
 판정: `pass`
@@ -79,10 +81,10 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 | `Eq. (10)` 손 보조 손실 | `analysis/2511.00139.md §🔬` | forward hunk `hand_loss = F.mse_loss(...)` | 구현 |
 | `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139.md §🔬` | forward hunk `arm_loss = F.mse_loss(...)` | 구현 |
 | `Eq. (12)` 총손실 | `2511.00139_design.md §📊` | forward hunk `losses + λ(arm_pad+hand_pad)` | 구현 |
-| `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #5` | 유보 |
-| `Eq. (3)` CAE 재구성 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #4` | 유보 |
-| `Eq. (14)` 비축적 corrective | `2511.00139_design.md §📊` | `impl.md §🚧 #6` | 유보 |
-| `Eq. (4)` / `Eq. (8)` 입력 계약 | `2511.00139_design.md §🧮` | `impl.md §🚧 #4` (촉각) / data layer | 유보 |
+| `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #2` | 유보 |
+| `Eq. (3)` CAE 재구성 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #1` | 유보 |
+| `Eq. (14)` 비축적 corrective | `2511.00139_design.md §📊` | `impl.md §🚧 #3` | 유보 |
+| `Eq. (4)` / `Eq. (8)` 입력 계약 | `2511.00139_design.md §🧮` | `impl.md §🚧 #1` (촉각) / data layer | 유보 |
 | `Table 1`–`Table 4` · `Fig. 16` | `analysis/2511.00139.md §📊` | 평가 결과 — 정적 검증 대상 아님 | 유보 |
 
 <!-- silent-skip 없음 (모든 미구현 식은 §🚧 또는 평가 유보로 명시) → §🧪 partial 유발 없음. -->
@@ -103,20 +105,21 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 
 | §🚧 # | 항목 한 줄 | bucket | 근거 / 다음 액션 |
 |-------|------------|--------|-------------------|
-| 1 | 총손실 보조 가중치 λ 절대값 본문 미명시 | `paper-silent-defaultable` | analysis §🔬 "가중치 λ 의 절대값은 본문에 명시되어 있지 않다" — patch 가 default 1.0 + `# NOTE` 로 도입. 다음 라운드 feedback 이 §🚧→§🧪 이동 |
-| 2 | 공유 latent 차원 d_s 절대값 미명시 | `vendor-resolved` | `vendor/lerobot/policies/pi0/modeling_pi0.py:580` — `action_expert_config.width` 가 d_s 를 강제 (vendor 기본). 다음 라운드가 §🧪 로 lift |
-| 3 | action chunk size H 미명시 | `vendor-resolved` | `vendor/lerobot/policies/pi0/configuration_pi0.py:36` — `chunk_size: int = 50` 이 H 를 강제 |
-| 4 | 촉각 인코더 (CAE+resultant-force MLP, §3.2.2) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE 선언 + §🪛 신규-미구현 행 — `pi0` 에 촉각 모달리티 없음. outer/inner 모두 무의미 |
-| 5 | LSTM admittance 정책 (§3.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — `pi0` 와 무관한 독립 정책 |
-| 6 | 비축적 corrective SFT 루프 (식 14) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — 모델 forward 가 아닌 학습 오케스트레이션 레이어 |
-| 7 | selective gating 임계값 τ_contact (§8.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — 촉각 모달리티 부재로 base 밖 |
+| 1 | 촉각 인코더 (CAE+resultant-force MLP, §3.2.2) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE 선언 + §🪛 신규-미구현 행 — `pi0` 에 촉각 모달리티 없음. outer/inner 모두 무의미 |
+| 2 | LSTM admittance 정책 (§3.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — `pi0` 와 무관한 독립 정책 |
+| 3 | 비축적 corrective SFT 루프 (식 14) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — 모델 forward 가 아닌 학습 오케스트레이션 레이어 |
+| 4 | selective gating 임계값 τ_contact (§8.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — 촉각 모달리티 부재로 base 밖 |
+
+<!-- 라운드 0 의 vendor-resolved(2,3)·paper-silent-defaultable(1) 은 라운드 1
+     feedback 으로 impl.md §🚧 → §🧪 이동 완료 (zero-state 재분류이므로
+     이번 표에는 잔존하지 않음). 남은 4 항목은 모두 base 좌표계 밖 honest defer. -->
 
 <!-- ANALYSIS_BUCKETS:START -->
-- vendor-resolved: 2,3
+- vendor-resolved:
 - paper-extractable:
-- paper-silent-defaultable: 1
+- paper-silent-defaultable:
 - paper-silent-experimental:
-- out-of-base-scope: 4,5,6,7
+- out-of-base-scope: 1,2,3,4
 - focus-hint:
 <!-- ANALYSIS_BUCKETS:END -->
 
