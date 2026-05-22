@@ -16,7 +16,7 @@ known baseline, and emit an implementation guide
 | Pinned commit | `999e77ad7bc30774cccca58bd29f732a90600931` |
 | Vendor date | 2026-05-20 |
 | License | Apache-2.0 (see `LICENSE`; original headers preserved in each file) |
-| Scope | 6 baseline policies + shared base + `configs/` + `processor/` |
+| Scope | 6 baseline policies + `rtc/` + shared base + `configs/` + `processor/` + `datasets/` + `transforms/` + `utils/` |
 
 ## What is vendored
 
@@ -34,17 +34,21 @@ vendor/lerobot/
 │   ├── pi0_fast/                                openpi π0-FAST
 │   ├── smolvla/                                 SmolVLA (incl. smolvlm_with_expert.py)
 │   ├── act/                                     Action Chunking Transformer (ALOHA)
-│   └── diffusion/                               Diffusion Policy
+│   ├── diffusion/                               Diffusion Policy
+│   └── rtc/                                     Real-Time Chunking — inpainting/prefix-attention real-time inference for action-chunking policies
 ├── configs/                                     PreTrainedConfig, FeatureType, PolicyFeature, …
-└── processor/                                   normalization + tokenization pipeline
+├── processor/                                   normalization + tokenization pipeline
+├── datasets/                                    LeRobotDataset — the de-facto standard robot-learning dataset format (load/read/write/stream/aggregate/tools)
+├── transforms/                                  image transforms (augmentation) referenced by datasets
+└── utils/                                       shared constants + helpers (constants, import_utils, io_utils, feature_utils, hub, action_interpolator, …)
 ```
 
-Not vendored: `lerobot.optim`, `lerobot.utils.constants`, `lerobot.utils.hub`,
-`lerobot.utils.import_utils`, dataset code, robot drivers, training scripts,
-tests. The vendored `.py` files still `import` from those modules — that is
-intentional: the snapshot is for **reading and diff'ing**, not for running.
-If you want to actually execute any of this code, install `lerobot` from the
-pinned commit instead of relying on this directory.
+Not vendored: `lerobot.optim`, `lerobot.model`, `lerobot.envs`, `lerobot.types`,
+`lerobot.rl`, robot drivers, training scripts, tests. The vendored `.py` files
+still `import` from those modules — that is intentional: the snapshot is for
+**reading and diff'ing**, not for running. If you want to actually execute any
+of this code, install `lerobot` from the pinned commit instead of relying on
+this directory.
 
 ## Why it is here
 
@@ -65,11 +69,15 @@ upstream `lerobot` change is needed to support a new Design's baseline.
 Procedure:
 
 1. Update `jonghochoi/lerobot` to the desired commit and note its SHA.
-2. From the lerobot checkout, overwrite the six policy directories plus the
+2. From the lerobot checkout, overwrite the seven policy directories
+   (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`, `rtc`) plus the
    policy-level shared files (`pretrained.py`, `factory.py`, `utils.py`,
-   `pi_gemma.py`, `__init__.py`) and the `configs/` and `processor/` trees
-   under `vendor/lerobot/`. Do not modify the files by hand — they must
-   remain byte-identical to upstream so attribution stays clean.
+   `pi_gemma.py`, `__init__.py`) and the `configs/`, `processor/`, `datasets/`,
+   `transforms/`, and `utils/` trees under `vendor/lerobot/`. Do not modify the
+   files by hand — they must remain byte-identical to upstream so attribution
+   stays clean. One exception, applied consistently with the existing snapshot:
+   each policy's `README.md` is a symlink into `docs/source/` upstream; resolve
+   it to the real file content when copying (the snapshot has no `docs/` tree).
 3. Replace `LICENSE` if upstream changed it (it has not, at the pinned
    commit, but check).
 4. Update **Pinned commit** and **Vendor date** in the table above.

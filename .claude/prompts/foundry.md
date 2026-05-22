@@ -60,8 +60,17 @@ CONTEXT (read-only):
   - `vendor/lerobot/README.md` — pinned commit SHA; the `impl.md` meta
     header MUST cite the same SHA.
   - `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`
-    — the candidate baselines, indexed by a CodeGraph MCP server (see
-    CLAUDE.md → "CodeGraph"). The index is built on demand, NOT at
+    — the candidate base policies, indexed by a CodeGraph MCP server (see
+    CLAUDE.md → "CodeGraph"). Beyond the chosen base policy, the snapshot
+    now also covers groundable surface for non-policy changes:
+    `vendor/lerobot/policies/rtc/` (real-time chunking / inference-time
+    action handling), `vendor/lerobot/datasets/` (the standard
+    LeRobotDataset data contract — sampling, delta-timestamps, stats,
+    video/feature schema), `vendor/lerobot/transforms/` (image
+    augmentation), and `vendor/lerobot/utils/` (shared constants/helpers).
+    Ground data-pipeline / augmentation / real-time-inference changes
+    there rather than forcing them into a policy file. The index is built
+    on demand, NOT at
     session start: run `bash scripts/ensure-codegraph.sh` ONCE at the
     very start of this command, before any codegraph call. It builds
     `.codegraph/codegraph.db` if missing (~3s) and is a no-op when it
@@ -100,7 +109,11 @@ A. Mapping feasibility (Layer 2 gate).
    Signals: the Design's `변경 의도` and `foundry 힌트` sections, plus
    architectural fingerprints (PaliGemma + flow matching → pi0 family;
    action chunking + transformer enc/dec → ACT; DDPM/DDIM head →
-   Diffusion Policy; small VLM + action expert → SmolVLA).
+   Diffusion Policy; small VLM + action expert → SmolVLA). Changes that
+   are not policy-internal still ground against the wider snapshot:
+   real-time / inference-time action handling → `policies/rtc/`; data
+   contract, sampling, or stats → `datasets/`; augmentation →
+   `transforms/`; shared constants/helpers → `utils/`.
 
    If the Design cannot be mapped to this foundry with reasonable
    confidence, DO NOT produce `impl.md` or `impl.patch`. Instead,
