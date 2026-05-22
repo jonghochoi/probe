@@ -11,6 +11,18 @@ analysis-specific prose around the input. Here it is generalized so a
 single Design can be mapped onto multiple foundries by re-running with
 a different `--foundry <name>`.
 
+POSTURE (applies to this whole mode):
+- Surface assumptions before writing the patch. If the Design admits
+  more than one reading, or the foundry mapping is ambiguous, do NOT
+  pick one silently and proceed — stop and surface it through the
+  existing §A paths (`UNMAPPABLE.md`, a 🚧 entry, or a `위치 잠정`
+  row). Silent assumption is where fabrication starts.
+- Reduce the work to verifiable goals. Drive each change against an
+  explicit "what counts as passing" — `git apply --check` pass, §🧪
+  signature match, the Design's equations/tables actually implemented —
+  and narrow in until that criterion holds. If the criterion is weak
+  ("just make it apply"), define a stronger one before you start.
+
 INPUT:
 The first positional argument is the path to a Design document:
 
