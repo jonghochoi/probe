@@ -93,14 +93,30 @@
 - **학습 하이퍼파라미터** — enhancement 는 `enhancement_enabled=True` 로만 활성화. $`\lambda`$ 기본 1.0 (paper 침묵, default 채택). 공유 latent 차원 $`d_s`$ 는 `action_expert_config.width` 로 귀속시키고 사지별 latent 은 `width//2` 로 둠 (Design §📊 `d_s/2`).
 - **평가 / 추론** — `denoise_step` 도 fused-concat 경로를 타므로 학습/추론 정합. `action_out_proj` (base 경로) 는 enhancement off 일 때만 사용되어 기존 체크포인트 호환 유지.
 
+확정된 상수 (라운드 1 에서 §🚧 → 여기로 이동):
+
+- **default 채택 (paper-silent)** — $`\lambda = 1.0`$. paper §3.4.2 침묵 → patch 의 `enhancement_lambda` default + `# NOTE` 주석으로 근거 명시.
+- **vendor-resolved 상수** — 공유 latent 차원 $`d_s`$ = `action_expert_config.width` (`vendor/lerobot/policies/pi0/modeling_pi0.py:580`). 사지별 latent 은 `width//2`.
+- **vendor-resolved 상수** — action chunk size $`H`$ = `chunk_size: int = 50` (`vendor/lerobot/policies/pi0/configuration_pi0.py:36`).
+
 ---
 
 ## 🚧 미해결 / 잠정
 
-1. 총 손실 보조 가중치 $`\lambda`$ 의 절대값이 본문(§3.4.2)에 없습니다 — patch 에 default `1.0` 을 도입하고 `# NOTE` 주석으로 근거를 명시했습니다 (paper-silent-defaultable).
-2. 공유 latent 차원 $`d_s`$ 와 encoder/head 의 정확한 hidden width 가 §7.3 에 절대값으로 명시되지 않습니다 — `action_expert_config.width` (vendor 기본) 에 귀속시켰습니다 (vendor-resolved 후보).
-3. action chunk size $`H`$ 가 본문 미명시 — vendor `pi0` 기본 `chunk_size = 50` 을 사용합니다 (vendor-resolved 후보).
-4. 촉각 인코더 (CAE + resultant-force MLP, §3.2.2) 는 `pi0` 좌표계 밖 — §🧱 EXCLUDE, `out-of-base-scope` (§🪛 마지막 행).
-5. LSTM admittance 정책 (§3.2.1) 은 `pi0` 좌표계 밖 — §🧱 EXCLUDE, `out-of-base-scope`.
-6. 비축적 corrective SFT 루프 (식 14) 는 학습 오케스트레이션 레이어로 모델 forward 변경이 아님 — §🧱 EXCLUDE, `out-of-base-scope`.
-7. selective gating 임계값 $`\tau_{\text{contact}}`$ (음의 촉각 결과, §8.2.1) 은 촉각 모달리티 부재로 base 밖 — `out-of-base-scope`.
+> 라운드 1 (feedback) 에서 $`\lambda`$ (paper-silent-defaultable) · $`d_s`$ · $`H`$ (vendor-resolved) 3 항목이 §🧪 실무 구현 주의 "확정된 상수" 로 이동했습니다. 아래에는 base 좌표계 밖 honest-defer 항목만 남습니다.
+
+1. 촉각 인코더 (CAE + resultant-force MLP, §3.2.2) 는 `pi0` 좌표계 밖 — §🧱 EXCLUDE, `out-of-base-scope` (§🪛 마지막 행).
+2. LSTM admittance 정책 (§3.2.1) 은 `pi0` 좌표계 밖 — §🧱 EXCLUDE, `out-of-base-scope`.
+3. 비축적 corrective SFT 루프 (식 14) 는 학습 오케스트레이션 레이어로 모델 forward 변경이 아님 — §🧱 EXCLUDE, `out-of-base-scope`.
+4. selective gating 임계값 $`\tau_{\text{contact}}`$ (음의 촉각 결과, §8.2.1) 은 촉각 모달리티 부재로 base 밖 — `out-of-base-scope`.
+
+---
+
+### 🔁 변경 사유 (feedback 모드)
+
+- **라운드 1 (입력 verify: `../../2511.00139_audit/lerobot.round_0.md`):**
+  - 갭 `§🔎 #1` (paper-silent-defaultable, λ) → 액션 `default 채택` → 결과 `§🚧 #1 → §🧪 "default 채택 (paper-silent)" 이동`. patch 는 라운드 0 에서 이미 `enhancement_lambda = 1.0` + `# NOTE` 를 포함하므로 hunk 불변.
+  - 갭 `§🔎 #2` (vendor-resolved, d_s) → 액션 `vendor 값 lift` → 결과 `§🚧 #2 → §🧪 "vendor-resolved 상수" 이동`. `action_expert_config.width` (`modeling_pi0.py:580`) 가 이미 patch 에서 d_s 로 사용됨 — hunk 불변.
+  - 갭 `§🔎 #3` (vendor-resolved, H) → 액션 `vendor 값 lift` → 결과 `§🚧 #3 → §🧪 "vendor-resolved 상수" 이동`. `chunk_size = 50` (`configuration_pi0.py:36`) 가 이미 patch 의 `self.config.chunk_size` 로 사용됨 — hunk 불변.
+  - 갭 `§🔎 #4–#7` (out-of-base-scope) → 액션 `honest defer 유지` → 결과 `§🚧 #1–#4 로 잔존`.
+  - patch delta: 없음 (모든 통과 hunk 의미적 보존, §🪛 표 5 행 + 제외 행 유지). impl.md 만 §🚧→§🧪 이동 + 본 트레일 추가.
