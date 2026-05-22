@@ -19,7 +19,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scouting/` | agent | Weekly Scouting Reports (`YYYY-MM-DD-P#.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_audit/<foundry>.md`) |
-| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
+| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
@@ -48,7 +48,7 @@ demand, not at session start** — only the commands that actually read
 `vendor/lerobot/` need it (today just `/foundry`), so paying the build cost
 on every session would be waste. Those commands run
 `scripts/ensure-codegraph.sh` before their first codegraph call: it builds
-the DB if missing (~3s for the current 58 vendored `.py` files) and is a
+the DB if missing (~3s for the current 108 vendored `.py` files) and is a
 no-op when it already exists, after which the file watcher inside the MCP
 server keeps it fresh. Only `.codegraph/config.json` (defining
 `scope=vendor/lerobot`) is committed; the DB is per-checkout and gitignored.
