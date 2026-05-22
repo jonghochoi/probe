@@ -60,10 +60,13 @@ CONTEXT (read-only):
   - `vendor/lerobot/README.md` — pinned commit SHA; the `impl.md` meta
     header MUST cite the same SHA.
   - `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`
-    — the candidate baselines. A CodeGraph MCP server indexes
-    `vendor/lerobot/` at session start (see CLAUDE.md → "CodeGraph").
-    Before reading any `.py` file in full, use the MCP tools to
-    assemble the minimum file:line surface you actually need:
+    — the candidate baselines, indexed by a CodeGraph MCP server (see
+    CLAUDE.md → "CodeGraph"). The index is built on demand, NOT at
+    session start: run `bash scripts/ensure-codegraph.sh` ONCE at the
+    very start of this command, before any codegraph call. It builds
+    `.codegraph/codegraph.db` if missing (~3s) and is a no-op when it
+    already exists. Then, before reading any `.py` file in full, use the
+    MCP tools to assemble the minimum file:line surface you actually need:
       * `codegraph_files` to enumerate the chosen base's files,
       * `codegraph_search` / `codegraph_node` to locate symbols and
         get their exact spans,
@@ -73,8 +76,8 @@ CONTEXT (read-only):
     Full-file reads of `configuration_*.py` / `modeling_*.py` /
     `processor_*.py` are still allowed when a symbol-level view is
     insufficient (e.g. understanding control flow across a whole
-    `forward()`), but should be the exception. If the MCP server is
-    not reachable, fall back to reading those files directly.
+    `forward()`), but should be the exception. If the build or the MCP
+    server is not reachable, fall back to reading those files directly.
 
 Do NOT edit any file under `context/`, `vendor/`, or the Design
 document itself. Do NOT modify `analysis/<id>.md` (immutable input)
