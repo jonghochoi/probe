@@ -134,7 +134,7 @@ Both are regenerable snapshots — overwrite on re-run. Follow
 `analysis/_TEMPLATE.md` (analysis) and `analysis/_TEMPLATE_DESIGN.md`
 (Design) exactly, and `docs/STYLE.md` §5 / §6. Both are single
 Korean documents — not translations of English files. Write natively
-in Korean per STYLE §4 (formal 합니다/됩니다 체, glossary §4-2,
+in Korean per STYLE §4 (formal polite -ㅂ니다 register, glossary §4-2,
 verbatim tokens: paper title in original English, config/code names,
 formulas, arXiv links, P#/D#/CP#).
 
@@ -147,28 +147,30 @@ STRUCTURE of `analysis/<id>.md` — two parts, in this order:
 
 (A) 중립 논문 정리 — what the paper says, on its own terms:
   📄 논문 메타        — original English title, authors, arXiv link,
-                        발행일/버전, 본문 확보 수준, 분석 생성일.
+                        date/version, full-text acquisition level, analysis date.
   🧭 한 줄 요약 (TL;DR) — 1–2 sentences.
-  ❓ 문제 정의 / 동기   — 개조식만 허용. 단일 산문 문단 금지. 4–6 항목,
-                        각 항목은 굵은 라벨 + 1–2문장. 권장 라벨:
-                        **풀고자 하는 문제**, **기존 접근의 한계**,
+  ❓ 문제 정의 / 동기   — bullet form only; no single-prose paragraph. 4–6
+                        items, each a bold label + 1–2 sentences. Recommended
+                        labels: **풀고자 하는 문제**, **기존 접근의 한계**,
                         **본 논문의 가설**, **왜 지금 중요한가**.
   🧩 핵심 기여         — 3–6 bullets.
-  🔑 기술 키워드        — 본 논문 이해에 필요한 핵심 용어 5–10개. 각 항목은
-                        `- **<원어 / 약어>** — <비유적 한 줄 설명>` 형식.
-                        §4-2 글로서리에 등재된 용어는 글로서리 번역을
-                        그대로 쓰되 비유 한 줄을 곁들이고, 적절한 비유가
-                        없으면 평이한 정의로만 적습니다(사실 왜곡 금지).
-  🔬 방법론            — 압축이 아니라 디테일 보존이 목표. 가능하면
-                        `### 직관`, `### 아키텍처`, `### 학습 목표 / 손실`,
-                        `### 학습 셋업` 4 하위절로 분해. 앵커 클레임(설계
-                        의도를 못 박는 원문 문장)과 모든 수식은 영문 원문
-                        verbatim blockquote + `(§n)` 출처 + 한글 해설
-                        형식으로 인용. 수식은 LaTeX 표기 그대로.
-  📊 실험 설정과 결과   — 가능한 한 마크다운 표 1개 이상으로 핵심 수치
-                        정리. 본문의 핵심 수치 주장 문장은 영문 원문
-                        blockquote + `(§n, Table k)` 출처 + 한글 해설
-                        형식으로 인용. 추론·보정·반올림 금지.
+  🔑 기술 키워드        — 5–10 key terms essential for understanding the paper.
+                        Each item: `- **<original term / abbreviation>** —
+                        <one-line analogy or definition>`. For terms in the
+                        §4-2 glossary, use the glossary translation and add a
+                        one-line analogy; if no faithful analogy exists, use a
+                        plain definition (no distortion of facts).
+  🔬 방법론            — aim for detail preservation, not compression. Decompose
+                        into 4 subsections if possible: `### 직관`,
+                        `### 아키텍처`, `### 학습 목표 / 손실`, `### 학습 셋업`.
+                        Anchor claims (verbatim source sentences pinning the
+                        design intent) and all equations cite using English
+                        verbatim blockquote + `(§n)` source + Korean explanation.
+                        Formulas in original LaTeX notation.
+  📊 실험 설정과 결과   — summarise key figures in at least one markdown table.
+                        Key numerical claim sentences cite using English verbatim
+                        blockquote + `(§n, Table k)` source + Korean explanation.
+                        No inference, correction, or rounding.
   ⚖️ 한계              — author-stated weaknesses + obvious gaps.
   ♻️ 재현성            — code / data / hardware availability.
 

@@ -3,17 +3,10 @@ description: 논문 한 편을 분석 → foundry 매핑 → 정적 audit 의 �
 argument-hint: <arXiv id | analysis/<id>_design.md> [--foundry <name>] [--max-rounds N]
 ---
 
-Read `.claude/prompts/paper-reproduction.md` and execute it exactly as
-written. That file is the single source of truth for this command —
-do not duplicate or paraphrase its logic here.
+`.claude/prompts/paper-reproduction.md`를 읽고 그대로 실행하세요. 해당 파일이 이 커맨드의 유일한 정보 원천입니다 — 로직을 여기에 복제하거나 바꿔 쓰지 마세요.
 
-The reproduction target (arXiv id 또는 design path) 와 옵션들은: $ARGUMENTS
+재현 대상(arXiv id 또는 design path)과 옵션들: $ARGUMENTS
 
-If `$ARGUMENTS` is empty, ask the user for an arXiv id (또는 기존
-`analysis/<id>_design.md` 경로) 와 optional `--foundry <name>` (기본
-`lerobot`) / `--max-rounds N` (기본 3) 을 묻고 stop — do not pick a
-target yourself.
+`$ARGUMENTS`가 비어 있으면 arXiv id(또는 기존 `analysis/<id>_design.md` 경로)와 선택적 `--foundry <name>`(기본 `lerobot`) / `--max-rounds N`(기본 3)을 사용자에게 물어보고 중단하세요 — 직접 대상을 선택하지 마세요.
 
-Precondition: 입력이 design path 인 경우 `analysis/<id>.md` 와
-`analysis/<id>_design.md` 가 모두 존재해야 합니다. 부재 시 stop 하고
-`/analyze-paper <id>` 부터 돌리도록 안내하세요.
+사전 조건: 입력이 design path인 경우 `analysis/<id>.md`와 `analysis/<id>_design.md`가 모두 존재해야 합니다. 없으면 중단하고 `/analyze-paper <id>`부터 실행하도록 안내하세요.
