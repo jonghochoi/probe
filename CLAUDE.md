@@ -20,11 +20,12 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_audit/<foundry>.md`) |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + configs + processor; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
-| `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built at session start. See the "CodeGraph" section below |
+| `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` 📑 Index table; invoked by `/analyze-paper`, `/foundry`, `/audit` |
+| `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/foundry` before its first codegraph call (see the "CodeGraph" section below) |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
@@ -42,12 +43,21 @@ nothing else.
 
 `vendor/lerobot/` is indexed by
 [CodeGraph](https://github.com/colbymchenry/codegraph) and exposed to every
-session over MCP. The SessionStart hook in `.claude/settings.json` builds
-`.codegraph/codegraph.db` on first session start (typically under a second
-for the current 58 vendored `.py` files), and the file watcher inside the
-MCP server keeps it fresh after vendor refreshes — no manual rebuild step.
-Only `.codegraph/config.json` (defining `scope=vendor/lerobot`) is committed;
-the DB is per-checkout and gitignored.
+session over MCP. The index (`.codegraph/codegraph.db`) is built **on
+demand, not at session start** — only the commands that actually read
+`vendor/lerobot/` need it (today just `/foundry`), so paying the build cost
+on every session would be waste. Those commands run
+`scripts/ensure-codegraph.sh` before their first codegraph call: it builds
+the DB if missing (~3s for the current 58 vendored `.py` files) and is a
+no-op when it already exists, after which the file watcher inside the MCP
+server keeps it fresh. Only `.codegraph/config.json` (defining
+`scope=vendor/lerobot`) is committed; the DB is per-checkout and gitignored.
+
+The build cannot be a plain `codegraph index` — codegraph requires `init`
+first, and `init` overwrites `config.json` with a default template whose
+exclude list drops `vendor/`. `scripts/ensure-codegraph.sh` backs up the
+committed config across `init` and restores it before indexing; run it by
+hand from the repo root if you ever need to (re)build outside `/foundry`.
 
 For any `/foundry` run, or any time you need to ground a Design row in
 `file:line` coordinates inside `vendor/lerobot/`, prefer the MCP tools over

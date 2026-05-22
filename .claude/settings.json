@@ -5,20 +5,9 @@
       "Edit(**/.claude/**)",
       "Write(**/.claude/**)",
       "Bash(npx -y @colbymchenry/codegraph*)",
+      "Bash(bash scripts/ensure-codegraph.sh)",
+      "Bash(scripts/ensure-codegraph.sh)",
       "mcp__codegraph__*"
-    ]
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "test -f .codegraph/codegraph.db || npx -y @colbymchenry/codegraph index . >&2"
-          }
-        ]
-      }
     ]
   }
 }
