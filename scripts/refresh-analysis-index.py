@@ -105,6 +105,50 @@ def lerobot_state(stem: str) -> str:
     return "—"
 
 
+# §🔎 §🚧 bucket counts come from the audit report's machine marker.
+BUCKETS_START = "<!-- ANALYSIS_BUCKETS:START -->"
+BUCKETS_END = "<!-- ANALYSIS_BUCKETS:END -->"
+BUCKET_LINE_RE = re.compile(r"^-\s*(vendor-resolved|paper-extractable|paper-silent-defaultable|paper-silent-experimental|out-of-base-scope)\s*:\s*(.*)$")
+BUCKET_ORDER = (
+    "vendor-resolved",
+    "paper-extractable",
+    "paper-silent-defaultable",
+    "paper-silent-experimental",
+    "out-of-base-scope",
+)
+
+
+def lerobot_buckets(stem: str) -> str:
+    """Return the §🔎 bucket counts `vr/pe/sd/se/ob` for the lerobot audit.
+
+    Reads the ANALYSIS_BUCKETS marker block from
+    `analysis/<stem>_audit/lerobot.md` and counts the comma-separated
+    row ids per bucket. `—` when no audit report exists; `0/0/0/0/0` when
+    the marker is present but empty (e.g. all checks pass with no §🚧).
+    `ob` = out-of-base-scope (fully specified but outside the chosen
+    foundry base's coordinate system).
+    """
+    audit = ANALYSIS_DIR / f"{stem}_audit" / "lerobot.md"
+    try:
+        text = audit.read_text(encoding="utf-8")
+    except OSError:
+        return "—"
+    if BUCKETS_START not in text or BUCKETS_END not in text:
+        return "—"
+    block = text.split(BUCKETS_START, 1)[1].split(BUCKETS_END, 1)[0]
+    counts = {name: 0 for name in BUCKET_ORDER}
+    for line in block.splitlines():
+        m = BUCKET_LINE_RE.match(line.strip())
+        if not m:
+            continue
+        name, payload = m.group(1), m.group(2).strip()
+        # Count comma-separated ids; ignore placeholder/empty payloads.
+        if not payload or payload.startswith("<"):
+            continue
+        counts[name] = len([tok for tok in payload.split(",") if tok.strip()])
+    return "/".join(str(counts[name]) for name in BUCKET_ORDER)
+
+
 def sort_key(row: dict[str, str]) -> tuple[str, str]:
     # Refreshed date descending → tied by arXiv id descending.
     # Use string sort: ISO dates and arXiv ids both order lexically.
@@ -116,11 +160,11 @@ def sort_key(row: dict[str, str]) -> tuple[str, str]:
 
 def build_table(rows: list[dict[str, str]]) -> str:
     header = (
-        "| # | Analysis | arXiv | Title | Refreshed | lerobot |\n"
-        "|---|---|---|---|---|---|\n"
+        "| # | Analysis | arXiv | Title | Refreshed | lerobot | 🔎 vr/pe/sd/se/ob |\n"
+        "|---|---|---|---|---|---|---|\n"
     )
     if not rows:
-        return header + "| — | _no deep-dives yet_ | — | — | — | — |\n"
+        return header + "| — | _no deep-dives yet_ | — | — | — | — | — |\n"
     out = [header]
     for i, row in enumerate(rows, 1):
         link = f"[`{row['stem']}.md`]({row['stem']}.md)"
@@ -129,7 +173,8 @@ def build_table(rows: list[dict[str, str]]) -> str:
         else:
             arxiv = f"`{row['arxiv_id']}`" if row["arxiv_id"] != WARN else WARN
         out.append(
-            f"| {i} | {link} | {arxiv} | {row['title']} | {row['refreshed']} | {row['lerobot']} |\n"
+            f"| {i} | {link} | {arxiv} | {row['title']} | {row['refreshed']} "
+            f"| {row['lerobot']} | {row['buckets']} |\n"
         )
     return "".join(out)
 
@@ -160,6 +205,7 @@ def main() -> int:
         meta = extract_meta(path)
         meta["stem"] = path.stem
         meta["lerobot"] = lerobot_state(path.stem)
+        meta["buckets"] = lerobot_buckets(path.stem)
         rows.append(meta)
     rows.sort(key=sort_key, reverse=True)
     table = build_table(rows)

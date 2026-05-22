@@ -127,6 +127,18 @@ A. Mapping feasibility (Layer 2 gate).
    contract, sampling, or stats → `datasets/`; augmentation →
    `transforms/`; shared constants/helpers → `utils/`.
 
+   Declare the scope explicitly. A paper often describes several
+   policies/modules; the base you pick covers only some of them. In
+   `impl.md §🧱` you MUST state, in one short paragraph, which of the
+   paper's policies/modules this base COVERS and which it EXCLUDES,
+   each with a one-line reason (e.g. "π_uni 의 enhancement 만 cover;
+   π_hand 촉각 인코더·LSTM 정책은 base 좌표계 밖 — 제외"). This is the
+   contract the `/audit` `out-of-base-scope` bucket cites. Without it,
+   an excluded module cannot be classified `out-of-base-scope` and the
+   exclusion looks like an unexplained omission. The base scope is your
+   discretionary call, so making it inspectable here is what lets a
+   reviewer challenge the scoping itself rather than trust it.
+
    If the Design cannot be mapped to this foundry with reasonable
    confidence, DO NOT produce `impl.md` or `impl.patch`. Instead,
    write a single file `analysis/<id>_impl/<foundry>/UNMAPPABLE.md`
@@ -210,13 +222,15 @@ F. Update mode (feedback-driven). [`--feedback <audit-path>` 가 있을 때만]
    이미 통과한 부분은 보존합니다. 이 모드는 Design 이 본문과 정합한
    상태 (`📚 pass`) 에서 impl 만 부족한 케이스를 위한 것입니다 — 📚
    verdict 자체가 fail/partial 인 경우는 본 prompt 의 책임 밖입니다
-   (→ 외부 루프, 현재 미구현).
+   (→ 외부 루프 — `/reproduce-paper` 가 `/analyze-paper --focus` 로
+   처리).
 
    F-1. 추가로 읽을 입력.
    - `<audit-path>` — 직전 라운드 audit 보고서. 메타 헤더의 verdict
      셀, §🔍 의 stderr verbatim, §🧪 의 행 (특히 ❌/⚠️), §📐 의 행
-     (특히 `silent-skip`), 그리고 직전 impl.md §🚧 미해결 표를 모두
-     읽습니다.
+     (특히 `silent-skip`), §🔎 §🚧 분류 표 + 그 머신 마커
+     (`<!-- ANALYSIS_BUCKETS:... -->`), 그리고 직전 impl.md §🚧 미해결
+     표를 모두 읽습니다.
    - `analysis/<id>_impl/<foundry>/impl.md` (직전 라운드) — §🪛 매핑 표
      와 §🚧 미해결 표가 출발점.
    - `analysis/<id>_impl/<foundry>/impl.patch` (직전 라운드) — 통과한
@@ -235,14 +249,20 @@ F. Update mode (feedback-driven). [`--feedback <audit-path>` 가 있을 때만]
    | §🧪 행 ⚠️ (인용은 됐으나 패치 누락) | 해당 상수를 patch 의 적절한 위치에 추가 |
    | §📐 행 `silent-skip` (식·표 누락) | 식·표를 구현하는 새 hunk 추가, 또는 명시적으로 🚧 로 강등 |
    | §🪛 직전 라운드 `위치 잠정` | vendor 코드 재확인 후 좌표 확정 or 잠정 유지 사유 명시 |
-   | 직전 impl.md §🚧 항목 | 본문에 정보가 충분해졌으면 patch 로 승격, 아니면 그대로 유지 |
+   | §🔎 bucket `vendor-resolved` | audit 가 cite 한 vendor `file:line` 의 값을 patch 의 default 또는 새 hunk 로 lift. impl.md 의 해당 §🚧 항목을 §🧪 "vendor-resolved 상수" 행으로 이동 (§🚧 에서 제거) |
+   | §🔎 bucket `paper-silent-defaultable` | default 값을 patch 에 도입하되 hunk 안에 `# NOTE: paper §X 본문 침묵, default <value> 채택 — 근거: <한 줄>` 1-line 주석 의무. impl.md 의 해당 §🚧 항목을 §🧪 "default 채택 (paper-silent)" 행으로 이동 |
+   | §🔎 bucket `paper-extractable` | 본 prompt 책임 밖 — Design 갱신이 필요하므로 outer step (`/analyze-paper --focus`) 가 처리. 해당 §🚧 항목은 그대로 유지 |
+   | §🔎 bucket `paper-silent-experimental` | 구현하지 않고 §🚧 그대로 유지. honest defer |
+   | 직전 impl.md §🚧 항목 (위 bucket 으로 분류 안 된 잔여) | 본문에 정보가 충분해졌으면 patch 로 승격, 아니면 그대로 유지 |
 
    F-3. 1:1 추적성 (honesty 가드).
    본 모드에서 추가·변경되는 모든 hunk 는 audit 보고서의 **구체적
-   행 한 줄** 또는 직전 impl.md §🚧 의 **번호된 항목** 과 1:1 로
-   대응돼야 합니다. 대응 없는 새 hunk 는 추가 금지 — 추가하고 싶으면
-   먼저 Design 갱신이 필요한 케이스이므로 본 prompt 의 책임 밖
-   (→ 외부 루프).
+   행 한 줄** (§🧪 / §📐 / §🔎 의 한 행) 또는 직전 impl.md §🚧 의
+   **번호된 항목** 과 1:1 로 대응돼야 합니다. 대응 없는 새 hunk 는
+   추가 금지 — 추가하고 싶으면 먼저 Design 갱신이 필요한 케이스이므로
+   본 prompt 의 책임 밖 (→ 외부 루프). `vendor-resolved` /
+   `paper-silent-defaultable` 승격 hunk 는 §🔎 의 해당 행 번호를
+   F-4 트레일에 명시합니다.
 
    F-4. 변경 사유 트레일.
    impl.md 끝에 다음 형식의 새 H3 절을 append 합니다 (이미 존재하면

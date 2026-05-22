@@ -528,11 +528,15 @@ The script rewrites only the block between these fixed markers in
 <!-- ANALYSIS_INDEX:END -->
 ```
 
-The table has six columns: `#`, `Analysis` (relative hotlink),
+The table has seven columns: `#`, `Analysis` (relative hotlink),
 `arXiv` (link to the arXiv abstract), `Title` (the paper's English
 title), `Refreshed` (ISO date), `lerobot` (✅ if
 `<id>_impl/lerobot/impl.md` exists, 🚧 if `UNMAPPABLE.md` exists,
-`—` if `/foundry` has not been run for the lerobot foundry).
+`—` if `/foundry` has not been run for the lerobot foundry), and
+`🔎 vr/pe/sd/se` (the four §🔎 §🚧 bucket counts —
+vendor-resolved / paper-extractable / paper-silent-defaultable /
+paper-silent-experimental — read from the `<!-- ANALYSIS_BUCKETS -->`
+marker in `<id>_audit/lerobot.md`, or `—` when no audit exists).
 Sort: `Refreshed` descending, ties broken by arXiv id descending.
 
 Load-bearing 📄 논문 메타 rows the script reads from every
@@ -702,3 +706,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/audit`) with the audit report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |
 | v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/audit` |
 | v1.14 | 2026-05-21 | New `/reproduce-paper` orchestrator command (`.claude/commands/reproduce-paper.md` + `.claude/prompts/reproduce-paper.md`) drives `/analyze-paper → /foundry → /audit` as an iterative loop with verdict-cell parsing and honest-partial stable termination. Inner-loop refinement uses `/foundry --feedback <audit-path>` to update the prior round's impl surgically; outer-loop refinement (Design-side update) is deferred — 📚 fail/partial currently exits as `hold_and_report` for manual intervention. `/verify` renamed to `/audit` (noun form); output paths `<id>_verify/` → `<id>_audit/`, template `_TEMPLATE_VERIFY.md` → `_TEMPLATE_AUDIT.md` |
+| v1.15 | 2026-05-21 | Outer convergence loop implemented (supersedes the v1.14 deferral). `_TEMPLATE_AUDIT.md` gains a §🔎 §🚧 분류 section that classifies every open 🚧 item zero-state into `vendor-resolved` / `paper-extractable §X.Y` / `paper-silent-defaultable` / `paper-silent-experimental`, with a machine-readable `<!-- ANALYSIS_BUCKETS -->` footer (`focus-hint:` line). `/analyze-paper` gains a `--focus "<§X.Y,...>"` re-extraction mode (seed from prior docs, re-extract only named sections). `/reproduce-paper` matrix now branches on the buckets: vendor-resolved / paper-silent-defaultable stay inner (`/foundry --feedback`), paper-extractable triggers the outer step (`/analyze-paper --focus`). New termination reason `stable_design` (focused re-extraction byte-identical); convergence is fixed-point only, no separate outer counter. §5-7 index gains a `🔎 vr/pe/sd/se` bucket-count column |

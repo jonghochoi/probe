@@ -15,6 +15,37 @@ Normalize to the arXiv id when possible (strip version unless the
 human pinned a specific vN). If the argument is empty or unparseable,
 stop and say so — do not guess a paper.
 
+Optional flag — `--focus "<§X.Y,§A.B,...>"` (FOCUSED re-extraction):
+When set, this is an OUTER-LOOP refresh driven by `/reproduce-paper`,
+not a from-scratch analysis. The argument is a comma-separated, `§`-
+prefixed list of paper sections (e.g. `--focus "§3.2.1,§3.2.2,§3.4.3"`;
+table / equation refs like `§Table 3` are also valid). Behaviour:
+
+  - PRECONDITION — `analysis/<id>.md` and `analysis/<id>_design.md`
+    must already exist. If either is missing, stop and tell the human
+    to run `/analyze-paper <id>` (no `--focus`) first.
+  - Read the existing `analysis/<id>.md` + `analysis/<id>_design.md`
+    as the SEED. Re-fetch the paper body (same retrieval ladder) but
+    re-extract ONLY the named sections; everything else in both
+    documents is copied VERBATIM from the seed (no silent rewrites of
+    untouched rows).
+  - Merge is row-level and prompt-driven (no separate merge tool):
+    a Design row whose content derives from a focused section is
+    replaced with the freshly-extracted content; all other rows,
+    section ordering, and the §📄 메타 header are preserved
+    byte-for-byte except the `Design 생성일` / `분석 생성일` dates.
+  - If focused re-extraction yields no new information (the body says
+    no more than the seed already captured), reproduce the seed
+    unchanged. A byte-identical Design signals the `/reproduce-paper`
+    outer-loop fixed point (`stable_design`), so do not churn dates or
+    reorder rows when nothing substantive changed.
+  - The `§` tokens come from the audit report's
+    `<!-- ANALYSIS_BUCKETS --> focus-hint:` line; `/reproduce-paper`
+    passes them through verbatim.
+
+Without `--focus`, the prompt behaves exactly as before (full
+regenerate of both documents from the paper body).
+
 CONTEXT (read-only):
 - context/MASTER.md        — full source of truth. A single paper
                                often spans multiple pillars, so read
@@ -329,6 +360,11 @@ Refresh the analyses index in the same commit, then push to `main`:
   python3 scripts/refresh-analysis-index.py
   git add analysis/<id>.md analysis/<id>_design.md analysis/README.md
   git commit -m "analysis: add <id> deep-dive + design"
+  # --focus re-extraction uses instead:
+  #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
+  # When the focused re-extraction is a no-op (Design byte-identical),
+  # there is nothing to stage — skip the commit; the byte-identical
+  # Design is the outer-loop fixed-point signal.
   git push origin HEAD:main
 
 The refresh script regenerates the table between the
