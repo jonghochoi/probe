@@ -25,13 +25,18 @@
 같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
 편집하지 마십시오. `lerobot` 컬럼은 `<id>_impl/lerobot/impl.md`
 존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
+`🔎 vr/pe/sd/se/ob` 컬럼은 `lerobot` audit 의 §🔎 §🚧 분류 마커에서
+vendor-resolved / paper-extractable / paper-silent-defaultable /
+paper-silent-experimental / out-of-base-scope 행 수를 읽어 옵니다
+(audit 없으면 —). `ob` 는 논문·Design 모두 완전 명세하지만 선택된
+foundry base 좌표계 밖이라 본 매핑에서 제외된 모듈 수입니다.
 규칙은 `docs/STYLE.md` §5-7 에 정리돼 있습니다.
 
 <!-- ANALYSIS_INDEX:START -->
 
-| # | Analysis | arXiv | Title | Refreshed | lerobot |
-|---|---|---|---|---|---|
-| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | — |
+| # | Analysis | arXiv | Title | Refreshed | lerobot | 🔎 vr/pe/sd/se/ob |
+|---|---|---|---|---|---|---|
+| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | ⚠️ metadata | — | — |
 
 <!-- ANALYSIS_INDEX:END -->
 
@@ -96,8 +101,8 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
   생성한 뒤, `/foundry` 1 회 + `/audit` 1 회로 첫 verdict 튜플을
   얻습니다. foundry 매핑이 불가하면 (`UNMAPPABLE.md` 생성) 즉시 정상
   종료합니다.
-- **Round 1..N — inner loop (Design 고정).** audit 보고서 메타 헤더의
-  📚 / 🔍 / 🧪 / ⚖️ verdict 셀을 파싱해 분기 매트릭스로 다음 액션을
+- **Round 1..N — 분기 매트릭스 (inner + outer).** audit 보고서 메타 헤더의
+  📚 / 🔍 / 🧪 / ⚖️ verdict 셀 + §🔎 bucket 마커를 파싱해 다음 액션을
   결정합니다. 우선순위 **📚 > 🔍 > 🧪 > 📐**. impl-side gap (🔍 patch
   apply 실패, 🧪 시그니처/상수 불일치, 📐 silent-skip → 🧪 partial) 은
   `/foundry <design> --feedback <prev-audit>` 로 외과적 갱신 → `/audit`
@@ -105,17 +110,22 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
   는 직전 라운드의 `impl.md` + `impl.patch` 를 시작점으로 삼아 통과한
   hunk 는 보존하고 새 hunk 는 audit 행과 1-to-1 추적합니다 (정식 규칙은
   `.claude/prompts/foundry.md` §F 참조).
-- **Outer loop — 현재는 hold_and_report.** 📚 (literature) verdict 가
-  `fail`/`partial` 이면 Design 자체가 본문과 어긋난 신호로, 본문 재추출
-  (`/analyze-paper --focus <섹션>`) 이 필요합니다. blast radius 가 커서
-  현재는 자동화하지 않고 마지막 audit 보고서를 그대로 남기며 사용자가
-  수동으로 결정합니다.
-- **종료 사유.** `all_pass` · `unmappable` · `stable_partial` (라운드
-  N 과 N-1 의 verdict 튜플 + 🪛 변경 지점 표 + 🚧 미해결 표가
-  byte-identical 이고 어떤 verdict 도 fail 이 아닐 때) · `hold_and_report`
-  (📚 fail/partial 또는 max-rounds 소진) · `max_rounds_exhausted`.
-  `partial` 안정화도 정상 종료이며, 본문이 채우지 않는 빈칸은 영구
-  🚧 로 남고 마지막 audit 보고서가 그대로 사유 보고서입니다.
+- **Outer loop — 자동 focused re-extraction.** 📚 (literature) verdict 가
+  `fail`/`partial` 이거나 §🔎 에 `paper-extractable` 행이 있으면 Design
+  자체가 본문보다 얕다는 신호로, `/analyze-paper --focus "<§X.Y,...>"`
+  를 같은 라운드에서 자동 호출해 Design 을 row-level 로 갱신한 뒤
+  `/foundry` full regenerate → `/audit` 로 이어집니다. 두 가드가 무한
+  진동을 막습니다 — 갱신된 Design 이 byte-identical 이면 `stable_design`,
+  outer 가 Design 을 바꿨는데 `impl.patch` 가 byte-불변이면 (트리거
+  bucket 오분류 신호) `hold_and_report — zero patch delta`.
+- **종료 사유.** `all_pass` · `unmappable` · `stable_partial` (verdict
+  튜플 + 🪛 표 + 🚧 표 + §🔎 bucket set 이 직전 라운드와 byte-identical
+  이고 fail 없음; 남은 건 honest-defer bucket `paper-silent-experimental`
+  /`out-of-base-scope` 뿐) · `stable_design` (outer 직후 Design
+  byte-identical) · `hold_and_report` (empty focus-hint / zero patch
+  delta / taxonomy-gap / max-rounds 소진) · `max_rounds_exhausted`.
+  `partial` 안정화도 정상 종료이며 마지막 audit 보고서가 그대로 사유
+  보고서입니다.
 - **라운드 추적.** 각 라운드 끝에 audit 보고서가
   `<id>_audit/<foundry>.round_<N>.md` 로 복사돼 git 에 들어갑니다 (N
   은 0-indexed). 라운드별 분리 commit 이라 사후 부분 롤백 가능합니다.

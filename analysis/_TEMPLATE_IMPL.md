@@ -37,7 +37,14 @@
      인용, 구조 일치). 1–3 문단. 근거가 약하면 "잠정 매칭" 으로 명시.
 
      lerobot 의 경우: `vendor/lerobot/policies/<base>/` 중 어느 정책을
-     베이스로 잡았는지. -->
+     베이스로 잡았는지.
+
+     SCOPE 선언 (필수). 논문이 여러 정책/모듈을 기술할 때, 이 base 가
+     그중 무엇을 COVER 하고 무엇을 EXCLUDE 하는지 각각 한 줄 사유와
+     함께 명시합니다 (예: "π_uni enhancement 만 cover; π_hand 촉각
+     인코더·LSTM 정책은 base 좌표계 밖 — 제외"). 이 선언이 audit 의
+     `out-of-base-scope` bucket 이 cite 하는 계약입니다. 선언이 없으면
+     제외 모듈은 `out-of-base-scope` 로 분류될 수 없습니다. -->
 
 ---
 

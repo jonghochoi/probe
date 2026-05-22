@@ -133,52 +133,64 @@ The FOCUSED column drills deeper than the main diagram shows. A
 single `/analyze-paper` call produces the *analysis* and a *Layer 1
 Design*; the Design is then mapped onto a target *foundry* by
 `/foundry`, and the resulting impl is statically validated by
-`/audit`. When the audit report comes back `partial`, the
-next-action choice (reanalyze vs refoundry vs stop) is deterministic
-from the four verdict cells — so `/reproduce-paper` orchestrates the whole
+`/audit`. The audit's §🔎 section sorts every open 🚧 item into four
+buckets, and the next-action choice is deterministic from the verdict
+cells plus those buckets — so `/reproduce-paper` orchestrates the whole
 thing as an **iterative loop with two nested cycles**:
 
 ```
    Initial pass (round 0):
 
-       /analyze-paper ──► design ──► /foundry ──► impl ──► /audit ──► verdict
+       /analyze-paper ──► design ──► /foundry ──► impl ──► /audit ──► verdict + §🔎 buckets
 
 
-   Branch on verdict (round 1..N):
+   Branch on verdict + §🔎 buckets (round 1..N):
 
-       ⚖️  pass                        ──►  done
+       ⚖️ pass ∧ no paper-extractable     ──►  done (success)
 
-       🔍 / 🧪 / 📐  fail/partial     ──►  inner loop (current)
-                                              /foundry --feedback <audit-path>
-                                              Design fixed; surgical patch update
+       🔍 / 🧪 / 📐 fail/partial          ──►  inner loop
+       §🔎 vendor-resolved                      /foundry --feedback <audit-path>
+       §🔎 paper-silent-defaultable             Design fixed; surgical patch update
+                                                (vendor-lift / default+NOTE promote)
 
-       📚  fail/partial                ──►  outer loop (future)
-                                              /analyze-paper --focus <section>
-                                              Design itself needs rework;
-                                              currently emits hold_and_report
+       📚 fail/partial                    ──►  outer loop
+       §🔎 paper-extractable §X.Y               /analyze-paper --focus "<§X.Y,...>"
+                                                Design re-extracted, then re-foundry
+
+       §🔎 paper-silent-experimental only ──►  stable_partial (honest defer)
+       focused re-extract byte-identical  ──►  stable_design (fixed point)
 ```
 
-- **Inner loop (current).** The Design is a vendor-agnostic single
-  source of truth, so we avoid touching it. Impl-side gaps —
-  🔍 patch-apply failures, 🧪 signature/constant mismatches, and
-  📐 silent-skip rows (which surface as 🧪 partial) — get filled in
-  surgically by `/foundry --feedback <audit-path>`, which treats the
-  prior round's `impl.md` + `impl.patch` as a starting point. Passing
-  hunks are preserved; every new hunk traces 1-to-1 to a specific row
-  in the audit report (the honesty guard against fabrication).
-- **Outer loop (future).** A `fail` or `partial` on the 📚 verdict
-  means the Design itself disagrees with the paper body, which would
-  call for `/analyze-paper --focus <section>` to re-extract the
-  affected sections and refresh the Design. Layer-1 has a large
-  blast radius (every registered foundry's impl is invalidated the
-  moment the Design moves), so this step stays manual for now —
-  `/reproduce-paper` exits with `hold_and_report` on 📚 verdicts and the
-  user explicitly decides whether to rerun `/analyze-paper`.
-- **Honest partial termination.** When the audit report stabilises
-  byte-identical to the previous round, `/reproduce-paper` exits as
-  `stable_partial` — gaps the paper body itself never pins down stay
-  as 🚧 permanently. The last audit report is the closure note;
-  nothing else is appended.
+- **§🔎 §🚧 bucket classifier.** Every round, `/audit` re-classifies
+  each open 🚧 item zero-state into `vendor-resolved` /
+  `paper-extractable §X.Y` / `paper-silent-defaultable` /
+  `paper-silent-experimental`, and emits a machine-readable
+  `<!-- ANALYSIS_BUCKETS -->` footer (including a `focus-hint:` line).
+  This footer is the single source of truth the orchestrator parses to
+  pick its next action.
+- **Inner loop.** The Design is a vendor-agnostic single source of
+  truth, so impl-side gaps are filled without touching it:
+  🔍 patch-apply failures, 🧪 signature/constant mismatches,
+  📐 silent-skip rows, plus `vendor-resolved` (lift the cited vendor
+  `file:line`) and `paper-silent-defaultable` (promote a default with a
+  mandatory `# NOTE:` comment) buckets. `/foundry --feedback
+  <audit-path>` treats the prior round's `impl.md` + `impl.patch` as a
+  starting point; passing hunks are preserved and every new hunk traces
+  1-to-1 to a specific audit row (the honesty guard).
+- **Outer loop.** A 📚 `fail`/`partial` — or any `paper-extractable`
+  bucket — means the Design is shallower than the paper body.
+  `/reproduce-paper` runs `/analyze-paper --focus "<focus-hint>"` to
+  re-extract just the named sections (everything else copied verbatim),
+  then re-runs `/foundry` (full regenerate, since the Design moved) and
+  `/audit` in the same round. Layer-1 has a large blast radius, but the
+  loop is bounded by fixed-point detection rather than a manual gate.
+- **Honest termination (fixed-point, no extra counter).** When the
+  verdict tuple + 🪛/🚧 tables + §🔎 bucket set repeat byte-for-byte,
+  `/reproduce-paper` exits `stable_partial` — only
+  `paper-silent-experimental` items remain as permanent 🚧. When a
+  focused re-extraction leaves the Design byte-identical, it exits
+  `stable_design`. Together these guard against inner↔outer ping-pong.
+  The last audit report is the closure note; nothing else is appended.
 
 The full branch matrix and termination conditions are specified in
 [`.claude/prompts/paper-reproduction.md`](.claude/prompts/paper-reproduction.md) and

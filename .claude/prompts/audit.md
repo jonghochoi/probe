@@ -112,7 +112,13 @@ C. 🧪 시그니처·하이퍼파라미터 일치.
        constant the Design or impl guide cites (verbatim per
        STYLE §4-1: `ε = 0.1`, `chunk_size = 50`, etc.) match
        what the patch actually sets? Constants named in the Design
-       but absent from the patch → `partial`.
+       but absent from the patch → `partial`. EXCEPTION: a constant
+       that belongs to a module classified `out-of-base-scope` (per
+       impl.md §🧱 cover/exclude + §🪛) is NOT counted against this
+       verdict — it is out of the patch's scope by design, tracked in
+       §🔎 `out-of-base-scope` instead. Counting it would manufacture a
+       permanent `partial` that drives endless inner steps the inner
+       loop cannot resolve.
      - **import 경로** — Are new imports valid against the foundry
        tree? No fabricated module paths.
 
@@ -141,6 +147,101 @@ E. ⚖️ 종합 판정.
 
    The report has no status to graduate — the verdict is the
    deliverable.
+
+F. 🔎 §🚧 분류 (separate `##` section in the report).
+   Read `impl.md §🚧 미해결 / 잠정` end-to-end. Classify EVERY row into
+   exactly one of five buckets. This is the single source of truth that
+   `/reproduce-paper` reads to choose the next action — fabricating
+   even one row poisons the outer loop, so honesty here is critical.
+
+   The base scope is NOT objective — it is the foundry agent's own §A
+   choice (which single base, which of the paper's policies/modules it
+   covers). So `out-of-base-scope` must never be a self-serving escape:
+   it is valid ONLY when `impl.md §🧱` explicitly declares which paper
+   modules the base covers vs. excludes, and the row cites that
+   declaration. If `§🧱` carries no cover/exclude declaration, you may
+   NOT use `out-of-base-scope` — fall through to the paper-* buckets.
+
+   Buckets (in priority order; pick the first that applies):
+
+   - `vendor-resolved` — the foundry already encodes an equivalent
+     constant or default. Cite a vendor `file:line` whose value the
+     next foundry round can lift directly. Example for `--foundry
+     lerobot`: `vendor/lerobot/policies/<base>/configuration_<base>.py:
+     LNN` carries the field. Once promoted, the row moves from §🚧 to
+     §🧪 in the next round's impl.md.
+   - `out-of-base-scope` — the paper AND the Design both fully specify
+     the item, but it belongs to a module/policy the chosen base does
+     not cover (e.g. a tactile CAE encoder or a standalone LSTM policy
+     when the base maps only the unified arm-hand policy onto `pi0`).
+     Cite the `impl.md §🧱` cover/exclude declaration. Record it in
+     `§🪛` as 신규-미구현, NOT as a §🚧 loop-driver; `/reproduce-paper`
+     treats it as an honest defer (no outer, no inner). This bucket
+     ranks ABOVE `paper-extractable` on purpose: re-extracting the
+     Design (the outer step) cannot help an item that has no insertion
+     point in this base, so routing it to `paper-extractable` would
+     spend an outer round that changes no patch — the exact symptom the
+     reproduce-loop zero-patch-delta guard flags.
+   - `paper-extractable §X.Y` — the paper body has the information,
+     but the existing Design captured only a sketch. Cite the specific
+     §X.Y (or table / equation number) where the missing detail lives.
+     `/reproduce-paper` 's outer step will pass these §X.Y tokens to
+     `/analyze-paper --focus` for re-extraction.
+   - `paper-silent-defaultable` — paper body is silent, but a defensible
+     default exists (vendor convention, established practice, or
+     1-line argument). Next foundry round promotes the row to a patch
+     hunk with a 1-line `# NOTE: paper §X silent, default <v> chosen —
+     reason: ...` comment.
+   - `paper-silent-experimental` — paper body silent AND no defensible
+     default. Resolution requires an external experiment / ablation /
+     author contact. Stay in §🚧 honestly; surface as
+     `stable_partial` termination reason.
+
+   No force-fit. If a row honestly fits NONE of the five buckets, do
+   NOT shoehorn it into the nearest one to reach a clean termination —
+   that is the misclassification failure mode this taxonomy guards
+   against. Instead leave the row in §🚧, tag it `taxonomy-gap` in the
+   bucket cell with a one-line reason, and add a `taxonomy-gap` line to
+   the machine footer (below). `/reproduce-paper` treats any
+   `taxonomy-gap` row as `hold_and_report` rather than silent
+   convergence.
+
+   Run zero-state every round. Do NOT inherit the prior round's table.
+   The §C stability check on `<!-- ANALYSIS_BUCKETS -->` set equality
+   catches honest fixed points; an inherited table would smuggle prior
+   misclassifications into later rounds.
+
+   Output the section in the form prescribed by `_TEMPLATE_AUDIT.md` §🔎.
+   The machine-readable footer
+   (`<!-- ANALYSIS_BUCKETS:START --> ... <!-- ANALYSIS_BUCKETS:END -->`)
+   is mandatory — `/reproduce-paper` parses it verbatim:
+
+     - `vendor-resolved:` comma-separated §🚧 row numbers (empty if
+       none).
+     - `paper-extractable:` row numbers.
+     - `paper-silent-defaultable:` row numbers.
+     - `paper-silent-experimental:` row numbers.
+     - `out-of-base-scope:` the `§🪛` row numbers of the excluded
+       modules (these live in `§🪛`, not `§🚧`); list them in the §🔎
+       table too, citing their §🪛 entry. Empty if none.
+     - `focus-hint:` sorted, comma-separated, deduplicated `§X.Y`
+       tokens from the `paper-extractable` rows. Use `§` (U+00A7) to
+       match `docs/STYLE.md` §4-1 verbatim quotation. Empty if no
+       `paper-extractable` row.
+
+   If any row was tagged `taxonomy-gap` (above), add one more line
+   `taxonomy-gap:` with those row numbers. `/reproduce-paper` reads it
+   verbatim and halts on a non-empty value.
+
+   Also append a `🔎 §🚧 분류` row to the meta header summary
+   (`<vendor-resolved> N / <paper-extractable> N / ...`) — keeps the
+   audit table's top-of-file glance accurate.
+
+   `partial` / `fail` verdicts on §🧪 / §📐 do not by themselves drive
+   the bucket choice; the buckets are about §🚧 items specifically. A
+   `🧪 partial` row whose underlying gap is also a `vendor-resolved`
+   §🚧 item is normal — both surface, both are addressed by the next
+   round.
 
 HARD RULES:
 - No code execution beyond `git apply --check`. No training, no
