@@ -28,6 +28,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` 📑 Index table; invoked by `/analyze-paper`, `/foundry`, `/audit` |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/foundry` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/audit` (§🧬) and `/foundry` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
+| `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/foundry` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
