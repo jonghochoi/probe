@@ -21,6 +21,7 @@
 | 📚 문헌 대조 | `pass` / `fail` / `partial` |
 | 🔍 패치 정합성 | `pass` / `fail` |
 | 🧪 시그니처·하이퍼파라미터 | `pass` / `fail` / `partial` |
+| 🧬 실행 검증 | `pass` / `fail` / `skipped` |
 | ⚖️ 종합 판정 | 한 줄 요약 (분석 트랙은 상태 없음) |
 | 🔎 §🚧 분류 | `vendor-resolved` N / `paper-extractable` N / `paper-silent-defaultable` N / `paper-silent-experimental` N / `out-of-base-scope` N (다음 액션 트리거) |
 
@@ -98,15 +99,42 @@ $ cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.pat
 
 ---
 
+## 🧬 실행 검증
+
+<!-- 설치된 foundry 위에서 patch 를 적용하고 impl 의 sibling smoke
+     test 를 실제로 실행한 결과입니다. 정적 체크(🔍/🧪/📐)가 "diff 가
+     맞다"를 보이는 데 비해, 본 체크는 "코드가 실제로 import·인스턴스화
+     ·계산된다"를 보입니다. 런타임을 만들 수 없으면(offline/install 실패)
+     또는 sibling test 가 없으면 `skipped` — 정적 verdict 는 그대로
+     유효합니다. 실제 학습/추론은 절대 돌리지 않습니다 (CPU·weight-free
+     smoke test 만). -->
+
+```text
+$ py=$(bash scripts/ensure-foundry-runtime.sh <foundry>)
+$ git -C .foundry-runtime/<foundry>/src apply -p3 --directory=src/lerobot <impl.patch>
+$ "$py" -m pytest <sibling test> -q
+<pytest 요약 줄 verbatim — 예: "6 passed in 2.96s">
+```
+
+판정: `pass` (전부 green) / `fail` (apply 또는 테스트 실패 — 실패
+assertion verbatim) / `skipped` (테스트 부재 또는 런타임 미가용 — 사유)
+
+<!-- fail 은 실제 결함입니다 — patch 가 코드로 성립하지 않음. 실패
+     assertion 한 줄을 반드시 인용. skipped 는 정합성 fail 이 아니며
+     `/reproduce-paper` 수렴 판정에서 pass 와 동일 취급. -->
+
+---
+
 ## ⚖️ 종합 판정
 
 - 📚 문헌 대조: `pass` / `fail` / `partial`
 - 🔍 패치 정합성: `pass` / `fail`
 - 🧪 시그니처·하이퍼파라미터: `pass` / `fail` / `partial`
+- 🧬 실행 검증: `pass` / `fail` / `skipped`
 
-→ <한 줄 요약: "이 foundry 의 구현은 Design 과 정합합니다" / "이
-   foundry 의 구현은 정합하지 않습니다 — <사유>" / "이 foundry 의
-   구현은 부분적으로 정합합니다 — <partial 항목>">
+→ <한 줄 요약: "이 foundry 의 구현은 Design 과 정합하며 실행 검증을
+   통과합니다" / "이 foundry 의 구현은 정합하지 않습니다 — <사유>" /
+   "이 foundry 의 구현은 부분적으로 정합합니다 — <partial 항목>">
 
 ---
 

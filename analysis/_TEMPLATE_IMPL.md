@@ -20,6 +20,7 @@
 | 베이스 모델 / 코드 좌표 | `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` (lerobot 의 경우), 또는 foundry 별 등가물 |
 | 본문 확보 수준 | 전문(arXiv HTML) / 전문(ar5iv) / PDF 텍스트(pdftotext) / 초록 only |
 | 패치 파일 | [`./impl.patch`](./impl.patch) — `git apply --check` <통과 / 실패> |
+| 실행 테스트 | [`./test_<base>_<name>_smoke.py`](./test_<base>_<name>_smoke.py) — <N passed / 미실행 — 런타임 미가용 / 해당 없음 (데이터·문서 패치)> |
 | 가이드 생성일 | YYYY-MM-DD |
 
 <!-- Design 이 이 foundry 의 좌표계로 매핑되지 않는다면 이 파일을
@@ -38,6 +39,12 @@
 
      lerobot 의 경우: `vendor/lerobot/policies/<base>/` 중 어느 정책을
      베이스로 잡았는지.
+
+     구현 형태 (필수). importable surface 가 있으면 in-place 재작성이
+     아니라 subclass-seam 으로 매핑합니다 (foundry §C-2): base 에 동작-
+     보존 seam + 신규 서브클래스 모듈/config + 등록. 그래야 sibling
+     smoke test 로 실행 검증(audit §🧬)이 가능합니다. 데이터/문서 패치
+     처럼 importable surface 가 없으면 in-place 로 두고 그 사유를 명시.
 
      SCOPE 선언 (필수). 논문이 여러 정책/모듈을 기술할 때, 이 base 가
      그중 무엇을 COVER 하고 무엇을 EXCLUDE 하는지 각각 한 줄 사유와

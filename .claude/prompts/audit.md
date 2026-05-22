@@ -4,11 +4,18 @@ Design + foundry patch that have already passed through
 `/analyze-paper` and `/foundry`, and produce **one Korean validation
 report**.
 
-Verification is **static** — it does not run training, evaluation, or
-inference. It compares the Design and its patch against (1) the
-originating analysis document, and (2) the foundry code the patch
-touches, looking for inconsistencies the team should resolve before
-trusting the implementation.
+Verification has two tiers. The **static** core (📚 / 🔍 / 🧪 / 📐)
+does not run training, evaluation, or inference — it compares the Design
+and its patch against (1) the originating analysis document, and (2) the
+foundry code the patch touches. On top of that, an **execution** check
+(🧬) installs the foundry at its pinned commit, applies the patch, and
+runs the impl's sibling smoke test, so that "the patch is correct" is
+backed by code that actually imports, instantiates, and computes — not
+only by text that diffs. The execution tier degrades gracefully: if the
+runtime cannot be built (offline, install failure), 🧬 is recorded as
+`skipped` and the static verdicts still stand. Neither training nor
+inference of a real checkpoint is ever run — the smoke test is CPU-only,
+weight-free.
 
 This mode replaces the old `/validate-hypothesis` command. It is now
 applied to the analysis track, whose patch was previously verified
@@ -49,6 +56,13 @@ CONTEXT (read-only):
     guide) — `configuration_*.py`, `modeling_*.py`, `processor_*.py`.
     Read the actual functions the patch touches before judging
     signatures.
+- `analysis/<id>_impl/<foundry>/test_*.py` — the impl's sibling smoke
+  test (if present). The executable counterpart of `impl.patch`; §🧬
+  runs it.
+- `scripts/ensure-foundry-runtime.sh` — builds the executable runtime
+  (full upstream checkout at the pinned commit + venv) on demand, prints
+  the venv python on its last stdout line, exits non-zero (and tells you
+  to degrade to static-only) when it cannot.
 - `analysis/_TEMPLATE_AUDIT.md` — the exact form the report must
   follow.
 - `docs/STYLE.md` — §7 (Audit report) + §4.
@@ -57,9 +71,12 @@ Do NOT edit any file under `context/`, `vendor/`, the Design, the
 originating analysis, or the impl guide/patch — those are immutable
 inputs. This command writes only the audit report.
 
-You do NOT run training, evaluation, or model inference. You do NOT
-install dependencies. The only Bash commands you may issue are
-`git apply --check` and read-only file listings.
+You do NOT run training, evaluation, or real-checkpoint inference. The
+ONLY code you execute is (1) `git apply --check`, (2)
+`bash scripts/ensure-foundry-runtime.sh <foundry>` to build the runtime,
+and (3) the impl's sibling CPU smoke test under that runtime (§🧬). No
+`pip install` by hand — the runtime script owns dependency setup. If the
+runtime cannot be built, 🧬 is `skipped`, never fabricated.
 
 TASK — produce this output (overwriting if it exists):
 
@@ -68,8 +85,9 @@ TASK — produce this output (overwriting if it exists):
 The report is the deliverable. There is no manifest lifecycle to
 graduate; the analysis track is fidelity-only.
 
-PROCEDURE — four checks, in this order, each its own `##` section in
-the report:
+PROCEDURE — five checks, in this order, each its own `##` section in
+the report (📚 / 🔍 / 🧪 / 📐 fold into the static tier; 🧬 is the
+execution tier):
 
 A. 📚 문헌 대조.
    For each analysis the Design cites as supporting evidence (the
@@ -135,20 +153,77 @@ D. 📐 식·표 일치 (separate `##` section in the report).
    signature_check verdict (this section folds into 🧪 for the
    summary).
 
-E. ⚖️ 종합 판정.
-   One `##` section summarising the three verdicts (literature ·
-   patch_consistency · signature_check). Write one line summarising
-   whether the analysis can rely on this implementation:
-     - All three `pass` → "이 foundry 의 구현은 Design 과 정합합니다."
-     - Any `fail` → "이 foundry 의 구현은 정합하지 않습니다 — <어떤
-       체크가 어떤 사유로 실패했는지>."
+E. 🧬 실행 검증 (separate `##` section in the report).
+   The static checks above prove the patch *diffs* correctly. This check
+   proves it *runs*. Only applies when the impl ships a sibling smoke
+   test (`analysis/<id>_impl/<foundry>/test_*.py`); if there is none,
+   record `skipped — no sibling test` and move on (an in-place patch with
+   no test cannot be executed — note it as a 🚧 for the foundry step to
+   add one).
+
+   Procedure (do exactly this; do not improvise other code execution):
+
+   1. Build the runtime:
+
+      ```bash
+      cd /home/user/probe && py=$(bash scripts/ensure-foundry-runtime.sh <foundry>)
+      ```
+
+      Non-zero exit → record `🧬 skipped — <stderr first line>` (offline
+      / install failure). The static verdicts stand; do NOT fail the
+      audit on a missing runtime.
+
+   2. Apply the patch to the runtime checkout, translating the vendored
+      path prefix to the upstream layout (`vendor/<foundry>/` →
+      `src/<foundry>/`). For `--foundry lerobot`:
+
+      ```bash
+      src=.foundry-runtime/<foundry>/src
+      git -C "$src" apply -p3 --directory=src/lerobot \
+          "$PWD/analysis/<id>_impl/<foundry>/impl.patch"
+      ```
+
+      Apply failure here (when `git apply --check` in §🔍 passed against
+      the snapshot) means the snapshot and the upstream checkout have
+      drifted — record `🧬 fail — patch did not apply to runtime` and
+      cite the stderr.
+
+   3. Run ONLY the sibling test, copying it into the checkout's `tests/`
+      tree (so its `lerobot.*` imports resolve against the editable
+      install):
+
+      ```bash
+      cp analysis/<id>_impl/<foundry>/test_*.py "$src/tests/"
+      "$py" -m pytest "$src/tests/$(basename analysis/<id>_impl/<foundry>/test_*.py)" -q
+      ```
+
+      Record the pytest summary line verbatim (`N passed`, or the first
+      failing assertion + traceback tail on failure).
+
+   4. Restore the checkout so the runtime stays reusable:
+      `git -C "$src" checkout -- . && git -C "$src" clean -fdq tests/`.
+
+   Verdict: `pass` (all tests green) / `fail` (apply or any test fails) /
+   `skipped` (no test, or runtime unbuildable). A `fail` is a real defect
+   — the patch claims a behaviour the code does not exhibit; cite the
+   failing assertion. Record the verbatim pytest output in the report.
+
+F. ⚖️ 종합 판정.
+   One `##` section summarising the four verdicts (literature ·
+   patch_consistency · signature_check · execution). Write one line
+   summarising whether the analysis can rely on this implementation:
+     - All `pass` (🧬 `pass` or `skipped`) → "이 foundry 의 구현은
+       Design 과 정합하며 실행 검증을 통과합니다." (🧬 skipped 이면
+       "(실행 검증은 런타임 미가용으로 생략)" 을 덧붙입니다.)
+     - Any `fail` (static OR 🧬) → "이 foundry 의 구현은 정합하지
+       않습니다 — <어떤 체크가 어떤 사유로 실패했는지>."
      - Mixed `pass`/`partial` (no `fail`) → "이 foundry 의 구현은
        부분적으로 정합합니다 — <partial 항목>."
 
    The report has no status to graduate — the verdict is the
    deliverable.
 
-F. 🔎 §🚧 분류 (separate `##` section in the report).
+G. 🔎 §🚧 분류 (separate `##` section in the report).
    Read `impl.md §🚧 미해결 / 잠정` end-to-end. Classify EVERY row into
    exactly one of five buckets. This is the single source of truth that
    `/reproduce-paper` reads to choose the next action — fabricating
@@ -244,9 +319,12 @@ F. 🔎 §🚧 분류 (separate `##` section in the report).
    round.
 
 HARD RULES:
-- No code execution beyond `git apply --check`. No training, no
-  inference, no `pip install`, no model load. If a check requires
-  running code, leave it as 🚧.
+- Code execution is limited to: `git apply --check`, the runtime
+  builder `scripts/ensure-foundry-runtime.sh`, and the impl's sibling
+  CPU smoke test (§🧬). No training, no real-checkpoint inference, no
+  manual `pip install`, no model-weight load. If a deeper check would
+  require those, leave it as 🚧 — never run a real training/eval to
+  resolve an audit row.
 - No edits under `context/`, `vendor/`. No edits to the Design,
   originating analysis, or impl files. The only writable file in
   this command is the audit report.

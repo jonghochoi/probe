@@ -1,91 +1,317 @@
---- a/vendor/lerobot/policies/pi0/configuration_pi0.py
-+++ b/vendor/lerobot/policies/pi0/configuration_pi0.py
-@@ -85,6 +85,16 @@
-     # Finetuning settings
-     freeze_vision_encoder: bool = False  # Freeze only the vision encoder
-     train_expert_only: bool = False  # Freeze entire VLM, train only action expert and projections
+diff --git a/vendor/lerobot/policies/pi0/__init__.py b/vendor/lerobot/policies/pi0/__init__.py
+index ea3095b..2154003 100644
+--- a/vendor/lerobot/policies/pi0/__init__.py
++++ b/vendor/lerobot/policies/pi0/__init__.py
+@@ -15,7 +15,15 @@
+ # limitations under the License.
+ 
+ from .configuration_pi0 import PI0Config
++from .configuration_pi0_enhance import PI0EnhanceConfig
+ from .modeling_pi0 import PI0Policy
++from .modeling_pi0_enhance import PI0EnhancePolicy
+ from .processor_pi0 import make_pi0_pre_post_processors
+ 
+-__all__ = ["PI0Config", "PI0Policy", "make_pi0_pre_post_processors"]
++__all__ = [
++    "PI0Config",
++    "PI0EnhanceConfig",
++    "PI0Policy",
++    "PI0EnhancePolicy",
++    "make_pi0_pre_post_processors",
++]
+diff --git a/vendor/lerobot/policies/pi0/configuration_pi0_enhance.py b/vendor/lerobot/policies/pi0/configuration_pi0_enhance.py
+new file mode 100644
+index 0000000..174c4a8
+--- /dev/null
++++ b/vendor/lerobot/policies/pi0/configuration_pi0_enhance.py
+@@ -0,0 +1,59 @@
++#!/usr/bin/env python
 +
-+    # Arm-Hand Feature Enhancement (arXiv:2511.00139 §7.3, Eq. (10)-(12)).
-+    # Off by default so the base pi0 behaviour and pretrained-weight loading are unchanged.
-+    enhancement_enabled: bool = False
-+    # Eq. (12) auxiliary-loss weight lambda.
-+    # NOTE: paper §3.4.2 silent on lambda's value; default 1.0 chosen — reason: equal weight on aux vs main, common SFT default.
-+    enhancement_lambda: float = 1.0
-+    # Per-limb DoF split for selective auxiliary supervision (Design 데이터 계약: UR3e arm 6-DoF, hand 12-DoF).
-+    enhancement_arm_dim: int = 6
-+    enhancement_hand_dim: int = 12
-
-     # Optimizer settings: see openpi `AdamW``
-     optimizer_lr: float = 2.5e-5  # see openpi `CosineDecaySchedule: peak_lr`
++# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Config for the Arm-Hand Feature Enhancement extension of pi0.
++
++Reproduction of arXiv:2511.00139 §7.3 / Eq. (9)-(12) (Design §🧰, §📊): the
++action expert's final hidden state (``z_share``) is branched into per-limb
++arm/hand sub-pathways with index-masked auxiliary flow-matching losses, plus a
++fused-concat main head. ``feature_enhancement=False`` makes the policy behave
++exactly like vanilla pi0 (the πuni-origin baseline), so origin-vs-enhance is a
++single config flag with no training-script changes.
++"""
++
++from dataclasses import dataclass
++
++from lerobot.configs import PreTrainedConfig
++
++from .configuration_pi0 import PI0Config
++
++
++@PreTrainedConfig.register_subclass("pi0_enhance")
++@dataclass
++class PI0EnhanceConfig(PI0Config):
++    # Toggle: False -> vanilla pi0 (πuni-origin); True -> feature enhancement (πuni-enhance).
++    feature_enhancement: bool = False
++
++    # Index split of the (padded) action vector for selective supervision
++    # (paper §7.3 / Design 데이터 계약): arm = [0, arm_dim);
++    # hand = [arm_dim, original_action_dim). Default 6 = UR3e 6-DoF arm; the
++    # paper's hand is 12-DoF, so original_action_dim is 18 on that contract.
++    arm_dim: int = 6
++
++    # Auxiliary loss weight lambda: L_total = L_main + lambda * (L_arm + L_hand)
++    # (Eq. (12)).
++    # NOTE: paper §3.4.2 silent on lambda's value; default 1.0 chosen — reason:
++    # equal weight on aux vs main, a common SFT default. Sweep when reproducing.
++    aux_loss_weight: float = 1.0
++
++    def __post_init__(self):
++        super().__post_init__()
++        if self.arm_dim < 0 or self.arm_dim > self.max_action_dim:
++            raise ValueError(
++                f"arm_dim ({self.arm_dim}) must be in [0, max_action_dim={self.max_action_dim}]"
++            )
++        if self.aux_loss_weight < 0:
++            raise ValueError(f"aux_loss_weight ({self.aux_loss_weight}) must be non-negative")
+diff --git a/vendor/lerobot/policies/pi0/modeling_pi0.py b/vendor/lerobot/policies/pi0/modeling_pi0.py
+index 510af07..28f9d6f 100644
 --- a/vendor/lerobot/policies/pi0/modeling_pi0.py
 +++ b/vendor/lerobot/policies/pi0/modeling_pi0.py
-@@ -583,6 +583,20 @@
-         self.state_proj = nn.Linear(config.max_state_dim, action_expert_config.width)
-         self.action_time_mlp_in = nn.Linear(2 * action_expert_config.width, action_expert_config.width)
-         self.action_time_mlp_out = nn.Linear(action_expert_config.width, action_expert_config.width)
-+
-+        # ── Arm-Hand Feature Enhancement (arXiv:2511.00139 §7.3): the shared action-expert
-+        # latent z_share (width=action_expert_config.width) is split into per-limb latents
-+        # via two 2-layer Mish MLPs, with selective linear auxiliary heads; the main head
-+        # decodes the fused concat [z_share, z_arm, z_hand]. Built only when enabled so the
-+        # default pi0 path and its pretrained weights are untouched.
-+        if config.enhancement_enabled:
-+            _w = action_expert_config.width
-+            _h = _w // 2
-+            self.enh_arm_mlp = nn.Sequential(nn.Linear(_w, _h), nn.Mish(), nn.Linear(_h, _h))
-+            self.enh_hand_mlp = nn.Sequential(nn.Linear(_w, _h), nn.Mish(), nn.Linear(_h, _h))
-+            self.enh_aux_arm_head = nn.Linear(_h, config.max_action_dim)
-+            self.enh_aux_hand_head = nn.Linear(_h, config.max_action_dim)
-+            self.enh_main_proj = nn.Linear(_w + 2 * _h, config.max_action_dim)
-
-         # Initialize gradient checkpointing flag
-         self.gradient_checkpointing_enabled = False
-@@ -746,6 +760,13 @@
-         att_masks = att_masks[None, :].expand(bsize, len(att_masks))
-
+@@ -747,8 +747,21 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+ 
          return embs, pad_masks, att_masks, adarms_cond
+ 
+-    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
+-        """Do a full training forward pass and compute the loss."""
++    def _compute_suffix_out(
++        self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
++    ) -> tuple[Tensor, Tensor]:
++        """Embed prefix/suffix and run the PaliGemma-with-expert forward.
 +
-+    def _enhancement_main(self, suffix_out):
-+        """Arm-Hand Feature Enhancement fused-concat main head (arXiv:2511.00139 §7.3)."""
-+        z_arm = self.enh_arm_mlp(suffix_out)
-+        z_hand = self.enh_hand_mlp(suffix_out)
-+        fused = torch.cat([suffix_out, z_arm, z_hand], dim=-1)
-+        return self.enh_main_proj(fused), z_arm, z_hand
-
-     def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
-         """Do a full training forward pass and compute the loss."""
-@@ -791,6 +812,24 @@
++        Extracted from ``forward`` (behavior-preserving) so that
++        feature-enhancement subclasses can branch off the action expert's final
++        hidden state without duplicating the embedding/attention setup.
++
++        Returns:
++            suffix_out: action-expert final hidden state, the ``z_share`` hook
++                point. Shape ``(B, chunk_size, action_expert_width)``, float32.
++            u_t: flow-matching target ``noise - actions``. Shape
++                ``(B, chunk_size, max_action_dim)``.
++        """
+         time_expanded = time[:, None, None]
+         x_t = time_expanded * noise + (1 - time_expanded) * actions
+         u_t = noise - actions
+@@ -790,6 +803,13 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+ 
          suffix_out = suffix_out[:, -self.config.chunk_size :]
          suffix_out = suffix_out.to(dtype=torch.float32)
-
-+        if self.config.enhancement_enabled:
-+            # Eq. (9): flow-matching main loss on the fused-concat main head.
-+            v_t, z_arm, z_hand = self._enhancement_main(suffix_out)
-+            losses = F.mse_loss(u_t, v_t, reduction="none")
-+            # Eq. (10)-(11): selective per-limb auxiliary regression, each on its own DoF slice.
-+            a = self.config.enhancement_arm_dim
-+            h = self.config.enhancement_hand_dim
-+            arm_loss = F.mse_loss(u_t[..., :a], self.enh_aux_arm_head(z_arm)[..., :a], reduction="none")
-+            hand_loss = F.mse_loss(
-+                u_t[..., a : a + h], self.enh_aux_hand_head(z_hand)[..., a : a + h], reduction="none"
-+            )
-+            d = losses.shape[-1]
-+            arm_pad = F.pad(arm_loss, (0, d - a))
-+            hand_pad = F.pad(hand_loss, (a, d - a - h))
-+            # Eq. (12): L_total = L_main + lambda(L_arm + L_hand), folded into the per-element
-+            # tensor so the caller's mean reduction is unchanged in shape.
-+            return losses + self.config.enhancement_lambda * (arm_pad + hand_pad)
++        return suffix_out, u_t
 +
++    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
++        """Do a full training forward pass and compute the loss."""
++        suffix_out, u_t = self._compute_suffix_out(
++            images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
++        )
+ 
          def action_out_proj_func(suffix_out):
              return self.action_out_proj(suffix_out)
-
-@@ -920,6 +959,9 @@
-         suffix_out = outputs_embeds[1]
-         suffix_out = suffix_out[:, -self.config.chunk_size :]
-         suffix_out = suffix_out.to(dtype=torch.float32)
-+        if self.config.enhancement_enabled:
-+            v_t, _, _ = self._enhancement_main(suffix_out)
-+            return v_t
-         return self.action_out_proj(suffix_out)
-
-
+@@ -945,7 +965,7 @@ class PI0Policy(PreTrainedPolicy):
+ 
+         # Initialize the core PI0 model
+         self.init_rtc_processor()
+-        self.model = PI0Pytorch(config, rtc_processor=self.rtc_processor)
++        self.model = self._build_model(config)
+ 
+         # Enable gradient checkpointing if requested
+         if config.gradient_checkpointing:
+@@ -955,6 +975,11 @@ class PI0Policy(PreTrainedPolicy):
+ 
+         self.reset()
+ 
++    def _build_model(self, config: PI0Config) -> PI0Pytorch:
++        """Construct the core model. Overridable seam for subclasses that swap
++        in an alternative ``PI0Pytorch`` (e.g. feature-enhancement decoder)."""
++        return PI0Pytorch(config, rtc_processor=self.rtc_processor)
++
+     @classmethod
+     def from_pretrained(
+         cls: builtins.type[T],
+diff --git a/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py b/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py
+new file mode 100644
+index 0000000..175a3ad
+--- /dev/null
++++ b/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py
+@@ -0,0 +1,162 @@
++#!/usr/bin/env python
++
++# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Arm-Hand Feature Enhancement — reproduction of arXiv:2511.00139 §7.3.
++
++The action expert's final hidden state (``z_share``, the hook point extracted
++into ``PI0Pytorch._compute_suffix_out``) is branched into arm/hand sub-pathways
++with index-masked auxiliary flow-matching losses, plus a main head over the
++concatenated features (Design §🧰, Eq. (9)-(12)):
++
++    z_arm  = E_arm(z_share)                      # 2-layer MLP, Mish
++    z_hand = E_hand(z_share)
++    v_arm  = H_arm(z_arm)                         # index-masked aux loss (arm)
++    v_hand = H_hand(z_hand)                       # index-masked aux loss (hand)
++    v_main = H_main([z_share; z_arm; z_hand])     # main flow loss   (Eq. (9))
++    L = L_main + lambda * (L_arm + L_hand)        #                  (Eq. (12))
++
++The composite loss is folded into a single ``(B, T, max_action_dim)`` tensor so
++``PI0Policy.forward``'s contract (``losses[:, :, :original_action_dim]`` slice
++and per-dim logging) is preserved unchanged.
++
++``feature_enhancement=False`` defers entirely to vanilla pi0 (the πuni-origin
++baseline).
++"""
++
++import torch
++from torch import Tensor, nn
++
++from lerobot.utils.constants import ACTION
++
++from .configuration_pi0_enhance import PI0EnhanceConfig
++from .modeling_pi0 import PI0Policy, PI0Pytorch, get_gemma_config
++
++
++def build_index_masks(arm_dim: int, original_action_dim: int, max_action_dim: int) -> tuple[Tensor, Tensor]:
++    """Build disjoint arm/hand supervision masks over the padded action vector.
++
++    arm  = indices [0, arm_dim)
++    hand = indices [arm_dim, original_action_dim)
++    padding indices [original_action_dim, max_action_dim) are zero in both.
++    """
++    idx = torch.arange(max_action_dim)  # (max_action_dim,)
++    arm_mask = ((idx < arm_dim) & (idx < original_action_dim)).to(torch.float32)
++    hand_mask = ((idx >= arm_dim) & (idx < original_action_dim)).to(torch.float32)
++    return arm_mask, hand_mask
++
++
++def compute_feature_enhancement_loss(
++    v_main: Tensor,
++    v_arm: Tensor,
++    v_hand: Tensor,
++    u_t: Tensor,
++    arm_mask: Tensor,
++    hand_mask: Tensor,
++    aux_loss_weight: float,
++) -> Tensor:
++    """Composite flow-matching loss, returned per-dim as ``(B, T, A)``.
++
++    Mirrors ``F.mse_loss(reduction="none")`` for the main term (Eq. (9)) so the
++    result plugs into ``PI0Policy.forward`` unchanged. Auxiliary terms (Eq. (10)
++    -(11)) are squared error gated by the (1, 1, A) index masks (paper §7.3
++    selective supervision).
++    """
++    arm_mask = arm_mask.to(device=u_t.device, dtype=u_t.dtype).view(1, 1, -1)  # (1,1,A)
++    hand_mask = hand_mask.to(device=u_t.device, dtype=u_t.dtype).view(1, 1, -1)  # (1,1,A)
++
++    se_main = (v_main - u_t) ** 2  # (B,T,A)
++    se_arm = ((v_arm - u_t) ** 2) * arm_mask  # (B,T,A)
++    se_hand = ((v_hand - u_t) ** 2) * hand_mask  # (B,T,A)
++
++    return se_main + aux_loss_weight * (se_arm + se_hand)  # (B,T,A)  — Eq. (12)
++
++
++class ArmHandFeatureEnhancer(nn.Module):
++    """Branches z_share into arm/hand sub-pathways + a fused-concat main head.
++
++    E_arm/E_hand: 2-layer MLP with Mish, R^d_s -> R^{d_s/2} (paper §7.3).
++    H_arm/H_hand/H_main: single Linear to ``max_action_dim``.
++    """
++
++    def __init__(self, d_s: int, max_action_dim: int):
++        super().__init__()
++        d_half = d_s // 2
++
++        self.E_arm = nn.Sequential(nn.Linear(d_s, d_s), nn.Mish(), nn.Linear(d_s, d_half))  # R^d_s -> R^{d_s/2}
++        self.E_hand = nn.Sequential(nn.Linear(d_s, d_s), nn.Mish(), nn.Linear(d_s, d_half))  # R^d_s -> R^{d_s/2}
++
++        self.H_arm = nn.Linear(d_half, max_action_dim)  # R^{d_s/2} -> R^A
++        self.H_hand = nn.Linear(d_half, max_action_dim)  # R^{d_s/2} -> R^A
++        self.H_main = nn.Linear(d_s + 2 * d_half, max_action_dim)  # [z_share; z_arm; z_hand] -> R^A
++
++    def forward(self, z_share: Tensor) -> tuple[Tensor, Tensor, Tensor]:
++        z_share = z_share.to(torch.float32)  # (B, T, d_s)
++        z_arm = self.E_arm(z_share)  # (B, T, d_s/2)
++        z_hand = self.E_hand(z_share)  # (B, T, d_s/2)
++
++        v_arm = self.H_arm(z_arm)  # (B, T, A)
++        v_hand = self.H_hand(z_hand)  # (B, T, A)
++        v_main = self.H_main(torch.cat([z_share, z_arm, z_hand], dim=-1))  # (B, T, A)
++        return v_main, v_arm, v_hand
++
++
++class PI0EnhancePytorch(PI0Pytorch):
++    """pi0 core model with the optional arm-hand feature enhancement head."""
++
++    def __init__(self, config: PI0EnhanceConfig, rtc_processor=None):
++        super().__init__(config, rtc_processor=rtc_processor)
++        self.config: PI0EnhanceConfig = config
++
++        if not config.feature_enhancement:
++            return  # πuni-origin: behave exactly like vanilla pi0
++
++        d_s = get_gemma_config(config.action_expert_variant).width
++        self.feature_enhancer = ArmHandFeatureEnhancer(d_s, config.max_action_dim)
++
++        try:
++            original_action_dim = config.output_features[ACTION].shape[0]
++        except (KeyError, AttributeError, TypeError):
++            original_action_dim = config.max_action_dim
++        arm_mask, hand_mask = build_index_masks(config.arm_dim, original_action_dim, config.max_action_dim)
++        self.register_buffer("arm_mask", arm_mask, persistent=False)  # (A,)
++        self.register_buffer("hand_mask", hand_mask, persistent=False)  # (A,)
++
++    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
++        if not self.config.feature_enhancement:
++            return super().forward(images, img_masks, lang_tokens, lang_masks, state, actions, noise, time)
++
++        suffix_out, u_t = self._compute_suffix_out(
++            images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
++        )  # suffix_out (B,T,d_s) float32; u_t (B,T,A)
++
++        v_main, v_arm, v_hand = self._apply_checkpoint(self.feature_enhancer, suffix_out)
++        return compute_feature_enhancement_loss(
++            v_main, v_arm, v_hand, u_t, self.arm_mask, self.hand_mask, self.config.aux_loss_weight
++        )  # (B,T,A) — same contract as base PI0Pytorch.forward
++
++
++class PI0EnhancePolicy(PI0Policy):
++    """pi0 policy variant exposing the arm-hand feature-enhancement reproduction.
++
++    Reuses pi0 processors (selected via ``isinstance(cfg, PI0Config)`` in the
++    policy factory) and the pi0 training/inference paths unchanged.
++    """
++
++    config_class = PI0EnhanceConfig
++    name = "pi0_enhance"
++
++    def _build_model(self, config: PI0EnhanceConfig) -> PI0EnhancePytorch:
++        return PI0EnhancePytorch(config, rtc_processor=self.rtc_processor)

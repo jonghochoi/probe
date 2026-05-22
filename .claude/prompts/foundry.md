@@ -108,6 +108,11 @@ TASK — produce these outputs (overwriting if they exist):
 
   1. `analysis/<id>_impl/<foundry>/impl.md`     — Korean implementation guide
   2. `analysis/<id>_impl/<foundry>/impl.patch`  — unified diff
+  3. `analysis/<id>_impl/<foundry>/test_*.py`   — executable smoke test
+     (the runnable counterpart of the patch; see §G). Required whenever
+     the patch is a subclass-seam mapping (§C-2); omitted only when the
+     change genuinely has no importable surface (pure data/doc patch),
+     in which case §G records why.
 
 PROCEDURE:
 
@@ -189,6 +194,44 @@ C. Construct the patch.
    that caller or downgrade the hunk to a 🪛 + 🚧 entry. Silent
    cross-base breakage (an edit that compiles in one base and breaks
    a sibling) is the failure mode this guards against.
+
+C-2. Prefer the subclass-seam form (verifiable mapping).
+   A patch that rewrites a base method in place (e.g. editing
+   `PI0Pytorch.forward` directly) can only ever be checked with
+   `git apply --check` — the vendored snapshot is partial and cannot be
+   imported or run. Whenever the Design's change has an importable
+   surface (a new module/loss/head on top of an existing policy), map it
+   instead as a **subclass-seam**, which `/audit §🧬` can actually
+   execute:
+
+   1. **Behavior-preserving seam(s) in the base.** Add the *minimum*
+      override points to the base file without changing its behavior —
+      an extract-method that returns the hook tensor, and/or a small
+      factory the policy calls to build its core model. Each seam hunk
+      must be a pure refactor (identical behavior when the subclass is
+      absent); say so in the §🪛 row.
+   2. **A new subclass module** next to the base that imports the base
+      symbols and overrides only those seams to add the Design's
+      contribution, behind a config flag that defaults to the base
+      behavior (off). Add a sibling config dataclass registered under a
+      new policy name. New files live under the same code root as the
+      base (for lerobot: `vendor/lerobot/policies/<base>/`), so the
+      patch still `git apply --check`s against the snapshot.
+   3. The patch therefore contains: the seam hunks + the new
+      module/config files + the registration edit (e.g. the package
+      `__init__.py`). The §🪛 table maps one row per piece.
+
+   For `--foundry lerobot` the canonical shape is the `pi0` family:
+   extract `PI0Pytorch._compute_suffix_out` (the `z_share` hook),
+   add a `PI0Policy._build_model` factory, and ship
+   `modeling_<base>_<name>.py` + `configuration_<base>_<name>.py` with a
+   `PreTrainedConfig.register_subclass("<base>_<name>")` config. The
+   policy factory's generic resolver picks up the new name with no
+   factory edit. Mirror upstream's own file/scope conventions.
+
+   If the change has NO importable surface (a pure data-schema or doc
+   change), keep the plain in-place patch and record in §G why no test
+   ships. Do not contort a data patch into a subclass.
 
 D. Verify the patch.
    Validate via `git apply --check` (do not actually apply). Run from
@@ -297,6 +340,47 @@ F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
    (coordinate updates are allowed)** — a new round must not lose
    hunks that were passing in a prior round.
 
+G. Ship + run the smoke test.
+   For a subclass-seam mapping (§C-2), write
+   `analysis/<id>_impl/<foundry>/test_<base>_<name>_smoke.py` — a
+   CPU-only, weight-free pytest that imports the subclass against the
+   *installed* foundry and asserts what the Design promises:
+
+   - The new module imports and the pure pieces have the right shapes
+     (Design 데이터 계약 dims — e.g. arm/hand DoF split, padded
+     `max_action_dim`).
+   - The Design's equations hold as code (e.g. the composite loss with
+     its aux weight at 0 reduces to the bare main loss; index masks are
+     disjoint and zero on padding).
+   - Config defaults match the §🧪 "확정된 상수" and validation rejects
+     out-of-range values.
+   - Factory registration resolves the new policy name.
+
+   Do NOT test the heavy backbone forward (it needs downloaded weights);
+   keep to the pure modules, config, and factory wiring. Mirror the
+   foundry's own test conventions (for lerobot: a `tests/`-style pytest
+   importing from `lerobot.policies.<base>...`).
+
+   Then actually run it, so the shipped artifact is known-green, not
+   hopeful:
+
+   ```bash
+   py=$(bash scripts/ensure-foundry-runtime.sh <foundry>)   # builds runtime; non-zero → skip
+   src=.foundry-runtime/<foundry>/src
+   git -C "$src" apply -p3 --directory=src/lerobot "$PWD/analysis/<id>_impl/<foundry>/impl.patch"
+   cp analysis/<id>_impl/<foundry>/test_*.py "$src/tests/"
+   "$py" -m pytest "$src/tests/$(basename analysis/<id>_impl/<foundry>/test_*.py)" -q
+   git -C "$src" checkout -- . && git -C "$src" clean -fdq tests/
+   ```
+
+   Record the result in `impl.md` 📄 가이드 메타 row `실행 테스트`
+   (`N passed`, or `미실행 — 런타임 미가용` when the runtime could not be
+   built). If the runtime IS available and the test fails, fix the patch
+   until it passes before committing — a red test is a real mapping
+   defect, not a deferrable 🚧. If the change has no importable surface,
+   skip this section and write `실행 테스트 | 해당 없음 (데이터/문서 패치)`
+   in the meta row.
+
 HARD RULES:
 - No edits anywhere under `context/`, `vendor/`. No edits to the
   Design document. No edits to `analysis/<id>.md` except the single
@@ -328,9 +412,14 @@ Refresh the analyses index in the same commit, then push to `main`:
   # Add the patch ONLY if it was actually generated. If §A produced
   # UNMAPPABLE.md, add that instead.
   git add analysis/<id>_impl/<foundry>/impl.patch
+  # Add the sibling smoke test when one was generated (§G subclass-seam).
+  git add analysis/<id>_impl/<foundry>/test_*.py 2>/dev/null || true
   git add analysis/README.md
   git commit -m "foundry: map <id> onto <foundry>"
   git push origin HEAD:main
+
+Never stage anything under `.foundry-runtime/` — it is the gitignored
+execution runtime, not an artifact.
 
 The refresh script regenerates the `lerobot` column in the index
 table between `<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->`

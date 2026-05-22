@@ -18,14 +18,16 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
 | `scouting/` | agent | Weekly Scouting Reports (`YYYY-MM-DD-P#.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
-| `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}`), and verification reports (`<arxiv-id>_audit/<foundry>.md`) |
+| `analysis/` | agent | On-demand single-paper deep-dives (`<arxiv-id>.md`), Layer 1 Designs (`<arxiv-id>_design.md`), foundry-specific impl guides (`<arxiv-id>_impl/<foundry>/impl.{md,patch}` + an executable `test_*.py` for subclass-seam mappings), and verification reports (`<arxiv-id>_audit/<foundry>.md`) |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
+| `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/audit §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` 📑 Index table; invoked by `/analyze-paper`, `/foundry`, `/audit` |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/foundry` before its first codegraph call (see the "CodeGraph" section below) |
+| `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/audit` (§🧬) and `/foundry` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
@@ -72,6 +74,44 @@ reading full `.py` files:
 
 If the MCP server is unreachable (sandbox without `npx`, offline clone), fall
 back to direct file reads — `/foundry` should still complete.
+
+## Foundry runtime
+
+The vendored `vendor/lerobot/` snapshot is a *partial, read-only* copy for
+diffing and `file:line` grounding — its `.py` files import from non-vendored
+modules, so it cannot be imported or run. To verify that an impl patch is not
+just textually applicable but *actually correct*, `/audit` runs the impl's
+sibling smoke test against the **whole** upstream package installed at the
+pinned commit. `scripts/ensure-foundry-runtime.sh <foundry>` builds that
+runtime on demand:
+
+1. Parse the pinned-commit SHA from `vendor/<foundry>/README.md` (the same
+   provenance row `/foundry` and `/audit` cite — single source of truth).
+2. Clone the source repo at that SHA (depth-1) into
+   `.foundry-runtime/<foundry>/src`.
+3. Create a venv and `pip install -e .[test]` into it. (Plain `pip`, not
+   `uv pip install` — lerobot's `pyproject.toml` pins torch to a cu128 index
+   via `[tool.uv.sources]` that has a version gap in some environments; pip
+   resolves torch from the default index instead.)
+4. Touch a `.ready` marker holding the SHA, so re-runs are a no-op.
+
+It prints the venv python path on its last stdout line and exits non-zero
+(with a one-line reason on stderr) when the runtime cannot be built — offline,
+install failure, unknown foundry. The execution check **degrades gracefully**:
+when the runtime is unavailable, `/audit §🧬` records `skipped`, never a
+fabricated pass, and the static verdicts (📚/🔍/🧪/📐) still stand. torch is
+the dominant one-time cost (a few minutes); after that the marker makes it
+free.
+
+The committed surface stays the vendored snapshot only — `.foundry-runtime/`
+is per-checkout and gitignored, and nothing under it is ever staged. The impl
+patch is authored against `vendor/<foundry>/` paths; `/audit` translates that
+prefix to the upstream layout (`vendor/lerobot/` → `src/lerobot/`) when
+applying it to the runtime checkout (`git apply -p3 --directory=src/lerobot`).
+
+Adding a new foundry is a one-line `case` arm in the script (its clone URL)
+plus a `vendor/<name>/` snapshot with the same `Pinned commit` provenance row;
+nothing else in the script changes.
 
 ## Commit message style
 
