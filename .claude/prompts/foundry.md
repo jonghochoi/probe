@@ -217,56 +217,57 @@ E. Write the guide.
    `--foundry` argument verbatim. The row `상위 Design` must link to
    the Design document path (relative).
 
-F. Update mode (feedback-driven). [`--feedback <audit-path>` 가 있을 때만]
-   목적: 직전 라운드의 audit 보고서가 짚어낸 갭을 **외과적으로** 메우되,
-   이미 통과한 부분은 보존합니다. 이 모드는 Design 이 본문과 정합한
-   상태 (`📚 pass`) 에서 impl 만 부족한 케이스를 위한 것입니다 — 📚
-   verdict 자체가 fail/partial 인 경우는 본 prompt 의 책임 밖입니다
-   (→ 외부 루프 — `/reproduce-paper` 가 `/analyze-paper --focus` 로
-   처리).
+F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
+   Purpose: surgically fill the gaps identified by the previous round's
+   audit report while preserving parts that already passed. This mode is
+   for cases where the Design is consistent with the paper body (📚 pass)
+   but the impl is insufficient — when the 📚 verdict itself is
+   fail/partial, that is outside this prompt's responsibility
+   (→ outer loop — `/reproduce-paper` handles it via `/analyze-paper --focus`).
 
-   F-1. 추가로 읽을 입력.
-   - `<audit-path>` — 직전 라운드 audit 보고서. 메타 헤더의 verdict
-     셀, §🔍 의 stderr verbatim, §🧪 의 행 (특히 ❌/⚠️), §📐 의 행
-     (특히 `silent-skip`), §🔎 §🚧 분류 표 + 그 머신 마커
-     (`<!-- ANALYSIS_BUCKETS:... -->`), 그리고 직전 impl.md §🚧 미해결
-     표를 모두 읽습니다.
-   - `analysis/<id>_impl/<foundry>/impl.md` (직전 라운드) — §🪛 매핑 표
-     와 §🚧 미해결 표가 출발점.
-   - `analysis/<id>_impl/<foundry>/impl.patch` (직전 라운드) — 통과한
-     hunk 의 좌표를 보존하기 위해 read-only 참고. 본 모드에서도 새
-     패치는 vendor pinned 시점 기준 처음부터 재생성합니다 (diff-on-diff
-     surgery 는 하지 않음 — 검증성이 떨어짐). 단 새 패치는 직전 라운드
-     패치의 모든 통과 hunk 를 의미적으로 포함해야 합니다.
+   F-1. Additional inputs to read.
+   - `<audit-path>` — the previous round's audit report. Read the verdict
+     cell in the meta header, §🔍 stderr verbatim, §🧪 rows (especially
+     ❌/⚠️), §📐 rows (especially `silent-skip`), §🔎 §🚧 classification
+     table + machine markers (`<!-- ANALYSIS_BUCKETS:... -->`), and the
+     previous impl.md §🚧 unresolved table.
+   - `analysis/<id>_impl/<foundry>/impl.md` (previous round) — the §🪛
+     mapping table and §🚧 unresolved table are the starting point.
+   - `analysis/<id>_impl/<foundry>/impl.patch` (previous round) — read-only
+     reference to preserve passing hunk coordinates. In this mode the new
+     patch is also regenerated from scratch against the vendor pinned commit
+     (no diff-on-diff surgery — it degrades verifiability). The new patch
+     MUST semantically include all passing hunks from the previous round.
 
-   F-2. 갭 → 액션 매핑. audit 보고서의 각 갭은 다음 액션 중 정확히
-   하나로 처리합니다.
+   F-2. Gap → action mapping. Each gap in the audit report is handled by
+   exactly one of the following actions.
 
-   | audit 신호 | 액션 |
+   | Audit signal | Action |
    |-------------|------|
-   | §🔍 `fail — <stderr>` | 새 패치 hunk 의 컨텍스트를 재확인해 apply 가능하도록 정정 |
-   | §🧪 행 ❌ (시그니처 불일치) | 해당 hunk 의 시그니처를 vendor 코드와 일치시키도록 수정 |
-   | §🧪 행 ⚠️ (인용은 됐으나 패치 누락) | 해당 상수를 patch 의 적절한 위치에 추가 |
-   | §📐 행 `silent-skip` (식·표 누락) | 식·표를 구현하는 새 hunk 추가, 또는 명시적으로 🚧 로 강등 |
-   | §🪛 직전 라운드 `위치 잠정` | vendor 코드 재확인 후 좌표 확정 or 잠정 유지 사유 명시 |
-   | §🔎 bucket `vendor-resolved` | audit 가 cite 한 vendor `file:line` 의 값을 patch 의 default 또는 새 hunk 로 lift. impl.md 의 해당 §🚧 항목을 §🧪 "vendor-resolved 상수" 행으로 이동 (§🚧 에서 제거) |
-   | §🔎 bucket `paper-silent-defaultable` | default 값을 patch 에 도입하되 hunk 안에 `# NOTE: paper §X 본문 침묵, default <value> 채택 — 근거: <한 줄>` 1-line 주석 의무. impl.md 의 해당 §🚧 항목을 §🧪 "default 채택 (paper-silent)" 행으로 이동 |
-   | §🔎 bucket `paper-extractable` | 본 prompt 책임 밖 — Design 갱신이 필요하므로 outer step (`/analyze-paper --focus`) 가 처리. 해당 §🚧 항목은 그대로 유지 |
-   | §🔎 bucket `paper-silent-experimental` | 구현하지 않고 §🚧 그대로 유지. honest defer |
-   | 직전 impl.md §🚧 항목 (위 bucket 으로 분류 안 된 잔여) | 본문에 정보가 충분해졌으면 patch 로 승격, 아니면 그대로 유지 |
+   | §🔍 `fail — <stderr>` | Correct the new patch hunk's context so `git apply` can succeed |
+   | §🧪 row ❌ (signature mismatch) | Fix the hunk's signature to match the vendor code |
+   | §🧪 row ⚠️ (cited but missing from patch) | Add the constant to the appropriate location in the patch |
+   | §📐 row `silent-skip` (missing equation/table) | Add a new hunk implementing the equation/table, or explicitly downgrade to 🚧 |
+   | §🪛 previous round `위치 잠정` | Re-verify vendor code to confirm coordinates, or state the reason for keeping them provisional |
+   | §🔎 bucket `vendor-resolved` | Lift the vendor `file:line` value cited by audit as a default or new hunk in the patch. Move the corresponding §🚧 item in impl.md to a §🧪 "vendor-resolved 상수" row (remove from §🚧) |
+   | §🔎 bucket `paper-silent-defaultable` | Introduce the default value into the patch with a mandatory `# NOTE: paper §X 본문 침묵, default <value> 채택 — 근거: <한 줄>` 1-line comment in the hunk. Move the corresponding §🚧 item in impl.md to a §🧪 "default 채택 (paper-silent)" row |
+   | §🔎 bucket `paper-extractable` | Outside this prompt's responsibility — Design update required, handled by outer step (`/analyze-paper --focus`). Keep the corresponding §🚧 item as-is |
+   | §🔎 bucket `paper-silent-experimental` | Do not implement; keep §🚧 as-is. Honest defer |
+   | Previous impl.md §🚧 items not classified under the above buckets | Promote to patch if enough information is now available; otherwise keep as-is |
 
-   F-3. 1:1 추적성 (honesty 가드).
-   본 모드에서 추가·변경되는 모든 hunk 는 audit 보고서의 **구체적
-   행 한 줄** (§🧪 / §📐 / §🔎 의 한 행) 또는 직전 impl.md §🚧 의
-   **번호된 항목** 과 1:1 로 대응돼야 합니다. 대응 없는 새 hunk 는
-   추가 금지 — 추가하고 싶으면 먼저 Design 갱신이 필요한 케이스이므로
-   본 prompt 의 책임 밖 (→ 외부 루프). `vendor-resolved` /
-   `paper-silent-defaultable` 승격 hunk 는 §🔎 의 해당 행 번호를
-   F-4 트레일에 명시합니다.
+   F-3. 1:1 traceability (honesty guard).
+   Every hunk added or changed in this mode must correspond 1:1 with a
+   **specific single line** in the audit report (one row from
+   §🧪 / §📐 / §🔎) or a **numbered item** in the previous impl.md §🚧.
+   Adding hunks without a corresponding source is forbidden — if you want
+   to add one, a Design update is required first and it is therefore
+   outside this prompt's scope (→ outer loop). `vendor-resolved` /
+   `paper-silent-defaultable` promoted hunks must cite the corresponding
+   §🔎 row number in the F-4 trail.
 
-   F-4. 변경 사유 트레일.
-   impl.md 끝에 다음 형식의 새 H3 절을 append 합니다 (이미 존재하면
-   새 라운드 항목을 같은 절에 누적):
+   F-4. Change rationale trail.
+   Append a new H3 section at the end of impl.md in the following format
+   (if the section already exists, accumulate the new round's items in it):
 
    ```
    ### 🔁 변경 사유 (feedback 모드)
@@ -277,21 +278,24 @@ F. Update mode (feedback-driven). [`--feedback <audit-path>` 가 있을 때만]
      - …
    ```
 
-   이 절은 사용자가 사후 라운드를 재구성할 수 있게 해주는 감사 로그
-   입니다. fabrication 방지의 1차 방어선이기도 합니다.
+   This section is an audit log that allows users to reconstruct
+   subsequent rounds after the fact. It is the primary defense
+   against fabrication.
 
-   F-5. 변경 없을 때.
-   audit 보고서가 모든 갭에 대해 "정보 부족" 으로 결론 (예: §🚧 의
-   모든 항목이 본문 미명시) 인 경우 impl.md / impl.patch 를 변경하지
-   않고 §🔁 변경 사유에 `- 라운드 N: 새 정보 없음, 동일 산출` 한 줄만
-   append 합니다. git diff 가 그 한 줄뿐이면 `/reproduce-paper` 의 안정화
-   감지기가 정상 종료를 트리거합니다.
+   F-5. No changes.
+   If the audit report concludes "insufficient information" for all gaps
+   (e.g. all §🚧 items state the paper body does not specify them), do not
+   modify impl.md / impl.patch — only append a single line
+   `- 라운드 N: 새 정보 없음, 동일 산출` to §🔁 변경 사유. If the git
+   diff is only that one line, the `/reproduce-paper` stabilisation
+   detector triggers a normal exit.
 
-   F-6. 검증.
-   §D 의 `git apply --check` 는 본 모드에서도 동일하게 실행됩니다.
-   추가로, **직전 라운드 패치의 모든 §🪛 표 행이 새 패치의 §🪛 표
-   에도 (좌표 갱신은 허용하지만) 의미적으로 보존** 되어야 합니다 —
-   통과한 hunk 를 새 라운드가 도리어 잃어버리면 안 됩니다.
+   F-6. Verification.
+   The `git apply --check` from §D is run identically in this mode.
+   Additionally, **all §🪛 table rows from the previous round's patch
+   must be semantically preserved in the new patch's §🪛 table
+   (coordinate updates are allowed)** — a new round must not lose
+   hunks that were passing in a prior round.
 
 HARD RULES:
 - No edits anywhere under `context/`, `vendor/`. No edits to the
