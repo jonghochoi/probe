@@ -1,0 +1,91 @@
+--- a/vendor/lerobot/policies/pi0/configuration_pi0.py
++++ b/vendor/lerobot/policies/pi0/configuration_pi0.py
+@@ -85,6 +85,16 @@
+     # Finetuning settings
+     freeze_vision_encoder: bool = False  # Freeze only the vision encoder
+     train_expert_only: bool = False  # Freeze entire VLM, train only action expert and projections
++
++    # Arm-Hand Feature Enhancement (arXiv:2511.00139 §7.3, Eq. (10)-(12)).
++    # Off by default so the base pi0 behaviour and pretrained-weight loading are unchanged.
++    enhancement_enabled: bool = False
++    # Eq. (12) auxiliary-loss weight lambda.
++    # NOTE: paper §3.4.2 silent on lambda's value; default 1.0 chosen — reason: equal weight on aux vs main, common SFT default.
++    enhancement_lambda: float = 1.0
++    # Per-limb DoF split for selective auxiliary supervision (Design 데이터 계약: UR3e arm 6-DoF, hand 12-DoF).
++    enhancement_arm_dim: int = 6
++    enhancement_hand_dim: int = 12
+
+     # Optimizer settings: see openpi `AdamW``
+     optimizer_lr: float = 2.5e-5  # see openpi `CosineDecaySchedule: peak_lr`
+--- a/vendor/lerobot/policies/pi0/modeling_pi0.py
++++ b/vendor/lerobot/policies/pi0/modeling_pi0.py
+@@ -583,6 +583,20 @@
+         self.state_proj = nn.Linear(config.max_state_dim, action_expert_config.width)
+         self.action_time_mlp_in = nn.Linear(2 * action_expert_config.width, action_expert_config.width)
+         self.action_time_mlp_out = nn.Linear(action_expert_config.width, action_expert_config.width)
++
++        # ── Arm-Hand Feature Enhancement (arXiv:2511.00139 §7.3): the shared action-expert
++        # latent z_share (width=action_expert_config.width) is split into per-limb latents
++        # via two 2-layer Mish MLPs, with selective linear auxiliary heads; the main head
++        # decodes the fused concat [z_share, z_arm, z_hand]. Built only when enabled so the
++        # default pi0 path and its pretrained weights are untouched.
++        if config.enhancement_enabled:
++            _w = action_expert_config.width
++            _h = _w // 2
++            self.enh_arm_mlp = nn.Sequential(nn.Linear(_w, _h), nn.Mish(), nn.Linear(_h, _h))
++            self.enh_hand_mlp = nn.Sequential(nn.Linear(_w, _h), nn.Mish(), nn.Linear(_h, _h))
++            self.enh_aux_arm_head = nn.Linear(_h, config.max_action_dim)
++            self.enh_aux_hand_head = nn.Linear(_h, config.max_action_dim)
++            self.enh_main_proj = nn.Linear(_w + 2 * _h, config.max_action_dim)
+
+         # Initialize gradient checkpointing flag
+         self.gradient_checkpointing_enabled = False
+@@ -746,6 +760,13 @@
+         att_masks = att_masks[None, :].expand(bsize, len(att_masks))
+
+         return embs, pad_masks, att_masks, adarms_cond
++
++    def _enhancement_main(self, suffix_out):
++        """Arm-Hand Feature Enhancement fused-concat main head (arXiv:2511.00139 §7.3)."""
++        z_arm = self.enh_arm_mlp(suffix_out)
++        z_hand = self.enh_hand_mlp(suffix_out)
++        fused = torch.cat([suffix_out, z_arm, z_hand], dim=-1)
++        return self.enh_main_proj(fused), z_arm, z_hand
+
+     def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
+         """Do a full training forward pass and compute the loss."""
+@@ -791,6 +812,24 @@
+         suffix_out = suffix_out[:, -self.config.chunk_size :]
+         suffix_out = suffix_out.to(dtype=torch.float32)
+
++        if self.config.enhancement_enabled:
++            # Eq. (9): flow-matching main loss on the fused-concat main head.
++            v_t, z_arm, z_hand = self._enhancement_main(suffix_out)
++            losses = F.mse_loss(u_t, v_t, reduction="none")
++            # Eq. (10)-(11): selective per-limb auxiliary regression, each on its own DoF slice.
++            a = self.config.enhancement_arm_dim
++            h = self.config.enhancement_hand_dim
++            arm_loss = F.mse_loss(u_t[..., :a], self.enh_aux_arm_head(z_arm)[..., :a], reduction="none")
++            hand_loss = F.mse_loss(
++                u_t[..., a : a + h], self.enh_aux_hand_head(z_hand)[..., a : a + h], reduction="none"
++            )
++            d = losses.shape[-1]
++            arm_pad = F.pad(arm_loss, (0, d - a))
++            hand_pad = F.pad(hand_loss, (a, d - a - h))
++            # Eq. (12): L_total = L_main + lambda(L_arm + L_hand), folded into the per-element
++            # tensor so the caller's mean reduction is unchanged in shape.
++            return losses + self.config.enhancement_lambda * (arm_pad + hand_pad)
++
+         def action_out_proj_func(suffix_out):
+             return self.action_out_proj(suffix_out)
+
+@@ -920,6 +959,9 @@
+         suffix_out = outputs_embeds[1]
+         suffix_out = suffix_out[:, -self.config.chunk_size :]
+         suffix_out = suffix_out.to(dtype=torch.float32)
++        if self.config.enhancement_enabled:
++            v_t, _, _ = self._enhancement_main(suffix_out)
++            return v_t
+         return self.action_out_proj(suffix_out)
+
+
