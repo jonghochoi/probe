@@ -107,8 +107,9 @@ GIT — after `synthesis/P3_BRIEF.md` is written:
 
 Persist the output by pushing directly to `main`. No PR is created.
 
+  MONTH=$(TZ=Asia/Seoul date +%Y-%m)
   git add synthesis/P3_BRIEF.md
-  git commit -m "synthesis: P3 brief refresh"
+  git commit -m "synthesis: P3 brief ${MONTH}"
   git push origin HEAD:main
 
 - Stage ONLY `synthesis/P3_BRIEF.md`. Never `git add` anything under

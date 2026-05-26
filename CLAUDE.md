@@ -139,8 +139,9 @@ Hard rules:
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types. (The bare `scout:` / `synthesis:` prefixes
-   in older history are *generated routine commits*, not human commits — do not
-   imitate them when authoring code/doc changes.)
+   are *generated routine commits*, not human commits — do not imitate them
+   when authoring code/doc changes. Their canonical formats are:
+   `scout: P{N} report YYYY-MM-DD` and `synthesis: P{N} brief YYYY-MM`.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
    `scout`/`scouting`, `synthesis`, `analysis`, `context`, `prompts`,
    `config`, `docs`, `brand`, `CLAUDE.md`. Omit the scope only for repo-wide
