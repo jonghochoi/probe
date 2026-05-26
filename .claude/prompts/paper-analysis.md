@@ -21,10 +21,10 @@ not a from-scratch analysis. The argument is a comma-separated, `§`-
 prefixed list of paper sections (e.g. `--focus "§3.2.1,§3.2.2,§3.4.3"`;
 table / equation refs like `§Table 3` are also valid). Behaviour:
 
-  - PRECONDITION — `analysis/<id>.md` and `analysis/<id>_design.md`
+  - PRECONDITION — `analysis/<id>/analysis.md` and `analysis/<id>/design.md`
     must already exist. If either is missing, stop and tell the human
     to run `/analyze-paper <id>` (no `--focus`) first.
-  - Read the existing `analysis/<id>.md` + `analysis/<id>_design.md`
+  - Read the existing `analysis/<id>/analysis.md` + `analysis/<id>/design.md`
     as the SEED. Re-fetch the paper body (same retrieval ladder) but
     re-extract ONLY the named sections; everything else in both
     documents is copied VERBATIM from the seed (no silent rewrites of
@@ -34,6 +34,7 @@ table / equation refs like `§Table 3` are also valid). Behaviour:
     replaced with the freshly-extracted content; all other rows,
     section ordering, and the §📄 메타 header are preserved
     byte-for-byte except the `Design 생성일` / `분석 생성일` dates.
+
   - If focused re-extraction yields no new information (the body says
     no more than the seed already captured), reproduce the seed
     unchanged. A byte-identical Design signals the `/reproduce-paper`
@@ -125,10 +126,10 @@ extraction — quote numbers as found; never infer or "correct" them.
 TASK:
 Produce TWO Korean documents in the same run:
 
-  1. `analysis/<id>.md`           — the analysis document
+  1. `analysis/<id>/analysis.md`  — the analysis document
                                     (non-arXiv input:
-                                     `analysis/<human-or-title-slug>.md`)
-  2. `analysis/<id>_design.md`    — the Layer 1 Design (vendor-agnostic)
+                                     `analysis/<human-or-title-slug>/analysis.md`)
+  2. `analysis/<id>/design.md`    — the Layer 1 Design (vendor-agnostic)
 
 Both are regenerable snapshots — overwrite on re-run. Follow
 `analysis/_TEMPLATE.md` (analysis) and `analysis/_TEMPLATE_DESIGN.md`
@@ -143,7 +144,7 @@ coordinates of any foundry (vendor/lerobot or otherwise). Its purpose
 is to capture *what the algorithm is*, not *where it lives in any
 codebase*. Base mapping happens later in `/foundry`.
 
-STRUCTURE of `analysis/<id>.md` — two parts, in this order:
+STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
 (A) 중립 논문 정리 — what the paper says, on its own terms:
   📄 논문 메타        — original English title, authors, arXiv link,
@@ -189,16 +190,17 @@ STRUCTURE of `analysis/<id>.md` — two parts, in this order:
        trigger moves, state it here for the human. Do NOT edit
        context/MASTER.md.
 
-STRUCTURE of `analysis/<id>_design.md` — Layer 1 only:
+STRUCTURE of `analysis/<id>/design.md` — Layer 1 only:
 
 Follow `analysis/_TEMPLATE_DESIGN.md` exactly. The 7 sections are:
 📄 Design 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스, ⛓️ 불변식·가정,
 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도, 🔌 Foundry 힌트
 (선택), 🚧 미해결 / 잠정.
 
-Sources: derive from the analysis document you just wrote (§🔬 방법론,
-§📊 실험 설정과 결과, §⚖️ 한계, §♻️ 재현성). Do NOT re-fetch the paper
-text — the analysis document is your single source for the Design.
+Sources: derive from `analysis/<id>/analysis.md` you just wrote
+(§🔬 방법론, §📊 실험 설정과 결과, §⚖️ 한계, §♻️ 재현성). Do NOT
+re-fetch the paper text — the analysis document is your single source
+for the Design.
 
 Honesty over completeness: any field the paper does not specify must
 be left as `(원문에 명시 없음 — 가정으로 메움)` rather than fabricated.
@@ -296,9 +298,9 @@ HARD RULES:
 
 FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
-as the very last line of `analysis/<id>.md`:
+as the very last line of `analysis/<id>/analysis.md`:
 
-> 💡 base 매핑은 `/foundry analysis/<id>_design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/foundry analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
 `<id>` is the same arXiv id / slug the analysis file uses. The line
 is added unconditionally — `/foundry` itself decides whether the
@@ -310,8 +312,8 @@ the human decides.
 
 HUMANIZE — Korean post-processing (mandatory before commit):
 
-After both Korean output files (`analysis/<id>.md` and
-`analysis/<id>_design.md`) are written and BEFORE `git add`, invoke
+After both Korean output files (`analysis/<id>/analysis.md` and
+`analysis/<id>/design.md`) are written and BEFORE `git add`, invoke
 the `humanize-korean` skill once per file:
 
   Skill:  `.claude/skills/humanize-korean/SKILL.md`
@@ -360,7 +362,7 @@ GIT — after both files are written:
 Refresh the analyses index in the same commit, then push to `main`:
 
   python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>.md analysis/<id>_design.md analysis/README.md
+  git add analysis/<id>/analysis.md analysis/<id>/design.md analysis/README.md
   git commit -m "analysis: add <id> deep-dive + design"
   # --focus re-extraction uses instead:
   #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
@@ -374,10 +376,10 @@ The refresh script regenerates the table between the
 in `analysis/README.md` and is idempotent (no-op when nothing
 changed).
 
-`<id>` is the same arXiv id / slug used for the analysis filename.
+`<id>` is the same arXiv id / slug used for the analysis folder name.
 
-- Stage ONLY `analysis/<id>.md` and `analysis/<id>_design.md`. Never
-  `git add` anything under `context/` or `vendor/`. No `git add .`,
+- Stage ONLY `analysis/<id>/analysis.md` and `analysis/<id>/design.md`.
+  Never `git add` anything under `context/` or `vendor/`. No `git add .`,
   no `git add -A`, no `commit -a`.
 - If push is rejected as non-fast-forward, run `git pull --rebase
   origin main` and retry the push. Repeat this rebase-and-retry loop

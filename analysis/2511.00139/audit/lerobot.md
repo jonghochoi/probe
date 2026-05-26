@@ -14,10 +14,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| 상위 Design | [`../2511.00139_design.md`](../2511.00139_design.md) |
-| Originating analysis | [`../2511.00139.md`](../2511.00139.md) |
+| 상위 Design | [`../design.md`](../design.md) |
+| Originating analysis | [`../analysis.md`](../analysis.md) |
 | Foundry | `lerobot` |
-| 구현 가이드 | [`../2511.00139_impl/lerobot/impl.md`](../2511.00139_impl/lerobot/impl.md) · [`impl.patch`](../2511.00139_impl/lerobot/impl.patch) · [`test_pi0_enhance_smoke.py`](../2511.00139_impl/lerobot/test_pi0_enhance_smoke.py) |
+| 구현 가이드 | [`../impl/lerobot/impl.md`](../impl/lerobot/impl.md) · [`../impl/lerobot/impl.patch`](../impl/lerobot/impl.patch) · [`../impl/lerobot/test_pi0_enhance_smoke.py`](../impl/lerobot/test_pi0_enhance_smoke.py) |
 | 검증 생성일 | 2026-05-22 (`TZ=Asia/Seoul`) |
 | 📚 문헌 대조 | `pass` |
 | 🔍 패치 정합성 | `pass` |
@@ -44,7 +44,7 @@
 ## 🔍 패치 정합성
 
 ```text
-$ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl.patch
+$ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl.patch
 (zero exit, 빈 출력)
 ```
 
@@ -63,7 +63,7 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 | `nn.Mish` / `nn.Sequential` / `nn.Linear` (E_arm/E_hand 2-layer Mish) | torch `nn` | `ArmHandFeatureEnhancer` 정의 | ✅ |
 | 반환 계약 `(B,chunk,max_action_dim)` 유지 | `modeling_pi0.py` 원 `forward` + 호출부 `:1271` | `compute_feature_enhancement_loss` 가 `(B,T,A)` 반환 — base 와 동일 shape | ✅ |
 | `register_subclass("pi0_enhance")` + config_class/name 배선 | `lerobot.configs.PreTrainedConfig` registry | `PI0EnhanceConfig`/`PI0EnhancePolicy` (factory generic resolver) | ✅ |
-| 상수 `aux_loss_weight = 1.0` | `2511.00139_design.md §📊` (λ, paper-silent default) | `configuration_pi0_enhance.py` + `# NOTE` 주석 | ✅ |
+| 상수 `aux_loss_weight = 1.0` | `design.md §📊` (λ, paper-silent default) | `configuration_pi0_enhance.py` + `# NOTE` 주석 | ✅ |
 | 상수 `arm_dim = 6` (hand 12 → original_action_dim 18) | Design §🧮 데이터 계약 (arm 6-DoF / hand 12-DoF) | config 필드 + `build_index_masks(arm_dim, original_action_dim, A)` | ✅ |
 | 상수 $`d_s`$ = `get_gemma_config(...).width` (vendor-resolved) | `vendor/lerobot/policies/pi0/modeling_pi0.py:315` | `__init__` `d_s` | ✅ |
 | 상수 $`H`$ = `chunk_size = 50` (vendor-resolved) | `vendor/lerobot/policies/pi0/configuration_pi0.py:36` | base `_compute_suffix_out` 의 `self.config.chunk_size` 상속 | ✅ |
@@ -83,11 +83,11 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 | `Eq. (9)` 메인 flow matching | `analysis/2511.00139.md §🔬` | `modeling_pi0_enhance.py` `se_main = (v_main - u_t) ** 2` | 구현 |
 | `Eq. (10)` 손 보조 손실 | `analysis/2511.00139.md §🔬` | `se_hand = ((v_hand - u_t) ** 2) * hand_mask` | 구현 |
 | `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139.md §🔬` | `se_arm = ((v_arm - u_t) ** 2) * arm_mask` | 구현 |
-| `Eq. (12)` 총손실 | `2511.00139_design.md §📊` | `se_main + aux_loss_weight * (se_arm + se_hand)` | 구현 |
+| `Eq. (12)` 총손실 | `design.md §📊` | `se_main + aux_loss_weight * (se_arm + se_hand)` | 구현 |
 | `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #2` | 유보 |
 | `Eq. (3)` CAE 재구성 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #1` | 유보 |
-| `Eq. (14)` 비축적 corrective | `2511.00139_design.md §📊` | `impl.md §🚧 #3` | 유보 |
-| `Eq. (4)` / `Eq. (8)` 입력 계약 | `2511.00139_design.md §🧮` | `impl.md §🚧 #1` (촉각) / data layer | 유보 |
+| `Eq. (14)` 비축적 corrective | `design.md §📊` | `impl.md §🚧 #3` | 유보 |
+| `Eq. (4)` / `Eq. (8)` 입력 계약 | `design.md §🧮` | `impl.md §🚧 #1` (촉각) / data layer | 유보 |
 | `Table 1`–`Table 4` · `Fig. 16` | `analysis/2511.00139.md §📊` | 평가 결과 — 정적 검증 대상 아님 | 유보 |
 
 <!-- silent-skip 없음 (모든 미구현 식은 §🚧 또는 평가 유보로 명시) → §🧪 partial 유발 없음. -->
@@ -99,7 +99,7 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 ```text
 $ py=$(bash scripts/ensure-foundry-runtime.sh lerobot)
 $ git -C .foundry-runtime/lerobot/src apply -p3 --directory=src/lerobot \
-      "$PWD/analysis/2511.00139_impl/lerobot/impl.patch"
+      "$PWD/analysis/2511.00139/impl/lerobot/impl.patch"
 $ "$py" -m pytest .../tests/test_pi0_enhance_smoke.py -q
 ......                                                                   [100%]
 6 passed in 2.96s

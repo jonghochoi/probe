@@ -1,7 +1,7 @@
 # Implementation Guide — End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy on `lerobot`
 
 > PROBE foundry 모드 산출물 (Layer 2, foundry-specific). 한글 단일
-> 문서이며, sibling Design (`analysis/2511.00139_design.md`) 을 입력으로
+> 문서이며, sibling Design (`analysis/2511.00139/design.md`) 을 입력으로
 > 받아 한 foundry 의 좌표계 위에서 변경 지점을 매핑합니다. 형식·이모지
 > ·용어 규칙은 `docs/STYLE.md` §6 / §4 를 정확히 따릅니다.
 > 재실행 시 이 파일과 sibling `impl.patch` 를 덮어씁니다.
@@ -14,7 +14,7 @@
 |------|------|
 | 원문 제목 | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection |
 | 링크 | [arXiv:2511.00139](https://arxiv.org/abs/2511.00139) |
-| 상위 Design | [`../../2511.00139_design.md`](../../2511.00139_design.md) |
+| 상위 Design | [`../../design.md`](../../design.md) |
 | Foundry | `lerobot` |
 | Foundry pinned commit | `999e77ad7bc30774cccca58bd29f732a90600931` (`vendor/lerobot/README.md` 와 일치) |
 | 베이스 모델 / 코드 좌표 | `pi0` (`vendor/lerobot/policies/pi0/`) |
@@ -122,7 +122,7 @@ return se_main + aux_loss_weight * (se_arm + se_hand)  # Eq. (12)
 - **라운드 2 (verifiable 형태로 재구성):**
   - in-place forward 수정 → **subclass-seam** 으로 전환: base 에 동작-보존 seam 2개 (`_compute_suffix_out`, `_build_model`) + 신규 `modeling_pi0_enhance.py`/`configuration_pi0_enhance.py`. 의미는 라운드 1 과 동일 (식 9–12) 하나, 산출물이 설치된 foundry 에서 **실행 검증** 가능해짐 (sibling `test_pi0_enhance_smoke.py`, audit §🧬).
   - 결과: §🪛 표가 in-place 5행 → seam 2 + 신규모듈 2 + export 1 로 재매핑. §🚧 honest-defer 4행 불변.
-- **라운드 1 (입력 verify: `../../2511.00139_audit/lerobot.round_0.md`):**
+- **라운드 1 (입력 verify: `../../audit/lerobot.round_0.md`):**
   - 갭 `§🔎 #1` (paper-silent-defaultable, λ) → 액션 `default 채택` → 결과 `§🚧 #1 → §🧪 "default 채택 (paper-silent)" 이동`.
   - 갭 `§🔎 #2` (vendor-resolved, d_s) → 액션 `vendor 값 lift` → 결과 `§🚧 #2 → §🧪 이동`.
   - 갭 `§🔎 #3` (vendor-resolved, H) → 액션 `vendor 값 lift` → 결과 `§🚧 #3 → §🧪 이동`.

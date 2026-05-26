@@ -1,7 +1,7 @@
 # Design — End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection
 
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
-> 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>.md` 와
+> 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
 > base 매핑은 `/foundry` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
@@ -15,7 +15,7 @@
 |------|------|
 | 원문 제목 (영문) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection |
 | 링크 | [arXiv:2511.00139](https://arxiv.org/abs/2511.00139) |
-| 분석 문서 | [`analysis/2511.00139.md`](./2511.00139.md) |
+| 분석 문서 | [`analysis/2511.00139/analysis.md`](./analysis.md) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | Design 생성일 | 2026-05-21 |
 

@@ -24,39 +24,39 @@ only by a single `git apply --check`.
 INPUT:
 The first positional argument is the path to a Design document:
 
-  - `analysis/<id>_design.md`
+  - `analysis/<id>/design.md`
 
 A second positional flag selects the foundry: `--foundry <name>`
 (default `lerobot`). The patch under
-`analysis/<id>_impl/<foundry>/impl.patch` must exist for that foundry.
+`analysis/<id>/impl/<foundry>/impl.patch` must exist for that foundry.
 
 If the argument is empty or the Design file does not exist, stop and
 say so — do not guess.
 
 PRECONDITION — all of these must exist:
 
-  - `analysis/<id>.md`
-  - `analysis/<id>_design.md`
-  - `analysis/<id>_impl/<foundry>/impl.md`
-  - `analysis/<id>_impl/<foundry>/impl.patch`
+  - `analysis/<id>/analysis.md`
+  - `analysis/<id>/design.md`
+  - `analysis/<id>/impl/<foundry>/impl.md`
+  - `analysis/<id>/impl/<foundry>/impl.patch`
 
 If any is missing, stop and tell the human which generator to run
 first (`/analyze-paper` or `/foundry`).
 
 CONTEXT (read-only):
 - The Design document (passed as argument) — the authoritative spec.
-- `analysis/<id>.md` — the originating analysis.
-- `analysis/<id>_impl/<foundry>/impl.md` + `impl.patch` — the
+- `analysis/<id>/analysis.md` — the originating analysis.
+- `analysis/<id>/impl/<foundry>/impl.md` + `impl.patch` — the
   implementation under audit.
 - Any other analyses the Design cites as supporting evidence (when
-  named in `analysis/<id>.md` ✨ 핀 논문 대비 델타 or 🎯 관련 Pillar /
-  Decision).
+  named in `analysis/<id>/analysis.md` ✨ 핀 논문 대비 델타 or 🎯 관련
+  Pillar / Decision).
 - For `--foundry lerobot`:
   - `vendor/lerobot/policies/<base>/` (the base named in the impl
     guide) — `configuration_*.py`, `modeling_*.py`, `processor_*.py`.
     Read the actual functions the patch touches before judging
     signatures.
-- `analysis/<id>_impl/<foundry>/test_*.py` — the impl's sibling smoke
+- `analysis/<id>/impl/<foundry>/test_*.py` — the impl's sibling smoke
   test (if present). The executable counterpart of `impl.patch`; §🧬
   runs it.
 - `scripts/ensure-foundry-runtime.sh` — builds the executable runtime
@@ -80,7 +80,7 @@ runtime cannot be built, 🧬 is `skipped`, never fabricated.
 
 TASK — produce this output (overwriting if it exists):
 
-  - `analysis/<id>_audit/<foundry>.md` — Korean audit report.
+  - `analysis/<id>/audit/<foundry>.md` — Korean audit report.
 
 The report is the deliverable. There is no manifest lifecycle to
 graduate; the analysis track is fidelity-only.
@@ -91,7 +91,7 @@ execution tier):
 
 A. 📚 문헌 대조.
    For each analysis the Design cites as supporting evidence (the
-   originating `analysis/<id>.md` itself plus any other analyses
+   originating `analysis/<id>/analysis.md` itself plus any other analyses
    named in its 🎯 관련 Pillar / Decision or ✨ 핀 논문 대비 델타
    sections), read it in full and decide whether the Design is:
      - 일치 — analysis directly supports the Design's claim. Quote one
@@ -112,7 +112,7 @@ B. 🔍 패치 정합성.
    (foundry may have been refreshed since `/foundry` ran):
 
    ```bash
-   cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.patch
+   cd /home/user/probe && git apply --check analysis/<id>/impl/<foundry>/impl.patch
    ```
 
    Record stdout/stderr verbatim. Zero exit → `pass`. Non-zero exit →
@@ -156,7 +156,7 @@ D. 📐 식·표 일치 (separate `##` section in the report).
 E. 🧬 실행 검증 (separate `##` section in the report).
    The static checks above prove the patch *diffs* correctly. This check
    proves it *runs*. Only applies when the impl ships a sibling smoke
-   test (`analysis/<id>_impl/<foundry>/test_*.py`); if there is none,
+   test (`analysis/<id>/impl/<foundry>/test_*.py`); if there is none,
    record `skipped — no sibling test` and move on (an in-place patch with
    no test cannot be executed — note it as a 🚧 for the foundry step to
    add one).
@@ -180,7 +180,7 @@ E. 🧬 실행 검증 (separate `##` section in the report).
       ```bash
       src=.foundry-runtime/<foundry>/src
       git -C "$src" apply -p3 --directory=src/lerobot \
-          "$PWD/analysis/<id>_impl/<foundry>/impl.patch"
+          "$PWD/analysis/<id>/impl/<foundry>/impl.patch"
       ```
 
       Apply failure here (when `git apply --check` in §🔍 passed against
@@ -193,8 +193,8 @@ E. 🧬 실행 검증 (separate `##` section in the report).
       install):
 
       ```bash
-      cp analysis/<id>_impl/<foundry>/test_*.py "$src/tests/"
-      "$py" -m pytest "$src/tests/$(basename analysis/<id>_impl/<foundry>/test_*.py)" -q
+      cp analysis/<id>/impl/<foundry>/test_*.py "$src/tests/"
+      "$py" -m pytest "$src/tests/$(basename analysis/<id>/impl/<foundry>/test_*.py)" -q
       ```
 
       Record the pytest summary line verbatim (`N passed`, or the first
@@ -340,7 +340,7 @@ HARD RULES:
 GIT — after the report is written:
 
   python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>_audit/<foundry>.md analysis/README.md
+  git add analysis/<id>/audit/<foundry>.md analysis/README.md
   git commit -m "audit: <id> on <foundry>"
   git push origin HEAD:main
 

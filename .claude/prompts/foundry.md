@@ -26,7 +26,7 @@ POSTURE (applies to this whole mode):
 INPUT:
 The first positional argument is the path to a Design document:
 
-  - `analysis/<id>_design.md`
+  - `analysis/<id>/design.md`
 
 A second positional flag selects the foundry: `--foundry <name>`
 (default `lerobot` — the only foundry currently registered). The name
@@ -34,7 +34,7 @@ must match a registered foundry; for now only `lerobot` is valid.
 
 A third optional flag enables **feedback mode**:
 `--feedback <audit-report-path>`. When set, the prompt reads the
-prior audit report (typically `analysis/<id>_audit/<foundry>.md`)
+prior audit report (typically `analysis/<id>/audit/<foundry>.md`)
 and treats the existing `impl.md` + `impl.patch` as a **starting
 point**, not a blank slate — targeted surgery instead of full
 regeneration. This is the mode `/reproduce-paper` uses for iterative
@@ -51,8 +51,8 @@ the audit report does not exist, stop and tell the human to run
 PRECONDITION — the Design document and its originating analysis must
 already exist:
 
-  - `analysis/<id>.md`
-  - `analysis/<id>_design.md`
+  - `analysis/<id>/analysis.md`
+  - `analysis/<id>/design.md`
 
 If either is missing, stop and tell the human to run `/analyze-paper
 <id>` first.
@@ -63,8 +63,8 @@ CONTEXT (read-only):
   불변식·가정 · 하이퍼파라미터·손실 · 평가 메트릭 · 변경 의도 ·
   foundry 힌트) are vendor-agnostic — your job is to ground them in
   the target foundry.
-- `analysis/<id>.md` — the originating analysis. Read for context only;
-  the Design is the contract.
+- `analysis/<id>/analysis.md` — the originating analysis. Read for
+  context only; the Design is the contract.
 - `analysis/_TEMPLATE_IMPL.md` — the exact form `impl.md` must follow.
 - `docs/STYLE.md` — §6 (Implementation guide) + §4 (Korean tone,
   glossary, verbatim).
@@ -101,14 +101,14 @@ CONTEXT (read-only):
     server is not reachable, fall back to reading those files directly.
 
 Do NOT edit any file under `context/`, `vendor/`, or the Design
-document itself. Do NOT modify `analysis/<id>.md` (immutable input)
-except the single `🚧 매핑 불가` blockquote described in §A.
+document itself. Do NOT modify `analysis/<id>/analysis.md` (immutable
+input) except the single `🚧 매핑 불가` blockquote described in §A.
 
 TASK — produce these outputs (overwriting if they exist):
 
-  1. `analysis/<id>_impl/<foundry>/impl.md`     — Korean implementation guide
-  2. `analysis/<id>_impl/<foundry>/impl.patch`  — unified diff
-  3. `analysis/<id>_impl/<foundry>/test_*.py`   — executable smoke test
+  1. `analysis/<id>/impl/<foundry>/impl.md`     — Korean implementation guide
+  2. `analysis/<id>/impl/<foundry>/impl.patch`  — unified diff
+  3. `analysis/<id>/impl/<foundry>/test_*.py`   — executable smoke test
      (the runnable counterpart of the patch; see §G). Required whenever
      the patch is a subclass-seam mapping (§C-2); omitted only when the
      change genuinely has no importable surface (pure data/doc patch),
@@ -146,10 +146,10 @@ A. Mapping feasibility (Layer 2 gate).
 
    If the Design cannot be mapped to this foundry with reasonable
    confidence, DO NOT produce `impl.md` or `impl.patch`. Instead,
-   write a single file `analysis/<id>_impl/<foundry>/UNMAPPABLE.md`
+   write a single file `analysis/<id>/impl/<foundry>/UNMAPPABLE.md`
    containing one paragraph stating why (specific contract or
    interface the foundry cannot satisfy). Also append one blockquote
-   line as the very last line of `analysis/<id>.md`:
+   line as the very last line of `analysis/<id>/analysis.md`:
 
    > 🚧 매핑 불가 (`<foundry>`) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.
 
@@ -238,7 +238,7 @@ D. Verify the patch.
    the repo root, with the verbatim path you just wrote:
 
    ```bash
-   git apply --check analysis/<id>_impl/<foundry>/impl.patch
+   git apply --check analysis/<id>/impl/<foundry>/impl.patch
    ```
 
    Record the result in `impl.md` 📄 가이드 메타 row `패치 파일`,
@@ -274,9 +274,9 @@ F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
      ❌/⚠️), §📐 rows (especially `silent-skip`), §🔎 §🚧 classification
      table + machine markers (`<!-- ANALYSIS_BUCKETS:... -->`), and the
      previous impl.md §🚧 unresolved table.
-   - `analysis/<id>_impl/<foundry>/impl.md` (previous round) — the §🪛
+   - `analysis/<id>/impl/<foundry>/impl.md` (previous round) — the §🪛
      mapping table and §🚧 unresolved table are the starting point.
-   - `analysis/<id>_impl/<foundry>/impl.patch` (previous round) — read-only
+   - `analysis/<id>/impl/<foundry>/impl.patch` (previous round) — read-only
      reference to preserve passing hunk coordinates. In this mode the new
      patch is also regenerated from scratch against the vendor pinned commit
      (no diff-on-diff surgery — it degrades verifiability). The new patch
@@ -342,7 +342,7 @@ F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
 
 G. Ship + run the smoke test.
    For a subclass-seam mapping (§C-2), write
-   `analysis/<id>_impl/<foundry>/test_<base>_<name>_smoke.py` — a
+   `analysis/<id>/impl/<foundry>/test_<base>_<name>_smoke.py` — a
    CPU-only, weight-free pytest that imports the subclass against the
    *installed* foundry and asserts what the Design promises:
 
@@ -367,9 +367,9 @@ G. Ship + run the smoke test.
    ```bash
    py=$(bash scripts/ensure-foundry-runtime.sh <foundry>)   # builds runtime; non-zero → skip
    src=.foundry-runtime/<foundry>/src
-   git -C "$src" apply -p3 --directory=src/lerobot "$PWD/analysis/<id>_impl/<foundry>/impl.patch"
-   cp analysis/<id>_impl/<foundry>/test_*.py "$src/tests/"
-   "$py" -m pytest "$src/tests/$(basename analysis/<id>_impl/<foundry>/test_*.py)" -q
+   git -C "$src" apply -p3 --directory=src/lerobot "$PWD/analysis/<id>/impl/<foundry>/impl.patch"
+   cp analysis/<id>/impl/<foundry>/test_*.py "$src/tests/"
+   "$py" -m pytest "$src/tests/$(basename analysis/<id>/impl/<foundry>/test_*.py)" -q
    git -C "$src" checkout -- . && git -C "$src" clean -fdq tests/
    ```
 
@@ -383,8 +383,8 @@ G. Ship + run the smoke test.
 
 HARD RULES:
 - No edits anywhere under `context/`, `vendor/`. No edits to the
-  Design document. No edits to `analysis/<id>.md` except the single
-  🚧 blockquote in §A.
+  Design document. No edits to `analysis/<id>/analysis.md` except the
+  single 🚧 blockquote in §A.
 - Never fabricate `file:line` coordinates. If unsure, re-read the
   foundry file; if still unsure, mark the row `위치 잠정` and add a
   🚧 row. On `--foundry lerobot`, "re-read" means `codegraph_node`
@@ -408,12 +408,12 @@ GIT — after the guide file(s) are written:
 Refresh the analyses index in the same commit, then push to `main`:
 
   python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>_impl/<foundry>/impl.md
+  git add analysis/<id>/impl/<foundry>/impl.md
   # Add the patch ONLY if it was actually generated. If §A produced
   # UNMAPPABLE.md, add that instead.
-  git add analysis/<id>_impl/<foundry>/impl.patch
+  git add analysis/<id>/impl/<foundry>/impl.patch
   # Add the sibling smoke test when one was generated (§G subclass-seam).
-  git add analysis/<id>_impl/<foundry>/test_*.py 2>/dev/null || true
+  git add analysis/<id>/impl/<foundry>/test_*.py 2>/dev/null || true
   git add analysis/README.md
   git commit -m "foundry: map <id> onto <foundry>"
   git push origin HEAD:main
@@ -425,7 +425,7 @@ The refresh script regenerates the `lerobot` column in the index
 table between `<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->`
 markers and is idempotent (no-op when nothing changed).
 
-`<id>` is the arXiv id used by the analysis file. `<foundry>` is the
+`<id>` is the arXiv id used by the analysis folder. `<foundry>` is the
 verbatim foundry name.
 
 - Stage ONLY the files this command produced. Never `git add` anything

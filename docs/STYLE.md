@@ -315,7 +315,7 @@ this section overrides them on conflict.
 ## 5. Paper Analysis Document (`analysis/`)
 
 The `/analyze-paper` slash command (prompt: `.claude/prompts/paper-analysis.md`)
-produces a deep-dive on **one** paper at `analysis/<arxiv-id>.md`.
+produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
 
 ### 5-1. File convention
 
@@ -324,8 +324,9 @@ produces a deep-dive on **one** paper at `analysis/<arxiv-id>.md`.
   file. It is written natively in Korean per §4 (tone, glossary,
   verbatim tokens), not translated. The filename carries no language
   suffix — every PROBE output is Korean, so marking it is redundant.
-- Filename: `analysis/<arxiv-id>.md` (e.g. `analysis/2401.12345.md`);
-  non-arXiv PDF input uses a human-chosen slug.
+- Filename: `analysis/<arxiv-id>/analysis.md` (e.g.
+  `analysis/2401.12345/analysis.md`); non-arXiv PDF input uses a
+  human-chosen slug as the folder name.
 - Regenerable snapshot — re-running overwrites the file, never appends.
 - The document follows `analysis/_TEMPLATE.md` exactly: part (A) a
   neutral structured summary, part (B) `context/MASTER.md`-anchored
@@ -379,7 +380,7 @@ The analysis always ends with exactly one blockquote line as its very
 last line, regardless of whether a baseline can be matched:
 
 ```markdown
-> 💡 base 매핑은 `/foundry analysis/2401.12345_design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/foundry analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 ```
 
 `/foundry` itself decides whether the Design can be grounded in the
@@ -531,16 +532,16 @@ The script rewrites only the block between these fixed markers in
 The table has seven columns: `#`, `Analysis` (relative hotlink),
 `arXiv` (link to the arXiv abstract), `Title` (the paper's English
 title), `Refreshed` (ISO date), `lerobot` (✅ if
-`<id>_impl/lerobot/impl.md` exists, 🚧 if `UNMAPPABLE.md` exists,
+`<id>/impl/lerobot/impl.md` exists, 🚧 if `UNMAPPABLE.md` exists,
 `—` if `/foundry` has not been run for the lerobot foundry), and
 `🔎 vr/pe/sd/se` (the four §🔎 §🚧 bucket counts —
 vendor-resolved / paper-extractable / paper-silent-defaultable /
 paper-silent-experimental — read from the `<!-- ANALYSIS_BUCKETS -->`
-marker in `<id>_audit/lerobot.md`, or `—` when no audit exists).
+marker in `<id>/audit/lerobot.md`, or `—` when no audit exists).
 Sort: `Refreshed` descending, ties broken by arXiv id descending.
 
 Load-bearing 📄 논문 메타 rows the script reads from every
-`analysis/<id>.md`:
+`analysis/<id>/analysis.md`:
 
 | Row label | Required format |
 |---|---|
@@ -565,15 +566,15 @@ produces a **Layer 2** foundry-specific implementation. The two-layer
 split exists so the same Design can serve multiple foundries (the v0
 foundry is `lerobot`).
 
-Outputs:
+Outputs (all under `analysis/<id>/`):
 
-- `analysis/<id>_design.md`                  — Layer 1 Design.
-- `analysis/<id>_impl/<foundry>/impl.md`     — Korean impl guide.
-- `analysis/<id>_impl/<foundry>/impl.patch`  — unified diff against
+- `analysis/<id>/design.md`                  — Layer 1 Design.
+- `analysis/<id>/impl/<foundry>/impl.md`     — Korean impl guide.
+- `analysis/<id>/impl/<foundry>/impl.patch`  — unified diff against
                                                the foundry's code
                                                root (for lerobot:
                                                `vendor/lerobot/`).
-- `analysis/<id>_audit/<foundry>.md`        — Korean static
+- `analysis/<id>/audit/<foundry>.md`         — Korean static
                                                validation report
                                                (`/audit`).
 
@@ -646,10 +647,10 @@ refresh procedure.
 
 ### 6-4. Honesty rules carried over
 
-- If `analysis/<id>.md` was produced from abstract-only, every Design
-  section is prefixed **(본문 미확보 — 잠정)** and most fields will be
-  `(원문에 명시 없음 — 가정으로 메움)`. The impl document, when
-  generated, also prefixes every `##` section first line with
+- If `analysis/<id>/analysis.md` was produced from abstract-only,
+  every Design section is prefixed **(본문 미확보 — 잠정)** and most
+  fields will be `(원문에 명시 없음 — 가정으로 메움)`. The impl document,
+  when generated, also prefixes every `##` section first line with
   **(본문 미확보 — 잠정)** and no patch file is produced — only the
   markdown.
 - Sparse Design > fabricated Design. Any field the source does not pin
@@ -660,8 +661,8 @@ refresh procedure.
   instead of being silently forged.
 - If the Design cannot ground in the target foundry, **neither**
   `impl.md` nor `impl.patch` is produced. Instead `/foundry` writes
-  `analysis/<id>_impl/<foundry>/UNMAPPABLE.md` with one paragraph of
-  reason, and appends one line to `analysis/<id>.md`:
+  `analysis/<id>/impl/<foundry>/UNMAPPABLE.md` with one paragraph of
+  reason, and appends one line to `analysis/<id>/analysis.md`:
   `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
 ### 6-5. Verify report (`/audit` output)

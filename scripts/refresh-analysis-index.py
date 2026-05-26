@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Regenerate the auto-maintained analyses index in analysis/README.md.
 
-Scans every deep-dive `analysis/<id>.md`, pulls metadata from its
-"📄 논문 메타" table, checks for foundry-specific impl artifacts, and
+Scans every per-paper subdirectory `analysis/<id>/` and reads metadata
+from its `analysis.md`, checks for foundry-specific impl artifacts, and
 rewrites the table between fixed markers in `analysis/README.md`.
 
 Idempotent: re-running with no underlying change produces no diff.
@@ -27,9 +27,6 @@ README = ANALYSIS_DIR / "README.md"
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
 
-# arXiv ids look like 1234.56789 (with optional version suffix).
-ARXIV_FILENAME_RE = re.compile(r"^\d{4}\.\d{4,5}(?:v\d+)?$")
-
 # Rows we extract from the 📄 논문 메타 table.
 TITLE_ROW = re.compile(r"^\|\s*원문\s*제목\s*\(영문\)\s*\|\s*(.+?)\s*\|\s*$")
 LINK_ROW = re.compile(r"^\|\s*링크\s*\|\s*\[arXiv:([^\]]+)\]\(([^)]+)\)\s*\|\s*$")
@@ -39,31 +36,29 @@ WARN = "⚠️ metadata"
 
 
 def find_analyses() -> list[Path]:
-    """Return deep-dive analysis paths (not templates, designs, impls, verifies)."""
+    """Return per-paper subdirectory paths (not templates or other dirs)."""
     out: list[Path] = []
-    for path in sorted(ANALYSIS_DIR.glob("*.md")):
+    for path in sorted(ANALYSIS_DIR.iterdir()):
+        if not path.is_dir():
+            continue
         name = path.name
         if name.startswith("_"):
             continue
-        if name in {"README.md"}:
-            continue
-        stem = path.stem
-        if any(stem.endswith(suffix) for suffix in ("_design", "_impl", "_audit")):
-            continue
-        # Accept arXiv ids or arbitrary slug filenames (PDF-input analyses).
+        # Accept arXiv ids or arbitrary slug directory names.
         out.append(path)
     return out
 
 
-def extract_meta(path: Path) -> dict[str, str]:
+def extract_meta(paper_dir: Path) -> dict[str, str]:
     """Pull title / arxiv id / arxiv url / refreshed date out of the meta table.
 
     Missing or malformed rows produce the `⚠️ metadata` placeholder for that
     cell rather than aborting.
     """
     title = arxiv_id = arxiv_url = refreshed = ""
+    analysis_file = paper_dir / "analysis.md"
     try:
-        text = path.read_text(encoding="utf-8")
+        text = analysis_file.read_text(encoding="utf-8")
     except OSError:
         return {"title": WARN, "arxiv_id": WARN, "arxiv_url": "", "refreshed": WARN}
 
@@ -97,7 +92,7 @@ def extract_meta(path: Path) -> dict[str, str]:
 
 def lerobot_state(stem: str) -> str:
     """Return ✅ / 🚧 UNMAPPABLE / — for the lerobot foundry column."""
-    base = ANALYSIS_DIR / f"{stem}_impl" / "lerobot"
+    base = ANALYSIS_DIR / stem / "impl" / "lerobot"
     if (base / "impl.md").is_file():
         return "✅"
     if (base / "UNMAPPABLE.md").is_file():
@@ -116,7 +111,7 @@ def lerobot_exec(stem: str) -> str:
     header. `—` when no audit report exists or the row is absent (older
     reports predating the execution tier).
     """
-    audit = ANALYSIS_DIR / f"{stem}_audit" / "lerobot.md"
+    audit = ANALYSIS_DIR / stem / "audit" / "lerobot.md"
     try:
         text = audit.read_text(encoding="utf-8")
     except OSError:
@@ -145,13 +140,13 @@ def lerobot_buckets(stem: str) -> str:
     """Return the §🔎 bucket counts `vr/pe/sd/se/ob` for the lerobot audit.
 
     Reads the ANALYSIS_BUCKETS marker block from
-    `analysis/<stem>_audit/lerobot.md` and counts the comma-separated
+    `analysis/<stem>/audit/lerobot.md` and counts the comma-separated
     row ids per bucket. `—` when no audit report exists; `0/0/0/0/0` when
     the marker is present but empty (e.g. all checks pass with no §🚧).
     `ob` = out-of-base-scope (fully specified but outside the chosen
     foundry base's coordinate system).
     """
-    audit = ANALYSIS_DIR / f"{stem}_audit" / "lerobot.md"
+    audit = ANALYSIS_DIR / stem / "audit" / "lerobot.md"
     try:
         text = audit.read_text(encoding="utf-8")
     except OSError:
@@ -190,7 +185,7 @@ def build_table(rows: list[dict[str, str]]) -> str:
         return header + "| — | _no deep-dives yet_ | — | — | — | — | — | — |\n"
     out = [header]
     for i, row in enumerate(rows, 1):
-        link = f"[`{row['stem']}.md`]({row['stem']}.md)"
+        link = f"[`{row['stem']}/analysis.md`]({row['stem']}/analysis.md)"
         if row["arxiv_url"]:
             arxiv = f"[`{row['arxiv_id']}`]({row['arxiv_url']})"
         else:
@@ -224,12 +219,12 @@ def rewrite_readme(table: str) -> bool:
 
 def main() -> int:
     rows: list[dict[str, str]] = []
-    for path in find_analyses():
-        meta = extract_meta(path)
-        meta["stem"] = path.stem
-        meta["lerobot"] = lerobot_state(path.stem)
-        meta["exec"] = lerobot_exec(path.stem)
-        meta["buckets"] = lerobot_buckets(path.stem)
+    for paper_dir in find_analyses():
+        meta = extract_meta(paper_dir)
+        meta["stem"] = paper_dir.name
+        meta["lerobot"] = lerobot_state(paper_dir.name)
+        meta["exec"] = lerobot_exec(paper_dir.name)
+        meta["buckets"] = lerobot_buckets(paper_dir.name)
         rows.append(meta)
     rows.sort(key=sort_key, reverse=True)
     table = build_table(rows)
