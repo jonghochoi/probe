@@ -21,32 +21,9 @@
 | `<arxiv-id>/audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 대조한 한글 검증 보고서 (정적 4-체크 + §🧬 실행 검증) |
 | `<arxiv-id>/audit/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 audit 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
 
-## 📑 Index
-
-아래 표는 `scripts/refresh-analysis-index.py` 가 자동 관리합니다 —
-`/analyze-paper`, `/foundry`, `/audit` 가 자기 산출물을 커밋할 때
-같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
-편집하지 마십시오. `lerobot` 컬럼은 `<id>/impl/lerobot/impl.md`
-존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
-`🧬` 컬럼은 `lerobot` audit 메타 헤더의 🧬 실행 검증 verdict
-(`pass`/`fail`/`skipped`, audit 없거나 구버전이면 —) 입니다.
-`🔎 vr/pe/sd/se/ob` 컬럼은 `lerobot` audit 의 §🔎 §🚧 분류 마커에서
-vendor-resolved / paper-extractable / paper-silent-defaultable /
-paper-silent-experimental / out-of-base-scope 행 수를 읽어 옵니다
-(audit 없으면 —). `ob` 는 논문·Design 모두 완전 명세하지만 선택된
-foundry base 좌표계 밖이라 본 매핑에서 제외된 모듈 수입니다.
-규칙은 `docs/STYLE.md` §5-7 에 정리돼 있습니다.
-
-<!-- ANALYSIS_INDEX:START -->
-
-| # | Analysis | arXiv | Title | Refreshed | lerobot | 🧬 | 🔎 vr/pe/sd/se/ob |
-|---|---|---|---|---|---|---|---|
-| 1 | [`2605.22082/analysis.md`](2605.22082/analysis.md) | [`2605.22082`](https://arxiv.org/abs/2605.22082) | CoRMA: Contrastive RMA for Contact-Rich Meta-Adaptation | 2026-05-26 | — | — | — |
-| 2 | [`2605.07308/analysis.md`](2605.07308/analysis.md) | [`2605.07308`](https://arxiv.org/abs/2605.07308) | AT-VLA: Adaptive Tactile Injection for Enhanced Feedback Reaction in Vision-Language-Action Models | 2026-05-26 | — | — | — |
-| 3 | [`2604.23272/analysis.md`](2604.23272/analysis.md) | [`2604.23272`](https://arxiv.org/abs/2604.23272) | Modular Sensory Stream for Integrating Physical Feedback in Vision-Language-Action Models | 2026-05-26 | — | — | — |
-| 4 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
-
-<!-- ANALYSIS_INDEX:END -->
+전체 deep-dive 목록은 [`INDEX.md`](INDEX.md) — `/analyze-paper` ·
+`/foundry` · `/audit` 가 커밋 시 `scripts/refresh-analysis-index.py`
+로 자동 갱신하는 산출물입니다. 컬럼 규약은 `docs/STYLE.md` §5-7.
 
 ## 호출
 

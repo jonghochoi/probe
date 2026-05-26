@@ -578,16 +578,18 @@ conventions below codify both.
 
 ### 5-7. Auto-maintained analysis index
 
-`analysis/README.md` carries a generated index of every deep-dive in
+`analysis/INDEX.md` carries a generated index of every deep-dive in
 the folder, refreshed by `scripts/refresh-analysis-index.py`. The
 script is invoked automatically by the GIT step of `/analyze-paper`,
 `/foundry`, and `/audit`, so any run that adds or refreshes an
 analysis (or its downstream impl/audit artifacts) updates the index
-in the same commit. This is the first intentional exception to the
-"every doc reference is hand-maintained" rule recorded in `CLAUDE.md`.
+in the same commit. The table lives in its own file so the static
+`analysis/README.md` narrative stays free of an auto-rewritten block;
+this is the first intentional exception to the "every doc reference
+is hand-maintained" rule recorded in `CLAUDE.md`.
 
 The script rewrites only the block between these fixed markers in
-`analysis/README.md`; the rest of the file is preserved verbatim:
+`analysis/INDEX.md`; the rest of the file is preserved verbatim:
 
 ```markdown
 <!-- ANALYSIS_INDEX:START -->
