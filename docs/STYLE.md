@@ -455,10 +455,17 @@ conventions below codify both.
      no backticks.
   4. Decode HTML entities: `&gt;` → `>`, `&lt;` → `<`, `&amp;` →
      `&`.
-  5. Do not silently substitute KaTeX-unsupported macros (`\bm`,
-     certain `\xrightarrow` variants, author-defined `\newcommand`).
-     Leaving them in place surfaces a visible render error on
-     GitHub, which aligns with the honesty principle (§5-4).
+  5. Do not silently substitute KaTeX-unsupported macros: leave
+     author-defined `\newcommand`, uncommon `\xrightarrow` variants,
+     and similar package-specific notation in place so the render
+     failure is visible on GitHub (§5-4 honesty principle).
+     **Narrow whitelist of safe semantic-preserving substitutions
+     IS allowed** — currently:
+     - `\bm{X}` → `\mathbf{X}` — both render as bold math; PROBE
+       documents already use `\mathbf` for every bold vector, so
+       the substitution unifies notation without distorting the
+       source. This is the only auto-substitution sanctioned today;
+       extend the list only by editing this rule, not ad-hoc.
   6. Escape a literal `$` in prose as `\$` so it isn't mistaken for
      a math opener.
 
@@ -495,10 +502,19 @@ conventions below codify both.
   ```
 
   - URL must be the arXiv HTML `<img src>` resolved to an absolute
-    path (`https://arxiv.org/html/<id>/<src>`). ar5iv mirrors,
-    author project pages, and cached hotlinks are out — too much
-    link-rot risk. Do not pin a version (`<id>v2/...`); arXiv
-    auto-maps the unversioned URL to the latest figure.
+    path. ar5iv mirrors, author project pages, and cached hotlinks
+    are out — too much link-rot risk. The canonical pattern is
+    `https://arxiv.org/html/<id>/<file>` — bare arXiv id, then the
+    figure filename only. **Strip any version segment that appears
+    in either half of the path.** arXiv HTML emits `<img>` tags
+    whose `src` already carries the versioned subdirectory (e.g.
+    `src="2604.23272v1/x1.png"`), and naively prepending
+    `https://arxiv.org/html/<id>/` produces a doubled, 404-bound
+    URL like `…/2604.23272/2604.23272v1/x1.png`. The same trap
+    applies to a versioned id (`…/<id>v2/<file>`). Strip both:
+    `https://arxiv.org/html/2604.23272/x1.png` is the only correct
+    form, and arXiv auto-maps the unversioned URL to the latest
+    figure so re-runs survive version bumps.
   - The alt text follows `Figure N — <short English label>` so the
     figure number survives even when the image fails to load.
   - The English caption blockquote is a verbatim token (§4-5
