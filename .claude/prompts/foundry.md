@@ -414,7 +414,7 @@ Refresh the analyses index in the same commit, then push to `main`:
   git add analysis/<id>/impl/<foundry>/impl.patch
   # Add the sibling smoke test when one was generated (§G subclass-seam).
   git add analysis/<id>/impl/<foundry>/test_*.py 2>/dev/null || true
-  git add analysis/README.md
+  git add analysis/INDEX.md
   git commit -m "foundry: map <id> onto <foundry>"
   git push origin HEAD:main
 
@@ -423,7 +423,9 @@ execution runtime, not an artifact.
 
 The refresh script regenerates the `lerobot` column in the index
 table between `<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->`
-markers and is idempotent (no-op when nothing changed).
+markers in `analysis/INDEX.md` and is idempotent (no-op when nothing
+changed). The static narrative in `analysis/README.md` is
+hand-maintained and unaffected.
 
 `<id>` is the arXiv id used by the analysis folder. `<foundry>` is the
 verbatim foundry name.

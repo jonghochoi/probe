@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Regenerate the auto-maintained analyses index in analysis/README.md.
+"""Regenerate the auto-maintained analyses index in analysis/INDEX.md.
 
 Scans every per-paper subdirectory `analysis/<id>/` and reads metadata
 from its `analysis.md`, checks for foundry-specific impl artifacts, and
-rewrites the table between fixed markers in `analysis/README.md`.
+rewrites the table between fixed markers in `analysis/INDEX.md`.
 
 Idempotent: re-running with no underlying change produces no diff.
 Invoked from the GIT step of `/analyze-paper`, `/foundry`, and
@@ -22,7 +22,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
-README = ANALYSIS_DIR / "README.md"
+INDEX = ANALYSIS_DIR / "INDEX.md"
 
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
@@ -197,12 +197,12 @@ def build_table(rows: list[dict[str, str]]) -> str:
     return "".join(out)
 
 
-def rewrite_readme(table: str) -> bool:
-    """Replace the marker block in analysis/README.md. Return True if changed."""
-    original = README.read_text(encoding="utf-8")
+def rewrite_index(table: str) -> bool:
+    """Replace the marker block in analysis/INDEX.md. Return True if changed."""
+    original = INDEX.read_text(encoding="utf-8")
     if MARKER_START not in original or MARKER_END not in original:
         sys.stderr.write(
-            f"error: missing {MARKER_START} / {MARKER_END} markers in {README}\n"
+            f"error: missing {MARKER_START} / {MARKER_END} markers in {INDEX}\n"
         )
         sys.exit(2)
     pattern = re.compile(
@@ -213,7 +213,7 @@ def rewrite_readme(table: str) -> bool:
     updated = pattern.sub(lambda _m: new_block, original, count=1)
     if updated == original:
         return False
-    README.write_text(updated, encoding="utf-8")
+    INDEX.write_text(updated, encoding="utf-8")
     return True
 
 
@@ -228,7 +228,7 @@ def main() -> int:
         rows.append(meta)
     rows.sort(key=sort_key, reverse=True)
     table = build_table(rows)
-    changed = rewrite_readme(table)
+    changed = rewrite_index(table)
     print(f"refresh-analysis-index: {len(rows)} analyses · {'updated' if changed else 'no change'}")
     return 0
 

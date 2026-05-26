@@ -340,13 +340,14 @@ HARD RULES:
 GIT — after the report is written:
 
   python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>/audit/<foundry>.md analysis/README.md
+  git add analysis/<id>/audit/<foundry>.md analysis/INDEX.md
   git commit -m "audit: <id> on <foundry>"
   git push origin HEAD:main
 
 The refresh script regenerates the index table between
 `<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->` markers
-in `analysis/README.md` and is idempotent.
+in `analysis/INDEX.md` and is idempotent. The static narrative in
+`analysis/README.md` is hand-maintained and unaffected.
 
 Standard rebase-and-retry / network-retry rules as in other PROBE
 prompts. Never `--no-verify`, never force-push.
