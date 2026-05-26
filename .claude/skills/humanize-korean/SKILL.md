@@ -8,6 +8,26 @@ description: AI(ChatGPT·Claude·Gemini 등)가 쓴 한글 텍스트를 "사람�
 
 > **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식 후 v2.0 에서 3-tier 모드 (`fast` / `standard` / `strict`) 로 분기된다. file_path prefix 에 따라 자동 선택되며 (`scouting/` → fast, `synthesis/` → standard, `analysis/` → strict), 호출자가 `options.mode` 로 override 가능. `docs/STYLE.md` §4-5 invariants 는 어느 모드에서나 동등하게 강제된다 — 이 단일 출처를 어떤 tier 도 우회하지 않는다. monolith fast-path 는 어느 모드에서도 사용하지 않는다. 입력은 항상 파일 경로이며 출력은 in-place 갱신.
 
+## 의존 sub-agent (반드시 함께 존재해야 함)
+
+본 스킬은 자기완결적이지 **않다** — Phase A/B/C 가 호출하는 4 개 sub-agent
+정의가 `.claude/agents/` 에 함께 있어야 동작한다. 스킬 폴더만 다른 레포로
+복사하면 깨지므로, 이식 시 아래 4 개 파일도 같은 리비전으로 함께 옮긴다.
+
+| Phase | 호출되는 sub-agent | 모드 가용성 | 정의 파일 |
+|---|---|---|---|
+| A   | `ai-tell-detector`         | fast / standard / strict | `.claude/agents/ai-tell-detector.md` |
+| B   | `korean-style-rewriter`    | fast / standard / strict | `.claude/agents/korean-style-rewriter.md` |
+| C-1 | `content-fidelity-auditor` | standard / strict (fast 모드는 인라인 invariant 검사로 대체) | `.claude/agents/content-fidelity-auditor.md` |
+| C-2 | `naturalness-reviewer`     | standard (final 1회) / strict (매 round) | `.claude/agents/naturalness-reviewer.md` |
+
+추가로 본 스킬 폴더 안의 두 reference 문서(`references/ai-tell-taxonomy.md`,
+`references/rewriting-playbook.md`)는 위 sub-agent 들이 진단·윤문 근거로
+직접 읽으므로 함께 유지해야 한다. 3-tier 파이프라인의 검증 절차·STYLE
+invariants 정본은 본 SKILL.md (Phase 0/A/B/C/D/E) 와 `docs/STYLE.md` §4-5
+두 군데이며, sub-agent 의 system prompt 는 이 두 문서를 반복 재기술하지
+않는다.
+
 ## Phase 0: 컨텍스트 확인 및 모드 결정
 
 ```
