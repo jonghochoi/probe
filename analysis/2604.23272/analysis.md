@@ -69,7 +69,7 @@ MoSS 는 사전학습 VLA 의 액션 전문가 옆에 모달리티별 디커플 
 > "This bidirectional design enables cross-modal reasoning (e.g., modulating actions based on tactile feedback or unexpected torques), while keeping other network components decoupled to prevent gradient interference." (§3.1)
 (액션·물리 양방향 추론이 이 설계의 골자입니다. 어텐션 외 경로를 끊는 결정은 무작위 초기화된 새 스트림이 사전학습 액션 전문가를 망가뜨리지 못하게 막아 주는 안전핀입니다.)
 
-![Figure 2 — MoSS architecture overview](https://arxiv.org/html/2604.23272/2604.23272v1/x2.png)
+![Figure 2 — MoSS architecture overview](https://arxiv.org/html/2604.23272/x2.png)
 
 > "Figure 2: Overview of the proposed approach. We propose MoSS, a Modular Sensory Stream framework that integrates multiple physical sensory signals into VLAs. Building on a pretrained VLA, MoSS introduces a multimodal stream architecture that processes newly added physical signals (e.g., tactile and torque) in parallel. This figure illustrates a representative instantiation of MoSS with tactile and torque modalities, while the framework itself remains agnostic to the specific choice of physical signals. To ensure stable incorporation of these modality streams, we employ a two-stage training scheme and a future feedback prediction objective to further exploit physical signals." (§3)
 (아키텍처·두 단계 학습·미래 예측 보조 손실이 한 장에 압축돼 있습니다. 저자들도 본문에서 같은 순서로 디테일을 풀어 갑니다.)
@@ -80,7 +80,7 @@ MoSS 는 사전학습 VLA 의 액션 전문가 옆에 모달리티별 디커플 
 
 $$\mathcal{L}=\mathbb{E}_{\tau,\epsilon}\left[\|({\mathbf{A}}_{t}-\epsilon)-\mathcal{A}_{\psi}({\mathbf{A}}_{t}^{\tau},{\mathbf{s}}_{t}~|~{\mathbf{h}}_{t})\|^{2}\right]$$
 
-여기서 노이즈가 섞인 액션 청크는 $`{\mathbf{A}}_{t}^{\tau}=\tau{\mathbf{A}}_{t}+(1-\tau)\epsilon`$, 노이즈 $`\epsilon\sim\mathcal{N}({\bm{0}},{\mathbf{I}})`$, 시점 $`\tau\in[0,1]`$ 입니다.
+여기서 노이즈가 섞인 액션 청크는 $`{\mathbf{A}}_{t}^{\tau}=\tau{\mathbf{A}}_{t}+(1-\tau)\epsilon`$, 노이즈 $`\epsilon\sim\mathcal{N}({\mathbf{0}},{\mathbf{I}})`$, 시점 $`\tau\in[0,1]`$ 입니다.
 
 MoSS 는 시점 $`t`$ 의 물리 센서 집합 $`{\mathbf{M}}=\{{\mathbf{m}}_{t}^{(i)}\in\mathbb{R}^{d_{i}}\}_{i=1}^{N}`$ 을 받아 모달리티 $`i`$ 마다 별도 스트림 $`\mathcal{A}_{\phi_{i}}`$ 를 둡니다. 액션 스트림과 물리 스트림은 다음과 같이 정의됩니다.
 
@@ -89,7 +89,7 @@ $$\begin{aligned} &\text{Action stream}:&&\mathcal{A}_{\psi}({\mathbf{A}}_{t}^{\
 > "In practice, we construct each new sensory stream $`\mathcal{A}_{\phi_{i}}`$ by mirroring the architecture of the original action expert module $`\mathcal{A}_{\psi}`$ and randomly initializing its parameters. We then replace the self-attention layers in each stream with joint cross-modal self-attention layers." (§3.1)
 (같은 골격을 모달리티마다 복제하되, 셀프 어텐션을 조인트 크로스-모달 셀프 어텐션으로 갈아 끼웁니다. 이 한 줄이 결합의 전부입니다.)
 
-각 층에서 액션 스트림($`i=0`$)을 포함한 모든 스트림의 $`\{{\bm{Q}}_{i},{\bm{K}}_{i},{\bm{V}}_{i}\}_{i=0}^{N}`$ 를 이어 붙여 공유 스케일드 닷프로덕트 어텐션을 계산합니다. 이 통로만이 모달리티 사이의 결합 지점입니다. 나머지 경로는 끊긴 채로 둡니다.
+각 층에서 액션 스트림($`i=0`$)을 포함한 모든 스트림의 $`\{{\mathbf{Q}}_{i},{\mathbf{K}}_{i},{\mathbf{V}}_{i}\}_{i=0}^{N}`$ 를 이어 붙여 공유 스케일드 닷프로덕트 어텐션을 계산합니다. 이 통로만이 모달리티 사이의 결합 지점입니다. 나머지 경로는 끊긴 채로 둡니다.
 
 ### 학습 목표 / 손실
 
@@ -169,7 +169,7 @@ GR00T 는 총 60K, π0 는 총 30K 스텝이며, 최종 체크포인트로 평�
 > "Tactile-VLA, ForceVLA, and TA-VLA often degrade when an additional modality is introduced (e.g., Tactile-VLA drops from 30.2% to 20.9% when both tactile and torque are provided), whereas MoSS consistently improves as each new modality is added." (§4.2/§C.1, Table 6)
 (표 6 은 결국 이 한 줄로 압축됩니다. 두 모달리티를 합치면 선행 연구는 -6 ~ -12%p 떨어지지만 MoSS 만 +6.3%p 더 올라갑니다.)
 
-![Figure 4 — Example rollouts of real-world tasks](https://arxiv.org/html/2604.23272/2604.23272v1/x4.png)
+![Figure 4 — Example rollouts of real-world tasks](https://arxiv.org/html/2604.23272/x4.png)
 
 > "Figure 4: Example rollouts of real-world tasks. We provide example rollouts of the designed tasks that critically depend on physical feedback (e.g., tactile or torque signals). While MoSS leverages physical feedback to successfully perform the tasks, GR00T N1.5 without physical feedback often have difficulties in (a), (b) regulating grasp force, (c) maintaining appropriate pushing force for contact, and (d) probing occluded geometry." (§4.2)
 (롤아웃 비교가 정성적 근거입니다. 물리 피드백이 없으면 그립 강도·접촉 압력·차폐 기하 탐색에서 어떻게 실패하는지를 네 과제에서 차례로 보여 줍니다.)
