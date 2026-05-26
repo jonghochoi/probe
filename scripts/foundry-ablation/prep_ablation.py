@@ -45,8 +45,8 @@ the four decisions + justifications + tags. {paper_clause}"""
 FORBIDDEN = """\
 STRICTLY FORBIDDEN — do not open, grep, or look at any of these (it invalidates
 the experiment, they contain the answer):
-  - /home/user/probe/analysis/{id}_impl/**
-  - /home/user/probe/analysis/{id}_audit/**
+  - /home/user/probe/analysis/{id}/impl/**
+  - /home/user/probe/analysis/{id}/audit/**
   - any reference repository that already implements this paper (e.g. a fork
     under /home/user/ other than the probe repo itself)"""
 
@@ -57,7 +57,7 @@ CONTEXT: /home/user/probe maps paper Designs onto the vendored `{foundry}`
 foundry. You are the `/foundry` mapping step for arXiv:{id} on the `{base}` base.
 
 ALLOWED SOURCES (read ONLY these):
-  - /home/user/probe/analysis/{id}_design.md   (the Layer-1 Design — your spec)
+  - /home/user/probe/analysis/{id}/design.md   (the Layer-1 Design — your spec)
   - /home/user/probe/vendor/{foundry}/policies/{base}/   (the foundry base, to ground dims)
 
 {forbidden}
@@ -71,8 +71,8 @@ CONTEXT: /home/user/probe maps paper Designs onto the vendored `{foundry}`
 foundry. You are the `/foundry` mapping step for arXiv:{id} on the `{base}` base.
 
 ALLOWED SOURCES (read ONLY these):
-  - /home/user/probe/analysis/{id}_design.md   (the Layer-1 Design)
-  - /home/user/probe/analysis/{id}.md          (the FULL deep-dive analysis — richer than the Design)
+  - /home/user/probe/analysis/{id}/design.md   (the Layer-1 Design)
+  - /home/user/probe/analysis/{id}/analysis.md (the FULL deep-dive analysis — richer than the Design)
   - /home/user/probe/vendor/{foundry}/policies/{base}/   (the foundry base)
   - You MAY fetch the actual paper if reachable: arXiv:{id}
     (https://arxiv.org/abs/{id}). If blocked, rely on the analysis and say so.
@@ -89,9 +89,9 @@ def main() -> int:
     ap.add_argument("--base", default="pi0")
     args = ap.parse_args()
 
-    design = ANALYSIS / f"{args.arxiv_id}_design.md"
-    analysis = ANALYSIS / f"{args.arxiv_id}.md"
-    missing = [p.name for p in (design, analysis) if not p.is_file()]
+    design = ANALYSIS / args.arxiv_id / "design.md"
+    analysis = ANALYSIS / args.arxiv_id / "analysis.md"
+    missing = [str(p.relative_to(REPO_ROOT)) for p in (design, analysis) if not p.is_file()]
     if missing:
         sys.stderr.write(
             f"error: ablation needs both files; missing: {', '.join(missing)}\n"
