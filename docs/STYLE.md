@@ -278,6 +278,13 @@ rollback triggers:
 - Paper titles in original English (see §4-1)
 - Config / code names (`env_cfg.py`, `ObservationManager`, etc.)
 - Formulas and numbers (`ε = 0.1`, `±2σ`, `< 15%`)
+- Inline-math wrapping form — every inline `$...$` span (including
+  spans **inside English verbatim blockquotes**) must use the
+  inside-dollar backtick form `` $`X`$ `` and satisfy the §5-6
+  rule-2 boundary; the outside-dollar `` `$X$` `` form, or an
+  inside-blockquote `$X$` whose `_`/`^`/`{` is left unguarded, is
+  treated as a fidelity fail (the published doc would render
+  source-leaked math)
 - `P#` / `D#` / `CP#` tags
 - `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` intra-doc links
 - arXiv / DOI links
@@ -493,6 +500,24 @@ conventions below codify both.
        extend the list only by editing this rule, not ad-hoc.
   6. Escape a literal `$` in prose as `\$` so it isn't mistaken for
      a math opener.
+  7. **Inside English verbatim blockquotes** — the inside-dollar
+     backtick wrapping (rule 1) and the boundary rule (rule 2)
+     apply equally to inline math that appears inside an English
+     verbatim quote (`> "...source sentence... $X$ ..."` form).
+     The English text content is verbatim (§4-5 invariant), but
+     math delimiters are GitHub-rendering formatting — content and
+     formatting are separate concerns, and the wrapping convention
+     is enforced regardless of where the math appears. So a paper
+     sentence quoted as `> "... the supervision $\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$, $\lambda_{1}$ is set to 0.01 ..."`
+     must be rewritten as
+     `` > "... the supervision $`\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}`$ , $`\lambda_{1}`$ is set to 0.01 ..." ``
+     with each inline-math span wrapped and the rule-2 spaces
+     restored around each `$`. The English word order, every
+     letter, every space outside the math, and the `(§n)` source
+     marker stay byte-identical. `humanize-korean` treats the
+     resulting blockquote as a verbatim token (§4-5); the math
+     wrapping is performed once at extraction time and never
+     re-touched downstream.
 
 - **Bullet form (❓ 문제 정의 / 동기)** — Do not write a single
   paragraph. Use 4–6 items, each a bold label + 1–2 sentences.
@@ -749,3 +774,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/audit` |
 | v1.14 | 2026-05-21 | New `/reproduce-paper` orchestrator command (`.claude/commands/reproduce-paper.md` + `.claude/prompts/reproduce-paper.md`) drives `/analyze-paper → /foundry → /audit` as an iterative loop with verdict-cell parsing and honest-partial stable termination. Inner-loop refinement uses `/foundry --feedback <audit-path>` to update the prior round's impl surgically; outer-loop refinement (Design-side update) is deferred — 📚 fail/partial currently exits as `hold_and_report` for manual intervention. `/verify` renamed to `/audit` (noun form); output paths `<id>_verify/` → `<id>_audit/`, template `_TEMPLATE_VERIFY.md` → `_TEMPLATE_AUDIT.md` |
 | v1.15 | 2026-05-21 | Outer convergence loop implemented (supersedes the v1.14 deferral). `_TEMPLATE_AUDIT.md` gains a §🔎 §🚧 분류 section that classifies every open 🚧 item zero-state into `vendor-resolved` / `paper-extractable §X.Y` / `paper-silent-defaultable` / `paper-silent-experimental`, with a machine-readable `<!-- ANALYSIS_BUCKETS -->` footer (`focus-hint:` line). `/analyze-paper` gains a `--focus "<§X.Y,...>"` re-extraction mode (seed from prior docs, re-extract only named sections). `/reproduce-paper` matrix now branches on the buckets: vendor-resolved / paper-silent-defaultable stay inner (`/foundry --feedback`), paper-extractable triggers the outer step (`/analyze-paper --focus`). New termination reason `stable_design` (focused re-extraction byte-identical); convergence is fixed-point only, no separate outer counter. §5-7 index gains a `🔎 vr/pe/sd/se` bucket-count column |
+| v1.16 | 2026-05-26 | Close the inline-math-inside-verbatim-blockquote gap that let source-leaked math through on `analysis/2605.07308`. §5-6 gains extraction-recipe rule 7 — the inside-dollar backtick wrapping and the boundary rule apply equally to inline math that appears inside an English verbatim quote; content and formatting are separate concerns. §4-5 invariants list gains a matching item — every inline `$...$` span (including spans inside verbatim quotes) must use `` $`X`$ `` and satisfy the §5-6 rule-2 boundary, treated as a fidelity-fail trigger by `content-fidelity-auditor`. `.claude/agents/content-fidelity-auditor.md` adds the corresponding bullet to checklist item 6, and `.claude/prompts/paper-analysis.md` adds the same recipe rule so the gap closes at extraction time too |

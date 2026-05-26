@@ -279,6 +279,19 @@ HARD RULES:
        the whitelist only by editing `docs/STYLE.md` §5-6 step 5 —
        not ad-hoc. Escape a literal `$` in prose as `\$` to avoid
        being mistaken for a math opener.
+    6. **Inline math inside English verbatim blockquotes** — when a
+       paper sentence quoted as
+       `> "...source sentence... $X$ ..." (§n)` carries inline math,
+       rules 1 + 2 apply to that math too. The English word order,
+       every letter, and the `(§n)` marker stay byte-identical, but
+       each `$X$` span is rewrapped as `` $`X`$ `` and rule-2
+       spaces are inserted around each `$`. Math wrapping is
+       formatting, not content — the §4-5 verbatim-quote invariant
+       and rules 1+2 are not in conflict. Failing to apply this at
+       extraction time leaks the LaTeX source onto the GitHub-
+       rendered page (the underscore italic pass runs before KaTeX
+       inside blockquotes too) and triggers a `content-fidelity-auditor`
+       rollback.
 - 🔑 기술 키워드 analogies must not distort the paper. If a faithful
   analogy doesn't exist, fall back to a plain definition.
 - Methodology favours preservation over compression. Default: if the
