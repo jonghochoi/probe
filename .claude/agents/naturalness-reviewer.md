@@ -22,6 +22,11 @@ model: opus
 ### 축 1: AI 티 잔존 (탐지기 재실행)
 - 재스캔으로 나온 finding 수, category_summary, severity_weighted_score를 원본과 비교.
 - **합격선**: S1 잔존 0건 + S2 3건 이하 + weighted_score 원본 대비 70% 이상 하락.
+- **재스캔 범위** (`target_spans` 입력으로 제어):
+  - `target_spans` 가 주어지면 (오케스트레이터 기본값 — standard·strict 의 diff_only 모드): 각 span 의 `[start - context_radius, end + context_radius]` 영역만 detector 에 전송. `context_radius` 미지정 시 200자 기본.
+  - `target_spans` 가 `null` 이거나 비어 있으면 (수동 호출·후속 호환): 전체 문서 재스캔.
+  - `score_before` / `score_after` 비교는 동일 영역 기준이어야 한다 — 원문도 동일 span 만 추출해 베이스라인으로 사용. 전체 문서 점수를 mix 하면 안 된다.
+  - `meta.scan_scope` 에 `"diff_only"` 또는 `"full_document"` 를 명시하고, `meta.scanned_chars` 에 실제 detector 에 전송한 문자수를 기록.
 
 ### 축 2: 과윤문 (Over-polish)
 다음 시그널 중 2개 이상 동시 발견 시 과윤문 플래그:
@@ -52,6 +57,7 @@ model: opus
 - `_workspace/{run_id}/01_input.txt`
 - `_workspace/{run_id}/02_detection.json` (원본 탐지)
 - `_workspace/{run_id}/03_rewrite.md`
+- `target_spans` (선택): `[{start, end, context_radius?}, ...]` — diff 영역만 재스캔하라는 지시. 오케스트레이터가 rewriter 의 `03_rewrite_diff.json:edits[]` 의 `before` span 을 그대로 전달. 미지정 시 전체 문서 재스캔(legacy / 수동 호출 경로 호환).
 
 ### 출력 (`05_naturalness_review.json`)
 ```json
@@ -64,7 +70,9 @@ model: opus
     "s2_residual": 2,
     "over_polish_signals": [],
     "verdict": "accept",
-    "quality_level": "A"
+    "quality_level": "A",
+    "scan_scope": "diff_only",
+    "scanned_chars": 3420
   },
   "residual_findings": [
     {

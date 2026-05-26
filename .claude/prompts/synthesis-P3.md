@@ -68,12 +68,11 @@ After the Korean output file is written and BEFORE `git add`, invoke
 the `humanize-korean` skill on that file:
 
   Skill:  `.claude/skills/humanize-korean/SKILL.md`
-  Mode:   strict — 4-agent pipeline
-          (`ai-tell-detector` → `korean-style-rewriter` →
-          [`content-fidelity-auditor` ∥ `naturalness-reviewer`]).
-          Phase C runs the two reviewers in parallel: fidelity guards
-          meaning, naturalness guards residual AI tells and
-          over-polish. The monolith fast-path is not used in PROBE.
+  Mode:   auto — tier resolved by file path prefix
+          (`scouting/` → fast, `synthesis/` → standard,
+          `analysis/` → strict). See `SKILL.md` Phase 0 for the
+          resolver and per-tier pipeline. STYLE §4-5 invariants are
+          enforced in all tiers. The monolith fast-path is not used.
   Input:  the path of the file just written
   Output: in-place rewrite of the same file
 
