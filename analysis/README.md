@@ -41,7 +41,8 @@ foundry base 좌표계 밖이라 본 매핑에서 제외된 모듈 수입니다.
 
 | # | Analysis | arXiv | Title | Refreshed | lerobot | 🧬 | 🔎 vr/pe/sd/se/ob |
 |---|---|---|---|---|---|---|---|
-| 1 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
+| 1 | [`2604.23272/analysis.md`](2604.23272/analysis.md) | [`2604.23272`](https://arxiv.org/abs/2604.23272) | Modular Sensory Stream for Integrating Physical Feedback in Vision-Language-Action Models | 2026-05-26 | — | — | — |
+| 2 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
 
 <!-- ANALYSIS_INDEX:END -->
 
