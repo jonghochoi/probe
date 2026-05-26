@@ -25,6 +25,7 @@ paper-silent-experimental / out-of-base-scope 행 수를 읽어 옵니다
 | 1 | [`2605.22082/analysis.md`](2605.22082/analysis.md) | [`2605.22082`](https://arxiv.org/abs/2605.22082) | CoRMA: Contrastive RMA for Contact-Rich Meta-Adaptation | 2026-05-26 | — | — | — |
 | 2 | [`2605.07308/analysis.md`](2605.07308/analysis.md) | [`2605.07308`](https://arxiv.org/abs/2605.07308) | AT-VLA: Adaptive Tactile Injection for Enhanced Feedback Reaction in Vision-Language-Action Models | 2026-05-26 | — | — | — |
 | 3 | [`2604.23272/analysis.md`](2604.23272/analysis.md) | [`2604.23272`](https://arxiv.org/abs/2604.23272) | Modular Sensory Stream for Integrating Physical Feedback in Vision-Language-Action Models | 2026-05-26 | — | — | — |
-| 4 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
+| 4 | [`2605.08879/analysis.md`](2605.08879/analysis.md) | ⚠️ metadata | Preserving Foundational Capabilities in Flow-Matching VLAs through Conservative SFT | 2026-05-26 | — | — | — |
+| 5 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
 
 <!-- ANALYSIS_INDEX:END -->
