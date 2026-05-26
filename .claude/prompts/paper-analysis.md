@@ -269,11 +269,16 @@ HARD RULES:
        be stripped; no backticks needed for display).
     4. Decode HTML entities: `&gt;` → `>`, `&lt;` → `<`, `&amp;` →
        `&`.
-    5. Do not substitute KaTeX-unsupported macros (`\bm`, certain
-       `\xrightarrow` variants, author-defined `\newcommand`). Leave
-       them as-is so the render failure is visible — this respects
-       the honesty principle (§5-4). Escape a literal `$` in prose
-       as `\$` to avoid being mistaken for a math opener.
+    5. Do not substitute KaTeX-unsupported macros in general — leave
+       author-defined `\newcommand`, uncommon `\xrightarrow` variants,
+       and similar package-specific notation as-is so the render
+       failure is visible (§5-4 honesty). **One safe whitelisted
+       substitution is allowed**: `\bm{X}` → `\mathbf{X}` (both render
+       as bold math; PROBE already uses `\mathbf` throughout, so the
+       swap unifies notation without distorting the source). Extend
+       the whitelist only by editing `docs/STYLE.md` §5-6 step 5 —
+       not ad-hoc. Escape a literal `$` in prose as `\$` to avoid
+       being mistaken for a math opener.
 - 🔑 기술 키워드 analogies must not distort the paper. If a faithful
   analogy doesn't exist, fall back to a plain definition.
 - Methodology favours preservation over compression. Default: if the
@@ -283,14 +288,22 @@ HARD RULES:
 - Hotlink 1–3 arXiv figures into the analysis body (see
   `docs/STYLE.md` §5-6 figure-citation block). Fixed format:
 
-      ![Figure N — short label](https://arxiv.org/html/<id>/figs/<file>)
+      ![Figure N — short label](https://arxiv.org/html/<id>/<file>)
 
       > "Figure N: <English caption verbatim>" (§n)
       (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
 
-  URL must be the arXiv HTML `<img src>` resolved to an absolute
-  path. Author project pages, ar5iv mirrors, and cached hotlinks are
-  out (link-rot risk). Cap: 3 figures per analysis — this is a
+  The canonical URL pattern is `https://arxiv.org/html/<id>/<file>` —
+  bare arXiv id, then the figure filename only. **Strip any version
+  segment that appears in either half of the path.** arXiv HTML emits
+  `<img>` tags whose `src` already carries the versioned subdirectory
+  (e.g. `src="2604.23272v1/x1.png"`); naively prepending
+  `https://arxiv.org/html/<id>/` yields a doubled, 404-bound URL like
+  `…/2604.23272/2604.23272v1/x1.png`. The same trap applies to a
+  versioned id (`…/<id>v2/<file>`). Strip both — the unversioned
+  form lets arXiv auto-map to the latest figure and survives version
+  bumps. Author project pages, ar5iv mirrors, and cached hotlinks
+  are out (link-rot risk). Cap: 3 figures per analysis — this is a
   decision tool, not a slide deck. Abstract-only / PDF-only
   retrieval → omit the figure citations entirely (no placeholders).
   The English caption blockquote is a verbatim token; the
