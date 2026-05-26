@@ -4,7 +4,7 @@ This guide takes you from zero to a scheduled, self-running PROBE agent — clou
 
 > ### Run manually for 1–2 weeks first
 >
-> Do **not** automate on day one. Open a [Claude.ai](https://claude.ai) conversation with Sonnet or Opus, paste `context/MASTER.md`, run the prompts in `.claude/prompts/scouting-P{1..4}.md` by hand, and iterate until the report quality is where you want it. The prompt that survives manual iteration is the prompt you deploy as a routine. Bad prompt + full automation = weekly garbage generated on schedule.
+> Do **not** automate on day one. Open a [Claude.ai](https://claude.ai) conversation with Sonnet or Opus, paste `context/MASTER.md`, run the `.claude/prompts/scouting.md` template by hand (one global find/replace of `<PILLAR>` → `P1`/`P2`/`P3`/`P4` before pasting), and iterate until the report quality is where you want it. The prompt that survives manual iteration is the prompt you deploy as a routine. Bad prompt + full automation = weekly garbage generated on schedule.
 
 ---
 
@@ -16,9 +16,9 @@ Only **three** things change versus a manual run:
 - **Retrieval** — Claude's built-in web search → direct `curl` calls to public REST APIs (arXiv + Semantic Scholar Graph). Same data sources, better citation accuracy and reproducibility. **No MCP server is involved** — cloud routine sessions cannot reach a local MCP server, so retrieval is plain `curl`.
 - **Output** — manual copy → the prompt itself commits the report file and pushes directly to `main` with `git push origin HEAD:main` (no PR is created; commit history *is* the research log). To prevent concurrent runs from racing on the shared branch, configure the RemoteTrigger to allow at most one active session per environment, and the prompt retains a `git pull --rebase origin main` retry as an in-prompt safety net.
 
-The repo's durable asset is the **prompt** (`.claude/prompts/scouting-P{1..4}.md`), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
+The repo's durable asset is the **prompt** (`.claude/prompts/scouting.md`, shared by P1–P4), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
 
-> This guide uses **P1** as the worked example. For another pillar, swap `scouting-P1.md` → `scouting-P{2,3,4}.md`, `context/P1.md` → `context/P{2,3,4}.md`, output `synthesis/P1_BRIEF.md` → `synthesis/P{2,3,4}_BRIEF.md`, and register one routine per pillar.
+> This guide uses **P1** as the worked example. The scouting and synthesis prompts are now single shared templates (`.claude/prompts/scouting.md`, `synthesis.md`); for another pillar, replace every `<PILLAR>` token in the template with `P2`/`P3`/`P4` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{2,3,4}.md` and `synthesis/P1_BRIEF.md` → `synthesis/P{2,3,4}_BRIEF.md` in your routine title/notes, and register one routine per pillar.
 
 ### Prerequisites
 
@@ -79,7 +79,7 @@ There is no YAML and no `claude routine register`. Create the schedule in the [c
 | Form field | Value |
 |---|---|
 | Name | `probe-weekly-scout` |
-| Prompt (Instructions) | Paste the full body of `.claude/prompts/scouting-P1.md`. Model selector → **Sonnet**. |
+| Prompt (Instructions) | Paste the full body of `.claude/prompts/scouting.md` after replacing every `<PILLAR>` with `P1` (one global find/replace; the file shows the exact instruction at the top). Model selector → **Sonnet**. |
 | Repositories | This repo. Output is pushed to a `claude/`-prefixed branch and reviewed via PR. |
 | Environment | The Step 1 environment (`SEMANTIC_SCHOLAR_API_KEY` if used + Network access = Custom). |
 | Trigger (Schedule) | Mon & Thu 09:00 (the form takes local time → UTC; min interval 1 h). For exact cron, after creating run the CLI `/schedule update` with `0 9 * * 1,4`. |
@@ -90,7 +90,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 
 ### Step 3 — The externalized prompts already exist
 
-`.claude/prompts/scouting-P{1..4}.md` and `synthesis-P{1..4}.md` are committed — one scouting + one synthesis prompt per pillar. They are the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
+`.claude/prompts/scouting.md` and `synthesis.md` are committed — one scouting + one synthesis prompt, each a single shared template for all four pillars (`<PILLAR>` substituted to `P1`/`P2`/`P3`/`P4` once before paste). They are the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
 
 | Retrieval step | Manual run | Routine (`curl` REST) |
 |---|---|---|
@@ -114,7 +114,7 @@ There is no `--dry-run`. On the routine detail page use **Run now** — it opens
 - Decision implications are concrete (a specific config key / hyperparameter / metric, not "tune DR wider").
 - The Anti-topics filter actually fired (an empty "did not pass filter" section is suspicious).
 
-If it is unsatisfactory, fix `scouting-P1.md` (or `context/P1.md`) and re-run — do not leave automation on with a bad prompt.
+If it is unsatisfactory, fix `scouting.md` (or `context/P1.md`) and re-run — do not leave automation on with a bad prompt.
 
 ### Step 5 — Monthly human review
 
@@ -135,7 +135,7 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 | Form field | Value |
 |---|---|
 | Name | `probe-p1-synthesis` |
-| Prompt | Paste `.claude/prompts/synthesis-P1.md`, model Sonnet |
+| Prompt | Paste `.claude/prompts/synthesis.md` with every `<PILLAR>` replaced by `P1` (one global find/replace before paste). Model Sonnet. |
 | Repositories | This repo |
 | Environment | Default is fine — **no search → no custom domains needed** |
 | Trigger | Monthly (exact cron via `/schedule update` `0 9 1 * *`) |
@@ -173,11 +173,11 @@ Network note: `/analyze-paper`'s full-text fetch needs the session environment t
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Papers recommended are in your Anti-topics list | Anti-topics are too vague | Rewrite `context/P#.md` §5 with concrete exclusions (e.g. "any paper whose primary task is locomotion") |
-| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add to `scouting-P#.md`: "name a specific config key / hyperparameter / metric (not a hand-wave like 'tune X wider')" |
+| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add to `scouting.md`: "name a specific config key / hyperparameter / metric (not a hand-wave like 'tune X wider')" |
 | Same paper recommended two weeks in a row | Agent skipped the last-2-weeks context | Confirm the prompt's read-only "last 2 weeks of `scouting/`" reference is intact and those files exist |
 | `claude routine register` / a `.claude/routines/*.yaml` does nothing | That is not the execution mechanism | Register via the RemoteTrigger form ([claude.ai/code/routines](https://claude.ai/code/routines)) — Step 2/4 |
-| Agent silently edits `context/P#.md` | Prompt guard missing | Re-add the hard "never modify `context/P#.md`" guard (currently present in `scouting-P#.md` — do not remove it) |
+| Agent silently edits `context/P#.md` | Prompt guard missing | Re-add the hard "never modify `context/P#.md`" guard (currently present in `scouting.md` — do not remove it) |
 | Routine ran but PR is empty / every `curl` fails | Outbound network policy blocking the API domains | Set Network access = Custom and allow `export.arxiv.org` / `arxiv.org` / `api.semanticscholar.org`; check the verbatim error under 📋 Scout Methodology |
 | Citation graph only partially filled / frequent HTTP 429 | Semantic Scholar rate-limited | Run keyless (recommended) or add a *valid approved* key; keep the ~3 s sleep + backoff. See the two-403 note in Step 1 |
 | Semantic Scholar returns 403 even with a key set | Invalid/unapproved key (free-domain emails no longer get keys) | Remove the `SEMANTIC_SCHOLAR_API_KEY` env var and run keyless (works at 200) |
-| `scouting-P#.md` tries to call MCP tools | Stale prompt (MCP residue) | Confirm the RETRIEVAL section is `curl` REST — MCP is unreachable from cloud sessions |
+| `scouting.md` tries to call MCP tools | Stale prompt (MCP residue) | Confirm the RETRIEVAL section is `curl` REST — MCP is unreachable from cloud sessions |

@@ -15,8 +15,9 @@
 ## 호출
 
 `probe-p#-synthesis` 는 [claude.ai/code/routines](https://claude.ai/code/routines)
-의 RemoteTrigger 루틴입니다 (프롬프트: `.claude/prompts/synthesis-P#.md`,
-pillar별 1개). 한 실행은 한 pillar 만 처리하며 결과는 `P#_BRIEF.md`
+의 RemoteTrigger 루틴입니다 (프롬프트: `.claude/prompts/synthesis.md`
+한 개 — pillar 4종이 공유하는 단일 템플릿이며, 붙여넣기 전 `<PILLAR>`
+토큰을 `P1`/`P2`/`P3`/`P4` 중 하나로 1회 find/replace). 한 실행은 한 pillar 만 처리하며 결과는 `P#_BRIEF.md`
 하나를 갈아끼웁니다. §6 핀이 바뀌면 월간 실행을 기다리지 말고 루틴 상세
 페이지의 **Run now** 로 즉시 재생성합니다. 자세한 설정은 루트
 `README.md` → Stage 3 Bonus 참조.

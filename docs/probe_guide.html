@@ -769,7 +769,7 @@
         <div class="step-body">
           <h4>Stage 3 — 완전 자동화 (Week 5+)</h4>
           <p>
-            <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">Claude Code Routines</a> RemoteTrigger 폼에 <code>.claude/prompts/scouting-P1.md</code> 전문을 붙여넣고 레포·스케줄·환경을 지정. 클라우드 루틴은 <strong>로컬 MCP 서버에 도달할 수 없으므로</strong> 검색은 <code>curl</code> REST(arXiv + Semantic Scholar Graph)로만 수행. 환경의 <strong>Network access = Custom</strong>으로 <code>export.arxiv.org</code> / <code>arxiv.org</code> / <code>api.semanticscholar.org</code> 세 도메인을 허용해야 합니다. 산출물은 자체 commit + push 후 PR로 열립니다.
+            <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">Claude Code Routines</a> RemoteTrigger 폼에 <code>.claude/prompts/scouting.md</code> 전문을 붙여넣되, 사전에 템플릿의 <code>&lt;PILLAR&gt;</code> 토큰을 대상 pillar(<code>P1</code>/<code>P2</code>/<code>P3</code>/<code>P4</code>) 로 1회 find/replace 해 두고, 레포·스케줄·환경을 지정. 단일 템플릿이 4개 pillar 루틴에 공유되므로 prompt 로직 수정은 한 파일만 고치면 됩니다(폼은 4개 모두 재붙여넣기). 클라우드 루틴은 <strong>로컬 MCP 서버에 도달할 수 없으므로</strong> 검색은 <code>curl</code> REST(arXiv + Semantic Scholar Graph)로만 수행. 환경의 <strong>Network access = Custom</strong>으로 <code>export.arxiv.org</code> / <code>arxiv.org</code> / <code>api.semanticscholar.org</code> 세 도메인을 허용해야 합니다. 산출물은 자체 commit + push 후 PR로 열립니다.
           </p>
         </div>
       </div>
@@ -930,7 +930,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr>
             <td>Decision implication이 generic ("DR range 넓혀야 함")</td>
             <td>프롬프트가 약함</td>
-            <td><code>scouting-P#.md</code>에 "구체적 config 키 / 하이퍼파라미터 / 메트릭을 지목하라" 강화</td>
+            <td><code>scouting.md</code>에 "구체적 config 키 / 하이퍼파라미터 / 메트릭을 지목하라" 강화</td>
           </tr>
           <tr>
             <td>같은 논문이 두 주 연속 추천됨</td>
@@ -1010,7 +1010,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting-P{1..4}.md</code> · <code>synthesis-P{1..4}.md</code> · <code>paper-analysis.md</code> · <code>paper-reproduction.md</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P1–P4 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>synthesis.md</code>(P1–P4 공유 템플릿) · <code>paper-analysis.md</code> · <code>paper-reproduction.md</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
           <tr><td>컨텍스트</td>    <td><code>context/P{1..4}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트) + <code>synthesis/P{1..4}_BRIEF.md</code>(월 스냅샷)</td></tr>
           <tr><td>vendor</td>      <td><code>vendor/lerobot/</code> — byte-stable 스냅샷, 6개 baseline policy + configs (재현 패치의 적용 대상)</td></tr>

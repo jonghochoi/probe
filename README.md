@@ -242,7 +242,7 @@ cd probe
 
 ## 🤖 Agent Setup Guide
 
-Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/foundry` → `/audit`) and its `/reproduce-paper` orchestrator, and troubleshooting. Run the prompts in `.claude/prompts/scouting-P{1..4}.md` by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine.
+Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/foundry` → `/audit`) and its `/reproduce-paper` orchestrator, and troubleshooting. Run the `.claude/prompts/scouting.md` template by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine. A single template is shared by all four pillars; replace `<PILLAR>` with `P1`/`P2`/`P3`/`P4` once before each manual run or before pasting into a RemoteTrigger routine.
 
 ---
 
@@ -254,7 +254,7 @@ Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) —
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting-P{1..4}.md` (weekly) + `synthesis-P{1..4}.md` (monthly) + `paper-analysis.md` · `foundry.md` · `audit.md` · `paper-reproduction.md` (on-demand) |
+| **Prompts** | `.claude/prompts/scouting.md` (weekly, shared by P1–P4) + `synthesis.md` (monthly, shared by P1–P4) + `paper-analysis.md` · `foundry.md` · `audit.md` · `paper-reproduction.md` (on-demand) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
 | **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
 
