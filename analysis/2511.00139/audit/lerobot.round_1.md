@@ -1,7 +1,7 @@
 # Audit Report — Dexterous Arm-Hand VLA via Shared Autonomy on `lerobot`
 
 > PROBE audit 모드 산출물. 한글 단일 문서이며, sibling Design + 한
-> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/2511.00139.md`) 와
+> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/2511.00139/analysis.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
@@ -13,10 +13,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| 상위 Design | [`../2511.00139_design.md`](../2511.00139_design.md) |
-| Originating analysis | [`../2511.00139.md`](../2511.00139.md) |
+| 상위 Design | [`../design.md`](../design.md) |
+| Originating analysis | [`../analysis.md`](../analysis.md) |
 | Foundry | `lerobot` |
-| 구현 가이드 | [`../2511.00139_impl/lerobot/impl.md`](../2511.00139_impl/lerobot/impl.md) · [`../2511.00139_impl/lerobot/impl.patch`](../2511.00139_impl/lerobot/impl.patch) |
+| 구현 가이드 | [`../impl/lerobot/impl.md`](../impl/lerobot/impl.md) · [`../impl/lerobot/impl.patch`](../impl/lerobot/impl.patch) |
 | 검증 생성일 | 2026-05-22 (`TZ=Asia/Seoul`) |
 | 📚 문헌 대조 | `pass` |
 | 🔍 패치 정합성 | `pass` |
@@ -30,8 +30,8 @@
 
 | 분석 | 관계 | 인용 / 사유 |
 |------|------|-------------|
-| [`../2511.00139.md`](../2511.00139.md) | 일치 | §⚙️ 의사결정 함의: "본 논문 식 (12) 의 $`\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda(\mathcal{L}_{\text{hand}}+\mathcal{L}_{\text{arm}})`$ 는 사지별 latent 를 강제 분리시키는 비용 낮은 보조 손실이다." — Design 의 enhancement + 사지별 보조 손실 매핑을 직접 뒷받침 |
-| [`../2511.00139.md`](../2511.00139.md) | 일치 | §🔬 학습 셋업: "$`E_{\text{arm}}`$ · $`E_{\text{hand}}`$ 가 2-layer MLP (Mish), 보조 헤드는 single linear, 출력은 한 사지의 실제 DoF 인덱스에만 supervision 을 적용한다 (§7.3)." — patch 의 `nn.Sequential(Linear, Mish, Linear)` × 2 + single-linear aux head + selective slice 구현과 일치 |
+| [`../analysis.md`](../analysis.md) | 일치 | §⚙️ 의사결정 함의: "본 논문 식 (12) 의 $`\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda(\mathcal{L}_{\text{hand}}+\mathcal{L}_{\text{arm}})`$ 는 사지별 latent 를 강제 분리시키는 비용 낮은 보조 손실이다." — Design 의 enhancement + 사지별 보조 손실 매핑을 직접 뒷받침 |
+| [`../analysis.md`](../analysis.md) | 일치 | §🔬 학습 셋업: "$`E_{\text{arm}}`$ · $`E_{\text{hand}}`$ 가 2-layer MLP (Mish), 보조 헤드는 single linear, 출력은 한 사지의 실제 DoF 인덱스에만 supervision 을 적용한다 (§7.3)." — patch 의 `nn.Sequential(Linear, Mish, Linear)` × 2 + single-linear aux head + selective slice 구현과 일치 |
 
 판정: `pass`
 
@@ -42,7 +42,7 @@
 ## 🔍 패치 정합성
 
 ```text
-$ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl.patch
+$ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl.patch
 (zero exit, 빈 출력)
 ```
 
@@ -59,7 +59,7 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 | `nn.Mish` / `nn.Sequential` / `nn.Linear` | torch `nn` (모델 전반 사용) | enhancement 모듈 정의 | ✅ |
 | `F.mse_loss(..., reduction="none")` 반환 계약 (B,chunk,dim) | `modeling_pi0.py:799` 원본 + 호출부 `:1294` | forward enhancement 분기 `losses + λ(arm_pad+hand_pad)` 동일 shape 유지 | ✅ |
 | `F.pad` 슬라이스 zero-pad | torch `F` (functional) | `F.pad(arm_loss, (0, d-a))` / `F.pad(hand_loss, (a, d-a-h))` | ✅ |
-| 상수 `enhancement_lambda = 1.0` | `2511.00139_design.md §📊` (λ, paper-silent default) | `configuration_pi0.py` hunk + `# NOTE` 주석 | ✅ |
+| 상수 `enhancement_lambda = 1.0` | `design.md §📊` (λ, paper-silent default) | `configuration_pi0.py` hunk + `# NOTE` 주석 | ✅ |
 | 상수 `enhancement_arm_dim = 6` / `enhancement_hand_dim = 12` | Design §🧮 데이터 계약 (arm 6-DoF / hand 12-DoF) | config hunk + forward slice `[..., :a]` / `[..., a:a+h]` | ✅ |
 | 상수 $`d_s`$ = `action_expert_config.width` (vendor-resolved) | `vendor/lerobot/policies/pi0/modeling_pi0.py:580` | `__init__` hunk `_w = action_expert_config.width` | ✅ |
 | 상수 $`H`$ = `chunk_size = 50` (vendor-resolved) | `vendor/lerobot/policies/pi0/configuration_pi0.py:36` | forward/denoise `self.config.chunk_size` | ✅ |
@@ -77,15 +77,15 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139_impl/lerobot/impl
 
 | 참조 | 출처 | 패치 hunk / 🚧 항목 | 상태 |
 |------|------|---------------------|------|
-| `Eq. (9)` 메인 flow matching | `analysis/2511.00139.md §🔬` | `impl.patch` forward hunk `v_t, z_arm, z_hand = self._enhancement_main(...)` | 구현 |
-| `Eq. (10)` 손 보조 손실 | `analysis/2511.00139.md §🔬` | forward hunk `hand_loss = F.mse_loss(...)` | 구현 |
-| `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139.md §🔬` | forward hunk `arm_loss = F.mse_loss(...)` | 구현 |
-| `Eq. (12)` 총손실 | `2511.00139_design.md §📊` | forward hunk `losses + λ(arm_pad+hand_pad)` | 구현 |
-| `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #2` | 유보 |
-| `Eq. (3)` CAE 재구성 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #1` | 유보 |
-| `Eq. (14)` 비축적 corrective | `2511.00139_design.md §📊` | `impl.md §🚧 #3` | 유보 |
-| `Eq. (4)` / `Eq. (8)` 입력 계약 | `2511.00139_design.md §🧮` | `impl.md §🚧 #1` (촉각) / data layer | 유보 |
-| `Table 1`–`Table 4` · `Fig. 16` | `analysis/2511.00139.md §📊` | 평가 결과 — 정적 검증 대상 아님 | 유보 |
+| `Eq. (9)` 메인 flow matching | `analysis/2511.00139/analysis.md §🔬` | `impl.patch` forward hunk `v_t, z_arm, z_hand = self._enhancement_main(...)` | 구현 |
+| `Eq. (10)` 손 보조 손실 | `analysis/2511.00139/analysis.md §🔬` | forward hunk `hand_loss = F.mse_loss(...)` | 구현 |
+| `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139/analysis.md §🔬` | forward hunk `arm_loss = F.mse_loss(...)` | 구현 |
+| `Eq. (12)` 총손실 | `design.md §📊` | forward hunk `losses + λ(arm_pad+hand_pad)` | 구현 |
+| `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139/analysis.md §🔬` | `impl.md §🚧 #2` | 유보 |
+| `Eq. (3)` CAE 재구성 | `analysis/2511.00139/analysis.md §🔬` | `impl.md §🚧 #1` | 유보 |
+| `Eq. (14)` 비축적 corrective | `design.md §📊` | `impl.md §🚧 #3` | 유보 |
+| `Eq. (4)` / `Eq. (8)` 입력 계약 | `design.md §🧮` | `impl.md §🚧 #1` (촉각) / data layer | 유보 |
+| `Table 1`–`Table 4` · `Fig. 16` | `analysis/2511.00139/analysis.md §📊` | 평가 결과 — 정적 검증 대상 아님 | 유보 |
 
 <!-- silent-skip 없음 (모든 미구현 식은 §🚧 또는 평가 유보로 명시) → §🧪 partial 유발 없음. -->
 
