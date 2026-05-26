@@ -189,7 +189,8 @@ Probe 는 **Claude Code Routines 클라우드 스케줄링 단일 운영 모드*
 루틴은 `.claude/routines/*.yaml` 로 자동 등록되지 **않습니다.** 실제
 스케줄링은 [claude.ai/code/routines](https://claude.ai/code/routines)
 의 **RemoteTrigger 폼**(또는 CLI `/schedule`)으로 만듭니다 — 폼에
-`.claude/prompts/scouting-P#.md` 전문을 붙여넣고, 레포·스케줄(월·목
+`.claude/prompts/scouting.md` 전문을 붙여넣되 사전에 `<PILLAR>` 토큰을
+대상 pillar(`P1`/`P2`/`P3`/`P4`) 로 1회 find/replace 해 두고, 레포·스케줄(월·목
 09:00)·환경을 지정합니다. 클라우드 루틴은 로컬 MCP 서버에 도달할 수
 없으므로 검색은 **MCP가 아니라 `curl`로 공개 REST API**(arXiv
 `export.arxiv.org` + Semantic Scholar Graph)를 직접 호출합니다. 환경의

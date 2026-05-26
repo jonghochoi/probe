@@ -14,9 +14,10 @@ Author Watch를 훑고 의사결정 등급 후보만 추립니다.
 ## 호출
 
 `probe-weekly-scout` 는 [claude.ai/code/routines](https://claude.ai/code/routines)
-의 RemoteTrigger 루틴입니다. 프롬프트는 `.claude/prompts/scouting-P#.md`
-(pillar별 1개), 검색은 MCP 가 아니라 `curl` REST (arXiv + Semantic Scholar)
-입니다. 한 실행은 한 pillar 만 처리하며 결과 파일은 `YYYY-MM-DD-P#.md`
+의 RemoteTrigger 루틴입니다. 프롬프트는 `.claude/prompts/scouting.md`
+한 개(pillar 4종이 공유하는 단일 템플릿 — 붙여넣기 전 `<PILLAR>` 토큰을
+`P1`/`P2`/`P3`/`P4` 중 하나로 1회 find/replace), 검색은 MCP 가 아니라
+`curl` REST (arXiv + Semantic Scholar) 입니다. 한 실행은 한 pillar 만 처리하며 결과 파일은 `YYYY-MM-DD-P#.md`
 하나입니다. 자세한 설정은 루트 `README.md` → Stage 3 참조.
 
 ## 다른 산출물·컨텍스트와의 관계
