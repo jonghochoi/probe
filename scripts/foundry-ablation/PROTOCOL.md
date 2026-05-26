@@ -6,8 +6,8 @@ accumulate samples; the ledger aggregates a verdict over time.
 
 ## The question
 
-PROBE reaches code through a mediated pipeline — paper → `analysis/<id>.md`
-(deep-dive) → `analysis/<id>_design.md` (Layer-1, deliberately vendor-agnostic,
+PROBE reaches code through a mediated pipeline — paper → `analysis/<id>/analysis.md`
+(deep-dive) → `analysis/<id>/design.md` (Layer-1, deliberately vendor-agnostic,
 context-reduced) → `/foundry` (maps onto the vendored base). A direct setup
 (paper + repo handed straight to a coder) skips that filtering. When the
 mediated output looks weaker, two causes are confounded:
@@ -27,16 +27,16 @@ the H_verify / form signals alongside so a per-paper picture accumulates.
 
 ## Method — a-axis ablation (the part that needs LLM agents)
 
-For a paper with both `analysis/<id>_design.md` and `analysis/<id>.md`, run two
+For a paper with both `analysis/<id>/design.md` and `analysis/<id>/analysis.md`, run two
 **isolated** foundry-mapping agents that differ ONLY in their input corpus:
 
-- **a1 — design-only**: sees `analysis/<id>_design.md` + the foundry base
+- **a1 — design-only**: sees `analysis/<id>/design.md` + the foundry base
   (`vendor/<foundry>/policies/<base>/`). Nothing else.
-- **a2 — context-rich**: sees the Design + the full `analysis/<id>.md` + the
+- **a2 — context-rich**: sees the Design + the full `analysis/<id>/analysis.md` + the
   base, and may fetch the actual paper.
 
 Both must be forbidden from reading the existing impl/audit artifacts
-(`analysis/<id>_impl/**`, `analysis/<id>_audit/**`) and any reference repo
+(`analysis/<id>/impl/**`, `analysis/<id>/audit/**`) and any reference repo
 (e.g. a fork that already implements the paper) — those leak the answer.
 
 Each agent reports, for the contested "decision points" (the underspecified

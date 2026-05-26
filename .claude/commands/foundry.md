@@ -7,6 +7,6 @@ argument-hint: <design-path> [--foundry <name>] [--feedback <verify-path>]
 
 Design 경로와 선택적 foundry 플래그: $ARGUMENTS
 
-`$ARGUMENTS`가 비어 있으면 사용자에게 Design 경로(`analysis/<id>_design.md`)와 선택적 `--foundry <name>`(기본 `lerobot`)을 물어보고 중단하세요 — 직접 선택하지 마세요.
+`$ARGUMENTS`가 비어 있으면 사용자에게 Design 경로(`analysis/<id>/design.md`)와 선택적 `--foundry <name>`(기본 `lerobot`)을 물어보고 중단하세요 — 직접 선택하지 마세요.
 
 사전 조건: Design 문서가 이미 존재해야 합니다. 없으면 중단하고 `/analyze-paper <id>`를 먼저 실행하도록 안내하세요.

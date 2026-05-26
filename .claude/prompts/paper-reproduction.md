@@ -14,7 +14,7 @@ The first positional argument is one of:
 
   - `<arXiv id>` — e.g. `2511.00139` (no analysis exists yet, or you
     want to refresh from scratch)
-  - `analysis/<id>_design.md` — when a design already exists
+  - `analysis/<id>/design.md` — when a design already exists
 
 Optional flags:
 
@@ -27,7 +27,7 @@ Optional flags:
     convergence is judged by fixed-point detection).
   - `--skip-analysis` — automatically on when a design path is given as
     input. Also automatically on when an arXiv id is given but
-    `analysis/<id>_design.md` already exists (regenerable, but re-fetch
+    `analysis/<id>/design.md` already exists (regenerable, but re-fetch
     is costly).
 
 If the positional argument is empty, stop and ask the user — do not
@@ -35,12 +35,12 @@ guess a target. If `--foundry` is given but unknown, stop and list the
 registered foundries (currently only `lerobot`).
 
 PRECONDITION:
-- If the input is a design path, both `analysis/<id>.md` and `_design.md`
-  must exist. If either is missing, stop and instruct the user to run
-  `/analyze-paper <id>` first.
-- If the input is an arXiv id and `_design.md` already exists and
-  `--skip-analysis` was not explicitly set, treat it as skip automatically
-  (auto-on). Do not ask the user.
+- If the input is a design path, both `analysis/<id>/analysis.md` and
+  `analysis/<id>/design.md` must exist. If either is missing, stop and
+  instruct the user to run `/analyze-paper <id>` first.
+- If the input is an arXiv id and `analysis/<id>/design.md` already
+  exists and `--skip-analysis` was not explicitly set, treat it as skip
+  automatically (auto-on). Do not ask the user.
 
 CONTEXT (read-only):
 - `.claude/prompts/paper-analysis.md` — the `/analyze-paper` prompt body.
@@ -66,19 +66,19 @@ PROCEDURE:
 A. Round 0 — Gate.
    Purpose: early-exit if the paper cannot be mapped to the foundry.
 
-   1. If the design is absent (`analysis/<id>_design.md` missing), execute
+   1. If the design is absent (`analysis/<id>/design.md` missing), execute
       `.claude/prompts/paper-analysis.md` as-is. This is the standard
       behaviour when an arXiv id is provided as input.
    2. Execute `.claude/prompts/foundry.md` once (`<design-path>
       --foundry <name>`).
-   3. If the output is `analysis/<id>_impl/<foundry>/UNMAPPABLE.md`,
+   3. If the output is `analysis/<id>/impl/<foundry>/UNMAPPABLE.md`,
       terminate normally — the reason is already recorded as one paragraph
       in that file. The `/foundry` prompt §A has also appended a
-      `🚧 매핑 불가` line to the end of `analysis/<id>.md`, so no further
-      edits are needed.
+      `🚧 매핑 불가` line to the end of `analysis/<id>/analysis.md`, so no
+      further edits are needed.
    4. Execute `.claude/prompts/audit.md` once to generate the first audit
       report.
-   5. Copy the report to `analysis/<id>_audit/<foundry>.round_0.md`
+   5. Copy the report to `analysis/<id>/audit/<foundry>.round_0.md`
       (`cp` one line). This copy is included in git for round tracking.
    6. Parse the verdict tuple — read the following cells from the report's
       meta header:
@@ -137,7 +137,7 @@ B. Round 1..N — Branch matrix (inner + outer combined).
    (comma-separated `§X.Y` tokens, `§` prefix included).
 
    `<prev-audit>` is the previous round's audit report path — after
-   Round 0 this is `analysis/<id>_audit/<foundry>.md` (the moment
+   Round 0 this is `analysis/<id>/audit/<foundry>.md` (the moment
    before it is overwritten). The copy `<foundry>.round_<N-1>.md` is
    already in git, so passing that copy to `--feedback` is equivalent
    (and clearer for round tracking).
@@ -149,7 +149,7 @@ B. Round 1..N — Branch matrix (inner + outer combined).
    After executing a round (inner step):
 
    1. Re-run `.claude/prompts/audit.md` to overwrite the report.
-   2. Copy the report to `analysis/<id>_audit/<foundry>.round_<N>.md`.
+   2. Copy the report to `analysis/<id>/audit/<foundry>.round_<N>.md`.
    3. Parse the new verdict tuple + §🔎 machine markers.
 
    For an outer step, `/analyze-paper --focus` updates the Design, then
@@ -170,15 +170,16 @@ B-out. Outer step — focused Design re-extraction.
       analysis body are updated at row level (paper-analysis.md `--focus`
       mode).
    3. **Design stabilisation check** — if the updated
-      `analysis/<id>_design.md` is byte-identical to the Design just
+      `analysis/<id>/design.md` is byte-identical to the Design just
       before this outer step, focused re-extraction found no new
       information; terminate immediately with exit reason `stable_design`.
       The §🧭 diagram in the README visualises this fixed point.
    4. If there is a byte change, run `/foundry` (full regenerate) →
       `/audit` in the same round.
    5. **Zero-patch-delta guard (misclassification detection).** Immediately
-      after the foundry regenerate in step 4, if the new `impl.patch` is
-      **byte-identical** to the `impl.patch` before this outer step —
+      after the foundry regenerate in step 4, if the new
+      `analysis/<id>/impl/<foundry>/impl.patch` is **byte-identical** to
+      the `impl.patch` before this outer step —
       meaning the Design deepened but the implementation did not change by
       a single character — the promise of `paper-extractable` ("digging
       into the Design makes the next round implement more") was broken.
@@ -252,7 +253,7 @@ E. Round-boundary commit.
    their own GIT step. This prompt leaves those untouched and only
    stages + commits the following at each round boundary:
 
-   1. One copy: `analysis/<id>_audit/<foundry>.round_<N>.md`.
+   1. One copy: `analysis/<id>/audit/<foundry>.round_<N>.md`.
    2. (This prompt produces no other direct file edits during any round —
       the round copy is its sole output.)
 
@@ -300,9 +301,9 @@ GIT — round-boundary stage / commit / push:
 At the end of each round (immediately after the delegated audit's own commit):
 
 ```bash
-cp analysis/<id>_audit/<foundry>.md \
-   analysis/<id>_audit/<foundry>.round_<N>.md
-git add analysis/<id>_audit/<foundry>.round_<N>.md
+cp analysis/<id>/audit/<foundry>.md \
+   analysis/<id>/audit/<foundry>.round_<N>.md
+git add analysis/<id>/audit/<foundry>.round_<N>.md
 git diff --cached --quiet || \
     git commit -m "reproduce(<id>, <foundry>, round <N>): <action>"
 ```
@@ -318,7 +319,7 @@ branch mandated by the system environment). If the environment's branch
 policy overrides this prompt's default (`main`), follow that policy.
 
 `<id>` is extracted from the design path or the input arXiv id —
-regex `analysis/(.*)_design\.md$` or the input itself. `<foundry>` is
+regex `analysis/(.*)/design\.md$` or the input itself. `<foundry>` is
 the `--foundry` argument verbatim.
 
 This prompt does NOT call `scripts/refresh-analysis-index.py` directly

@@ -1,7 +1,7 @@
 # Audit Report — <one-line English-friendly title> on `<foundry>`
 
 > PROBE audit 모드 산출물. 한글 단일 문서이며, sibling Design + 한
-> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>.md`) 와
+> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>/analysis.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
@@ -13,10 +13,10 @@
 
 | 항목 | 내용 |
 |------|------|
-| 상위 Design | [`../<id>_design.md`](../<id>_design.md) |
-| Originating analysis | [`../<id>.md`](../<id>.md) |
+| 상위 Design | [`../design.md`](../design.md) |
+| Originating analysis | [`../analysis.md`](../analysis.md) |
 | Foundry | `lerobot` (또는 다른 등록된 foundry 이름) |
-| 구현 가이드 | [`../<id>_impl/<foundry>/impl.md`](../<id>_impl/<foundry>/impl.md) · [`../<id>_impl/<foundry>/impl.patch`](../<id>_impl/<foundry>/impl.patch) |
+| 구현 가이드 | [`../impl/<foundry>/impl.md`](../impl/<foundry>/impl.md) · [`../impl/<foundry>/impl.patch`](../impl/<foundry>/impl.patch) |
 | 검증 생성일 | YYYY-MM-DD (`TZ=Asia/Seoul`) |
 | 📚 문헌 대조 | `pass` / `fail` / `partial` |
 | 🔍 패치 정합성 | `pass` / `fail` |
@@ -29,14 +29,14 @@
 
 ## 📚 문헌 대조
 
-<!-- originating analysis/<id>.md 와 Design 이 명시한 추가 인용에 대해
+<!-- originating analysis/<id>/analysis.md 와 Design 이 명시한 추가 인용에 대해
      일치 / 충돌 / 확장 / 무관 중 어느 관계인지 한 줄씩 판정합니다.
      일치·충돌 의 경우 analysis 문서에서 직접 인용 (verbatim) 한 줄을
      반드시 함께 적습니다. -->
 
 | 분석 | 관계 | 인용 / 사유 |
 |------|------|-------------|
-| [`../<id>.md`](../<id>.md) | 일치 / 충돌 / 확장 / 무관 | <verbatim 인용 또는 갭 설명> |
+| [`../analysis.md`](../analysis.md) | 일치 / 충돌 / 확장 / 무관 | <verbatim 인용 또는 갭 설명> |
 | … | | |
 
 판정: `pass` / `fail` / `partial`
@@ -51,7 +51,7 @@
 <!-- `git apply --check` 결과를 verbatim 으로 기록합니다. -->
 
 ```text
-$ cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.patch
+$ cd /home/user/probe && git apply --check analysis/<id>/impl/<foundry>/impl.patch
 <stdout/stderr verbatim, 빈 출력이면 그 사실을 적습니다>
 ```
 
@@ -69,7 +69,7 @@ $ cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.pat
 | 항목 | 출처 | 패치 본문 | 일치 |
 |------|------|-----------|------|
 | 함수 시그니처 `forward(...)` | `vendor/lerobot/policies/<base>/modeling_<base>.py:LNN` | `patch hunk @<line>` | ✅ / ❌ / ⚠️ |
-| 상수 `<name> = <value>` | `<id>_design.md §📊` verbatim | `patch hunk @<line>` | ✅ / ❌ / ⚠️ |
+| 상수 `<name> = <value>` | `<id>/design.md §📊` verbatim | `patch hunk @<line>` | ✅ / ❌ / ⚠️ |
 | import 경로 `<module>` | `impl.md §🪛` | `patch hunk @<line>` | ✅ / ❌ / ⚠️ |
 | … | | | |
 
@@ -83,15 +83,15 @@ $ cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.pat
 
 ## 📐 식·표 일치
 
-<!-- Design 또는 cited analysis/<id>.md 가 언급한 모든 수식 (`Eq. (4)`)
+<!-- Design 또는 cited analysis/<id>/analysis.md 가 언급한 모든 수식 (`Eq. (4)`)
      · 표 (`Table 3`) 가 패치에 구현되어 있는지, 또는 impl.md §🚧
      미해결 로 명시적으로 유보되어 있는지 점검합니다. 둘 다 아닌
      silent-skip 은 partial 입니다. -->
 
 | 참조 | 출처 | 패치 hunk / 🚧 항목 | 상태 |
 |------|------|---------------------|------|
-| `Eq. (4)` | `analysis/<id>.md §🔬` | `impl.patch @<line>` / `impl.md §🚧 #N` | 구현 / 유보 / silent-skip |
-| `Table 3` | `<id>_design.md §📊` | `…` | 구현 / 유보 / silent-skip |
+| `Eq. (4)` | `analysis/<id>/analysis.md §🔬` | `impl.patch @<line>` / `impl.md §🚧 #N` | 구현 / 유보 / silent-skip |
+| `Table 3` | `<id>/design.md §📊` | `…` | 구현 / 유보 / silent-skip |
 | … | | | |
 
 <!-- silent-skip 항목은 §🧪 시그니처·하이퍼파라미터 판정에 partial 로
@@ -111,7 +111,7 @@ $ cd /home/user/probe && git apply --check analysis/<id>_impl/<foundry>/impl.pat
 
 ```text
 $ py=$(bash scripts/ensure-foundry-runtime.sh <foundry>)
-$ git -C .foundry-runtime/<foundry>/src apply -p3 --directory=src/lerobot <impl.patch>
+$ git -C .foundry-runtime/<foundry>/src apply -p3 --directory=src/lerobot analysis/<id>/impl/<foundry>/impl.patch
 $ "$py" -m pytest <sibling test> -q
 <pytest 요약 줄 verbatim — 예: "6 passed in 2.96s">
 ```

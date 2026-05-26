@@ -1,7 +1,7 @@
 # Implementation Guide — <Original English Title> on `<foundry>`
 
 > PROBE foundry 모드 산출물 (Layer 2, foundry-specific). 한글 단일
-> 문서이며, sibling Design (`analysis/<id>_design.md`) 을 입력으로
+> 문서이며, sibling Design (`analysis/<id>/design.md`) 을 입력으로
 > 받아 한 foundry 의 좌표계 위에서 변경 지점을 매핑합니다. 형식·이모지
 > ·용어 규칙은 `docs/STYLE.md` §6 / §4 를 정확히 따릅니다.
 > 재실행 시 이 파일과 sibling `impl.patch` 를 덮어씁니다.
@@ -14,7 +14,7 @@
 |------|------|
 | 원문 제목 | <Original English Title> |
 | 링크 | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) |
-| 상위 Design | [`../<id>_design.md`](../<id>_design.md) |
+| 상위 Design | [`../design.md`](../design.md) |
 | Foundry | `lerobot` (또는 다른 등록된 foundry 이름) |
 | Foundry pinned commit | `999e77a…` (lerobot 의 경우 `vendor/lerobot/README.md` 와 일치 필수) |
 | 베이스 모델 / 코드 좌표 | `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` (lerobot 의 경우), 또는 foundry 별 등가물 |

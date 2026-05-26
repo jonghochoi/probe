@@ -152,13 +152,13 @@ Scouting finds new papers *outward*; synthesis re-states the pinned set; this th
 
 | Item | Value |
 |---|---|
-| Invoke (orchestrated) | `/reproduce-paper <arXiv id \| analysis/<id>_design.md> [--foundry <name>] [--max-rounds N]` — runs analyze → foundry → audit, then loops `/foundry --feedback <prev-audit>` + `/audit` until the audit verdict stabilises or the round cap is reached |
-| Invoke (step-by-step) | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` → `/foundry analysis/<id>_design.md [--foundry <name>]` → `/audit analysis/<id>_design.md [--foundry <name>]` |
+| Invoke (orchestrated) | `/reproduce-paper <arXiv id \| analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]` — runs analyze → foundry → audit, then loops `/foundry --feedback <prev-audit>` + `/audit` until the audit verdict stabilises or the round cap is reached |
+| Invoke (step-by-step) | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` → `/foundry analysis/<id>/design.md [--foundry <name>]` → `/audit analysis/<id>/design.md [--foundry <name>]` |
 | Slash commands | `.claude/commands/{analyze-paper,foundry,audit,reproduce-paper}.md` (thin wrappers) |
 | Canonical prompts | `.claude/prompts/{paper-analysis,foundry,audit,paper-reproduction}.md` (single source per stage) |
 | Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
 | Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
-| Outputs | `analysis/<id>.md` (deep-dive), `analysis/<id>_design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>_impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>_audit/<foundry>.md` (validation), plus per-round audit copies `analysis/<id>_audit/<foundry>.round_<N>.md` when run via `/reproduce-paper` — all Korean, overwritten each run |
+| Outputs | `analysis/<id>/analysis.md` (deep-dive), `analysis/<id>/design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>/impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>/audit/<foundry>.md` (validation), plus per-round audit copies `analysis/<id>/audit/<foundry>.round_<N>.md` when run via `/reproduce-paper` — all Korean, overwritten each run |
 | Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; audit carries 4-check report |
 | Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/foundry`, `/audit`, `/reproduce-paper` are local |
 | Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |

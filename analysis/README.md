@@ -8,23 +8,25 @@
 그리고 그 Design 을 한 foundry 의 좌표계로 매핑한 Layer 2 구현·검증
 산출물을 남기는 곳입니다.
 
+논문마다 `<arxiv-id>/` 폴더 하나를 두고, 그 안에 아래 파일들을 배치합니다.
+
 | 파일 | 생성 주체 | 성격 |
 |---|---|---|
-| `<arxiv-id>.md` | `/analyze-paper` 슬래시 커맨드 | arXiv id/URL 또는 PDF URL 한 편을 전문 우선으로 분석한 단일 한글 문서 |
-| `<arxiv-id>_design.md` | `/analyze-paper` 슬래시 커맨드 | 위 분석에서 추출한 **Layer 1 Design** — 데이터 계약·모듈 인터페이스·불변식·하이퍼·평가 메트릭. **base 좌표 없음** (vendor-agnostic) |
-| `<arxiv-id>_impl/<foundry>/impl.md` | `/foundry` 슬래시 커맨드 | 위 Design 을 한 foundry (기본 `lerobot`) 의 좌표계로 매핑한 한글 구현 가이드 |
-| `<arxiv-id>_impl/<foundry>/impl.patch` | `/foundry` 슬래시 커맨드 | 같은 foundry 에 적용 가능한 unified diff (`git apply --check` 검증) |
-| `<arxiv-id>_impl/<foundry>/test_*.py` | `/foundry` 슬래시 커맨드 | subclass-seam 매핑의 실행 가능한 smoke test — `impl.patch` 의 runnable counterpart. `/audit §🧬` 가 설치된 foundry 에서 실행 |
-| `<arxiv-id>_impl/<foundry>/UNMAPPABLE.md` | `/foundry` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
-| `<arxiv-id>_audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 대조한 한글 검증 보고서 (정적 4-체크 + §🧬 실행 검증) |
-| `<arxiv-id>_audit/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 audit 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
+| `<arxiv-id>/analysis.md` | `/analyze-paper` 슬래시 커맨드 | arXiv id/URL 또는 PDF URL 한 편을 전문 우선으로 분석한 단일 한글 문서 |
+| `<arxiv-id>/design.md` | `/analyze-paper` 슬래시 커맨드 | 위 분석에서 추출한 **Layer 1 Design** — 데이터 계약·모듈 인터페이스·불변식·하이퍼·평가 메트릭. **base 좌표 없음** (vendor-agnostic) |
+| `<arxiv-id>/impl/<foundry>/impl.md` | `/foundry` 슬래시 커맨드 | 위 Design 을 한 foundry (기본 `lerobot`) 의 좌표계로 매핑한 한글 구현 가이드 |
+| `<arxiv-id>/impl/<foundry>/impl.patch` | `/foundry` 슬래시 커맨드 | 같은 foundry 에 적용 가능한 unified diff (`git apply --check` 검증) |
+| `<arxiv-id>/impl/<foundry>/test_*.py` | `/foundry` 슬래시 커맨드 | subclass-seam 매핑의 실행 가능한 smoke test — `impl.patch` 의 runnable counterpart. `/audit §🧬` 가 설치된 foundry 에서 실행 |
+| `<arxiv-id>/impl/<foundry>/UNMAPPABLE.md` | `/foundry` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
+| `<arxiv-id>/audit/<foundry>.md` | `/audit` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 대조한 한글 검증 보고서 (정적 4-체크 + §🧬 실행 검증) |
+| `<arxiv-id>/audit/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 audit 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
 
 ## 📑 Index
 
 아래 표는 `scripts/refresh-analysis-index.py` 가 자동 관리합니다 —
 `/analyze-paper`, `/foundry`, `/audit` 가 자기 산출물을 커밋할 때
 같이 갱신합니다. 마커 사이는 매 호출마다 멱등 재생성되므로 손으로
-편집하지 마십시오. `lerobot` 컬럼은 `<id>_impl/lerobot/impl.md`
+편집하지 마십시오. `lerobot` 컬럼은 `<id>/impl/lerobot/impl.md`
 존재 시 ✅, `UNMAPPABLE.md` 존재 시 🚧 UNMAPPABLE, 둘 다 없을 때 —.
 `🧬` 컬럼은 `lerobot` audit 메타 헤더의 🧬 실행 검증 verdict
 (`pass`/`fail`/`skipped`, audit 없거나 구버전이면 —) 입니다.
@@ -39,7 +41,7 @@ foundry base 좌표계 밖이라 본 매핑에서 제외된 모듈 수입니다.
 
 | # | Analysis | arXiv | Title | Refreshed | lerobot | 🧬 | 🔎 vr/pe/sd/se/ob |
 |---|---|---|---|---|---|---|---|
-| 1 | [`2511.00139.md`](2511.00139.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
+| 1 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
 
 <!-- ANALYSIS_INDEX:END -->
 
@@ -79,20 +81,20 @@ claude -p "/analyze-paper 2410.07864"
 Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며,
 `PATH` 위의 실행 파일이 아닙니다.
 
-`/foundry analysis/<id>_design.md [--foundry <name>]` — 정식 프롬프트는
-`.claude/prompts/foundry.md`. 선결 조건은 `analysis/<id>.md` 와
-`analysis/<id>_design.md` 의 존재이며, Design 이 target foundry 의
+`/foundry analysis/<id>/design.md [--foundry <name>]` — 정식 프롬프트는
+`.claude/prompts/foundry.md`. 선결 조건은 `analysis/<id>/analysis.md` 와
+`analysis/<id>/design.md` 의 존재이며, Design 이 target foundry 의
 좌표계로 매핑 가능할 때만 `impl.md` + `impl.patch` 를 산출합니다. 매핑
-불가 시 `UNMAPPABLE.md` 와 `analysis/<id>.md` 말미의 `> 🚧 매핑 불가
-(<foundry>) — …` 한 줄만 추가하고 멈춥니다. 기본 foundry 는 `lerobot`
-(= `vendor/lerobot/` 의 6 종 정책).
+불가 시 `UNMAPPABLE.md` 와 `analysis/<id>/analysis.md` 말미의
+`> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 추가하고 멈춥니다. 기본 foundry
+는 `lerobot` (= `vendor/lerobot/` 의 6 종 정책).
 
-`/audit analysis/<id>_design.md [--foundry <name>]` — 정식 프롬프트는
+`/audit analysis/<id>/design.md [--foundry <name>]` — 정식 프롬프트는
 `.claude/prompts/audit.md`. Design + impl 패치 + 분석 문서를 정적으로
-대조해 `<id>_audit/<foundry>.md` 를 산출합니다. 보고서 자체가
+대조해 `<id>/audit/<foundry>.md` 를 산출합니다. 보고서 자체가
 산출물이며 상태 격상 같은 라이프사이클은 없습니다.
 
-`/reproduce-paper <arXiv id | analysis/<id>_design.md> [--foundry <name>] [--max-rounds N]` —
+`/reproduce-paper <arXiv id | analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]` —
 정식 프롬프트는 `.claude/prompts/paper-reproduction.md`. 위 세 슬래시
 커맨드를 **재구현하지 않고 그대로 위임 호출**하며, audit verdict 가
 안정화되거나 라운드 상한에 도달할 때까지 자동 수렴시키는 상위 호환
@@ -130,7 +132,7 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
   `partial` 안정화도 정상 종료이며 마지막 audit 보고서가 그대로 사유
   보고서입니다.
 - **라운드 추적.** 각 라운드 끝에 audit 보고서가
-  `<id>_audit/<foundry>.round_<N>.md` 로 복사돼 git 에 들어갑니다 (N
+  `<id>/audit/<foundry>.round_<N>.md` 로 복사돼 git 에 들어갑니다 (N
   은 0-indexed). 라운드별 분리 commit 이라 사후 부분 롤백 가능합니다.
 
 ```bash
@@ -138,13 +140,13 @@ Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며
 > /reproduce-paper 2410.07864
 
 # (b) Design 이 이미 있고 (직전 /analyze-paper 출력) 매핑·검증만 자동 수렴
-> /reproduce-paper analysis/2410.07864_design.md --foundry lerobot
+> /reproduce-paper analysis/2410.07864/design.md --foundry lerobot
 
 # (c) 단발로만 (Round 0 = 게이트만 돌고 종료, 현재 수동 워크플로우와 동치)
 > /reproduce-paper 2410.07864 --max-rounds 1
 ```
 
-**다중 foundry.** `<id>_impl/` 와 `<id>_audit/` 아래의 `<foundry>`
+**다중 foundry.** `<id>/impl/` 와 `<id>/audit/` 아래의 `<foundry>`
 서브폴더가 다중 foundry 를 폴더 레벨에서 수용합니다. `lerobot` 이 v0
 foundry 이며, 회사 코드용 foundry 가 추후 추가되면 같은 Design 을
 그대로 두고 `/foundry` (또는 `/reproduce-paper`) 만 `--foundry
@@ -159,7 +161,7 @@ foundry 에서 재사용됩니다.
 | 기존 Design 을 한 foundry 에 한 번만 매핑 | `/foundry` |
 | 기존 impl 의 정합성을 한 번만 점검 | `/audit` |
 | 새 논문을 분석부터 audit 안정화까지 자동 수렴 | **`/reproduce-paper`** |
-| 직전 audit 의 gap 을 inner loop 로 외과적으로 채우기 | **`/reproduce-paper analysis/<id>_design.md`** |
+| 직전 audit 의 gap 을 inner loop 로 외과적으로 채우기 | **`/reproduce-paper analysis/<id>/design.md`** |
 
 ## 다른 산출물·컨텍스트와의 관계
 
@@ -170,7 +172,7 @@ foundry 에서 재사용됩니다.
   한 편 심층은 `analysis/`. `scouting/` 리포트의 ✨ 추천 논문이
   `analysis/` 의 입력으로 이어질 수 있지만 자동화는 없습니다 — 사람이
   슬래시 커맨드로 명시적으로 호출합니다.
-- foundry 좌표: `<id>_impl/lerobot/` 의 패치는 `vendor/lerobot/` 의
+- foundry 좌표: `<id>/impl/lerobot/` 의 패치는 `vendor/lerobot/` 의
   pinned 스냅샷 위에서만 의미가 있습니다. vendor 스냅샷 갱신은
   `vendor/lerobot/README.md` 의 절차로만 진행하며, 기존 패치는
   필요시 재생성합니다.
