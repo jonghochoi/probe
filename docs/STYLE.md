@@ -294,16 +294,41 @@ pre-humanize content; that content is what gets committed.
 `humanize-korean` is the LAST step before `git add` — never run it
 before the agent has finished writing the output file.
 
-**Pipeline.** PROBE uses the `--strict` 4-agent pipeline:
-`ai-tell-detector` → `korean-style-rewriter` →
-[`content-fidelity-auditor` ∥ `naturalness-reviewer`]. The two
-reviewers run in parallel and are orthogonal — the fidelity auditor
+**Pipeline (v2.0 — 3-tier).** From `humanize-korean` v2.0 the skill
+runs in one of three tiers, resolved automatically from the target
+file path: `scouting/` → **fast**, `synthesis/` → **standard**,
+`analysis/` → **strict**. A caller may override via `options.mode`,
+except that `mode: fast` against an `analysis/` path is refused and
+promoted to `standard` (decision-grade documents do not get the fast
+path). Per-tier pipeline:
+
+- **fast** — `ai-tell-detector` (Haiku 4.5) → `korean-style-rewriter`
+  (Sonnet 4.6 with `--conservative`) → inline STYLE §4-5 invariant
+  check (no agent). Loop cap 1.
+- **standard** — `ai-tell-detector` (Sonnet 4.6) →
+  `korean-style-rewriter` (Opus) → `content-fidelity-auditor` (Opus)
+  in the main loop, with `naturalness-reviewer` (Opus) called once at
+  the end as a final-round check (diff-area rescan only). Loop cap 2.
+- **strict** — full 4-agent pipeline as before:
+  `ai-tell-detector` → `korean-style-rewriter` →
+  [`content-fidelity-auditor` ∥ `naturalness-reviewer`] in parallel
+  (diff-area rescan only). Loop cap 3. All agents on Opus.
+
+The two reviewers (when run) remain orthogonal — the fidelity auditor
 asks only "is the meaning preserved?", the naturalness reviewer asks
 only "did the AI tells actually disappear, and was the rewrite not
 over-polished?". A `fail` from fidelity always rolls back; a
 `rewrite_round_2` or `rollback_and_rewrite` from naturalness triggers
-a second pass (max 3 rounds, then `hold_and_report` for human review).
-The monolith fast-path from `im-not-ai` upstream is not used here.
+a second pass (within the tier's loop cap, then `hold_and_report` for
+human review). The fast tier substitutes the fidelity auditor with a
+deterministic inline regex check against the invariants listed above;
+the invariants themselves are **enforced identically in all three
+tiers** — this section is the SSOT and no tier may relax it. The
+monolith fast-path from `im-not-ai` upstream is not used in any tier.
+
+A one-line cost estimate (`est_tokens`) is appended to the skill's
+Phase E status line for regression watching; exact `usage` collection
+is opt-in via `options.measure: true`.
 
 This subsection is the single source of truth that the
 `humanize-korean` skill must respect when run against any PROBE

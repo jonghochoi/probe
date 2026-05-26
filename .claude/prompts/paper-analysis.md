@@ -317,12 +317,13 @@ After both Korean output files (`analysis/<id>/analysis.md` and
 the `humanize-korean` skill once per file:
 
   Skill:  `.claude/skills/humanize-korean/SKILL.md`
-  Mode:   strict — 4-agent pipeline
-          (`ai-tell-detector` → `korean-style-rewriter` →
+  Mode:   auto — tier resolved by file path prefix; `analysis/`
+          resolves to strict (4-agent pipeline:
+          `ai-tell-detector` → `korean-style-rewriter` →
           [`content-fidelity-auditor` ∥ `naturalness-reviewer`]).
-          Phase C runs the two reviewers in parallel: fidelity guards
-          meaning, naturalness guards residual AI tells and
-          over-polish. The monolith fast-path is not used in PROBE.
+          See `SKILL.md` Phase 0 for the resolver. STYLE §4-5
+          invariants are enforced in all tiers. The monolith
+          fast-path is not used.
   Input:  the path of each file just written (run the pipeline once
           per file)
   Output: in-place rewrite of the same file
