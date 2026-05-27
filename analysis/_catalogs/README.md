@@ -1,25 +1,46 @@
-# `_catalogs/` — Cross-paper lineage 카탈로그
+# `_catalogs/` — Cross-paper lineage 카탈로그 + pillar 방법론
 
-> PROBE D19b "VLM backbone lineage choice" + D22 "Multi-embodiment
-> pretraining data" 의 의사결정 근거 자료. 세 축의 enumeration 을
-> 분리 관리하면서 cross-reference 규약으로 묶음. per-paper deep-dive
-> (`analysis/<arxiv-id>/`) 와는 *목적이 다른* 자료이므로 별도 폴더.
+> 두 트랙이 한 폴더에 산다.
+>
+> **(1) Cross-paper lineage 카탈로그** — PROBE D19b "VLM backbone
+> lineage choice" + D22 "Multi-embodiment pretraining data" 의 의사결정
+> 근거. lineage 2-튜플 *(초기 가중치) × (further-pretrain corpus)* 의
+> 세 축 enumeration (vlm / vla / lineage_corpus) 을 분리 관리하면서
+> cross-reference 규약으로 묶음. *사실 표* — 누가-무엇-규모.
+>
+> **(2) Pillar 단위 보존·검증 참조 문서** — pillar 별 방법론·측정
+> 프로토콜·이론 정리물 (예: `vlm-prior-preservation.md` — P4 의
+> forgetting × carve-out 직교 평면, 경로 개입 A~D, staged training
+> recipe, forward KL 측정 프로토콜). *사실 표가 아니라 설계 문서*.
+>
+> per-paper deep-dive (`analysis/<arxiv-id>/`) 와는 *목적이 다른*
+> 자료이므로 별도 폴더. 두 트랙은 cross-reference 로 묶임 — 방법론
+> 문서가 카탈로그 행을 인용해 lineage 별 권고를 깔고, 카탈로그가 새
+> 행을 추가할 때 방법론 문서의 평가 기준을 참고.
 
 ---
 
-## 1. 세 축의 정의
+## 1. 두 트랙의 정의
+
+### 1-1. Lineage 카탈로그 (사실 표) — 세 축
 
 | 파일 | 무엇을 enumerate 하는가 | 무엇은 enumerate 하지 않는가 |
 |---|---|---|
 | [`vlm.md`](vlm.md) | open-weight VLM 후보 — *lineage 2-tuple 의 첫 항* | VLA (VLM 위에 action expert 쌓은 시스템), 데이터셋 |
 | [`vla.md`](vla.md) | 랜드마크 VLA — `(VLM init) × (Further-pretrain corpus)` 매트릭스 | VLM 단일, 데이터셋 단일 (각 셀 값으로만 인용) |
-| [`pretrain_data.md`](pretrain_data.md) | 멀티-임베디먼트 사전학습 데이터셋 — robot action / human video / mixed | 벤치마크 (LIBERO/CALVIN 등; 별도 처리 deferred) |
+| [`lineage_corpus.md`](lineage_corpus.md) | VLA further-pretrain corpus — robot action / human video / mixed (멀티-임베디먼트) | 벤치마크 (LIBERO/CALVIN 등; 별도 처리 deferred) |
+
+### 1-2. Pillar 방법론 (설계 문서)
+
+| 파일 | 무엇을 정의하는가 | 어느 pillar / 결정 |
+|---|---|---|
+| [`vlm-prior-preservation.md`](vlm-prior-preservation.md) | VLA 사전학습 보존 — forgetting × carve-out 직교 평면, θ_VLM 경로 개입 A~D, staged training recipe, forward KL 측정 프로토콜 | P4 D19~D23 (보존 전략 + 측정 + 사다리) |
 
 > *lineage 2-tuple* = `(initial weights) × (further-pretrain corpus)`. 한
 > VLA 의 정체성은 *어떤 VLM 으로 시작했는지* + *그 위에 어떤 데이터로
 > 추가 학습했는지* 두 항으로 정해진다. 단순 모델명("PaliGemma") 은 빈
 > 껍데기 — π0 가 그 위에 OXE+π in-house 로 추가 학습한 게 *π0 의*
-> lineage. 그래서 vlm.md / vla.md / pretrain_data.md 가 분리되어야 함.
+> lineage. 그래서 vlm.md / vla.md / lineage_corpus.md 가 분리되어야 함.
 
 ---
 
@@ -64,7 +85,7 @@
 > `huggingface.co/datasets/<org>`). 링크 텍스트는 `hf:` 통일하고 URL 은
 > 실제 경로 그대로 둠.
 
-### 2-3. 데이터 유형 (pretrain_data.md 전용)
+### 2-3. 데이터 유형 (lineage_corpus.md 전용)
 
 | 아이콘 | 의미 |
 |---|---|
@@ -72,9 +93,9 @@
 | 👤 Human video | robot action 없음, 인간 손/몸 행동 비디오 (VLA pre-training prior 용) |
 | 🔀 Mixed | 한 데이터셋 안에 robot + human 둘 다 (UniHand-2.0 등) |
 
-### 2-4. Scan 표 + per-dataset 카드 (pretrain_data.md 전용)
+### 2-4. Scan 표 + per-dataset 카드 (lineage_corpus.md 전용)
 
-`pretrain_data.md` 는 컬럼이 많아 평면 표만으로는 가독성이 떨어진다.
+`lineage_corpus.md` 는 컬럼이 많아 평면 표만으로는 가독성이 떨어진다.
 Cycle 5 부터 **상단 scan 표 + 하단 per-dataset `<details>` 카드** 하이브리드.
 
 **Scan 표 (7 컬럼)** — 한 행 한 줄:
@@ -128,7 +149,7 @@ H4 sub-section 순서 고정. H4 헤더는 emoji 없음 (`docs/STYLE.md` H3-plai
 
 | 카탈로그 | H4 sub-section (순서 고정) |
 |---|---|
-| `pretrain_data.md` | Observations · Actions · Embodiment · Annotation · Scale · Lineage 적층 · Source check · Sources |
+| `lineage_corpus.md` | Observations · Actions · Embodiment · Annotation · Scale · Lineage 적층 · Source check · Sources |
 | `vla.md` | Architecture · Training data · Action representation · Inference · Eval · Open-weight · Source check · Sources |
 
 `<details><summary>` 는 GitHub markdown 표준 — 클릭하면 펼쳐짐. summary
@@ -160,7 +181,7 @@ Scan 표 7번째 컬럼의 source-check 마커는 *카드 안의 모든 필드* 
 
 | 카탈로그 | 의사결정 4-필드 |
 |---|---|
-| `pretrain_data.md` | License · Scale · 데이터 유형 · Lineage 적층 |
+| `lineage_corpus.md` | License · Scale · 데이터 유형 · Lineage 적층 |
 | `vla.md` (도입 시) | License · 총 파라미터 · VLM init · Open-weight |
 | `vlm.md` (도입 시) | License · 파라미터 · Instruction-tuning corpus · Access |
 
@@ -186,14 +207,14 @@ dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan �
 | 출발 위치 | 가리키는 위치 | 예시 |
 |---|---|---|
 | `vla.md` "VLM init" 컬럼 | `vlm.md` 의 같은 모델명 행 | `PaliGemma-2B` → `vlm.md` PaliGemma 행 |
-| `vla.md` "Further-pretrain corpus" 컬럼 | `pretrain_data.md` 의 같은 데이터셋 행 | `OXE + π in-house mix` → `pretrain_data.md` OXE 행 |
-| `pretrain_data.md` "lineage 적층" 컬럼 | `vla.md` 의 같은 VLA 행 | `π0, π0.5, OpenVLA` → `vla.md` 각 VLA 행 |
+| `vla.md` "Further-pretrain corpus" 컬럼 | `lineage_corpus.md` 의 같은 데이터셋 행 | `OXE + π in-house mix` → `lineage_corpus.md` OXE 행 |
+| `lineage_corpus.md` "lineage 적층" 컬럼 | `vla.md` 의 같은 VLA 행 | `π0, π0.5, OpenVLA` → `vla.md` 각 VLA 행 |
 | `vlm.md` "PROBE D19b 후보 메모" 의 *"X init"* 토큰 | `vla.md` 의 X VLA 행 | `Xiaomi-Robotics-0 init` → `vla.md` Xiaomi-Robotics-0 행 |
 
 > **추가/갱신 원칙**: 새 entity 를 한 카탈로그에 등재하면, 다른 두 카탈로그의
 > 관련 셀도 *같은 commit* 에서 갱신. 예: 새 VLA 를 `vla.md` 에 추가하면 그
 > VLA 가 쓰는 VLM 이 `vlm.md` 에 없을 때 `vlm.md` 에도 행 추가; 그 VLA 가
-> 적층한 데이터셋의 `pretrain_data.md` 의 "lineage 적층" 셀에 그 VLA 명도
+> 적층한 데이터셋의 `lineage_corpus.md` 의 "lineage 적층" 셀에 그 VLA 명도
 > 추가.
 
 ---
@@ -209,7 +230,7 @@ dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan �
    → `vla.md` 에 행 추가. + 그 VLA 의 VLM init 이 `vlm.md` 에 없으면
    `vlm.md` 에도 추가.
 3. **X 가 *데이터셋* 인가** (학습용 trajectory / video / image corpus)?
-   → `pretrain_data.md` 에 행 추가. 데이터 유형 (🤖 / 👤 / 🔀) 분류.
+   → `lineage_corpus.md` 에 행 추가. 데이터 유형 (🤖 / 👤 / 🔀) 분류.
 4. **X 가 *벤치마크* 인가** (LIBERO, CALVIN, RoboCasa, RoboTwin 2.0
    같은 평가 환경)?
    → 현 카탈로그 범위 *밖*. 향후 `_catalogs/benchmarks.md` 신설 검토
@@ -230,8 +251,8 @@ dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan �
 2. 해당 카탈로그의 표 헤더 schema 에 맞춰 셀 값 채움.
    - License: §2-1 마커 형식
    - Access: §2-2 아이콘 + 링크 prefix
-   - (pretrain_data 만) 데이터 유형: §2-3
-   - (pretrain_data 만) 카드 schema: §2-4 의 H4 8개 sub-section 모두 채움
+   - (lineage_corpus 만) 데이터 유형: §2-3
+   - (lineage_corpus 만) 카드 schema: §2-4 의 H4 8개 sub-section 모두 채움
 3. Cross-reference 동기화 (§3) — 다른 카탈로그에서 이 entity 를 인용하는
    셀이 있으면 같이 갱신.
 4. **Source-check 절 (§2-5) 채우기 필수** — 어느 필드가 paper-level
@@ -285,7 +306,7 @@ Commit: `docs(catalogs): 2026-Qx rebalance` 형태. body 에 *추가/제거/
 | Prismatic-VLM + Qwen2.5-0.5B | VLA-Adapter |
 | (별도 VLM 없음) | Octo |
 
-`pretrain_data.md` 데이터셋별로 그 데이터셋을 적층한 VLA 들을 역참조:
+`lineage_corpus.md` 데이터셋별로 그 데이터셋을 적층한 VLA 들을 역참조:
 
 | 데이터셋 | 이 데이터셋을 적층한 VLA |
 |---|---|

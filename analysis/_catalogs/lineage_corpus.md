@@ -1,6 +1,12 @@
-# 멀티-임베디먼트 사전학습 데이터셋 카탈로그 (D22)
+# VLA lineage corpus 카탈로그 (further-pretrain corpus, D22)
 
-> PROBE D22 "Multi-embodiment pretraining data" 의사결정 근거.
+> PROBE D22 "Multi-embodiment pretraining data" 의사결정 근거. lineage
+> 2-튜플 *(초기 VLM 가중치) × (further-pretrain corpus)* 의 **두 번째 축**
+> — VLM은 이미 학습된 채로 들어오고, 그 위에 VLA를 만들기 위해 *추가로
+> 사전학습할 때* 쓰이는 corpus 후보를 정리한다. (파일명이 `pretrain_data`
+> 였던 이유 — 단, "VLM 사전학습"이 아니라 *VLA further-pretrain* 임을
+> 슬러그가 더 정확히 담도록 `lineage_corpus` 로 개명.)
+>
 > 각 데이터셋의 입력·출력 스키마 + 임베디먼트 메타 + 규모를 *scan 표*
 > 와 *per-dataset `<details>` 카드* 의 하이브리드로 정리. PROBE 의
 > dexterous hand 타깃 (Sharpa 22-DOF / xhand) 을 기준으로 hand-DOF
