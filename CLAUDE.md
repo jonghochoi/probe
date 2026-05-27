@@ -17,7 +17,6 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/MASTER.md` | human | Single source of truth — Identity, Pillars, Decision Log, Tracked Literature (all P1–P5) |
 | `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
 | `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
-| `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Each contains: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`audit/<foundry>.md`) |
 | `analysis/_catalogs/` | agent (hand-curated) | Cross-paper lineage catalogs, separated from per-paper `<arxiv-id>/` deep-dives. `README.md` defines the common column standard (License + commercial marker / Access icon / `hf:`/`gh:`/`web` link prefix / 🤖-👤-🔀 데이터 유형 / 🟢-🟡-🔴-❓ source-check) + the decision-4-field rule for the scan marker; `vlm.md` enumerates open-weight VLM candidates as a flat table, `vla.md` and `pretrain_data.md` both use the *scan table + per-row `<details>` cards* hybrid (vla 8 H4: Architecture / Training data / Action representation / Inference / Eval / Open-weight / Source check / Sources · pretrain_data 8 H4: Observations / Actions / Embodiment / Annotation / Scale / Lineage / Source check / Sources). Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
@@ -139,12 +138,12 @@ Hard rules:
    `switch`, `migrate`, `restructure`, `clarify`, `re-align`, `unify`,
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
-   `deps`. Don't invent new types. (The bare `scout:` / `synthesis:` prefixes
-   are *generated routine commits*, not human commits — do not imitate them
-   when authoring code/doc changes. Their canonical formats are:
-   `scout: P{N} report YYYY-MM-DD` and `synthesis: P{N} brief YYYY-MM`.)
+   `deps`. Don't invent new types. (The bare `scout:` prefix is a
+   *generated routine commit*, not a human commit — do not imitate it
+   when authoring code/doc changes. Its canonical format is
+   `scout: P{N} report YYYY-MM-DD`.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
-   `scout`/`scouting`, `synthesis`, `analysis`, `context`, `prompts`,
+   `scout`/`scouting`, `analysis`, `context`, `prompts`,
    `config`, `docs`, `brand`, `CLAUDE.md`. Omit the scope only for repo-wide
    changes.
 4. **Description** — lowercase first letter (after the colon), no trailing
@@ -239,7 +238,7 @@ must be brought into line, not left as exceptions.
 ### Reference / structural docs
 
 `CLAUDE.md`, `docs/STYLE.md`, `scouting/README.md`,
-`synthesis/README.md`, `analysis/README.md`. Plain headers, **no emoji**.
+`analysis/README.md`. Plain headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
 `STYLE.md`. A folder README's H1 is the folder name (`# scouting/`).
 
@@ -276,9 +275,9 @@ English so `git log`, PR threads, and external collaborators read uniformly.
 Use this rule as the single source of truth for "which language should a
 new doc be in?":
 
-- **Default — Korean (한글).** All agent outputs (`scouting/`, `synthesis/`,
+- **Default — Korean (한글).** All agent outputs (`scouting/`,
   `analysis/`) and the folder READMEs that describe them
-  (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`) are
+  (`scouting/README.md`, `analysis/README.md`) are
   Korean. Templates that those folders ship (`_TEMPLATE*.md`) are Korean
   as well.
 - **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
@@ -311,14 +310,14 @@ checklist existed). Walk this list every time:
       reference/structural (plain headers). Pick one consistently per the
       table above and do not mix levels.
 - [ ] **Pick the location** — folder READMEs sit next to what they describe
-      (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`);
+      (`scouting/README.md`, `analysis/README.md`);
       onboarding / formatting guides live under `docs/`; contributor /
       governance docs sit at the repo root next to `CLAUDE.md`.
 - [ ] **Add it to `README.md` → "Further Reading" table.** This is the only
       index in the repo. Match the existing row format (`[`path`](path) |
       one-line description`).
-- [ ] **If it is a folder README**, confirm the three output-track READMEs
-      (`scouting/`, `synthesis/`, `analysis/`) and the new one remain
+- [ ] **If it is a folder README**, confirm the two output-track READMEs
+      (`scouting/`, `analysis/`) and the new one remain
       structurally symmetric — each opens with `# foldername/`, names its
       file convention, its generator, and what it reads from `context/`.
 - [ ] **If it introduces a new top-level path**, add a row to the
@@ -366,5 +365,5 @@ idempotent.
 - `docs/INTRO.md` — Korean onboarding + operations manual.
 - `docs/STYLE.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
-- `scouting/README.md`, `synthesis/README.md`, `analysis/README.md` — what
+- `scouting/README.md`, `analysis/README.md` — what
   each output track is and how it is produced.

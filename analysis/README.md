@@ -1,8 +1,8 @@
 # analysis/
 
-주간 스카우팅(`scouting/`) · 월간 종합(`synthesis/`)과 **분리된** 산출물
-경로입니다. 새 논문을 찾는 곳도, 핀 논문 묶음을 재진술하는 곳도
-아닙니다. 사람이 이미 신경 쓰는 **특정 논문 한 편** (보통
+주간 스카우팅(`scouting/`)과 **분리된** 산출물
+경로입니다. 새 논문을 찾는 곳이 아닙니다. 사람이 이미 신경 쓰는 **특정
+논문 한 편** (보통
 `context/MASTER.md` §8 Tracked Literature 의 핀/기준 논문) 을 깊게 읽고,
 그 한 편에 대한 한글 심층 분석과 **vendor-agnostic Layer 1 Design**,
 그리고 그 Design 을 한 foundry 의 좌표계로 매핑한 Layer 2 구현·검증
@@ -166,8 +166,8 @@ foundry 에서 재사용됩니다.
 - 입력: 사람이 직접 골라 슬래시 커맨드에 넘긴 arXiv id 또는 PDF URL.
   `context/MASTER.md` §8 Tracked Literature 의 핀/기준 논문이 일반적
   대상이지만, 슬래시 커맨드는 임의의 입력을 받습니다.
-- 분리: 새 논문 탐색은 `scouting/`, 핀 묶음의 서사 압축은 `synthesis/`,
-  한 편 심층은 `analysis/`. `scouting/` 리포트의 ✨ 추천 논문이
+- 분리: 새 논문 탐색은 `scouting/`, 한 편 심층은 `analysis/`.
+  `scouting/` 리포트의 ✨ 추천 논문이
   `analysis/` 의 입력으로 이어질 수 있지만 자동화는 없습니다 — 사람이
   슬래시 커맨드로 명시적으로 호출합니다.
 - foundry 좌표: `<id>/impl/lerobot/` 의 패치는 `vendor/lerobot/` 의

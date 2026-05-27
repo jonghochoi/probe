@@ -2,8 +2,8 @@
 
 > Automated research scouting for dexterous manipulation —
 > citation-graph expansion, author watch, and arXiv triage
-> distilled into weekly Scouting Reports, monthly synthesis
-> briefs, and on-demand deep-dives with reproduction patches.
+> distilled into weekly Scouting Reports and on-demand
+> deep-dives with reproduction patches.
 
 ---
 
@@ -26,21 +26,20 @@
 **Probe는 그 3 ~ 5%를 대신 찾아온다 — 그리고 다운로드 폴더에서 죽게 두지 않는다.**
 "이 논문이 흥미롭다"가 아니라
 **"이 논문이 맞다면 지금 내 학습·평가 파이프라인에서 무엇을 바꿔야 하는가"** 를 묻고,
-요약이 아니라 **세 갈래로 의사결정 재료**를 만든다 — outward (찾기), inward (압축), focused (재현):
+요약이 아니라 **두 갈래로 의사결정 재료**를 만든다 — outward (찾기), focused (재현):
 
 - **주간 Scouting Report** (outward) — 월·목, pillar 별 3 ~ 5편. 점수화된 후보 + 너의 open question 에 묶인 decision implication.
-- **월간 Synthesis Brief** (inward) — pillar 별 핀된 문헌(§6 8편)이 시간이 지나면 머릿속에서 흐려지는 걸 막는다. 짧고 정직한 산문 압축.
 - **온디맨드 Analysis + Foundry + Verify** (focused) — `/analyze-paper` 가 한 편을 한국어 deep-dive + Layer 1 Design (vendor-agnostic) 으로 읽고, `/foundry` 가 그 Design 을 target foundry (기본 `lerobot`) 좌표계로 매핑한 unified diff 패치를 떠먹여 주며, `/audit` 가 Design + 패치 + 분석 문서를 정적 대조해 검증 보고서를 만든다. 셋을 한 번에 돌려 audit 안정화까지 자동 수렴시키고 싶으면 상위 호환 오케스트레이터 `/reproduce-paper` 를 쓴다.
 
 ---
 
 ## 🧭 파이프라인
 
-PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출물**입니다 — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌고, 자기 폴더에 씁니다. 셋이 합쳐져 연구 로그를 정직하게 유지합니다.
+PROBE 는 **하나의 정적 컨텍스트를 공유하는 두 갈래의 산출물**입니다 — outward (`scouting/`), focused (`analysis/`). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌고, 자기 폴더에 씁니다. 둘이 합쳐져 연구 로그를 정직하게 유지합니다.
 
 > **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — 정본 정의는 [`context/MASTER.md`](../context/MASTER.md) §5.
 >
-> **Full doc vs. per-pillar extract**: `context/MASTER.md` 는 다섯 pillar 전체(Decision Log 포함)의 단일 진실원입니다. `context/P{1..4}.md` 각 파일은 그 중 한 pillar 를 §1–§9 동일 골격으로 좁혀낸 history-free 추출본이며, 클라우드 scouting/synthesis 루틴은 **추출본 하나만** 읽어 컨텍스트를 가볍고 pillar-focused 하게 유지합니다. 풀 문서를 편집하고 추출본을 재생성하세요 — 역방향 금지.
+> **Full doc vs. per-pillar extract**: `context/MASTER.md` 는 다섯 pillar 전체(Decision Log 포함)의 단일 진실원입니다. `context/P{1..4}.md` 각 파일은 그 중 한 pillar 를 §1–§9 동일 골격으로 좁혀낸 history-free 추출본이며, 클라우드 scouting 루틴은 **추출본 하나만** 읽어 컨텍스트를 가볍고 pillar-focused 하게 유지합니다. 풀 문서를 편집하고 추출본을 재생성하세요 — 역방향 금지.
 
 ```
    ┌───────────────────────────────────────────────────────────────────┐
@@ -55,39 +54,39 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
                                      ▼
    ┌───────────────────────────────────────────────────────────────────┐
    │                             P R O B E                             │
-   └───────────┬─────────────────────┬──────────────────────┬──────────┘
-               │                     │                      │
-               ▼                     ▼                      ▼
-   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-   │   OUTWARD           │ │   INWARD           │ │   FOCUSED          │
-   │   Weekly Scouting   │ │   Monthly Synth.   │ │   On-demand Anal.  │
-   │                     │ │                    │ │                    │
-   │   Mon/Thu · per P#  │ │   monthly · per P# │ │   /analyze-paper   │
-   │                     │ │                    │ │                    │
-   │ · Author Watch      │ │ · compress the     │ │ · one paper —      │
-   │ · Citation-Graph    │ │   pinned set       │ │   full-text first  │
-   │ · Keyword Sweep     │ │ · connect dots:    │ │ · neutral summary  │
-   │ · Competitor watch  │ │   D# ↔ §6 pins     │ │   + decision-      │
-   │                     │ │                    │ │   grade implic.    │
-   │ in: P#.md +         │ │ in: P#.md §4 + §6  │ │ in: MASTER.md      │
-   │     last ~2 wk      │ │     (D# + pins)    │ │     + paper body   │
-   │                     │ │                    │ │                    │
-   │ curl: arXiv + S2    │ │ no retrieval —     │ │ curl: arxiv/html   │
-   │                     │ │ static compress    │ │ → ar5iv → abstract │
-   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
-              │ writes new           │ overwrites           │ overwrites
-              ▼                      ▼                      ▼
-   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-   │ scouting/           │ │ synthesis/         │ │ analysis/          │
-   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
-   │                     │ │                    │ │                    │
-   │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
-   │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │
-   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
-              │                      │                      │
-              └──────────────────────┼──────────────────────┘
-                                     │ informs
-                                     ▼
+   └─────────────────────┬────────────────────────────┬────────────────┘
+                         │                            │
+                         ▼                            ▼
+   ┌──────────────────────────────┐ ┌──────────────────────────────┐
+   │   OUTWARD                    │ │   FOCUSED                    │
+   │   Weekly Scouting            │ │   On-demand Analysis         │
+   │                              │ │                              │
+   │   Mon/Thu · per P#           │ │   /analyze-paper             │
+   │                              │ │                              │
+   │ · Author Watch               │ │ · one paper —                │
+   │ · Citation-Graph             │ │   full-text first            │
+   │ · Keyword Sweep              │ │ · neutral summary            │
+   │ · Competitor watch           │ │   + decision-grade implic.   │
+   │                              │ │                              │
+   │ in: P#.md +                  │ │ in: MASTER.md                │
+   │     last ~2 wk               │ │     + paper body             │
+   │                              │ │                              │
+   │ curl: arXiv + S2             │ │ curl: arxiv/html             │
+   │                              │ │ → ar5iv → abstract           │
+   └───────────────┬──────────────┘ └───────────────┬──────────────┘
+                   │ writes new                     │ overwrites
+                   ▼                                ▼
+   ┌──────────────────────────────┐ ┌──────────────────────────────┐
+   │ scouting/                    │ │ analysis/                    │
+   │ P#/YYYY-MM-DD.md             │ │ <arxiv-id>.md                │
+   │                              │ │                              │
+   │ 3–5 papers, scored,          │ │ single Korean                │
+   │ decision-grade KO            │ │ deep-dive doc                │
+   └───────────────┬──────────────┘ └───────────────┬──────────────┘
+                   │                                │
+                   └────────────────┬───────────────┘
+                                    │ informs
+                                    ▼
                     ┌─────────────────────────────────┐
                     │             Human               │
                     │                                 │
@@ -110,7 +109,7 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
 `context/` (정적)와 산출물 트랙들(동적) 사이의 분리는 단 하나의 이유로 존재합니다 — 에이전트 컨텍스트를 가볍게 유지하기 위해서입니다.
 
 - **정적** (`context/`) — 월 단위로 한 번 정도 바뀝니다. 에이전트는 *읽기만* 하고, 절대 쓰지 않습니다.
-- **동적** — 에이전트가 씁니다. `scouting/` 는 append-only 입니다 (실행마다 pillar별 새 dated 파일 1개; 다음 실행은 해당 pillar 의 직전 ~2주분만 읽습니다). `synthesis/` 와 `analysis/` 는 매 실행마다 덮어쓰는 living snapshot 입니다 — 이력 없음, 필요 시 재생성.
+- **동적** — 에이전트가 씁니다. `scouting/` 는 append-only 입니다 (실행마다 pillar별 새 dated 파일 1개; 다음 실행은 해당 pillar 의 직전 ~2주분만 읽습니다). `analysis/` 는 매 실행마다 덮어쓰는 living snapshot 입니다 — 이력 없음, 필요 시 재생성.
 
 모든 것을 한 파일에 쌓으면 몇 주 안에 context 가 부풀어 에이전트가 이미 다뤘던 논문을 재추천하거나 핀된 literature 가 망각됩니다.
 

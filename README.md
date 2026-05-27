@@ -49,7 +49,7 @@ But it does not stop at "here are some interesting papers." It asks the only que
 
 > *"If this paper is right, what do I change in my training/evaluation pipeline next week?"*
 
-Summaries are cheap. PROBE produces **decision material** across three tracks — outward (find), inward (compress), focused (reproduce).
+Summaries are cheap. PROBE produces **decision material** across two tracks — outward (find) and focused (reproduce).
 
 | Without PROBE | With PROBE |
 |---|---|
@@ -58,7 +58,6 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 | Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
-| Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
 | "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
 | "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` takes the Design, drives `/foundry` → `/audit` in a converging loop, and ships a unified-diff patch against a target foundry (default `lerobot`) |
 
@@ -66,11 +65,11 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 
 ## 🧭 The Pipeline
 
-PROBE has **three output tracks** sharing one static context — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). Each answers a different question, runs on a different cadence, and writes to its own folder; together they keep the research log honest.
+PROBE has **two output tracks** sharing one static context — outward (`scouting/`) and focused (`analysis/`). Each answers a different question, runs on a different cadence, and writes to its own folder; together they keep the research log honest.
 
 > **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
-> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§9 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
+> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§9 skeleton; the cloud scouting routine reads **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
 
 ```
    ┌───────────────────────────────────────────────────────────────────┐
@@ -85,39 +84,39 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
                                      ▼
    ┌───────────────────────────────────────────────────────────────────┐
    │                             P R O B E                             │
-   └───────────┬─────────────────────┬──────────────────────┬──────────┘
-               │                     │                      │
-               ▼                     ▼                      ▼
-   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-   │   OUTWARD           │ │   INWARD           │ │   FOCUSED          │
-   │   Weekly Scouting   │ │   Monthly Synth.   │ │   On-demand Anal.  │
-   │                     │ │                    │ │                    │
-   │   Mon/Thu · per P#  │ │   monthly · per P# │ │   /analyze-paper   │
-   │                     │ │                    │ │                    │
-   │ · Author Watch      │ │ · compress the     │ │ · one paper —      │
-   │ · Citation-Graph    │ │   pinned set       │ │   full-text first  │
-   │ · Keyword Sweep     │ │ · connect dots:    │ │ · neutral summary  │
-   │ · Competitor watch  │ │   D# ↔ §6 pins     │ │   + decision-      │
-   │                     │ │                    │ │   grade implic.    │
-   │ in: P#.md +         │ │ in: P#.md §4 + §6  │ │ in: MASTER.md      │
-   │     last ~2 wk      │ │     (D# + pins)    │ │     + paper body   │
-   │                     │ │                    │ │                    │
-   │ curl: arXiv + S2    │ │ no retrieval —     │ │ curl: arxiv/html   │
-   │                     │ │ static compress    │ │ → ar5iv → abstract │
-   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
-              │ writes new           │ overwrites           │ overwrites
-              ▼                      ▼                      ▼
-   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-   │ scouting/           │ │ synthesis/         │ │ analysis/          │
-   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
-   │                     │ │                    │ │                    │
-   │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
-   │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │
-   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
-              │                      │                      │
-              └──────────────────────┼──────────────────────┘
-                                     │ informs
-                                     ▼
+   └─────────────────────┬────────────────────────────┬────────────────┘
+                         │                            │
+                         ▼                            ▼
+   ┌──────────────────────────────┐ ┌──────────────────────────────┐
+   │   OUTWARD                    │ │   FOCUSED                    │
+   │   Weekly Scouting            │ │   On-demand Analysis         │
+   │                              │ │                              │
+   │   Mon/Thu · per P#           │ │   /analyze-paper             │
+   │                              │ │                              │
+   │ · Author Watch               │ │ · one paper —                │
+   │ · Citation-Graph             │ │   full-text first            │
+   │ · Keyword Sweep              │ │ · neutral summary            │
+   │ · Competitor watch           │ │   + decision-grade implic.   │
+   │                              │ │                              │
+   │ in: P#.md +                  │ │ in: MASTER.md                │
+   │     last ~2 wk               │ │     + paper body             │
+   │                              │ │                              │
+   │ curl: arXiv + S2             │ │ curl: arxiv/html             │
+   │                              │ │ → ar5iv → abstract           │
+   └───────────────┬──────────────┘ └───────────────┬──────────────┘
+                   │ writes new                     │ overwrites
+                   ▼                                ▼
+   ┌──────────────────────────────┐ ┌──────────────────────────────┐
+   │ scouting/                    │ │ analysis/                    │
+   │ P#/YYYY-MM-DD.md             │ │ <arxiv-id>.md                │
+   │                              │ │                              │
+   │ 3–5 papers, scored,          │ │ single Korean                │
+   │ decision-grade KO            │ │ deep-dive doc                │
+   └───────────────┬──────────────┘ └───────────────┬──────────────┘
+                   │                                │
+                   └────────────────┬───────────────┘
+                                    │ informs
+                                    ▼
                     ┌─────────────────────────────────┐
                     │             Human               │
                     │                                 │
@@ -202,7 +201,7 @@ mode).
 The split between `context/` (static) and the output tracks (dynamic) exists for one reason: to keep the agent's context lean.
 
 - **Static** (`context/`) changes monthly at most. The agent *reads* it, never writes.
-- **Dynamic** — agent-written. `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks). `synthesis/` and `analysis/` are overwrite-snapshots — no history, regenerate on demand.
+- **Dynamic** — agent-written. `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks). `analysis/` is an overwrite-snapshot — no history, regenerate on demand.
 
 Shove everything into one file and within six weeks the context bloats, the agent re-recommends last month's papers, and the pinned literature drifts into a mess.
 
@@ -254,9 +253,9 @@ Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) —
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
 | **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting.md` (weekly, shared by P1–P4) + `synthesis.md` (monthly, shared by P1–P4) + `paper-analysis.md` · `foundry.md` · `audit.md` · `paper-reproduction.md` (on-demand) |
+| **Prompts** | `.claude/prompts/scouting.md` (weekly, shared by P1–P4) + `paper-analysis.md` · `foundry.md` · `audit.md` · `paper-reproduction.md` (on-demand) |
 | **Output** | Direct commits to `main` — commit history *is* the research log |
-| **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
+| **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) |
 
 ---
 
@@ -292,7 +291,7 @@ the references below are the exact sources.
 
 | Repo | What PROBE borrows |
 |---|---|
-| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes the strict 4-agent pipeline (detector → rewriter → [fidelity ∥ naturalness]) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
+| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `analysis/`) passes the strict 4-agent pipeline (detector → rewriter → [fidelity ∥ naturalness]) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
 | **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot vendored at `vendor/lerobot/` — six baseline policies (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`) plus the `rtc` real-time-chunking module, configs, the processor, the `datasets/` tree (the de-facto standard LeRobotDataset format), `transforms/`, and `utils/`. `analysis/<id>/impl/<foundry>/impl.patch` is a unified diff against this snapshot; the pinned commit and refresh procedure live in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
 | **[colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)** | The MCP code-intelligence server that indexes `vendor/lerobot/` into a per-checkout SQLite knowledge graph at `.codegraph/codegraph.db`. The index is built on demand by `scripts/ensure-codegraph.sh` — `/foundry` runs it before its first codegraph call (no session-start cost for runs that never touch `vendor/`); only `.codegraph/config.json` (scope definition) is committed. `/foundry` uses its `codegraph_search` / `codegraph_node` / `codegraph_context` tools to ground Design rows in exact `file:line` coordinates inside the vendored snapshot. See [`CLAUDE.md`](CLAUDE.md) §CodeGraph. |
 
@@ -308,9 +307,8 @@ the references below are the exact sources.
 | [`docs/INTRO.md`](docs/INTRO.md) | Korean onboarding — motivation, pipeline, operations manual |
 | [`docs/STYLE.md`](docs/STYLE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
-| `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
+| `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
-| [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → `analysis/<id>/analysis.md` + `<id>/design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>/impl/<foundry>/{impl.md,impl.patch}`; `/audit` → `<id>/audit/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
 | [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `README.md` defines the common column standard (License + commercial marker, Access icon, `hf:`/`gh:`/`web` link prefix, 🤖/👤/🔀 data type) and operations procedure; `vlm.md` open-weight VLM candidates, `vla.md` landmark VLA lineage matrix, `pretrain_data.md` multi-embodiment dataset I/O catalog with hand-DOF prioritization for the Sharpa / xhand target |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |

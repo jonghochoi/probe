@@ -18,7 +18,7 @@ Only **three** things change versus a manual run:
 
 The repo's durable asset is the **prompt** (`.claude/prompts/scouting.md`, shared by P1–P4), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
 
-> This guide uses **P1** as the worked example. The scouting and synthesis prompts are now single shared templates (`.claude/prompts/scouting.md`, `synthesis.md`); for another pillar, replace every `<PILLAR>` token in the template with `P2`/`P3`/`P4` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{2,3,4}.md` and `synthesis/P1_BRIEF.md` → `synthesis/P{2,3,4}_BRIEF.md` in your routine title/notes, and register one routine per pillar.
+> This guide uses **P1** as the worked example. The scouting prompt is a single shared template (`.claude/prompts/scouting.md`); for another pillar, replace every `<PILLAR>` token in the template with `P2`/`P3`/`P4` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{2,3,4}.md` in your routine title/notes, and register one routine per pillar.
 
 ### Prerequisites
 
@@ -90,7 +90,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 
 ### Step 3 — The externalized prompts already exist
 
-`.claude/prompts/scouting.md` and `synthesis.md` are committed — one scouting + one synthesis prompt, each a single shared template for all four pillars (`<PILLAR>` substituted to `P1`/`P2`/`P3`/`P4` once before paste). They are the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
+`.claude/prompts/scouting.md` is committed — a single shared template for all four pillars (`<PILLAR>` substituted to `P1`/`P2`/`P3`/`P4` once before paste). It is the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
 
 | Retrieval step | Manual run | Routine (`curl` REST) |
 |---|---|---|
@@ -128,27 +128,9 @@ Automation is not the finish line. Once a month fill in three numbers. The P1 ex
 
 The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — not the model; re-check Anti-topics (§5) and Pillar P1 (§2) in `context/P1.md`.
 
-### Bonus — P1 Synthesis Brief
-
-Where weekly scouting looks *outward* for new papers, this output looks *inward*: it compresses what the already-pinned papers are collectively saying — what props up each Decision and what shakes it — into a prose narrative so you can carry the P1 architecture in your head. Run it as a **second, fully separate** RemoteTrigger routine:
-
-| Form field | Value |
-|---|---|
-| Name | `probe-p1-synthesis` |
-| Prompt | Paste `.claude/prompts/synthesis.md` with every `<PILLAR>` replaced by `P1` (one global find/replace before paste). Model Sonnet. |
-| Repositories | This repo |
-| Environment | Default is fine — **no search → no custom domains needed** |
-| Trigger | Monthly (exact cron via `/schedule update` `0 9 1 * *`) |
-| Connectors | None |
-| Input | `context/P1.md` §4 (D1–D7) + §6 (pinned papers) only |
-| Output | `synthesis/P1_BRIEF.md` — Korean, overwritten each run (living snapshot) |
-| Retrieval | **None** — no MCP/web/`curl`, pure static-file compression (zero citation-fabrication risk) |
-
-When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
-
 ### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/foundry` → `/audit`, orchestrated by `/reproduce-paper`)
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/audit` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; this second mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/foundry` produces a target-codebase patch and `/audit` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|

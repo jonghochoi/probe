@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.13 (2026-05-21) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
+> **Version:** v1.18 (2026-05-27) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -244,7 +244,7 @@ markdown rather than tone:
 
 ### 4-5. Humanize-korean post-processing (mandatory tail step)
 
-Every Korean output in PROBE (`scouting/`, `synthesis/`, `analysis/`)
+Every Korean output in PROBE (`scouting/`, `analysis/`)
 passes through the `humanize-korean` skill
 (`.claude/skills/humanize-korean/SKILL.md`, ported from
 [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai))
@@ -301,11 +301,11 @@ before the agent has finished writing the output file.
 
 **Pipeline (v2.0 — 3-tier).** From `humanize-korean` v2.0 the skill
 runs in one of three tiers, resolved automatically from the target
-file path: `scouting/` → **fast**, `synthesis/` → **standard**,
-`analysis/` → **strict**. A caller may override via `options.mode`,
-except that `mode: fast` against an `analysis/` path is refused and
-promoted to `standard` (decision-grade documents do not get the fast
-path). Per-tier pipeline:
+file path: `scouting/` → **fast**, `analysis/` → **strict**. Any
+other path defaults to **standard**. A caller may override via
+`options.mode`, except that `mode: fast` against an `analysis/` path
+is refused and promoted to `standard` (decision-grade documents do
+not get the fast path). Per-tier pipeline:
 
 - **fast** — `ai-tell-detector` (Haiku 4.5) → `korean-style-rewriter`
   (Sonnet 4.6 with `--conservative`) → inline STYLE §4-5 invariant
@@ -776,3 +776,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.15 | 2026-05-21 | Outer convergence loop implemented (supersedes the v1.14 deferral). `_TEMPLATE_AUDIT.md` gains a §🔎 §🚧 분류 section that classifies every open 🚧 item zero-state into `vendor-resolved` / `paper-extractable §X.Y` / `paper-silent-defaultable` / `paper-silent-experimental`, with a machine-readable `<!-- ANALYSIS_BUCKETS -->` footer (`focus-hint:` line). `/analyze-paper` gains a `--focus "<§X.Y,...>"` re-extraction mode (seed from prior docs, re-extract only named sections). `/reproduce-paper` matrix now branches on the buckets: vendor-resolved / paper-silent-defaultable stay inner (`/foundry --feedback`), paper-extractable triggers the outer step (`/analyze-paper --focus`). New termination reason `stable_design` (focused re-extraction byte-identical); convergence is fixed-point only, no separate outer counter. §5-7 index gains a `🔎 vr/pe/sd/se` bucket-count column |
 | v1.16 | 2026-05-26 | Close the inline-math-inside-verbatim-blockquote gap that let source-leaked math through on `analysis/2605.07308`. §5-6 gains extraction-recipe rule 7 — the inside-dollar backtick wrapping and the boundary rule apply equally to inline math that appears inside an English verbatim quote; content and formatting are separate concerns. §4-5 invariants list gains a matching item — every inline `$...$` span (including spans inside verbatim quotes) must use `` $`X`$ `` and satisfy the §5-6 rule-2 boundary, treated as a fidelity-fail trigger by `content-fidelity-auditor`. `.claude/agents/content-fidelity-auditor.md` adds the corresponding bullet to checklist item 6, and `.claude/prompts/paper-analysis.md` adds the same recipe rule so the gap closes at extraction time too |
 | v1.17 | 2026-05-27 | Scouting reports re-shelved per pillar: path `scouting/YYYY-MM-DD-P#.md` → `scouting/P#/YYYY-MM-DD.md`. §1 table updated; the agent's de-dup lookup now scans sibling files inside the same `P#/` folder. Existing 16 reports were `git mv`-relocated; historical boilerplate inside those files is intentionally not back-edited |
+| v1.18 | 2026-05-27 | Drop the `synthesis/` track entirely — monthly per-pillar narrative briefs no longer fit the workflow (the weekly scouting cadence + on-demand `/analyze-paper` covers the same surface without a separate compression step that grew stale). Scope tagline now lists `scouting/`, `analysis/` only. `humanize-korean` tier resolver simplified: `scouting/` → fast, `analysis/` → strict, else → standard (the explicit `synthesis/` → standard arm is gone). §4-5 invariants list, §4-5 pipeline description, and `.claude/skills/humanize-korean/SKILL.md` Phase 0 all reflect the two-track shape. `README.md`, `CLAUDE.md`, `docs/INTRO.md`, `docs/AGENT_SETUP.md`, `docs/probe_guide.html`, `scouting/README.md`, `analysis/README.md`, `.claude/settings.json`, `.claude/prompts/{scouting,paper-analysis}.md` updated in the same pass |
