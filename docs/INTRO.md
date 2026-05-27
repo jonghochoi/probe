@@ -79,7 +79,7 @@ PROBE 는 **하나의 정적 컨텍스트를 공유하는 세 갈래의 산출�
               ▼                      ▼                      ▼
    ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
    │ scouting/           │ │ synthesis/         │ │ analysis/          │
-   │ YYYY-MM-DD-P#.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
+   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
    │                     │ │                    │ │                    │
    │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
    │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │

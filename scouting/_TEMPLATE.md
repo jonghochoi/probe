@@ -6,7 +6,7 @@
 **Papers surfaced (every dimension ≥ 2):** <count>
 
 > 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE.md`에 정의되어 있으니 정확히 따릅니다.
-> 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`YYYY-MM-DD-P#.md`)를 산출합니다.
+> 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`scouting/P#/YYYY-MM-DD.md`)를 산출합니다.
 > 각 섹션에서 처음 등장하는 P#/D#/CP# 코드는 아래 🔑 참조 약어 풀이로 링크합니다.
 
 ---
@@ -158,7 +158,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 <!--
 Self-check against this pillar's recent reports (last ~2 weeks, ~4 files
-scouting/YYYY-MM-DD-P#.md):
+scouting/P#/YYYY-MM-DD.md):
   · Papers already covered? (list, or "none")
   · Contradictions with recent findings?
   · Decision-Log triggers / falsifier evidence observed this run?

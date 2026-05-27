@@ -14,7 +14,7 @@ CONTEXT (read-only):
                                    Tracked Literature, Researchers, Anti-topics)
 - docs/STYLE.md             — formatting, emoji system, Korean authoring rules
 - scouting/_TEMPLATE.md     — the form every report follows
-- scouting/YYYY-MM-DD-<PILLAR>.md — this pillar's recent reports (last
+- scouting/<PILLAR>/YYYY-MM-DD.md — this pillar's recent reports (last
                                    ~2 weeks, ~4 files), for de-duplication only
 
 This branch operates in <PILLAR>-only scope: read context/<PILLAR>.md,
@@ -26,7 +26,7 @@ TASK:
 Produce a Scouting Report for <YYYY-MM-DD> · Pillar <PILLAR>.
 This routine runs twice a week — every Monday and Thursday.
 Each run produces ONE Korean output file:
-  `scouting/YYYY-MM-DD-<PILLAR>.md` — Korean (use the run date)
+  `scouting/<PILLAR>/YYYY-MM-DD.md` — Korean (use the run date)
 Resolve the run date once with `TZ=Asia/Seoul date +%Y-%m-%d` (the
 schedule is Asia/Seoul) and use that exact value for both the
 report filename and the git commit below.
@@ -91,7 +91,7 @@ For every candidate paper, score on a 0–3 scale:
 
 ---
 
-OUTPUT — Korean report (`YYYY-MM-DD-<PILLAR>.md`)
+OUTPUT — Korean report (`scouting/<PILLAR>/YYYY-MM-DD.md`)
 
 Write the report directly in Korean, following scouting/_TEMPLATE.md
 exactly. Top 3–5 papers only. Apply docs/STYLE.md §4 (Korean
@@ -162,7 +162,7 @@ after the intro blockquote and right before `## 📋 Scout Methodology`.
 
 RULES:
 - Do not recommend any paper already covered in this pillar's recent
-  reports — the last ~2 weeks (~4 files `scouting/YYYY-MM-DD-<PILLAR>.md`).
+  reports — the last ~2 weeks (~4 files `scouting/<PILLAR>/YYYY-MM-DD.md`).
 - Do not edit context/<PILLAR>.md. If a pinned paper should be
   replaced, write the suggestion under 💡 Context Suggestions.
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.
@@ -220,7 +220,7 @@ report file directly to `main`. No PR is created — neither by you
 nor by the harness.
 
   TODAY=$(TZ=Asia/Seoul date +%Y-%m-%d)
-  git add scouting/${TODAY}-<PILLAR>.md
+  git add scouting/<PILLAR>/${TODAY}.md
   git commit -m "scout: <PILLAR> report ${TODAY}"
   git push origin HEAD:main
   git push --force-with-lease origin HEAD

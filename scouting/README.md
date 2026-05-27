@@ -8,8 +8,14 @@ Author Watch를 훑고 의사결정 등급 후보만 추립니다.
 
 | 파일 | 생성 주체 | 성격 |
 |---|---|---|
-| `YYYY-MM-DD-P#.md` | `probe-weekly-scout` Routine (주 2회, 월·목) | `context/P#.md` + 해당 pillar 최근 ~2주 리포트만 읽고 그 실행분 1개 생성 |
+| `P#/YYYY-MM-DD.md` | `probe-weekly-scout` Routine (주 2회, 월·목) | `context/P#.md` + 같은 `P#/` 폴더 안 최근 ~2주 리포트만 읽고 그 실행분 1개 생성 |
 | `_TEMPLATE.md` | 사람 소유 | 리포트 폼(에이전트는 이 골격을 채움) |
+
+폴더는 필라별로 쪼개져 있습니다 (`P1/`, `P2/`, `P3/`, `P4/`).
+같은 실행일에 4 필라가 각각 한 번씩 돌아 하루 4 파일이 생기지만,
+파일은 모두 다른 폴더로 들어가므로 한 필라의 시간순 흐름은
+`ls scouting/P#/` 한 줄로 따라갈 수 있습니다. 중복 제거 조회 역시
+같은 폴더 안에서만 일어납니다.
 
 ## 호출
 
@@ -17,7 +23,7 @@ Author Watch를 훑고 의사결정 등급 후보만 추립니다.
 의 RemoteTrigger 루틴입니다. 프롬프트는 `.claude/prompts/scouting.md`
 한 개(pillar 4종이 공유하는 단일 템플릿 — 붙여넣기 전 `<PILLAR>` 토큰을
 `P1`/`P2`/`P3`/`P4` 중 하나로 1회 find/replace), 검색은 MCP 가 아니라
-`curl` REST (arXiv + Semantic Scholar) 입니다. 한 실행은 한 pillar 만 처리하며 결과 파일은 `YYYY-MM-DD-P#.md`
+`curl` REST (arXiv + Semantic Scholar) 입니다. 한 실행은 한 pillar 만 처리하며 결과 파일은 `P#/YYYY-MM-DD.md`
 하나입니다. 자세한 설정은 루트 `README.md` → Stage 3 참조.
 
 ## 다른 산출물·컨텍스트와의 관계
@@ -32,8 +38,8 @@ Author Watch를 훑고 의사결정 등급 후보만 추립니다.
 
 - `context/` 는 **절대 수정하지 않습니다**. 핀/Decision 변경 제안은
   리포트의 💡 컨텍스트 제안 섹션에만 적습니다.
-- 한글 단일 문서 (영문 1차 파일 없음). 파일명 verbatim 토큰
-  `YYYY-MM-DD-P#.md` 로 중복 제거·재조회.
+- 한글 단일 문서 (영문 1차 파일 없음). 경로 verbatim 토큰
+  `scouting/P#/YYYY-MM-DD.md` 로 중복 제거·재조회.
 - append 가 아니라 실행마다 **새 파일 1개** — 덮어쓰지 않습니다.
 - 형식·이모지·용어·링크 규칙은 `docs/STYLE.md` 를 정확히
   따릅니다. 폼은 `scouting/_TEMPLATE.md`.

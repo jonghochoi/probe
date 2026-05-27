@@ -109,7 +109,7 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
               ▼                      ▼                      ▼
    ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
    │ scouting/           │ │ synthesis/         │ │ analysis/          │
-   │ YYYY-MM-DD-P#.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
+   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
    │                     │ │                    │ │                    │
    │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
    │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │
@@ -309,7 +309,7 @@ the references below are the exact sources.
 | [`docs/STYLE.md`](docs/STYLE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
-| [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `YYYY-MM-DD-P#.md` dated reports |
+| [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → `analysis/<id>/analysis.md` + `<id>/design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>/impl/<foundry>/{impl.md,impl.patch}`; `/audit` → `<id>/audit/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |

@@ -16,7 +16,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 |---|---|---|
 | `context/MASTER.md` | human | Single source of truth — Identity, Pillars, Decision Log, Tracked Literature (all P1–P5) |
 | `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
-| `scouting/` | agent | Weekly Scouting Reports (`YYYY-MM-DD-P#.md`, Mon/Thu, per pillar) |
+| `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Each contains: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`audit/<foundry>.md`) |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
