@@ -8,12 +8,12 @@
 >
 > v0.3 (2026-05). 공통 컬럼 표준 + 카드 schema 는
 > `analysis/_catalogs/README.md` §2 참고. 상단 **scan 표** + 하단
-> **per-VLA `<details>` 카드** 하이브리드 — pretrain_data 와 동일 패턴.
+> **per-VLA `<details>` 카드** 하이브리드 — lineage_corpus 와 동일 패턴.
 > **Scan 표 Source-check 컬럼은 의사결정 4-필드** (License · 총 파라미터 ·
 > VLM init · Open-weight) **검증 상태** — 카드 안 부차 필드 (정확한
 > control rate · evaluation 점수 등) 의 🔴/❓ 는 영향 없음 (README §2-5).
 > `analysis/_catalogs/vlm.md` (VLM 후보) 와
-> `analysis/_catalogs/pretrain_data.md` (데이터셋) 가 양 옆에서
+> `analysis/_catalogs/lineage_corpus.md` (데이터셋) 가 양 옆에서
 > cross-reference.
 
 ---
@@ -963,8 +963,8 @@
   "PaliGemma-2B" → vlm.md PaliGemma 행, "Qwen3-VL-4B-Instruct" → vlm.md
   Qwen3-VL 행 등. vlm.md 에서 빠진 새 VLM 이 여기 등장하면 vlm.md 에 추가
   필요.
-- **Training data** 카드의 데이터셋 명은 `analysis/_catalogs/pretrain_data.md`
-  의 행과 1:1 대응 — "OXE" → pretrain_data.md OXE 행, "BridgeData v2" →
+- **Training data** 카드의 데이터셋 명은 `analysis/_catalogs/lineage_corpus.md`
+  의 행과 1:1 대응 — "OXE" → lineage_corpus.md OXE 행, "BridgeData v2" →
   BridgeData V2 행, "DROID" → DROID 행 등.
 - **PROBE 적용 메모** (카드 footer / scan 표 Lineage 요약) 의 `D19/D19b/D20/
   D22/D23` 토큰은 `context/P4.md` §3 의 Decision Log 와 직접 link.

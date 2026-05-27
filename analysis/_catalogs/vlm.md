@@ -4,7 +4,7 @@
 > *lineage 2-tuple = (initial weights) × (further-pretrain corpus)* 중
 > **첫 번째 항** 의 enumeration. 두 번째 항(누가 이 VLM 위에 어떤 corpus 를
 > 적층했는가) 은 `analysis/_catalogs/vla.md` 와 cross-reference.
-> 데이터셋 적층은 `analysis/_catalogs/pretrain_data.md`.
+> 데이터셋 적층은 `analysis/_catalogs/lineage_corpus.md`.
 >
 > v0.4 (2026-05). 공통 컬럼 표준 + Source-check 마커는
 > `analysis/_catalogs/README.md` §2 참고. HuggingFace 공식 model card /

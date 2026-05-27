@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 720 560" style="max-width:720px;font-family:sans-serif">
+<defs><marker id="far" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<style>.ft{font-size:14px;font-weight:600;fill:#222}.fs{font-size:12px;fill:#555}</style>
+<text class="ft" x="24" y="34" style="font-size:17px">처방 도구 ① forgetting — "경로를 어디서 막는가"</text>
+<text class="fs" x="24" y="56">정의: VLM 사전학습 분포의 손실 그 자체 · 측정: VQA · instruction-following · semantic 일반화</text>
+<text class="fs" x="24" y="92">▼ gradient 경로 (하류 → 상류)</text>
+<rect x="40" y="104" width="120" height="48" rx="10" fill="#f4f4f5" stroke="#d4d4d8" stroke-width="0.5"/><text class="fs" x="100" y="132" text-anchor="middle">학습 데이터 D</text>
+<rect x="240" y="104" width="120" height="48" rx="10" fill="#f4f4f5" stroke="#d4d4d8" stroke-width="0.5"/><text class="fs" x="300" y="124" text-anchor="middle">행동 손실</text><text class="fs" x="300" y="140" text-anchor="middle">L_act</text>
+<rect x="440" y="104" width="120" height="48" rx="10" fill="#f4f4f5" stroke="#d4d4d8" stroke-width="0.5"/><text class="fs" x="500" y="124" text-anchor="middle">조건 특징</text><text class="fs" x="500" y="140" text-anchor="middle">h = VLM(x)</text>
+<rect x="600" y="104" width="96" height="48" rx="10" fill="#f4f4f5" stroke="#1D9E75" stroke-width="1.5"/><text class="fs" x="648" y="124" text-anchor="middle">VLM 가중치</text><text class="fs" x="648" y="140" text-anchor="middle">θ → θ₀</text>
+<line x1="238" y1="128" x2="162" y2="128" stroke="#999" stroke-width="1.5" marker-end="url(#far)"/>
+<line x1="438" y1="128" x2="362" y2="128" stroke="#D85A30" stroke-width="2.5" marker-end="url(#far)"/>
+<line x1="598" y1="128" x2="562" y2="128" stroke="#D85A30" stroke-width="2.5" marker-end="url(#far)"/>
+<text class="fs" x="400" y="98" text-anchor="middle" fill="#D85A30">∇ 가 θ를 θ₀에서 끌어냄</text>
+<circle cx="100" cy="184" r="14" fill="#dcfce7" stroke="#1D9E75" stroke-width="0.5"/><text class="ft" x="100" y="189" text-anchor="middle">D</text><line x1="100" y1="170" x2="100" y2="154" stroke="#1D9E75" stroke-width="1.5" stroke-dasharray="3 3"/>
+<circle cx="300" cy="184" r="14" fill="#fef3c7" stroke="#C8860A" stroke-width="0.5"/><text class="ft" x="300" y="189" text-anchor="middle">C</text><line x1="300" y1="170" x2="300" y2="154" stroke="#C8860A" stroke-width="1.5" stroke-dasharray="3 3"/>
+<circle cx="500" cy="184" r="14" fill="#dbeafe" stroke="#2D6BC4" stroke-width="0.5"/><text class="ft" x="500" y="189" text-anchor="middle">B</text><line x1="500" y1="170" x2="500" y2="154" stroke="#2D6BC4" stroke-width="1.5" stroke-dasharray="3 3"/>
+<circle cx="648" cy="184" r="14" fill="#ede9fe" stroke="#7C5BC4" stroke-width="0.5"/><text class="ft" x="648" y="189" text-anchor="middle">A</text><line x1="648" y1="170" x2="648" y2="154" stroke="#7C5BC4" stroke-width="1.5" stroke-dasharray="3 3"/>
+<text class="fs" x="100" y="212" text-anchor="middle">D 데이터</text><text class="fs" x="300" y="212" text-anchor="middle">C 손실</text><text class="fs" x="500" y="212" text-anchor="middle">B 특징</text><text class="fs" x="648" y="212" text-anchor="middle">A 가중치</text>
+<rect x="24" y="228" width="330" height="150" rx="12" fill="none" stroke="#7C5BC4" stroke-width="0.5"/>
+<text class="ft" x="42" y="254">A · 격리 — 갱신량을 0으로</text>
+<text class="fs" x="42" y="276">개입: ∇_θ 항 자체를 죽임 (경로 미개방)</text>
+<text class="fs" x="42" y="294">수식: η_VLM=0  또는  h = sg(VLM(x))</text>
+<text class="fs" x="42" y="312">비유: 집주인은 집에, 대리인(expert)만 외출</text>
+<text class="fs" x="42" y="334">하위: freeze · action expert(π0) · gradient</text>
+<text class="fs" x="42" y="350">decoupling(DM0) · action-side adapter</text>
+<text class="fs" x="42" y="370" fill="#D85A30">포기: VLM의 co-adapt 기회 (h에 정보 多 베팅)</text>
+<rect x="366" y="228" width="330" height="150" rx="12" fill="none" stroke="#2D6BC4" stroke-width="0.5"/>
+<text class="ft" x="384" y="254">B · 궤적 구속 — θ₀ 근처로 묶음</text>
+<text class="fs" x="384" y="276">개입: 경로는 열되 ‖θ−θ₀‖ 제약</text>
+<text class="fs" x="384" y="294">①부분공간 LoRA  ②벌점 EWC·L2-SP·KL</text>
+<text class="fs" x="384" y="312">③스텝 low-LR·gradual unfreeze·early-stop</text>
+<text class="fs" x="384" y="334">비유: ①정해진 골목 ②무거운 배낭 ③작은 걸음</text>
+<text class="fs" x="384" y="352">(PEFT·정규화·최적화를 한 갈래로 압축)</text>
+<text class="fs" x="384" y="372" fill="#D85A30">포기: 표현력↔보존 (과제약 시 학습 질식)</text>
+<rect x="24" y="390" width="330" height="150" rx="12" fill="none" stroke="#C8860A" stroke-width="0.5"/>
+<text class="ft" x="42" y="416">C · 분포 재현 — 손실에 옛 분포 남김</text>
+<text class="fs" x="42" y="438">개입: L 자체 변경 (최적점을 집 근처로)</text>
+<text class="fs" x="42" y="456">수식: L = L_robot + α·L_web</text>
+<text class="fs" x="42" y="474">비유: 여행 가도 옛 앨범을 매일 복습</text>
+<text class="fs" x="42" y="496">하위: web/robot co-train(RT-2) · replay ·</text>
+<text class="fs" x="42" y="512">embedding replay</text>
+<text class="fs" x="42" y="532" fill="#D85A30">포기: mix ratio α·버퍼 = 깨지기 쉬운 hparam</text>
+<rect x="366" y="390" width="330" height="150" rx="12" fill="none" stroke="#1D9E75" stroke-width="0.5"/>
+<text class="ft" x="384" y="416">D · 원인 제거 — 갭 자체를 없앰</text>
+<text class="fs" x="384" y="438">개입: 데이터 상류에서 분포 갭 삭제</text>
+<text class="fs" x="384" y="456">수식: D_ft ≈ D_pre ⇒ ∇|θ₀ ≈ 0</text>
+<text class="fs" x="384" y="474">비유: 새 직장을 옛 동네 안에 차림</text>
+<text class="fs" x="384" y="492">하위: action을 자연어로 정합(VLM2VLA·</text>
+<text class="fs" x="384" y="508">NoTVLA) · modality balance(BayesVLA)</text>
+<text class="fs" x="384" y="528" fill="#D85A30">포기: 데이터 파이프라인 재설계 + 표현 제약</text>
+<text class="fs" x="24" y="556" fill="#2D6BC4">개입 위치(상류→하류): D 데이터 → C 손실 → B 특징 → A 가중치 · 경로 개방도: A 잠금이 최소, D는 상류차단으로 ∇ 자체를 0으로</text>
+</svg>
