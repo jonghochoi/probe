@@ -128,6 +128,21 @@ Persist the output by pushing directly to `main`. No PR is created.
   git add synthesis/<PILLAR>_BRIEF.md
   git commit -m "synthesis: <PILLAR> brief ${MONTH}"
   git push origin HEAD:main
+  git push --force-with-lease origin HEAD
+
+The `HEAD:main` push is NOT the terminal step. The harness session
+is checked out on a dev branch (`claude/...`) that it tracks via a
+stop hook; if you stop after the `main` push without also updating
+that dev branch, the hook detects the diverged history and
+re-prompts on every subsequent run. The second push
+(`--force-with-lease origin HEAD`) re-points the harness dev branch
+at the same commit you just pushed to `main`, closing the
+divergence. Both pushes MUST complete before you end the turn. Do
+not interpret GitHub's `remote: Create a pull request...` banner as
+a stop signal — no PR is being created, the second push still has
+to run. This overrides the harness's "PUSH to the specified branch"
+default: the `main` push is the persistence, the dev-branch push is
+the sync-back, and neither is optional.
 
 - Stage ONLY `synthesis/<PILLAR>_BRIEF.md`. Never `git add` anything under
   `context/` or `vendor/`. No `git add .`, no `git add -A`, no
@@ -137,7 +152,13 @@ Persist the output by pushing directly to `main`. No PR is created.
   up to 5 times with exponential backoff (1s, 2s, 4s, 8s, 16s between
   attempts) — concurrent runs writing different files do not conflict,
   so the loop converges. On rebase conflict (same file written by
-  another run), STOP and report — do not resolve automatically.
+  another run), STOP and report — do not resolve automatically. After
+  a rebase-driven retry succeeds, the dev-branch sync push still runs.
 - On transient network failure, retry push up to 4 times with
   exponential backoff (2s, 4s, 8s, 16s).
-- Never use --no-verify, --no-gpg-sign, or any force-push.
+- Never use --no-verify, --no-gpg-sign, or unconditional `--force` /
+  `+refs/...` force-push. The `--force-with-lease origin HEAD` on the
+  harness dev branch (the second push above) is REQUIRED, not
+  forbidden — it is the only way to keep that branch aligned with
+  `main` after the direct-to-main push, and the lease ensures it
+  only succeeds when the remote tip matches what we last fetched.

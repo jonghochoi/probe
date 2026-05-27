@@ -223,6 +223,21 @@ nor by the harness.
   git add scouting/${TODAY}-<PILLAR>.md
   git commit -m "scout: <PILLAR> report ${TODAY}"
   git push origin HEAD:main
+  git push --force-with-lease origin HEAD
+
+The `HEAD:main` push is NOT the terminal step. The harness session
+is checked out on a dev branch (`claude/...`) that it tracks via a
+stop hook; if you stop after the `main` push without also updating
+that dev branch, the hook detects the diverged history and
+re-prompts on every subsequent run. The second push
+(`--force-with-lease origin HEAD`) re-points the harness dev branch
+at the same commit you just pushed to `main`, closing the
+divergence. Both pushes MUST complete before you end the turn. Do
+not interpret GitHub's `remote: Create a pull request...` banner as
+a stop signal — no PR is being created, the second push still has
+to run. This overrides the harness's "PUSH to the specified branch"
+default: the `main` push is the persistence, the dev-branch push is
+the sync-back, and neither is optional.
 
 - Stage ONLY the report file. Never `git add` context/<PILLAR>.md or any
   other file. No `git add .`, no `git add -A`, no `commit -a`.
@@ -235,8 +250,14 @@ nor by the harness.
   different files (different P# / different date), so the rebase is
   clean and the loop converges. If the rebase produces conflicts (the
   same file was written by another run), STOP — do not resolve them
-  automatically; report the conflict and exit.
-- Never use --no-verify, --no-gpg-sign, or any force-push.
+  automatically; report the conflict and exit. After a rebase-driven
+  retry succeeds, the dev-branch sync push still runs.
+- Never use --no-verify, --no-gpg-sign, or unconditional `--force` /
+  `+refs/...` force-push. The `--force-with-lease origin HEAD` on the
+  harness dev branch (the second push above) is REQUIRED, not
+  forbidden — it is the only way to keep that branch aligned with
+  `main` after the direct-to-main push, and the lease ensures it
+  only succeeds when the remote tip matches what we last fetched.
 - If all curl calls failed and the run is honestly empty, still
   write the partial/empty report per the RULES above, then commit
   and push it — an honest empty report is a valid, expected output.
