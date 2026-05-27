@@ -7,7 +7,7 @@
 
 > 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE.md`에 정의되어 있으니 정확히 따릅니다.
 > 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`scouting/P#/YYYY-MM-DD.md`)를 산출합니다.
-> 각 섹션에서 처음 등장하는 P#/D#/CP# 코드는 아래 🔑 참조 약어 풀이로 링크합니다.
+> 각 섹션에서 처음 등장하는 P#/D# 코드는 아래 🔑 참조 약어 풀이로 링크합니다.
 
 ---
 
@@ -15,23 +15,21 @@
 
 <!--
 STYLE.md §3-1 is authoritative. Summary:
-  · ONLY P#/D#/CP# codes that this report actually cites. No others.
-  · One table, rows ordered P# → D# (asc) → CP# (asc), one per distinct code.
+  · ONLY P#/D# codes that this report actually cites. No others.
+  · One table, rows ordered P# → D# (asc), one per distinct code.
   · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning (Korean).
   · Meaning source (do not invent), from context/P#.md:
-      P#  → §2 heading "Pillar P# — <name>"           → "<name> (pillar)"
-      D#  → §4 "#### [D#] <title>" + its v1 line       → "<title> — v1 choice (≤~12 words)"
-      CP# → §3 bullet "- **CP#**: <desc>"              → "Checkpoint #: <desc>"
+      P# → §2 heading "Pillar P# — <name>"           → "<name> (pillar)"
+      D# → §4 "#### [D#] <title>" + its v1 line       → "<title> — v1 choice (≤~12 words)"
   · In the body, link only the FIRST occurrence of each code per ## section
     as [CODE](#ref-CODE); later same-section occurrences stay plain.
-  · If the report cites no P#/D#/CP# code, delete this whole section.
+  · If the report cites no P#/D# code, delete this whole section.
 -->
 
 | Code | Meaning |
 |------|---------|
 | <a id="ref-P#"></a>**P#** | <pillar name> (pillar) |
 | <a id="ref-D#"></a>**D#** | <decision title> — <v1 choice, ≤~12 words> |
-| <a id="ref-CP#"></a>**CP#** | Checkpoint #: <checkpoint description> |
 
 ---
 
@@ -59,7 +57,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
 
 ### 🎯 (a) 관련 Pillar / Decision (P# / D#)
-<!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D15) from context/MASTER.md does this address? Mention CP1–CP5 in body if it lands at a specific Checkpoint. Also note any Identity tension/support and any §10 Competitor implication. -->
+<!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D26) from context/MASTER.md does this address? Also note any Identity tension/support and any §10 Competitor implication. -->
 
 ### ✨ (b) 진정으로 새로운 점
 <!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->

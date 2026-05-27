@@ -20,10 +20,10 @@
 
 **Update protocol**
 - Identity / Purpose: change only with deliberate review (semantic shift, not phrasing)
-- Pillars: structure stable; tracked items within can evolve at Revisit Checkpoints (CP1–CP5)
+- Pillars: structure stable; tracked items within can evolve as evidence accumulates
 - Decision Log: append-only; do not renumber. Decisions are *first-attempt defaults* with explicit deferred candidates and revisit triggers
 - Tracked Literature: rebalanced quarterly. Hard cap 8 pinned per pillar; replace, don't append
-- Competitor/Kindred Monitoring: review at every CP
+- Competitor/Kindred Monitoring: review whenever a Tracked-Literature rebalance lands
 
 **Output formatting & authoring rules**
 All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`docs/STYLE.md`** — the single source of truth. The agent must read `docs/STYLE.md` before producing any output. Do not duplicate formatting rules here; edit `docs/STYLE.md` instead.
@@ -76,13 +76,13 @@ Build a holistic system for human-level dexterous manipulation. Full stack envis
 
 ### 3.4 Long-term task families
 - **In-hand reorientation** (HORA-style): object rotation in palm — first demo, architectural validation
-- **Tool articulation** (e.g., tagging machine, trigger tools): hold tool + finger operation — identity flagship demo (phase 2, CP3)
+- **Tool articulation** (e.g., tagging machine, trigger tools): hold tool + finger operation — identity flagship demo (phase 2)
 - **Diverse functional grasping**: appropriate nominal pose synthesis across objects — generalization phase (later)
 
 ### 3.5 Demo task phasing
 - **Phase 1**: in-hand cube rotation (architectural validation of split + structured input + System0 gating, measurable falsifier)
-- **Phase 2 (CP3)**: tool articulation (identity flagship; body-hand coordination + finger asymmetry); 5-tool evaluation set matching CATFA precedent (arXiv:2509.23075)
-- **Phase 3 (CP5)**: cross-object generalization
+- **Phase 2**: tool articulation (identity flagship; body-hand coordination + finger asymmetry); 5-tool evaluation set matching CATFA precedent (arXiv:2509.23075)
+- **Phase 3**: cross-object generalization
 
 ---
 
@@ -100,15 +100,15 @@ Build a holistic system for human-level dexterous manipulation. Full stack envis
 
 ### 4.2 Simulation
 - Primary: **NVIDIA Isaac Sim + Isaac Lab** (PhysX rigid-body, Signorini-Coulomb contact) — used for **System0 RL training only**
-- Secondary (deferred to CP2+): **MuJoCo MJX** as alternative for differentiable contact
-- Visuotactile sim: Sharpa Deform Map sim-side rendering — protocol TBD at CP2 prerequisite (Chen et al. 2024 / Akinola Isaac Gym tactile library as reference)
+- Secondary (deferred to a later phase): **MuJoCo MJX** as alternative for differentiable contact
+- Visuotactile sim: Sharpa Deform Map sim-side rendering — protocol TBD before real-robot transition (Chen et al. 2024 / Akinola Isaac Gym tactile library as reference)
 
 Known gap: PhysX point contact vs. real fingertip viscoelastic deformation (P3/System0-sim2real scope). Contact-Aware Neural Dynamics (arXiv:2601.12796) documents this gap.
 
 ### 4.3 Training
 - **Primary policy**: VLA backbone (**Physical Intelligence π**, π0 / π0.5) + flow-matching Body/Hand action experts, trained by imitation with VLM-prior preservation (P4). This is the capability source.
 - **RL (scoped)**: GPU-parallel RL, 8,192–16,384 envs, **PPO**, **for the Hand System0 stabilization module only** (P3). Not the primary policy's learning signal.
-- Backbone weights from openpi (Apache 2.0); see §14.B.
+- Backbone weights from openpi (Apache 2.0); see §14.A.
 
 ---
 
@@ -150,11 +150,11 @@ Five pillars.
 **Literature anchor**: HORA, AnyRotate (reward terms), CCGE (contact coverage), RMA (teacher-student adaptation), Static Friction Sim2Real, Contact-Aware Neural Dynamics, π0.5 (hierarchical inference as System1/System0 analog). See §8.3.
 
 ### P4. VLM Pretraining Preservation
-**Scope**: generalization/situation-understanding originates in the VLM backbone; full fine-tuning on deploy data over-specializes and erodes the pretrained prior. Decide VLM FT range (freeze / partial / LoRA-adapter / full), prior-preservation strategy, staged training recipe, multi-embodiment pretraining data, and the action-representation × VLM-preservation relationship.
+**Scope**: generalization/situation-understanding originates in the VLM backbone; full fine-tuning on deploy data over-specializes and erodes the pretrained prior. Decide VLM FT range (freeze / partial / LoRA-adapter / full), prior-preservation strategy, staged training recipe, multi-embodiment pretraining data, and the action-representation × VLM-preservation relationship. The **VLM lineage itself** (= initial weights × further-pretrain corpus) and the **multi-embodiment pretraining data catalog** are first-class P4 variables, not only the preservation strategy on top of them.
 
 **Identity tie**: protects the VLA ceiling that the whole identity rests on; without it, the VLA-level pivot self-defeats.
 
-**Tracked items**: VLM FT range (D19), prior-preservation strategy (D20), staged training recipe (D21), multi-embodiment pretraining data (D22), action-representation × VLM-preservation (D23).
+**Tracked items**: VLM FT range (D19), VLM backbone lineage choice (D19b), prior-preservation strategy (D20), staged training recipe (D21), multi-embodiment pretraining data (D22), action-representation × VLM-preservation (D23).
 
 **Anti-topics**: action-only papers ignoring backbone preservation; pick-and-place-only VLA without forgetting/over-specialization analysis.
 
@@ -175,173 +175,164 @@ Five pillars.
 
 ## 6. Decision Log [LIVING] [AGENT-INPUT]
 
-All architectural commits recorded with: options considered, v1 choice, rationale, deferred candidates with revisit triggers and checkpoints. Append-only.
+All architectural commits recorded with: options considered, v1 choice, rationale, deferred candidates with revisit triggers. Append-only.
 
-### 6.1 Revisit Checkpoints (CP1–CP5)
-
-- **CP1**: v1 first ablation analysis (4-contribution ablation on in-hand rotation, sim)
-- **CP2**: in-hand rotation first real-world demo result analysis
-- **CP3**: tool articulation demo entry (phase 2; 5-tool evaluation set)
-- **CP4**: hardware transition (Sharpa → xhand → in-house)
-- **CP5**: cross-object generalization phase entry
-
-**CP2 prerequisite**: System0 tactile sim2real protocol verified (Chen et al. 2024 lineage) + static friction range estimation completed.
-
-### 6.2 Decisions — P1 (D1–D7)
+### 6.1 Decisions — P1 (D1–D7)
 
 #### [D1] Split form (P1)
 - **Options**: (i) explicit BodyExpert–HandExpert separation, (ii) single ActionExpert with shared representation + body-specific latent + hand-specific latent, (iii) hybrid (shared trunk, split heads)
 - **v1**: (iii) hybrid — shared trunk + split body/hand heads
-- **Rationale**: cleanest isolation of the split contribution at CP1 while reusing π's shared representation; (i) and (ii) become the ablation comparison group
-- **Deferred**: (i) fully separate experts → trigger: shared trunk shows body↔hand gradient interference / **CP1**; (ii) latent-only separation → trigger: explicit split underperforms latent separation on contact metrics / **CP1**
-
+- **Rationale**: cleanest isolation of the split contribution at the v1 ablation while reusing π's shared representation; (i) and (ii) become the ablation comparison group
+- **Deferred**: (i) fully separate experts → trigger: shared trunk shows body↔hand gradient interference; (ii) latent-only separation → trigger: explicit split underperforms latent separation on contact metrics
 #### [D2] Body output space (P1)
 - **Options**: (a) both-wrist / tool-flange pose (Cartesian), (b) joint-space minus wrist, (c) delta Cartesian, (d) split
 - **v1**: (a) both-wrist / tool-flange pose
 - **Rationale**: targets embodiment-transfer easing; flange pose decouples Body expert from arm kinematics (joint-space is the comparison group)
-- **Deferred**: (b) joint-space → trigger: flange-pose Body shows training instability vs joint-space ("Demystifying Action Space Design": joint-space=stability, task-space=generalization) / **CP1**; (c) delta Cartesian → trigger: absolute-pose learnability poor / **CP1**
-
+- **Deferred**: (b) joint-space → trigger: flange-pose Body shows training instability vs joint-space ("Demystifying Action Space Design": joint-space=stability, task-space=generalization); (c) delta Cartesian → trigger: absolute-pose learnability poor
 #### [D3] Hand output space (P1)
 - **Options**: (i) finger joint command, (ii) fingertip pose, (iii) grip-force / impedance, (iv) hybrid
 - **v1**: (i) finger joint command
 - **Rationale**: directest tactile/proprioceptive-feedback-grounded precision control; matches Sharpa joint interface
-- **Deferred**: (iii) impedance → trigger: stiff joint-position control causes excessive contact force / **CP2**
-
+- **Deferred**: (iii) impedance → trigger: stiff joint-position control causes excessive contact force
 #### [D4] Body↔Hand information sharing (P1)
 - **Options for mechanism**: (A) shared latent, (B) cross-attention, (C) mutual conditioning, (D) routing/gating, (E) action/history sharing, (F) FiLM
 - **Options for what flows**: (i) $a_b$ only, (ii) body hidden state, (iii) both
 - **v1**: (F) FiLM with $a_b$ → ($\gamma,\beta$) modulating hand head input, single point
 - **Rationale**: MLP-style hand head + minimum delta + sufficient first-experiment expressivity
-- **Deferred**: (B) cross-attention → trigger: FiLM bottleneck OR hand head restructured to transformer (cf. LaMP gated cross-attn, TwinBrainVLA AsyMoT) / **CP1**; (ii) hidden-state injection → trigger: D6 v2 entry / **CP1**; multi-layer depth → trigger: single-point info bottleneck (cf. MolmoAct2 per-layer KV) / **CP1**
-
+- **Deferred**: (B) cross-attention → trigger: FiLM bottleneck OR hand head restructured to transformer (cf. LaMP gated cross-attn, TwinBrainVLA AsyMoT); (ii) hidden-state injection → trigger: D6 v2 entry; multi-layer depth → trigger: single-point info bottleneck (cf. MolmoAct2 per-layer KV)
 #### [D5] Input-modality + control-rate separation (P1)
 - **Options (modality)**: (i) shared input to both experts, (ii) Body={vision, language, proprio, task context} / Hand={tactile, proprio, local visual, VLA intent}, (iii) partial
 - **Options (rate)**: (α) shared control rate, (β) separated (time-positional encoding / action timestamp embedding / async action conditioning)
 - **v1**: (ii) modality-separated + (α) shared rate
 - **Rationale**: modality separation is identity-aligned (hand=contact); shared rate = minimum delta for first experiment
-- **Deferred**: (β) rate separation → trigger: finger precision needs higher-frequency loop than body / **CP2 (in-hand rotation)**
+- **Deferred**: (β) rate separation → trigger: finger precision needs higher-frequency loop than body (in-hand rotation)
 
 #### [D6] Coordination direction & flow (P1)
 - **Options**: body→hand / hand→body / iterative / bidirectional; flow = (a) hierarchical (body K-step denoise → $a_b$ → hand conditioned), (b) coupled denoising, (c) coupled single network, (d) independent
 - **v1**: body→hand, (a) hierarchical flow
 - **Rationale**: literal sequential conditioning; clean interface; training stability
-- **Deferred**: iterative/bidirectional + (b) coupled → trigger: slip fails to reshape arm motion in time / **CP1+CP2**; (c) single network → trigger: latency budget pressure / **CP3**
-
+- **Deferred**: iterative/bidirectional + (b) coupled → trigger: slip fails to reshape arm motion in time; (c) single network → trigger: latency budget pressure
 #### [D7] π backbone integration / partition (P1)
 - **Options**: (i) slice π0 action expert + FT both sides, (ii) repurpose π expert as Hand + add new Body, (iii) both re-init, (iv) distillation from monolithic π
 - **v1**: (i) slice partition + FT
-- **Rationale**: maximally preserves π manipulation prior; cleanest split-vs-monolithic baseline. Sub-reading **Repurpose vs Subdivide** unresolved → §14.C, decide at CP1 code entry
-- **Deferred**: (ii) repurpose → trigger: Body re-init acceptable / **CP4**; (iv) distillation → trigger: π surgery overhead prohibitive / **CP1**
+- **Rationale**: maximally preserves π manipulation prior; cleanest split-vs-monolithic baseline. Sub-reading **Repurpose vs Subdivide** unresolved → §14.C, decide at code entry
+- **Deferred**: (ii) repurpose → trigger: Body re-init acceptable; (iv) distillation → trigger: π surgery overhead prohibitive
 - **Note**: tightly coupled to P4 (D19 freeze strategy)
 
-### 6.3 Decisions — P2 (D8–D12)
+### 6.2 Decisions — P2 (D8–D12)
 
 #### [D8] Finger/palm structured token construction (P2)
 - **Options**: (i) per-finger {joint state + that finger's tactile} → one token (~10 finger + 2 palm tokens), (ii) per-fingertip only, (iii) flat concat (baseline/ablation)
 - **v1**: (i) per-finger proprio-tactile binding, 10 finger + 2 palm tokens (both hands)
 - **Rationale**: makes finger-wise contact semantics explicit instead of implicitly learned
-- **Deferred**: finer sub-finger tokenization → trigger: per-finger token too coarse for in-hand rotation / **CP2**
-
+- **Deferred**: finer sub-finger tokenization → trigger: per-finger token too coarse for in-hand rotation
 #### [D9] Topology-aware encoding (P2)
 - **Options**: (i) raw sensor vector, (ii) + finger/left-right identity, (iii) + palm-relative fingertip pose + kinematic-chain embedding
 - **v1**: (iii) full topology-aware
 - **Rationale**: "which hand's which finger/palm produced this contact" must be explicit for cross-hand portability
-- **Deferred**: learned topology embedding → trigger: hand-coded topology insufficient at CP4 hardware change / **CP4**
-
+- **Deferred**: learned topology embedding → trigger: hand-coded topology insufficient when the hand hardware changes
 #### [D10] Hand-level aggregation encoder (P2)
 - **Options**: (A) mean/sum pool, (B) self-attention, (C) graph attention, (D) lightweight transformer
 - **v1**: (B) self-attention over finger/palm tokens
 - **Rationale**: recovers inter-finger interaction lost by per-finger separation; lighter than full transformer
-- **Deferred**: (C) graph attention → trigger: kinematic-chain structure underused / **CP2**; (D) transformer → trigger: self-attn capacity insufficient / **CP3**
-
+- **Deferred**: (C) graph attention → trigger: kinematic-chain structure underused; (D) transformer → trigger: self-attn capacity insufficient
 #### [D11] Visuotactile / proprio-tactile encoder candidate (P2)
 - **Encoder v1**: hardware-specific CNN on Deform Map → per-fingertip feature → fed into D8 finger token; swappable sensor head + common token format; contact-binary + slip-binary aux heads (light)
 - **Tactile feature options**: tactile image / resultant force vector / pressure distribution / contact map — compared
 - **Proprio scope options**: joint position / velocity / torque / motor current — compared
-- **Deferred**: force-prediction aux (AdapTac, arXiv:2505.13982) → trigger: contact/slip-binary saturation / **CP1**; Sparsh/T3 pretraining → trigger: random-init encoder underperforms / **CP1**; latent tactile prediction (Touch Dreaming) → trigger: inference-time tactile dropout robustness needed / **CP2**
+- **Deferred**: force-prediction aux (AdapTac, arXiv:2505.13982) → trigger: contact/slip-binary saturation; Sparsh/T3 pretraining → trigger: random-init encoder underperforms; latent tactile prediction (Touch Dreaming) → trigger: inference-time tactile dropout robustness needed
 - **Non-negotiable**: (1) no Sharpa lock-in, (2) preserve contact-relevant features
 
 #### [D12] Multi-camera vision pre-fusion (P2)
 - **Options**: (i) N camera features fed raw to VLM, (ii) cross-attention fuser → unified spatial vision embedding → VLM, (iii) learned camera-token selection
 - **v1**: (ii) cross-attention fuser → unified spatial embedding
 - **Rationale**: stable spatial context; avoids VLM token bloat from N cameras
-- **Deferred**: (iii) selection → trigger: fuser loses viewpoint-specific contact cues / **CP3**
-
-### 6.4 Decisions — P3 / System0 (D13–D18)
+- **Deferred**: (iii) selection → trigger: fuser loses viewpoint-specific contact cues
+### 6.3 Decisions — P3 / System0 (D13–D18)
 
 #### [D13] System0 role & operating regime (P3)
 - **Role options**: slip anticipation / stable grasp maintenance / minor finger posture correction
 - **v1**: all three, scoped to: post-grasp grasp maintenance; in-hand stable-contact maintenance; insertion/contact retention
 - **Rationale**: narrow, reward-engineerable sub-problem — the only place RL is justified
 - **Constraint**: must NOT interfere with peg-in-hole insertion motion (gated off when System1 needs free finger motion)
-- **Deferred**: expand to dynamic regrasp → trigger: static-maintenance scope too narrow at CP3 / **CP3**
-
+- **Deferred**: expand to dynamic regrasp → trigger: static-maintenance scope too narrow once tool-articulation tasks enter scope
 #### [D14] System1↔System0 interface (P3)
 - **Options**: (i) binary `maintain_grasp` on/off (bypass System1 when off → System0 takes finger command), (ii) continuous blend weight, (iii) System0 always-on residual
 - **v1**: (i) binary on/off, bypass-when-off
 - **Rationale**: cleanest interface; clearest ablation of System0 contribution
-- **Deferred**: (ii) continuous blend → trigger: hard switching causes finger-command discontinuity / **CP2**
-
+- **Deferred**: (ii) continuous blend → trigger: hard switching causes finger-command discontinuity
 #### [D15] System0 input modality (P3)
 - **v1**: tactile feature + finger joint position + velocity + joint torque (or motor current) + contact-state history. **Vision excluded** (by design)
 - **Rationale**: sub-loop reaction speed requires vision-free low-latency state
-- **Deferred**: add wrist IMU/force → trigger: tactile+proprio insufficient for slip anticipation / **CP2**
-
+- **Deferred**: add wrist IMU/force → trigger: tactile+proprio insufficient for slip anticipation
 #### [D16] System0 output form (P3)
 - **Options**: (i) finger joint command (direct), (ii) grip-force / impedance parameter, (iii) local stabilizing correction added to System1 output
 - **v1**: (i) direct finger joint command (active only when gated on)
 - **Rationale**: matches D3 Hand output space; clean bypass semantics
-- **Deferred**: (ii) impedance → trigger: position control overshoots contact force / **CP2**; (iii) correction-residual → trigger: full-bypass loses System1 intent during maintenance / **CP2**
-
+- **Deferred**: (ii) impedance → trigger: position control overshoots contact force; (iii) correction-residual → trigger: full-bypass loses System1 intent during maintenance
 #### [D17] System0 RL policy spec (P3)
 - **State**: tactile + proprioceptive history (D15)
 - **Action**: finger-level stabilizing command (D16)
 - **Reward**: object retention + slip suppression + contact stability − excessive-force penalty − smoothness penalty (task/contact/slip core + AnyRotate term structure)
 - **Termination**: object drop / contact loss / excessive deformation or force
-- **Synthesis v1**: hand-crafted contact-aware; **deferred** Eureka/DrEureka contact-aware variant → trigger: hand-crafted reward search cost prohibitive / **CP1**
-- **Algorithm**: PPO, GPU-parallel Isaac Lab (8k–16k env)
+- **Synthesis v1**: hand-crafted contact-aware; **deferred** Eureka/DrEureka contact-aware variant → trigger: hand-crafted reward search cost prohibitive- **Algorithm**: PPO, GPU-parallel Isaac Lab (8k–16k env)
 
 #### [D18] System0 sim2real (P3)
 - **DR params**: static_friction + dynamic_friction (split, arXiv:2503.01255) + contact stiffness + restitution + mass + surface compliance + actuator delay/noise
 - **Adaptation**: RMA-family teacher-student with contact-relevant extrinsics
-- **Deferred (priority)**: RMA-style Phase-3 RL fine-tuning → **CP2 (pre sim→real)**; static-friction-aware DR scheduling → **CP2 (post-real-demo)**; learned contact correction (Contact-Aware Neural Dynamics) → **CP3**
-- **Caveat**: System0-scoped only; activates mostly at CP2 — plan, not current implementation
+- **Deferred (priority)**: RMA-style Phase-3 RL fine-tuning → *before sim→real transition*; static-friction-aware DR scheduling → *post-real-robot transition*; learned contact correction (Contact-Aware Neural Dynamics) → *deferred to a later phase*
+- **Caveat**: System0-scoped only; activates mostly at the real-robot transition — plan, not current implementation
 
-### 6.5 Decisions — P4 / VLM Preservation (D19–D23)
+### 6.4 Decisions — P4 / VLM Preservation (D19–D23)
 
 #### [D19] VLM fine-tuning range (P4)
 - **Options**: (a) full VLM freeze + action experts only, (b) vision encoder freeze + partial language/decoder, (c) selective layer unfreeze, (d) LoRA/adapter PEFT, (e) full-FT baseline
 - **v1**: (a) full freeze + action experts only
 - **Rationale**: late tactile/structured-input fusion → backbone sees π-trained modalities only → no adaptation pressure; minimum delta; maximal prior preservation
-- **Deferred**: (d) LoRA → trigger: frozen backbone representation insufficient for new modality combos / **CP1**; (c) selective unfreeze → trigger: LoRA still insufficient / **CP1**
+- **Deferred**: (d) LoRA → trigger: frozen backbone representation insufficient for new modality combos; (c) selective unfreeze → trigger: LoRA still insufficient
+#### [D19b] VLM backbone lineage choice (P4)
+- **Unit**: a VLM is identified by the 2-tuple `(initial weights) × (further-pretrain corpus)`, not by the bare model name. Two stacks that both load "PaliGemma" but were further-pretrained on different mixes are different lineages for our purposes.
+- **Options (lineage examples)**: PaliGemma-2B × π0 mix (OXE + π in-house) — π0 default; PaliGemma × π0.5 mix; Eagle-2 (NVIDIA, 1.34B VLM portion) × GR00T cross-embodiment mix (humanoid traj + human video + synthetic); Molmo × MolmoAct mix; Being-H (init TBD) × UniHand-2.0 (~35k h × 30 embodiments, 400M+ samples / 120B tokens); **Qwen3-VL-4B-Instruct × ~200M robot trajectory timesteps (DROID + MolmoAct + in-house) + 80M+ VL samples** — Xiaomi-Robotics-0, open-weight; **Gemma-3-12B-IT × BridgeData v2 NL-formatted (fine-tune only)** — VLM2VLA, LoRA-only path; **Prismatic-VLM + Qwen2.5-0.5B × LIBERO + CALVIN (adapter-only)** — VLA-Adapter, minimal-backbone path; **OpenVLA (CLIP-B/L + Llama-7B) × frozen Prior + Adaptation on RoboTwin 2.0 + LIBERO** — PriorVLA, two-expert path; InternVL × ? / Qwen2.5-VL × ? — open-weight candidates pending corpus pairing.
+- **v1**: PaliGemma-2B × π0 mix (= openpi weights). Compatible with D19(a) freeze + D23(iii) flow-matching head.
+- **Rationale**: validated lineage; coexists with the rest of the v1 stack at zero re-train cost.
+- **Deferred**: alternative-lineage comparison experiment → trigger: a generalization weakness surfaced on real-robot rollouts is diagnosed as *lineage-attributable*. Restricted to a **2-pair comparison** (v1 vs one diagnosis-matched candidate) to avoid ablation factor blow-up.
+- **Watch artifact**: open-weight VLM candidate catalog (init-weight accessibility, license, inference cost, instruction-tuning provenance) — drives §8.4 rows.
 
 #### [D20] Prior-preservation strategy (P4)
-- **Options**: LoRA-minimal (VLM2VLA, NL-style action), web/robot co-FT (RT-2), action-side adapter (VLA-Adapter Bridge Attention), prior-preserving adaptation (PriorVLA)
+- **Definition (scope)**: the target is **the loss of the VLM pretrained distribution itself**. *Cause* (action-expert training, LoRA, co-pretrain, data-mix change, …) is the *activation condition* of D20, not part of its definition.
+- **Standby regime**: while D19 = (a) full freeze holds, the prior-loss pathway is mathematically blocked and D20 operates as a *standby decision*. D20 activates the moment D19 moves off freeze (LoRA / partial / full FT) **or** D23 moves to (ii) NL-style action where the VLM language head is dragged into action prediction.
+- **Options (active when D20 fires)**: LoRA-minimal (VLM2VLA, NL-style action), web/robot co-FT (RT-2), action-side adapter (VLA-Adapter Bridge Attention), prior-preserving adaptation (PriorVLA)
 - **v1**: action-side adapter (D4/D7 split heads *are* the action-side adapter; backbone untouched)
 - **Rationale**: consistent with D19(a) full-freeze; no backbone re-train burden
-- **Deferred**: LoRA-minimal → trigger: D19 moves to (d) / **CP1**; web/robot co-FT → trigger: deploy data distribution-shift severe (see D-analysis) / **CP3**
+- **Deferred**: LoRA-minimal → trigger: D19 moves to (d); web/robot co-FT → trigger: deploy data distribution-shift severe (see D-analysis)
+- **Not in scope**: "action-expert over-specialization on deploy-task distribution that degrades system-level generalization" is a *different phenomenon* — VLM weights stay intact, so it is not forgetting. Handled by D21 "Stage 2 in-distribution plateau with generalization loss" trigger. Do not conflate with D20.
 
 #### [D21] Staged training recipe (P4)
-- **v1**: Stage 1 keep VLM alignment (no-op: use openpi weights) → Stage 2 VLM-freeze, train Body/Hand experts → Stage 3 (deferred) LoRA/adapter/top-layer limited FT → Stage 4 (deferred) small-LR full-FT + prior-preserving regularization
-- **Rationale**: each stage gated by the prior stage's insufficiency, minimizing forgetting risk
-- **Deferred**: Stage 3/4 entry → trigger: Stage 2 in-distribution plateau with generalization loss / **CP1→CP3**
-
+- **v1 (with Stage 0 / Stage 0½ separation)**:
+  - **Stage 0** — VLM lineage selection (= adopt D19b v1). Decision act, no training.
+  - **Stage 0½** (deferred) — multi-embodiment co-pretrain on the chosen lineage (= execution site for D22 when it fires). Trigger inherited from D22.
+  - **Stage 1** — keep VLM alignment (no-op: load lineage weights as-is).
+  - **Stage 2** — VLM-freeze, train Body/Hand experts (current v1).
+  - **Stage 3** (deferred) — LoRA / top-layer limited FT.
+  - **Stage 4** (deferred) — small-LR full-FT + prior-preserving regularization.
+- **Rationale**: each stage gated by the prior stage's insufficiency, minimizing forgetting risk. Stage 0 / Stage 0½ separation makes "*checkpoint selection*" (bound to D19b) and "*additional pretraining*" (bound to D22) visible as distinct decisions so their triggers do not entangle.
+- **Deferred**: Stage 3/4 entry → trigger: Stage 2 in-distribution plateau with generalization loss
 #### [D22] Multi-embodiment pretraining data (P4)
-- **v1**: rely on π pretrained prior only (no extra multi-embodiment co-training) for first experiment
-- **Action item**: list-up leading-lab multi-embodiment datasets; select performance-critical subsets ([arXiv:2506.19121])
-- **Deferred**: add multi-embodiment co-training → trigger: π prior coverage insufficient for target tasks / **CP3**
+- **v1 (execution)**: rely on π pretrained prior only (no extra multi-embodiment co-training) for first experiment
+- **Promoted action item (deliverable before v1 ablation)**: build a multi-embodiment dataset catalog. Per-dataset columns: name / source / license / accessibility; **input schema** (camera count·resolution·FPS, proprio channels, tactile presence·format, language-instruction format); **output schema** (action space — joint vs end-effector vs delta — DOF, control rate); **embodiment meta** (arm DOF, hand DOF — gripper vs dexterous — wrist DOF, mounting); **lineage-stacking info** — which landmark VLA (π / GR00T / MolmoAct2 / Being-H0.5 / Xiaomi-Robotics-0) stacked this dataset on top of its VLM, and how — wires the catalog back into D19b lineage identification.
+- **Reference**: starter list from multi-embodiment data survey ([arXiv:2506.19121]).
+- **Deferred (execution)**: add multi-embodiment co-training (= Stage 0½ in D21) → trigger: π prior coverage insufficient for target tasks. Catalog *build* is not deferred — it lands before v1 ablation.
 
 #### [D23] Action representation × VLM preservation (P4)
 - **Options**: (i) discrete action token, (ii) NL-style action representation, (iii) continuous flow-matching action head
 - **v1**: (iii) continuous flow-matching head (π-consistent; backbone not used as action token predictor → less prior disturbance)
 - **Rationale**: keeps VLM in semantic role, action experts carry control
-- **Deferred**: (ii) NL-style → trigger: D20 moves to LoRA-minimal/VLM2VLA path / **CP1**
-
-### 6.6 Decisions — P5 / Evaluation (D24–D26)
+- **Deferred**: (ii) NL-style → trigger: D20 moves to LoRA-minimal/VLM2VLA path
+### 6.5 Decisions — P5 / Evaluation (D24–D26)
 
 #### [D24] Demo task & phasing (P5)
-- **First demo**: in-hand cube rotation, 50–100g, 7cm, friction 0.5–1.5, arbitrary axis, angular error <10°, 5s episode. CP1 sim 30 trials/condition; CP2 real 50+/condition
-- **Phase 2 (CP3)**: 5 articulated tools (CATFA precedent, arXiv:2509.23075)
+- **First demo**: in-hand cube rotation, 50–100g, 7cm, friction 0.5–1.5, arbitrary axis, angular error <10°, 5s episode. Sim ablation 30 trials/condition; real-robot 50+/condition
+- **Phase 2**: 5 articulated tools (CATFA precedent, arXiv:2509.23075)
 - **Non-negotiable**: phased demo (in-hand rotation → tool articulation)
 
 #### [D25] 4-contribution ablation & falsifier (P5)
@@ -354,8 +345,8 @@ All architectural commits recorded with: options considered, v1 choice, rational
 - **Non-negotiable**: per-metric falsifier with quantitative threshold; 4-contribution decomposition
 
 #### [D26] Evaluation protocol (P5)
-- **v1**: Grouped Blind Ensemble (operator blinding; BeingBeyond 2026) + AutoEval-style automation (arXiv:2503.24278) for CP1 sim ablation; CP2 real-world = manual + blind
-- **Metrics**: contact-precision (slip count, pose stability) — falsifier; throughput (consecutive rotation count, rotations/sec) — field comparison; coordination corr($a_b$,$a_h$) — split validation; robustness (CP2+, success drop under perturbation, CATFA)
+- **v1**: Grouped Blind Ensemble (operator blinding; BeingBeyond 2026) + AutoEval-style automation (arXiv:2503.24278) for the sim ablation; real-robot evaluation = manual + blind
+- **Metrics**: contact-precision (slip count, pose stability) — falsifier; throughput (consecutive rotation count, rotations/sec) — field comparison; coordination corr($a_b$,$a_h$) — split validation; robustness (post-real-robot, success drop under perturbation, CATFA)
 
 ---
 
@@ -372,7 +363,7 @@ Excluded from weekly digest unless unusually strong tie to a Pillar/Decision:
 - **Post-hoc correction/residual on a frozen VLA** that does not address the distribution-bound limitation
 - Monolithic VLA decoders without arm-hand split; flat-concat multimodal fusion without per-finger attribution
 - VLA papers: in scope only if (a) arm-hand split / heterogeneous experts, (b) structured tactile/proprio binding, (c) VLM-preservation / forgetting / over-specialization analysis, (d) System0-style low-level stabilization. Exclude pick-and-place-only.
-- Grasping-only (lift-and-hold) — pre-grasp / nominal-pose in scope only at CP3+
+- Grasping-only (lift-and-hold) — pre-grasp / nominal-pose in scope only in the tool-articulation phase
 - Soft robotics hardware design without learning
 - Survey / position papers (read manually, not via agent)
 - Router-based MoE for action selection (DexReMoE monitoring is the exception — §10)
@@ -416,38 +407,43 @@ Excluded from weekly digest unless unusually strong tie to a Pillar/Decision:
 | HORA (Qi et al., CoRL'22) | [arXiv:2210.04887](https://arxiv.org/abs/2210.04887) | 2022 | In-hand rotation + RMA + privileged→tactile distill (D17/D18) |
 | AnyRotate (Bristol/Cambrian) | [arXiv:2405.07391](https://arxiv.org/abs/2405.07391) | 2024 | D17 reward direct reference |
 | CCGE | [arXiv:2603.10971](https://arxiv.org/abs/2603.10971) | 2026 | Contact-coverage reward (D17 deferred) |
-| RMA (legged) | [arXiv:2107.04034](https://arxiv.org/abs/2107.04034) | 2021 | D18 teacher-student origin; Phase-3 RL fine-tuning deferred (CP2) |
+| RMA (legged) | [arXiv:2107.04034](https://arxiv.org/abs/2107.04034) | 2021 | D18 teacher-student origin; Phase-3 RL fine-tuning deferred until real-robot transition |
 | Static Friction Sim2Real (Hu et al.) | [arXiv:2503.01255](https://arxiv.org/abs/2503.01255) | 2025 | D18 static/dynamic friction split |
-| Contact-Aware Neural Dynamics | [arXiv:2601.12796](https://arxiv.org/abs/2601.12796) | 2026 | DR limit; learned contact correction (D18 CP3) |
+| Contact-Aware Neural Dynamics | [arXiv:2601.12796](https://arxiv.org/abs/2601.12796) | 2026 | DR limit; learned contact correction (D18, deferred) |
 | π0.5 | [arXiv:2504.16054](https://arxiv.org/abs/2504.16054) | 2025 | Hierarchical inference = System1/System0 analog (D14) |
 
 **Methodology base**: Eureka [arXiv:2310.12931](https://arxiv.org/abs/2310.12931) / DrEureka [arXiv:2406.01967](https://arxiv.org/abs/2406.01967) (D17 synthesis deferred); DAPG [arXiv:1709.10087](https://arxiv.org/abs/1709.10087) (demo integration); OpenAI Rubik's Cube ADR [arXiv:1910.07113](https://arxiv.org/abs/1910.07113).
 
 ### 8.4 P4 Pinned — VLM Pretraining Preservation
-| Paper | arXiv | Year | Role |
-|---|---|---|---|
-| π0 | [arXiv:2410.24164](https://arxiv.org/abs/2410.24164) | 2024 | Frozen-backbone + action-expert pattern (D19) |
-| π0.5 | [arXiv:2504.16054](https://arxiv.org/abs/2504.16054) | 2025 | Co-training / hierarchical (D21/D22) |
-| VLM2VLA | [arXiv:2509.22195](https://arxiv.org/abs/2509.22195) | 2025 | LoRA + NL-action, forgetting mitigation (D20) |
-| RT-2 | [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) | 2023 | Web/robot co-FT prior retention (D20) |
-| VLA-Adapter | [arXiv:2509.09372](https://arxiv.org/abs/2509.09372) | 2025 | Bridge Attention action-side adapter (D20) |
-| PriorVLA | [arXiv:2605.10925](https://arxiv.org/abs/2605.10925) | 2026 | Prior-preserving downstream adaptation; frozen Prior Expert + Adaptation Expert (D20) |
-| Multi-Embodiment Pretraining Data | [arXiv:2506.19121](https://arxiv.org/abs/2506.19121) | 2025 | Dataset selection (D22) |
-| MolmoAct2 | [arXiv:2605.02881](https://arxiv.org/abs/2605.02881) | 2026 | Per-layer KV-cache conditioning preserves VLM (D19/D23) |
+
+> Two columns split off the single "VLM" identity so lineage is visible at a glance: **VLM init** = initial weights, **Further-pretrain corpus** = what the paper's team stacked on top. `TBD` marks values still to be filled from the paper.
+>
+> 2026-05 rebalance: VLA-Adapter / PriorVLA / Multi-Embodiment Pretraining Data demoted from pins (VLA-Adapter and PriorVLA stay tracked in the P4 competitor section of `context/P4.md` §8; Multi-Embodiment promoted into the D22 catalog under `context/P4.md` §9). Slots reused for GR00T N1, Being-H0.5, Xiaomi-Robotics-0 to widen lineage coverage (D19b).
+
+| Paper | arXiv | Year | VLM init | Further-pretrain corpus | Role |
+|---|---|---|---|---|---|
+| π0 | [arXiv:2410.24164](https://arxiv.org/abs/2410.24164) | 2024 | PaliGemma-2B | OXE + π in-house mix | Frozen-backbone + action-expert pattern (D19); v1 lineage (D19b) |
+| π0.5 | [arXiv:2504.16054](https://arxiv.org/abs/2504.16054) | 2025 | PaliGemma | π0.5 mix (web pretrain + co-train) | Co-training / hierarchical (D21/D22) |
+| VLM2VLA | [arXiv:2509.22195](https://arxiv.org/abs/2509.22195) | 2025 | Gemma-3-12B-IT (LoRA on all linear modules) | BridgeData v2, NL-formatted via Gemini-2.5 (fine-tune corpus, *no additional pretraining*) | LoRA + NL-action, forgetting mitigation (D20); triggers D23(ii) path |
+| RT-2 | [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) | 2023 | PaLI-X | web VLM data + robot co-FT | Web/robot co-FT prior retention (D20) |
+| GR00T N1 | [arXiv:2503.14734](https://arxiv.org/abs/2503.14734) | 2025 | Eagle-2 (NVIDIA, 1.34B VLM portion) | humanoid trajectories + human video + synthetic | Cross-embodiment dual-system VLA; lineage benchmark (D19b/D22) |
+| Being-H0.5 | [arXiv:2601.12993](https://arxiv.org/abs/2601.12993) | 2026 | TBD (not disclosed in paper; check GitHub config) | UniHand-2.0 (~35k h × 30 embodiments, 400M+ samples / 120B tokens; ~16k h ego video + ~14k h robot manip + ~5k h VL) | Human-video-centric pretraining + cross-embodiment (D22/D19b) |
+| Xiaomi-Robotics-0 | [arXiv:2602.12684](https://arxiv.org/abs/2602.12684) | 2026 | Qwen3-VL-4B-Instruct | ~200M robot trajectory timesteps (DROID + MolmoAct + in-house cross-embodiment) + 80M+ VL samples (4.7B total params) | Open-weight VLA + real-time exec; open-weight lineage candidate (D19b) |
+| MolmoAct2 | [arXiv:2605.02881](https://arxiv.org/abs/2605.02881) | 2026 | Molmo | MolmoAct mix | Per-layer KV-cache conditioning preserves VLM (D19/D23) |
 
 ### 8.5 P5 Pinned — Task Definition & Falsifiable Evaluation
 | Paper | arXiv | Year | Role |
 |---|---|---|---|
 | OpenAI Learning Dexterous In-Hand | IJRR 2020 | 2018-20 | Consecutive-rotation metric (D26) |
-| DexArt (CVPR'23) | [arXiv:2305.05706](https://arxiv.org/abs/2305.05706) | 2023 | Articulated benchmark, CP3 |
-| CATFA (In-Hand Articulated Tools) | [arXiv:2509.23075](https://arxiv.org/abs/2509.23075) | 2025 | CP3 direct baseline; 5 tools |
+| DexArt (CVPR'23) | [arXiv:2305.05706](https://arxiv.org/abs/2305.05706) | 2023 | Articulated benchmark (tool-articulation phase) |
+| CATFA (In-Hand Articulated Tools) | [arXiv:2509.23075](https://arxiv.org/abs/2509.23075) | 2025 | Tool-articulation direct baseline; 5 tools |
 | RoboEval | [arXiv:2507.00435](https://arxiv.org/abs/2507.00435) | 2025 | Behavioral metrics (D25 falsifier) |
 | Grounding Sim2Real VLA | [arXiv:2603.22876](https://arxiv.org/abs/2603.22876) | 2026 | 10k-trial protocol; 4-dim eval |
-| AutoEval | [arXiv:2503.24278](https://arxiv.org/abs/2503.24278) | 2025 | CP1 ablation automation (D26) |
+| AutoEval | [arXiv:2503.24278](https://arxiv.org/abs/2503.24278) | 2025 | Sim ablation automation (D26) |
 | NVIDIA Robot Policy Evaluation | [arXiv:2508.11117](https://arxiv.org/abs/2508.11117) | 2025 | Sim2real benchmarking; Isaac stack |
 | DexReMoE | [arXiv:2508.01695](https://arxiv.org/abs/2508.01695) | 2025 | P1 architectural sibling; monitoring (§10) |
 
-**Methodology base**: Grouped Blind Ensemble (BeingBeyond 2026, operator-blinding); SimplerEnv (CoRL'24); ArtiBench/ArtiBrain [arXiv:2511.20330](https://arxiv.org/abs/2511.20330) (CP5).
+**Methodology base**: Grouped Blind Ensemble (BeingBeyond 2026, operator-blinding); SimplerEnv (CoRL'24); ArtiBench/ArtiBrain [arXiv:2511.20330](https://arxiv.org/abs/2511.20330) (cross-object generalization phase).
 
 ---
 
@@ -471,7 +467,7 @@ Physical Intelligence; Berkeley BAIR/RAIL; SJTU MVIG/RISE; Meta FAIR Robotics; N
 
 ## 10. Competitor / Kindred Monitoring [LIVING] [AGENT-INPUT]
 
-Review at every CP.
+Reviewed when Tracked Literature rebalances or a Decision-Log trigger fires.
 
 ### 10.1 VLA-only strong performers (antagonist evidence — "RL not necessary")
 - **Genesis AI** — VLA-only does all tasks without RL/System0. *Watch trigger*: any release demonstrating contact-rich dexterity without low-level RL → directly tests the System0 necessity claim.
@@ -482,13 +478,13 @@ Review at every CP.
 - **DexterityGen** ([arXiv:2502.04307](https://arxiv.org/abs/2502.04307)) — RL primitive policy as data-acquisition aid; no guarantee RL covers all hard tasks. *Watch trigger*: target-task count / generalization claims.
 
 ### 10.3 Architectural siblings (P1 split)
-- **LaMP** ([arXiv:2603.25399](https://arxiv.org/abs/2603.25399)) — two-expert gated cross-attn; split axis = scene-flow, not anatomical. CP1 architecture comparison.
+- **LaMP** ([arXiv:2603.25399](https://arxiv.org/abs/2603.25399)) — two-expert gated cross-attn; split axis = scene-flow, not anatomical. v1 architecture comparison.
 - **TwinBrainVLA** ([arXiv:2601.14133](https://arxiv.org/abs/2601.14133)) — AsyMoT frozen+trainable; closest analog. Watch real-robot validation.
 - **HEX** ([arXiv:2604.07993](https://arxiv.org/abs/2604.07993)) / **DexReMoE** ([arXiv:2508.01695](https://arxiv.org/abs/2508.01695)) — embodiment/object routing vs anatomical split.
-- **Shared-Autonomy Arm-Hand VLA / DexGrasp-VLA** ([arXiv:2511.00139](https://arxiv.org/abs/2511.00139)) — anatomical arm/hand split at *both* the data-collection layer (VR-teleop arm + autonomous hand VLA) and the decoder layer (Arm-Hand Feature Enhancement). Closest published analog to P1's anatomical claim. *Watch trigger*: any extension to in-hand reorientation or articulated-tool tasks (would intersect CP2/CP3 directly).
+- **Shared-Autonomy Arm-Hand VLA / DexGrasp-VLA** ([arXiv:2511.00139](https://arxiv.org/abs/2511.00139)) — anatomical arm/hand split at *both* the data-collection layer (VR-teleop arm + autonomous hand VLA) and the decoder layer (Arm-Hand Feature Enhancement). Closest published analog to P1's anatomical claim. *Watch trigger*: any extension to in-hand reorientation or articulated-tool tasks (would intersect both phases directly).
 
-### 10.4 CP3 baseline & hardware-paired
-- **CATFA** ([arXiv:2509.23075](https://arxiv.org/abs/2509.23075)) — frozen base + cross-attn adapter vs our split-both-trained; CP3 baseline.
+### 10.4 Tool-articulation baseline & hardware-paired
+- **CATFA** ([arXiv:2509.23075](https://arxiv.org/abs/2509.23075)) — frozen base + cross-attn adapter vs our split-both-trained; tool-articulation baseline.
 - **SaTA** ([arXiv:2510.14647](https://arxiv.org/abs/2510.14647)) — uses Sharpa Wave; single-task adapter vs full-system identity.
 - **Sharpa Robotics VTLA** — vendor + competitor; any release/demo.
 
@@ -528,50 +524,37 @@ Filled monthly by maintainer, *not* by agent.
 
 **Quarterly review question**: *Has my thinking on Identity / any Pillar shifted? If no, the retrieval pipeline may be underperforming — revisit pinned papers and antagonist articulation.*
 
-**Decision-Log checkpoint review (every 3 months)**: scan D1–D26 — any deferred candidate's trigger now observed? Any rationale invalidated?
+**Decision-Log review (every 3 months)**: scan D1–D26 — any deferred candidate's trigger now observed? Any rationale invalidated?
 
-**Competitor/Kindred monitoring (every CP)**: §10 — any Genesis AI / Sharpa VTLA / π RLT-RECAP / CATFA / TwinBrainVLA follow-up? Differentiation vehicle intact?
+**Competitor/Kindred monitoring (quarterly)**: §10 — any Genesis AI / Sharpa VTLA / π RLT-RECAP / CATFA / TwinBrainVLA follow-up? Differentiation vehicle intact?
 
 ---
 
 ## 14. Open Items & Dependency Graph [LIVING] [AGENT-INPUT]
 
-### 14.A — CP-Tiered Prerequisites
+### 14.A — Prerequisites & Defaults
 
-**Tier 0 — CP1 (sim ablation) minimum blockers**
-| Item | Default fallback | Resolve by |
-|---|---|---|
-| First-demo cube fine spec | HORA/AnyRotate standard (D24 v1) | Just before CP1 |
+| Item | Default fallback |
+|---|---|
+| First-demo cube fine spec | HORA/AnyRotate standard (D24 v1) |
+| Arm hardware spec | Generic 7-DOF; Body=flange pose (D2) decouples |
+| Real-world site/setup | physical workspace required |
+| System0 tactile sim2real protocol (D18 prereq) | Akinola Isaac Gym lib + Chen et al. 2024 |
+| Static friction range estimation (D18 prereq) | Wide DR range, gradual narrowing |
+| 5 articulated tools list | CATFA 5 / DexArt subset + stapler/scissors/pen/pliers |
+| Custom hand spec (2H 2026) | Continue with Sharpa; D11 swappable head allows P2 encoder swap |
 
-> Tier 0 default is strong enough that CP1 entry is effectively possible from current committed state.
-
-**Tier 1 — CP2 (real-world) blockers**
-| Item | Default fallback | Resolve by |
-|---|---|---|
-| Arm hardware spec | Generic 7-DOF; Body=flange pose (D2) decouples | 3–6 mo before CP2 |
-| Real-world site/setup | physical workspace required | At CP2 |
-| System0 tactile sim2real protocol (D18 prereq) | Akinola Isaac Gym lib + Chen et al. 2024 | End of CP1 |
-| Static friction range estimation (D18 prereq) | Wide DR range, gradual narrowing | Just before CP2 |
-
-**Tier 2 — CP3 (tool articulation)**
-| Item | Default fallback | Resolve by |
-|---|---|---|
-| 5 articulated tools list | CATFA 5 / DexArt subset + stapler/scissors/pen/pliers | Just before CP3 |
-
-**Tier 3 — CP4+ (hardware transition)**
-| Item | Default fallback | Resolve by |
-|---|---|---|
-| Custom hand spec (2H 2026) | Continue with Sharpa; D11 swappable head allows P2 encoder swap | 2H 2026 |
+> Defaults are strong enough that v1 sim-ablation entry is effectively possible from the current committed state; the remaining items unlock the real-robot, tool-articulation, and hand-hardware phases respectively.
 
 ### 14.B — Implementation Feasibility Unclarities
-| Item | Status | Default if unresolved | Deadline |
-|---|---|---|---|
-| π weight access | ✅ openpi (π0/π0.5/π0-FAST, Apache 2.0; PyTorch port + open-pi-zero) | — | — |
-| π variant (π0/π0.5/π0.7) | 🟡 open | π0 (most stable) | CP1 code start |
-| Code base (JAX openpi / HF PyTorch / open-pi-zero) | 🟡 open | PyTorch port | CP1 code start |
-| Compute budget — GPU mem for D7 slice + FT × 8k–16k env (System0) | 🟡 unknown | Fallback 2k–4k env | Before CP1 exec |
-| Multi-embodiment pretraining data access (D22) | 🟡 unknown | π prior only (D22 v1) | CP3 |
-| Team / engineering capacity | 🟡 unknown — maintainer-side | — | maintainer-side |
+| Item | Status | Default if unresolved |
+|---|---|---|
+| π weight access | ✅ openpi (π0/π0.5/π0-FAST, Apache 2.0; PyTorch port + open-pi-zero) | — |
+| π variant (π0/π0.5/π0.7) | 🟡 open | π0 (most stable) |
+| Code base (JAX openpi / HF PyTorch / open-pi-zero) | 🟡 open | PyTorch port |
+| Compute budget — GPU mem for D7 slice + FT × 8k–16k env (System0) | 🟡 unknown | Fallback 2k–4k env |
+| Multi-embodiment pretraining data access (D22) | 🟡 unknown | π prior only (D22 v1) |
+| Team / engineering capacity | 🟡 unknown — maintainer-side | — |
 
 ### 14.C — Architectural Sub-Unclarity (D7 / P1 core)
 
@@ -582,7 +565,7 @@ Filled monthly by maintainer, *not* by agent.
 | **A — Repurpose** | π0 action expert as Hand; *add* new Body | Minimal π disruption; Body random-init loses prior |
 | **B — Subdivide** | *Slice* π0 action expert into Body/Hand | Preserves prior both sides; needs slice-boundary + capacity decision |
 
-→ Sub-readings of D7 v1; decide at CP1 code entry (explicit acknowledgment, no hard commit now). open-pi-zero = parameter-level reference. TwinBrainVLA AsyMoT + LaMP gated cross-attn = concrete references for the body→hand sharing module (D4).
+→ Sub-readings of D7 v1; decide at code entry (explicit acknowledgment, no hard commit now). open-pi-zero = parameter-level reference. TwinBrainVLA AsyMoT + LaMP gated cross-attn = concrete references for the body→hand sharing module (D4).
 
 ### 14.D — Non-blocking Ongoing Items
 | Item | Why valuable | Default posture |
@@ -602,29 +585,31 @@ External / Ongoing (anytime):
 Resolved:
    [π weight access] ✅────→ D7 (i) cascade safe
 
-Tier 0 → CP1:
-   [Cube spec default] ──→ ┌── CP1 entry (4-contribution ablation) ──┐
-                            └──  also needs §14.B (π variant/codebase) ┘
-                  │
-   Concurrent during CP1:
-   ├─ System0 tactile sim2real protocol ┐
-   ├─ Friction range estimation         │→ CP2 prerequisite gate
-   ├─ Arm hardware spec                 │
-   └─ Real-world site/setup             ┘
-                  ↓ CP2 → [5-tool list] → CP3 → [Custom hand spec 2H26] → CP4
+Implementation-unblocked:
+   [Cube spec default] ──→ 4-contribution ablation (also needs §14.B π variant/codebase)
+
+Real-robot prerequisites (concurrent with sim ablation):
+   ├─ System0 tactile sim2real protocol
+   ├─ Friction range estimation
+   ├─ Arm hardware spec
+   └─ Real-world site/setup
+
+Phase items (resolve before their phase fires):
+   [5-tool list] → tool-articulation phase
+   [Custom hand spec 2H26] → hand-hardware phase
 ```
 
 ### 14.F — Why This Structure?
-CP-tiered organization separates near-term blockers from distant ones. §14.B/§14.C surface implementation-feasibility and literal-reading ambiguity that flat task-lists conceal.
+Open-items separates near-term implementation blockers (§14.B/§14.C) from background research and external-world items (§14.D), without committing the order in which the remaining phases land.
 
 ---
 
 ## Appendix C: Open meta-questions
 
-- **Domain epistemics**: detailed-design judgment is limited because the field is in unknown territory. Decision Log (defaults + triggers + checkpoints) is the principled response — each v1 default is a *bet* whose evidence accrues at the corresponding checkpoint.
-- **First-experiment fragility**: most CP1 deferred decisions converge on the first ablation; noisy CP1 → multiple v2 candidates activate at once.
-- **Sim2real timing (System0-scoped)**: P3/System0 sim2real is plan, not implementation; CP2 prerequisite (visuotactile sim protocol + friction range) gates it.
-- **Publication race**: TwinBrainVLA / LaMP / CATFA / DexReMoE active. §10 differentiation; revisit each CP.
+- **Domain epistemics**: detailed-design judgment is limited because the field is in unknown territory. Decision Log (defaults + triggers) is the principled response — each v1 default is a *bet* whose evidence accrues as the corresponding trigger condition is observed.
+- **First-experiment fragility**: most v1-deferred decisions converge on the first ablation; a noisy first ablation → multiple v2 candidates activate at once.
+- **Sim2real timing (System0-scoped)**: P3/System0 sim2real is plan, not implementation; the real-robot transition prerequisite (visuotactile sim protocol + friction range) gates it.
+- **Publication race**: TwinBrainVLA / LaMP / CATFA / DexReMoE active. §10 differentiation; revisit when Tracked Literature rebalances.
 - **Hardware partnership uncertainty**: Sharpa = vendor + competitor (own VTLA). Posture TBD.
 - **OpenProblem — Limitation of Imitation Learning**: flow-matching diffusion policy models the data distribution; it does not directly learn the task-success *mechanism*. Whether this can be *fundamentally* overcome (beyond System0 stabilization patching the contact tail) is an open research question, not a closed decision. This is the deepest uncertainty under the VLA-level identity — directly tied to Antagonist A (correction modules are distribution-bounded; but so is the VLA itself). Track, do not prematurely resolve.
 
@@ -634,7 +619,7 @@ CP-tiered organization separates near-term blockers from distant ones. §14.B/§
 |---|---|---|---|
 | **A — Knowledge gap** | Study (read) | π0 internals (openpi + open-pi-zero), VLM-preservation literature (VLM2VLA/RT-2/VLA-Adapter/PriorVLA), Sharpa Deform Map sim, IL-limitation theory | Self-paced reading; pre-condition for step (iii) |
 | **B — Information gap** | Acquire (look up/ask) | unverified arXiv IDs (§14.B), π0.7 release, multi-embodiment data access, Korean PI contacts, compute/team capacity | Periodic scan; concurrent with A |
-| **C — Experiential gap** | Run experiments (CP1~CP5) | Evidence for D1–D26 v1 defaults, §14.C D7 sub-reading, falsifier threshold appropriateness, System0-necessity test | Resolved only by step (iii)+ |
+| **C — Experiential gap** | Run experiments (v1 ablation through the generalization phase) | Evidence for D1–D26 v1 defaults, §14.C D7 sub-reading, falsifier threshold appropriateness, System0-necessity test | Resolved only by step (iii)+ |
 | **D — External world dependency** | Wait + monitor | Custom hand spec (2H 2026), Genesis AI / Sharpa VTLA / TwinBrainVLA follow-ups, π0.7+ release | Periodic scan via §10 |
 
 **Key insight**: a "don't know enough to commit" feeling usually arises when Category A items are mistaken for Category C. The classification clarifies which gaps close *before* re-entering step (iii) and which require step (iii) itself.

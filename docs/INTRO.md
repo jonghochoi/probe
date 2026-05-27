@@ -126,7 +126,7 @@ Probe는 탐사선이다. 전투는 하지 않는다.
 | **방향 설정** | Identity 명제 점검 + Pillar 우선순위 결정 (최우선 Pillar 가 여전히 맞는가?) |
 | **Decision 정제** | 에이전트가 찾아온 논문이 어떤 Decision 의 default 를 흔들거나 deferred 트리거를 점등시키면, 해당 Decision 을 Decision Log 에서 업데이트 |
 | **평가 프로토콜** | 현재 Decision Log 가 정의한 falsifier 임계값·메트릭을 유지·강화 — 없으면 어떤 리포트도 의미 없음 |
-| **맥락 갱신** | Revisit Checkpoint 도래 시 `context/MASTER.md` 업데이트 — 실험 결과, deferred 트리거, 새 evidence 반영 |
+| **맥락 갱신** | 실험 결과·deferred 트리거·새 evidence 가 나올 때마다 `context/MASTER.md` 업데이트 |
 | **피드백 루프** | Scouting Report 를 실제로 읽고, 실험 설계에 반영된 것을 기록 |
 
 > "에이전트가 잘 작동하고 있는가"는 에이전트 스스로 판단할 수 없다.
@@ -218,7 +218,7 @@ Probe 는 **Claude Code Routines 클라우드 스케줄링 단일 운영 모드*
 이 세 숫자의 **비율**이 Probe의 실효성 지표다.
 3개월마다 "내 Identity 명제 또는 어느 Pillar에 대한 생각이 실제로 바뀌었는가?"를 자문한다.
 바뀌지 않았다면 retrieval 파이프라인을 재점검한다.
-추가로 매 Checkpoint마다 Competitor 동향과 Decision Log 의 deferred 트리거를 함께 점검한다.
+추가로 Tracked Literature 분기 재조정마다 Competitor 동향과 Decision Log 의 deferred 트리거를 함께 점검한다.
 
 ---
 

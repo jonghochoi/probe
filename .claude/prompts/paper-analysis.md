@@ -137,7 +137,7 @@ Both are regenerable snapshots — overwrite on re-run. Follow
 Korean documents — not translations of English files. Write natively
 in Korean per STYLE §4 (formal polite -ㅂ니다 register, glossary §4-2,
 verbatim tokens: paper title in original English, config/code names,
-formulas, arXiv links, P#/D#/CP#).
+formulas, arXiv links, P#/D#).
 
 The Design is **vendor-agnostic** — it must not contain `file:line`
 coordinates of any foundry (vendor/lerobot or otherwise). Its purpose
@@ -176,9 +176,9 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
   ♻️ 재현성            — code / data / hardware availability.
 
 (B) PROBE 연동 — decision-grade, anchored to context/MASTER.md:
-  🎯 관련 Pillar / Decision (P#/D#) — which P1–P5 / D1–D26 / CP1–CP5
-       this paper touches, with Identity tension/support and any §10
-       competitor implication.
+  🎯 관련 Pillar / Decision (P#/D#) — which P1–P5 / D1–D26 this paper
+       touches. Also note Identity tension/support and any §10 competitor
+       implication.
   ✨ 핀 논문 대비 델타  — what is genuinely new vs. the Tracked
        Literature already in context/MASTER.md (name the pinned paper).
   ⚙️ 의사결정 함의     — what changes in MY training/evaluation pipeline
@@ -211,7 +211,7 @@ real spec to ground.
 HARD RULES:
 - Two Korean documents. No English-primary file. KO-only filenames.
 - Anchor (B) of the analysis strictly to context/MASTER.md — cite real
-  P#/D#/CP# with their meaning from the doc; do not invent a
+  P#/D# with their meaning from the doc; do not invent a
   connection. If the paper does not touch a given Decision, say so
   plainly.
 - Abstract-only acquisition → prefix every (B) section of the analysis
@@ -367,7 +367,7 @@ Hard rules for this stage:
   - The §4-5 invariants in `docs/STYLE.md` MUST survive
     humanization for both files. Violation of any invariant (verbatim
     tokens, emoji placement, `<a id="ref-…">` anchors, arXiv / DOI
-    links, citation accuracy, P#/D#/CP# tag form, §4-2 glossary
+    links, citation accuracy, P#/D# tag form, §4-2 glossary
     translations) is treated as a fidelity fail → rollback.
   - English-verbatim quotes inside a `>` blockquote, their `(§n)`
     source markers, and any formula are excluded from humanize
