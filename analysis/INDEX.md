@@ -28,9 +28,9 @@ paper-silent-experimental / out-of-base-scope 행 수를 읽어 옵니다
 | 4 | [`2605.15735/analysis.md`](2605.15735/analysis.md) | [`2605.15735`](https://arxiv.org/abs/2605.15735) | UAM: A Dual-Stream Perspective on Forgetting in VLA Training | 2026-05-26 | — | — | — |
 | 5 | [`2605.13403/analysis.md`](2605.13403/analysis.md) | [`2605.13403`](https://arxiv.org/abs/2605.13403) | RotVLA: Rotational Latent Action for Vision-Language-Action Model | 2026-05-26 | — | — | — |
 | 6 | [`2605.11048/analysis.md`](2605.11048/analysis.md) | [`2605.11048`](https://arxiv.org/abs/2605.11048) | ForceFlow: Learning to Feel and Act via Contact-Driven Flow Matching | 2026-05-26 | — | — | — |
-| 7 | [`2605.07308/analysis.md`](2605.07308/analysis.md) | [`2605.07308`](https://arxiv.org/abs/2605.07308) | AT-VLA: Adaptive Tactile Injection for Enhanced Feedback Reaction in Vision-Language-Action Models | 2026-05-26 | — | — | — |
-| 8 | [`2604.23272/analysis.md`](2604.23272/analysis.md) | [`2604.23272`](https://arxiv.org/abs/2604.23272) | Modular Sensory Stream for Integrating Physical Feedback in Vision-Language-Action Models | 2026-05-26 | — | — | — |
-| 9 | [`2605.08879/analysis.md`](2605.08879/analysis.md) | ⚠️ metadata | Preserving Foundational Capabilities in Flow-Matching VLAs through Conservative SFT | 2026-05-26 | — | — | — |
+| 7 | [`2605.08879/analysis.md`](2605.08879/analysis.md) | [`2605.08879`](https://arxiv.org/abs/2605.08879) | Preserving Foundational Capabilities in Flow-Matching VLAs through Conservative SFT | 2026-05-26 | — | — | — |
+| 8 | [`2605.07308/analysis.md`](2605.07308/analysis.md) | [`2605.07308`](https://arxiv.org/abs/2605.07308) | AT-VLA: Adaptive Tactile Injection for Enhanced Feedback Reaction in Vision-Language-Action Models | 2026-05-26 | — | — | — |
+| 9 | [`2604.23272/analysis.md`](2604.23272/analysis.md) | [`2604.23272`](https://arxiv.org/abs/2604.23272) | Modular Sensory Stream for Integrating Physical Feedback in Vision-Language-Action Models | 2026-05-26 | — | — | — |
 | 10 | [`2511.00139/analysis.md`](2511.00139/analysis.md) | [`2511.00139`](https://arxiv.org/abs/2511.00139) | End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection | 2026-05-21 | ✅ | pass | 0/0/0/0/4 |
 
 <!-- ANALYSIS_INDEX:END -->
