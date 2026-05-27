@@ -96,7 +96,7 @@ OUTPUT — Korean report (`scouting/<PILLAR>/YYYY-MM-DD.md`)
 Write the report directly in Korean, following scouting/_TEMPLATE.md
 exactly. Top 3–5 papers only. Apply docs/STYLE.md §4 (Korean
 authoring rules): all prose is formal Korean (합니다/됩니다 체), while
-paper titles, config / code names, formulas, P#/D#/CP# tags, arXiv
+paper titles, config / code names, formulas, P#/D# tags, arXiv
 links, emojis and `<a id="ref-…">` anchors stay verbatim in their
 original form. Use the §4-2 glossary and §4-3 header table.
 
@@ -142,18 +142,16 @@ For each paper, state:
 ### Reference Legend (docs/STYLE.md §3-1)
 Open the report with a `## 🔑 Reference Legend` section, placed right
 after the intro blockquote and right before `## 📋 Scout Methodology`.
-  - Include ONLY the P#/D#/CP# codes this report actually cites. No
+  - Include ONLY the P#/D# codes this report actually cites. No
     other codes; no competitor codenames / Identity / falsifier.
-  - One table, rows ordered P# → D# (ascending) → CP# (ascending), one
-    row per distinct cited code. Omit the section if none are cited.
+  - One table, rows ordered P# → D# (ascending), one row per distinct
+    cited code. Omit the section if none are cited.
   - Each row: `| <a id="ref-CODE"></a>**CODE** | <one-line meaning> |`.
   - Derive the meaning from context/<PILLAR>.md (do not invent), matching
     by literal header pattern, not section number:
     P# = the `## ... Pillar P# — <name>` header → "<name> (pillar)";
     D# = the `#### [D#] <title>` entry inside the "Decision Log" section
-    + its v1 line → "<title> — v1 choice in ≤~12 words";
-    CP# = the `- **CP#**: <desc>` line inside the "Revisit Checkpoints"
-    section → "Checkpoint #: <desc>".
+    + its v1 line → "<title> — v1 choice in ≤~12 words".
   - In the body, link the FIRST occurrence of each code per top-level
     `##` section as `[CODE](#ref-CODE)`; later same-section occurrences
     stay plain. Do not link codes inside tables or code blocks.
@@ -200,7 +198,7 @@ Hard rules for this stage:
   - The §4-5 invariants in `docs/STYLE.md` MUST survive
     humanization. Violation of any invariant (verbatim tokens, emoji
     placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
-    accuracy, P#/D#/CP# tag form, §4-2 glossary translations)
+    accuracy, P#/D# tag form, §4-2 glossary translations)
     is treated as a fidelity fail → rollback.
   - The humanize pass NEVER adds, removes, or changes facts; it only
     rewrites Korean prose style (translation-ese, mechanical

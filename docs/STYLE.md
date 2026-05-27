@@ -15,7 +15,7 @@ pillar. Each run produces **one Korean file**:
 | `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P1–P4); `YYYY-MM-DD` is the run date. The agent reads sibling files in the same `P#/` folder for de-duplication. |
 
 The report is written directly in Korean (no separate English file).
-Paper titles, arXiv links, and `P#/D#/CP#` tags stay verbatim in their
+Paper titles, arXiv links, and `P#/D#` tags stay verbatim in their
 original form (see §4-1), so de-duplication across previous reports
 works on those verbatim tokens regardless of prose language.
 
@@ -100,10 +100,10 @@ Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 ### 3-1. Reference Legend & cross-reference links
 
 The report opens with a **Reference Legend** — a one-line glossary of the
-`P#` / `D#` / `CP#` codes, so a reader who does not have the codes
-memorized can decode the report without opening `context/P#.md`.
+`P#` / `D#` codes, so a reader who does not have the codes memorized can
+decode the report without opening `context/P#.md`.
 
-**Scope.** Only `P#` (Pillar), `D#` (Decision), `CP#` (Checkpoint) codes.
+**Scope.** Only `P#` (Pillar) and `D#` (Decision) codes.
 **Only codes actually cited in this report.** Never list a code the body
 does not use; never list competitor codenames, Identity, or the falsifier.
 
@@ -111,8 +111,8 @@ does not use; never list competitor codenames, Identity, or the falsifier.
 after the top intro blockquote and immediately before `## 📋 Scout
 Methodology`. It is the first content section of the report.
 
-**Format.** One compact table, rows ordered `P#` → `D#` (ascending) →
-`CP#` (ascending), one row per distinct cited code:
+**Format.** One compact table, rows ordered `P#` → `D#` (ascending),
+one row per distinct cited code:
 
 ```markdown
 ## 🔑 Reference Legend
@@ -121,7 +121,6 @@ Methodology`. It is the first content section of the report.
 |------|---------|
 | <a id="ref-P1"></a>**P1** | Heterogeneous Body/Hand Action Expert (pillar) |
 | <a id="ref-D4"></a>**D4** | Body↔Hand information sharing — v1 FiLM; cross-attn/hidden-state deferred |
-| <a id="ref-CP1"></a>**CP1** | Checkpoint 1: v1 first ablation (4-contribution, in-hand rotation, sim) |
 ```
 
 If the body cites no such code (rare), omit the section entirely.
@@ -133,11 +132,10 @@ which the agent already reads; do not invent):
 |------|-----------------------------------|----------------|
 | `P#` | §2 heading `Pillar P# — <name>` | `<name>` + `(pillar)` |
 | `D#` | §4 `#### [D#] <title>` + its v1 line | `<title>` — v1 choice in ≤ ~12 words |
-| `CP#` | §3 bullet `- **CP#**: <desc>` | `Checkpoint #: <desc>` (compressed) |
 
 **Anchor convention.** Each legend row carries an explicit HTML anchor
 `<a id="ref-<CODE>"></a>` placed before the bold code. `<CODE>` is the
-verbatim code (`P1`, `D4`, `CP2` — case preserved; GitHub matches explicit
+verbatim code (`P1`, `D4` — case preserved; GitHub matches explicit
 `id=` attributes verbatim).
 
 **In-body links (first occurrence per section).** Within each top-level
@@ -165,7 +163,7 @@ verbatim in their original form versus which prose is Korean.
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
-| P#, D#, CP# tags | Keep verbatim (`P2`, `D11`, `CP3`, etc.) |
+| P#, D# tags | Keep verbatim (`P2`, `D11`, etc.). |
 | Reference Legend | Meaning column in Korean; codes + `<a id="ref-…">` anchors verbatim |
 | Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
 | arXiv links | Keep verbatim |
@@ -285,7 +283,7 @@ rollback triggers:
   inside-blockquote `$X$` whose `_`/`^`/`{` is left unguarded, is
   treated as a fidelity fail (the published doc would render
   source-leaked math)
-- `P#` / `D#` / `CP#` tags
+- `P#` / `D#` tags
 - `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` intra-doc links
 - arXiv / DOI links
 - arXiv figure hotlinks and their accompanying English caption
@@ -393,7 +391,7 @@ Do not use any emoji not listed in §2 or here.
 ### 5-3. Korean & verbatim rules
 
 §4 applies in full. Specifically: original English paper title,
-config/code names, formulas, arXiv links, and `P#`/`D#`/`CP#` tags
+config/code names, formulas, arXiv links, and `P#`/`D#` tags
 are kept verbatim; technical terms use the §4-2 glossary; tone is
 formal 합니다/됩니다 체.
 

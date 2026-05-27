@@ -25,6 +25,24 @@
 `/foundry` · `/audit` 가 커밋 시 `scripts/refresh-analysis-index.py`
 로 자동 갱신하는 산출물입니다. 컬럼 규약은 `docs/STYLE.md` §5-7.
 
+## `_catalogs/` — cross-paper lineage 카탈로그
+
+`<arxiv-id>/` per-paper 폴더와 *분리된* 자리. 한 논문 하나가 아니라
+**여러 논문/모델/데이터셋을 가로지르는 격자** 산출물이 들어갑니다.
+
+| 파일 | 무엇 | 누구를 위한 cross-reference |
+|---|---|---|
+| [`_catalogs/README.md`](_catalogs/README.md) | 운영 가이드 — 공통 컬럼 표준 (License / Access / 데이터 유형), cross-reference 규약, 신규 entity 의사결정 트리, 단발/분기 업데이트 절차 | 카탈로그 자체의 *사용설명서* |
+| [`_catalogs/vlm.md`](_catalogs/vlm.md) | open-weight VLM 후보 16개 (PaliGemma · Qwen-VL · InternVL · Eagle-2 · Molmo · LLaVA · SmolVLM · DeepSeek-VL2 등) — 컬럼: 파라미터 / License / Vision encoder / LLM backbone / Instruction-tuning / **Source-check** / Access | D19b "VLM backbone lineage choice" 의 후보 풀 |
+| [`_catalogs/vla.md`](_catalogs/vla.md) | 랜드마크 VLA — 상단 **scan 표** (7컬럼) + 하단 **per-VLA `<details>` 카드** (Architecture / Training data / Action representation / Inference / Eval / Open-weight / Source check / Sources H4) 하이브리드. 19행 (π0 · π0.5 · π0-FAST · RT-2 · OpenVLA · Octo · GR00T N1/N1.5 · MolmoAct/Act2/Bot · VLM2VLA · VLA-Adapter · PriorVLA · TwinBrainVLA · Being-H0/H0.5 · Xiaomi-Robotics-0 · Genesis AI). 모든 셀에 source-check 마커 (🟢/🟡/🔴/❓) | D19b / D22 의 의사결정 근거 |
+| [`_catalogs/pretrain_data.md`](_catalogs/pretrain_data.md) | 멀티-임베디먼트 데이터셋 — 상단 **scan 표** (7컬럼) + 하단 **per-dataset `<details>` 카드** (Observations / Actions / Embodiment / Annotation / Scale / Lineage 적층 / Source check / Sources H4) 하이브리드. 25행 (robot action 15 + human video 9 + mixed 1: HOI4D · ARCTIC · OakInk · AssemblyHands · Assembly101 · Ego4D · Ego-Exo4D · Epic Kitchens · EgoExoLearn · HoloAssist + MolmoAct2-BimanualYAM · -SO100/101 · MolmoBot-Data 등). 모든 셀에 source-check 마커 (🟢/🟡/🔴/❓) | D22 — **Sharpa/xhand 22-DOF 타깃 기준 hand-DOF 우선도** 표기 |
+
+세 카탈로그가 서로 cross-reference 함 — (C) 의 lineage-stacking 열 → (B)
+행 / (B) 의 VLM init 열 → (A) 행. 공통 컬럼 표준 (License + 상용 마커 /
+Access 아이콘 / `hf:`·`gh:`·`web` 링크 prefix) 은 `_catalogs/README.md`
+가 단일 소스. `INDEX.md` 의 per-paper 색인과는 별도 규약
+(auto-generation 대상 아님; 손으로 quarterly rebalance).
+
 ## 호출
 
 `/analyze-paper <arXiv id | url | pdf url>` — 정식 프롬프트는

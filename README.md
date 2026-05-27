@@ -217,7 +217,7 @@ PROBE is a scout. It does not fight. The human still owns every judgement call.
 | **Direction** — is the Identity claim still load-bearing? Is the top Pillar still the right priority? | **Author watch** — recent submissions from the Researchers list |
 | **Decision Log curation** — if a paper shakes a default or trips a deferred trigger, update the relevant Decision | **Citation-graph expansion** — semantic neighbors of the Tracked Literature anchors |
 | **Evaluation protocol** — own the falsifier thresholds the active Decision Log defines; without these, no report matters | **Anti-topic filtering** — drop whatever the Anti-topics list excludes |
-| **CP-driven context update** — refresh Tracked Literature, Decision Log, and Competitor Monitoring at every Checkpoint | **Scoring** — Pillar / Decision fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
+| **Context refresh** — refresh Tracked Literature, Decision Log, and Competitor Monitoring whenever a phase boundary or Decision-Log trigger fires | **Scoring** — Pillar / Decision fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
 | **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced periodic pick from the cross-pollination rotation |
 | **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — work through the Competitor watch list |
 
@@ -265,7 +265,7 @@ Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) —
 - At least **one paper per week** triggers a concrete change in your experiment design or in a Decision Log entry.
 - The Anti-topics filter catches **≥ 10 papers/week** — that's the healthy exclusion rate.
 - The agent reports "no paper scored ≥ 2 this week" without padding.
-- Every Checkpoint (CP1–CP5), you can point at a line in `context/MASTER.md` Decision Log that moved because of a scouted paper.
+- Quarterly, you can point at a line in `context/MASTER.md` Decision Log that moved because of a scouted paper.
 
 If none of those are true after a month, the prompt is drifting or the Tracked Literature is stale. Fix the static context first, the prompt second. The model is almost never the problem.
 
@@ -312,6 +312,7 @@ the references below are the exact sources.
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → `analysis/<id>/analysis.md` + `<id>/design.md`; follow-up `/foundry <design-path> [--foundry <name>]` → `<id>/impl/<foundry>/{impl.md,impl.patch}`; `/audit` → `<id>/audit/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
+| [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `README.md` defines the common column standard (License + commercial marker, Access icon, `hf:`/`gh:`/`web` link prefix, 🤖/👤/🔀 data type) and operations procedure; `vlm.md` open-weight VLM candidates, `vla.md` landmark VLA lineage matrix, `pretrain_data.md` multi-embodiment dataset I/O catalog with hand-DOF prioritization for the Sharpa / xhand target |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
