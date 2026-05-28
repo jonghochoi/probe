@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/foundry` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -91,7 +91,7 @@ def <module_name>(<args>) -> <return_type>:
 ## 🔌 Foundry 힌트 (선택)
 
 <!-- 알려진 foundry 들에서 어디에 매핑될 가능성이 있는지 — 강제 아님.
-     `/foundry` 가 실제 매핑을 수행하므로 여기는 후보 수준의 1–2 줄만.
+     `/implement` 가 실제 매핑을 수행하므로 여기는 후보 수준의 1–2 줄만.
      foundry 별로 한 블록씩. base 후보가 분명하지 않으면 "없음". -->
 
 - **`lerobot`** — 후보 base: `pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion` 중 어느 family 와 가까운지 한 줄.

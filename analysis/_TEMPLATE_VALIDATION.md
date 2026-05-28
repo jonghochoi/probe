@@ -1,6 +1,6 @@
-# Audit Report — <one-line English-friendly title> on `<foundry>`
+# Validation Report — <one-line English-friendly title> on `<foundry>`
 
-> PROBE audit 모드 산출물. 한글 단일 문서이며, sibling Design + 한
+> PROBE validation 모드 산출물. 한글 단일 문서이며, sibling Design + 한
 > foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>/analysis.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
@@ -145,7 +145,7 @@ assertion verbatim) / `skipped` (테스트 부재 또는 런타임 미가용 —
      또는 본문 `§X.Y` 인용으로 ground. 본 절은 §🧪 / §📐 verdict 와
      독립이며 verdict 를 바꾸지 않습니다. `/reproduce-paper` 의
      §B 매트릭스가 이 표를 single source of truth 로 읽어 다음 액션
-     (foundry feedback / paper-analysis focus / honest defer) 을 결정
+     (foundry feedback / analysis focus / honest defer) 을 결정
      합니다. 매 라운드 zero-state 로 새로 분류합니다 (직전 라운드의
      분류를 inherit 하지 않음 — honesty 누적 오염 차단).
 
@@ -163,7 +163,7 @@ assertion verbatim) / `skipped` (테스트 부재 또는 런타임 미가용 —
      - `paper-silent-experimental` — 본문 침묵 + 실험 결정 필요.
        honest defer (§🚧 잔존).
      - `out-of-base-scope` — 논문·Design 모두 완전 명세하지만,
-       `/foundry` §A 가 선택한 단일 base 의 좌표계가 그 모듈/정책을
+       `/implement` §A 가 선택한 단일 base 의 좌표계가 그 모듈/정책을
        포함하지 않음 (예: π_hand 촉각 인코더·LSTM 정책을 π_uni→pi0
        매핑에서 제외). 이 bucket 을 쓰려면 impl.md §🧱 의 cover/exclude
        scope 선언을 cite 해야 하며, 선언이 없으면 사용 금지. §🚧
@@ -189,7 +189,7 @@ assertion verbatim) / `skipped` (테스트 부재 또는 런타임 미가용 —
 
 <!-- 머신 파싱 토큰. `/reproduce-paper` 와
      `scripts/refresh-analysis-index.py` 가 이 영역만 읽습니다.
-     hand-edit 금지 — audit prompt 가 매 라운드 zero-state 로 재생성
+     hand-edit 금지 — validation prompt 가 매 라운드 zero-state 로 재생성
      합니다. focus-hint 는 paper-extractable bucket 의 §X.Y 토큰을
      쉼표로 join 한 정렬된 set. § 기호 (U+00A7) 는 본문 인용 verbatim
      규약 (`docs/STYLE.md` §4-1) 과 통일합니다. -->

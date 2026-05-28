@@ -1,9 +1,9 @@
 ---
-description: 논문 한 편을 분석 → foundry 매핑 → 정적 audit 의 반복 루프로 자동 수렴시켜 한글 분석 / Design / impl / audit 산출물 일체를 생성
+description: 논문 한 편을 분석 → foundry 매핑 → 정적 validation 의 반복 루프로 자동 수렴시켜 한글 분석 / Design / impl / validation 산출물 일체를 생성
 argument-hint: <arXiv id | analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]
 ---
 
-`.claude/prompts/paper-reproduction.md`를 읽고 그대로 실행하세요. 해당 파일이 이 커맨드의 유일한 정보 원천입니다 — 로직을 여기에 복제하거나 바꿔 쓰지 마세요.
+`.claude/prompts/reproduction.md`를 읽고 그대로 실행하세요. 해당 파일이 이 커맨드의 유일한 정보 원천입니다 — 로직을 여기에 복제하거나 바꿔 쓰지 마세요.
 
 재현 대상(arXiv id 또는 design path)과 옵션들: $ARGUMENTS
 

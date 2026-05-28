@@ -46,7 +46,7 @@ FORBIDDEN = """\
 STRICTLY FORBIDDEN — do not open, grep, or look at any of these (it invalidates
 the experiment, they contain the answer):
   - /home/user/probe/analysis/{id}/impl/**
-  - /home/user/probe/analysis/{id}/audit/**
+  - /home/user/probe/analysis/{id}/validation/**
   - any reference repository that already implements this paper (e.g. a fork
     under /home/user/ other than the probe repo itself)"""
 
@@ -54,7 +54,7 @@ A1 = """\
 You are a scoped sub-task in a controlled experiment. Read ONLY the sources I name.
 
 CONTEXT: /home/user/probe maps paper Designs onto the vendored `{foundry}`
-foundry. You are the `/foundry` mapping step for arXiv:{id} on the `{base}` base.
+foundry. You are the `/implement` mapping step for arXiv:{id} on the `{base}` base.
 
 ALLOWED SOURCES (read ONLY these):
   - /home/user/probe/analysis/{id}/design.md   (the Layer-1 Design — your spec)
@@ -68,7 +68,7 @@ A2 = """\
 You are a scoped sub-task in a controlled experiment. Read ONLY the sources I name.
 
 CONTEXT: /home/user/probe maps paper Designs onto the vendored `{foundry}`
-foundry. You are the `/foundry` mapping step for arXiv:{id} on the `{base}` base.
+foundry. You are the `/implement` mapping step for arXiv:{id} on the `{base}` base.
 
 ALLOWED SOURCES (read ONLY these):
   - /home/user/probe/analysis/{id}/design.md   (the Layer-1 Design)

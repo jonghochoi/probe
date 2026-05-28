@@ -1,4 +1,4 @@
-# Built on demand by scripts/ensure-codegraph.sh (invoked by /foundry).
+# Built on demand by scripts/ensure-codegraph.sh (invoked by /implement).
 # Only config.json (defining scope=vendor/lerobot) is committed.
 *.db
 *.db-wal

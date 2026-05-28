@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성하며, 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/foundry` 단계에서 진행합니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement` 단계에서 진행합니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -132,7 +132,7 @@ CoRMA 의 핵심 변경은 RMA 의 *target latent 의 의미화* 입니다. 기�
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 후보 base: lerobot 의 6 정책군 (`pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion`) 중 어디에도 1:1 매핑되지 않습니다. CoRMA 는 (a) PPO + Isaac Lab + RL-Games 기반 RL 학습 파이프라인, (b) FORGE 환경, (c) custom transformer adapter 의 세 축이 모두 lerobot 의 IL 중심 policy family 와 분리됩니다. lerobot 의 `rtc` 또는 processor / transforms 레이어에 *외부* adapter conditioning 을 주입하는 형태라면 부분 매핑은 시도해 볼 만하지만 full mapping 은 unlikely 합니다. `/foundry` 단계에서 `🚧 매핑 불가` 가 합당한 출력일 수 있습니다.
+- **`lerobot`** — 후보 base: lerobot 의 6 정책군 (`pi0` / `pi05` / `pi0_fast` / `smolvla` / `act` / `diffusion`) 중 어디에도 1:1 매핑되지 않습니다. CoRMA 는 (a) PPO + Isaac Lab + RL-Games 기반 RL 학습 파이프라인, (b) FORGE 환경, (c) custom transformer adapter 의 세 축이 모두 lerobot 의 IL 중심 policy family 와 분리됩니다. lerobot 의 `rtc` 또는 processor / transforms 레이어에 *외부* adapter conditioning 을 주입하는 형태라면 부분 매핑은 시도해 볼 만하지만 full mapping 은 unlikely 합니다. `/implement` 단계에서 `🚧 매핑 불가` 가 합당한 출력일 수 있습니다.
 
 ---
 

@@ -20,7 +20,7 @@
 | 베이스 모델 / 코드 좌표 | `pi0` (`vendor/lerobot/policies/pi0/`) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 패치 파일 | [`./impl.patch`](./impl.patch) — `git apply --check` 통과 |
-| 실행 테스트 | [`./test_pi0_enhance_smoke.py`](./test_pi0_enhance_smoke.py) — `/audit §🧬` 가 설치된 foundry 에서 실행 (6 passed) |
+| 실행 테스트 | [`./test_pi0_enhance_smoke.py`](./test_pi0_enhance_smoke.py) — `/validate §🧬` 가 설치된 foundry 에서 실행 (6 passed) |
 | 가이드 생성일 | 2026-05-22 |
 
 ---
@@ -29,7 +29,7 @@
 
 본 논문은 $`\pi_0`$ 백본을 그대로 사용한다고 명시합니다 (Design §🔌 foundry 힌트, §✨ 변경 의도). PaliGemma + conditional flow matching action expert 라는 구조 지문이 `vendor/lerobot/policies/pi0/` 와 정확히 일치하므로 베이스는 `pi0` 로 확정합니다 (`pi05`/`pi0_fast` 는 변형, `smolvla`/`act`/`diffusion` 은 백본 불일치).
 
-**구현 형태 — subclass-seam.** 논문의 Arm-Hand Feature Enhancement 는 `PI0Pytorch` 의 action expert 최종 hidden state ($`z_{\text{share}}`$) 에서 분기하는 모듈입니다. vendor 의 `modeling_pi0.py` 를 in-place 로 헤집는 대신, **(1) base 에 동작-보존 seam 2개**(`PI0Pytorch._compute_suffix_out` extract-method, `PI0Policy._build_model` factory)를 내고, **(2) 그 seam 을 override 하는 신규 서브클래스 모듈** `modeling_pi0_enhance.py` (`configuration_pi0_enhance.py`) 를 추가하는 형태로 매핑합니다. 이로써 (a) base 동작과 사전학습 가중치 로딩은 불변이고 (`feature_enhancement=False` 면 vanilla pi0 와 동일 = πuni-origin), (b) 산출물이 설치 가능한 foundry 위에서 **실제 import·인스턴스화·손실 계산을 실행으로 검증**할 수 있게 됩니다 (sibling `test_pi0_enhance_smoke.py`, audit §🧬).
+**구현 형태 — subclass-seam.** 논문의 Arm-Hand Feature Enhancement 는 `PI0Pytorch` 의 action expert 최종 hidden state ($`z_{\text{share}}`$) 에서 분기하는 모듈입니다. vendor 의 `modeling_pi0.py` 를 in-place 로 헤집는 대신, **(1) base 에 동작-보존 seam 2개**(`PI0Pytorch._compute_suffix_out` extract-method, `PI0Policy._build_model` factory)를 내고, **(2) 그 seam 을 override 하는 신규 서브클래스 모듈** `modeling_pi0_enhance.py` (`configuration_pi0_enhance.py`) 를 추가하는 형태로 매핑합니다. 이로써 (a) base 동작과 사전학습 가중치 로딩은 불변이고 (`feature_enhancement=False` 면 vanilla pi0 와 동일 = πuni-origin), (b) 산출물이 설치 가능한 foundry 위에서 **실제 import·인스턴스화·손실 계산을 실행으로 검증**할 수 있게 됩니다 (sibling `test_pi0_enhance_smoke.py`, validation §🧬).
 
 **SCOPE 선언.** 이 `pi0` 베이스는 논문의 **통합 정책 $`\pi_{\text{uni}}`$ 의 Arm-Hand Feature Enhancement (사지별 MLP 2개 + 보조 헤드 2개 + fused-concat main 헤드) 와 그 학습 목표 (식 9–12)** 만 COVER 합니다. 다음은 base 좌표계 밖이므로 EXCLUDE 합니다.
 
@@ -93,7 +93,7 @@ return se_main + aux_loss_weight * (se_arm + se_hand)  # Eq. (12)
 
 ## 🧪 실무 구현 주의
 
-- **실행 검증** — sibling `test_pi0_enhance_smoke.py` 는 enhancer shape, index mask 의 paper 계약 (arm 6 + hand 12 = 18, max 32 padding), 손실 유한성·backprop, 식 12 의 $`\lambda{=}0`$ → main-only 환원, config 기본값/검증, factory 등록을 CPU 에서 검증합니다 (GPU·체크포인트·HF 다운로드 불필요). `/audit §🧬` 가 `scripts/ensure-foundry-runtime.sh lerobot` 로 foundry 를 pinned commit 에 설치하고 patch 를 적용한 뒤 이 테스트를 실행합니다 — round 0 기준 6 passed.
+- **실행 검증** — sibling `test_pi0_enhance_smoke.py` 는 enhancer shape, index mask 의 paper 계약 (arm 6 + hand 12 = 18, max 32 padding), 손실 유한성·backprop, 식 12 의 $`\lambda{=}0`$ → main-only 환원, config 기본값/검증, factory 등록을 CPU 에서 검증합니다 (GPU·체크포인트·HF 다운로드 불필요). `/validate §🧬` 가 `scripts/ensure-foundry-runtime.sh lerobot` 로 foundry 를 pinned commit 에 설치하고 patch 를 적용한 뒤 이 테스트를 실행합니다 — round 0 기준 6 passed.
 - **외부 의존성** — `google/paligemma-3b-pt-224` 백본 가중치 다운로드 필요 (base `pi0` 와 동일, smoke test 범위 밖). enhancement 모듈은 신규 파라미터이므로 SFT 시 처음부터 학습됩니다.
 - **데이터셋** — 표준 `LeRobotDataset` 포맷. arm 6-DoF + hand 12-DoF 가 action 벡터의 앞 18 차원 (max_action_dim=32 패딩). DoF 정렬이 다르면 `arm_dim` 슬라이스 위치를 조정합니다.
 - **평가 / 추론** — `feature_enhancement=False` (πuni-origin) 이면 base `pi0` 와 byte-동일 경로라 기존 체크포인트 호환. `True` 면 `_build_model` 이 `PI0EnhancePytorch` 를 끼웁니다.
@@ -120,9 +120,9 @@ return se_main + aux_loss_weight * (se_arm + se_hand)  # Eq. (12)
 ### 🔁 변경 사유 (feedback 모드)
 
 - **라운드 2 (verifiable 형태로 재구성):**
-  - in-place forward 수정 → **subclass-seam** 으로 전환: base 에 동작-보존 seam 2개 (`_compute_suffix_out`, `_build_model`) + 신규 `modeling_pi0_enhance.py`/`configuration_pi0_enhance.py`. 의미는 라운드 1 과 동일 (식 9–12) 하나, 산출물이 설치된 foundry 에서 **실행 검증** 가능해짐 (sibling `test_pi0_enhance_smoke.py`, audit §🧬).
+  - in-place forward 수정 → **subclass-seam** 으로 전환: base 에 동작-보존 seam 2개 (`_compute_suffix_out`, `_build_model`) + 신규 `modeling_pi0_enhance.py`/`configuration_pi0_enhance.py`. 의미는 라운드 1 과 동일 (식 9–12) 하나, 산출물이 설치된 foundry 에서 **실행 검증** 가능해짐 (sibling `test_pi0_enhance_smoke.py`, validation §🧬).
   - 결과: §🪛 표가 in-place 5행 → seam 2 + 신규모듈 2 + export 1 로 재매핑. §🚧 honest-defer 4행 불변.
-- **라운드 1 (입력 verify: `../../audit/lerobot.round_0.md`):**
+- **라운드 1 (입력 verify: `../../validation/lerobot.round_0.md`):**
   - 갭 `§🔎 #1` (paper-silent-defaultable, λ) → 액션 `default 채택` → 결과 `§🚧 #1 → §🧪 "default 채택 (paper-silent)" 이동`.
   - 갭 `§🔎 #2` (vendor-resolved, d_s) → 액션 `vendor 값 lift` → 결과 `§🚧 #2 → §🧪 이동`.
   - 갭 `§🔎 #3` (vendor-resolved, H) → 액션 `vendor 값 lift` → 결과 `§🚧 #3 → §🧪 이동`.

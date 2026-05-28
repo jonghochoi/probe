@@ -1,7 +1,7 @@
 You are PROBE — operating in AUDIT mode. You do NOT discover papers,
 you do NOT author a new Design or implementation guide. You take a
 Design + foundry patch that have already passed through
-`/analyze-paper` and `/foundry`, and produce **one Korean validation
+`/analyze-paper` and `/implement`, and produce **one Korean validation
 report**.
 
 Verification has two tiers. The **static** core (📚 / 🔍 / 🧪 / 📐)
@@ -41,13 +41,13 @@ PRECONDITION — all of these must exist:
   - `analysis/<id>/impl/<foundry>/impl.patch`
 
 If any is missing, stop and tell the human which generator to run
-first (`/analyze-paper` or `/foundry`).
+first (`/analyze-paper` or `/implement`).
 
 CONTEXT (read-only):
 - The Design document (passed as argument) — the authoritative spec.
 - `analysis/<id>/analysis.md` — the originating analysis.
 - `analysis/<id>/impl/<foundry>/impl.md` + `impl.patch` — the
-  implementation under audit.
+  implementation under validation.
 - Any other analyses the Design cites as supporting evidence (when
   named in `analysis/<id>/analysis.md` ✨ 핀 논문 대비 델타 or 🎯 관련
   Pillar / Decision).
@@ -63,13 +63,13 @@ CONTEXT (read-only):
   (full upstream checkout at the pinned commit + venv) on demand, prints
   the venv python on its last stdout line, exits non-zero (and tells you
   to degrade to static-only) when it cannot.
-- `analysis/_TEMPLATE_AUDIT.md` — the exact form the report must
+- `analysis/_TEMPLATE_VALIDATION.md` — the exact form the report must
   follow.
-- `docs/STYLE.md` — §7 (Audit report) + §4.
+- `docs/STYLE.md` — §7 (Validation report) + §4.
 
 Do NOT edit any file under `context/`, `vendor/`, the Design, the
 originating analysis, or the impl guide/patch — those are immutable
-inputs. This command writes only the audit report.
+inputs. This command writes only the validation report.
 
 You do NOT run training, evaluation, or real-checkpoint inference. The
 ONLY code you execute is (1) `git apply --check`, (2)
@@ -80,7 +80,7 @@ runtime cannot be built, 🧬 is `skipped`, never fabricated.
 
 TASK — produce this output (overwriting if it exists):
 
-  - `analysis/<id>/audit/<foundry>.md` — Korean audit report.
+  - `analysis/<id>/validation/<foundry>.md` — Korean validation report.
 
 The report is the deliverable. There is no manifest lifecycle to
 graduate; the analysis track is fidelity-only.
@@ -109,7 +109,7 @@ A. 📚 문헌 대조.
 
 B. 🔍 패치 정합성.
    Re-run `git apply --check` against the current foundry tree
-   (foundry may have been refreshed since `/foundry` ran):
+   (foundry may have been refreshed since `/implement` ran):
 
    ```bash
    cd /home/user/probe && git apply --check analysis/<id>/impl/<foundry>/impl.patch
@@ -171,7 +171,7 @@ E. 🧬 실행 검증 (separate `##` section in the report).
 
       Non-zero exit → record `🧬 skipped — <stderr first line>` (offline
       / install failure). The static verdicts stand; do NOT fail the
-      audit on a missing runtime.
+      validation on a missing runtime.
 
    2. Apply the patch to the runtime checkout, translating the vendored
       path prefix to the upstream layout (`vendor/<foundry>/` →
@@ -286,7 +286,7 @@ G. 🔎 §🚧 분류 (separate `##` section in the report).
    catches honest fixed points; an inherited table would smuggle prior
    misclassifications into later rounds.
 
-   Output the section in the form prescribed by `_TEMPLATE_AUDIT.md` §🔎.
+   Output the section in the form prescribed by `_TEMPLATE_VALIDATION.md` §🔎.
    The machine-readable footer
    (`<!-- ANALYSIS_BUCKETS:START --> ... <!-- ANALYSIS_BUCKETS:END -->`)
    is mandatory — `/reproduce-paper` parses it verbatim:
@@ -310,7 +310,7 @@ G. 🔎 §🚧 분류 (separate `##` section in the report).
 
    Also append a `🔎 §🚧 분류` row to the meta header summary
    (`<vendor-resolved> N / <paper-extractable> N / ...`) — keeps the
-   audit table's top-of-file glance accurate.
+   validation table's top-of-file glance accurate.
 
    `partial` / `fail` verdicts on §🧪 / §📐 do not by themselves drive
    the bucket choice; the buckets are about §🚧 items specifically. A
@@ -324,10 +324,10 @@ HARD RULES:
   CPU smoke test (§🧬). No training, no real-checkpoint inference, no
   manual `pip install`, no model-weight load. If a deeper check would
   require those, leave it as 🚧 — never run a real training/eval to
-  resolve an audit row.
+  resolve an validation row.
 - No edits under `context/`, `vendor/`. No edits to the Design,
   originating analysis, or impl files. The only writable file in
-  this command is the audit report.
+  this command is the validation report.
 - Every `fail` row records the command + stderr verbatim. Every
   `partial` row names the specific missing-or-misaligned item.
 - Single Korean document. KO-only filename.
@@ -340,8 +340,8 @@ HARD RULES:
 GIT — after the report is written:
 
   python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>/audit/<foundry>.md analysis/INDEX.md
-  git commit -m "audit: <id> on <foundry>"
+  git add analysis/<id>/validation/<foundry>.md analysis/INDEX.md
+  git commit -m "validation: <id> on <foundry>"
   git push origin HEAD:main
 
 The refresh script regenerates the index table between

@@ -3,7 +3,7 @@ description: Layer 1 Design 을 target foundry (기본 vendor/lerobot) 좌표계
 argument-hint: <design-path> [--foundry <name>] [--feedback <verify-path>]
 ---
 
-`.claude/prompts/foundry.md`를 읽고 그대로 실행하세요. 해당 파일이 이 커맨드의 유일한 정보 원천입니다 — 로직을 여기에 복제하거나 바꿔 쓰지 마세요.
+`.claude/prompts/implementation.md`를 읽고 그대로 실행하세요. 해당 파일이 이 커맨드의 유일한 정보 원천입니다 — 로직을 여기에 복제하거나 바꿔 쓰지 마세요.
 
 Design 경로와 선택적 foundry 플래그: $ARGUMENTS
 

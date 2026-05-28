@@ -33,8 +33,8 @@ A second positional flag selects the foundry: `--foundry <name>`
 must match a registered foundry; for now only `lerobot` is valid.
 
 A third optional flag enables **feedback mode**:
-`--feedback <audit-report-path>`. When set, the prompt reads the
-prior audit report (typically `analysis/<id>/audit/<foundry>.md`)
+`--feedback <validation-report-path>`. When set, the prompt reads the
+prior validation report (typically `analysis/<id>/validation/<foundry>.md`)
 and treats the existing `impl.md` + `impl.patch` as a **starting
 point**, not a blank slate — targeted surgery instead of full
 regeneration. This is the mode `/reproduce-paper` uses for iterative
@@ -45,8 +45,8 @@ the update procedure.
 If the argument is empty or the Design file does not exist, stop and
 say so — do not guess a target. If `--foundry` is given but unknown,
 stop and list the registered foundries. If `--feedback` is given but
-the audit report does not exist, stop and tell the human to run
-`/audit` first.
+the validation report does not exist, stop and tell the human to run
+`/validate` first.
 
 PRECONDITION — the Design document and its originating analysis must
 already exist:
@@ -138,7 +138,7 @@ A. Mapping feasibility (Layer 2 gate).
    paper's policies/modules this base COVERS and which it EXCLUDES,
    each with a one-line reason (e.g. "π_uni 의 enhancement 만 cover;
    π_hand 촉각 인코더·LSTM 정책은 base 좌표계 밖 — 제외"). This is the
-   contract the `/audit` `out-of-base-scope` bucket cites. Without it,
+   contract the `/validate` `out-of-base-scope` bucket cites. Without it,
    an excluded module cannot be classified `out-of-base-scope` and the
    exclusion looks like an unexplained omission. The base scope is your
    discretionary call, so making it inspectable here is what lets a
@@ -201,7 +201,7 @@ C-2. Prefer the subclass-seam form (verifiable mapping).
    `git apply --check` — the vendored snapshot is partial and cannot be
    imported or run. Whenever the Design's change has an importable
    surface (a new module/loss/head on top of an existing policy), map it
-   instead as a **subclass-seam**, which `/audit §🧬` can actually
+   instead as a **subclass-seam**, which `/validate §🧬` can actually
    execute:
 
    1. **Behavior-preserving seam(s) in the base.** Add the *minimum*
@@ -260,16 +260,16 @@ E. Write the guide.
    `--foundry` argument verbatim. The row `상위 Design` must link to
    the Design document path (relative).
 
-F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
+F. Update mode (feedback-driven). [Only when `--feedback <validation-path>` is set]
    Purpose: surgically fill the gaps identified by the previous round's
-   audit report while preserving parts that already passed. This mode is
+   validation report while preserving parts that already passed. This mode is
    for cases where the Design is consistent with the paper body (📚 pass)
    but the impl is insufficient — when the 📚 verdict itself is
    fail/partial, that is outside this prompt's responsibility
    (→ outer loop — `/reproduce-paper` handles it via `/analyze-paper --focus`).
 
    F-1. Additional inputs to read.
-   - `<audit-path>` — the previous round's audit report. Read the verdict
+   - `<validation-path>` — the previous round's validation report. Read the verdict
      cell in the meta header, §🔍 stderr verbatim, §🧪 rows (especially
      ❌/⚠️), §📐 rows (especially `silent-skip`), §🔎 §🚧 classification
      table + machine markers (`<!-- ANALYSIS_BUCKETS:... -->`), and the
@@ -282,17 +282,17 @@ F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
      (no diff-on-diff surgery — it degrades verifiability). The new patch
      MUST semantically include all passing hunks from the previous round.
 
-   F-2. Gap → action mapping. Each gap in the audit report is handled by
+   F-2. Gap → action mapping. Each gap in the validation report is handled by
    exactly one of the following actions.
 
-   | Audit signal | Action |
+   | Validation signal | Action |
    |-------------|------|
    | §🔍 `fail — <stderr>` | Correct the new patch hunk's context so `git apply` can succeed |
    | §🧪 row ❌ (signature mismatch) | Fix the hunk's signature to match the vendor code |
    | §🧪 row ⚠️ (cited but missing from patch) | Add the constant to the appropriate location in the patch |
    | §📐 row `silent-skip` (missing equation/table) | Add a new hunk implementing the equation/table, or explicitly downgrade to 🚧 |
    | §🪛 previous round `위치 잠정` | Re-verify vendor code to confirm coordinates, or state the reason for keeping them provisional |
-   | §🔎 bucket `vendor-resolved` | Lift the vendor `file:line` value cited by audit as a default or new hunk in the patch. Move the corresponding §🚧 item in impl.md to a §🧪 "vendor-resolved 상수" row (remove from §🚧) |
+   | §🔎 bucket `vendor-resolved` | Lift the vendor `file:line` value cited by validation as a default or new hunk in the patch. Move the corresponding §🚧 item in impl.md to a §🧪 "vendor-resolved 상수" row (remove from §🚧) |
    | §🔎 bucket `paper-silent-defaultable` | Introduce the default value into the patch with a mandatory `# NOTE: paper §X 본문 침묵, default <value> 채택 — 근거: <한 줄>` 1-line comment in the hunk. Move the corresponding §🚧 item in impl.md to a §🧪 "default 채택 (paper-silent)" row |
    | §🔎 bucket `paper-extractable` | Outside this prompt's responsibility — Design update required, handled by outer step (`/analyze-paper --focus`). Keep the corresponding §🚧 item as-is |
    | §🔎 bucket `paper-silent-experimental` | Do not implement; keep §🚧 as-is. Honest defer |
@@ -300,7 +300,7 @@ F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
 
    F-3. 1:1 traceability (honesty guard).
    Every hunk added or changed in this mode must correspond 1:1 with a
-   **specific single line** in the audit report (one row from
+   **specific single line** in the validation report (one row from
    §🧪 / §📐 / §🔎) or a **numbered item** in the previous impl.md §🚧.
    Adding hunks without a corresponding source is forbidden — if you want
    to add one, a Design update is required first and it is therefore
@@ -315,18 +315,18 @@ F. Update mode (feedback-driven). [Only when `--feedback <audit-path>` is set]
    ```
    ### 🔁 변경 사유 (feedback 모드)
 
-   - **라운드 N (입력 verify: `<audit-path>`):**
+   - **라운드 N (입력 verify: `<validation-path>`):**
      - 갭 `<verify-section> <행 식별자>` → 액션 `<F-2 매핑>` → 결과
        `<hunk 라인 범위 또는 🚧 #M 유지>`
      - …
    ```
 
-   This section is an audit log that allows users to reconstruct
+   This section is an validation log that allows users to reconstruct
    subsequent rounds after the fact. It is the primary defense
    against fabrication.
 
    F-5. No changes.
-   If the audit report concludes "insufficient information" for all gaps
+   If the validation report concludes "insufficient information" for all gaps
    (e.g. all §🚧 items state the paper body does not specify them), do not
    modify impl.md / impl.patch — only append a single line
    `- 라운드 N: 새 정보 없음, 동일 산출` to §🔁 변경 사유. If the git

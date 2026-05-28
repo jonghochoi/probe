@@ -6,8 +6,8 @@ from its `analysis.md`, checks for foundry-specific impl artifacts, and
 rewrites the table between fixed markers in `analysis/INDEX.md`.
 
 Idempotent: re-running with no underlying change produces no diff.
-Invoked from the GIT step of `/analyze-paper`, `/foundry`, and
-`/audit`. Safe to run manually from the repo root:
+Invoked from the GIT step of `/analyze-paper`, `/implement`, and
+`/validate`. Safe to run manually from the repo root:
 
     python3 scripts/refresh-analysis-index.py
 
@@ -100,20 +100,20 @@ def lerobot_state(stem: str) -> str:
     return "—"
 
 
-# 🧬 execution-verification verdict, read from the audit report meta header.
+# 🧬 execution-verification verdict, read from the validation report meta header.
 EXEC_ROW_RE = re.compile(r"^\|\s*🧬[^|]*\|\s*`?(pass|fail|skipped)`?\s*\|\s*$")
 
 
 def lerobot_exec(stem: str) -> str:
-    """Return the 🧬 실행 검증 verdict for the lerobot audit (pass/fail/skipped/—).
+    """Return the 🧬 실행 검증 verdict for the lerobot validation (pass/fail/skipped/—).
 
-    Reads the `| 🧬 실행 검증 | <verdict> |` row from the audit report meta
-    header. `—` when no audit report exists or the row is absent (older
+    Reads the `| 🧬 실행 검증 | <verdict> |` row from the validation report meta
+    header. `—` when no validation report exists or the row is absent (older
     reports predating the execution tier).
     """
-    audit = ANALYSIS_DIR / stem / "audit" / "lerobot.md"
+    validation = ANALYSIS_DIR / stem / "validation" / "lerobot.md"
     try:
-        text = audit.read_text(encoding="utf-8")
+        text = validation.read_text(encoding="utf-8")
     except OSError:
         return "—"
     for line in text.splitlines():
@@ -123,7 +123,7 @@ def lerobot_exec(stem: str) -> str:
     return "—"
 
 
-# §🔎 §🚧 bucket counts come from the audit report's machine marker.
+# §🔎 §🚧 bucket counts come from the validation report's machine marker.
 BUCKETS_START = "<!-- ANALYSIS_BUCKETS:START -->"
 BUCKETS_END = "<!-- ANALYSIS_BUCKETS:END -->"
 BUCKET_LINE_RE = re.compile(r"^-\s*(vendor-resolved|paper-extractable|paper-silent-defaultable|paper-silent-experimental|out-of-base-scope)\s*:\s*(.*)$")
@@ -137,18 +137,18 @@ BUCKET_ORDER = (
 
 
 def lerobot_buckets(stem: str) -> str:
-    """Return the §🔎 bucket counts `vr/pe/sd/se/ob` for the lerobot audit.
+    """Return the §🔎 bucket counts `vr/pe/sd/se/ob` for the lerobot validation.
 
     Reads the ANALYSIS_BUCKETS marker block from
-    `analysis/<stem>/audit/lerobot.md` and counts the comma-separated
-    row ids per bucket. `—` when no audit report exists; `0/0/0/0/0` when
+    `analysis/<stem>/validation/lerobot.md` and counts the comma-separated
+    row ids per bucket. `—` when no validation report exists; `0/0/0/0/0` when
     the marker is present but empty (e.g. all checks pass with no §🚧).
     `ob` = out-of-base-scope (fully specified but outside the chosen
     foundry base's coordinate system).
     """
-    audit = ANALYSIS_DIR / stem / "audit" / "lerobot.md"
+    validation = ANALYSIS_DIR / stem / "validation" / "lerobot.md"
     try:
-        text = audit.read_text(encoding="utf-8")
+        text = validation.read_text(encoding="utf-8")
     except OSError:
         return "—"
     if BUCKETS_START not in text or BUCKETS_END not in text:

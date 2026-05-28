@@ -1,6 +1,6 @@
 # Paper Analysis — <Original English Title>
 
-> PROBE paper-analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
+> PROBE analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
 > 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE.md` §5 / §4 를
 > 정확히 따릅니다. 재실행 시 이 파일을 덮어씁니다.
 

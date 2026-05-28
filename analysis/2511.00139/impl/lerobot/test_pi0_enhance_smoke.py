@@ -17,7 +17,7 @@
 """CPU smoke test for the Arm-Hand Feature Enhancement reproduction (arXiv:2511.00139 §7.3).
 
 This is PROBE's *executable* foundry artifact — the runnable counterpart of
-``impl.patch``. The audit §🧬 check installs the foundry at its pinned commit
+``impl.patch``. The validation §🧬 check installs the foundry at its pinned commit
 (`scripts/ensure-foundry-runtime.sh lerobot`), applies ``impl.patch`` to that
 checkout, and runs this file with pytest. No GPU, no checkpoint, no HF
 download: it validates the pure pieces (enhancer shapes, index masking,
