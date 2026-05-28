@@ -18,18 +18,18 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
 | `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
-| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Each contains: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`audit/<foundry>.md`) |
+| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Each contains: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`) |
 | `analysis/_catalogs/` | agent (hand-curated) | Cross-paper lineage catalogs, separated from per-paper `<arxiv-id>/` deep-dives. `README.md` defines the common column standard (License + commercial marker / Access icon / `hf:`/`gh:`/`web` link prefix / 🤖-👤-🔀 데이터 유형 / 🟢-🟡-🔴-❓ source-check) + the decision-4-field rule for the scan marker; `vlm.md` enumerates open-weight VLM candidates as a flat table, `vla.md` and `lineage_corpus.md` both use the *scan table + per-row `<details>` cards* hybrid (vla 8 H4: Architecture / Training data / Action representation / Inference / Eval / Open-weight / Source check / Sources · lineage_corpus 8 H4: Observations / Actions / Embodiment / Annotation / Scale / Lineage / Source check / Sources). The folder also hosts pillar-level methodology references (e.g. `vlm-prior-preservation.md` — P4 forgetting / carve-out orthogonal planes + θ_VLM path-intervention A~D + 4-stage recipe + forward-KL measurement protocol); methodology docs are not facts-tables but design references and cross-link to the catalog rows. Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
-| `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/audit §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
+| `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive table; invoked by `/analyze-paper`, `/foundry`, `/audit` |
-| `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/foundry` before its first codegraph call (see the "CodeGraph" section below) |
-| `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/audit` (§🧬) and `/foundry` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
-| `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/foundry` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
+| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive table; invoked by `/analyze-paper`, `/implement`, `/validate` |
+| `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement` before its first codegraph call (see the "CodeGraph" section below) |
+| `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate` (§🧬) and `/implement` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
+| `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/implement` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
@@ -49,7 +49,7 @@ nothing else.
 [CodeGraph](https://github.com/colbymchenry/codegraph) and exposed to every
 session over MCP. The index (`.codegraph/codegraph.db`) is built **on
 demand, not at session start** — only the commands that actually read
-`vendor/lerobot/` need it (today just `/foundry`), so paying the build cost
+`vendor/lerobot/` need it (today just `/implement`), so paying the build cost
 on every session would be waste. Those commands run
 `scripts/ensure-codegraph.sh` before their first codegraph call: it builds
 the DB if missing (~3s for the current 108 vendored `.py` files) and is a
@@ -61,9 +61,9 @@ The build cannot be a plain `codegraph index` — codegraph requires `init`
 first, and `init` overwrites `config.json` with a default template whose
 exclude list drops `vendor/`. `scripts/ensure-codegraph.sh` backs up the
 committed config across `init` and restores it before indexing; run it by
-hand from the repo root if you ever need to (re)build outside `/foundry`.
+hand from the repo root if you ever need to (re)build outside `/implement`.
 
-For any `/foundry` run, or any time you need to ground a Design row in
+For any `/implement` run, or any time you need to ground a Design row in
 `file:line` coordinates inside `vendor/lerobot/`, prefer the MCP tools over
 reading full `.py` files:
 
@@ -75,20 +75,20 @@ reading full `.py` files:
 - `codegraph_impact` — surface cross-file consumers a patch would break.
 
 If the MCP server is unreachable (sandbox without `npx`, offline clone), fall
-back to direct file reads — `/foundry` should still complete.
+back to direct file reads — `/implement` should still complete.
 
 ## Foundry runtime
 
 The vendored `vendor/lerobot/` snapshot is a *partial, read-only* copy for
 diffing and `file:line` grounding — its `.py` files import from non-vendored
 modules, so it cannot be imported or run. To verify that an impl patch is not
-just textually applicable but *actually correct*, `/audit` runs the impl's
+just textually applicable but *actually correct*, `/validate` runs the impl's
 sibling smoke test against the **whole** upstream package installed at the
 pinned commit. `scripts/ensure-foundry-runtime.sh <foundry>` builds that
 runtime on demand:
 
 1. Parse the pinned-commit SHA from `vendor/<foundry>/README.md` (the same
-   provenance row `/foundry` and `/audit` cite — single source of truth).
+   provenance row `/implement` and `/validate` cite — single source of truth).
 2. Clone the source repo at that SHA (depth-1) into
    `.foundry-runtime/<foundry>/src`.
 3. Create a venv and `pip install -e .[test]` into it. (Plain `pip`, not
@@ -100,14 +100,14 @@ runtime on demand:
 It prints the venv python path on its last stdout line and exits non-zero
 (with a one-line reason on stderr) when the runtime cannot be built — offline,
 install failure, unknown foundry. The execution check **degrades gracefully**:
-when the runtime is unavailable, `/audit §🧬` records `skipped`, never a
+when the runtime is unavailable, `/validate §🧬` records `skipped`, never a
 fabricated pass, and the static verdicts (📚/🔍/🧪/📐) still stand. torch is
 the dominant one-time cost (a few minutes); after that the marker makes it
 free.
 
 The committed surface stays the vendored snapshot only — `.foundry-runtime/`
 is per-checkout and gitignored, and nothing under it is ever staged. The impl
-patch is authored against `vendor/<foundry>/` paths; `/audit` translates that
+patch is authored against `vendor/<foundry>/` paths; `/validate` translates that
 prefix to the upstream layout (`vendor/lerobot/` → `src/lerobot/`) when
 applying it to the runtime checkout (`git apply -p3 --directory=src/lerobot`).
 
@@ -338,7 +338,7 @@ are bare arXiv ids (e.g. `2511.00139.md`), so a reader cannot tell
 which paper is which without opening the file. Maintaining that
 mapping by hand drifts immediately, so it is regenerated by
 `scripts/refresh-analysis-index.py` from the GIT step of
-`/analyze-paper`, `/foundry`, and `/audit`. The script reads each
+`/analyze-paper`, `/implement`, and `/validate`. The script reads each
 analysis's 📄 논문 메타 table (the load-bearing rows are documented in
 `docs/STYLE.md` §5-7), inspects the filesystem for foundry
 artifacts (`<id>/impl/<foundry>/impl.md` vs `UNMAPPABLE.md`), and

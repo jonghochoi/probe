@@ -1,6 +1,6 @@
 # Paper Analysis — Being-H0.7: A Latent World-Action Model from Egocentric Videos
 
-> PROBE paper-analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
+> PROBE analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
 > 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE.md` §5 / §4 를
 > 정확히 따릅니다. 재실행 시 이 파일을 덮어씁니다.
 
@@ -288,4 +288,4 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 
 context/MASTER.md는 절대 수정하지 않습니다. 위 항목은 사람이 검토할 후보 제안입니다.
 
-> 💡 base 매핑은 `/foundry analysis/2605.00078/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement analysis/2605.00078/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

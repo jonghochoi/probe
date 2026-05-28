@@ -1,6 +1,6 @@
 # Paper Analysis — ForceFlow: Learning to Feel and Act via Contact-Driven Flow Matching
 
-> PROBE paper-analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
+> PROBE analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
 > 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE.md` §5 / §4 를
 > 정확히 따릅니다. 재실행 시 이 파일을 덮어씁니다.
 
@@ -257,4 +257,4 @@ Ablation (Stamp, Table 5):
 
 ---
 
-> 💡 base 매핑은 `/foundry analysis/2605.11048/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement analysis/2605.11048/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

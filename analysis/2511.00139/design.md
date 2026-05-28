@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/foundry` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -157,13 +157,13 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{main}} + \lambda \left( \mathc
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — $`\pi_0`$ 백본을 그대로 사용하므로 `pi0` family 와 직접 매핑됩니다. Arm-Hand Feature Enhancement 모듈은 `pi0` action expert 출력 직후의 토큰 흐름에 2-layer MLP 두 개 + single-linear 보조 헤드 두 개를 추가하는 형태로 들어갑니다. 촉각 인코더는 별도 모듈이며 vendor 의 기본 `pi0` 에는 없습니다 — `/foundry` 가 새 `tactile_encoder.py` 또는 동등 모듈을 신설해야 합니다. 데이터셋 측 변경은 `LeRobotDataset` 의 episode metadata 에 fingertip tactile 채널을 추가하는 형태로 매핑됩니다.
+- **`lerobot`** — $`\pi_0`$ 백본을 그대로 사용하므로 `pi0` family 와 직접 매핑됩니다. Arm-Hand Feature Enhancement 모듈은 `pi0` action expert 출력 직후의 토큰 흐름에 2-layer MLP 두 개 + single-linear 보조 헤드 두 개를 추가하는 형태로 들어갑니다. 촉각 인코더는 별도 모듈이며 vendor 의 기본 `pi0` 에는 없습니다 — `/implement` 가 새 `tactile_encoder.py` 또는 동등 모듈을 신설해야 합니다. 데이터셋 측 변경은 `LeRobotDataset` 의 episode metadata 에 fingertip tactile 채널을 추가하는 형태로 매핑됩니다.
 
 ---
 
 ## 🚧 미해결 / 잠정
 
-- 총 손실 보조 가중치 $`\lambda`$ 의 절대값과 민감도 분석이 본문에 없습니다 — `/foundry` 단계에서 기본값을 가정해야 합니다 (예: $`\lambda = 1.0`$).
+- 총 손실 보조 가중치 $`\lambda`$ 의 절대값과 민감도 분석이 본문에 없습니다 — `/implement` 단계에서 기본값을 가정해야 합니다 (예: $`\lambda = 1.0`$).
 - 공유 latent 차원 $`d_s`$ 의 구체 수치, encoder/head 의 정확한 hidden width 가 §7.3 에 명시되지 않습니다. $`\pi_0`$ 백본의 표준 표현 차원을 따른다고 가정해야 합니다.
 - action chunk size $`H`$ 가 본문에 명시되지 않습니다. $`\pi_0`$ 기본값 (보통 50) 을 가정합니다.
 - proprioceptive 정규화 통계 ($`q_t^{\text{arm/hand}}`$ 의 평균/표준편차) 의 출처가 본문에 없습니다. 데이터셋 전체 통계를 사용한다고 가정합니다.

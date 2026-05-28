@@ -40,7 +40,7 @@ table / equation refs like `§Table 3` are also valid). Behaviour:
     unchanged. A byte-identical Design signals the `/reproduce-paper`
     outer-loop fixed point (`stable_design`), so do not churn dates or
     reorder rows when nothing substantive changed.
-  - The `§` tokens come from the audit report's
+  - The `§` tokens come from the validation report's
     `<!-- ANALYSIS_BUCKETS --> focus-hint:` line; `/reproduce-paper`
     passes them through verbatim.
 
@@ -142,7 +142,7 @@ formulas, arXiv links, P#/D#).
 The Design is **vendor-agnostic** — it must not contain `file:line`
 coordinates of any foundry (vendor/lerobot or otherwise). Its purpose
 is to capture *what the algorithm is*, not *where it lives in any
-codebase*. Base mapping happens later in `/foundry`.
+codebase*. Base mapping happens later in `/implement`.
 
 STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
@@ -205,7 +205,7 @@ for the Design.
 Honesty over completeness: any field the paper does not specify must
 be left as `(원문에 명시 없음 — 가정으로 메움)` rather than fabricated.
 A sparse Design is acceptable; a fabricated one is not. The Design
-should still be useful enough that a downstream `/foundry` call has a
+should still be useful enough that a downstream `/implement` call has a
 real spec to ground.
 
 HARD RULES:
@@ -222,7 +222,7 @@ HARD RULES:
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - The Design is **vendor-agnostic**. It must not contain `file:line`
   coordinates from `vendor/lerobot/` or any other codebase. Mapping
-  belongs to `/foundry`.
+  belongs to `/implement`.
 - Emoji/header system per docs/STYLE.md §5 (analysis) and §6
   (Design) — one emoji at the start of each `##`/`###` header, none
   in body text. §5-6 governs the quote / bullet-form / keyword
@@ -326,12 +326,12 @@ FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
 as the very last line of `analysis/<id>/analysis.md`:
 
-> 💡 base 매핑은 `/foundry analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
 `<id>` is the same arXiv id / slug the analysis file uses. The line
-is added unconditionally — `/foundry` itself decides whether the
+is added unconditionally — `/implement` itself decides whether the
 Design can be mapped to a given foundry (and emits a clean
-`🚧 매핑 불가` if not). Never auto-invoke `/foundry` from this prompt;
+`🚧 매핑 불가` if not). Never auto-invoke `/implement` from this prompt;
 the human decides.
 
 ---

@@ -1,17 +1,17 @@
 # analysis/ Index
 
 `scripts/refresh-analysis-index.py` 가 자동 관리하는 deep-dive
-인덱스입니다 — `/analyze-paper`, `/foundry`, `/audit` 가 자기
+인덱스입니다 — `/analyze-paper`, `/implement`, `/validate` 가 자기
 산출물을 커밋할 때 같이 갱신합니다. 마커 사이는 매 호출마다 멱등
 재생성되므로 손으로 편집하지 마십시오. `lerobot` 컬럼은
 `<id>/impl/lerobot/impl.md` 존재 시 ✅, `UNMAPPABLE.md` 존재 시
-🚧 UNMAPPABLE, 둘 다 없을 때 —. `🧬` 컬럼은 `lerobot` audit 메타
-헤더의 🧬 실행 검증 verdict (`pass`/`fail`/`skipped`, audit
+🚧 UNMAPPABLE, 둘 다 없을 때 —. `🧬` 컬럼은 `lerobot` validation 메타
+헤더의 🧬 실행 검증 verdict (`pass`/`fail`/`skipped`, validation
 없거나 구버전이면 —) 입니다. `🔎 vr/pe/sd/se/ob` 컬럼은
-`lerobot` audit 의 §🔎 §🚧 분류 마커에서 vendor-resolved /
+`lerobot` validation 의 §🔎 §🚧 분류 마커에서 vendor-resolved /
 paper-extractable / paper-silent-defaultable /
 paper-silent-experimental / out-of-base-scope 행 수를 읽어 옵니다
-(audit 없으면 —). `ob` 는 논문·Design 모두 완전 명세하지만
+(validation 없으면 —). `ob` 는 논문·Design 모두 완전 명세하지만
 선택된 foundry base 좌표계 밖이라 본 매핑에서 제외된 모듈 수입니다.
 규칙은 `docs/STYLE.md` §5-7 에 정리돼 있습니다.
 

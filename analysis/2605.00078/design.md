@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/foundry` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -182,7 +182,7 @@ $$\mathcal{R}_{\mathrm{norm}}(h)=\left[\mathrm{ReLU}(\tau-\|h\|_{2})\right]^{2},
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 후보 base: `pi0` / `pi05` (flow matching action expert + MoT-style 시퀀스 패밀리)와 가장 가깝습니다. 그 위에 (i) latent query 슬롯을 액션 청크 앞에 삽입, (ii) posterior branch를 학습 전용 *parallel* 시퀀스로 추가, (iii) dual-branch attention mask + alignment loss + norm/rank 정규화를 손실 함수에 add — 세 변경이 핵심입니다. `pi05`는 hierarchical inference가 있어 별도의 high-level reasoning layer가 본 논문의 latent reasoning slot과 겹칠 수 있으므로, `/foundry` 단계에서 차별점을 별도로 매핑합니다. `act` / `diffusion` 패밀리는 backbone 구조가 달라 base 후보 부적합. `smolvla`는 capacity가 작아 비교 후보로만.
+- **`lerobot`** — 후보 base: `pi0` / `pi05` (flow matching action expert + MoT-style 시퀀스 패밀리)와 가장 가깝습니다. 그 위에 (i) latent query 슬롯을 액션 청크 앞에 삽입, (ii) posterior branch를 학습 전용 *parallel* 시퀀스로 추가, (iii) dual-branch attention mask + alignment loss + norm/rank 정규화를 손실 함수에 add — 세 변경이 핵심입니다. `pi05`는 hierarchical inference가 있어 별도의 high-level reasoning layer가 본 논문의 latent reasoning slot과 겹칠 수 있으므로, `/implement` 단계에서 차별점을 별도로 매핑합니다. `act` / `diffusion` 패밀리는 backbone 구조가 달라 base 후보 부적합. `smolvla`는 capacity가 작아 비교 후보로만.
 
 ---
 

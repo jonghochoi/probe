@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the CodeGraph index over vendor/lerobot/ on demand.
 #
-# Invoked by /foundry (and anything that reads vendor/lerobot/ through the
+# Invoked by /implement (and anything that reads vendor/lerobot/ through the
 # CodeGraph MCP tools) before its first codegraph call. No-op if the index
 # already exists, so it is cheap to call unconditionally.
 #

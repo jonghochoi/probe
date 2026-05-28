@@ -1,7 +1,7 @@
-# Audit Report — Dexterous Arm-Hand VLA via Shared Autonomy on `lerobot`
+# Validation Report — Dexterous Arm-Hand VLA via Shared Autonomy on `lerobot`
 
-> PROBE audit 모드 산출물. 한글 단일 문서이며, sibling Design + 한
-> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/2511.00139/analysis.md`) 와
+> PROBE validation 모드 산출물. 한글 단일 문서이며, sibling Design + 한
+> foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/2511.00139.md`) 와
 > foundry 코드에 대조한 검증 결과입니다. 정적 체크(📚/🔍/🧪/📐) 위에
 > 설치된 foundry 에서 sibling smoke test 를 실행하는 §🧬 실행 검증을
 > 더합니다 (학습/추론은 돌리지 않음). 형식·이모지·용어 규칙은
@@ -17,7 +17,7 @@
 | 상위 Design | [`../design.md`](../design.md) |
 | Originating analysis | [`../analysis.md`](../analysis.md) |
 | Foundry | `lerobot` |
-| 구현 가이드 | [`../impl/lerobot/impl.md`](../impl/lerobot/impl.md) · [`impl.patch`](../impl/lerobot/impl.patch) · [`test_pi0_enhance_smoke.py`](../impl/lerobot/test_pi0_enhance_smoke.py) |
+| 구현 가이드 | [`../impl/lerobot/impl.md`](../impl/lerobot/impl.md) · [`../impl/lerobot/impl.patch`](../impl/lerobot/impl.patch) · [`../impl/lerobot/test_pi0_enhance_smoke.py`](../impl/lerobot/test_pi0_enhance_smoke.py) |
 | 검증 생성일 | 2026-05-22 (`TZ=Asia/Seoul`) |
 | 📚 문헌 대조 | `pass` |
 | 🔍 패치 정합성 | `pass` |
@@ -32,8 +32,8 @@
 
 | 분석 | 관계 | 인용 / 사유 |
 |------|------|-------------|
-| [`../analysis.md`](../analysis.md) | 일치 | §⚙️ 의사결정 함의: "본 논문 식 (12) 의 $`\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda(\mathcal{L}_{\text{hand}}+\mathcal{L}_{\text{arm}})`$ 는 사지별 latent 를 강제 분리시키는 비용 낮은 보조 손실이다." — Design 의 enhancement + 사지별 보조 손실 매핑을 직접 뒷받침 |
-| [`../analysis.md`](../analysis.md) | 일치 | §🔬 학습 셋업: "$`E_{\text{arm}}`$ · $`E_{\text{hand}}`$ 가 2-layer MLP (Mish), 보조 헤드는 single linear, 출력은 한 사지의 실제 DoF 인덱스에만 supervision 을 적용한다 (§7.3)." — patch 의 `nn.Sequential(Linear, Mish, Linear)` × 2 + single-linear aux head + selective slice 구현과 일치 |
+| [`../2511.00139.md`](../2511.00139.md) | 일치 | §⚙️ 의사결정 함의: "본 논문 식 (12) 의 $`\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda(\mathcal{L}_{\text{hand}}+\mathcal{L}_{\text{arm}})`$ 는 사지별 latent 를 강제 분리시키는 비용 낮은 보조 손실이다." — Design 의 enhancement + 사지별 보조 손실 매핑을 직접 뒷받침 |
+| [`../2511.00139.md`](../2511.00139.md) | 일치 | §🔬 학습 셋업: "$`E_{\text{arm}}`$ · $`E_{\text{hand}}`$ 가 2-layer MLP (Mish), 보조 헤드는 single linear, 출력은 한 사지의 실제 DoF 인덱스에만 supervision 을 적용한다 (§7.3)." — patch 의 `nn.Sequential(Linear, Mish, Linear)` × 2 + single-linear aux head + selective slice 구현과 일치 |
 
 판정: `pass`
 
@@ -80,15 +80,15 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl
 
 | 참조 | 출처 | 패치 hunk / 🚧 항목 | 상태 |
 |------|------|---------------------|------|
-| `Eq. (9)` 메인 flow matching | `analysis/2511.00139/analysis.md §🔬` | `modeling_pi0_enhance.py` `se_main = (v_main - u_t) ** 2` | 구현 |
-| `Eq. (10)` 손 보조 손실 | `analysis/2511.00139/analysis.md §🔬` | `se_hand = ((v_hand - u_t) ** 2) * hand_mask` | 구현 |
-| `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139/analysis.md §🔬` | `se_arm = ((v_arm - u_t) ** 2) * arm_mask` | 구현 |
+| `Eq. (9)` 메인 flow matching | `analysis/2511.00139.md §🔬` | `modeling_pi0_enhance.py` `se_main = (v_main - u_t) ** 2` | 구현 |
+| `Eq. (10)` 손 보조 손실 | `analysis/2511.00139.md §🔬` | `se_hand = ((v_hand - u_t) ** 2) * hand_mask` | 구현 |
+| `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139.md §🔬` | `se_arm = ((v_arm - u_t) ** 2) * arm_mask` | 구현 |
 | `Eq. (12)` 총손실 | `design.md §📊` | `se_main + aux_loss_weight * (se_arm + se_hand)` | 구현 |
-| `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139/analysis.md §🔬` | `impl.md §🚧 #2` | 유보 |
-| `Eq. (3)` CAE 재구성 | `analysis/2511.00139/analysis.md §🔬` | `impl.md §🚧 #1` | 유보 |
+| `Eq. (2)` LSTM MSE+L2 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #2` | 유보 |
+| `Eq. (3)` CAE 재구성 | `analysis/2511.00139.md §🔬` | `impl.md §🚧 #1` | 유보 |
 | `Eq. (14)` 비축적 corrective | `design.md §📊` | `impl.md §🚧 #3` | 유보 |
 | `Eq. (4)` / `Eq. (8)` 입력 계약 | `design.md §🧮` | `impl.md §🚧 #1` (촉각) / data layer | 유보 |
-| `Table 1`–`Table 4` · `Fig. 16` | `analysis/2511.00139/analysis.md §📊` | 평가 결과 — 정적 검증 대상 아님 | 유보 |
+| `Table 1`–`Table 4` · `Fig. 16` | `analysis/2511.00139.md §📊` | 평가 결과 — 정적 검증 대상 아님 | 유보 |
 
 <!-- silent-skip 없음 (모든 미구현 식은 §🚧 또는 평가 유보로 명시) → §🧪 partial 유발 없음. -->
 
@@ -153,4 +153,4 @@ $ "$py" -m pytest .../tests/test_pi0_enhance_smoke.py -q
 ## 🚧 미해결 / 잠정
 
 - `out-of-base-scope` 4개 항목 (촉각 인코더·LSTM·corrective·τ_contact) 은 `pi0` base 좌표계 밖이라 정적 검증으로 더 진행할 수 없습니다 — 별도 foundry 또는 신규 모듈 좌표계가 필요합니다.
-- enhancement 의 수렴/성능 (88.7% 등) 검증은 실제 학습이 필요해 정적 audit 으로 결론 불가.
+- enhancement 의 수렴/성능 (88.7% 등) 검증은 실제 학습이 필요해 정적 validation 으로 결론 불가.

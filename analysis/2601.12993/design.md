@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/foundry` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -202,7 +202,7 @@ $$\mathbf{a}^{(k+1)}=\mathbf{a}^{(k)}+\Delta t\cdot v_{\theta}(\mathbf{a}^{(k)},
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — `pi0` / `pi05` 와 동계열 (flow-matching action expert + VLM backbone) 이라 *gross-skeleton 매핑* 은 가능하다. 다만 *Mixture-of-Flow 의 Top-K 라우팅* 과 *unified state-action 슬롯 매핑*, *InternVL-3.5 backbone* 은 `vendor/lerobot` 에 직접 대응되는 모듈이 없다. base 후보는 `pi05` (closest flow-matching 라인업) 이되 MoF / MPG / UAC / ESA / slot mapping 4 개 모듈은 *신규 코드 추가* 가 불가피하다. base data pipeline 은 `vendor/lerobot/datasets/` 의 LeRobotDataset 형식으로 슬롯 매핑된 통합 벡터를 새 dtype 으로 등록한다. 실제 매핑 가능 여부는 `/foundry` 단계에서 판정한다.
+- **`lerobot`** — `pi0` / `pi05` 와 동계열 (flow-matching action expert + VLM backbone) 이라 *gross-skeleton 매핑* 은 가능하다. 다만 *Mixture-of-Flow 의 Top-K 라우팅* 과 *unified state-action 슬롯 매핑*, *InternVL-3.5 backbone* 은 `vendor/lerobot` 에 직접 대응되는 모듈이 없다. base 후보는 `pi05` (closest flow-matching 라인업) 이되 MoF / MPG / UAC / ESA / slot mapping 4 개 모듈은 *신규 코드 추가* 가 불가피하다. base data pipeline 은 `vendor/lerobot/datasets/` 의 LeRobotDataset 형식으로 슬롯 매핑된 통합 벡터를 새 dtype 으로 등록한다. 실제 매핑 가능 여부는 `/implement` 단계에서 판정한다.
 
 ---
 

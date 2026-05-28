@@ -344,7 +344,7 @@ this section overrides them on conflict.
 
 ## 5. Paper Analysis Document (`analysis/`)
 
-The `/analyze-paper` slash command (prompt: `.claude/prompts/paper-analysis.md`)
+The `/analyze-paper` slash command (prompt: `.claude/prompts/analysis.md`)
 produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
 
 ### 5-1. File convention
@@ -410,10 +410,10 @@ The analysis always ends with exactly one blockquote line as its very
 last line, regardless of whether a baseline can be matched:
 
 ```markdown
-> 💡 base 매핑은 `/foundry analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 ```
 
-`/foundry` itself decides whether the Design can be grounded in the
+`/implement` itself decides whether the Design can be grounded in the
 target foundry (and emits a clean `🚧 매핑 불가 (<foundry>)` line if
 not). The analysis prompt never speculates about base matching — that
 decision belongs to Layer 2.
@@ -579,8 +579,8 @@ conventions below codify both.
 `analysis/INDEX.md` carries a generated index of every deep-dive in
 the folder, refreshed by `scripts/refresh-analysis-index.py`. The
 script is invoked automatically by the GIT step of `/analyze-paper`,
-`/foundry`, and `/audit`, so any run that adds or refreshes an
-analysis (or its downstream impl/audit artifacts) updates the index
+`/implement`, and `/validate`, so any run that adds or refreshes an
+analysis (or its downstream impl/validate artifacts) updates the index
 in the same commit. The table lives in its own file so the static
 `analysis/README.md` narrative stays free of an auto-rewritten block;
 this is the first intentional exception to the "every doc reference
@@ -599,11 +599,11 @@ The table has seven columns: `#`, `Analysis` (relative hotlink),
 `arXiv` (link to the arXiv abstract), `Title` (the paper's English
 title), `Refreshed` (ISO date), `lerobot` (✅ if
 `<id>/impl/lerobot/impl.md` exists, 🚧 if `UNMAPPABLE.md` exists,
-`—` if `/foundry` has not been run for the lerobot foundry), and
+`—` if `/implement` has not been run for the lerobot foundry), and
 `🔎 vr/pe/sd/se` (the four §🔎 §🚧 bucket counts —
 vendor-resolved / paper-extractable / paper-silent-defaultable /
 paper-silent-experimental — read from the `<!-- ANALYSIS_BUCKETS -->`
-marker in `<id>/audit/lerobot.md`, or `—` when no audit exists).
+marker in `<id>/validation/lerobot.md`, or `—` when no validation exists).
 Sort: `Refreshed` descending, ties broken by arXiv id descending.
 
 Load-bearing 📄 논문 메타 rows the script reads from every
@@ -626,8 +626,8 @@ idempotent — re-running with no underlying change produces no diff.
 ## 6. Design + Foundry Implementation Documents
 
 The `/analyze-paper` slash command emits a **Layer 1 Design**
-(vendor-agnostic) alongside the analysis. The `/foundry` slash command
-(prompt: `.claude/prompts/foundry.md`) consumes that Design and
+(vendor-agnostic) alongside the analysis. The `/implement` slash command
+(prompt: `.claude/prompts/implementation.md`) consumes that Design and
 produces a **Layer 2** foundry-specific implementation. The two-layer
 split exists so the same Design can serve multiple foundries (the v0
 foundry is `lerobot`).
@@ -640,9 +640,9 @@ Outputs (all under `analysis/<id>/`):
                                                the foundry's code
                                                root (for lerobot:
                                                `vendor/lerobot/`).
-- `analysis/<id>/audit/<foundry>.md`         — Korean static
+- `analysis/<id>/validation/<foundry>.md`         — Korean static
                                                validation report
-                                               (`/audit`).
+                                               (`/validate`).
 
 ### 6-1. File convention
 
@@ -659,7 +659,7 @@ Outputs (all under `analysis/<id>/`):
   `##` sections in this order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표
   식별, 🪛 변경 지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의,
   🚧 미해결 / 잠정.
-- The audit report follows `analysis/_TEMPLATE_AUDIT.md` — six `##`
+- The validation report follows `analysis/_TEMPLATE_VALIDATION.md` — six `##`
   sections: 📄 검증 메타, 📚 문헌 대조, 🔍 패치 정합성, 🧪 시그니처
   ·하이퍼파라미터 일치, 📐 식·표 일치, ⚖️ 종합 판정, 🚧 미해결 /
   잠정.
@@ -726,14 +726,14 @@ refresh procedure.
   ⚙️ 핵심 변경 (diff). Affected hunks are downgraded to 🪛 + 🚧 entries
   instead of being silently forged.
 - If the Design cannot ground in the target foundry, **neither**
-  `impl.md` nor `impl.patch` is produced. Instead `/foundry` writes
+  `impl.md` nor `impl.patch` is produced. Instead `/implement` writes
   `analysis/<id>/impl/<foundry>/UNMAPPABLE.md` with one paragraph of
   reason, and appends one line to `analysis/<id>/analysis.md`:
   `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
-### 6-5. Verify report (`/audit` output)
+### 6-5. Verify report (`/validate` output)
 
-The audit report is the static check of a Design + foundry patch
+The validation report is the static check of a Design + foundry patch
 against the originating analysis and the foundry code. It is the
 single deliverable — there is no manifest, no graduated status.
 
@@ -776,3 +776,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.15 | 2026-05-21 | Outer convergence loop implemented (supersedes the v1.14 deferral). `_TEMPLATE_AUDIT.md` gains a §🔎 §🚧 분류 section that classifies every open 🚧 item zero-state into `vendor-resolved` / `paper-extractable §X.Y` / `paper-silent-defaultable` / `paper-silent-experimental`, with a machine-readable `<!-- ANALYSIS_BUCKETS -->` footer (`focus-hint:` line). `/analyze-paper` gains a `--focus "<§X.Y,...>"` re-extraction mode (seed from prior docs, re-extract only named sections). `/reproduce-paper` matrix now branches on the buckets: vendor-resolved / paper-silent-defaultable stay inner (`/foundry --feedback`), paper-extractable triggers the outer step (`/analyze-paper --focus`). New termination reason `stable_design` (focused re-extraction byte-identical); convergence is fixed-point only, no separate outer counter. §5-7 index gains a `🔎 vr/pe/sd/se` bucket-count column |
 | v1.16 | 2026-05-26 | Close the inline-math-inside-verbatim-blockquote gap that let source-leaked math through on `analysis/2605.07308`. §5-6 gains extraction-recipe rule 7 — the inside-dollar backtick wrapping and the boundary rule apply equally to inline math that appears inside an English verbatim quote; content and formatting are separate concerns. §4-5 invariants list gains a matching item — every inline `$...$` span (including spans inside verbatim quotes) must use `` $`X`$ `` and satisfy the §5-6 rule-2 boundary, treated as a fidelity-fail trigger by `content-fidelity-auditor`. `.claude/agents/content-fidelity-auditor.md` adds the corresponding bullet to checklist item 6, and `.claude/prompts/paper-analysis.md` adds the same recipe rule so the gap closes at extraction time too |
 | v1.17 | 2026-05-27 | Scouting reports re-shelved per pillar: path `scouting/YYYY-MM-DD-P#.md` → `scouting/P#/YYYY-MM-DD.md`. §1 table updated; the agent's de-dup lookup now scans sibling files inside the same `P#/` folder. Existing 16 reports were `git mv`-relocated; historical boilerplate inside those files is intentionally not back-edited |
+| v1.18 | 2026-05-28 | Unify the on-demand pipeline on a verb-command / noun-prompt scheme. Prompts renamed `paper-analysis.md` → `analysis.md`, `paper-reproduction.md` → `reproduction.md`, `foundry.md` → `implementation.md`, `audit.md` → `validation.md`. Commands `/foundry` → `/implement` (`commands/foundry.md` → `implement.md`) and `/audit` → `/validate` (`commands/audit.md` → `validate.md`); `/analyze-paper` and `/reproduce-paper` are already verbs and unchanged. `/validate` was chosen over `/verify` to avoid shadowing the built-in `verify` skill. The validation stage is fully renamed audit → validation: output dir `analysis/<id>/audit/` → `<id>/validation/`, template `_TEMPLATE_AUDIT.md` → `_TEMPLATE_VALIDATION.md`, the §6-5 report name, the round-boundary commit prefix, and the `refresh-analysis-index.py` path logic. The `foundry` concept noun (target foundry, `--foundry`, `impl/<foundry>/`, `.foundry-runtime/`, `scripts/foundry-ablation/`) and the `*-auditor` humanize-korean agent names are preserved |

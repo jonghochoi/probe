@@ -1,6 +1,6 @@
 # Paper Analysis — RotVLA: Rotational Latent Action for Vision-Language-Action Model
 
-> PROBE paper-analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
+> PROBE analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
 > 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE.md` §5 / §4 를
 > 정확히 따릅니다. 재실행 시 이 파일을 덮어씁니다.
 
@@ -218,4 +218,4 @@ LIBERO (4 suite) 와 RoboTwin2.0 (50 dual-arm task, clean / randomized) 두 시�
 - §8.1 P1 의 "정보 흐름 변형" 자료로 structured attention (planner→controller 단방향) 을 참고 자료로 등록 — 핀 교체 없이 D4 deferred 의 cross-attn 옵션 (B) 의 "비대칭 단방향" 변형을 정리할 때 그대로 인용합니다.
 - §6.4 의 [D26](#ref-D26) 보조 metric 카탈로그에 "latent stability — single-step vs imagined-step MSE 격차" 추가 검토. baseline 비교가 아닌 LAM 진단 도구이므로 falsifier 가 아닌 보조 지표로만.
 
-> 💡 base 매핑은 `/foundry analysis/2605.13403/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement analysis/2605.13403/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

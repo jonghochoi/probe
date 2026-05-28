@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/foundry` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -164,7 +164,7 @@ def unified_action_expert(z_target: Tensor, a_target: Tensor, h: Tensor) -> Tens
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 후보 base: `pi0` / `pi05` (flow-matching action expert + VLM 백본의 분리) 와 가장 가까움. RotVLA 의 unified flow-matching action head 는 `pi0` 의 action expert 패턴 위에 latent 차원을 추가한 형태로 매핑 가능. LAM 자체 (DINOv2 + spatial-temporal transformer + SoftVQ + SVD projection) 는 `lerobot` 내 대응 family 가 없어 신규 모듈 (`processor` 의 별도 hook 또는 외부 사전학습 산출물 로딩) 형태로 들어갑니다. VLM 백본 (InternVL3.5-1B) 은 vendored 스냅샷에 들어 있지 않으므로 `/foundry` 단계에서 별도 어댑터로 대체합니다.
+- **`lerobot`** — 후보 base: `pi0` / `pi05` (flow-matching action expert + VLM 백본의 분리) 와 가장 가까움. RotVLA 의 unified flow-matching action head 는 `pi0` 의 action expert 패턴 위에 latent 차원을 추가한 형태로 매핑 가능. LAM 자체 (DINOv2 + spatial-temporal transformer + SoftVQ + SVD projection) 는 `lerobot` 내 대응 family 가 없어 신규 모듈 (`processor` 의 별도 hook 또는 외부 사전학습 산출물 로딩) 형태로 들어갑니다. VLM 백본 (InternVL3.5-1B) 은 vendored 스냅샷에 들어 있지 않으므로 `/implement` 단계에서 별도 어댑터로 대체합니다.
 
 ---
 

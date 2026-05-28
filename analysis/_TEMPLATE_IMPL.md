@@ -43,13 +43,13 @@
      구현 형태 (필수). importable surface 가 있으면 in-place 재작성이
      아니라 subclass-seam 으로 매핑합니다 (foundry §C-2): base 에 동작-
      보존 seam + 신규 서브클래스 모듈/config + 등록. 그래야 sibling
-     smoke test 로 실행 검증(audit §🧬)이 가능합니다. 데이터/문서 패치
+     smoke test 로 실행 검증(validation §🧬)이 가능합니다. 데이터/문서 패치
      처럼 importable surface 가 없으면 in-place 로 두고 그 사유를 명시.
 
      SCOPE 선언 (필수). 논문이 여러 정책/모듈을 기술할 때, 이 base 가
      그중 무엇을 COVER 하고 무엇을 EXCLUDE 하는지 각각 한 줄 사유와
      함께 명시합니다 (예: "π_uni enhancement 만 cover; π_hand 촉각
-     인코더·LSTM 정책은 base 좌표계 밖 — 제외"). 이 선언이 audit 의
+     인코더·LSTM 정책은 base 좌표계 밖 — 제외"). 이 선언이 validation 의
      `out-of-base-scope` bucket 이 cite 하는 계약입니다. 선언이 없으면
      제외 모듈은 `out-of-base-scope` 로 분류될 수 없습니다. -->
 

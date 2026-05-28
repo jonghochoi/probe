@@ -36,7 +36,7 @@ Record schema (JSON object):
      "a2_value": "d_s", "a2_status": "ASSUMED"},
     ...
   ],
-  "exec_verdict": "pass",              # optional: pass|fail|skipped (audit §🧬)
+  "exec_verdict": "pass",              # optional: pass|fail|skipped (validation §🧬)
   "form": "subclass-seam",             # optional: subclass-seam|in-place
   "gold_ref": "lerobot:pi0_hetero",    # optional: reference impl, if any
   "notes": "..."                       # optional

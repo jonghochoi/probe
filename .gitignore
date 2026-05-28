@@ -7,7 +7,7 @@ __pycache__/
 venv/
 
 # Foundry execution runtime — full upstream checkout + venv built on demand by
-# scripts/ensure-foundry-runtime.sh so /audit can RUN a foundry's smoke test
+# scripts/ensure-foundry-runtime.sh so /validate can RUN a foundry's smoke test
 # (impl §🧬). Per-checkout, multi-GB, rebuildable from the pinned commit; never
 # committed. The committed surface stays the vendored read-only snapshot.
 .foundry-runtime/
@@ -19,7 +19,7 @@ venv/
 .DS_Store
 
 # humanize-korean scratch workspace — per-run experiment artifacts
-# (detection JSON, rewrite drafts, audit reports). The only deliverable
+# (detection JSON, rewrite drafts, validation reports). The only deliverable
 # is the in-place rewrite of the target file; everything in _workspace/
 # is ephemeral.
 _workspace/

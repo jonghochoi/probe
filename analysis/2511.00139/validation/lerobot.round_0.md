@@ -1,6 +1,6 @@
-# Audit Report — Dexterous Arm-Hand VLA via Shared Autonomy on `lerobot`
+# Validation Report — Dexterous Arm-Hand VLA via Shared Autonomy on `lerobot`
 
-> PROBE audit 모드 산출물. 한글 단일 문서이며, sibling Design + 한
+> PROBE validation 모드 산출물. 한글 단일 문서이며, sibling Design + 한
 > foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/2511.00139/analysis.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
@@ -125,4 +125,4 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl
 ## 🚧 미해결 / 잠정
 
 - `out-of-base-scope` 4개 항목 (촉각 인코더·LSTM·corrective·τ_contact) 은 `pi0` base 좌표계 밖이라 정적 검증으로 더 진행할 수 없습니다 — 별도 foundry 또는 신규 모듈 좌표계가 필요합니다.
-- enhancement 의 수렴/성능 (88.7% 등) 검증은 실제 학습이 필요해 정적 audit 으로 결론 불가.
+- enhancement 의 수렴/성능 (88.7% 등) 검증은 실제 학습이 필요해 정적 validation 으로 결론 불가.

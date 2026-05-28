@@ -1,6 +1,6 @@
 # Paper Analysis — End-to-End Dexterous Arm-Hand VLA Policies via Shared Autonomy: VR Teleoperation Augmented by Autonomous Hand VLA Policy for Efficient Data Collection
 
-> PROBE paper-analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
+> PROBE analysis 모드 산출물. 단일 한글 문서이며, 영문 1차 파일은
 > 없습니다. 형식·이모지·용어 규칙은 `docs/STYLE.md` §5 / §4 를
 > 정확히 따릅니다. 재실행 시 이 파일을 덮어씁니다.
 
@@ -281,4 +281,4 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 - **D19 deferred 트리거 보강 (선택)** — 본 논문은 D19 의 deferred 후보 (d) LoRA · (c) selective unfreeze 대신 사실상 (e) full-FT 로 가는 데이터 포인트다. D19 deferred 줄에 full-FT 가 데이터 100 traj 규모에서 88.7% 를 달성한다는 외부 근거 ([arXiv:2511.00139](https://arxiv.org/abs/2511.00139)) 를 한 줄 각주로 추가할지 검토해 주십시오. 결정 변경이 아니라 근거 등록 수준입니다.
 - **D25 falsifier 의 차폐 항 추가 (선택)** — P2 의 multi-camera pre-fusion (D12) 의 효용을 정량 falsifier 로 묶을 재현 가능한 프로토콜이 본 논문에 제공된다. D25 falsifier 의 보조 항목으로 단일 카메라 차폐 시 성공률 drop ≥ X% 면 D12 의 cross-attn fuser 무효를 추가할지 고려해 주십시오.
 
-> 💡 base 매핑은 `/foundry analysis/2511.00139/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement analysis/2511.00139/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

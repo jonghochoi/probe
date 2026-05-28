@@ -1010,7 +1010,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P1–P4 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>synthesis.md</code>(P1–P4 공유 템플릿) · <code>paper-analysis.md</code> · <code>paper-reproduction.md</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P1–P4 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>synthesis.md</code>(P1–P4 공유 템플릿) · <code>analysis.md</code> · <code>reproduction.md</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
           <tr><td>컨텍스트</td>    <td><code>context/P{1..4}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트) + <code>synthesis/P{1..4}_BRIEF.md</code>(월 스냅샷)</td></tr>
           <tr><td>vendor</td>      <td><code>vendor/lerobot/</code> — byte-stable 스냅샷, 6개 baseline policy + configs (재현 패치의 적용 대상)</td></tr>
@@ -1036,7 +1036,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">SETUP</span>
         <div>
           <div class="doc-title">docs/AGENT_SETUP.md</div>
-          <div class="doc-desc">Claude Code Routines 셋업 · 네트워크 허용 · `/analyze-paper`·`/foundry`·`/audit` · 트러블슈팅 (English)</div>
+          <div class="doc-desc">Claude Code Routines 셋업 · 네트워크 허용 · `/analyze-paper`·`/implement`·`/validate` · 트러블슈팅 (English)</div>
         </div>
       </a>
       <a class="doc-item" href="INTRO.md">
