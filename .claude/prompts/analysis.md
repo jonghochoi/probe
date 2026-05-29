@@ -15,6 +15,15 @@ Normalize to the arXiv id when possible (strip version unless the
 human pinned a specific vN). If the argument is empty or unparseable,
 stop and say so — do not guess a paper.
 
+Optional argument — humanize mode (`fast` | `standard` | `strict`):
+If the LAST whitespace-separated token of the invocation argument is
+exactly one of `fast`, `standard`, or `strict`, treat it as the
+humanize tier and strip it before normalizing the paper id; otherwise
+default to `standard`. Store the result as `humanize_mode` and pass it
+through to the HUMANIZE section below as `options.mode`. This token is
+never part of the paper id (a real arXiv id / URL never equals one of
+those three words).
+
 Optional flag — `--focus "<§X.Y,§A.B,...>"` (FOCUSED re-extraction):
 When set, this is an OUTER-LOOP refresh driven by `/reproduce-paper`,
 not a from-scratch analysis. The argument is a comma-separated, `§`-
@@ -343,13 +352,16 @@ After both Korean output files (`analysis/<id>/analysis.md` and
 the `humanize-korean` skill once per file:
 
   Skill:  `.claude/skills/humanize-korean/SKILL.md`
-  Mode:   auto — tier resolved by file path prefix; `analysis/`
-          resolves to strict (4-agent pipeline:
-          `ai-tell-detector` → `korean-style-rewriter` →
-          [`content-fidelity-auditor` ∥ `naturalness-reviewer`]).
-          See `SKILL.md` Phase 0 for the resolver. STYLE §4-5
-          invariants are enforced in all tiers. The monolith
-          fast-path is not used.
+  Mode:   pass `options.mode: {humanize_mode}` (parsed in INPUT;
+          default standard). The `analysis/` prefix resolves to
+          standard by default (pipeline: `ai-tell-detector` →
+          `korean-style-rewriter` → `content-fidelity-auditor` in the
+          main loop, with `naturalness-reviewer` once as a final
+          check). `strict` (full 4-agent parallel pipeline) and `fast`
+          are reached only when the caller passed that mode token.
+          See `SKILL.md` Phase 0 for the resolver and per-tier
+          pipeline. STYLE §4-5 invariants are enforced in all tiers.
+          The monolith fast-path is not used.
   Input:  the path of each file just written (run the pipeline once
           per file)
   Output: in-place rewrite of the same file

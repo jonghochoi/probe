@@ -6,7 +6,7 @@ description: AI(ChatGPT·Claude·Gemini 등)가 쓴 한글 텍스트를 "사람�
 
 # Humanize Korean — AI 한글 티 제거 오케스트레이터 (v2.0)
 
-> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식 후 v2.0 에서 3-tier 모드 (`fast` / `standard` / `strict`) 로 분기된다. file_path prefix 에 따라 자동 선택되며 (`scouting/` → fast, `synthesis/` → standard, `analysis/` → strict), 호출자가 `options.mode` 로 override 가능. `docs/STYLE.md` §4-5 invariants 는 어느 모드에서나 동등하게 강제된다 — 이 단일 출처를 어떤 tier 도 우회하지 않는다. monolith fast-path 는 어느 모드에서도 사용하지 않는다. 입력은 항상 파일 경로이며 출력은 in-place 갱신.
+> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식 후 v2.0 에서 3-tier 모드 (`fast` / `standard` / `strict`) 로 분기된다. file_path prefix 에 따라 자동 선택되며 (`scouting/` → fast, `synthesis/` → standard, `analysis/` → standard), 호출자가 `options.mode` 로 override 가능 (strict 는 자동 기본값이 아니라 명시 지정으로만 진입). `docs/STYLE.md` §4-5 invariants 는 어느 모드에서나 동등하게 강제된다 — 이 단일 출처를 어떤 tier 도 우회하지 않는다. monolith fast-path 는 어느 모드에서도 사용하지 않는다. 입력은 항상 파일 경로이며 출력은 in-place 갱신.
 
 ## 의존 sub-agent (반드시 함께 존재해야 함)
 
@@ -34,13 +34,12 @@ invariants 정본은 본 SKILL.md (Phase 0/A/B/C/D/E) 와 `docs/STYLE.md` §4-5
 mode := options.mode ?? (
     file_path startswith "scouting/"  → "fast"
     file_path startswith "synthesis/" → "standard"
-    file_path startswith "analysis/"  → "strict"
+    file_path startswith "analysis/"  → "standard"
     else                              → "standard"
 )
 # 우선순위: options.mode > prefix > default
-# 안전장치: options.mode = "fast" AND file_path startswith "analysis/"
-#   → 거부 + "standard" 로 승격 + Phase E 에 mode_override_warning 추가
-#   (analysis 는 decision-grade commit-once 문서이므로 fast 강등 금지)
+# 세 tier (fast/standard/strict) 모두 어느 경로에서나 options.mode 로
+# 명시 지정 가능. strict 는 명시 지정으로만 진입한다 (자동 기본값 아님).
 ```
 
 작업 시작 시 한 줄을 출력한다.
@@ -200,7 +199,7 @@ humanize-korean: {accept|partial|fail|hold} — mode {fast|standard|strict} / ch
   - `loads`: 루프 회수.
   - 정확도 ±30% 가정. 진짜 측정값이 필요할 때만 `options.measure: true` 로 각 agent 의 `usage` 블록 수집 (영구 활성화 안 함).
 - `fidelity` / `naturalness` 가 모드 정의상 호출되지 않았으면 `skipped` 로 표기.
-- 모드 override 사고가 일어났으면 (`analysis/` 에 fast 강등 거부 등) 첫 줄 다음에 `mode_override_warning: {reason}` 한 줄 추가.
+- 모드 override 관련 특이사항이 있으면 (잘못된 `options.mode` 값 무시 등) 첫 줄 다음에 `mode_override_warning: {reason}` 한 줄 추가.
 
 `fail` 또는 `hold` 인 경우 사유 (어떤 invariant 가 깨졌는지, 어떤 finding 이 잔존했는지, 어떤 구간이 과윤문 의심인지) 1~2 문장 첨부.
 
@@ -209,7 +208,7 @@ humanize-korean: {accept|partial|fail|hold} — mode {fast|standard|strict} / ch
 - `장르: 리포트` (PROBE 고정, 변경 금지)
 - `강도: 보수|기본` (기본값 보수 — PROBE 산출물은 의미 보존 우선)
 - `최소심각도: S2` (기본, S1 으로 올리면 더 적게 고침)
-- `mode: fast|standard|strict` (지정 시 자동 결정 override. 단 `analysis/` 경로에 `fast` 는 거부되어 `standard` 로 승격된다.)
+- `mode: fast|standard|strict` (지정 시 자동 결정 override. 세 tier 모두 어느 경로에서나 명시 지정 가능.)
 - `measure: true|false` (기본 false. true 시 각 agent 의 `usage` 블록을 수집해 Phase E 에 exact token 보고 첨부.)
 
 ## 데이터 흐름 요약
@@ -263,7 +262,6 @@ strict 모드의 Phase C 의 fidelity-auditor 와 naturalness-reviewer 는 **반
 - **장르 이탈 금지.** PROBE 산출물은 리포트 장르로 고정.
 - **register 보존.** 합니다/됩니다 정중체 입력 → 동일 정중체 출력.
 - **자동 로드 금지.** 다른 파일을 자동 파싱해 옵션을 추론하지 않는다.
-- **mode override 안전장치.** `analysis/` 경로에 `mode: fast` 가 강제 지정되어도 standard 로 승격한다 (decision-grade 문서 보호).
 - **STYLE.md §4-5 가 SSOT.** 본 스킬의 invariant 정규식 셋은 STYLE.md §4-5 의 invariant 목록을 ground 한 결과물 — STYLE.md 변경 시 본 스킬도 동시 변경해야 drift 방지.
 
 ## 참고 자료

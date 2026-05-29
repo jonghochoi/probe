@@ -302,10 +302,10 @@ before the agent has finished writing the output file.
 **Pipeline (v2.0 — 3-tier).** From `humanize-korean` v2.0 the skill
 runs in one of three tiers, resolved automatically from the target
 file path: `scouting/` → **fast**, `synthesis/` → **standard**,
-`analysis/` → **strict**. A caller may override via `options.mode`,
-except that `mode: fast` against an `analysis/` path is refused and
-promoted to `standard` (decision-grade documents do not get the fast
-path). Per-tier pipeline:
+`analysis/` → **standard**. A caller may override via `options.mode`;
+all three tiers can be requested explicitly on any path. The heaviest
+tier, **strict**, is never an automatic default — it is reached only by
+passing `options.mode: strict`. Per-tier pipeline:
 
 - **fast** — `ai-tell-detector` (Haiku 4.5) → `korean-style-rewriter`
   (Sonnet 4.6 with `--conservative`) → inline STYLE §4-5 invariant

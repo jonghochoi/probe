@@ -179,7 +179,7 @@ the `humanize-korean` skill on that file:
   Skill:  `.claude/skills/humanize-korean/SKILL.md`
   Mode:   auto — tier resolved by file path prefix
           (`scouting/` → fast, `synthesis/` → standard,
-          `analysis/` → strict). See `SKILL.md` Phase 0 for the
+          `analysis/` → standard). See `SKILL.md` Phase 0 for the
           resolver and per-tier pipeline. STYLE §4-5 invariants are
           enforced in all tiers. The monolith fast-path is not used.
   Input:  the path of the file just written
