@@ -203,6 +203,21 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
                         No inference, correction, or rounding.
   ⚖️ 한계              — author-stated weaknesses + obvious gaps.
   ♻️ 재현성            — code / data / hardware availability.
+  🩺 건전성 판정        — a SKEPTICAL soundness verdict that closes Part (A).
+                        Synthesise 🔬 방법론 / 📊 실험 / ⚖️ 한계 / ♻️ 재현성 into
+                        one judgment, ported from SoundnessBench's aggressive
+                        rigor policy to counter LLM optimism bias (over-rating
+                        rigor). Emit three fields:
+                          - rigor_bucket: low | high (DEFAULT low)
+                          - confidence: 1–5
+                          - 근거: step-by-step — check controls, baselines/
+                            ablations, metric validity, and claim–evidence
+                            match one by one.
+                        Assign `high` ONLY when those are explicit and
+                        unambiguous in the body; incomplete or ambiguous ⇒
+                        `low`. End with the single weakest link to probe first.
+                        Abstract-only acquisition ⇒ this section is prefixed
+                        **(본문 미확보 — 잠정)** and defaults to `low`.
 
 (B) PROBE 연동 — decision-grade, anchored to context/MASTER.md + the relevant context/P#.md:
   🎯 관련 Pillar / Decision (P#/D#) — which P1–P4 / D1–D23 this paper
@@ -212,7 +227,10 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
        Literature already in the relevant context/P#.md §5 (name the pinned paper).
   ⚙️ 의사결정 함의     — what changes in MY training/evaluation pipeline
        if this paper is right? Name a specific config key / hyperparameter /
-       metric / loss term. Vague is failure.
+       metric / loss term. Vague is failure. GATE on the 🩺 건전성 판정: when
+       the verdict is `low`, do NOT issue an actionable change — state that
+       the claim is not yet trustworthy enough to act on, and route the
+       takeaway into ⚠️ 먼저 검증할 실패 모드 instead.
   ⚠️ 먼저 검증할 실패 모드 — why might this NOT transfer to our stack?
        Cheapest sanity check first.
   💡 컨텍스트 제안      — if a pin should change or a Decision/deferred
@@ -248,6 +266,11 @@ HARD RULES:
   still generated but every section carries the same prefix and most
   fields are filled with `(원문에 명시 없음 — 가정으로 메움)`.
 - Never fabricate an arXiv id, a number, a citation, or a result.
+- 🩺 건전성 판정 defaults to `low` and follows SoundnessBench's aggressive
+  policy: assign `high` only when controls, baselines/ablations, metric
+  validity, and claim–evidence match are explicit in the body. The
+  ⚙️ 의사결정 함의 recommendation is gated on this verdict — a `low` verdict
+  blocks any actionable config change.
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - The Design is **vendor-agnostic**. It must not contain `file:line`
   coordinates from `vendor/lerobot/` or any other codebase. Mapping

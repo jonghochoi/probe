@@ -120,6 +120,21 @@ For every candidate paper, score on a 0–3 scale:
   · Novelty         — genuinely new, or a delta over tracked work?
   · Reproducibility — code / data / hardware details?
   · Sim2Real        — real-robot evidence, or sim-only?
+  · Soundness       — are the paper's claims actually supported by its
+                      own experiments? This is NOT reproducibility (code
+                      released) — it is internal validity: explicit
+                      controls, strong baselines, ablations, valid
+                      metrics, and claim–evidence match.
+
+Soundness is scored under an AGGRESSIVE default. An LLM scout
+systematically over-rates rigor (optimism bias) — it tends to read a
+confident abstract as a sound result. Counter it: treat a paper as
+low-soundness UNLESS the body clearly demonstrates otherwise.
+  · 0–1 — missing controls, vague method, weak or absent baselines,
+          underspecified metrics, or claims the experiments do not back.
+          When information is incomplete or ambiguous, score here.
+  · 2–3 — only when controls, baselines/ablations, metric validity, and
+          claim–evidence match are explicit and unambiguous in the body.
 
 ---
 
@@ -169,6 +184,11 @@ For each paper, state:
   (c) decision implication — what changes in MY training/evaluation
       pipeline next week if this paper is right? Be concrete (config
       key, hyperparameter, specific metric, loss term). Vague is failure.
+      GATE this on Soundness: issue an actionable config change ONLY when
+      the paper's Soundness ≥ 2. If Soundness ≤ 1, do not recommend a
+      pipeline change — state plainly that the claim is not yet
+      trustworthy enough to act on, and fold the takeaway into (d) as the
+      first failure mode to probe.
   (d) failure mode to probe first.
 
 ### Reference Legend (docs/STYLE.md §3-1)
@@ -196,6 +216,9 @@ RULES:
 - Do not edit context/<PILLAR>.md. If a pinned paper should be
   replaced, write the suggestion under 💡 Context Suggestions.
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.
+- A paper is surfaced only if EVERY dimension (incl. Soundness) scores
+  ≥ 2. A low-Soundness paper may still be logged under 🚫 with the drop
+  reason `Soundness < 2`, never promoted to a ★ tier.
 - Every paper link must be verified to resolve correctly before
   inclusion. Do not fabricate arXiv IDs.
 - If any curl call fails, include the exact command and error/HTTP
