@@ -1,0 +1,23 @@
+# probe soundness calibration config.
+# Ported shape from SoundnessBench config/eval/eval.yaml.
+# Provider precedence: CLI --provider > LLM_PROVIDER env > this file.
+# Use provider: random for an offline, no-API-key smoke run.
+
+provider: openai
+max_tokens: 2048
+temperature: 0.2
+seed: 42
+
+openai:
+  model: gpt-4o-mini
+  # base_url: https://api.openai.com/v1   # set for OpenAI-compatible endpoints
+
+anthropic:
+  model: claude-sonnet-4-6
+
+google:
+  model: gemini-2.5-pro
+
+vllm:
+  model: Qwen/Qwen2.5-7B-Instruct
+  base_url: http://localhost:8000/v1

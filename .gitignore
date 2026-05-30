@@ -23,3 +23,7 @@ venv/
 # is the in-place rewrite of the target file; everything in _workspace/
 # is ephemeral.
 _workspace/
+
+# Soundness calibration outputs (harness + prompts + gold set are committed)
+/eval/results/*.json
+/eval/.venv/

@@ -30,6 +30,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
+| `eval/` | human | Soundness calibration harness ported from `SoundnessBench` — `judge/` (accuracy + Cohen's κ + optimism false-high metric), neutral vs. skeptical prompts, a robotics gold set, CLI at `scripts/run-soundness-eval.py`. Measures whether probe's soundness gate (the 🩺 건전성 판정 / scouting Soundness axis) is calibrated against gold labels. `eval/results/` is gitignored; harness + prompts + gold set are committed |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Per-pillar content (Decision Log, Tracked Literature,
