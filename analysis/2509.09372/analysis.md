@@ -45,13 +45,13 @@
 ## 🔑 기술 키워드
 
 - **VLA-Adapter** — 대형 백본 대신 "조건 주입 어댑터"로 성능을 내는 브리징 패러다임. VLM은 그대로 두고 액션 쪽 Policy만 정교하게 설계한 접근입니다.
-- **Raw latent (`` $`\mathcal{C}_{t}^{\mathcal{R}}`$ ``)** — VLM이 직접 내보내는 비전·언어 표현. 저자들에 따르면 이 중 중간층이 액션에 더 유용합니다.
-- **ActionQuery latent (`` $`\mathcal{C}_{t}^{\mathcal{AQ}}`$ ``)** — VLM 시퀀스에 삽입된 학습형 쿼리 토큰의 출력. 멀티모달 정보를 능동적으로 빨아들이는 "빈 잔" 역할이며, 심층일수록 더 풍부해집니다.
+- **Raw latent ($`\mathcal{C}_{t}^{\mathcal{R}}`$)** — VLM이 직접 내보내는 비전·언어 표현. 저자들에 따르면 이 중 중간층이 액션에 더 유용합니다.
+- **ActionQuery latent ($`\mathcal{C}_{t}^{\mathcal{AQ}}`$)** — VLM 시퀀스에 삽입된 학습형 쿼리 토큰의 출력. 멀티모달 정보를 능동적으로 빨아들이는 "빈 잔" 역할이며, 심층일수록 더 풍부해집니다.
 - **Bridge Attention** — Raw 조건과 ActionQuery 조건을 각각 cross-attention 으로, 액션 잠재 자신을 self-attention 으로 묶는 3-어텐션 모듈. VL→A 매핑의 핵심 다리입니다.
-- **Ratio `` $`g`$ `` (injection degree)** — Raw 특징 주입량을 조절하는 학습형 스칼라. 0으로 초기화하고 `` $`\tanh(g)`$ `` 로 범위를 [-1,1] 로 묶어 학습 안정성을 확보합니다(FiLM/게이팅 계열의 변주).
+- **Ratio $`g`$ (injection degree)** — Raw 특징 주입량을 조절하는 학습형 스칼라. 0으로 초기화하고 $`\tanh(g)`$ 로 범위를 [-1,1] 로 묶어 학습 안정성을 확보합니다(FiLM/게이팅 계열의 변주).
 - **Prismatic-VLMs** — DINOv2 + SigLIP 비전 인코더에 LLM을 얹은 VLM 설계 공간. 본 논문 백본의 기반 아키텍처입니다.
 - **L1-based Policy** — 플로우 매칭/디퓨전 대신 L1 회귀 손실로 액션 청크를 직접 예측하는 경량 정책 헤드. 본 논문이 채택한 기본형입니다.
-- **액션 청크 (action chunk, `` $`H`$ ``)** — 한 번에 예측하는 `` $`H`$ ``-스텝 액션 묶음. 본 논문은 `` $`H=8`$ `` 을 사용합니다.
+- **액션 청크 (action chunk, $`H`$)** — 한 번에 예측하는 $`H`$-스텝 액션 묶음. 본 논문은 $`H=8`$ 을 사용합니다.
 - **백본 동결 (frozen backbone)** — VLM 가중치를 고정한 채 ActionQuery 와 Policy 만 학습. VLM 사전학습 보존(P4) 관점에서 핵심 실험입니다.
 
 ---
@@ -80,17 +80,17 @@
 > "Figure 3: The proposed VLA framework. The key components are the effective condition exploration and Attention design. “Attention” specifically includes cross attention with conditions and self attention with itself. In the “Unified VLA-Adapter Framework”, “Attention” is the Bridge Attention as shown in Section 3.3. Four conditions about “layer” and “type” are given on the right." (§3.1)
 (VLM이 만들어내는 두 종류·여러 레이어의 조건을 Policy의 각 레이어에 주입하는 전체 골격을 보여줍니다 — "어떤 조건을 쓸지" 와 "어떻게 주입할지" 가 설계의 두 축입니다.)
 
-**백본·입력.** VLM은 Prismatic-VLMs 구조(DINOv2 + SigLIP 비전, Qwen2.5-0.5B 언어)이며 `` $`M`$ `` 개 레이어를 가집니다. 타임스텝 `` $`t`$ `` 에서 입력은 다음과 같습니다.
+**백본·입력.** VLM은 Prismatic-VLMs 구조(DINOv2 + SigLIP 비전, Qwen2.5-0.5B 언어)이며 $`M`$ 개 레이어를 가집니다. 타임스텝 $`t`$ 에서 입력은 다음과 같습니다.
 
 > "the input into VLM consists of $`\{\mathcal{X}_{t}^{v},\mathcal{X}_{t}^{g},\mathcal{L}_{t},\mathcal{AQ}_{t}\}`$ : the 3rd-view image $`\mathcal{X}_{t}^{v}`$ , the gripper image $`\mathcal{X}_{t}^{g}`$ , the instruction $`\mathcal{L}_{t}`$ , and additional ActionQuery $`\mathcal{AQ}_{t}`$ ." (§3.1)
-(3인칭 시점 이미지·그리퍼 이미지·언어 지시·학습형 ActionQuery 가 VLM에 함께 들어가고, 출력으로 지정 레이어의 Raw 잠재 `` $`\mathcal{C}_{t}^{\mathcal{R}}`$ `` 와 ActionQuery 잠재 `` $`\mathcal{C}_{t}^{\mathcal{AQ}}`$ `` 가 Policy의 조건으로 나옵니다.)
+(3인칭 시점 이미지·그리퍼 이미지·언어 지시·학습형 ActionQuery 가 VLM에 함께 들어가고, 출력으로 지정 레이어의 Raw 잠재 $`\mathcal{C}_{t}^{\mathcal{R}}`$ 와 ActionQuery 잠재 $`\mathcal{C}_{t}^{\mathcal{AQ}}`$ 가 Policy의 조건으로 나옵니다.)
 
 **백본 규모.** 백본을 키워도 이득이 제한적임을 보이려고 Prismatic-VLM(Qwen2.5-0.5B), Prismatic-VLM(LLaMA2-7B), 로봇 데이터로 사전학습된 OpenVLA-7B 세 가지로 실험했고, 효율을 노려 기본 백본은 Qwen2.5-0.5B 로 고정했습니다.
 
-**Policy 구조.** 설계를 단순하게 가져가려고 L1 기반 Policy를 쓰며, Policy 레이어 수를 VLM과 동일하게(`` $`M=24`$ ``) 둡니다. 각 레이어는 Bridge Attention + FFN 으로 구성됩니다. 입력은 다음과 같습니다.
+**Policy 구조.** 설계를 단순하게 가져가려고 L1 기반 Policy를 쓰며, Policy 레이어 수를 VLM과 동일하게($`M=24`$) 둡니다. 각 레이어는 Bridge Attention + FFN 으로 구성됩니다. 입력은 다음과 같습니다.
 
 > "At $`t`$ -th timestep, the input to Policy includes: $`\{\mathcal{C}_{t}^{\mathcal{R}},\mathcal{C}_{t}^{\mathcal{AQ}},{\bf A}^{\tau=0}_{t},\mathcal{P}_{t}\}`$ ." (§3.3)
-(각 레이어의 두 조건, 전부 0으로 초기화된 `` $`H`$ ``-스텝 초기 액션 `` $`{\bf A}^{0}_{t}`$ ``, 그리고 고유감각 상태 `` $`\mathcal{P}_{t}`$ `` 가 입력입니다. 초기 액션은 LN+MLP로, proprio는 2-layer MLP로 임베딩 `` $`\sigma_{0}(\mathcal{P}_{t})`$ `` 가 됩니다.)
+(각 레이어의 두 조건, 전부 0으로 초기화된 $`H`$-스텝 초기 액션 $`{\bf A}^{0}_{t}`$, 그리고 고유감각 상태 $`\mathcal{P}_{t}`$ 가 입력입니다. 초기 액션은 LN+MLP로, proprio는 2-layer MLP로 임베딩 $`\sigma_{0}(\mathcal{P}_{t})`$ 가 됩니다.)
 
 ![Figure 5 — Policy with Bridge Attention](https://arxiv.org/html/2509.09372/x5.png)
 
@@ -99,20 +99,20 @@
 
 **Bridge Attention.** 한 모듈은 두 개의 cross-attention 과 한 개의 self-attention 으로 구성됩니다.
 
-- 첫 cross-attention: Raw `` $`\mathcal{C}_{t}^{\mathcal{R}}`$ `` 를 MLP `` $`\sigma_{1}`$ `` 로 `` $`K_{1},V_{1}`$ `` 로 만들고, 액션 잠재 `` $`\widetilde{\bf{A}}^{\tau}_{t}`$ `` 를 `` $`Q_{1}`$ `` 으로 써서 `` $`\text{CA}_{1}`$ `` 을 얻습니다.
-- 둘째 cross-attention: ActionQuery `` $`\mathcal{C}_{t}^{\mathcal{AQ}}`$ `` 를 proprio `` $`\sigma_{0}(\mathcal{P}_{t})`$ `` 와 concat 한 뒤 MLP `` $`\sigma_{2}`$ `` 로 `` $`K_{2},V_{2}`$ `` 로 만들고, `` $`\widetilde{\bf{A}}^{\tau}_{t}`$ `` 를 `` $`Q_{2}`$ `` 로 써서 `` $`\text{CA}_{2}`$ `` 를 얻습니다.
-- self-attention: `` $`\widetilde{\bf{A}}^{\tau}_{t}`$ `` 를 `` $`Q,K,V`$ `` 로 써서 `` $`\text{SA}`$ `` 를 얻습니다.
+- 첫 cross-attention: Raw $`\mathcal{C}_{t}^{\mathcal{R}}`$ 를 MLP $`\sigma_{1}`$ 로 $`K_{1},V_{1}`$ 로 만들고, 액션 잠재 $`\widetilde{\bf{A}}^{\tau}_{t}`$ 를 $`Q_{1}`$ 으로 써서 $`\text{CA}_{1}`$ 을 얻습니다.
+- 둘째 cross-attention: ActionQuery $`\mathcal{C}_{t}^{\mathcal{AQ}}`$ 를 proprio $`\sigma_{0}(\mathcal{P}_{t})`$ 와 concat 한 뒤 MLP $`\sigma_{2}`$ 로 $`K_{2},V_{2}`$ 로 만들고, $`\widetilde{\bf{A}}^{\tau}_{t}`$ 를 $`Q_{2}`$ 로 써서 $`\text{CA}_{2}`$ 를 얻습니다.
+- self-attention: $`\widetilde{\bf{A}}^{\tau}_{t}`$ 를 $`Q,K,V`$ 로 써서 $`\text{SA}`$ 를 얻습니다.
 
-Raw 주입량은 학습형 Ratio `` $`g`$ `` 로 조절합니다.
+Raw 주입량은 학습형 Ratio $`g`$ 로 조절합니다.
 
 > "$`g`$ is initialized to 0 value, and the $`\tanh`$ activation function is utilized $`\tanh(g)\in[-1,1]`$ to prevent extreme values from destabilizing the distribution." (§3.3)
-(`` $`g`$ `` 를 0으로 초기화하고 `` $`\tanh`$ `` 로 [-1,1] 에 가둬 극단값이 분포를 흔들지 못하게 합니다 — 학습 초기에는 Raw 영향을 0에서 출발시켜 안정성을 확보하는 게이팅입니다.)
+($`g`$ 를 0으로 초기화하고 $`\tanh`$ 로 [-1,1] 에 가둬 극단값이 분포를 흔들지 못하게 합니다 — 학습 초기에는 Raw 영향을 0에서 출발시켜 안정성을 확보하는 게이팅입니다.)
 
-세 어텐션을 concat 해 `` $`\widehat{\bf{A}}_{t}^{\tau}`$ `` 를 만듭니다.
+세 어텐션을 concat 해 $`\widehat{\bf{A}}_{t}^{\tau}`$ 를 만듭니다.
 
 $$\widehat{\bf{A}}_{t}^{\tau}=[\text{CA}_{1}\left(\widetilde{\bf{A}}^{\tau}_{t},\sigma_{1}(\mathcal{C}_{t}^{\mathcal{R}})\right)\cdot\tanh(g),\text{CA}_{2}(\widetilde{\bf{A}}^{\tau}_{t},\sigma_{2}[\mathcal{C}_{t}^{\mathcal{AQ}},\sigma_{0}({\mathcal{P}_{t}})]),\text{SA}\left(\widetilde{\bf{A}}^{\tau}_{t},\widetilde{\bf{A}}^{\tau}_{t}\right)].$$
 
-이후 residual FFN을 거쳐 `` $`\widetilde{\bf A}^{\tau+1}_{t}`$ `` 가 되고, 이 과정을 반복해 `` $`\widetilde{\bf A}^{M-1}_{t}`$ `` 를 얻은 뒤 LN+MLP로 최종 액션 청크 `` $`{\bf A}^{M-1}_{t}`$ `` 를 산출합니다. (DiT 기반 Policy 변형도 설계했으나 L1 기반이 성능에서도 속도에서도 대체로 앞서 L1을 기본으로 채택했습니다 — Appendix B.)
+이후 residual FFN을 거쳐 $`\widetilde{\bf A}^{\tau+1}_{t}`$ 가 되고, 이 과정을 반복해 $`\widetilde{\bf A}^{M-1}_{t}`$ 를 얻은 뒤 LN+MLP로 최종 액션 청크 $`{\bf A}^{M-1}_{t}`$ 를 산출합니다. (DiT 기반 Policy 변형도 설계했으나 L1 기반이 성능에서도 속도에서도 대체로 앞서 L1을 기본으로 채택했습니다 — Appendix B.)
 
 ### 학습 목표 / 손실
 
@@ -120,13 +120,13 @@ $$\widehat{\bf{A}}_{t}^{\tau}=[\text{CA}_{1}\left(\widetilde{\bf{A}}^{\tau}_{t},
 
 $$\min_{\theta}\mathcal{J}(\theta)=\mathbb{E}_{\mathbf{A}_{t},\mathcal{C}_{t}^{\mathcal{R}},\mathcal{C}_{t}^{\mathcal{AQ}},{\sigma_{0}}({\mathcal{P}_{t}}),\tau}\Big[\big\|\pi_{\theta}(\mathbf{A}_{t}^{\tau},\mathcal{C}_{t}^{\mathcal{R}},\mathcal{C}_{t}^{\mathcal{AQ}},{\sigma_{0}}({\mathcal{P}_{t}}),\tau)-\mathbf{A}_{t}\big\|_{1}\Big].$$
 
-(예측 액션과 ground-truth 궤적 `` $`{\bf A}_{t}`$ `` 의 L1 거리만 최소화합니다 — 디퓨전 노이즈 스케줄이나 플로우 매칭 없이 회귀로 끝내는 단순한 목표입니다.)
+(예측 액션과 ground-truth 궤적 $`{\bf A}_{t}`$ 의 L1 거리만 최소화합니다 — 디퓨전 노이즈 스케줄이나 플로우 매칭 없이 회귀로 끝내는 단순한 목표입니다.)
 
 ### 학습 셋업
 
 - **옵티마이저·스케줄**: AdamW + LoRA 스킴, learning rate `1e-4`, cosine-annealing + warmup, batch size 16, max training step 150,000, warmup step 10% (Table F1).
 - **하드웨어**: 4× NVIDIA H100 (메인 실험). 제안 패러다임 덕에 단일 소비자급 GPU에서 8시간 학습이 가능하다고 주장합니다.
-- **하이퍼파라미터 (Table F2)**: 백본 Qwen2.5-0.5B, 레이어 `` $`\tau/M=24`$ ``, ActionQuery 64개, hidden size 896, attention head 8, action chunk `` $`H=8`$ ``, VLM 중간 레이어 1–24 전부 사용, Policy 학습 파라미터 97.3M, VLA-Adapter 전체 학습 파라미터 197.2M.
+- **하이퍼파라미터 (Table F2)**: 백본 Qwen2.5-0.5B, 레이어 $`\tau/M=24`$, ActionQuery 64개, hidden size 896, attention head 8, action chunk $`H=8`$, VLM 중간 레이어 1–24 전부 사용, Policy 학습 파라미터 97.3M, VLA-Adapter 전체 학습 파라미터 197.2M.
 
 ---
 
@@ -157,7 +157,7 @@ $$\min_{\theta}\mathcal{J}(\theta)=\mathbb{E}_{\mathbf{A}_{t},\mathcal{C}_{t}^{\
 > "using both all-layer Raw and ActionQuery achieves superior performance" (§4.5, Table 7)
 (Last-layer Raw=85.8, Last ActionQuery=90.2, 중간층 Raw=88.4, 전 레이어 Raw=90.6, 전 레이어 ActionQuery=92.6, 전 레이어 Raw+ActionQuery=95.0 — 두 타입을 모두 전 레이어로 쓸 때 최고입니다.)
 
-게이팅 설계는 주입 정도 절제(Table 8)에서 확인됩니다. Raw=`` $`\tanh(g)`$ `` + ActionQuery=1 조합이 95.0 으로, Raw=1·ActionQuery=1(91.4), Raw=1·ActionQuery=`` $`\tanh(g)`$ ``(91.0), 둘 다 `` $`\tanh(g)`$ ``(92.6) 보다 우수합니다. ActionQuery는 그대로 완전 주입하고 Raw만 학습형으로 선별 주입하는 것이 최선임을 보입니다. ActionQuery 토큰 수는 64개에서 성능과 효율이 모두 가장 좋습니다(Figure 8).
+게이팅 설계는 주입 정도 절제(Table 8)에서 확인됩니다. Raw=$`\tanh(g)`$ + ActionQuery=1 조합이 95.0 으로, Raw=1·ActionQuery=1(91.4), Raw=1·ActionQuery=$`\tanh(g)`$(91.0), 둘 다 $`\tanh(g)`$(92.6) 보다 우수합니다. ActionQuery는 그대로 완전 주입하고 Raw만 학습형으로 선별 주입하는 것이 최선임을 보입니다. ActionQuery 토큰 수는 64개에서 성능과 효율이 모두 가장 좋습니다(Figure 8).
 
 ---
 
@@ -183,7 +183,7 @@ $$\min_{\theta}\mathcal{J}(\theta)=\mathbb{E}_{\mathbf{A}_{t},\mathcal{C}_{t}^{\
 이 논문은 `context/MASTER.md` 에 **이미 추적 중인 논문**입니다 — P4 §8.4의 "VLA-Adapter (Bridge Attention)", D19b의 "Prismatic-VLM + Qwen2.5-0.5B × LIBERO + CALVIN (adapter-only), minimal-backbone path", D20의 "action-side adapter (VLA-Adapter Bridge Attention)" 옵션이 모두 이 논문을 가리킵니다.
 
 - **P4 (VLM 사전학습 보존)** — 여기에 정면으로 맞닿습니다. **D19**(VLM FT 범위) v1 = (a) 완전 동결 + 액션 전문가만 학습, **D20**(prior-preservation) v1 = action-side adapter, **D23**(액션 표현) v1 = (iii) flow-matching. VLA-Adapter는 D19(a)+D20(action-side adapter)의 **구체적 성공 사례**이자, D23에서 PROBE가 택한 flow-matching의 **L1-회귀 대안**입니다.
-- **P1 (이종 Body/Hand 액션 전문가)** — Bridge Attention의 "Raw cross-attn × 학습형 `` $`\tanh(g)`$ `` 게이트" 는 **D4**(Body↔Hand 정보 공유, v1=FiLM, cross-attn 지연 후보)와 **D7**(π 백본 통합/분할)의 방법론 참조가 됩니다. 단, 해부학적 split이 아니라 단일 액션 전문가 설계라는 점에서 P1의 핵심 주장과는 결이 다릅니다.
+- **P1 (이종 Body/Hand 액션 전문가)** — Bridge Attention의 "Raw cross-attn × 학습형 $`\tanh(g)`$ 게이트" 는 **D4**(Body↔Hand 정보 공유, v1=FiLM, cross-attn 지연 후보)와 **D7**(π 백본 통합/분할)의 방법론 참조가 됩니다. 단, 해부학적 split이 아니라 단일 액션 전문가 설계라는 점에서 P1의 핵심 주장과는 결이 다릅니다.
 - **Identity 긴장/지지** — Identity는 "보정 모듈은 VLA 출력 주변 local distribution 에 한정되어 ceiling을 못 넘는다"고 주장합니다(Antagonist A). VLA-Adapter는 frozen VLA 위의 어댑터이지만, 후처리 보정이 아니라 **전 레이어 특징을 액션 공간으로 직접 브리징**하는 설계라 단순 correction/residual 과는 구분됩니다 — 다만 백본을 동결한 채 어댑터만 키운다는 점에서 P4의 "동결 백본으로 충분한가" 질문에 곧바로 데이터가 됩니다.
 - **§10 경쟁자 함의** — OpenHelix(Cui et al.) 등 본 논문 저자진의 dual-system VLA 계열과 연결되며, P4 competitor(§8.4 demote 후 P4.md §8 추적)로서 위치가 유지됩니다.
 
@@ -203,7 +203,7 @@ $$\min_{\theta}\mathcal{J}(\theta)=\mathbb{E}_{\mathbf{A}_{t},\mathcal{C}_{t}^{\
 
 - **D19(a) 완전 동결의 전제 수정** — "백본 동결 + 액션 전문가만 학습" 이 동작하려면 **last-layer 특징만으로는 부족**하고(OFT frozen=0.0), VLM의 **중간/전 레이어 특징을 액션 전문가에 주입**해야 합니다. PROBE의 π0 슬라이스(D7)에서 액션 전문가가 백본의 마지막 hidden state만 받는 구조라면, **레이어별 cross-attention 주입**을 설계 옵션으로 올립니다.
 - **구체적 config 키** — (1) 액션 전문가의 cross-attention key/value 소스를 `last_hidden_state` → `all_hidden_states[1:M]` 로 확장, (2) Raw 특징 주입에 학습형 스칼라 `ratio_g`(init 0, `tanh` 클램프) 추가, (3) D5(입력 모달리티)에서 proprio 임베딩을 ActionQuery 측 cross-attn의 KV에 concat. 
-- **D4(Body↔Hand) 방법론 보강** — v1 FiLM `` $`(\gamma,\beta)`$ `` 대신/병행해, `` $`a_b`$ `` 를 Hand 헤드 cross-attn의 조건으로 주입하고 그 주입량을 `` $`\tanh(g)`$ `` 로 게이팅하는 변형이 "단일 지점 정보 병목" 우려(D4 deferred trigger)에 대한 경량 대안이 됩니다.
+- **D4(Body↔Hand) 방법론 보강** — v1 FiLM $`(\gamma,\beta)`$ 대신/병행해, $`a_b`$ 를 Hand 헤드 cross-attn의 조건으로 주입하고 그 주입량을 $`\tanh(g)`$ 로 게이팅하는 변형이 "단일 지점 정보 병목" 우려(D4 deferred trigger)에 대한 경량 대안이 됩니다.
 - **D23 비교군 확보** — flow-matching(v1) vs L1-회귀(VLA-Adapter)의 정밀도/속도 트레이드오프가 in-hand rotation 같은 접촉 집약 과제에서 어떻게 갈리는지를 4-contribution 절제(D25)의 보조 축으로 추가할 수 있습니다.
 
 ---

@@ -23,16 +23,16 @@
 
 ## 🧮 데이터 계약
 
-타임스텝 `` $`t`$ `` 기준. 시간 축은 액션 청크 길이 `` $`H`$ `` (본문 `` $`H=8`$ ``), Policy/VLM 레이어 수 `` $`M`$ `` (본문 `` $`M=24`$ ``) 로 표기합니다.
+타임스텝 $`t`$ 기준. 시간 축은 액션 청크 길이 $`H`$ (본문 $`H=8`$), Policy/VLM 레이어 수 $`M`$ (본문 $`M=24`$) 로 표기합니다.
 
-- **입력** — 3인칭 이미지 `` $`\mathcal{X}_{t}^{v}`$ ``: shape `(B, 3, Hpx, Wpx)`, RGB; VLM 비전 인코더(DINOv2 + SigLIP) 입력 정규화 (원문에 픽셀 통계 명시 없음 — 인코더 기본값 가정).
-- **입력** — 그리퍼 이미지 `` $`\mathcal{X}_{t}^{g}`$ ``: shape `(B, 3, Hpx, Wpx)`, RGB; 동일 정규화.
-- **입력** — 언어 지시 `` $`\mathcal{L}_{t}`$ ``: 토큰 시퀀스 `(B, L_text)`, int token id.
-- **입력** — ActionQuery `` $`\mathcal{AQ}_{t}`$ ``: 학습형 임베딩 `(B, N_aq, d)`, `N_aq=64`, `d=896` (hidden size).
-- **입력** — 고유감각 상태 `` $`\mathcal{P}_{t}`$ ``: shape `(B, d_proprio)`, float; 2-layer MLP `` $`\sigma_{0}`$ `` 로 proprio 임베딩 매핑 (정규화 통계 원문 미명시 — 데이터셋 평균/표준편차 가정).
-- **입력** — 초기 액션 `` $`{\bf A}^{0}_{t}`$ ``: shape `(B, H, d_action)`, **전부 0으로 초기화**; LN+MLP로 `` $`\widetilde{\bf A}^{0}_{t}`$ `` 임베딩.
-- **VLM 중간 산출 (Policy 조건)** — Raw 잠재 `` $`\mathcal{C}_{t}^{\mathcal{R}}`$ `` 와 ActionQuery 잠재 `` $`\mathcal{C}_{t}^{\mathcal{AQ}}`$ ``: 레이어 1–`` $`M`$ `` 전부에서 추출, 레이어별로 대응 Policy 레이어에 주입.
-- **출력** — 액션 청크 `` $`{\bf A}^{M-1}_{t}`$ ``: shape `(B, H, d_action)`, 연속값 (그리퍼 검증 시 `d_action=7` + gripper; 원문은 action chunk 8 dimensions 명시).
+- **입력** — 3인칭 이미지 $`\mathcal{X}_{t}^{v}`$: shape `(B, 3, Hpx, Wpx)`, RGB; VLM 비전 인코더(DINOv2 + SigLIP) 입력 정규화 (원문에 픽셀 통계 명시 없음 — 인코더 기본값 가정).
+- **입력** — 그리퍼 이미지 $`\mathcal{X}_{t}^{g}`$: shape `(B, 3, Hpx, Wpx)`, RGB; 동일 정규화.
+- **입력** — 언어 지시 $`\mathcal{L}_{t}`$: 토큰 시퀀스 `(B, L_text)`, int token id.
+- **입력** — ActionQuery $`\mathcal{AQ}_{t}`$: 학습형 임베딩 `(B, N_aq, d)`, `N_aq=64`, `d=896` (hidden size).
+- **입력** — 고유감각 상태 $`\mathcal{P}_{t}`$: shape `(B, d_proprio)`, float; 2-layer MLP $`\sigma_{0}`$ 로 proprio 임베딩 매핑 (정규화 통계 원문 미명시 — 데이터셋 평균/표준편차 가정).
+- **입력** — 초기 액션 $`{\bf A}^{0}_{t}`$: shape `(B, H, d_action)`, **전부 0으로 초기화**; LN+MLP로 $`\widetilde{\bf A}^{0}_{t}`$ 임베딩.
+- **VLM 중간 산출 (Policy 조건)** — Raw 잠재 $`\mathcal{C}_{t}^{\mathcal{R}}`$ 와 ActionQuery 잠재 $`\mathcal{C}_{t}^{\mathcal{AQ}}`$: 레이어 1–$`M`$ 전부에서 추출, 레이어별로 대응 Policy 레이어에 주입.
+- **출력** — 액션 청크 $`{\bf A}^{M-1}_{t}`$: shape `(B, H, d_action)`, 연속값 (그리퍼 검증 시 `d_action=7` + gripper; 원문은 action chunk 8 dimensions 명시).
 
 ---
 
@@ -57,17 +57,17 @@ def policy_forward(C_R, C_AQ, A0, proprio) -> Tensor:
 
 - **`vlm_forward`** — 백본은 동결(frozen) 또는 LoRA 학습 둘 다 지원. 출력은 **전 레이어** hidden 으로, last-layer 만 쓰면 frozen 시 붕괴(분석 §📊 Appendix H).
 - **`bridge_attention`** — `sigma1`, `sigma2` 는 MLP projection. 극경량화를 위해 세 어텐션 행렬의 projection layer를 공유(VLA-Adapter, 97MB); Pro 버전은 분리 + RoPE(207MB).
-- **`policy_forward`** — Policy 레이어 수 = VLM 레이어 수(`` $`M`$ ``). L1 회귀 헤드로 종료. DiT 기반 변형도 존재(Appendix B)하나 기본은 L1.
+- **`policy_forward`** — Policy 레이어 수 = VLM 레이어 수($`M`$). L1 회귀 헤드로 종료. DiT 기반 변형도 존재(Appendix B)하나 기본은 L1.
 
 ---
 
 ## ⛓️ 불변식·가정
 
-- (가정 1) — Policy 레이어 수는 VLM 레이어 수와 동일(`` $`M`$ ``)하며, Policy 레이어 `` $`\tau`$ `` 는 VLM 레이어 `` $`\tau`$ `` 의 조건을 받는다 (`` $`0\leq\tau\leq M-1`$ ``).
-- (가정 2) — Raw 주입 게이트 `` $`g`$ `` 는 0으로 초기화되고 `` $`\tanh(g)\in[-1,1]`$ `` 로 클램프된다 — 학습 초기 Raw 영향이 0에서 출발해 분포 안정성을 보장한다.
+- (가정 1) — Policy 레이어 수는 VLM 레이어 수와 동일($`M`$)하며, Policy 레이어 $`\tau`$ 는 VLM 레이어 $`\tau`$ 의 조건을 받는다 ($`0\leq\tau\leq M-1`$).
+- (가정 2) — Raw 주입 게이트 $`g`$ 는 0으로 초기화되고 $`\tanh(g)\in[-1,1]`$ 로 클램프된다 — 학습 초기 Raw 영향이 0에서 출발해 분포 안정성을 보장한다.
 - (가정 3) — ActionQuery 는 VLM 시퀀스에 삽입되어 attention 에 참여하는 진짜 학습형 토큰이어야 한다(마스크형 0-토큰이 아님). 그래야 백본 동결 시에도 from-scratch 학습이 가능하다.
-- (가정 4) — ActionQuery 주입 정도는 1(완전 주입), Raw 주입 정도만 학습형 `` $`\tanh(g)`$ `` — 절제 실험(Table 8)이 이 조합을 최적으로 지지한다.
-- (가정 5) — 초기 액션은 전부 0 텐서이며, 모델은 회귀로 한 번에 `` $`H`$ ``-스텝 청크를 산출한다(반복적 denoising 아님, L1 기본형 기준).
+- (가정 4) — ActionQuery 주입 정도는 1(완전 주입), Raw 주입 정도만 학습형 $`\tanh(g)`$ — 절제 실험(Table 8)이 이 조합을 최적으로 지지한다.
+- (가정 5) — 초기 액션은 전부 0 텐서이며, 모델은 회귀로 한 번에 $`H`$-스텝 청크를 산출한다(반복적 denoising 아님, L1 기본형 기준).
 
 ---
 
@@ -118,7 +118,7 @@ $$\widehat{\bf{A}}_{t}^{\tau}=[\text{CA}_{1}\left(\widetilde{\bf{A}}^{\tau}_{t},
 
 ## ✨ 변경 의도 (intent)
 
-prior art는 VL→A 브리징에서 단일 선택(예: π0 = 전 레이어 Raw + flow-matching, OpenVLA-OFT = last-layer ActionQuery)을 했지만, 어느 레이어·어느 타입이 본질적인지에 대한 체계 분석이 없었습니다. VLA-Adapter는 "중간층 Raw는 멀티모달 통합에, 심층 ActionQuery는 누적 정보에 유리하고, 전 레이어가 보편적으로 낫다"는 발견을 근거로, **두 타입을 전 레이어에서 동시에** Bridge Attention(2 cross-attn + 1 self-attn)으로 결합하되 Raw 주입만 학습형 게이트 `` $`\tanh(g)`$ `` 로 선별합니다. 그 결과 0.5B 백본 + 로봇 데이터 사전학습 없음으로 7B급 성능과 최고 추론 속도를 내고, 백본 동결 시에도 동작합니다(last-layer만 쓰는 OFT는 동결 시 붕괴).
+prior art는 VL→A 브리징에서 단일 선택(예: π0 = 전 레이어 Raw + flow-matching, OpenVLA-OFT = last-layer ActionQuery)을 했지만, 어느 레이어·어느 타입이 본질적인지에 대한 체계 분석이 없었습니다. VLA-Adapter는 "중간층 Raw는 멀티모달 통합에, 심층 ActionQuery는 누적 정보에 유리하고, 전 레이어가 보편적으로 낫다"는 발견을 근거로, **두 타입을 전 레이어에서 동시에** Bridge Attention(2 cross-attn + 1 self-attn)으로 결합하되 Raw 주입만 학습형 게이트 $`\tanh(g)`$ 로 선별합니다. 그 결과 0.5B 백본 + 로봇 데이터 사전학습 없음으로 7B급 성능과 최고 추론 속도를 내고, 백본 동결 시에도 동작합니다(last-layer만 쓰는 OFT는 동결 시 붕괴).
 
 ---
 
