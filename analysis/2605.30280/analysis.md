@@ -333,7 +333,7 @@ PROBE 관점의 추가 갭:
 - **D20 — VL co-training 손실 가중치.** D20 이 발화(D19 가 freeze 를 벗어남)하면, $`\lambda_{vl} : \lambda_{act} = 0.1 : 1.0`$(SFT 기준)을 망각 방지 출발값으로 채택.
 - **D2 — 행동 정규화 레시피.** 데이터셋별 1·99 분위수 → $`[-1,1]`$ 클리핑(Eq.5)을 다중 임바디먼트 데이터 정규화 표준으로 채택 후보.
 - **D3 — 손 출력 표현 후보.** eigengrasp(상위 10 PCA 계수) + 손목 6D = 손당 32차원. 단, "per-joint redundancy 폐기" 가 Sharpa 22-DOF 인핸드 정밀 회전에 충분한지는 별도 검증 필요(아래 실패 모드).
-- **D7 — 백본 통합 제3 경로 인지.** Qwen-VLA 는 π slice(Reading B)도 repurpose(Reading A)도 아닌, "사전학습 VLM + fresh DiT 부착 후 둘 다 학습" 경로입니다. §14.C 의 A/B 외 옵션으로 기록 가치.
+- **D7 — 백본 통합 제3 경로 인지.** Qwen-VLA 는 π slice(Reading B)도 repurpose(Reading A)도 아닌, "사전학습 VLM + fresh DiT 부착 후 둘 다 학습" 경로입니다. §13.C 의 A/B 외 옵션으로 기록 가치.
 - **D17 — 플로우 매칭 RL 기법.** System0 가 플로우 매칭이 될 경우, ODE→SDE 로그확률(§4.2) + 백본 stop-gradient value head 가 PPO 적용 레시피.
 
 ---

@@ -437,26 +437,6 @@
     .callout-warn { background: #fffbeb; border: 1px solid #fcd34d; }
     .callout-info { background: var(--orange-soft); border: 1px solid #f3c8b1; }
 
-    /* ── KPI block ────────────────────────────────────────────────── */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-    @media (max-width: 640px) { .kpi-grid { grid-template-columns: 1fr; } }
-    .kpi {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
-      text-align: center;
-    }
-    .kpi-num {
-      font-size: 1.3rem; font-weight: 800; color: var(--orange-deep);
-      margin-bottom: .25rem;
-    }
-    .kpi-label { font-size: .82rem; color: var(--text-muted); }
-
     /* ── Footer ───────────────────────────────────────────────────── */
     footer {
       background: var(--code-bg);
@@ -955,48 +935,6 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
     <p>
       Citation-graph만 쓰면 본인 관심사 주변에서만 맴돕니다. <code>context/MASTER.md</code>의 Cross-pollination 로테이션 섹션이 이를 막습니다. 월 1회 인접 분야(접촉 최적화, FEM 시뮬레이션, 촉각 신경과학 등)에서 강제로 1편을 픽업하는 것이 의외로 가장 가치 있는 발견의 소스입니다.
     </p>
-
-    <h3>지속 가능성의 핵심 — 월간 리뷰 KPI</h3>
-    <p>자동화됐다고 방치하면 에이전트가 잘 작동하는지 알 수 없습니다. <code>context/MASTER.md</code>의 Feedback Loop 섹션을 월 1회 직접 채웁니다. 이 세 숫자의 <strong>비율</strong>이 PROBE의 실효성 지표입니다.</p>
-
-    <div class="kpi-grid">
-      <div class="kpi">
-        <div class="kpi-num">Papers surfaced</div>
-        <div class="kpi-label">이번 달 PROBE가 올린 총 논문 수</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-num">Actually read</div>
-        <div class="kpi-label">실제로 정독한 것</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-num">Influenced a decision</div>
-        <div class="kpi-label">실험 설계 / Decision Log 수정에 반영된 것</div>
-      </div>
-    </div>
-
-    <h3>잘 작동하고 있다는 신호</h3>
-    <div class="card-grid">
-      <div class="card">
-        <div class="card-icon">📅</div>
-        <h4>주 1편 이상</h4>
-        <p>매주 3 ~ 5편 중 최소 1편이 현재 실험 설계에 구체적 변화를 유발한다.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🚫</div>
-        <h4>Anti-topic 적중 ≥ 10편/주</h4>
-        <p>그게 정상 비율. 0이면 필터가 안 도는 것.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🤷</div>
-        <h4>"이번 주 score ≥ 2 없음"</h4>
-        <p>패딩 없이 솔직하게 보고하는 것이 정상. 그게 안 되면 프롬프트 드리프트.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">📌</div>
-        <h4>Decision Log 라인</h4>
-        <p>매 Checkpoint(CP1–CP5)마다 스카우트로 인해 움직인 Decision Log 라인을 한 줄이라도 짚을 수 있다.</p>
-      </div>
-    </div>
   </section>
 
   <!-- ── Agent stack ─────────────────────────────────────────────── -->

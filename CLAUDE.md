@@ -15,18 +15,20 @@ for **commit hygiene and document style** so the repo stays consistent.
 | Path | Owner | Role |
 |---|---|---|
 | `context/MASTER.md` | human | Single source of truth — Identity, Pillars, Decision Log, Tracked Literature (all P1–P5) |
-| `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§9 skeleton) — the pipeline reads one, never the full doc |
+| `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§8 skeleton) — the pipeline reads one, never the full doc. No `P5.md`: the evaluation pillar lives only in `MASTER.md` |
 | `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
-| `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
-| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Each contains: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`) |
-| `analysis/_catalogs/` | agent (hand-curated) | Cross-paper lineage catalogs, separated from per-paper `<arxiv-id>/` deep-dives. `README.md` defines the common column standard (License + commercial marker / Access icon / `hf:`/`gh:`/`web` link prefix / 🤖-👤-🔀 데이터 유형 / ✅-⬜ Human verified — single "did a human check this" bit, default ⬜); `vlm.md` enumerates open-weight VLM candidates as a flat table, `vla.md` and `dataset.md` both use the *scan table + per-row `<details>` cards* hybrid (vla 8 H4: Architecture / Training data / Action representation / Inference / Eval / Open-weight / Human verified / Sources · dataset 8 H4: Observations / Actions / Embodiment / Annotation / Scale / Lineage / Human verified / Sources). The folder also hosts pillar-level methodology references (e.g. `vlm-prior-preservation.md` — P4 forgetting / carve-out orthogonal planes + θ_VLM path-intervention A~D + 4-stage recipe + forward-KL measurement protocol); methodology docs are not facts-tables but design references and cross-link to the catalog rows. Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
+| `synthesis/` | agent | Monthly per-pillar narrative briefs — intended output is one `P#_BRIEF.md` per pillar (none generated yet) |
+| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
+| `analysis/_catalogs/` | agent (hand-curated) | Cross-paper lineage catalogs, separated from per-paper `<arxiv-id>/` deep-dives. `README.md` defines the common column standard (License + commercial marker / Access icon / `hf:`/`gh:`/`web` link prefix / 🤖-👤-🔀 데이터 유형 / ✅-⬜ Human verified — single "did a human check this" bit, default ⬜); `vlm.md` enumerates open-weight VLM candidates as a flat table, `vla.md` and `dataset.md` both use the *scan table + per-row `<details>` cards* hybrid (vla 8 H4: Architecture / Training data / Action representation / Inference / Eval / Open-weight / Human verified / Sources · dataset 8 H4: Observations / Actions / Embodiment / Annotation / Scale / Lineage 적층 / Human verified / Sources). The folder also hosts pillar-level methodology references (e.g. `vlm-prior-preservation.md` — P4 forgetting / carve-out orthogonal planes + θ_VLM path-intervention A~D + 4-stage recipe + forward-KL measurement protocol); methodology docs are not facts-tables but design references and cross-link to the catalog rows. Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
-| `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
+| `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) + `.gitignore` are committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
+| `.claude/agents/**`, `.claude/skills/**` | external | Korean humanization pipeline vendored from `epoko77-ai/im-not-ai` — the 4 review agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) + the `humanize-korean` skill every Korean output passes before commit |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive table; invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
+| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 | `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/implement-design` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
@@ -100,14 +102,15 @@ Hard rules:
    `switch`, `migrate`, `restructure`, `clarify`, `re-align`, `unify`,
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
-   `deps`. Don't invent new types. (The bare `scout:` / `synthesis:` prefixes
-   are *generated routine commits*, not human commits — do not imitate them
-   when authoring code/doc changes. Their canonical formats are:
-   `scout: P{N} report YYYY-MM-DD` and `synthesis: P{N} brief YYYY-MM`.)
+   `deps`. Don't invent new types. (The bare `scout:` / `synthesis:` /
+   `analysis:` prefixes are *generated routine commits*, not human commits — do
+   not imitate them when authoring code/doc changes. Their canonical formats
+   are: `scout: P{N} report YYYY-MM-DD`, `synthesis: P{N} brief YYYY-MM`, and
+   `analysis: add <arxiv-id> deep-dive + design`.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
-   `scout`/`scouting`, `synthesis`, `analysis`, `context`, `prompts`,
-   `config`, `docs`, `brand`, `CLAUDE.md`. Omit the scope only for repo-wide
-   changes.
+   `scout`/`scouting`, `synthesis`, `analysis`, `catalogs`, `context`,
+   `prompts`, `config`, `style`, `docs`, `brand`, `CLAUDE.md`. Omit the scope
+   only for repo-wide changes.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
    does, not why (the why goes in the body).
@@ -119,11 +122,11 @@ Hard rules:
 Good (from this repo's history):
 
 ```
-feat(analysis): add on-demand single-paper deep-dive mode
-refactor(scout): per-pillar dated Korean reports
-docs: repo-wide consistency overhaul + cited-code reference legend
-chore(config): allow Edit/Write under .claude/ without prompting
-feat: history-free research context + per-pillar P2–P4 extracts
+feat(analysis): add math-formatting checker + PR auto-fix CI
+refactor(scouting): re-shelve reports per pillar (P#/YYYY-MM-DD.md)
+docs(style): codify arXiv figure URL + KaTeX math substitution rules
+feat(catalogs): add P4 prior-preservation reference + rename lineage corpus
+refactor: streamline guide docs — renames, compression, cross-updates
 ```
 
 Bad (don't do this):
@@ -208,6 +211,9 @@ apply to:
   `analysis/<id>/analysis.md`.
   These follow `docs/STYLE.md`'s own emoji system (emoji on `##`/`###`
   headers is *required* there — the opposite of structural docs).
+- **Math / formula rendering** — the GitHub-KaTeX `$`-wrapping and substitution
+  rules are an *output* convention, not a contributor-doc one, so they live in
+  `docs/STYLE.md` §5-6 (enforced by `scripts/check-analysis-math.py`), not here.
 
 Path correctness is **not** exempt: when a path moves, references inside
 prompts and context files are still updated even though their formatting is
