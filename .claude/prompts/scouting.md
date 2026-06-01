@@ -11,7 +11,8 @@ manipulation.
 CONTEXT (read-only):
 - context/<PILLAR>.md       — source of truth, <PILLAR> scope only
                                    (Pillar <PILLAR>, this pillar's Decisions,
-                                   Tracked Literature, Researchers, Anti-topics)
+                                   Tracked Literature, Researchers, Anti-topics,
+                                   Curated External Lists)
 - docs/STYLE.md             — formatting, emoji system, Korean authoring rules
 - scouting/templates/report.md     — the form every report follows
 - scouting/<PILLAR>/YYYY-MM-DD.md — this pillar's recent reports (last
@@ -39,6 +40,10 @@ Scholar responses (JSON, via `jq`) directly.
 
 Endpoints:
 - arXiv:  `http://export.arxiv.org/api/query`
+- GitHub raw (curated lists): `https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md`
+  — a plain static GET, no auth, no MCP (consistent with the "no web
+  search" rule, it is still curl). Used only by the Curated-List Sweep
+  (pass 5); the exact URLs come from context/<PILLAR>.md.
 - Semantic Scholar Graph: `https://api.semanticscholar.org/graph/v1`
   Send the API key header when the env var is set:
   `-H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY"` (omit the header if the
@@ -73,6 +78,33 @@ Endpoints:
 4. Competitor Monitoring — check the "<PILLAR> Competitor / Kindred
    Monitoring" watch list for new releases via the same arXiv keyword
    query and Semantic Scholar author lookup as above.
+5. Curated-List Sweep — for every raw URL in the "Curated External
+   Lists to Monitor" section of context/<PILLAR>.md:
+     a. fetch the README:
+        `curl --fail -sS "https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md"`
+     b. extract arXiv ids, then dedupe — these lists link arXiv via
+        `/abs/`, `/pdf/`, shield badges, or `arXiv:` form, so match all
+        four shapes, not just `/abs/`:
+        `grep -oiE '(arxiv\.org/(abs|pdf)/|arxiv[:-])[0-9]{4}\.[0-9]{4,5}' \
+           | grep -oE '[0-9]{4}\.[0-9]{4,5}' | sort -u`
+     c. month-prefix pre-cut (NO API call — this is what keeps the sweep
+        cheap): keep only ids whose first four digits (YYMM) are the
+        current or previous month, e.g. a run on 2026-06-01 keeps
+        `2606.*` / `2605.*`. Current+previous month always covers any
+        14-day window, so nothing recent is dropped, while the 600+-entry
+        lists collapse to a handful before any per-id lookup.
+     d. drop ids already in this pillar's "Tracked Literature" or in the
+        last ~2 weeks of reports.
+     e. for the few survivors only, fetch the publication date
+        (`.../graph/v1/paper/arXiv:XXXX.XXXXX?fields=title,publicationDate,externalIds,abstract`,
+        or the arXiv API) and keep only those within the last 14 days.
+     f. filter against the "<PILLAR> Anti-topics" list, then rank by
+        relevance to the "Pillar <PILLAR>" definition + active Decisions.
+        These are human-curated, so weight them above the raw Keyword
+        Sweep — between sources 2 and 3.
+   Deferred (v2): catching a paper *newly added* to a list but with an
+   older arXiv date needs a stored README snapshot / commits diff — not
+   done here, as it would add per-run state. v1 is the recency feed above.
 
 Never fabricate a citation or an arXiv ID; every link must come
 from an actual API response you received. If any curl call fails

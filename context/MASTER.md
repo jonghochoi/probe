@@ -588,6 +588,37 @@ Open-items separates near-term implementation blockers (§13.B/§13.C) from back
 
 ---
 
+## 15. Curated External Lists [AGENT-INPUT]
+
+Human-curated GitHub "awesome" lists of papers worth watching. These are a
+*topic whitelist* — a human has already judged each entry on-topic — fed into
+the scout as a fifth retrieval pass alongside the arXiv Keyword Sweep and the
+citation graph. All four lists are checked by every pillar (all-to-all); the
+per-pillar relevance score + that pillar's Anti-topics decide what survives, so
+off-pillar entries (VLN, pure world-model, etc.) fall out naturally. Mirrored
+verbatim into each `context/P#.md` §9 — the scout reads only its pillar file.
+
+| List | Scope | raw README (HEAD resolves the default branch) |
+|---|---|---|
+| awesome-embodied-vla-va-vln | VLA / VA / VLN (broad embodied) | `https://raw.githubusercontent.com/jonyzhang2023/awesome-embodied-vla-va-vln/HEAD/README.md` |
+| Awesome-RL-VLA | RL for VLA (offline / online / test-time) | `https://raw.githubusercontent.com/Denghaoyuan123/Awesome-RL-VLA/HEAD/README.md` |
+| awesome-vla-wam | VLA + World Action Models | `https://raw.githubusercontent.com/DravenALG/awesome-vla-wam/HEAD/README.md` |
+| Awesome-WAM | World Action Models | `https://raw.githubusercontent.com/OpenMOSS/Awesome-WAM/HEAD/README.md` |
+
+**Recency model (v1)** — stateless weekly feed: keep only entries whose arXiv-id
+month-prefix (`YYMM`) is the current or previous month, then confirm the precise
+last-14-day window via the arXiv / Semantic Scholar `publicationDate`. The
+month-prefix pre-cut needs no API call and collapses the 600+-entry lists to a
+handful before any per-id lookup, so all-to-all stays cheap. These lists link
+arXiv via `/abs/`, `/pdf/`, shield badges, or `arXiv:` form — the sweep matches
+all four (see the scout prompt's pass 5 for the extraction regex).
+
+**Deferred (v2)** — catching a paper *newly added* to a list whose arXiv date is
+older than the 14-day window needs a stored README snapshot / commits diff; not
+built, since it would add per-run state to a stateless routine.
+
+---
+
 ## Appendix C: Open meta-questions
 
 - **Domain epistemics**: detailed-design judgment is limited because the field is in unknown territory. Decision Log (defaults + triggers) is the principled response — each v1 default is a *bet* whose evidence accrues as the corresponding trigger condition is observed.
