@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement-design` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -125,7 +125,7 @@ def tail_execute(theta, omega_j):
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — base 후보: `pi0` / `pi05` family에 가장 가깝습니다. TAIL의 "동결 backbone + 소수 학습 어댑터" 패턴은 `pi0`의 frozen-VLM + action-expert 구조에 LoRA(attention $`W_Q`$/$`W_V`$, rank 8) 어댑터를 추가하는 형태로 매핑될 여지가 있습니다. 단, `lerobot`/openpi의 PEFT 진입점(LoRA 삽입 훅) 존재 여부는 `/implement` 단계에서 확인 필요. 평행 그리퍼 IL 골격(CLIP+GPT-2)은 `act`/`diffusion`과도 형식상 유사하나, 보존·연속학습 의도는 `pi0` 계열이 더 부합.
+- **`lerobot`** — base 후보: `pi0` / `pi05` family에 가장 가깝습니다. TAIL의 "동결 backbone + 소수 학습 어댑터" 패턴은 `pi0`의 frozen-VLM + action-expert 구조에 LoRA(attention $`W_Q`$/$`W_V`$, rank 8) 어댑터를 추가하는 형태로 매핑될 여지가 있습니다. 단, `lerobot`/openpi의 PEFT 진입점(LoRA 삽입 훅) 존재 여부는 `/implement-design` 단계에서 확인 필요. 평행 그리퍼 IL 골격(CLIP+GPT-2)은 `act`/`diffusion`과도 형식상 유사하나, 보존·연속학습 의도는 `pi0` 계열이 더 부합.
 
 ---
 

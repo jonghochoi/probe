@@ -1,45 +1,26 @@
 # scouting/
 
-월간 종합(`synthesis/`) · 온디맨드 심층분석(`analysis/`)과 함께 PROBE
-산출물의 한 축인 **주간 스카우팅 리포트** 경로입니다. 이미 핀된 논문을
-재진술하거나 한 편을 깊게 파는 곳이 아니라, **새 논문을 바깥에서 찾아오는**
-곳이며, 매주 월·목 2회, pillar별로 실행되어 그 주의 arXiv·Citation Graph·
-Author Watch를 훑고 의사결정 등급 후보만 추립니다.
+**주간 스카우팅 리포트** — 매주 월·목, pillar별로 새 논문을 바깥에서 찾아
+의사결정 등급 후보만 추리는 산출물 경로. (핀 논문 재진술은 `synthesis/`,
+한 편 심층은 `analysis/`.)
 
 | 파일 | 생성 주체 | 성격 |
 |---|---|---|
-| `P#/YYYY-MM-DD.md` | `probe-weekly-scout` Routine (주 2회, 월·목) | `context/P#.md` + 같은 `P#/` 폴더 안 최근 ~2주 리포트만 읽고 그 실행분 1개 생성 |
-| `_TEMPLATE.md` | 사람 소유 | 리포트 폼(에이전트는 이 골격을 채움) |
+| `P#/YYYY-MM-DD.md` | `probe-weekly-scout` Routine (주 2회) | `context/P#.md` + 같은 `P#/` 폴더의 최근 ~2주 리포트만 읽고 실행분 1개 생성 |
+| `templates/report.md` | 사람 소유 | 리포트 폼 (에이전트가 채움) |
 
-폴더는 필라별로 쪼개져 있습니다 (`P1/`, `P2/`, `P3/`, `P4/`).
-같은 실행일에 4 필라가 각각 한 번씩 돌아 하루 4 파일이 생기지만,
-파일은 모두 다른 폴더로 들어가므로 한 필라의 시간순 흐름은
-`ls scouting/P#/` 한 줄로 따라갈 수 있습니다. 중복 제거 조회 역시
-같은 폴더 안에서만 일어납니다.
+필라별 폴더 (`P1/`~`P4/`)로 분리 — 한 실행은 한 pillar 만 처리.
 
 ## 호출
 
-`probe-weekly-scout` 는 [claude.ai/code/routines](https://claude.ai/code/routines)
-의 RemoteTrigger 루틴입니다. 프롬프트는 `.claude/prompts/scouting.md`
-한 개(pillar 4종이 공유하는 단일 템플릿 — 붙여넣기 전 `<PILLAR>` 토큰을
-`P1`/`P2`/`P3`/`P4` 중 하나로 1회 find/replace), 검색은 MCP 가 아니라
-`curl` REST (arXiv + Semantic Scholar) 입니다. 한 실행은 한 pillar 만 처리하며 결과 파일은 `P#/YYYY-MM-DD.md`
-하나입니다. 자세한 설정은 루트 `README.md` → Stage 3 참조.
-
-## 다른 산출물·컨텍스트와의 관계
-
-- 입력: `context/P#.md` (pillar 추출본) + 같은 pillar 의 최근 ~2주 `scouting/`
-  리포트.
-- 출력 흐름: 리포트는 그 자체로 결정 기록입니다. 핀/Decision 변경
-  제안은 리포트의 💡 컨텍스트 제안 섹션에 남기고, 다음 `synthesis/`
-  월간 실행이 핀 변경을 반영합니다.
+- `probe-weekly-scout` = [claude.ai/code/routines](https://claude.ai/code/routines) RemoteTrigger 루틴.
+- 프롬프트 = `.claude/prompts/scouting.md` 한 개 (pillar 4종 공유; 붙여넣기 전 `<PILLAR>` 토큰을 `P1`~`P4` 중 하나로 1회 치환).
+- 입력 = `context/P#.md` + 같은 pillar 최근 ~2주 리포트. 검색은 `curl` REST (arXiv + Semantic Scholar), MCP 아님.
+- 자세한 설정은 루트 `README.md` → Stage 3.
 
 ## 절대 규칙
 
-- `context/` 는 **절대 수정하지 않습니다**. 핀/Decision 변경 제안은
-  리포트의 💡 컨텍스트 제안 섹션에만 적습니다.
-- 한글 단일 문서 (영문 1차 파일 없음). 경로 verbatim 토큰
-  `scouting/P#/YYYY-MM-DD.md` 로 중복 제거·재조회.
-- append 가 아니라 실행마다 **새 파일 1개** — 덮어쓰지 않습니다.
-- 형식·이모지·용어·링크 규칙은 `docs/STYLE.md` 를 정확히
-  따릅니다. 폼은 `scouting/_TEMPLATE.md`.
+- `context/` 는 **절대 수정 금지** — 핀/Decision 변경 제안은 리포트의 💡 컨텍스트 제안 섹션에만.
+- 한글 단일 문서 (영문 1차 파일 없음). 경로 verbatim `scouting/P#/YYYY-MM-DD.md` 로 중복 제거·재조회.
+- append 아니라 실행마다 **새 파일 1개** — 덮어쓰지 않음.
+- 형식·이모지·용어·링크는 `docs/STYLE.md`, 폼은 `templates/report.md`.

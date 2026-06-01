@@ -123,7 +123,7 @@ $$\mathcal{L}_{\mathrm{nce}}=-\log\frac{\exp(\mathrm{sim}(u_{t},u^{+})/\tau)}{\e
 
 $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce}}\mathcal{L}_{\mathrm{nce}}$$
 
-> "We use the contrastive term as a weak semantic regularizer rather than as a replacement for supervised Privileged $Z$ regression." (§3.3)
+> "We use the contrastive term as a weak semantic regularizer rather than as a replacement for supervised Privileged $`Z`$ regression." (§3.3)
 (한글 해설 — InfoNCE 의 역할 한정을 못 박는 문장. policy 는 어디까지나 supervised 회귀 출력 $`\hat{z}_{t}`$ 만 받고 contrastive 항은 표현을 정돈하는 정규화로만 작동합니다.)
 
 ### 학습 셋업
@@ -164,10 +164,10 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 | RMA-Transformer | 0.8688 | 0.9313 | 0.9151 | 0.1312 |
 | CoRMA (Ours) | 0.8792 | 0.9369 | 0.9215 | 0.1208 |
 
-> "The causal Transformer is the dominant architectural factor: replacing it with an RMA-style Conv1D adapter reduces mean validation $R^{2}$ from 0.8792 to 0.4336 and increases mean MSE from 0.1208 to 0.5664." (§4.4)
+> "The causal Transformer is the dominant architectural factor: replacing it with an RMA-style Conv1D adapter reduces mean validation $`R^{2}`$ from 0.8792 to 0.4336 and increases mean MSE from 0.1208 to 0.5664." (§4.4)
 (한글 해설 — 기여 분해의 핵심. 성능 향상의 대부분은 causal Transformer 도입이 가져왔고, InfoNCE 는 그 위에 작은 정규화 이득을 더하는 구조라는 명시입니다.)
 
-> "The force-regime contrastive objective gives a smaller but consistent gain over Transformer-MSE, improving mean $R^{2}$ from 0.8688 to 0.8792 and reducing mean MSE from 0.1312 to 0.1208." (§4.4)
+> "The force-regime contrastive objective gives a smaller but consistent gain over Transformer-MSE, improving mean $`R^{2}`$ from 0.8688 to 0.8792 and reducing mean MSE from 0.1312 to 0.1208." (§4.4)
 (한글 해설 — InfoNCE 자체의 한계 효과 (marginal gain) 수치. 큰 폭의 개선이 아니라는 점을 저자가 직접 인정합니다.)
 
 ### Hyperparameter ablation 요점 (Appendix C, Table 4)
@@ -271,4 +271,4 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 
 ---
 
-> 💡 base 매핑은 `/implement analysis/2605.22082/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.22082/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

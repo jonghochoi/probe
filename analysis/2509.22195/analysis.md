@@ -116,7 +116,7 @@ $$p_{\theta}(\bar{a}_{i},m_{i},l_{i}|\bar{o}_{i},L)=\underbrace{p_{\theta}(l_{i}
 
 ## 📊 실험 설정과 결과
 
-평가는 세 질문(Q1 멀티모달 이해 보존, Q2 in-distribution 조작 성능, Q3 추론 일반화)에 답하도록 설계되었습니다. 로봇 평가는 toy kitchen 환경의 6-DoF WidowX 250S 팔에서 과제당 30 trial(다국어 Pick Up -T는 3개 언어 × 30 = 90 trial)로 수행했습니다. 비교군은 토큰화 기반 SOTA VLA인 OpenVLA, 그 reasoning 변형 ECoT이며, co-trained VLA로 MolmoAct·$`\pi_{0.5}`$, action 표현 ablation으로 VLM2VLA-AT를 둡니다.
+평가는 세 질문(Q1 멀티모달 이해 보존, Q2 in-distribution 조작 성능, Q3 추론 일반화)에 답하도록 설계되었습니다. 로봇 평가는 toy kitchen 환경의 6-DoF WidowX 250S 팔에서 과제당 30 trial(다국어 Pick Up -T는 3개 언어 × 30 = 90 trial)로 수행했습니다. 비교군은 토큰화 기반 SOTA VLA인 OpenVLA, 그 reasoning 변형 ECoT이며, co-trained VLA로 MolmoAct· $`\pi_{0.5}`$, action 표현 ablation으로 VLM2VLA-AT를 둡니다.
 
 ![Figure 2 — 기존 VLA의 과적합 vs VLM2VLA의 세계 지식 보존](https://arxiv.org/html/2509.22195/x2.png)
 
@@ -241,4 +241,4 @@ ID(Pick Up, Pick and Place)에서는 더 큰 Open-X-Embodiment로 학습한 Open
 - **방법론 참조 후보** — 본 논문의 "VQA 보존율(base 대비 %)" 측정 프로토콜은 `analysis/_catalogs/vlm-prior-preservation.md`의 forward-KL 측정 프로토콜과 상호 보완적입니다. 동 문서에 VLM2VLA의 행동-언어 정렬을 "데이터 레벨 분포 정렬" 사례로 cross-link하는 것을 제안드립니다(사람이 판단).
 - **나머지** — D1–D18, D24–D26 등 다른 Decision과의 연결은 없습니다(연결 날조 금지).
 
-> 💡 base 매핑은 `/implement analysis/2509.22195/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2509.22195/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

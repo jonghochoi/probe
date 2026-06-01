@@ -1,194 +1,41 @@
 # analysis/
 
-주간 스카우팅(`scouting/`) · 월간 종합(`synthesis/`)과 **분리된** 산출물
-경로입니다. 새 논문을 찾는 곳도, 핀 논문 묶음을 재진술하는 곳도
-아닙니다. 사람이 이미 신경 쓰는 **특정 논문 한 편** (보통
-`context/MASTER.md` §8 Tracked Literature 의 핀/기준 논문) 을 깊게 읽고,
-그 한 편에 대한 한글 심층 분석과 **vendor-agnostic Layer 1 Design**,
-그리고 그 Design 을 한 foundry 의 좌표계로 매핑한 Layer 2 구현·검증
-산출물을 남기는 곳입니다.
+주간 스카우팅(`scouting/`)·월간 종합(`synthesis/`)과 **분리된** 산출물
+경로. 사람이 고른 **특정 논문 한 편**(보통 `context/MASTER.md` §8 Tracked
+Literature)을 깊게 읽어 한글 심층 분석 + vendor-agnostic Layer 1 Design +
+foundry 매핑 구현·검증을 남긴다.
 
-논문마다 `<arxiv-id>/` 폴더 하나를 두고, 그 안에 아래 파일들을 배치합니다.
+논문마다 `<arxiv-id>/` 폴더 하나:
 
 | 파일 | 생성 주체 | 성격 |
 |---|---|---|
-| `<arxiv-id>/analysis.md` | `/analyze-paper` 슬래시 커맨드 | arXiv id/URL 또는 PDF URL 한 편을 전문 우선으로 분석한 단일 한글 문서 |
-| `<arxiv-id>/design.md` | `/analyze-paper` 슬래시 커맨드 | 위 분석에서 추출한 **Layer 1 Design** — 데이터 계약·모듈 인터페이스·불변식·하이퍼·평가 메트릭. **base 좌표 없음** (vendor-agnostic) |
-| `<arxiv-id>/impl/<foundry>/impl.md` | `/implement` 슬래시 커맨드 | 위 Design 을 한 foundry (기본 `lerobot`) 의 좌표계로 매핑한 한글 구현 가이드 |
-| `<arxiv-id>/impl/<foundry>/impl.patch` | `/implement` 슬래시 커맨드 | 같은 foundry 에 적용 가능한 unified diff (`git apply --check` 검증) |
-| `<arxiv-id>/impl/<foundry>/test_*.py` | `/implement` 슬래시 커맨드 | subclass-seam 매핑의 실행 가능한 smoke test — `impl.patch` 의 runnable counterpart. `/validate §🧬` 가 설치된 foundry 에서 실행 |
-| `<arxiv-id>/impl/<foundry>/UNMAPPABLE.md` | `/implement` 슬래시 커맨드 | Design 이 이 foundry 의 좌표계로 매핑되지 않을 때 한 줄 사유만 남기는 파일 (impl.md/patch 대신) |
-| `<arxiv-id>/validation/<foundry>.md` | `/validate` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 대조한 한글 검증 보고서 (정적 4-체크 + §🧬 실행 검증) |
-| `<arxiv-id>/validation/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 validation 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
+| `<id>/analysis.md` | `/analyze-paper` | 논문 한 편의 전문 우선 한글 심층 분석 |
+| `<id>/design.md` | `/analyze-paper` | 위 분석에서 추출한 **Layer 1 Design** (vendor-agnostic) |
+| `<id>/impl/<foundry>/impl.{md,patch}` | `/implement-design` | Design 을 한 foundry 좌표계로 매핑한 구현 가이드 + unified diff |
+| `<id>/impl/<foundry>/test_*.py` | `/implement-design` | subclass-seam smoke test (`/validate-impl §🧬` 가 실행) |
+| `<id>/impl/<foundry>/UNMAPPABLE.md` | `/implement-design` | 매핑 불가 시 한 줄 사유만 (impl 대신) |
+| `<id>/validation/<foundry>.md` | `/validate-impl` | impl 을 Design+분석+foundry 코드와 대조한 검증 보고서 |
+| `<id>/validation/<foundry>.round_<N>.md` | `/reproduce-paper` | 수렴 루프 라운드별 validation 사본 (N 은 0-indexed) |
 
-전체 deep-dive 목록은 [`INDEX.md`](INDEX.md) — 머지 후 `main` 에서
-`.github/workflows/refresh-analysis-index.yml` 워크플로우가
-`scripts/refresh-analysis-index.py` 를 돌려 갱신하는 산출물입니다
-(`/analyze-paper` · `/implement` · `/validate` 는 PR 에서 직접
-스테이지하지 않습니다 — 병렬 PR 의 INDEX 충돌 회피). 컬럼 규약은
-`docs/STYLE.md` §5-7, 전체 정책은 `CLAUDE.md`
-"Automatically-maintained indexes".
-
-## `_catalogs/` — cross-paper lineage 카탈로그
-
-`<arxiv-id>/` per-paper 폴더와 *분리된* 자리. 한 논문 하나가 아니라
-**여러 논문/모델/데이터셋을 가로지르는 격자** 산출물이 들어갑니다.
-
-| 파일 | 무엇 | 누구를 위한 cross-reference |
-|---|---|---|
-| [`_catalogs/README.md`](_catalogs/README.md) | 운영 가이드 — 공통 컬럼 표준 (License / Access / 데이터 유형), cross-reference 규약, 신규 entity 의사결정 트리, 단발/분기 업데이트 절차 | 카탈로그 자체의 *사용설명서* |
-| [`_catalogs/vlm.md`](_catalogs/vlm.md) | open-weight VLM 후보 16개 (PaliGemma · Qwen-VL · InternVL · Eagle-2 · Molmo · LLaVA · SmolVLM · DeepSeek-VL2 등) — 컬럼: 파라미터 / License / Vision encoder / LLM backbone / Instruction-tuning / **Source-check** / Access | D19b "VLM backbone lineage choice" 의 후보 풀 |
-| [`_catalogs/vla.md`](_catalogs/vla.md) | 랜드마크 VLA — 상단 **scan 표** (7컬럼) + 하단 **per-VLA `<details>` 카드** (Architecture / Training data / Action representation / Inference / Eval / Open-weight / Source check / Sources H4) 하이브리드. 19행 (π0 · π0.5 · π0-FAST · RT-2 · OpenVLA · Octo · GR00T N1/N1.5 · MolmoAct/Act2/Bot · VLM2VLA · VLA-Adapter · PriorVLA · TwinBrainVLA · Being-H0/H0.5 · Xiaomi-Robotics-0 · Genesis AI). 모든 셀에 source-check 마커 (🟢/🟡/🔴/❓) | D19b / D22 의 의사결정 근거 |
-| [`_catalogs/lineage_corpus.md`](_catalogs/lineage_corpus.md) | VLA further-pretrain corpus (멀티-임베디먼트) — 상단 **scan 표** (7컬럼) + 하단 **per-dataset `<details>` 카드** (Observations / Actions / Embodiment / Annotation / Scale / Lineage 적층 / Source check / Sources H4) 하이브리드. 25행 (robot action 15 + human video 9 + mixed 1: HOI4D · ARCTIC · OakInk · AssemblyHands · Assembly101 · Ego4D · Ego-Exo4D · Epic Kitchens · EgoExoLearn · HoloAssist + MolmoAct2-BimanualYAM · -SO100/101 · MolmoBot-Data 등). 모든 셀에 source-check 마커 (🟢/🟡/🔴/❓) | D22 — **Sharpa/xhand 22-DOF 타깃 기준 hand-DOF 우선도** 표기 |
-| [`_catalogs/vlm-prior-preservation.md`](_catalogs/vlm-prior-preservation.md) | **방법론 트랙** (카탈로그 폴더 안 첫 입주) — P4 VLA 사전학습 보존: forgetting × carve-out 직교 평면, θ_VLM 경로 개입 네 갈래 (A 격리 / B 궤적 구속 / C 분포 재현 / D 원인 제거), staged training recipe (Stage 1~4), 측정 프로토콜 (forward KL on 고정 probe + 보조 벤치 정확도) | P4 D19~D23 (보존 전략 + 측정 + 사다리). 말미 부록은 `context/P4.md`·`MASTER.md` 등재 권고 |
-
-세 카탈로그가 서로 cross-reference 함 — (C) 의 lineage-stacking 열 → (B)
-행 / (B) 의 VLM init 열 → (A) 행. 공통 컬럼 표준 (License + 상용 마커 /
-Access 아이콘 / `hf:`·`gh:`·`web` 링크 prefix) 은 `_catalogs/README.md`
-가 단일 소스. `INDEX.md` 의 per-paper 색인과는 별도 규약
-(auto-generation 대상 아님; 손으로 quarterly rebalance).
+- 전체 deep-dive 목록 = [`INDEX.md`](INDEX.md) — 머지 후 `main` 에서 `scripts/refresh-analysis-index.py` 가 자동 갱신 (PR 에서 직접 스테이지 안 함). 컬럼 규약 `docs/STYLE.md` §5-7, 정책 `CLAUDE.md` "Automatically-maintained indexes".
+- cross-paper lineage 카탈로그(vlm / vla / dataset)와 pillar 방법론 문서는 별도 폴더 `_catalogs/` — 사용법은 [`_catalogs/README.md`](_catalogs/README.md).
 
 ## 호출
 
-`/analyze-paper <arXiv id | url | pdf url>` — 정식 프롬프트는
-`.claude/prompts/analysis.md`. cloud 에서 `curl` 로 본문을 전문
-우선 확보하되, 실패하면 ar5iv → 초록 only 로 단계적 폴백하고 **확보
-수준을 문서 헤더에 명시**합니다. 본문 미확보 시 decision-grade 함의부는
-잠정으로 표기합니다. 분석 문서와 Design 문서를 같은 호출에서 함께
-생성합니다 — Design 은 추상화가 부족하면 `(원문에 명시 없음 — 가정으로
-메움)` 으로 정직하게 비웁니다. 호출 경로는 세 가지이며 모두 같은
-슬래시 커맨드를 호출해 같은 두 파일을 생성합니다:
+네 슬래시 커맨드 모두 정식 로직은 `.claude/prompts/<name>.md` 에 있고, 커맨드
+파일은 얇은 래퍼다.
 
-```bash
-# (a) 로컬 인터랙티브 — repo 루트에서 Claude Code 세션을 열고,
-#     슬래시 커맨드를 입력합니다 (이어지는 턴에도 그대로 호출 가능)
-cd ~/work/probe
-claude
-> /analyze-paper 2410.07864
-> /analyze-paper https://arxiv.org/abs/2410.07864
-> /analyze-paper https://some.lab/paper.pdf
-```
+- `/analyze-paper <arXiv id | url | pdf url>` → `analysis.md` + `design.md`. 본문은 `curl` 전문 우선 확보, 실패 시 ar5iv → 초록 단계 폴백하고 확보 수준을 헤더에 명시.
+- `/implement-design analysis/<id>/design.md [--foundry <name>]` → `impl.md` + `impl.patch` (기본 `lerobot`). 매핑 불가 시 `UNMAPPABLE.md` 만.
+- `/validate-impl analysis/<id>/design.md [--foundry <name>]` → `validation/<foundry>.md`. 정적 4-체크(📚/🔍/🧪/📐) + §🧬 실행 검증.
+- `/reproduce-paper <arXiv id | design path> [--foundry <name>] [--max-rounds N]` — 위 셋을 위임 호출해 validation verdict 가 안정화되거나 라운드 상한까지 자동 수렴시키는 오케스트레이터 (기본 `--max-rounds 3`). 수렴 매트릭스·종료 사유의 정본은 `.claude/prompts/reproduction.md`.
 
-```bash
-# (b) 로컬 원샷 — 인터랙티브 세션 없이 한 번 실행하고 종료
-claude -p "/analyze-paper 2410.07864"
-```
-
-```text
-# (c) 웹 — claude.ai/code, 이 repo 를 attach 한 뒤 슬래시 커맨드 입력
-> /analyze-paper 2410.07864
-```
-
-(a) 가 일상적인 경로, (b) 는 셸 스크립트에 끼우기 좋은 형태, (c) 는
-브라우저만 있으면 어디서든 가능한 형태입니다. 셋 다 **셸 CLI 가 아니라**
-Claude Code 의 슬래시 커맨드 (`.claude/commands/analyze-paper.md`) 이며,
-`PATH` 위의 실행 파일이 아닙니다.
-
-`/implement analysis/<id>/design.md [--foundry <name>]` — 정식 프롬프트는
-`.claude/prompts/implementation.md`. 선결 조건은 `analysis/<id>/analysis.md` 와
-`analysis/<id>/design.md` 의 존재이며, Design 이 target foundry 의
-좌표계로 매핑 가능할 때만 `impl.md` + `impl.patch` 를 산출합니다. 매핑
-불가 시 `UNMAPPABLE.md` 와 `analysis/<id>/analysis.md` 말미의
-`> 🚧 매핑 불가 (<foundry>) — …` 한 줄만 추가하고 멈춥니다. 기본 foundry
-는 `lerobot` (= `vendor/lerobot/` 의 6 종 정책).
-
-`/validate analysis/<id>/design.md [--foundry <name>]` — 정식 프롬프트는
-`.claude/prompts/validation.md`. Design + impl 패치 + 분석 문서를 정적으로
-대조해 `<id>/validation/<foundry>.md` 를 산출합니다. 보고서 자체가
-산출물이며 상태 격상 같은 라이프사이클은 없습니다.
-
-`/reproduce-paper <arXiv id | analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]` —
-정식 프롬프트는 `.claude/prompts/reproduction.md`. 위 세 슬래시
-커맨드를 **재구현하지 않고 그대로 위임 호출**하며, validation verdict 가
-안정화되거나 라운드 상한에 도달할 때까지 자동 수렴시키는 상위 호환
-오케스트레이터입니다. 분석부터 매핑·검증까지 한 번에 돌리고 싶다면
-대부분의 경우 이 명령이 진입점입니다 — 손으로 세 단계를 이어 돌리는
-대신 한 줄로 끝납니다. 기본 `--max-rounds 3`, `--foundry lerobot`.
-
-- **Round 0 — gate.** Design 이 없으면 `/analyze-paper` 를 먼저 돌려
-  생성한 뒤, `/implement` 1 회 + `/validate` 1 회로 첫 verdict 튜플을
-  얻습니다. foundry 매핑이 불가하면 (`UNMAPPABLE.md` 생성) 즉시 정상
-  종료합니다.
-- **Round 1..N — 분기 매트릭스 (inner + outer).** validation 보고서 메타 헤더의
-  📚 / 🔍 / 🧪 / 🧬 / ⚖️ verdict 셀 + §🔎 bucket 마커를 파싱해 다음 액션을
-  결정합니다. 우선순위 **📚 > 🔍 > 🧬 > 🧪 > 📐**. impl-side gap (🔍 patch
-  apply 실패, 🧪 시그니처/상수 불일치, 📐 silent-skip → 🧪 partial) 은
-  `/implement <design> --feedback <prev-validation>` 로 외과적 갱신 → `/validate`
-  재실행 순으로 매 라운드 자동 반복합니다. `--feedback` 모드의 foundry
-  는 직전 라운드의 `impl.md` + `impl.patch` 를 시작점으로 삼아 통과한
-  hunk 는 보존하고 새 hunk 는 validation 행과 1-to-1 추적합니다 (정식 규칙은
-  `.claude/prompts/implementation.md` §F 참조).
-- **Outer loop — 자동 focused re-extraction.** 📚 (literature) verdict 가
-  `fail`/`partial` 이거나 §🔎 에 `paper-extractable` 행이 있으면 Design
-  자체가 본문보다 얕다는 신호로, `/analyze-paper --focus "<§X.Y,...>"`
-  를 같은 라운드에서 자동 호출해 Design 을 row-level 로 갱신한 뒤
-  `/implement` full regenerate → `/validate` 로 이어집니다. 두 가드가 무한
-  진동을 막습니다 — 갱신된 Design 이 byte-identical 이면 `stable_design`,
-  outer 가 Design 을 바꿨는데 `impl.patch` 가 byte-불변이면 (트리거
-  bucket 오분류 신호) `hold_and_report — zero patch delta`.
-- **종료 사유.** `all_pass` · `unmappable` · `stable_partial` (verdict
-  튜플 + 🪛 표 + 🚧 표 + §🔎 bucket set 이 직전 라운드와 byte-identical
-  이고 fail 없음; 남은 건 honest-defer bucket `paper-silent-experimental`
-  /`out-of-base-scope` 뿐) · `stable_design` (outer 직후 Design
-  byte-identical) · `hold_and_report` (empty focus-hint / zero patch
-  delta / taxonomy-gap / max-rounds 소진) · `max_rounds_exhausted`.
-  `partial` 안정화도 정상 종료이며 마지막 validation 보고서가 그대로 사유
-  보고서입니다.
-- **라운드 추적.** 각 라운드 끝에 validation 보고서가
-  `<id>/validation/<foundry>.round_<N>.md` 로 복사돼 git 에 들어갑니다 (N
-  은 0-indexed). 라운드별 분리 commit 이라 사후 부분 롤백 가능합니다.
-
-```bash
-# (a) 새 논문을 분석부터 검증까지 한 번에 — 가장 흔한 경로
-> /reproduce-paper 2410.07864
-
-# (b) Design 이 이미 있고 (직전 /analyze-paper 출력) 매핑·검증만 자동 수렴
-> /reproduce-paper analysis/2410.07864/design.md --foundry lerobot
-
-# (c) 단발로만 (Round 0 = 게이트만 돌고 종료, 현재 수동 워크플로우와 동치)
-> /reproduce-paper 2410.07864 --max-rounds 1
-```
-
-**다중 foundry.** `<id>/impl/` 와 `<id>/validation/` 아래의 `<foundry>`
-서브폴더가 다중 foundry 를 폴더 레벨에서 수용합니다. `lerobot` 이 v0
-foundry 이며, 회사 코드용 foundry 가 추후 추가되면 같은 Design 을
-그대로 두고 `/implement` (또는 `/reproduce-paper`) 만 `--foundry
-<new-name>` 으로 다시 호출하면 됩니다 — Design 은 한 번 만들면 여러
-foundry 에서 재사용됩니다.
-
-**언제 어떤 커맨드를 쓰나.**
-
-| 의도 | 권장 커맨드 |
-|---|---|
-| 분석 문서·Design 만 새로 만들고 끝 | `/analyze-paper` |
-| 기존 Design 을 한 foundry 에 한 번만 매핑 | `/implement` |
-| 기존 impl 의 정합성을 한 번만 점검 | `/validate` |
-| 새 논문을 분석부터 validation 안정화까지 자동 수렴 | **`/reproduce-paper`** |
-| 직전 validation 의 gap 을 inner loop 로 외과적으로 채우기 | **`/reproduce-paper analysis/<id>/design.md`** |
-
-## 다른 산출물·컨텍스트와의 관계
-
-- 입력: 사람이 직접 골라 슬래시 커맨드에 넘긴 arXiv id 또는 PDF URL.
-  `context/MASTER.md` §8 Tracked Literature 의 핀/기준 논문이 일반적
-  대상이지만, 슬래시 커맨드는 임의의 입력을 받습니다.
-- 분리: 새 논문 탐색은 `scouting/`, 핀 묶음의 서사 압축은 `synthesis/`,
-  한 편 심층은 `analysis/`. `scouting/` 리포트의 ✨ 추천 논문이
-  `analysis/` 의 입력으로 이어질 수 있지만 자동화는 없습니다 — 사람이
-  슬래시 커맨드로 명시적으로 호출합니다.
-- foundry 좌표: `<id>/impl/lerobot/` 의 패치는 `vendor/lerobot/` 의
-  pinned 스냅샷 위에서만 의미가 있습니다. vendor 스냅샷 갱신은
-  `vendor/lerobot/README.md` 의 절차로만 진행하며, 기존 패치는
-  필요시 재생성합니다.
+- 호출 경로 — 로컬 인터랙티브(`claude` 세션에서 슬래시 입력) / 로컬 원샷(`claude -p "/analyze-paper 2410.07864"`) / 웹(claude.ai/code) 세 가지. 모두 셸 CLI 가 아니라 Claude Code 슬래시 커맨드.
+- 다중 foundry — `<id>/impl/<foundry>/` 서브폴더로 수용. 같은 Design 을 `--foundry <name>` 만 바꿔 재사용 (Design 은 한 번 만들면 여러 foundry 공용).
 
 ## 절대 규칙
 
-- `context/MASTER.md` 도, `vendor/lerobot/` 도 **절대 수정하지 않습니다**.
-  핀/Decision 변경 제안은 분석 문서의 💡 컨텍스트 제안 섹션에만,
-  vendor 스냅샷 갱신은 `vendor/lerobot/README.md` 의 절차로만
-  진행합니다.
-- 한글 단일 문서 (영문 1차 파일 없음). 같은 논문 재실행 시 append 가
-  아니라 **덮어쓰는** 재생성 스냅샷입니다.
-- 분석 문서 구조는 `docs/STYLE.md` §5 + `analysis/_TEMPLATE.md`,
-  Design 문서는 §6 + `analysis/_TEMPLATE_DESIGN.md`, 구현 가이드는
-  §6 + `analysis/_TEMPLATE_IMPL.md`, 검증 보고서는 §6-5 +
-  `analysis/_TEMPLATE_VALIDATION.md` 를 정확히 따릅니다.
+- `context/MASTER.md` 도 `vendor/lerobot/` 도 **절대 수정 금지**. 핀/Decision 제안은 분석 문서의 💡 컨텍스트 제안 섹션에만, vendor 갱신은 `vendor/lerobot/README.md` 절차로만.
+- 한글 단일 문서 (영문 1차 파일 없음). 재실행 시 append 아니라 **덮어쓰는** 재생성.
+- 입력은 사람이 슬래시 커맨드로 명시적으로 넘긴 논문 — `scouting/` → `analysis/` 자동 연결은 없음.
+- 문서 구조: 분석 `docs/STYLE.md` §5 + `analysis/templates/analysis.md`, Design §6 + `analysis/templates/design.md`, 구현 §6 + `analysis/templates/impl.md`, 검증 §6-5 + `analysis/templates/validation.md`.

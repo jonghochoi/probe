@@ -84,7 +84,7 @@ $$Z_{\text{sem}}=E_{\text{sem}}(I_{t},L;\theta_{\text{sem}}),\quad Z_{\text{dor}
 
 ![Figure 3 — UAM and Dorsal Expert design space](https://arxiv.org/html/2605.15735/fig/method_dorsal.png)
 
-> "Figure 3: Unified Action Model (UAM) and the Dorsal Expert design space. (Bottom) The three-expert macro-architecture: a semantic expert $E_{\text{sem}}$ initialized from a pretrained VLM, a Dorsal Expert $E_{\text{dor}}$, and an action expert $E_{\text{act}}$, coupled via parallel routing. (Top) The Dorsal Expert design space we explore in Sec. 3.3, varying input modality and initialization (random, VLM, generative expert with or without an auxiliary visual-dynamics objective)." (§3.2)
+> "Figure 3: Unified Action Model (UAM) and the Dorsal Expert design space. (Bottom) The three-expert macro-architecture: a semantic expert $`E_{\text{sem}}`$ initialized from a pretrained VLM, a Dorsal Expert $`E_{\text{dor}}`$, and an action expert $`E_{\text{act}}`$, coupled via parallel routing. (Top) The Dorsal Expert design space we explore in Sec. 3.3, varying input modality and initialization (random, VLM, generative expert with or without an auxiliary visual-dynamics objective)." (§3.2)
 > (논문의 핵심 매크로. 아래 패널이 3-expert 결합 구조, 위 패널이 §3.3 의 설계 공간 sweep 이 변주하는 두 축 — 초기화 × 입력 modality + 보조 손실 — 을 같이 보여줍니다.)
 
 채택된 UAM(Variant 3b) 인스턴스화는 VLM 과 Dorsal 양쪽을 사전학습 Bagel 가중치로 초기화하고, action 토큰은 별도의 action expert 로 라우팅하며, BagelVLA(§9.3) 의 단일 step denoising 과 dual flow-matching 결합을 그대로 따릅니다.
@@ -138,7 +138,7 @@ $`S(\cdot)`$ 은 MMMU·MME·MMBench·MathVista·MMStar·TextVQA·MM-Vet 등 표�
 \* 다중모달 reasoning 데이터를 co-training 으로 섞은 VLA. (Tab. 2)
 
 > "the proposed UAM automatically preserves the capabilities of its original VLM backbone (with only a marginal performance drop of less than 5%), without incorporating VQA co-training or relying on gradient-blocking techniques." (§4.1, Tab. 2)
-> (UAM 의 핵심 수치 주장입니다. OpenVLA 가 다중모달 능력을 *완전히* 잃고 ChatVLA·$`\pi_{0.5}`$ 가 co-training 을 쓰고도 큰 폭으로 떨어지는 반면, UAM 은 Bagel 상한 대비 평균 5% 미만 손실에 그칩니다.)
+> (UAM 의 핵심 수치 주장입니다. OpenVLA 가 다중모달 능력을 *완전히* 잃고 ChatVLA· $`\pi_{0.5}`$ 가 co-training 을 쓰고도 큰 폭으로 떨어지는 반면, UAM 은 Bagel 상한 대비 평균 5% 미만 손실에 그칩니다.)
 
 망각이 *왜* 어디서나 일어나는지에 대한 통제 측정도 별도로 제시됩니다(Tab. 3).
 
@@ -163,7 +163,7 @@ OOD 일반화는 두 baseline(Qwen-$`\pi_0`$ 2-expert, Variant 2a 의 VLM-init D
 
 ![Figure 6 — Attention maps during action generation](https://arxiv.org/html/2605.15735/fig/exp-repr.png)
 
-> "Figure 6: Visualization of attention maps during action generation. For each task, we show the input third-view image, attention over $E_{\text{dor}}$ visual tokens, and $E_{\text{sem}}$ visual tokens. The action queries attend to different regions: attention over $E_{\text{sem}}$ tokens is concentrated on task-relevant semantic entities, such as target objects and goal regions, while attention over $E_{\text{dor}}$ tokens focuses more on the robot arm, interaction regions, and global scene context." (§4.3)
+> "Figure 6: Visualization of attention maps during action generation. For each task, we show the input third-view image, attention over $`E_{\text{dor}}`$ visual tokens, and $`E_{\text{sem}}`$ visual tokens. The action queries attend to different regions: attention over $`E_{\text{sem}}`$ tokens is concentrated on task-relevant semantic entities, such as target objects and goal regions, while attention over $`E_{\text{dor}}`$ tokens focuses more on the robot arm, interaction regions, and global scene context." (§4.3)
 > (UAM 학습 후 명시적 grounding 감독 없이도 What/How 분기가 emergent 하게 떠오른다는 정성 증거입니다. P1 에서 우리가 노리는 Body/Hand 분리에 대해, *데이터 라벨이 아니라 architectural separation 만으로* 기능 분기를 끌어낼 선례가 됩니다.)
 
 추론 latency 는 표준 Qwen7B-$`\pi_0`$ 대비 +15% 수준이며(1300 → 1500 ms, Tab. 4), Dorsal expert 가 single-step denoising 만 수행하므로 두 배 가까이 늘어난 파라미터에도 비용 증가가 제한된다는 주장입니다.
@@ -254,4 +254,4 @@ P4 의 핀 라인업과 비교했을 때 — π0 ([arXiv:2410.24164]), π0.5 ([a
 
 context/MASTER.md 는 수정하지 않았습니다 — 위 항목은 maintainer 검토용 제안일 뿐입니다.
 
-> 💡 base 매핑은 `/implement analysis/2605.15735/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.15735/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

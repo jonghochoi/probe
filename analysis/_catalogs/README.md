@@ -5,7 +5,7 @@
 > **(1) Cross-paper lineage 카탈로그** — PROBE D19b "VLM backbone
 > lineage choice" + D22 "Multi-embodiment pretraining data" 의 의사결정
 > 근거. lineage 2-튜플 *(초기 가중치) × (further-pretrain corpus)* 의
-> 세 축 enumeration (vlm / vla / lineage_corpus) 을 분리 관리하면서
+> 세 축 enumeration (vlm / vla / dataset) 을 분리 관리하면서
 > cross-reference 규약으로 묶음. *사실 표* — 누가-무엇-규모.
 >
 > **(2) Pillar 단위 보존·검증 참조 문서** — pillar 별 방법론·측정
@@ -28,7 +28,7 @@
 |---|---|---|
 | [`vlm.md`](vlm.md) | open-weight VLM 후보 — *lineage 2-tuple 의 첫 항* | VLA (VLM 위에 action expert 쌓은 시스템), 데이터셋 |
 | [`vla.md`](vla.md) | 랜드마크 VLA — `(VLM init) × (Further-pretrain corpus)` 매트릭스 | VLM 단일, 데이터셋 단일 (각 셀 값으로만 인용) |
-| [`lineage_corpus.md`](lineage_corpus.md) | VLA further-pretrain corpus — robot action / human video / mixed (멀티-임베디먼트) | 벤치마크 (LIBERO/CALVIN 등; 별도 처리 deferred) |
+| [`dataset.md`](dataset.md) | VLA further-pretrain corpus — robot action / human video / mixed (멀티-임베디먼트) | 벤치마크 (LIBERO/CALVIN 등; 별도 처리 deferred) |
 
 ### 1-2. Pillar 방법론 (설계 문서)
 
@@ -40,7 +40,7 @@
 > VLA 의 정체성은 *어떤 VLM 으로 시작했는지* + *그 위에 어떤 데이터로
 > 추가 학습했는지* 두 항으로 정해진다. 단순 모델명("PaliGemma") 은 빈
 > 껍데기 — π0 가 그 위에 OXE+π in-house 로 추가 학습한 게 *π0 의*
-> lineage. 그래서 vlm.md / vla.md / lineage_corpus.md 가 분리되어야 함.
+> lineage. 그래서 vlm.md / vla.md / dataset.md 가 분리되어야 함.
 
 ---
 
@@ -85,7 +85,7 @@
 > `huggingface.co/datasets/<org>`). 링크 텍스트는 `hf:` 통일하고 URL 은
 > 실제 경로 그대로 둠.
 
-### 2-3. 데이터 유형 (lineage_corpus.md 전용)
+### 2-3. 데이터 유형 (dataset.md 전용)
 
 | 아이콘 | 의미 |
 |---|---|
@@ -93,14 +93,14 @@
 | 👤 Human video | robot action 없음, 인간 손/몸 행동 비디오 (VLA pre-training prior 용) |
 | 🔀 Mixed | 한 데이터셋 안에 robot + human 둘 다 (UniHand-2.0 등) |
 
-### 2-4. Scan 표 + per-dataset 카드 (lineage_corpus.md 전용)
+### 2-4. Scan 표 + per-dataset 카드 (dataset.md 전용)
 
-`lineage_corpus.md` 는 컬럼이 많아 평면 표만으로는 가독성이 떨어진다.
+`dataset.md` 는 컬럼이 많아 평면 표만으로는 가독성이 떨어진다.
 Cycle 5 부터 **상단 scan 표 + 하단 per-dataset `<details>` 카드** 하이브리드.
 
 **Scan 표 (7 컬럼)** — 한 행 한 줄:
 
-| 데이터셋 | License | Access | 데이터 유형 | 규모 | Source-check | 우선도 |
+| 데이터셋 | License | Access | 데이터 유형 | 규모 | Human verified | 우선도 |
 
 데이터셋 이름은 카드 anchor 로 점프하는 마크다운 링크 (`[OXE](#oxe)`).
 규모는 한 셀에 가장 압축된 한 줄 (예: `~970k traj / 22 robots`, `100h ego`).
@@ -131,11 +131,8 @@ Cycle 5 부터 **상단 scan 표 + 하단 per-dataset `<details>` 카드** 하�
 #### Lineage 적층
 - 어떤 VLA 들이 적층
 
-#### Source check
-- 🟢 verified: <필드>
-- 🟡 partial: <필드>
-- 🔴 unverified: <필드>
-- ❓ needs-human: <필드>
+#### Human verified
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:XXXX.XXXXX]
@@ -149,56 +146,26 @@ H4 sub-section 순서 고정. H4 헤더는 emoji 없음 (`docs/STYLE.md` H3-plai
 
 | 카탈로그 | H4 sub-section (순서 고정) |
 |---|---|
-| `lineage_corpus.md` | Observations · Actions · Embodiment · Annotation · Scale · Lineage 적층 · Source check · Sources |
-| `vla.md` | Architecture · Training data · Action representation · Inference · Eval · Open-weight · Source check · Sources |
+| `dataset.md` | Observations · Actions · Embodiment · Annotation · Scale · Lineage 적층 · Human verified · Sources |
+| `vla.md` | Architecture · Training data · Action representation · Inference · Eval · Open-weight · Human verified · Sources |
 
 `<details><summary>` 는 GitHub markdown 표준 — 클릭하면 펼쳐짐. summary
 한 줄에 가장 압축된 자기소개. **펼치고 닫고 UI** 가 dense 한 카드를
 *scan-vs-deep-dive* 두 surface 로 분리해 가독성을 회복.
 
 > 현재 `vlm.md` 는 평면 표 유지 — 컬럼 수가 적고 셀당 정보량도 낮아
-> 카드화 효익이 상대적으로 낮음. Source-check 컬럼만 도입 (Cycle 6).
-> 후속 사이클에 카드화 재검토 가능.
+> 카드화 효익이 상대적으로 낮음. Human verified 컬럼만 도입.
 
-### 2-5. Source-check 마커
+### 2-5. Human verified 마커
 
-각 셀이 얼마나 검증됐는지 명시. 카드의 `#### Source check` 절에 *어느
-필드가 어느 레벨인지* 줄별로 나열.
+- 세 카탈로그의 scan 표와 카드 모두 **Human verified** 단일 항목을 둔다.
+- **인간이 셀/카드 내용을 직접 검수했는지 여부만** 표시한다 — 자동 생성된
+  값의 출처 등급(arXiv 1차 / HF 2차 / GitHub 3차)이나 정확도는 보지 않는다.
+- 값은 둘뿐: `✅` (검수 완료, 선택적으로 `✅ YYYY-MM-DD`) / `⬜` (미검수, 기본값).
+- 모든 신규 행·카드는 `⬜` 로 시작한다. 에이전트가 채운 값은 정의상 미검수.
 
-| 아이콘 | 의미 |
-|---|---|
-| 🟢 verified | 직접 paper / HF card / 공식 README 에서 확인됨 |
-| 🟡 partial | paper 에 명시되어 있으나 사이드 추정 포함, 또는 sub-dataset 별 변동을 통합 값으로 표현 |
-| 🔴 unverified | 메모리 / 훈련 지식으로 채움 (네트워크 차단 등으로 소스 직접 확인 불가). 사용자가 다음 사이클에 검증 권장 |
-| ❓ needs-human | 원본 source 에 명시 부재 — 사용자가 paper 직접 내려받아 확인 필요 |
-
-#### Scan 마커는 *의사결정 4-필드* 기준
-
-Scan 표 7번째 컬럼의 source-check 마커는 *카드 안의 모든 필드* 를 종합한
-값이 **아니다**. 한 카탈로그의 *의사결정 핵심 4 필드* 의 검증 상태만
-종합한 *전반* 마커다 — 카탈로그가 "이 entity 를 채택할까" 에 영향을 주는
-필드만 본다.
-
-| 카탈로그 | 의사결정 4-필드 |
-|---|---|
-| `lineage_corpus.md` | License · Scale · 데이터 유형 · Lineage 적층 |
-| `vla.md` (도입 시) | License · 총 파라미터 · VLM init · Open-weight |
-| `vlm.md` (도입 시) | License · 파라미터 · Instruction-tuning corpus · Access |
-
-**규칙**: 위 4 필드가 *모두* 🟢 → scan 🟢. 한 필드라도 🟡 → scan 🟡. 한
-필드라도 🔴 → scan 🔴. ❓ 가 있으면 보수적으로 🔴.
-
-카드 안 `#### Source check` 절의 *부차 필드* — 정확한 control rate, sub-
-dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan 마커에
-영향 없음**. 부차 필드는 *적층 결정 후 구현 단계* 의 디테일이라 D22
-의사결정 자체에는 관여하지 않는다. 단 카드 안에서 *이 카드 전체가
-얼마나 검증됐는지* 의 내부 일관성 표시로는 의미를 유지한다.
-
-> 즉, **scan 마커** = 의사결정 4-필드의 검증 상태 (decide-or-skip).
-> **카드 source check 절** = 카드 안 모든 필드의 *세분화된* 검증 상태
-> (이후 사이클의 cell-level ratchet 추적). 두 트랙이 분리됨을 명시해
-> *4-필드는 verified 인데 부차 필드가 unverified* 한 자연스러운 상태를
-> 정직하게 표현 가능하게 함.
+> 이전의 🟢/🟡/🔴/❓ 4단계 source-check 는 셀 단위 검증 레벨을 추적하려
+> 했으나 관리 비용이 커 폐기했다. *"사람이 봤는가"* 한 비트로 단순화한다.
 
 ---
 
@@ -207,14 +174,14 @@ dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan �
 | 출발 위치 | 가리키는 위치 | 예시 |
 |---|---|---|
 | `vla.md` "VLM init" 컬럼 | `vlm.md` 의 같은 모델명 행 | `PaliGemma-2B` → `vlm.md` PaliGemma 행 |
-| `vla.md` "Further-pretrain corpus" 컬럼 | `lineage_corpus.md` 의 같은 데이터셋 행 | `OXE + π in-house mix` → `lineage_corpus.md` OXE 행 |
-| `lineage_corpus.md` "lineage 적층" 컬럼 | `vla.md` 의 같은 VLA 행 | `π0, π0.5, OpenVLA` → `vla.md` 각 VLA 행 |
+| `vla.md` "Further-pretrain corpus" 컬럼 | `dataset.md` 의 같은 데이터셋 행 | `OXE + π in-house mix` → `dataset.md` OXE 행 |
+| `dataset.md` "lineage 적층" 컬럼 | `vla.md` 의 같은 VLA 행 | `π0, π0.5, OpenVLA` → `vla.md` 각 VLA 행 |
 | `vlm.md` "PROBE D19b 후보 메모" 의 *"X init"* 토큰 | `vla.md` 의 X VLA 행 | `Xiaomi-Robotics-0 init` → `vla.md` Xiaomi-Robotics-0 행 |
 
 > **추가/갱신 원칙**: 새 entity 를 한 카탈로그에 등재하면, 다른 두 카탈로그의
 > 관련 셀도 *같은 commit* 에서 갱신. 예: 새 VLA 를 `vla.md` 에 추가하면 그
 > VLA 가 쓰는 VLM 이 `vlm.md` 에 없을 때 `vlm.md` 에도 행 추가; 그 VLA 가
-> 적층한 데이터셋의 `lineage_corpus.md` 의 "lineage 적층" 셀에 그 VLA 명도
+> 적층한 데이터셋의 `dataset.md` 의 "lineage 적층" 셀에 그 VLA 명도
 > 추가.
 
 ---
@@ -230,7 +197,7 @@ dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan �
    → `vla.md` 에 행 추가. + 그 VLA 의 VLM init 이 `vlm.md` 에 없으면
    `vlm.md` 에도 추가.
 3. **X 가 *데이터셋* 인가** (학습용 trajectory / video / image corpus)?
-   → `lineage_corpus.md` 에 행 추가. 데이터 유형 (🤖 / 👤 / 🔀) 분류.
+   → `dataset.md` 에 행 추가. 데이터 유형 (🤖 / 👤 / 🔀) 분류.
 4. **X 가 *벤치마크* 인가** (LIBERO, CALVIN, RoboCasa, RoboTwin 2.0
    같은 평가 환경)?
    → 현 카탈로그 범위 *밖*. 향후 `_catalogs/benchmarks.md` 신설 검토
@@ -251,14 +218,12 @@ dataset 별 spec, 카메라 해상도 분포 등 — 의 🔴 / ❓ 는 **scan �
 2. 해당 카탈로그의 표 헤더 schema 에 맞춰 셀 값 채움.
    - License: §2-1 마커 형식
    - Access: §2-2 아이콘 + 링크 prefix
-   - (lineage_corpus 만) 데이터 유형: §2-3
-   - (lineage_corpus 만) 카드 schema: §2-4 의 H4 8개 sub-section 모두 채움
+   - (dataset 만) 데이터 유형: §2-3
+   - (dataset 만) 카드 schema: §2-4 의 H4 8개 sub-section 모두 채움
 3. Cross-reference 동기화 (§3) — 다른 카탈로그에서 이 entity 를 인용하는
    셀이 있으면 같이 갱신.
-4. **Source-check 절 (§2-5) 채우기 필수** — 어느 필드가 paper-level
-   검증됐는지 / 추정인지 / 사용자 확인 필요한지를 *반드시* 명시. 추정
-   금지가 아니라 *추정임을 명시* 가 원칙. 모르는 것은 `❓ needs-human`
-   으로 surface.
+4. **Human verified 는 `⬜` 로 둔다 (§2-5)** — 에이전트가 채운 값은
+   정의상 미검수. 사람이 직접 확인하기 전까지 `✅` 로 올리지 않는다.
 5. Commit: `docs(catalogs): add <entity-name> (<axis>)` 형태. 예:
    `docs(catalogs): add Gemini-Robotics-On-Device (vla)`.
 
@@ -306,7 +271,7 @@ Commit: `docs(catalogs): 2026-Qx rebalance` 형태. body 에 *추가/제거/
 | Prismatic-VLM + Qwen2.5-0.5B | VLA-Adapter |
 | (별도 VLM 없음) | Octo |
 
-`lineage_corpus.md` 데이터셋별로 그 데이터셋을 적층한 VLA 들을 역참조:
+`dataset.md` 데이터셋별로 그 데이터셋을 적층한 VLA 들을 역참조:
 
 | 데이터셋 | 이 데이터셋을 적층한 VLA |
 |---|---|

@@ -115,7 +115,7 @@ $$\mathcal{J}_{\text{force}}=\frac{1}{N}\sum_{i=1}^{N}\left|\hat{F}_{\text{polic
 
 ### 학습 셋업
 
-하드웨어는 6-DoF UFactory xArm6 + 1-DoF gripper, 글로벌은 Intel RealSense L515, wrist 는 D435 입니다. 30 Hz teleoperation (SpaceMouse / Quest Pro) 으로 task 당 50–100 demonstration 을 수집해 듀얼 뷰 $`320\times 240`$ RGB + 7D proprio (6D pose + 1D gripper) + 10-step F/T history 를 동기 저장합니다. DiT 백본은 model dim 384, depth 12, head 6, ResNet-18 인코더 듀얼 뷰 (각 256), force encoder $(H_{\text{force}}\times 6)\to 128$. 학습은 RTX 4090 ×4 / 48 CPU / 283 GB RAM 노드에서 AdamW ($`\beta_{1}=0.9,\beta_{2}=0.999`$, weight decay 0.01), cosine LR (시작 $`1\times 10^{-4}`$), batch 64, gradient clip $`\|\nabla\|=1.0`$, bf16-mixed, 100k step (task 당 8–10시간) 로 진행됩니다 (Table 6).
+하드웨어는 6-DoF UFactory xArm6 + 1-DoF gripper, 글로벌은 Intel RealSense L515, wrist 는 D435 입니다. 30 Hz teleoperation (SpaceMouse / Quest Pro) 으로 task 당 50–100 demonstration 을 수집해 듀얼 뷰 $`320\times 240`$ RGB + 7D proprio (6D pose + 1D gripper) + 10-step F/T history 를 동기 저장합니다. DiT 백본은 model dim 384, depth 12, head 6, ResNet-18 인코더 듀얼 뷰 (각 256), force encoder $`(H_{\text{force}}\times 6)\to 128`$. 학습은 RTX 4090 ×4 / 48 CPU / 283 GB RAM 노드에서 AdamW ($`\beta_{1}=0.9,\beta_{2}=0.999`$, weight decay 0.01), cosine LR (시작 $`1\times 10^{-4}`$), batch 64, gradient clip $`\|\nabla\|=1.0`$, bf16-mixed, 100k step (task 당 8–10시간) 로 진행됩니다 (Table 6).
 
 ---
 
@@ -257,4 +257,4 @@ Ablation (Stamp, Table 5):
 
 ---
 
-> 💡 base 매핑은 `/implement analysis/2605.11048/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.11048/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

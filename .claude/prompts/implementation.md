@@ -46,7 +46,7 @@ If the argument is empty or the Design file does not exist, stop and
 say so — do not guess a target. If `--foundry` is given but unknown,
 stop and list the registered foundries. If `--feedback` is given but
 the validation report does not exist, stop and tell the human to run
-`/validate` first.
+`/validate-impl` first.
 
 PRECONDITION — the Design document and its originating analysis must
 already exist:
@@ -65,7 +65,7 @@ CONTEXT (read-only):
   the target foundry.
 - `analysis/<id>/analysis.md` — the originating analysis. Read for
   context only; the Design is the contract.
-- `analysis/_TEMPLATE_IMPL.md` — the exact form `impl.md` must follow.
+- `analysis/templates/impl.md` — the exact form `impl.md` must follow.
 - `docs/STYLE.md` — §6 (Implementation guide) + §4 (Korean tone,
   glossary, verbatim).
 - For `--foundry lerobot`:
@@ -138,7 +138,7 @@ A. Mapping feasibility (Layer 2 gate).
    paper's policies/modules this base COVERS and which it EXCLUDES,
    each with a one-line reason (e.g. "π_uni 의 enhancement 만 cover;
    π_hand 촉각 인코더·LSTM 정책은 base 좌표계 밖 — 제외"). This is the
-   contract the `/validate` `out-of-base-scope` bucket cites. Without it,
+   contract the `/validate-impl` `out-of-base-scope` bucket cites. Without it,
    an excluded module cannot be classified `out-of-base-scope` and the
    exclusion looks like an unexplained omission. The base scope is your
    discretionary call, so making it inspectable here is what lets a
@@ -201,7 +201,7 @@ C-2. Prefer the subclass-seam form (verifiable mapping).
    `git apply --check` — the vendored snapshot is partial and cannot be
    imported or run. Whenever the Design's change has an importable
    surface (a new module/loss/head on top of an existing policy), map it
-   instead as a **subclass-seam**, which `/validate §🧬` can actually
+   instead as a **subclass-seam**, which `/validate-impl §🧬` can actually
    execute:
 
    1. **Behavior-preserving seam(s) in the base.** Add the *minimum*
@@ -249,7 +249,7 @@ D. Verify the patch.
    exact error and downgrade affected hunks to 🪛 + 🚧 entries.
 
 E. Write the guide.
-   Follow `analysis/_TEMPLATE_IMPL.md` exactly. Korean throughout,
+   Follow `analysis/templates/impl.md` exactly. Korean throughout,
    formal 합니다/됩니다 체. Verbatim tokens per `docs/STYLE.md`
    §4-1: original English paper titles (when cited), config/code
    names, `file:line` coordinates, formulas, arXiv links,

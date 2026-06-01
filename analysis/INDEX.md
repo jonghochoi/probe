@@ -1,7 +1,7 @@
 # analysis/ Index
 
 `scripts/refresh-analysis-index.py` 가 자동 관리하는 deep-dive
-인덱스입니다 — `/analyze-paper`, `/implement`, `/validate` 가 자기
+인덱스입니다 — `/analyze-paper`, `/implement-design`, `/validate-impl` 가 자기
 산출물을 커밋할 때 같이 갱신합니다. 마커 사이는 매 호출마다 멱등
 재생성되므로 손으로 편집하지 마십시오. `lerobot` 컬럼은
 `<id>/impl/lerobot/impl.md` 존재 시 ✅, `UNMAPPABLE.md` 존재 시

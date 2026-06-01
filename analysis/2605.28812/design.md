@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/implement` 단계에서 수행합니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement-design` 단계에서 수행합니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -125,7 +125,7 @@ def calibrate_taxel_orientation(taxel_forces, joint_torques, joint_angles) -> R:
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 명확한 정책 family base 없음. 본 산출물의 핵심은 IL 정책(`act` / `diffusion` / `pi0` 계열)이 아니라 **관측 전처리 모듈**(raw taxel → CoP 힘·위치)과 RL 학습 레시피(비대칭 PPO + DR)입니다. lerobot 좌표계로는 정책 base 보다 `transforms/` / `processor` 의 관측 변환 단계에 가깝습니다. PPO·IsaacLab RL 루프 자체는 lerobot 의 IL baseline 범위 밖입니다. 매핑 적합성은 `/implement` 가 최종 판정합니다.
+- **`lerobot`** — 명확한 정책 family base 없음. 본 산출물의 핵심은 IL 정책(`act` / `diffusion` / `pi0` 계열)이 아니라 **관측 전처리 모듈**(raw taxel → CoP 힘·위치)과 RL 학습 레시피(비대칭 PPO + DR)입니다. lerobot 좌표계로는 정책 base 보다 `transforms/` / `processor` 의 관측 변환 단계에 가깝습니다. PPO·IsaacLab RL 루프 자체는 lerobot 의 IL baseline 범위 밖입니다. 매핑 적합성은 `/implement-design` 가 최종 판정합니다.
 
 ---
 

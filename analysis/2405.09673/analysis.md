@@ -183,7 +183,7 @@ target module 선택은 초기 LoRA 가 $`W_q,W_v`$ 만 겨냥했으나 이후 �
 
 - **D19 (VLM fine-tuning range)** — option (d) LoRA/adapter PEFT 의 근거 논문입니다. PROBE v1 은 (a) full freeze 이고 LoRA 는 deferred 후보이므로, 이 논문은 "freeze 가 불충분해 D19 가 (d) 로 이동할 때" 무엇을 기대·설정해야 하는지의 사전 지식입니다.
 - **D20 (prior-preservation strategy)** — "LoRA-minimal" option 의 핵심 증거. LoRA 가 weight decay·dropout 보다 망각을 더 잘 막는다는 측정 결과가 D20 의 LoRA 경로를 수치로 뒷받침합니다.
-- **D21 (staged training recipe)** — Stage 3(LoRA/top-layer 제한 FT) 진입 시의 설정 지침(랭크·$`\alpha`$·target module·학습률)을 제공합니다.
+- **D21 (staged training recipe)** — Stage 3(LoRA/top-layer 제한 FT) 진입 시의 설정 지침(랭크· $`\alpha`$ ·target module·학습률)을 제공합니다.
 - **D23 (action representation × VLM preservation)** — 직접 다루지는 않습니다. 다만 "어려운 신규 도메인은 LoRA 저랭크로 학습이 안 된다"는 발견을 보면, 액션 표현 같은 신규 modality 학습 부담을 LoRA 에 얹는 것은 위험합니다.
 - **Identity 지지/긴장** — Antagonist 가 아니라 P4 정체성을 **지지**합니다. 다만 PROBE 는 backbone 을 아예 얼리므로(D19a), 이 논문이 비교하는 두 극(LoRA vs full-FT) 모두 PROBE v1 의 freeze 보다 prior 보존에 불리하다는 점에서 직접 대응되지는 않습니다. §10 경쟁자 함의는 없습니다(텍스트 LLM 연구).
 
@@ -224,7 +224,7 @@ P4 핀 중 **VLM2VLA** ([arXiv:2509.22195], LoRA + NL-action, forgetting mitigat
 ## 💡 컨텍스트 제안
 
 - **P4 methodology base 추가 후보** — 본 논문(arXiv:2405.09673)을 P4 의 "methodology base"(continual learning / PEFT) 항목으로 추가 검토를 제안합니다. 현재 §8.4 핀은 모두 VLA/VLM 적용 논문이고, LoRA 의 학습-망각 trade-off 를 정량화한 *기반* PEFT 연구는 부재합니다. 다만 핀 8개 cap 을 넘기지 않도록 핀이 아닌 methodology base 라인(§8.1 의 FiLM/PCGrad 형식)으로 다는 것이 적절해 보입니다.
-- **D19/D21 deferred trigger 보강 후보** — D19 (d) LoRA 와 D21 Stage 3 의 deferred 설명에, LoRA 채택 시 "r=256·$`\alpha=2r`$·all-linear·IFT 한정" 기본값을 본 논문 근거로 부기하는 것을 제안합니다(트리거 자체는 변경 없음).
+- **D19/D21 deferred trigger 보강 후보** — D19 (d) LoRA 와 D21 Stage 3 의 deferred 설명에, LoRA 채택 시 "r=256· $`\alpha=2r`$ ·all-linear·IFT 한정" 기본값을 본 논문 근거로 부기하는 것을 제안합니다(트리거 자체는 변경 없음).
 - **Cross-pollination 기록** — §12 Month A(continual learning / forgetting / PEFT) 슬롯에 부합하는 크로스폴리네이션 후보입니다.
 
-> 💡 base 매핑은 `/implement analysis/2405.09673/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2405.09673/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

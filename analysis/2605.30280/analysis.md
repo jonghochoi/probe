@@ -359,4 +359,4 @@ PROBE 관점의 추가 갭:
 - **방법론 cross-link 후보.** T2A(시각 없는 행동 prior 압축 사전학습)와 단계별 $`p(\tau)`$ 스케줄은 `analysis/_catalogs/` 의 P4 staging 방법론 참조로 묶을 가치가 있습니다.
 - **D5/D15 증거 메모.** Table 12(state conditioning ≤1.3pp)는 D5/D15 에 대한 직접 증거이되 "시야 가시 테이블탑" 전제 조건이 핵심임을 함께 기록 제안 — 인핸드 가림 조건에서 결론이 역전될 수 있다는 우리 차별화 가설의 시험대입니다.
 
-> 💡 base 매핑은 `/implement analysis/2605.30280/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.30280/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

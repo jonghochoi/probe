@@ -3,7 +3,7 @@
 > PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
 > 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
 > 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/implement` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
+> base 매핑은 `/implement-design` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
 > `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
 > 덮어씁니다.
 
@@ -108,7 +108,7 @@ $$p_{\theta}(\bar{a}_{i},m_{i},l_{i}|\bar{o}_{i},L)=p_{\theta}(l_{i}|\bar{o}_{i}
 
 ## 🎯 평가 메트릭
 
-- **지표 (멀티모달 보존)** — 다수 VQA 벤치마크(MMMU, MMStar, MME, OCRBench, MMB-en/cn, TextVQA, DocVQA, InfoVQA, AI2D, ChartQA, RealWorldQA) · **임계값** — base 모델 성능의 `≥85%` 유지 · **비교 baseline** — 원 backbone(Gemma-3-12B-IT), OpenVLA·ECoT(forgetting 비교군), MolmoAct·$`\pi_{0.5}`$(co-trained 비교군).
+- **지표 (멀티모달 보존)** — 다수 VQA 벤치마크(MMMU, MMStar, MME, OCRBench, MMB-en/cn, TextVQA, DocVQA, InfoVQA, AI2D, ChartQA, RealWorldQA) · **임계값** — base 모델 성능의 `≥85%` 유지 · **비교 baseline** — 원 backbone(Gemma-3-12B-IT), OpenVLA·ECoT(forgetting 비교군), MolmoAct· $`\pi_{0.5}`$(co-trained 비교군).
 - **지표 (조작 성공률)** — 과제별 success rate(부분 점수 포함 rubric), 과제당 30 trial(다국어 90) · **비교 baseline** — OpenVLA, ECoT, ablation VLM2VLA-AT · 셋업 — 6-DoF WidowX 250S, toy kitchen, Realsense D435.
 - **지표 (추론 일반화)** — ID / borderline / OOD(다국어 번역, 'Ash Ketchum' 의미 추론) 구분 평가; task decomposition 정확도(Fig. 6, 키워드 매칭). 대표 수치: Ash Ketchum 과제 VLM2VLA 60% vs VLM2VLA-AT 30%.
 - **지표 (지연)** — 1 action 사이클 wall-clock: median 6.1s / mean 10.5s / std 14.3s (A100, N=30).
@@ -123,7 +123,7 @@ $$p_{\theta}(\bar{a}_{i},m_{i},l_{i}|\bar{o}_{i},L)=p_{\theta}(l_{i}|\bar{o}_{i}
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 직접 대응 base는 사실상 없습니다. lerobot의 6개 정책(`pi0`/`pi05`/`pi0_fast`/`smolvla`/`act`/`diffusion`)은 모두 **별도 연속 액션 head(flow-matching/diffusion) 또는 액션 토큰**을 전제하는데, VLM2VLA의 본질은 "액션 디코더 제거 + 자연어 액션 + 표준 LM cross-entropy"라 이 family들과 구조적으로 어긋납니다. 가장 가까운 점은 `pi0_fast`의 토큰화 액션 계열(자기회귀 텍스트 생성)이나, VLM2VLA는 token 사전 개조 대신 일반 자연어를 쓴다는 점에서 다릅니다. 매핑은 "데이터 재라벨링 파이프라인 + LoRA fine-tuning 레시피" 수준의 부분 이식에 그칩니다(최종 판정은 `/implement`).
+- **`lerobot`** — 직접 대응 base는 사실상 없습니다. lerobot의 6개 정책(`pi0`/`pi05`/`pi0_fast`/`smolvla`/`act`/`diffusion`)은 모두 **별도 연속 액션 head(flow-matching/diffusion) 또는 액션 토큰**을 전제하는데, VLM2VLA의 본질은 "액션 디코더 제거 + 자연어 액션 + 표준 LM cross-entropy"라 이 family들과 구조적으로 어긋납니다. 가장 가까운 점은 `pi0_fast`의 토큰화 액션 계열(자기회귀 텍스트 생성)이나, VLM2VLA는 token 사전 개조 대신 일반 자연어를 쓴다는 점에서 다릅니다. 매핑은 "데이터 재라벨링 파이프라인 + LoRA fine-tuning 레시피" 수준의 부분 이식에 그칩니다(최종 판정은 `/implement-design`).
 
 ---
 

@@ -107,7 +107,7 @@ S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed direct
 
 There is no `--dry-run`. On the routine detail page use **Run now** — it opens a fresh session and executes once. A green run status only means "exited without an infra error", **not** that the prompt succeeded — open the session transcript and inspect the actual output (blocked network requests show up there). Check with the same rigor as a manual run:
 
-- Follows `scouting/_TEMPLATE.md` + `docs/STYLE.md`.
+- Follows `scouting/templates/report.md` + `docs/STYLE.md`.
 - Both the English and Korean files were produced.
 - Every paper link resolves (no fabricated arXiv IDs).
 - 📋 Scout Methodology has **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
@@ -146,21 +146,21 @@ Where weekly scouting looks *outward* for new papers, this output looks *inward*
 
 When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
 
-### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/implement` → `/validate`, orchestrated by `/reproduce-paper`)
+### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/implement-design` → `/validate-impl`, orchestrated by `/reproduce-paper`)
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement` produces a target-codebase patch and `/validate` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement-design` produces a target-codebase patch and `/validate-impl` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|
-| Invoke (orchestrated) | `/reproduce-paper <arXiv id \| analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]` — runs analyze → implement → validate, then loops `/implement --feedback <prev-validation>` + `/validate` until the validation verdict stabilises or the round cap is reached |
-| Invoke (step-by-step) | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` → `/implement analysis/<id>/design.md [--foundry <name>]` → `/validate analysis/<id>/design.md [--foundry <name>]` |
+| Invoke (orchestrated) | `/reproduce-paper <arXiv id \| analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]` — runs analyze → implement → validate, then loops `/implement-design --feedback <prev-validation>` + `/validate-impl` until the validation verdict stabilises or the round cap is reached |
+| Invoke (step-by-step) | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` → `/implement-design analysis/<id>/design.md [--foundry <name>]` → `/validate-impl analysis/<id>/design.md [--foundry <name>]` |
 | Slash commands | `.claude/commands/{analyze-paper,implement,validate,reproduce-paper}.md` (thin wrappers) |
 | Canonical prompts | `.claude/prompts/{analysis,implementation,validation,reproduction}.md` (single source per stage) |
 | Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
 | Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
 | Outputs | `analysis/<id>/analysis.md` (deep-dive), `analysis/<id>/design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>/impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>/validation/<foundry>.md` (validation), plus per-round validation copies `analysis/<id>/validation/<foundry>.round_<N>.md` when run via `/reproduce-paper` — all Korean, overwritten each run |
 | Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; validation carries 4-check report |
-| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/implement`, `/validate`, `/reproduce-paper` are local |
+| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/implement-design`, `/validate-impl`, `/reproduce-paper` are local |
 | Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |
 | Termination | `/reproduce-paper` exits on one of `all_pass` / `unmappable` / `stable_partial` / `stable_design` (focused re-extraction byte-identical) / `hold_and_report` (empty focus-hint) / `max_rounds_exhausted`. The validation §🔎 bucket classifier drives the inner/outer branch; `partial` stabilisation counts as a clean exit and only `paper-silent-experimental` gaps stay as 🚧 permanently. |
 

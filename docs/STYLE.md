@@ -244,101 +244,42 @@ markdown rather than tone:
 
 ### 4-5. Humanize-korean post-processing (mandatory tail step)
 
-Every Korean output in PROBE (`scouting/`, `synthesis/`, `analysis/`)
-passes through the `humanize-korean` skill
-(`.claude/skills/humanize-korean/SKILL.md`, ported from
-[`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai))
-immediately before `git add`. The skill detects and rewrites the
-"AI tell" patterns catalogued at
-`.claude/skills/humanize-korean/references/ai-tell-taxonomy.md` —
-translation-ese, mechanical parallelism, AI signature phrases,
-hedging chains, formal-noun overuse, visual-ornament overuse —
-into natural Korean prose. **Content is never touched.**
+Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes through
+the `humanize-korean` skill (`.claude/skills/humanize-korean/SKILL.md`)
+immediately before `git add` — the LAST step, never before the file is
+finished. It rewrites "AI tell" patterns (translation-ese, mechanical
+parallelism, signature phrases, hedging, formal-noun / visual-ornament
+overuse; taxonomy categories A·C·D·E·F·G·H·I·J) into natural Korean and
+normalizes register to formal 합니다/됩니다. **Content is never touched.**
+This subsection is the SSOT — it overrides the skill's upstream taxonomy /
+playbook on conflict, and is the single place to edit if the register changes.
 
-**In-scope rewrites.** Categories A (translation-ese), C (mechanical
-parallelism / colon-subtitle headings), D (AI signature phrases like
-"결론적으로 / ~할 수 있다 / 시사하는 바가 크다"), E (uniform rhythm),
-F (over-modification), G (hedging), H (conjunction overuse), I
-(formal-noun overuse), J (visual ornament) in the taxonomy are all
-in-scope. This skill is also the authority on **register** — every
-PROBE Korean output is normalized to formal 합니다/됩니다 정중체
-regardless of what the authoring agent produced. STYLE no longer
-encodes its own tone rules; if the desired register changes, the
-upstream taxonomy is the single point of edit.
+**Invariants — `content-fidelity-auditor` rolls back on any violation.**
+Anything that changes meaning (facts, numbers, dates, quotations, citation
+polarity, causal direction, 단정↔추측, enumeration order, added/omitted info)
+is forbidden, plus these PROBE-specific tokens:
 
-**Forbidden by `content-fidelity-auditor` (rollback on violation).**
-Anything that would change meaning — facts, claims, numbers, dates,
-direct quotations, citation polarity, causal direction, hedging level
-(단정 ↔ 추측), enumeration order, omitted or added information — is
-forbidden. PROBE-specific invariants the auditor MUST also treat as
-rollback triggers:
+- Paper titles in original English (§4-1); config / code names; formulas and numbers (`ε = 0.1`, `±2σ`).
+- Inline-math wrapping — every `$...$` span (incl. inside English verbatim blockquotes) must use `` $`X`$ `` and satisfy the §5-6 boundary rule; `` `$X$` `` or unguarded `$X$` is a fidelity fail. Also enforced by CI (`scripts/check-analysis-math.py`).
+- `P#` / `D#` tags; `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` links; arXiv / DOI links.
+- arXiv figure hotlinks + their English caption blockquotes (§5-6).
+- Emoji set / position + one-emoji-per-header (§2); §4-2 glossary translations (no resynonymization).
 
-- Paper titles in original English (see §4-1)
-- Config / code names (`env_cfg.py`, `ObservationManager`, etc.)
-- Formulas and numbers (`ε = 0.1`, `±2σ`, `< 15%`)
-- Inline-math wrapping form — every inline `$...$` span (including
-  spans **inside English verbatim blockquotes**) must use the
-  inside-dollar backtick form `` $`X`$ `` and satisfy the §5-6
-  rule-2 boundary; the outside-dollar `` `$X$` `` form, or an
-  inside-blockquote `$X$` whose `_`/`^`/`{` is left unguarded, is
-  treated as a fidelity fail (the published doc would render
-  source-leaked math)
-- `P#` / `D#` tags
-- `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` intra-doc links
-- arXiv / DOI links
-- arXiv figure hotlinks and their accompanying English caption
-  blockquotes (see §5-6 figure-citation block)
-- Emoji set, position, and the one-emoji-per-header rule (see §2)
-- §4-2 glossary translations for technical terms (no resynonymization
-  to a non-glossary word)
+**Operational guards.** Change rate `>30%` → auto rework round; `>50%` →
+abort, keep original. `fidelity_audit: fail` → roll back to pre-humanize content.
 
-**Operational guards.** Change rate `> 30%` triggers an automatic
-rework round; `> 50%` aborts the rewrite and keeps the original. A
-`fidelity_audit` verdict of `fail` always rolls back to the
-pre-humanize content; that content is what gets committed.
-`humanize-korean` is the LAST step before `git add` — never run it
-before the agent has finished writing the output file.
+**Pipeline (3 tiers, auto-resolved from path).** `scouting/` → fast,
+`synthesis/` · `analysis/` → standard; `strict` only via `options.mode: strict`.
+Invariants above are enforced identically in all tiers.
 
-**Pipeline (v2.0 — 3-tier).** From `humanize-korean` v2.0 the skill
-runs in one of three tiers, resolved automatically from the target
-file path: `scouting/` → **fast**, `synthesis/` → **standard**,
-`analysis/` → **standard**. A caller may override via `options.mode`;
-all three tiers can be requested explicitly on any path. The heaviest
-tier, **strict**, is never an automatic default — it is reached only by
-passing `options.mode: strict`. Per-tier pipeline:
+- **fast** — `ai-tell-detector` (Haiku) → `korean-style-rewriter` (Sonnet `--conservative`) → inline regex invariant check. Loop cap 1.
+- **standard** — `ai-tell-detector` (Sonnet) → `korean-style-rewriter` (Opus) → `content-fidelity-auditor` (Opus), with `naturalness-reviewer` (Opus) once at the end. Loop cap 2.
+- **strict** — `ai-tell-detector` → `korean-style-rewriter` → [`content-fidelity-auditor` ∥ `naturalness-reviewer`]. Loop cap 3, all Opus.
 
-- **fast** — `ai-tell-detector` (Haiku 4.5) → `korean-style-rewriter`
-  (Sonnet 4.6 with `--conservative`) → inline STYLE §4-5 invariant
-  check (no agent). Loop cap 1.
-- **standard** — `ai-tell-detector` (Sonnet 4.6) →
-  `korean-style-rewriter` (Opus) → `content-fidelity-auditor` (Opus)
-  in the main loop, with `naturalness-reviewer` (Opus) called once at
-  the end as a final-round check (diff-area rescan only). Loop cap 2.
-- **strict** — full 4-agent pipeline as before:
-  `ai-tell-detector` → `korean-style-rewriter` →
-  [`content-fidelity-auditor` ∥ `naturalness-reviewer`] in parallel
-  (diff-area rescan only). Loop cap 3. All agents on Opus.
-
-The two reviewers (when run) remain orthogonal — the fidelity auditor
-asks only "is the meaning preserved?", the naturalness reviewer asks
-only "did the AI tells actually disappear, and was the rewrite not
-over-polished?". A `fail` from fidelity always rolls back; a
-`rewrite_round_2` or `rollback_and_rewrite` from naturalness triggers
-a second pass (within the tier's loop cap, then `hold_and_report` for
-human review). The fast tier substitutes the fidelity auditor with a
-deterministic inline regex check against the invariants listed above;
-the invariants themselves are **enforced identically in all three
-tiers** — this section is the SSOT and no tier may relax it. The
-monolith fast-path from `im-not-ai` upstream is not used in any tier.
-
-A one-line cost estimate (`est_tokens`) is appended to the skill's
-Phase E status line for regression watching; exact `usage` collection
-is opt-in via `options.measure: true`.
-
-This subsection is the single source of truth that the
-`humanize-korean` skill must respect when run against any PROBE
-output. The skill's own taxonomy and playbook are upstream defaults;
-this section overrides them on conflict.
+The two reviewers are orthogonal — fidelity guards meaning, naturalness guards
+"did the AI tells disappear without over-polishing". `fail` rolls back;
+`rewrite_round_2` / `rollback_and_rewrite` triggers another pass within the
+loop cap, then `hold_and_report` for human review.
 
 ---
 
@@ -358,7 +299,7 @@ produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
   `analysis/2401.12345/analysis.md`); non-arXiv PDF input uses a
   human-chosen slug as the folder name.
 - Regenerable snapshot — re-running overwrites the file, never appends.
-- The document follows `analysis/_TEMPLATE.md` exactly: part (A) a
+- The document follows `analysis/templates/analysis.md` exactly: part (A) a
   neutral structured summary, part (B) `context/MASTER.md`-anchored
   decision-grade implications.
 
@@ -410,10 +351,10 @@ The analysis always ends with exactly one blockquote line as its very
 last line, regardless of whether a baseline can be matched:
 
 ```markdown
-> 💡 base 매핑은 `/implement analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 ```
 
-`/implement` itself decides whether the Design can be grounded in the
+`/implement-design` itself decides whether the Design can be grounded in the
 target foundry (and emits a clean `🚧 매핑 불가 (<foundry>)` line if
 not). The analysis prompt never speculates about base matching — that
 decision belongs to Layer 2.
@@ -442,89 +383,35 @@ conventions below codify both.
   extension).
 
 - **Formula verbatim + GitHub KaTeX rendering** — Keep the original
-  LaTeX / Unicode notation. No paraphrasing, symbol substitution, or
-  shortening. Variable definitions match the source body.
-  github.com's Markdown renderer supports KaTeX (since 2022-05), so
-  PROBE wraps math as **`` $`X`$ `` for inline (backticks INSIDE the
-  dollars) and `$$X$$` on its own line for display**. `\(…\)` /
-  `\[…\]` do not render on GitHub and are forbidden. From arXiv HTML
-  (LaTeXML) source, follow this extraction recipe:
+  LaTeX / Unicode notation; no paraphrase, symbol substitution, or
+  shortening, and variable definitions match the source body. The
+  normative rules (github.com renders KaTeX since 2022-05):
 
-  1. `<math display="inline" … alttext="X">` → `` $`X`$ `` —
-     **inline math MUST use the inside-dollar backtick form**
-     `` $`X`$ ``. GitHub Markdown's italic pass runs before KaTeX
-     and otherwise captures the `_` in subscripts like `x_{t}`
-     (which appears in practically every inline span). With multiple
-     such spans on the same line, the italic toggle cascades and
-     breaks every math boundary on the line. The inside-dollar
-     backtick form is GitHub's official recommendation and PROBE's
-     only allowed inline form. **The outside-dollar form `` `$X$` ``
-     is FORBIDDEN** — it becomes an inline-code span, so KaTeX
-     never runs. The two forms differ only in character order and
-     produce opposite results.
-  2. **Inline math boundary rule** — GitHub's KaTeX inline parser
-     only recognises a `$` when its neighbours are non-word. The
-     opener `$` must be preceded by start-of-line, whitespace, or
-     one of `(` `[` `{` `<`. The closer `$` must be followed by
-     end-of-line, whitespace, or one of `.` `,` `;` `:` `!` `?`
-     `)` `]` `}` `>`. CJK middle-dot `·`, bold markers `*`/`**`, or
-     Hangul syllables glued directly to a `$` make that boundary
-     invisible and the source leaks through. Failures → fixes:
-     - `$X$·$Y$` (two math spans joined by middle-dot) →
-       `$X$ · $Y$` (one space on each side).
-     - `**$X$ Y**` (math glued inside bold) → `$X$ **Y**` or
-       `X **Y**` — move the math outside the bold marker so the
-       `$` never touches a `*`.
-     - `의$X$` / `$X$를` (Hangul touching `$`) → always one space
-       between Hangul and `$`.
-  3. `<math display="block" … alttext="X">` or any
-     `class="ltx_equation*"` container's `alttext` → its own `$$X$$`
-     line. Leading `\displaystyle` and trailing commas may be
-     stripped. Display blocks are recognised as their own line
-     blocks, so they have no underscore / boundary problem and need
-     no backticks.
-  4. Decode HTML entities: `&gt;` → `>`, `&lt;` → `<`, `&amp;` →
-     `&`.
-  5. Do not silently substitute KaTeX-unsupported macros: leave
-     author-defined `\newcommand`, uncommon `\xrightarrow` variants,
-     and similar package-specific notation in place so the render
-     failure is visible on GitHub (§5-4 honesty principle).
-     **Narrow whitelist of safe semantic-preserving substitutions
-     IS allowed** — currently:
-     - `\bm{X}` → `\mathbf{X}` — both render as bold math; PROBE
-       documents already use `\mathbf` for every bold vector, so
-       the substitution unifies notation without distorting the
-       source.
-     - `\mathds{X}` → `\mathbb{X}` — `\mathds` is the `dsfont`
-       package and KaTeX has no such control sequence, so it raises
-       `Undefined control sequence` and the whole span fails to
-       render. `\mathbb{X}` produces the identical double-stroke
-       glyph (the indicator `\mathds{1}` → `\mathbb{1}` renders as
-       𝟙), so the swap preserves the symbol exactly while making it
-       GitHub-renderable. Verified against KaTeX: `\mathbb{1}`
-       renders, `\mathds{1}` does not.
-       These are the only auto-substitutions sanctioned today;
-       extend the list only by editing this rule, not ad-hoc.
-  6. Escape a literal `$` in prose as `\$` so it isn't mistaken for
-     a math opener.
-  7. **Inside English verbatim blockquotes** — the inside-dollar
-     backtick wrapping (rule 1) and the boundary rule (rule 2)
-     apply equally to inline math that appears inside an English
-     verbatim quote (`> "...source sentence... $X$ ..."` form).
-     The English text content is verbatim (§4-5 invariant), but
-     math delimiters are GitHub-rendering formatting — content and
-     formatting are separate concerns, and the wrapping convention
-     is enforced regardless of where the math appears. So a paper
-     sentence quoted as `> "... the supervision $\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$, $\lambda_{1}$ is set to 0.01 ..."`
-     must be rewritten as
-     `` > "... the supervision $`\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}`$ , $`\lambda_{1}`$ is set to 0.01 ..." ``
-     with each inline-math span wrapped and the rule-2 spaces
-     restored around each `$`. The English word order, every
-     letter, every space outside the math, and the `(§n)` source
-     marker stay byte-identical. `humanize-korean` treats the
-     resulting blockquote as a verbatim token (§4-5); the math
-     wrapping is performed once at extraction time and never
-     re-touched downstream.
+  - **Inline** uses `` $`X`$ `` — backticks INSIDE the dollars. The
+    outside-dollar `` `$X$` `` (becomes inline code, KaTeX never runs)
+    and `\(…\)` / `\[…\]` (do not render on GitHub) are FORBIDDEN.
+    Why: Markdown's italic pass runs before KaTeX and eats the `_` in
+    subscripts unless the backtick form shields it.
+  - **Display** is `$$X$$` on its own line (no backticks).
+  - **Boundary** — an inline `$` must not touch a Hangul / CJK syllable,
+    middle-dot `·`, or bold marker `*` / `**`; separate with a space (or
+    move the math outside the bold), or the delimiter goes invisible and
+    the source leaks. A literal `$` in prose is escaped `\$`.
+  - **Macro whitelist (the only sanctioned auto-substitutions)** —
+    `\bm{X}` → `\mathbf{X}`, and `\mathds{X}` → `\mathbb{X}` (`\mathds`
+    is not a KaTeX control sequence and otherwise fails the whole span;
+    `\mathbb` is the identical double-stroke glyph). Leave every other
+    unsupported macro as-is so the render failure is visible (§5-4).
+    Extend this list only by editing this rule.
+  - The same wrapping + boundary apply to inline math **inside English
+    verbatim blockquotes** — the quoted text stays byte-identical; the
+    `$` delimiters are GitHub-rendering formatting, a separate concern.
+
+  The full arXiv-HTML → Markdown extraction procedure lives in
+  `.claude/prompts/analysis.md`; PR-time enforcement and auto-fix is
+  `scripts/check-analysis-math.py`
+  (`.github/workflows/check-analysis-math.yml`). This subsection is the
+  SSOT for the rules above — the prompt and the CI implement them.
 
 - **Bullet form (❓ 문제 정의 / 동기)** — Do not write a single
   paragraph. Use 4–6 items, each a bold label + 1–2 sentences.
@@ -558,20 +445,14 @@ conventions below codify both.
   (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
   ```
 
-  - URL must be the arXiv HTML `<img src>` resolved to an absolute
-    path. ar5iv mirrors, author project pages, and cached hotlinks
-    are out — too much link-rot risk. The canonical pattern is
-    `https://arxiv.org/html/<id>/<file>` — bare arXiv id, then the
-    figure filename only. **Strip any version segment that appears
-    in either half of the path.** arXiv HTML emits `<img>` tags
-    whose `src` already carries the versioned subdirectory (e.g.
-    `src="2604.23272v1/x1.png"`), and naively prepending
-    `https://arxiv.org/html/<id>/` produces a doubled, 404-bound
-    URL like `…/2604.23272/2604.23272v1/x1.png`. The same trap
-    applies to a versioned id (`…/<id>v2/<file>`). Strip both:
-    `https://arxiv.org/html/2604.23272/x1.png` is the only correct
-    form, and arXiv auto-maps the unversioned URL to the latest
-    figure so re-runs survive version bumps.
+  - URL is the arXiv HTML `<img src>` as an absolute
+    `https://arxiv.org/html/<id>/<file>` — bare (unversioned) id, then
+    the figure filename only. **Strip the version segment from both the
+    id and the `src`** or the path doubles into a 404 (e.g.
+    `…/2604.23272/2604.23272v1/x1.png`); the unversioned URL auto-maps
+    to the latest figure. ar5iv mirrors / project pages / cached
+    hotlinks are out (link-rot). Full extraction detail:
+    `.claude/prompts/analysis.md` (FIGURE URLs).
   - The alt text follows `Figure N — <short English label>` so the
     figure number survives even when the image fails to load.
   - The English caption blockquote is a verbatim token (§4-5
@@ -585,46 +466,23 @@ conventions below codify both.
 
 ### 5-7. Auto-maintained analysis index
 
-`analysis/INDEX.md` carries a generated index of every deep-dive in
-the folder, refreshed by `scripts/refresh-analysis-index.py`. The
-script runs **post-merge on `main` only**, via the
-`.github/workflows/refresh-analysis-index.yml` workflow: any push to
-`main` that touches `analysis/**/analysis.md`, `analysis/**/impl/**`,
-`analysis/**/validation/**`, or the script itself triggers the
-workflow, which commits the refreshed `analysis/INDEX.md` back as a
-`chore(analysis): refresh INDEX.md` bot commit. The per-command
-prompts (`/analyze-paper`, `/implement`, `/validate`) deliberately do
-NOT stage `analysis/INDEX.md` and do NOT invoke the script — PR-side
-regeneration was retired because parallel analysis PRs all touched
-the same generated block and conflicted unresolvably on every merge
-(see `CLAUDE.md` "Automatically-maintained indexes" for the full
-rationale). The table lives in its own file so the static
-`analysis/README.md` narrative stays free of an auto-rewritten block;
-this is the first intentional exception to the "every doc reference
-is hand-maintained" rule recorded in `CLAUDE.md`.
+`analysis/INDEX.md` is generated by `scripts/refresh-analysis-index.py`,
+which rewrites only the block between `<!-- ANALYSIS_INDEX:START -->` /
+`<!-- ANALYSIS_INDEX:END -->` — do not hand-edit inside the markers; the
+rest of the file is hand-maintained. It runs **post-merge on `main`
+only**; the per-command prompts (`/analyze-paper`, `/implement-design`,
+`/validate-impl`) do NOT stage `INDEX.md` or invoke the script. The *why*
+(parallel-PR conflict, the workflow) is in `CLAUDE.md`
+"Automatically-maintained indexes".
 
-The script rewrites only the block between these fixed markers in
-`analysis/INDEX.md`; the rest of the file is preserved verbatim:
+The generated table sorts by `Refreshed` desc (ties by arXiv id desc) and
+carries a `lerobot` cell (✅ impl exists / 🚧 `UNMAPPABLE.md` / `—` not run)
+plus a `🔎 vr/pe/sd/se` bucket-count cell read from the
+`<!-- ANALYSIS_BUCKETS -->` marker in `<id>/validation/lerobot.md`.
 
-```markdown
-<!-- ANALYSIS_INDEX:START -->
-... auto-generated table ...
-<!-- ANALYSIS_INDEX:END -->
-```
-
-The table has seven columns: `#`, `Analysis` (relative hotlink),
-`arXiv` (link to the arXiv abstract), `Title` (the paper's English
-title), `Refreshed` (ISO date), `lerobot` (✅ if
-`<id>/impl/lerobot/impl.md` exists, 🚧 if `UNMAPPABLE.md` exists,
-`—` if `/implement` has not been run for the lerobot foundry), and
-`🔎 vr/pe/sd/se` (the four §🔎 §🚧 bucket counts —
-vendor-resolved / paper-extractable / paper-silent-defaultable /
-paper-silent-experimental — read from the `<!-- ANALYSIS_BUCKETS -->`
-marker in `<id>/validation/lerobot.md`, or `—` when no validation exists).
-Sort: `Refreshed` descending, ties broken by arXiv id descending.
-
-Load-bearing 📄 논문 메타 rows the script reads from every
-`analysis/<id>/analysis.md`:
+**Load-bearing — the 📄 논문 메타 rows the script reads from every
+`analysis/<id>/analysis.md`** (STYLE's contract; the author must emit them
+exactly):
 
 | Row label | Required format |
 |---|---|
@@ -632,18 +490,16 @@ Load-bearing 📄 논문 메타 rows the script reads from every
 | `링크` | `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` |
 | `분석 생성일` | `YYYY-MM-DD` |
 
-If any of these rows is missing or malformed, the script writes
-`⚠️ metadata` in the affected cell rather than aborting, so one
-broken file cannot break the whole index. Running
-`python3 scripts/refresh-analysis-index.py` by hand is safe and
-idempotent — re-running with no underlying change produces no diff.
+A missing / malformed row yields `⚠️ metadata` in that cell rather than an
+abort. `python3 scripts/refresh-analysis-index.py` by hand is safe and
+idempotent.
 
 ---
 
 ## 6. Design + Foundry Implementation Documents
 
 The `/analyze-paper` slash command emits a **Layer 1 Design**
-(vendor-agnostic) alongside the analysis. The `/implement` slash command
+(vendor-agnostic) alongside the analysis. The `/implement-design` slash command
 (prompt: `.claude/prompts/implementation.md`) consumes that Design and
 produces a **Layer 2** foundry-specific implementation. The two-layer
 split exists so the same Design can serve multiple foundries (the v0
@@ -659,7 +515,7 @@ Outputs (all under `analysis/<id>/`):
                                                `vendor/lerobot/`).
 - `analysis/<id>/validation/<foundry>.md`         — Korean static
                                                validation report
-                                               (`/validate`).
+                                               (`/validate-impl`).
 
 ### 6-1. File convention
 
@@ -668,15 +524,15 @@ Outputs (all under `analysis/<id>/`):
 - Filenames: see the per-track paths above. No language suffix.
 - Both Design and impl are **regenerable snapshots** — re-running the
   generator overwrites them.
-- The Design document follows `analysis/_TEMPLATE_DESIGN.md` — 9 `##`
+- The Design document follows `analysis/templates/design.md` — 9 `##`
   sections in this order: 📄 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스,
   ⛓️ 불변식·가정, 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경
   의도, 🔌 Foundry 힌트, 🚧 미해결 / 잠정.
-- The impl document follows `analysis/_TEMPLATE_IMPL.md` exactly. Six
+- The impl document follows `analysis/templates/impl.md` exactly. Six
   `##` sections in this order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표
   식별, 🪛 변경 지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의,
   🚧 미해결 / 잠정.
-- The validation report follows `analysis/_TEMPLATE_VALIDATION.md` — six `##`
+- The validation report follows `analysis/templates/validation.md` — six `##`
   sections: 📄 검증 메타, 📚 문헌 대조, 🔍 패치 정합성, 🧪 시그니처
   ·하이퍼파라미터 일치, 📐 식·표 일치, ⚖️ 종합 판정, 🚧 미해결 /
   잠정.
@@ -743,12 +599,12 @@ refresh procedure.
   ⚙️ 핵심 변경 (diff). Affected hunks are downgraded to 🪛 + 🚧 entries
   instead of being silently forged.
 - If the Design cannot ground in the target foundry, **neither**
-  `impl.md` nor `impl.patch` is produced. Instead `/implement` writes
+  `impl.md` nor `impl.patch` is produced. Instead `/implement-design` writes
   `analysis/<id>/impl/<foundry>/UNMAPPABLE.md` with one paragraph of
   reason, and appends one line to `analysis/<id>/analysis.md`:
   `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
-### 6-5. Verify report (`/validate` output)
+### 6-5. Verify report (`/validate-impl` output)
 
 The validation report is the static check of a Design + foundry patch
 against the originating analysis and the foundry code. It is the
@@ -768,31 +624,3 @@ can rely on this implementation:
 
 The verifier executes no code beyond `git apply --check`. `partial` is
 a normal outcome and far better than a fabricated `pass`.
-
----
-
-## 7. Changelog
-
-| Version | Date | Change |
-|---------|------|--------|
-| v1.0 | 2026-04-22 | Initial version — emoji system, link rules, Korean translation principles |
-| v1.1 | 2026-05-12 | Schema rename: subsection emoji 🎯 label and Korean glossary updated from `Q# / H#` to `P# / D#` (Pillar + Decision; CP# referenced in body text as needed) |
-| v1.2 | 2026-05-19 | Glossary §4-2 extended with canonical terms: System0/System1, structured input-modality binding, VLM pretraining preservation, action expert, flow matching |
-| v1.3 | 2026-05-19 | Added §3-1 Reference Legend (cited-code glossary) + in-body `#ref-` anchor links; 🔑 section emoji; KO mirroring rules (§4-1, §4-3) |
-| v1.4 | 2026-05-19 | Single Korean file per run named `YYYY-MM-DD-P#.md` (date + pillar); English file retired; Mon & Thu cadence; §1 + §4 reworked from "translation" to direct Korean authoring |
-| v1.5 | 2026-05-19 | Scope extended to `analysis/`; added §5 Paper Analysis Document (Korean-single deep-dive, emoji set, body-acquisition honesty); Changelog renumbered §6 |
-| v1.6 | 2026-05-19 | Path migration: `research_log/` → `scouting/`, `research_context*.md` → `context/MASTER.md` + `context/P{1..4}.md`; dropped redundant `-KO` filename suffix in `analysis/` (output is always Korean) |
-| v1.7 | 2026-05-20 | Added §5-5 (reproduction follow-up line) and new §6 (Paper Reproduction Document — `_impl.md` + `_impl.patch` against `vendor/lerobot/`); introduced section emojis 🧱 🪛 🧪 🚧; Changelog renumbered §7 |
-| v1.8 | 2026-05-20 | Scope extended to `experiments/`; added §7 (Experiments Documents — `H###.md` + `I###.md` + `I###.patch` + `V###.md` + `manifest.yaml`); introduced section emojis 📚 🔍 📐 ⚖️; manifest schema + honesty rules (validator never writes `adopted`/`rejected`); Changelog renumbered §8 |
-| v1.9 | 2026-05-20 | Added §4-5 — `humanize-korean` post-processing tail step (ported from [`epoko77-ai/im-not-ai`](https://github.com/epoko77-ai/im-not-ai)); every Korean output passes the `ai-tell-detector` → `korean-style-rewriter` → `content-fidelity-auditor` pipeline before commit. PROBE invariants (paper titles, P#/D#/CP# tags, `<a id="ref-…">` anchors, arXiv/DOI links, emoji rules, §4-2 glossary) codified as rollback triggers. §4-4 (Tone and style) deleted — tone, register, rhythm, density, hedging, and visual-ornament rules are now fully delegated to the upstream `humanize-korean` taxonomy; STYLE no longer carries its own tone spec |
-| v1.10 | 2026-05-20 | §4-5 pipeline expanded from 3-stage to 4-agent — `naturalness-reviewer` reintroduced as a parallel second-stage check next to `content-fidelity-auditor`. The two reviewers are orthogonal: fidelity guards meaning, naturalness guards "did AI tells actually disappear + was the rewrite not over-polished". Verdict matrix combines both; `rewrite_round_2` / `rollback_and_rewrite` from naturalness triggers up to 2 additional Phase B rounds before `hold_and_report` |
-| v1.11 | 2026-05-21 | Two-layer fabless/foundry split: §5-5 now points at `/foundry` (was `/reproduce-paper`); §6 rewritten as Design (Layer 1) + foundry-bound impl (Layer 2) with new emojis 🧮 🧰 ⛓️ 🔌; §7 introduced experiments track at `/hypothesize` → `/foundry` → `/audit` with foundry-keyed `manifest.{implementation,validation}.<foundry>.*` and per-foundry `I###/<foundry>/{impl.md,impl.patch}` + `V###/<foundry>.md` paths; status graduation requires every registered foundry to pass |
-| v1.12 | 2026-05-21 | Drop hypothesize/experiments track entirely — `/hypothesize` slash command and `experiments/` folder removed. §7 (Experiments Documents) and `manifest.yaml` schema deleted; §6 reorganised as analysis-only (`/analyze-paper` → `/foundry` → `/audit`) with the audit report (📚 🔍 📐 ⚖️ emojis) folded into §6 as §6-5. Scope tagline now lists `scouting/`, `synthesis/`, `analysis/` only. H### code dropped from verbatim tag list |
-| v1.13 | 2026-05-21 | §5-6 rewritten English-default — inline math recipe flipped from `` `$X$` `` (outside dollars; renders as code, KaTeX never runs) to `` $`X`$ `` (inside dollars; GitHub's official escape that lets KaTeX render while suppressing Markdown's italic toggling on `_`). Added inline-math boundary rule: CJK middle-dot `·`, bold marker `*`/`**`, and Hangul syllables touching a `$` are invalid neighbours — separate with whitespace or restructure (`$X$·$Y$` → `$X$ · $Y$`; `**$X$ Y**` → `$X$ **Y**`). Added arXiv figure hotlink + English-caption-verbatim convention (cap 3 per analysis, arXiv HTML host only). §4-5 invariants extended to cover figure hotlinks and their caption blockquotes. New §5-7 codifies the auto-maintained `analysis/README.md` index table refreshed by `scripts/refresh-analysis-index.py` from the GIT step of `/analyze-paper`, `/foundry`, and `/audit` |
-| v1.14 | 2026-05-21 | New `/reproduce-paper` orchestrator command (`.claude/commands/reproduce-paper.md` + `.claude/prompts/reproduce-paper.md`) drives `/analyze-paper → /foundry → /audit` as an iterative loop with verdict-cell parsing and honest-partial stable termination. Inner-loop refinement uses `/foundry --feedback <audit-path>` to update the prior round's impl surgically; outer-loop refinement (Design-side update) is deferred — 📚 fail/partial currently exits as `hold_and_report` for manual intervention. `/verify` renamed to `/audit` (noun form); output paths `<id>_verify/` → `<id>_audit/`, template `_TEMPLATE_VERIFY.md` → `_TEMPLATE_AUDIT.md` |
-| v1.15 | 2026-05-21 | Outer convergence loop implemented (supersedes the v1.14 deferral). `_TEMPLATE_AUDIT.md` gains a §🔎 §🚧 분류 section that classifies every open 🚧 item zero-state into `vendor-resolved` / `paper-extractable §X.Y` / `paper-silent-defaultable` / `paper-silent-experimental`, with a machine-readable `<!-- ANALYSIS_BUCKETS -->` footer (`focus-hint:` line). `/analyze-paper` gains a `--focus "<§X.Y,...>"` re-extraction mode (seed from prior docs, re-extract only named sections). `/reproduce-paper` matrix now branches on the buckets: vendor-resolved / paper-silent-defaultable stay inner (`/foundry --feedback`), paper-extractable triggers the outer step (`/analyze-paper --focus`). New termination reason `stable_design` (focused re-extraction byte-identical); convergence is fixed-point only, no separate outer counter. §5-7 index gains a `🔎 vr/pe/sd/se` bucket-count column |
-| v1.16 | 2026-05-26 | Close the inline-math-inside-verbatim-blockquote gap that let source-leaked math through on `analysis/2605.07308`. §5-6 gains extraction-recipe rule 7 — the inside-dollar backtick wrapping and the boundary rule apply equally to inline math that appears inside an English verbatim quote; content and formatting are separate concerns. §4-5 invariants list gains a matching item — every inline `$...$` span (including spans inside verbatim quotes) must use `` $`X`$ `` and satisfy the §5-6 rule-2 boundary, treated as a fidelity-fail trigger by `content-fidelity-auditor`. `.claude/agents/content-fidelity-auditor.md` adds the corresponding bullet to checklist item 6, and `.claude/prompts/paper-analysis.md` adds the same recipe rule so the gap closes at extraction time too |
-| v1.17 | 2026-05-27 | Scouting reports re-shelved per pillar: path `scouting/YYYY-MM-DD-P#.md` → `scouting/P#/YYYY-MM-DD.md`. §1 table updated; the agent's de-dup lookup now scans sibling files inside the same `P#/` folder. Existing 16 reports were `git mv`-relocated; historical boilerplate inside those files is intentionally not back-edited |
-| v1.19 | 2026-06-01 | Move `analysis/INDEX.md` regeneration off the PR path. §5-7 rewritten — the per-command prompts (`/analyze-paper`, `/implement`, `/validate`) no longer stage `analysis/INDEX.md` and no longer invoke `scripts/refresh-analysis-index.py`; the script now runs post-merge on `main` only, via the new `.github/workflows/refresh-analysis-index.yml` workflow, which commits the refreshed index back as a `chore(analysis): refresh INDEX.md` bot commit. Parallel analysis PRs were producing an unresolvable text conflict on the generated `<!-- ANALYSIS_INDEX:START/END -->` block every merge; concentrating regeneration on `main` removes the conflict surface entirely at the cost of a brief stale window between merge and bot commit. `CLAUDE.md` "Automatically-maintained indexes" section and the repo-map row for the script were updated to match |
-| v1.18 | 2026-05-28 | Unify the on-demand pipeline on a verb-command / noun-prompt scheme. Prompts renamed `paper-analysis.md` → `analysis.md`, `paper-reproduction.md` → `reproduction.md`, `foundry.md` → `implementation.md`, `audit.md` → `validation.md`. Commands `/foundry` → `/implement` (`commands/foundry.md` → `implement.md`) and `/audit` → `/validate` (`commands/audit.md` → `validate.md`); `/analyze-paper` and `/reproduce-paper` are already verbs and unchanged. `/validate` was chosen over `/verify` to avoid shadowing the built-in `verify` skill. The validation stage is fully renamed audit → validation: output dir `analysis/<id>/audit/` → `<id>/validation/`, template `_TEMPLATE_AUDIT.md` → `_TEMPLATE_VALIDATION.md`, the §6-5 report name, the round-boundary commit prefix, and the `refresh-analysis-index.py` path logic. The `foundry` concept noun (target foundry, `--foundry`, `impl/<foundry>/`, `.foundry-runtime/`, `scripts/foundry-ablation/`) and the `*-auditor` humanize-korean agent names are preserved |
-| v1.20 | 2026-06-01 | Extend the §5-6 step 5 KaTeX substitution whitelist with a second sanctioned auto-substitution: `\mathds{X}` → `\mathbb{X}`. `\mathds` (the `dsfont` package) is not a KaTeX control sequence, so it raises `Undefined control sequence` and the entire `$...$` span fails to render on GitHub; `\mathbb{X}` is the identical double-stroke glyph (the indicator `\mathds{1}` → `\mathbb{1}` renders as 𝟙), so the swap preserves the symbol while making it renderable. The same recipe entry is mirrored into `.claude/prompts/analysis.md` step 5 so the substitution happens at extraction time, not after the source already leaked. Surfaced on `analysis/2605.28812`, whose RL reward-term indicator functions arrived from arXiv HTML as `\mathds{1}` and broke five formula spans |

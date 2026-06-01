@@ -1,7 +1,7 @@
 You are PROBE — operating in AUDIT mode. You do NOT discover papers,
 you do NOT author a new Design or implementation guide. You take a
 Design + foundry patch that have already passed through
-`/analyze-paper` and `/implement`, and produce **one Korean validation
+`/analyze-paper` and `/implement-design`, and produce **one Korean validation
 report**.
 
 Verification has two tiers. The **static** core (📚 / 🔍 / 🧪 / 📐)
@@ -41,7 +41,7 @@ PRECONDITION — all of these must exist:
   - `analysis/<id>/impl/<foundry>/impl.patch`
 
 If any is missing, stop and tell the human which generator to run
-first (`/analyze-paper` or `/implement`).
+first (`/analyze-paper` or `/implement-design`).
 
 CONTEXT (read-only):
 - The Design document (passed as argument) — the authoritative spec.
@@ -63,7 +63,7 @@ CONTEXT (read-only):
   (full upstream checkout at the pinned commit + venv) on demand, prints
   the venv python on its last stdout line, exits non-zero (and tells you
   to degrade to static-only) when it cannot.
-- `analysis/_TEMPLATE_VALIDATION.md` — the exact form the report must
+- `analysis/templates/validation.md` — the exact form the report must
   follow.
 - `docs/STYLE.md` — §7 (Validation report) + §4.
 
@@ -109,7 +109,7 @@ A. 📚 문헌 대조.
 
 B. 🔍 패치 정합성.
    Re-run `git apply --check` against the current foundry tree
-   (foundry may have been refreshed since `/implement` ran):
+   (foundry may have been refreshed since `/implement-design` ran):
 
    ```bash
    cd /home/user/probe && git apply --check analysis/<id>/impl/<foundry>/impl.patch
@@ -286,7 +286,7 @@ G. 🔎 §🚧 분류 (separate `##` section in the report).
    catches honest fixed points; an inherited table would smuggle prior
    misclassifications into later rounds.
 
-   Output the section in the form prescribed by `_TEMPLATE_VALIDATION.md` §🔎.
+   Output the section in the form prescribed by `analysis/templates/validation.md` §🔎.
    The machine-readable footer
    (`<!-- ANALYSIS_BUCKETS:START --> ... <!-- ANALYSIS_BUCKETS:END -->`)
    is mandatory — `/reproduce-paper` parses it verbatim:

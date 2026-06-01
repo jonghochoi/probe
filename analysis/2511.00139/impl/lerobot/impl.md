@@ -20,7 +20,7 @@
 | 베이스 모델 / 코드 좌표 | `pi0` (`vendor/lerobot/policies/pi0/`) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 패치 파일 | [`./impl.patch`](./impl.patch) — `git apply --check` 통과 |
-| 실행 테스트 | [`./test_pi0_enhance_smoke.py`](./test_pi0_enhance_smoke.py) — `/validate §🧬` 가 설치된 foundry 에서 실행 (6 passed) |
+| 실행 테스트 | [`./test_pi0_enhance_smoke.py`](./test_pi0_enhance_smoke.py) — `/validate-impl §🧬` 가 설치된 foundry 에서 실행 (6 passed) |
 | 가이드 생성일 | 2026-05-22 |
 
 ---
@@ -93,7 +93,7 @@ return se_main + aux_loss_weight * (se_arm + se_hand)  # Eq. (12)
 
 ## 🧪 실무 구현 주의
 
-- **실행 검증** — sibling `test_pi0_enhance_smoke.py` 는 enhancer shape, index mask 의 paper 계약 (arm 6 + hand 12 = 18, max 32 padding), 손실 유한성·backprop, 식 12 의 $`\lambda{=}0`$ → main-only 환원, config 기본값/검증, factory 등록을 CPU 에서 검증합니다 (GPU·체크포인트·HF 다운로드 불필요). `/validate §🧬` 가 `scripts/ensure-foundry-runtime.sh lerobot` 로 foundry 를 pinned commit 에 설치하고 patch 를 적용한 뒤 이 테스트를 실행합니다 — round 0 기준 6 passed.
+- **실행 검증** — sibling `test_pi0_enhance_smoke.py` 는 enhancer shape, index mask 의 paper 계약 (arm 6 + hand 12 = 18, max 32 padding), 손실 유한성·backprop, 식 12 의 $`\lambda{=}0`$ → main-only 환원, config 기본값/검증, factory 등록을 CPU 에서 검증합니다 (GPU·체크포인트·HF 다운로드 불필요). `/validate-impl §🧬` 가 `scripts/ensure-foundry-runtime.sh lerobot` 로 foundry 를 pinned commit 에 설치하고 patch 를 적용한 뒤 이 테스트를 실행합니다 — round 0 기준 6 passed.
 - **외부 의존성** — `google/paligemma-3b-pt-224` 백본 가중치 다운로드 필요 (base `pi0` 와 동일, smoke test 범위 밖). enhancement 모듈은 신규 파라미터이므로 SFT 시 처음부터 학습됩니다.
 - **데이터셋** — 표준 `LeRobotDataset` 포맷. arm 6-DoF + hand 12-DoF 가 action 벡터의 앞 18 차원 (max_action_dim=32 패딩). DoF 정렬이 다르면 `arm_dim` 슬라이스 위치를 조정합니다.
 - **평가 / 추론** — `feature_enhancement=False` (πuni-origin) 이면 base `pi0` 와 byte-동일 경로라 기존 체크포인트 호환. `True` 면 `_build_model` 이 `PI0EnhancePytorch` 를 끼웁니다.

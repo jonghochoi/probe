@@ -163,7 +163,7 @@ assertion verbatim) / `skipped` (테스트 부재 또는 런타임 미가용 —
      - `paper-silent-experimental` — 본문 침묵 + 실험 결정 필요.
        honest defer (§🚧 잔존).
      - `out-of-base-scope` — 논문·Design 모두 완전 명세하지만,
-       `/implement` §A 가 선택한 단일 base 의 좌표계가 그 모듈/정책을
+       `/implement-design` §A 가 선택한 단일 base 의 좌표계가 그 모듈/정책을
        포함하지 않음 (예: π_hand 촉각 인코더·LSTM 정책을 π_uni→pi0
        매핑에서 제외). 이 bucket 을 쓰려면 impl.md §🧱 의 cover/exclude
        scope 선언을 cite 해야 하며, 선언이 없으면 사용 금지. §🚧

@@ -19,17 +19,17 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs (`P#_BRIEF.md`) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Each contains: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`) |
-| `analysis/_catalogs/` | agent (hand-curated) | Cross-paper lineage catalogs, separated from per-paper `<arxiv-id>/` deep-dives. `README.md` defines the common column standard (License + commercial marker / Access icon / `hf:`/`gh:`/`web` link prefix / 🤖-👤-🔀 데이터 유형 / 🟢-🟡-🔴-❓ source-check) + the decision-4-field rule for the scan marker; `vlm.md` enumerates open-weight VLM candidates as a flat table, `vla.md` and `lineage_corpus.md` both use the *scan table + per-row `<details>` cards* hybrid (vla 8 H4: Architecture / Training data / Action representation / Inference / Eval / Open-weight / Source check / Sources · lineage_corpus 8 H4: Observations / Actions / Embodiment / Annotation / Scale / Lineage / Source check / Sources). The folder also hosts pillar-level methodology references (e.g. `vlm-prior-preservation.md` — P4 forgetting / carve-out orthogonal planes + θ_VLM path-intervention A~D + 4-stage recipe + forward-KL measurement protocol); methodology docs are not facts-tables but design references and cross-link to the catalog rows. Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
+| `analysis/_catalogs/` | agent (hand-curated) | Cross-paper lineage catalogs, separated from per-paper `<arxiv-id>/` deep-dives. `README.md` defines the common column standard (License + commercial marker / Access icon / `hf:`/`gh:`/`web` link prefix / 🤖-👤-🔀 데이터 유형 / ✅-⬜ Human verified — single "did a human check this" bit, default ⬜); `vlm.md` enumerates open-weight VLM candidates as a flat table, `vla.md` and `dataset.md` both use the *scan table + per-row `<details>` cards* hybrid (vla 8 H4: Architecture / Training data / Action representation / Inference / Eval / Open-weight / Human verified / Sources · dataset 8 H4: Observations / Actions / Embodiment / Annotation / Scale / Lineage / Human verified / Sources). The folder also hosts pillar-level methodology references (e.g. `vlm-prior-preservation.md` — P4 forgetting / carve-out orthogonal planes + θ_VLM path-intervention A~D + 4-stage recipe + forward-KL measurement protocol); methodology docs are not facts-tables but design references and cross-link to the catalog rows. Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) is committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
-| `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
+| `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive table; invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
-| `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement` before its first codegraph call (see the "CodeGraph" section below) |
-| `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate` (§🧬) and `/implement` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
-| `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/implement` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
+| `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
+| `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
+| `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/implement-design` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
@@ -46,74 +46,35 @@ nothing else.
 ## CodeGraph
 
 `vendor/lerobot/` is indexed by
-[CodeGraph](https://github.com/colbymchenry/codegraph) and exposed to every
-session over MCP. The index (`.codegraph/codegraph.db`) is built **on
-demand, not at session start** — only the commands that actually read
-`vendor/lerobot/` need it (today just `/implement`), so paying the build cost
-on every session would be waste. Those commands run
-`scripts/ensure-codegraph.sh` before their first codegraph call: it builds
-the DB if missing (~3s for the current 108 vendored `.py` files) and is a
-no-op when it already exists, after which the file watcher inside the MCP
-server keeps it fresh. Only `.codegraph/config.json` (defining
-`scope=vendor/lerobot`) is committed; the DB is per-checkout and gitignored.
+[CodeGraph](https://github.com/colbymchenry/codegraph) over MCP. The index
+(`.codegraph/codegraph.db`) is built **on demand, not at session start** —
+only commands that read `vendor/lerobot/` (today `/implement-design`) need it.
+They run `scripts/ensure-codegraph.sh` before their first codegraph call:
+builds the DB if missing (~3s for 108 `.py` files), no-op otherwise, then the
+MCP file watcher keeps it fresh. Only `.codegraph/config.json`
+(`scope=vendor/lerobot`) is committed; the DB is per-checkout and gitignored.
 
-The build cannot be a plain `codegraph index` — codegraph requires `init`
-first, and `init` overwrites `config.json` with a default template whose
-exclude list drops `vendor/`. `scripts/ensure-codegraph.sh` backs up the
-committed config across `init` and restores it before indexing; run it by
-hand from the repo root if you ever need to (re)build outside `/implement`.
-
-For any `/implement` run, or any time you need to ground a Design row in
-`file:line` coordinates inside `vendor/lerobot/`, prefer the MCP tools over
-reading full `.py` files:
-
-- `codegraph_search <symbol>` / `codegraph_node <id>` — exact spans without
-  manual line-counting.
-- `codegraph_context <task>` — minimum file:line surface for the change set.
-- `codegraph_callers` / `codegraph_callees` — confirm the binding site before
-  patching.
-- `codegraph_impact` — surface cross-file consumers a patch would break.
-
-If the MCP server is unreachable (sandbox without `npx`, offline clone), fall
-back to direct file reads — `/implement` should still complete.
+- **Gotcha** — the build cannot be a plain `codegraph index`: `init` is required first and overwrites `config.json` with a default that drops `vendor/`. The script backs up and restores the committed config across `init`. Run it by hand to (re)build outside `/implement-design`.
+- **Prefer MCP tools over reading full `.py` files** when grounding a Design row in `file:line` — `codegraph_search`/`codegraph_node` (exact spans), `codegraph_context` (min surface for a change), `codegraph_callers`/`codegraph_callees` (binding site), `codegraph_impact` (cross-file consumers).
+- MCP server unreachable (no `npx`, offline)? Fall back to direct reads — `/implement-design` still completes.
 
 ## Foundry runtime
 
-The vendored `vendor/lerobot/` snapshot is a *partial, read-only* copy for
-diffing and `file:line` grounding — its `.py` files import from non-vendored
-modules, so it cannot be imported or run. To verify that an impl patch is not
-just textually applicable but *actually correct*, `/validate` runs the impl's
-sibling smoke test against the **whole** upstream package installed at the
-pinned commit. `scripts/ensure-foundry-runtime.sh <foundry>` builds that
-runtime on demand:
+The vendored `vendor/lerobot/` snapshot is *partial, read-only* (its `.py`
+files import non-vendored modules, so it cannot run). To check an impl patch is
+not just textually applicable but *correct*, `/validate-impl` runs the impl's
+sibling smoke test against the **whole** upstream package at the pinned commit.
+`scripts/ensure-foundry-runtime.sh <foundry>` builds that runtime on demand:
 
-1. Parse the pinned-commit SHA from `vendor/<foundry>/README.md` (the same
-   provenance row `/implement` and `/validate` cite — single source of truth).
-2. Clone the source repo at that SHA (depth-1) into
-   `.foundry-runtime/<foundry>/src`.
-3. Create a venv and `pip install -e .[test]` into it. (Plain `pip`, not
-   `uv pip install` — lerobot's `pyproject.toml` pins torch to a cu128 index
-   via `[tool.uv.sources]` that has a version gap in some environments; pip
-   resolves torch from the default index instead.)
-4. Touch a `.ready` marker holding the SHA, so re-runs are a no-op.
+1. Parse the pinned-commit SHA from `vendor/<foundry>/README.md` (the same provenance row `/implement-design` and `/validate-impl` cite).
+2. Clone the source at that SHA (depth-1) into `.foundry-runtime/<foundry>/src`.
+3. venv + `pip install -e .[test]` — plain `pip`, not `uv pip install` (lerobot's `pyproject.toml` pins torch to a cu128 index with a version gap in some environments; pip resolves from the default index).
+4. Touch a `.ready` marker holding the SHA so re-runs are a no-op.
 
-It prints the venv python path on its last stdout line and exits non-zero
-(with a one-line reason on stderr) when the runtime cannot be built — offline,
-install failure, unknown foundry. The execution check **degrades gracefully**:
-when the runtime is unavailable, `/validate §🧬` records `skipped`, never a
-fabricated pass, and the static verdicts (📚/🔍/🧪/📐) still stand. torch is
-the dominant one-time cost (a few minutes); after that the marker makes it
-free.
-
-The committed surface stays the vendored snapshot only — `.foundry-runtime/`
-is per-checkout and gitignored, and nothing under it is ever staged. The impl
-patch is authored against `vendor/<foundry>/` paths; `/validate` translates that
-prefix to the upstream layout (`vendor/lerobot/` → `src/lerobot/`) when
-applying it to the runtime checkout (`git apply -p3 --directory=src/lerobot`).
-
-Adding a new foundry is a one-line `case` arm in the script (its clone URL)
-plus a `vendor/<name>/` snapshot with the same `Pinned commit` provenance row;
-nothing else in the script changes.
+- Prints the venv python on its last stdout line; exits non-zero (reason on stderr) when it can't build — offline, install failure, unknown foundry.
+- **Degrades gracefully** — runtime unavailable → `/validate-impl §🧬` records `skipped`, never a fabricated pass; static verdicts (📚/🔍/🧪/📐) still stand. torch is the one-time cost; the marker makes re-runs free.
+- Committed surface stays the vendored snapshot only — `.foundry-runtime/` is gitignored, never staged. The patch is authored against `vendor/<foundry>/` paths; `/validate-impl` translates the prefix to the upstream layout (`git apply -p3 --directory=src/lerobot`).
+- Adding a foundry = one `case` arm (clone URL) + a `vendor/<name>/` snapshot with the same `Pinned commit` row; nothing else changes.
 
 ## Commit message style
 
@@ -152,12 +113,8 @@ Hard rules:
    does, not why (the why goes in the body).
 5. **Do NOT include `(#NN)` in the local commit subject** — GitHub appends the
    PR number automatically on squash-merge; adding it manually duplicates it.
-6. **Write the commit message in English** — subject *and* body. Document
-   content (`.md`, prompts, reports) is Korean or English per
-   `docs/STYLE.md`, but the commit message itself is always English so
-   `git log` stays uniformly grep-able and consistent with this repo's
-   history. Do not switch to Korean even when the body explains
-   Korean-authored content; describe it in English.
+6. **Write the commit message in English** — subject *and* body — even when
+   describing Korean-authored content, so `git log` stays uniformly grep-able.
 
 Good (from this repo's history):
 
@@ -205,18 +162,6 @@ one logical area or needs context to be reviewable. When present:
 8. **Backticks** around paths (`context/MASTER.md`), identifiers, CLI flags
    (`--dry-run`), and shell commands.
 
-### Audit checklist before committing
-
-- [ ] First word after `<type>(<scope>):` is an imperative verb (not a noun,
-      not past tense).
-- [ ] Description is lowercase, ≲ 72 chars, no trailing period.
-- [ ] No `(#NN)` PR-number suffix in the subject.
-- [ ] Subject and body are in English (regardless of the language of the
-      files being changed).
-- [ ] Body (if any) leads with *why*, wraps at ~72, uses `─` dividers (not
-      `-`/`=`) for big commits, and uses em dash `—` for label/explanation
-      joins.
-
 ## Document Markdown style
 
 Probe docs fall into two families. The rule **codifies the existing
@@ -224,7 +169,7 @@ convention** — it does not strip emoji.
 
 ### Narrative / onboarding docs
 
-`README.md`, `docs/INTRO.md`. Headers may carry **one leading thematic
+`README.md`. Headers may carry **one leading thematic
 emoji**, placed at the start of the header text, after the `#`s and a space
 (`# 🛸 …`, `## 📌 …`, `### 🪜 …`). Exactly one emoji, at the start — never at
 the end, never inside body text. One H1 per document.
@@ -232,9 +177,9 @@ the end, never inside body text. One H1 per document.
 **Internal consistency per level (hard rule).** Each header level used in a
 document must be uniformly emoji or uniformly plain — no mixing within the
 same level in the same doc. The canonical narrative pattern in this repo is
-**emoji at H1 and H2, plain at H3 and below**, used by both `README.md` and
-`docs/INTRO.md`. If you add a new H3 to either, it stays plain; outliers
-must be brought into line, not left as exceptions.
+**emoji at H1 and H2, plain at H3 and below**, used by `README.md`. If you
+add a new H3, it stays plain; outliers must be brought into line, not left
+as exceptions.
 
 ### Reference / structural docs
 
@@ -258,8 +203,8 @@ apply to:
 - `context/MASTER.md`, `context/P{1..4}.md` — human-owned research input with
   its own `[STABLE]` / `[AGENT-INPUT]` section schema.
 - `.claude/prompts/**`, `.claude/commands/**` — agent prompts, free-form.
-- Agent-generated output and its templates — `scouting/_TEMPLATE.md`,
-  `analysis/_TEMPLATE.md`, dated reports, `*_BRIEF.md`,
+- Agent-generated output and its templates — `scouting/templates/report.md`,
+  `analysis/templates/analysis.md`, dated reports, `*_BRIEF.md`,
   `analysis/<id>/analysis.md`.
   These follow `docs/STYLE.md`'s own emoji system (emoji on `##`/`###`
   headers is *required* there — the opposite of structural docs).
@@ -279,8 +224,8 @@ new doc be in?":
 - **Default — Korean (한글).** All agent outputs (`scouting/`, `synthesis/`,
   `analysis/`) and the folder READMEs that describe them
   (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`) are
-  Korean. Templates that those folders ship (`_TEMPLATE*.md`) are Korean
-  as well.
+  Korean. Templates that those folders ship (`analysis/templates/`,
+  `scouting/templates/`) are Korean as well.
 - **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
   `docs/STYLE.md`. The audience is anyone reading PRs or
   history; English keeps that surface grep-able and consistent with the
@@ -288,17 +233,13 @@ new doc be in?":
 - **Exception 2 — Project front door in English.** `README.md`. The
   GitHub-rendered top page is the public-facing entry, and the
   hand-tuned Korean onboarding lives one click away at
-  `docs/INTRO.md` + `docs/probe_guide.html`.
-- **Korean onboarding docs stay Korean.** `docs/INTRO.md` is Korean even
-  though it sits alongside the English contributor docs — its folder
-  location plus the Korean H1 on line 1 are enough to identify it.
+  `docs/probe_guide.html`.
 
 **No `_KO` / `_EN` filename suffix.** Location (the folder rule above) plus
 the H1 on line 1 are sufficient — `head -1 <file>` tells you the language
-in one command. When `docs/` ends up holding both `STYLE.md` (en) and
-`INTRO.md` (ko), that mix is intentional and documented here. Do not add a
-language suffix to a new document just to disambiguate; if the rule above
-does not place the doc unambiguously, the doc is in the wrong folder.
+in one command. Do not add a language suffix to a new document just to
+disambiguate; if the rule above does not place the doc unambiguously, the
+doc is in the wrong folder.
 
 ## When adding a new top-level doc
 
@@ -332,53 +273,23 @@ checklist existed). Walk this list every time:
 
 ## Automatically-maintained indexes
 
-The "no cross-link automation" rule above has one intentional exception:
-the deep-dive table in `analysis/INDEX.md`. Filenames there
-are bare arXiv ids (e.g. `2511.00139.md`), so a reader cannot tell
-which paper is which without opening the file. Maintaining that
-mapping by hand drifts immediately, so it is regenerated by
-`scripts/refresh-analysis-index.py`. The script reads each
-analysis's 📄 논문 메타 table (the load-bearing rows are documented in
-`docs/STYLE.md` §5-7), inspects the filesystem for foundry
-artifacts (`<id>/impl/<foundry>/impl.md` vs `UNMAPPABLE.md`), and
-rewrites only the block between
+One intentional exception to "no cross-link automation": the deep-dive table
+in `analysis/INDEX.md`. Filenames there are bare arXiv ids (`2511.00139.md`),
+so the title-to-id mapping drifts if hand-maintained — `scripts/refresh-analysis-index.py`
+regenerates it. The script reads each analysis's 📄 논문 메타 table (load-bearing
+rows in `docs/STYLE.md` §5-7), inspects the filesystem for foundry artifacts
+(`impl.md` vs `UNMAPPABLE.md`), and rewrites only the block between
+`<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->`. Everything
+outside the markers stays hand-maintained (own file, so it doesn't interleave
+with the `analysis/README.md` narrative).
 
-```
-<!-- ANALYSIS_INDEX:START -->
-<!-- ANALYSIS_INDEX:END -->
-```
-
-in `analysis/INDEX.md`. Everything outside those markers stays
-hand-maintained — the table lives in its own file so the static
-`analysis/README.md` narrative does not interleave with the
-auto-generated block.
-
-**Where the script runs.** Post-merge on `main` only, via
-`.github/workflows/refresh-analysis-index.yml`. The workflow triggers
-on pushes to `main` that touch `analysis/**/analysis.md`,
-`analysis/**/impl/**`, `analysis/**/validation/**`, or the script
-itself, then commits the refreshed `analysis/INDEX.md` back to `main`
-as a `chore(analysis): refresh INDEX.md` bot commit. PR branches and
-the per-command prompts (`/analyze-paper`, `/implement`, `/validate`)
-deliberately do NOT stage `analysis/INDEX.md` and do NOT invoke the
-script — the prior PR-side regeneration produced an unresolvable
-text conflict on the generated block every time two analysis PRs
-landed in parallel. Concentrating regeneration on `main` eliminates
-the conflict surface at the cost of a brief stale window between
-merge and the bot commit.
-
-Manual edits inside the markers are overwritten on the next workflow
-run, so do not put information there that isn't already extractable
-from the meta table or the foundry folder contents — extend the
-script or the meta-table spec instead. Running the script by hand
-from the repo root with `python3 scripts/refresh-analysis-index.py`
-is still safe and idempotent for ad-hoc inspection; just do not
-commit the result on a feature branch.
+- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh INDEX.md` bot commit. PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `INDEX.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
+- **Don't hand-edit inside the markers** — overwritten on the next run. Put nothing there that isn't extractable from the meta table or foundry folder; extend the script or the meta-table spec instead. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more
 
 - `README.md` — motivation, repository structure, full Stage 1–3 agent setup.
-- `docs/INTRO.md` — Korean onboarding + operations manual.
+- `docs/probe_guide.html` — Korean onboarding + operations manual.
 - `docs/STYLE.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
 - `scouting/README.md`, `synthesis/README.md`, `analysis/README.md` — what

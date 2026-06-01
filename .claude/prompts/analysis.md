@@ -66,8 +66,8 @@ CONTEXT (read-only):
 - docs/STYLE.md        — §5 (Paper Analysis doc) + §6 (Design /
                                Implementation guide) + §4 (Korean
                                terms/tone/glossary).
-- analysis/_TEMPLATE.md      — the form for the analysis document.
-- analysis/_TEMPLATE_DESIGN.md — the form for the Layer 1 Design
+- analysis/templates/analysis.md      — the form for the analysis document.
+- analysis/templates/design.md — the form for the Layer 1 Design
                                document (vendor-agnostic).
 Never edit any context file. context/MASTER.md is human-owned; if
 this paper implies a pinned-literature or Decision change, write it
@@ -141,7 +141,7 @@ Produce TWO Korean documents in the same run:
   2. `analysis/<id>/design.md`    — the Layer 1 Design (vendor-agnostic)
 
 Both are regenerable snapshots — overwrite on re-run. Follow
-`analysis/_TEMPLATE.md` (analysis) and `analysis/_TEMPLATE_DESIGN.md`
+`analysis/templates/analysis.md` (analysis) and `analysis/templates/design.md`
 (Design) exactly, and `docs/STYLE.md` §5 / §6. Both are single
 Korean documents — not translations of English files. Write natively
 in Korean per STYLE §4 (formal polite -ㅂ니다 register, glossary §4-2,
@@ -151,7 +151,7 @@ formulas, arXiv links, P#/D#).
 The Design is **vendor-agnostic** — it must not contain `file:line`
 coordinates of any foundry (vendor/lerobot or otherwise). Its purpose
 is to capture *what the algorithm is*, not *where it lives in any
-codebase*. Base mapping happens later in `/implement`.
+codebase*. Base mapping happens later in `/implement-design`.
 
 STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
@@ -201,7 +201,7 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
 STRUCTURE of `analysis/<id>/design.md` — Layer 1 only:
 
-Follow `analysis/_TEMPLATE_DESIGN.md` exactly. The 7 sections are:
+Follow `analysis/templates/design.md` exactly. The 7 sections are:
 📄 Design 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스, ⛓️ 불변식·가정,
 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도, 🔌 Foundry 힌트
 (선택), 🚧 미해결 / 잠정.
@@ -214,7 +214,7 @@ for the Design.
 Honesty over completeness: any field the paper does not specify must
 be left as `(원문에 명시 없음 — 가정으로 메움)` rather than fabricated.
 A sparse Design is acceptable; a fabricated one is not. The Design
-should still be useful enough that a downstream `/implement` call has a
+should still be useful enough that a downstream `/implement-design` call has a
 real spec to ground.
 
 HARD RULES:
@@ -231,7 +231,7 @@ HARD RULES:
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - The Design is **vendor-agnostic**. It must not contain `file:line`
   coordinates from `vendor/lerobot/` or any other codebase. Mapping
-  belongs to `/implement`.
+  belongs to `/implement-design`.
 - Emoji/header system per docs/STYLE.md §5 (analysis) and §6
   (Design) — one emoji at the start of each `##`/`###` header, none
   in body text. §5-6 governs the quote / bullet-form / keyword
@@ -339,12 +339,12 @@ FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
 as the very last line of `analysis/<id>/analysis.md`:
 
-> 💡 base 매핑은 `/implement analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
 `<id>` is the same arXiv id / slug the analysis file uses. The line
-is added unconditionally — `/implement` itself decides whether the
+is added unconditionally — `/implement-design` itself decides whether the
 Design can be mapped to a given foundry (and emits a clean
-`🚧 매핑 불가` if not). Never auto-invoke `/implement` from this prompt;
+`🚧 매핑 불가` if not). Never auto-invoke `/implement-design` from this prompt;
 the human decides.
 
 ---
