@@ -33,7 +33,7 @@
 > # xdg-open probe/docs/probe_guide.html   # Linux
 > ```
 >
-> 동기·파이프라인·운영 노하우·월간 리뷰 KPI 까지 같은 가이드 한 곳에 담겨 있다.
+> 동기·파이프라인·운영 노하우까지 같은 가이드 한 곳에 담겨 있다.
 
 ---
 
@@ -70,7 +70,7 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
 
 > **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
-> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§9 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
+> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§8 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
 
 ```
    ┌───────────────────────────────────────────────────────────────────┐
@@ -79,7 +79,7 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
    │ MASTER.md   · Identity / Pillars (P1–P5) / Decision Log (D1–D26)  │
    │             · Tracked Literature (5 × 8) / Researchers /          │
    │               Competitor Monitoring / Anti-topics                 │
-   │ P{1..4}.md  · per-pillar history-free extracts (§1–§9 skeleton)   │
+   │ P{1..4}.md  · per-pillar history-free extracts (§1–§8 skeleton)   │
    └─────────────────────────────────┬─────────────────────────────────┘
                                      │ read-only (every run)
                                      ▼
@@ -260,41 +260,16 @@ Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) —
 
 ---
 
-## 📡 Signals That PROBE Is Actually Working
-
-- At least **one paper per week** triggers a concrete change in your experiment design or in a Decision Log entry.
-- The Anti-topics filter catches **≥ 10 papers/week** — that's the healthy exclusion rate.
-- The agent reports "no paper scored ≥ 2 this week" without padding.
-- Quarterly, you can point at a line in `context/MASTER.md` Decision Log that moved because of a scouted paper.
-
-If none of those are true after a month, the prompt is drifting or the Tracked Literature is stale. Fix the static context first, the prompt second. The model is almost never the problem.
-
----
-
-## 🔗 Related Projects
-
-| Project | Role |
-|---|---|
-| **[nexus](https://github.com/jonghochoi/nexus)** | Centralized RL experiment hub — MLflow + TensorBoard dual logging |
-| **[observer](https://github.com/jonghochoi/observer)** | Automated evaluation pipeline — multi-view recording, failure-mode classification, checkpoint ranking |
-| **probe** *(you are here)* | Research scouting — the upstream that decides *what is worth experimenting on at all* |
-
-> `probe` → `nexus` → `observer` is one research loop.
-> PROBE surfaces the idea. NEXUS logs the experiment. OBSERVER judges the policy.
-
----
-
 ## 🙏 Upstream References
 
-PROBE depends on three external repositories. Code and specs vendored from
-these repos are kept in sync with their upstream rather than rewritten —
-the references below are the exact sources.
+PROBE vendors code and specs from three external repos — kept in sync with
+upstream rather than rewritten. The links below are the exact sources.
 
 | Repo | What PROBE borrows |
 |---|---|
-| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes the `humanize-korean` pipeline (detector → rewriter → fidelity / naturalness review, tiered by track) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
-| **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot vendored at `vendor/lerobot/` — six baseline policies (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`) plus the `rtc` real-time-chunking module, configs, the processor, the `datasets/` tree (the de-facto standard LeRobotDataset format), `transforms/`, and `utils/`. `analysis/<id>/impl/<foundry>/impl.patch` is a unified diff against this snapshot; the pinned commit and refresh procedure live in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
-| **[colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)** | The MCP code-intelligence server that indexes `vendor/lerobot/` into a per-checkout SQLite knowledge graph at `.codegraph/codegraph.db`. The index is built on demand by `scripts/ensure-codegraph.sh` — `/implement-design` runs it before its first codegraph call (no session-start cost for runs that never touch `vendor/`); only `.codegraph/config.json` (scope definition) is committed. `/implement-design` uses its `codegraph_search` / `codegraph_node` / `codegraph_context` tools to ground Design rows in exact `file:line` coordinates inside the vendored snapshot. See [`CLAUDE.md`](CLAUDE.md) §CodeGraph. |
+| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill + four review agents under `.claude/skills/` and `.claude/agents/`. Every Korean output passes this pipeline before commit so long-form prose doesn't read as machine-generated; fidelity invariants live in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
+| **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot at `vendor/lerobot/` — six baseline policies + `rtc`, configs, processor, `datasets/`, `transforms/`, `utils/`. Every `impl.patch` is a unified diff against it; pinned commit + refresh in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
+| **[colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)** | The MCP server that indexes `vendor/lerobot/` into a per-checkout SQLite graph, letting `/implement-design` ground Design rows in exact `file:line`. Built on demand by `scripts/ensure-codegraph.sh`; see [`CLAUDE.md`](CLAUDE.md) §CodeGraph. |
 
 ---
 
@@ -310,10 +285,11 @@ the references below are the exact sources.
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → `analysis/<id>/analysis.md` + `<id>/design.md`; follow-up `/implement-design <design-path> [--foundry <name>]` → `<id>/impl/<foundry>/{impl.md,impl.patch}`; `/validate-impl` → `<id>/validation/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
-| [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `README.md` defines the common column standard (License + commercial marker, Access icon, `hf:`/`gh:`/`web` link prefix, 🤖/👤/🔀 data type) and operations procedure; `vlm.md` open-weight VLM candidates, `vla.md` landmark VLA lineage matrix, `dataset.md` multi-embodiment further-pretrain corpus catalog with hand-DOF prioritization for the Sharpa / xhand target. Also hosts pillar methodology references — `vlm-prior-preservation.md` (P4 forgetting / carve-out + path-intervention A~D + 4-stage recipe + forward-KL measurement protocol) |
+| [`analysis/README.md`](analysis/README.md) | On-demand deep-dive trio — `/analyze-paper` → `analysis.md` + `design.md`, `/implement-design` → `impl/<foundry>/`, `/validate-impl` → `validation/`, orchestrated by `/reproduce-paper` |
+| [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `vlm.md` / `vla.md` / `dataset.md` facts-tables (column standard in their `README.md`) plus pillar methodology refs (`vlm-prior-preservation.md`) |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/templates/report.md`](scouting/templates/report.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
+| [`analysis/templates/`](analysis/templates/) | Korean templates for the analysis trio — `analysis.md` / `design.md` / `impl.md` / `validation.md` |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 
 ---

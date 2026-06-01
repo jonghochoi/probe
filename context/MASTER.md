@@ -108,7 +108,7 @@ Known gap: PhysX point contact vs. real fingertip viscoelastic deformation (P3/S
 ### 4.3 Training
 - **Primary policy**: VLA backbone (**Physical Intelligence π**, π0 / π0.5) + flow-matching Body/Hand action experts, trained by imitation with VLM-prior preservation (P4). This is the capability source.
 - **RL (scoped)**: GPU-parallel RL, 8,192–16,384 envs, **PPO**, **for the Hand System0 stabilization module only** (P3). Not the primary policy's learning signal.
-- Backbone weights from openpi (Apache 2.0); see §14.A.
+- Backbone weights from openpi (Apache 2.0); see §13.A.
 
 ---
 
@@ -215,7 +215,7 @@ All architectural commits recorded with: options considered, v1 choice, rational
 #### [D7] π backbone integration / partition (P1)
 - **Options**: (i) slice π0 action expert + FT both sides, (ii) repurpose π expert as Hand + add new Body, (iii) both re-init, (iv) distillation from monolithic π
 - **v1**: (i) slice partition + FT
-- **Rationale**: maximally preserves π manipulation prior; cleanest split-vs-monolithic baseline. Sub-reading **Repurpose vs Subdivide** unresolved → §14.C, decide at code entry
+- **Rationale**: maximally preserves π manipulation prior; cleanest split-vs-monolithic baseline. Sub-reading **Repurpose vs Subdivide** unresolved → §13.C, decide at code entry
 - **Deferred**: (ii) repurpose → trigger: Body re-init acceptable; (iv) distillation → trigger: π surgery overhead prohibitive
 - **Note**: tightly coupled to P4 (D19 freeze strategy)
 
@@ -514,25 +514,9 @@ Reviewed when Tracked Literature rebalances or a Decision-Log trigger fires.
 
 ---
 
-## 13. Feedback Loop [LIVING]
+## 13. Open Items & Dependency Graph [LIVING] [AGENT-INPUT]
 
-Filled monthly by maintainer, *not* by agent.
-
-| Month | Papers surfaced | Actually read | Influenced experiment/decision | Notes |
-|-------|-----------------|---------------|--------------------------------|-------|
-| 2026-05 | | | | |
-
-**Quarterly review question**: *Has my thinking on Identity / any Pillar shifted? If no, the retrieval pipeline may be underperforming — revisit pinned papers and antagonist articulation.*
-
-**Decision-Log review (every 3 months)**: scan D1–D26 — any deferred candidate's trigger now observed? Any rationale invalidated?
-
-**Competitor/Kindred monitoring (quarterly)**: §10 — any Genesis AI / Sharpa VTLA / π RLT-RECAP / CATFA / TwinBrainVLA follow-up? Differentiation vehicle intact?
-
----
-
-## 14. Open Items & Dependency Graph [LIVING] [AGENT-INPUT]
-
-### 14.A — Prerequisites & Defaults
+### 13.A — Prerequisites & Defaults
 
 | Item | Default fallback |
 |---|---|
@@ -546,7 +530,7 @@ Filled monthly by maintainer, *not* by agent.
 
 > Defaults are strong enough that v1 sim-ablation entry is effectively possible from the current committed state; the remaining items unlock the real-robot, tool-articulation, and hand-hardware phases respectively.
 
-### 14.B — Implementation Feasibility Unclarities
+### 13.B — Implementation Feasibility Unclarities
 | Item | Status | Default if unresolved |
 |---|---|---|
 | π weight access | ✅ openpi (π0/π0.5/π0-FAST, Apache 2.0; PyTorch port + open-pi-zero) | — |
@@ -556,7 +540,7 @@ Filled monthly by maintainer, *not* by agent.
 | Multi-embodiment pretraining data access (D22) | 🟡 unknown | π prior only (D22 v1) |
 | Team / engineering capacity | 🟡 unknown — maintainer-side | — |
 
-### 14.C — Architectural Sub-Unclarity (D7 / P1 core)
+### 13.C — Architectural Sub-Unclarity (D7 / P1 core)
 
 π0 is *already* MoT (PaliGemma 2.291B VLM + action expert 0.315B). D7 (i) "slice partition + FT" admits two readings:
 
@@ -567,14 +551,14 @@ Filled monthly by maintainer, *not* by agent.
 
 → Sub-readings of D7 v1; decide at code entry (explicit acknowledgment, no hard commit now). open-pi-zero = parameter-level reference. TwinBrainVLA AsyMoT + LaMP gated cross-attn = concrete references for the body→hand sharing module (D4).
 
-### 14.D — Non-blocking Ongoing Items
+### 13.D — Non-blocking Ongoing Items
 | Item | Why valuable | Default posture |
 |---|---|---|
 | Korean PI lab contacts | Local network | Reach out when bandwidth permits |
 | Genesis AI / Sharpa VTLA RE | §10 differentiation; tests System0 necessity | Monitor as antagonist evidence |
 | Expected-but-unpublished failure mode | Highest-value search query | Capture when discovered |
 
-### 14.E — Dependency Map
+### 13.E — Dependency Map
 
 ```
 External / Ongoing (anytime):
@@ -586,7 +570,7 @@ Resolved:
    [π weight access] ✅────→ D7 (i) cascade safe
 
 Implementation-unblocked:
-   [Cube spec default] ──→ 4-contribution ablation (also needs §14.B π variant/codebase)
+   [Cube spec default] ──→ 4-contribution ablation (also needs §13.B π variant/codebase)
 
 Real-robot prerequisites (concurrent with sim ablation):
    ├─ System0 tactile sim2real protocol
@@ -599,8 +583,8 @@ Phase items (resolve before their phase fires):
    [Custom hand spec 2H26] → hand-hardware phase
 ```
 
-### 14.F — Why This Structure?
-Open-items separates near-term implementation blockers (§14.B/§14.C) from background research and external-world items (§14.D), without committing the order in which the remaining phases land.
+### 13.F — Why This Structure?
+Open-items separates near-term implementation blockers (§13.B/§13.C) from background research and external-world items (§13.D), without committing the order in which the remaining phases land.
 
 ---
 
@@ -618,8 +602,8 @@ Open-items separates near-term implementation blockers (§14.B/§14.C) from back
 | Category | Resolution path | Example items | Action |
 |---|---|---|---|
 | **A — Knowledge gap** | Study (read) | π0 internals (openpi + open-pi-zero), VLM-preservation literature (VLM2VLA/RT-2/VLA-Adapter/PriorVLA), Sharpa Deform Map sim, IL-limitation theory | Self-paced reading; pre-condition for step (iii) |
-| **B — Information gap** | Acquire (look up/ask) | unverified arXiv IDs (§14.B), π0.7 release, multi-embodiment data access, Korean PI contacts, compute/team capacity | Periodic scan; concurrent with A |
-| **C — Experiential gap** | Run experiments (v1 ablation through the generalization phase) | Evidence for D1–D26 v1 defaults, §14.C D7 sub-reading, falsifier threshold appropriateness, System0-necessity test | Resolved only by step (iii)+ |
+| **B — Information gap** | Acquire (look up/ask) | unverified arXiv IDs (§13.B), π0.7 release, multi-embodiment data access, Korean PI contacts, compute/team capacity | Periodic scan; concurrent with A |
+| **C — Experiential gap** | Run experiments (v1 ablation through the generalization phase) | Evidence for D1–D26 v1 defaults, §13.C D7 sub-reading, falsifier threshold appropriateness, System0-necessity test | Resolved only by step (iii)+ |
 | **D — External world dependency** | Wait + monitor | Custom hand spec (2H 2026), Genesis AI / Sharpa VTLA / TwinBrainVLA follow-ups, π0.7+ release | Periodic scan via §10 |
 
 **Key insight**: a "don't know enough to commit" feeling usually arises when Category A items are mistaken for Category C. The classification clarifies which gaps close *before* re-entering step (iii) and which require step (iii) itself.

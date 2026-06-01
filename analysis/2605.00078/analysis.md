@@ -243,7 +243,7 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 
 ## ✨ 핀 논문 대비 델타
 
-- **vs. Being-H0.5 ([arXiv:2601.12993](https://arxiv.org/abs/2601.12993))** — P4 핀. 0.5는 *cross-embodiment 통합 시퀀스 포맷(UniHand 2.0) + MoT* 으로 cross-embodiment 사전학습을 정립했고 0.7는 그 위에 *latent reasoning + dual-branch joint alignment* 라는 한 층을 새로 올립니다. 측정 가능한 새로움은 LIBERO 98.9 → 99.2, LIBERO-plus 78.5 → 82.1, RoboCasa-50 53.5 → 62.1, GR1 (—)→49.2, RoboTwin Easy/Hard (—)→90.2/89.6입니다. 추론 비용은 같은 UAC 위에서 3–4 ms/step으로 유지(§4.3.3). 0.5는 핀 유지 가능, 0.7는 *후속*으로 §8.4 후보지만 0.5와 동일 라인이라 핀 교체는 부적절합니다(§13 quarterly 재밸런스에서 다룰 항목).
+- **vs. Being-H0.5 ([arXiv:2601.12993](https://arxiv.org/abs/2601.12993))** — P4 핀. 0.5는 *cross-embodiment 통합 시퀀스 포맷(UniHand 2.0) + MoT* 으로 cross-embodiment 사전학습을 정립했고 0.7는 그 위에 *latent reasoning + dual-branch joint alignment* 라는 한 층을 새로 올립니다. 측정 가능한 새로움은 LIBERO 98.9 → 99.2, LIBERO-plus 78.5 → 82.1, RoboCasa-50 53.5 → 62.1, GR1 (—)→49.2, RoboTwin Easy/Hard (—)→90.2/89.6입니다. 추론 비용은 같은 UAC 위에서 3–4 ms/step으로 유지(§4.3.3). 0.5는 핀 유지 가능, 0.7는 *후속*으로 §8.4 후보지만 0.5와 동일 라인이라 핀 교체는 부적절합니다(§8 quarterly 재밸런스에서 다룰 항목).
 - **vs. π0 / π0.5 ([arXiv:2410.24164](https://arxiv.org/abs/2410.24164) · [arXiv:2504.16054](https://arxiv.org/abs/2504.16054))** — π 계열은 flow matching head를 정립한 backbone 핀. Being-H0.7도 flow matching action expert를 그대로 쓰지만 (i) backbone을 PaliGemma → InternVL3.5 + Qwen3로 갈아탔고, (ii) action expert 앞에 *명시적 latent reasoning 자리* 를 끼웠습니다. π0.5의 *hierarchical inference* 는 high-level → low-level decomposition이고, Being-H0.7의 prior–posterior는 *현재 vs 미래 정보 access* decomposition이라는 점에서 직교합니다.
 - **vs. MolmoAct2 ([arXiv:2605.02881](https://arxiv.org/abs/2605.02881))** — P4 핀. MolmoAct2는 *per-layer KV-cache* 로 VLM을 보존합니다. Being-H0.7은 *latent query 자리에 미래 임베딩을 끼워* VLM을 우회적으로 활용합니다. 두 접근 모두 "VLM을 깨지 않고 새 supervision을 흘려 보낸다"는 동일 목표를 다른 길로 풉니다. 묶어서 D20 prior-preservation 후보 비교 시 함께 인용할 가치.
 - **vs. 다른 World-Action 핀 후보들 (DreamZero, Cosmos-Policy, LingBot-VA, Fast-WAM — Table 1 인용 [12,13,14,15])** — 모두 *픽셀 미래* 라인. Being-H0.7는 같은 RoboCasa·RoboTwin에서 Cosmos-Policy(67.1 → 62.1)·LingBot-VA(92.9 → 90.2)에 사실은 *밀리는 항목*이 있지만 *5/5 suite 1위 + 3–4 ms/step* 라는 *시스템 레벨 우위* 로 결론을 가져갑니다. PROBE 관점에서 핀 후보가 아닌 *antagonist comparison* 라인.
@@ -255,7 +255,7 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 
 ## ⚙️ 의사결정 함의
 
-- **D7 (π backbone 통합)** — Being-H0.7은 π 백본 *없이* InternVL3.5 + Qwen3 + V-JEPA2.1 위에서 MoT를 굴립니다. PROBE의 v1(슬라이스 + FT) 결정을 흔들 정도는 아니지만 §14.B의 *π 변종 / 코드베이스 선택* 항목에서 "open-weight 백본 + MoT 라인"을 alternative branch로 메모할 가치가 있습니다. CP1 코드 진입에서 §14.C A/B 둘 다 막힐 때 *Being-H0.7-style open-weight stack*이 백업 path로 등록됩니다.
+- **D7 (π backbone 통합)** — Being-H0.7은 π 백본 *없이* InternVL3.5 + Qwen3 + V-JEPA2.1 위에서 MoT를 굴립니다. PROBE의 v1(슬라이스 + FT) 결정을 흔들 정도는 아니지만 §13.B의 *π 변종 / 코드베이스 선택* 항목에서 "open-weight 백본 + MoT 라인"을 alternative branch로 메모할 가치가 있습니다. CP1 코드 진입에서 §13.C A/B 둘 다 막힐 때 *Being-H0.7-style open-weight stack*이 백업 path로 등록됩니다.
 - **D19b (VLM lineage)** — InternVL3.5(understanding) + Qwen3(action) + V-JEPA2.1(시각) 3-요소 lineage가 새로운 데이터 포인트입니다. §8.4 lineage 표에 *cross-pollination 형태*로 추가 검토 — 핀 교체 후보는 아니지만 lineage-attributable 진단 시 비교 후보 풀에 들어옵니다.
 - **D20 (prior-preservation strategy)** — *비대칭 freeze* 패턴(context encoder trainable, future encoder frozen)이 새로운 후보입니다. 본 논문 자체는 "prior preservation" 어휘를 쓰지 않지만 frozen ViT가 posterior 쪽에서만 평가되는 구조는 *VLM 가중치 보존이 필요한 시점에 deployable branch와 supervision branch를 분리*하는 일반 패턴으로 확장 가능합니다. v1(action-side adapter) 결정 자체는 유지하되, D19 trigger 발화 시 비교 후보로 등록.
 - **D23 (action representation)** — flow matching head v1 결정을 *VLM 백본이 다른* lineage(InternVL3.5/Qwen3)에서도 강하게 보강합니다. prior·posterior 두 branch가 모두 flow matching인 점은 *flow matching head가 supervision 강도에 robust*하다는 외부 증거입니다. 차원별 가중·timestep 분포 등 구체 키 변경은 없습니다.
@@ -282,7 +282,7 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 
 - **§8.4 (P4 Pinned)** — 현재 Being-H0.5가 핀입니다. Being-H0.7은 *동일 라인의 후속* 이라 핀 교체는 부적절하지만 §8.4 표 아래에 "**0.7 = 0.5 + latent reasoning slot + dual-branch alignment**"라는 한 줄 메모를 D19b lineage 추적용으로 추가 검토할 만합니다(quarterly rebalance 후보).
 - **§10.1 (VLA-only strong performers / antagonist evidence)** — Genesis AI 라인과 별도로, "**Being-Beyond 라인 (Being-H0 → 0.5 → 0.7)**"을 *RL 없이 latent reasoning만으로 reactive·long-horizon을 잡는 antagonist evidence*로 한 줄 추가 검토. *Watch trigger* — "0.7 후속에서 in-hand reorientation 같은 dexterous *finger-level* 태스크로 확장될 때" — 이 시점에서 P3 System0 필요성 진영이 직접 시험됩니다.
-- **§14.B (Implementation Feasibility Unclarities)** — *코드베이스 선택* 항목에서 "open-weight VLM (InternVL/Qwen 계열) + MoT" 라인을 π 백본의 alternative branch로 메모 추가 검토. 본 논문이 *PaliGemma 외 lineage*에서도 SOTA 결과가 가능함을 보여 줍니다.
+- **§13.B (Implementation Feasibility Unclarities)** — *코드베이스 선택* 항목에서 "open-weight VLM (InternVL/Qwen 계열) + MoT" 라인을 π 백본의 alternative branch로 메모 추가 검토. 본 논문이 *PaliGemma 외 lineage*에서도 SOTA 결과가 가능함을 보여 줍니다.
 - **D14 deferred 항목** — 현재 D14 v1은 *binary on/off bypass*. Being-H0.7의 UAC가 *deployment layer*의 prefix-lock / suffix-update 패턴을 정립했으므로, "System1 청크 출력의 prefix-lock + System0 sub-loop가 한 buffer에 공존하는 schema" 검토를 D14 deferred 항목 아래에 한 줄 메모 추가 — *Trigger*: 실로봇 진입 시 System1↔System0 timing jitter가 측정 가능해질 때.
 - **D26 deferred 항목** — Being-H0.7 §4.3.2의 *unified black-box inference server + endpoint randomization + 20 blind trial / task* 프로토콜을 PROBE 실로봇 평가 직접 인용 후보로 D26 메모에 추가.
 

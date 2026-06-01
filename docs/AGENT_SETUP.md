@@ -116,18 +116,6 @@ There is no `--dry-run`. On the routine detail page use **Run now** — it opens
 
 If it is unsatisfactory, fix `scouting.md` (or `context/P1.md`) and re-run — do not leave automation on with a bad prompt.
 
-### Step 5 — Monthly human review
-
-Automation is not the finish line. Once a month fill in three numbers. The P1 extract has no Feedback Loop section, so record this human review in the full multi-pillar `context/MASTER.md` Section 13 (the agent reads only the extract; the feedback record lives in the source of truth).
-
-| Field | Question |
-|---|---|
-| Papers surfaced | How many did PROBE report this month? |
-| Actually read | Of those, how many did *you* read? |
-| Influenced a decision | Of those, how many changed an experiment? |
-
-The ratio is PROBE's real KPI. If it trends to zero, the prompt is drifting — not the model; re-check Anti-topics (§5) and Pillar P1 (§2) in `context/P1.md`.
-
 ### Bonus — P1 Synthesis Brief
 
 Where weekly scouting looks *outward* for new papers, this output looks *inward*: it compresses what the already-pinned papers are collectively saying — what props up each Decision and what shakes it — into a prose narrative so you can carry the P1 architecture in your head. Run it as a **second, fully separate** RemoteTrigger routine:

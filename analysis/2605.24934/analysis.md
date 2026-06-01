@@ -264,6 +264,6 @@ ICT vs 시각 우회의 분리를 보여주는 ablation(§4.4, Water Flowers)은
 
 - §8.2 (P2) **methodology base**에 ICT 패턴 참조용으로 본 논문을 보조 인용으로 추가 검토 — *시각만* 입력에서 entity 단위 구조적 토큰의 데이터 효율을 보여주는 외부 증거로 가치 있음. 핀 교체 후보는 아님.
 - §10 §10.1 (VLA-only / antagonist evidence) 모니터링 리스트에 HumanEgo 라인을 **"VLA·RL·VLM 없이도 동작하는 imitation-only 라인"** 안티고니스트로 메모 — Genesis AI 라인과는 다른 결(사전학습 없음, 분 단위 데이터)이라 별도 트래킹 가치. 본 논문 자체는 §7 anti-topic("2-finger parallel-jaw only" + "pure imitation from human video without learning/physics") 두 항목에 정확히 걸려 핀 후보는 아님.
-- §14.D (non-blocking 모니터링)에 "분 단위 사람 1인칭 → 로봇 정책" 라인의 follow-up 등장 시 PROBE의 데이터 수집 시나리오를 *human-video Phase 0* 으로 확장 가능한지 재검토 트리거 등록.
+- §13.D (non-blocking 모니터링)에 "분 단위 사람 1인칭 → 로봇 정책" 라인의 follow-up 등장 시 PROBE의 데이터 수집 시나리오를 *human-video Phase 0* 으로 확장 가능한지 재검토 트리거 등록.
 
 > 💡 base 매핑은 `/implement-design analysis/2605.24934/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

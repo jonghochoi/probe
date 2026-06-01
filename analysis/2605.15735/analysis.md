@@ -197,7 +197,7 @@ OOD 일반화는 두 baseline(Qwen-$`\pi_0`$ 2-expert, Variant 2a 의 VLM-init D
 - **P4 / D20 (prior-preservation strategy)** — UAM 의 action-side adapter 는 우리의 v1 (action-side adapter = split heads, 백본 untouched) 과 *동일한 방향*이지만, 추가로 *제어 전용 시각 경로*를 더해 prior 부담을 분산. VLA-Adapter([arXiv:2509.09372]) / PriorVLA([arXiv:2605.10925]) 와는 *어떤 면을 분리하는가* 가 다름 — UAM 은 modality/처리 경로 자체를 분리.
 - **P4 / D21 (staged training recipe)** — UAM 결과는 Stage 2 (VLM-freeze + action expert) 에서 발생할 일반화 손실에 대한 우회 옵션을 제시. Stage 3/4 의 *대안*으로 Dorsal-style 경로 추가를 검토할 트리거가 될 수 있음.
 - **P4 / D23 (action representation × VLM preservation)** — 우리의 v1 인 continuous flow-matching head 와 정합. UAM 은 더 나아가 *시각 표상까지* 별도 expert 에 위임.
-- **P1 / D4 (Body↔Hand information sharing)** — UAM 의 attention 시각화는 *MoT + 적절한 보조 손실*만으로 기능 분기가 emergent 하게 일어남을 보여줌. 우리의 FiLM v1 대비 *cross-attention deferred* 옵션의 트리거(§14.C "single-point info bottleneck") 분석에 직접 인용 가능.
+- **P1 / D4 (Body↔Hand information sharing)** — UAM 의 attention 시각화는 *MoT + 적절한 보조 손실*만으로 기능 분기가 emergent 하게 일어남을 보여줌. 우리의 FiLM v1 대비 *cross-attention deferred* 옵션의 트리거(§13.C "single-point info bottleneck") 분석에 직접 인용 가능.
 - **P1 / D7 (π backbone integration)** — UAM 은 *추가 expert 를 끼우는* 방향. 우리의 (i) slice partition + FT 와는 다른 축이지만, "VLM 동결 없이도 망각 회피" 라는 결과는 우리의 P4-D19 가정과 P1-D7 의 *slice + FT* 가 충돌하지 않음을 간접적으로 지지.
 - **§10 경쟁자 함의** — Genesis AI / IMCopilot 류의 VLA-only 성능 주장에 대한 새로운 증거: action-only 학습으로도 (a) 의미 보존, (b) OOD 일반화가 가능. *우리의 System0 필요성 주장*은 UAM 이 다루지 않는 **post-contact 안정화 sub-loop** 영역에서 여전히 유효(UAM 은 ALOHA pick-and-place 류만 평가).
 
@@ -248,7 +248,7 @@ P4 의 핀 라인업과 비교했을 때 — π0 ([arXiv:2410.24164]), π0.5 ([a
 ## 💡 컨텍스트 제안
 
 - **§8.4 P4 Tracked Literature 핀 교체 후보** — 현재 P4 핀 8개 중 가장 *대증적 co-training* 측면을 대표하는 항목(예: RT-2)을 UAM 으로 교체하는 안. UAM 은 (i) embodiment tax 의 정량 정의를 도입, (ii) frozen·co-training 두 갈래를 모두 거부한 첫 사례라는 점에서 P4 의 *구조적* 노선을 대표할 자격이 있음. 단 교체 결정은 maintainer 가 §8 의 "분기 quarterly rebalance" 사이클에서 검토.
-- **§14 Open Items 신규 항목 후보** — "VLM/제어 경로 분리를 구조적으로 강제할 때 우리의 tactile/proprio 토큰을 어느 expert 로 라우팅할 것인가" 가 P2 ↔ P4 의 새로운 교차점으로 등장. D19 deferred trigger 의 §14.C 와 연결.
+- **§13 Open Items 신규 항목 후보** — "VLM/제어 경로 분리를 구조적으로 강제할 때 우리의 tactile/proprio 토큰을 어느 expert 로 라우팅할 것인가" 가 P2 ↔ P4 의 새로운 교차점으로 등장. D19 deferred trigger 의 §13.C 와 연결.
 - **§10 Competitor monitoring 메모** — Tsinghua + ByteDance Seed 조합은 §9.3 의 *대형 lab 코드 릴리즈 watch* 대상에 추가할 가치. Bagel/BagelVLA 라인업이 P4 에 지속적인 영향을 줄 가능성.
 - **Decision Log 변경 제안 없음** — D19~D23 어느 것도 *현 시점*에서 v1 을 바꿀 결정적 증거는 아님. UAM 결과는 *deferred trigger* 측에 후보를 더하는 정도가 적절. 정식 변경은 CP1 (4-contribution ablation) 결과를 본 뒤 판단.
 
