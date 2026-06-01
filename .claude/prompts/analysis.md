@@ -398,10 +398,7 @@ humanized (or rolled-back) files per the GIT section below.
 
 GIT — after both files are written:
 
-Refresh the analyses index in the same commit, then push to `main`:
-
-  python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>/analysis.md analysis/<id>/design.md analysis/INDEX.md
+  git add analysis/<id>/analysis.md analysis/<id>/design.md
   git commit -m "analysis: add <id> deep-dive + design"
   # --focus re-extraction uses instead:
   #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
@@ -410,11 +407,14 @@ Refresh the analyses index in the same commit, then push to `main`:
   # Design is the outer-loop fixed-point signal.
   git push origin HEAD:main
 
-The refresh script regenerates the table between the
-`<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->` markers
-in `analysis/INDEX.md` and is idempotent (no-op when nothing
-changed). The static narrative in `analysis/README.md` is
-hand-maintained and unaffected.
+Do NOT stage `analysis/INDEX.md` and do NOT run
+`scripts/refresh-analysis-index.py` from this prompt. The index is
+regenerated post-merge on `main` by
+`.github/workflows/refresh-analysis-index.yml` so that parallel
+`/analyze-paper` runs cannot collide on the same generated block (see
+`CLAUDE.md` "Automatically-maintained indexes"). Local manual
+regeneration is still safe and idempotent if needed for ad-hoc
+inspection.
 
 `<id>` is the same arXiv id / slug used for the analysis folder name.
 

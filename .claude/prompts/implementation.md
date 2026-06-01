@@ -405,27 +405,26 @@ HARD RULES:
 
 GIT — after the guide file(s) are written:
 
-Refresh the analyses index in the same commit, then push to `main`:
-
-  python3 scripts/refresh-analysis-index.py
   git add analysis/<id>/impl/<foundry>/impl.md
   # Add the patch ONLY if it was actually generated. If §A produced
   # UNMAPPABLE.md, add that instead.
   git add analysis/<id>/impl/<foundry>/impl.patch
   # Add the sibling smoke test when one was generated (§G subclass-seam).
   git add analysis/<id>/impl/<foundry>/test_*.py 2>/dev/null || true
-  git add analysis/INDEX.md
   git commit -m "foundry: map <id> onto <foundry>"
   git push origin HEAD:main
 
 Never stage anything under `.foundry-runtime/` — it is the gitignored
 execution runtime, not an artifact.
 
-The refresh script regenerates the `lerobot` column in the index
-table between `<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->`
-markers in `analysis/INDEX.md` and is idempotent (no-op when nothing
-changed). The static narrative in `analysis/README.md` is
-hand-maintained and unaffected.
+Do NOT stage `analysis/INDEX.md` and do NOT run
+`scripts/refresh-analysis-index.py` from this prompt. The index
+(including its `lerobot` column) is regenerated post-merge on `main`
+by `.github/workflows/refresh-analysis-index.yml` so that parallel
+foundry runs cannot collide on the same generated block (see
+`CLAUDE.md` "Automatically-maintained indexes"). Local manual
+regeneration is still safe and idempotent if needed for ad-hoc
+inspection.
 
 `<id>` is the arXiv id used by the analysis folder. `<foundry>` is the
 verbatim foundry name.
