@@ -157,7 +157,7 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{main}} + \lambda \left( \mathc
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — $`\pi_0`$ 백본을 그대로 사용하므로 `pi0` family 와 직접 매핑됩니다. Arm-Hand Feature Enhancement 모듈은 `pi0` action expert 출력 직후의 토큰 흐름에 2-layer MLP 두 개 + single-linear 보조 헤드 두 개를 추가하는 형태로 들어갑니다. 촉각 인코더는 별도 모듈이며 vendor 의 기본 `pi0` 에는 없습니다 — `/implement` 가 새 `tactile_encoder.py` 또는 동등 모듈을 신설해야 합니다. 데이터셋 측 변경은 `LeRobotDataset` 의 episode metadata 에 fingertip tactile 채널을 추가하는 형태로 매핑됩니다.
+- **`lerobot`** — 논문 백본은 $`\pi_0`$ 이지만, 본 구현은 의도적으로 더 최신 foundry 베이스인 **`pi05` family 로 치환해 매핑**합니다 ($`\pi_{0.5}`$ 도 PaliGemma + flow-matching action expert 구조라 Arm-Hand Feature Enhancement 가 분기하는 action expert 출력 hook 이 동일; 구조적 차이는 pi05 가 state 를 프롬프트 토큰으로 접어 넣어 `forward` 에 `state` 인자가 없다는 점뿐). Arm-Hand Feature Enhancement 모듈은 `pi05` action expert 출력 직후의 토큰 흐름에 2-layer MLP 두 개 + single-linear 보조 헤드 두 개를 추가하는 형태로 들어갑니다. 촉각 인코더는 별도 모듈이며 vendor 의 기본 `pi05` 에는 없습니다 — `/implement` 가 새 `tactile_encoder.py` 또는 동등 모듈을 신설해야 합니다. 데이터셋 측 변경은 `LeRobotDataset` 의 episode metadata 에 fingertip tactile 채널을 추가하는 형태로 매핑됩니다.
 
 ---
 

@@ -23,6 +23,10 @@ checkout, and runs this file with pytest. No GPU, no checkpoint, no HF
 download: it validates the pure pieces (enhancer shapes, index masking,
 composite loss + backprop, Eq. (12) recovery) and the config/factory wiring.
 The heavy PaliGemma-backed forward is left to a real training run.
+
+The paper's backbone is π0; this reproduction targets pi05 as a deliberate
+foundry-base substitution (the ``z_share`` action-expert hook is identical, so
+the enhancement math below is backbone-independent).
 """
 
 import pytest
@@ -30,10 +34,10 @@ import torch
 
 from lerobot.configs import PreTrainedConfig
 from lerobot.policies.factory import get_policy_class, make_policy_config
-from lerobot.policies.pi0.configuration_pi0_enhance import PI0EnhanceConfig
-from lerobot.policies.pi0.modeling_pi0_enhance import (
+from lerobot.policies.pi05.configuration_pi05_enhance import PI05EnhanceConfig
+from lerobot.policies.pi05.modeling_pi05_enhance import (
     ArmHandFeatureEnhancer,
-    PI0EnhancePolicy,
+    PI05EnhancePolicy,
     build_index_masks,
     compute_feature_enhancement_loss,
 )
@@ -103,19 +107,19 @@ def test_aux_weight_zero_recovers_main_only_loss():
 
 
 def test_config_defaults_and_validation():
-    cfg = PI0EnhanceConfig()
+    cfg = PI05EnhanceConfig()
     assert cfg.feature_enhancement is False  # πuni-origin by default
     assert cfg.arm_dim == 6  # UR3e 6-DoF (Design 데이터 계약)
     assert cfg.aux_loss_weight == 1.0  # paper-silent default (§3.4.2)
 
     with pytest.raises(ValueError):
-        PI0EnhanceConfig(arm_dim=999)
+        PI05EnhanceConfig(arm_dim=999)
     with pytest.raises(ValueError):
-        PI0EnhanceConfig(aux_loss_weight=-1.0)
+        PI05EnhanceConfig(aux_loss_weight=-1.0)
 
 
 def test_factory_registration_and_class_resolution():
-    assert "pi0_enhance" in PreTrainedConfig.get_known_choices()
-    assert PreTrainedConfig.get_choice_class("pi0_enhance") is PI0EnhanceConfig
-    assert make_policy_config("pi0_enhance").type == "pi0_enhance"
-    assert get_policy_class("pi0_enhance") is PI0EnhancePolicy
+    assert "pi05_enhance" in PreTrainedConfig.get_known_choices()
+    assert PreTrainedConfig.get_choice_class("pi05_enhance") is PI05EnhanceConfig
+    assert make_policy_config("pi05_enhance").type == "pi05_enhance"
+    assert get_policy_class("pi05_enhance") is PI05EnhancePolicy

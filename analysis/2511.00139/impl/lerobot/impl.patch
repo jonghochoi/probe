@@ -1,30 +1,30 @@
-diff --git a/vendor/lerobot/policies/pi0/__init__.py b/vendor/lerobot/policies/pi0/__init__.py
-index ea3095b..2154003 100644
---- a/vendor/lerobot/policies/pi0/__init__.py
-+++ b/vendor/lerobot/policies/pi0/__init__.py
+diff --git a/vendor/lerobot/policies/pi05/__init__.py b/vendor/lerobot/policies/pi05/__init__.py
+index 4f9a9de..413060b 100644
+--- a/vendor/lerobot/policies/pi05/__init__.py
++++ b/vendor/lerobot/policies/pi05/__init__.py
 @@ -15,7 +15,15 @@
  # limitations under the License.
  
- from .configuration_pi0 import PI0Config
-+from .configuration_pi0_enhance import PI0EnhanceConfig
- from .modeling_pi0 import PI0Policy
-+from .modeling_pi0_enhance import PI0EnhancePolicy
- from .processor_pi0 import make_pi0_pre_post_processors
+ from .configuration_pi05 import PI05Config
++from .configuration_pi05_enhance import PI05EnhanceConfig
+ from .modeling_pi05 import PI05Policy
++from .modeling_pi05_enhance import PI05EnhancePolicy
+ from .processor_pi05 import make_pi05_pre_post_processors
  
--__all__ = ["PI0Config", "PI0Policy", "make_pi0_pre_post_processors"]
+-__all__ = ["PI05Config", "PI05Policy", "make_pi05_pre_post_processors"]
 +__all__ = [
-+    "PI0Config",
-+    "PI0EnhanceConfig",
-+    "PI0Policy",
-+    "PI0EnhancePolicy",
-+    "make_pi0_pre_post_processors",
++    "PI05Config",
++    "PI05EnhanceConfig",
++    "PI05Policy",
++    "PI05EnhancePolicy",
++    "make_pi05_pre_post_processors",
 +]
-diff --git a/vendor/lerobot/policies/pi0/configuration_pi0_enhance.py b/vendor/lerobot/policies/pi0/configuration_pi0_enhance.py
+diff --git a/vendor/lerobot/policies/pi05/configuration_pi05_enhance.py b/vendor/lerobot/policies/pi05/configuration_pi05_enhance.py
 new file mode 100644
-index 0000000..174c4a8
+index 0000000..9f86d95
 --- /dev/null
-+++ b/vendor/lerobot/policies/pi0/configuration_pi0_enhance.py
-@@ -0,0 +1,59 @@
++++ b/vendor/lerobot/policies/pi05/configuration_pi05_enhance.py
+@@ -0,0 +1,63 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -41,27 +41,31 @@ index 0000000..174c4a8
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
 +
-+"""Config for the Arm-Hand Feature Enhancement extension of pi0.
++"""Config for the Arm-Hand Feature Enhancement extension of pi05.
 +
 +Reproduction of arXiv:2511.00139 §7.3 / Eq. (9)-(12) (Design §🧰, §📊): the
 +action expert's final hidden state (``z_share``) is branched into per-limb
 +arm/hand sub-pathways with index-masked auxiliary flow-matching losses, plus a
 +fused-concat main head. ``feature_enhancement=False`` makes the policy behave
-+exactly like vanilla pi0 (the πuni-origin baseline), so origin-vs-enhance is a
++exactly like vanilla pi05 (the πuni-origin baseline), so origin-vs-enhance is a
 +single config flag with no training-script changes.
++
++Note: the paper's backbone is π0; pi05 is a deliberate foundry-base
++substitution for this reproduction. The ``z_share`` action-expert hook point is
++identical across both backbones, so the enhancement transfers unchanged.
 +"""
 +
 +from dataclasses import dataclass
 +
 +from lerobot.configs import PreTrainedConfig
 +
-+from .configuration_pi0 import PI0Config
++from .configuration_pi05 import PI05Config
 +
 +
-+@PreTrainedConfig.register_subclass("pi0_enhance")
++@PreTrainedConfig.register_subclass("pi05_enhance")
 +@dataclass
-+class PI0EnhanceConfig(PI0Config):
-+    # Toggle: False -> vanilla pi0 (πuni-origin); True -> feature enhancement (πuni-enhance).
++class PI05EnhanceConfig(PI05Config):
++    # Toggle: False -> vanilla pi05 (πuni-origin); True -> feature enhancement (πuni-enhance).
 +    feature_enhancement: bool = False
 +
 +    # Index split of the (padded) action vector for selective supervision
@@ -84,24 +88,26 @@ index 0000000..174c4a8
 +            )
 +        if self.aux_loss_weight < 0:
 +            raise ValueError(f"aux_loss_weight ({self.aux_loss_weight}) must be non-negative")
-diff --git a/vendor/lerobot/policies/pi0/modeling_pi0.py b/vendor/lerobot/policies/pi0/modeling_pi0.py
-index 510af07..28f9d6f 100644
---- a/vendor/lerobot/policies/pi0/modeling_pi0.py
-+++ b/vendor/lerobot/policies/pi0/modeling_pi0.py
-@@ -747,8 +747,21 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
+index bdaf01f..477c6e8 100644
+--- a/vendor/lerobot/policies/pi05/modeling_pi05.py
++++ b/vendor/lerobot/policies/pi05/modeling_pi05.py
+@@ -727,8 +727,23 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
  
          return embs, pad_masks, att_masks, adarms_cond
  
--    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
+-    def forward(self, images, img_masks, tokens, masks, actions, noise, time) -> Tensor:
 -        """Do a full training forward pass and compute the loss."""
 +    def _compute_suffix_out(
-+        self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
++        self, images, img_masks, tokens, masks, actions, noise, time
 +    ) -> tuple[Tensor, Tensor]:
 +        """Embed prefix/suffix and run the PaliGemma-with-expert forward.
 +
 +        Extracted from ``forward`` (behavior-preserving) so that
 +        feature-enhancement subclasses can branch off the action expert's final
-+        hidden state without duplicating the embedding/attention setup.
++        hidden state without duplicating the embedding/attention setup. pi05
++        folds robot state into the language prompt, so (unlike pi0) the
++        signature carries no ``state`` argument.
 +
 +        Returns:
 +            suffix_out: action-expert final hidden state, the ``z_share`` hook
@@ -112,47 +118,47 @@ index 510af07..28f9d6f 100644
          time_expanded = time[:, None, None]
          x_t = time_expanded * noise + (1 - time_expanded) * actions
          u_t = noise - actions
-@@ -790,6 +803,13 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+@@ -768,6 +783,13 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
  
          suffix_out = suffix_out[:, -self.config.chunk_size :]
          suffix_out = suffix_out.to(dtype=torch.float32)
 +        return suffix_out, u_t
 +
-+    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
++    def forward(self, images, img_masks, tokens, masks, actions, noise, time) -> Tensor:
 +        """Do a full training forward pass and compute the loss."""
 +        suffix_out, u_t = self._compute_suffix_out(
-+            images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
++            images, img_masks, tokens, masks, actions, noise, time
 +        )
  
          def action_out_proj_func(suffix_out):
              return self.action_out_proj(suffix_out)
-@@ -945,7 +965,7 @@ class PI0Policy(PreTrainedPolicy):
+@@ -918,7 +940,7 @@ class PI05Policy(PreTrainedPolicy):
  
-         # Initialize the core PI0 model
+         # Initialize the core PI05 model
          self.init_rtc_processor()
--        self.model = PI0Pytorch(config, rtc_processor=self.rtc_processor)
+-        self.model = PI05Pytorch(config, rtc_processor=self.rtc_processor)
 +        self.model = self._build_model(config)
  
          # Enable gradient checkpointing if requested
          if config.gradient_checkpointing:
-@@ -955,6 +975,11 @@ class PI0Policy(PreTrainedPolicy):
+@@ -928,6 +950,11 @@ class PI05Policy(PreTrainedPolicy):
  
          self.reset()
  
-+    def _build_model(self, config: PI0Config) -> PI0Pytorch:
++    def _build_model(self, config: PI05Config) -> PI05Pytorch:
 +        """Construct the core model. Overridable seam for subclasses that swap
-+        in an alternative ``PI0Pytorch`` (e.g. feature-enhancement decoder)."""
-+        return PI0Pytorch(config, rtc_processor=self.rtc_processor)
++        in an alternative ``PI05Pytorch`` (e.g. feature-enhancement decoder)."""
++        return PI05Pytorch(config, rtc_processor=self.rtc_processor)
 +
      @classmethod
      def from_pretrained(
          cls: builtins.type[T],
-diff --git a/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py b/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05_enhance.py b/vendor/lerobot/policies/pi05/modeling_pi05_enhance.py
 new file mode 100644
-index 0000000..175a3ad
+index 0000000..6b0e62a
 --- /dev/null
-+++ b/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py
-@@ -0,0 +1,162 @@
++++ b/vendor/lerobot/policies/pi05/modeling_pi05_enhance.py
+@@ -0,0 +1,165 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -172,7 +178,7 @@ index 0000000..175a3ad
 +"""Arm-Hand Feature Enhancement — reproduction of arXiv:2511.00139 §7.3.
 +
 +The action expert's final hidden state (``z_share``, the hook point extracted
-+into ``PI0Pytorch._compute_suffix_out``) is branched into arm/hand sub-pathways
++into ``PI05Pytorch._compute_suffix_out``) is branched into arm/hand sub-pathways
 +with index-masked auxiliary flow-matching losses, plus a main head over the
 +concatenated features (Design §🧰, Eq. (9)-(12)):
 +
@@ -184,11 +190,14 @@ index 0000000..175a3ad
 +    L = L_main + lambda * (L_arm + L_hand)        #                  (Eq. (12))
 +
 +The composite loss is folded into a single ``(B, T, max_action_dim)`` tensor so
-+``PI0Policy.forward``'s contract (``losses[:, :, :original_action_dim]`` slice
++``PI05Policy.forward``'s contract (``losses[:, :, :original_action_dim]`` slice
 +and per-dim logging) is preserved unchanged.
 +
-+``feature_enhancement=False`` defers entirely to vanilla pi0 (the πuni-origin
-+baseline).
++``feature_enhancement=False`` defers entirely to vanilla pi05 (the πuni-origin
++baseline). The paper's backbone is π0; pi05 is a deliberate foundry-base
++substitution — the ``z_share`` hook is identical, the only structural
++difference is pi05's ``state``-free forward signature (state is folded into the
++language prompt as discretized tokens).
 +"""
 +
 +import torch
@@ -196,8 +205,8 @@ index 0000000..175a3ad
 +
 +from lerobot.utils.constants import ACTION
 +
-+from .configuration_pi0_enhance import PI0EnhanceConfig
-+from .modeling_pi0 import PI0Policy, PI0Pytorch, get_gemma_config
++from .configuration_pi05_enhance import PI05EnhanceConfig
++from .modeling_pi05 import PI05Policy, PI05Pytorch, get_gemma_config
 +
 +
 +def build_index_masks(arm_dim: int, original_action_dim: int, max_action_dim: int) -> tuple[Tensor, Tensor]:
@@ -225,7 +234,7 @@ index 0000000..175a3ad
 +    """Composite flow-matching loss, returned per-dim as ``(B, T, A)``.
 +
 +    Mirrors ``F.mse_loss(reduction="none")`` for the main term (Eq. (9)) so the
-+    result plugs into ``PI0Policy.forward`` unchanged. Auxiliary terms (Eq. (10)
++    result plugs into ``PI05Policy.forward`` unchanged. Auxiliary terms (Eq. (10)
 +    -(11)) are squared error gated by the (1, 1, A) index masks (paper §7.3
 +    selective supervision).
 +    """
@@ -268,15 +277,15 @@ index 0000000..175a3ad
 +        return v_main, v_arm, v_hand
 +
 +
-+class PI0EnhancePytorch(PI0Pytorch):
-+    """pi0 core model with the optional arm-hand feature enhancement head."""
++class PI05EnhancePytorch(PI05Pytorch):
++    """pi05 core model with the optional arm-hand feature enhancement head."""
 +
-+    def __init__(self, config: PI0EnhanceConfig, rtc_processor=None):
++    def __init__(self, config: PI05EnhanceConfig, rtc_processor=None):
 +        super().__init__(config, rtc_processor=rtc_processor)
-+        self.config: PI0EnhanceConfig = config
++        self.config: PI05EnhanceConfig = config
 +
 +        if not config.feature_enhancement:
-+            return  # πuni-origin: behave exactly like vanilla pi0
++            return  # πuni-origin: behave exactly like vanilla pi05
 +
 +        d_s = get_gemma_config(config.action_expert_variant).width
 +        self.feature_enhancer = ArmHandFeatureEnhancer(d_s, config.max_action_dim)
@@ -289,29 +298,29 @@ index 0000000..175a3ad
 +        self.register_buffer("arm_mask", arm_mask, persistent=False)  # (A,)
 +        self.register_buffer("hand_mask", hand_mask, persistent=False)  # (A,)
 +
-+    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
++    def forward(self, images, img_masks, tokens, masks, actions, noise, time) -> Tensor:
 +        if not self.config.feature_enhancement:
-+            return super().forward(images, img_masks, lang_tokens, lang_masks, state, actions, noise, time)
++            return super().forward(images, img_masks, tokens, masks, actions, noise, time)
 +
 +        suffix_out, u_t = self._compute_suffix_out(
-+            images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
++            images, img_masks, tokens, masks, actions, noise, time
 +        )  # suffix_out (B,T,d_s) float32; u_t (B,T,A)
 +
 +        v_main, v_arm, v_hand = self._apply_checkpoint(self.feature_enhancer, suffix_out)
 +        return compute_feature_enhancement_loss(
 +            v_main, v_arm, v_hand, u_t, self.arm_mask, self.hand_mask, self.config.aux_loss_weight
-+        )  # (B,T,A) — same contract as base PI0Pytorch.forward
++        )  # (B,T,A) — same contract as base PI05Pytorch.forward
 +
 +
-+class PI0EnhancePolicy(PI0Policy):
-+    """pi0 policy variant exposing the arm-hand feature-enhancement reproduction.
++class PI05EnhancePolicy(PI05Policy):
++    """pi05 policy variant exposing the arm-hand feature-enhancement reproduction.
 +
-+    Reuses pi0 processors (selected via ``isinstance(cfg, PI0Config)`` in the
-+    policy factory) and the pi0 training/inference paths unchanged.
++    Reuses pi05 processors (selected via ``isinstance(cfg, PI05Config)`` in the
++    policy factory) and the pi05 training/inference paths unchanged.
 +    """
 +
-+    config_class = PI0EnhanceConfig
-+    name = "pi0_enhance"
++    config_class = PI05EnhanceConfig
++    name = "pi05_enhance"
 +
-+    def _build_model(self, config: PI0EnhanceConfig) -> PI0EnhancePytorch:
-+        return PI0EnhancePytorch(config, rtc_processor=self.rtc_processor)
++    def _build_model(self, config: PI05EnhanceConfig) -> PI05EnhancePytorch:
++        return PI05EnhancePytorch(config, rtc_processor=self.rtc_processor)

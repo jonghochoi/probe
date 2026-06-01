@@ -17,8 +17,8 @@
 | 상위 Design | [`../design.md`](../design.md) |
 | Originating analysis | [`../analysis.md`](../analysis.md) |
 | Foundry | `lerobot` |
-| 구현 가이드 | [`../impl/lerobot/impl.md`](../impl/lerobot/impl.md) · [`../impl/lerobot/impl.patch`](../impl/lerobot/impl.patch) · [`../impl/lerobot/test_pi0_enhance_smoke.py`](../impl/lerobot/test_pi0_enhance_smoke.py) |
-| 검증 생성일 | 2026-05-22 (`TZ=Asia/Seoul`) |
+| 구현 가이드 | [`../impl/lerobot/impl.md`](../impl/lerobot/impl.md) · [`../impl/lerobot/impl.patch`](../impl/lerobot/impl.patch) · [`../impl/lerobot/test_pi05_enhance_smoke.py`](../impl/lerobot/test_pi05_enhance_smoke.py) |
+| 검증 생성일 | 2026-06-01 (`TZ=Asia/Seoul`) — 베이스 모델 `pi0` → `pi05` 치환 재검증 |
 | 📚 문헌 대조 | `pass` |
 | 🔍 패치 정합성 | `pass` |
 | 🧪 시그니처·하이퍼파라미터 | `pass` |
@@ -56,17 +56,17 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl
 
 | 항목 | 출처 | 패치 본문 | 일치 |
 |------|------|-----------|------|
-| seam `PI0Pytorch._compute_suffix_out(...) -> (suffix_out, u_t)` | `vendor/lerobot/policies/pi0/modeling_pi0.py:750` (원 `forward`) | extract-method hunk — 본문 의미 불변, 반환만 추가 | ✅ |
-| seam `PI0Policy._build_model(config) -> PI0Pytorch` | `modeling_pi0.py:968` (`self.model = PI0Pytorch(...)`) | factory hunk — 호출부를 `self._build_model(config)` 로 우회 | ✅ |
-| `get_gemma_config(variant).width` 사용 | `vendor/lerobot/policies/pi0/modeling_pi0.py:315` | `PI0EnhancePytorch.__init__` `d_s = get_gemma_config(...).width` | ✅ |
-| `config.max_action_dim` 속성 | `vendor/lerobot/policies/pi0/configuration_pi0.py:41` | `H_arm/H_hand/H_main = nn.Linear(..., config.max_action_dim)` | ✅ |
+| seam `PI05Pytorch._compute_suffix_out(...) -> (suffix_out, u_t)` | `vendor/lerobot/policies/pi05/modeling_pi05.py:730` (원 `forward`) | extract-method hunk — 본문 의미 불변, 반환만 추가 (pi05 는 `state`-free 시그니처) | ✅ |
+| seam `PI05Policy._build_model(config) -> PI05Pytorch` | `modeling_pi05.py:921` (`self.model = PI05Pytorch(...)`) | factory hunk — 호출부를 `self._build_model(config)` 로 우회 | ✅ |
+| `get_gemma_config(variant).width` 사용 | `vendor/lerobot/policies/pi05/modeling_pi05.py:312` | `PI05EnhancePytorch.__init__` `d_s = get_gemma_config(...).width` | ✅ |
+| `config.max_action_dim` 속성 | `vendor/lerobot/policies/pi05/configuration_pi05.py:41` | `H_arm/H_hand/H_main = nn.Linear(..., config.max_action_dim)` | ✅ |
 | `nn.Mish` / `nn.Sequential` / `nn.Linear` (E_arm/E_hand 2-layer Mish) | torch `nn` | `ArmHandFeatureEnhancer` 정의 | ✅ |
-| 반환 계약 `(B,chunk,max_action_dim)` 유지 | `modeling_pi0.py` 원 `forward` + 호출부 `:1271` | `compute_feature_enhancement_loss` 가 `(B,T,A)` 반환 — base 와 동일 shape | ✅ |
-| `register_subclass("pi0_enhance")` + config_class/name 배선 | `lerobot.configs.PreTrainedConfig` registry | `PI0EnhanceConfig`/`PI0EnhancePolicy` (factory generic resolver) | ✅ |
-| 상수 `aux_loss_weight = 1.0` | `design.md §📊` (λ, paper-silent default) | `configuration_pi0_enhance.py` + `# NOTE` 주석 | ✅ |
+| 반환 계약 `(B,chunk,max_action_dim)` 유지 | `modeling_pi05.py` 원 `forward` + 호출부 `:1262` | `compute_feature_enhancement_loss` 가 `(B,T,A)` 반환 — base 와 동일 shape | ✅ |
+| `register_subclass("pi05_enhance")` + config_class/name 배선 | `lerobot.configs.PreTrainedConfig` registry | `PI05EnhanceConfig`/`PI05EnhancePolicy` (factory generic resolver) | ✅ |
+| 상수 `aux_loss_weight = 1.0` | `design.md §📊` (λ, paper-silent default) | `configuration_pi05_enhance.py` + `# NOTE` 주석 | ✅ |
 | 상수 `arm_dim = 6` (hand 12 → original_action_dim 18) | Design §🧮 데이터 계약 (arm 6-DoF / hand 12-DoF) | config 필드 + `build_index_masks(arm_dim, original_action_dim, A)` | ✅ |
-| 상수 $`d_s`$ = `get_gemma_config(...).width` (vendor-resolved) | `vendor/lerobot/policies/pi0/modeling_pi0.py:315` | `__init__` `d_s` | ✅ |
-| 상수 $`H`$ = `chunk_size = 50` (vendor-resolved) | `vendor/lerobot/policies/pi0/configuration_pi0.py:36` | base `_compute_suffix_out` 의 `self.config.chunk_size` 상속 | ✅ |
+| 상수 $`d_s`$ = `get_gemma_config(...).width` (vendor-resolved) | `vendor/lerobot/policies/pi05/modeling_pi05.py:312` | `__init__` `d_s` | ✅ |
+| 상수 $`H`$ = `chunk_size = 50` (vendor-resolved) | `vendor/lerobot/policies/pi05/configuration_pi05.py:36` | base `_compute_suffix_out` 의 `self.config.chunk_size` 상속 | ✅ |
 
 판정: `pass`
 
@@ -80,7 +80,7 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl
 
 | 참조 | 출처 | 패치 hunk / 🚧 항목 | 상태 |
 |------|------|---------------------|------|
-| `Eq. (9)` 메인 flow matching | `analysis/2511.00139.md §🔬` | `modeling_pi0_enhance.py` `se_main = (v_main - u_t) ** 2` | 구현 |
+| `Eq. (9)` 메인 flow matching | `analysis/2511.00139.md §🔬` | `modeling_pi05_enhance.py` `se_main = (v_main - u_t) ** 2` | 구현 |
 | `Eq. (10)` 손 보조 손실 | `analysis/2511.00139.md §🔬` | `se_hand = ((v_hand - u_t) ** 2) * hand_mask` | 구현 |
 | `Eq. (11)` 팔 보조 손실 | `analysis/2511.00139.md §🔬` | `se_arm = ((v_arm - u_t) ** 2) * arm_mask` | 구현 |
 | `Eq. (12)` 총손실 | `design.md §📊` | `se_main + aux_loss_weight * (se_arm + se_hand)` | 구현 |
@@ -100,12 +100,12 @@ $ cd /home/user/probe && git apply --check analysis/2511.00139/impl/lerobot/impl
 $ py=$(bash scripts/ensure-foundry-runtime.sh lerobot)
 $ git -C .foundry-runtime/lerobot/src apply -p3 --directory=src/lerobot \
       "$PWD/analysis/2511.00139/impl/lerobot/impl.patch"
-$ "$py" -m pytest .../tests/test_pi0_enhance_smoke.py -q
+$ "$py" -m pytest .../test_pi05_enhance_smoke.py -q
 ......                                                                   [100%]
-6 passed in 2.96s
+6 passed in 3.11s
 ```
 
-판정: `pass` (6 passed)
+판정: `pass` (6 passed) — pi05 런타임에 patch 적용 후 실측
 
 <!-- subclass-seam 산출물을 pinned commit 의 설치된 lerobot 에 적용하고
      sibling smoke test 를 실행 — enhancer shape, paper 계약 index mask
@@ -122,7 +122,7 @@ $ "$py" -m pytest .../tests/test_pi0_enhance_smoke.py -q
 - 🧪 시그니처·하이퍼파라미터: `pass`
 - 🧬 실행 검증: `pass`
 
-→ 이 foundry 의 구현은 in-scope 범위 (π_uni Arm-Hand Feature Enhancement, 식 9–12) 에서 Design 과 정합하며 실행 검증(6 passed)을 통과합니다. 촉각 인코더·LSTM admittance·비축적 corrective SFT 는 `pi0` base 좌표계 밖이라 honest defer (`out-of-base-scope`) 로 남습니다.
+→ 이 foundry 의 구현은 in-scope 범위 (π_uni Arm-Hand Feature Enhancement, 식 9–12) 에서 Design 과 정합하며 실행 검증(6 passed)을 통과합니다. 베이스 모델은 `pi0` → `pi05` 로 치환했으나 ($`z_{\text{share}}`$ action-expert hook 동일, seam 은 pi05 의 `state`-free 시그니처만 수용) in-scope 정합·실행 검증은 변동 없습니다. 촉각 인코더·LSTM admittance·비축적 corrective SFT 는 `pi05` base 좌표계 밖이라 honest defer (`out-of-base-scope`) 로 남습니다.
 
 ---
 
@@ -130,8 +130,8 @@ $ "$py" -m pytest .../tests/test_pi0_enhance_smoke.py -q
 
 | §🚧 # | 항목 한 줄 | bucket | 근거 / 다음 액션 |
 |-------|------------|--------|-------------------|
-| 1 | 촉각 인코더 (CAE+resultant-force MLP, §3.2.2) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE 선언 + §🪛 신규-미구현 행 — `pi0` 에 촉각 모달리티 없음. outer/inner 모두 무의미 |
-| 2 | LSTM admittance 정책 (§3.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — `pi0` 와 무관한 독립 정책 |
+| 1 | 촉각 인코더 (CAE+resultant-force MLP, §3.2.2) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE 선언 + §🪛 신규-미구현 행 — `pi05` 에 촉각 모달리티 없음. outer/inner 모두 무의미 |
+| 2 | LSTM admittance 정책 (§3.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — `pi05` 와 무관한 독립 정책 |
 | 3 | 비축적 corrective SFT 루프 (식 14) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — 모델 forward 가 아닌 학습 오케스트레이션 레이어 |
 | 4 | selective gating 임계값 τ_contact (§8.2.1) | `out-of-base-scope` | `impl.md §🧱` EXCLUDE — 촉각 모달리티 부재로 base 밖 |
 
@@ -152,5 +152,5 @@ $ "$py" -m pytest .../tests/test_pi0_enhance_smoke.py -q
 
 ## 🚧 미해결 / 잠정
 
-- `out-of-base-scope` 4개 항목 (촉각 인코더·LSTM·corrective·τ_contact) 은 `pi0` base 좌표계 밖이라 정적 검증으로 더 진행할 수 없습니다 — 별도 foundry 또는 신규 모듈 좌표계가 필요합니다.
+- `out-of-base-scope` 4개 항목 (촉각 인코더·LSTM·corrective·τ_contact) 은 `pi05` base 좌표계 밖이라 정적 검증으로 더 진행할 수 없습니다 — 별도 foundry 또는 신규 모듈 좌표계가 필요합니다.
 - enhancement 의 수렴/성능 (88.7% 등) 검증은 실제 학습이 필요해 정적 validation 으로 결론 불가.
