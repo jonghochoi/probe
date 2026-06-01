@@ -281,13 +281,17 @@ HARD RULES:
     5. Do not substitute KaTeX-unsupported macros in general — leave
        author-defined `\newcommand`, uncommon `\xrightarrow` variants,
        and similar package-specific notation as-is so the render
-       failure is visible (§5-4 honesty). **One safe whitelisted
-       substitution is allowed**: `\bm{X}` → `\mathbf{X}` (both render
-       as bold math; PROBE already uses `\mathbf` throughout, so the
-       swap unifies notation without distorting the source). Extend
-       the whitelist only by editing `docs/STYLE.md` §5-6 step 5 —
-       not ad-hoc. Escape a literal `$` in prose as `\$` to avoid
-       being mistaken for a math opener.
+       failure is visible (§5-4 honesty). **Two safe whitelisted
+       substitutions are allowed**: (a) `\bm{X}` → `\mathbf{X}` (both
+       render as bold math; PROBE already uses `\mathbf` throughout),
+       and (b) `\mathds{X}` → `\mathbb{X}` (`\mathds`/`dsfont` is not
+       a KaTeX control sequence and fails to render; `\mathbb{X}` is
+       the identical double-stroke glyph — e.g. the indicator
+       `\mathds{1}` → `\mathbb{1}` = 𝟙). Both preserve the symbol
+       without distorting the source. Extend the whitelist only by
+       editing `docs/STYLE.md` §5-6 step 5 — not ad-hoc. Escape a
+       literal `$` in prose as `\$` to avoid being mistaken for a
+       math opener.
     6. **Inline math inside English verbatim blockquotes** — when a
        paper sentence quoted as
        `> "...source sentence... $X$ ..." (§n)` carries inline math,

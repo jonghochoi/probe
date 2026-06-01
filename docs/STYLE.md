@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.13 (2026-05-21) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
+> **Version:** v1.20 (2026-06-01) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -494,7 +494,16 @@ conventions below codify both.
      - `\bm{X}` → `\mathbf{X}` — both render as bold math; PROBE
        documents already use `\mathbf` for every bold vector, so
        the substitution unifies notation without distorting the
-       source. This is the only auto-substitution sanctioned today;
+       source.
+     - `\mathds{X}` → `\mathbb{X}` — `\mathds` is the `dsfont`
+       package and KaTeX has no such control sequence, so it raises
+       `Undefined control sequence` and the whole span fails to
+       render. `\mathbb{X}` produces the identical double-stroke
+       glyph (the indicator `\mathds{1}` → `\mathbb{1}` renders as
+       𝟙), so the swap preserves the symbol exactly while making it
+       GitHub-renderable. Verified against KaTeX: `\mathbb{1}`
+       renders, `\mathds{1}` does not.
+       These are the only auto-substitutions sanctioned today;
        extend the list only by editing this rule, not ad-hoc.
   6. Escape a literal `$` in prose as `\$` so it isn't mistaken for
      a math opener.
@@ -786,3 +795,4 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.17 | 2026-05-27 | Scouting reports re-shelved per pillar: path `scouting/YYYY-MM-DD-P#.md` → `scouting/P#/YYYY-MM-DD.md`. §1 table updated; the agent's de-dup lookup now scans sibling files inside the same `P#/` folder. Existing 16 reports were `git mv`-relocated; historical boilerplate inside those files is intentionally not back-edited |
 | v1.19 | 2026-06-01 | Move `analysis/INDEX.md` regeneration off the PR path. §5-7 rewritten — the per-command prompts (`/analyze-paper`, `/implement`, `/validate`) no longer stage `analysis/INDEX.md` and no longer invoke `scripts/refresh-analysis-index.py`; the script now runs post-merge on `main` only, via the new `.github/workflows/refresh-analysis-index.yml` workflow, which commits the refreshed index back as a `chore(analysis): refresh INDEX.md` bot commit. Parallel analysis PRs were producing an unresolvable text conflict on the generated `<!-- ANALYSIS_INDEX:START/END -->` block every merge; concentrating regeneration on `main` removes the conflict surface entirely at the cost of a brief stale window between merge and bot commit. `CLAUDE.md` "Automatically-maintained indexes" section and the repo-map row for the script were updated to match |
 | v1.18 | 2026-05-28 | Unify the on-demand pipeline on a verb-command / noun-prompt scheme. Prompts renamed `paper-analysis.md` → `analysis.md`, `paper-reproduction.md` → `reproduction.md`, `foundry.md` → `implementation.md`, `audit.md` → `validation.md`. Commands `/foundry` → `/implement` (`commands/foundry.md` → `implement.md`) and `/audit` → `/validate` (`commands/audit.md` → `validate.md`); `/analyze-paper` and `/reproduce-paper` are already verbs and unchanged. `/validate` was chosen over `/verify` to avoid shadowing the built-in `verify` skill. The validation stage is fully renamed audit → validation: output dir `analysis/<id>/audit/` → `<id>/validation/`, template `_TEMPLATE_AUDIT.md` → `_TEMPLATE_VALIDATION.md`, the §6-5 report name, the round-boundary commit prefix, and the `refresh-analysis-index.py` path logic. The `foundry` concept noun (target foundry, `--foundry`, `impl/<foundry>/`, `.foundry-runtime/`, `scripts/foundry-ablation/`) and the `*-auditor` humanize-korean agent names are preserved |
+| v1.20 | 2026-06-01 | Extend the §5-6 step 5 KaTeX substitution whitelist with a second sanctioned auto-substitution: `\mathds{X}` → `\mathbb{X}`. `\mathds` (the `dsfont` package) is not a KaTeX control sequence, so it raises `Undefined control sequence` and the entire `$...$` span fails to render on GitHub; `\mathbb{X}` is the identical double-stroke glyph (the indicator `\mathds{1}` → `\mathbb{1}` renders as 𝟙), so the swap preserves the symbol while making it renderable. The same recipe entry is mirrored into `.claude/prompts/analysis.md` step 5 so the substitution happens at extraction time, not after the source already leaked. Surfaced on `analysis/2605.28812`, whose RL reward-term indicator functions arrived from arXiv HTML as `\mathds{1}` and broke five formula spans |
