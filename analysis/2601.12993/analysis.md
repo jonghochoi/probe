@@ -377,4 +377,4 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 
 ---
 
-> 💡 base 매핑은 `/implement analysis/2601.12993/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2601.12993/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -397,8 +397,9 @@ hard cap 8 유지. 정식 승격은 분기 rebalance 때 기존 1~2편과 교체
 (NoTVLA 시사). 이 검증 자체를 초기 실험 항목으로. 본 문서 §6.2 의 메타
 반증과 직결.
 
-### D. `pretrain_data.md` → `lineage_corpus.md` rename 의 잔존
+### D. 데이터셋 카탈로그 슬러그 (context 잔존)
 
-`context/P4.md` §3 의 D22 행에 `analysis/_catalogs/pretrain_data.md` 인용이
-한 건 남아있음 (CLAUDE.md 규약상 agent 미터치). `context/MASTER.md` 도
-동일 점검 권장. P4·MASTER 갱신 시 슬러그를 `lineage_corpus.md` 로 치환.
+`context/P4.md` §3 의 D22 행에 옛 카탈로그 슬러그(`pretrain_data` /
+`lineage_corpus`) 인용이 남아있을 수 있음 (CLAUDE.md 규약상 agent 미터치).
+`context/MASTER.md` 도 동일 점검 권장. P4·MASTER 갱신 시 슬러그를 현재
+파일명 `analysis/_catalogs/dataset.md` 로 치환.

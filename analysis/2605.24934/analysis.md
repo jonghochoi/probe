@@ -96,7 +96,7 @@ $$\mathrm{ICT}_{k}=\big[\underbrace{\tau}_{1} \| \underbrace{{}^{\mathrm{REF}}T_
 
    여기서 $`\tau`$ 는 엔티티 타입(손/물체), $`{}^{\mathrm{REF}}T_{E}`$ 는 공유 기준 프레임에서 본 엔티티 $`k`$ 의 포즈, $`{}^{E}T_{LH}`$ · $`{}^{E}T_{RH}`$ 는 엔티티 로컬 프레임에서 본 양손 포즈, $`g`$ 는 그래스프 상태(손은 binarized 핀치 거리, 물체는 sentinel)입니다. SE(3)은 정규화 translation + 6-D rotation(9-D)으로 평탄화합니다.
 
-4. **정책 (§3.4)** — 상태 $`s_t`$ (ICT 토큰 + RGB 한 장)를 받아 $K$-스텝 양손 액션 청크 $`\mathbf{a}\in\mathbb{R}^{K\times D_{a}}`$ 를 만듭니다. 트랜스포머 디코더(6 layer · 8 head · embed 384)가 청크 self-attention과 컨텍스트 cross-attention을 동시에 하며, 컨텍스트는 (i) 240×320 RGB의 16×16 patch embedding + sinusoidal time embedding, (ii) 엔티티별 ICT 토큰을 384채널로 선형 사영한 두 스트림으로 구성됩니다(부록 C.1).
+4. **정책 (§3.4)** — 상태 $`s_t`$ (ICT 토큰 + RGB 한 장)를 받아 $`K`$-스텝 양손 액션 청크 $`\mathbf{a}\in\mathbb{R}^{K\times D_{a}}`$ 를 만듭니다. 트랜스포머 디코더(6 layer · 8 head · embed 384)가 청크 self-attention과 컨텍스트 cross-attention을 동시에 하며, 컨텍스트는 (i) 240×320 RGB의 16×16 patch embedding + sinusoidal time embedding, (ii) 엔티티별 ICT 토큰을 384채널로 선형 사영한 두 스트림으로 구성됩니다(부록 C.1).
 
 ### 학습 목표 / 손실
 
@@ -119,7 +119,7 @@ $$\mathcal{L}=\mathcal{L}_{\text{FM}}+\lambda_{\text{OM}}\,\mathcal{L}_{\text{OM
 
 ### 학습 셋업
 
-- **데이터** — 태스크당 사람 시연 약 40분(약 60 에피소드)을 30 Hz RGB로 수집. 입력은 240×320 RGB와 ICT 토큰, 예측 호라이즌 $K=50$ 입니다.
+- **데이터** — 태스크당 사람 시연 약 40분(약 60 에피소드)을 30 Hz RGB로 수집. 입력은 240×320 RGB와 ICT 토큰, 예측 호라이즌 $`K=50`$ 입니다.
 - **최적화** — AdamW, 베이스 학습률 $`1\times10^{-4}`$ , cosine decay, 200-step warmup, min-LR ratio 0.05, 배치 32, 400 epoch, 그래디언트 노름 클립 1.0, bfloat16, EMA decay 0.999(부록 C.1).
 - **증강** — 이미지 광도/RRC/블러/random erasing (p≈0.5~0.8), 액션 타깃에 $`\sigma_{\text{pos}}=1\,\text{mm}`$ · $`\sigma_{\text{rot}}=0.5^{\circ}`$ 가우시안 노이즈, 시간 sub-step 보간 p=0.5.
 - **추론** — Euler 20-step ODE 적분, 10 Hz로 재계획, step stride 2(실효 5 Hz), look-ahead 25 step, grasp는 any-over-horizon (확률>0.6 시 닫기, 옵션으로 grasp-latch), 위치 EMA α=0.5 + 회전 SLERP + trajectory-overlap blend(smoothing 12), 안전 케이지 위치 0.08 m·회전 0.02 rad/사이클.
@@ -177,10 +177,10 @@ ICT vs 시각 우회의 분리를 보여주는 ablation(§4.4, Water Flowers)은
 
 | 추가 손실 | 성공률 변동 | 출처 |
 |---|---|---|
-| Object motion 단독 | $+17.5$ pp | §4.4, Fig. 10 |
-| Latent consistency 단독 | $+12.5$ pp | §4.4 |
-| 2D trace 단독 | $+5$ pp | §4.4 |
-| 세 손실 모두 | $+25$ pp | §4.4 |
+| Object motion 단독 | $`+17.5`$ pp | §4.4, Fig. 10 |
+| Latent consistency 단독 | $`+12.5`$ pp | §4.4 |
+| 2D trace 단독 | $`+5`$ pp | §4.4 |
+| 세 손실 모두 | $`+25`$ pp | §4.4 |
 
 부록 E.1의 손 추적 ablation은 스테레오 깊이가 사실상의 전제조건임을 못 박습니다.
 
@@ -228,7 +228,7 @@ ICT vs 시각 우회의 분리를 보여주는 ablation(§4.4, Water Flowers)은
 - **vs. π0 / π0.5 ([arXiv:2410.24164](https://arxiv.org/abs/2410.24164) · [arXiv:2504.16054](https://arxiv.org/abs/2504.16054))** — 둘 다 flow matching action expert를 쓰지만, π0/π0.5는 VLM 백본 + 대규모 cross-embodiment 코퍼스를 전제로 합니다. HumanEgo는 VLM 없이, 사전학습 없이, 태스크당 30분만으로 동작하는 *경량 단일-태스크* 플로우 매칭 정책입니다. **새로움** — π 스택에서 차원별 grasp 가중 $`w_g=10`$ 처럼 *비-VLM* 환경의 플로우 매칭 레시피가 명시적으로 제공됩니다.
 - **vs. Demystifying Action Space Design ([arXiv:2602.23408](https://arxiv.org/abs/2602.23408))** — D2 evidence 핀 논문. HumanEgo의 reference-frame ablation(부록 E.3 anchor frame vs camera frame)은 *액션 공간*이 아닌 *관측 프레임* 차원에서 동일 결의 결론을 냅니다 — 저데이터에서는 task-relative anchor가 우월, 대데이터에서는 sensor-grounded camera frame이 수렴. PROBE의 D2(both-wrist/tool-flange pose)와 직접 정합되는 보강 증거.
 - **vs. ViTacFormer ([arXiv:2506.15953](https://arxiv.org/abs/2506.15953)), TacFiLM ([arXiv:2603.14604](https://arxiv.org/abs/2603.14604))** — P2 핀 논문 두 편은 *촉각 + 시각* 융합인 반면, HumanEgo는 *시각만*으로 운동학을 추론합니다. 비교 가치는 입력 구조 *형식* (per-entity 구조적 토큰 + cross-attention)이며 모달리티 자체는 다릅니다.
-- **vs. Touch Dreaming ([arXiv:2604.13015](https://arxiv.org/abs/2604.13015))** — Touch Dreaming은 *촉각* 잠재 예측을 보조 목적으로 둡니다. HumanEgo의 *latent consistency* 헤드는 ICT 자체를 $K$-스텝 후방으로 예측하는 비-촉각 버전이며, 동일한 "보조 잠재 예측" 패턴이 시각 입력 정책에서도 +12.5 pp의 데이터 효율을 준다는 실측 증거입니다.
+- **vs. Touch Dreaming ([arXiv:2604.13015](https://arxiv.org/abs/2604.13015))** — Touch Dreaming은 *촉각* 잠재 예측을 보조 목적으로 둡니다. HumanEgo의 *latent consistency* 헤드는 ICT 자체를 $`K`$-스텝 후방으로 예측하는 비-촉각 버전이며, 동일한 "보조 잠재 예측" 패턴이 시각 입력 정책에서도 +12.5 pp의 데이터 효율을 준다는 실측 증거입니다.
 - **vs. DexterityGen ([arXiv:2502.04307](https://arxiv.org/abs/2502.04307))** — DexterityGen은 RL primitive policy를 데이터 수집 보조로 씁니다. HumanEgo는 RL을 한 줄도 안 쓰고 사람 1인칭 영상만으로 동급 성능을 주장 — antagonist B(RL 불필요론)에 직접 증거를 추가합니다. 단, in-hand reorientation 같은 *접촉 풍부* 정밀 영역은 HumanEgo가 1 cm에서 평탄화된다고 *스스로* 인정하므로 antagonist의 한계도 함께 드러납니다.
 
 핀을 교체할 만큼 강한 증거는 없습니다. P2의 ICT-스타일 entity 토큰을 *시각만* 환경에서 인용하고 싶을 때 보조 인용으로 추가하는 정도가 적절합니다.
@@ -241,7 +241,7 @@ ICT vs 시각 우회의 분리를 보여주는 ablation(§4.4, Water Flowers)은
 
 - **D23 (action representation)** — flow matching v1 결정에 대한 외부 보강. 차원별 손실 가중 $`(w_p,w_r,w_g)=(5,1,10)`$ 와 Euler 20-step + look-ahead 25-step 추론 레시피를 CP1 코드 진입 시 초기값 후보로 직접 사용 가능합니다. 액션 청크 호라이즌 $`K=50`$ , re-plan 10 Hz, 실효 5 Hz step-stride 2 패턴도 참조 가치 있음.
 - **D8 / D9 (per-finger 구조적 토큰 + topology-aware 인코딩)** — ICT 토큰의 *형식 설계*가 직접 비유 대상입니다. PROBE P2 토큰 정의에 "토큰 안에 (i) 공유 REF 기준 포즈, (ii) 다른 엔티티 기준에서 본 자신, (iii) 그래스프/접촉 스칼라"를 함께 넣는 패턴을 도입 검토 — D8 v1 정의를 *augment* 하는 수준의 후보이며 v2 trigger는 아닙니다.
-- **보조 목적 도입 여부 (P1/P2 학습 파이프라인)** — HumanEgo가 보고하는 +25 pp는 *저데이터(15분)* 구간에서 얻은 이득이라는 점이 중요합니다. CP1 사전 ablation에서 (i) object 6-DoF future-trajectory 예측, (ii) ICT $K$-step latent consistency 두 보조 헤드를 *추가 컨디션*으로 두는 안을 후보 D 항목에 올립니다. 구체 가중치 후보 — object motion $`0.5\,w_p`$ , latent consistency $`w_c\in[0.1,1.0]`$ .
+- **보조 목적 도입 여부 (P1/P2 학습 파이프라인)** — HumanEgo가 보고하는 +25 pp는 *저데이터(15분)* 구간에서 얻은 이득이라는 점이 중요합니다. CP1 사전 ablation에서 (i) object 6-DoF future-trajectory 예측, (ii) ICT $`K`$-step latent consistency 두 보조 헤드를 *추가 컨디션*으로 두는 안을 후보 D 항목에 올립니다. 구체 가중치 후보 — object motion $`0.5\,w_p`$ , latent consistency $`w_c\in[0.1,1.0]`$ .
 - **D24 (first demo)** — HumanEgo의 4 태스크는 모두 평면 픽앤플레이스/회전 — PROBE의 in-hand cube rotation과 직접 겹치지 않습니다. 단 "동시간 텔레오퍼레이션 vs 사람 1인칭" 비교 슬롯을 CP2 real-world 실험에 *Phase 0* 으로 끼워 사람 데이터의 효율 곡선을 직접 측정하는 안을 검토합니다.
 - **D17 / D18 (System0)** — 본 논문이 *반증*하는 부분은 없습니다. 오히려 1 cm 평탄화 + in-hand 미지원이라는 자기 한계가 P3 System0의 *필요성* 진영을 강화합니다. 의사결정 키 변경 없음.
 - **D11 (visuotactile encoder)** — 영향 없음(촉각 미사용).
@@ -266,4 +266,4 @@ ICT vs 시각 우회의 분리를 보여주는 ablation(§4.4, Water Flowers)은
 - §10 §10.1 (VLA-only / antagonist evidence) 모니터링 리스트에 HumanEgo 라인을 **"VLA·RL·VLM 없이도 동작하는 imitation-only 라인"** 안티고니스트로 메모 — Genesis AI 라인과는 다른 결(사전학습 없음, 분 단위 데이터)이라 별도 트래킹 가치. 본 논문 자체는 §7 anti-topic("2-finger parallel-jaw only" + "pure imitation from human video without learning/physics") 두 항목에 정확히 걸려 핀 후보는 아님.
 - §14.D (non-blocking 모니터링)에 "분 단위 사람 1인칭 → 로봇 정책" 라인의 follow-up 등장 시 PROBE의 데이터 수집 시나리오를 *human-video Phase 0* 으로 확장 가능한지 재검토 트리거 등록.
 
-> 💡 base 매핑은 `/implement analysis/2605.24934/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.24934/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

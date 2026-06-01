@@ -1,62 +1,57 @@
-# VLA lineage corpus 카탈로그 (further-pretrain corpus, D22)
+# 데이터셋 카탈로그 (VLA further-pretrain corpus, D22)
 
 > PROBE D22 "Multi-embodiment pretraining data" 의사결정 근거. lineage
 > 2-튜플 *(초기 VLM 가중치) × (further-pretrain corpus)* 의 **두 번째 축**
 > — VLM은 이미 학습된 채로 들어오고, 그 위에 VLA를 만들기 위해 *추가로
-> 사전학습할 때* 쓰이는 corpus 후보를 정리한다. (파일명이 `pretrain_data`
-> 였던 이유 — 단, "VLM 사전학습"이 아니라 *VLA further-pretrain* 임을
-> 슬러그가 더 정확히 담도록 `lineage_corpus` 로 개명.)
+> 사전학습할 때* 쓰이는 corpus 후보를 정리한다.
 >
 > 각 데이터셋의 입력·출력 스키마 + 임베디먼트 메타 + 규모를 *scan 표*
 > 와 *per-dataset `<details>` 카드* 의 하이브리드로 정리. PROBE 의
 > dexterous hand 타깃 (Sharpa 22-DOF / xhand) 을 기준으로 hand-DOF
 > 우선순위를 명시.
 >
-> v0.5 (2026-05). 공통 컬럼 표준 + 카드 schema 는
-> `analysis/_catalogs/README.md` §2 참고. **Scan 표 마커는 의사결정
-> 4-필드 (License · Scale · 데이터 유형 · Lineage 적층) 의 검증 상태**
-> — 카드 안 부차 필드의 🔴/❓ 는 scan 마커에 영향 없음 (README §2-5).
+> v0.6 (2026-05). 공통 컬럼 표준 + 카드 schema 는
+> `analysis/_catalogs/README.md` §2 참고.
+> **Human verified** — 인간이 셀 내용을 직접 검수했으면 ✅, 아니면 ⬜ (기본값).
 
 ---
 
 ## Scan 표
 
-> Scan 표의 **Source-check** 컬럼은 *의사결정 4-필드* (License · Scale ·
-> 데이터 유형 · Lineage 적층) 의 검증 상태만 종합한다. 카드 안의 부차
-> 필드 (정확한 control rate · sub-dataset spec · 카메라 해상도 분포 등)
-> 의 🔴/❓ 는 *scan 마커에 영향 없음* — `_catalogs/README.md` §2-5 참고.
+> **Human verified** 컬럼 — 인간이 직접 검수했으면 ✅, 아니면 ⬜ (기본값,
+> `_catalogs/README.md` §2-5 참고).
 
-| 데이터셋 | License | Access | 데이터 유형 | 규모 | Source-check | 우선도 |
+| 데이터셋 | License | Access | 데이터 유형 | 규모 | Human verified | 우선도 |
 |---|---|---|---|---|---|---|
-| [Open X-Embodiment (OXE)](#oxe) | CC-BY-4.0 ✅ | 🟢 [web](https://robotics-transformer-x.github.io/) | 🤖 Robot action | 22 robots / 527 skills / 160266 tasks | 🟢 verified | ⭐⭐ baseline |
-| [RT-1 (Robotics Transformer)](#rt1) | Closed ❌ | 🔴 — Google internal | 🤖 Robot action | ~130k traj | 🔴 unverified | ⭐ 폐쇄 |
-| [BridgeData V2](#bridge-v2) | CC-BY-SA-4.0 ✅ | 🟢 [web](https://rail-berkeley.github.io/bridgedata/) | 🤖 Robot action | 60,096 traj / 24 env | 🟢 verified | ⭐⭐ 풍부 |
-| [DROID](#droid) | CC-BY-4.0 ✅ | 🟢 [web](https://droid-dataset.github.io/) | 🤖 Robot action | 76k traj / 350h / 564 scenes / 84 tasks | 🟢 verified | ⭐⭐ 다양성 |
-| [ManiSkill 3](#maniskill-3) | CC-BY-4.0 ✅ | 🟢 [web](https://maniskill.readthedocs.io/) | 🤖 Robot action (sim) | 12 domains / 30K+ FPS | 🟢 verified | ⭐ sim |
-| [RoboMIND](#robomind) | TBD ❓ | 🟢 [web](https://x-humanoid-robomind.github.io/) | 🤖 Robot action | 107k traj / 479 tasks / 96 obj / 4 embodiments | 🟡 partial | ⭐⭐⭐ **dual-dex humanoid** |
-| [AgiBot World](#agibot-world) | CC-BY-NC-SA-4.0 ❌ | 🟢 [web](https://agibot-world.com/) | 🤖 Robot action | 1M+ traj / 217 tasks | 🟢 verified | ⭐⭐⭐ **hand-DOF** |
-| [DexMimicGen](#dexmimicgen) | CC-BY-NC-SA-4.0 ❌ | 🟢 [gh:NVlabs/dex-mimicgen](https://github.com/NVlabs/dex-mimicgen) | 🤖 Robot action (sim) | 21K synth / 60 human | 🟢 verified | ⭐⭐⭐ **finger sim** |
-| [UniHand-2.0](#unihand-2) | Apache-2.0 ✅ | 🟢 [gh:BeingBeyond/Being-H](https://github.com/BeingBeyond/Being-H) | 🔀 Mixed | ~35,000h / 30 embodiments | 🟢 verified | ⭐⭐⭐ **human-video → hand** |
-| [ALOHA / Mobile ALOHA](#aloha) | MIT ✅ | 🟢 [web](https://tonyzhaozh.github.io/aloha/) | 🤖 Robot action | TBD (50+ public HF subsets) | 🟡 partial | ⭐⭐ bimanual + high-FPS |
-| [RH20T](#rh20t) | CC-BY-SA-4.0 ✅ | 🟢 [web](https://rh20t.github.io/) | 🤖 Robot action | 110K seq | 🟢 verified | ⭐ **촉각** |
-| [LeRobot (aggregated)](#lerobot) | Apache-2.0 ✅ | 🟢 [hf:lerobot](https://huggingface.co/lerobot) | 🤖 Robot action | 50+ embodiments | 🟡 partial | ⭐⭐ 통합 |
-| [HOI4D](#hoi4d) | CC-BY-NC-4.0 ❌ (추정) | 🟢 [web](http://www.hoi4d.top/) | 👤 Human video | 4000 seq / 800 obj / 16 cat / 2.4M RGB-D frames | 🟡 partial | ⭐⭐⭐ **hand-object 3D** |
-| [ARCTIC](#arctic) | CC-BY-NC-SA-4.0 ❌ (추정) | 🟢 [web](https://arctic.is.tue.mpg.de/) | 👤 Human video | 2.1M frames bimanual | 🟡 partial | ⭐⭐⭐ **bimanual articulated** |
-| [OakInk](#oakink) | CC-BY-NC-4.0 ❌ (추정) | 🟢 [web](https://oakink.net/) | 👤 Human video | 50K interactions / 100 obj from 1800 households | 🟡 partial | ⭐⭐⭐ **grasp + intent** |
-| [AssemblyHands](#assemblyhands) | CC-BY-4.0 ✅ | 🟢 [web](https://assemblyhands.github.io/) | 👤 Human video | 3.0M frames / 490K ego | 🟢 verified | ⭐⭐⭐ **bimanual ego pose** |
-| [Ego4D](#ego4d) | Ego4D license ⚠️ | 🟠 [web](https://ego4d-data.org/) | 👤 Human video | 3670h / 931 wearers / 74 loc · 9 countries | 🟢 verified | ⭐⭐ **VLM prior** |
-| [Epic Kitchens 100](#epic-kitchens-100) | CC-BY-NC-SA-4.0 ❌ | 🟢 [web](https://epic-kitchens.github.io/100) | 👤 Human video | 100h / 20M frames / 90K actions / 700 videos / 45 env | 🟢 verified | ⭐⭐ **action label** |
-| [EgoExoLearn](#egoexolearn) | CC-BY-4.0 ✅ | 🟢 [gh:OpenGVLab/EgoExoLearn](https://github.com/OpenGVLab/EgoExoLearn) | 👤 Human video | 120h paired | 🟢 verified | ⭐⭐ **ego-exo paired** |
-| [MolmoAct2-BimanualYAM](#molmoact2-bimanualyam) | TBD (Apache-2.0 추정) ❓ | 🟢 [web](https://allenai.org/blog/molmoact2) | 🤖 Robot action | 34,500 demos / 720h bimanual | 🟡 partial | ⭐⭐⭐ **bimanual real** |
-| [MolmoAct2-SO100/101](#molmoact2-so100-101) | TBD ❓ | 🟢 [web](https://allenai.org/blog/molmoact2) | 🤖 Robot action | TBD ❓ | 🟡 partial | ⭐ low-cost arm |
-| [MolmoBot-Data](#molmobot-data) | TBD (Apache-2.0 추정) ❓ | 🟢 [web](https://allenai.org/blog/molmobot-robot-manipulation) | 🤖 Robot action (sim) | 1.7M traj / 11K+ obj / 94K+ env / 8 tasks | 🟡 partial | ⭐⭐ sim-only |
-| [Ego-Exo4D](#ego-exo4d) | Ego-Exo4D license ⚠️ (추정) | 🟠 [web](https://ego-exo4d-data.org/) | 👤 Human video | 1286h paired / 740 participants / 13 cities | 🟡 partial | ⭐⭐⭐ **paired ego-exo skilled** |
-| [Assembly101](#assembly101) | CC-BY-NC-4.0 ❌ (추정) | 🟢 [web](https://assembly-101.github.io/) | 👤 Human video | 4321 videos / 101 toys / 4 ego + 8 exo / 18M hand poses | 🟡 partial | ⭐⭐⭐ **bimanual assembly** |
-| [HoloAssist](#holoassist) | CC-BY-4.0 ✅ | 🟠 [web](https://holoassist.github.io/) | 👤 Human video | 166h / 350 pairs | 🟢 verified | ⭐⭐ **task-assist NL** |
+| [Open X-Embodiment (OXE)](#oxe) | CC-BY-4.0 ✅ | 🟢 [web](https://robotics-transformer-x.github.io/) | 🤖 Robot action | 22 robots / 527 skills / 160266 tasks | ⬜ | ⭐⭐ baseline |
+| [RT-1 (Robotics Transformer)](#rt1) | Closed ❌ | 🔴 — Google internal | 🤖 Robot action | ~130k traj | ⬜ | ⭐ 폐쇄 |
+| [BridgeData V2](#bridge-v2) | CC-BY-SA-4.0 ✅ | 🟢 [web](https://rail-berkeley.github.io/bridgedata/) | 🤖 Robot action | 60,096 traj / 24 env | ⬜ | ⭐⭐ 풍부 |
+| [DROID](#droid) | CC-BY-4.0 ✅ | 🟢 [web](https://droid-dataset.github.io/) | 🤖 Robot action | 76k traj / 350h / 564 scenes / 84 tasks | ⬜ | ⭐⭐ 다양성 |
+| [ManiSkill 3](#maniskill-3) | CC-BY-4.0 ✅ | 🟢 [web](https://maniskill.readthedocs.io/) | 🤖 Robot action (sim) | 12 domains / 30K+ FPS | ⬜ | ⭐ sim |
+| [RoboMIND](#robomind) | TBD ❓ | 🟢 [web](https://x-humanoid-robomind.github.io/) | 🤖 Robot action | 107k traj / 479 tasks / 96 obj / 4 embodiments | ⬜ | ⭐⭐⭐ **dual-dex humanoid** |
+| [AgiBot World](#agibot-world) | CC-BY-NC-SA-4.0 ❌ | 🟢 [web](https://agibot-world.com/) | 🤖 Robot action | 1M+ traj / 217 tasks | ⬜ | ⭐⭐⭐ **hand-DOF** |
+| [DexMimicGen](#dexmimicgen) | CC-BY-NC-SA-4.0 ❌ | 🟢 [gh:NVlabs/dex-mimicgen](https://github.com/NVlabs/dex-mimicgen) | 🤖 Robot action (sim) | 21K synth / 60 human | ⬜ | ⭐⭐⭐ **finger sim** |
+| [UniHand-2.0](#unihand-2) | Apache-2.0 ✅ | 🟢 [gh:BeingBeyond/Being-H](https://github.com/BeingBeyond/Being-H) | 🔀 Mixed | ~35,000h / 30 embodiments | ⬜ | ⭐⭐⭐ **human-video → hand** |
+| [ALOHA / Mobile ALOHA](#aloha) | MIT ✅ | 🟢 [web](https://tonyzhaozh.github.io/aloha/) | 🤖 Robot action | TBD (50+ public HF subsets) | ⬜ | ⭐⭐ bimanual + high-FPS |
+| [RH20T](#rh20t) | CC-BY-SA-4.0 ✅ | 🟢 [web](https://rh20t.github.io/) | 🤖 Robot action | 110K seq | ⬜ | ⭐ **촉각** |
+| [LeRobot (aggregated)](#lerobot) | Apache-2.0 ✅ | 🟢 [hf:lerobot](https://huggingface.co/lerobot) | 🤖 Robot action | 50+ embodiments | ⬜ | ⭐⭐ 통합 |
+| [HOI4D](#hoi4d) | CC-BY-NC-4.0 ❌ (추정) | 🟢 [web](http://www.hoi4d.top/) | 👤 Human video | 4000 seq / 800 obj / 16 cat / 2.4M RGB-D frames | ⬜ | ⭐⭐⭐ **hand-object 3D** |
+| [ARCTIC](#arctic) | CC-BY-NC-SA-4.0 ❌ (추정) | 🟢 [web](https://arctic.is.tue.mpg.de/) | 👤 Human video | 2.1M frames bimanual | ⬜ | ⭐⭐⭐ **bimanual articulated** |
+| [OakInk](#oakink) | CC-BY-NC-4.0 ❌ (추정) | 🟢 [web](https://oakink.net/) | 👤 Human video | 50K interactions / 100 obj from 1800 households | ⬜ | ⭐⭐⭐ **grasp + intent** |
+| [AssemblyHands](#assemblyhands) | CC-BY-4.0 ✅ | 🟢 [web](https://assemblyhands.github.io/) | 👤 Human video | 3.0M frames / 490K ego | ⬜ | ⭐⭐⭐ **bimanual ego pose** |
+| [Ego4D](#ego4d) | Ego4D license ⚠️ | 🟠 [web](https://ego4d-data.org/) | 👤 Human video | 3670h / 931 wearers / 74 loc · 9 countries | ⬜ | ⭐⭐ **VLM prior** |
+| [Epic Kitchens 100](#epic-kitchens-100) | CC-BY-NC-SA-4.0 ❌ | 🟢 [web](https://epic-kitchens.github.io/100) | 👤 Human video | 100h / 20M frames / 90K actions / 700 videos / 45 env | ⬜ | ⭐⭐ **action label** |
+| [EgoExoLearn](#egoexolearn) | CC-BY-4.0 ✅ | 🟢 [gh:OpenGVLab/EgoExoLearn](https://github.com/OpenGVLab/EgoExoLearn) | 👤 Human video | 120h paired | ⬜ | ⭐⭐ **ego-exo paired** |
+| [MolmoAct2-BimanualYAM](#molmoact2-bimanualyam) | TBD (Apache-2.0 추정) ❓ | 🟢 [web](https://allenai.org/blog/molmoact2) | 🤖 Robot action | 34,500 demos / 720h bimanual | ⬜ | ⭐⭐⭐ **bimanual real** |
+| [MolmoAct2-SO100/101](#molmoact2-so100-101) | TBD ❓ | 🟢 [web](https://allenai.org/blog/molmoact2) | 🤖 Robot action | TBD ❓ | ⬜ | ⭐ low-cost arm |
+| [MolmoBot-Data](#molmobot-data) | TBD (Apache-2.0 추정) ❓ | 🟢 [web](https://allenai.org/blog/molmobot-robot-manipulation) | 🤖 Robot action (sim) | 1.7M traj / 11K+ obj / 94K+ env / 8 tasks | ⬜ | ⭐⭐ sim-only |
+| [Ego-Exo4D](#ego-exo4d) | Ego-Exo4D license ⚠️ (추정) | 🟠 [web](https://ego-exo4d-data.org/) | 👤 Human video | 1286h paired / 740 participants / 13 cities | ⬜ | ⭐⭐⭐ **paired ego-exo skilled** |
+| [Assembly101](#assembly101) | CC-BY-NC-4.0 ❌ (추정) | 🟢 [web](https://assembly-101.github.io/) | 👤 Human video | 4321 videos / 101 toys / 4 ego + 8 exo / 18M hand poses | ⬜ | ⭐⭐⭐ **bimanual assembly** |
+| [HoloAssist](#holoassist) | CC-BY-4.0 ✅ | 🟠 [web](https://holoassist.github.io/) | 👤 Human video | 166h / 350 pairs | ⬜ | ⭐⭐ **task-assist NL** |
 
 > 각 행의 이름 링크를 클릭하면 아래 *per-dataset 카드* 의 해당 anchor 로
 > 점프합니다. 카드 안의 `<details>` 를 펼치면 Observations · Actions ·
-> Embodiment · Annotation · Scale · Lineage 적층 · Source check · Sources
+> Embodiment · Annotation · Scale · Lineage 적층 · Human verified · Sources
 > 8개 H4 sub-section 이 보입니다.
 
 ---
@@ -107,11 +102,9 @@
 #### Lineage 적층
 π0 · π0.5 · π0-FAST · OpenVLA · Octo · GR00T N1 (부분) · Xiaomi-Robotics-0 (부분)
 
-#### Source check
-- 🟢 verified: License (CC-BY-4.0), 22 robots, 21 institutions, 527 skills (160266 tasks) — arXiv:2310.08864 abstract 직접 확인
-- 🟡 partial: action space (sub-dataset 마다 상이; 통합 spec 은 RLDS), arm DOF 분포
-- 🔴 unverified: 정확한 hours, storage size
-- ❓ needs-human: sub-dataset 별 정확한 control rate / resolution 분포 표
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2310.08864](https://arxiv.org/abs/2310.08864)
@@ -159,10 +152,9 @@
 #### Lineage 적층
 RT-2 (자체 후속) · RT-X 통합 흡수 후 OXE 의 한 sub-dataset 으로 재배포
 
-#### Source check
-- 🟡 partial: trajectory / task count (paper)
-- 🔴 unverified: 정확한 action token spec, control rate
-- ❓ needs-human: RT-1 dataset 단독 다운로드 가능 여부 (현재 RT-X 통합 외 단독 release 미확인)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2212.06817](https://arxiv.org/abs/2212.06817)
@@ -208,10 +200,9 @@ RT-2 (자체 후속) · RT-X 통합 흡수 후 OXE 의 한 sub-dataset 으로 �
 #### Lineage 적층
 **VLM2VLA fine-tune corpus** (NL-formatted Gemini 2.5 변환) · OpenVLA (부분) · Octo (부분)
 
-#### Source check
-- 🟢 verified: License (CC-BY-SA-4.0), 데이터 유형, 60,096 trajectories, 24 environments — arXiv:2308.12952 abstract
-- 🟡 partial: action space (NL instruction 호환 명시)
-- 🔴 unverified: 정확한 camera count / resolution / control rate
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2308.12952](https://arxiv.org/abs/2308.12952)
@@ -262,10 +253,9 @@ RT-2 (자체 후속) · RT-X 통합 흡수 후 OXE 의 한 sub-dataset 으로 �
 #### Lineage 적층
 **Xiaomi-Robotics-0** (코어 corpus 의 한 축) · OpenVLA fine-tune · Universal-Policy
 
-#### Source check
-- 🟢 verified: License (CC-BY-4.0), 76k traj / 350h / 564 scenes / 84 tasks / 50 collectors — arXiv:2403.12945 abstract
-- 🟡 partial: Franka Panda + Robotiq 2F-85 (project page 표준; abstract 미명시)
-- 🔴 unverified: 정확한 ZED stereo spec, control rate (full paper 확인 필요)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2403.12945](https://arxiv.org/abs/2403.12945)
@@ -314,11 +304,9 @@ RT-2 (자체 후속) · RT-X 통합 흡수 후 OXE 의 한 sub-dataset 으로 �
 #### Lineage 적층
 PriorVLA · VLA-Adapter 의 LIBERO 옆 sim benchmark
 
-#### Source check
-- 🟢 verified: License (**CC-BY-4.0**, not CC-BY-SA), simulation-only, 12 task domains, 30K+ FPS, dexterous manipulation 지원 — arXiv:2410.00425 abstract
-- 🟡 partial: pointcloud/voxel observation 지원 (abstract 명시)
-- 🔴 unverified: 정확한 trajectory / hour 수치 (generative 라 자체 모호)
-- ❓ needs-human: 정확한 embodiment 목록 + hand-DOF 분포 (paper 본문 확인 필요)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2410.00425](https://arxiv.org/abs/2410.00425) (id 미검증)
@@ -367,11 +355,9 @@ PriorVLA · VLA-Adapter 의 LIBERO 옆 sim benchmark
 #### Lineage 적층
 (자체 baseline; 외부 적층 미확인)
 
-#### Source check
-- 🟢 verified: 107k traj, 479 tasks, 96 obj, 5k failure demos, 4 embodiments (Franka / UR5e / AgileX / humanoid w/ dual-dex) — arXiv:2412.13877 abstract
-- 🟡 partial: NL instruction 존재, multi-view
-- 🔴 unverified: 정확한 camera count·resolution·fps, action space spec, dexterous hand 의 DOF
-- ❓ needs-human: dataset card license (nonexclusive-distrib/1.0 인지 CC-BY-4.0 인지)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2412.13877](https://arxiv.org/abs/2412.13877)
@@ -419,11 +405,9 @@ PriorVLA · VLA-Adapter 의 LIBERO 옆 sim benchmark
 #### Lineage 적층
 **Genie Operator-1 (GO-1)** 자체 적층 + 일부 third-party humanoid VLA + RDT-1B 평가
 
-#### Source check
-- 🟢 verified: License **CC-BY-NC-SA-4.0** (정정, abstract 라이선스 아이콘), 1M+ trajectories, 217 tasks, "extensible from grippers to dexterous hands and visuo-tactile sensors" (abstract) — arXiv:2503.06669
-- 🟡 partial: humanoid 양팔, xhand 22-DOF 옵션
-- 🔴 unverified: hand-DOF subset 의 정확한 비율, tactile sub-dataset 의 spec, camera count 분포
-- ❓ needs-human: 카메라 개수 / 정확한 robot 모델명 / collection period
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2503.06669](https://arxiv.org/abs/2503.06669)
@@ -470,11 +454,9 @@ PriorVLA · VLA-Adapter 의 LIBERO 옆 sim benchmark
 #### Lineage 적층
 (NVIDIA 내부 GR00T pretraining mix 의 일부 추정; 공개 적층 VLA 미확인) · Robocasa
 
-#### Source check
-- 🟢 verified: License (CC-BY-NC-SA-4.0), simulation-only, bimanual
-- 🟡 partial: 21K from 60 (paper §4)
-- 🔴 unverified: Inspire Hand 12 vs 16 DOF (논문/release 마다 변동), 정확한 camera spec
-- ❓ needs-human: GR00T N1 / N1.5 의 적층 여부 (NVIDIA 내부 mix 일 가능성)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2410.24185](https://arxiv.org/abs/2410.24185)
@@ -523,11 +505,9 @@ PriorVLA · VLA-Adapter 의 LIBERO 옆 sim benchmark
 #### Lineage 적층
 **Being-H0.5** (자체)
 
-#### Source check
-- 🟢 verified: ~35,000h, **30 distinct robotic embodiments**, cross-embodiment + VL 통합 corpus, License **Apache-2.0** (GitHub repo footer) — Being-H0.5 search 결과
-- 🟡 partial: 35k h 분할 (ego + robot + VL)
-- 🔴 unverified: 정확한 trajectory count 분할, NL instruction 형식
-- ❓ needs-human: VLM backbone (Qwen2.5-VL 추정이지만 paper 미명시), 30 embodiments 의 정확한 목록 + 각 hand-DOF
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2601.12993](https://arxiv.org/abs/2601.12993) (Being-H0.5 paper)
@@ -574,11 +554,9 @@ PriorVLA · VLA-Adapter 의 LIBERO 옆 sim benchmark
 #### Lineage 적층
 lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train · X-VLA 6-bench
 
-#### Source check
-- 🟢 verified: ViperX 300S × 2, MIT license, 50 Hz
-- 🟡 partial: lerobot HF subset 수 (~50+)
-- 🔴 unverified: ALOHA 본체와 Mobile ALOHA 의 데이터 합산 hour
-- ❓ needs-human: 공식 ALOHA 데이터 단독 release 위치 (lerobot 미러 외)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2304.13705](https://arxiv.org/abs/2304.13705) (ACT) · [arXiv:2401.02117](https://arxiv.org/abs/2401.02117) (Mobile)
@@ -626,11 +604,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (tactile-aware VLA 드물어 직접 적층 미확인) · OXE sub-dataset 으로 부분 포함 가능성
 
-#### Source check
-- 🟢 verified: License (CC-BY-SA-4.0), **110,000+ contact-rich sequences**, **force/torque + audio + visual + action 통합** — arXiv:2307.00595 abstract
-- 🟡 partial: "hundreds of real-world skills" 명시 (정확 task 수 abstract 미명시)
-- 🔴 unverified: arm 분포 (Franka / UR-5 / Flexiv 비율), 정확한 audio spec, 카메라 수
-- ❓ needs-human: tactile + force 라벨 통합 spec (paper §3)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2307.00595](https://arxiv.org/abs/2307.00595)
@@ -677,11 +653,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (lerobot 내부 benchmark; 외부 VLA 적층은 sub-subset 단위)
 
-#### Source check
-- 🟢 verified: License (Apache-2.0), 50+ embodiments, **arXiv:2602.22818** (Cadene et al., ICLR 2026 — 정정: 직전 ID `2404.14541` 은 다른 paper) — WebSearch 결과
-- 🟡 partial: ShadowHand subset 의 정확한 수
-- 🔴 unverified: 통합 trajectory 수치 (subset 마다 다름)
-- ❓ needs-human: 정확한 included policy / embodiment 목록
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2602.22818](https://arxiv.org/abs/2602.22818) (정정)
@@ -725,11 +699,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — hand-object retarget 후보)
 
-#### Source check
-- 🟢 verified: 4000 seq, 800 obj, 16 categories, **2.4M RGB-D egocentric video frames** — arXiv:2203.01577 abstract
-- 🟡 partial: 3개 benchmarking task (4D segmentation / pose tracking / action segmentation) 명시
-- 🔴 unverified: License (CC-BY-NC-4.0 추정 — project page 직접 확인 필요)
-- ❓ needs-human: 정확한 hand-pose annotation format (MANO 등), depth resolution
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2203.01577](https://arxiv.org/abs/2203.01577)
@@ -772,11 +744,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — bimanual articulated retarget 후보)
 
-#### Source check
-- 🟢 verified: **2.1M video frames**, bimanual articulated object manipulation — arXiv:2204.13662 abstract
-- 🟡 partial: 11 articulated objects (이전 메모리), 339 sequences (이전 메모리; abstract 미확인)
-- 🔴 unverified: License (CC-BY-NC-SA-4.0 추정 — project page 확인 필요), multi-view camera 수
-- ❓ needs-human: MANO 변종, subject count, 정확한 sequence/object count
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2204.13662](https://arxiv.org/abs/2204.13662)
@@ -820,11 +790,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — grasp prior 후보)
 
-#### Source check
-- 🟢 verified: **50,000 affordance-aware + intent-oriented hand-object interactions**, **1,800 household objects (100 recorded)** — arXiv:2203.15709 abstract
-- 🟡 partial: 5 intent 카테고리 (이전 메모리; abstract 미확인)
-- 🔴 unverified: License (CC-BY-NC-4.0 추정 — GitHub repo 확인 필요), MANO spec 변종
-- ❓ needs-human: intent taxonomy 의 정확한 정의, 카메라 spec
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2203.15709](https://arxiv.org/abs/2203.15709)
@@ -869,11 +837,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — bimanual ego pose prior 후보)
 
-#### Source check
-- 🟢 verified: **3.0M annotated images (490K ego)**, **License CC-BY-4.0** (정정 — abstract 라이선스 아이콘), Assembly101 기반 — arXiv:2304.12301 abstract
-- 🟡 partial: 3D hand pose (포맷 abstract 미명시)
-- 🔴 unverified: 정확한 ego + exo camera 수, subject count (34 는 이전 메모리)
-- ❓ needs-human: hand-pose annotation 의 정확한 format (MANO vs 3D keypoint)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2304.12301](https://arxiv.org/abs/2304.12301)
@@ -917,11 +883,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — vision/temporal/NL prior 표준 corpus)
 
-#### Source check
-- 🟢 verified: **3,670h**, **931 unique camera wearers**, **74 worldwide locations / 9 countries** (정정 — 이전 13 cities 가 아님), "hand-object manipulation" benchmark 존재 — arXiv:2110.07058 abstract
-- 🟡 partial: stereo / synchronized multi-camera subset 존재 명시
-- 🔴 unverified: 3D head pose subset 의 정확한 spec, 정확한 hand pose subset 위치
-- ❓ needs-human: Ego4D license 본문 세부 조항 (가입 동의 형태)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2110.07058](https://arxiv.org/abs/2110.07058)
@@ -965,10 +929,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — cooking-task NL grounding 후보)
 
-#### Source check
-- 🟢 verified: **100h / 20M frames / 90K actions / 700 variable-length videos / 45 environments**, **License CC-BY-NC-SA-4.0** (정정 — 이전 NC-4.0 에서 NC-SA-4.0 으로 abstract 라이선스 링크 확인), head-mounted camera — arXiv:2006.13256 abstract
-- 🟡 partial: verb-noun action label 명시 (전체 verb/noun 클래스 수 미명시)
-- 🔴 unverified: hand-object bbox vs 3D subset 의 정확한 비율, 개별 참가자 수
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2006.13256](https://arxiv.org/abs/2006.13256)
@@ -1011,11 +974,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — ego-exo gap 학습 prior 후보; P2 D12 multi-cam fuser 와 연결)
 
-#### Source check
-- 🟢 verified: **120h captured in daily life scenarios and specialized laboratories**, **License CC-BY-4.0** (정정 — abstract 라이선스 아이콘 확인; 이전 Apache-2.0 은 GitHub repo 라이선스이며 데이터셋 자체는 CC-BY-4.0) — arXiv:2403.16182 abstract
-- 🟡 partial: paired ego + exo 명시 (정확한 매칭 단위 미명시)
-- 🔴 unverified: 정확한 paired sequence 수, NL instruction 형식
-- ❓ needs-human: hand-pose annotation 존재 여부
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2403.16182](https://arxiv.org/abs/2403.16182)
@@ -1064,11 +1025,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 **MolmoAct2** (자체) — *현존 최대 open bimanual robotics dataset* (verified, techtimes/techfastforward)
 
-#### Source check
-- 🟢 verified: 34,500 demos / 720h / 2개월 / bimanual tabletop / task 예시 (towel/grocery/phone/bussing) — MolmoAct2 paper arXiv:2605.02881 + Allen AI blog (techtimes, techfastforward 보도)
-- 🟡 partial: NL instruction 존재 (paper §)
-- 🔴 unverified: License (Apache-2.0 또는 ODC-BY 추정 — Allen AI 표준; 직접 확인 필요), YAM rig 의 DOF/카메라/control rate
-- ❓ needs-human: arXiv:2605.02881 paper §4 의 데이터셋 spec 표, HuggingFace dataset card 의 정확한 spec
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2605.02881](https://arxiv.org/abs/2605.02881) (MolmoAct2 paper)
@@ -1117,11 +1076,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 **MolmoAct2** (자체) — MolmoAct2 의 data mix 의 일부 (BimanualYAM + DROID-MolmoAct2 + SO100/101 합산)
 
-#### Source check
-- 🟢 verified: MolmoAct2 data mix 에 "MolmoAct2-SO100/101 Dataset" 명시 — WebSearch (techtimes / techfastforward) + arXiv:2605.02881
-- 🟡 partial: SO-ARM 플랫폼 (lerobot 표준 저비용 arm) 추정
-- 🔴 unverified: 정확한 trajectory 수, license, control rate
-- ❓ needs-human: SO-100 vs SO-101 의 데이터 분리/합산, HuggingFace dataset card 의 spec
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2605.02881](https://arxiv.org/abs/2605.02881) (MolmoAct2 paper)
@@ -1174,11 +1131,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 **MolmoBot** (자체 — Allen AI MolmoBot 모델) — *MolmoBot 은 VLA 모델 + 데이터셋 + 시뮬 ecosystem 통합*
 
-#### Source check
-- 🟢 verified: **arXiv:2603.16861** (MolmoB0T paper, 정정 — 이전 paper ID 미확정), **1.7M trajectories / 11K+ obj / 94K+ env / 8 tasks / Franka FR3 + Rainbow RB-Y1 / sim-only / MuJoCo / domain randomization** — WebSearch (Allen AI / HPCwire 보도) + project page allenai.github.io/MolmoBot/
-- 🟡 partial: NL instruction 형식, 8 task type 의 정확한 목록
-- 🔴 unverified: License (Apache-2.0 추정 — Allen AI 표준; release 확인 필요), RB-Y1 의 hand spec
-- ❓ needs-human: arXiv:2603.16861 paper §3 의 데이터셋 spec, HF dataset URL (현재 미확인)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2603.16861](https://arxiv.org/abs/2603.16861) (MolmoB0T paper, 정정)
@@ -1227,11 +1182,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — paired ego-exo + skilled task prior 후보; P2 D12 multi-cam fuser 와 강하게 연결)
 
-#### Source check
-- 🟢 verified: **1,286h paired ego + exo**, **740 participants**, **13 cities**, skilled human activities (sports · music · dance · bike repair), 3D hand/body pose benchmark — arXiv:2311.18259 abstract
-- 🟡 partial: cooking / health 카테고리 (abstract 미명시; full paper 확인 필요)
-- 🔴 unverified: License (Ego4D 와 유사 gated 추정), 정확한 exo camera 수
-- ❓ needs-human: hand pose annotation subset 의 정확한 범위, 전체 task taxonomy
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2311.18259](https://arxiv.org/abs/2311.18259)
@@ -1279,10 +1232,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — bimanual assembly hand prior 후보; PROBE 의 tool-articulation phase 에 가까운 task)
 
-#### Source check
-- 🟢 verified: **4,321 videos / 101 toy vehicles**, **4 ego + 8 static (exo) = 12 cameras** (정정 — 이전 1 ego + 8 exo 가 아니라 4 ego + 8 static), **18M 3D hand poses**, "100K coarse + 1M fine-grained action segments" + "mistake detection" task — arXiv:2203.14712 abstract
-- 🟡 partial: ~513h (paper 본문 추정), 53 subjects (이전 메모리)
-- 🔴 unverified: License (CC-BY-NC-4.0 추정 — project page 확인 필요), hand pose annotation format (MANO vs 3D keypoint)
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2203.14712](https://arxiv.org/abs/2203.14712)
@@ -1328,11 +1280,9 @@ lerobot subset 의 다수 적층 · ACT 류 · π0 fine-tune · RT-X co-train ·
 #### Lineage 적층
 (직접 적층 VLA 없음 — task-assist + instruction-following + NL grounding prior 후보)
 
-#### Source check
-- 🟢 verified: **166h**, **350 unique instructor-performer pairs**, **License CC-BY-4.0** (정정 — 이전 Microsoft Research 비상용 추정에서 CC-BY-4.0 으로 abstract 라이선스 아이콘 확인), "conversational annotations" + instructor-performer real-time verbal guidance, mistake detection + intervention type prediction benchmark — arXiv:2309.17024 abstract
-- 🟡 partial: 20 daily-life task (이전 메모리; abstract 미명시)
-- 🔴 unverified: HoloLens version, hand tracking spec
-- ❓ needs-human: dialogue 텍스트의 NL annotation 형식, mistake/intervention 라벨 taxonomy
+#### Human verified
+
+⬜ 미검수
 
 #### Sources
 - arXiv: [arXiv:2309.17024](https://arxiv.org/abs/2309.17024)
@@ -1420,9 +1370,7 @@ PROBE Sharpa 22-DOF 타깃에 닿는 정도로 별점.
 - **1차**: arXiv 논문 (모델/시스템) 또는 dataset 공식 README (데이터).
 - **2차**: HuggingFace dataset card.
 - **3차**: 공식 GitHub README / project page.
-- Source-check 마커 (🟢/🟡/🔴/❓) 는 각 카드의 `#### Source check` 절에
-  *어떤 필드가 어느 레벨인지* 명시. Scan 표의 7번째 컬럼은 *전반*
-  마커 — 한 필드라도 🔴 면 전체 🔴 보수적 표시.
-- arXiv ID 위조 금지 (`docs/STYLE.md` §3 절대 원칙). 미확인 ID 는
-  source-check 절에서 `❓ needs-human` 으로 표기.
+- **Human verified** 컬럼/H4 — 인간이 셀 내용을 직접 검수했으면 ✅,
+  아니면 ⬜ (기본값). 출처 등급(1~3차)과 무관하게 *사람의 확인 여부*만 본다.
+- arXiv ID 위조 금지 (`docs/STYLE.md` §3 절대 원칙).
 - 2026-05 기준; 새 데이터셋 (특히 hand-DOF) 출시 시 quarterly rebalance.

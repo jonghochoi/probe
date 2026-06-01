@@ -221,4 +221,4 @@ RLVR 결과는 더 극단적입니다.
 - **§9 Researchers — 추가 후보**: Sijia Liu (Michigan State), Mingyi Hong (UMN) 의 spectral / matrix-aware optimizer 라인. 우리 핵심 분야는 아니지만 매트릭스 인식 옵티마이저 흐름을 따라가려면 follow 후보.
 - **D25 4-contribution ablation 가벼운 보강**: falsifier 평가 비용을 줄이려면 옵티마이저 sweep(AdamW vs Pion) 한 셀을 ablation 안에 합치는 안을 검토 (우선순위 낮음. Pion 도입 후 별개 ablation 으로 분리하는 편이 깔끔할 수 있습니다).
 
-> 💡 base 매핑은 `/implement analysis/2605.19282/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.19282/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

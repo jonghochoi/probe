@@ -13,7 +13,7 @@ CONTEXT (read-only):
                                    (Pillar <PILLAR>, this pillar's Decisions,
                                    Tracked Literature, Researchers, Anti-topics)
 - docs/STYLE.md             — formatting, emoji system, Korean authoring rules
-- scouting/_TEMPLATE.md     — the form every report follows
+- scouting/templates/report.md     — the form every report follows
 - scouting/<PILLAR>/YYYY-MM-DD.md — this pillar's recent reports (last
                                    ~2 weeks, ~4 files), for de-duplication only
 
@@ -93,7 +93,7 @@ For every candidate paper, score on a 0–3 scale:
 
 OUTPUT — Korean report (`scouting/<PILLAR>/YYYY-MM-DD.md`)
 
-Write the report directly in Korean, following scouting/_TEMPLATE.md
+Write the report directly in Korean, following scouting/templates/report.md
 exactly. Top 3–5 papers only. Apply docs/STYLE.md §4 (Korean
 authoring rules): all prose is formal Korean (합니다/됩니다 체), while
 paper titles, config / code names, formulas, P#/D# tags, arXiv

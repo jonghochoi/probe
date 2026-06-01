@@ -751,7 +751,7 @@
         <div class="step-body">
           <h4>Stage 1 — 수동 실행 (Week 1–2)</h4>
           <p>
-            새 <a href="https://claude.ai" target="_blank" rel="noopener">Claude.ai</a> 대화 → <code>context/MASTER.md</code> 업로드 → Scouting Prompt 붙여넣기(실행 날짜 + pillar 채우기) → 결과를 <code>scouting/_TEMPLATE.md</code> 기준으로 검토. 통과하지 못하면 모델이 아니라 <em>프롬프트</em>가 문제입니다. <code>scouting/YYYY-MM-DD-P#.md</code>로 저장 후 commit. 다음 실행(월·목)에 반복.
+            새 <a href="https://claude.ai" target="_blank" rel="noopener">Claude.ai</a> 대화 → <code>context/MASTER.md</code> 업로드 → Scouting Prompt 붙여넣기(실행 날짜 + pillar 채우기) → 결과를 <code>scouting/templates/report.md</code> 기준으로 검토. 통과하지 못하면 모델이 아니라 <em>프롬프트</em>가 문제입니다. <code>scouting/P#/YYYY-MM-DD.md</code>로 저장 후 commit. 다음 실행(월·목)에 반복.
           </p>
         </div>
       </div>
@@ -1036,14 +1036,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">SETUP</span>
         <div>
           <div class="doc-title">docs/AGENT_SETUP.md</div>
-          <div class="doc-desc">Claude Code Routines 셋업 · 네트워크 허용 · `/analyze-paper`·`/implement`·`/validate` · 트러블슈팅 (English)</div>
-        </div>
-      </a>
-      <a class="doc-item" href="INTRO.md">
-        <span class="doc-tag">한글</span>
-        <div>
-          <div class="doc-title">docs/INTRO.md</div>
-          <div class="doc-desc">한글 온보딩 + 운영 매뉴얼 — 마크다운 텍스트 버전</div>
+          <div class="doc-desc">Claude Code Routines 셋업 · 네트워크 허용 · `/analyze-paper`·`/implement-design`·`/validate-impl` · 트러블슈팅 (English)</div>
         </div>
       </a>
       <a class="doc-item" href="STYLE.md">
@@ -1071,7 +1064,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">OUT</span>
         <div>
           <div class="doc-title">scouting/README.md</div>
-          <div class="doc-desc">주간 OUTWARD 트랙 — <code>YYYY-MM-DD-P#.md</code> 파일명, _TEMPLATE 참조</div>
+          <div class="doc-desc">주간 OUTWARD 트랙 — <code>P#/YYYY-MM-DD.md</code> 파일명, <code>templates/report.md</code> 참조</div>
         </div>
       </a>
       <a class="doc-item" href="../synthesis/README.md">

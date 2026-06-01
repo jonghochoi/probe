@@ -273,7 +273,7 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 - **Posterior 인코더(V-JEPA2.1) 의존도** — frozen ViT + Perceiver resampler가 미래 임베딩을 만들고 이 임베딩의 *분포*가 prior가 학습해야 할 *teacher signal*입니다. ViT를 다른 인코더로 바꿨을 때 alignment loss curve가 무너진다면, latent WAM의 효과는 V-JEPA2.1의 pretraining에 *bound*된 것일 수 있습니다. 가장 싼 sanity check — 사전 ablation에서 future encoder를 (a) V-JEPA2.1, (b) frozen CLIP, (c) trainable scratch ViT로 바꿔 prior branch 성능 격차를 측정.
 - **MoT capacity 분할이 우리 데이터 규모에서 작동할지** — InternVL3.5 (큰 understanding expert) + Qwen3 (작은 action expert)는 *대규모 사전학습 + 대규모 robot mix*를 전제로 합니다. PROBE의 v1 sim ablation 규모(태스크당 50~1000 trial)에서는 큰 understanding expert가 *underconstrained*해 overfit할 위험이 있습니다. 가장 싼 sanity check — 첫 ablation은 *동일 backbone*에서 latent reasoning slot ON/OFF로만 비교, expert capacity 자체는 변수에서 분리.
 - **Future embedding의 temporal horizon이 PROBE 태스크와 안 맞을 가능성** — 본 논문은 $`H=4`$ obs + $`T=20`$ action chunk를 미래 horizon으로 잡고 이 구간의 ViT 임베딩을 posterior 입력으로 씁니다. *in-hand reorientation*은 의미 있는 *미래 변화*가 손가락 micro-motion 수준에서 일어나므로, 20-step 미래 frame이 *contact event*를 담을 만큼 충분히 시간 해상도를 잡지 못할 수 있습니다. 가장 싼 sanity check — sim에서 *contact event 시점*을 라벨로 잡아 ViT 임베딩이 정말 그 시점을 *separable* 하게 표현하는지 t-SNE/probing으로 확인.
-- **prior branch가 deployable해도 *training cost*는 두 배 가까이 든다** — 한 시퀀스에 두 branch를 packing해 단일 forward를 쓰지만 시퀀스 길이 자체는 2배($`K`$ extra) + alignment 대상 layer가 last $`L=9`$라서 backward 비용이 늘어납니다. 본 논문은 step time 보고가 deployment에 집중되어 있고 *training step time*은 명시 없음. PROBE에 도입할 때 사전 학습 시 GPU 시간 견적이 부풀 가능성이 있어, *training-time cost monitoring*을 D21 stage 정의에 미리 메모해 두는 것이 안전합니다.
+- **prior branch가 deployable해도 *training cost*는 두 배 가까이 든다** — 한 시퀀스에 두 branch를 packing해 단일 forward를 쓰지만 시퀀스 길이 자체는 2배($`K`$ extra) + alignment 대상 layer가 last $`L=9`$ 라서 backward 비용이 늘어납니다. 본 논문은 step time 보고가 deployment에 집중되어 있고 *training step time*은 명시 없음. PROBE에 도입할 때 사전 학습 시 GPU 시간 견적이 부풀 가능성이 있어, *training-time cost monitoring*을 D21 stage 정의에 미리 메모해 두는 것이 안전합니다.
 - **System0 자리에 들어갈 RL 신호와의 호환성** — Being-H0.7의 prior branch는 *flow matching*으로 액션을 만들고 추론 시 단일 청크를 내뱉습니다. PROBE의 System0이 사이에 끼어들면 (i) latent reasoning이 만든 *current context only* 추론이 sub-loop RL 액션과 *충돌*할 수 있고, (ii) UAC의 prefix-lock 규약이 System0의 *실시간 finger override*와 부딪힐 수 있습니다. 가장 싼 sanity check — UAC client schema에 *partial prefix override*가 가능한지(논문은 "never rewrites the already committed prefix"라고 못 박음, §4.3.3) 미리 확인.
 
 ---
@@ -288,4 +288,4 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 
 context/MASTER.md는 절대 수정하지 않습니다. 위 항목은 사람이 검토할 후보 제안입니다.
 
-> 💡 base 매핑은 `/implement analysis/2605.00078/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.00078/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

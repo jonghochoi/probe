@@ -16,7 +16,7 @@
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-📖 팀 온보딩 한글 문서: [`docs/probe_guide.html`](docs/probe_guide.html) · [`docs/INTRO.md`](docs/INTRO.md)
+📖 팀 온보딩 한글 문서: [`docs/probe_guide.html`](docs/probe_guide.html)
 
 </div>
 
@@ -33,7 +33,7 @@
 > # xdg-open probe/docs/probe_guide.html   # Linux
 > ```
 >
-> Operations manual (한글, 마크다운): [`docs/INTRO.md`](docs/INTRO.md) — 동기, 파이프라인, 운영 노하우, 월간 리뷰 KPI.
+> 동기·파이프라인·운영 노하우·월간 리뷰 KPI 까지 같은 가이드 한 곳에 담겨 있다.
 
 ---
 
@@ -60,7 +60,7 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 | Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
 | Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
 | "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
-| "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` takes the Design, drives `/implement` → `/validate` in a converging loop, and ships a unified-diff patch against a target foundry (default `lerobot`) |
+| "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` takes the Design, drives `/implement-design` → `/validate-impl` in a converging loop, and ships a unified-diff patch against a target foundry (default `lerobot`) |
 
 ---
 
@@ -109,7 +109,7 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
               ▼                      ▼                      ▼
    ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
    │ scouting/           │ │ synthesis/         │ │ analysis/          │
-   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <arxiv-id>.md      │
+   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <id>/analysis.md   │
    │                     │ │                    │ │                    │
    │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
    │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │
@@ -132,8 +132,8 @@ PROBE has **three output tracks** sharing one static context — outward (`scout
 The FOCUSED column drills deeper than the main diagram shows. A
 single `/analyze-paper` call produces the *analysis* and a *Layer 1
 Design*; the Design is then mapped onto a target *foundry* by
-`/implement`, and the resulting impl is statically validated by
-`/validate`. The validation's §🔎 section sorts every open 🚧 item into four
+`/implement-design`, and the resulting impl is statically validated by
+`/validate-impl`. The validation's §🔎 section sorts every open 🚧 item into four
 buckets, and the next-action choice is deterministic from the verdict
 cells plus those buckets — so `/reproduce-paper` orchestrates the whole
 thing as an **iterative loop with two nested cycles**:
@@ -141,7 +141,7 @@ thing as an **iterative loop with two nested cycles**:
 ```
    Initial pass (round 0):
 
-       /analyze-paper ──► design ──► /implement ──► impl ──► /validate ──► verdict + §🔎 buckets
+       /analyze-paper ──► design ──► /implement-design ──► impl ──► /validate-impl ──► verdict + §🔎 buckets
 
 
    Branch on verdict + §🔎 buckets (round 1..N):
@@ -149,7 +149,7 @@ thing as an **iterative loop with two nested cycles**:
        ⚖️ pass ∧ no paper-extractable     ──►  done (success)
 
        🔍 / 🧪 / 📐 fail/partial          ──►  inner loop
-       §🔎 vendor-resolved                      /implement --feedback <validation-path>
+       §🔎 vendor-resolved                      /implement-design --feedback <validation-path>
        §🔎 paper-silent-defaultable             Design fixed; surgical patch update
                                                 (vendor-lift / default+NOTE promote)
 
@@ -161,7 +161,7 @@ thing as an **iterative loop with two nested cycles**:
        focused re-extract byte-identical  ──►  stable_design (fixed point)
 ```
 
-- **§🔎 §🚧 bucket classifier.** Every round, `/validate` re-classifies
+- **§🔎 §🚧 bucket classifier.** Every round, `/validate-impl` re-classifies
   each open 🚧 item zero-state into `vendor-resolved` /
   `paper-extractable §X.Y` / `paper-silent-defaultable` /
   `paper-silent-experimental`, and emits a machine-readable
@@ -173,7 +173,7 @@ thing as an **iterative loop with two nested cycles**:
   🔍 patch-apply failures, 🧪 signature/constant mismatches,
   📐 silent-skip rows, plus `vendor-resolved` (lift the cited vendor
   `file:line`) and `paper-silent-defaultable` (promote a default with a
-  mandatory `# NOTE:` comment) buckets. `/implement --feedback
+  mandatory `# NOTE:` comment) buckets. `/implement-design --feedback
   <validation-path>` treats the prior round's `impl.md` + `impl.patch` as a
   starting point; passing hunks are preserved and every new hunk traces
   1-to-1 to a specific validation row (the honesty guard).
@@ -181,8 +181,8 @@ thing as an **iterative loop with two nested cycles**:
   bucket — means the Design is shallower than the paper body.
   `/reproduce-paper` runs `/analyze-paper --focus "<focus-hint>"` to
   re-extract just the named sections (everything else copied verbatim),
-  then re-runs `/implement` (full regenerate, since the Design moved) and
-  `/validate` in the same round. Layer-1 has a large blast radius, but the
+  then re-runs `/implement-design` (full regenerate, since the Design moved) and
+  `/validate-impl` in the same round. Layer-1 has a large blast radius, but the
   loop is bounded by fixed-point detection rather than a manual gate.
 - **Honest termination (fixed-point, no extra counter).** When the
   verdict tuple + 🪛/🚧 tables + §🔎 bucket set repeat byte-for-byte,
@@ -242,7 +242,7 @@ cd probe
 
 ## 🤖 Agent Setup Guide
 
-Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/implement` → `/validate`) and its `/reproduce-paper` orchestrator, and troubleshooting. Run the `.claude/prompts/scouting.md` template by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine. A single template is shared by all four pillars; replace `<PILLAR>` with `P1`/`P2`/`P3`/`P4` once before each manual run or before pasting into a RemoteTrigger routine.
+Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/implement-design` → `/validate-impl`) and its `/reproduce-paper` orchestrator, and troubleshooting. Run the `.claude/prompts/scouting.md` template by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine. A single template is shared by all four pillars; replace `<PILLAR>` with `P1`/`P2`/`P3`/`P4` once before each manual run or before pasting into a RemoteTrigger routine.
 
 ---
 
@@ -292,9 +292,9 @@ the references below are the exact sources.
 
 | Repo | What PROBE borrows |
 |---|---|
-| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes the strict 4-agent pipeline (detector → rewriter → [fidelity ∥ naturalness]) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
+| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill at `.claude/skills/humanize-korean/` and the four pipeline agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) at `.claude/agents/`. Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes the `humanize-korean` pipeline (detector → rewriter → fidelity / naturalness review, tiered by track) before commit so the long-form Korean prose does not read as machine-generated. Tone and style for Korean output are fully delegated to this skill; PROBE-specific fidelity invariants are codified in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
 | **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot vendored at `vendor/lerobot/` — six baseline policies (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`) plus the `rtc` real-time-chunking module, configs, the processor, the `datasets/` tree (the de-facto standard LeRobotDataset format), `transforms/`, and `utils/`. `analysis/<id>/impl/<foundry>/impl.patch` is a unified diff against this snapshot; the pinned commit and refresh procedure live in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
-| **[colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)** | The MCP code-intelligence server that indexes `vendor/lerobot/` into a per-checkout SQLite knowledge graph at `.codegraph/codegraph.db`. The index is built on demand by `scripts/ensure-codegraph.sh` — `/implement` runs it before its first codegraph call (no session-start cost for runs that never touch `vendor/`); only `.codegraph/config.json` (scope definition) is committed. `/implement` uses its `codegraph_search` / `codegraph_node` / `codegraph_context` tools to ground Design rows in exact `file:line` coordinates inside the vendored snapshot. See [`CLAUDE.md`](CLAUDE.md) §CodeGraph. |
+| **[colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)** | The MCP code-intelligence server that indexes `vendor/lerobot/` into a per-checkout SQLite knowledge graph at `.codegraph/codegraph.db`. The index is built on demand by `scripts/ensure-codegraph.sh` — `/implement-design` runs it before its first codegraph call (no session-start cost for runs that never touch `vendor/`); only `.codegraph/config.json` (scope definition) is committed. `/implement-design` uses its `codegraph_search` / `codegraph_node` / `codegraph_context` tools to ground Design rows in exact `file:line` coordinates inside the vendored snapshot. See [`CLAUDE.md`](CLAUDE.md) §CodeGraph. |
 
 ---
 
@@ -304,17 +304,16 @@ the references below are the exact sources.
 |---|---|
 | [`CLAUDE.md`](CLAUDE.md) | Contributor rules — commit-message style + document Markdown style + CodeGraph usage |
 | [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) | Full agent setup — Claude Code Routines, network allowlist, on-demand analysis trio, troubleshooting |
-| [`docs/probe_guide.html`](docs/probe_guide.html) | **Korean onboarding guide** — download and open locally for a visual walkthrough |
-| [`docs/INTRO.md`](docs/INTRO.md) | Korean onboarding — motivation, pipeline, operations manual |
+| [`docs/probe_guide.html`](docs/probe_guide.html) | **Korean onboarding guide** — download and open locally for a visual walkthrough of motivation, pipeline, and operations |
 | [`docs/STYLE.md`](docs/STYLE.md) | Output formatting rules — emoji system, link format, Korean authoring |
 | [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → `analysis/<id>/analysis.md` + `<id>/design.md`; follow-up `/implement <design-path> [--foundry <name>]` → `<id>/impl/<foundry>/{impl.md,impl.patch}`; `/validate` → `<id>/validation/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
-| [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `README.md` defines the common column standard (License + commercial marker, Access icon, `hf:`/`gh:`/`web` link prefix, 🤖/👤/🔀 data type) and operations procedure; `vlm.md` open-weight VLM candidates, `vla.md` landmark VLA lineage matrix, `lineage_corpus.md` multi-embodiment further-pretrain corpus catalog with hand-DOF prioritization for the Sharpa / xhand target. Also hosts pillar methodology references — `vlm-prior-preservation.md` (P4 forgetting / carve-out + path-intervention A~D + 4-stage recipe + forward-KL measurement protocol) |
+| [`analysis/README.md`](analysis/README.md) | On-demand single-paper deep-dive — `/analyze-paper <id\|url\|pdf>` → `analysis/<id>/analysis.md` + `<id>/design.md`; follow-up `/implement-design <design-path> [--foundry <name>]` → `<id>/impl/<foundry>/{impl.md,impl.patch}`; `/validate-impl` → `<id>/validation/<foundry>.md`; `/reproduce-paper <id\|design-path>` orchestrates the three through a converging loop |
+| [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `README.md` defines the common column standard (License + commercial marker, Access icon, `hf:`/`gh:`/`web` link prefix, 🤖/👤/🔀 data type) and operations procedure; `vlm.md` open-weight VLM candidates, `vla.md` landmark VLA lineage matrix, `dataset.md` multi-embodiment further-pretrain corpus catalog with hand-DOF prioritization for the Sharpa / xhand target. Also hosts pillar methodology references — `vlm-prior-preservation.md` (P4 forgetting / carve-out + path-intervention A~D + 4-stage recipe + forward-KL measurement protocol) |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
-| [`scouting/_TEMPLATE.md`](scouting/_TEMPLATE.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
+| [`scouting/templates/report.md`](scouting/templates/report.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
 
 ---

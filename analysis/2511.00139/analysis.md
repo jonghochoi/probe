@@ -107,7 +107,7 @@ $$\mathcal{D}_{\text{uni}}=\{(o_{t}^{\text{uni}},a_{t}^{\text{arm}},a_{t}^{\text
 
 **엔드-투-엔드 $`\pi_{\text{uni}}`$ + Arm-Hand Feature Enhancement.** $`\pi_0`$ 의 PaliGemma + Gemma Expert 가 만든 공유 표현 $`z_t^{\text{share}}\in\mathbb{R}^{d_s}`$ 를 두 개의 2-layer MLP ($`E_{\text{arm}}`$ · $`E_{\text{hand}}`$, Mish activation) 로 사상해 $`z_t^{\text{arm}},z_t^{\text{hand}}\in\mathbb{R}^{d_s/2}`$ 를 만든다. 보조 헤드 $`H_{\text{arm}}`$ · $`H_{\text{hand}}`$ 는 각자 사지별 sub-action 을 예측해 보조 손실을 부과한다. 메인 헤드 $`H_{\text{main}}`$ 은 $`z_t^{\text{fused}}=[z_t^{\text{share}},z_t^{\text{arm}},z_t^{\text{hand}}]`$ 로부터 통합 액션 $`\hat{\mathcal{A}}_t^{\text{uni}}=[\hat{\mathcal{A}}_t^{\text{arm}},\hat{\mathcal{A}}_t^{\text{hand}}]`$ 를 출력한다.
 
-> "The use of $z_{t}^{\text{share}}$ preserves the global task context, while limb-specific features enable fine-grained adaptive control." (§3.4.1)
+> "The use of $`z_{t}^{\text{share}}`$ preserves the global task context, while limb-specific features enable fine-grained adaptive control." (§3.4.1)
 (공유 표현이 글로벌 컨텍스트를 깔고 그 위에 사지별 미세 조정 신호가 덧붙는 형태다. 어느 한쪽이 다른 쪽을 잡아먹지 않도록 막겠다는 설계다.)
 
 **Corrective Teleoperation.** 자율 실행 중 성공/실패 궤적을 각각 $`\mathcal{D}_{\text{success}}^{(k)}`$ · $`\mathcal{D}_{\text{corrective}}^{(k)}`$ 로 누적한다 (식 13). 그리고 $`\pi_{\text{uni}}^{(k+1)}=\text{SFT}(\pi_0;\mathcal{D}_{\text{uni}}\cup\mathcal{D}^{(k)})`$ 식 (14) 로 항상 원 $`\pi_0`$ 에서 다시 미세조정한다. 누적이 아니라 항상 베이스로 돌아가는 비축적 재학습이 핵심이다.
@@ -173,13 +173,13 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 > "The policy achieves a 95.5% overall success rate, consistently clearing nearly all objects in each scene." (§4.2.1)
 (handheld 셋업에서 5 scene × 50+ 물체 크러터를 거의 다 비워 내는 hand-only 정책의 성능 주장이다.)
 
-> "Without any tactile feedback, the success rate drops to 21%. Using only resultant force features ($f^{\text{tac-f}}$) improves performance to 70%, and further incorporating both force and spatial tactile features ($f^{\text{tac-f}}$ and $f^{\text{tac-s}}$) achieves 90% success." (§4.3.1, Table 2)
+> "Without any tactile feedback, the success rate drops to 21%. Using only resultant force features ($`f^{\text{tac-f}}`$) improves performance to 70%, and further incorporating both force and spatial tactile features ($`f^{\text{tac-f}}`$ and $`f^{\text{tac-s}}`$) achieves 90% success." (§4.3.1, Table 2)
 (시각 차폐 10 초 유지 조건에서 촉각 두 종류의 단조 개선을 명시한 대목이다.)
 
-> "On the main Xhand platform, $\pi_{\text{uni-enhance}}$ achieves a 95% success rate compared to 88% for the baseline, confirming improved coordination and grasp stability." (§4.3.2, Table 3)
+> "On the main Xhand platform, $`\pi_{\text{uni-enhance}}`$ achieves a 95% success rate compared to 88% for the baseline, confirming improved coordination and grasp stability." (§4.3.2, Table 3)
 (같은 $`\mathcal{D}_{\text{uni}}`$ 로 학습한 두 정책의 XHand 결과 격차다.)
 
-> "Under this challenging condition, compared to the baseline performance that drops drastically to 19%, our $\pi_{\text{uni-enhance}}$ still maintains a 58% success rate." (§4.3.2, Table 3)
+> "Under this challenging condition, compared to the baseline performance that drops drastically to 19%, our $`\pi_{\text{uni-enhance}}`$ still maintains a 58% success rate." (§4.3.2, Table 3)
 (우측 카메라 차폐 조건에서 enhancement 가 만들어 내는 절대 격차다.)
 
 ![Figure 15 — Arm-Hand Feature Enhancement under camera occlusion](https://arxiv.org/html/2511.00139/figs/de_vis.jpg)
@@ -187,7 +187,7 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 > "Figure 15: Effectiveness of the Arm-Hand Feature Enhancement module. Under limited perception with a blocked camera, the enhanced policy enforces complementary roles: arm for reaching, and hand for grasping. This leads to more stable execution and a substantially higher grasp success rate than the baseline VLA. The approach generalizes across different dexterous hands, improving arm–hand coordination and grasp robustness on challenging objects." (§4.3.2, Fig. 15)
 (우측 카메라 차폐 조건에서 baseline (19%) 과 enhanced (58%) 의 행동 차이를 시각화한 비교 프레임이다. PROBE 의 D12 occlusion robustness falsifier 후보로 그대로 차용 가능한 프로토콜이다.)
 
-> "Specifically, the enhanced policy with tactile input ($\pi_{\text{uni-enhance-tac}}$) achieved a success rate of 82%, compared to 95% for the visual-proprioceptive only policy ($\pi_{\text{uni-enhance}}$) trained by datasets collected by shared autonomy." (§8.2.1)
+> "Specifically, the enhanced policy with tactile input ($`\pi_{\text{uni-enhance-tac}}`$) achieved a success rate of 82%, compared to 95% for the visual-proprioceptive only policy ($`\pi_{\text{uni-enhance}}`$) trained by datasets collected by shared autonomy." (§8.2.1)
 (통합 정책에서 같은 촉각 통합을 적용하면 도리어 성능이 떨어진다는 음(陰)의 결과다.)
 
 > "These results were achieved with an initial proof-of-concept of the full stack, without particular engineering efforts." (§4.2.2)
@@ -281,4 +281,4 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 - **D19 deferred 트리거 보강 (선택)** — 본 논문은 D19 의 deferred 후보 (d) LoRA · (c) selective unfreeze 대신 사실상 (e) full-FT 로 가는 데이터 포인트다. D19 deferred 줄에 full-FT 가 데이터 100 traj 규모에서 88.7% 를 달성한다는 외부 근거 ([arXiv:2511.00139](https://arxiv.org/abs/2511.00139)) 를 한 줄 각주로 추가할지 검토해 주십시오. 결정 변경이 아니라 근거 등록 수준입니다.
 - **D25 falsifier 의 차폐 항 추가 (선택)** — P2 의 multi-camera pre-fusion (D12) 의 효용을 정량 falsifier 로 묶을 재현 가능한 프로토콜이 본 논문에 제공된다. D25 falsifier 의 보조 항목으로 단일 카메라 차폐 시 성공률 drop ≥ X% 면 D12 의 cross-attn fuser 무효를 추가할지 고려해 주십시오.
 
-> 💡 base 매핑은 `/implement analysis/2511.00139/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2511.00139/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

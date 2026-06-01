@@ -223,4 +223,4 @@ $$\min_{\theta}\mathcal{J}(\theta)=\mathbb{E}_{\mathbf{A}_{t},\mathcal{C}_{t}^{\
 - **D19/D20 근거 업데이트 제안** — D19(a) 완전 동결 rationale("late fusion → 백본은 π-trained 모달리티만 봄")에 "단, 액션 전문가는 last-layer가 아니라 중간/전 레이어 특징을 받아야 frozen이 동작한다(VLA-Adapter Appendix H)" 라는 단서 조항 추가를 제안합니다.
 - 위 제안은 사람이 판단할 사항이며, `context/MASTER.md` 는 수정하지 않았습니다.
 
-> 💡 base 매핑은 `/implement analysis/2509.09372/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2509.09372/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

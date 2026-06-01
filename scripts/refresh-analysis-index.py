@@ -42,7 +42,7 @@ def find_analyses() -> list[Path]:
         if not path.is_dir():
             continue
         name = path.name
-        if name.startswith("_"):
+        if name.startswith("_") or name == "templates":
             continue
         # Accept arXiv ids or arbitrary slug directory names.
         out.append(path)

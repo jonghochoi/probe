@@ -234,4 +234,4 @@ OOD 초기화에서 `cop` 의 성공률 하락이 가장 작습니다(0.78 → 0
 - **핀 교체는 보류 권고** — 본 논문은 RL-as-core·비전 없는 단일 손 과제로 Identity 핵심(VLA-level 분할)과는 거리가 있어, 핀 승격보다 P3·P2 방법론 참고 자료로 두는 편이 적절합니다.
 - 그 외 신규 컨텍스트 변경 제안: 없음.
 
-> 💡 base 매핑은 `/implement analysis/2605.28812/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2605.28812/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

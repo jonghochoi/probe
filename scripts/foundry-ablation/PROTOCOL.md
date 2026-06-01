@@ -1,6 +1,6 @@
 # Foundry-quality ablation harness
 
-A repeatable experiment for attributing *why* a PROBE `/implement` mapping is or
+A repeatable experiment for attributing *why* a PROBE `/implement-design` mapping is or
 isn't as good as a reference implementation. Run it across many papers and
 accumulate samples; the ledger aggregates a verdict over time.
 
@@ -8,12 +8,12 @@ accumulate samples; the ledger aggregates a verdict over time.
 
 PROBE reaches code through a mediated pipeline — paper → `analysis/<id>/analysis.md`
 (deep-dive) → `analysis/<id>/design.md` (Layer-1, deliberately vendor-agnostic,
-context-reduced) → `/implement` (maps onto the vendored base). A direct setup
+context-reduced) → `/implement-design` (maps onto the vendored base). A direct setup
 (paper + repo handed straight to a coder) skips that filtering. When the
 mediated output looks weaker, two causes are confounded:
 
 - **H_context** — the analysis→design filtering drops *load-bearing* detail
-  that exists upstream, so `/implement` fills paper-silent gaps blindly.
+  that exists upstream, so `/implement-design` fills paper-silent gaps blindly.
 - **H_verify** — the snapshot foundry gives no execution feedback (only
   `git apply --check`), so shape/signature/form defects survive. (Largely
   addressed by the `§🧬` execution tier — see `scripts/ensure-foundry-runtime.sh`
@@ -35,7 +35,7 @@ For a paper with both `analysis/<id>/design.md` and `analysis/<id>/analysis.md`,
 - **a2 — context-rich**: sees the Design + the full `analysis/<id>/analysis.md` + the
   base, and may fetch the actual paper.
 
-Both must be forbidden from reading the existing impl/validate artifacts
+Both must be forbidden from reading the existing impl/validate-impl artifacts
 (`analysis/<id>/impl/**`, `analysis/<id>/validation/**`) and any reference repo
 (e.g. a fork that already implements the paper) — those leak the answer.
 

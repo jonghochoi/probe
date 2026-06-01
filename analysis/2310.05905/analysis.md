@@ -229,4 +229,4 @@ LIBERO-10 장기 과제 적응 결과 (Table 1, 평균, 높을수록 좋음):
 - **D26 메트릭 확장 후보**. P4 보존 검증용으로 TAIL식 **FWT/BWT + circle-back drop** 을 D26 "VLM-preservation validated by generalization/OOD metric not regressing" 항목의 구체 측정 도구로 채택할지 검토 제안. (Decision 본문 수정은 사람 몫 — 여기서는 제안만.)
 - 핀 교체는 제안하지 않습니다(TAIL은 2023년 작으로, VLM2VLA가 더 최신·대형 VLM 사례이므로 핀은 유지하고 TAIL은 방법론 base로 두는 편이 적절).
 
-> 💡 base 매핑은 `/implement analysis/2310.05905/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 base 매핑은 `/implement-design analysis/2310.05905/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
