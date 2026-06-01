@@ -162,7 +162,7 @@ ablation은 세 요소를 하나씩 제거했을 때의 붕괴를 보여줍니�
 
 저자들은 메커니즘 분석을 정량 근거로 뒷받침합니다.
 
-> "On the large OpenVLA-OFT model, the average $`E_{F}$` is only 0.02, indicating very little interference between the task gradient and pretrained knowledge. However, on the small policy, `$E_{F}`$ jumps to 0.16, which likely explains the catastrophic forgetting that occurs with small models." (§5.1)
+> "On the large OpenVLA-OFT model, the average $`E_{F}`$ is only 0.02, indicating very little interference between the task gradient and pretrained knowledge. However, on the small policy, $`E_{F}`$ jumps to 0.16, which likely explains the catastrophic forgetting that occurs with small models." (§5.1)
 (한글 해설 — Fisher energy가 큰 모델 0.02 vs 작은 모델 0.16으로, 큰 사전학습 모델의 고차원 null space가 간섭을 줄인다는 가설의 정량 근거입니다.)
 
 > "By contrast, LoRA (with rank 32) produces a nearly uniform pattern across layers: the mean effective rank is 29.3, with a tiny standard deviation of 2.16." (§5.1)

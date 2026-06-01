@@ -86,7 +86,7 @@ ConSFT 는 백본을 건드리지 않는다. 학습 루프 안의 손실 한 줄
 
 표준 SFT 손실은 모든 샘플에 균일한 가중치 1 을 준다. ConSFT 는 이 자리에 confidence-aware 스칼라 $`\omega`$ 를 끼워 넣습니다.
 
-> "$$r(\theta)\approx\frac{\exp(\mathrm{ELBO}_{\theta})}{\exp(\mathrm{ELBO}_{\mathrm{behavior}})}=\frac{\exp(-\mathcal{L}_{\theta}+c)}{\exp(-\mathcal{L}_{\mathrm{behavior}}+c)}=\exp\left(\mathcal{L}_{\mathrm{behavior}}-\mathcal{L}_{\theta}\right).$$" (§4.1, Eq. 3)
+> "$`r(\theta)\approx\frac{\exp(\mathrm{ELBO}_{\theta})}{\exp(\mathrm{ELBO}_{\mathrm{behavior}})}=\frac{\exp(-\mathcal{L}_{\theta}+c)}{\exp(-\mathcal{L}_{\mathrm{behavior}}+c)}=\exp\left(\mathcal{L}_{\mathrm{behavior}}-\mathcal{L}_{\theta}\right).`$" (§4.1, Eq. 3)
 > (Flow-matching 손실이 ELBO 의 노이즈 스케줄 상수 차이로 환원되기 때문에 likelihood ratio 가 손실 차의 지수로 깔끔하게 떨어집니다.)
 
 ideal expert 가정 $`\mathcal{L}_{\mathrm{behavior}}=0`$ 과 온도 $`\tau>0`$ 을 넣어 보수적 가중치를 얻습니다:
