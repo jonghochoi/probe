@@ -1,0 +1,62 @@
+name: Check analysis math
+
+# Validate the GitHub-KaTeX math conventions (docs/STYLE.md §5-6) on every PR
+# that touches an analysis doc, and auto-fix what is safely fixable. This runs
+# PR-time (not post-merge like the index refresh) so malformed math is caught
+# and cleaned BEFORE it lands on main and leaks the source on github.com.
+#
+# Flow: run the checker with --fix, push the normalized result back to the PR
+# branch as a bot commit, then re-run without --fix so any unfixable finding
+# (unbalanced `$`, unsupported macro) fails the check. The push retriggers the
+# workflow, which then finds nothing to fix and passes — so it self-terminates.
+
+on:
+  pull_request:
+    paths:
+      - 'analysis/**/*.md'
+      - 'scripts/check-analysis-math.py'
+      - '.github/workflows/check-analysis-math.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: check-analysis-math-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # Same-repo branches only — fork PRs get a read-only token and cannot be
+    # auto-fixed-and-pushed. (PROBE develops on internal branches.)
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Auto-fix math formatting
+        run: python3 scripts/check-analysis-math.py --fix
+      - name: Commit and push fixes if changed
+        run: |
+          if git diff --quiet; then
+            echo "No math formatting fixes needed."
+            exit 0
+          fi
+          git config user.name  'probe-math-bot'
+          git config user.email 'probe-math-bot@users.noreply.github.com'
+          git add -A
+          git commit -m "style(analysis): auto-fix math formatting"
+          # Retry on race with another push to the PR branch.
+          for i in 1 2 3 4; do
+            if git push origin HEAD:${{ github.head_ref }}; then exit 0; fi
+            git pull --rebase origin ${{ github.head_ref }}
+            sleep $((2 ** i))
+          done
+          git push origin HEAD:${{ github.head_ref }}
+      - name: Re-check for unfixable issues
+        run: python3 scripts/check-analysis-math.py
