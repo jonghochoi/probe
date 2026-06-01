@@ -21,9 +21,13 @@
 | `<arxiv-id>/validation/<foundry>.md` | `/validate` 슬래시 커맨드 | 위 impl 을 Design + 분석 문서 + foundry 코드와 대조한 한글 검증 보고서 (정적 4-체크 + §🧬 실행 검증) |
 | `<arxiv-id>/validation/<foundry>.round_<N>.md` | `/reproduce-paper` 슬래시 커맨드 | 수렴 루프의 라운드별 validation 사본 — N 은 0-indexed (round 0 = gate, round 1..N = inner loop). 추적용으로 git 에 포함 |
 
-전체 deep-dive 목록은 [`INDEX.md`](INDEX.md) — `/analyze-paper` ·
-`/implement` · `/validate` 가 커밋 시 `scripts/refresh-analysis-index.py`
-로 자동 갱신하는 산출물입니다. 컬럼 규약은 `docs/STYLE.md` §5-7.
+전체 deep-dive 목록은 [`INDEX.md`](INDEX.md) — 머지 후 `main` 에서
+`.github/workflows/refresh-analysis-index.yml` 워크플로우가
+`scripts/refresh-analysis-index.py` 를 돌려 갱신하는 산출물입니다
+(`/analyze-paper` · `/implement` · `/validate` 는 PR 에서 직접
+스테이지하지 않습니다 — 병렬 PR 의 INDEX 충돌 회피). 컬럼 규약은
+`docs/STYLE.md` §5-7, 전체 정책은 `CLAUDE.md`
+"Automatically-maintained indexes".
 
 ## `_catalogs/` — cross-paper lineage 카탈로그
 

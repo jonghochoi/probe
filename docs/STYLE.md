@@ -578,10 +578,18 @@ conventions below codify both.
 
 `analysis/INDEX.md` carries a generated index of every deep-dive in
 the folder, refreshed by `scripts/refresh-analysis-index.py`. The
-script is invoked automatically by the GIT step of `/analyze-paper`,
-`/implement`, and `/validate`, so any run that adds or refreshes an
-analysis (or its downstream impl/validate artifacts) updates the index
-in the same commit. The table lives in its own file so the static
+script runs **post-merge on `main` only**, via the
+`.github/workflows/refresh-analysis-index.yml` workflow: any push to
+`main` that touches `analysis/**/analysis.md`, `analysis/**/impl/**`,
+`analysis/**/validation/**`, or the script itself triggers the
+workflow, which commits the refreshed `analysis/INDEX.md` back as a
+`chore(analysis): refresh INDEX.md` bot commit. The per-command
+prompts (`/analyze-paper`, `/implement`, `/validate`) deliberately do
+NOT stage `analysis/INDEX.md` and do NOT invoke the script — PR-side
+regeneration was retired because parallel analysis PRs all touched
+the same generated block and conflicted unresolvably on every merge
+(see `CLAUDE.md` "Automatically-maintained indexes" for the full
+rationale). The table lives in its own file so the static
 `analysis/README.md` narrative stays free of an auto-rewritten block;
 this is the first intentional exception to the "every doc reference
 is hand-maintained" rule recorded in `CLAUDE.md`.
@@ -776,4 +784,5 @@ a normal outcome and far better than a fabricated `pass`.
 | v1.15 | 2026-05-21 | Outer convergence loop implemented (supersedes the v1.14 deferral). `_TEMPLATE_AUDIT.md` gains a §🔎 §🚧 분류 section that classifies every open 🚧 item zero-state into `vendor-resolved` / `paper-extractable §X.Y` / `paper-silent-defaultable` / `paper-silent-experimental`, with a machine-readable `<!-- ANALYSIS_BUCKETS -->` footer (`focus-hint:` line). `/analyze-paper` gains a `--focus "<§X.Y,...>"` re-extraction mode (seed from prior docs, re-extract only named sections). `/reproduce-paper` matrix now branches on the buckets: vendor-resolved / paper-silent-defaultable stay inner (`/foundry --feedback`), paper-extractable triggers the outer step (`/analyze-paper --focus`). New termination reason `stable_design` (focused re-extraction byte-identical); convergence is fixed-point only, no separate outer counter. §5-7 index gains a `🔎 vr/pe/sd/se` bucket-count column |
 | v1.16 | 2026-05-26 | Close the inline-math-inside-verbatim-blockquote gap that let source-leaked math through on `analysis/2605.07308`. §5-6 gains extraction-recipe rule 7 — the inside-dollar backtick wrapping and the boundary rule apply equally to inline math that appears inside an English verbatim quote; content and formatting are separate concerns. §4-5 invariants list gains a matching item — every inline `$...$` span (including spans inside verbatim quotes) must use `` $`X`$ `` and satisfy the §5-6 rule-2 boundary, treated as a fidelity-fail trigger by `content-fidelity-auditor`. `.claude/agents/content-fidelity-auditor.md` adds the corresponding bullet to checklist item 6, and `.claude/prompts/paper-analysis.md` adds the same recipe rule so the gap closes at extraction time too |
 | v1.17 | 2026-05-27 | Scouting reports re-shelved per pillar: path `scouting/YYYY-MM-DD-P#.md` → `scouting/P#/YYYY-MM-DD.md`. §1 table updated; the agent's de-dup lookup now scans sibling files inside the same `P#/` folder. Existing 16 reports were `git mv`-relocated; historical boilerplate inside those files is intentionally not back-edited |
+| v1.19 | 2026-06-01 | Move `analysis/INDEX.md` regeneration off the PR path. §5-7 rewritten — the per-command prompts (`/analyze-paper`, `/implement`, `/validate`) no longer stage `analysis/INDEX.md` and no longer invoke `scripts/refresh-analysis-index.py`; the script now runs post-merge on `main` only, via the new `.github/workflows/refresh-analysis-index.yml` workflow, which commits the refreshed index back as a `chore(analysis): refresh INDEX.md` bot commit. Parallel analysis PRs were producing an unresolvable text conflict on the generated `<!-- ANALYSIS_INDEX:START/END -->` block every merge; concentrating regeneration on `main` removes the conflict surface entirely at the cost of a brief stale window between merge and bot commit. `CLAUDE.md` "Automatically-maintained indexes" section and the repo-map row for the script were updated to match |
 | v1.18 | 2026-05-28 | Unify the on-demand pipeline on a verb-command / noun-prompt scheme. Prompts renamed `paper-analysis.md` → `analysis.md`, `paper-reproduction.md` → `reproduction.md`, `foundry.md` → `implementation.md`, `audit.md` → `validation.md`. Commands `/foundry` → `/implement` (`commands/foundry.md` → `implement.md`) and `/audit` → `/validate` (`commands/audit.md` → `validate.md`); `/analyze-paper` and `/reproduce-paper` are already verbs and unchanged. `/validate` was chosen over `/verify` to avoid shadowing the built-in `verify` skill. The validation stage is fully renamed audit → validation: output dir `analysis/<id>/audit/` → `<id>/validation/`, template `_TEMPLATE_AUDIT.md` → `_TEMPLATE_VALIDATION.md`, the §6-5 report name, the round-boundary commit prefix, and the `refresh-analysis-index.py` path logic. The `foundry` concept noun (target foundry, `--foundry`, `impl/<foundry>/`, `.foundry-runtime/`, `scripts/foundry-ablation/`) and the `*-auditor` humanize-korean agent names are preserved |

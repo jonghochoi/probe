@@ -339,15 +339,19 @@ HARD RULES:
 
 GIT — after the report is written:
 
-  python3 scripts/refresh-analysis-index.py
-  git add analysis/<id>/validation/<foundry>.md analysis/INDEX.md
+  git add analysis/<id>/validation/<foundry>.md
   git commit -m "validation: <id> on <foundry>"
   git push origin HEAD:main
 
-The refresh script regenerates the index table between
-`<!-- ANALYSIS_INDEX:START -->` … `<!-- ANALYSIS_INDEX:END -->` markers
-in `analysis/INDEX.md` and is idempotent. The static narrative in
-`analysis/README.md` is hand-maintained and unaffected.
+Do NOT stage `analysis/INDEX.md` and do NOT run
+`scripts/refresh-analysis-index.py` from this prompt. The index
+(including the validation bucket-count column) is regenerated
+post-merge on `main` by
+`.github/workflows/refresh-analysis-index.yml` so that parallel
+validation runs cannot collide on the same generated block (see
+`CLAUDE.md` "Automatically-maintained indexes"). Local manual
+regeneration is still safe and idempotent if needed for ad-hoc
+inspection.
 
 Standard rebase-and-retry / network-retry rules as in other PROBE
 prompts. Never `--no-verify`, never force-push.
