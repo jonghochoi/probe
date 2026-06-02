@@ -4,13 +4,13 @@ index ea3095b..2154003 100644
 +++ b/vendor/lerobot/policies/pi0/__init__.py
 @@ -15,7 +15,15 @@
  # limitations under the License.
- 
+
  from .configuration_pi0 import PI0Config
 +from .configuration_pi0_enhance import PI0EnhanceConfig
  from .modeling_pi0 import PI0Policy
 +from .modeling_pi0_enhance import PI0EnhancePolicy
  from .processor_pi0 import make_pi0_pre_post_processors
- 
+
 -__all__ = ["PI0Config", "PI0Policy", "make_pi0_pre_post_processors"]
 +__all__ = [
 +    "PI0Config",
@@ -88,12 +88,21 @@ diff --git a/vendor/lerobot/policies/pi0/modeling_pi0.py b/vendor/lerobot/polici
 index 510af07..28f9d6f 100644
 --- a/vendor/lerobot/policies/pi0/modeling_pi0.py
 +++ b/vendor/lerobot/policies/pi0/modeling_pi0.py
-@@ -747,8 +747,21 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
- 
+@@ -747,8 +747,30 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+
          return embs, pad_masks, att_masks, adarms_cond
- 
+
 -    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
 -        """Do a full training forward pass and compute the loss."""
++    def _project_to_action(self, suffix_out: Tensor) -> Tensor:
++        """Project the action-expert hidden state to actions.
++
++        Overridable seam for subclasses (e.g. feature-enhancement variant)
++        that swap in an alternative final head while leaving the embedding,
++        attention, and denoising loop untouched.
++        """
++        return self.action_out_proj(suffix_out)
++
 +    def _compute_suffix_out(
 +        self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
 +    ) -> tuple[Tensor, Tensor]:
@@ -112,8 +121,8 @@ index 510af07..28f9d6f 100644
          time_expanded = time[:, None, None]
          x_t = time_expanded * noise + (1 - time_expanded) * actions
          u_t = noise - actions
-@@ -790,6 +803,13 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
- 
+@@ -790,10 +812,17 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+
          suffix_out = suffix_out[:, -self.config.chunk_size :]
          suffix_out = suffix_out.to(dtype=torch.float32)
 +        return suffix_out, u_t
@@ -123,22 +132,35 @@ index 510af07..28f9d6f 100644
 +        suffix_out, u_t = self._compute_suffix_out(
 +            images, img_masks, lang_tokens, lang_masks, state, actions, noise, time
 +        )
- 
-         def action_out_proj_func(suffix_out):
-             return self.action_out_proj(suffix_out)
-@@ -945,7 +965,7 @@ class PI0Policy(PreTrainedPolicy):
- 
+
+-        def action_out_proj_func(suffix_out):
+-            return self.action_out_proj(suffix_out)
++        def project_func(suffix_out):
++            return self._project_to_action(suffix_out)
+
+-        v_t = self._apply_checkpoint(action_out_proj_func, suffix_out)
++        v_t = self._apply_checkpoint(project_func, suffix_out)
+
+         return F.mse_loss(u_t, v_t, reduction="none")
+@@ -921,4 +950,4 @@ class PI0Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+         suffix_out = suffix_out[:, -self.config.chunk_size :]
+         suffix_out = suffix_out.to(dtype=torch.float32)
+-        return self.action_out_proj(suffix_out)
++        return self._project_to_action(suffix_out)
+
+@@ -945,7 +974,7 @@ class PI0Policy(PreTrainedPolicy):
+
          # Initialize the core PI0 model
          self.init_rtc_processor()
 -        self.model = PI0Pytorch(config, rtc_processor=self.rtc_processor)
 +        self.model = self._build_model(config)
- 
+
          # Enable gradient checkpointing if requested
          if config.gradient_checkpointing:
-@@ -955,6 +975,11 @@ class PI0Policy(PreTrainedPolicy):
- 
+@@ -955,6 +984,11 @@ class PI0Policy(PreTrainedPolicy):
+
          self.reset()
- 
+
 +    def _build_model(self, config: PI0Config) -> PI0Pytorch:
 +        """Construct the core model. Overridable seam for subclasses that swap
 +        in an alternative ``PI0Pytorch`` (e.g. feature-enhancement decoder)."""
@@ -152,7 +174,7 @@ new file mode 100644
 index 0000000..175a3ad
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi0/modeling_pi0_enhance.py
-@@ -0,0 +1,162 @@
+@@ -0,0 +1,195 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -183,12 +205,18 @@ index 0000000..175a3ad
 +    v_main = H_main([z_share; z_arm; z_hand])     # main flow loss   (Eq. (9))
 +    L = L_main + lambda * (L_arm + L_hand)        #                  (Eq. (12))
 +
-+The composite loss is folded into a single ``(B, T, max_action_dim)`` tensor so
-+``PI0Policy.forward``'s contract (``losses[:, :, :original_action_dim]`` slice
-+and per-dim logging) is preserved unchanged.
++``H_main`` is also the inference head, swapped in via the
++``_project_to_action`` seam on the base class — training and inference share
++the same projection so that the action produced at rollout matches the head
++the loss optimised.
 +
-+``feature_enhancement=False`` defers entirely to vanilla pi0 (the πuni-origin
-+baseline).
++For fair train-loss comparison against vanilla pi0, ``forward`` stashes the
++main-only squared error on ``self._last_se_main`` (detached); the policy-level
++``forward`` reads it and logs ``loss_main`` / ``loss_main_per_dim`` alongside
++the composite ``loss``. Without this, the composite (main + aux) is not
++directly comparable to base pi0's main-only loss.
++
++``feature_enhancement=False`` defers entirely to vanilla pi0 (πuni-origin).
 +"""
 +
 +import torch
@@ -289,6 +317,14 @@ index 0000000..175a3ad
 +        self.register_buffer("arm_mask", arm_mask, persistent=False)  # (A,)
 +        self.register_buffer("hand_mask", hand_mask, persistent=False)  # (A,)
 +
++    def _project_to_action(self, suffix_out: Tensor) -> Tensor:
++        """Use ``H_main`` as the action head when feature enhancement is on so
++        training and inference share the same projection."""
++        if not self.config.feature_enhancement:
++            return super()._project_to_action(suffix_out)
++        v_main, _, _ = self.feature_enhancer(suffix_out)
++        return v_main
++
 +    def forward(self, images, img_masks, lang_tokens, lang_masks, state, actions, noise, time) -> Tensor:
 +        if not self.config.feature_enhancement:
 +            return super().forward(images, img_masks, lang_tokens, lang_masks, state, actions, noise, time)
@@ -298,6 +334,11 @@ index 0000000..175a3ad
 +        )  # suffix_out (B,T,d_s) float32; u_t (B,T,A)
 +
 +        v_main, v_arm, v_hand = self._apply_checkpoint(self.feature_enhancer, suffix_out)
++        # Stash main-only squared error (detached) so the policy-level
++        # `forward` can log loss_main / loss_main_per_dim next to the
++        # composite loss. base's `loss` mixes aux terms and is not directly
++        # comparable to vanilla pi0's main-only `loss`; `loss_main` is.
++        self._last_se_main = ((v_main - u_t) ** 2).detach()
 +        return compute_feature_enhancement_loss(
 +            v_main, v_arm, v_hand, u_t, self.arm_mask, self.hand_mask, self.config.aux_loss_weight
 +        )  # (B,T,A) — same contract as base PI0Pytorch.forward
@@ -307,7 +348,9 @@ index 0000000..175a3ad
 +    """pi0 policy variant exposing the arm-hand feature-enhancement reproduction.
 +
 +    Reuses pi0 processors (selected via ``isinstance(cfg, PI0Config)`` in the
-+    policy factory) and the pi0 training/inference paths unchanged.
++    policy factory). ``_project_to_action`` on the model routes inference
++    through ``H_main``, and ``forward`` below adds main-only metrics to the
++    loss dict for fair comparison against vanilla pi0.
 +    """
 +
 +    config_class = PI0EnhanceConfig
@@ -315,3 +358,15 @@ index 0000000..175a3ad
 +
 +    def _build_model(self, config: PI0EnhanceConfig) -> PI0EnhancePytorch:
 +        return PI0EnhancePytorch(config, rtc_processor=self.rtc_processor)
++
++    def forward(self, batch: dict[str, Tensor], reduction: str = "mean") -> tuple[Tensor, dict]:
++        loss, loss_dict = super().forward(batch, reduction)
++        if not getattr(self.config, "feature_enhancement", False):
++            return loss, loss_dict
++        se_main = getattr(self.model, "_last_se_main", None)
++        if se_main is not None:
++            original_action_dim = self.config.output_features[ACTION].shape[0]
++            se_main = se_main[:, :, :original_action_dim]
++            loss_dict["loss_main_per_dim"] = se_main.mean(dim=[0, 1]).cpu().numpy().tolist()
++            loss_dict["loss_main"] = se_main.mean().item()
++        return loss, loss_dict

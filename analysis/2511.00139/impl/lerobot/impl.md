@@ -29,9 +29,9 @@
 
 본 논문은 $`\pi_0`$ 백본을 그대로 사용한다고 명시합니다 (Design §🔌 foundry 힌트, §✨ 변경 의도). PaliGemma + conditional flow matching action expert 라는 구조 지문이 `vendor/lerobot/policies/pi0/` 와 정확히 일치하므로 베이스는 `pi0` 로 확정합니다 (`pi05`/`pi0_fast` 는 변형, `smolvla`/`act`/`diffusion` 은 백본 불일치).
 
-**구현 형태 — subclass-seam.** 논문의 Arm-Hand Feature Enhancement 는 `PI0Pytorch` 의 action expert 최종 hidden state ($`z_{\text{share}}`$) 에서 분기하는 모듈입니다. vendor 의 `modeling_pi0.py` 를 in-place 로 헤집는 대신, **(1) base 에 동작-보존 seam 2개**(`PI0Pytorch._compute_suffix_out` extract-method, `PI0Policy._build_model` factory)를 내고, **(2) 그 seam 을 override 하는 신규 서브클래스 모듈** `modeling_pi0_enhance.py` (`configuration_pi0_enhance.py`) 를 추가하는 형태로 매핑합니다. 이로써 (a) base 동작과 사전학습 가중치 로딩은 불변이고 (`feature_enhancement=False` 면 vanilla pi0 와 동일 = πuni-origin), (b) 산출물이 설치 가능한 foundry 위에서 **실제 import·인스턴스화·손실 계산을 실행으로 검증**할 수 있게 됩니다 (sibling `test_pi0_enhance_smoke.py`, audit §🧬).
+**구현 형태 — subclass-seam.** 논문의 Arm-Hand Feature Enhancement 는 `PI0Pytorch` 의 action expert 최종 hidden state ($`z_{\text{share}}`$) 에서 분기하는 모듈입니다. vendor 의 `modeling_pi0.py` 를 in-place 로 헤집는 대신, **(1) base 에 동작-보존 seam 3개**(`PI0Pytorch._compute_suffix_out` extract-method, `PI0Pytorch._project_to_action` 최종 head 추출, `PI0Policy._build_model` factory)를 내고, **(2) 그 seam 을 override 하는 신규 서브클래스 모듈** `modeling_pi0_enhance.py` (`configuration_pi0_enhance.py`) 를 추가하는 형태로 매핑합니다. 이로써 (a) base 동작과 사전학습 가중치 로딩은 불변이고 (`feature_enhancement=False` 면 vanilla pi0 와 동일 = πuni-origin), (b) 학습 시 손실을 학습한 그 head 가 **추론에도 그대로 사용**되며 (`_project_to_action` override 가 `H_main` 을 끼움), (c) 산출물이 설치 가능한 foundry 위에서 **실제 import·인스턴스화·손실 계산을 실행으로 검증**할 수 있게 됩니다 (sibling `test_pi0_enhance_smoke.py`, audit §🧬).
 
-**SCOPE 선언.** 이 `pi0` 베이스는 논문의 **통합 정책 $`\pi_{\text{uni}}`$ 의 Arm-Hand Feature Enhancement (사지별 MLP 2개 + 보조 헤드 2개 + fused-concat main 헤드) 와 그 학습 목표 (식 9–12)** 만 COVER 합니다. 다음은 base 좌표계 밖이므로 EXCLUDE 합니다.
+**SCOPE 선언.** 이 `pi0` 베이스는 논문의 **통합 정책 $`\pi_{\text{uni}}`$ 의 Arm-Hand Feature Enhancement (사지별 MLP 2개 + 보조 헤드 2개 + fused-concat main 헤드) 와 그 학습 목표 (식 9–12)** 를 학습·추론 양쪽에서 COVER 합니다 (`H_main` 이 train head 이자 inference head). 또한 `PI0EnhancePolicy.forward` 가 `loss_main` / `loss_main_per_dim` 을 `loss_dict` 에 같이 실어, vanilla pi0 의 main-only `loss` 와 **차원-동형 비교**가 가능합니다 (composite `loss` 만으로는 항 수가 달라 비대칭). 다음은 base 좌표계 밖이므로 EXCLUDE 합니다.
 
 - **촉각 인코더 (CAE + resultant-force MLP, §3.2.2)** — `pi0` 에는 촉각 모달리티/인코더가 없음. 별도 신규 모듈이 필요하며 정책 내부 변경이 아님 — 제외.
 - **LSTM admittance 정책 (§3.2.1)** — `pi0` 와 무관한 독립 부트스트랩 정책 — 제외.
@@ -46,10 +46,11 @@
 | # | Foundry 위치 | 변경 종류 | Design 근거 | 요약 |
 |---|--------------|-----------|-------------|------|
 | 1 | `vendor/lerobot/policies/pi0/modeling_pi0.py:750` | 수정 (seam) | Design §🧰 `pi_uni_main_head` 힌트 | `forward` 에서 prefix/suffix 임베딩+attention 부분을 `_compute_suffix_out` 으로 extract — 동작 보존, 서브클래스가 $`z_{\text{share}}`$ 에서 분기할 hook 제공 |
-| 2 | `vendor/lerobot/policies/pi0/modeling_pi0.py:968` | 수정 (seam) | Design §🧰 | `PI0Policy.__init__` 의 모델 생성을 `_build_model` factory 로 우회 — 서브클래스가 대체 `PI0Pytorch` 를 끼울 override 지점 |
-| 3 | `vendor/lerobot/policies/pi0/configuration_pi0_enhance.py` (신규) | 추가 | Design §📊, §🚧 | `PI0EnhanceConfig` — `feature_enhancement`(기본 off)·`arm_dim=6`·`aux_loss_weight=1.0` 필드 + 검증 |
-| 4 | `vendor/lerobot/policies/pi0/modeling_pi0_enhance.py` (신규) | 추가 | Design §🧰 `arm_hand_feature_enhancement`·`aux_heads`·`pi_uni_main_head`, §📊 식 9–12 | `ArmHandFeatureEnhancer`(E_arm/E_hand 2-layer Mish, H_arm/H_hand/H_main) + `build_index_masks` + `compute_feature_enhancement_loss` + `PI0EnhancePytorch`/`PI0EnhancePolicy` |
-| 5 | `vendor/lerobot/policies/pi0/__init__.py` | 수정 | Design §🧰 | 신규 `PI0EnhanceConfig`/`PI0EnhancePolicy` export (factory 가 등록 이름 `pi0_enhance` 로 resolve) |
+| 2 | `vendor/lerobot/policies/pi0/modeling_pi0.py:750·797·923` | 수정 (seam) | Design §🧰 `pi_uni_main_head` | `action_out_proj(suffix_out)` 호출을 `_project_to_action(suffix_out)` 으로 추출 (training forward + `denoise_step` 양쪽). 서브클래스가 최종 head 를 교체할 단일 override 지점 |
+| 3 | `vendor/lerobot/policies/pi0/modeling_pi0.py:968` | 수정 (seam) | Design §🧰 | `PI0Policy.__init__` 의 모델 생성을 `_build_model` factory 로 우회 — 서브클래스가 대체 `PI0Pytorch` 를 끼울 override 지점 |
+| 4 | `vendor/lerobot/policies/pi0/configuration_pi0_enhance.py` (신규) | 추가 | Design §📊, §🚧 | `PI0EnhanceConfig` — `feature_enhancement`(기본 off)·`arm_dim=6`·`aux_loss_weight=1.0` 필드 + 검증 |
+| 5 | `vendor/lerobot/policies/pi0/modeling_pi0_enhance.py` (신규) | 추가 | Design §🧰 `arm_hand_feature_enhancement`·`aux_heads`·`pi_uni_main_head`, §📊 식 9–12 | `ArmHandFeatureEnhancer`(E_arm/E_hand 2-layer Mish, H_arm/H_hand/H_main) + `build_index_masks` + `compute_feature_enhancement_loss` + `PI0EnhancePytorch` (`_project_to_action` override 로 추론도 `H_main` 사용, `forward` 가 `_last_se_main` stash) + `PI0EnhancePolicy` (`forward` 가 `loss_main`/`loss_main_per_dim` 을 loss_dict 에 주입) |
+| 6 | `vendor/lerobot/policies/pi0/__init__.py` | 수정 | Design §🧰 | 신규 `PI0EnhanceConfig`/`PI0EnhancePolicy` export (factory 가 등록 이름 `pi0_enhance` 로 resolve) |
 | — | (촉각 인코더 · LSTM · corrective SFT) | 신규-미구현 | Design §🧰, §📊 | base 좌표계 밖 — §🧱 EXCLUDE 선언 참조, `out-of-base-scope` |
 
 ---

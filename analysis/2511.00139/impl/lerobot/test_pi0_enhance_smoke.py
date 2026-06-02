@@ -31,9 +31,11 @@ import torch
 from lerobot.configs import PreTrainedConfig
 from lerobot.policies.factory import get_policy_class, make_policy_config
 from lerobot.policies.pi0.configuration_pi0_enhance import PI0EnhanceConfig
+from lerobot.policies.pi0.modeling_pi0 import PI0Policy, PI0Pytorch
 from lerobot.policies.pi0.modeling_pi0_enhance import (
     ArmHandFeatureEnhancer,
     PI0EnhancePolicy,
+    PI0EnhancePytorch,
     build_index_masks,
     compute_feature_enhancement_loss,
 )
@@ -119,3 +121,17 @@ def test_factory_registration_and_class_resolution():
     assert PreTrainedConfig.get_choice_class("pi0_enhance") is PI0EnhanceConfig
     assert make_policy_config("pi0_enhance").type == "pi0_enhance"
     assert get_policy_class("pi0_enhance") is PI0EnhancePolicy
+
+
+def test_project_to_action_seam():
+    """``_project_to_action`` exists on base PI0Pytorch as the overridable
+    final-head seam, and PI0EnhancePytorch supplies its own implementation so
+    inference also routes through the enhanced ``H_main``."""
+    assert hasattr(PI0Pytorch, "_project_to_action")
+    # Override must be a different function object on the subclass.
+    assert PI0EnhancePytorch._project_to_action is not PI0Pytorch._project_to_action
+    # Base policy and enhance policy must share the same `_build_model` seam.
+    assert hasattr(PI0Policy, "_build_model")
+    assert PI0EnhancePolicy._build_model is not PI0Policy._build_model
+    # PI0EnhancePolicy.forward must wrap base forward to log loss_main.
+    assert PI0EnhancePolicy.forward is not PI0Policy.forward

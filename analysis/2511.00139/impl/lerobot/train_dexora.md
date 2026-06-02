@@ -85,6 +85,10 @@ CUDA_VISIBLE_DEVICES=1 env $COMMON POLICY_TYPE=pi0_enhance OUTPUT_DIR=outputs/en
 
 `PRETRAINED=` (빈값) → scratch 학습.
 
+> enhance 의 inference head 는 `action_out_proj` 가 아니라 `H_main` 입니다
+> (`PI0EnhancePytorch._project_to_action` override). 학습 loss 를 받은 head
+> 그대로 추론에 사용되므로 train↔inference 일관성이 보장됩니다.
+
 ## 🧪 실험 매트릭스
 
 ### Stage 별
@@ -107,20 +111,28 @@ done
 
 `λ=0` = enhancer 아키텍처만 살아있고 보조 감독 OFF (통제군).
 
-### 비교 지표
+### 비교 지표 — `loss_main` 으로 공정 비교
 
-손 인덱스 `[12:36)` 의 `loss_per_dim` 평균을 base vs enhance:
+enhance 의 stdout `loss` 는 `L_main + λ(L_arm + L_hand)` 합성이라 base 의
+`L_main` 과 직접 비교 불가. `PI0EnhancePolicy.forward` 가 `loss_dict` 에
+**`loss_main` (scalar)** 과 **`loss_main_per_dim` (length-40 list)** 도 함께
+실어 보내므로:
+
+- **scalar 비교**: base 의 `loss` ↔ enhance 의 `loss_main` (둘 다 단일 main MSE).
+- **차원별 비교**: base 의 `loss_per_dim` ↔ enhance 의 `loss_main_per_dim`.
+- **enhancement 표적**: 손 인덱스 `[12:36)` 평균이 enhance 에서 더 빠르게/낮게 떨어지는지.
 
 ```python
 import json
 d = json.load(open('outputs/<run>/wandb/latest-run/files/wandb-summary.json'))
-lpd = [d[f'train/loss_per_dim/{i}'] for i in range(40)]
+key = 'train/loss_main_per_dim' if 'train/loss_main_per_dim/0' in d else 'train/loss_per_dim'
+lpd = [d[f'{key}/{i}'] for i in range(40)]
 print('hands [12:36) mean=', sum(lpd[12:36]) / 24)
 ```
 
 > 필요: fork 의 `src/lerobot/common/wandb_utils.py` 에서 numeric list 를
-> per-index key (`loss_per_dim/0`, `loss_per_dim/1`, …) 로 풀도록 1곳 패치.
-> 기본 래퍼는 list 타입을 버려서 `loss_per_dim` 이 기록되지 않습니다.
+> per-index key (`<name>/0`, `<name>/1`, …) 로 풀도록 1곳 패치. 기본 래퍼는
+> list 타입을 버려 `loss_per_dim` / `loss_main_per_dim` 둘 다 기록 안 됩니다.
 
 ## 🚚 오프라인 GPU 서버로 이전 (uv)
 
