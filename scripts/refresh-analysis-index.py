@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import re
 import sys
+import urllib.parse
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -90,8 +91,13 @@ def extract_meta(paper_dir: Path) -> dict[str, str]:
     }
 
 
-def lerobot_state(stem: str) -> str:
-    """Return ✅ / 🚧 UNMAPPABLE / — for the lerobot foundry column."""
+def impl_state(stem: str) -> str:
+    """Return ✅ / 🚧 UNMAPPABLE / — for the impl column.
+
+    Vendor-neutral header, but pathed to the v0 foundry (`lerobot`): ✅ when
+    `impl/lerobot/impl.md` exists, 🚧 UNMAPPABLE when `UNMAPPABLE.md` exists,
+    `—` when neither has been generated.
+    """
     base = ANALYSIS_DIR / stem / "impl" / "lerobot"
     if (base / "impl.md").is_file():
         return "✅"
@@ -100,71 +106,135 @@ def lerobot_state(stem: str) -> str:
     return "—"
 
 
-# 🧬 execution-verification verdict, read from the validation report meta header.
-EXEC_ROW_RE = re.compile(r"^\|\s*🧬[^|]*\|\s*`?(pass|fail|skipped)`?\s*\|\s*$")
-
-
-def lerobot_exec(stem: str) -> str:
-    """Return the 🧬 실행 검증 verdict for the lerobot validation (pass/fail/skipped/—).
-
-    Reads the `| 🧬 실행 검증 | <verdict> |` row from the validation report meta
-    header. `—` when no validation report exists or the row is absent (older
-    reports predating the execution tier).
-    """
-    validation = ANALYSIS_DIR / stem / "validation" / "lerobot.md"
-    try:
-        text = validation.read_text(encoding="utf-8")
-    except OSError:
-        return "—"
-    for line in text.splitlines():
-        m = EXEC_ROW_RE.match(line)
-        if m:
-            return m.group(1)
-    return "—"
-
-
-# §🔎 §🚧 bucket counts come from the validation report's machine marker.
-BUCKETS_START = "<!-- ANALYSIS_BUCKETS:START -->"
-BUCKETS_END = "<!-- ANALYSIS_BUCKETS:END -->"
-BUCKET_LINE_RE = re.compile(r"^-\s*(vendor-resolved|paper-extractable|paper-silent-defaultable|paper-silent-experimental|out-of-base-scope)\s*:\s*(.*)$")
-BUCKET_ORDER = (
-    "vendor-resolved",
-    "paper-extractable",
-    "paper-silent-defaultable",
-    "paper-silent-experimental",
-    "out-of-base-scope",
+# 🔑 기술 키워드 bullet head: `- **<term>** — …` (em dash separates head/def).
+KEYWORD_HEADER_RE = re.compile(r"^##\s+🔑")
+KEYWORD_BULLET_RE = re.compile(r"^-\s+(.+)$")
+# Secondary cut for bullets that use `term: def` instead of the spec's em dash.
+KEYWORD_COLON_RE = re.compile(r":\s")
+# Hangul (incl. Jamo) — a keyword head must reduce to English before it ships.
+HANGUL_RE = re.compile(r"[가-힣ᄀ-ᇿ㄰-㆏]")
+# `<a> (<b>)` split used to recover the English half of a bilingual head.
+PAREN_RE = re.compile(r"^(.*?)\s*\(([^()]*)\)\s*(.*)$")
+# Any math/markup markup → the keyword is excluded outright (English plain
+# text only): inline KaTeX `$`…`$`, `$…$`, raw LaTeX, backticks.
+MATH_RE = re.compile(r"[`$\\]")
+MAX_KEYWORDS = 5
+KEYWORD_HEAD_CAP = 40  # badges stay short and scannable
+# 빨주노초파 — five fixed colors assigned sequentially by position (badge #1 is
+# red, #2 orange, …); never hashed, so 3 keywords get 빨주노 and 5 get 빨주노초파.
+KEYWORD_PALETTE = (
+    "e60000",  # 빨 red
+    "ff8c00",  # 주 orange
+    "ffd700",  # 노 yellow
+    "2ca02c",  # 초 green
+    "1f77b4",  # 파 blue
 )
 
 
-def lerobot_buckets(stem: str) -> str:
-    """Return the §🔎 bucket counts `vr/pe/sd/se/ob` for the lerobot validation.
+def _englishize(head: str) -> str:
+    """Reduce a keyword head to its English form, dropping any Korean gloss.
 
-    Reads the ANALYSIS_BUCKETS marker block from
-    `analysis/<stem>/validation/lerobot.md` and counts the comma-separated
-    row ids per bucket. `—` when no validation report exists; `0/0/0/0/0` when
-    the marker is present but empty (e.g. all checks pass with no §🚧).
-    `ob` = out-of-base-scope (fully specified but outside the chosen
-    foundry base's coordinate system).
+    Bilingual heads in the corpus take the shape `한글 (English)` or
+    `English (한글)`; we keep whichever side carries no Hangul. A head with no
+    recoverable English (pure Korean) collapses to the empty string and is
+    dropped by the caller — the English-only rule is enforced in
+    docs/STYLE.md §5-6 for new analyses.
     """
-    validation = ANALYSIS_DIR / stem / "validation" / "lerobot.md"
+    if not HANGUL_RE.search(head):
+        return head.strip()
+    m = PAREN_RE.match(head)
+    if m:
+        inner = m.group(2).strip()
+        outer = f"{m.group(1)} {m.group(3)}".strip()
+        if inner and not HANGUL_RE.search(inner):
+            return inner
+        if outer and not HANGUL_RE.search(outer):
+            return outer
+    cleaned = re.sub(r"\s{2,}", " ", HANGUL_RE.sub(" ", head)).strip(" -–—·,/")
+    return "" if HANGUL_RE.search(cleaned) else cleaned
+
+
+def extract_keywords(paper_dir: Path) -> list[str]:
+    """Return up to MAX_KEYWORDS English keyword labels from 🔑 기술 키워드.
+
+    Reads the `## 🔑 기술 키워드` section (spec'd in docs/STYLE.md §5-6) and
+    takes each top-level bullet's head term — the text before the em dash `—`
+    (the spec delimiter; a `: ` separator is tolerated for non-conforming
+    bullets). English plain text only: a head carrying any math/markup
+    (`MATH_RE` — inline KaTeX, LaTeX, backticks) is excluded outright, and a
+    head with no recoverable English (`_englishize`) is dropped too. The scan
+    continues past skipped heads to fill up to MAX_KEYWORDS. Empty list when
+    the section is missing.
+    """
+    analysis_file = paper_dir / "analysis.md"
     try:
-        text = validation.read_text(encoding="utf-8")
+        text = analysis_file.read_text(encoding="utf-8")
     except OSError:
-        return "—"
-    if BUCKETS_START not in text or BUCKETS_END not in text:
-        return "—"
-    block = text.split(BUCKETS_START, 1)[1].split(BUCKETS_END, 1)[0]
-    counts = {name: 0 for name in BUCKET_ORDER}
-    for line in block.splitlines():
-        m = BUCKET_LINE_RE.match(line.strip())
+        return []
+
+    in_section = False
+    labels: list[str] = []
+    for line in text.splitlines():
+        if not in_section:
+            if KEYWORD_HEADER_RE.match(line):
+                in_section = True
+            continue
+        # End of section: next ## header or a horizontal rule.
+        if line.startswith("## ") or line.strip() == "---":
+            break
+        m = KEYWORD_BULLET_RE.match(line)
         if not m:
             continue
-        name, payload = m.group(1), m.group(2).strip()
-        # Count comma-separated ids; ignore placeholder/empty payloads.
-        if not payload or payload.startswith("<"):
+        head = m.group(1).split("—", 1)[0].replace("**", "").strip()
+        head = KEYWORD_COLON_RE.split(head, maxsplit=1)[0].strip()
+        # Exclude math keywords outright — no $…$, KaTeX, LaTeX, or backticks.
+        if MATH_RE.search(head):
             continue
-        counts[name] = len([tok for tok in payload.split(",") if tok.strip()])
-    return "/".join(str(counts[name]) for name in BUCKET_ORDER)
+        head = re.sub(r"\s{2,}", " ", _englishize(head)).strip()
+        if not head:
+            continue
+        if len(head) > KEYWORD_HEAD_CAP:
+            head = head[: KEYWORD_HEAD_CAP - 1].rstrip() + "…"
+        labels.append(head)
+        if len(labels) >= MAX_KEYWORDS:
+            break
+    return labels
+
+
+def _shields_escape(text: str) -> str:
+    """Escape a shields.io badge field: `-`→`--`, `_`→`__`, space→`_`, then URL-quote."""
+    text = text.replace("-", "--").replace("_", "__").replace(" ", "_")
+    return urllib.parse.quote(text, safe="_-.")
+
+
+def keyword_badges(labels: list[str]) -> str:
+    """Render keyword labels as space-separated colored shields.io badges.
+
+    GitHub's Markdown sanitizer strips inline CSS (`<span style=…>`), so a
+    shields.io badge is the only way to vary text color per keyword on
+    github.com. Colors are the fixed 빨주노초파 palette assigned sequentially by
+    position (badge #1 red … #5 blue).
+    """
+    if not labels:
+        return "—"
+    badges = []
+    for i, label in enumerate(labels):
+        color = KEYWORD_PALETTE[i % len(KEYWORD_PALETTE)]
+        alt = label.replace("|", "/").replace("]", ")")
+        badges.append(
+            f"![{alt}](https://img.shields.io/badge/{_shields_escape(label)}-{color}.svg)"
+        )
+    return " ".join(badges)
+
+
+def arxiv_badge(arxiv_id: str, arxiv_url: str) -> str:
+    """Render the arXiv cell as a red shields.io badge linking to the abs page."""
+    if arxiv_id == WARN:
+        return WARN
+    if not arxiv_url:
+        return f"`{arxiv_id}`"
+    label = _shields_escape(arxiv_id)
+    return f"[![arXiv](https://img.shields.io/badge/arXiv-{label}-b31b1b.svg)]({arxiv_url})"
 
 
 def sort_key(row: dict[str, str]) -> tuple[str, str]:
@@ -178,21 +248,19 @@ def sort_key(row: dict[str, str]) -> tuple[str, str]:
 
 def build_table(rows: list[dict[str, str]]) -> str:
     header = (
-        "| # | Analysis | arXiv | Title | Refreshed | lerobot | 🧬 | 🔎 vr/pe/sd/se/ob |\n"
-        "|---|---|---|---|---|---|---|---|\n"
+        "| # | Analysis | arXiv | Title | Keywords | Refreshed | impl |\n"
+        "|---|---|---|---|---|---|---|\n"
     )
     if not rows:
-        return header + "| — | _no deep-dives yet_ | — | — | — | — | — | — |\n"
+        return header + "| — | _no deep-dives yet_ | — | — | — | — | — |\n"
     out = [header]
     for i, row in enumerate(rows, 1):
         link = f"[`{row['stem']}/analysis.md`]({row['stem']}/analysis.md)"
-        if row["arxiv_url"]:
-            arxiv = f"[`{row['arxiv_id']}`]({row['arxiv_url']})"
-        else:
-            arxiv = f"`{row['arxiv_id']}`" if row["arxiv_id"] != WARN else WARN
+        arxiv = arxiv_badge(row["arxiv_id"], row["arxiv_url"])
+        keywords = keyword_badges(row["keywords"])
         out.append(
-            f"| {i} | {link} | {arxiv} | {row['title']} | {row['refreshed']} "
-            f"| {row['lerobot']} | {row['exec']} | {row['buckets']} |\n"
+            f"| {i} | {link} | {arxiv} | {row['title']} | {keywords} "
+            f"| {row['refreshed']} | {row['impl']} |\n"
         )
     return "".join(out)
 
@@ -222,9 +290,8 @@ def main() -> int:
     for paper_dir in find_analyses():
         meta = extract_meta(paper_dir)
         meta["stem"] = paper_dir.name
-        meta["lerobot"] = lerobot_state(paper_dir.name)
-        meta["exec"] = lerobot_exec(paper_dir.name)
-        meta["buckets"] = lerobot_buckets(paper_dir.name)
+        meta["keywords"] = extract_keywords(paper_dir)
+        meta["impl"] = impl_state(paper_dir.name)
         rows.append(meta)
     rows.sort(key=sort_key, reverse=True)
     table = build_table(rows)

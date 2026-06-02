@@ -166,10 +166,15 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
   🧩 핵심 기여         — 3–6 bullets.
   🔑 기술 키워드        — 5–10 key terms essential for understanding the paper.
                         Each item: `- **<original term / abbreviation>** —
-                        <one-line analogy or definition>`. For terms in the
-                        §4-2 glossary, use the glossary translation and add a
-                        one-line analogy; if no faithful analogy exists, use a
-                        plain definition (no distortion of facts).
+                        <one-line analogy or definition>`. The bold head term
+                        MUST be plain English (the head is lifted into INDEX.md
+                        keyword badges; a non-English OR math-bearing head is
+                        dropped); put any Korean gloss or math ($…$/LaTeX) only
+                        after the em dash. For terms in the §4-2
+                        glossary, still lead the head with the English original
+                        (translation after the em dash) and add a one-line
+                        analogy; if no faithful analogy exists, use a plain
+                        definition (no distortion of facts).
   🔬 방법론            — aim for detail preservation, not compression. Decompose
                         into 4 subsections if possible: `### 직관`,
                         `### 아키텍처`, `### 학습 목표 / 손실`, `### 학습 셋업`.

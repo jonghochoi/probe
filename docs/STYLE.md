@@ -420,8 +420,16 @@ conventions below codify both.
 
 - **🔑 기술 키워드** — 5–10 key terms needed to read the paper,
   each formatted as `- **<original / abbrev>** — <one-line analogy
-  or plain definition>`. For terms in the §4-2 glossary, use the
-  glossary translation as the head and add a short analogy.
+  or plain definition>`. **The bold head term MUST be a plain English
+  word or abbreviation** (the paper's original term); any Korean gloss
+  goes only *after* the em dash, never in the head, and math notation
+  (`$…$`, LaTeX) belongs in the definition, not the head. This is
+  load-bearing — the head is lifted into the `analysis/INDEX.md` keyword
+  badges (§5-7), which drop any head that is non-English or math-bearing,
+  so a math-symbol keyword (e.g. `$`\pi_0`$`) simply won't surface there.
+  For terms in the
+  §4-2 glossary, still lead with the English original (glossary
+  translation may follow the em dash) and add a short analogy.
   Analogies are allowed only when they do not distort the paper's
   claim; when no faithful analogy fits, write a plain definition.
 
@@ -476,9 +484,21 @@ only**; the per-command prompts (`/analyze-paper`, `/implement-design`,
 "Automatically-maintained indexes".
 
 The generated table sorts by `Refreshed` desc (ties by arXiv id desc) and
-carries a `lerobot` cell (✅ impl exists / 🚧 `UNMAPPABLE.md` / `—` not run)
-plus a `🔎 vr/pe/sd/se` bucket-count cell read from the
-`<!-- ANALYSIS_BUCKETS -->` marker in `<id>/validation/lerobot.md`.
+carries, per row:
+
+- an `arXiv` cell rendered as a red shields.io badge linking to the abs page —
+  `[![arXiv](https://img.shields.io/badge/arXiv-<id>-b31b1b.svg)](https://arxiv.org/abs/<id>)`;
+- a `Keywords` cell — up to 5 `🔑 기술 키워드` head terms, each a colored
+  shields.io badge. English plain text only: a head carrying any math (inline
+  KaTeX / LaTeX / backticks) is excluded outright, and a head with no
+  recoverable English is dropped (§5-6 enforces English heads); skipped heads
+  are backfilled from later bullets. Badge colors are the fixed 빨주노초파
+  five-color palette assigned **sequentially by position** — badge #1 red, #2
+  orange, #3 yellow, #4 green, #5 blue (3 keywords → 빨주노). GitHub's Markdown
+  sanitizer strips inline CSS (`<span style=…>`), so a shields.io badge is the
+  only way to color text per keyword on github.com;
+- an `impl` cell — lerobot-based: ✅ `impl/lerobot/impl.md` exists /
+  🚧 `UNMAPPABLE.md` / `—` not generated.
 
 **Load-bearing — the 📄 논문 메타 rows the script reads from every
 `analysis/<id>/analysis.md`** (STYLE's contract; the author must emit them
@@ -491,8 +511,10 @@ exactly):
 | `분석 생성일` | `YYYY-MM-DD` |
 
 A missing / malformed row yields `⚠️ metadata` in that cell rather than an
-abort. `python3 scripts/refresh-analysis-index.py` by hand is safe and
-idempotent.
+abort. The `🔑 기술 키워드` bullet heads are load-bearing too: the index reads
+each bullet's term — the text before the em dash in the `- **<term>** — …`
+shape §5-6 mandates (it also tolerates a `: ` separator and caps long heads).
+`python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
 
 ---
 
