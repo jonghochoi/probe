@@ -238,7 +238,7 @@ ID(Pick Up, Pick and Place)에서는 더 큰 Open-X-Embodiment로 학습한 Open
 ## 💡 컨텍스트 제안
 
 - **핀 유지** — 이미 P4 핀(§8.4)이자 §10 Antagonist 맥락에 등재돼 있어 신규 핀 교체 제안은 없습니다. 다만 §8.4 표의 VLM2VLA 역할 설명에 **"co-training 불필요성의 실증 반례(특히 $`\pi_{0.5}`$ VQA 저하)"** 를 한 줄 보강하면 D20/D21 의사결정 시 근거가 더 또렷해집니다(사람이 판단·반영).
-- **방법론 참조 후보** — 본 논문의 "VQA 보존율(base 대비 %)" 측정 프로토콜은 `analysis/_catalogs/vlm-prior-preservation.md`의 forward-KL 측정 프로토콜과 상호 보완적입니다. 동 문서에 VLM2VLA의 행동-언어 정렬을 "데이터 레벨 분포 정렬" 사례로 cross-link하는 것을 제안드립니다(사람이 판단).
+- **방법론 참조 후보** — 본 논문의 "VQA 보존율(base 대비 %)" 측정 프로토콜은 `analysis/catalogs/vlm-prior-preservation.md`의 forward-KL 측정 프로토콜과 상호 보완적입니다. 동 문서에 VLM2VLA의 행동-언어 정렬을 "데이터 레벨 분포 정렬" 사례로 cross-link하는 것을 제안드립니다(사람이 판단).
 - **나머지** — D1–D18, D24–D26 등 다른 Decision과의 연결은 없습니다(연결 날조 금지).
 
 > 💡 base 매핑은 `/implement-design analysis/2509.22195/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
