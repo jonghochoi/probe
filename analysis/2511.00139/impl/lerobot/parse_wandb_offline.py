@@ -47,6 +47,7 @@ def main() -> None:
     wandb_file = str(matches[0])
 
     try:
+        from wandb.proto.wandb_internal_pb2 import Record
         from wandb.sdk.internal.datastore import DataStore
     except Exception as e:  # noqa: BLE001
         print(f"failed to import wandb internals ({e}); install wandb", file=sys.stderr)
@@ -55,10 +56,28 @@ def main() -> None:
     ds = DataStore()
     ds.open_for_scan(wandb_file)
 
+    def _next_record():
+        """Normalise scan_record() across wandb versions.
+
+        Older: returns Record directly (or None at EOF).
+        Newer (>=0.18): returns (status, data_bytes) — parse to Record.
+        """
+        out = ds.scan_record()
+        if out is None:
+            return None
+        if isinstance(out, tuple):
+            _status, data = out
+            if data is None:
+                return None
+            rec = Record()
+            rec.ParseFromString(data)
+            return rec
+        return out
+
     history: list[dict] = []
     summary: dict = {}
     while True:
-        rec = ds.scan_record()
+        rec = _next_record()
         if rec is None:
             break
         if rec.HasField("history"):
