@@ -43,7 +43,10 @@ def find_analyses() -> list[Path]:
         if not path.is_dir():
             continue
         name = path.name
-        if name.startswith("_") or name == "templates":
+        # `templates` is the skeleton; `catalogs` is hand-curated cross-paper
+        # reference material, explicitly out of INDEX auto-regeneration scope
+        # (CLAUDE.md "Automatically-maintained indexes"). Neither is a paper.
+        if name.startswith("_") or name in ("templates", "catalogs"):
             continue
         # Accept arXiv ids or arbitrary slug directory names.
         out.append(path)
