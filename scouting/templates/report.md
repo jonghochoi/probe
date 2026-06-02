@@ -95,7 +95,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ---
 
-## 🌱 논문 4 — 크로스폴리네이션 (월 1회)
+## 🌱 논문 4 — 인접 분야 픽 (월 1회)
 
 <!-- Include once per month. Rotate target field per context/MASTER.md §12 (Cross-pollination Budget). -->
 
