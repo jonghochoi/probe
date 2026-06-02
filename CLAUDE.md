@@ -31,7 +31,6 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
-| `scripts/foundry-ablation/` | human | Reusable experiment harness for attributing `/implement-design` output quality (H_context vs H_verify vs H_null) — controlled a1/a2 prompt generator + an append-only sample ledger with cross-paper aggregation. Spec in its own `PROTOCOL.md` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
