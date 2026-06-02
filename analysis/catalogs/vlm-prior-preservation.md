@@ -359,7 +359,7 @@ Stage 2는 VLM freeze라 $\theta_{\text{VLM}}=\theta_0$ → $\|\theta-\theta_0\|
 
 ## 부록 — Pillar 4 등재 권고 (context/ 읽기 전용)
 
-> 이 문서는 `analysis/_catalogs/` 의 *방법론 트랙* 첫 입주물이고, `context/P4.md`
+> 이 문서는 `analysis/catalogs/` 의 *방법론 트랙* 첫 입주물이고, `context/P4.md`
 > 와 `context/MASTER.md` 는 agent read-only (CLAUDE.md 규약). 아래 권고는
 > 사용자가 P4·MASTER 를 *직접* 편집할 때 참고할 항목이다. 본문에서 자라난
 > 결정·문헌·미해결 항목을 P4 스켈레톤 슬롯에 매핑.
@@ -402,4 +402,4 @@ hard cap 8 유지. 정식 승격은 분기 rebalance 때 기존 1~2편과 교체
 `context/P4.md` §3 의 D22 행에 옛 카탈로그 슬러그(`pretrain_data` /
 `lineage_corpus`) 인용이 남아있을 수 있음 (CLAUDE.md 규약상 agent 미터치).
 `context/MASTER.md` 도 동일 점검 권장. P4·MASTER 갱신 시 슬러그를 현재
-파일명 `analysis/_catalogs/dataset.md` 로 치환.
+파일명 `analysis/catalogs/dataset.md` 로 치환.

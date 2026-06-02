@@ -286,7 +286,7 @@ upstream rather than rewritten. The links below are the exact sources.
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
 | [`analysis/README.md`](analysis/README.md) | On-demand deep-dive trio — `/analyze-paper` → `analysis.md` + `design.md`, `/implement-design` → `impl/<foundry>/`, `/validate-impl` → `validation/`, orchestrated by `/reproduce-paper` |
-| [`analysis/_catalogs/`](analysis/_catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `vlm.md` / `vla.md` / `dataset.md` facts-tables (column standard in their `README.md`) plus pillar methodology refs (`vlm-prior-preservation.md`) |
+| [`analysis/catalogs/`](analysis/catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `vlm.md` / `vla.md` / `dataset.md` facts-tables (column standard in their `README.md`) plus pillar methodology refs (`vlm-prior-preservation.md`) |
 | [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
 | [`scouting/templates/report.md`](scouting/templates/report.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
 | [`analysis/templates/`](analysis/templates/) | Korean templates for the analysis trio — `analysis.md` / `design.md` / `impl.md` / `validation.md` |

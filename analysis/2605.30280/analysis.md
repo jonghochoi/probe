@@ -356,7 +356,7 @@ PROBE 관점의 추가 갭:
 
 - **P4 핀/카탈로그 후보.** Qwen-VLA 를 §8.4 P4 핀 후보 또는 §6.4 D22 데이터 카탈로그 항목으로 검토 제안: lineage(D19b) = `Qwen3.5-4B × 대규모 멀티-임바디먼트 믹스`, 신규 staging(D21) = T2A, 데이터 카탈로그(D22) 입력 가치. 현 Qwen-4B 형제 핀 Xiaomi-Robotics-0 과 묶어 "Qwen-backbone lineage" 비교군을 형성할 수 있습니다(핀 8개 하드캡이므로, 추가 시 약한 핀 1개 교체 필요).
 - **§10.2 bounded-RL-in-VLA 추가 후보.** Qwen-VLA 의 단계 RL(전 정책 task-success, deploy FT)을 "RL = 미세조정, capability source 아님" 프레이밍의 추가 증거로 §10.2 에 기록 제안.
-- **방법론 cross-link 후보.** T2A(시각 없는 행동 prior 압축 사전학습)와 단계별 $`p(\tau)`$ 스케줄은 `analysis/_catalogs/` 의 P4 staging 방법론 참조로 묶을 가치가 있습니다.
+- **방법론 cross-link 후보.** T2A(시각 없는 행동 prior 압축 사전학습)와 단계별 $`p(\tau)`$ 스케줄은 `analysis/catalogs/` 의 P4 staging 방법론 참조로 묶을 가치가 있습니다.
 - **D5/D15 증거 메모.** Table 12(state conditioning ≤1.3pp)는 D5/D15 에 대한 직접 증거이되 "시야 가시 테이블탑" 전제 조건이 핵심임을 함께 기록 제안 — 인핸드 가림 조건에서 결론이 역전될 수 있다는 우리 차별화 가설의 시험대입니다.
 
 > 💡 base 매핑은 `/implement-design analysis/2605.30280/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
