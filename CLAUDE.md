@@ -283,8 +283,12 @@ One intentional exception to "no cross-link automation": the deep-dive table
 in `analysis/INDEX.md`. Filenames there are bare arXiv ids (`2511.00139.md`),
 so the title-to-id mapping drifts if hand-maintained — `scripts/refresh-analysis-index.py`
 regenerates it. The script reads each analysis's 📄 논문 메타 table (load-bearing
-rows in `docs/STYLE.md` §5-7), inspects the filesystem for foundry artifacts
-(`impl.md` vs `UNMAPPABLE.md`), and rewrites only the block between
+rows in `docs/STYLE.md` §5-7) plus up to 5 English `🔑 기술 키워드` bullet heads
+(math-bearing/non-English heads excluded, rendered as 빨주노초파 shields.io
+badges — same badge style for the `arXiv` cell), inspects the filesystem for
+the vendor-neutral `impl` column
+(lerobot-pathed: `impl.md` vs `UNMAPPABLE.md`), and rewrites only the block
+between
 `<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->`. Everything
 outside the markers stays hand-maintained (own file, so it doesn't interleave
 with the `analysis/README.md` narrative).
