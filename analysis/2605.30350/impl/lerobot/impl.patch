@@ -1,0 +1,247 @@
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
+index bdaf01f..a53e392 100644
+--- a/vendor/lerobot/policies/pi05/modeling_pi05.py
++++ b/vendor/lerobot/policies/pi05/modeling_pi05.py
+@@ -638,6 +638,15 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+         time = time_beta * self.config.time_sampling_scale + self.config.time_sampling_offset
+         return time.to(dtype=torch.float32, device=device)
+ 
++    def _extra_prefix_embeds(self):
++        """Hook for subclasses to append auxiliary prefix tokens before the
++        image / language tokens are concatenated. Base PI05 adds none (identity).
++
++        Returns None, or a ``(embs, pad_mask)`` pair where ``embs`` is
++        ``(B, num_extra, hidden)`` and ``pad_mask`` is ``(B, num_extra)`` bool.
++        """
++        return None
++
+     def embed_prefix(
+         self, images, img_masks, tokens, masks
+     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+@@ -671,6 +680,15 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+         num_lang_embs = lang_emb.shape[1]
+         att_masks += [0] * num_lang_embs
+ 
++        # Seam: subclasses may append auxiliary prefix tokens (e.g. DynaFLIP
++        # PVI injection). Base ``_extra_prefix_embeds`` returns None -> identical.
++        extra = self._extra_prefix_embeds()
++        if extra is not None:
++            extra_embs, extra_mask = extra
++            embs.append(extra_embs.to(embs[0].dtype))
++            pad_masks.append(extra_mask)
++            att_masks += [0] * extra_embs.shape[1]
++
+         embs = torch.cat(embs, dim=1)
+         pad_masks = torch.cat(pad_masks, dim=1)
+         att_masks = torch.tensor(att_masks, dtype=torch.bool, device=pad_masks.device)
+@@ -918,7 +936,7 @@ class PI05Policy(PreTrainedPolicy):
+ 
+         # Initialize the core PI05 model
+         self.init_rtc_processor()
+-        self.model = PI05Pytorch(config, rtc_processor=self.rtc_processor)
++        self.model = self._build_model()
+ 
+         # Enable gradient checkpointing if requested
+         if config.gradient_checkpointing:
+@@ -928,6 +946,11 @@ class PI05Policy(PreTrainedPolicy):
+ 
+         self.reset()
+ 
++    def _build_model(self) -> PI05Pytorch:
++        """Factory seam: build the core model. Subclasses override to swap in
++        a variant (e.g. DynaFLIP PVI injection); default builds vanilla PI05."""
++        return PI05Pytorch(self.config, rtc_processor=self.rtc_processor)
++
+     @classmethod
+     def from_pretrained(
+         cls: builtins.type[T],
+diff --git a/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
+new file mode 100644
+index 0000000..1649d46
+--- /dev/null
++++ b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
+@@ -0,0 +1,57 @@
++#!/usr/bin/env python
++
++# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++from dataclasses import dataclass
++
++from lerobot.configs import PreTrainedConfig
++
++from .configuration_pi05 import PI05Config
++
++
++@PreTrainedConfig.register_subclass("pi05_dynaflip")
++@dataclass
++class PI05DynaflipConfig(PI05Config):
++    """PI0.5 + DynaFLIP frozen-injection (PVI) variant.
++
++    Adds a frozen auxiliary visual branch (DynaFLIP, arXiv:2605.30350 §3.4)
++    whose precomputed feature is projected into prefix tokens and appended to
++    the SigLIP image / language tokens. The SigLIP encoder, VLM and LLM stay
++    untouched, so the base model's prior is preserved. Defaults reproduce
++    vanilla PI05 behavior (``inject_dynaflip=False``).
++    """
++
++    # Master switch. False -> identical to PI05.
++    inject_dynaflip: bool = False
++    # DynaFLIP image-encoder feature dim: DINOv2-B CLS(768) (+) patch-mean(768).
++    # See analysis/2605.30350/design.md (data contract, intermediate feature).
++    dynaflip_feature_dim: int = 1536
++    # Number of injected prefix tokens. The paper delegates PVI internals to
++    # ref [60] (design.md unresolved); default 1 = the single pooled transition
++    # embedding z_I.
++    dynaflip_num_tokens: int = 1
++    # Batch key carrying the precomputed frozen DynaFLIP feature.
++    dynaflip_feature_key: str = "observation.dynaflip_feature"
++
++    def __post_init__(self):
++        super().__post_init__()
++        if self.dynaflip_feature_dim <= 0:
++            raise ValueError(
++                f"dynaflip_feature_dim must be positive, got {self.dynaflip_feature_dim}"
++            )
++        if self.dynaflip_num_tokens < 1:
++            raise ValueError(
++                f"dynaflip_num_tokens must be >= 1, got {self.dynaflip_num_tokens}"
++            )
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
+new file mode 100644
+index 0000000..90bccb9
+--- /dev/null
++++ b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
+@@ -0,0 +1,100 @@
++#!/usr/bin/env python
++
++# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""PI0.5 + DynaFLIP frozen-injection (PVI) variant.
++
++Maps the downstream integration of DynaFLIP (arXiv:2605.30350 §3.4, Plug-in
++Visual Injection) onto the lerobot pi05 base. A frozen auxiliary visual feature
++is projected to the PaliGemma hidden width and appended as extra prefix tokens,
++leaving the SigLIP encoder / VLM / LLM untouched (prior-preserving). All
++DynaFLIP *pretraining* (simplex alignment, TCN, actor losses, 3D-flow encoder)
++is out-of-base-scope: the feature arrives precomputed in the batch.
++"""
++
++import torch
++from torch import Tensor, nn
++
++from .configuration_pi05_dynaflip import PI05DynaflipConfig
++from .modeling_pi05 import PI05Policy, PI05Pytorch, get_gemma_config
++
++
++class DynaflipPrefixInjector(nn.Module):
++    """Project a frozen DynaFLIP feature into ``num_tokens`` prefix tokens."""
++
++    def __init__(self, feature_dim: int, hidden_dim: int, num_tokens: int):
++        super().__init__()
++        self.hidden_dim = hidden_dim
++        self.num_tokens = num_tokens
++        self.proj = nn.Linear(feature_dim, hidden_dim * num_tokens)
++
++    def forward(self, feature: Tensor) -> Tensor:
++        # (B, feature_dim) -> (B, num_tokens, hidden_dim)
++        bsize = feature.shape[0]
++        return self.proj(feature).view(bsize, self.num_tokens, self.hidden_dim)
++
++
++class PI05DynaflipPytorch(PI05Pytorch):
++    """PI05 core model with a DynaFLIP PVI prefix-injection seam."""
++
++    def __init__(self, config: PI05DynaflipConfig, rtc_processor=None):
++        super().__init__(config, rtc_processor=rtc_processor)
++        self._pending_dynaflip_feature = None
++        if config.inject_dynaflip:
++            hidden_dim = get_gemma_config(config.paligemma_variant).width
++            self.injector = DynaflipPrefixInjector(
++                config.dynaflip_feature_dim, hidden_dim, config.dynaflip_num_tokens
++            )
++        else:
++            self.injector = None
++
++    def set_dynaflip_feature(self, feature: Tensor | None) -> None:
++        """Stash the precomputed feature for the next ``embed_prefix`` call."""
++        self._pending_dynaflip_feature = feature
++
++    def _extra_prefix_embeds(self):
++        # Override of the base seam: append projected DynaFLIP tokens when the
++        # injector is built and a feature has been stashed. Otherwise None, which
++        # reproduces the base PI05 prefix exactly.
++        if self.injector is None or self._pending_dynaflip_feature is None:
++            return None
++        feat = self._pending_dynaflip_feature
++        if feat.dim() == 3:
++            # (B, T, dim) -> pool the transition window to a single feature.
++            feat = feat.mean(dim=1)
++        proj = self.injector(feat.to(self.injector.proj.weight.dtype))
++        mask = torch.ones(
++            proj.shape[0], proj.shape[1], dtype=torch.bool, device=proj.device
++        )
++        return proj, mask
++
++
++class PI05DynaflipPolicy(PI05Policy):
++    """PI05 policy that stashes the batch DynaFLIP feature for prefix injection."""
++
++    config_class = PI05DynaflipConfig
++    name = "pi05_dynaflip"
++
++    def _build_model(self) -> PI05Pytorch:
++        return PI05DynaflipPytorch(self.config, rtc_processor=self.rtc_processor)
++
++    def forward(self, batch, reduction: str = "mean"):
++        self.model.set_dynaflip_feature(batch.get(self.config.dynaflip_feature_key))
++        return super().forward(batch, reduction=reduction)
++
++    @torch.no_grad()
++    def predict_action_chunk(self, batch, **kwargs):
++        self.model.set_dynaflip_feature(batch.get(self.config.dynaflip_feature_key))
++        return super().predict_action_chunk(batch, **kwargs)
+diff --git a/vendor/lerobot/policies/pi05/__init__.py b/vendor/lerobot/policies/pi05/__init__.py
+index 4f9a9de..e115179 100644
+--- a/vendor/lerobot/policies/pi05/__init__.py
++++ b/vendor/lerobot/policies/pi05/__init__.py
+@@ -15,7 +15,15 @@
+ # limitations under the License.
+ 
+ from .configuration_pi05 import PI05Config
++from .configuration_pi05_dynaflip import PI05DynaflipConfig
+ from .modeling_pi05 import PI05Policy
++from .modeling_pi05_dynaflip import PI05DynaflipPolicy
+ from .processor_pi05 import make_pi05_pre_post_processors
+ 
+-__all__ = ["PI05Config", "PI05Policy", "make_pi05_pre_post_processors"]
++__all__ = [
++    "PI05Config",
++    "PI05DynaflipConfig",
++    "PI05Policy",
++    "PI05DynaflipPolicy",
++    "make_pi05_pre_post_processors",
++]
