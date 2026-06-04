@@ -39,6 +39,7 @@ Usage:
 import argparse
 import csv
 import json
+import math
 import re
 import sys
 from collections import OrderedDict
@@ -75,6 +76,42 @@ def _per_dim(summary: dict, base_key: str) -> list[float]:
     if not vals:
         return []
     return [vals[i] for i in range(max(vals) + 1)]
+
+
+def _window_means(run_dir: Path, scalar_key: str, pd_prefix: str, frac: float):
+    """Mean of the last ``frac`` of metrics.csv steps — robust to the per-step
+    noise that makes a single summary.json snapshot unreliable.
+
+    Returns (scalar_mean, per_dim_means, window_rows, total_rows).
+    """
+    p = run_dir / "metrics.csv"
+    if not p.exists():
+        print(f"no metrics.csv in {run_dir} (needed for --window)", file=sys.stderr)
+        sys.exit(1)
+    with p.open() as f:
+        rows = [r for r in csv.DictReader(f) if r.get("_step")]
+    if not rows:
+        return None, [], 0, 0
+    rows.sort(key=lambda r: float(r["_step"]))
+    w = max(1, math.ceil(len(rows) * frac))
+    last = rows[-w:]
+
+    def cmean(k: str):
+        xs = [float(r[k]) for r in last if r.get(k) not in (None, "")]
+        return sum(xs) / len(xs) if xs else None
+
+    scalar = cmean(scalar_key)
+    prefix = pd_prefix + "/"
+    vals: dict[int, float] = {}
+    for k in last[0]:
+        if k.startswith(prefix):
+            tail = k[len(prefix):]
+            if tail.isdigit():
+                v = cmean(k)
+                if v is not None:
+                    vals[int(tail)] = v
+    pd_list = [vals[i] for i in range(max(vals) + 1)] if vals else []
+    return scalar, pd_list, w, len(rows)
 
 
 def _parse_regions(spec: str) -> list[tuple[str, int, int]]:
@@ -145,24 +182,45 @@ def main() -> None:
     ap.add_argument("enhance_dir", type=Path, help="enhance run output dir")
     ap.add_argument("--regions", default=DEFAULT_REGIONS,
                     help=f"comma list of name:start:end; names ending _L/_R roll up. Default: {DEFAULT_REGIONS}")
+    ap.add_argument("--window", type=float, default=None, metavar="FRAC",
+                    help="average the last FRAC (0-1] of metrics.csv steps instead of using the "
+                         "single summary.json snapshot — robust to per-step noise (e.g. 0.2)")
     ap.add_argument("--per-dim", action="store_true", help="also print the full per-dim table with region labels")
     ap.add_argument("-o", "--out", type=Path, default=None, help="write aligned step-wise compare.csv here")
     args = ap.parse_args()
 
-    base = _load_summary(args.base_dir)
-    enh = _load_summary(args.enhance_dir)
+    if args.window is not None:
+        if not 0 < args.window <= 1:
+            print("--window must be in (0, 1]", file=sys.stderr)
+            sys.exit(1)
+        base_scalar, base_pd, bw, bn = _window_means(args.base_dir, "train/loss", "train/loss_per_dim", args.window)
+        enh_scalar, enh_pd, ew, en = _window_means(args.enhance_dir, "train/loss_main", "train/loss_main_per_dim", args.window)
+        if enh_scalar is None or not enh_pd:
+            fs, fp, ew, en = _window_means(args.enhance_dir, "train/loss", "train/loss_per_dim", args.window)
+            if enh_scalar is None:
+                enh_scalar = fs
+                print("warning: enhance run has no train/loss_main; falling back to "
+                      "composite train/loss — NOT a fair comparison (see --help)", file=sys.stderr)
+            if not enh_pd:
+                enh_pd = fp
+        source = f"metrics.csv 마지막 {args.window:.0%} 윈도우 평균 (base {bw}/{bn}, enh {ew}/{en} steps)"
+    else:
+        base = _load_summary(args.base_dir)
+        enh = _load_summary(args.enhance_dir)
 
-    # Scalar: base loss <-> enhance loss_main (fall back with a warning).
-    base_scalar = _scalar(base, "train/loss")
-    enh_scalar = _scalar(enh, "train/loss_main")
-    if enh_scalar is None:
-        enh_scalar = _scalar(enh, "train/loss")
-        print("warning: enhance run has no train/loss_main; falling back to "
-              "composite train/loss — NOT a fair comparison (see --help)", file=sys.stderr)
+        # Scalar: base loss <-> enhance loss_main (fall back with a warning).
+        base_scalar = _scalar(base, "train/loss")
+        enh_scalar = _scalar(enh, "train/loss_main")
+        if enh_scalar is None:
+            enh_scalar = _scalar(enh, "train/loss")
+            print("warning: enhance run has no train/loss_main; falling back to "
+                  "composite train/loss — NOT a fair comparison (see --help)", file=sys.stderr)
 
-    # Per-dim: base loss_per_dim <-> enhance loss_main_per_dim.
-    base_pd = _per_dim(base, "train/loss_per_dim")
-    enh_pd = _per_dim(enh, "train/loss_main_per_dim") or _per_dim(enh, "train/loss_per_dim")
+        # Per-dim: base loss_per_dim <-> enhance loss_main_per_dim.
+        base_pd = _per_dim(base, "train/loss_per_dim")
+        enh_pd = _per_dim(enh, "train/loss_main_per_dim") or _per_dim(enh, "train/loss_per_dim")
+        source = "summary.json (최종 스텝 1개 — 노이즈 주의, --window 권장)"
+
     active = min(len(base_pd), len(enh_pd))
 
     regions = _parse_regions(args.regions)
@@ -181,6 +239,7 @@ def main() -> None:
     print("# base vs enhance — fair comparison (loss vs loss_main), per region\n")
     print(f"- base    : `{args.base_dir}`")
     print(f"- enhance : `{args.enhance_dir}`")
+    print(f"- source  : {source}")
     print(f"- active dims: `{active}`\n")
     print("| region | dims | base | enhance | Δ | 개선 | win |")
     print("|---|---|---|---|---|---|---|")

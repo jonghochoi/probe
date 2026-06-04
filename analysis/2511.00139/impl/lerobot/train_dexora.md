@@ -148,8 +148,13 @@ for r in s1_base s1_enhance; do
   $PY parse_wandb_offline.py outputs/$r/wandb/latest-run -o outputs/tb/$r
 done
 $PY compare_runs.py outputs/tb/s1_base outputs/tb/s1_enhance \
-  --per-dim -o outputs/tb/compare.csv
+  --window 0.2 --per-dim -o outputs/tb/compare.csv
 ```
+
+per-dim loss 는 스텝마다 노이즈가 크므로 `--window 0.2`(마지막 20% 스텝
+평균)를 권장합니다 — `summary.json` 의 최종 스텝 1개로 비교하면 단일 샘플
+노이즈에 휘둘립니다(예: 한 dim 의 최종값 0.989 vs 윈도우 평균 0.764). 옵션을
+빼면 `summary.json` 최종값으로 떨어지며 헤더에 경고가 붙습니다.
 
 ## 🚚 오프라인 GPU 서버로 이전 (uv)
 
