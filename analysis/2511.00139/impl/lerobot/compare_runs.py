@@ -1,36 +1,52 @@
 #!/usr/bin/env python3
-"""Compare a base pi0 run against a pi0_enhance run, fairly.
+"""Compare a base pi0 run against a pi0_enhance run, fairly and per region.
 
 Consumes the per-run outputs of ``parse_wandb_offline.py`` (``summary.json``
 + ``metrics.csv``) and reports the *dimension-homomorphic* comparison the
 paper (2511.00139) actually calls for.
 
-The trap this tool exists to avoid: enhance's ``train/loss`` is the composite
-``L_main + lambda*(L_arm + L_hand)``, so it is NOT comparable to base's
-main-only ``train/loss``. ``PI0EnhancePolicy.forward`` logs ``loss_main`` /
-``loss_main_per_dim`` precisely so a like-for-like comparison is possible:
+Trap 1 — wrong scalar: enhance's ``train/loss`` is the composite
+``L_main + lambda*(L_arm + L_hand)``, NOT comparable to base's main-only
+``train/loss``. ``PI0EnhancePolicy.forward`` logs ``loss_main`` /
+``loss_main_per_dim`` so a like-for-like comparison is possible:
 
   scalar      base train/loss          <-> enhance train/loss_main
   per-dim     base train/loss_per_dim  <-> enhance train/loss_main_per_dim
 
-Index contract (Design / build_index_masks): arm = [0, arm_dim),
-hand = [arm_dim, active_dim); trailing padding is dropped. The hand-region
-mean is the paper's enhancement target.
+Trap 2 — wrong regions: the action vector is NOT "arm then all-hand". For
+Dexora (39-DoF) the documented layout (train_dexora.md, build_index_masks)
+is left/right arm + left/right hand + head/spine, and only arm/hand get aux
+supervision. Folding head/spine into "hand", or not splitting L/R, hides the
+left/right asymmetry that dominates a single-task run. So regions are an
+explicit, overridable map rather than a single arm/hand boundary.
+
+  --regions name:start:end,name:start:end,...
+
+Region names ending in ``_L`` / ``_R`` are rolled up to a parent group
+(``hand_L`` + ``hand_R`` -> ``hand``) for a both-sides summary row. Default
+is the Dexora 39-DoF layout; override for any other embodiment.
 
 Pure stdlib; no plotting dependency. Emits a Markdown table to stdout and,
 with -o, an aligned step-wise ``compare.csv`` (base loss vs enhance
 loss_main over ``_step``) for whatever plotting you prefer.
 
 Usage:
-  python compare_runs.py outputs/tb/s1_base outputs/tb/s1_enhance --arm-dim 12
-  python compare_runs.py outputs/tb/s1_base outputs/tb/s1_enhance --arm-dim 12 \
-      --per-dim -o outputs/tb/compare.csv
+  python compare_runs.py outputs/tb/s1_base outputs/tb/s1_enhance
+  python compare_runs.py outputs/tb/s1_base outputs/tb/s1_enhance --per-dim \
+      -o outputs/tb/compare.csv
+  python compare_runs.py base enh --regions arm:0:12,hand:12:36,head_spine:36:39
 """
 import argparse
 import csv
 import json
+import re
 import sys
+from collections import OrderedDict
 from pathlib import Path
+
+# Dexora 39-DoF action layout (train_dexora.md "데이터 차원" table):
+# arm 6+6, hand 12+12 (xhand), head 2 + spine 1. Only arm/hand get aux loss.
+DEFAULT_REGIONS = "arm_L:0:6,arm_R:6:12,hand_L:12:24,hand_R:24:36,head_spine:36:39"
 
 
 def _load_summary(run_dir: Path) -> dict:
@@ -61,21 +77,44 @@ def _per_dim(summary: dict, base_key: str) -> list[float]:
     return [vals[i] for i in range(max(vals) + 1)]
 
 
-def _mean(xs: list[float]):
-    return sum(xs) / len(xs) if xs else None
+def _parse_regions(spec: str) -> list[tuple[str, int, int]]:
+    out: list[tuple[str, int, int]] = []
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            name, start, end = part.rsplit(":", 2)
+            out.append((name, int(start), int(end)))
+        except ValueError:
+            print(f"bad --regions entry {part!r}; want name:start:end", file=sys.stderr)
+            sys.exit(1)
+    return out
 
 
 def _fmt(x, nd: int = 5) -> str:
     return f"{x:.{nd}f}" if isinstance(x, (int, float)) else "—"
 
 
-def _delta_row(label: str, base, enh) -> str:
+def _stats(base_pd: list[float], enh_pd: list[float], idxs: list[int]):
+    """Mean of base/enhance over idxs (clamped to both lengths) + win count."""
+    idxs = [i for i in idxs if i < len(base_pd) and i < len(enh_pd)]
+    if not idxs:
+        return None, None, 0, 0
+    b = sum(base_pd[i] for i in idxs) / len(idxs)
+    e = sum(enh_pd[i] for i in idxs) / len(idxs)
+    wins = sum(1 for i in idxs if enh_pd[i] < base_pd[i])
+    return b, e, wins, len(idxs)
+
+
+def _row(label: str, span: str, base, enh, wins: int, n: int) -> str:
     if base is None or enh is None:
-        return f"| {label} | {_fmt(base)} | {_fmt(enh)} | — | — |"
+        return f"| {label} | {span} | — | — | — | — | — |"
     d = enh - base
     pct = (d / base * 100) if base else float("nan")
-    sign = "🟢" if d < 0 else "🔴"  # lower loss = better = green
-    return f"| {label} | {_fmt(base)} | {_fmt(enh)} | {d:+.5f} | {sign} {pct:+.1f}% |"
+    tag = "🟢" if d < 0 else "🔴"  # lower loss = better
+    return (f"| {label} | {span} | {_fmt(base)} | {_fmt(enh)} | "
+            f"{d:+.5f} | {tag} {pct:+.1f}% | {wins}/{n} |")
 
 
 def _write_curve_csv(base_dir: Path, enh_dir: Path, out: Path) -> int:
@@ -104,8 +143,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("base_dir", type=Path, help="base run output dir (parse_wandb_offline.py -o target)")
     ap.add_argument("enhance_dir", type=Path, help="enhance run output dir")
-    ap.add_argument("--arm-dim", type=int, default=12, help="arm = [0, arm_dim); hand = [arm_dim, active) (default 12, Dexora dual-arm)")
-    ap.add_argument("--per-dim", action="store_true", help="also print the full per-dim table")
+    ap.add_argument("--regions", default=DEFAULT_REGIONS,
+                    help=f"comma list of name:start:end; names ending _L/_R roll up. Default: {DEFAULT_REGIONS}")
+    ap.add_argument("--per-dim", action="store_true", help="also print the full per-dim table with region labels")
     ap.add_argument("-o", "--out", type=Path, default=None, help="write aligned step-wise compare.csv here")
     args = ap.parse_args()
 
@@ -123,31 +163,53 @@ def main() -> None:
     # Per-dim: base loss_per_dim <-> enhance loss_main_per_dim.
     base_pd = _per_dim(base, "train/loss_per_dim")
     enh_pd = _per_dim(enh, "train/loss_main_per_dim") or _per_dim(enh, "train/loss_per_dim")
+    active = min(len(base_pd), len(enh_pd))
 
-    active = min(len(base_pd), len(enh_pd)) if base_pd and enh_pd else max(len(base_pd), len(enh_pd))
-    a = args.arm_dim
-    base_arm, base_hand = _mean(base_pd[:a]), _mean(base_pd[a:active])
-    enh_arm, enh_hand = _mean(enh_pd[:a]), _mean(enh_pd[a:active])
+    regions = _parse_regions(args.regions)
+    # Coverage check against active dims — catches a wrong embodiment/layout.
+    covered = {i for _, s, e in regions for i in range(s, e)}
+    gap = sorted(set(range(active)) - covered)
+    if gap:
+        print(f"warning: dims {gap} are in the data but not covered by --regions", file=sys.stderr)
 
-    print(f"# base vs enhance — fair comparison (loss vs loss_main)\n")
+    # Group L/R regions under a parent for roll-up rows.
+    groups: "OrderedDict[str, list[tuple[str, int, int]]]" = OrderedDict()
+    for name, s, e in regions:
+        parent = re.sub(r"_(L|R)$", "", name)
+        groups.setdefault(parent, []).append((name, s, e))
+
+    print("# base vs enhance — fair comparison (loss vs loss_main), per region\n")
     print(f"- base    : `{args.base_dir}`")
     print(f"- enhance : `{args.enhance_dir}`")
-    print(f"- contract: arm `[0:{a})` · hand `[{a}:{active})` · active dims `{active}`\n")
-    print("| 지표 | base | enhance | Δ | 개선 |")
-    print("|---|---|---|---|---|")
-    print(_delta_row("scalar (loss ↔ loss_main)", base_scalar, enh_scalar))
-    print(_delta_row(f"arm  mean [0:{a})", base_arm, enh_arm))
-    print(_delta_row(f"hand mean [{a}:{active}) ← 표적", base_hand, enh_hand))
+    print(f"- active dims: `{active}`\n")
+    print("| region | dims | base | enhance | Δ | 개선 | win |")
+    print("|---|---|---|---|---|---|---|")
+    print(_row("scalar (loss ↔ loss_main)", "—", base_scalar, enh_scalar, 0, 0)
+          .replace("| 0/0 |", "| — |"))
+
+    for parent, members in groups.items():
+        if len(members) > 1:
+            idxs = [i for _, s, e in members for i in range(s, e)]
+            b, e_, w, n = _stats(base_pd, enh_pd, idxs)
+            lo, hi = min(s for _, s, _ in members), max(e for _, _, e in members)
+            print(_row(f"**{parent}**", f"[{lo}:{hi})", b, e_, w, n))
+            for name, s, e in members:
+                b, e_, w, n = _stats(base_pd, enh_pd, list(range(s, e)))
+                print(_row(f"└ {name}", f"[{s}:{e})", b, e_, w, n))
+        else:
+            name, s, e = members[0]
+            b, e_, w, n = _stats(base_pd, enh_pd, list(range(s, e)))
+            print(_row(name, f"[{s}:{e})", b, e_, w, n))
 
     if args.per_dim and base_pd and enh_pd:
+        dim2region = {i: name for name, s, e in regions for i in range(s, e)}
         wins = sum(1 for i in range(active) if enh_pd[i] < base_pd[i])
         print(f"\n## per-dim (enhance가 더 낮은 차원: {wins}/{active})\n")
         print("| dim | region | base | enhance | Δ |")
         print("|---|---|---|---|---|")
         for i in range(active):
-            region = "arm" if i < a else "hand"
             d = enh_pd[i] - base_pd[i]
-            print(f"| {i} | {region} | {_fmt(base_pd[i])} | {_fmt(enh_pd[i])} | {d:+.5f} |")
+            print(f"| {i} | {dim2region.get(i, '—')} | {_fmt(base_pd[i])} | {_fmt(enh_pd[i])} | {d:+.5f} |")
 
     if args.out:
         n = _write_curve_csv(args.base_dir, args.enhance_dir, args.out)
