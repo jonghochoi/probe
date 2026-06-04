@@ -56,30 +56,48 @@ def main() -> None:
     ds = DataStore()
     ds.open_for_scan(wandb_file)
 
-    def _next_record():
-        """Normalise scan_record() across wandb versions.
+    def _bytes_to_record(data):
+        if not isinstance(data, (bytes, bytearray)) or not data:
+            return None
+        rec = Record()
+        try:
+            rec.ParseFromString(bytes(data))
+        except Exception:  # noqa: BLE001
+            return None
+        return rec
 
-        Older: returns Record directly (or None at EOF).
-        Newer (>=0.18): returns (status, data_bytes) — parse to Record.
-        """
+    def _next_record():
+        """Normalise scan_record() across wandb versions; skip unparseable."""
         out = ds.scan_record()
         if out is None:
             return None
-        if isinstance(out, tuple):
-            _status, data = out
-            if data is None:
-                return None
-            rec = Record()
-            rec.ParseFromString(data)
-            return rec
-        return out
+        # Older wandb: returns Record directly.
+        if hasattr(out, "HasField"):
+            return out
+        # Newer (>=0.18): returns a tuple where the last element is bytes.
+        if isinstance(out, tuple) and out:
+            return _bytes_to_record(out[-1])
+        return _bytes_to_record(out)
 
     history: list[dict] = []
     summary: dict = {}
+    parse_skips = 0
+    seen = 0
     while True:
-        rec = _next_record()
-        if rec is None:
+        out = ds.scan_record()
+        if out is None:
             break
+        seen += 1
+        rec = None
+        if hasattr(out, "HasField"):
+            rec = out
+        elif isinstance(out, tuple) and out:
+            rec = _bytes_to_record(out[-1])
+        else:
+            rec = _bytes_to_record(out)
+        if rec is None:
+            parse_skips += 1
+            continue
         if rec.HasField("history"):
             row = {item.key: _decode_value(item.value_json) for item in rec.history.item}
             history.append(row)
@@ -102,6 +120,8 @@ def main() -> None:
         json.dump(summary, f, indent=2, default=str)
     print(f"wrote {len(history)} step rows -> {csv_path}")
     print(f"wrote {len(summary)} summary keys -> {summary_path}")
+    if parse_skips:
+        print(f"note: {parse_skips}/{seen} records were unparseable and skipped", file=sys.stderr)
 
 
 if __name__ == "__main__":
