@@ -1,66 +1,30 @@
-diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
-index bdaf01f..a53e392 100644
---- a/vendor/lerobot/policies/pi05/modeling_pi05.py
-+++ b/vendor/lerobot/policies/pi05/modeling_pi05.py
-@@ -638,6 +638,15 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
-         time = time_beta * self.config.time_sampling_scale + self.config.time_sampling_offset
-         return time.to(dtype=torch.float32, device=device)
+diff --git a/vendor/lerobot/policies/pi05/__init__.py b/vendor/lerobot/policies/pi05/__init__.py
+index 4f9a9de..e115179 100644
+--- a/vendor/lerobot/policies/pi05/__init__.py
++++ b/vendor/lerobot/policies/pi05/__init__.py
+@@ -15,7 +15,15 @@
+ # limitations under the License.
  
-+    def _extra_prefix_embeds(self):
-+        """Hook for subclasses to append auxiliary prefix tokens before the
-+        image / language tokens are concatenated. Base PI05 adds none (identity).
-+
-+        Returns None, or a ``(embs, pad_mask)`` pair where ``embs`` is
-+        ``(B, num_extra, hidden)`` and ``pad_mask`` is ``(B, num_extra)`` bool.
-+        """
-+        return None
-+
-     def embed_prefix(
-         self, images, img_masks, tokens, masks
-     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-@@ -671,6 +680,15 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
-         num_lang_embs = lang_emb.shape[1]
-         att_masks += [0] * num_lang_embs
+ from .configuration_pi05 import PI05Config
++from .configuration_pi05_dynaflip import PI05DynaflipConfig
+ from .modeling_pi05 import PI05Policy
++from .modeling_pi05_dynaflip import PI05DynaflipPolicy
+ from .processor_pi05 import make_pi05_pre_post_processors
  
-+        # Seam: subclasses may append auxiliary prefix tokens (e.g. DynaFLIP
-+        # PVI injection). Base ``_extra_prefix_embeds`` returns None -> identical.
-+        extra = self._extra_prefix_embeds()
-+        if extra is not None:
-+            extra_embs, extra_mask = extra
-+            embs.append(extra_embs.to(embs[0].dtype))
-+            pad_masks.append(extra_mask)
-+            att_masks += [0] * extra_embs.shape[1]
-+
-         embs = torch.cat(embs, dim=1)
-         pad_masks = torch.cat(pad_masks, dim=1)
-         att_masks = torch.tensor(att_masks, dtype=torch.bool, device=pad_masks.device)
-@@ -918,7 +936,7 @@ class PI05Policy(PreTrainedPolicy):
- 
-         # Initialize the core PI05 model
-         self.init_rtc_processor()
--        self.model = PI05Pytorch(config, rtc_processor=self.rtc_processor)
-+        self.model = self._build_model()
- 
-         # Enable gradient checkpointing if requested
-         if config.gradient_checkpointing:
-@@ -928,6 +946,11 @@ class PI05Policy(PreTrainedPolicy):
- 
-         self.reset()
- 
-+    def _build_model(self) -> PI05Pytorch:
-+        """Factory seam: build the core model. Subclasses override to swap in
-+        a variant (e.g. DynaFLIP PVI injection); default builds vanilla PI05."""
-+        return PI05Pytorch(self.config, rtc_processor=self.rtc_processor)
-+
-     @classmethod
-     def from_pretrained(
-         cls: builtins.type[T],
+-__all__ = ["PI05Config", "PI05Policy", "make_pi05_pre_post_processors"]
++__all__ = [
++    "PI05Config",
++    "PI05DynaflipConfig",
++    "PI05Policy",
++    "PI05DynaflipPolicy",
++    "make_pi05_pre_post_processors",
++]
 diff --git a/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
 new file mode 100644
-index 0000000..1649d46
+index 0000000..2073ee2
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
-@@ -0,0 +1,57 @@
+@@ -0,0 +1,51 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -90,10 +54,12 @@ index 0000000..1649d46
 +    """PI0.5 + DynaFLIP frozen-injection (PVI) variant.
 +
 +    Adds a frozen auxiliary visual branch (DynaFLIP, arXiv:2605.30350 §3.4)
-+    whose precomputed feature is projected into prefix tokens and appended to
-+    the SigLIP image / language tokens. The SigLIP encoder, VLM and LLM stay
-+    untouched, so the base model's prior is preserved. Defaults reproduce
-+    vanilla PI05 behavior (``inject_dynaflip=False``).
++    whose precomputed feature is injected as a residual into the action-expert
++    (diffusion transformer) hidden states, following PVI (plug-in visual
++    injection, arXiv:2603.12772). The SigLIP encoder, VLM, LLM and main action
++    expert stay frozen; only the zero-initialized injection projection (and the
++    action expert, per the usual fine-tune) learns, so the base prior is
++    preserved. Defaults reproduce vanilla PI05 (``inject_dynaflip=False``).
 +    """
 +
 +    # Master switch. False -> identical to PI05.
@@ -101,10 +67,6 @@ index 0000000..1649d46
 +    # DynaFLIP image-encoder feature dim: DINOv2-B CLS(768) (+) patch-mean(768).
 +    # See analysis/2605.30350/design.md (data contract, intermediate feature).
 +    dynaflip_feature_dim: int = 1536
-+    # Number of injected prefix tokens. The paper delegates PVI internals to
-+    # ref [60] (design.md unresolved); default 1 = the single pooled transition
-+    # embedding z_I.
-+    dynaflip_num_tokens: int = 1
 +    # Batch key carrying the precomputed frozen DynaFLIP feature.
 +    dynaflip_feature_key: str = "observation.dynaflip_feature"
 +
@@ -114,16 +76,67 @@ index 0000000..1649d46
 +            raise ValueError(
 +                f"dynaflip_feature_dim must be positive, got {self.dynaflip_feature_dim}"
 +            )
-+        if self.dynaflip_num_tokens < 1:
-+            raise ValueError(
-+                f"dynaflip_num_tokens must be >= 1, got {self.dynaflip_num_tokens}"
-+            )
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
+index bdaf01f..a18b3cb 100644
+--- a/vendor/lerobot/policies/pi05/modeling_pi05.py
++++ b/vendor/lerobot/policies/pi05/modeling_pi05.py
+@@ -680,6 +680,18 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+ 
+         return embs, pad_masks, att_masks
+ 
++    def _inject_expert_aux(self, suffix_embs):
++        """Seam: subclasses may inject an auxiliary visual residual into the
++        action-expert (diffusion transformer) hidden states, following PVI
++        (plug-in visual injection, arXiv:2603.12772) as adopted by DynaFLIP
++        (arXiv:2605.30350 §3.4). Base PI05 injects nothing -> identity.
++
++        Applied inside ``embed_suffix`` so both the training (``forward``) and
++        inference (``denoise_step``) paths pick it up from the single shared
++        site. ``suffix_embs`` is ``(B, chunk_size, expert_width)``.
++        """
++        return suffix_embs
++
+     def embed_suffix(self, noisy_actions, timestep):
+         """Embed noisy_actions, timestep to prepare for Expert Gemma processing."""
+         embs = []
+@@ -725,6 +737,10 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+         att_masks = torch.tensor(att_masks, dtype=embs.dtype, device=embs.device)
+         att_masks = att_masks[None, :].expand(bsize, len(att_masks))
+ 
++        # Seam: inject an auxiliary visual residual into the expert hidden
++        # states (PVI). Base returns embs unchanged -> identical to vanilla PI05.
++        embs = self._inject_expert_aux(embs)
++
+         return embs, pad_masks, att_masks, adarms_cond
+ 
+     def forward(self, images, img_masks, tokens, masks, actions, noise, time) -> Tensor:
+@@ -918,7 +934,7 @@ class PI05Policy(PreTrainedPolicy):
+ 
+         # Initialize the core PI05 model
+         self.init_rtc_processor()
+-        self.model = PI05Pytorch(config, rtc_processor=self.rtc_processor)
++        self.model = self._build_model()
+ 
+         # Enable gradient checkpointing if requested
+         if config.gradient_checkpointing:
+@@ -928,6 +944,11 @@ class PI05Policy(PreTrainedPolicy):
+ 
+         self.reset()
+ 
++    def _build_model(self) -> PI05Pytorch:
++        """Factory seam: build the core model. Subclasses override to swap in a
++        variant (e.g. DynaFLIP PVI injection); default builds vanilla PI05."""
++        return PI05Pytorch(self.config, rtc_processor=self.rtc_processor)
++
+     @classmethod
+     def from_pretrained(
+         cls: builtins.type[T],
 diff --git a/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
 new file mode 100644
-index 0000000..90bccb9
+index 0000000..1dad0ca
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
-@@ -0,0 +1,100 @@
+@@ -0,0 +1,121 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -142,12 +155,31 @@ index 0000000..90bccb9
 +
 +"""PI0.5 + DynaFLIP frozen-injection (PVI) variant.
 +
-+Maps the downstream integration of DynaFLIP (arXiv:2605.30350 §3.4, Plug-in
-+Visual Injection) onto the lerobot pi05 base. A frozen auxiliary visual feature
-+is projected to the PaliGemma hidden width and appended as extra prefix tokens,
-+leaving the SigLIP encoder / VLM / LLM untouched (prior-preserving). All
-+DynaFLIP *pretraining* (simplex alignment, TCN, actor losses, 3D-flow encoder)
-+is out-of-base-scope: the feature arrives precomputed in the batch.
++Maps the downstream integration of DynaFLIP (arXiv:2605.30350 §3.4) onto the
++lerobot pi05 base. DynaFLIP adopts "a lightweight visual-injection design
++similar to plug-in visual injection (PVI) [arXiv:2603.12772]: an additional
++visual branch encodes features from the pre-trained image encoder, and an
++injection module projects them into the hidden feature space of the diffusion
++transformer of pi0.5" (§3.4).
++
++Accordingly the injection target here is the **action-expert (diffusion
++transformer) hidden space**, not the VLM prefix: a frozen DynaFLIP feature is
++projected by a **zero-initialized** linear map and added residually to the
++action-token hidden states (PVI's zero-init residual principle -> identity at
++init, learned during fine-tune). The SigLIP encoder / VLM / LLM / main expert
++stay untouched (prior-preserving).
++
++All DynaFLIP *pretraining* (simplex alignment, TCN, actor losses, 3D-flow
++encoder) is out-of-base-scope: the feature arrives precomputed in the batch
++under ``config.dynaflip_feature_key``.
++
++Fidelity note — full PVI [60] threads a trainable copy-branch DiT and a
++zero-init injection layer Z_i into *every* expert block. The lerobot inference
++path runs the expert through HF's fused ``gemma_expert.model.forward`` (no
++per-layer hook), so the per-layer copy-branch is not cleanly insertable for
++both train and inference. This module implements DynaFLIP's own "lightweight"
++reading — a single zero-init residual at the shared expert-input site
++(``embed_suffix``) that both paths traverse. See impl.md §🚧.
 +"""
 +
 +import torch
@@ -157,58 +189,60 @@ index 0000000..90bccb9
 +from .modeling_pi05 import PI05Policy, PI05Pytorch, get_gemma_config
 +
 +
-+class DynaflipPrefixInjector(nn.Module):
-+    """Project a frozen DynaFLIP feature into ``num_tokens`` prefix tokens."""
++class DynaflipExpertInjector(nn.Module):
++    """Project a frozen DynaFLIP feature into the action-expert hidden width.
 +
-+    def __init__(self, feature_dim: int, hidden_dim: int, num_tokens: int):
++    Zero-initialized (PVI, arXiv:2603.12772): at init the residual is exactly
++    zero, so the injected model is identical to the frozen base; the projection
++    is learned during fine-tuning.
++    """
++
++    def __init__(self, feature_dim: int, expert_width: int):
 +        super().__init__()
-+        self.hidden_dim = hidden_dim
-+        self.num_tokens = num_tokens
-+        self.proj = nn.Linear(feature_dim, hidden_dim * num_tokens)
++        self.proj = nn.Linear(feature_dim, expert_width)
++        nn.init.zeros_(self.proj.weight)
++        nn.init.zeros_(self.proj.bias)
 +
 +    def forward(self, feature: Tensor) -> Tensor:
-+        # (B, feature_dim) -> (B, num_tokens, hidden_dim)
-+        bsize = feature.shape[0]
-+        return self.proj(feature).view(bsize, self.num_tokens, self.hidden_dim)
++        # (B, feature_dim) -> (B, expert_width)
++        return self.proj(feature)
 +
 +
 +class PI05DynaflipPytorch(PI05Pytorch):
-+    """PI05 core model with a DynaFLIP PVI prefix-injection seam."""
++    """PI05 core model with a DynaFLIP PVI expert-residual injection seam."""
 +
 +    def __init__(self, config: PI05DynaflipConfig, rtc_processor=None):
 +        super().__init__(config, rtc_processor=rtc_processor)
 +        self._pending_dynaflip_feature = None
 +        if config.inject_dynaflip:
-+            hidden_dim = get_gemma_config(config.paligemma_variant).width
-+            self.injector = DynaflipPrefixInjector(
-+                config.dynaflip_feature_dim, hidden_dim, config.dynaflip_num_tokens
++            expert_width = get_gemma_config(config.action_expert_variant).width
++            self.expert_injector = DynaflipExpertInjector(
++                config.dynaflip_feature_dim, expert_width
 +            )
 +        else:
-+            self.injector = None
++            self.expert_injector = None
 +
 +    def set_dynaflip_feature(self, feature: Tensor | None) -> None:
-+        """Stash the precomputed feature for the next ``embed_prefix`` call."""
++        """Stash the precomputed feature for the next ``embed_suffix`` call."""
 +        self._pending_dynaflip_feature = feature
 +
-+    def _extra_prefix_embeds(self):
-+        # Override of the base seam: append projected DynaFLIP tokens when the
-+        # injector is built and a feature has been stashed. Otherwise None, which
-+        # reproduces the base PI05 prefix exactly.
-+        if self.injector is None or self._pending_dynaflip_feature is None:
-+            return None
++    def _inject_expert_aux(self, suffix_embs: Tensor) -> Tensor:
++        # Override of the base seam: add a zero-init residual built from the
++        # frozen DynaFLIP feature to every action-token hidden state. When the
++        # injector is absent or no feature is stashed, return embs unchanged,
++        # reproducing the base PI05 expert input exactly.
++        if self.expert_injector is None or self._pending_dynaflip_feature is None:
++            return suffix_embs
 +        feat = self._pending_dynaflip_feature
 +        if feat.dim() == 3:
 +            # (B, T, dim) -> pool the transition window to a single feature.
 +            feat = feat.mean(dim=1)
-+        proj = self.injector(feat.to(self.injector.proj.weight.dtype))
-+        mask = torch.ones(
-+            proj.shape[0], proj.shape[1], dtype=torch.bool, device=proj.device
-+        )
-+        return proj, mask
++        residual = self.expert_injector(feat.to(suffix_embs.dtype))  # (B, width)
++        return suffix_embs + residual[:, None, :]
 +
 +
 +class PI05DynaflipPolicy(PI05Policy):
-+    """PI05 policy that stashes the batch DynaFLIP feature for prefix injection."""
++    """PI05 policy that stashes the batch DynaFLIP feature for expert injection."""
 +
 +    config_class = PI05DynaflipConfig
 +    name = "pi05_dynaflip"
@@ -224,24 +258,3 @@ index 0000000..90bccb9
 +    def predict_action_chunk(self, batch, **kwargs):
 +        self.model.set_dynaflip_feature(batch.get(self.config.dynaflip_feature_key))
 +        return super().predict_action_chunk(batch, **kwargs)
-diff --git a/vendor/lerobot/policies/pi05/__init__.py b/vendor/lerobot/policies/pi05/__init__.py
-index 4f9a9de..e115179 100644
---- a/vendor/lerobot/policies/pi05/__init__.py
-+++ b/vendor/lerobot/policies/pi05/__init__.py
-@@ -15,7 +15,15 @@
- # limitations under the License.
- 
- from .configuration_pi05 import PI05Config
-+from .configuration_pi05_dynaflip import PI05DynaflipConfig
- from .modeling_pi05 import PI05Policy
-+from .modeling_pi05_dynaflip import PI05DynaflipPolicy
- from .processor_pi05 import make_pi05_pre_post_processors
- 
--__all__ = ["PI05Config", "PI05Policy", "make_pi05_pre_post_processors"]
-+__all__ = [
-+    "PI05Config",
-+    "PI05DynaflipConfig",
-+    "PI05Policy",
-+    "PI05DynaflipPolicy",
-+    "make_pi05_pre_post_processors",
-+]
