@@ -18,6 +18,8 @@ foundry 매핑 구현·검증을 남긴다.
 | `<id>/validation/<foundry>.round_<N>.md` | `/reproduce-paper` | 수렴 루프 라운드별 validation 사본 (N 은 0-indexed) |
 
 - 전체 deep-dive 목록 = [`INDEX.md`](INDEX.md) — 머지 후 `main` 에서 `scripts/refresh-analysis-index.py` 가 자동 갱신 (PR 에서 직접 스테이지 안 함). 컬럼 규약 `docs/STYLE.md` §5-7, 정책 `CLAUDE.md` "Automatically-maintained indexes".
+  - **탐색** — 맨 위 `분류 지도` 가 Pillar(P1~P4) 별 논문 수와 태그 분포를 한눈에 보여주고, 그 아래는 **1차 Pillar 별 테이블**(primary = `관련 Pillar` 첫 항목)로 묶인다. 각 행에 `Pillars`·`Tags`·`Keywords` 배지가 붙어 한 페이지 안에서 Ctrl-F 패싯 검색이 된다. P5(평가)는 교차절단 pillar 라 인덱스 분류에서 제외된다.
+  - **분류 입력** — 각 `analysis.md` 의 📄 논문 메타 표 `관련 Pillar`·`태그` 두 행에서 읽는다(통제 어휘는 `docs/STYLE.md` §5-7). 머지 후 봇이 갱신하므로 `INDEX.md` 는 손으로 고치지 않는다.
 - cross-paper lineage 카탈로그(vlm / vla / dataset)와 pillar 방법론 문서는 별도 폴더 `catalogs/` — 사용법은 [`catalogs/README.md`](catalogs/README.md).
 
 ## 호출

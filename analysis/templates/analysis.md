@@ -12,6 +12,8 @@
 | 발행일 / 버전 | YYYY-MM-DD · vN |
 | 본문 확보 수준 | 전문(arXiv HTML) / 전문(ar5iv) / PDF 텍스트(pdftotext) / 초록 only |
 | 분석 생성일 | YYYY-MM-DD |
+| 관련 Pillar | P1, P3 |
+| 태그 | vla-arch, tactile |
 
 <!-- curl 호출이 실패했다면, 실패한 명령과 HTTP 상태를 여기에 verbatim 으로
      기록합니다. 가짜 결과로 대체하지 않습니다. 초록 only 인 경우 아래

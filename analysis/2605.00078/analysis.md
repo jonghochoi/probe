@@ -12,6 +12,8 @@
 | 발행일 / 버전 | 2026-04-30 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-27 |
+| 관련 Pillar | P1, P2, P3 |
+| 태그 | vla-arch, egocentric-data |
 
 ---
 

@@ -12,6 +12,8 @@
 | 발행일 / 버전 | 2026-03-12 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-28 |
+| 관련 Pillar | P4 |
+| 태그 | continual, forgetting, vla-arch |
 
 ---
 
