@@ -34,6 +34,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("run_dir", type=Path, help="wandb offline run dir (contains run-*.wandb)")
     ap.add_argument("-o", "--out", type=Path, required=True, help="output dir for metrics.csv + summary.json")
+    ap.add_argument("--debug", action="store_true", help="dump the first history record's raw key/nested_key items to stderr")
     args = ap.parse_args()
 
     matches = list(args.run_dir.glob("run-*.wandb"))
@@ -65,19 +66,6 @@ def main() -> None:
         except Exception:  # noqa: BLE001
             return None
         return rec
-
-    def _next_record():
-        """Normalise scan_record() across wandb versions; skip unparseable."""
-        out = ds.scan_record()
-        if out is None:
-            return None
-        # Older wandb: returns Record directly.
-        if hasattr(out, "HasField"):
-            return out
-        # Newer (>=0.18): returns a tuple where the last element is bytes.
-        if isinstance(out, tuple) and out:
-            return _bytes_to_record(out[-1])
-        return _bytes_to_record(out)
 
     history: list[dict] = []
     summary: dict = {}
@@ -113,7 +101,7 @@ def main() -> None:
             parse_skips += 1
             continue
         if rec.HasField("history"):
-            if not first_history_dumped:
+            if args.debug and not first_history_dumped:
                 first_history_dumped = True
                 print("first history record items (diagnostic):", file=sys.stderr)
                 for item in rec.history.item:
