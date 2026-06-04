@@ -14,16 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CPU-only, weight-free smoke test for the PI05 + DynaFLIP PVI injection seam
+"""CPU-only, weight-free smoke test for the PI05 + DynaFLIP PVI copy-branch
 (maps analysis/2605.30350/design.md onto the lerobot pi05 base).
 
-Covers the pure pieces only — the zero-init expert injector, config defaults /
-validation / registration, the subclass seam overrides, and factory wiring.
-The heavy PaliGemma backbone forward is NOT exercised (it needs downloaded
-weights), per the foundry §G contract.
-
-The injection target is the action-expert (diffusion transformer) hidden space,
-not the VLM prefix, following PVI (arXiv:2603.12772) as adopted by DynaFLIP §3.4.
+Covers the pure / structural pieces only — the zero-init projection convention,
+config defaults / validation / registration, the subclass seam overrides, and
+factory wiring. The copy-branch forward (a full action-expert pass over the
+aux + action tokens) and the per-layer injection are NOT exercised: they need
+the PaliGemma / gemma weights and the heavy model build, per the foundry §G
+contract. Numerical behavior-preservation (zero-init -> identity) is guaranteed
+by construction and asserted here at the module level via ``zero_init_linear``.
 """
 
 import pytest
@@ -34,44 +34,36 @@ from lerobot.policies.pi05.configuration_pi05 import PI05Config
 from lerobot.policies.pi05.configuration_pi05_dynaflip import PI05DynaflipConfig
 from lerobot.policies.pi05.modeling_pi05 import PI05Policy, PI05Pytorch
 from lerobot.policies.pi05.modeling_pi05_dynaflip import (
-    DynaflipExpertInjector,
     PI05DynaflipPolicy,
     PI05DynaflipPytorch,
+    zero_init_linear,
 )
 
 
-def test_injector_projects_feature_to_expert_width():
-    # (B, feature_dim) -> (B, expert_width)
-    injector = DynaflipExpertInjector(feature_dim=8, expert_width=16)
-    out = injector(torch.randn(4, 8))
+def test_zero_init_linear_outputs_zero():
+    # PVI zero-init: the residual is EXACTLY zero at init -> identity, so the
+    # injected policy equals the frozen base until training learns it in.
+    lin = zero_init_linear(8, 16)
+    out = lin(torch.randn(4, 8))
     assert out.shape == (4, 16)
-
-
-def test_injector_is_zero_initialized():
-    # PVI zero-init: at init the residual is EXACTLY zero, so the injected model
-    # is identical to the frozen base. This is the behavior-preservation core.
-    injector = DynaflipExpertInjector(feature_dim=1536, expert_width=1024)
-    out = injector(torch.randn(3, 1536))
     assert torch.count_nonzero(out) == 0
 
 
-def test_injector_learns_after_weight_update():
-    # Once the zero-init projection is perturbed, the residual is non-trivial,
-    # i.e. the injection is actually wired into the output (not a dead path).
-    injector = DynaflipExpertInjector(feature_dim=8, expert_width=16)
+def test_zero_init_linear_learns_after_update():
+    # Once perturbed, the projection is a live (non-dead) path.
+    lin = zero_init_linear(8, 16)
     with torch.no_grad():
-        injector.proj.weight.add_(torch.randn_like(injector.proj.weight))
-    out = injector(torch.randn(4, 8))
-    assert torch.count_nonzero(out) > 0
+        lin.weight.add_(torch.randn_like(lin.weight))
+    assert torch.count_nonzero(lin(torch.randn(4, 8))) > 0
 
 
 def test_config_defaults_reproduce_base_behavior():
     cfg = PI05DynaflipConfig()
     # Default OFF -> identical to vanilla PI05.
     assert cfg.inject_dynaflip is False
-    assert cfg.dynaflip_feature_dim == 1536
+    # Patch-token feature dim (DINOv2-B token width), not the pooled 1536.
+    assert cfg.dynaflip_feature_dim == 768
     assert cfg.dynaflip_feature_key == "observation.dynaflip_feature"
-    # It is a genuine PI05Config subclass (reuses the pi05 processor path).
     assert isinstance(cfg, PI05Config)
 
 
@@ -84,21 +76,31 @@ def test_registered_type_name():
     assert PI05DynaflipConfig().type == "pi05_dynaflip"
 
 
-def test_seam_overrides_are_in_place():
-    # Base defines the behavior-preserving seams ...
-    assert hasattr(PI05Pytorch, "_inject_expert_aux")
-    assert hasattr(PI05Policy, "_build_model")
-    # ... and the subclass overrides exactly those seams.
-    assert "_inject_expert_aux" in PI05DynaflipPytorch.__dict__
-    assert "_build_model" in PI05DynaflipPolicy.__dict__
+def test_class_hierarchy():
+    assert issubclass(PI05DynaflipPytorch, PI05Pytorch)
+    assert issubclass(PI05DynaflipPolicy, PI05Policy)
     assert PI05DynaflipPolicy.name == "pi05_dynaflip"
 
 
-def test_base_inject_hook_is_identity():
-    # The base seam must be a pure pass-through (no behavior change for PI05).
-    embs = torch.randn(2, 5, 16)
-    out = PI05Pytorch._inject_expert_aux(object(), embs)
-    assert out is embs
+def test_base_seams_present():
+    # Factory seam for the core model ...
+    assert hasattr(PI05Policy, "_build_model")
+    # ... and the per-layer expert injection callback hook on the base model
+    # (an instance attr defaulting to None; the source wires it in __init__).
+    import inspect
+
+    from lerobot.policies.pi05 import modeling_pi05
+
+    src = inspect.getsource(modeling_pi05.PaliGemmaWithExpertModel)
+    assert "expert_layer_injector" in src
+
+
+def test_subclass_overrides_in_place():
+    # The copy-branch subclass overrides exactly the seams it needs.
+    for name in ("_build_model",):
+        assert name in PI05DynaflipPolicy.__dict__
+    for name in ("embed_suffix", "_inject_expert_layer", "_compute_copy_hidden", "set_dynaflip_feature"):
+        assert name in PI05DynaflipPytorch.__dict__
 
 
 def test_factory_resolves_new_policy_name():

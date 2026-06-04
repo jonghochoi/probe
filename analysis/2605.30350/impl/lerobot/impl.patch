@@ -21,10 +21,10 @@ index 4f9a9de..e115179 100644
 +]
 diff --git a/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
 new file mode 100644
-index 0000000..2073ee2
+index 0000000..f6a0342
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,63 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -53,21 +53,33 @@ index 0000000..2073ee2
 +class PI05DynaflipConfig(PI05Config):
 +    """PI0.5 + DynaFLIP frozen-injection (PVI) variant.
 +
-+    Adds a frozen auxiliary visual branch (DynaFLIP, arXiv:2605.30350 §3.4)
-+    whose precomputed feature is injected as a residual into the action-expert
-+    (diffusion transformer) hidden states, following PVI (plug-in visual
-+    injection, arXiv:2603.12772). The SigLIP encoder, VLM, LLM and main action
-+    expert stay frozen; only the zero-initialized injection projection (and the
-+    action expert, per the usual fine-tune) learns, so the base prior is
-+    preserved. Defaults reproduce vanilla PI05 (``inject_dynaflip=False``).
++    Faithful mapping of DynaFLIP's VLA integration (arXiv:2605.30350 §3.4 /
++    appendix), which adopts plug-in visual injection (PVI, arXiv:2603.12772):
++
++      * an auxiliary visual encoder (DynaFLIP, frozen) emits **patch-token
++        sequences** per camera view;
++      * a zero-initialized **projection** maps those tokens to the action
++        expert's hidden width;
++      * a **trainable copy of the action expert** (initialized from the
++        pretrained expert, conditioned on the projected aux tokens) produces
++        per-layer hidden states;
++      * **zero-initialized per-layer injectors** add the copy-branch hidden as
++        a residual into the frozen main action expert at every layer.
++
++    Frozen: SigLIP / VLM / LLM / main action expert / aux encoder. Trained:
++    projection + copy-branch + per-layer injectors. Zero-init projection &
++    injectors make the policy identical to base pi0.5 at init; the visual
++    signal is learned in. Defaults reproduce vanilla PI05 (``inject_dynaflip
++    =False``).
 +    """
 +
 +    # Master switch. False -> identical to PI05.
 +    inject_dynaflip: bool = False
-+    # DynaFLIP image-encoder feature dim: DINOv2-B CLS(768) (+) patch-mean(768).
-+    # See analysis/2605.30350/design.md (data contract, intermediate feature).
-+    dynaflip_feature_dim: int = 1536
-+    # Batch key carrying the precomputed frozen DynaFLIP feature.
++    # Per-token feature dim of the auxiliary DynaFLIP patch tokens.
++    # DINOv2-Base patch-token width = 768. See analysis/2605.30350/design.md.
++    dynaflip_feature_dim: int = 768
++    # Batch key carrying the precomputed frozen DynaFLIP patch tokens,
++    # shape (B, L, dynaflip_feature_dim) with L = views * patches.
 +    dynaflip_feature_key: str = "observation.dynaflip_feature"
 +
 +    def __post_init__(self):
@@ -77,40 +89,37 @@ index 0000000..2073ee2
 +                f"dynaflip_feature_dim must be positive, got {self.dynaflip_feature_dim}"
 +            )
 diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
-index bdaf01f..a18b3cb 100644
+index bdaf01f..f2509e4 100644
 --- a/vendor/lerobot/policies/pi05/modeling_pi05.py
 +++ b/vendor/lerobot/policies/pi05/modeling_pi05.py
-@@ -680,6 +680,18 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+@@ -392,6 +392,11 @@ class PaliGemmaWithExpertModel(
+         self.gemma_expert = PiGemmaForCausalLM(config=action_expert_config_hf)
+         self.gemma_expert.model.embed_tokens = None
  
-         return embs, pad_masks, att_masks
- 
-+    def _inject_expert_aux(self, suffix_embs):
-+        """Seam: subclasses may inject an auxiliary visual residual into the
-+        action-expert (diffusion transformer) hidden states, following PVI
-+        (plug-in visual injection, arXiv:2603.12772) as adopted by DynaFLIP
-+        (arXiv:2605.30350 §3.4). Base PI05 injects nothing -> identity.
++        # Seam: a subclass may set a callable(layer_idx, suffix_hidden) ->
++        # suffix_hidden to inject an auxiliary residual into the action expert
++        # at each layer of the joint (training) forward. None -> no injection.
++        self.expert_layer_injector = None
 +
-+        Applied inside ``embed_suffix`` so both the training (``forward``) and
-+        inference (``denoise_step``) paths pick it up from the single shared
-+        site. ``suffix_embs`` is ``(B, chunk_size, expert_width)``.
-+        """
-+        return suffix_embs
-+
-     def embed_suffix(self, noisy_actions, timestep):
-         """Embed noisy_actions, timestep to prepare for Expert Gemma processing."""
-         embs = []
-@@ -725,6 +737,10 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
-         att_masks = torch.tensor(att_masks, dtype=embs.dtype, device=embs.device)
-         att_masks = att_masks[None, :].expand(bsize, len(att_masks))
+         self.to_bfloat16_for_selected_params(precision)
+         self._set_requires_grad()
  
-+        # Seam: inject an auxiliary visual residual into the expert hidden
-+        # states (PVI). Base returns embs unchanged -> identical to vanilla PI05.
-+        embs = self._inject_expert_aux(embs)
-+
-         return embs, pad_masks, att_masks, adarms_cond
+@@ -521,6 +526,14 @@ class PaliGemmaWithExpertModel(
+                         gemma_expert=self.gemma_expert,
+                     )
  
-     def forward(self, images, img_masks, tokens, masks, actions, noise, time) -> Tensor:
-@@ -918,7 +934,7 @@ class PI05Policy(PreTrainedPolicy):
++                # Seam: per-layer auxiliary residual injection into the expert
++                # (PVI copy-branch). Base injector is None -> identical to PI05.
++                if self.expert_layer_injector is not None:
++                    inputs_embeds = [
++                        inputs_embeds[0],
++                        self.expert_layer_injector(layer_idx, inputs_embeds[1]),
++                    ]
++
+             # final norm
+             def compute_final_norms(inputs_embeds, adarms_cond):
+                 outputs_embeds = []
+@@ -918,7 +931,7 @@ class PI05Policy(PreTrainedPolicy):
  
          # Initialize the core PI05 model
          self.init_rtc_processor()
@@ -119,7 +128,7 @@ index bdaf01f..a18b3cb 100644
  
          # Enable gradient checkpointing if requested
          if config.gradient_checkpointing:
-@@ -928,6 +944,11 @@ class PI05Policy(PreTrainedPolicy):
+@@ -928,6 +941,11 @@ class PI05Policy(PreTrainedPolicy):
  
          self.reset()
  
@@ -133,10 +142,10 @@ index bdaf01f..a18b3cb 100644
          cls: builtins.type[T],
 diff --git a/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
 new file mode 100644
-index 0000000..1dad0ca
+index 0000000..c868759
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
-@@ -0,0 +1,121 @@
+@@ -0,0 +1,230 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -153,96 +162,205 @@ index 0000000..1dad0ca
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
 +
-+"""PI0.5 + DynaFLIP frozen-injection (PVI) variant.
++"""PI0.5 + DynaFLIP frozen-injection (PVI) variant — faithful copy-branch.
 +
-+Maps the downstream integration of DynaFLIP (arXiv:2605.30350 §3.4) onto the
-+lerobot pi05 base. DynaFLIP adopts "a lightweight visual-injection design
-+similar to plug-in visual injection (PVI) [arXiv:2603.12772]: an additional
-+visual branch encodes features from the pre-trained image encoder, and an
-+injection module projects them into the hidden feature space of the diffusion
-+transformer of pi0.5" (§3.4).
++Maps DynaFLIP's VLA integration (arXiv:2605.30350 §3.4 / appendix) onto the
++lerobot pi05 base, following plug-in visual injection (PVI, arXiv:2603.12772):
 +
-+Accordingly the injection target here is the **action-expert (diffusion
-+transformer) hidden space**, not the VLM prefix: a frozen DynaFLIP feature is
-+projected by a **zero-initialized** linear map and added residually to the
-+action-token hidden states (PVI's zero-init residual principle -> identity at
-+init, learned during fine-tune). The SigLIP encoder / VLM / LLM / main expert
-+stay untouched (prior-preserving).
++  * **Auxiliary encoder** — DynaFLIP (frozen) emits patch-token sequences; here
++    they arrive precomputed in the batch under ``config.dynaflip_feature_key``,
++    shape ``(B, L, dynaflip_feature_dim)``.
++  * **Projection** — a zero-initialized linear maps aux tokens to the action
++    expert hidden width.
++  * **Copy-branch** — a trainable copy of the action expert (``gemma_expert``),
++    initialized from the pretrained expert, runs over ``[aux_tokens ; action
++    tokens]`` so the action positions attend to the aux context; its per-layer
++    hidden states (at the action positions) are captured.
++  * **Per-layer injectors** — one zero-initialized linear per expert layer adds
++    the copy-branch hidden as a residual into the frozen main expert at every
++    layer: ``h_i_main += Z_i(h_i_copy)`` (PVI Eq. for the residual pathway).
++
++Frozen: SigLIP / VLM / LLM / main expert / aux encoder. Trained: projection +
++copy-branch + per-layer injectors. The zero-init projection & injectors make
++the policy identical to base pi0.5 at init; the visual signal is learned in.
++
++Two injection sites are needed because the base routes the expert differently
++per path: the **training** joint forward runs a manual per-layer loop (injected
++via the ``expert_layer_injector`` callback seam), while the **inference**
++``denoise_step`` runs the expert through HF's fused ``gemma_expert.model.forward``
++(injected via forward hooks on its layers). Each path triggers exactly one
++mechanism, so there is no double-injection. See impl.md §🚧 for the validation
++boundary — the weight-free smoke test covers structure / zero-init only; the
++copy-branch forward (attention, masks) needs the weighted runtime.
 +
 +All DynaFLIP *pretraining* (simplex alignment, TCN, actor losses, 3D-flow
-+encoder) is out-of-base-scope: the feature arrives precomputed in the batch
-+under ``config.dynaflip_feature_key``.
-+
-+Fidelity note — full PVI [60] threads a trainable copy-branch DiT and a
-+zero-init injection layer Z_i into *every* expert block. The lerobot inference
-+path runs the expert through HF's fused ``gemma_expert.model.forward`` (no
-+per-layer hook), so the per-layer copy-branch is not cleanly insertable for
-+both train and inference. This module implements DynaFLIP's own "lightweight"
-+reading — a single zero-init residual at the shared expert-input site
-+(``embed_suffix``) that both paths traverse. See impl.md §🚧.
++encoder) is out-of-base-scope.
 +"""
++
++import copy
 +
 +import torch
 +from torch import Tensor, nn
 +
 +from .configuration_pi05_dynaflip import PI05DynaflipConfig
-+from .modeling_pi05 import PI05Policy, PI05Pytorch, get_gemma_config
++from .modeling_pi05 import (
++    PI05Policy,
++    PI05Pytorch,
++    get_gemma_config,
++    make_att_2d_masks,
++)
 +
 +
-+class DynaflipExpertInjector(nn.Module):
-+    """Project a frozen DynaFLIP feature into the action-expert hidden width.
-+
-+    Zero-initialized (PVI, arXiv:2603.12772): at init the residual is exactly
-+    zero, so the injected model is identical to the frozen base; the projection
-+    is learned during fine-tuning.
-+    """
-+
-+    def __init__(self, feature_dim: int, expert_width: int):
-+        super().__init__()
-+        self.proj = nn.Linear(feature_dim, expert_width)
-+        nn.init.zeros_(self.proj.weight)
-+        nn.init.zeros_(self.proj.bias)
-+
-+    def forward(self, feature: Tensor) -> Tensor:
-+        # (B, feature_dim) -> (B, expert_width)
-+        return self.proj(feature)
++def zero_init_linear(in_dim: int, out_dim: int) -> nn.Linear:
++    """A linear whose weight and bias are exactly zero (PVI zero-init): the
++    residual it produces is zero at init, so the injected policy is identical to
++    the frozen base until training learns the projection in."""
++    lin = nn.Linear(in_dim, out_dim)
++    nn.init.zeros_(lin.weight)
++    nn.init.zeros_(lin.bias)
++    return lin
 +
 +
 +class PI05DynaflipPytorch(PI05Pytorch):
-+    """PI05 core model with a DynaFLIP PVI expert-residual injection seam."""
++    """PI05 core model with a faithful DynaFLIP PVI copy-branch."""
 +
 +    def __init__(self, config: PI05DynaflipConfig, rtc_processor=None):
 +        super().__init__(config, rtc_processor=rtc_processor)
-+        self._pending_dynaflip_feature = None
++        self._aux_tokens = None
++        self._copy_hidden = None  # per main-layer copy hidden (action positions)
++        self._copy_capture = None  # scratch filled by copy-branch capture hooks
++        self._copy_synced = False
++
 +        if config.inject_dynaflip:
++            pwe = self.paligemma_with_expert
 +            expert_width = get_gemma_config(config.action_expert_variant).width
-+            self.expert_injector = DynaflipExpertInjector(
-+                config.dynaflip_feature_dim, expert_width
++            num_layers = pwe.gemma_expert.config.num_hidden_layers
++
++            # Zero-init projection: aux patch tokens -> expert hidden width.
++            self.aux_proj = zero_init_linear(config.dynaflip_feature_dim, expert_width)
++
++            # Trainable copy of the action expert (synced from the pretrained
++            # expert lazily on first forward, once weights are loaded).
++            self.copy_expert = copy.deepcopy(pwe.gemma_expert)
++            for p in self.copy_expert.parameters():
++                p.requires_grad = True
++
++            # Zero-init per-layer injectors Z_i.
++            self.inject_layers = nn.ModuleList(
++                [zero_init_linear(expert_width, expert_width) for _ in range(num_layers)]
 +            )
++
++            # Wire the training-path callback and the inference-path hooks.
++            pwe.expert_layer_injector = self._inject_expert_layer
++            self._register_hooks()
 +        else:
-+            self.expert_injector = None
++            self.aux_proj = None
++            self.copy_expert = None
++            self.inject_layers = None
++
++    # -- public API ---------------------------------------------------------
 +
 +    def set_dynaflip_feature(self, feature: Tensor | None) -> None:
-+        """Stash the precomputed feature for the next ``embed_suffix`` call."""
-+        self._pending_dynaflip_feature = feature
++        """Stash the precomputed aux patch tokens for the next forward."""
++        self._aux_tokens = feature
++        self._copy_hidden = None
 +
-+    def _inject_expert_aux(self, suffix_embs: Tensor) -> Tensor:
-+        # Override of the base seam: add a zero-init residual built from the
-+        # frozen DynaFLIP feature to every action-token hidden state. When the
-+        # injector is absent or no feature is stashed, return embs unchanged,
-+        # reproducing the base PI05 expert input exactly.
-+        if self.expert_injector is None or self._pending_dynaflip_feature is None:
-+            return suffix_embs
-+        feat = self._pending_dynaflip_feature
-+        if feat.dim() == 3:
-+            # (B, T, dim) -> pool the transition window to a single feature.
-+            feat = feat.mean(dim=1)
-+        residual = self.expert_injector(feat.to(suffix_embs.dtype))  # (B, width)
-+        return suffix_embs + residual[:, None, :]
++    # -- internals ----------------------------------------------------------
++
++    def _injecting(self) -> bool:
++        return self.copy_expert is not None and self._aux_tokens is not None
++
++    def _maybe_sync_copy(self) -> None:
++        # Initialize the copy-branch from the (now loaded) pretrained expert.
++        if self.copy_expert is not None and not self._copy_synced:
++            self.copy_expert.load_state_dict(
++                self.paligemma_with_expert.gemma_expert.state_dict()
++            )
++            self._copy_synced = True
++
++    def _register_hooks(self) -> None:
++        # Capture per-layer hidden of the copy-branch.
++        for i, layer in enumerate(self.copy_expert.model.layers):
++            layer.register_forward_hook(self._make_capture_hook(i))
++        # Inject into the main expert (fires only in the fused inference path).
++        main_layers = self.paligemma_with_expert.gemma_expert.model.layers
++        for i, layer in enumerate(main_layers):
++            layer.register_forward_hook(self._make_inject_hook(i))
++
++    def _make_capture_hook(self, i: int):
++        def hook(_module, _inp, out):
++            if self._copy_capture is not None:
++                self._copy_capture[i] = out[0] if isinstance(out, tuple) else out
++
++        return hook
++
++    def _make_inject_hook(self, i: int):
++        def hook(_module, _inp, out):
++            if self._copy_hidden is None or self._copy_hidden[i] is None:
++                return out
++            h = out[0] if isinstance(out, tuple) else out
++            ch = self._copy_hidden[i]
++            add = self.inject_layers[i](ch).to(h.dtype)
++            chunk = ch.shape[1]
++            h = h.clone()
++            h[:, -chunk:] = h[:, -chunk:] + add
++            return (h, *out[1:]) if isinstance(out, tuple) else h
++
++        return hook
++
++    def _inject_expert_layer(self, layer_idx: int, suffix_hidden: Tensor) -> Tensor:
++        # Training-path per-layer residual (manual joint loop). suffix_hidden is
++        # the expert stream, sequence == chunk (action tokens).
++        if self._copy_hidden is None or self._copy_hidden[layer_idx] is None:
++            return suffix_hidden
++        ch = self._copy_hidden[layer_idx]
++        add = self.inject_layers[layer_idx](ch).to(suffix_hidden.dtype)
++        return suffix_hidden + add
++
++    def _compute_copy_hidden(self, suffix_embs: Tensor, adarms_cond: Tensor) -> None:
++        self._maybe_sync_copy()
++        aux = self._aux_tokens
++        if aux.dim() == 2:
++            aux = aux[:, None, :]  # (B, dim) -> (B, 1, dim)
++        aux_emb = self.aux_proj(aux.to(suffix_embs.dtype))  # (B, L, width)
++
++        full = torch.cat([aux_emb, suffix_embs], dim=1)
++        bsize, total_len, _ = full.shape
++        aux_len = aux_emb.shape[1]
++        chunk = suffix_embs.shape[1]
++
++        pad = torch.ones(bsize, total_len, dtype=torch.bool, device=full.device)
++        # aux tokens form a bidirectional prefix; the action block starts at aux_len.
++        att = torch.zeros(total_len, dtype=full.dtype, device=full.device)
++        att[aux_len] = 1
++        att = att[None, :].expand(bsize, total_len)
++        att_2d = make_att_2d_masks(pad, att)
++        att_4d = self._prepare_attention_masks_4d(att_2d)
++        position_ids = torch.cumsum(pad, dim=1) - 1
++
++        self._copy_capture = [None] * len(self.inject_layers)
++        self.copy_expert.model.forward(
++            inputs_embeds=full,
++            attention_mask=att_4d,
++            position_ids=position_ids,
++            past_key_values=None,
++            use_cache=False,
++            adarms_cond=adarms_cond,
++        )
++        # Keep only the action positions of each captured layer hidden.
++        self._copy_hidden = [
++            h[:, -chunk:] if h is not None else None for h in self._copy_capture
++        ]
++
++    def embed_suffix(self, noisy_actions, timestep):
++        embs, pad_masks, att_masks, adarms_cond = super().embed_suffix(noisy_actions, timestep)
++        if self._injecting():
++            self._compute_copy_hidden(embs, adarms_cond)
++        return embs, pad_masks, att_masks, adarms_cond
 +
 +
 +class PI05DynaflipPolicy(PI05Policy):
-+    """PI05 policy that stashes the batch DynaFLIP feature for expert injection."""
++    """PI05 policy that feeds the batch DynaFLIP tokens to the copy-branch."""
 +
 +    config_class = PI05DynaflipConfig
 +    name = "pi05_dynaflip"
