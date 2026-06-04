@@ -27,7 +27,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `.claude/agents/**`, `.claude/skills/**` | external | Korean humanization pipeline vendored from `epoko77-ai/im-not-ai` — the 4 review agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) + the `humanize-korean` skill every Korean output passes before commit |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive table; invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
+| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive index (분류 지도 summary + per-Pillar tables); invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
@@ -278,21 +278,23 @@ checklist existed). Walk this list every time:
 
 ## Automatically-maintained indexes
 
-One intentional exception to "no cross-link automation": the deep-dive table
+One intentional exception to "no cross-link automation": the deep-dive index
 in `analysis/INDEX.md`. Filenames there are bare arXiv ids (`2511.00139.md`),
-so the title-to-id mapping drifts if hand-maintained — `scripts/refresh-analysis-index.py`
-regenerates it. The script reads each analysis's 📄 논문 메타 table (load-bearing
-rows in `docs/STYLE.md` §5-7) plus up to 5 English `🔑 기술 키워드` bullet heads
-(math-bearing/non-English heads excluded, rendered as 빨주노초파 shields.io
-badges — same badge style for the `arXiv` cell), inspects the filesystem for
-the vendor-neutral `impl` column
-(lerobot-pathed: `impl.md` vs `UNMAPPABLE.md`), and rewrites only the block
-between
-`<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->`. Everything
-outside the markers stays hand-maintained (own file, so it doesn't interleave
-with the `analysis/README.md` narrative).
+so the title-to-id mapping drifts if hand-maintained —
+`scripts/refresh-analysis-index.py` regenerates it. The script reads each
+analysis's 📄 논문 메타 table (load-bearing rows in `docs/STYLE.md` §5-7 —
+including the `관련 Pillar` and `태그` classification rows) plus up to 5 English
+`🔑 기술 키워드` bullet heads (math-bearing/non-English heads excluded, rendered
+as single-color 노란 shields.io badges — same badge style for the `arXiv` cell),
+inspects the filesystem for the vendor-neutral `impl` column (lerobot-pathed:
+`impl.md` vs `UNMAPPABLE.md`), and rewrites the block between
+`<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->` as a `분류 지도`
+summary + one table **per primary Pillar** (P1…P4/미분류; primary = first
+`관련 Pillar` entry — P5/evaluation is cross-cutting and excluded from the
+index taxonomy, so a stray `P5` is dropped at generation). Everything outside the markers stays hand-maintained (own
+file, so it doesn't interleave with the `analysis/README.md` narrative).
 
-- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh INDEX.md` bot commit. PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `INDEX.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
+- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh INDEX.md` bot commit (stages `analysis/INDEX.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `INDEX.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
 - **Don't hand-edit inside the markers** — overwritten on the next run. Put nothing there that isn't extractable from the meta table or foundry folder; extend the script or the meta-table spec instead. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more

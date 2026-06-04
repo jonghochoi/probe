@@ -157,7 +157,16 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
 (A) 중립 논문 정리 — what the paper says, on its own terms:
   📄 논문 메타        — original English title, authors, arXiv link,
-                        date/version, full-text acquisition level, analysis date.
+                        date/version, full-text acquisition level, analysis date,
+                        plus two load-bearing classification rows the index reads
+                        (STYLE §5-7): `| 관련 Pillar | P#, … |` (controlled P1–P4,
+                        comma-separated, primary first — mirror the 🎯 section's
+                        pillar ties; P5/evaluation is excluded from the index
+                        taxonomy; omit the row if none) and `| 태그 | … |`
+                        (1–3 lowercase tags from the controlled vocabulary:
+                        vla-arch, forgetting, peft, tactile, force,
+                        egocentric-data, dexterity, flow-matching, optimizer,
+                        continual, sim2real, dataset).
   🧭 한 줄 요약 (TL;DR) — 1–2 sentences.
   ❓ 문제 정의 / 동기   — bullet form only; no single-prose paragraph. 4–6
                         items, each a bold label + 1–2 sentences. Recommended

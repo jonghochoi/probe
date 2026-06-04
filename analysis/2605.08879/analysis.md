@@ -12,6 +12,8 @@
 | 발행일 / 버전 | 2026-05-09 · v2 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-26 |
+| 관련 Pillar | P4, P1 |
+| 태그 | forgetting, flow-matching, vla-arch |
 
 ---
 

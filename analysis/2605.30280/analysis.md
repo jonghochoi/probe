@@ -12,6 +12,8 @@
 | 발행일 / 버전 | 2026-05-28 · v1 (cs.RO) |
 | 본문 확보 수준 | PDF 텍스트 (PyMuPDF 추출, 34 pages) |
 | 분석 생성일 | 2026-05-29 |
+| 관련 Pillar | P4, P1, P2 |
+| 태그 | vla-arch, flow-matching |
 
 <!-- 본문 확보 경로 (정직성 기록):
      1. curl --fail -sS "https://arxiv.org/abs/2605.30280"          → HTTP 200 (메타/초록 확보)

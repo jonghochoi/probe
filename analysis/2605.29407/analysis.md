@@ -12,6 +12,8 @@
 | 발행일 / 버전 | 2026-05-28 · v1 (IEEE/ASME Transactions on Mechatronics 게재 승인) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-06-02 |
+| 관련 Pillar | P3 |
+| 태그 | vla-arch, dexterity |
 
 ---
 
