@@ -134,6 +134,21 @@ print('hands [12:36) mean=', sum(lpd[12:36]) / 24)
 > per-index key (`<name>/0`, `<name>/1`, …) 로 풀도록 1곳 패치. 기본 래퍼는
 > list 타입을 버려 `loss_per_dim` / `loss_main_per_dim` 둘 다 기록 안 됩니다.
 
+`wandb-summary.json` 이 누락된 오프라인 run 은 먼저 `parse_wandb_offline.py`
+로 `summary.json` + `metrics.csv` 를 뽑고, 두 run 디렉터리를
+`compare_runs.py` 에 넣으면 위 공정 비교(scalar `loss`↔`loss_main`, arm/hand
+영역 평균, per-dim)를 Markdown 표로 한 번에 계산합니다 — `--arm-dim` 으로
+임베디먼트별 경계를 지정하고, `-o` 로 step 정렬된 `compare.csv`(plot 용)도
+함께 받습니다:
+
+```bash
+for r in s1_base s1_enhance; do
+  $PY parse_wandb_offline.py outputs/$r/wandb/latest-run -o outputs/tb/$r
+done
+$PY compare_runs.py outputs/tb/s1_base outputs/tb/s1_enhance \
+  --arm-dim 12 --per-dim -o outputs/tb/compare.csv
+```
+
 ## 🚚 오프라인 GPU 서버로 이전 (uv)
 
 ```bash
