@@ -9,11 +9,15 @@
 # --extra training` after `uv python pin 3.12`), DATASET_DIR (one Dexora
 # task folder containing meta/info.json, already v3.0).
 #
-# base vs enhance is just POLICY_TYPE flipped, same env:
+# The base / lambda=0 / enhance ablation is just three flag combos, same
+# COMMON env (identical SEED/STEPS/BATCH_SIZE/data so the comparison holds).
+# Pin each to a GPU with GPU=0 / GPU=1 to run two at once on one node:
 #   COMMON="LEROBOT_SRC=~/dev/lerobot LEROBOT_PY=~/dev/lerobot/.venv/bin/python \
-#           DATASET_DIR=/data/.../dexora/<task>"
-#   env $COMMON POLICY_TYPE=pi0         OUTPUT_DIR=outputs/base    bash setup_and_train.sh
-#   env $COMMON POLICY_TYPE=pi0_enhance OUTPUT_DIR=outputs/enhance bash setup_and_train.sh
+#           DATASET_DIR=/data/.../dexora/<task> SEED=42 STEPS=20000 BATCH_SIZE=8 \
+#           WANDB=true WANDB_MODE=offline"
+#   base : env $COMMON GPU=0 POLICY_TYPE=pi0                              OUTPUT_DIR=outputs/s1_base    bash setup_and_train.sh
+#   lam0 : env $COMMON GPU=1 POLICY_TYPE=pi0_enhance AUX_LOSS_WEIGHT=0.0  OUTPUT_DIR=outputs/s1_lam0    bash setup_and_train.sh
+#   enh  : env $COMMON GPU=0 POLICY_TYPE=pi0_enhance AUX_LOSS_WEIGHT=1.0  OUTPUT_DIR=outputs/s1_enhance bash setup_and_train.sh
 set -euo pipefail
 
 # ── Required ──────────────────────────────────────────────────────────
@@ -36,6 +40,7 @@ TRAIN_EXPERT_ONLY="${TRAIN_EXPERT_ONLY:-true}"      # VLM frozen; expert + proje
 GRADIENT_CHECKPOINTING="${GRADIENT_CHECKPOINTING:-true}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/pi0_enhance_dexora}"
 DEVICE="${DEVICE:-cuda}"
+GPU="${GPU:-}"                          # pin to ONE gpu index (e.g. 0 or 1); blank = all visible
 SEED="${SEED:-}"                        # same value for base vs enhance
 USE_AMP="${USE_AMP:-}"
 LOG_FREQ="${LOG_FREQ:-}"                # blank = lerobot default (200)
@@ -43,6 +48,14 @@ SAVE_FREQ="${SAVE_FREQ:-}"              # blank = lerobot default (20000)
 WANDB="${WANDB:-}"                      # also: export WANDB_MODE=offline
 RUN_SMOKE="${RUN_SMOKE:-1}"
 REPO_ID="${REPO_ID:-Dexora/Dexora_Real-World_Dataset}"
+
+# ── Pin to one GPU (so two runs can share a node on index 0 and 1) ─────
+# CUDA_VISIBLE_DEVICES makes the chosen card the only visible one, so it
+# appears as cuda:0 inside the process and DEVICE=cuda still works.
+if [ -n "$GPU" ]; then
+  export CUDA_VISIBLE_DEVICES="$GPU"
+  echo "==> pinned to GPU $GPU (CUDA_VISIBLE_DEVICES=$GPU)"
+fi
 
 # ── Resolve paths ─────────────────────────────────────────────────────
 REPO_ROOT="$(git rev-parse --show-toplevel)"

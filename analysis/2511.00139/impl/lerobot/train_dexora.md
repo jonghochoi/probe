@@ -111,6 +111,28 @@ done
 
 `λ=0` = enhancer 아키텍처만 살아있고 보조 감독 OFF (통제군).
 
+### 통제 삼각비교 + 두 GPU 병렬
+
+개선이 *보조 감독(논문 메커니즘)* 때문인지 *추가 파라미터(용량)* 때문인지는
+base / λ=0 / enhance 세 점을 **같은 SEED·STEPS·BATCH·데이터**로 돌려야
+갈린다. `GPU=0` / `GPU=1` 로 한 노드에서 둘씩 병렬 실행:
+
+```bash
+COMMON="LEROBOT_SRC=~/dev/lerobot LEROBOT_PY=~/dev/lerobot/.venv/bin/python \
+        DATASET_DIR=/data/.../dexora/<task> SEED=42 STEPS=20000 BATCH_SIZE=8 \
+        WANDB=true WANDB_MODE=offline"
+
+env $COMMON GPU=0 POLICY_TYPE=pi0         OUTPUT_DIR=outputs/s1_base  bash setup_and_train.sh &
+env $COMMON GPU=1 POLICY_TYPE=pi0_enhance AUX_LOSS_WEIGHT=0.0 \
+    OUTPUT_DIR=outputs/s1_lam0 bash setup_and_train.sh &
+wait
+env $COMMON GPU=0 POLICY_TYPE=pi0_enhance AUX_LOSS_WEIGHT=1.0 \
+    OUTPUT_DIR=outputs/s1_enhance bash setup_and_train.sh
+```
+
+판정: base→λ0 = 용량 효과, λ0→enhance = 보조 감독 효과
+(`compare_runs.py --window 0.2`).
+
 ### 비교 지표 — `loss_main` 으로 공정 비교
 
 enhance 의 stdout `loss` 는 `L_main + λ(L_arm + L_hand)` 합성이라 base 의
