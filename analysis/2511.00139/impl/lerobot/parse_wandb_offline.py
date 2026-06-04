@@ -83,6 +83,20 @@ def main() -> None:
     summary: dict = {}
     parse_skips = 0
     seen = 0
+    first_history_dumped = False
+
+    def _hi_key(item) -> str:
+        """Resolve a HistoryItem key across wandb proto shapes.
+
+        Newer wandb (>=0.18) stores hierarchical metric paths (e.g.
+        ``train/loss``) under ``nested_key`` (a repeated string) and leaves
+        ``key`` empty; older versions kept the full string in ``key``.
+        """
+        nk = list(getattr(item, "nested_key", []) or [])
+        if nk:
+            return "/".join(nk)
+        return item.key or ""
+
     while True:
         out = ds.scan_record()
         if out is None:
@@ -99,12 +113,24 @@ def main() -> None:
             parse_skips += 1
             continue
         if rec.HasField("history"):
-            row = {item.key: _decode_value(item.value_json) for item in rec.history.item}
-            history.append(row)
-            summary.update(row)  # last write wins -> final summary
+            if not first_history_dumped:
+                first_history_dumped = True
+                print("first history record items (diagnostic):", file=sys.stderr)
+                for item in rec.history.item:
+                    nk = list(getattr(item, "nested_key", []) or [])
+                    val_preview = (item.value_json or "")[:60]
+                    print(f"  key={item.key!r}  nested_key={nk}  value_json={val_preview!r}", file=sys.stderr)
+            row = {_hi_key(item): _decode_value(item.value_json) for item in rec.history.item}
+            # Drop the empty-key fallback if present (rare, defensive).
+            row = {k: v for k, v in row.items() if k}
+            if row:
+                history.append(row)
+                summary.update(row)  # last write wins -> final summary
         elif rec.HasField("summary"):
             for item in rec.summary.update:
-                summary[item.key] = _decode_value(item.value_json)
+                k = _hi_key(item)
+                if k:
+                    summary[k] = _decode_value(item.value_json)
 
     args.out.mkdir(parents=True, exist_ok=True)
     csv_path = args.out / "metrics.csv"
