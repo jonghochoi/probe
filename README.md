@@ -68,18 +68,19 @@ Summaries are cheap. PROBE produces **decision material** across three tracks �
 
 PROBE has **three output tracks** sharing one static context — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). Each answers a different question, runs on a different cadence, and writes to its own folder; together they keep the research log honest.
 
-> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation · P5 Task Definition & Falsifiable Evaluation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
+> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
-> **Full doc vs. per-pillar extract**: `context/MASTER.md` is the single source of truth (all five pillars, D1–D26). Each `context/P#.md` is a narrowed, history-free extract of one pillar with an identical §1–§8 skeleton; the cloud scouting/synthesis routines read **one extract** to keep agent context lean and pillar-focused. Edit the full doc; regenerate extracts from it — never the reverse.
+> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (four pillars, cross-cutting content only — Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers). Each `context/P#.md` **owns** its pillar's Decision Log (D1–D23 across pillars), Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, and Curated Lists, in an identical §1–§8 skeleton; the cloud scouting/synthesis routines read **one `P#.md`** to keep agent context lean and pillar-focused. Edit the `P#.md` for pillar content; edit MASTER only for global content.
 
 ```
    ┌───────────────────────────────────────────────────────────────────┐
    │ context/  (static · human-owned · read-only every run)            │
    │                                                                   │
-   │ MASTER.md   · Identity / Pillars (P1–P5) / Decision Log (D1–D26)  │
-   │             · Tracked Literature (5 × 8) / Researchers /          │
-   │               Competitor Monitoring / Anti-topics                 │
-   │ P{1..4}.md  · per-pillar history-free extracts (§1–§8 skeleton)   │
+   │ MASTER.md   · global anchor — Identity / Pillars (P1–P4) /        │
+   │               Venue / Cross-pollination / cross-pillar Researchers│
+   │ P{1..4}.md  · per-pillar owners (§1–§8 skeleton) — Decision Log / │
+   │               Tracked Literature / Anti-topics / Competitor /     │
+   │               Researchers / Curated Lists                         │
    └─────────────────────────────────┬─────────────────────────────────┘
                                      │ read-only (every run)
                                      ▼
@@ -216,12 +217,12 @@ PROBE is a scout. It does not fight. The human still owns every judgement call.
 |---|---|
 | **Direction** — is the Identity claim still load-bearing? Is the top Pillar still the right priority? | **Author watch** — recent submissions from the Researchers list |
 | **Decision Log curation** — if a paper shakes a default or trips a deferred trigger, update the relevant Decision | **Citation-graph expansion** — semantic neighbors of the Tracked Literature anchors |
-| **Evaluation protocol** — own the falsifier thresholds the active Decision Log defines; without these, no report matters | **Anti-topic filtering** — drop whatever the Anti-topics list excludes |
-| **Context refresh** — refresh Tracked Literature, Decision Log, and Competitor Monitoring whenever a phase boundary or Decision-Log trigger fires | **Scoring** — Pillar / Decision fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
+| **Analysis graduation** — decide which scouted papers are worth a deep-dive `analysis/` and which to pin | **Anti-topic filtering** — drop whatever the Anti-topics list excludes |
+| **Context refresh** — refresh each pillar's Tracked Literature, Decision Log, and Competitor Monitoring in its `context/P#.md` whenever a phase boundary or trigger fires | **Scoring** — Pillar / Decision fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
 | **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced periodic pick from the cross-pollination rotation |
 | **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — work through the Competitor watch list |
 
-The agent **never** edits `context/MASTER.md`. It can *propose* changes in the report. The human decides.
+The agent **never** edits the `context/` files (`MASTER.md` or any `P#.md`). It can *propose* changes in the report. The human decides.
 
 ---
 
@@ -232,7 +233,7 @@ git clone https://github.com/jonghochoi/probe.git
 cd probe
 ```
 
-1. Open `context/MASTER.md` and fill in **your** Identity, Pillars, Decision Log defaults, Tracked Literature, and Competitor watch list. Shipping defaults are a Sharpa Hand / Isaac Lab template — useful as an example, not a universal config.
+1. Open `context/MASTER.md` and fill in **your** cross-cutting anchor (Identity, Pillars overview, Hardware); then fill in each `context/P#.md` with that pillar's Decision Log defaults, Tracked Literature, and Competitor watch list. Shipping defaults are a Sharpa Hand / Isaac Lab template — useful as an example, not a universal config.
 2. Decide how you want to run the agent — manually in a Claude.ai conversation, or fully scheduled via Claude Code Routines. See [Agent Setup Guide](#-agent-setup-guide) below.
 3. Generate your first Scouting Report. Review it ruthlessly. Tune the prompt. Commit.
 
@@ -281,7 +282,7 @@ upstream rather than rewritten. The links below are the exact sources.
 | [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) | Full agent setup — Claude Code Routines, network allowlist, on-demand analysis trio, troubleshooting |
 | [`docs/probe_guide.html`](docs/probe_guide.html) | **Korean onboarding guide** — download and open locally for a visual walkthrough of motivation, pipeline, and operations |
 | [`docs/STYLE.md`](docs/STYLE.md) | Output formatting rules — emoji system, link format, Korean authoring |
-| [`context/MASTER.md`](context/MASTER.md) | Live research context (single source of truth) — Identity, Pillars, Decision Log, Tracked Literature, Competitor Monitoring |
+| [`context/MASTER.md`](context/MASTER.md) | Live research context — global anchor (four pillars): Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers (per-pillar Decision Log / Tracked Literature live in `context/P#.md`) |
 | `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
 | [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
 | [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |

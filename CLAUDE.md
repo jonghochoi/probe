@@ -14,8 +14,8 @@ for **commit hygiene and document style** so the repo stays consistent.
 
 | Path | Owner | Role |
 |---|---|---|
-| `context/MASTER.md` | human | Single source of truth — Identity, Pillars, Decision Log, Tracked Literature (all P1–P5) |
-| `context/P{1..4}.md` | human | Per-pillar history-free extracts (identical §1–§8 skeleton) — the pipeline reads one, never the full doc. No `P5.md`: the evaluation pillar lives only in `MASTER.md` |
+| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P1–P4), Venue, Cross-pollination, cross-pillar Researchers. No longer holds per-pillar Decision Log / Tracked Literature |
+| `context/P{1..4}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, and Curated Lists (identical §1–§8 skeleton). The pipeline reads one `P#.md`. Four pillars; the P5 evaluation pillar was retired |
 | `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
 | `synthesis/` | agent | Monthly per-pillar narrative briefs — intended output is one `P#_BRIEF.md` per pillar (none generated yet) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
@@ -33,8 +33,12 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
-never edit the source. Edit `MASTER.md`; regenerate the `P#` extracts from it,
-never the reverse.
+never edit the source. Per-pillar content (Decision Log, Tracked Literature,
+Anti-topics, Competitor Monitoring, Researchers, Curated Lists) is **owned by
+the relevant `P#.md`**; `MASTER.md` is a thin global anchor holding only
+cross-cutting content. Edit the `P#.md` for pillar content; edit `MASTER.md`
+only for global content. (The earlier "MASTER is SSOT, regenerate the extracts
+from it" model no longer holds.)
 
 `vendor/lerobot/` is read-only to **both** the agent and contributors. It is
 a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the v0
@@ -290,8 +294,9 @@ inspects the filesystem for the vendor-neutral `impl` column (lerobot-pathed:
 `impl.md` vs `UNMAPPABLE.md`), and rewrites the block between
 `<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->` as a `분류 지도`
 summary + one table **per primary Pillar** (P1…P4/미분류; primary = first
-`관련 Pillar` entry — P5/evaluation is cross-cutting and excluded from the
-index taxonomy, so a stray `P5` is dropped at generation). Everything outside the markers stays hand-maintained (own
+`관련 Pillar` entry — the index taxonomy covers the four pillars P1–P4; the P5
+evaluation pillar was retired, and any stray `P5` is dropped at generation).
+Everything outside the markers stays hand-maintained (own
 file, so it doesn't interleave with the `analysis/README.md` narrative).
 
 - **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh INDEX.md` bot commit (stages `analysis/INDEX.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `INDEX.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
