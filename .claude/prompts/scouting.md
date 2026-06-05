@@ -109,17 +109,20 @@ Endpoints:
 Never fabricate a citation or an arXiv ID; every link must come
 from an actual API response you received. If any curl call fails
 (non-zero exit, HTTP error, empty body after retries), do NOT
-silently skip it and do NOT invent results: record the exact
-command and the error/HTTP status verbatim in the report (under
-📋 Scout Methodology) and continue with the sources that did
+silently skip it and do NOT invent results: disclose the failure
+verbatim in the `Papers scanned:` header line (e.g.
+`일부 쿼리 HTTP 429 실패`) and continue with the sources that did
 succeed. An empty or honestly-partial report is far better than a
-padded or fabricated one.
+padded or fabricated one. Retrieval-pass provenance lives in the
+`Papers scanned:` header line (STYLE §2-1).
 
 For every candidate paper, score on a 0–3 scale:
   · Relevance       — which P# / D# does it touch?
   · Novelty         — genuinely new, or a delta over tracked work?
   · Reproducibility — code / data / hardware details?
   · Sim2Real        — real-robot evidence, or sim-only?
+The 📊 section carries NO summary table — just the per-paper rationale (one
+bold head with the total, then a bullet per dimension); a table duplicates it.
 
 ---
 
@@ -127,31 +130,30 @@ OUTPUT — Korean report (`scouting/<PILLAR>/YYYY-MM-DD.md`)
 
 Write the report directly in Korean, following scouting/templates/report.md
 exactly. Top 3–5 papers only. Apply docs/STYLE.md §4 (Korean
-authoring rules): all prose is formal Korean (합니다/됩니다 체), while
-paper titles, config / code names, formulas, P#/D# tags, arXiv
-links, emojis and `<a id="ref-…">` anchors stay verbatim in their
-original form. Use the §4-2 glossary and §4-3 header table.
+authoring rules): all body content is **개조식** (명사형 종결, 불릿 — §4-4),
+NOT 합니다/됩니다 prose, while paper titles, config / code names, formulas,
+P#/D# tags, arXiv links, emojis and `<a id="ref-…">` anchors stay verbatim in
+their original form. Use the §4-2 glossary and §4-3 header table.
 
 ### Emoji rules (docs/STYLE.md §2)
 Apply emojis to section and subsection headers only — never inside body text.
 
-Section-level (##):
-  📋  Scout Methodology
+Section-level (##), in this canonical order (STYLE §2-1):
+  🔑  Reference Legend
   🥇  Paper N — PRIORITY ★★★
   🥈  Paper N — PRIORITY ★★
   🥉  Paper N — PRIORITY ★
   🌱  Paper N — CROSS-POLLINATION (adjacent field)
   📊  Scoring Summary
-  🚫  Candidate Papers That Did Not Pass Filter
   💡  Context Suggestions
   🔄  Run-over-Run Synthesis
+  🚫  Candidate Papers That Did Not Pass Filter   (reference appendix — LAST)
 
-Subsection-level (###), same across all papers:
-  🎯  (a) P# / D# touched
-  ✨  (b) What is genuinely new
-  ⚙️  (c) Decision implication
-  ⚠️  (d) Failure mode to probe first
-  📌  All sub-sections within Context Suggestions
+Subsection-level (###), same across all papers (Korean headers per STYLE §4-3):
+  (a) 관련 Pillar / Decision    — the decision tie (badge line only)
+  (b) 핵심 기여                 — what the paper is / does / what's new
+  (c) 시사점                    — what it could mean for us, plainly
+  (d) 먼저 확인할 점            — the paper's limits + cheapest transfer check
 
 ### Link rules (docs/STYLE.md §3)
 Every paper entry must include a direct link:
@@ -163,30 +165,44 @@ table, and inline in Context Suggestions. Do not fabricate arXiv IDs;
 verify every link resolves before inclusion.
 
 ### Per-paper required sections
-For each paper, state:
-  (a) which P# / D# it touches,
-  (b) what is *genuinely* new,
-  (c) decision implication — what changes in MY training/evaluation
-      pipeline next week if this paper is right? Be concrete (config
-      key, hyperparameter, specific metric, loss term). Vague is failure.
-  (d) failure mode to probe first.
+The four sections read as one STORY and stay PAPER-FOCUSED. Carry the
+decision link in the (a) badges ONLY; in (b)–(d) do NOT plaster internal
+bookkeeping (`D#`, `deferred`, `v1`, config-key / `*.yaml` names) — a reader
+should not stop to ask "what is D11? what is deferred?". Concrete
+context-edit proposals belong in 💡 Context Suggestions, not the paper body.
+  (a) 관련 Pillar / Decision — the decision tie as a badge line only.
+  (b) 핵심 기여 — what the paper is, what it does, what is genuinely new.
+  (c) 시사점 — what it could mean for us, in plain terms (no D#/config plumbing).
+  (d) 먼저 확인할 점 — the paper's own limits + the cheapest transfer caveat.
 
 ### Reference Legend (docs/STYLE.md §3-1)
 Open the report with a `## 🔑 Reference Legend` section, placed right
-after the intro blockquote and right before `## 📋 Scout Methodology`.
+after the metadata block and right before the first `## 🥇` paper section.
+There is NO boilerplate intro blockquote — it repeats every file and carries
+no per-report info, so the report goes metadata → legend.
   - Include ONLY the P#/D# codes this report actually cites. No
     other codes; no competitor codenames / Identity / falsifier.
   - One table, rows ordered P# → D# (ascending), one row per distinct
     cited code. Omit the section if none are cited.
-  - Each row: `| <a id="ref-CODE"></a>**CODE** | <one-line meaning> |`.
+  - Each code is a shields.io BADGE color-coded by category: P# uses the
+    pillar palette (P1 `1f77b4`, P2 `9467bd`, P3 `2ca02c`, P4 `d62728`),
+    every D# shares `d97706` (amber). URL:
+    `https://img.shields.io/badge/<CODE>-<hex>.svg`.
+  - Each legend row: `| <a id="ref-CODE"></a>![CODE](…badge…) | <one-line meaning> |`
+    (anchor stays so links resolve; legend badge itself is not a link).
   - Derive the meaning from context/<PILLAR>.md (do not invent), matching
     by literal header pattern, not section number:
     P# = the `## ... Pillar P# — <name>` header → "<name> (pillar)";
-    D# = the `#### [D#] <title>` entry inside the "Decision Log" section
-    + its v1 line → "<title> — v1 choice in ≤~12 words".
-  - In the body, link the FIRST occurrence of each code per top-level
-    `##` section as `[CODE](#ref-CODE)`; later same-section occurrences
-    stay plain. Do not link codes inside tables or code blocks.
+    D# = the `#### [D#] <title>` entry + its current default →
+    "<title> — concise gloss, ≤~12 words". An ENGLISH-ONLY decode gloss: no
+    Korean in the meaning column, NO `v1:` label, NO `;` semicolon chains
+    (use commas).
+  - In the body, the FIRST occurrence of each code per top-level `##`
+    section is a LINKED badge `[![CODE](…badge…)](#ref-CODE)`; later
+    same-section occurrences stay plain text. Do not badge/link codes
+    inside tables or code blocks. The (a) decision-tie line is badges ONLY
+    (` / ` between pillar and decisions, a single SPACE between decision
+    badges) — NEVER a badge followed by a parenthetical Korean gloss.
 
 ---
 
@@ -200,46 +216,6 @@ RULES:
   inclusion. Do not fabricate arXiv IDs.
 - If any curl call fails, include the exact command and error/HTTP
   status verbatim; never substitute invented results.
-
----
-
-HUMANIZE — Korean post-processing (mandatory before commit):
-
-After the Korean output file is written and BEFORE `git add`, invoke
-the `humanize-korean` skill on that file:
-
-  Skill:  `.claude/skills/humanize-korean/SKILL.md`
-  Mode:   auto — tier resolved by file path prefix
-          (`scouting/` → fast, `analysis/` → standard).
-          See `SKILL.md` Phase 0 for the
-          resolver and per-tier pipeline. STYLE §4-5 invariants are
-          enforced in all tiers. The monolith fast-path is not used.
-  Input:  the path of the file just written
-  Output: in-place rewrite of the same file
-
-Hard rules for this stage:
-  - `fidelity_audit` verdict `fail` → ROLLBACK the rewrite; commit the
-    pre-humanize content; report the failure under your final summary.
-  - `naturalness_review` verdict `rewrite_round_2` → run Phase B
-    again on the residual findings; `rollback_and_rewrite` → restore
-    the over-polished spans from the original, then re-run Phase B.
-    Max 3 Phase B rounds total; afterward `hold_and_report` and keep
-    the original.
-  - Change rate > 30% → automatic rework round; > 50% → abort the
-    rewrite and keep the original.
-  - The §4-5 invariants in `docs/STYLE.md` MUST survive
-    humanization. Violation of any invariant (verbatim tokens, emoji
-    placement, `<a id="ref-…">` anchors, arXiv / DOI links, citation
-    accuracy, P#/D# tag form, §4-2 glossary translations)
-    is treated as a fidelity fail → rollback.
-  - The humanize pass NEVER adds, removes, or changes facts; it only
-    rewrites Korean prose style (translation-ese, mechanical
-    parallelism, AI signature phrases, hedging, etc.) per
-    `.claude/skills/humanize-korean/references/ai-tell-taxonomy.md`
-    and `.claude/skills/humanize-korean/references/rewriting-playbook.md`.
-
-Then proceed with `git add` / `git commit` / `git push` on the
-humanized (or rolled-back) file per the GIT section below.
 
 ---
 
