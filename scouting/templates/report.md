@@ -2,12 +2,11 @@
 
 **Run date:** YYYY-MM-DD
 **Agent version:** v0.1
+<!-- Papers scanned: ONE-LINE summary only (STYLE §4-5) — provenance lives
+     here. If a tool call failed, state it verbatim inline (e.g.
+     "일부 쿼리 HTTP 429 실패"); never fabricate. -->
 **Papers scanned:** <N from arXiv> + <M from citation graph> + <K from author watch>
 **Papers surfaced (every dimension ≥ 2):** <count>
-
-> 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE.md`에 정의되어 있으니 정확히 따릅니다.
-> 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`scouting/P#/YYYY-MM-DD.md`)를 산출합니다.
-> 각 섹션에서 처음 등장하는 P#/D# 코드는 아래 참조 약어 풀이로 링크합니다.
 
 ---
 
@@ -17,37 +16,28 @@
 STYLE.md §3-1 is authoritative. Summary:
   · ONLY P#/D# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc), one per distinct code.
-  · Each row: <a id="ref-CODE"></a>**CODE** | one-line meaning (Korean).
+  · Each code is a shields.io BADGE (STYLE §3-1): P# uses the pillar palette
+    (P1 1f77b4, P2 9467bd, P3 2ca02c, P4 d62728), every D# shares d97706 (amber).
+    Format: `![CODE](https://img.shields.io/badge/CODE-<hex>.svg)`.
+  · Legend row: <a id="ref-CODE"></a>![CODE](…badge…) | one-line meaning (English only).
+    The anchor stays so body links resolve; the legend badge itself is not a link.
   · Meaning source (do not invent), from context/P#.md:
-      P# → §2 heading "Pillar P# — <name>"           → "<name> (pillar)"
-      D# → §4 "#### [D#] <title>" + its v1 line       → "<title> — v1 choice (≤~12 words)"
-  · In the body, link only the FIRST occurrence of each code per ## section
-    as [CODE](#ref-CODE); later same-section occurrences stay plain.
+      P# → §2 heading "Pillar P# — <name>"     → "<name> (pillar)"
+      D# → §4 "#### [D#] <title>" + its current default
+           → "<title> — <concise gloss, ≤~12 words>". NO `v1:` label,
+             NO `;` semicolon chains (use commas); it is a decode gloss.
+  · In the body, the FIRST occurrence of each code per ## section is a
+    LINKED badge `[![CODE](…badge…)](#ref-CODE)`; later same-section
+    occurrences stay plain text. Codes inside table cells stay plain text.
+    Do NOT add a Korean gloss next to a body badge — the badge alone ties
+    the paper; the meaning lives in the legend.
   · If the report cites no P#/D# code, delete this whole section.
 -->
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P#"></a>**P#** | <pillar name> (pillar) |
-| <a id="ref-D#"></a>**D#** | <decision title> — <v1 choice, ≤~12 words> |
-
----
-
-## 📋 스카우트 방법론
-
-<!--
-Section numbers below are for the full context/MASTER.md. The cloud
-scouting routine instead reads a per-pillar extract context/P#.md,
-where the same content is renumbered: Researchers=§7, Tracked Literature=§6,
-Anti-topics=§5, Competitor=§8. Use whichever the active prompt points at.
-
-Summarize the retrieval passes in 3–5 bullets. Weight: Author Watch > Citation-Graph > Keyword Sweep; add Competitor Monitoring as a dedicated pass.
-  · Author Watch — N researchers (full §9 / extract §7), date range
-  · Citation-Graph Expansion — M pinned papers (full §8 / extract §6, Tracked Literature), citation window
-  · Keyword Sweep — queries, cs.RO + cs.LG window, anti-topic filter (full §7 / extract §5)
-  · Competitor Monitoring — watch-list scan (full §10 / extract §8)
-If any tool call failed, state the error verbatim. Do not fabricate.
--->
+| <a id="ref-P#"></a>![P#](https://img.shields.io/badge/P%23-9467bd.svg) | <pillar name> (pillar) |
+| <a id="ref-D#"></a>![D#](https://img.shields.io/badge/D%23-d97706.svg) | <decision title> — <concise gloss, ≤~12 words, commas not semicolons> |
 
 ---
 
@@ -56,18 +46,29 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
 
-### (a) 관련 Pillar / Decision (P# / D#)
-<!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D26) from context/MASTER.md does this address? Also note any Identity tension/support and any §10 Competitor implication. -->
+### (a) 관련 Pillar / Decision
+<!-- The decision TIE only — a single line of LINKED BADGES, nothing else
+     (STYLE §3-1). `[![P2](…)](#ref-P2) / [![D11](…)](#ref-D11) [![D8](…)](#ref-D8)`
+     ( ` / ` between pillar and decisions, a SPACE between decision badges); NO
+     Korean gloss next to any badge, NO body bullets here — the paper substance
+     goes in (b). The four sections read as ONE STORY: tie → contribution →
+     what it means for us → what to check.
+     PAPER-FOCUSED (do NOT plaster internal decision bookkeeping): in (b)–(d),
+     avoid `D11`/`deferred`/`v1`/config-key/`*.yaml` names — a reader should not
+     stop to ask "what is D11? what is deferred?". The decision link is the (a)
+     badges; concrete context-edit proposals live in 💡 Context Suggestions. -->
 
-### (b) 진정으로 새로운 점
-<!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->
+### (b) 핵심 기여
+<!-- 개조식 bullets: what the paper IS, what it DOES, and what is genuinely new
+     vs. the field — paper-focused, no internal D#/config references. -->
 
-### (c) 의사결정 함의
-<!-- What changes in MY training/evaluation pipeline next week if this paper is right?
-     Name a specific config key, hyperparameter, metric, or loss term. Vague = failure. -->
+### (c) 시사점
+<!-- 개조식 bullets: what this could mean for us, in PLAIN terms (e.g. "공개
+     기준점 확보", "도입 비용 낮음") — not "D11 v1 …" / config-key plumbing. -->
 
-### (d) 먼저 검증해야 할 실패 모드
-<!-- Why might this NOT transfer to our stack? What is the cheapest sanity check? -->
+### (d) 먼저 확인할 점
+<!-- 개조식 bullets: the paper's own limits + the cheapest transfer caveat,
+     plainly. No D#/deferred jargon. -->
 
 ---
 
@@ -76,10 +77,10 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### (a) 관련 Pillar / Decision (P# / D#)
-### (b) 진정으로 새로운 점
-### (c) 의사결정 함의
-### (d) 먼저 검증해야 할 실패 모드
+### (a) 관련 Pillar / Decision
+### (b) 핵심 기여
+### (c) 시사점
+### (d) 먼저 확인할 점
 
 ---
 
@@ -88,10 +89,10 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### (a) 관련 Pillar / Decision (P# / D#)
-### (b) 진정으로 새로운 점
-### (c) 의사결정 함의
-### (d) 먼저 검증해야 할 실패 모드
+### (a) 관련 Pillar / Decision
+### (b) 핵심 기여
+### (c) 시사점
+### (d) 먼저 확인할 점
 
 ---
 
@@ -102,38 +103,28 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...>
 
-### (a) 관련 Pillar / Decision (P# / D#)
-### (b) 진정으로 새로운 점
-### (c) 의사결정 함의
-### (d) 먼저 검증해야 할 실패 모드
+### (a) 관련 Pillar / Decision
+### (b) 핵심 기여
+### (c) 시사점
+### (d) 먼저 확인할 점
 
 ---
 
 ## 📊 점수 요약
 
-| # | Paper | Link | Relevance (0–3) | Novelty (0–3) | Reproducibility (0–3) | Sim2Real (0–3) | Total (/12) |
-|---|-------|------|:---:|:---:|:---:|:---:|:---:|
-| 1 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | – | – | – | – | – |
-| 2 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | – | – | – | – | – |
-| 3 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | – | – | – | – | – |
-
-<!-- Surface a paper only if every dimension scores ≥ 2. If fewer than 3 qualify, say so and do not pad. -->
-
----
-
-## 🚫 필터 통과 실패 후보 논문
-
-| Paper | Link | Reason dropped |
-|-------|------|----------------|
-| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Anti-topic: <specific rule from the pillar's §4 Anti-topics> |
-| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Novelty < 2 (delta over pinned:<name>) |
-| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Sim2Real = 0 (sim-only, no real-robot evidence) |
+<!-- NO summary table — it duplicates the per-paper rationale below (STYLE §4-5).
+     Surface a paper only if every dimension scores ≥ 2; if fewer than 3 qualify,
+     say so and do not pad. The rationale is 개조식 (STYLE §4-4): one bold paper
+     head carrying the total (`**HapTile (10/12)**`), then a nested bullet per
+     dimension (`- Relevance 3 — <명사형 근거>`). -->
 
 ---
 
 ## 💡 컨텍스트 제안
 
-<!-- Agent proposes edits to the relevant context/P#.md. Human decides. Agent must NOT edit any context/ file directly. -->
+<!-- Agent proposes edits to the relevant context/P#.md. Human decides. Agent must NOT edit any context/ file directly.
+     Every sub-section below is 개조식 (STYLE §4-4): labelled bullets
+     (대상/제안/근거/트리거 …, 명사형 종결), not prose paragraphs. -->
 
 ### Tracked literature
 <!-- Replace / add / remove a pinned paper within the pillar's 8-paper cap (`context/P#.md` §5). Include arXiv link and target Pillar. -->
@@ -156,10 +147,27 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 <!--
 Self-check against this pillar's recent reports (last ~2 weeks, ~4 files
-scouting/P#/YYYY-MM-DD.md):
-  · Papers already covered? (list, or "none")
+scouting/P#/YYYY-MM-DD.md). Keep it TIGHT — 3–4 bullets, one sentence each
+where possible, no hedging; this section is the most over-written one (STYLE
+§4-5). Cover:
+  · Papers already covered? — verdict FIRST ("N편 전원 재등장·제외"), then the list.
   · Contradictions with recent findings?
   · Decision-Log triggers / falsifier evidence observed this run?
   · Month-trend note (only on the first run of the month).
   · Anti-topics filter health — count of papers excluded.
 -->
+
+---
+
+## 🚫 필터 통과 실패 후보 논문
+
+<!-- Reference appendix — kept LAST so the decision content (papers, scores,
+     context suggestions) stays up top (STYLE §4-5). -->
+
+| Paper | Link | Reason dropped |
+|-------|------|----------------|
+<!-- Paper column: short name (+ author "et al." if helpful) only. Do NOT repeat
+     the arXiv id here — the Link column already carries it (STYLE §4-5). -->
+| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Anti-topic: <specific rule from the pillar's §4 Anti-topics> |
+| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Novelty < 2 (delta over pinned:<name>) |
+| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Sim2Real = 0 (sim-only, no real-robot evidence) |

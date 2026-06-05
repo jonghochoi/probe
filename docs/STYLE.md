@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.21 (2026-06-04) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.27 (2026-06-05) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -30,18 +30,25 @@ cells, or code blocks.
 
 ### 2-1. Scouting report `##` emojis
 
+The table also fixes the canonical **section order** (top to bottom). The
+🚫 dropped-candidates table is a reference appendix and sits LAST, after
+🔄; the decision content (papers, scores, context suggestions) stays up top.
+
 | Emoji | Section |
 |-------|---------|
 | 🔑 | Reference Legend (참조 약어 풀이) |
-| 📋 | Scout Methodology (스카우트 방법론) |
 | 🥇 | Paper N — PRIORITY ★★★ |
 | 🥈 | Paper N — PRIORITY ★★ |
 | 🥉 | Paper N — PRIORITY ★ |
 | 🌱 | Paper N — CROSS-POLLINATION (인접 분야 픽) |
 | 📊 | Scoring Summary (점수 요약) |
-| 🚫 | Candidate Papers That Did Not Pass Filter (필터 통과 실패 후보 논문) |
 | 💡 | Context Suggestions (컨텍스트 제안) |
 | 🔄 | Run-over-Run Synthesis (직전 리포트 대비 종합) |
+| 🚫 | Candidate Papers That Did Not Pass Filter (필터 통과 실패 후보 논문) |
+
+Retrieval-pass provenance — including verbatim disclosure of any tool
+failure (e.g. `일부 쿼리 HTTP 429 실패`) — is summarized in the
+`Papers scanned:` header line, not a dedicated section.
 
 ### 2-2. Subsection (`###`) headers are plain
 
@@ -100,43 +107,84 @@ decode the report without opening `context/P#.md`.
 does not use; never list competitor codenames, Identity, or the falsifier.
 
 **Placement.** A single `## 🔑 Reference Legend` section, immediately
-after the top intro blockquote and immediately before `## 📋 Scout
-Methodology`. It is the first content section of the report.
+after the top metadata block and immediately before the first
+`## 🥇 Paper` section. It is the first content section of the report.
+(There is no boilerplate intro blockquote — it repeated every file and
+carried no per-report information, so the report goes metadata → legend.)
 
 **Format.** One compact table, rows ordered `P#` → `D#` (ascending),
-one row per distinct cited code:
+one row per distinct cited code. Each code renders as a **shields.io
+badge**, color-coded by category:
+
+| Category | Color | Source |
+|----------|-------|--------|
+| `P1` | `1f77b4` (blue) | pillar palette — matches `refresh-analysis-index.py` `PILLAR_COLOR` |
+| `P2` | `9467bd` (purple) | pillar palette |
+| `P3` | `2ca02c` (green) | pillar palette |
+| `P4` | `d62728` (red) | pillar palette |
+| every `D#` | `d97706` (amber) | single shared decision color |
+
+Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
+message). All `D#` share one color (they are codes, not a ranked palette);
+`P#` follows the per-pillar palette so the badge color matches the analysis
+index. A scouting report is single-pillar, so in practice one pillar color
+plus amber decisions appear.
 
 ```markdown
 ## 🔑 Reference Legend
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P1"></a>**P1** | Heterogeneous Body/Hand Action Expert (pillar) |
-| <a id="ref-D4"></a>**D4** | Body↔Hand information sharing — v1 FiLM; cross-attn/hidden-state deferred |
+| <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-9467bd.svg) | Structured Input-Modality Binding (pillar) |
+| <a id="ref-D4"></a>![D4](https://img.shields.io/badge/D4-d97706.svg) | Body↔Hand information sharing — FiLM, cross-attn/hidden-state deferred |
 ```
 
 If the body cites no such code (rare), omit the section entirely.
 
 **Meaning source** (deterministic — derive from `context/P#.md`,
-which the agent already reads; do not invent):
+which the agent already reads; do not invent). The meaning is a **decode
+gloss**, so keep it clean: **English only** (the codes and their definitions
+are English; no Korean in this column), **no `v1:` label** (the reader does
+not need the version marker in a glossary), and **no `;` semicolon chains** —
+use commas, ≤~12 words:
 
 | Code | Source in `context/P#.md` | Meaning string |
 |------|-----------------------------------|----------------|
 | `P#` | §2 heading `Pillar P# — <name>` | `<name>` + `(pillar)` |
-| `D#` | §4 `#### [D#] <title>` + its v1 line | `<title>` — v1 choice in ≤ ~12 words |
+| `D#` | §4 `#### [D#] <title>` + its current default | `<title>` — concise gloss, ≤~12 words, commas not semicolons |
 
 **Anchor convention.** Each legend row carries an explicit HTML anchor
-`<a id="ref-<CODE>"></a>` placed before the bold code. `<CODE>` is the
-verbatim code (`P1`, `D4` — case preserved; GitHub matches explicit
-`id=` attributes verbatim).
+`<a id="ref-<CODE>"></a>` placed before the code badge (the legend badge
+itself is not a link). `<CODE>` is the verbatim code (`P1`, `D4` — case
+preserved; GitHub matches explicit `id=` attributes verbatim).
 
 **In-body links (first occurrence per section).** Within each top-level
 `##` section (each Paper N and the other sections), the **first** textual
-occurrence of each distinct code is written as `[D4](#ref-D4)`. Later
-occurrences of that same code **in the same section** stay plain text.
+occurrence of each distinct code is written as a **linked badge**
+`[![D4](https://img.shields.io/badge/D4-d97706.svg)](#ref-D4)` (same
+palette as the legend). Later occurrences of that same code **in the same
+section** stay plain text.
 Each new `##` section links the first occurrence again, so any section is
 self-contained for jump-back. Codes inside table cells and code blocks are
 not linked. The legend rows themselves are not self-linked.
+
+**No inline gloss next to a body badge.** The decision-tie line (each
+paper's (a) section) is badges only — `[![P2](…)](#ref-P2) /
+[![D11](…)](#ref-D11) [![D8](…)](#ref-D8)` — never a badge followed by a
+parenthetical Korean description. The badge alone names the tie; its
+meaning is in the legend and the paper-specific angle is in the (a)
+개조식 bullets below. Separate the pillar badge from the decision badges
+with ` / `, and decision badges from each other with a **single space**.
+
+**Paper sections stay paper-focused.** The four per-paper sections read as
+one story — (a) tie → (b) 핵심 기여 → (c) 시사점 → (d) 먼저 확인할 점 — and
+(a) is the badge line only (no body bullets; the substance starts in (b)).
+In (b)–(d), **do not plaster internal decision bookkeeping**: avoid `D#`
+codes, `deferred`, `v1`, config-key / `*.yaml` names in the prose. A reader
+should be able to follow the paper without stopping to ask "what is D11?
+what is deferred?". The decision link is carried by the (a) badges; concrete
+context-edit proposals (which `D#` to move, which deferred candidate to
+trigger) belong in 💡 Context Suggestions, the section built for them.
 
 ---
 
@@ -150,13 +198,13 @@ verbatim in their original form versus which prose is Korean.
 
 | Category | Treatment |
 |----------|-----------|
-| Body prose | Korean — tone fully governed by §4-5 (humanize-korean) |
+| Body prose | Korean **개조식** (명사형 종결) — register governed by §4-4 |
 | Paper titles | Keep original English title; add Korean description if helpful |
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
 | P#, D# tags | Keep verbatim (`P2`, `D11`, etc.). |
-| Reference Legend | Meaning column in Korean; codes + `<a id="ref-…">` anchors verbatim |
+| Reference Legend | Meaning column in **English** (mirrors the English code definitions — no Korean); codes + `<a id="ref-…">` anchors verbatim |
 | Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
 | arXiv links | Keep verbatim |
 | Section headers | Korean header text (see §4-3); `##` keeps its emoji, `###` plain |
@@ -204,75 +252,93 @@ verbatim in their original form versus which prose is Korean.
 | English header (`##`) | Korean header (`##`) |
 |----------------|--------------|
 | 🔑 Reference Legend | 🔑 참조 약어 풀이 |
-| 📋 Scout Methodology | 📋 스카우트 방법론 |
 | 🥇 Paper N — PRIORITY ★★★ | 🥇 논문 N — 우선순위 ★★★ |
 | 🥈 Paper N — PRIORITY ★★ | 🥈 논문 N — 우선순위 ★★ |
 | 🥉 Paper N — PRIORITY ★ | 🥉 논문 N — 우선순위 ★ |
 | 🌱 Paper N — CROSS-POLLINATION | 🌱 논문 N — 인접 분야 픽 |
 | 📊 Scoring Summary | 📊 점수 요약 |
-| 🚫 Candidate Papers That Did Not Pass Filter | 🚫 필터 통과 실패 후보 논문 |
 | 💡 Context Suggestions | 💡 컨텍스트 제안 |
 | 🔄 Run-over-Run Synthesis | 🔄 직전 리포트 대비 종합 |
-| (a) P# / D# touched | (a) 관련 Pillar / Decision (P# / D#) |
-| (b) What is genuinely new | (b) 진정으로 새로운 점 |
-| (c) Decision implication | (c) 의사결정 함의 |
-| (d) Failure mode to probe first | (d) 먼저 검증해야 할 실패 모드 |
+| 🚫 Candidate Papers That Did Not Pass Filter | 🚫 필터 통과 실패 후보 논문 |
+| (a) P# / D# touched | (a) 관련 Pillar / Decision |
+| (b) Key contribution | (b) 핵심 기여 |
+| (c) Takeaway for us | (c) 시사점 |
+| (d) What to check first | (d) 먼저 확인할 점 |
 | (sub-sections) | (하위 섹션) |
 
-### 4-4. Tone and style — delegated to humanize-korean
+### 4-4. Register — 개조식 (outline form, 명사형 종결)
 
-PROBE no longer carries its own Korean tone rules. Every Korean output
-passes through the `humanize-korean` skill (§4-5) immediately before
-commit, and that skill is the sole authority on register, rhythm,
-density, sentence-length distribution, conjunction frequency, hedging
-level, and visual-ornament usage. Authoring agents draft freely; the
-post-processing pass normalizes the prose.
+The **scouting report** (`scouting/`) is **개조식**: a scanned decision
+document, not flowing prose. Its body content is written as terse outline
+bullets, not 합니다/됩니다 paragraphs. (The `analysis/` deep-dives keep their
+explanatory 합니다/됩니다 register — §5-3, §6-1 — since they are read, not
+scanned; only the scouting report is 개조식.)
 
-The two surface conventions that still live here, because they are
-markdown rather than tone:
+- **명사형 종결.** End body items on a noun or nominalized form
+  (`~함 / ~음 / ~필요 / 명사`), not a full polite sentence. `D11 인코더 학습
+  기준 데이터` / `검증 필요` — not `…데이터입니다` / `…검증해야 합니다`.
+- **Labelled bullets.** Each item is a bold label + a terse phrase
+  (`- **판단 근거** — …`); nest sub-bullets for hierarchy. A section is a
+  short bullet list, not one or more paragraphs.
+- **One claim per bullet.** No `— …하기 위해` trailing-purpose tails; no
+  hedging padding (`~할 수 있을 것으로 보입니다`). Speculation stays speculative
+  in nominal form (`저하 우려` / `불필요 가능`), assertions stay assertive
+  (단정↔추측 preserved).
+- **No semicolon chains in body.** A `;` joining two or three clauses reads as
+  an unstructured run-on. When a bullet carries multiple clauses, use a comma,
+  or — if they are genuinely parallel items — split into nested sub-bullets
+  (e.g. the 🔄 Decision-Log signal becomes one sub-bullet per D#).
+- **Where it applies.** All body content — paper (a)–(d), 📊 score rationale,
+  💡 context suggestions, 🔄 synthesis. Exempt: table cells (a `;` may separate
+  distinct entries there) and verbatim English citation blockquotes (§5-6).
 
-- Use bold (`**text**`) for emphasis where it aids the reader.
-- Code blocks and inline code (`` `text` ``) are kept verbatim — see
-  the §4-5 invariants list.
+Two surface conventions (markdown, not register):
 
-### 4-5. Humanize-korean post-processing (mandatory tail step)
+- Use bold (`**text**`) for the bullet label and for emphasis.
+- Code blocks and inline code (`` `text` ``) are kept verbatim.
 
-Every Korean output (`scouting/`, `analysis/`) passes through
-the `humanize-korean` skill (`.claude/skills/humanize-korean/SKILL.md`)
-immediately before `git add` — the LAST step, never before the file is
-finished. It rewrites "AI tell" patterns (translation-ese, mechanical
-parallelism, signature phrases, hedging, formal-noun / visual-ornament
-overuse; taxonomy categories A·C·D·E·F·G·H·I·J) into natural Korean and
-normalizes register to formal 합니다/됩니다. **Content is never touched.**
-This subsection is the SSOT — it overrides the skill's upstream taxonomy /
-playbook on conflict, and is the single place to edit if the register changes.
+**Meaning is never altered for style.** Restructuring prose into 개조식 must
+not add, drop, or reorder any fact, number, date, quotation, citation
+polarity, causal direction, or `P#`/`D#` / arXiv / formula token — the same
+fidelity bar that governs every edit.
 
-**Invariants — `content-fidelity-auditor` rolls back on any violation.**
-Anything that changes meaning (facts, numbers, dates, quotations, citation
-polarity, causal direction, 단정↔추측, enumeration order, added/omitted info)
-is forbidden, plus these PROBE-specific tokens:
+### 4-5. Scannability — repetitive structure goes in a table
 
-- Paper titles in original English (§4-1); config / code names; formulas and numbers (`ε = 0.1`, `±2σ`).
-- Inline-math wrapping — every `$...$` span (incl. inside English verbatim blockquotes) must use `` $`X`$ `` and satisfy the §5-6 boundary rule; `` `$X$` `` or unguarded `$X$` is a fidelity fail. Also enforced by CI (`scripts/check-analysis-math.py`).
-- `P#` / `D#` tags; `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` links; arXiv / DOI links.
-- arXiv figure hotlinks + their English caption blockquotes (§5-6).
-- Emoji set / position on `##` headers, one per header, `###` plain (§2); §4-2 glossary translations (no resynonymization).
+A decision-grade report is *scanned* by a reader hunting for the one row
+that matters, not read prose-first end to end. §4-4 governs the register
+inside a bullet; this rule governs the *layout above the sentence*.
+It applies to every `scouting/` and `analysis/` output.
 
-**Operational guards.** Change rate `>30%` → auto rework round; `>50%` →
-abort, keep original. `fidelity_audit: fail` → roll back to pre-humanize content.
+- **Repetitive records become a table, never a run-on sentence.** Wherever
+  the report enumerates the same shape N times — dropped paper → reason
+  (🚫), or any researcher/paper roster — render it as a table (or a clean
+  bullet list), not a comma/`·`/`—`-chained paragraph. Target: one
+  eye-saccade per record. (Markdown needs a blank line both before and after
+  a table, including when a `-` bullet follows.)
+- **No 📊 summary score table.** The 📊 section is the per-paper rationale
+  only (one bold head carrying the total — `**HapTile (10/12)**` — then a
+  bullet per dimension). A separate scores table duplicates it, so it is
+  dropped.
+- **Conclusion before enumeration.** When a long list resolves to one
+  verdict ("10편 전원 재등장·제외"), state the verdict first, then the list —
+  the reader must not parse every item to reach the point.
+- **Machine identifiers stay out of prose.** Semantic Scholar author ids,
+  and any arXiv id already carried by an adjacent `Link` column or table
+  cell, do not belong inline in Korean sentences. Put them in a dedicated
+  cell; never repeat an id a sibling cell already shows (e.g. the 🚫
+  `Paper` column drops the id its `Link` column already carries).
+- **`Papers scanned:` is a one-line summary**, not a full query log —
+  per-query counts and any HTTP-error disclosure live once in that header
+  line (§2-1), never a separate block.
+- **No enumeration markers in body.** 개조식 uses bullets (§4-4); do not fall
+  back to `①②` / `1. 2.` / `첫째·둘째` running inside a sentence.
+- **P#/D# codes render as color-coded badges** (§3-1) — pillar palette for
+  `P#`, one shared amber for every `D#` — so the decision ties in each
+  paper's (a) line read as scannable chips rather than plain inline text.
 
-**Pipeline (3 tiers, auto-resolved from path).** `scouting/` → fast,
-`analysis/` → standard; `strict` only via `options.mode: strict`.
-Invariants above are enforced identically in all tiers.
-
-- **fast** — `ai-tell-detector` (Haiku) → `korean-style-rewriter` (Sonnet `--conservative`) → inline regex invariant check. Loop cap 1.
-- **standard** — `ai-tell-detector` (Sonnet) → `korean-style-rewriter` (Opus) → `content-fidelity-auditor` (Opus), with `naturalness-reviewer` (Opus) once at the end. Loop cap 2.
-- **strict** — `ai-tell-detector` → `korean-style-rewriter` → [`content-fidelity-auditor` ∥ `naturalness-reviewer`]. Loop cap 3, all Opus.
-
-The two reviewers are orthogonal — fidelity guards meaning, naturalness guards
-"did the AI tells disappear without over-polishing". `fail` rolls back;
-`rewrite_round_2` / `rollback_and_rewrite` triggers another pass within the
-loop cap, then `hold_and_report` for human review.
+These are fidelity-neutral: restructuring prose into a table or bullets must
+not add, drop, or reorder any fact, number, date, citation, or `P#`/`D#` /
+arXiv token — the §4-4 fidelity bar still binds.
 
 ---
 
@@ -370,9 +436,8 @@ conventions below codify both.
 
   Source marker is `(§n)` or `(§n, Table k)`. If the section number
   is unclear in the source body, write `(§?)` — do not guess. The
-  English text is never paraphrased; the `humanize-korean` pass
-  treats the entire blockquote as a verbatim token (§4-5 invariants
-  extension).
+  English text is never paraphrased; the entire blockquote is a
+  verbatim token, kept byte-identical.
 
 - **Formula verbatim + GitHub KaTeX rendering** — Keep the original
   LaTeX / Unicode notation; no paraphrase, symbol substitution, or
@@ -455,9 +520,8 @@ conventions below codify both.
     `.claude/prompts/analysis.md` (FIGURE URLs).
   - The alt text follows `Figure N — <short English label>` so the
     figure number survives even when the image fails to load.
-  - The English caption blockquote is a verbatim token (§4-5
-    invariants extension); the humanize-korean pass leaves it
-    untouched.
+  - The English caption blockquote is a verbatim token — kept
+    byte-identical, never paraphrased.
   - Abstract-only acquisition, or a non-arXiv-HTML source
     (PDF-only), means no figure URLs are available — omit the
     figure citations entirely. No placeholders, no guessing.
