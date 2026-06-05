@@ -85,8 +85,20 @@ def main() -> None:
             return "/".join(nk)
         return item.key or ""
 
+    truncated = False
     while True:
-        out = ds.scan_record()
+        try:
+            out = ds.scan_record()
+        except Exception as e:  # noqa: BLE001
+            # wandb's own scan_record() raises (e.g. IndexError in the crc step)
+            # on a corrupt/truncated trailing record — typical of a run still in
+            # progress or interrupted mid-write. Keep every complete record read
+            # so far and stop cleanly instead of crashing.
+            truncated = True
+            print(f"stopped early at a corrupt/truncated record after {seen} records "
+                  f"({type(e).__name__}); the run may still be in progress or was "
+                  f"interrupted", file=sys.stderr)
+            break
         if out is None:
             break
         seen += 1
@@ -136,6 +148,9 @@ def main() -> None:
     print(f"wrote {len(summary)} summary keys -> {summary_path}")
     if parse_skips:
         print(f"note: {parse_skips}/{seen} records were unparseable and skipped", file=sys.stderr)
+    if truncated:
+        print("note: file ended on a truncated record — re-run after the training "
+              "run finishes for the full curve", file=sys.stderr)
 
 
 if __name__ == "__main__":
