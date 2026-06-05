@@ -30,6 +30,32 @@ def _decode_value(s: str):
         return s
 
 
+_LEVELDB_BLOCK = 32768  # wandb datastore block size (LEVELDBLOG_BLOCK_LEN)
+
+
+def _resync_to_next_block(ds) -> bool:
+    """Skip a corrupt record by advancing the DataStore to the next 32 KB block
+    boundary, where a fresh fragment header always begins.
+
+    The ``.wandb`` (leveldb-log) format is block-aligned and ``scan_record``
+    reads sequentially via ``self._fp`` while mirroring the offset in
+    ``self._index``. So on a corrupt record mid-file we seek the file to the
+    next block start and reset the tracked index, letting the records beyond the
+    damage still be read instead of discarding the whole tail. Returns False when
+    the internals aren't where we expect or the next block is past EOF.
+    """
+    try:
+        idx, size, fp = ds._index, ds._size_bytes, ds._fp
+    except AttributeError:
+        return False
+    nxt = ((idx // _LEVELDB_BLOCK) + 1) * _LEVELDB_BLOCK
+    if nxt >= size:
+        return False
+    ds._index = nxt
+    fp.seek(nxt)
+    return True
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("run_dir", type=Path, help="wandb offline run dir (contains run-*.wandb)")
@@ -86,18 +112,22 @@ def main() -> None:
         return item.key or ""
 
     truncated = False
+    blocks_skipped = 0
     while True:
         try:
             out = ds.scan_record()
         except Exception as e:  # noqa: BLE001
-            # wandb's own scan_record() raises (e.g. IndexError in the crc step)
-            # on a corrupt/truncated trailing record — typical of a run still in
-            # progress or interrupted mid-write. Keep every complete record read
-            # so far and stop cleanly instead of crashing.
+            # wandb's scan_record() raises (e.g. IndexError in the crc step) on a
+            # corrupt record. A corrupt record mid-file would otherwise discard the
+            # whole rest of the run; skip to the next 32 KB block boundary and keep
+            # reading. Falls through to a clean stop only if we can't resync.
+            if _resync_to_next_block(ds):
+                blocks_skipped += 1
+                continue
             truncated = True
-            print(f"stopped early at a corrupt/truncated record after {seen} records "
-                  f"({type(e).__name__}); the run may still be in progress or was "
-                  f"interrupted", file=sys.stderr)
+            print(f"stopped at a corrupt record after {seen} records "
+                  f"({type(e).__name__}); could not resync — likely a truncated tail "
+                  f"(run still writing or interrupted)", file=sys.stderr)
             break
         if out is None:
             break
@@ -148,9 +178,12 @@ def main() -> None:
     print(f"wrote {len(summary)} summary keys -> {summary_path}")
     if parse_skips:
         print(f"note: {parse_skips}/{seen} records were unparseable and skipped", file=sys.stderr)
+    if blocks_skipped:
+        print(f"note: resynced past {blocks_skipped} corrupt block(s) to recover the "
+              f"records beyond them", file=sys.stderr)
     if truncated:
-        print("note: file ended on a truncated record — re-run after the training "
-              "run finishes for the full curve", file=sys.stderr)
+        print("note: file ended on a record we couldn't read past — if the run is "
+              "still training, re-run after it finishes", file=sys.stderr)
 
 
 if __name__ == "__main__":
