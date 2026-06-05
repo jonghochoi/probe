@@ -343,7 +343,7 @@ GIT — after the report is written:
   git commit -m "validation: <id> on <foundry>"
   git push origin HEAD:main
 
-Do NOT stage `analysis/INDEX.md` and do NOT run
+Do NOT stage `analysis/README.md` and do NOT run
 `scripts/refresh-analysis-index.py` from this prompt. The index
 (including the validation bucket-count column) is regenerated
 post-merge on `main` by

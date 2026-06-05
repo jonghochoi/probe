@@ -417,7 +417,7 @@ GIT — after the guide file(s) are written:
 Never stage anything under `.foundry-runtime/` — it is the gitignored
 execution runtime, not an artifact.
 
-Do NOT stage `analysis/INDEX.md` and do NOT run
+Do NOT stage `analysis/README.md` and do NOT run
 `scripts/refresh-analysis-index.py` from this prompt. The index
 (including its `lerobot` column) is regenerated post-merge on `main`
 by `.github/workflows/refresh-analysis-index.yml` so that parallel

@@ -1,10 +1,10 @@
 name: Refresh analysis index
 
-# Regenerate analysis/INDEX.md on main whenever an analysis artifact
+# Regenerate analysis/README.md on main whenever an analysis artifact
 # changes. PR-time generation was retired because parallel /analyze-paper
-# runs all stage the same INDEX.md block and conflict on every merge
+# runs all stage the same README.md block and conflict on every merge
 # (CLAUDE.md "Automatically-maintained indexes"). The regen now happens
-# exactly once, post-merge, on main — PRs never touch INDEX.md.
+# exactly once, post-merge, on main — PRs never touch README.md.
 
 on:
   push:
@@ -34,18 +34,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Regenerate INDEX.md
+      - name: Regenerate README.md
         run: python3 scripts/refresh-analysis-index.py
       - name: Commit and push if changed
         run: |
-          if git diff --quiet -- analysis/INDEX.md; then
-            echo "INDEX.md unchanged — nothing to commit."
+          if git diff --quiet -- analysis/README.md; then
+            echo "README.md unchanged — nothing to commit."
             exit 0
           fi
           git config user.name  'probe-index-bot'
           git config user.email 'probe-index-bot@users.noreply.github.com'
-          git add analysis/INDEX.md
-          git commit -m "chore(analysis): refresh INDEX.md"
+          git add analysis/README.md
+          git commit -m "chore(analysis): refresh README.md"
           # Retry on race with another push to main.
           for i in 1 2 3 4; do
             if git push origin HEAD:main; then exit 0; fi

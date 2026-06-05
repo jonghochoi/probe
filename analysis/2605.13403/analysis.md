@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | RotVLA: Rotational Latent Action for Vision-Language-Action Model |
 | 저자 | Qiwei Li, Xicheng Gong, Xinghang Li, Peiyan Li, Quanyun Zhou, Hangjun Ye, Jiahuan Zhou, Yadong Mu |
-| 링크 | [arXiv:2605.13403](https://arxiv.org/abs/2605.13403) |
+| 링크 | [arXiv:2605.13403](https://arxiv.org/abs/2605.13403) · [Website](https://qiweili00.github.io/rotvla-page/) |
 | 발행일 / 버전 | 2026-05-13 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-26 |

@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Being-H0.7: A Latent World-Action Model from Egocentric Videos |
 | 저자 | Hao Luo, Wanpeng Zhang, Yicheng Feng, Sipeng Zheng, Haiweng Xu, Chaoyi Xu, Ziheng Xi, Yuhui Fu, Zongqing Lu (BeingBeyond Team) |
-| 링크 | [arXiv:2605.00078](https://arxiv.org/abs/2605.00078) |
+| 링크 | [arXiv:2605.00078](https://arxiv.org/abs/2605.00078) · [GitHub](https://github.com/BeingBeyond/Being-H) |
 | 발행일 / 버전 | 2026-04-30 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-27 |

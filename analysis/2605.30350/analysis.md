@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | DynaFLIP: Rethinking Robotics Perception via Tri-Modal-Dynamics Guided Representation |
 | 저자 | Jusuk Lee, Seungjae Lee, Jonghun Shin, Hoseong Jung, Sungha Kim, Daesol Cho, H. Jin Kim, Jia-Bin Huang, Furong Huang |
-| 링크 | [arXiv:2605.30350](https://arxiv.org/abs/2605.30350) |
+| 링크 | [arXiv:2605.30350](https://arxiv.org/abs/2605.30350) · [Website](https://dynaflip-robotics.github.io/) |
 | 발행일 / 버전 | 2026-05-28 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-06-01 |

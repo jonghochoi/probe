@@ -117,7 +117,7 @@ return se_main + aux_loss_weight * (se_arm + se_hand)  # Eq. (12)
 
 ---
 
-### 🔁 변경 사유 (feedback 모드)
+### 변경 사유 (feedback 모드)
 
 - **라운드 2 (verifiable 형태로 재구성):**
   - in-place forward 수정 → **subclass-seam** 으로 전환: base 에 동작-보존 seam 2개 (`_compute_suffix_out`, `_build_model`) + 신규 `modeling_pi0_enhance.py`/`configuration_pi0_enhance.py`. 의미는 라운드 1 과 동일 (식 9–12) 하나, 산출물이 설치된 foundry 에서 **실행 검증** 가능해짐 (sibling `test_pi0_enhance_smoke.py`, validation §🧬).

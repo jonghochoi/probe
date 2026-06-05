@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Dexora: Open-source VLA for High-DoF Bimanual Dexterity |
 | 저자 | Zongzheng Zhang, Jingrui Pang (공동 1저자), Zhuo Yang, Kun Li, Minwen Liao, Saining Zhang, Guoxuan Chi, Jinbang Guo, Huan-ang Gao, Modi Shi, Dongyun Ge, Yao Mu, Jiayuan Gu, Rui Chen, Hao Dong, Huazhe Xu, Li Yi, Yixin Zhu, Hang Zhao, Pengwei Wang, Shanghang Zhang, Guocai Yao, Jianyu Chen, Hongyang Li, Hao Zhao (교신) — Tsinghua University / BAAI / HKU / SJTU / ShanghaiTech / Peking University |
-| 링크 | [arXiv:2605.18722](https://arxiv.org/abs/2605.18722) |
+| 링크 | [arXiv:2605.18722](https://arxiv.org/abs/2605.18722) · [GitHub](https://github.com/ZZongzheng0918/Dexora) · [HuggingFace](https://huggingface.co/datasets/Dexora/Dexora_Real-World_Dataset) |
 | 발행일 / 버전 | 2026-05-18 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-29 |

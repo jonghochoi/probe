@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Dexterity-BEV: Aligning 3D World and Actions for Generalizable Robot Policies Learning |
 | 저자 | Huayi Zhou, Wei Gao, Dekun Lu, Ruiji Liu, Zhanqi Zhang, Ziyang Zhang, Jian Chen, Wenlve Zhou, Sheng Xu, Shumin Li, Kangyi Guo, Shichen Xu, Zixin Huang, Yongyi Su, Kui Jia |
-| 링크 | [arXiv:2606.02274](https://arxiv.org/abs/2606.02274) |
+| 링크 | [arXiv:2606.02274](https://arxiv.org/abs/2606.02274) · [Website](https://hnuzhy.github.io/projects/Dex-BEV) |
 | 발행일 / 버전 | 2026-06-01 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-06-04 |

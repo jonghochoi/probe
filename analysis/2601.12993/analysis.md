@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Being-H0.5: Scaling Human-Centric Robot Learning for Cross-Embodiment Generalization |
 | 저자 | Hao Luo, Ye Wang, Wanpeng Zhang, Sipeng Zheng, Ziheng Xi, Chaoyi Xu, Haiweng Xu, Haoqi Yuan, Chi Zhang, Yiqing Wang, Yicheng Feng, Zongqing Lu (BeingBeyond / Peking University) |
-| 링크 | [arXiv:2601.12993](https://arxiv.org/abs/2601.12993) |
+| 링크 | [arXiv:2601.12993](https://arxiv.org/abs/2601.12993) · [GitHub](https://github.com/BeingBeyond/Being-H) · [Website](https://research.beingbeyond.com/being-h05) |
 | 발행일 / 버전 | 2026-01-19 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-27 |

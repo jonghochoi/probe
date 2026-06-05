@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | VLA-Adapter: An Effective Paradigm for Tiny-Scale Vision-Language-Action Model |
 | 저자 | Yihao Wang, Pengxiang Ding, Lingxiao Li, Can Cui, Zirui Ge, Xinyang Tong, Wenxuan Song, Han Zhao, Wei Zhao, Pengxu Hou, Siteng Huang, Yifan Tang, Wenhui Wang, Ru Zhang, Jianyi Liu, Donglin Wang (BUPT · Westlake University · Zhejiang University · OpenHelix Team · HKUST-Guangzhou) |
-| 링크 | [arXiv:2509.09372](https://arxiv.org/abs/2509.09372) |
+| 링크 | [arXiv:2509.09372](https://arxiv.org/abs/2509.09372) · [GitHub](https://github.com/OpenHelix-Team/VLA-Adapter) · [HuggingFace](https://huggingface.co/VLA-Adapter) · [Website](https://vla-adapter.github.io/) |
 | 발행일 / 버전 | 2025-09-11 · v2 (2025-09-22 개정) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-28 |
