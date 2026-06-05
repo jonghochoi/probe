@@ -14,15 +14,6 @@ Normalize to the arXiv id when possible (strip version unless the
 human pinned a specific vN). If the argument is empty or unparseable,
 stop and say so — do not guess a paper.
 
-Optional argument — humanize mode (`fast` | `standard` | `strict`):
-If the LAST whitespace-separated token of the invocation argument is
-exactly one of `fast`, `standard`, or `strict`, treat it as the
-humanize tier and strip it before normalizing the paper id; otherwise
-default to `standard`. Store the result as `humanize_mode` and pass it
-through to the HUMANIZE section below as `options.mode`. This token is
-never part of the paper id (a real arXiv id / URL never equals one of
-those three words).
-
 Optional flag — `--focus "<§X.Y,§A.B,...>"` (FOCUSED re-extraction):
 When set, this is an OUTER-LOOP refresh driven by `/reproduce-paper`,
 not a from-scratch analysis. The argument is a comma-separated, `§`-
@@ -319,12 +310,11 @@ HARD RULES:
        every letter, and the `(§n)` marker stay byte-identical, but
        each `$X$` span is rewrapped as `` $`X`$ `` and rule-2
        spaces are inserted around each `$`. Math wrapping is
-       formatting, not content — the §4-5 verbatim-quote invariant
-       and rules 1+2 are not in conflict. Failing to apply this at
+       formatting, not content — the verbatim-quote rule and
+       rules 1+2 are not in conflict. Failing to apply this at
        extraction time leaks the LaTeX source onto the GitHub-
        rendered page (the underscore italic pass runs before KaTeX
-       inside blockquotes too) and triggers a `content-fidelity-auditor`
-       rollback.
+       inside blockquotes too).
 - 🔑 기술 키워드 analogies must not distort the paper. If a faithful
   analogy doesn't exist, fall back to a plain definition.
 - Methodology favours preservation over compression. Default: if the
@@ -352,8 +342,8 @@ HARD RULES:
   are out (link-rot risk). Cap: 3 figures per analysis — this is a
   decision tool, not a slide deck. Abstract-only / PDF-only
   retrieval → omit the figure citations entirely (no placeholders).
-  The English caption blockquote is a verbatim token; the
-  humanize-korean pass must leave it untouched.
+  The English caption blockquote is a verbatim token — kept
+  byte-identical.
 
 FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
@@ -366,57 +356,6 @@ is added unconditionally — `/implement-design` itself decides whether the
 Design can be mapped to a given foundry (and emits a clean
 `🚧 매핑 불가` if not). Never auto-invoke `/implement-design` from this prompt;
 the human decides.
-
----
-
-HUMANIZE — Korean post-processing (mandatory before commit):
-
-After both Korean output files (`analysis/<id>/analysis.md` and
-`analysis/<id>/design.md`) are written and BEFORE `git add`, invoke
-the `humanize-korean` skill once per file:
-
-  Skill:  `.claude/skills/humanize-korean/SKILL.md`
-  Mode:   pass `options.mode: {humanize_mode}` (parsed in INPUT;
-          default standard). The `analysis/` prefix resolves to
-          standard by default (pipeline: `ai-tell-detector` →
-          `korean-style-rewriter` → `content-fidelity-auditor` in the
-          main loop, with `naturalness-reviewer` once as a final
-          check). `strict` (full 4-agent parallel pipeline) and `fast`
-          are reached only when the caller passed that mode token.
-          See `SKILL.md` Phase 0 for the resolver and per-tier
-          pipeline. STYLE §4-5 invariants are enforced in all tiers.
-          The monolith fast-path is not used.
-  Input:  the path of each file just written (run the pipeline once
-          per file)
-  Output: in-place rewrite of the same file
-
-Hard rules for this stage:
-  - `fidelity_audit` verdict `fail` → ROLLBACK the rewrite; commit the
-    pre-humanize content; report the failure under your final summary.
-  - `naturalness_review` verdict `rewrite_round_2` → run Phase B
-    again on the residual findings; `rollback_and_rewrite` → restore
-    the over-polished spans from the original, then re-run Phase B.
-    Max 3 Phase B rounds total; afterward `hold_and_report` and keep
-    the original.
-  - Change rate > 30% → automatic rework round; > 50% → abort the
-    rewrite and keep the original.
-  - The §4-5 invariants in `docs/STYLE.md` MUST survive
-    humanization for both files. Violation of any invariant (verbatim
-    tokens, emoji placement, `<a id="ref-…">` anchors, arXiv / DOI
-    links, citation accuracy, P#/D# tag form, §4-2 glossary
-    translations) is treated as a fidelity fail → rollback.
-  - English-verbatim quotes inside a `>` blockquote, their `(§n)`
-    source markers, and any formula are excluded from humanize
-    rewriting (treated as verbatim tokens, §5-6). Touching them is a
-    fidelity fail.
-  - The humanize pass NEVER adds, removes, or changes facts; it only
-    rewrites Korean prose style (translation-ese, mechanical
-    parallelism, AI signature phrases, hedging, etc.) per
-    `.claude/skills/humanize-korean/references/ai-tell-taxonomy.md`
-    and `.claude/skills/humanize-korean/references/rewriting-playbook.md`.
-
-Then proceed with `git add` / `git commit` / `git push` on the
-humanized (or rolled-back) files per the GIT section below.
 
 ---
 

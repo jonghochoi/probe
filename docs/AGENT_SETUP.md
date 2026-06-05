@@ -99,7 +99,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 | Keyword Sweep / topic-watch | built-in web search | arXiv `export.arxiv.org/api/query` |
 | Competitor Monitoring | built-in web search | arXiv query + S2 author lookup |
 
-S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt records the exact command and HTTP status verbatim under 📋 Scout Methodology and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. After the report is written the prompt resolves the run date (`TZ=Asia/Seoul`) and runs `git add` / `commit` / `git push origin HEAD:main` for that single report file — the only addition beyond retrieval; no PR is created. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, the `context/P#.md` never-modify guard) is unchanged from the manual run.
+S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt discloses the failure verbatim in the `Papers scanned:` header line and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. After the report is written the prompt resolves the run date (`TZ=Asia/Seoul`) and runs `git add` / `commit` / `git push origin HEAD:main` for that single report file — the only addition beyond retrieval; no PR is created. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, the `context/P#.md` never-modify guard) is unchanged from the manual run.
 
 > The P1-scoped prompt intentionally **drops the monthly Cross-pollination rule** — its source section (full `context/MASTER.md` §12) does not exist in the P1 extract.
 
@@ -110,7 +110,7 @@ There is no `--dry-run`. On the routine detail page use **Run now** — it opens
 - Follows `scouting/templates/report.md` + `docs/STYLE.md`.
 - Both the English and Korean files were produced.
 - Every paper link resolves (no fabricated arXiv IDs).
-- 📋 Scout Methodology has **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
+- The `Papers scanned:` header discloses **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
 - Decision implications are concrete (a specific config key / hyperparameter / metric, not "tune DR wider").
 - The Anti-topics filter actually fired (an empty "did not pass filter" section is suspicious).
 
@@ -147,7 +147,7 @@ Network note: `/analyze-paper`'s full-text fetch needs the session environment t
 | Same paper recommended two weeks in a row | Agent skipped the last-2-weeks context | Confirm the prompt's read-only "last 2 weeks of `scouting/`" reference is intact and those files exist |
 | `claude routine register` / a `.claude/routines/*.yaml` does nothing | That is not the execution mechanism | Register via the RemoteTrigger form ([claude.ai/code/routines](https://claude.ai/code/routines)) — Step 2/4 |
 | Agent silently edits `context/P#.md` | Prompt guard missing | Re-add the hard "never modify `context/P#.md`" guard (currently present in `scouting.md` — do not remove it) |
-| Routine ran but PR is empty / every `curl` fails | Outbound network policy blocking the API domains | Set Network access = Custom and allow `export.arxiv.org` / `arxiv.org` / `api.semanticscholar.org`; check the verbatim error under 📋 Scout Methodology |
+| Routine ran but PR is empty / every `curl` fails | Outbound network policy blocking the API domains | Set Network access = Custom and allow `export.arxiv.org` / `arxiv.org` / `api.semanticscholar.org`; check the verbatim error in the `Papers scanned:` header line |
 | Citation graph only partially filled / frequent HTTP 429 | Semantic Scholar rate-limited | Run keyless (recommended) or add a *valid approved* key; keep the ~3 s sleep + backoff. See the two-403 note in Step 1 |
 | Semantic Scholar returns 403 even with a key set | Invalid/unapproved key (free-domain emails no longer get keys) | Remove the `SEMANTIC_SCHOLAR_API_KEY` env var and run keyless (works at 200) |
 | `scouting.md` tries to call MCP tools | Stale prompt (MCP residue) | Confirm the RETRIEVAL section is `curl` REST — MCP is unreachable from cloud sessions |

@@ -137,7 +137,6 @@ PROBE vendors code and specs from external repos — kept in sync with upstream,
 
 | Source | What PROBE borrows |
 |---|---|
-| [epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai) | The `humanize-korean` skill + four review agents under `.claude/`. Every Korean output passes this before commit; fidelity invariants in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
 | [huggingface/lerobot](https://github.com/huggingface/lerobot) | The pinned snapshot at `vendor/lerobot/` — the v0 foundry every `impl.patch` targets. Pinned commit + refresh in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
 | [colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) | The MCP server indexing `vendor/lerobot/`, so `/implement-design` grounds Design rows in exact `file:line`. See [`CLAUDE.md`](CLAUDE.md) § CodeGraph. |
 
