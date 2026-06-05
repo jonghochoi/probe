@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.21 (2026-06-04) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.22 (2026-06-05) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -312,6 +312,7 @@ plain. The `##` section emojis for this document type (in addition to §2):
 | 📊 | 실험 설정과 결과 | A |
 | ⚖️ | 한계 | A |
 | ♻️ | 재현성 | A |
+| 🩺 | 건전성 판정 | A |
 | 🎯 | 관련 Pillar / Decision (P# / D#) | B |
 | ✨ | 핀 논문 대비 델타 | B |
 | ⚙️ | 의사결정 함의 | B |
@@ -320,6 +321,14 @@ plain. The `##` section emojis for this document type (in addition to §2):
 
 Use these header names verbatim. Part (B) reuses the 🎯 ✨ ⚙️ ⚠️ 💡 semantics
 from §2. Do not use an emoji not listed in §2 or here.
+
+🩺 건전성 판정 closes Part (A): a skeptical soundness verdict
+(`rigor_bucket` low|high + `confidence` 1–5 + step-by-step 근거), ported from
+SoundnessBench's aggressive rigor policy to counter LLM optimism bias
+(over-rating rigor). It defaults to `low` and gates the Part (B) ⚙️ 의사결정
+함의 — a `low` verdict blocks any actionable pipeline change. The scouting
+report's 📊 점수 요약 carries the same idea as a fifth 0–3 column (`Soundness`,
+Total `/15`); both share the same aggressive default.
 
 ### 5-3. Korean & verbatim rules
 

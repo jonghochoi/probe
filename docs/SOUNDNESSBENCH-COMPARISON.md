@@ -40,7 +40,7 @@ ML 연구 제안(가설 + 실험 설계)의 **건전성(soundness/rigor)**을 LL
 | 판정자 | LLM-as-judge(다중 프로바이더) | Claude 에이전트, 품질 미측정 |
 | 측정 | accuracy + Cohen's κ | 없음 |
 | 편향 인식 | optimism bias 상쇄(aggressive) | 없음(중립 채점) |
-| 채점 차원 | rigor 1축(low/high) + confidence | 4축 0–3, soundness 축 부재 |
+| 채점 차원 | rigor 1축(low/high) + confidence | 이식 전 4축 0–3(soundness 축 부재) → 이식 후 5축(§4) |
 
 핵심 관찰: probe의 `Reproducibility` 축은 "코드/데이터 공개 여부"일 뿐,
 **"주장이 실험으로 방법론적으로 뒷받침되는가(soundness)"**와는 다릅니다.
@@ -59,11 +59,11 @@ SoundnessBench의 aggressive 정책을 probe의 마크다운-프롬프트 구조
   내부 타당성(통제·baseline·ablation·metric 타당성·주장-증거 일치)을 보며,
   "명백한 근거 없으면 낮게"라는 aggressive 기본값을 적용. `(c) 의사결정 함의`는
   Soundness ≥ 2일 때만 실행 가능한 변경을 발행하도록 게이트.
-- `.claude/prompts/analysis.md` + `analysis/_TEMPLATE.md` — Part (A) 끝에
+- `.claude/prompts/analysis.md` + `analysis/templates/analysis.md` — Part (A) 끝에
   `🩺 건전성 판정` 섹션 추가(`rigor_bucket` low|high 기본값 low + `confidence`
   1–5 + step-by-step 근거). 이 판정이 `⚙️ 의사결정 함의`를 게이트.
-- `scouting/_TEMPLATE.md` — 점수 요약 표에 `Soundness` 열 추가(Total /12 → /15).
-- `docs/STYLE.md` — §5-2에 `🩺` 등록, v1.19 changelog.
+- `scouting/templates/report.md` — 점수 요약 표에 `Soundness` 열 추가(Total /12 → /15).
+- `docs/STYLE.md` — §5-2에 `🩺` 등록(v1.22).
 
 효과: 부실한 논문이 ★ 티어로 승격되거나 잘못된 config 변경으로 이어지는 것을
 차단합니다.

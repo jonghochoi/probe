@@ -124,15 +124,6 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ---
 
-## 📊 점수 요약 (이전 표기 — 4축, 참고용 폐기)
-
-<!-- DEPRECATED: 4축(/12) 표기는 Soundness 축 도입 전 형식입니다. 신규 리포트는
-     위 5축(/15) 표를 사용합니다. 이 블록은 형식 이력 메모이며 리포트에는 넣지
-     않습니다. -->
-
-
----
-
 ## 🚫 필터 통과 실패 후보 논문
 
 | Paper | Link | Reason dropped |
