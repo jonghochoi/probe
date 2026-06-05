@@ -20,11 +20,10 @@ Optional flags:
 
   - `--foundry <name>` — default `lerobot` (the only foundry currently
     registered)
-  - `--max-rounds N` — default `3` (matches the 3-round cap of
-    humanize-korean). `1` means single-shot (run Round 0 only, equivalent
-    to the current manual workflow). Inner step and outer step share the
-    same counter — this is a combined cap (no separate outer counter;
-    convergence is judged by fixed-point detection).
+  - `--max-rounds N` — default `3`. `1` means single-shot (run Round 0
+    only, equivalent to the current manual workflow). Inner step and outer
+    step share the same counter — this is a combined cap (no separate outer
+    counter; convergence is judged by fixed-point detection).
   - `--skip-analysis` — automatically on when a design path is given as
     input. Also automatically on when an arXiv id is given but
     `analysis/<id>/design.md` already exists (regenerable, but re-fetch

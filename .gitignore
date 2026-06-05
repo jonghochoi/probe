@@ -17,9 +17,3 @@ venv/
 .idea/
 *.swp
 .DS_Store
-
-# humanize-korean scratch workspace — per-run experiment artifacts
-# (detection JSON, rewrite drafts, validation reports). The only deliverable
-# is the in-place rewrite of the target file; everything in _workspace/
-# is ephemeral.
-_workspace/

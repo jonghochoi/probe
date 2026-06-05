@@ -24,7 +24,6 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
-| `.claude/agents/**`, `.claude/skills/**` | external | Korean humanization pipeline vendored from `epoko77-ai/im-not-ai` — the 4 review agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) + the `humanize-korean` skill every Korean output passes before commit |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar); invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
