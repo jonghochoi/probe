@@ -28,13 +28,21 @@ Project story:
     ground that no human has the hours to cover — and the colony
     stops mining the same vein twice.
 
+    And when one vein is worth mining, the same drone digs in:
+    PROBE takes a single chosen paper and drills it into a Korean
+    deep-dive plus a vendor-agnostic Layer 1 Design, then maps that
+    Design onto a target foundry and statically validates the patch.
+    Two tracks, one psionic core — outward scouting and focused
+    reproduction.
+
     My life for Aiur.
 
 Usage:
     from brand import print_banner, SIGIL
 
     print_banner()
-    print(f"{SIGIL} Scouting Report ready for week 2026-W17")
+    print(f"{SIGIL} Scouting Report ready for run 2026-06-04")
+    print(f"{SIGIL} Deep-dive + Design ready for arXiv:2511.00139")
 """
 
 # ── ANSI color codes ──────────────────────────────────────────────────
@@ -78,9 +86,10 @@ SIGIL = f"{ORANGE}{BOLD}[PRB]{RESET}"
 #          │    │    │
 #          ▼    ▼    ▼
 #           P R O B E          ← author watch · citation graph · anti-topic filter
-#               │
-#               ▼
-#      📡 Scouting Report     ← 3–5 papers · "change what you train next"
+#            │        │
+#            ▼        ▼
+#     Scouting     Deep-dive   ← outward: 3–5 papers/run · "change what you train next"
+#      Report      + Design       focused: one paper → analysis → Layer 1 Design → impl
 #
 BANNER = f"""{ORANGE}{BOLD}
   {RESET}{ORANGE}◆━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◆{BOLD}
@@ -100,10 +109,10 @@ FLOW = (
     f"{ORANGE}        ▼    ▼    ▼{RESET}\n"
     f"         {WHITE}{BOLD}P R O B E{RESET}   "
     f"      {DIM}← author watch · citations · filter{RESET}\n"
-    f"{ORANGE}             │{RESET}\n"
-    f"{ORANGE}             ▼{RESET}\n"
-    f"    {ORANGE}{BOLD}📡 Scouting Report{RESET}   "
-    f"  {DIM}← 3–5 papers · decision-grade{RESET}\n"
+    f"{ORANGE}        │         │{RESET}\n"
+    f"{ORANGE}        ▼         ▼{RESET}\n"
+    f"   {ORANGE}{BOLD}Scouting{RESET}   {ORANGE}{BOLD}Deep-dive{RESET}  "
+    f"  {DIM}← outward: 3–5 papers · focused: one paper → Design{RESET}\n"
 )
 
 # ── Version ───────────────────────────────────────────────────────────
@@ -162,7 +171,8 @@ if __name__ == "__main__":
     print()
     print(rule("Scouting Complete"))
     print()
-    print(log("Scanned 87 new arXiv submissions this week", "info"))
+    print(log("Scanned 87 new arXiv submissions this run", "info"))
     print(log("4 papers pass Q#/H# relevance threshold", "ok"))
+    print(log("Deep-dive + Layer 1 Design ready for arXiv:2511.00139", "ok"))
     print(log("Anti-topic filter caught 12 mobile-manipulation papers", "warn"))
     print(log("semantic-scholar-mcp timed out — retry scheduled", "error"))

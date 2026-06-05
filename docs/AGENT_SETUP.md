@@ -4,7 +4,7 @@ This guide takes you from zero to a scheduled, self-running PROBE agent — clou
 
 > ### Run manually for 1–2 weeks first
 >
-> Do **not** automate on day one. Open a [Claude.ai](https://claude.ai) conversation with Sonnet or Opus, paste `context/MASTER.md`, run the `.claude/prompts/scouting.md` template by hand (one global find/replace of `<PILLAR>` → `P1`/`P2`/`P3`/`P4` before pasting), and iterate until the report quality is where you want it. The prompt that survives manual iteration is the prompt you deploy as a routine. Bad prompt + full automation = weekly garbage generated on schedule.
+> Do **not** automate on day one. Open a [Claude.ai](https://claude.ai) conversation with Sonnet or Opus, paste `context/MASTER.md`, run the `.claude/prompts/scouting.md` template by hand (one global find/replace of `<PILLAR>` → `P1`/`P2`/`P3`/`P4` before pasting), and iterate until the report quality is where you want it. The prompt that survives manual iteration is the prompt you deploy as a routine. Bad prompt + full automation = garbage generated on schedule, run after run.
 
 ---
 
@@ -12,19 +12,19 @@ This guide takes you from zero to a scheduled, self-running PROBE agent — clou
 
 Only **three** things change versus a manual run:
 
-- **Execution location** — your laptop → the cloud (runs Mon & Thu 09:00 even with the laptop off).
+- **Execution location** — your laptop → the cloud (runs on a scheduled cadence even with the laptop off).
 - **Retrieval** — Claude's built-in web search → direct `curl` calls to public REST APIs (arXiv + Semantic Scholar Graph). Same data sources, better citation accuracy and reproducibility. **No MCP server is involved** — cloud routine sessions cannot reach a local MCP server, so retrieval is plain `curl`.
 - **Output** — manual copy → the prompt itself commits the report file and pushes directly to `main` with `git push origin HEAD:main` (no PR is created; commit history *is* the research log). To prevent concurrent runs from racing on the shared branch, configure the RemoteTrigger to allow at most one active session per environment, and the prompt retains a `git pull --rebase origin main` retry as an in-prompt safety net.
 
 The repo's durable asset is the **prompt** (`.claude/prompts/scouting.md`, shared by P1–P4), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
 
-> This guide uses **P1** as the worked example. The scouting and synthesis prompts are now single shared templates (`.claude/prompts/scouting.md`, `synthesis.md`); for another pillar, replace every `<PILLAR>` token in the template with `P2`/`P3`/`P4` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{2,3,4}.md` and `synthesis/P1_BRIEF.md` → `synthesis/P{2,3,4}_BRIEF.md` in your routine title/notes, and register one routine per pillar.
+> This guide uses **P1** as the worked example. The scouting prompt is now a single shared template (`.claude/prompts/scouting.md`); for another pillar, replace every `<PILLAR>` token in the template with `P2`/`P3`/`P4` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{2,3,4}.md` in your routine title/notes, and register one routine per pillar.
 
 ### Prerequisites
 
 | Item | Note |
 |---|---|
-| Claude Code Pro plan | Routines need cloud execution. The Pro daily cap easily covers 2 runs/week. |
+| Claude Code Pro plan | Routines need cloud execution. The Pro daily cap easily covers the scouting cadence. |
 | GitHub repo connected to Claude Code | Required for PR output (this repo). |
 | Outbound network policy | The routine's cloud environment must allow `export.arxiv.org` and `api.semanticscholar.org` — see Step 1. |
 | `SEMANTIC_SCHOLAR_API_KEY` | Optional. Set as an environment variable (there is no secret store). See Step 1. |
@@ -82,15 +82,15 @@ There is no YAML and no `claude routine register`. Create the schedule in the [c
 | Prompt (Instructions) | Paste the full body of `.claude/prompts/scouting.md` after replacing every `<PILLAR>` with `P1` (one global find/replace; the file shows the exact instruction at the top). Model selector → **Sonnet**. |
 | Repositories | This repo. Output is pushed to a `claude/`-prefixed branch and reviewed via PR. |
 | Environment | The Step 1 environment (`SEMANTIC_SCHOLAR_API_KEY` if used + Network access = Custom). |
-| Trigger (Schedule) | Mon & Thu 09:00 (the form takes local time → UTC; min interval 1 h). For exact cron, after creating run the CLI `/schedule update` with `0 9 * * 1,4`. |
+| Trigger (Schedule) | A scheduled recurring cadence of your choosing (the form takes local time → UTC; min interval 1 h). For exact cron, after creating run the CLI `/schedule update` with your chosen schedule. |
 | Connectors | None — remove all (retrieval is `curl`, not an MCP connector). |
 | Permissions | Default (`claude/` branch push) is sufficient — PR output needs no unrestricted push. |
 
 The prompt is the routine body and is **self-contained**: it names its own context files (`context/P1.md`, the last 2 weeks of `scouting/`), the `curl` procedure, output rules and guards. The form has no `context_files` field — the agent clones the repo and reads files per the prompt. The prompt is **pillar-scoped**: it reads the `context/P#.md` extract (skeleton §1–§9; Pillar=§2, Decision Log=§4, Anti-topics=§5, Tracked Literature=§6, Researchers=§7, Competitor=§8, Open Items=§9; no Cross-pollination/Feedback-Loop sections), never the full doc.
 
-### Step 3 — The externalized prompts already exist
+### Step 3 — The externalized prompt already exists
 
-`.claude/prompts/scouting.md` and `synthesis.md` are committed — one scouting + one synthesis prompt, each a single shared template for all four pillars (`<PILLAR>` substituted to `P1`/`P2`/`P3`/`P4` once before paste). They are the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
+`.claude/prompts/scouting.md` is committed — the scouting prompt, a single shared template for all four pillars (`<PILLAR>` substituted to `P1`/`P2`/`P3`/`P4` once before paste). It is the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
 
 | Retrieval step | Manual run | Routine (`curl` REST) |
 |---|---|---|
@@ -116,27 +116,9 @@ There is no `--dry-run`. On the routine detail page use **Run now** — it opens
 
 If it is unsatisfactory, fix `scouting.md` (or `context/P1.md`) and re-run — do not leave automation on with a bad prompt.
 
-### Bonus — P1 Synthesis Brief
-
-Where weekly scouting looks *outward* for new papers, this output looks *inward*: it compresses what the already-pinned papers are collectively saying — what props up each Decision and what shakes it — into a prose narrative so you can carry the P1 architecture in your head. Run it as a **second, fully separate** RemoteTrigger routine:
-
-| Form field | Value |
-|---|---|
-| Name | `probe-p1-synthesis` |
-| Prompt | Paste `.claude/prompts/synthesis.md` with every `<PILLAR>` replaced by `P1` (one global find/replace before paste). Model Sonnet. |
-| Repositories | This repo |
-| Environment | Default is fine — **no search → no custom domains needed** |
-| Trigger | Monthly (exact cron via `/schedule update` `0 9 1 * *`) |
-| Connectors | None |
-| Input | `context/P1.md` §4 (D1–D7) + §6 (pinned papers) only |
-| Output | `synthesis/P1_BRIEF.md` — Korean, overwritten each run (living snapshot) |
-| Retrieval | **None** — no MCP/web/`curl`, pure static-file compression (zero citation-fabrication risk) |
-
-When the pinned literature (§6) changes, don't wait for the monthly run — hit **Run now** to refresh the brief. Its value is entirely in being short and honest; if it grows long it is dead.
-
 ### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/implement-design` → `/validate-impl`, orchestrated by `/reproduce-paper`)
 
-Scouting finds new papers *outward*; synthesis re-states the pinned set; this third mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement-design` produces a target-codebase patch and `/validate-impl` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; this mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement-design` produces a target-codebase patch and `/validate-impl` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|
