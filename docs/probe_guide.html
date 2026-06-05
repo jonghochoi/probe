@@ -522,7 +522,7 @@
       문제는 <code>cs.RO</code> + <code>cs.LG</code>에 매일 50 ~ 100편이 새로 올라온다는 것입니다. 그 중 <em>Hand-centric dexterous manipulation + Sim-to-Real</em>에 실제로 연관된 논문은 주당 3 ~ 5편 — <strong>3 ~ 5% 신호율</strong>입니다.
     </p>
     <p>
-      직접 필터링하면 매주 몇 시간이 사라집니다. 포기하면 누군가 이미 풀어 놓은 문제를 다시 풉니다. PROBE는 그 3 ~ 5%를 대신 찾아오고 — <strong>다운로드 폴더에서 죽게 두지 않습니다.</strong> 단순 요약 대신 <strong>세 갈래로 의사결정 재료</strong>를 만듭니다 — outward (찾기), inward (압축), focused (재현):
+      직접 필터링하면 매주 몇 시간이 사라집니다. 포기하면 누군가 이미 풀어 놓은 문제를 다시 풉니다. PROBE는 그 3 ~ 5%를 대신 찾아오고 — <strong>다운로드 폴더에서 죽게 두지 않습니다.</strong> 단순 요약 대신 <strong>두 갈래로 의사결정 재료</strong>를 만듭니다 — outward (찾기), focused (재현):
     </p>
     <div class="callout callout-info">
       <span class="callout-icon">🎯</span>
@@ -572,7 +572,7 @@
         <div class="compare-body">
           <div class="compare-item">
             <span class="compare-icon">📥</span>
-            <span>매주 Scouting Report가 레포에 commit 된다</span>
+            <span>정기 Scouting Report가 레포에 commit 된다</span>
           </div>
           <div class="compare-item">
             <span class="compare-icon">🥇</span>
@@ -588,11 +588,7 @@
           </div>
           <div class="compare-item">
             <span class="compare-icon">🌱</span>
-            <span>월간 cross-pollination — 인접 분야에서 강제 1편</span>
-          </div>
-          <div class="compare-item">
-            <span class="compare-icon">🧠</span>
-            <span>월간 Synthesis Brief가 pillar 별 구조를 머릿속에 유지시킨다</span>
+            <span>주기적 cross-pollination — 인접 분야에서 강제 1편</span>
           </div>
           <div class="compare-item">
             <span class="compare-icon">🔬</span>
@@ -623,17 +619,17 @@
 
   <!-- ── Pipeline ─────────────────────────────────────────────────── -->
   <section id="pipeline">
-    <h2>파이프라인 — 세 갈래 + 사이드카 한 개</h2>
+    <h2>파이프라인 — 두 갈래 + 사이드카 한 개</h2>
     <p>
-      PROBE는 <strong>하나의 정적 컨텍스트를 공유하는 세 갈래의 산출물</strong>입니다 — outward (<code>scouting/</code>), inward (<code>synthesis/</code>), focused (<code>analysis/</code>). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌며, 자기 폴더에 씁니다.
+      PROBE는 <strong>하나의 정적 컨텍스트를 공유하는 두 갈래의 산출물</strong>입니다 — outward (<code>scouting/</code>), focused (<code>analysis/</code>). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌며, 자기 폴더에 씁니다.
     </p>
 
     <div class="pipe-grid">
       <div class="pipe-col">
         <h4>OUTWARD</h4>
-        <div class="pipe-sub">Weekly Scouting</div>
+        <div class="pipe-sub">Scheduled Scouting</div>
         <ul>
-          <li>주 2회 (월·목), pillar 별</li>
+          <li>정해진 주기로 정기 실행, pillar 별</li>
           <li>· Author Watch</li>
           <li>· Citation-Graph 확장</li>
           <li>· Keyword Sweep</li>
@@ -643,21 +639,6 @@
         <div class="pipe-out">
           <code>scouting/YYYY-MM-DD-P#.md</code>
           <span class="text-muted">3 ~ 5편 / 실행, append-only, 한글</span>
-        </div>
-      </div>
-      <div class="pipe-col">
-        <h4>INWARD</h4>
-        <div class="pipe-sub">Monthly Synthesis</div>
-        <ul>
-          <li>월 1회, pillar 별</li>
-          <li>· pinned literature 압축</li>
-          <li>· D# ↔ §6 pin 연결</li>
-          <li>· retrieval 없음 — 정적 압축</li>
-          <li>· 짧고 정직하게 (길어지면 죽음)</li>
-        </ul>
-        <div class="pipe-out">
-          <code>synthesis/P{1..4}_BRIEF.md</code>
-          <span class="text-muted">living snapshot, 매 실행 덮어쓰기</span>
         </div>
       </div>
       <div class="pipe-col">
@@ -704,7 +685,7 @@
         <div>
           <div class="principle-title">동적 — 에이전트가 쓴다</div>
           <div class="principle-desc">
-            <code>scouting/</code>는 append-only(실행마다 pillar별 새 dated 파일 1개; 다음 실행은 해당 pillar의 직전 ~2주분만 읽음). <code>synthesis/</code>와 <code>analysis/</code>는 매 실행마다 덮어쓰는 living snapshot — 이력 없음, 필요 시 재생성.
+            <code>scouting/</code>는 append-only(실행마다 pillar별 새 dated 파일 1개; 다음 실행은 해당 pillar의 직전 ~2주분만 읽음). <code>analysis/</code>는 매 실행마다 덮어쓰는 living snapshot — 이력 없음, 필요 시 재생성.
           </div>
         </div>
       </div>
@@ -722,7 +703,7 @@
   <section id="quickstart">
     <h2>빠른 시작 — 3단계 점진적 자동화</h2>
     <p>
-      <strong>당신은 단계를 건너뛰지 않습니다.</strong> Stage 1에서 살아남은 프롬프트가 Stage 3에 배포되는 프롬프트입니다. 자동화 → 나쁜 프롬프트 → 매주 쓰레기 로그 자동 생성. 1 ~ 2주 수동 실행으로 품질을 잡은 뒤 Routine에 올립니다.
+      <strong>당신은 단계를 건너뛰지 않습니다.</strong> Stage 1에서 살아남은 프롬프트가 Stage 3에 배포되는 프롬프트입니다. 자동화 → 나쁜 프롬프트 → 주기적으로 쓰레기 로그 자동 생성. 1 ~ 2주 수동 실행으로 품질을 잡은 뒤 Routine에 올립니다.
     </p>
 
     <div class="steps">
@@ -731,7 +712,7 @@
         <div class="step-body">
           <h4>Stage 1 — 수동 실행 (Week 1–2)</h4>
           <p>
-            새 <a href="https://claude.ai" target="_blank" rel="noopener">Claude.ai</a> 대화 → 해당 <code>context/P#.md</code> 업로드 → Scouting Prompt 붙여넣기(실행 날짜 + pillar 채우기) → 결과를 <code>scouting/templates/report.md</code> 기준으로 검토. 통과하지 못하면 모델이 아니라 <em>프롬프트</em>가 문제입니다. <code>scouting/P#/YYYY-MM-DD.md</code>로 저장 후 commit. 다음 실행(월·목)에 반복.
+            새 <a href="https://claude.ai" target="_blank" rel="noopener">Claude.ai</a> 대화 → 해당 <code>context/P#.md</code> 업로드 → Scouting Prompt 붙여넣기(실행 날짜 + pillar 채우기) → 결과를 <code>scouting/templates/report.md</code> 기준으로 검토. 통과하지 못하면 모델이 아니라 <em>프롬프트</em>가 문제입니다. <code>scouting/P#/YYYY-MM-DD.md</code>로 저장 후 commit. 정해진 주기로 반복.
           </p>
         </div>
       </div>
@@ -740,7 +721,7 @@
         <div class="step-body">
           <h4>Stage 2 — 반자동화 (Week 3–4)</h4>
           <p>
-            Claude Desktop → Settings → Scheduled Tasks. 트리거: 매주 월·목 09:00 Asia/Seoul. 프롬프트는 Stage 1과 동일. 한 달이면 충분히 가치 있지만, 노트북이 깨어 있고 데스크톱 앱이 떠 있어야 한다는 한계.
+            Claude Desktop → Settings → Scheduled Tasks. 트리거: 정해진 주기로 09:00 Asia/Seoul 정기 실행. 프롬프트는 Stage 1과 동일. 한 달이면 충분히 가치 있지만, 노트북이 깨어 있고 데스크톱 앱이 떠 있어야 한다는 한계.
           </p>
         </div>
       </div>
@@ -776,7 +757,6 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <div class="compare-body">
           <div class="compare-item"><span class="compare-icon">🎯</span><span><strong>방향</strong> — Identity 명제가 여전히 load-bearing 한가? 최우선 Pillar가 여전히 맞는가?</span></div>
           <div class="compare-item"><span class="compare-icon">📋</span><span><strong>Decision Log 큐레이션</strong> — 논문이 default를 흔들면 해당 Decision 업데이트</span></div>
-          <div class="compare-item"><span class="compare-icon">📏</span><span><strong>분석 승급</strong> — 어떤 논문을 deep-dive <code>analysis/</code>로 올리고 어떤 것을 핀으로 둘지 결정</span></div>
           <div class="compare-item"><span class="compare-icon">🔄</span><span><strong>맥락 갱신</strong> — Checkpoint마다 해당 <code>P#.md</code>의 Tracked Literature/Decision Log/Competitor 갱신</span></div>
           <div class="compare-item"><span class="compare-icon">💬</span><span><strong>피드백 루프</strong> — 어떤 스카우트 논문이 실험/Decision을 바꿨는가</span></div>
           <div class="compare-item"><span class="compare-icon">🗑️</span><span><strong>버리기</strong> — 대부분의 논문은 안 중요. 그게 정상.</span></div>
@@ -804,7 +784,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
   <!-- ── On-demand modes ─────────────────────────────────────────── -->
   <section id="on-demand">
     <h2>On-demand 모드 — 슬래시 커맨드</h2>
-    <p>주간 스카우트가 <em>outward</em>로 새 논문을 찾고 월간 synthesis가 pinned set을 다시 정리한다면, 이 두 모드는 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파고듭니다. 스케줄링 없이 로컬/웹 세션에서 호출합니다.</p>
+    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드들은 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파고듭니다. 스케줄링 없이 로컬/웹 세션에서 호출합니다.</p>
 
     <div class="card-grid">
       <div class="mode-card">
@@ -850,10 +830,10 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td class="center">🥇</td><td>Paper N — PRIORITY ★★★</td><td>최우선 — 즉시 행동</td></tr>
           <tr><td class="center">🥈</td><td>Paper N — PRIORITY ★★</td><td>읽고 결정에 반영</td></tr>
           <tr><td class="center">🥉</td><td>Paper N — PRIORITY ★</td><td>참고용</td></tr>
-          <tr><td class="center">🌱</td><td>Paper N — CROSS-POLLINATION</td><td>인접 분야 강제 픽업 (월 1회)</td></tr>
+          <tr><td class="center">🌱</td><td>Paper N — CROSS-POLLINATION</td><td>인접 분야 강제 픽업 (주기적)</td></tr>
           <tr><td class="center">📊</td><td>Scoring Summary</td><td>0–3 점수 요약 표</td></tr>
           <tr><td class="center">🚫</td><td>Candidate Papers That Did Not Pass Filter</td><td>Anti-topic 적중 + 점수 미달</td></tr>
-          <tr><td class="center">💡</td><td>Context Suggestions</td><td>context/ 수정 제안 (반영은 사람이)</td></tr>
+          <tr><td class="center">💡</td><td>Context Suggestions</td><td>P#.md 수정 제안 (반영은 사람이)</td></tr>
           <tr><td class="center">🔄</td><td>Run-over-Run Synthesis</td><td>직전 2주 대비 변화</td></tr>
         </tbody>
       </table>
@@ -933,7 +913,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 
     <h3>Echo chamber 방지</h3>
     <p>
-      Citation-graph만 쓰면 본인 관심사 주변에서만 맴돕니다. <code>context/MASTER.md</code>의 Cross-pollination 로테이션 섹션이 이를 막습니다. 월 1회 인접 분야(접촉 최적화, FEM 시뮬레이션, 촉각 신경과학 등)에서 강제로 1편을 픽업하는 것이 의외로 가장 가치 있는 발견의 소스입니다.
+      Citation-graph만 쓰면 본인 관심사 주변에서만 맴돕니다. <code>context/MASTER.md</code>의 Cross-pollination 로테이션 섹션이 이를 막습니다. 주기적으로 인접 분야(접촉 최적화, FEM 시뮬레이션, 촉각 신경과학 등)에서 강제로 1편을 픽업하는 것이 의외로 가장 가치 있는 발견의 소스입니다.
     </p>
   </section>
 
@@ -948,9 +928,9 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P1–P4 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>synthesis.md</code>(P1–P4 공유 템플릿) · <code>analysis.md</code> · <code>reproduction.md</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P1–P4 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.md</code> · <code>reproduction.md</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
-          <tr><td>컨텍스트</td>    <td><code>context/P{1..4}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트) + <code>synthesis/P{1..4}_BRIEF.md</code>(월 스냅샷)</td></tr>
+          <tr><td>컨텍스트</td>    <td><code>context/P{1..4}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트)</td></tr>
           <tr><td>vendor</td>      <td><code>vendor/lerobot/</code> — byte-stable 스냅샷, 6개 baseline policy + configs (재현 패치의 적용 대상)</td></tr>
         </tbody>
       </table>
@@ -998,25 +978,18 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <div class="doc-desc">글로벌 앵커 — Identity · Pillars(P1–P4) · Venue · Cross-pollination · cross-pillar Researchers</div>
         </div>
       </a>
-      <a class="doc-item" href="../scouting/README.md">
+      <a class="doc-item" href="../scouting/">
         <span class="doc-tag">OUT</span>
         <div>
-          <div class="doc-title">scouting/README.md</div>
-          <div class="doc-desc">주간 OUTWARD 트랙 — <code>P#/YYYY-MM-DD.md</code> 파일명, <code>templates/report.md</code> 참조</div>
-        </div>
-      </a>
-      <a class="doc-item" href="../synthesis/README.md">
-        <span class="doc-tag">IN</span>
-        <div>
-          <div class="doc-title">synthesis/README.md</div>
-          <div class="doc-desc">월간 INWARD 트랙 — <code>P{1..4}_BRIEF.md</code> living narrative</div>
+          <div class="doc-title">scouting/</div>
+          <div class="doc-desc">정기 OUTWARD 트랙 — <code>P#/YYYY-MM-DD.md</code> 리포트, <code>templates/report.md</code> 폼</div>
         </div>
       </a>
       <a class="doc-item" href="../analysis/README.md">
         <span class="doc-tag">FOC</span>
         <div>
           <div class="doc-title">analysis/README.md</div>
-          <div class="doc-desc">on-demand FOCUSED 트랙 — <code>/analyze-paper</code> · <code>/reproduce-paper</code></div>
+          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze-paper</code> · <code>/reproduce-paper</code></div>
         </div>
       </a>
       <a class="doc-item" href="../vendor/lerobot/README.md">
@@ -1045,7 +1018,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
       <div class="card">
         <div class="card-icon">🛸</div>
         <h4>probe <span class="text-muted">(여기)</span></h4>
-        <p>Research scouting — 위 두 프로젝트가 "무엇을 실험할지"를 결정하기 전의 upstream. 매주 3 ~ 5편 / 월 1회 synthesis / on-demand 분석.</p>
+        <p>Research scouting — 위 두 프로젝트가 "무엇을 실험할지"를 결정하기 전의 upstream. 정기 스카우트 3 ~ 5편 / on-demand 분석.</p>
       </div>
       <div class="card">
         <div class="card-icon">🔷</div>

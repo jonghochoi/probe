@@ -8,15 +8,11 @@
 
 *Author watch · Citation-graph expansion · Anti-topic filtering · Weekly decision-grade Scouting Reports*
 
----
-
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
 [![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-
-📖 팀 온보딩 한글 문서: [`docs/probe_guide.html`](docs/probe_guide.html)
 
 </div>
 
@@ -24,7 +20,7 @@
 
 > ### 📖 New here? Start with the onboarding guide.
 >
-> **한글 시각 가이드 (Korean visual onboarding):** [`docs/probe_guide.html`](docs/probe_guide.html)
+> [`docs/probe_guide.html`](docs/probe_guide.html)
 > — download and open in a browser for a full visual walkthrough of PROBE.
 >
 > ```bash
@@ -32,266 +28,118 @@
 > open probe/docs/probe_guide.html         # macOS
 > # xdg-open probe/docs/probe_guide.html   # Linux
 > ```
->
-> 동기·파이프라인·운영 노하우까지 같은 가이드 한 곳에 담겨 있다.
 
 ---
 
-## 📌 Why PROBE?
+## Why PROBE
 
-Running dexterous manipulation research is a full-time job. You tune reward curves, debug tactile pipelines, chase Sim-to-Real gaps — and somewhere between the hardware and the gradient logs, arXiv slips off the map.
+Running dexterous-manipulation research is a full-time job — reward curves, tactile pipelines, Sim-to-Real gaps. Meanwhile **50–100 new papers land on `cs.RO` + `cs.LG` every day**, and maybe 3–5 a week actually touch hand-centric dexterous manipulation. That is a 3–5% signal rate in a firehose, and the cost of missing the right paper is re-solving a problem someone already published.
 
-The field does not wait. **50–100 new papers land on `cs.RO` + `cs.LG` every day.** Of those, maybe 3–5 per week actually touch hand-centric dexterous manipulation plus Sim-to-Real. That's a 3–5% signal rate in a firehose, and the cost of missing the right paper is re-solving a problem someone already published — the most expensive mistake a researcher can make.
+PROBE finds those 3–5 for you and refuses to let them die in your downloads folder. It does not stop at "here are some interesting papers" — it answers the only question that matters:
 
-**PROBE finds those 3–5 for you — and won't let them die in your downloads folder.**
-
-But it does not stop at "here are some interesting papers." It asks the only question that matters:
-
-> *"If this paper is right, what do I change in my training/evaluation pipeline next week?"*
-
-Summaries are cheap. PROBE produces **decision material** across three tracks — outward (find), inward (compress), focused (reproduce).
+> *"If this paper is right, what do I change in my training / evaluation pipeline next week?"*
 
 | Without PROBE | With PROBE |
 |---|---|
-| "I'll check arXiv this weekend" → never happens | Weekly Scouting Report lands in your repo (Mon/Thu, per pillar) |
-| 50–100 papers/day → skim titles, remember none | 3–5 papers/week → scored, tied to your open questions |
+| "I'll check arXiv this weekend" → never happens | A Scouting Report lands in your repo on a fixed cadence, per pillar |
+| 50–100 papers/day → skim titles, remember none | 3–5 papers/run → scored, tied to your open questions |
 | Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
-| Echo chamber — same authors, same methods | Monthly cross-pollination picks from adjacent fields |
-| Pinned papers blur into noise over six weeks | Monthly Synthesis Brief keeps the per-pillar architecture in your head |
-| "I'll read that paper properly later" → never does | `/analyze-paper` produces a Korean deep-dive **and a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
-| "Great paper, but I'll never actually reproduce it" | `/reproduce-paper` takes the Design, drives `/implement-design` → `/validate-impl` in a converging loop, and ships a unified-diff patch against a target foundry (default `lerobot`) |
+| "I'll read that paper properly later" → never does | `/analyze-paper` → Korean deep-dive **+ a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
+| "Great paper, but I'll never reproduce it" | `/reproduce-paper` drives Design → impl → validation in a converging loop, shipping a unified-diff patch against a target foundry (default `lerobot`) |
+
+**Division of labor.** PROBE is a scout — it does not fight. The agent owns author watch, citation-graph expansion, anti-topic filtering, scoring, cross-pollination, and competitor monitoring. The human owns every judgement call: direction, Decision-Log curation, evaluation thresholds, per-pillar context refresh, and discarding. The agent **never** edits any `context/` file — it proposes in a report; the human decides.
 
 ---
 
-## 🧭 The Pipeline
+## Pipeline
 
-PROBE has **three output tracks** sharing one static context — outward (`scouting/`), inward (`synthesis/`), focused (`analysis/`). Each answers a different question, runs on a different cadence, and writes to its own folder; together they keep the research log honest.
+PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (reproduce). Each runs on its own trigger and writes to its own folder.
 
-> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5.
+> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5. (The P5 evaluation pillar was retired.)
 >
-> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (four pillars, cross-cutting content only — Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers). Each `context/P#.md` **owns** its pillar's Decision Log (D1–D23 across pillars), Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, and Curated Lists, in an identical §1–§8 skeleton; the cloud scouting/synthesis routines read **one `P#.md`** to keep agent context lean and pillar-focused. Edit the `P#.md` for pillar content; edit MASTER only for global content.
+> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (the four pillars + cross-cutting content — Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers). Each `context/P#.md` **owns** its pillar's Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, and Researchers; the cloud scouting routine reads **one `P#.md`** to keep agent context lean. Edit the `P#.md` for pillar content; edit MASTER only for global content.
 
 ```
-   ┌───────────────────────────────────────────────────────────────────┐
-   │ context/  (static · human-owned · read-only every run)            │
-   │                                                                   │
-   │ MASTER.md   · global anchor — Identity / Pillars (P1–P4) /        │
-   │               Venue / Cross-pollination / cross-pillar Researchers│
-   │ P{1..4}.md  · per-pillar owners (§1–§8 skeleton) — Decision Log / │
-   │               Tracked Literature / Anti-topics / Competitor /     │
-   │               Researchers / Curated Lists                         │
-   └─────────────────────────────────┬─────────────────────────────────┘
-                                     │ read-only (every run)
-                                     ▼
-   ┌───────────────────────────────────────────────────────────────────┐
-   │                             P R O B E                             │
-   └───────────┬─────────────────────┬──────────────────────┬──────────┘
-               │                     │                      │
-               ▼                     ▼                      ▼
-   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-   │   OUTWARD           │ │   INWARD           │ │   FOCUSED          │
-   │   Weekly Scouting   │ │   Monthly Synth.   │ │   On-demand Anal.  │
-   │                     │ │                    │ │                    │
-   │   Mon/Thu · per P#  │ │   monthly · per P# │ │   /analyze-paper   │
-   │                     │ │                    │ │                    │
-   │ · Author Watch      │ │ · compress the     │ │ · one paper —      │
-   │ · Citation-Graph    │ │   pinned set       │ │   full-text first  │
-   │ · Keyword Sweep     │ │ · connect dots:    │ │ · neutral summary  │
-   │ · Competitor watch  │ │   D# ↔ §6 pins     │ │   + decision-      │
-   │                     │ │                    │ │   grade implic.    │
-   │ in: P#.md +         │ │ in: P#.md §4 + §6  │ │ in: MASTER.md      │
-   │     last ~2 wk      │ │     (D# + pins)    │ │     + paper body   │
-   │                     │ │                    │ │                    │
-   │ curl: arXiv + S2    │ │ no retrieval —     │ │ curl: arxiv/html   │
-   │                     │ │ static compress    │ │ → ar5iv → abstract │
-   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
-              │ writes new           │ overwrites           │ overwrites
-              ▼                      ▼                      ▼
-   ┌─────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-   │ scouting/           │ │ synthesis/         │ │ analysis/          │
-   │ P#/YYYY-MM-DD.md    │ │ P{1..4}_BRIEF.md   │ │ <id>/analysis.md   │
-   │                     │ │                    │ │                    │
-   │ 3–5 papers, scored, │ │ living per-pillar  │ │ single Korean      │
-   │ decision-grade KO   │ │ narrative brief    │ │ deep-dive doc      │
-   └──────────┬──────────┘ └─────────┬──────────┘ └─────────┬──────────┘
-              │                      │                      │
-              └──────────────────────┼──────────────────────┘
-                                     │ informs
-                                     ▼
-                    ┌─────────────────────────────────┐
-                    │             Human               │
-                    │                                 │
-                    │  · Read, judge, discard         │
-                    │  · Update context (monthly)     │
-                    │  · Log feedback   (monthly)     │
-                    └─────────────────────────────────┘
+   ┌────────────────────────────────────────────────────────┐
+   │ context/  (static · human-owned · read-only every run) │
+   │ MASTER.md  · global anchor — Pillars (P1–P4) + Venue   │
+   │ P{1..4}.md · per-pillar owners — Decision Log / lit    │
+   └──────────────────────────┬─────────────────────────────┘
+                              │ read-only (every run)
+                              ▼
+                          P R O B E
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+   ┌────────────────────┐         ┌───────────────────────┐
+   │      OUTWARD       │         │        FOCUSED        │
+   │      Scouting      │         │   On-demand Analysis  │
+   │ scheduled · per P# │         │     /analyze-paper    │
+   │                    │         │                       │
+   │   author watch ·   │         │ one paper → deep-dive │
+   │  citation graph ·  │         │   → Layer 1 Design →  │
+   │   keyword sweep    │         │   impl → validation   │
+   └──────────┬─────────┘         └───────────┬───────────┘
+              │ append new file               │ overwrite snapshot
+              ▼                               ▼
+   ┌────────────────────┐         ┌───────────────────────┐
+   │     scouting/      │         │       analysis/       │
+   │  P#/YYYY-MM-DD.md  │         │   <id>/analysis.md +  │
+   │    3–5 papers,     │         │   design.md (+ impl/  │
+   │   decision-grade   │         │      validation)      │
+   └──────────┬─────────┘         └───────────┬───────────┘
+              └───────────────┬───────────────┘
+                              ▼  informs
+         Human — read, judge, discard, refresh context
 ```
 
-### Sidebar: analysis convergence loop
+**Static vs. dynamic, never mixed.** `context/` is static — it changes monthly at most, and the agent only *reads* it. The tracks are dynamic and agent-written: `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks), and `analysis/` is an overwrite-snapshot regenerated on demand. Keeping the two apart is what stops the agent re-recommending last month's papers as the context bloats.
 
-The FOCUSED column drills deeper than the main diagram shows. A
-single `/analyze-paper` call produces the *analysis* and a *Layer 1
-Design*; the Design is then mapped onto a target *foundry* by
-`/implement-design`, and the resulting impl is statically validated by
-`/validate-impl`. The validation's §🔎 section sorts every open 🚧 item into four
-buckets, and the next-action choice is deterministic from the verdict
-cells plus those buckets — so `/reproduce-paper` orchestrates the whole
-thing as an **iterative loop with two nested cycles**:
+**Analysis convergence loop.** A single `/analyze-paper` produces the deep-dive *and* a Layer 1 Design; `/implement-design` maps the Design onto a target foundry; `/validate-impl` statically checks the result. `/reproduce-paper` orchestrates the three as a bounded loop — fixing the impl against the foundry (inner loop) or re-extracting the Design from the paper (outer loop) until the verdict reaches a fixed point. Full branch matrix in [`.claude/prompts/reproduction.md`](.claude/prompts/reproduction.md).
 
-```
-   Initial pass (round 0):
+The two entry points (logic in `.claude/prompts/<name>.md`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
 
-       /analyze-paper ──► design ──► /implement-design ──► impl ──► /validate-impl ──► verdict + §🔎 buckets
+- `/analyze-paper <arXiv id | url | pdf url>` → `analysis.md` + `design.md`
+- `/reproduce-paper <arXiv id | design path> [--foundry <name>] [--max-rounds N]` — drives `/implement-design` → `/validate-impl` against a target foundry (default `lerobot`) until the verdict stabilizes (default `--max-rounds 3`)
 
-
-   Branch on verdict + §🔎 buckets (round 1..N):
-
-       ⚖️ pass ∧ no paper-extractable     ──►  done (success)
-
-       🔍 / 🧪 / 📐 fail/partial          ──►  inner loop
-       §🔎 vendor-resolved                      /implement-design --feedback <validation-path>
-       §🔎 paper-silent-defaultable             Design fixed; surgical patch update
-                                                (vendor-lift / default+NOTE promote)
-
-       📚 fail/partial                    ──►  outer loop
-       §🔎 paper-extractable §X.Y               /analyze-paper --focus "<§X.Y,...>"
-                                                Design re-extracted, then re-foundry
-
-       §🔎 paper-silent-experimental only ──►  stable_partial (honest defer)
-       focused re-extract byte-identical  ──►  stable_design (fixed point)
-```
-
-- **§🔎 §🚧 bucket classifier.** Every round, `/validate-impl` re-classifies
-  each open 🚧 item zero-state into `vendor-resolved` /
-  `paper-extractable §X.Y` / `paper-silent-defaultable` /
-  `paper-silent-experimental`, and emits a machine-readable
-  `<!-- ANALYSIS_BUCKETS -->` footer (including a `focus-hint:` line).
-  This footer is the single source of truth the orchestrator parses to
-  pick its next action.
-- **Inner loop.** The Design is a vendor-agnostic single source of
-  truth, so impl-side gaps are filled without touching it:
-  🔍 patch-apply failures, 🧪 signature/constant mismatches,
-  📐 silent-skip rows, plus `vendor-resolved` (lift the cited vendor
-  `file:line`) and `paper-silent-defaultable` (promote a default with a
-  mandatory `# NOTE:` comment) buckets. `/implement-design --feedback
-  <validation-path>` treats the prior round's `impl.md` + `impl.patch` as a
-  starting point; passing hunks are preserved and every new hunk traces
-  1-to-1 to a specific validation row (the honesty guard).
-- **Outer loop.** A 📚 `fail`/`partial` — or any `paper-extractable`
-  bucket — means the Design is shallower than the paper body.
-  `/reproduce-paper` runs `/analyze-paper --focus "<focus-hint>"` to
-  re-extract just the named sections (everything else copied verbatim),
-  then re-runs `/implement-design` (full regenerate, since the Design moved) and
-  `/validate-impl` in the same round. Layer-1 has a large blast radius, but the
-  loop is bounded by fixed-point detection rather than a manual gate.
-- **Honest termination (fixed-point, no extra counter).** When the
-  verdict tuple + 🪛/🚧 tables + §🔎 bucket set repeat byte-for-byte,
-  `/reproduce-paper` exits `stable_partial` — only
-  `paper-silent-experimental` items remain as permanent 🚧. When a
-  focused re-extraction leaves the Design byte-identical, it exits
-  `stable_design`. Together these guard against inner↔outer ping-pong.
-  The last validation report is the closure note; nothing else is appended.
-
-The full branch matrix and termination conditions are specified in
-[`.claude/prompts/reproduction.md`](.claude/prompts/reproduction.md) and
-[`.claude/prompts/implementation.md`](.claude/prompts/implementation.md) §F (Update
-mode).
-
-### Core principle: static vs. dynamic, never mixed
-
-The split between `context/` (static) and the output tracks (dynamic) exists for one reason: to keep the agent's context lean.
-
-- **Static** (`context/`) changes monthly at most. The agent *reads* it, never writes.
-- **Dynamic** — agent-written. `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks). `synthesis/` and `analysis/` are overwrite-snapshots — no history, regenerate on demand.
-
-Shove everything into one file and within six weeks the context bloats, the agent re-recommends last month's papers, and the pinned literature drifts into a mess.
+The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
 
 ---
 
-## 🧑‍🔬 Division of Labor
+## Agent Stack
 
-PROBE is a scout. It does not fight. The human still owns every judgement call.
-
-| Human owns | Agent owns |
-|---|---|
-| **Direction** — is the Identity claim still load-bearing? Is the top Pillar still the right priority? | **Author watch** — recent submissions from the Researchers list |
-| **Decision Log curation** — if a paper shakes a default or trips a deferred trigger, update the relevant Decision | **Citation-graph expansion** — semantic neighbors of the Tracked Literature anchors |
-| **Analysis graduation** — decide which scouted papers are worth a deep-dive `analysis/` and which to pin | **Anti-topic filtering** — drop whatever the Anti-topics list excludes |
-| **Context refresh** — refresh each pillar's Tracked Literature, Decision Log, and Competitor Monitoring in its `context/P#.md` whenever a phase boundary or trigger fires | **Scoring** — Pillar / Decision fit, Identity alignment, novelty, reproducibility, Sim2Real evidence |
-| **Feedback loop** — did any scouted paper change an experiment or a Decision? | **Cross-pollination** — forced periodic pick from the cross-pollination rotation |
-| **Discarding** — most papers won't matter, that's fine | **Competitor monitoring** — work through the Competitor watch list |
-
-The agent **never** edits the `context/` files (`MASTER.md` or any `P#.md`). It can *propose* changes in the report. The human decides.
-
----
-
-## ⚡ Quick Start
+Run `.claude/prompts/scouting.md` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared by all four pillars; replace `<PILLAR>` with `P1`/`P2`/`P3`/`P4` before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md).
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
 cd probe
+# 1. Fill context/MASTER.md (global anchor: Identity, Pillars overview), then each
+#    context/P#.md with that pillar's Decision Log, Tracked Literature, watch list.
+# 2. Generate a first Scouting Report by hand; review it ruthlessly; tune the prompt.
+# 3. Only then schedule it as a routine — bad prompt + automation = garbage on a timer.
 ```
-
-1. Open `context/MASTER.md` and fill in **your** cross-cutting anchor (Identity, Pillars overview, Hardware); then fill in each `context/P#.md` with that pillar's Decision Log defaults, Tracked Literature, and Competitor watch list. Shipping defaults are a Sharpa Hand / Isaac Lab template — useful as an example, not a universal config.
-2. Decide how you want to run the agent — manually in a Claude.ai conversation, or fully scheduled via Claude Code Routines. See [Agent Setup Guide](#-agent-setup-guide) below.
-3. Generate your first Scouting Report. Review it ruthlessly. Tune the prompt. Commit.
-
-> 💡 **Do not automate on day one.** Run manually for 1–2 weeks until the report quality is where you want it. Bad prompt + full automation = weekly garbage generated on schedule.
-
----
-
-## 🤖 Agent Setup Guide
-
-Full setup walkthrough lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) — cloud-scheduled Claude Code Routines, network/allowlist configuration, the on-demand analysis trio (`/analyze-paper` → `/implement-design` → `/validate-impl`) and its `/reproduce-paper` orchestrator, and troubleshooting. Run the `.claude/prompts/scouting.md` template by hand for 1–2 weeks before automating — the prompt that survives manual iteration is the prompt you deploy as a routine. A single template is shared by all four pillars; replace `<PILLAR>` with `P1`/`P2`/`P3`/`P4` once before each manual run or before pasting into a RemoteTrigger routine.
-
----
-
-## 🧱 Agent Stack
 
 | Component | Technology |
 |---|---|
-| **Agent engine** | Claude (Sonnet 4.6 / Opus 4.7) via Claude Code Routines |
+| **Agent engine** | Claude (Sonnet 4.6 / Opus 4.8) via Claude Code |
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
-| **Paper search** | arXiv REST API (`export.arxiv.org/api/query`, Atom XML) via `curl` |
-| **Citation graph** | Semantic Scholar Graph API (`api.semanticscholar.org/graph/v1`, JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Prompts** | `.claude/prompts/scouting.md` (weekly, shared by P1–P4) + `synthesis.md` (monthly, shared by P1–P4) + `analysis.md` · `implementation.md` · `validation.md` · `reproduction.md` (on-demand) |
-| **Output** | Direct commits to `main` — commit history *is* the research log |
-| **Context** | `context/P{1..4}.md` (static, human, per-pillar) + `scouting/` (dynamic, agent) + `synthesis/P{1..4}_BRIEF.md` (monthly snapshot) |
+| **Paper search** | arXiv REST API via `curl` (Atom XML) |
+| **Citation graph** | Semantic Scholar Graph API (JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
+| **Code grounding** | CodeGraph MCP over `vendor/lerobot/` — `/implement-design` cites exact `file:line` |
+| **Prompts** | `.claude/prompts/scouting.md` (shared by P1–P4) + `analysis.md` · `implementation.md` · `validation.md` · `reproduction.md` (on-demand) |
+| **Output** | Direct commits to `main` — the commit history *is* the research log |
 
 ---
 
-## 🙏 Upstream References
+## References
 
-PROBE vendors code and specs from three external repos — kept in sync with
-upstream rather than rewritten. The links below are the exact sources.
+PROBE vendors code and specs from external repos — kept in sync with upstream, not rewritten.
 
-| Repo | What PROBE borrows |
+| Source | What PROBE borrows |
 |---|---|
-| **[epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)** | The `humanize-korean` skill + four review agents under `.claude/skills/` and `.claude/agents/`. Every Korean output passes this pipeline before commit so long-form prose doesn't read as machine-generated; fidelity invariants live in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
-| **[huggingface/lerobot](https://github.com/huggingface/lerobot)** | The pinned snapshot at `vendor/lerobot/` — six baseline policies + `rtc`, configs, processor, `datasets/`, `transforms/`, `utils/`. Every `impl.patch` is a unified diff against it; pinned commit + refresh in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
-| **[colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)** | The MCP server that indexes `vendor/lerobot/` into a per-checkout SQLite graph, letting `/implement-design` ground Design rows in exact `file:line`. Built on demand by `scripts/ensure-codegraph.sh`; see [`CLAUDE.md`](CLAUDE.md) §CodeGraph. |
-
----
-
-## 📚 Further Reading
-
-| Document | Description |
-|---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Contributor rules — commit-message style + document Markdown style + CodeGraph usage |
-| [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md) | Full agent setup — Claude Code Routines, network allowlist, on-demand analysis trio, troubleshooting |
-| [`docs/probe_guide.html`](docs/probe_guide.html) | **Korean onboarding guide** — download and open locally for a visual walkthrough of motivation, pipeline, and operations |
-| [`docs/STYLE.md`](docs/STYLE.md) | Output formatting rules — emoji system, link format, Korean authoring |
-| [`context/MASTER.md`](context/MASTER.md) | Live research context — global anchor (four pillars): Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers (per-pillar Decision Log / Tracked Literature live in `context/P#.md`) |
-| `context/P{1..4}.md` | Per-pillar narrowed extracts read by the scouting/synthesis pipeline |
-| [`scouting/README.md`](scouting/README.md) | Weekly scouting pipeline summary; `P#/YYYY-MM-DD.md` dated reports |
-| [`synthesis/README.md`](synthesis/README.md) | Synthesis pipeline summary; `P{1..4}_BRIEF.md` living per-pillar narratives |
-| [`analysis/README.md`](analysis/README.md) | On-demand deep-dive trio — `/analyze-paper` → `analysis.md` + `design.md`, `/implement-design` → `impl/<foundry>/`, `/validate-impl` → `validation/`, orchestrated by `/reproduce-paper` |
-| [`analysis/catalogs/`](analysis/catalogs/) | Cross-paper lineage catalogs (D19b / D22) — `vlm.md` / `vla.md` / `dataset.md` facts-tables (column standard in their `README.md`) plus pillar methodology refs (`vlm-prior-preservation.md`) |
-| [`vendor/lerobot/README.md`](vendor/lerobot/README.md) | Read-only `lerobot` snapshot — the v0 foundry, target of every `foundry=lerobot` impl patch. Pinned commit, refresh procedure, license |
-| [`scouting/templates/report.md`](scouting/templates/report.md) | Weekly Scouting Report template; latest dated reports are the output-quality bar |
-| [`analysis/templates/`](analysis/templates/) | Korean templates for the analysis trio — `analysis.md` / `design.md` / `impl.md` / `validation.md` |
-| [`brand.py`](brand.py) | ASCII art, sigil, and color constants |
+| [epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai) | The `humanize-korean` skill + four review agents under `.claude/`. Every Korean output passes this before commit; fidelity invariants in [`docs/STYLE.md`](docs/STYLE.md) §4-5. |
+| [huggingface/lerobot](https://github.com/huggingface/lerobot) | The pinned snapshot at `vendor/lerobot/` — the v0 foundry every `impl.patch` targets. Pinned commit + refresh in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
+| [colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) | The MCP server indexing `vendor/lerobot/`, so `/implement-design` grounds Design rows in exact `file:line`. See [`CLAUDE.md`](CLAUDE.md) § CodeGraph. |
 
 ---
 

@@ -6,7 +6,7 @@ description: AI(ChatGPT·Claude·Gemini 등)가 쓴 한글 텍스트를 "사람�
 
 # Humanize Korean — AI 한글 티 제거 오케스트레이터 (v2.0)
 
-> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식 후 v2.0 에서 3-tier 모드 (`fast` / `standard` / `strict`) 로 분기된다. file_path prefix 에 따라 자동 선택되며 (`scouting/` → fast, `synthesis/` → standard, `analysis/` → standard), 호출자가 `options.mode` 로 override 가능 (strict 는 자동 기본값이 아니라 명시 지정으로만 진입). `docs/STYLE.md` §4-5 invariants 는 어느 모드에서나 동등하게 강제된다 — 이 단일 출처를 어떤 tier 도 우회하지 않는다. monolith fast-path 는 어느 모드에서도 사용하지 않는다. 입력은 항상 파일 경로이며 출력은 in-place 갱신.
+> **PROBE 이식판 안내** — 본 스킬은 `epoko77-ai/im-not-ai` v1.5 에서 PROBE 로 이식 후 v2.0 에서 3-tier 모드 (`fast` / `standard` / `strict`) 로 분기된다. file_path prefix 에 따라 자동 선택되며 (`scouting/` → fast, `analysis/` → standard), 호출자가 `options.mode` 로 override 가능 (strict 는 자동 기본값이 아니라 명시 지정으로만 진입). `docs/STYLE.md` §4-5 invariants 는 어느 모드에서나 동등하게 강제된다 — 이 단일 출처를 어떤 tier 도 우회하지 않는다. monolith fast-path 는 어느 모드에서도 사용하지 않는다. 입력은 항상 파일 경로이며 출력은 in-place 갱신.
 
 ## 의존 sub-agent (반드시 함께 존재해야 함)
 
@@ -33,7 +33,6 @@ invariants 정본은 본 SKILL.md (Phase 0/A/B/C/D/E) 와 `docs/STYLE.md` §4-5
 ```
 mode := options.mode ?? (
     file_path startswith "scouting/"  → "fast"
-    file_path startswith "synthesis/" → "standard"
     file_path startswith "analysis/"  → "standard"
     else                              → "standard"
 )
@@ -60,7 +59,7 @@ humanize-korean (PROBE {mode}) / target: {file_path}
 
 입력:
 - `input_text`: 대상 파일의 전체 내용
-- `genre_hint`: PROBE 컨텍스트에서는 `리포트` 고정 (scouting / synthesis / analysis 모두 리포트형)
+- `genre_hint`: PROBE 컨텍스트에서는 `리포트` 고정 (scouting / analysis 모두 리포트형)
 - `options.min_severity`: `S2` (기본)
 - `options.include_document_level`: `true`
 

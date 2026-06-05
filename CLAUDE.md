@@ -16,10 +16,9 @@ for **commit hygiene and document style** so the repo stays consistent.
 |---|---|---|
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P1–P4), Venue, Cross-pollination, cross-pillar Researchers. No longer holds per-pillar Decision Log / Tracked Literature |
 | `context/P{1..4}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, and Curated Lists (identical §1–§8 skeleton). The pipeline reads one `P#.md`. Four pillars; the P5 evaluation pillar was retired |
-| `scouting/` | agent | Weekly Scouting Reports (`P#/YYYY-MM-DD.md`, Mon/Thu, per pillar) |
-| `synthesis/` | agent | Monthly per-pillar narrative briefs — intended output is one `P#_BRIEF.md` per pillar (none generated yet) |
-| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
-| `analysis/catalogs/` | agent (hand-curated) | Cross-paper reference material, separated from per-paper `<arxiv-id>/` deep-dives. `models.md` is an awesome-list-style flat curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), reverse-chronological within each section. `dataset.md` is the same style for VLA further-pretrain datasets, grouped into 🤖 Robot action / 👤 Human video / 🔀 Mixed sections with a facts line + lineage line per entry. Both files carry a shields.io `Updated` badge at the top. Methodology / strategy docs (`vlm-prior-preservation.md`, `peft-robotics.md`, `peft-genesis-strategy.md`) sit alongside as design references. `README.md` is a one-line index of the folder. Quarterly rebalance; not in `INDEX.md` auto-regeneration scope |
+| `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
+| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). `README.md` is the folder's auto-generated deep-dive index (slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
+| `analysis/catalogs/` | agent (hand-curated) | Cross-paper reference material, separated from per-paper `<arxiv-id>/` deep-dives. `models.md` is an awesome-list-style flat curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), reverse-chronological within each section. `dataset.md` is the same style for VLA further-pretrain datasets, grouped into 🤖 Robot action / 👤 Human video / 🔀 Mixed sections with a facts line + lineage line per entry. Both files carry a shields.io `Updated` badge at the top. Methodology / strategy docs (`vlm-prior-preservation.md`, `peft-robotics.md`, `peft-genesis-strategy.md`) sit alongside as design references. Quarterly rebalance; not in `analysis/README.md` auto-regeneration scope |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) + `.gitignore` are committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
@@ -27,7 +26,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `.claude/agents/**`, `.claude/skills/**` | external | Korean humanization pipeline vendored from `epoko77-ai/im-not-ai` — the 4 review agents (`ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`) + the `humanize-korean` skill every Korean output passes before commit |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/INDEX.md` deep-dive index (분류 지도 summary + per-Pillar tables); invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
+| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar); invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
@@ -105,13 +104,12 @@ Hard rules:
    `switch`, `migrate`, `restructure`, `clarify`, `re-align`, `unify`,
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
-   `deps`. Don't invent new types. (The bare `scout:` / `synthesis:` /
-   `analysis:` prefixes are *generated routine commits*, not human commits — do
-   not imitate them when authoring code/doc changes. Their canonical formats
-   are: `scout: P{N} report YYYY-MM-DD`, `synthesis: P{N} brief YYYY-MM`, and
-   `analysis: add <arxiv-id> deep-dive + design`.)
+   `deps`. Don't invent new types. (The bare `scout:` / `analysis:` prefixes
+   are *generated routine commits*, not human commits — do not imitate them when
+   authoring code/doc changes. Their canonical formats are:
+   `scout: P{N} report YYYY-MM-DD` and `analysis: add <arxiv-id> deep-dive + design`.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
-   `scout`/`scouting`, `synthesis`, `analysis`, `catalogs`, `context`,
+   `scout`/`scouting`, `analysis`, `catalogs`, `context`,
    `prompts`, `config`, `style`, `docs`, `brand`, `CLAUDE.md`. Omit the scope
    only for repo-wide changes.
 4. **Description** — lowercase first letter (after the colon), no trailing
@@ -175,24 +173,23 @@ convention** — it does not strip emoji.
 
 ### Narrative / onboarding docs
 
-`README.md`. Headers may carry **one leading thematic
-emoji**, placed at the start of the header text, after the `#`s and a space
-(`# 🛸 …`, `## 📌 …`, `### 🪜 …`). Exactly one emoji, at the start — never at
-the end, never inside body text. One H1 per document.
+`README.md`. The H1 may carry **one leading thematic emoji**, placed at the
+start of the header text after the `#` and a space (`# 🛸 …`). Exactly one
+emoji, at the start — never at the end, never inside body text. One H1 per
+document.
 
 **Internal consistency per level (hard rule).** Each header level used in a
 document must be uniformly emoji or uniformly plain — no mixing within the
 same level in the same doc. The canonical narrative pattern in this repo is
-**emoji at H1 and H2, plain at H3 and below**, used by `README.md`. If you
-add a new H3, it stays plain; outliers must be brought into line, not left
-as exceptions.
+**emoji at H1 only, plain at H2 and below**, used by `README.md`. If you add a
+new H2/H3, it stays plain; outliers must be brought into line, not left as
+exceptions.
 
 ### Reference / structural docs
 
-`CLAUDE.md`, `docs/STYLE.md`, `scouting/README.md`,
-`synthesis/README.md`, `analysis/README.md`. Plain headers, **no emoji**.
+`CLAUDE.md`, `docs/STYLE.md`, `analysis/README.md`. Plain headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
-`STYLE.md`. A folder README's H1 is the folder name (`# scouting/`).
+`STYLE.md`. A folder README's H1 is the folder name (`# analysis/`).
 
 ### Shared rules (both families)
 
@@ -210,10 +207,9 @@ apply to:
   its own `[STABLE]` / `[AGENT-INPUT]` section schema.
 - `.claude/prompts/**`, `.claude/commands/**` — agent prompts, free-form.
 - Agent-generated output and its templates — `scouting/templates/report.md`,
-  `analysis/templates/analysis.md`, dated reports, `*_BRIEF.md`,
-  `analysis/<id>/analysis.md`.
-  These follow `docs/STYLE.md`'s own emoji system (emoji on `##`/`###`
-  headers is *required* there — the opposite of structural docs).
+  `analysis/templates/*.md`, dated reports, `analysis/<id>/analysis.md`.
+  These follow `docs/STYLE.md`'s own emoji system (one emoji on each `##`
+  header, `###` and below plain) plus its Korean / math conventions.
 - **Math / formula rendering** — the GitHub-KaTeX `$`-wrapping and substitution
   rules are an *output* convention, not a contributor-doc one, so they live in
   `docs/STYLE.md` §5-6 (enforced by `scripts/check-analysis-math.py`), not here.
@@ -230,11 +226,10 @@ English so `git log`, PR threads, and external collaborators read uniformly.
 Use this rule as the single source of truth for "which language should a
 new doc be in?":
 
-- **Default — Korean (한글).** All agent outputs (`scouting/`, `synthesis/`,
-  `analysis/`) and the folder READMEs that describe them
-  (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`) are
-  Korean. Templates that those folders ship (`analysis/templates/`,
-  `scouting/templates/`) are Korean as well.
+- **Default — Korean (한글).** All agent outputs (`scouting/`, `analysis/`)
+  and the analysis folder doc (`analysis/README.md`) are Korean. Templates that
+  those folders ship (`analysis/templates/`, `scouting/templates/`) are Korean
+  as well.
 - **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
   `docs/STYLE.md`. The audience is anyone reading PRs or
   history; English keeps that surface grep-able and consistent with the
@@ -257,56 +252,47 @@ A new doc that is only added to the filesystem without updating the index
 becomes a silent orphan (the last restructure produced one before this
 checklist existed). Walk this list every time:
 
-- [ ] **Classify the doc** — narrative/onboarding (emoji headers allowed) or
+- [ ] **Classify the doc** — narrative/onboarding (H1 emoji allowed) or
       reference/structural (plain headers). Pick one consistently per the
       table above and do not mix levels.
-- [ ] **Pick the location** — folder READMEs sit next to what they describe
-      (`scouting/README.md`, `synthesis/README.md`, `analysis/README.md`);
+- [ ] **Pick the location** — the analysis folder doc is `analysis/README.md`;
       onboarding / formatting guides live under `docs/`; contributor /
       governance docs sit at the repo root next to `CLAUDE.md`.
-- [ ] **Add it to `README.md` → "Further Reading" table.** This is the only
-      index in the repo. Match the existing row format (`[`path`](path) |
-      one-line description`).
-- [ ] **If it is a folder README**, confirm the three output-track READMEs
-      (`scouting/`, `synthesis/`, `analysis/`) and the new one remain
-      structurally symmetric — each opens with `# foldername/`, names its
-      file convention, its generator, and what it reads from `context/`.
-- [ ] **If it introduces a new top-level path**, add a row to the
-      "Repository map" table in this file (`CLAUDE.md`).
+- [ ] **Add a row to the "Repository map" table in this file (`CLAUDE.md`).**
+      That table is the canonical path index; the root `README.md` links only
+      the headline docs in prose, so wire a new doc in here.
 - [ ] **If it pins paths that live elsewhere** (templates, prompts, output
       files), grep the new doc against the current layout — every
       referenced path must resolve after the latest restructure.
 - [ ] **Run a final `grep -rn '<new-doc-basename>' .`** — at least one
-      inbound link (typically Further Reading) must exist. Zero inbound
-      links = orphan.
+      inbound link must exist. Zero inbound links = orphan.
 
 ## Automatically-maintained indexes
 
 One intentional exception to "no cross-link automation": the deep-dive index
-in `analysis/INDEX.md`. Filenames there are bare arXiv ids (`2511.00139.md`),
+in `analysis/README.md`. Filenames there are bare arXiv ids (`2511.00139.md`),
 so the title-to-id mapping drifts if hand-maintained —
 `scripts/refresh-analysis-index.py` regenerates it. The script reads each
-analysis's 📄 논문 메타 table (load-bearing rows in `docs/STYLE.md` §5-7 —
-including the `관련 Pillar` and `태그` classification rows) plus up to 5 English
-`🔑 기술 키워드` bullet heads (math-bearing/non-English heads excluded, rendered
+analysis's `논문 메타` table (load-bearing rows in `docs/STYLE.md` §5-7 —
+including the `관련 Pillar` classification row) plus up to 5 English
+`기술 키워드` bullet heads (math-bearing/non-English heads excluded, rendered
 as single-color 노란 shields.io badges — same badge style for the `arXiv` cell),
 inspects the filesystem for the vendor-neutral `impl` column (lerobot-pathed:
 `impl.md` vs `UNMAPPABLE.md`), and rewrites the block between
-`<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->` as a `분류 지도`
-summary + one table **per primary Pillar** (P1…P4/미분류; primary = first
+`<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->` as one table
+**per primary Pillar** (P1…P4/미분류; primary = first
 `관련 Pillar` entry — the index taxonomy covers the four pillars P1–P4; the P5
-evaluation pillar was retired, and any stray `P5` is dropped at generation).
-Everything outside the markers stays hand-maintained (own
-file, so it doesn't interleave with the `analysis/README.md` narrative).
+evaluation pillar was retired, and a stray `P5` is dropped at generation).
+Everything outside the markers stays hand-maintained — the short folder intro above the index block.
 
-- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh INDEX.md` bot commit (stages `analysis/INDEX.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `INDEX.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
+- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh README.md` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `analysis/README.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
 - **Don't hand-edit inside the markers** — overwritten on the next run. Put nothing there that isn't extractable from the meta table or foundry folder; extend the script or the meta-table spec instead. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more
 
-- `README.md` — motivation, repository structure, full Stage 1–3 agent setup.
+- `README.md` — motivation, pipeline, agent stack + setup, references.
 - `docs/probe_guide.html` — Korean onboarding + operations manual.
 - `docs/STYLE.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
-- `scouting/README.md`, `synthesis/README.md`, `analysis/README.md` — what
-  each output track is and how it is produced.
+- `analysis/README.md` — the auto-generated deep-dive index. The scouting
+  track is described in `README.md` → Pipeline and `docs/AGENT_SETUP.md`.

@@ -8,8 +8,6 @@
       "Write(analysis/**)",
       "Edit(scouting/**)",
       "Write(scouting/**)",
-      "Edit(synthesis/**)",
-      "Write(synthesis/**)",
       "Edit(scripts/**)",
       "Write(scripts/**)",
       "Edit(CLAUDE.md)",
