@@ -44,6 +44,31 @@ LEROBOT_PY=~/dev/lerobot/.venv/bin/python \
 - 멱등 — 이미 v3.0 이면 skip.
 - 학습 시 `DATASET_DIR=<원래 root>` (접미사 없음).
 
+## 🧩 멀티태스크 — 여러 task 를 하나로 aggregate
+
+이 lerobot 은 `MultiLeRobotDataset` 이 꺼져 있어(`datasets/factory.py` 가
+repo_id 리스트를 받으면 `NotImplementedError`) 여러 task 를 동시에 못 먹입니다.
+멀티태스크 학습은 **고른 task 들을 하나의 LeRobotDataset 으로 병합한 뒤** 그
+단일 데이터셋으로 학습합니다.
+
+1. **task 고르기** — `dexora_stats.py` 로 task 별 `act`/`state`/`cams` 를 보고,
+   **이 값들이 동일한** dexterous task 를 3~5개 고릅니다 (다르면 aggregate 가
+   abort). 단일 task 결과와의 연속성을 위해 `unscrew_water_bottle_cap` 포함 권장.
+2. **각 task 를 v3.0 변환** (위 `convert_all_dexora.sh`).
+3. **병합** — `aggregate_dexora.py` (lerobot `aggregate_datasets` 래퍼):
+
+```bash
+$LEROBOT_PY aggregate_dexora.py --out /data/.../dexora_mix \
+    /data/.../dexora/unscrew_water_bottle_cap \
+    /data/.../dexora/turn_rubiks_cube_bimanual \
+    /data/.../dexora/write_with_pen
+```
+
+- 같은 fps/robot_type/features 만 병합 가능 — 다르면 복사 전에 early abort.
+- task 별 description 이 보존돼 pi0 가 instruction 으로 조건화 (멀티태스크 학습).
+- 학습은 `DATASET_DIR=/data/.../dexora_mix` (병합 결과 단일 root) 로 그대로.
+- 단일 task 보다 데이터가 크니 `STEPS` 를 늘리세요 (Stage 3: 40–80k).
+
 ## 🚀 학습 실행
 
 ### 필수 env
