@@ -7,7 +7,7 @@
 
 > 에이전트가 아래 모든 섹션을 채웁니다. 본문은 한글로 작성하되, 이모지·링크·verbatim 유지 규칙은 `STYLE.md`에 정의되어 있으니 정확히 따릅니다.
 > 루틴은 주 2회(월·목) 실행되며, 매 실행마다 한글 파일 **하나**(`scouting/P#/YYYY-MM-DD.md`)를 산출합니다.
-> 각 섹션에서 처음 등장하는 P#/D# 코드는 아래 🔑 참조 약어 풀이로 링크합니다.
+> 각 섹션에서 처음 등장하는 P#/D# 코드는 아래 참조 약어 풀이로 링크합니다.
 
 ---
 
@@ -56,17 +56,17 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
 
-### 🎯 (a) 관련 Pillar / Decision (P# / D#)
+### (a) 관련 Pillar / Decision (P# / D#)
 <!-- Which Pillar(s) (P1–P5) and Decision(s) (D1–D26) from context/MASTER.md does this address? Also note any Identity tension/support and any §10 Competitor implication. -->
 
-### ✨ (b) 진정으로 새로운 점
+### (b) 진정으로 새로운 점
 <!-- One sentence. Not an abstract paraphrase. What is the delta against the pinned literature? -->
 
-### ⚙️ (c) 의사결정 함의
+### (c) 의사결정 함의
 <!-- What changes in MY training/evaluation pipeline next week if this paper is right?
      Name a specific config key, hyperparameter, metric, or loss term. Vague = failure. -->
 
-### ⚠️ (d) 먼저 검증해야 할 실패 모드
+### (d) 먼저 검증해야 할 실패 모드
 <!-- Why might this NOT transfer to our stack? What is the cheapest sanity check? -->
 
 ---
@@ -76,10 +76,10 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### 🎯 (a) 관련 Pillar / Decision (P# / D#)
-### ✨ (b) 진정으로 새로운 점
-### ⚙️ (c) 의사결정 함의
-### ⚠️ (d) 먼저 검증해야 할 실패 모드
+### (a) 관련 Pillar / Decision (P# / D#)
+### (b) 진정으로 새로운 점
+### (c) 의사결정 함의
+### (d) 먼저 검증해야 할 실패 모드
 
 ---
 
@@ -88,10 +88,10 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <...>
 
-### 🎯 (a) 관련 Pillar / Decision (P# / D#)
-### ✨ (b) 진정으로 새로운 점
-### ⚙️ (c) 의사결정 함의
-### ⚠️ (d) 먼저 검증해야 할 실패 모드
+### (a) 관련 Pillar / Decision (P# / D#)
+### (b) 진정으로 새로운 점
+### (c) 의사결정 함의
+### (d) 먼저 검증해야 할 실패 모드
 
 ---
 
@@ -102,10 +102,10 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...>
 
-### 🎯 (a) 관련 Pillar / Decision (P# / D#)
-### ✨ (b) 진정으로 새로운 점
-### ⚙️ (c) 의사결정 함의
-### ⚠️ (d) 먼저 검증해야 할 실패 모드
+### (a) 관련 Pillar / Decision (P# / D#)
+### (b) 진정으로 새로운 점
+### (c) 의사결정 함의
+### (d) 먼저 검증해야 할 실패 모드
 
 ---
 
@@ -135,19 +135,19 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 <!-- Agent proposes edits to the relevant context/P#.md. Human decides. Agent must NOT edit any context/ file directly. -->
 
-### 📌 Tracked literature
+### Tracked literature
 <!-- Replace / add / remove a pinned paper within the pillar's 8-paper cap (`context/P#.md` §5). Include arXiv link and target Pillar. -->
 
-### 📌 Decision Log
+### Decision Log
 <!-- Trigger an existing deferred candidate (cite D# + checkpoint), revise a v1 default's rationale, or propose a new decision. State which evidence this week moved it. -->
 
-### 📌 Anti-topics
+### Anti-topics
 <!-- Candidate new exclusion rule surfaced by this week's filter set. -->
 
-### 📌 Researchers to follow
+### Researchers to follow
 <!-- Add / remove authors based on signal this week (the pillar's §6 Researchers). -->
 
-### 📌 Competitor / Kindred monitoring
+### Competitor / Kindred monitoring
 <!-- Any new release from §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage)? Differentiation vehicle still intact? -->
 
 ---

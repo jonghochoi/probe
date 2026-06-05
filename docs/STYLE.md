@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.20 (2026-06-01) · **Scope:** All files under `scouting/`, `synthesis/`, and `analysis/`
+> **Version:** v1.21 (2026-06-04) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -7,8 +7,8 @@
 
 ## 1. Output File Convention
 
-The scouting routine runs **twice a week (Monday & Thursday)**, once per
-pillar. Each run produces **one Korean file**:
+The scouting routine runs **on a scheduled cadence**, once per pillar per run.
+Each run produces **one Korean file**:
 
 | File | Language | Purpose |
 |------|----------|---------|
@@ -23,60 +23,52 @@ works on those verbatim tokens regardless of prose language.
 
 ## 2. Emoji System
 
-Emojis are used **only on section and subsection headers** (lines starting with `##` or `###`).
-They are **never** used inside body text, bullet points, table cells, or code blocks.
+Emoji are used **only on section headers (`##`)** — exactly one, at the start of
+the header text after `## ` and a space. **`###` and deeper headers are plain
+text (no emoji)**, and emoji never appear in body text, bullet points, table
+cells, or code blocks.
 
-### 2-1. Section-level (`##`) Emojis
+### 2-1. Scouting report `##` emojis
 
 | Emoji | Section |
 |-------|---------|
-| 🔑 | Reference Legend |
-| 📋 | Scout Methodology |
+| 🔑 | Reference Legend (참조 약어 풀이) |
+| 📋 | Scout Methodology (스카우트 방법론) |
 | 🥇 | Paper N — PRIORITY ★★★ |
 | 🥈 | Paper N — PRIORITY ★★ |
 | 🥉 | Paper N — PRIORITY ★ |
-| 🌱 | Paper N — CROSS-POLLINATION |
-| 📊 | Scoring Summary |
-| 🚫 | Candidate Papers That Did Not Pass Filter |
-| 💡 | Context Suggestions |
-| 🔄 | Run-over-Run Synthesis |
+| 🌱 | Paper N — CROSS-POLLINATION (인접 분야 픽) |
+| 📊 | Scoring Summary (점수 요약) |
+| 🚫 | Candidate Papers That Did Not Pass Filter (필터 통과 실패 후보 논문) |
+| 💡 | Context Suggestions (컨텍스트 제안) |
+| 🔄 | Run-over-Run Synthesis (직전 리포트 대비 종합) |
 
-### 2-2. Subsection-level (`###`) Emojis
+### 2-2. Subsection (`###`) headers are plain
 
-These four emojis are used consistently across **all** paper entries:
-
-| Emoji | Subsection |
-|-------|------------|
-| 🎯 | (a) P# / D# touched |
-| ✨ | (b) What is genuinely new |
-| ⚙️ | (c) Decision implication |
-| ⚠️ | (d) Failure mode to probe first |
-
-Context Suggestions subsections use a single emoji:
-
-| Emoji | Subsection |
-|-------|------------|
-| 📌 | All sub-sections within Context Suggestions |
+The per-paper `###` subsections — (a) P# / D# touched, (b) what is genuinely
+new, (c) decision implication, (d) failure mode to probe first — and the
+Context-Suggestions `###` subsections carry **no emoji**.
 
 ### 2-3. Rules
 
-- One emoji per header, placed at the **start** of the header text, after `##` or `###` and a space.
-- Do not add emojis to the report title (`#`) or to table headers.
-- Do not use any emoji not listed in this guide.
+- One emoji per `##` header, at the start, after `## ` and a space.
+- No emoji on `#`, on `###` or deeper, on table headers, in table cells, or in
+  body text.
+- Do not use an emoji not listed in this guide (§2-1, §5-2, §6-2).
 - Emojis are not translated — use the symbols exactly as listed.
 
 #### Correct example
 ```markdown
 ## 🥇 Paper 1 — PRIORITY ★★★
-### 🎯 (a) P# / D# touched
-### ✨ (b) What is genuinely new
+### (a) P# / D# touched
+### (b) What is genuinely new
 ```
 
 #### Incorrect example
 ```markdown
-## Paper 1 — PRIORITY ★★★ 🥇              ← emoji at end, wrong
-### (a) 🎯 P# / D# touched                  ← emoji inside text, wrong
-The policy achieved ✨ great results.       ← emoji in body text, wrong
+## Paper 1 — PRIORITY ★★★ 🥇             ← emoji at end, wrong
+### 🎯 (a) P# / D# touched               ← emoji on H3, wrong (## only)
+The policy achieved ✨ great results.     ← emoji in body text, wrong
 ```
 
 ---
@@ -139,7 +131,7 @@ verbatim code (`P1`, `D4` — case preserved; GitHub matches explicit
 `id=` attributes verbatim).
 
 **In-body links (first occurrence per section).** Within each top-level
-`##` section (each Paper N, 📋, 📊, 🚫, 💡, 🔄), the **first** textual
+`##` section (each Paper N and the other sections), the **first** textual
 occurrence of each distinct code is written as `[D4](#ref-D4)`. Later
 occurrences of that same code **in the same section** stay plain text.
 Each new `##` section links the first occurrence again, so any section is
@@ -167,8 +159,7 @@ verbatim in their original form versus which prose is Korean.
 | Reference Legend | Meaning column in Korean; codes + `<a id="ref-…">` anchors verbatim |
 | Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
 | arXiv links | Keep verbatim |
-| Emojis | Keep identical — same position, same emoji |
-| Section headers | Korean header text (see §4-3); keep emoji prefix |
+| Section headers | Korean header text (see §4-3); `##` keeps its emoji, `###` plain |
 
 ### 4-2. Technical term glossary (standard translations)
 
@@ -208,23 +199,25 @@ verbatim in their original form versus which prose is Korean.
 
 ### 4-3. Header translation reference
 
-| English header | Korean header |
+`##` headers carry the §2 emoji; `###` subsections are plain.
+
+| English header (`##`) | Korean header (`##`) |
 |----------------|--------------|
 | 🔑 Reference Legend | 🔑 참조 약어 풀이 |
 | 📋 Scout Methodology | 📋 스카우트 방법론 |
 | 🥇 Paper N — PRIORITY ★★★ | 🥇 논문 N — 우선순위 ★★★ |
 | 🥈 Paper N — PRIORITY ★★ | 🥈 논문 N — 우선순위 ★★ |
-| 🥉 Paper N — PRIORITY ★★ | 🥉 논문 N — 우선순위 ★ |
-| 🌱 Paper N — CROSS-POLLINATION | 🌱 논문 N — 크로스폴리네이션 |
+| 🥉 Paper N — PRIORITY ★ | 🥉 논문 N — 우선순위 ★ |
+| 🌱 Paper N — CROSS-POLLINATION | 🌱 논문 N — 인접 분야 픽 |
 | 📊 Scoring Summary | 📊 점수 요약 |
 | 🚫 Candidate Papers That Did Not Pass Filter | 🚫 필터 통과 실패 후보 논문 |
 | 💡 Context Suggestions | 💡 컨텍스트 제안 |
 | 🔄 Run-over-Run Synthesis | 🔄 직전 리포트 대비 종합 |
-| 🎯 (a) P# / D# touched | 🎯 (a) 관련 Pillar / Decision (P# / D#) |
-| ✨ (b) What is genuinely new | ✨ (b) 진정으로 새로운 점 |
-| ⚙️ (c) Decision implication | ⚙️ (c) 의사결정 함의 |
-| ⚠️ (d) Failure mode to probe first | ⚠️ (d) 먼저 검증해야 할 실패 모드 |
-| 📌 (sub-sections) | 📌 (하위 섹션) |
+| (a) P# / D# touched | (a) 관련 Pillar / Decision (P# / D#) |
+| (b) What is genuinely new | (b) 진정으로 새로운 점 |
+| (c) Decision implication | (c) 의사결정 함의 |
+| (d) Failure mode to probe first | (d) 먼저 검증해야 할 실패 모드 |
+| (sub-sections) | (하위 섹션) |
 
 ### 4-4. Tone and style — delegated to humanize-korean
 
@@ -244,7 +237,7 @@ markdown rather than tone:
 
 ### 4-5. Humanize-korean post-processing (mandatory tail step)
 
-Every Korean output (`scouting/`, `synthesis/`, `analysis/`) passes through
+Every Korean output (`scouting/`, `analysis/`) passes through
 the `humanize-korean` skill (`.claude/skills/humanize-korean/SKILL.md`)
 immediately before `git add` — the LAST step, never before the file is
 finished. It rewrites "AI tell" patterns (translation-ese, mechanical
@@ -263,13 +256,13 @@ is forbidden, plus these PROBE-specific tokens:
 - Inline-math wrapping — every `$...$` span (incl. inside English verbatim blockquotes) must use `` $`X`$ `` and satisfy the §5-6 boundary rule; `` `$X$` `` or unguarded `$X$` is a fidelity fail. Also enforced by CI (`scripts/check-analysis-math.py`).
 - `P#` / `D#` tags; `<a id="ref-…">` anchors and `[CODE](#ref-CODE)` links; arXiv / DOI links.
 - arXiv figure hotlinks + their English caption blockquotes (§5-6).
-- Emoji set / position + one-emoji-per-header (§2); §4-2 glossary translations (no resynonymization).
+- Emoji set / position on `##` headers, one per header, `###` plain (§2); §4-2 glossary translations (no resynonymization).
 
 **Operational guards.** Change rate `>30%` → auto rework round; `>50%` →
 abort, keep original. `fidelity_audit: fail` → roll back to pre-humanize content.
 
 **Pipeline (3 tiers, auto-resolved from path).** `scouting/` → fast,
-`synthesis/` · `analysis/` → standard; `strict` only via `options.mode: strict`.
+`analysis/` → standard; `strict` only via `options.mode: strict`.
 Invariants above are enforced identically in all tiers.
 
 - **fast** — `ai-tell-detector` (Haiku) → `korean-style-rewriter` (Sonnet `--conservative`) → inline regex invariant check. Loop cap 1.
@@ -305,9 +298,8 @@ produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
 
 ### 5-2. Emoji system
 
-Same rule as §2: one emoji at the **start** of each `##` / `###`
-header, never in body text. Section (`##`) emojis for this document
-type — these are the only emojis permitted here in addition to §2:
+Same rule as §2: one emoji at the start of each `##` header, `###` and body
+plain. The `##` section emojis for this document type (in addition to §2):
 
 | Emoji | Section | Part |
 |-------|---------|------|
@@ -326,8 +318,8 @@ type — these are the only emojis permitted here in addition to §2:
 | ⚠️ | 먼저 검증할 실패 모드 | B |
 | 💡 | 컨텍스트 제안 | B |
 
-Part (B) reuses the existing 🎯 ✨ ⚙️ ⚠️ 💡 semantics from §2-2 / §2-1.
-Do not use any emoji not listed in §2 or here.
+Use these header names verbatim. Part (B) reuses the 🎯 ✨ ⚙️ ⚠️ 💡 semantics
+from §2. Do not use an emoji not listed in §2 or here.
 
 ### 5-3. Korean & verbatim rules
 
@@ -338,7 +330,7 @@ formal 합니다/됩니다 체.
 
 ### 5-4. Body-acquisition honesty
 
-The 📄 메타 header MUST state the actual full-text level reached
+The 메타 header MUST state the actual full-text level reached
 (`전문(arXiv HTML)` / `전문(ar5iv)` / `PDF 텍스트(pdftotext)` /
 `초록 only`). If only the abstract was obtained, every part (B)
 section is prefixed **(본문 미확보 — 잠정)**. Failed `curl` calls are
@@ -351,18 +343,18 @@ The analysis always ends with exactly one blockquote line as its very
 last line, regardless of whether a baseline can be matched:
 
 ```markdown
-> 💡 base 매핑은 `/implement-design analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> base 매핑은 `/implement-design analysis/2401.12345/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 ```
 
 `/implement-design` itself decides whether the Design can be grounded in the
-target foundry (and emits a clean `🚧 매핑 불가 (<foundry>)` line if
+target foundry (and emits a clean `매핑 불가 (<foundry>)` line if
 not). The analysis prompt never speculates about base matching — that
 decision belongs to Layer 2.
 
 ### 5-6. Quotation, bullet-form, keyword, math, and figure conventions
 
-🔬 방법론 and 📊 실험 결과 must keep the source body traceable;
-❓ 문제 정의 / 동기 and 🔑 기술 키워드 must stay scannable. The
+방법론 and 실험 결과 must keep the source body traceable;
+문제 정의 / 동기 and 기술 키워드 must stay scannable. The
 conventions below codify both.
 
 - **English-verbatim blockquote citation** — Anchor claims (the
@@ -413,18 +405,18 @@ conventions below codify both.
   (`.github/workflows/check-analysis-math.yml`). This subsection is the
   SSOT for the rules above — the prompt and the CI implement them.
 
-- **Bullet form (❓ 문제 정의 / 동기)** — Do not write a single
+- **Bullet form (문제 정의 / 동기)** — Do not write a single
   paragraph. Use 4–6 items, each a bold label + 1–2 sentences.
   Recommended Korean labels (verbatim): `풀고자 하는 문제`,
   `기존 접근의 한계`, `본 논문의 가설`, `왜 지금 중요한가`.
 
-- **🔑 기술 키워드** — 5–10 key terms needed to read the paper,
+- **기술 키워드** — 5–10 key terms needed to read the paper,
   each formatted as `- **<original / abbrev>** — <one-line analogy
   or plain definition>`. **The bold head term MUST be a plain English
   word or abbreviation** (the paper's original term); any Korean gloss
   goes only *after* the em dash, never in the head, and math notation
   (`$…$`, LaTeX) belongs in the definition, not the head. This is
-  load-bearing — the head is lifted into the `analysis/INDEX.md` keyword
+  load-bearing — the head is lifted into the `analysis/README.md` keyword
   badges (§5-7), which drop any head that is non-English or math-bearing,
   so a math-symbol keyword (e.g. `$`\pi_0`$`) simply won't surface there.
   For terms in the
@@ -433,7 +425,7 @@ conventions below codify both.
   Analogies are allowed only when they do not distort the paper's
   claim; when no faithful analogy fits, write a plain definition.
 
-- **Methodology decomposition** — Split 🔬 방법론 into four H3
+- **Methodology decomposition** — Split 방법론 into four H3
   subsections wherever possible, with verbatim Korean headers:
   `### 직관`, `### 아키텍처`, `### 학습 목표 / 손실`,
   `### 학습 셋업`. Detail preservation comes first. H3 headers
@@ -474,32 +466,32 @@ conventions below codify both.
 
 ### 5-7. Auto-maintained analysis index
 
-`analysis/INDEX.md` is generated by `scripts/refresh-analysis-index.py`,
+`analysis/README.md` is generated by `scripts/refresh-analysis-index.py`,
 which rewrites only the block between `<!-- ANALYSIS_INDEX:START -->` /
 `<!-- ANALYSIS_INDEX:END -->` — do not hand-edit inside the markers; the
 rest of the file is hand-maintained. It runs **post-merge on `main` only**;
 the per-command prompts (`/analyze-paper`, `/implement-design`,
-`/validate-impl`) do NOT stage `INDEX.md` or invoke the script. The *why*
+`/validate-impl`) do NOT stage `README.md` or invoke the script. The *why*
 (parallel-PR conflict, the workflow) is in `CLAUDE.md`
 "Automatically-maintained indexes".
 
-The generated `INDEX.md` block opens with a **분류 지도** summary
-(per-pillar paper counts + corpus-wide tag distribution) and then one
-plain-`##` table **per primary Pillar** (`P1`…`P4`, then `미분류`). The
-index taxonomy covers the four pillars P1–P4; the P5 evaluation pillar was
-retired, so any stray `P5` in a `관련 Pillar` row is dropped at generation. The
+The generated `README.md` block is one plain-`##` table **per primary Pillar**
+(`P1`…`P4`, then `미분류`). The index taxonomy covers the four pillars P1–P4; the
+P5 evaluation pillar was retired, so a stray `P5` in a `관련 Pillar` row is
+dropped at generation. The
 *primary pillar* is the first entry of the `관련 Pillar` row; a paper appears
 in exactly one table but lists its full pillar set in the `Pillars` column.
 Empty pillar buckets are skipped. Within each table rows sort by `Refreshed`
 desc (ties by arXiv id desc). Per row:
 
-- an `arXiv` cell rendered as a red shields.io badge linking to the abs page —
-  `[![arXiv](https://img.shields.io/badge/arXiv-<id>-b31b1b.svg)](https://arxiv.org/abs/<id>)`;
+- a `Links` cell — one shields.io badge per link in the `링크` row, classified
+  by host and rendered in a **fixed order: arXiv → Website → GitHub →
+  HuggingFace**. Badge styles: `arXiv-<id>-b31b1b.svg` (red, carries the id),
+  `Website-Link-blue`, `GitHub-Code-black`, `HuggingFace-Model-yellow`. Any
+  non-arXiv/GitHub/HuggingFace URL renders as the generic `Website` badge;
 - a `Pillars` cell — every `P#` from the `관련 Pillar` row as a fixed-color
   badge (P1 blue, P2 purple, P3 green, P4 red);
-- a `Tags` cell — every tag from the `태그` row as a neutral-color (`555555`)
-  facet badge;
-- a `Keywords` cell — up to 5 `🔑 기술 키워드` head terms, each a colored
+- a `Keywords` cell — up to 5 `기술 키워드` head terms, each a colored
   shields.io badge. English plain text only: a head carrying any math (inline
   KaTeX / LaTeX / backticks) is excluded outright, and a head with no
   recoverable English is dropped (§5-6 enforces English heads); skipped heads
@@ -509,30 +501,32 @@ desc (ties by arXiv id desc). Per row:
   sanitizer strips inline CSS (`<span style=…>`), so a shields.io badge is the
   only way to color text per keyword on github.com;
 - an `impl` cell — lerobot-based: ✅ `impl/lerobot/impl.md` exists /
-  🚧 `UNMAPPABLE.md` / `—` not generated.
+  `UNMAPPABLE.md` / `—` not generated.
 
-**Load-bearing — the 📄 논문 메타 rows the script reads from every
+**Load-bearing — the 논문 메타 rows the script reads from every
 `analysis/<id>/analysis.md`** (STYLE's contract; the author must emit them
 exactly):
 
 | Row label | Required format |
 |---|---|
 | `원문 제목 (영문)` | Plain English title |
-| `링크` | `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` |
+| `링크` | `[arXiv:XXXX.XXXXX](…)`, optionally followed by `· [GitHub](…) · [HuggingFace](…) · [Website](…)` — include a non-arXiv link only if it exists and resolves; never fabricate one |
 | `분석 생성일` | `YYYY-MM-DD` |
 | `관련 Pillar` | Comma-separated `P#` (controlled `P1`–`P4`; the P5 evaluation pillar was retired); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
 
-The `관련 Pillar` row mirrors the `🎯 관련 Pillar / Decision` section's
+The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
 pillar ties (primary first); a paper with no pillar tie omits the row and
 lands in `미분류`. **Controlled tag vocabulary** (extend only by editing this
 list): `vla-arch`, `forgetting`, `peft`, `tactile`, `force`,
 `egocentric-data`, `dexterity`, `flow-matching`, `optimizer`, `continual`,
 `sim2real`, `dataset`. Pick the 1–3 most load-bearing.
 
-A missing / malformed scalar row yields `⚠️ metadata` in that cell rather than
-an abort; a missing `관련 Pillar`/`태그` row yields an empty set. The
-`🔑 기술 키워드` bullet heads are load-bearing too: the index reads each
+A missing / malformed scalar row yields `metadata` in that cell rather than
+an abort; a missing `관련 Pillar` row yields an empty set (the paper lands in
+`미분류`). The `태그` row is still authored (controlled vocabulary above) but is
+no longer surfaced in the index. The
+`기술 키워드` bullet heads are load-bearing too: the index reads each
 bullet's term — the text before the em dash in the `- **<term>** — …` shape
 §5-6 mandates (it also tolerates a `: ` separator and caps long heads).
 `python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
@@ -568,47 +562,45 @@ Outputs (all under `analysis/<id>/`):
 - Both Design and impl are **regenerable snapshots** — re-running the
   generator overwrites them.
 - The Design document follows `analysis/templates/design.md` — 9 `##`
-  sections in this order: 📄 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스,
-  ⛓️ 불변식·가정, 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경
-  의도, 🔌 Foundry 힌트, 🚧 미해결 / 잠정.
+  sections in this order: 메타, 데이터 계약, 모듈 인터페이스,
+  불변식·가정, 하이퍼파라미터·손실, 평가 메트릭, 변경
+  의도, Foundry 힌트, 미해결 / 잠정.
 - The impl document follows `analysis/templates/impl.md` exactly. Six
-  `##` sections in this order: 📄 가이드 메타, 🧱 베이스 / 코드 좌표
-  식별, 🪛 변경 지점 매핑, ⚙️ 핵심 변경 (diff), 🧪 실무 구현 주의,
-  🚧 미해결 / 잠정.
+  `##` sections in this order: 가이드 메타, 베이스 / 코드 좌표
+  식별, 변경 지점 매핑, 핵심 변경 (diff), 실무 구현 주의,
+  미해결 / 잠정.
 - The validation report follows `analysis/templates/validation.md` — six `##`
-  sections: 📄 검증 메타, 📚 문헌 대조, 🔍 패치 정합성, 🧪 시그니처
-  ·하이퍼파라미터 일치, 📐 식·표 일치, ⚖️ 종합 판정, 🚧 미해결 /
+  sections: 검증 메타, 문헌 대조, 패치 정합성, 시그니처
+  ·하이퍼파라미터 일치, 식·표 일치, 종합 판정, 미해결 /
   잠정.
 
 ### 6-2. Emoji system
 
-Same rule as §2: one emoji at the start of each `##` / `###` header,
-never in body. Section (`##`) emojis specific to this document family
-(added on top of §2 and §5-2):
+Same rule as §2: one emoji at the start of each `##` header, `###` and body
+plain. The `##` section emojis for this document family (added on top of §2 and
+§5-2):
 
 | Emoji | Section | Document |
 |-------|---------|----------|
-| 📄 | Design 메타 · 가이드 메타 · 검증 메타 | Design · impl · verify (reused from §5-2) |
-| 🧮 | 데이터 계약 | Design (new) |
-| 🧰 | 모듈 인터페이스 | Design (new) |
-| ⛓️ | 불변식·가정 | Design (new) |
-| 📊 | 하이퍼파라미터·손실 | Design (reused from §5-2) |
-| 🎯 | 평가 메트릭 | Design (reused from §5-2 / §2-2) |
-| ✨ | 변경 의도 | Design (reused from §5-2 / §2-2) |
-| 🔌 | Foundry 힌트 | Design (new) |
+| 📄 | Design 메타 · 가이드 메타 · 검증 메타 | Design · impl · verify |
+| 🧮 | 데이터 계약 | Design |
+| 🧰 | 모듈 인터페이스 | Design |
+| ⛓️ | 불변식·가정 | Design |
+| 📊 | 하이퍼파라미터·손실 | Design |
+| 🎯 | 평가 메트릭 | Design |
+| ✨ | 변경 의도 | Design |
+| 🔌 | Foundry 힌트 | Design |
 | 🧱 | 베이스 / 코드 좌표 식별 | impl |
 | 🪛 | 변경 지점 매핑 | impl |
 | ⚙️ | 핵심 변경 (diff) | impl |
 | 🧪 | 실무 구현 주의 · 시그니처·하이퍼파라미터 일치 | impl · verify |
-| 📚 | 문헌 대조 | verify (new) |
-| 🔍 | 패치 정합성 | verify (new) |
-| 📐 | 식·표 일치 | verify (new) |
-| ⚖️ | 종합 판정 | verify (new) |
+| 📚 | 문헌 대조 | verify |
+| 🔍 | 패치 정합성 | verify |
+| 📐 | 식·표 일치 | verify |
+| 🧬 | 실행 검증 | verify |
+| ⚖️ | 종합 판정 | verify |
+| 🔎 | §🚧 분류 | verify |
 | 🚧 | 미해결 / 잠정 | Design · impl · verify |
-
-🧮 🧰 ⛓️ 🔌 are introduced by Design. 🧱 🪛 are introduced for impl.
-📚 🔍 📐 ⚖️ are introduced for verify. 🧪 🚧 are reused across
-documents. None appear elsewhere in PROBE outputs outside §6.
 
 ### 6-3. Vendor-agnostic Design vs. foundry-bound impl
 
@@ -622,7 +614,7 @@ chosen foundry's code root and follows the form
 `<foundry-root>/<path>:<line>` (line numbers optional but recommended;
 for `lerobot` the prefix is `vendor/lerobot/policies/<base>/`).
 Coordinates are bound to the foundry's pinned snapshot — for lerobot
-the SHA in `vendor/lerobot/README.md`, which the impl's 📄 가이드 메타
+the SHA in `vendor/lerobot/README.md`, which the impl's 가이드 메타
 table MUST cite verbatim. Bumping the snapshot invalidates every
 existing `*/lerobot/impl.patch`; see `vendor/lerobot/README.md` for the
 refresh procedure.
@@ -638,14 +630,14 @@ refresh procedure.
 - Sparse Design > fabricated Design. Any field the source does not pin
   down is left as `(원문에 명시 없음 — 가정으로 메움)`.
 - If `git apply --check` fails on the generated patch, the failure is
-  recorded verbatim in the 📄 가이드 메타 table and at the end of
-  ⚙️ 핵심 변경 (diff). Affected hunks are downgraded to 🪛 + 🚧 entries
+  recorded verbatim in the 가이드 메타 table and at the end of
+  핵심 변경 (diff). Affected hunks are downgraded to + entries
   instead of being silently forged.
 - If the Design cannot ground in the target foundry, **neither**
   `impl.md` nor `impl.patch` is produced. Instead `/implement-design` writes
   `analysis/<id>/impl/<foundry>/UNMAPPABLE.md` with one paragraph of
   reason, and appends one line to `analysis/<id>/analysis.md`:
-  `> 🚧 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
+  `> 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
 
 ### 6-5. Verify report (`/validate-impl` output)
 
@@ -654,16 +646,16 @@ against the originating analysis and the foundry code. It is the
 single deliverable — there is no manifest, no graduated status.
 
 Four `##` sections drive the verdict (`pass` / `fail` / `partial` per
-section), followed by ⚖️ 종합 판정 summarising whether the analysis
+section), followed by 종합 판정 summarising whether the analysis
 can rely on this implementation:
 
-- 📚 문헌 대조 — Design vs cited analyses (일치 / 충돌 / 확장 / 무관).
-- 🔍 패치 정합성 — re-run `git apply --check` against the current
+- 문헌 대조 — Design vs cited analyses (일치 / 충돌 / 확장 / 무관).
+- 패치 정합성 — re-run `git apply --check` against the current
   foundry tree.
-- 🧪 시그니처·하이퍼파라미터 일치 — function signatures, hyperparameter
+- 시그니처·하이퍼파라미터 일치 — function signatures, hyperparameter
   constants, and import paths must match between patch and foundry.
-- 📐 식·표 일치 — formulas and tables cited in the Design or analyses
-  must either be implemented in the patch or explicitly deferred to 🚧.
+- 식·표 일치 — formulas and tables cited in the Design or analyses
+  must either be implemented in the patch or explicitly deferred to .
 
 The verifier executes no code beyond `git apply --check`. `partial` is
 a normal outcome and far better than a fabricated `pass`.
