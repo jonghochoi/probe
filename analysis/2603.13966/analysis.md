@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | vla-eval: A Unified Evaluation Harness for Vision-Language-Action Models |
 | 저자 | Suhwan Choi¹, Yunsung Lee¹, Yubeen Park¹, Chris Dongjoo Kim², Ranjay Krishna², Dieter Fox², Youngjae Yu³ (소속 위첨자 1/2/3 — arXiv HTML 본문에서 기관명은 별도 추출되지 않음. 공개 코드/리더보드 호스트는 `allenai`) |
-| 링크 | [arXiv:2603.13966](https://arxiv.org/abs/2603.13966) |
+| 링크 | [arXiv:2603.13966](https://arxiv.org/abs/2603.13966) · [GitHub](https://github.com/allenai/vla-evaluation-harness) · [Website](https://allenai.github.io/vla-evaluation-harness/leaderboard/) |
 | 발행일 / 버전 | 2026-03-14 제출 · 2026-04-17 개정 (v2) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-06-04 |

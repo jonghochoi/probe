@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | LoRA Learns Less and Forgets Less |
 | 저자 | Dan Biderman, Jacob Portes, Jose Javier Gonzalez Ortiz, Mansheej Paul, Philip Greengard, Connor Jennings, Daniel King, Sam Havens, Vitaliy Chiley, Jonathan Frankle, Cody Blakeney, John P. Cunningham |
-| 링크 | [arXiv:2405.09673](https://arxiv.org/abs/2405.09673) |
+| 링크 | [arXiv:2405.09673](https://arxiv.org/abs/2405.09673) · [HuggingFace](https://huggingface.co/LoRA-TMLR-2024) |
 | 발행일 / 버전 | 2024-05-15 제출 · 2024-09-20 개정 · v2 (TMLR 게재본) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-28 |

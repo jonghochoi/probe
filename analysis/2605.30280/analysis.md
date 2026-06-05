@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Qwen-VLA: Unifying Vision-Language-Action Modeling across Tasks, Environments, and Robot Embodiments |
 | 저자 | Qwen Team — Qiuyue Wang, Mingsheng Li, Jian Guan (공동 1저자) 외 / Shuai Bai (교신저자), Jingren Zhou 등 총 41인 |
-| 링크 | [arXiv:2605.30280](https://arxiv.org/abs/2605.30280) |
+| 링크 | [arXiv:2605.30280](https://arxiv.org/abs/2605.30280) · [GitHub](https://github.com/QwenLM/Qwen-VLA) |
 | 발행일 / 버전 | 2026-05-28 · v1 (cs.RO) |
 | 본문 확보 수준 | PDF 텍스트 (PyMuPDF 추출, 34 pages) |
 | 분석 생성일 | 2026-05-29 |

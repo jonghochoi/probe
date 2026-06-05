@@ -9,7 +9,7 @@ macros (`\\bm`, `\\mathds`), and `$` glued to Hangul/CJK/bold all break
 rendering on github.com and leak the source.
 
 Scope: `analysis/<id>/analysis.md`, `analysis/<id>/design.md`, and
-`analysis/<id>/impl/<foundry>/impl.md`. Catalogs, templates, and INDEX.md
+`analysis/<id>/impl/<foundry>/impl.md`. Catalogs, templates, and README.md
 are out of scope.
 
 Auto-fixable (applied with --fix):

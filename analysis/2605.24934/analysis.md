@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | HumanEgo: Zero-Shot Robot Learning from Minutes of Human Egocentric Videos |
 | 저자 | Zhi (Leo) Wang, Botao He, Kelin Yu, Seungjae Lee, Ruohan Gao, Furong Huang, Yiannis Aloimonos (University of Maryland) |
-| 링크 | [arXiv:2605.24934](https://arxiv.org/abs/2605.24934) |
+| 링크 | [arXiv:2605.24934](https://arxiv.org/abs/2605.24934) · [GitHub](https://github.com/TX-Leo/HumanEgo) · [Website](https://humanego-ai.github.io/) |
 | 발행일 / 버전 | 2026-05-24 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-27 |

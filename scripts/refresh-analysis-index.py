@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Regenerate the auto-maintained analyses index in analysis/INDEX.md.
+"""Regenerate the auto-maintained analyses index in analysis/README.md.
 
 Scans every per-paper subdirectory `analysis/<id>/` and reads metadata
 from its `analysis.md`, checks for foundry-specific impl artifacts, and
-rewrites the block between fixed markers in `analysis/INDEX.md`.
+rewrites the block between fixed markers in `analysis/README.md`.
 
-The generated block is grouped by **Pillar** (primary = first `관련 Pillar`
-entry) under a top "분류 지도" summary, so the human-facing layout stays
-scannable as the corpus grows; a single page still supports Ctrl-F.
+The generated block is one table per primary Pillar (primary = first `관련
+Pillar` entry), so the human-facing layout stays scannable as the corpus grows;
+a single page still supports Ctrl-F.
 
 Idempotent: re-running with no underlying change produces no diff.
 Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml`.
@@ -27,17 +27,18 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
-INDEX = ANALYSIS_DIR / "INDEX.md"
+INDEX = ANALYSIS_DIR / "README.md"
 
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
 
-# Rows we extract from the 📄 논문 메타 table.
+# Rows we extract from the 논문 메타 table.
 TITLE_ROW = re.compile(r"^\|\s*원문\s*제목\s*\(영문\)\s*\|\s*(.+?)\s*\|\s*$")
-LINK_ROW = re.compile(r"^\|\s*링크\s*\|\s*\[arXiv:([^\]]+)\]\(([^)]+)\)\s*\|\s*$")
+LINK_ROW = re.compile(r"^\|\s*링크\s*\|\s*(.+?)\s*\|\s*$")
+MD_LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+ARXIV_ID_RE = re.compile(r"(\d{4}\.\d{4,5})")
 REFRESHED_ROW = re.compile(r"^\|\s*분석\s*생성일\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*$")
 PILLAR_ROW = re.compile(r"^\|\s*관련\s*Pillar\s*\|\s*(.+?)\s*\|\s*$")
-TAGS_ROW = re.compile(r"^\|\s*태그\s*\|\s*(.+?)\s*\|\s*$")
 
 WARN = "⚠️ metadata"
 UNCLASSIFIED = "미분류"
@@ -63,8 +64,6 @@ PILLAR_COLOR = {
 }
 # P1–P4 only; P5 (and anything else) is dropped at extraction time.
 PILLAR_RE = re.compile(r"P[1-4]")
-# Tag badges share one neutral color so they read as a single facet.
-TAG_COLOR = "555555"
 
 
 def find_analyses() -> list[Path]:
@@ -89,21 +88,23 @@ def _split_csv(value: str) -> list[str]:
 
 
 def extract_meta(paper_dir: Path) -> dict:
-    """Pull title / arxiv / refreshed / pillars / tags out of the meta table.
+    """Pull title / links / refreshed / pillars out of the meta table.
 
+    The `링크` row may carry several links (arXiv + GitHub / HuggingFace /
+    project site); each is classified by host and rendered as its own badge.
     Missing or malformed scalar rows produce the `⚠️ metadata` placeholder for
-    that cell rather than aborting; missing pillar/tag rows yield empty lists.
+    that cell rather than aborting; a missing pillar row yields an empty list.
     """
     title = arxiv_id = arxiv_url = refreshed = ""
+    links: list[tuple[str, str]] = []   # (kind, url), arXiv first
     pillars: list[str] = []
-    tags: list[str] = []
     analysis_file = paper_dir / "analysis.md"
     try:
         text = analysis_file.read_text(encoding="utf-8")
     except OSError:
         return {
             "title": WARN, "arxiv_id": WARN, "arxiv_url": "",
-            "refreshed": WARN, "pillars": [], "tags": [],
+            "refreshed": WARN, "pillars": [], "links": [],
         }
 
     for line in text.splitlines():
@@ -112,11 +113,17 @@ def extract_meta(paper_dir: Path) -> dict:
             if m:
                 title = m.group(1).strip()
                 continue
-        if not arxiv_id:
+        if not links:
             m = LINK_ROW.match(line)
-            if m:
-                arxiv_id = m.group(1).strip()
-                arxiv_url = m.group(2).strip()
+            if m and MD_LINK.search(m.group(1)):
+                for _label, url in MD_LINK.findall(m.group(1)):
+                    url = url.strip()
+                    kind = classify_link(url)
+                    links.append((kind, url))
+                    if kind == "arxiv" and not arxiv_id:
+                        am = ARXIV_ID_RE.search(url) or ARXIV_ID_RE.search(_label)
+                        if am:
+                            arxiv_id, arxiv_url = am.group(1), url
                 continue
         if not refreshed:
             m = REFRESHED_ROW.match(line)
@@ -129,11 +136,6 @@ def extract_meta(paper_dir: Path) -> dict:
                 # Keep declared order; first entry is the primary pillar.
                 pillars = [p for p in PILLAR_RE.findall(m.group(1))]
                 continue
-        if not tags:
-            m = TAGS_ROW.match(line)
-            if m:
-                tags = [t.lower() for t in _split_csv(m.group(1))]
-                continue
 
     return {
         "title": title or WARN,
@@ -141,7 +143,7 @@ def extract_meta(paper_dir: Path) -> dict:
         "arxiv_url": arxiv_url,
         "refreshed": refreshed or WARN,
         "pillars": pillars,
-        "tags": tags,
+        "links": links,
     }
 
 
@@ -160,8 +162,9 @@ def impl_state(stem: str) -> str:
     return "—"
 
 
-# 🔑 기술 키워드 bullet head: `- **<term>** — …` (em dash separates head/def).
-KEYWORD_HEADER_RE = re.compile(r"^##\s+🔑")
+# 기술 키워드 bullet head: `- **<term>** — …` (em dash separates head/def).
+# The `## 🔑 기술 키워드` header carries the §2 emoji; accept it with or without.
+KEYWORD_HEADER_RE = re.compile(r"^##\s+(?:🔑\s*)?기술\s*키워드")
 KEYWORD_BULLET_RE = re.compile(r"^-\s+(.+)$")
 # Secondary cut for bullets that use `term: def` instead of the spec's em dash.
 KEYWORD_COLON_RE = re.compile(r":\s")
@@ -203,9 +206,9 @@ def _englishize(head: str) -> str:
 
 
 def extract_keywords(paper_dir: Path) -> list[str]:
-    """Return up to MAX_KEYWORDS English keyword labels from 🔑 기술 키워드.
+    """Return up to MAX_KEYWORDS English keyword labels from 기술 키워드.
 
-    Reads the `## 🔑 기술 키워드` section (spec'd in docs/STYLE.md §5-6) and
+    Reads the `## 기술 키워드` section (spec'd in docs/STYLE.md §5-6) and
     takes each top-level bullet's head term — the text before the em dash `—`
     (the spec delimiter; a `: ` separator is tolerated for non-conforming
     bullets). English plain text only: a head carrying any math/markup
@@ -281,21 +284,48 @@ def pillar_badges(pillars: list[str]) -> str:
     return " ".join(_badge(p, PILLAR_COLOR.get(p, PILLAR_COLOR[UNCLASSIFIED])) for p in pillars)
 
 
-def tag_badges(tags: list[str]) -> str:
-    """Render a paper's tags as neutral-color facet badges."""
-    if not tags:
-        return "—"
-    return " ".join(_badge(t, TAG_COLOR) for t in tags)
+def classify_link(url: str) -> str:
+    """Bucket a meta-table link by host: arxiv / github / hf / web."""
+    host = urllib.parse.urlparse(url).netloc.lower()
+    if "arxiv.org" in host:
+        return "arxiv"
+    if "github.com" in host:
+        return "github"
+    if "huggingface.co" in host:
+        return "hf"
+    return "web"
 
 
-def arxiv_badge(arxiv_id: str, arxiv_url: str) -> str:
-    """Render the arXiv cell as a red shields.io badge linking to the abs page."""
-    if arxiv_id == WARN:
-        return WARN
-    if not arxiv_url:
-        return f"`{arxiv_id}`"
-    label = _shields_escape(arxiv_id)
-    return f"[![arXiv](https://img.shields.io/badge/arXiv-{label}-b31b1b.svg)]({arxiv_url})"
+# Per-kind shields.io badge: (alt/left label, right label, color). arXiv is
+# built separately so the badge carries the id; the rest are fixed-style badges.
+# Badge order is always arXiv → Website → GitHub → HuggingFace.
+_LINK_BADGE = {
+    "web": ("Website", "Link", "blue"),
+    "github": ("GitHub", "Code", "black"),
+    "hf": ("HuggingFace", "Model", "yellow"),
+}
+_LINK_ORDER = {"arxiv": 0, "web": 1, "github": 2, "hf": 3}
+
+
+def link_badges(links: list[tuple[str, str]], arxiv_id: str) -> str:
+    """Render the links cell as shields.io badges in a fixed order.
+
+    arXiv → Website → GitHub → HuggingFace. Falls back to `—` when the row
+    carried no links.
+    """
+    if not links:
+        return WARN if arxiv_id == WARN else "—"
+    out: list[str] = []
+    for kind, url in sorted(links, key=lambda kv: _LINK_ORDER.get(kv[0], 9)):
+        if kind == "arxiv":
+            m = ARXIV_ID_RE.search(url)
+            aid = m.group(1) if m else arxiv_id
+            label = _shields_escape(aid)
+            out.append(f"[![arXiv](https://img.shields.io/badge/arXiv-{label}-b31b1b.svg)]({url})")
+        else:
+            left, right, color = _LINK_BADGE[kind]
+            out.append(f"[![{left}](https://img.shields.io/badge/{left}-{right}-{color})]({url})")
+    return " ".join(out)
 
 
 def sort_key(row: dict) -> tuple[str, str]:
@@ -311,14 +341,13 @@ def primary_pillar(row: dict) -> str:
 
 
 def build_block(rows: list[dict]) -> str:
-    """Compose the full generated block: 분류 지도 summary + per-pillar tables."""
+    """Compose the generated block: one table per primary Pillar."""
     if not rows:
         return (
-            "## 분류 지도\n\n_no deep-dives yet_\n\n"
             "## 미분류\n\n"
-            "| # | Analysis | arXiv | Title | Pillars | Tags | Keywords | Refreshed | impl |\n"
-            "|---|---|---|---|---|---|---|---|---|\n"
-            "| — | _no deep-dives yet_ | — | — | — | — | — | — | — |\n"
+            "| # | Analysis | Links | Title | Pillars | Keywords | Refreshed | impl |\n"
+            "|---|---|---|---|---|---|---|---|\n"
+            "| — | _no deep-dives yet_ | — | — | — | — | — | — |\n"
         )
 
     # Bucket by primary pillar.
@@ -328,40 +357,12 @@ def build_block(rows: list[dict]) -> str:
     for key in groups:
         groups[key].sort(key=sort_key, reverse=True)
 
-    # Tag distribution across the whole corpus.
-    tag_counts: dict[str, int] = {}
-    for row in rows:
-        for tag in row["tags"]:
-            tag_counts[tag] = tag_counts.get(tag, 0) + 1
-
     out: list[str] = []
-
-    # ── 분류 지도 (summary) ──────────────────────────────────────────────
-    out.append("## 분류 지도\n\n")
-    out.append(f"총 {len(rows)}편. Pillar 별 1차 분류(primary = 첫 `관련 Pillar`):\n\n")
-    out.append("| Pillar | 논문 수 | 영역 |\n|---|---|---|\n")
-    for key in PILLAR_ORDER:
-        n = len(groups[key])
-        if key == UNCLASSIFIED:
-            if n == 0:
-                continue
-            name = "—"
-        else:
-            name = PILLAR_NAMES[key]
-        anchor = key.lower() if key != UNCLASSIFIED else "미분류"
-        label = _badge(key, PILLAR_COLOR[key]) if key != UNCLASSIFIED else key
-        out.append(f"| {label} | {n} | {name} |\n")
-    out.append("\n")
-    if tag_counts:
-        out.append("태그 분포: ")
-        ordered = sorted(tag_counts.items(), key=lambda kv: (-kv[1], kv[0]))
-        out.append(" ".join(_badge(f"{t} {c}", TAG_COLOR) for t, c in ordered))
-        out.append("\n\n")
 
     # ── Per-pillar tables ───────────────────────────────────────────────
     header = (
-        "| # | Analysis | arXiv | Title | Pillars | Tags | Keywords | Refreshed | impl |\n"
-        "|---|---|---|---|---|---|---|---|---|\n"
+        "| # | Analysis | Links | Title | Pillars | Keywords | Refreshed | impl |\n"
+        "|---|---|---|---|---|---|---|---|\n"
     )
     for key in PILLAR_ORDER:
         bucket = groups[key]
@@ -373,9 +374,9 @@ def build_block(rows: list[dict]) -> str:
         for i, row in enumerate(bucket, 1):
             link = f"[`{row['stem']}/analysis.md`]({row['stem']}/analysis.md)"
             out.append(
-                f"| {i} | {link} | {arxiv_badge(row['arxiv_id'], row['arxiv_url'])} "
+                f"| {i} | {link} | {link_badges(row['links'], row['arxiv_id'])} "
                 f"| {row['title']} | {pillar_badges(row['pillars'])} "
-                f"| {tag_badges(row['tags'])} | {keyword_badges(row['keywords'])} "
+                f"| {keyword_badges(row['keywords'])} "
                 f"| {row['refreshed']} | {row['impl']} |\n"
             )
         out.append("\n")
@@ -384,7 +385,7 @@ def build_block(rows: list[dict]) -> str:
 
 
 def rewrite_index(block: str) -> bool:
-    """Replace the marker block in analysis/INDEX.md. Return True if changed."""
+    """Replace the marker block in analysis/README.md. Return True if changed."""
     original = INDEX.read_text(encoding="utf-8")
     if MARKER_START not in original or MARKER_END not in original:
         sys.stderr.write(

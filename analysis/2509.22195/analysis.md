@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Actions as Language: Fine-Tuning VLMs into VLAs Without Catastrophic Forgetting |
 | 저자 | Asher J. Hancock, Xindi Wu, Lihan Zha, Olga Russakovsky, Anirudha Majumdar (Princeton University) |
-| 링크 | [arXiv:2509.22195](https://arxiv.org/abs/2509.22195) |
+| 링크 | [arXiv:2509.22195](https://arxiv.org/abs/2509.22195) · [Website](https://vlm2vla.github.io/) |
 | 발행일 / 버전 | 2025-09-26 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-28 |

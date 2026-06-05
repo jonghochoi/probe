@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | <Original English Title> |
 | 저자 | <authors> |
-| 링크 | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) |
+| 링크 | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · [GitHub](https://github.com/...) · [HuggingFace](https://huggingface.co/...) · [Website](https://...) |
 | 발행일 / 버전 | YYYY-MM-DD · vN |
 | 본문 확보 수준 | 전문(arXiv HTML) / 전문(ar5iv) / PDF 텍스트(pdftotext) / 초록 only |
 | 분석 생성일 | YYYY-MM-DD |
@@ -48,7 +48,7 @@
      - **<원어 / 약어>** — 한 줄 직관적 비유 또는 평이한 설명
        (선택) → 본 논문에서의 역할 한 줄.
      굵은 head 용어는 반드시 평이한 영어(원어/약어)로 적습니다. 한글
-     해설·수식($…$/LaTeX)은 em dash 뒤에만 둡니다 — head 는 INDEX.md
+     해설·수식($…$/LaTeX)은 em dash 뒤에만 둡니다 — head 는 README.md
      키워드 배지로 올라가며, 영어가 아니거나 수식이 든 head 는
      버려집니다(STYLE §5-6/§5-7).
      §4-2 글로서리에 등재된 용어도 head 는 영어 원어로 시작하고

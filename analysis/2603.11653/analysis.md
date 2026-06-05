@@ -8,7 +8,7 @@
 |------|------|
 | 원문 제목 (영문) | Simple Recipe Works: Vision-Language-Action Models are Natural Continual Learners with Reinforcement Learning |
 | 저자 | Jiaheng Hu, Jay Shim, Chen Tang, Yoonchang Sung, Bo Liu, Peter Stone, Roberto Martín-Martín |
-| 링크 | [arXiv:2603.11653](https://arxiv.org/abs/2603.11653) |
+| 링크 | [arXiv:2603.11653](https://arxiv.org/abs/2603.11653) · [GitHub](https://github.com/UT-Austin-RobIn/continual-vla-rl) |
 | 발행일 / 버전 | 2026-03-12 · v1 |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 분석 생성일 | 2026-05-28 |
