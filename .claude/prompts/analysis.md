@@ -57,19 +57,22 @@ Without `--focus`, the prompt behaves exactly as before (full
 regenerate of both documents from the paper body).
 
 CONTEXT (read-only):
-- context/MASTER.md        — full source of truth. A single paper
-                               often spans multiple pillars, so read
-                               the FULL doc, not a per-pillar extract.
-                               Identity & Purpose, Pillars P1–P5,
-                               Decision Log D1–D26, Tracked Literature,
-                               Competitor list, Researchers, Anti-topics.
+- context/MASTER.md        — cross-pillar anchor: Identity & Purpose,
+                               Pillars overview (P1–P4), Venue,
+                               Cross-pollination, cross-pillar Researchers.
+- context/P1–P4.md         — the per-pillar owners: Decision Log
+                               (D1–D23 across pillars), Tracked Literature,
+                               Competitor / Kindred Monitoring, Researchers,
+                               Anti-topics. A single paper often spans
+                               multiple pillars, so read MASTER + every
+                               P#.md, not a single extract.
 - docs/STYLE.md        — §5 (Paper Analysis doc) + §6 (Design /
                                Implementation guide) + §4 (Korean
                                terms/tone/glossary).
 - analysis/templates/analysis.md      — the form for the analysis document.
 - analysis/templates/design.md — the form for the Layer 1 Design
                                document (vendor-agnostic).
-Never edit any context file. context/MASTER.md is human-owned; if
+Never edit any context file. The context/ files are human-owned; if
 this paper implies a pinned-literature or Decision change, write it
 under 💡 컨텍스트 제안 and stop there.
 
@@ -161,8 +164,8 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
                         plus two load-bearing classification rows the index reads
                         (STYLE §5-7): `| 관련 Pillar | P#, … |` (controlled P1–P4,
                         comma-separated, primary first — mirror the 🎯 section's
-                        pillar ties; P5/evaluation is excluded from the index
-                        taxonomy; omit the row if none) and `| 태그 | … |`
+                        pillar ties; the P5 evaluation pillar was retired, so any
+                        stray P5 is dropped; omit the row if none) and `| 태그 | … |`
                         (1–3 lowercase tags from the controlled vocabulary:
                         vla-arch, forgetting, peft, tactile, force,
                         egocentric-data, dexterity, flow-matching, optimizer,
@@ -198,12 +201,12 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
   ⚖️ 한계              — author-stated weaknesses + obvious gaps.
   ♻️ 재현성            — code / data / hardware availability.
 
-(B) PROBE 연동 — decision-grade, anchored to context/MASTER.md:
-  🎯 관련 Pillar / Decision (P#/D#) — which P1–P5 / D1–D26 this paper
-       touches. Also note Identity tension/support and any §10 competitor
-       implication.
+(B) PROBE 연동 — decision-grade, anchored to context/MASTER.md + the relevant context/P#.md:
+  🎯 관련 Pillar / Decision (P#/D#) — which P1–P4 / D1–D23 this paper
+       touches. Also note Identity tension/support and any competitor
+       implication (the relevant P#.md §7 Competitor / Kindred Monitoring).
   ✨ 핀 논문 대비 델타  — what is genuinely new vs. the Tracked
-       Literature already in context/MASTER.md (name the pinned paper).
+       Literature already in the relevant context/P#.md §5 (name the pinned paper).
   ⚙️ 의사결정 함의     — what changes in MY training/evaluation pipeline
        if this paper is right? Name a specific config key / hyperparameter /
        metric / loss term. Vague is failure.
@@ -211,7 +214,7 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
        Cheapest sanity check first.
   💡 컨텍스트 제안      — if a pin should change or a Decision/deferred
        trigger moves, state it here for the human. Do NOT edit
-       context/MASTER.md.
+       any context/ file.
 
 STRUCTURE of `analysis/<id>/design.md` — Layer 1 only:
 
@@ -233,9 +236,9 @@ real spec to ground.
 
 HARD RULES:
 - Two Korean documents. No English-primary file. KO-only filenames.
-- Anchor (B) of the analysis strictly to context/MASTER.md — cite real
-  P#/D# with their meaning from the doc; do not invent a
-  connection. If the paper does not touch a given Decision, say so
+- Anchor (B) of the analysis strictly to context/MASTER.md + the relevant
+  context/P#.md — cite real P#/D# with their meaning from the docs; do not
+  invent a connection. If the paper does not touch a given Decision, say so
   plainly.
 - Abstract-only acquisition → prefix every (B) section of the analysis
   with the verbatim marker **(본문 미확보 — 잠정)**. The Design is

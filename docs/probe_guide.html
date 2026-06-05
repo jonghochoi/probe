@@ -696,7 +696,7 @@
         <span class="principle-icon">📌</span>
         <div>
           <div class="principle-title">정적 (<code>context/</code>) — 월 단위로 한 번 정도 바뀐다</div>
-          <div class="principle-desc">에이전트는 <em>읽기만</em> 합니다. 절대 쓰지 않습니다. <code>MASTER.md</code>(다섯 pillar 전체) + <code>P{1..4}.md</code>(pillar별 history-free 추출본). 클라우드 루틴은 추출본 하나만 읽어 컨텍스트를 가볍고 pillar-focused 하게 유지합니다.</div>
+          <div class="principle-desc">에이전트는 <em>읽기만</em> 합니다. 절대 쓰지 않습니다. <code>MASTER.md</code>(글로벌 앵커 — 네 pillar 개요·cross-cutting) + <code>P{1..4}.md</code>(pillar별 Decision Log·Tracked Literature 등 소유). 클라우드 루틴은 <code>P#.md</code> 하나만 읽어 컨텍스트를 가볍고 pillar-focused 하게 유지합니다.</div>
         </div>
       </div>
       <div class="principle">
@@ -712,7 +712,7 @@
         <span class="principle-icon">🚫</span>
         <div>
           <div class="principle-title">절대 섞지 않는다</div>
-          <div class="principle-desc">모든 것을 한 파일에 쌓으면 몇 주 안에 컨텍스트가 부풀어 에이전트가 이미 다뤘던 논문을 재추천하거나, pinned literature가 망각됩니다. 풀 문서를 편집하고 추출본을 재생성하세요 — 역방향 금지.</div>
+          <div class="principle-desc">모든 것을 한 파일에 쌓으면 몇 주 안에 컨텍스트가 부풀어 에이전트가 이미 다뤘던 논문을 재추천하거나, pinned literature가 망각됩니다. pillar 내용은 해당 <code>P#.md</code>를, cross-cutting 내용은 <code>MASTER.md</code>를 편집하세요.</div>
         </div>
       </div>
     </div>
@@ -731,7 +731,7 @@
         <div class="step-body">
           <h4>Stage 1 — 수동 실행 (Week 1–2)</h4>
           <p>
-            새 <a href="https://claude.ai" target="_blank" rel="noopener">Claude.ai</a> 대화 → <code>context/MASTER.md</code> 업로드 → Scouting Prompt 붙여넣기(실행 날짜 + pillar 채우기) → 결과를 <code>scouting/templates/report.md</code> 기준으로 검토. 통과하지 못하면 모델이 아니라 <em>프롬프트</em>가 문제입니다. <code>scouting/P#/YYYY-MM-DD.md</code>로 저장 후 commit. 다음 실행(월·목)에 반복.
+            새 <a href="https://claude.ai" target="_blank" rel="noopener">Claude.ai</a> 대화 → 해당 <code>context/P#.md</code> 업로드 → Scouting Prompt 붙여넣기(실행 날짜 + pillar 채우기) → 결과를 <code>scouting/templates/report.md</code> 기준으로 검토. 통과하지 못하면 모델이 아니라 <em>프롬프트</em>가 문제입니다. <code>scouting/P#/YYYY-MM-DD.md</code>로 저장 후 commit. 다음 실행(월·목)에 반복.
           </p>
         </div>
       </div>
@@ -776,8 +776,8 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <div class="compare-body">
           <div class="compare-item"><span class="compare-icon">🎯</span><span><strong>방향</strong> — Identity 명제가 여전히 load-bearing 한가? 최우선 Pillar가 여전히 맞는가?</span></div>
           <div class="compare-item"><span class="compare-icon">📋</span><span><strong>Decision Log 큐레이션</strong> — 논문이 default를 흔들면 해당 Decision 업데이트</span></div>
-          <div class="compare-item"><span class="compare-icon">📏</span><span><strong>평가 프로토콜</strong> — Decision Log가 정의한 falsifier 임계값/메트릭 유지</span></div>
-          <div class="compare-item"><span class="compare-icon">🔄</span><span><strong>맥락 갱신</strong> — Checkpoint마다 Tracked Literature/Decision Log/Competitor 갱신</span></div>
+          <div class="compare-item"><span class="compare-icon">📏</span><span><strong>분석 승급</strong> — 어떤 논문을 deep-dive <code>analysis/</code>로 올리고 어떤 것을 핀으로 둘지 결정</span></div>
+          <div class="compare-item"><span class="compare-icon">🔄</span><span><strong>맥락 갱신</strong> — Checkpoint마다 해당 <code>P#.md</code>의 Tracked Literature/Decision Log/Competitor 갱신</span></div>
           <div class="compare-item"><span class="compare-icon">💬</span><span><strong>피드백 루프</strong> — 어떤 스카우트 논문이 실험/Decision을 바꿨는가</span></div>
           <div class="compare-item"><span class="compare-icon">🗑️</span><span><strong>버리기</strong> — 대부분의 논문은 안 중요. 그게 정상.</span></div>
         </div>
@@ -797,7 +797,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 
     <div class="callout callout-warn">
       <span class="callout-icon">🚨</span>
-      <p>에이전트는 <strong>절대로</strong> <code>context/MASTER.md</code>를 편집하지 않습니다. 리포트 안에서 <em>수정 제안</em>만 합니다. 실제 반영은 사람이 결정합니다.</p>
+      <p>에이전트는 <strong>절대로</strong> <code>context/</code> 파일(<code>MASTER.md</code>·<code>P#.md</code>)을 편집하지 않습니다. 리포트 안에서 <em>수정 제안</em>만 합니다. 실제 반영은 사람이 결정합니다.</p>
     </div>
   </section>
 
@@ -809,12 +809,12 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
     <div class="card-grid">
       <div class="mode-card">
         <h4>/analyze-paper &lt;id | url | pdf&gt;</h4>
-        <p>인간이 이미 관심을 가진 한 편(보통 <code>context/MASTER.md</code> §8의 pinned/anchor 논문 중 아직 내재화하지 못한 것)을 읽고 한글 deep-dive를 남깁니다.</p>
+        <p>인간이 이미 관심을 가진 한 편(보통 <code>context/P#.md</code> §5의 pinned/anchor 논문 중 아직 내재화하지 못한 것)을 읽고 한글 deep-dive를 남깁니다.</p>
         <dl class="mode-meta">
-          <dt>입력</dt>          <dd>full <code>context/MASTER.md</code> (한 논문이 여러 pillar에 걸치므로 추출본이 아니라 풀 문서)</dd>
+          <dt>입력</dt>          <dd><code>context/MASTER.md</code>(cross-pillar anchor) + 네 <code>context/P#.md</code> 전부 (한 논문이 여러 pillar에 걸치므로)</dd>
           <dt>본문 획득</dt>     <dd><code>arxiv.org/abs</code> → <code>/html</code> → ar5iv → abstract-only, 획득 레벨을 문서 헤더에 기록</dd>
           <dt>출력</dt>          <dd><code>analysis/&lt;arxiv-id&gt;.md</code> — 단일 한글, 매 실행 덮어쓰기</dd>
-          <dt>구조</dt>          <dd>(A) 중립 요약 + (B) <code>MASTER.md</code> 기반 decision-grade 함의</dd>
+          <dt>구조</dt>          <dd>(A) 중립 요약 + (B) <code>MASTER.md</code> + <code>P#.md</code> 기반 decision-grade 함의</dd>
         </dl>
       </div>
       <div class="mode-card">
@@ -853,7 +853,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td class="center">🌱</td><td>Paper N — CROSS-POLLINATION</td><td>인접 분야 강제 픽업 (월 1회)</td></tr>
           <tr><td class="center">📊</td><td>Scoring Summary</td><td>0–3 점수 요약 표</td></tr>
           <tr><td class="center">🚫</td><td>Candidate Papers That Did Not Pass Filter</td><td>Anti-topic 적중 + 점수 미달</td></tr>
-          <tr><td class="center">💡</td><td>Context Suggestions</td><td>MASTER.md 수정 제안 (반영은 사람이)</td></tr>
+          <tr><td class="center">💡</td><td>Context Suggestions</td><td>context/ 수정 제안 (반영은 사람이)</td></tr>
           <tr><td class="center">🔄</td><td>Run-over-Run Synthesis</td><td>직전 2주 대비 변화</td></tr>
         </tbody>
       </table>
@@ -995,7 +995,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">CTX</span>
         <div>
           <div class="doc-title">context/MASTER.md</div>
-          <div class="doc-desc">단일 진실원 — Identity · Pillars · Decision Log · Tracked Literature · Competitor</div>
+          <div class="doc-desc">글로벌 앵커 — Identity · Pillars(P1–P4) · Venue · Cross-pollination · cross-pillar Researchers</div>
         </div>
       </a>
       <a class="doc-item" href="../scouting/README.md">

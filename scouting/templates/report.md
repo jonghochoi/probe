@@ -125,7 +125,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 | Paper | Link | Reason dropped |
 |-------|------|----------------|
-| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Anti-topic: <specific rule from §7> |
+| <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Anti-topic: <specific rule from the pillar's §4 Anti-topics> |
 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Novelty < 2 (delta over pinned:<name>) |
 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Sim2Real = 0 (sim-only, no real-robot evidence) |
 
@@ -133,10 +133,10 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 
 ## 💡 컨텍스트 제안
 
-<!-- Agent proposes edits to context/MASTER.md. Human decides. Agent must NOT edit context/MASTER.md directly. -->
+<!-- Agent proposes edits to the relevant context/P#.md. Human decides. Agent must NOT edit any context/ file directly. -->
 
 ### 📌 Tracked literature
-<!-- Replace / add / remove a pinned paper within a Pillar's 8-paper cap (§8.1–§8.5). Include arXiv link and target Pillar. -->
+<!-- Replace / add / remove a pinned paper within the pillar's 8-paper cap (`context/P#.md` §5). Include arXiv link and target Pillar. -->
 
 ### 📌 Decision Log
 <!-- Trigger an existing deferred candidate (cite D# + checkpoint), revise a v1 default's rationale, or propose a new decision. State which evidence this week moved it. -->
@@ -145,7 +145,7 @@ If any tool call failed, state the error verbatim. Do not fabricate.
 <!-- Candidate new exclusion rule surfaced by this week's filter set. -->
 
 ### 📌 Researchers to follow
-<!-- Add / remove authors based on signal this week (§9). -->
+<!-- Add / remove authors based on signal this week (the pillar's §6 Researchers). -->
 
 ### 📌 Competitor / Kindred monitoring
 <!-- Any new release from §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage)? Differentiation vehicle still intact? -->

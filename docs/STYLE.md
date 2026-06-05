@@ -485,10 +485,9 @@ the per-command prompts (`/analyze-paper`, `/implement-design`,
 
 The generated `INDEX.md` block opens with a **분류 지도** summary
 (per-pillar paper counts + corpus-wide tag distribution) and then one
-plain-`##` table **per primary Pillar** (`P1`…`P4`, then `미분류`). P5
-(evaluation) is excluded from the index taxonomy — a cross-cutting pillar no
-analysis takes as its primary identity (MASTER.md-only, no `P5.md` extract), so
-a stray `P5` in a `관련 Pillar` row is dropped at generation. The
+plain-`##` table **per primary Pillar** (`P1`…`P4`, then `미분류`). The
+index taxonomy covers the four pillars P1–P4; the P5 evaluation pillar was
+retired, so any stray `P5` in a `관련 Pillar` row is dropped at generation. The
 *primary pillar* is the first entry of the `관련 Pillar` row; a paper appears
 in exactly one table but lists its full pillar set in the `Pillars` column.
 Empty pillar buckets are skipped. Within each table rows sort by `Refreshed`
@@ -521,7 +520,7 @@ exactly):
 | `원문 제목 (영문)` | Plain English title |
 | `링크` | `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` |
 | `분석 생성일` | `YYYY-MM-DD` |
-| `관련 Pillar` | Comma-separated `P#` (controlled `P1`–`P4`; P5 excluded); first = primary |
+| `관련 Pillar` | Comma-separated `P#` (controlled `P1`–`P4`; the P5 evaluation pillar was retired); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
 
 The `관련 Pillar` row mirrors the `🎯 관련 Pillar / Decision` section's

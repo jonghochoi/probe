@@ -42,12 +42,10 @@ TAGS_ROW = re.compile(r"^\|\s*태그\s*\|\s*(.+?)\s*\|\s*$")
 WARN = "⚠️ metadata"
 UNCLASSIFIED = "미분류"
 
-# Pillar display names mirror context/MASTER.md §5 Pillars (SSOT — kept here
-# only because this script never reads the human-owned context/ tree). P5
-# (evaluation) is deliberately excluded from the index taxonomy: it is a
-# cross-cutting pillar no analysis takes as its primary identity (it lives only
-# in MASTER.md, with no P5.md extract), so it never groups and is stripped from
-# the Pillars column.
+# Pillar display names mirror context/MASTER.md §5 Pillars (kept here only
+# because this script never reads the human-owned context/ tree). The taxonomy
+# covers the four pillars P1–P4; the P5 evaluation pillar was retired, so any
+# stray P5 in a 관련 Pillar row is stripped from the Pillars column.
 PILLAR_NAMES = {
     "P1": "Heterogeneous Body/Hand Action Expert",
     "P2": "Structured Input-Modality Binding",
