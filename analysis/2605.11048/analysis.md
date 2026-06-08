@@ -209,7 +209,7 @@ Ablation (Stamp, Table 5):
 - **P4 (VLM Preservation) — 약한 지지.** V2F 가 VLM 의 zero-shot pointing 능력을 fine-tune 으로 한정해 끌어 쓰고 접촉 정책에는 VLM 을 *전혀* 통과시키지 않습니다. D19 (a) "frozen backbone + action experts only" 와 같은 *기능 분리* 정신을 task-level 에서 구현한 사례로 읽힙니다.
 - **P5 (Falsifiable Evaluation) — Force Fidelity metric 의 직접 참조.** D26 의 contact-precision metric 후보 (slip count / pose stability) 에 *force-MAE cost* 라는 의미적으로 동치인 지표 정의를 더해 줍니다.
 - **P1 (Body/Hand Split) — 거의 무관.** 1-DoF gripper 만 사용하므로 anatomical 분리 의제와 직접 닿지 않습니다. *task-level* V2F 분리는 P1 의 *architectural* split 과 다른 층위입니다.
-- **CP 함의** — CP1 (4-contribution ablation) 보다는 *CP2 (real-world demo)* 에서 force-fidelity metric 채택 여부와, System0 RL 의 필요성 판단에서 antagonist 증거로 직접 참조됩니다.
+- **단계(phase) 함의** — 4-contribution ablation 보다는 *실로봇 데모(real-world demo)* 에서 force-fidelity metric 채택 여부와, System0 RL 의 필요성 판단에서 antagonist 증거로 직접 참조됩니다.
 
 ---
 
@@ -229,19 +229,19 @@ Ablation (Stamp, Table 5):
 
 - **D11 (Visuotactile encoder 후보) — global modulator path 추가.** 현재 D11 은 *swappable sensor head + per-finger token* 으로 D8 의 finger token 에 흡수시키는 *local* 경로만 있습니다. ForceFlow 결과는 "force 를 token 으로 cross-attn 에 넣을 때 modal masking 이 발생할 수 있다" 는 가설을 강화합니다. → **action experts (Body/Hand) 의 backbone LayerNorm 에 force-summary AdaLN $`\gamma,\beta`$ 를 주입하는 옵션을 D11 deferred 후보로 등록** 검토 (구체 config: hand expert DiT block 의 모든 LayerNorm 을 AdaLN 으로, force-summary = `[F_palm_summary; F_finger_summary_aggregated]`).
 - **D5 (Input-modality + control-rate 분리) — modality dominance 분리의 정당화.** ForceFlow 결과는 D5 v1 의 "Body={vision/lang/proprio}, Hand={tactile/proprio/local visual}" 분리 정당성을 *비대칭 fusion* 가설로 보강합니다. → 변동 없음, 현 v1 유지를 강화.
-- **D13/D14 (System0 필요성) — 반증 후보 등록.** ForceFlow 는 RL 없이 force history (10-step) + joint force prediction 만으로 contact regulation 을 잡았습니다. CP1/CP2 ablation 비교군에 *"Hand expert with force history 10-step + next-force prediction head, no System0"* 변형을 추가하는 것이 합리적입니다. → **D25 4-contribution ablation 의 (d) +System0 조건 옆에 "(d') force history+pred head, no RL" 비교 셀 추가** 검토.
+- **D13/D14 (System0 필요성) — 반증 후보 등록.** ForceFlow 는 RL 없이 force history (10-step) + joint force prediction 만으로 contact regulation 을 잡았습니다. 초기 sim ablation / 실로봇 데모 비교군에 *"Hand expert with force history 10-step + next-force prediction head, no System0"* 변형을 추가하는 것이 합리적입니다. → **D25 4-contribution ablation 의 (d) +System0 조건 옆에 "(d') force history+pred head, no RL" 비교 셀 추가** 검토.
 - **D17 (System0 reward) — joint prediction aux 영감.** Force prediction 을 학습 신호로만 쓰는 active-compliance 패턴은 System0 policy 의 next-tactile prediction aux head 로 이식 가능합니다. → **System0 PPO loss 에 `+ λ · MSE(predicted_next_tactile, observed_next_tactile)` aux term** 검토 ($`\lambda`$ ≈ 0.01–0.1 부터 sweep).
-- **D26 (평가 metric) — Force Fidelity (MAE Cost) 채택.** contact-precision metric 의 slip-count / pose-stability 옆에 *task-dependent force MAE* (short-horizon: peak ‖f‖, continuous: 평균 effective ‖f‖) 를 정식으로 등록. → **CP1 sim ablation 의 falsifier metric 에 `force_mae_cost` 추가**.
-- **V2F handover 패턴은 우리 phase 매핑상 별도.** 우리 단계는 *in-hand rotation → tool articulation* 로, V2F 가 노리는 *approach→contact* 분리와 시점이 다릅니다. 직접 채택 후보는 CP3 (tool articulation) 의 *tool 도달 → tool 조작* 분리에 한해 검토.
+- **D26 (평가 metric) — Force Fidelity (MAE Cost) 채택.** contact-precision metric 의 slip-count / pose-stability 옆에 *task-dependent force MAE* (short-horizon: peak ‖f‖, continuous: 평균 effective ‖f‖) 를 정식으로 등록. → **초기 sim ablation 의 falsifier metric 에 `force_mae_cost` 추가**.
+- **V2F handover 패턴은 우리 phase 매핑상 별도.** 우리 단계는 *in-hand rotation → tool articulation* 로, V2F 가 노리는 *approach→contact* 분리와 시점이 다릅니다. 직접 채택 후보는 tool articulation 단계의 *tool 도달 → tool 조작* 분리에 한해 검토.
 
 ---
 
 ## ⚠️ 먼저 검증할 실패 모드
 
 - **Modal masking 가설이 우리 multi-finger F/T 에는 같은 강도로 성립하지 않을 수 있다.** ForceFlow 의 force 는 단일 EE 6D 입니다. 우리는 (Sharpa 기준) finger 별 320×240 Deform Map 으로, 차원이 force 쪽도 *고차원* 입니다. 첫 sanity check: **D8 의 per-finger token 을 cross-attn 으로 넣은 baseline 과 AdaLN-summary 로 넣은 변형을 동일 데이터로 학습해 contact-precision metric 비교** (가장 싼 sim 단일 task, e.g. 큐브 회전 슬립 카운트).
-- **VLM pointing 이 in-hand 도메인에서는 의미가 다르다.** V2F 는 "approach waypoint" 라는 자연스러운 분기점이 있지만 in-hand rotation 은 손 안에서 끊임없이 접촉합니다. → **V2F 이식은 CP3 tool articulation 까지 미루고 CP1/CP2 에서는 무리하게 적용하지 않는다.**
+- **VLM pointing 이 in-hand 도메인에서는 의미가 다르다.** V2F 는 "approach waypoint" 라는 자연스러운 분기점이 있지만 in-hand rotation 은 손 안에서 끊임없이 접촉합니다. → **V2F 이식은 tool articulation 단계까지 미루고 초기 sim ablation / 실로봇 데모 에서는 무리하게 적용하지 않는다.**
 - **Joint force prediction 은 datasource bias 에 민감.** 우리 demonstration 의 force annotation 노이즈가 ForceFlow 의 6D F/T 보다 훨씬 거칠 가능성. → **prediction head 채택 전 expert force 신호의 SNR / temporal smoothness 를 먼저 측정.**
-- **Force Cost metric 이 force regulation 우수성을 *과대평가* 할 수 있다.** ForceFlow (w/o Force) 가 SR 44% 로 ForceVLA 와 거의 같은데 Force Cost 22.67 N vs 23.31 N 으로 비슷합니다. SR 과 Force Cost 가 상관이 약한 영역에서는 metric 채택의 의미가 줄어듭니다. → **CP1 에서 SR 과 Force Cost 의 task-별 상관을 먼저 측정**, 그 다음에 falsifier 에 정식 편입.
+- **Force Cost metric 이 force regulation 우수성을 *과대평가* 할 수 있다.** ForceFlow (w/o Force) 가 SR 44% 로 ForceVLA 와 거의 같은데 Force Cost 22.67 N vs 23.31 N 으로 비슷합니다. SR 과 Force Cost 가 상관이 약한 영역에서는 metric 채택의 의미가 줄어듭니다. → **초기 sim ablation 에서 SR 과 Force Cost 의 task-별 상관을 먼저 측정**, 그 다음에 falsifier 에 정식 편입.
 - **Flow matching vs diffusion 의 closed-loop latency 우위는 우리 control rate 에서 무의미할 수 있다.** π 백본은 이미 flow matching 입니다. → 별도 검증 불필요, 기존 D23 (iii) 유지.
 
 ---

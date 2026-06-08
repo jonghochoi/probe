@@ -1,5 +1,3 @@
-# analysis/
-
 <!-- ANALYSIS_INDEX:START -->
 
 ## P1 — Heterogeneous Body/Hand Action Expert

@@ -119,7 +119,7 @@
 
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
-<!-- context/MASTER.md 기준. 어떤 P1–P5 / D1–D26 / CP1–CP5 를 건드리는지,
+<!-- context/MASTER.md 기준. 어떤 P1–P4 / D1–D26 를 건드리는지,
      Identity 긴장/지지, §10 경쟁자 함의. 없으면 없다고 명시(연결 날조 금지). -->
 
 ---

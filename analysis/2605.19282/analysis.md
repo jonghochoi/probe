@@ -177,7 +177,7 @@ RLVR 결과는 더 극단적입니다.
 - **§8 Tracked Literature methodology base**: FiLM / PCGrad 와 같은 *방법론 base* 층의 후보. 어느 단일 Pillar 의 pinned 자리에 들어가기보다는, P1/P4 학습 recipe 의 옵티마이저 base 로 검토할 가치가 있습니다.
 - **§10 Competitor 함의**: 없음. 본 논문은 optimizer 논문이라 §10 (VLA-only strong performers / Bounded RL) 와 곧장 경쟁하는 라인은 아닙니다.
 - **Anti-topics 점검**: "RL reward-engineering for generalized full-task" 가 아닌 *옵티마이저 mechanics* 이므로 RLVR 부분도 anti-topic 에 걸리지 않습니다. VLA 부분 역시 arm-hand split / structured binding / VLM-preservation / System0 의 4 in-scope 조건과는 직교한 *학습 recipe* 층이라, 핀 자리는 아니되 methodology base 후보로는 수용 가능합니다.
-- **Identity 긴장/지지**: 긴장 없음. heterogeneous-decoder claim 과는 무관합니다. 다만 step-efficiency 가 진짜라면 CP1 sim ablation 의 학습 cost 를 압축할 수 있어 *지지 방향* 입니다.
+- **Identity 긴장/지지**: 긴장 없음. heterogeneous-decoder claim 과는 무관합니다. 다만 step-efficiency 가 진짜라면 초기 sim ablation 의 학습 cost 를 압축할 수 있어 *지지 방향* 입니다.
 
 ---
 
@@ -196,7 +196,7 @@ RLVR 결과는 더 극단적입니다.
 - **Optimizer config 키 후보**: Stage 2 학습에서 `optimizer.body.cls = Muon`, `optimizer.hand.cls = Pion`, `optimizer.vlm.cls = Muon`, `optimizer.fallback.cls = AdamW` 같은 modality-wise 분리 설정을 도입합니다. 본 논문은 V/L=Muon, action=Pion, 그 외=AdamW 를 권장합니다.
 - **Pion 하이퍼**: `pion.k = 5` (Muon per-step cost 보존), `pion.k_s ≥ 3` (Suppression-dominant), 초기값 후보 `pion.k_p = 1, pion.k_s = 4` (action head 저-rank 강도가 클수록 k_s 를 키웁니다).
 - **Per-head 모드 트리거**: D19 가 (a) 전체 freeze 에서 (c)(d) 부분 unfreeze 로 이동하는 시점에, attention projection 에 한해 Pion per-head 모드를 활성화합니다. (지금 v1 에선 backbone freeze 이므로 곧장 영향이 발생하지는 않습니다.)
-- **CP1 ablation 학습 budget**: VLA-Adapter Object 의 100% @1,500 step 결과가 우리 스택에서 재현되면, 4-contribution ablation (D25) 각 셀의 학습 step budget 을 줄여 운용 비용을 압축할 수 있습니다. step-efficiency 가 안 나오면 즉시 폐기.
+- **초기 sim ablation 학습 budget**: VLA-Adapter Object 의 100% @1,500 step 결과가 우리 스택에서 재현되면, 4-contribution ablation (D25) 각 셀의 학습 step budget 을 줄여 운용 비용을 압축할 수 있습니다. step-efficiency 가 안 나오면 즉시 폐기.
 - **Falsifier 지표 단단해짐**: D26 의 contact-precision (slip count, pose stability) 측정 전에, 옵티마이저 효과를 분리하기 위해 동일 backbone × AdamW vs Pion 의 1 차 비교 셀을 ablation 매트릭스에 한 줄 추가합니다. AdamW vs Muon vs Pion 3-way 가 부담스러우면 AdamW + Pion 만.
 - **결정 모호함 회피**: Pion 의 per-head 모드가 grouped-query attention(우리 backbone 후보 중 일부, π 계열) 의 KV head 분배와 호환되는지 한 번 확인이 필요합니다. 호환되지 않으면 default 모드만 사용.
 
@@ -215,7 +215,7 @@ RLVR 결과는 더 극단적입니다.
 ## 💡 컨텍스트 제안
 
 - **§8 Tracked Literature methodology base 후보 신설**: 현재 §8.1 P1 의 "Methodology base" 줄에 FiLM / PCGrad / DQ-RISE 가 있고 §8.3 P3 에 Eureka 류 옵티마이저성 base 가 있어 base 층이 분산돼 있는 상태입니다. *학습 옵티마이저 base* (Muon, Pion 류) 를 별도 카테고리로 추가할지 검토합니다. 단, 1편으로 신설하기보다는 Muon (jordan2024muon) + Pion 의 2편이 모일 때 카테고리화하는 편이 합리적입니다.
-- **D21 (Staged training recipe) 하위 노트 추가 제안**: Stage 2 학습에서 modality-wise optimizer assignment (action=Pion, V/L=Muon, else=AdamW) 를 *deferred candidate* 로 등재. Trigger: AdamW baseline 으로 Stage 2 가 in-distribution plateau 에 빨리 닿지 못할 때 / CP1.
+- **D21 (Staged training recipe) 하위 노트 추가 제안**: Stage 2 학습에서 modality-wise optimizer assignment (action=Pion, V/L=Muon, else=AdamW) 를 *deferred candidate* 로 등재. Trigger: AdamW baseline 으로 Stage 2 가 in-distribution plateau 에 빨리 닿지 못할 때 (sim ablation 단계).
 - **§9 Researchers — 추가 후보**: Sijia Liu (Michigan State), Mingyi Hong (UMN) 의 spectral / matrix-aware optimizer 라인. 우리 핵심 분야는 아니지만 매트릭스 인식 옵티마이저 흐름을 따라가려면 follow 후보.
 - **D25 4-contribution ablation 가벼운 보강**: falsifier 평가 비용을 줄이려면 옵티마이저 sweep(AdamW vs Pion) 한 셀을 ablation 안에 합치는 안을 검토 (우선순위 낮음. Pion 도입 후 별개 ablation 으로 분리하는 편이 깔끔할 수 있습니다).
 

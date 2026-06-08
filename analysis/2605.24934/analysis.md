@@ -237,10 +237,10 @@ ICT vs 시각 우회의 분리를 보여주는 ablation(§4.4, Water Flowers)은
 
 이 논문이 PROBE 스택에 미치는 영향을 구체 키 단위로 정리합니다.
 
-- **D23 (action representation)** — flow matching v1 결정에 대한 외부 보강. 차원별 손실 가중 $`(w_p,w_r,w_g)=(5,1,10)`$ 와 Euler 20-step + look-ahead 25-step 추론 레시피를 CP1 코드 진입 시 초기값 후보로 직접 사용 가능합니다. 액션 청크 호라이즌 $`K=50`$ , re-plan 10 Hz, 실효 5 Hz step-stride 2 패턴도 참조 가치 있음.
+- **D23 (action representation)** — flow matching v1 결정에 대한 외부 보강. 차원별 손실 가중 $`(w_p,w_r,w_g)=(5,1,10)`$ 와 Euler 20-step + look-ahead 25-step 추론 레시피를 구현 진입 시 초기값 후보로 직접 사용 가능합니다. 액션 청크 호라이즌 $`K=50`$ , re-plan 10 Hz, 실효 5 Hz step-stride 2 패턴도 참조 가치 있음.
 - **D8 / D9 (per-finger 구조적 토큰 + topology-aware 인코딩)** — ICT 토큰의 *형식 설계*가 직접 비유 대상입니다. PROBE P2 토큰 정의에 "토큰 안에 (i) 공유 REF 기준 포즈, (ii) 다른 엔티티 기준에서 본 자신, (iii) 그래스프/접촉 스칼라"를 함께 넣는 패턴을 도입 검토 — D8 v1 정의를 *augment* 하는 수준의 후보이며 v2 trigger는 아닙니다.
-- **보조 목적 도입 여부 (P1/P2 학습 파이프라인)** — HumanEgo가 보고하는 +25 pp는 *저데이터(15분)* 구간에서 얻은 이득이라는 점이 중요합니다. CP1 사전 ablation에서 (i) object 6-DoF future-trajectory 예측, (ii) ICT $`K`$-step latent consistency 두 보조 헤드를 *추가 컨디션*으로 두는 안을 후보 D 항목에 올립니다. 구체 가중치 후보 — object motion $`0.5\,w_p`$ , latent consistency $`w_c\in[0.1,1.0]`$ .
-- **D24 (first demo)** — HumanEgo의 4 태스크는 모두 평면 픽앤플레이스/회전 — PROBE의 in-hand cube rotation과 직접 겹치지 않습니다. 단 "동시간 텔레오퍼레이션 vs 사람 1인칭" 비교 슬롯을 CP2 real-world 실험에 *Phase 0* 으로 끼워 사람 데이터의 효율 곡선을 직접 측정하는 안을 검토합니다.
+- **보조 목적 도입 여부 (P1/P2 학습 파이프라인)** — HumanEgo가 보고하는 +25 pp는 *저데이터(15분)* 구간에서 얻은 이득이라는 점이 중요합니다. 초기 sim ablation에서 (i) object 6-DoF future-trajectory 예측, (ii) ICT $`K`$-step latent consistency 두 보조 헤드를 *추가 컨디션*으로 두는 안을 후보 D 항목에 올립니다. 구체 가중치 후보 — object motion $`0.5\,w_p`$ , latent consistency $`w_c\in[0.1,1.0]`$ .
+- **D24 (first demo)** — HumanEgo의 4 태스크는 모두 평면 픽앤플레이스/회전 — PROBE의 in-hand cube rotation과 직접 겹치지 않습니다. 단 "동시간 텔레오퍼레이션 vs 사람 1인칭" 비교 슬롯을 실로봇 데모 실험에 *Phase 0* 으로 끼워 사람 데이터의 효율 곡선을 직접 측정하는 안을 검토합니다.
 - **D17 / D18 (System0)** — 본 논문이 *반증*하는 부분은 없습니다. 오히려 1 cm 평탄화 + in-hand 미지원이라는 자기 한계가 P3 System0의 *필요성* 진영을 강화합니다. 의사결정 키 변경 없음.
 - **D11 (visuotactile encoder)** — 영향 없음(촉각 미사용).
 

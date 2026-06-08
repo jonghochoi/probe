@@ -195,9 +195,9 @@ $$\rho(t)=\frac{\exp\left(-\lambda\left[\min\left(\frac{t}{T},1\right)\right]^{c
 
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
-- **P4 (VLM Pretraining Preservation) — 직격**. D19 (VLM FT range), D20 (prior-preservation strategy), D21 (staged training recipe), D23 (action representation × VLM preservation) 의 deferred trigger 와 직접 맞물립니다. 특히 D20 의 deferred 옵션 "LoRA-minimal / 액션 측 어댑터 / co-FT" 외에 *손실-가중치만으로* prior 를 지키는 네 번째 길을 제시합니다. CP1 에서 D19 가 (a) freeze 에서 벗어나야 할 때, ConSFT 는 "freeze 안 풀고 full-FT 가까운 plasticity 를 얻는" 절충안이 될 수 있습니다.
+- **P4 (VLM Pretraining Preservation) — 직격**. D19 (VLM FT range), D20 (prior-preservation strategy), D21 (staged training recipe), D23 (action representation × VLM preservation) 의 deferred trigger 와 직접 맞물립니다. 특히 D20 의 deferred 옵션 "LoRA-minimal / 액션 측 어댑터 / co-FT" 외에 *손실-가중치만으로* prior 를 지키는 네 번째 길을 제시합니다. 초기 sim ablation 에서 D19 가 (a) freeze 에서 벗어나야 할 때, ConSFT 는 "freeze 안 풀고 full-FT 가까운 plasticity 를 얻는" 절충안이 될 수 있습니다.
 - **P1 (Heterogeneous Body/Hand Decoder) — 보조**. D7 (π backbone integration / partition) 의 slice-and-FT 전략에서, Hand expert 쪽이 contact-rich 신규 분포에 노출될 때 Body expert 와 백본의 prior 를 보호하는 손실로 채택 가능합니다. 단, ConSFT 자체는 백본 분할과 무관 — *어떤* flow-matching VLA 든 손실 한 줄 교체로 적용됩니다.
-- **CP1 (4-contribution ablation)** — D25 의 (e) "+VLM-preservation" 조건을 ConSFT 로 인스턴스화할 후보. 현재 (e) 는 추상적 명세에 머물러 있는데, ConSFT 는 추가 파라미터·데이터 없이 정의되므로 ablation 의 깔끔한 한 축이 됩니다.
+- **4-contribution ablation** — D25 의 (e) "+VLM-preservation" 조건을 ConSFT 로 인스턴스화할 후보. 현재 (e) 는 추상적 명세에 머물러 있는데, ConSFT 는 추가 파라미터·데이터 없이 정의되므로 ablation 의 깔끔한 한 축이 됩니다.
 - **§10 경쟁자 함의** — antagonist A (correction-residual on frozen VLA) 의 "frozen 으로 prior 보호" 라인을, ConSFT 는 "frozen 없이도 prior 보호 가능" 으로 약하게 만듭니다. 다만 본 논문은 dexterous hand 가 아닌 LIBERO/RoboTwin 의 거시 manipulation 만 평가하므로 contact-precision 차원의 antagonist 무력화는 아직 미검증.
 
 ---
@@ -221,7 +221,7 @@ $$\rho(t)=\frac{\exp\left(-\lambda\left[\min\left(\frac{t}{T},1\right)\right]^{c
 
 - **`training.loss` 모듈** — π0 / π0.5 백본 학습 손실에 `consfter_weight = stop_gradient(exp(-flow_loss / tau))` 한 줄을 곱해 `loss = consfter_weight * flow_loss` 로 교체. 표준 flow-matching 손실 자리에 들어가는 in-place 변경이라 백본·어댑터 코드 무수정.
 - **새 하이퍼파라미터 키** — `consft.tau_start = 0.003`, `consft.tau_end = 5.0`, `consft.kappa = 25.0`, `consft.lambda = 0.8`, `consft.c_curvature = 3.5`, `consft.omega_min = 0.001`, `consft.decay_steps = 2000`. shape 4 개는 고정, task-specific 은 `tau_start` 와 `decay_steps` 둘만 튜닝.
-- **D19 v1 (full freeze) → D19 deferred 진입 시의 백업** — Stage 2 가 plateau 에 도달해 D19 (d) LoRA 로 가야 할 때, ConSFT 를 *먼저* 끼워 보는 분기점을 추가. 메모리 추가 비용 0 이므로 CP1 코드 진입 전 prerequisite 으로 추가해도 일정 부담 없음.
+- **D19 v1 (full freeze) → D19 deferred 진입 시의 백업** — Stage 2 가 plateau 에 도달해 D19 (d) LoRA 로 가야 할 때, ConSFT 를 *먼저* 끼워 보는 분기점을 추가. 메모리 추가 비용 0 이므로 구현 진입 전 prerequisite 으로 추가해도 일정 부담 없음.
 - **D25 4-contribution ablation 의 (e) 조건** — "+VLM-preservation" 을 "freeze + ConSFT 손실" 로 인스턴스화. 기존 (e) 가 추상적이었던 부분을 구체 손실로 못 박을 수 있습니다.
 - **메트릭 추가** — Eq. 8 의 relative-deviation sparsity $`S`$ (`δ=10⁻³`) 를 학습 중 layer-wise 로 로깅. catastrophic forgetting 의 *조기 신호* 로 활용 (Fig. 1, 2 의 곡선이 이걸 보여줍니다).
 - **System0 (P3) 와는 무관** — RL 영역이라 변동 없음.
@@ -244,7 +244,7 @@ PROBE 스택으로 전이될 때 의심할 점과 가장 싼 sanity check 순서
 
 ## 💡 컨텍스트 제안
 
-- **P4 (D20) deferred 후보에 "scalar-weighted SFT" 추가** — 현재 D20 의 deferred 옵션은 LoRA-minimal / web-co-FT / Bridge Attention 셋입니다. ConSFT 류 *손실 가중* 을 네 번째 라인으로 명시하면, CP1 에서 Stage 2 plateau 가 왔을 때 어댑터 도입 없이 시도할 가장 가벼운 선택지가 생깁니다.
+- **P4 (D20) deferred 후보에 "scalar-weighted SFT" 추가** — 현재 D20 의 deferred 옵션은 LoRA-minimal / web-co-FT / Bridge Attention 셋입니다. ConSFT 류 *손실 가중* 을 네 번째 라인으로 명시하면, 초기 sim ablation 에서 Stage 2 plateau 가 왔을 때 어댑터 도입 없이 시도할 가장 가벼운 선택지가 생깁니다.
 - **§8.4 P4 Pinned 후보** — PriorVLA / VLM2VLA 와 함께 또는 둘 중 하나를 대체해 ConSFT 를 핀 후보로 고려. "prior-data-free + 메모리 0" 이라는 차별점이 명확합니다. 단, dexterous contact-precision 검증이 없다는 점은 분명히 약점. 다음 분기 rebalance 때 결정 권고.
 - **D25 falsifier 의 (e) 조건 명세화** — 현재 "+VLM-preservation" 이 추상적인데, ConSFT 손실을 default 인스턴스로 못 박으면 ablation 재현성과 비교 가능성이 올라갑니다.
 - **§10.2 "Bounded RL-in-VLA precedents" 확장 검토** — ConSFT 는 RL 이 아니지만 "RL 의 trust-region 효과를 SFT 로 옮긴 것" 이므로, "RL = capability source 가 아닌 fine-tuning 도구" 라는 antagonist 프레임을 *더 약화* 시키는 증거이기도 합니다. RL 의 핵심 장점을 RL 없이 얻는다면 P3 System0 의 정당화 논거 (slip/grasp 가 reward-engineerable 한 유일 지점) 는 그대로 유지되지만, "다른 곳엔 RL 안 쓴다" 의 정당화는 한층 단단해집니다.

@@ -218,11 +218,11 @@ $$\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$$
 
 ## ⚙️ 의사결정 함의
 
-- **D5 (input-modality + control-rate separation) 의 deferred 트리거 보강** — v1 은 "shared rate", deferred 트리거는 "finger precision needs higher-frequency loop than body". 본 논문은 양팔 그리퍼 수준에서도 촉각 패스트 스트림 (slow:fast = 1:3) 만으로 0.04 초 폐루프가 성능을 의미 있게 끌어올린다는 직접 증거를 내놓습니다. PROBE 의 CP2 (in-hand rotation 실세계) 에서 finger 수준 control rate 분리의 deferred 발동 조건을 명문화할 때, "3:1 비동기 추론, 패스트 스트림은 촉각만, 슬로우 스트림 한 번이 future $`H`$ 스텝의 조건으로 살아남음" 이라는 구체 하이퍼파라미터를 가져올 수 있습니다.
+- **D5 (input-modality + control-rate separation) 의 deferred 트리거 보강** — v1 은 "shared rate", deferred 트리거는 "finger precision needs higher-frequency loop than body". 본 논문은 양팔 그리퍼 수준에서도 촉각 패스트 스트림 (slow:fast = 1:3) 만으로 0.04 초 폐루프가 성능을 의미 있게 끌어올린다는 직접 증거를 내놓습니다. PROBE 의 실로봇 데모(in-hand rotation 실세계) 에서 finger 수준 control rate 분리의 deferred 발동 조건을 명문화할 때, "3:1 비동기 추론, 패스트 스트림은 촉각만, 슬로우 스트림 한 번이 future $`H`$ 스텝의 조건으로 살아남음" 이라는 구체 하이퍼파라미터를 가져올 수 있습니다.
 - **D11 (tactile feature 옵션) 의 비교 우선순위 조정** — 본 논문 결과 (force 6D > marker 2D > V-T image) 를 그대로 받으면 PROBE 의 Sharpa Deform Map (비전 기반 320×240 / fingertip) 라인이 dangerous default 일 위험이 있습니다. **단** 본 논문이 finger-wise structured binding 을 시도하지 않은 채로 비교한 결과라는 사실을 잊으면 안 됩니다. PROBE D8 (per-finger proprio-tactile binding, 10+2 토큰) 식으로 토큰 수를 통제해 둔다면 V-T 표현도 살아남을 여지가 있습니다. **의사결정 함의는 "V-T 인코더를 쓰려면 먼저 토큰 수를 finger 토큰으로 묶어야 한다" 라는 사전 조건을 D11 Non-negotiable 에 추가하는 것입니다.**
-- **D14 (System1↔System0 interface) v1 보강** — v1 "binary on/off, bypass-when-off" 가 본 논문의 Tactile Gate 와 사상이 같습니다. 본 논문은 **임계값 0.5 + BCE 지도** 라는 구체 하이퍼파라미터까지 제시. PROBE 의 D14 deferred (continuous blend, 트리거 = 하드 스위칭 finger-command discontinuity at CP2) 에 본 논문의 0.5 임계값을 v1 의 안전한 시작점으로 명시할 수 있습니다.
+- **D14 (System1↔System0 interface) v1 보강** — v1 "binary on/off, bypass-when-off" 가 본 논문의 Tactile Gate 와 사상이 같습니다. 본 논문은 **임계값 0.5 + BCE 지도** 라는 구체 하이퍼파라미터까지 제시. PROBE 의 D14 deferred (continuous blend, 트리거 = 하드 스위칭 finger-command discontinuity at 실로봇 데모) 에 본 논문의 0.5 임계값을 v1 의 안전한 시작점으로 명시할 수 있습니다.
 - **D19 (VLM FT 범위) / D20 (prior-preservation strategy) — v1 freeze 의 사후 검증.** 본 논문 Ex1 (-9%p) → Ex2 (+17%p, gate + adaptive cross-attn) 는 "토큰 시퀀스를 단순 augmentation 하면 사전학습이 망가진다" 는 강한 외부 증거. PROBE v1 의 full-freeze + action-side adapter 노선이 본 논문의 query-슬롯 교체보다 더 보수적이므로, v1 은 안전하게 유지하되 새 modality 추가 시 본 논문 패턴 (key/value 는 사전학습된 채 그대로, query 만 게이트로) 을 D19 deferred 옵션의 한 자리에 추가할 가치가 있습니다.
-- **D26 (평가 메트릭) — modality-agnostic 메트릭 추가 후보.** 본 논문 Table 2 의 "동일 가중치 · 추론 시 촉각 OFF" 비교는 PROBE 의 robustness 메트릭에 자연스럽게 끼울 수 있습니다 — "촉각 센서 fault 시 vanilla 대비 drop 폭" 을 D26 robustness 항목 (CP2+) 에 명시적 sub-metric 으로 추가 가능. 본 논문 결과를 그대로 받으면 임계값은 "vanilla 와 동등 (≥0.7 평균 유지)".
+- **D26 (평가 메트릭) — modality-agnostic 메트릭 추가 후보.** 본 논문 Table 2 의 "동일 가중치 · 추론 시 촉각 OFF" 비교는 PROBE 의 robustness 메트릭에 자연스럽게 끼울 수 있습니다 — "촉각 센서 fault 시 vanilla 대비 drop 폭" 을 D26 robustness 항목 (실로봇 데모 단계 이후) 에 명시적 sub-metric 으로 추가 가능. 본 논문 결과를 그대로 받으면 임계값은 "vanilla 와 동등 (≥0.7 평균 유지)".
 
 ---
 
@@ -240,7 +240,7 @@ $$\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$$
 - **§8.4 (P4 핀) 후보로 추가 검토** — 현재 P4 핀 8 종 (π0 / π0.5 / VLM2VLA / RT-2 / VLA-Adapter / PriorVLA / Multi-Embodiment / MolmoAct2) 모두 "어떻게 끼울까" 계열. 본 논문은 "언제 / 어디 슬롯에 끼울까" 라는 직교 축의 첫 사례라 핀 교체 후보로 강합니다. 가장 약한 핀과 교체하는 안을 권장합니다. 다만 P4 핀은 hard cap 8 이라, 어떤 항목을 빼야 할지는 사람이 판단합니다 (sketch 안: Multi-Embodiment Pretraining Data 가 D22 활용도 가장 낮음).
 - **§10.3 (Architectural siblings — P1 split) 가 아니라 새 카테고리 "tactile-VLA injection siblings" 신설 검토** — 본 논문 + Tactile-VLA + TLA + TA-VLA + VTLA 가족이 한 줄로 모니터링 대상에 떠올랐습니다. §10.1 (VLA-only strong performers) 옆에 §10.5 (tactile-VLA injection — 본 논문 + Tactile-VLA + TLA + TA-VLA 가족 + RDP) 항목 신설 권장. 본 논문이 사실상 그 카테고리의 SOTA 로 자리하므로 베이스라인-Watch 의 자연스러운 anchor.
 - **D11 Non-negotiable 항목 추가 후보** — 현재 (1) no Sharpa lock-in, (2) preserve contact-relevant features 두 줄. 본 논문 발견에 비추어 (3) "촉각 토큰 수를 finger 토큰 단위로 통제 (raw V-T 이미지를 그대로 token sequence 에 푸는 것 금지)" 를 추가 후보로 검토하고자 합니다. PROBE D8 식 binding 을 사후적으로 정당화하는 항목이기도 합니다.
-- **D14 v1 라인에 본 논문 임계값 명시** — 현재 v1 "binary on/off" 만. 본 논문이 제공한 "BCE 손실 + threshold 0.5 + λ = 0.01 멀티태스크" 구체 하이퍼파라미터를 v1 의 "안전한 첫 시작점" 으로 한 줄 명시하면 CP1 entry 시 시행착오를 줄입니다.
+- **D14 v1 라인에 본 논문 임계값 명시** — 현재 v1 "binary on/off" 만. 본 논문이 제공한 "BCE 손실 + threshold 0.5 + λ = 0.01 멀티태스크" 구체 하이퍼파라미터를 v1 의 "안전한 첫 시작점" 으로 한 줄 명시하면 구현 진입 시 시행착오를 줄입니다.
 - **D26 robustness sub-metric 추가** — Table 2 의 "modality-agnostic" 비교를 PROBE 평가 프로토콜의 robustness 카테고리에 sub-metric 으로 흡수. "동일 가중치 · 추론 시 촉각 OFF 시 평균 성공률 drop ≤ 10%p" 같은 임계값으로 본 논문 결과를 PROBE 데이터점으로 변환 가능.
 
 > 💡 base 매핑은 `/implement-design analysis/2605.07308/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

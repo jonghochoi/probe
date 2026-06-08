@@ -253,7 +253,7 @@ Latent reasoning 자체의 시각화는 다음과 같이 정성적으로 검증�
 
 ## ⚙️ 의사결정 함의
 
-- **D7 (π backbone 통합)** — Being-H0.7은 π 백본 *없이* InternVL3.5 + Qwen3 + V-JEPA2.1 위에서 MoT를 굴립니다. PROBE의 v1(슬라이스 + FT) 결정을 흔들 정도는 아니지만 §13.B의 *π 변종 / 코드베이스 선택* 항목에서 "open-weight 백본 + MoT 라인"을 alternative branch로 메모할 가치가 있습니다. CP1 코드 진입에서 §13.C A/B 둘 다 막힐 때 *Being-H0.7-style open-weight stack*이 백업 path로 등록됩니다.
+- **D7 (π backbone 통합)** — Being-H0.7은 π 백본 *없이* InternVL3.5 + Qwen3 + V-JEPA2.1 위에서 MoT를 굴립니다. PROBE의 v1(슬라이스 + FT) 결정을 흔들 정도는 아니지만 §13.B의 *π 변종 / 코드베이스 선택* 항목에서 "open-weight 백본 + MoT 라인"을 alternative branch로 메모할 가치가 있습니다. 구현 진입에서 §13.C A/B 둘 다 막힐 때 *Being-H0.7-style open-weight stack*이 백업 path로 등록됩니다.
 - **D19b (VLM lineage)** — InternVL3.5(understanding) + Qwen3(action) + V-JEPA2.1(시각) 3-요소 lineage가 새로운 데이터 포인트입니다. §8.4 lineage 표에 *cross-pollination 형태*로 추가 검토 — 핀 교체 후보는 아니지만 lineage-attributable 진단 시 비교 후보 풀에 들어옵니다.
 - **D20 (prior-preservation strategy)** — *비대칭 freeze* 패턴(context encoder trainable, future encoder frozen)이 새로운 후보입니다. 본 논문 자체는 "prior preservation" 어휘를 쓰지 않지만 frozen ViT가 posterior 쪽에서만 평가되는 구조는 *VLM 가중치 보존이 필요한 시점에 deployable branch와 supervision branch를 분리*하는 일반 패턴으로 확장 가능합니다. v1(action-side adapter) 결정 자체는 유지하되, D19 trigger 발화 시 비교 후보로 등록.
 - **D23 (action representation)** — flow matching head v1 결정을 *VLM 백본이 다른* lineage(InternVL3.5/Qwen3)에서도 강하게 보강합니다. prior·posterior 두 branch가 모두 flow matching인 점은 *flow matching head가 supervision 강도에 robust*하다는 외부 증거입니다. 차원별 가중·timestep 분포 등 구체 키 변경은 없습니다.
