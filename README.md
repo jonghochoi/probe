@@ -56,15 +56,15 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 
 PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (reproduce). Each runs on its own trigger and writes to its own folder.
 
-> **Pillars**: P1 Heterogeneous Body/Hand Action Expert · P2 Structured Input-Modality Binding · P3 Hand-level System0 · P4 VLM Pretraining Preservation — canonical definitions in [`context/MASTER.md`](context/MASTER.md) §5. (The P5 evaluation pillar was retired.)
+> **Pillars**: the static context is organized into a small set of research pillars, each owning its own Decision Log and Tracked Literature — canonical names and definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
-> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (the four pillars + cross-cutting content — Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers). Each `context/P#.md` **owns** its pillar's Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, and Researchers; the cloud scouting routine reads **one `P#.md`** to keep agent context lean. Edit the `P#.md` for pillar content; edit MASTER only for global content.
+> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (the pillars + cross-cutting content — Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers). Each `context/P#.md` **owns** its pillar's Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, and Researchers; the cloud scouting routine reads **one `P#.md`** to keep agent context lean. Edit the `P#.md` for pillar content; edit MASTER only for global content.
 
 ```
    ┌────────────────────────────────────────────────────────┐
    │ context/  (static · human-owned · read-only every run) │
-   │ MASTER.md  · global anchor — Pillars (P1–P4) + Venue   │
-   │ P{1..4}.md · per-pillar owners — Decision Log / lit    │
+   │ MASTER.md  · global anchor — Pillars + Venue           │
+   │ P#.md      · per-pillar owners — Decision Log / lit    │
    └──────────────────────────┬─────────────────────────────┘
                               │ read-only (every run)
                               ▼
@@ -108,7 +108,7 @@ The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwri
 
 ## Agent Stack
 
-Run `.claude/prompts/scouting.md` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared by all four pillars; replace `<PILLAR>` with `P1`/`P2`/`P3`/`P4` before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md).
+Run `.claude/prompts/scouting.md` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md).
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
@@ -126,7 +126,7 @@ cd probe
 | **Paper search** | arXiv REST API via `curl` (Atom XML) |
 | **Citation graph** | Semantic Scholar Graph API (JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
 | **Code grounding** | CodeGraph MCP over `vendor/lerobot/` — `/implement-design` cites exact `file:line` |
-| **Prompts** | `.claude/prompts/scouting.md` (shared by P1–P4) + `analysis.md` · `implementation.md` · `validation.md` · `reproduction.md` (on-demand) |
+| **Prompts** | `.claude/prompts/scouting.md` (shared across pillars) + `analysis.md` · `implementation.md` · `validation.md` · `reproduction.md` (on-demand) |
 | **Output** | Direct commits to `main` — the commit history *is* the research log |
 
 ---
