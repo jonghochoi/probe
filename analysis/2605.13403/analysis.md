@@ -212,7 +212,7 @@ LIBERO (4 suite) 와 RoboTwin2.0 (50 dual-arm task, clean / randomized) 두 시�
 
 ## 💡 컨텍스트 제안
 
-- §8.4 P4 핀 후보로 *cross-embodiment LAM* 한 자리 신설을 검토합니다. 현재 P4 핀에 LAM 계열이 없는데, RotVLA / UniVLA / villa-X 중 하나를 후보로 띄우는 편이 D23 옵션 공간의 누락을 메웁니다 — 트리거: [CP1](#ref-CP1) ablation 결과에서 frozen backbone + flow-matching 만으로 cross-embodiment 일반화가 부족함이 드러날 때.
+- §8.4 P4 핀 후보로 *cross-embodiment LAM* 한 자리 신설을 검토합니다. 현재 P4 핀에 LAM 계열이 없는데, RotVLA / UniVLA / villa-X 중 하나를 후보로 띄우는 편이 D23 옵션 공간의 누락을 메웁니다 — 트리거: 초기 sim ablation 결과에서 frozen backbone + flow-matching 만으로 cross-embodiment 일반화가 부족함이 드러날 때.
 - §8.1 P1 의 "정보 흐름 변형" 자료로 structured attention (planner→controller 단방향) 을 참고 자료로 등록 — 핀 교체 없이 D4 deferred 의 cross-attn 옵션 (B) 의 "비대칭 단방향" 변형을 정리할 때 그대로 인용합니다.
 - §6.4 의 [D26](#ref-D26) 보조 metric 카탈로그에 "latent stability — single-step vs imagined-step MSE 격차" 추가 검토. baseline 비교가 아닌 LAM 진단 도구이므로 falsifier 가 아닌 보조 지표로만.
 

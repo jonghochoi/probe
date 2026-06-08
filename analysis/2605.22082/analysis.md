@@ -213,7 +213,7 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 
 - **[P3](#ref-P3) — Hand-level System0 Module (RL-scoped)** : 가장 직접 연결됩니다. CoRMA 는 P3 의 핀 논문인 [RMA](https://arxiv.org/abs/2107.04034) 의 contact-rich assembly 변형이며, [D17](#ref-D17) (System0 RL policy spec) 의 reward 와 privileged 정보 정의, [D18](#ref-D18) (System0 sim2real) 의 RMA-family teacher-student 라인을 바로 건드립니다. 다만 PROBE 의 System0 가정 (post-grasp 안정화, slip 억제) 과 CoRMA 의 target (assembly insertion 의 contact regime) 은 task 자체가 다르고, P3 의 RMA 의존을 *어떻게* 응용할지에 대한 새로운 예시에 가깝습니다.
 - **[P1](#ref-P1) — Heterogeneous Body/Hand Action Expert (보조)** : CoRMA 가 정의하는 6D semantic latent 는 [D4](#ref-D4) (Body↔Hand 정보 공유) 의 v1 인 FiLM 모듈이 받는 정보의 *공급 형태* 와 유사한 발상입니다. raw simulator parameter 대신 의미 단위 latent 를 policy 에 주입한다는 점이 P1 의 hand expert 에 contact 단계 latent 를 conditioning 으로 넣는 가설과 결이 같습니다. 단, architecture 가 직접 일치하지는 않습니다.
-- **[CP2](#ref-CP2) — in-hand rotation 실로봇 데모 분석 시점** : CoRMA 가 보여주는 "sim 100% 가 real 12.5% 로 떨어지는" 격차는 PROBE 가 CP2 진입 시 마주칠 sim-to-real 시나리오의 정확한 reference 입니다. P3 의 D18 deferred priority (RMA-style Phase-3 RL fine-tuning, static-friction-aware DR) 가 CP2 직전에 활성화되는 트리거와 바로 닿습니다.
+- **in-hand rotation 실로봇 데모 분석 시점** : CoRMA 가 보여주는 "sim 100% 가 real 12.5% 로 떨어지는" 격차는 PROBE 가 실로봇 데모 진입 시 마주칠 sim-to-real 시나리오의 정확한 reference 입니다. P3 의 D18 deferred priority (RMA-style Phase-3 RL fine-tuning, static-friction-aware DR) 가 실로봇 데모 직전에 활성화되는 트리거와 바로 닿습니다.
 - **§10 경쟁자 함의** — `RMA family` 는 P3 의 anti-topic 면제 대상이므로 CoRMA 는 anti-topic 위반이 아닙니다. assembly task family (PegInsert / GearMesh / NutThread) 는 PROBE 의 in-hand rotation / tool articulation 과 거리가 있으나, force-dominant contact regime 추론이라는 메커니즘은 그대로 차용 가능합니다.
 
 | Code | Meaning |
@@ -223,7 +223,6 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 | <a id="ref-D4"></a>**D4** | Body↔Hand information sharing — v1 FiLM with $`a_{b}`$ → ($`\gamma,\beta`$); cross-attn deferred |
 | <a id="ref-D17"></a>**D17** | System0 RL policy spec — PPO, contact reward, hand-crafted v1; Eureka/DrEureka deferred |
 | <a id="ref-D18"></a>**D18** | System0 sim2real — RMA-family teacher-student; static/dynamic friction split DR |
-| <a id="ref-CP2"></a>**CP2** | Checkpoint 2: in-hand rotation 실로봇 데모 결과 분석 |
 
 ---
 
@@ -233,7 +232,7 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 - **vs. [HORA (Qi et al., 2022)](https://arxiv.org/abs/2210.04887) — P3 핀, 인핸드** : HORA 는 in-hand rotation 에서 privileged 정보를 *촉각* 으로 distill 합니다. 입력 modality (촉각) 와 target task (회전) 가 다르고, CoRMA 는 assembly insertion + force/torque 라는 다른 평면을 다룹니다. 두 논문은 "privileged 정보를 deployable 으로 변환" 이라는 큰 아이디어를 공유할 뿐, target latent 의 의미 단위 정의는 CoRMA 가 새 기여입니다.
 - **vs. [AnyRotate](https://arxiv.org/abs/2405.07391) — D17 reward 직접 reference** : AnyRotate 는 reward term 의 직접 reference 이지만 task (회전) 와 modality (촉각) 가 다릅니다. CoRMA 는 reward 가 아니라 *adaptation latent 의 표현 학습* 을 손본 쪽이라 바로 충돌하지 않고 보완 관계가 됩니다.
 - **vs. [Static Friction Sim2Real](https://arxiv.org/abs/2503.01255) — D18 DR 핀** : CoRMA 는 static/dynamic friction split DR 을 따로 도입하지 않고, 대신 의미 단위 contact latent 로 sim-to-real 격차가 줄어드는 경로를 택합니다. PROBE 의 v1 D18 (friction split + RMA-family) 과는 *다른 단면* 에서 같은 문제를 공격하는 사례이며, 둘은 결합 가능합니다.
-- **vs. [Contact-Aware Neural Dynamics](https://arxiv.org/abs/2601.12796) — D18 CP3 deferred** : 학습된 contact correction 으로 sim-to-real 격차를 메우는 아이디어와 비교하면, CoRMA 는 *correction* 이 아니라 *적응 latent 를 통한 conditioning* 으로 격차를 줄이려 합니다. 보완 관계로 해석할 수 있습니다.
+- **vs. [Contact-Aware Neural Dynamics](https://arxiv.org/abs/2601.12796) — D18 (tool articulation 단계) deferred** : 학습된 contact correction 으로 sim-to-real 격차를 메우는 아이디어와 비교하면, CoRMA 는 *correction* 이 아니라 *적응 latent 를 통한 conditioning* 으로 격차를 줄이려 합니다. 보완 관계로 해석할 수 있습니다.
 
 ---
 
@@ -264,7 +263,7 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 ## 💡 컨텍스트 제안
 
 - §8.3 P3 핀 후보 보충 — CoRMA 자체를 P3 핀으로 올리는 것은 **권하지 않습니다**: task 가 PROBE 의 in-hand rotation / tool articulation 과 거리가 있고, 핀 한도 (≤8) 안에서 HORA · AnyRotate · RMA · Static Friction Sim2Real 의 우선순위가 더 높습니다. 다만 §10 (Competitor / Kindred Monitoring) 의 *RMA-family 응용 사례* 또는 D18 의 **Note** 로 "CoRMA = RMA target 의 의미화 사례 ([arXiv:2605.22082](https://arxiv.org/abs/2605.22082))" 한 줄 인용을 추가하면 D18 v2 (privileged 정보 형태 변경 옵션) 의 트리거 증거로 활용할 수 있습니다.
-- D18 **Deferred (priority)** 항목에 "privileged target 의 semantic-encoding 화 (CoRMA-style)" 한 줄을 추가 후보로 검토 (트리거는 CP1 ablation 에서 raw extrinsic 기반 RMA adapter 의 $`R^{2}`$ 가 0.5 미만일 때).
+- D18 **Deferred (priority)** 항목에 "privileged target 의 semantic-encoding 화 (CoRMA-style)" 한 줄을 추가 후보로 검토 (트리거는 초기 sim ablation 에서 raw extrinsic 기반 RMA adapter 의 $`R^{2}`$ 가 0.5 미만일 때).
 - §10.2 (Bounded RL-in-VLA precedents) 와 §10.3 (Architectural siblings) 에는 바로 해당하지 않으므로 신규 carryover 는 필요 없습니다.
 
 ---

@@ -223,7 +223,7 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 - **P2 / D11 (visuotactile encoder)** — 합력 + spatial CAE 듀얼 촉각 표현은 PROBE D11 의 "Tactile feature options: tactile image / resultant force vector / pressure distribution / contact map — 비교" 옵션 두 가지를 실제로 동시 채택한 사례입니다. 합력 단독 70% 대 합력 + spatial 90% 라는 정량 격차도 함께 따라옵니다. 단, hardware-specific CNN 을 finger 단위 구조 토큰에 묶는 PROBE 식 binding (D8) 은 본 논문에서 명시적으로 다뤄지지 않는다.
 - **P3 (Hand-level System0)** — LSTM 어드미턴스 정책이 RL 이 아닌 IL 기반이라 PROBE 의 System0 (PPO 기반 슬립 억제 RL) 과는 학습 방식이 다르다. 그래도 고수준 VLA 아래에 사지·접촉 저지연 안정화 레이어를 둔다는 분업 사상은 D14 의 bypass-on 인터페이스와 같은 가족이다. 저자들은 시각 차폐 ablation 으로 촉각 기반 저수준 그립 유지의 가치를 21% → 90% 로 정량화했습니다.
 - **P5 (Falsifiable evaluation)** — 데이터 수집 효율, 시각 차폐 강건성, corrective 데이터 단계별 기여를 ablation 으로 분해한 방식은 PROBE D25 의 4-기여 ablation 사고와 결이 비슷하다. 다만 본 논문에는 PROBE 식 사전 정의된 falsifier 임계치가 없다.
-- **§10 경쟁자 함의** — §10.3 의 Architectural siblings (P1 split) 항목에 본 논문이 이미 등재돼 있다. 트리거로 "in-hand reorientation 또는 articulated-tool 로 확장 시 CP2/CP3 와 직접 교차"가 명시돼 있다. 본 논문 future work 가 정확히 그 두 방향(in-hand reorientation, tool articulation)을 적극 거론한다. 다음 follow-up 발표는 CP2~CP3 진입 직전에 한 번 더 확인할 가치가 있다.
+- **§10 경쟁자 함의** — §10.3 의 Architectural siblings (P1 split) 항목에 본 논문이 이미 등재돼 있다. 트리거로 "in-hand reorientation 또는 articulated-tool 로 확장 시 실로봇 데모·tool articulation 단계와 직접 교차"가 명시돼 있다. 본 논문 future work 가 정확히 그 두 방향(in-hand reorientation, tool articulation)을 적극 거론한다. 다음 follow-up 발표는 실로봇 데모~tool articulation 단계 진입 직전에 한 번 더 확인할 가치가 있다.
 
 ---
 
@@ -245,15 +245,15 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 
 이 논문이 옳다고 가정할 때 PROBE 의 학습·평가 파이프라인에서 바뀔 만한 후보는 다음과 같습니다.
 
-- **D1 / D4 하이브리드 split 의 보조 손실 항 도입 검토** — 본 논문 식 (12) 의 $`\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda(\mathcal{L}_{\text{hand}}+\mathcal{L}_{\text{arm}})`$ 는 사지별 latent 를 강제 분리시키는 비용 낮은 보조 손실이다. PROBE 의 D1 v1 하이브리드에 보조 손실 두 항($`\mathcal{L}_{\text{body-aux}}`$, $`\mathcal{L}_{\text{hand-aux}}`$)을 추가하고 가중치 $`\lambda`$ 를 CP1 ablation 의 추가 축으로 두자. PROBE 의 split 은 별도 액션 헤드를 가정한다. 본 논문처럼 보조 헤드만 분리하고 메인은 단일 헤드로 두는 변형까지 ablation 그룹에 포함하면 D1 (i)/(ii)/(iii) 결정에 강한 근거가 된다.
-- **D6 (coordination flow) 비교군 추가** — 본 논문은 hierarchical body→hand 가 아니라 공유 latent 동시 디코딩으로 통합 액션을 뽑는다. PROBE 의 CP1 4-contribution ablation 에 본 논문 식 (12) 의 동시 디코딩 그룹을 (b) coupled denoising 또는 (c) coupled single network 한 사례로 추가하면 된다.
+- **D1 / D4 하이브리드 split 의 보조 손실 항 도입 검토** — 본 논문 식 (12) 의 $`\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda(\mathcal{L}_{\text{hand}}+\mathcal{L}_{\text{arm}})`$ 는 사지별 latent 를 강제 분리시키는 비용 낮은 보조 손실이다. PROBE 의 D1 v1 하이브리드에 보조 손실 두 항($`\mathcal{L}_{\text{body-aux}}`$, $`\mathcal{L}_{\text{hand-aux}}`$)을 추가하고 가중치 $`\lambda`$ 를 초기 sim ablation 의 추가 축으로 두자. PROBE 의 split 은 별도 액션 헤드를 가정한다. 본 논문처럼 보조 헤드만 분리하고 메인은 단일 헤드로 두는 변형까지 ablation 그룹에 포함하면 D1 (i)/(ii)/(iii) 결정에 강한 근거가 된다.
+- **D6 (coordination flow) 비교군 추가** — 본 논문은 hierarchical body→hand 가 아니라 공유 latent 동시 디코딩으로 통합 액션을 뽑는다. PROBE 의 4-contribution ablation 에 본 논문 식 (12) 의 동시 디코딩 그룹을 (b) coupled denoising 또는 (c) coupled single network 한 사례로 추가하면 된다.
 - **D11 촉각 인코더 v1 의 듀얼 표현 채택 검토** — 합력 + spatial latent 듀얼 표현이 21% → 70% → 90% 라는 단조 개선을 보여준다. PROBE 의 Deform Map 인코더 v1 도 resultant force vector 추출 보조 head + spatial CNN latent 두 출력을 동시에 finger 토큰에 주입하도록 기본값을 갱신한다. 구체 config 키 후보: `tactile_encoder.dual_head: [resultant_force_vec, spatial_cae_latent]`, `cae_latent_dim: 128`, `cae_input_shape: [16,16,3]`.
-- **D8 / D11 음(陰)의 결과를 selective gating 트리거로 활용** — 본 논문은 통합 정책에서 촉각을 추가하면 95% → 82% 로 성능이 떨어진다고 보고했다. 따라서 PROBE 의 finger-bound structured token 에서 도달 단계 동안 촉각 토큰을 마스킹하는 단계별 gating 을 D8 의 deferred 트리거(per-finger token 충분도 검증)와 함께 CP1 사전 검증 항목으로 올리는 편이 안전하다. 구체 후보 키: `tactile_token_mask.phase: {reach: 0, grasp: 1}`, `phase_detector.signal: net_normal_force > τ_contact`.
+- **D8 / D11 음(陰)의 결과를 selective gating 트리거로 활용** — 본 논문은 통합 정책에서 촉각을 추가하면 95% → 82% 로 성능이 떨어진다고 보고했다. 따라서 PROBE 의 finger-bound structured token 에서 도달 단계 동안 촉각 토큰을 마스킹하는 단계별 gating 을 D8 의 deferred 트리거(per-finger token 충분도 검증)와 함께 초기 sim ablation 사전 검증 항목으로 올리는 편이 안전하다. 구체 후보 키: `tactile_token_mask.phase: {reach: 0, grasp: 1}`, `phase_detector.signal: net_normal_force > τ_contact`.
 - **D12 multi-camera 차폐 강건성의 falsifier 임계치 추가** — 본 논문의 19% → 58% 격차는 차폐 조건에서 모듈 기여를 정량화하는 재현 가능한 프로토콜이다. PROBE 의 D26 metric 에 단일 카메라 차폐 시 성공률 drop ≤ X% 항목을 명시적으로 추가한다. 임계치 X 는 본 논문의 기준 drop (88 → 19) 대비 PROBE 구조가 그 절반 이하로 줄여야 한다는 식으로 못 박는다. 그러면 P1 + P2 차별화가 한 줄로 반증 가능해진다.
-- **D24/D26 corrective 데이터 단계 평가 프로토콜 차용** — 본 논문의 ($`\pi_{\text{uni-enhance}}\to\pi_{\text{uni-orient}}\to\pi_{\text{uni-final}}`$) 단계별 벤치 구조(Fig. 16, 5 객체 3×3 그리드 + 방위 변화)는 PROBE 의 CP2 실환경 평가에서 데이터 augmentation 효과의 단조성을 보여주기에 적합하다. 단순하고 재현 가능한 프로토콜이라 그대로 차용할 만하다.
+- **D24/D26 corrective 데이터 단계 평가 프로토콜 차용** — 본 논문의 ($`\pi_{\text{uni-enhance}}\to\pi_{\text{uni-orient}}\to\pi_{\text{uni-final}}`$) 단계별 벤치 구조(Fig. 16, 5 객체 3×3 그리드 + 방위 변화)는 PROBE 의 실환경 평가에서 데이터 augmentation 효과의 단조성을 보여주기에 적합하다. 단순하고 재현 가능한 프로토콜이라 그대로 차용할 만하다.
 - **D19 (VLM FT 범위) 반례 데이터 포인트로 기록** — 본 논문은 vision encoder 동결 + 나머지 full-FT 만으로도 50+ 물체 88.7% 를 달성했다. D19 v1 "(a) 전 VLM 동결" 결정의 deferred 트리거(frozen 백본의 새 모달리티 조합 표현이 부족할 때 LoRA 로 이동)에 정량 비교 기준으로 끼워 넣을 수 있는 데이터다.
 
-명시적으로 바뀌지 않는 것도 짚어 둡니다. P3 의 RL-기반 System0 결정 (D13~D18) 은 본 논문의 LSTM admittance 사례로 직접 대체되지 않는다. 본 논문은 IL + 어드미턴스 휴리스틱 조합일 뿐 PROBE 가 정조준하는 슬립/그립 유지 보상의 RL 학습 자체에 대한 반례는 아니다. 본 논문이 in-hand reorientation 을 명시적 future work 로 남긴 점을 봐도 CP2 의 first demo (in-hand cube rotation) 결정 D24 v1 은 그대로 유지하는 편이 낫다.
+명시적으로 바뀌지 않는 것도 짚어 둡니다. P3 의 RL-기반 System0 결정 (D13~D18) 은 본 논문의 LSTM admittance 사례로 직접 대체되지 않는다. 본 논문은 IL + 어드미턴스 휴리스틱 조합일 뿐 PROBE 가 정조준하는 슬립/그립 유지 보상의 RL 학습 자체에 대한 반례는 아니다. 본 논문이 in-hand reorientation 을 명시적 future work 로 남긴 점을 봐도 실로봇 데모의 first demo (in-hand cube rotation) 결정 D24 v1 은 그대로 유지하는 편이 낫다.
 
 ---
 
@@ -262,7 +262,7 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 본 논문의 결과가 PROBE 스택으로 그대로 이전되지 않을 가능성을, 가장 싼 점검 순으로 정리합니다.
 
 1. **하드웨어 비대칭** — Xhand 의 fingertip 당 120채널 3축 force 와 EtherCAT 83 Hz 인터페이스는 Sharpa Deform Map (320×240 vision-based, 30 Hz) 과 모달리티가 다르다. 합력 벡터 추출이 Deform Map 위에서 같은 SNR/지연을 보장하지 못할 가능성이 크다. 따라서 Sharpa Deform Map 에서 resultant force vector 를 안정적으로 회귀할 수 있는지를 정적 보정 데이터 수십 분 분량으로 먼저 점검한다.
-2. **데이터 규모 의존성** — 본 논문의 통합 정책은 100 trajectories 라는 작은 규모로 88.7% 를 달성했다. 다만 이는 단일물체 pick-and-place 워크스페이스(40×40 cm)에 맞춰진 결과다. PROBE 의 in-hand rotation 처럼 contact-rich · long-horizon 과제로 옮기면 같은 규모로는 수렴하지 못할 가능성이 크다. CP1 sim ablation 에서 (100, 300, 1000) trajectories 스윕으로 학습 곡선의 plateau 위치를 먼저 측정한다.
+2. **데이터 규모 의존성** — 본 논문의 통합 정책은 100 trajectories 라는 작은 규모로 88.7% 를 달성했다. 다만 이는 단일물체 pick-and-place 워크스페이스(40×40 cm)에 맞춰진 결과다. PROBE 의 in-hand rotation 처럼 contact-rich · long-horizon 과제로 옮기면 같은 규모로는 수렴하지 못할 가능성이 크다. 초기 sim ablation 에서 (100, 300, 1000) trajectories 스윕으로 학습 곡선의 plateau 위치를 먼저 측정한다.
 3. **풀-FT 의 사전학습 prior 소실** — 본 논문은 vision encoder 만 동결한 full-FT 다. 반면 PROBE D19 v1 의 핵심 가설은 전 VLM 동결이 prior 보존에 핵심이라는 점이다. 가장 싼 검증은 본 논문 기준($`\pi_{\text{uni-enhance}}`$, full-FT) 대 (모든 백본 동결 + 보조 헤드만 학습)의 OOD 일반화 격차다. 새 카테고리 5종 정도를 sim 에서 빠르게 재 본다.
 4. **음(陰)의 촉각 통합 결과의 일반화** — §8.2.1 의 -13% 결과는 같은 워크스페이스·단일물체 가정에서 나왔다. PROBE 의 in-hand rotation 처럼 도달 단계가 짧고 접촉이 처음부터 핵심인 과제에서는 부호가 뒤집힐 가능성이 크다. 단일 객체 in-hand rotation sim 에서 전구간 촉각과 단계별 gating 촉각 두 그룹의 학습 곡선만 측정해도 충분하다.
 5. **Corrective 데이터의 분포 편향** — 식 (14) 가 항상 원 $`\pi_0`$ 에서 다시 SFT 한다는 점은 파국적 누적을 피하는 효과가 있다. 그러나 $`\mathcal{D}_{\text{uni}}\cup\mathcal{D}^{(k)}`$ 의 양이 적은 초기 라운드에서는 corrective 가 도리어 기준 분포를 흐릴 위험도 있다. PROBE 가 동일 패턴을 채택하기 전에 같은 데이터 규모에서 누적과 항상 원본 두 그룹의 성공률 분산을 한 번 재 둔다.

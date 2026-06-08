@@ -266,7 +266,7 @@ MoSS 의 결과가 맞다면 PROBE 의 다음 파이프라인 항목이 바뀝�
 - **D8 per-finger 토큰 구성 + D10 hand-level aggregation 통합 방식** — "per-finger 토큰 N+2 개 → self-attention 풀링" 대신 *각 손가락(또는 팜)* 을 별도 스트림으로 두고, 액션 전문가와 *조인트 크로스-모달 셀프 어텐션* 으로만 결합하는 변종을 ablation 후보로 추가합니다. 구체 config 키: `action_expert.cross_modal_streams.fingers=10`, `action_expert.cross_modal_streams.palm=2`, `action_expert.joint_xattn=True`. 비교 baseline 은 D10 v1 의 (B) self-attention 풀링입니다.
 - **D19 / D20 / D21 staged training** — 현재 v1 은 "Stage 1: VLM 정렬 → Stage 2: VLM-freeze + Body/Hand 학습 → Stage 3/4 deferred" 입니다. MoSS 결과는 *Stage 2 내부* 를 다시 둘로 쪼개 (2a) Body/Hand 헤드 *전체* 동결 + 신규 모달리티 스트림만 학습, (2b) 전체 해제 공동 미세조정 단계를 추가하는 변형이 가치 있음을 시사합니다. config 키: `train.stage2a.iters`, `train.stage2a.freeze_action_expert=True`, `train.stage2b.iters`.
 - **D11 보조 손실 — future tactile prediction** — Touch Dreaming 계열의 deferred 항목을 MoSS 식 "$`\mathcal{L}_{\mathrm{phy}}=\sum_i \|\hat{m}^{(i)}_{t+1:t+H}-m^{(i)}_{t+1:t+H}\|^2`$" 로 구체화합니다. config 키: `loss.future_phys_pred=True`, `loss.lambda_phy=0.1`. 메트릭으로는 *contact-precision (slip count)* 가 D26 의 falsifier 와 곧장 맞물립니다.
-- **D7 π backbone integration — repurpose vs subdivide 제 3 안** — *append parallel streams* 라는 옵션을 D7 의 sub-reading 에 추가 등록합니다. 이는 π0 의 액션 전문가를 *손대지 않고* Body/Hand 를 둘 다 *옆에 새로 붙이는* 구조입니다. 트레이드오프: π prior 최대 보존 대 새 스트림 초기화 비용. **CP1 코드 진입 시 비교 후보로 등록**.
+- **D7 π backbone integration — repurpose vs subdivide 제 3 안** — *append parallel streams* 라는 옵션을 D7 의 sub-reading 에 추가 등록합니다. 이는 π0 의 액션 전문가를 *손대지 않고* Body/Hand 를 둘 다 *옆에 새로 붙이는* 구조입니다. 트레이드오프: π prior 최대 보존 대 새 스트림 초기화 비용. **구현 진입 시 비교 후보로 등록**.
 - **falsifier 와의 연결** — D25 의 4-contribution ablation 에 "(c') future_phys_pred on/off" 한 줄을 더해 보조 손실 기여를 분리할 수 있습니다. 임계값은 ±5%p contact-precision 변화로 잡습니다.
 
 ---
@@ -279,7 +279,7 @@ MoSS 의 결과가 PROBE 스택으로 그대로 전이되지 않을 가능성과
 - **모달리티 수 1 종에서 무조건 향상 — 우리 셋업에서도 일관될까** — 단일 모달리티 변종도 일관되게 base 보다 오른다고 저자들은 적지만, 우리 cube rotation 과제는 본문 4 과제와 접촉 프로파일이 다릅니다. **싼 sanity check**: cube rotation 에서 *촉각 단일* MoSS 가 base 대비 향상 없으면, 다중 모달리티로 가는 명분이 약합니다. 24-trial 표본은 ±5%p 노이즈 한계이므로 30+ trial 을 권합니다.
 - **두 단계 학습의 안정성 효과 — 우리 학습 곡선에서 재현될까** — 표 2 의 "w/o two-stage training" 은 Unstack Cup 에서 16.7%p 떨어집니다. **싼 sanity check**: Stage 1 (액션 헤드 동결) 의 *물리 손실 곡선* 이 plateau 에 도달하는지 학습 초기 5K 스텝에서 확인합니다. plateau 없이 발산하면 freeze 범위·LR 재조정이 필요합니다.
 - **$`\lambda_{\mathrm{phy}}=0.1`$ 의 좁은 안전 마진** — 표 5 는 $`\lambda_{\mathrm{phy}}=1.0`$ 에서 큰 폭의 성능 저하를 짚습니다. **싼 sanity check**: 본격 학습 전 $`\lambda_{\mathrm{phy}}\in\{0.05, 0.1, 0.2\}`$ 그리드 1K-스텝 마이크로 스윕.
-- **초기 접근/그래스핑 실패는 물리 피드백으로 못 메운다 (저자 자인)** — §B.2 가 자기 입으로 인정한 한계입니다. PROBE 의 in-hand rotation 과제는 접촉이 *이미* 형성된 상태에서 시작하므로 영향이 작지만, tool articulation (CP3) 에서는 같은 한계가 그대로 나타날 위험이 큽니다. **싼 sanity check**: CP3 진입 전 *grasping prior 정책* 의 별도 검증.
+- **초기 접근/그래스핑 실패는 물리 피드백으로 못 메운다 (저자 자인)** — §B.2 가 자기 입으로 인정한 한계입니다. PROBE 의 in-hand rotation 과제는 접촉이 *이미* 형성된 상태에서 시작하므로 영향이 작지만, tool articulation 단계에서는 같은 한계가 그대로 나타날 위험이 큽니다. **싼 sanity check**: tool articulation 단계 진입 전 *grasping prior 정책* 의 별도 검증.
 
 ---
 
@@ -287,8 +287,8 @@ MoSS 의 결과가 PROBE 스택으로 그대로 전이되지 않을 가능성과
 
 - **§8.2 P2 핀 보강 후보 등록** — MoSS(arXiv:2604.23272)를 P2 의 *deferred candidate* 로 등록해 두기를 제안합니다. 현재 P2 핀은 8 종 한도가 차 있고(SaTA·TacFiLM·Sparsh·ViTacFormer·DexViTac·Touch Dreaming·AdapTac·XL-VLA), 분기별 rebalance 때 AdapTac 또는 Touch Dreaming 자리와 비교해 교체 여부를 결정합니다. 우위는 *복수 물리 모달리티 결합* 의 첫 통합 사례라는 데 있습니다.
 - **§8.4 P4 핀 보강 후보 등록** — 두 단계 학습(Stage 1 액션 전문가 동결)이 D19/D21 의 1차 evidence 이므로 P4 deferred candidate 로 올립니다. VLA-Adapter 또는 PriorVLA 자리와 비교.
-- **§6.3 D8/D10 deferred trigger 추가** — *모달리티별 디커플 스트림 + 조인트 크로스-모달 어텐션* 변종을 D8/D10 의 deferred 후보로 한 줄 적어 둡니다. 트리거: D10 v1(self-attention 풀링)이 in-hand rotation contact-precision 지표에서 baseline 대비 +5%p 미만일 때 / **CP1**.
-- **§6.5 D19/D21 deferred — Stage 2 내부 분할** — 위 ⚙️ 의사결정 함의의 staged training 변형을 D21 의 deferred recipe 로 적어 둡니다. 트리거: Stage 2 학습 초반 (≤5K 스텝) 에 액션 전문가 그래디언트 노름이 발산할 때 / **CP1**.
+- **§6.3 D8/D10 deferred trigger 추가** — *모달리티별 디커플 스트림 + 조인트 크로스-모달 어텐션* 변종을 D8/D10 의 deferred 후보로 한 줄 적어 둡니다. 트리거: D10 v1(self-attention 풀링)이 in-hand rotation contact-precision 지표에서 baseline 대비 +5%p 미만일 때 (sim ablation 단계).
+- **§6.5 D19/D21 deferred — Stage 2 내부 분할** — 위 ⚙️ 의사결정 함의의 staged training 변형을 D21 의 deferred recipe 로 적어 둡니다. 트리거: Stage 2 학습 초반 (≤5K 스텝) 에 액션 전문가 그래디언트 노름이 발산할 때 (sim ablation 단계).
 - **anti-topic 예외 메모** — §7 의 "2-finger parallel-jaw grippers only" anti-topic 에 대해, MoSS 는 (b) structured tactile/proprio binding 조건으로 in-scope 입니다. 추후 비슷한 어댑터 논문의 일관된 처리를 위해 §7 본문에 *"VLA 적응 어댑터 논문은 평행 그리퍼 한정이어도 (a)~(d) 중 하나라도 만족 시 in-scope"* 한 줄 추가를 검토합니다.
 
 > 💡 base 매핑은 `/implement-design analysis/2604.23272/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

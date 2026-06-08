@@ -236,7 +236,7 @@ P4 의 핀 라인업과 비교했을 때 — π0 ([arXiv:2410.24164]), π0.5 ([a
 ## ⚠️ 먼저 검증할 실패 모드
 
 - **Bagel-grade UMM 의존성** — UAM 의 generative prior 는 *이해+생성 결합* 사전학습에서 옴. 우리가 $`\pi`$ 백본 + 별도 Dorsal 을 도입할 때, $`\pi`$ 와 Bagel 의 표상 alignment 비용이 크면 학습이 발산할 수 있음. **싼 sanity check**: 우리의 Stage 2 weight 위에 *visual-dynamics aux loss only* (Dorsal expert 미도입) 를 켜고, action 학습 30k step 동안 MMBench 1종 점수가 ≥95% 유지되는지부터 측정. 망각이 *손실 구성* 만으로 완화된다면 expert 추가 비용 없이 일부 이득 회수 가능.
-- **Contact-rich 손가락 작업에서의 부적합** — UAM 의 visual-dynamics 손실은 *장면이 어떻게 변하는가* 를 학습. 손바닥 안 회전처럼 *겉보기 시각 변화가 미약한* 작업에서는 이 신호가 거의 사라질 수 있어 Dorsal 경로가 활성화되지 않을 위험. **싼 sanity check**: CALVIN/RoboTwin 류가 아닌 in-hand cube rotation(우리의 CP1) sim 에서 $`\mathcal{L}_{\text{wm}}`$ 의 magnitude 가 학습 후반에도 의미 있게 유지되는지 측정.
+- **Contact-rich 손가락 작업에서의 부적합** — UAM 의 visual-dynamics 손실은 *장면이 어떻게 변하는가* 를 학습. 손바닥 안 회전처럼 *겉보기 시각 변화가 미약한* 작업에서는 이 신호가 거의 사라질 수 있어 Dorsal 경로가 활성화되지 않을 위험. **싼 sanity check**: CALVIN/RoboTwin 류가 아닌 in-hand cube rotation(우리의 초기 sim ablation) sim 에서 $`\mathcal{L}_{\text{wm}}`$ 의 magnitude 가 학습 후반에도 의미 있게 유지되는지 측정.
 - **추론 latency** — 추가 7B expert 가 +15% latency. 우리의 control loop 가 시스템1 50–100 ms 영역이라면 이미 한계에 가깝다. **싼 sanity check**: 우리의 표준 action chunk size + 우리 GPU 에서 Bagel 사이즈 expert 추가 시 step latency 가 우리의 closed-loop 예산을 초과하는지부터 측정 — 초과하면 *축소된 generative expert*(예: 1–2B) 로 ablation 필요.
 - **Tactile 입력과의 충돌** — UAM 은 vision-only. 우리의 P2 (tactile per-finger token) 를 어느 expert 로 라우팅할지 미정. **싼 sanity check**: tactile 토큰을 Dorsal 로 보내는 변형 vs $`E_{\text{act}}`$ 로 보내는 변형의 차이를 in-hand rotation sim 에서 한 차례 ablation — Dorsal 의 What/How 가설이 visuotactile 셋업에서도 유효한지 확인.
 - **VLM-init Dorsal 의 실패 재현** — UAM 의 §4.2 는 "VLM 가중치를 그대로 복제한 Dorsal" 이 OOD 에서 *baseline 보다 나쁘다* 고 보고. 우리가 D19/D20 변형에서 비슷한 패턴을 보이는지 — 즉 *단순한 경로 추가* 가 오히려 해가 되는 영역인지 — 를 우리 데이터 분포에서도 먼저 확인할 필요.
@@ -248,7 +248,7 @@ P4 의 핀 라인업과 비교했을 때 — π0 ([arXiv:2410.24164]), π0.5 ([a
 - **§8.4 P4 Tracked Literature 핀 교체 후보** — 현재 P4 핀 8개 중 가장 *대증적 co-training* 측면을 대표하는 항목(예: RT-2)을 UAM 으로 교체하는 안. UAM 은 (i) embodiment tax 의 정량 정의를 도입, (ii) frozen·co-training 두 갈래를 모두 거부한 첫 사례라는 점에서 P4 의 *구조적* 노선을 대표할 자격이 있음. 단 교체 결정은 maintainer 가 §8 의 "분기 quarterly rebalance" 사이클에서 검토.
 - **§13 Open Items 신규 항목 후보** — "VLM/제어 경로 분리를 구조적으로 강제할 때 우리의 tactile/proprio 토큰을 어느 expert 로 라우팅할 것인가" 가 P2 ↔ P4 의 새로운 교차점으로 등장. D19 deferred trigger 의 §13.C 와 연결.
 - **§10 Competitor monitoring 메모** — Tsinghua + ByteDance Seed 조합은 §9.3 의 *대형 lab 코드 릴리즈 watch* 대상에 추가할 가치. Bagel/BagelVLA 라인업이 P4 에 지속적인 영향을 줄 가능성.
-- **Decision Log 변경 제안 없음** — D19~D23 어느 것도 *현 시점*에서 v1 을 바꿀 결정적 증거는 아님. UAM 결과는 *deferred trigger* 측에 후보를 더하는 정도가 적절. 정식 변경은 CP1 (4-contribution ablation) 결과를 본 뒤 판단.
+- **Decision Log 변경 제안 없음** — D19~D23 어느 것도 *현 시점*에서 v1 을 바꿀 결정적 증거는 아님. UAM 결과는 *deferred trigger* 측에 후보를 더하는 정도가 적절. 정식 변경은 4-contribution ablation 결과를 본 뒤 판단.
 
 context/MASTER.md 는 수정하지 않았습니다 — 위 항목은 maintainer 검토용 제안일 뿐입니다.
 
