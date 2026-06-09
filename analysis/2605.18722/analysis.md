@@ -344,7 +344,7 @@ ALOHA), EC-3(Unitree G1 7-DoF 팔 + Inspire Hand 6-DoF)로 전이합니다.
   트리거 맥락).
 - **P4 (VLM Pretraining Preservation)** — **약한 접점**. Dexora는 사전학습 VLM
   백본을 보존·동결하는 구조가 아니라 T5/SigLip 인코더-조건형 디퓨전 정책으로,
-  D19/D19b/D23(플로우 매칭 vs 디퓨전)와 직접 대비됩니다. VLM 사전학습 보존 분석은
+  D19/D23(플로우 매칭 vs 디퓨전)와 직접 대비됩니다. VLM 사전학습 보존 분석은
   하지 않습니다.
 - **P5 (Task Definition & Falsifiable Evaluation)** — **방법론 참고**. 4-기여
   어블레이션은 아니지만(데이터 구성·판별기 어블레이션) OOD 6조건·크로스

@@ -28,7 +28,7 @@ InternVL-3.5 기반 Mixture-of-Transformers 위에 Mixture-of-Flow 액션 전문
 - **풀고자 하는 문제** — 형태가 다른 로봇(병렬 그리퍼·다지 손·다지 휴머노이드)을 한 체크포인트로 통제하면서 플랫폼별 데이터가 부족해도 새 하드웨어에 빠르게 적응하는 일반 정책을 세우는 일입니다.
 - **기존 접근의 한계** — 기존 VLA는 한 플랫폼에 묶인 *monolingual speaker* 이며 embodiment 별 MLP head 로 차원을 맞추는 통상 전략은 공통 물리 prior 를 흡수하지 못해 cross-embodiment 일반화가 약합니다. 다지 손 데이터는 전체 코퍼스의 5 % 미만이라 데이터 측면에서도 묶입니다.
 - **본 논문의 가설** — 사람의 손 상호작용 흔적이 *physical mother tongue* 로 작동해 모든 kinematic 변종에 공통된 물리 상식을 담는다. 사람 손 모션과 로봇 제어를 *공통 vocabulary* 로 묶으면 저자원 로봇이 데이터-풍부 플랫폼·사람 시연에서 motor skill 을 bootstrap 할 수 있다는 주장입니다.
-- **왜 지금 중요한가** — 컨텍스트의 D19b·D22 라인업에 새로 핀된 Being-H0.5 는 "lineage = (init weight × further-pretrain corpus)" 단위를 명시적으로 흔드는 사례다. 사람 영상 16,000 시간을 사전학습 코퍼스의 절반에 올렸기 때문에 P4 의 lineage 비교 실험을 설계할 때 직접적인 기준점이 됩니다.
+- **왜 지금 중요한가** — 컨텍스트의 D19·D22 라인업에 새로 핀된 Being-H0.5 는 "lineage = (init weight × further-pretrain corpus)" 단위를 명시적으로 흔드는 사례다. 사람 영상 16,000 시간을 사전학습 코퍼스의 절반에 올렸기 때문에 P4 의 lineage 비교 실험을 설계할 때 직접적인 기준점이 됩니다.
 
 ---
 
@@ -90,7 +90,7 @@ InternVL-3.5 기반 Mixture-of-Transformers 위에 Mixture-of-Flow 액션 전문
 - **Backbone 초기화** — InternVL-3.5 에서 시작 (decoder-only). 백본 선택이 robotic 성능을 결정적으로 좌우한다고 본문에서도 직접 언급한다:
 
 > "It is worth noting that the choice of the VLM backbone is critical, with empirical evidence suggests that the underlying visual features significantly dictate downstream VLA efficacy." (§5.1)
-(한글 해설 — VLM lineage 가 downstream VLA 성능을 좌우한다는 진술. D19b 핀에 직접 매칭되는 주장입니다.)
+(한글 해설 — VLM lineage 가 downstream VLA 성능을 좌우한다는 진술. D19 핀에 직접 매칭되는 주장입니다.)
 
 #### Unified State-Action Space (§5.1.1)
 
@@ -302,7 +302,7 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 ## ⚖️ 한계
 
 - **저자가 밝힌 한계** — Masked motion 학습이 *fine-grained motion fidelity* 와 *abstraction-level behavior prior* 사이에서 trade-off 를 만들며 MWDS 같은 정량지표가 wild 분포에서 hybrid 의 손해를 시사한다고 본문 표에 적혀 있습니다. caption 의 *"clear drop in MWDS"* 진술과 Table 8 수치(hybrid 가 낮음)의 정합성은 본 분석 시점에서 *원문 그대로* 유지합니다. 발표 후 erratum 가능성 있음.
-- **VLM lineage 명시의 불완전성** — 본문은 InternVL-3.5 라고만 적고 *further-pretrain 코퍼스* 의 정확한 mixing ratio·토크나이저·단계별 lr 등 lineage 식별에 필요한 세부는 GitHub release 로 이연. D19b 의 *(initial weight × corpus)* 2-tuple 비교 실험을 짜려면 코드 공개를 기다려야 합니다.
+- **VLM lineage 명시의 불완전성** — 본문은 InternVL-3.5 라고만 적고 *further-pretrain 코퍼스* 의 정확한 mixing ratio·토크나이저·단계별 lr 등 lineage 식별에 필요한 세부는 GitHub release 로 이연. D19 의 *(initial weight × corpus)* 2-tuple 비교 실험을 짜려면 코드 공개를 기다려야 합니다.
 - **다지 손 데이터 비중의 잔존 약점** — 본문은 dexterous-hand 데이터가 전체의 5 % 미만이라는 일반적 문제를 지적한다. 다만 UniHand-2.0 의 30 개 embodiment 중 *dexterous hand 가 차지하는 시간 비율* 은 표로 명시되지 않아 P1 (Body/Hand 비대칭 학습) 측면에서 데이터 편향이 남습니다.
 - **MoT 분해와 Body/Hand 비대칭 분해의 불일치** — MoT 는 *modality* 별 분해(이해/액션)이지 *해부학적* 분해(Body/Hand)는 아닙니다. Mixture-of-Flow 의 specialized expert 라우팅도 *embodiment / task* 단위라 finger-level 접촉 시멘틱이 명시적으로 토큰화되지는 않습니다.
 - **System0 류의 저수준 안정화 모듈 부재** — MPG 가 *context-level* 안전 장치라면 slip / grasp 유지 같은 *하위 제어 루프* 수준의 안정화는 별도 모듈 없이 flow-matching 한 패스에 위임됩니다. 본문의 핵심 evaluation 에 dexterous in-hand rotation 같은 contact-rich 시연이 등장하지 않는 점과 맞물립니다.
@@ -322,10 +322,10 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
-- **P4 (VLM Pretraining Preservation)** — Being-H0.5 는 §8.4 의 핀 논문이며 "InternVL-3.5 × UniHand-2.0" 이라는 *별도 lineage* 를 제공해 P4 의 D19b/D22 결정을 직접 흔듭니다.
+- **P4 (VLM Pretraining Preservation)** — Being-H0.5 는 §8.4 의 핀 논문이며 "InternVL-3.5 × UniHand-2.0" 이라는 *별도 lineage* 를 제공해 P4 의 D19/D22 결정을 직접 흔듭니다.
 - **P1 (Heterogeneous Body/Hand Action Expert)** — MoT 의 *이해/액션 분리* 와 MoF 의 *foundation/specialized 분리* 는 Body/Hand 비대칭과는 직교한 축의 분해이지만 π0 류 단일 액션 전문가 패턴 가운데 가장 야심찬 대안 중 하나입니다. D1(split form), D4(Body↔Hand info sharing), D7(π backbone integration) 의 비교군에 곧장 해당합니다.
 - **D19 (VLM fine-tuning range)** — 본문은 MLLM 전체(visual encoder + projector 포함)를 *전 파라미터 freeze* 하고 액션 전문가만 학습하는 셋업을 ablation 의 베이스로 사용 (§7.3.1 Table 6, Figure 10/11). 우리 D19 v1 (full freeze + action experts only) 과 정확히 같은 posture 입니다.
-- **D19b (VLM backbone lineage choice)** — context 의 핀 entry 가 "TBD (not disclosed; check GitHub config)" 였던 부분이 본문에서 InternVL-3.5 로 확정됩니다. corpus 측은 UniHand-2.0 (16K h ego video + 14K h robot manip + 5K h VL) 로 표기. 우리 v1 인 PaliGemma-2B × π0 mix 와는 *init weight·corpus 양쪽 다 다른* 비교군.
+- **D19 (VLM backbone lineage choice)** — context 의 핀 entry 가 "TBD (not disclosed; check GitHub config)" 였던 부분이 본문에서 InternVL-3.5 로 확정됩니다. corpus 측은 UniHand-2.0 (16K h ego video + 14K h robot manip + 5K h VL) 로 표기. 우리 v1 인 PaliGemma-2B × π0 mix 와는 *init weight·corpus 양쪽 다 다른* 비교군.
 - **D22 (Multi-embodiment pretraining data)** — UniHand-2.0 은 30 embodiment × 13,817 시간의 로봇 데이터 + 16,000 시간 사람 영상을 합친 *가장 큰 catalog* 로 우리 D22 의 *지연된 데이터 catalog 구축* 산출물에 직접 반영됩니다.
 - **D23 (Action representation × VLM preservation)** — Rectified Flow 연속 표현을 메인 path 로, masked motion token 을 보조 채널로 *동시에* 사용. 우리 v1 의 (iii) flow-matching head 와 (ii) NL-style action 을 결합한 새 *하이브리드* 카테고리를 제시.
 - **D6 (Coordination direction & flow)** — MoT shared self-attention 은 두 전문가 사이를 *layer 마다 양방향* 으로 통신시키는 패턴이므로 우리 v1 의 *hierarchical body→hand* 와 비교군이 될 수 있습니다.
@@ -347,7 +347,7 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 ## ⚙️ 의사결정 함의
 
 - **D19 (VLM FT range)** — v1 (a) full freeze 가 본 논문에서도 *베이스 셋업* 으로 채택됩니다. Figure 10/11 에서 *Action Expert 의 frozen layer 수 sweep* 결과가 함께 보고되므로 우리 ablation 셋업에 *MoF 류 specialized expert 의 부분 freeze* 한 칸을 추가할 근거가 생깁니다. 구체적으로 `train_cfg.action_expert.freeze_first_K_layers ∈ {0, 4, 8}` 같은 sweep 인자.
-- **D19b (lineage)** — 핀 entry 의 *VLM init = TBD* 칸을 *InternVL-3.5* 로 채우는 업데이트가 필요합니다. PaliGemma 계열 외의 *decoder-only* 라인을 비교군에 둘 때 *2-pair 비교 실험* (v1 = PaliGemma-2B × π0 mix vs Being-H0.5 lineage) 의 차원이 *backbone 종류* 와 *코퍼스 종류* 양쪽임을 함께 명시합니다.
+- **D19 (lineage)** — 핀 entry 의 *VLM init = TBD* 칸을 *InternVL-3.5* 로 채우는 업데이트가 필요합니다. PaliGemma 계열 외의 *decoder-only* 라인을 비교군에 둘 때 *2-pair 비교 실험* (v1 = PaliGemma-2B × π0 mix vs Being-H0.5 lineage) 의 차원이 *backbone 종류* 와 *코퍼스 종류* 양쪽임을 함께 명시합니다.
 - **D22 (multi-embodiment data catalog)** — UniHand-2.0 의 표 1 row 들은 catalog 의 *direct row 후보* 로 그대로 끌어올 수 있습니다. *embodiment / hand DoF / arm DoF / camera config / hours* 5 칸이 본문에 명시되어 있어 `pretrain_data.md` 의 lineage-stacking 컬럼을 채우는 작업이 자동화 가능.
 - **D23 (action representation × VLM preservation)** — Being-H0.5 는 *연속 flow + masked-token 보조* 의 하이브리드를 보였습니다. 우리 v1 (iii) flow-matching head 만 사용하던 결정에 *aux head 로 masked motion token 을 얹어 noise robustness 를 얻는다* 는 옵션이 새로 추가됩니다. ablation 인자: `loss.action.lambda_mask ∈ {0, 0.1, 0.5}`.
 - **D6 (coordination flow)** — MoT 의 *layer 별 shared self-attention* 은 우리 v1 의 *body→hand single FiLM* 보다 훨씬 강한 양방향 결합이라 우리 deferred 후보 (B) cross-attention 의 *극단 사례* 로 평가 대상이 됩니다.
@@ -360,7 +360,7 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 
 - **Cross-embodiment 일반화는 좋지만 contact-precision 에서는 손해를 본다는 가설** — 본 논문 평가는 *Pick & Place / Doors-Drawers / Open-Place-Close / Wipe / Bimanual hand-over* 등 *macro-motion 중심* task 가 대부분이며 in-hand rotation / tool articulation / dexterous insertion 같은 *contact-precision* 카테고리가 부재합니다. 우리 P5 의 in-hand cube rotation 벤치에서 *unified action space* 가 finger 별 슬립을 무력화하는지 확인하는 sanity check 가 가장 싸게 효과 큽니다 — Sharpa hand 에서 30 trial 로 slip count / pose stability 두 지표만 재면 됨.
 - **MANO → unified slot 매핑이 *손가락별 접촉 시멘틱* 을 흐리는지** — wrist 6-DoF 는 EEF subspace 에 정렬되어 보존되는 반면, 손가락 articulation 이 "fine-manipulation 슬롯" 으로 *명시적으로 무엇* 인지 본문은 풀어 쓰지 않습니다. 우리 D8 의 *per-finger proprio-tactile 토큰* 과 충돌할 가능성. 검증법: Being-H0.5 의 손가락 슬롯에서 *finger-wise attention* 을 뽑아 contact 시점과의 상관을 측정.
-- **InternVL-3.5 backbone 의 spatial reasoning 우위가 실제로 우리 contact-rich 셋업에서 유지되는가** — 본문은 *VLM backbone 선택이 robotic 성능을 dictate* 한다고 명시한다. 다만 검증 task 가 RGB-only macro-motion 중심입니다. dexterous in-hand rotation 처럼 *tactile-dominant* 한 셋업에서도 InternVL-3.5 의 visual prior 가 PaliGemma-2B × π0 mix 보다 유리한지는 별도 비교가 필요. 우리 lineage 비교 *2-pair* 실험 (D19b deferred) 의 *진입 trigger* 가 될 수 있습니다.
+- **InternVL-3.5 backbone 의 spatial reasoning 우위가 실제로 우리 contact-rich 셋업에서 유지되는가** — 본문은 *VLM backbone 선택이 robotic 성능을 dictate* 한다고 명시한다. 다만 검증 task 가 RGB-only macro-motion 중심입니다. dexterous in-hand rotation 처럼 *tactile-dominant* 한 셋업에서도 InternVL-3.5 의 visual prior 가 PaliGemma-2B × π0 mix 보다 유리한지는 별도 비교가 필요. 우리 lineage 비교 *2-pair* 실험 (D19 deferred) 의 *진입 trigger* 가 될 수 있습니다.
 - **MPG / UAC 의 contribution 이 사전학습 없는 셋업에서도 유지되는가** — Ablation Figure 12 는 *Being-H0.5 사전학습 + post-training 전체* 를 두고 돌린 ablation 입니다. UniHand-2.0 사전학습 *없이* MPG / UAC 만 떼다 우리 stack 에 붙였을 때 same delta 가 재현되는지 확인하지 않으면 deployment trick 의 transferability 를 단정할 수 없습니다.
 - **Masked motion prediction 의 표·caption 불일치** — Table 8 의 *MWDS Wild 0.20 (hybrid) vs 0.28 (w/o mask)* 숫자는 caption 의 정성 결론과 어긋납니다. 우리 데이터에서 동일 ablation 을 재현하기 전에는 *hybrid 권장* 을 그대로 도입하기 위험.
 
@@ -368,7 +368,7 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 
 ## 💡 컨텍스트 제안
 
-- **§8.4 핀 entry 업데이트** — `Being-H0.5` row 의 *VLM init* 컬럼을 `TBD` → `InternVL-3.5 (decoder-only, ~2B)` 로 갱신 권장. 추가로 *Open-weight* 여부·라이선스·코드 공개 일정을 GitHub release 확인 후 D19b lineage 카탈로그에 반영. 본 분석은 *제안만* — `context/MASTER.md` 는 수정하지 않습니다.
+- **§8.4 핀 entry 업데이트** — `Being-H0.5` row 의 *VLM init* 컬럼을 `TBD` → `InternVL-3.5 (decoder-only, ~2B)` 로 갱신 권장. 추가로 *Open-weight* 여부·라이선스·코드 공개 일정을 GitHub release 확인 후 D19 lineage 카탈로그에 반영. 본 분석은 *제안만* — `context/MASTER.md` 는 수정하지 않습니다.
 - **analysis/catalogs/models.md 추가 entry 후보** — 본 논문은 *open-weight* + *cross-embodiment* + *MoT/MoF + 연속 + 이산 hybrid* 조합이라 카탈로그의 평면 큐레이션 entry 로 등재할 만한 사례. 다음 분기 카탈로그 재밸런스 때 entry 추가 검토.
 - **analysis/catalogs/pretrain_data.md 갱신** — UniHand-2.0 의 30 embodiment 표 1 row 들이 *lineage-stacking* 컬럼을 그대로 채울 수 있으므로 *데이터 catalog 빌드* 라는 D22 의 deferred 산출물을 본 논문을 seed 로 삼아 시작 가능. 단 mixing ratio 와 라이선스 호환성은 GitHub 공개 후 별도 확인.
 - **D6 deferred trigger 후보** — Being-H0.5 의 *MoT shared self-attention* 이 5 embodiment 에서 강건한 결과를 보였으므로 우리 D6 deferred (B) cross-attention 의 *evidence 누적* 으로 한 줄 카운트 가능. trigger 자체는 우리 v1 FiLM 의 *bottleneck 관측* 이 떠야 점화.
