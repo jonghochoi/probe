@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.27 (2026-06-05) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.28 (2026-06-09) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -438,6 +438,17 @@ conventions below codify both.
   English text is never paraphrased; the entire blockquote is a
   verbatim token, kept byte-identical.
 
+  - **Explanation line reads as connected prose, not a terse gloss.**
+    The Korean line(s) below the quote may run 1–3 sentences and
+    should lead with the *intuition* — why this matters, how it works,
+    what it changes — rather than restating the English. The intuition
+    may also come *before* the quote, with the blockquote then standing
+    as the verbatim *evidence* for a claim already made in prose. Only
+    the English quote + `(§n)` marker are byte-locked; the surrounding
+    explanation is where readability lives (§5-8). This is the single
+    biggest lever for absorbing an explainer-tool's readability without
+    losing PROBE's source traceability.
+
 - **Formula verbatim + GitHub KaTeX rendering** — Keep the original
   LaTeX / Unicode notation; no paraphrase, symbol substitution, or
   shortening, and variable definitions match the source body. The
@@ -495,7 +506,17 @@ conventions below codify both.
   `### 학습 셋업`. Detail preservation comes first. H3 headers
   carry no emoji (same as the §2 H3-plain rule).
 
-- **arXiv figure hotlink + English caption verbatim** — Insert 1–3
+  - **`### 직관` is REQUIRED, and it is the plain-language layer.**
+    Write the whole method so a reader with no prior context follows it:
+    2–4 short paragraphs explaining *what the method does, why, and how*
+    in accessible prose, with **no verbatim quotes and no formulas** —
+    those belong in the `### 아키텍처` / `### 학습 목표 / 손실`
+    subsections that follow. 직관 is where an explainer-tool's
+    "what + why" opening is absorbed; the rigor lives below it, not
+    inside it. (Abstract-only acquisition: keep 직관 brief and mark
+    **(본문 미확보 — 잠정)** — do not speculate past the abstract.)
+
+- **arXiv figure hotlink + English caption verbatim** — Insert 1–5
   high-value figures, typically one architecture / pipeline diagram
   under the methodology and one or two key ablation figures under
   the results. PROBE never copies figures into the repo; it
@@ -524,7 +545,7 @@ conventions below codify both.
   - Abstract-only acquisition, or a non-arXiv-HTML source
     (PDF-only), means no figure URLs are available — omit the
     figure citations entirely. No placeholders, no guessing.
-  - Cap: never more than 3 figures per analysis. This is a decision
+  - Cap: never more than 5 figures per analysis. This is a decision
     tool, not a slide deck.
 
 ### 5-7. Auto-maintained analysis index
@@ -593,6 +614,52 @@ no longer surfaced in the index. The
 bullet's term — the text before the em dash in the `- **<term>** — …` shape
 §5-6 mandates (it also tolerates a `: ` separator and caps long heads).
 `python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
+
+### 5-8. Readability / narrative layer
+
+A paper analysis is *read* (unlike a scouting report, which is *scanned* —
+§4-4), and it is also a decision tool anchored to `context/`. The rules
+below raise readability to an explainer-tool standard **without touching any
+machine-readable contract** (the 메타 table rows §5-7, keyword heads §5-6,
+verbatim `(§n)` anchors §5-6, KaTeX §5-6, the emoji system §5-2, Part A→B
+order). They govern the prose *between and around* those locked tokens.
+
+- **Lead with intuition, then evidence.** Every (A) section earns its
+  density only after the reader knows *why* it matters. The required
+  `### 직관` (§5-6) carries the plain-language opening; within other
+  sections, an intuition sentence may precede a verbatim quote that then
+  serves as its evidence (§5-6 explanation-line rule). Restating the
+  English in Korean is not an explanation — say what it *means*.
+
+- **Short connected paragraphs over fragment dumps.** Part (A) explanatory
+  prose (합니다/됩니다 체, §5-3) favors 1–4-sentence paragraphs that connect
+  ideas with "왜 중요한가" expansion, not a wall of terse fragments. The
+  mandated bullet sections stay bulleted (❓ 문제 정의 / 동기 §5-6, 🧩
+  핵심 기여, 🔑 기술 키워드); everything else may breathe as prose. An
+  architecture walk-through may use **bold inline labels + nested lists**
+  (e.g. `- **CA₁ (Raw 주입)** — …`) — this is explicitly sanctioned, it
+  reads better than a paragraph for component-by-component structure.
+
+- **Expand a `D#` / `P#` on first use.** Part (B) anchors to Decision and
+  Pillar codes, but a cold reader stalls on bare `D20` / `P4`. On the
+  *first* occurrence in the document, attach a one-clause inline gloss:
+  `D20(prior-preservation strategy)`, `P4(VLM 사전학습 보존)`. The code
+  token itself stays verbatim (§4-1) — the gloss is a parenthetical, so the
+  `관련 Pillar` row's `P[1-4]` parsing (§5-7) is unaffected. Later mentions
+  may use the bare code.
+
+- **⚖️ 한계 carries discursive insight; ⚠️ 먼저 검증할 실패 모드 stays
+  lab-specific.** Split the two register the explainer-tool blends:
+  - `⚖️ 한계` — author-stated weaknesses + inferred gaps, each with a
+    1–2-sentence *discursive* read of the mechanism and why it matters
+    (the "비판적 통찰" quality).
+  - `⚠️ 먼저 검증할 실패 모드` — keep PROBE's differentiator: concrete
+    transfer risk to *our* stack, cheapest sanity check first. Do **not**
+    dilute it into generic critique; the generic critique belongs in ⚖️.
+
+These are fidelity-neutral (§4-4 / §4-5 bar): improving readability must
+not add, drop, or reorder any fact, number, quotation, citation polarity,
+or `P#`/`D#` / arXiv / formula token.
 
 ---
 
