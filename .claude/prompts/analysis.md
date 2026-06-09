@@ -404,7 +404,14 @@ the human decides.
 GIT — after both files are written:
 
   git add analysis/<id>/analysis.md analysis/<id>/design.md
-  git commit -m "analysis: add <id> deep-dive + design"
+  # Subject verb depends on whether this <id> was ALREADY analyzed.
+  # Decide BEFORE overwriting the files (check whether
+  # analysis/<id>/analysis.md already existed / was git-tracked):
+  #   first-time analysis (folder newly created this run) →
+  #     git commit -m "analysis: add <id> deep-dive + design"
+  #   re-analysis (analysis/<id>/ pre-existed; you overwrote the
+  #     regenerable snapshots) →
+  #     git commit -m "analysis: update <id> deep-dive + design"
   # --focus re-extraction uses instead:
   #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
   # When the focused re-extraction is a no-op (Design byte-identical),
