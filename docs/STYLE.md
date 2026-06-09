@@ -638,6 +638,17 @@ bullet's term — the text before the em dash in the `- **<term>** — …` shap
 §5-6 mandates (it also tolerates a `: ` separator and caps long heads).
 `python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
 
+**Catalog cross-link.** The same script maintains a bidirectional link between
+`analysis/catalogs/models.md` and this index. A catalog bullet whose arXiv id
+has an `analysis/<id>/` folder gets a `deep--dive-📄_analysis` badge (purple
+`6f42c1`) spliced in **right after its arXiv badge**, pointing at
+`../<id>/analysis.md`; the matching index row gets a `catalog-📚_models` badge
+(same purple) appended to its `Links` cell, pointing at `catalogs/models.md`.
+The injection is idempotent — any prior `deep-dive` badge is stripped before
+re-adding, so a removed folder drops its badge on the next run. Only the badges
+are automated: catalog entry add/remove and the catalog's hand-owned `Updated`
+badge are never touched by the script.
+
 ### 5-8. Readability / narrative layer
 
 A paper analysis is *read* (unlike a scouting report, which is *scanned* —

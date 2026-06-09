@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the auto-maintained analyses index in analysis/README.md.
+"""Regenerate the auto-maintained analysis surfaces (index + catalog cross-links).
 
 Scans every per-paper subdirectory `analysis/<id>/` and reads metadata
 from its `analysis.md`, checks for foundry-specific impl artifacts, and
@@ -8,6 +8,12 @@ rewrites the block between fixed markers in `analysis/README.md`.
 The generated block is one table per primary Pillar (primary = first `관련
 Pillar` entry), so the human-facing layout stays scannable as the corpus grows;
 a single page still supports Ctrl-F.
+
+It also maintains the bidirectional cross-link between the hand-curated
+`analysis/catalogs/models.md` and the deep-dive corpus: every catalog bullet
+whose arXiv id has an `analysis/<id>/` folder gets a `deep-dive` badge, and the
+matching index row gets a `catalog` badge back. Only the link badges are
+automated — catalog entry add/remove and its `Updated` badge stay hand-owned.
 
 Idempotent: re-running with no underlying change produces no diff.
 Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml`.
@@ -28,6 +34,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
 INDEX = ANALYSIS_DIR / "README.md"
+CATALOG = ANALYSIS_DIR / "catalogs" / "models.md"
 
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
@@ -332,6 +339,78 @@ def link_badges(links: list[tuple[str, str]], arxiv_id: str) -> str:
     return " ".join(out)
 
 
+# ── Catalog cross-link (analysis/catalogs/models.md ↔ index) ─────────────
+# Both directions share one purple badge color, distinct from the link/pillar/
+# keyword palettes, so a cross-link reads as "the same paper, the other surface".
+CROSSLINK_COLOR = "6f42c1"  # 보라 purple
+# Index → catalog: appended to a row's Links cell when the paper is curated.
+CATALOG_BADGE = (
+    f"[![catalog](https://img.shields.io/badge/catalog-📚_models-{CROSSLINK_COLOR}.svg)]"
+    "(catalogs/models.md)"
+)
+# Catalog → index: injected into a models.md bullet after its arXiv badge.
+# Matches any prior injection (id-agnostic) so re-runs strip-then-readd cleanly.
+DEEP_DIVE_RE = re.compile(r"\s*\[!\[deep-dive\][^\)]*\)\]\([^)]*\)")
+# The arXiv badge in a models.md bullet — we splice the deep-dive badge in right
+# after it (id always present when there is one), keeping trailing status emoji last.
+CATALOG_ARXIV_BADGE_RE = re.compile(
+    r"\[!\[arXiv\]\(https://img\.shields\.io/badge/arXiv-(\d{4}\.\d{4,5})-b31b1b\.svg\)\]\([^)]*\)"
+)
+
+
+def _deep_dive_badge(stem: str) -> str:
+    """Deep-dive badge for a models.md bullet → `../<id>/analysis.md` (catalog is one level down)."""
+    return (
+        f" [![deep-dive](https://img.shields.io/badge/deep--dive-📄_analysis-{CROSSLINK_COLOR}.svg)]"
+        f"(../{stem}/analysis.md)"
+    )
+
+
+def load_catalog_ids() -> set[str]:
+    """Return the set of arXiv ids curated in analysis/catalogs/models.md.
+
+    Used for the reverse badge: an index row whose paper is in this set gets a
+    `catalog` badge. Missing catalog file → empty set (reverse link disabled).
+    """
+    try:
+        text = CATALOG.read_text(encoding="utf-8")
+    except OSError:
+        return set()
+    return set(ARXIV_ID_RE.findall(text))
+
+
+def enrich_catalog(analysis_ids: set[str]) -> bool:
+    """Inject/refresh deep-dive badges in models.md; return True if changed.
+
+    For every bullet carrying an arXiv badge whose id has an `analysis/<id>/`
+    folder, splice a deep-dive badge right after the arXiv badge; strip any
+    existing deep-dive badge first so the op is idempotent and a deleted folder
+    drops its badge. Lines without an arXiv badge (id-less entries) are left
+    untouched. The hand-owned `Updated` badge is never modified.
+    """
+    try:
+        original = CATALOG.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    out_lines: list[str] = []
+    for line in original.splitlines():
+        stripped = DEEP_DIVE_RE.sub("", line)
+        m = CATALOG_ARXIV_BADGE_RE.search(stripped)
+        if m and m.group(1) in analysis_ids:
+            insert_at = m.end()
+            stripped = stripped[:insert_at] + _deep_dive_badge(m.group(1)) + stripped[insert_at:]
+        out_lines.append(stripped)
+
+    updated = "\n".join(out_lines)
+    if original.endswith("\n"):
+        updated += "\n"
+    if updated == original:
+        return False
+    CATALOG.write_text(updated, encoding="utf-8")
+    return True
+
+
 def sort_key(row: dict) -> tuple[str, str]:
     # Refreshed date descending → tied by arXiv id descending.
     # Use string sort: ISO dates and arXiv ids both order lexically.
@@ -344,8 +423,12 @@ def primary_pillar(row: dict) -> str:
     return row["pillars"][0] if row["pillars"] else UNCLASSIFIED
 
 
-def build_block(rows: list[dict]) -> str:
-    """Compose the generated block: one table per primary Pillar."""
+def build_block(rows: list[dict], catalog_ids: set[str]) -> str:
+    """Compose the generated block: one table per primary Pillar.
+
+    A row whose arXiv id is curated in `catalog_ids` gets a `catalog` badge
+    appended to its Links cell (the reverse half of the catalog cross-link).
+    """
     if not rows:
         return (
             "## 미분류\n\n"
@@ -377,8 +460,11 @@ def build_block(rows: list[dict]) -> str:
         out.append(header)
         for i, row in enumerate(bucket, 1):
             link = f"[`{row['stem']}/analysis.md`]({row['stem']}/analysis.md)"
+            links_cell = link_badges(row["links"], row["arxiv_id"])
+            if row["arxiv_id"] in catalog_ids:
+                links_cell += f" {CATALOG_BADGE}"
             out.append(
-                f"| {i} | {link} | {link_badges(row['links'], row['arxiv_id'])} "
+                f"| {i} | {link} | {links_cell} "
                 f"| {row['title']} | {pillar_badges(row['pillars'])} "
                 f"| {keyword_badges(row['keywords'])} "
                 f"| {row['refreshed']} | {row['impl']} |\n"
@@ -409,17 +495,26 @@ def rewrite_index(block: str) -> bool:
 
 
 def main() -> int:
+    analyses = find_analyses()
+    analysis_ids = {p.name for p in analyses}
+    catalog_ids = load_catalog_ids()
+
     rows: list[dict] = []
-    for paper_dir in find_analyses():
+    for paper_dir in analyses:
         meta = extract_meta(paper_dir)
         meta["stem"] = paper_dir.name
         meta["keywords"] = extract_keywords(paper_dir)
         meta["impl"] = impl_state(paper_dir.name)
         rows.append(meta)
 
-    block = build_block(rows)
-    changed = rewrite_index(block)
-    print(f"refresh-analysis-index: {len(rows)} analyses · {'updated' if changed else 'no change'}")
+    block = build_block(rows, catalog_ids)
+    index_changed = rewrite_index(block)
+    catalog_changed = enrich_catalog(analysis_ids)
+    print(
+        f"refresh-analysis-index: {len(rows)} analyses · "
+        f"README {'updated' if index_changed else 'no change'} · "
+        f"models.md {'updated' if catalog_changed else 'no change'}"
+    )
     return 0
 
 
