@@ -106,7 +106,9 @@ Hard rules:
    `deps`. Don't invent new types. (The bare `scout:` / `analysis:` prefixes
    are *generated routine commits*, not human commits — do not imitate them when
    authoring code/doc changes. Their canonical formats are:
-   `scout: P{N} report YYYY-MM-DD` and `analysis: add <arxiv-id> deep-dive + design`.)
+   `scout: P{N} report YYYY-MM-DD` and `analysis: add <arxiv-id> deep-dive + design`
+   for a first-time analysis (`update` instead of `add` when re-running
+   `/analyze-paper` on an `<arxiv-id>` that already had a folder).)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
    `scout`/`scouting`, `analysis`, `catalogs`, `context`,
    `prompts`, `config`, `style`, `docs`, `brand`, `CLAUDE.md`. Omit the scope
