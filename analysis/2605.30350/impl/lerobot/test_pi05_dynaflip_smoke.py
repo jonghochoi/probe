@@ -14,16 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""CPU-only, weight-free smoke test for the PI05 + DynaFLIP PVI copy-branch
+"""CPU-only, weight-free smoke test for the PI05 + DynaFLIP injection
 (maps analysis/2605.30350/design.md onto the lerobot pi05 base).
 
-Covers the pure / structural pieces only — the zero-init projection convention,
-config defaults / validation / registration, the subclass seam overrides, and
-factory wiring. The copy-branch forward (a full action-expert pass over the
-aux + action tokens) and the per-layer injection are NOT exercised: they need
+Covers both injection modes' pure / structural pieces — the zero-init
+projection convention (copy_branch) and the zero-init gated cross-attention
+(bridge_attention), config defaults / validation / registration, the subclass
+seam overrides, and factory wiring. The full expert forward (copy-branch pass
+or per-layer cross-attention over the action stream) is NOT exercised: it needs
 the PaliGemma / gemma weights and the heavy model build, per the foundry §G
 contract. Numerical behavior-preservation (zero-init -> identity) is guaranteed
-by construction and asserted here at the module level via ``zero_init_linear``.
+by construction and asserted here at the module level.
 """
 
 import pytest
@@ -34,6 +35,7 @@ from lerobot.policies.pi05.configuration_pi05 import PI05Config
 from lerobot.policies.pi05.configuration_pi05_dynaflip import PI05DynaflipConfig
 from lerobot.policies.pi05.modeling_pi05 import PI05Policy, PI05Pytorch
 from lerobot.policies.pi05.modeling_pi05_dynaflip import (
+    DynaflipBridgeInjector,
     PI05DynaflipPolicy,
     PI05DynaflipPytorch,
     zero_init_linear,
@@ -57,19 +59,58 @@ def test_zero_init_linear_learns_after_update():
     assert torch.count_nonzero(lin(torch.randn(4, 8))) > 0
 
 
+def test_bridge_injector_zero_gate_is_identity():
+    # bridge_attention: g init 0 -> tanh(g)=0 -> residual EXACTLY zero, even
+    # though the cross-attention weights are randomly initialized. This is the
+    # VLA-Adapter zero-init-gate behavior-preservation property.
+    inj = DynaflipBridgeInjector(width=16, num_layers=3, num_heads=4)
+    query = torch.randn(2, 5, 16)  # (B, chunk, width)
+    kv = torch.randn(2, 7, 16)  # (B, L, width)
+    res = inj(layer_idx=1, query=query, kv=kv)
+    assert res.shape == (2, 5, 16)
+    assert torch.count_nonzero(res) == 0
+
+
+def test_bridge_injector_learns_after_gate_update():
+    # Once the gate leaves zero, the cross-attention residual is a live path.
+    inj = DynaflipBridgeInjector(width=16, num_layers=3, num_heads=4)
+    with torch.no_grad():
+        inj.gate.add_(1.0)
+    res = inj(layer_idx=0, query=torch.randn(2, 5, 16), kv=torch.randn(2, 7, 16))
+    assert torch.count_nonzero(res) > 0
+
+
 def test_config_defaults_reproduce_base_behavior():
     cfg = PI05DynaflipConfig()
     # Default OFF -> identical to vanilla PI05.
     assert cfg.inject_dynaflip is False
+    # Default mode is the faithful PVI copy-branch (preserves prior behavior).
+    assert cfg.dynaflip_inject_mode == "copy_branch"
     # Patch-token feature dim (DINOv2-B token width), not the pooled 1536.
     assert cfg.dynaflip_feature_dim == 768
     assert cfg.dynaflip_feature_key == "observation.dynaflip_feature"
     assert isinstance(cfg, PI05Config)
 
 
+def test_config_accepts_bridge_attention_mode():
+    cfg = PI05DynaflipConfig(dynaflip_inject_mode="bridge_attention", dynaflip_num_heads=8)
+    assert cfg.dynaflip_inject_mode == "bridge_attention"
+    assert cfg.dynaflip_gate_per_layer is True
+
+
 def test_config_rejects_out_of_range_values():
     with pytest.raises(ValueError):
         PI05DynaflipConfig(dynaflip_feature_dim=0)
+    with pytest.raises(ValueError):
+        PI05DynaflipConfig(dynaflip_inject_mode="not_a_mode")
+    with pytest.raises(ValueError):
+        PI05DynaflipConfig(dynaflip_num_heads=0)
+
+
+def test_config_action_query_reserved_not_implemented():
+    # CA2 (ActionQuery + proprio) is reserved but not wired in the first cut.
+    with pytest.raises(NotImplementedError):
+        PI05DynaflipConfig(dynaflip_use_action_query=True)
 
 
 def test_registered_type_name():

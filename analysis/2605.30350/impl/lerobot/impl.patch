@@ -21,10 +21,10 @@ index 4f9a9de..e115179 100644
 +]
 diff --git a/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
 new file mode 100644
-index 0000000..f6a0342
+index 0000000..27df5f7
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,90 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -51,30 +51,33 @@ index 0000000..f6a0342
 +@PreTrainedConfig.register_subclass("pi05_dynaflip")
 +@dataclass
 +class PI05DynaflipConfig(PI05Config):
-+    """PI0.5 + DynaFLIP frozen-injection (PVI) variant.
++    """PI0.5 + DynaFLIP frozen-injection variant (two injection modes).
 +
-+    Faithful mapping of DynaFLIP's VLA integration (arXiv:2605.30350 §3.4 /
-+    appendix), which adopts plug-in visual injection (PVI, arXiv:2603.12772):
++    A frozen auxiliary visual encoder (DynaFLIP, arXiv:2605.30350) emits
++    patch-token sequences that are injected into the action expert's hidden
++    space. Two ``dynaflip_inject_mode`` options:
 +
-+      * an auxiliary visual encoder (DynaFLIP, frozen) emits **patch-token
-+        sequences** per camera view;
-+      * a zero-initialized **projection** maps those tokens to the action
-+        expert's hidden width;
-+      * a **trainable copy of the action expert** (initialized from the
-+        pretrained expert, conditioned on the projected aux tokens) produces
-+        per-layer hidden states;
-+      * **zero-initialized per-layer injectors** add the copy-branch hidden as
-+        a residual into the frozen main action expert at every layer.
++    * ``"copy_branch"`` (default) — faithful PVI (arXiv:2603.12772): a
++      zero-init projection feeds a **trainable copy of the action expert**
++      (init from the pretrained expert) whose per-layer hidden is added as a
++      **zero-init per-layer residual** into the frozen main expert.
++    * ``"bridge_attention"`` — VLA-Adapter (arXiv:2509.09372) style: the action
++      tokens **cross-attend** to the projected DynaFLIP patch tokens, gated by
++      a learnable ``tanh(g)`` with ``g`` zero-initialized (the "raw feature"
++      CA1 path of Bridge Attention). Lighter — no expert copy. DynaFLIP, being
++      a dynamics-pretrained DINOv2, is exactly VLA-Adapter's action-aware
++      "raw feature" condition.
 +
 +    Frozen: SigLIP / VLM / LLM / main action expert / aux encoder. Trained:
-+    projection + copy-branch + per-layer injectors. Zero-init projection &
-+    injectors make the policy identical to base pi0.5 at init; the visual
-+    signal is learned in. Defaults reproduce vanilla PI05 (``inject_dynaflip
-+    =False``).
++    the injection module only. Both modes are **zero-init -> identity at init**,
++    so the policy equals base pi0.5 until the visual signal is learned in.
++    Defaults reproduce vanilla PI05 (``inject_dynaflip=False``).
 +    """
 +
 +    # Master switch. False -> identical to PI05.
 +    inject_dynaflip: bool = False
++    # Injection mechanism: "copy_branch" (PVI) | "bridge_attention" (VLA-Adapter).
++    dynaflip_inject_mode: str = "copy_branch"
 +    # Per-token feature dim of the auxiliary DynaFLIP patch tokens.
 +    # DINOv2-Base patch-token width = 768. See analysis/2605.30350/design.md.
 +    dynaflip_feature_dim: int = 768
@@ -82,11 +85,35 @@ index 0000000..f6a0342
 +    # shape (B, L, dynaflip_feature_dim) with L = views * patches.
 +    dynaflip_feature_key: str = "observation.dynaflip_feature"
 +
++    # --- bridge_attention mode only ---
++    # Cross-attention heads for the Bridge injector.
++    dynaflip_num_heads: int = 8
++    # One learnable tanh gate per expert layer (vs a single shared gate).
++    dynaflip_gate_per_layer: bool = True
++    # Optional VLA-Adapter CA2 (ActionQuery + proprio). Reserved; not yet wired.
++    dynaflip_use_action_query: bool = False
++    dynaflip_action_query_tokens: int = 64
++
 +    def __post_init__(self):
 +        super().__post_init__()
 +        if self.dynaflip_feature_dim <= 0:
 +            raise ValueError(
 +                f"dynaflip_feature_dim must be positive, got {self.dynaflip_feature_dim}"
++            )
++        valid_modes = ("copy_branch", "bridge_attention")
++        if self.dynaflip_inject_mode not in valid_modes:
++            raise ValueError(
++                f"dynaflip_inject_mode must be one of {valid_modes}, "
++                f"got {self.dynaflip_inject_mode!r}"
++            )
++        if self.dynaflip_num_heads <= 0:
++            raise ValueError(
++                f"dynaflip_num_heads must be positive, got {self.dynaflip_num_heads}"
++            )
++        if self.dynaflip_use_action_query:
++            raise NotImplementedError(
++                "dynaflip_use_action_query (VLA-Adapter CA2) is reserved but not "
++                "yet implemented; leave it False for the bridge_attention first cut."
 +            )
 diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
 index bdaf01f..f2509e4 100644
@@ -142,10 +169,10 @@ index bdaf01f..f2509e4 100644
          cls: builtins.type[T],
 diff --git a/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
 new file mode 100644
-index 0000000..c868759
+index 0000000..be7165c
 --- /dev/null
 +++ b/vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py
-@@ -0,0 +1,230 @@
+@@ -0,0 +1,309 @@
 +#!/usr/bin/env python
 +
 +# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
@@ -162,36 +189,41 @@ index 0000000..c868759
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
 +
-+"""PI0.5 + DynaFLIP frozen-injection (PVI) variant — faithful copy-branch.
++"""PI0.5 + DynaFLIP frozen-injection variant — two injection modes.
 +
-+Maps DynaFLIP's VLA integration (arXiv:2605.30350 §3.4 / appendix) onto the
-+lerobot pi05 base, following plug-in visual injection (PVI, arXiv:2603.12772):
++A frozen DynaFLIP encoder (arXiv:2605.30350) emits patch tokens that condition
++the action expert. They arrive precomputed in the batch under
++``config.dynaflip_feature_key`` (shape ``(B, L, dynaflip_feature_dim)``).
 +
-+  * **Auxiliary encoder** — DynaFLIP (frozen) emits patch-token sequences; here
-+    they arrive precomputed in the batch under ``config.dynaflip_feature_key``,
-+    shape ``(B, L, dynaflip_feature_dim)``.
-+  * **Projection** — a zero-initialized linear maps aux tokens to the action
-+    expert hidden width.
-+  * **Copy-branch** — a trainable copy of the action expert (``gemma_expert``),
-+    initialized from the pretrained expert, runs over ``[aux_tokens ; action
-+    tokens]`` so the action positions attend to the aux context; its per-layer
-+    hidden states (at the action positions) are captured.
-+  * **Per-layer injectors** — one zero-initialized linear per expert layer adds
-+    the copy-branch hidden as a residual into the frozen main expert at every
-+    layer: ``h_i_main += Z_i(h_i_copy)`` (PVI Eq. for the residual pathway).
++``dynaflip_inject_mode``:
 +
-+Frozen: SigLIP / VLM / LLM / main expert / aux encoder. Trained: projection +
-+copy-branch + per-layer injectors. The zero-init projection & injectors make
-+the policy identical to base pi0.5 at init; the visual signal is learned in.
++* ``"copy_branch"`` — faithful PVI (arXiv:2603.12772). A zero-init projection
++  feeds a **trainable copy of the action expert** (init from the pretrained
++  expert) run over ``[aux ; action]``; its per-layer hidden (action positions)
++  is added into the frozen main expert via **zero-init per-layer residuals**
++  ``h_i += Z_i(h_i_copy)``.
 +
-+Two injection sites are needed because the base routes the expert differently
++* ``"bridge_attention"`` — VLA-Adapter (arXiv:2509.09372) style. The action
++  tokens **cross-attend** to the projected DynaFLIP patch tokens; the residual
++  is scaled by ``tanh(g)`` with ``g`` zero-initialized (the CA1 "raw feature"
++  path of Bridge Attention). Lighter — no expert copy. DynaFLIP, a
++  dynamics-pretrained DINOv2, is exactly VLA-Adapter's action-aware "raw
++  feature" condition. ``g=0 -> tanh(g)=0 -> identity at init``, the same
++  zero-init principle as the copy-branch in cross-attention form.
++
++Frozen: SigLIP / VLM / LLM / main expert / aux encoder. Trained: the injection
++module only. Both modes are identity at init, so the policy equals base pi0.5
++until the visual signal is learned in.
++
++Two injection sites are wired because the base routes the expert differently
 +per path: the **training** joint forward runs a manual per-layer loop (injected
 +via the ``expert_layer_injector`` callback seam), while the **inference**
 +``denoise_step`` runs the expert through HF's fused ``gemma_expert.model.forward``
 +(injected via forward hooks on its layers). Each path triggers exactly one
 +mechanism, so there is no double-injection. See impl.md §🚧 for the validation
 +boundary — the weight-free smoke test covers structure / zero-init only; the
-+copy-branch forward (attention, masks) needs the weighted runtime.
++copy-branch / cross-attention numerics over the full expert need the weighted
++runtime.
 +
 +All DynaFLIP *pretraining* (simplex alignment, TCN, actor losses, 3D-flow
 +encoder) is out-of-base-scope.
@@ -221,42 +253,84 @@ index 0000000..c868759
 +    return lin
 +
 +
++class DynaflipBridgeInjector(nn.Module):
++    """VLA-Adapter-style gated cross-attention injection (Bridge Attention CA1).
++
++    Per expert layer, the action tokens (query) cross-attend to the projected
++    DynaFLIP patch tokens (key/value); the attention output is scaled by a
++    learnable ``tanh(g)`` with ``g`` zero-initialized. At init ``tanh(0)=0`` so
++    the residual is exactly zero (identity), and the injection degree is
++    learned — the same zero-init principle as the PVI copy-branch.
++    """
++
++    def __init__(self, width: int, num_layers: int, num_heads: int, gate_per_layer: bool = True):
++        super().__init__()
++        self.num_layers = num_layers
++        self.gate_per_layer = gate_per_layer
++        self.attn = nn.ModuleList(
++            [nn.MultiheadAttention(width, num_heads, batch_first=True) for _ in range(num_layers)]
++        )
++        # g init 0 -> tanh(g) = 0 -> zero residual at init.
++        self.gate = nn.Parameter(torch.zeros(num_layers if gate_per_layer else 1))
++
++    def forward(self, layer_idx: int, query: Tensor, kv: Tensor) -> Tensor:
++        # query: (B, chunk, width) action tokens; kv: (B, L, width) dyna tokens.
++        attn_out, _ = self.attn[layer_idx](query, kv, kv, need_weights=False)
++        g = self.gate[layer_idx if self.gate_per_layer else 0]
++        return torch.tanh(g) * attn_out.to(query.dtype)
++
++
 +class PI05DynaflipPytorch(PI05Pytorch):
-+    """PI05 core model with a faithful DynaFLIP PVI copy-branch."""
++    """PI05 core model with a DynaFLIP injection (copy_branch or bridge_attention)."""
 +
 +    def __init__(self, config: PI05DynaflipConfig, rtc_processor=None):
 +        super().__init__(config, rtc_processor=rtc_processor)
 +        self._aux_tokens = None
-+        self._copy_hidden = None  # per main-layer copy hidden (action positions)
-+        self._copy_capture = None  # scratch filled by copy-branch capture hooks
++        self._mode = None
++        # copy_branch scratch
++        self._copy_hidden = None
++        self._copy_capture = None
 +        self._copy_synced = False
++        # bridge_attention scratch
++        self._dyna_proj = None
 +
-+        if config.inject_dynaflip:
-+            pwe = self.paligemma_with_expert
-+            expert_width = get_gemma_config(config.action_expert_variant).width
-+            num_layers = pwe.gemma_expert.config.num_hidden_layers
-+
-+            # Zero-init projection: aux patch tokens -> expert hidden width.
-+            self.aux_proj = zero_init_linear(config.dynaflip_feature_dim, expert_width)
-+
-+            # Trainable copy of the action expert (synced from the pretrained
-+            # expert lazily on first forward, once weights are loaded).
-+            self.copy_expert = copy.deepcopy(pwe.gemma_expert)
-+            for p in self.copy_expert.parameters():
-+                p.requires_grad = True
-+
-+            # Zero-init per-layer injectors Z_i.
-+            self.inject_layers = nn.ModuleList(
-+                [zero_init_linear(expert_width, expert_width) for _ in range(num_layers)]
-+            )
-+
-+            # Wire the training-path callback and the inference-path hooks.
-+            pwe.expert_layer_injector = self._inject_expert_layer
-+            self._register_hooks()
-+        else:
++        if not config.inject_dynaflip:
 +            self.aux_proj = None
 +            self.copy_expert = None
 +            self.inject_layers = None
++            self.bridge_injector = None
++            return
++
++        self._mode = config.dynaflip_inject_mode
++        pwe = self.paligemma_with_expert
++        expert_width = get_gemma_config(config.action_expert_variant).width
++        num_layers = pwe.gemma_expert.config.num_hidden_layers
++
++        if self._mode == "copy_branch":
++            # Zero-init projection feeds the copy-branch; identity at init.
++            self.aux_proj = zero_init_linear(config.dynaflip_feature_dim, expert_width)
++            self.copy_expert = copy.deepcopy(pwe.gemma_expert)
++            for p in self.copy_expert.parameters():
++                p.requires_grad = True
++            self.inject_layers = nn.ModuleList(
++                [zero_init_linear(expert_width, expert_width) for _ in range(num_layers)]
++            )
++            self.bridge_injector = None
++            self._register_copy_capture_hooks()
++        else:  # bridge_attention
++            # Normal projection (the gate provides the zero-init identity, so the
++            # KV should carry real dyna info rather than starting at zero).
++            self.aux_proj = nn.Linear(config.dynaflip_feature_dim, expert_width)
++            self.copy_expert = None
++            self.inject_layers = None
++            self.bridge_injector = DynaflipBridgeInjector(
++                expert_width, num_layers, config.dynaflip_num_heads, config.dynaflip_gate_per_layer
++            )
++
++        # Wire the training-path callback and the inference-path injection hooks
++        # (shared across both modes; the per-layer op dispatches on mode).
++        pwe.expert_layer_injector = self._inject_expert_layer
++        self._register_main_inject_hooks()
 +
 +    # -- public API ---------------------------------------------------------
 +
@@ -264,25 +338,28 @@ index 0000000..c868759
 +        """Stash the precomputed aux patch tokens for the next forward."""
 +        self._aux_tokens = feature
 +        self._copy_hidden = None
++        self._dyna_proj = None
 +
 +    # -- internals ----------------------------------------------------------
 +
 +    def _injecting(self) -> bool:
-+        return self.copy_expert is not None and self._aux_tokens is not None
++        return self._mode is not None and self._aux_tokens is not None
 +
-+    def _maybe_sync_copy(self) -> None:
-+        # Initialize the copy-branch from the (now loaded) pretrained expert.
-+        if self.copy_expert is not None and not self._copy_synced:
-+            self.copy_expert.load_state_dict(
-+                self.paligemma_with_expert.gemma_expert.state_dict()
-+            )
-+            self._copy_synced = True
++    def _aux_as_tokens(self) -> Tensor:
++        aux = self._aux_tokens
++        if aux.dim() == 2:
++            aux = aux[:, None, :]  # (B, dim) -> (B, 1, dim)
++        return aux
 +
-+    def _register_hooks(self) -> None:
-+        # Capture per-layer hidden of the copy-branch.
++    # ---- hooks -------------------------------------------------------------
++
++    def _register_copy_capture_hooks(self) -> None:
 +        for i, layer in enumerate(self.copy_expert.model.layers):
 +            layer.register_forward_hook(self._make_capture_hook(i))
-+        # Inject into the main expert (fires only in the fused inference path).
++
++    def _register_main_inject_hooks(self) -> None:
++        # Fire only in the fused inference path (denoise_step); the training
++        # joint loop uses the expert_layer_injector callback instead.
 +        main_layers = self.paligemma_with_expert.gemma_expert.model.layers
 +        for i, layer in enumerate(main_layers):
 +            layer.register_forward_hook(self._make_inject_hook(i))
@@ -296,33 +373,57 @@ index 0000000..c868759
 +
 +    def _make_inject_hook(self, i: int):
 +        def hook(_module, _inp, out):
-+            if self._copy_hidden is None or self._copy_hidden[i] is None:
++            residual = self._layer_residual(i, out[0] if isinstance(out, tuple) else out)
++            if residual is None:
 +                return out
 +            h = out[0] if isinstance(out, tuple) else out
-+            ch = self._copy_hidden[i]
-+            add = self.inject_layers[i](ch).to(h.dtype)
-+            chunk = ch.shape[1]
++            chunk = residual.shape[1]
 +            h = h.clone()
-+            h[:, -chunk:] = h[:, -chunk:] + add
++            h[:, -chunk:] = h[:, -chunk:] + residual
 +            return (h, *out[1:]) if isinstance(out, tuple) else h
 +
 +        return hook
 +
++    # ---- per-layer residual (mode dispatch, shared by both paths) ----------
++
++    def _layer_residual(self, layer_idx: int, layer_hidden: Tensor) -> Tensor | None:
++        """Return the residual to add at expert layer ``layer_idx`` (action
++        positions), or None when not injecting. ``layer_hidden`` is the action
++        stream so cross-attention can use it as the query."""
++        if self._mode == "copy_branch":
++            if self._copy_hidden is None or self._copy_hidden[layer_idx] is None:
++                return None
++            ch = self._copy_hidden[layer_idx]
++            return self.inject_layers[layer_idx](ch).to(layer_hidden.dtype)
++        if self._mode == "bridge_attention":
++            if self._dyna_proj is None:
++                return None
++            chunk = layer_hidden.shape[1]
++            query = layer_hidden[:, -chunk:]
++            return self.bridge_injector(layer_idx, query, self._dyna_proj)
++        return None
++
 +    def _inject_expert_layer(self, layer_idx: int, suffix_hidden: Tensor) -> Tensor:
-+        # Training-path per-layer residual (manual joint loop). suffix_hidden is
++        # Training-path per-layer injection (manual joint loop). suffix_hidden is
 +        # the expert stream, sequence == chunk (action tokens).
-+        if self._copy_hidden is None or self._copy_hidden[layer_idx] is None:
++        residual = self._layer_residual(layer_idx, suffix_hidden)
++        if residual is None:
 +            return suffix_hidden
-+        ch = self._copy_hidden[layer_idx]
-+        add = self.inject_layers[layer_idx](ch).to(suffix_hidden.dtype)
-+        return suffix_hidden + add
++        return suffix_hidden + residual
++
++    # ---- copy_branch: compute per-layer copy hidden ------------------------
++
++    def _maybe_sync_copy(self) -> None:
++        # Initialize the copy-branch from the (now loaded) pretrained expert.
++        if self.copy_expert is not None and not self._copy_synced:
++            self.copy_expert.load_state_dict(
++                self.paligemma_with_expert.gemma_expert.state_dict()
++            )
++            self._copy_synced = True
 +
 +    def _compute_copy_hidden(self, suffix_embs: Tensor, adarms_cond: Tensor) -> None:
 +        self._maybe_sync_copy()
-+        aux = self._aux_tokens
-+        if aux.dim() == 2:
-+            aux = aux[:, None, :]  # (B, dim) -> (B, 1, dim)
-+        aux_emb = self.aux_proj(aux.to(suffix_embs.dtype))  # (B, L, width)
++        aux_emb = self.aux_proj(self._aux_as_tokens().to(suffix_embs.dtype))  # (B, L, width)
 +
 +        full = torch.cat([aux_emb, suffix_embs], dim=1)
 +        bsize, total_len, _ = full.shape
@@ -352,15 +453,20 @@ index 0000000..c868759
 +            h[:, -chunk:] if h is not None else None for h in self._copy_capture
 +        ]
 +
++    # ---- shared entry: prepare conditions in embed_suffix ------------------
++
 +    def embed_suffix(self, noisy_actions, timestep):
 +        embs, pad_masks, att_masks, adarms_cond = super().embed_suffix(noisy_actions, timestep)
 +        if self._injecting():
-+            self._compute_copy_hidden(embs, adarms_cond)
++            if self._mode == "copy_branch":
++                self._compute_copy_hidden(embs, adarms_cond)
++            else:  # bridge_attention: project + stash dyna tokens (no copy forward)
++                self._dyna_proj = self.aux_proj(self._aux_as_tokens().to(embs.dtype))
 +        return embs, pad_masks, att_masks, adarms_cond
 +
 +
 +class PI05DynaflipPolicy(PI05Policy):
-+    """PI05 policy that feeds the batch DynaFLIP tokens to the copy-branch."""
++    """PI05 policy that feeds the batch DynaFLIP tokens to the injection module."""
 +
 +    config_class = PI05DynaflipConfig
 +    name = "pi05_dynaflip"

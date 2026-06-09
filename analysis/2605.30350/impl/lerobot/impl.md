@@ -18,10 +18,11 @@
 | Foundry | `lerobot` |
 | Foundry pinned commit | `999e77ad7bc30774cccca58bd29f732a90600931` (`vendor/lerobot/README.md` 와 일치) |
 | 베이스 모델 / 코드 좌표 | `pi05` (`vendor/lerobot/policies/pi05/`) |
-| 주입 메커니즘 근거 | PVI — [arXiv:2603.12772](https://arxiv.org/abs/2603.12772) (DynaFLIP §3.4 가 인용한 [60]) |
+| 주입 메커니즘 근거 | PVI — [arXiv:2603.12772](https://arxiv.org/abs/2603.12772) (DynaFLIP §3.4 가 인용한 [60]); bridge 모드는 VLA-Adapter [arXiv:2509.09372] |
+| 주입 모드 | `dynaflip_inject_mode`: `copy_branch`(기본, PVI) / `bridge_attention`(VLA-Adapter식 gated cross-attn) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 패치 파일 | [`./impl.patch`](./impl.patch) — `git apply --check` 통과 |
-| 실행 테스트 | [`./test_pi05_dynaflip_smoke.py`](./test_pi05_dynaflip_smoke.py) — 9 passed |
+| 실행 테스트 | [`./test_pi05_dynaflip_smoke.py`](./test_pi05_dynaflip_smoke.py) — 13 passed |
 | 가이드 생성일 | 2026-06-04 |
 
 ---
@@ -35,6 +36,15 @@ feature 를 주입하는 것입니다. §3.4 원문이 주입 지점을 명시�
 projects them into the **hidden feature space of the diffusion transformer** of π0.5"*. 즉
 주입 표적은 **VLM prefix 가 아니라 액션 전문가(diffusion transformer)의 hidden 공간**입니다.
 `pi05` 의 액션 전문가(`gemma_expert`)가 정확히 그 대상입니다.
+
+**두 주입 모드 (`dynaflip_inject_mode`).** 같은 표적(액션 전문가 hidden)·같은 seam 위에서
+주입 *형태*만 다른 두 모드를 제공합니다. 둘 다 zero-init→identity 에서 출발해 베이스를
+보존합니다. 비교·연결 고리는 [`analysis/catalogs/vla-action-bridging.md`](../../../catalogs/vla-action-bridging.md).
+
+- **`copy_branch`** (기본) — 아래 PVI copy-branch.
+- **`bridge_attention`** — VLA-Adapter([arXiv:2509.09372]) Bridge Attention 의 CA1(raw-feature)
+  경로: action 토큰이 DynaFLIP 패치 토큰에 cross-attend 하고 `tanh(g)`(g=0 init) 로 게이팅.
+  copy-branch 보다 가볍다(전문가 복제 없음). 아래 §🔀.
 
 **주입 구조 — PVI copy-branch ([60] + DynaFLIP appendix 충실 매핑).** DynaFLIP 의 VLA 통합은
 [60] 의 4 요소를 그대로 따릅니다:
@@ -90,8 +100,8 @@ resolver `_get_policy_cls_from_policy_name` (`factory.py:564`) 가 자동 처리
 | 2 | `vendor/lerobot/policies/pi05/modeling_pi05.py` `PaliGemmaWithExpertModel.forward` joint loop | 수정 (seam) | Design §🔌 / [60] | layer 마다 `compute_layer_complete` 직후 콜백 적용(None 이면 무변화) — 학습 경로 주입 site |
 | 3 | `vendor/lerobot/policies/pi05/modeling_pi05.py` `PI05Policy.__init__` | 수정 (seam) | foundry §C-2 | 모델 생성을 `self._build_model()` 팩토리로 추출 |
 | 4 | `vendor/lerobot/policies/pi05/modeling_pi05.py` `PI05Policy._build_model` | 추가 (seam) | foundry §C-2 | 기본 구현(`PI05Pytorch` 그대로 반환) |
-| 5 | `vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py` | 신규 추가 | Design §📊, §🧮 | `PI05DynaflipConfig` — `inject_dynaflip`(기본 False)·`dynaflip_feature_dim=768`(패치 토큰 폭)·`dynaflip_feature_key` |
-| 6 | `vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py` | 신규 추가 | Design §🔌 / analysis §3.4 / [60] | `zero_init_linear` + `PI05DynaflipPytorch`(`aux_proj`·`copy_expert`·`inject_layers`, `embed_suffix`/`_inject_expert_layer` override, 추론 forward hook) + `PI05DynaflipPolicy`(`_build_model` override, batch feature stash) |
+| 5 | `vendor/lerobot/policies/pi05/configuration_pi05_dynaflip.py` | 신규 추가 | Design §📊, §🧮 | `PI05DynaflipConfig` — `inject_dynaflip`(기본 False)·`dynaflip_inject_mode`(기본 `copy_branch`)·`dynaflip_feature_dim=768`·`dynaflip_feature_key`·(bridge) `dynaflip_num_heads`·`dynaflip_gate_per_layer` |
+| 6 | `vendor/lerobot/policies/pi05/modeling_pi05_dynaflip.py` | 신규 추가 | Design §🔌 / analysis §3.4 / [60] / [2509.09372] | `zero_init_linear` + `DynaflipBridgeInjector`(gated cross-attn) + `PI05DynaflipPytorch`(`aux_proj`; copy_branch: `copy_expert`·`inject_layers`; bridge: `bridge_injector`; `_layer_residual` mode 분기 + `embed_suffix`/`_inject_expert_layer` override + 추론 forward hook) + `PI05DynaflipPolicy`(`_build_model` override, batch feature stash) |
 | 7 | `vendor/lerobot/policies/pi05/__init__.py:17` | 수정 | — | 신규 config/policy import 로 `register_subclass` 발화 보장 |
 
 좌표는 pinned commit `999e77ad…` 스냅샷 기준이며 vendor refresh 시 함께 갱신됩니다.
@@ -139,10 +149,44 @@ def _inject_expert_layer(self, layer_idx, suffix_hidden):    # 학습 경로 콜
 ```
 
 `git apply --check` 결과: **통과**. 실행 검증: foundry runtime(Python 3.12, lerobot @
-pinned commit)에 `-p3 --directory=src/lerobot` 로 적용 후 sibling smoke test **9 passed**.
+pinned commit)에 `-p3 --directory=src/lerobot` 로 적용 후 sibling smoke test **13 passed**.
 zero-init 동작-보존을 직접 계측합니다 — `zero_init_linear` 출력이 초기화 직후 정확히
-0(`count_nonzero == 0`), 가중치 섭동 후 비0. **단** copy-branch forward(attention·mask)와
-per-layer 주입의 *수치* 정합은 가중치가 필요해 CPU smoke 범위 밖입니다(아래 §🚧 / foundry §G).
+0(`count_nonzero == 0`), `bridge_attention` 게이트 0 시 잔차 정확히 0, 둘 다 섭동 후 비0.
+**단** copy-branch / cross-attn forward 의 *수치* 정합은 가중치가 필요해 CPU smoke 범위
+밖입니다(아래 §🚧 / foundry §G).
+
+---
+
+## 🔀 주입 모드 — `bridge_attention` (VLA-Adapter식)
+
+`dynaflip_inject_mode="bridge_attention"` 은 copy-branch 와 같은 seam·같은 표적(액션 전문가
+hidden) 위에서 주입 *형태*만 바꿉니다 — VLA-Adapter([arXiv:2509.09372]) Bridge Attention 의
+**CA1(raw-feature) 경로**. DynaFLIP 이 dynamics-pretrained DINOv2 라, VLA-Adapter 가 말하는
+action-aware "raw feature 조건"의 자리에 그대로 들어갑니다. 연결 고리 전체는
+[`analysis/catalogs/vla-action-bridging.md`](../../../catalogs/vla-action-bridging.md).
+
+```python
+class DynaflipBridgeInjector(nn.Module):           # per-layer cross-attn + tanh 게이트
+    # attn[i]: nn.MultiheadAttention(width, heads), gate: nn.Parameter(zeros(L))
+    def forward(self, i, query, kv):               # query=(B,chunk,width) action
+        out, _ = self.attn[i](query, kv, kv)       # kv=(B,L,width) DynaFLIP 패치 토큰
+        return torch.tanh(self.gate[i]) * out      # g=0 → tanh=0 → 잔차 0 (identity)
+
+def _layer_residual(self, i, layer_hidden):        # PI05DynaflipPytorch (mode 분기)
+    if mode == "bridge_attention":
+        return self.bridge_injector(i, layer_hidden[:, -chunk:], self._dyna_proj)
+    # mode == "copy_branch": return self.inject_layers[i](self._copy_hidden[i])
+```
+
+- **공통 seam 재사용** — `embed_suffix` override 가 (copy_branch) copy hidden 계산 / (bridge)
+  `aux_proj` 로 패치 토큰을 투영해 `self._dyna_proj` stash. `_layer_residual` 이 mode 로 분기해
+  학습 경로(콜백)·추론 경로(forward hook) 양쪽에서 같은 잔차를 낸다.
+- **zero-init 주체 차이** — copy_branch 는 투영·`Z_i` 가 zero-init(잔차=0). bridge 는 **게이트
+  `g`** 가 zero-init(`tanh(0)=0`); cross-attn 가중치는 일반 init 이고 `aux_proj` 도 일반 init
+  (KV 가 실제 dyna 정보를 담도록). 두 모드 모두 init 시 잔차 정확히 0 → 베이스 보존.
+- **가벼움** — 전문가 복제본이 없어 학습 파라미터가 작다(투영 + per-layer cross-attn + 게이트).
+- **ActionQuery(CA2)** — VLA-Adapter 의 두 번째 cross-attn(ActionQuery + proprio)은 config
+  자리(`dynaflip_use_action_query`)만 두고 미구현(켜면 `NotImplementedError`).
 
 ---
 
@@ -161,9 +205,10 @@ per-layer 주입의 *수치* 정합은 가중치가 필요해 CPU smoke 범위 �
   pretrained 전문가로 초기화됩니다. copy 가중치를 담은 체크포인트에서 resume 한다면 이 lazy
   sync 를 꺼야 합니다(다운스트림에서 조정).
 - **학습 하이퍼파라미터** — prior 보존을 위해 `freeze_vision_encoder=true`(+ 필요 시
-  `train_expert_only`)로 SigLIP·VLM·main 전문가를 frozen 하고, 학습 대상은 `aux_proj` +
-  `copy_expert` + `inject_layers` 로 한정하는 것이 [60] PVI 의 학습 분리 그대로입니다.
-  `inject_dynaflip=true` 로 켜고 `dynaflip_feature_dim` 을 보조 인코더 패치 토큰 폭에 맞춥니다.
+  `train_expert_only`)로 SigLIP·VLM·main 전문가를 frozen 하고, 학습 대상을 주입 모듈로
+  한정합니다 — copy_branch: `aux_proj`+`copy_expert`+`inject_layers`, bridge: `aux_proj`
+  +`bridge_injector`(cross-attn+게이트). [60] PVI / VLA-Adapter 의 학습 분리 그대로입니다.
+  `inject_dynaflip=true` 로 켜고 `dynaflip_inject_mode`·`dynaflip_feature_dim` 을 맞춥니다.
 - **평가 / 추론** — copy-branch hidden 은 `embed_suffix` override 에서 계산되어 `forward`
   (학습)·`denoise_step`(추론) 두 경로에서 모두 채워지고, 학습은 콜백·추론은 forward hook 으로
   주입됩니다. 추론 시점에도 같은 batch 키로 패치 토큰을 공급해야 합니다.
@@ -173,9 +218,10 @@ per-layer 주입의 *수치* 정합은 가중치가 필요해 CPU smoke 범위 �
 ## 🚧 미해결 / 잠정
 
 - **검증 경계 (가중치 필요분).** weight-free CPU smoke 가 보장하는 것은 **구조·등록·zero-init
-  잔차의 identity 성질**뿐입니다(9 passed). copy-branch 의 *수치* 동작 — `copy_expert` 의
-  attention/mask 구성, per-layer 주입이 baseline rollout 을 zero-init 시점에 비트 단위로
-  보존하는지 — 은 PaliGemma/gemma 가중치와 무거운 모델 build 가 필요해 CPU smoke 범위 밖입니다
+  identity 성질**뿐입니다(13 passed; copy_branch `Z_i` 잔차=0, bridge 게이트=0 잔차=0). 두 모드의
+  *수치* 동작 — copy_branch `copy_expert` 의 attention/mask, bridge per-layer cross-attn,
+  주입이 baseline rollout 을 zero-init 시점에 비트 단위로 보존하는지 — 은 PaliGemma/gemma
+  가중치와 무거운 모델 build 가 필요해 CPU smoke 범위 밖입니다
   (foundry §G 계약과 동일하게, 백본 forward 는 원래 smoke 가 돌리지 않음). 다운스트림 weighted
   런타임에서 `inject_dynaflip` on/off 출력 동치(zero-init 시점)를 회귀 테스트로 확인하길 권장.
 - **copy-branch 조건화 방식 (해석).** [60]·발췌는 copy-branch 가 보조 feature 를 조건으로 받되
