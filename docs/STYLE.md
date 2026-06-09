@@ -237,7 +237,6 @@ verbatim in their original form versus which prose is Korean.
 | Failure mode | 실패 모드 |
 | Decision implication | 의사결정 함의 |
 | Citation-graph expansion | Citation-Graph 확장 |
-| Author Watch | Author Watch (저자 추적) |
 | Keyword Sweep | Keyword Sweep (키워드 스윕) |
 | System0 / System1 | System0 / System1 (저수준 안정화 / 고수준 정책 계층) |
 | Structured input-modality binding | 구조적 입력-모달리티 결합 |

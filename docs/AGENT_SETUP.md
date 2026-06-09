@@ -86,7 +86,7 @@ There is no YAML and no `claude routine register`. Create the schedule in the [c
 | Connectors | None — remove all (retrieval is `curl`, not an MCP connector). |
 | Permissions | Default (`claude/` branch push) is sufficient — PR output needs no unrestricted push. |
 
-The prompt is the routine body and is **self-contained**: it names its own context files (`context/P1.md`, the last 2 weeks of `scouting/`), the `curl` procedure, output rules and guards. The form has no `context_files` field — the agent clones the repo and reads files per the prompt. The prompt is **pillar-scoped**: it reads the `context/P#.md` extract (skeleton §1–§9; Pillar=§2, Decision Log=§4, Anti-topics=§5, Tracked Literature=§6, Researchers=§7, Competitor=§8, Open Items=§9; no Cross-pollination/Feedback-Loop sections), never the full doc.
+The prompt is the routine body and is **self-contained**: it names its own context files (`context/P1.md`, the last 2 weeks of `scouting/`), the `curl` procedure, output rules and guards. The form has no `context_files` field — the agent clones the repo and reads files per the prompt. The prompt is **pillar-scoped**: it reads the `context/P#.md` extract (skeleton §1–§6; Identity=§1, Pillar=§2, Decision Log=§3, Anti-topics=§4, Tracked Literature=§5, Curated Lists=§6; no Researchers/Competitor/Cross-pollination sections), never the full doc.
 
 ### Step 3 — The externalized prompt already exists
 
@@ -94,14 +94,13 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 
 | Retrieval step | Manual run | Routine (`curl` REST) |
 |---|---|---|
-| Author Watch | built-in web search | S2 `/author/search` → `/author/{id}/papers` |
 | Citation-Graph expansion | built-in web search | S2 `/paper/arXiv:XXXX.XXXXX/citations` |
 | Keyword Sweep / topic-watch | built-in web search | arXiv `export.arxiv.org/api/query` |
-| Competitor Monitoring | built-in web search | arXiv query + S2 author lookup |
+| Curated-List Sweep | built-in web search | GitHub raw README `curl` + month-prefix pre-cut |
 
 S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed directly. On failure (non-zero exit, HTTP error, empty body after retries) the prompt discloses the failure verbatim in the `Papers scanned:` header line and continues with the sources that succeeded — it never fabricates a citation or an arXiv ID. After the report is written the prompt resolves the run date (`TZ=Asia/Seoul`) and runs `git add` / `commit` / `git push origin HEAD:main` for that single report file — the only addition beyond retrieval; no PR is created. Everything else (0–3 scoring, "≥2 on every axis", no-padding, no-duplicate-vs-last-2-weeks, the `context/P#.md` never-modify guard) is unchanged from the manual run.
 
-> The P1-scoped prompt intentionally **drops the monthly Cross-pollination rule** — its source section (full `context/MASTER.md` §12) does not exist in the P1 extract.
+> The P1-scoped prompt intentionally **drops the monthly Cross-pollination rule** — its source section (full `context/MASTER.md` §7) does not exist in the P1 extract.
 
 ### Step 4 — First run & verification
 
@@ -118,7 +117,7 @@ If it is unsatisfactory, fix `scouting.md` (or `context/P1.md`) and re-run — d
 
 ### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/implement-design` → `/validate-impl`, orchestrated by `/reproduce-paper`)
 
-Scouting finds new papers *outward*; this mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §8 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement-design` produces a target-codebase patch and `/validate-impl` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
+Scouting finds new papers *outward*; this mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §5 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement-design` produces a target-codebase patch and `/validate-impl` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
 
 | Item | Value |
 |---|---|

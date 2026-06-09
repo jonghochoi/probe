@@ -7,7 +7,7 @@
 
 > **Last updated**: 2026-06-04
 > **Maintainer**: \<your-name\>
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, Hardware, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, Curated Lists) is **owned by `context/P1–P4.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, Hardware, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics, Curated Lists) is **owned by `context/P1–P4.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -15,7 +15,7 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P1–P4.md` are the **owners** of their pillar's Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, and Curated Lists. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P1–P4.md` are the **owners** of their pillar's Decision Log, Tracked Literature, Anti-topics, and Curated Lists. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
 - `[STABLE]`: changes rarely (identity, purpose, hardware)
@@ -161,22 +161,7 @@ Four pillars.
 
 ---
 
-## 6. Researchers & Groups to Follow — cross-pillar [LIVING]
-
-> Per-pillar researchers and labs live in each `context/P#.md` §6. This anchor keeps only names that span pillars or have no single-pillar home.
-
-### 6.1 Cross-pillar individuals
-Pulkit Agrawal (MIT Improbable AI); Lerrel Pinto (NYU); Ankur Handa, Yashraj Narang (NVIDIA GEAR); Jeannette Bohg, C. Karen Liu (Stanford).
-
-### 6.2 Korean-affiliated groups (prevent local blind spot)
-KAIST / SNU / NAVER Labs / POSTECH / UNIST (specific PIs — TBD by maintainer).
-
-### 6.3 Multi-pillar labs / vendors (watch code releases)
-Physical Intelligence (π backbone — spans P1/P3/P4); NVIDIA Robotics/GEAR; **Sharpa Robotics (Singapore)** — hardware vendor + competitor (own VTLA); **Genesis AI** — VLA-only strong performer (antagonist evidence).
-
----
-
-## 7. Venue Priority [AGENT-INPUT]
+## 6. Venue Priority [AGENT-INPUT]
 
 | Tier | Venues |
 |------|--------|
@@ -188,7 +173,7 @@ Physical Intelligence (π backbone — spans P1/P3/P4); NVIDIA Robotics/GEAR; **
 
 ---
 
-## 8. Cross-pollination Budget [AGENT-INPUT]
+## 7. Cross-pollination Budget [AGENT-INPUT]
 
 1 paper per month from an adjacent field that plausibly transfers. Rotating:
 - **Month A**: continual learning / catastrophic forgetting / PEFT (P4 adjacency)

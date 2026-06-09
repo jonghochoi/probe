@@ -135,12 +135,6 @@ STYLE.md §3-1 is authoritative. Summary:
 ### Anti-topics
 <!-- Candidate new exclusion rule surfaced by this week's filter set. -->
 
-### Researchers to follow
-<!-- Add / remove authors based on signal this week (the pillar's §6 Researchers). -->
-
-### Competitor / Kindred monitoring
-<!-- Any new release from §10 watch list (DexReMoE / CATFA / SaTA / Sharpa VTLA / π lineage)? Differentiation vehicle still intact? -->
-
 ---
 
 ## 🔄 직전 리포트 대비 종합
