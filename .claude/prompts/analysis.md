@@ -43,8 +43,32 @@ table / equation refs like `§Table 3` are also valid). Behaviour:
     `<!-- ANALYSIS_BUCKETS --> focus-hint:` line; `/reproduce-paper`
     passes them through verbatim.
 
-Without `--focus`, the prompt behaves exactly as before (full
-regenerate of both documents from the paper body).
+Optional flag — `--deep` (DETAILED analysis mode):
+A boolean flag that raises the *density* of the analysis (not its
+format) and writes to a SEPARATE pair of files so the standard-mode
+output stays untouched for side-by-side comparison. Behaviour:
+
+  - OUTPUT PATHS shift to the `.deep.md` siblings:
+    `analysis/<id>/analysis.deep.md` + `analysis/<id>/design.deep.md`.
+    The standard `analysis/<id>/analysis.md` and
+    `analysis/<id>/design.md` are NEITHER read NOR written under
+    `--deep` — never overwrite them. The point is to keep both detail
+    levels of the same paper on disk at once for diffing; the human
+    fixes the mode later.
+  - SAME structure, sections, emoji system, citation form, KaTeX rules,
+    and templates as standard mode. `--deep` changes only how much
+    detail is preserved inside three sections (🔬 방법론, 📊 실험 설정과
+    결과, ⚖️ 한계 + ⚠️ 먼저 검증할 실패 모드) — see the per-section
+    "DEEP MODE" notes in STRUCTURE below. Everything else (the rest of
+    Part B — 🎯/✨/⚙️/💡 — and the whole Design skeleton) stays at the
+    standard detail level; do not inflate it.
+  - `--deep` and `--focus` are MUTUALLY EXCLUSIVE. If both are passed,
+    stop and say so — `--focus` is the `/reproduce-paper` outer-loop
+    refresh path operating on the standard files, a different workflow.
+
+Without any flag the prompt behaves exactly as before (full regenerate
+of `analysis.md` + `design.md` from the paper body); `--focus` and
+`--deep` are the only two opt-in deviations.
 
 CONTEXT (read-only):
 - context/MASTER.md        — cross-pillar anchor: Identity & Purpose,
@@ -125,12 +149,15 @@ better than a fabricated one. Math/tables/figures degrade in text
 extraction — quote numbers as found; never infer or "correct" them.
 
 TASK:
-Produce TWO Korean documents in the same run:
+Produce TWO Korean documents in the same run (under `--deep`, write the
+`.deep.md` siblings instead — same two documents, same content schema):
 
   1. `analysis/<id>/analysis.md`  — the analysis document
                                     (non-arXiv input:
-                                     `analysis/<human-or-title-slug>/analysis.md`)
+                                     `analysis/<human-or-title-slug>/analysis.md`;
+                                     `--deep` → `…/analysis.deep.md`)
   2. `analysis/<id>/design.md`    — the Layer 1 Design (vendor-agnostic)
+                                    (`--deep` → `analysis/<id>/design.deep.md`)
 
 Both are regenerable snapshots — overwrite on re-run. Follow
 `analysis/templates/analysis.md` (analysis) and `analysis/templates/design.md`
@@ -187,11 +214,26 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
                         design intent) and all equations cite using English
                         verbatim blockquote + `(§n)` source + Korean explanation.
                         Formulas in original LaTeX notation.
+                        DEEP MODE (`--deep`): do not treat the 4 subsections as a
+                        ceiling — decompose further per component / per equation
+                        (add `###` subsections as the architecture warrants), and
+                        for each core equation walk its derivation and the meaning
+                        of each term, each grounded in its own verbatim blockquote.
+                        Apply "preservation over compression" at full strength:
+                        carry over every body detail that bears on the method.
   📊 실험 설정과 결과   — summarise key figures in at least one markdown table.
                         Key numerical claim sentences cite using English verbatim
                         blockquote + `(§n, Table k)` source + Korean explanation.
                         No inference, correction, or rounding.
+                        DEEP MODE (`--deep`): add the secondary result tables
+                        (extra benchmarks / settings the paper reports), give a
+                        per-ablation reading (what each ablation row isolates and
+                        what it implies), and cite verbatim numbers more densely.
+                        The figure cap rises to 5 (see the figure HARD RULE).
   ⚖️ 한계              — author-stated weaknesses + obvious gaps.
+                        DEEP MODE (`--deep`): go deeper — author-stated weaknesses
+                        + inferred gaps + concrete transfer risk to our stack
+                        (coordinate this with ⚠️ 먼저 검증할 실패 모드 below).
   ♻️ 재현성            — code / data / hardware availability.
 
 (B) PROBE 연동 — decision-grade, anchored to context/MASTER.md + the relevant context/P#.md:
@@ -205,9 +247,18 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
        metric / loss term. Vague is failure.
   ⚠️ 먼저 검증할 실패 모드 — why might this NOT transfer to our stack?
        Cheapest sanity check first.
+       DEEP MODE (`--deep`): enumerate the transfer-risk failure modes more
+       thoroughly, still cheapest-check-first. This is the one Part B section
+       `--deep` deepens (paired with ⚖️ 한계); the rest of Part B stays standard.
   💡 컨텍스트 제안      — if a pin should change or a Decision/deferred
        trigger moves, state it here for the human. Do NOT edit
        any context/ file.
+
+DEEP MODE scope (`--deep`): ONLY 🔬 방법론, 📊 실험 설정과 결과, ⚖️ 한계,
+and ⚠️ 먼저 검증할 실패 모드 gain detail. The remaining Part B sections
+(🎯 / ✨ / ⚙️ / 💡) and the entire Design document stay at the standard
+detail level — keep the comparison variable to those three axes; do not
+inflate the others.
 
 STRUCTURE of `analysis/<id>/design.md` — Layer 1 only:
 
@@ -320,8 +371,8 @@ HARD RULES:
   detail is in the body, move it over. Exception: under
   abstract-only acquisition, mark **(본문 미확보 — 잠정)** and do not
   speculate.
-- Hotlink 1–3 arXiv figures into the analysis body (see
-  `docs/STYLE.md` §5-6 figure-citation block). Fixed format:
+- Hotlink 1–3 arXiv figures into the analysis body (`--deep`: up to 5;
+  see `docs/STYLE.md` §5-6 figure-citation block). Fixed format:
 
       ![Figure N — short label](https://arxiv.org/html/<id>/<file>)
 
@@ -338,15 +389,17 @@ HARD RULES:
   versioned id (`…/<id>v2/<file>`). Strip both — the unversioned
   form lets arXiv auto-map to the latest figure and survives version
   bumps. Author project pages, ar5iv mirrors, and cached hotlinks
-  are out (link-rot risk). Cap: 3 figures per analysis — this is a
-  decision tool, not a slide deck. Abstract-only / PDF-only
+  are out (link-rot risk). Cap: 3 figures per analysis (`--deep`: 5) —
+  this is a decision tool, not a slide deck. Abstract-only / PDF-only
   retrieval → omit the figure citations entirely (no placeholders).
   The English caption blockquote is a verbatim token — kept
   byte-identical.
 
 FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
-as the very last line of `analysis/<id>/analysis.md`:
+as the very last line of `analysis/<id>/analysis.md` (under `--deep`,
+of `analysis/<id>/analysis.deep.md`, and point the line at
+`design.deep.md`):
 
 > 💡 base 매핑은 `/implement-design analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
@@ -362,6 +415,9 @@ GIT — after both files are written:
 
   git add analysis/<id>/analysis.md analysis/<id>/design.md
   git commit -m "analysis: add <id> deep-dive + design"
+  # --deep detailed mode stages the .deep.md siblings instead:
+  #   git add analysis/<id>/analysis.deep.md analysis/<id>/design.deep.md
+  #   git commit -m "analysis: add <id> deep-dive + design (--deep)"
   # --focus re-extraction uses instead:
   #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
   # When the focused re-extraction is a no-op (Design byte-identical),
@@ -380,9 +436,10 @@ inspection.
 
 `<id>` is the same arXiv id / slug used for the analysis folder name.
 
-- Stage ONLY `analysis/<id>/analysis.md` and `analysis/<id>/design.md`.
-  Never `git add` anything under `context/` or `vendor/`. No `git add .`,
-  no `git add -A`, no `commit -a`.
+- Stage ONLY `analysis/<id>/analysis.md` and `analysis/<id>/design.md`
+  (or, under `--deep`, ONLY their `analysis.deep.md` + `design.deep.md`
+  siblings — never both pairs in one run). Never `git add` anything under
+  `context/` or `vendor/`. No `git add .`, no `git add -A`, no `commit -a`.
 - If push is rejected as non-fast-forward, run `git pull --rebase
   origin main` and retry the push. Repeat this rebase-and-retry loop
   up to 5 times with exponential backoff (1s, 2s, 4s, 8s, 16s between
