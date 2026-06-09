@@ -433,7 +433,7 @@ long-horizon(spoon→cup→plate) 4 범주를 각 10 회 평균하며 ACT·OFT �
     분할 헤드 = 어댑터, 백본 무손상". VLA-Adapter 는 바로 그 패턴의 강화판 —
     백본 동결 + 전층(1–24) Raw·ActionQuery 를 탭하는 풍부한 액션측 어댑터입니다.
     우리 D20 의 "분할 헤드만" 보다 *조건 탭이 두텁다* 는 점이 가장 큰 차이.
-  - **D19b (백본 lineage)** — Qwen2.5-0.5B Prismatic(로봇 사전학습 없음)은
+  - **D19 (백본 lineage)** — Qwen2.5-0.5B Prismatic(로봇 사전학습 없음)은
     `models.md` 의 tiny-lineage 후보를 한 점 추가합니다.
 - **P1 (이종 Body/Hand 액션 전문가) — 2차 연결.**
   - **D4 (Body↔Hand 정보 공유, v1=FiLM)** — VLA-Adapter-Pro 코드가 명시적으로

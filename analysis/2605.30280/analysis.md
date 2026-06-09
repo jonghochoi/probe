@@ -295,7 +295,7 @@ PROBE 관점의 추가 갭:
 
 - **P4 (VLM Pretraining Preservation) — 가장 강한 연결.**
   - **D19 (VLM FT 범위)** — Qwen-VLA 는 CPT 에서 백본·전문가를 모두 동결 해제(full FT 계열)합니다. PROBE v1 의 (a) full freeze 와 정반대 선택이며 VL next-token 손실(Eq.3)로 망각을 막는 방식이 그 대가입니다.
-  - **D19b (VLM 백본 lineage)** — `Qwen3.5-4B × (대규모 조작+인간+합성+내비+VL 믹스)` 는 새로운 lineage 후보입니다. 핀의 Xiaomi-Robotics-0(`Qwen3-VL-4B-Instruct × ~200M traj`)와 같은 Qwen-4B 계열이라 직접 비교 대상이 됩니다.
+  - **D19 (VLM 백본 lineage)** — `Qwen3.5-4B × (대규모 조작+인간+합성+내비+VL 믹스)` 는 새로운 lineage 후보입니다. 핀의 Xiaomi-Robotics-0(`Qwen3-VL-4B-Instruct × ~200M traj`)와 같은 Qwen-4B 계열이라 직접 비교 대상이 됩니다.
   - **D20 (prior 보존 전략)** — VL 코퍼스 합동학습(웹/로봇 co-FT, RT-2 계열 패턴)을 망각 방지책으로 씁니다. SFT 손실 가중 VL=0.1 : 행동=1.0 은 D20 발화 시 채택 가능한 구체값입니다.
   - **D21 (단계별 학습 레시피)** — T2A→CPT→SFT→RL 4단계는 D21 v1 의 Stage 구분과 직접 대화합니다. 특히 **T2A(시각 없는 언어→행동 사전 단계)**는 D21 에 없는 신규 단계 아이디어입니다.
   - **D22 (다중 임바디먼트 사전학습 데이터)** — 본 논문 자체가 거대한 다중 임바디먼트 데이터 믹스 카탈로그(Table 1·2)로, D22 의 "deliverable 카탈로그" 입력으로 직접 활용 가능합니다.
@@ -352,7 +352,7 @@ PROBE 관점의 추가 갭:
 
 (아래는 사람에게 드리는 제안일 뿐이며 `context/MASTER.md` 는 수정하지 않습니다.)
 
-- **P4 핀/카탈로그 후보.** Qwen-VLA 를 §8.4 P4 핀 후보 또는 §6.4 D22 데이터 카탈로그 항목으로 검토 제안: lineage(D19b) = `Qwen3.5-4B × 대규모 멀티-임바디먼트 믹스`, 신규 staging(D21) = T2A, 데이터 카탈로그(D22) 입력 가치. 현 Qwen-4B 형제 핀 Xiaomi-Robotics-0 과 묶어 "Qwen-backbone lineage" 비교군을 형성할 수 있습니다(핀 8개 하드캡이므로, 추가 시 약한 핀 1개 교체 필요).
+- **P4 핀/카탈로그 후보.** Qwen-VLA 를 §8.4 P4 핀 후보 또는 §6.4 D22 데이터 카탈로그 항목으로 검토 제안: lineage(D19) = `Qwen3.5-4B × 대규모 멀티-임바디먼트 믹스`, 신규 staging(D21) = T2A, 데이터 카탈로그(D22) 입력 가치. 현 Qwen-4B 형제 핀 Xiaomi-Robotics-0 과 묶어 "Qwen-backbone lineage" 비교군을 형성할 수 있습니다(핀 8개 하드캡이므로, 추가 시 약한 핀 1개 교체 필요).
 - **§10.2 bounded-RL-in-VLA 추가 후보.** Qwen-VLA 의 단계 RL(전 정책 task-success, deploy FT)을 "RL = 미세조정, capability source 아님" 프레이밍의 추가 증거로 §10.2 에 기록 제안.
 - **방법론 cross-link 후보.** T2A(시각 없는 행동 prior 압축 사전학습)와 단계별 $`p(\tau)`$ 스케줄은 `analysis/catalogs/` 의 P4 staging 방법론 참조로 묶을 가치가 있습니다.
 - **D5/D15 증거 메모.** Table 12(state conditioning ≤1.3pp)는 D5/D15 에 대한 직접 증거이되 "시야 가시 테이블탑" 전제 조건이 핵심임을 함께 기록 제안 — 인핸드 가림 조건에서 결론이 역전될 수 있다는 우리 차별화 가설의 시험대입니다.
