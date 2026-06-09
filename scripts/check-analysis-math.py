@@ -19,10 +19,15 @@ Auto-fixable (applied with --fix):
   4. `\\bm{X}`/`\\mathds{X}`-> `\\mathbf{X}`/`\\mathbb{X}` (inside math only)
   5. boundary spacing       -> insert a space where Hangul/CJK/`·`/`*` is glued
                               to an inline `$` delimiter
+  6. `` `$`X`$` ``          -> `` $`X`$ ``        (valid span wrapped in an extra
+                              backtick pair — GitHub renders it as code, not math)
 
 Report-only (no safe auto-fix; cause a non-zero exit):
   - odd count of unescaped `$` on a line (unbalanced delimiters)
   - KaTeX-unsupported author macros (`\\newcommand`, `\\def`, `\\renewcommand`)
+  - multi-line `$$…\\…$$` (a `\\` row break inside display dollars) — GitHub
+    renders `\\` only inside a ```math fenced block, so this must be moved
+    there by hand (the fix is structural, not a token swap)
 
 Usage (repo root):
     python3 scripts/check-analysis-math.py [--fix] [PATH ...]
@@ -61,10 +66,12 @@ UNSUPPORTED_MACRO = re.compile(r"\\(?:newcommand|renewcommand|def)\b")
 
 VALID_INLINE = re.compile(r"\$`[^`]*?`\$")      # the one allowed inline form
 DISPLAY = re.compile(r"\$\$.+?\$\$")            # display block (possibly inline)
-# Valid inline (`$`X`$ `) and the forbidden outside-dollar form (`` `$X$` ``)
-# are mirror images, so a single left-to-right pass dispatches on which
-# alternative matched — separate passes would let one form's delimiters be
-# misread as the other's (e.g. the `$`` inside `` `$X$` ``).
+# A valid inline span `$`X`$ ` accidentally wrapped in an EXTRA pair of
+# backticks — `` `$`X`$` ``. The inner span is correct, but the outer
+# backticks make GitHub parse it as code-span($) + literal-text(X) +
+# code-span($), so the LaTeX leaks as raw text in every browser. The
+# author almost always meant the bare `$`X`$ `; strip the outer pair.
+OUTER_WRAP = re.compile(r"`(\$`[^`]+?`\$)`")
 COMBINED_INLINE = re.compile(r"\$`(?P<vbody>[^`]*?)`\$|`\$(?P<obody>[^`$]+?)\$`")
 PAREN_INLINE = re.compile(r"\\\((.+?)\\\)")     # \( ... \)
 BRACKET_DISPLAY = re.compile(r"\\\[(.+?)\\\]")  # \[ ... \]
@@ -148,9 +155,29 @@ def process_line(line: str) -> tuple[str, list[str], list[tuple[int, str]]]:
     line = BRACKET_DISPLAY.sub(_bracket, line)
     line = PAREN_INLINE.sub(_paren, line)
 
+    # 1b. Strip an extra backtick pair wrapping a valid inline span:
+    #     `` `$`X`$` `` -> `` $`X`$ ``. Done before display/inline passes so
+    #     the unwrapped span is then recognized as canonical inline math.
+    def _unwrap(m: re.Match) -> str:
+        fixes.append("outer-backtick-wrapped inline ``` `$`X`$` ``` → $`X`$")
+        return m.group(1)
+
+    line = OUTER_WRAP.sub(_unwrap, line)
+
     # 2. Stash display blocks first (applying the macro whitelist), so the
-    #    inline passes below cannot see their `$$` delimiters.
+    #    inline passes below cannot see their `$$` delimiters. A `$$…$$` that
+    #    carries a `\\` row break (aligned / matrix / cases / a bare line
+    #    break) does not render on GitHub in any browser — only a ```math
+    #    fenced block does — so flag it (report-only; the fix is structural).
     def _display(m: re.Match) -> str:
+        if "\\\\" in m.group(0):
+            issues.append(
+                (
+                    m.start() + 1,
+                    "multi-line `$$…\\\\…$$` — move to a ```math fenced block "
+                    "(GitHub renders `\\\\` row breaks only inside ```math)",
+                )
+            )
         return _stash(_apply_macro_subs(m.group(0), fixes))
 
     line = DISPLAY.sub(_display, line)

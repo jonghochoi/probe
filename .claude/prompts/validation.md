@@ -341,7 +341,12 @@ GIT — after the report is written:
 
   git add analysis/<id>/validation/<foundry>.md
   git commit -m "validation: <id> on <foundry>"
-  git push origin HEAD:main
+  # Do NOT push directly to `main`. Push the commit to the CURRENT
+  # working branch and stop there. Landing it on `main` is the human's
+  # call — they decide when and how (e.g. via a PR). Never auto-merge,
+  # fast-forward, or push to `main` on your own; wait for explicit
+  # permission.
+  git push -u origin HEAD
 
 Do NOT stage `analysis/README.md` and do NOT run
 `scripts/refresh-analysis-index.py` from this prompt. The index
@@ -353,5 +358,9 @@ validation runs cannot collide on the same generated block (see
 regeneration is still safe and idempotent if needed for ad-hoc
 inspection.
 
-Standard rebase-and-retry / network-retry rules as in other PROBE
-prompts. Never `--no-verify`, never force-push.
+Push only to the CURRENT working branch, never to `main`; merging into
+`main` requires the human's explicit permission. On non-fast-forward,
+`git pull --rebase origin HEAD` (the same working branch) and retry
+(5×, exponential backoff); on conflict STOP and report. Standard
+network-retry rules as in other PROBE prompts. Never `--no-verify`,
+never force-push.

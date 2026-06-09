@@ -412,7 +412,12 @@ GIT — after the guide file(s) are written:
   # Add the sibling smoke test when one was generated (§G subclass-seam).
   git add analysis/<id>/impl/<foundry>/test_*.py 2>/dev/null || true
   git commit -m "foundry: map <id> onto <foundry>"
-  git push origin HEAD:main
+  # Do NOT push directly to `main`. Push the commit to the CURRENT
+  # working branch and stop there. Landing it on `main` is the human's
+  # call — they decide when and how (e.g. via a PR). Never auto-merge,
+  # fast-forward, or push to `main` on your own; wait for explicit
+  # permission.
+  git push -u origin HEAD
 
 Never stage anything under `.foundry-runtime/` — it is the gitignored
 execution runtime, not an artifact.
@@ -432,11 +437,13 @@ verbatim foundry name.
 - Stage ONLY the files this command produced. Never `git add` anything
   under `context/` or `vendor/`. No `git add .`, no `git add -A`, no
   `commit -a`.
-- If push is rejected as non-fast-forward, run `git pull --rebase
-  origin main` and retry the push. Repeat this rebase-and-retry loop
-  up to 5 times with exponential backoff (1s, 2s, 4s, 8s, 16s between
-  attempts). On rebase conflict (same file written by another run),
-  STOP and report — do not resolve automatically.
+- Push only to the CURRENT working branch, never to `main`. Merging the
+  branch into `main` requires the human's explicit permission.
+- If the push to the working branch is rejected as non-fast-forward,
+  run `git pull --rebase origin HEAD` (the same working branch) and
+  retry the push. Repeat this rebase-and-retry loop up to 5 times with
+  exponential backoff (1s, 2s, 4s, 8s, 16s between attempts). On rebase
+  conflict, STOP and report — do not resolve automatically.
 - On transient network failure, retry push up to 4 times with
   exponential backoff (2s, 4s, 8s, 16s).
 - Never use --no-verify, --no-gpg-sign, or any force-push.
