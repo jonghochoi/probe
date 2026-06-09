@@ -253,3 +253,8 @@ flat-layout 이면 `--directory=lerobot`. `--check` 거부 = 버전 불일치 �
 - pretrained 로드 시 missing/size-mismatch 가 projection 3개 + (enhance) enhancer 헤드만.
 - 학습 loss 우하향 + 체크포인트 저장.
 - 손 인덱스 `[12:36)` 평균 loss 가 enhance < base.
+
+## 📑 결과
+
+실측 통제 삼각(base / λ0 / enhance) 분석은 [`RESULTS.md`](RESULTS.md) 참조 —
+삼각 분해 표·손 per-dim·좌우 비대칭 원인·`plot_curves.py` 그림까지.
