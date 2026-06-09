@@ -14,8 +14,8 @@ for **commit hygiene and document style** so the repo stays consistent.
 
 | Path | Owner | Role |
 |---|---|---|
-| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P1–P4), Venue, Cross-pollination, cross-pillar Researchers. No longer holds per-pillar Decision Log / Tracked Literature |
-| `context/P{1..4}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, Researchers, and Curated Lists (identical §1–§8 skeleton). The pipeline reads one `P#.md`. Four pillars; the P5 evaluation pillar was retired |
+| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P1–P4), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
+| `context/P{1..4}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Four pillars; the P5 evaluation pillar was retired |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). `README.md` is the folder's auto-generated deep-dive index (slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
 | `analysis/catalogs/` | agent (hand-curated) | Cross-paper reference material, separated from per-paper `<arxiv-id>/` deep-dives. `models.md` is an awesome-list-style flat curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), reverse-chronological within each section. `dataset.md` is the same style for VLA further-pretrain datasets, grouped into 🤖 Robot action / 👤 Human video / 🔀 Mixed sections with a facts line + lineage line per entry. Both files carry a shields.io `Updated` badge at the top. Methodology / strategy docs (`vlm-prior-preservation.md`, `peft-robotics.md`, `peft-genesis-strategy.md`) sit alongside as design references. Quarterly rebalance; not in `analysis/README.md` auto-regeneration scope |
@@ -32,7 +32,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Per-pillar content (Decision Log, Tracked Literature,
-Anti-topics, Competitor Monitoring, Researchers, Curated Lists) is **owned by
+Anti-topics, Curated Lists) is **owned by
 the relevant `P#.md`**; `MASTER.md` is a thin global anchor holding only
 cross-cutting content. Edit the `P#.md` for pillar content; edit `MASTER.md`
 only for global content. (The earlier "MASTER is SSOT, regenerate the extracts

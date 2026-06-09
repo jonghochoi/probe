@@ -6,7 +6,7 @@
 
 **Stop drowning in arXiv. Start changing what you train next week.**
 
-*Author watch · Citation-graph expansion · Anti-topic filtering · Weekly decision-grade Scouting Reports*
+*Citation-graph expansion · Anti-topic filtering · Weekly decision-grade Scouting Reports*
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
@@ -48,7 +48,7 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 | "I'll read that paper properly later" → never does | `/analyze-paper` → Korean deep-dive **+ a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
 | "Great paper, but I'll never reproduce it" | `/reproduce-paper` drives Design → impl → validation in a converging loop, shipping a unified-diff patch against a target foundry (default `lerobot`) |
 
-**Division of labor.** PROBE is a scout — it does not fight. The agent owns author watch, citation-graph expansion, anti-topic filtering, scoring, cross-pollination, and competitor monitoring. The human owns every judgement call: direction, Decision-Log curation, evaluation thresholds, per-pillar context refresh, and discarding. The agent **never** edits any `context/` file — it proposes in a report; the human decides.
+**Division of labor.** PROBE is a scout — it does not fight. The agent owns citation-graph expansion, anti-topic filtering, scoring, and cross-pollination. The human owns every judgement call: direction, Decision-Log curation, evaluation thresholds, per-pillar context refresh, and discarding. The agent **never** edits any `context/` file — it proposes in a report; the human decides.
 
 ---
 
@@ -58,7 +58,7 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 
 > **Pillars**: the static context is organized into a small set of research pillars, each owning its own Decision Log and Tracked Literature — canonical names and definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
-> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (the pillars + cross-cutting content — Identity, Pillars overview, Venue, Cross-pollination, cross-pillar Researchers). Each `context/P#.md` **owns** its pillar's Decision Log, Tracked Literature, Anti-topics, Competitor Monitoring, and Researchers; the cloud scouting routine reads **one `P#.md`** to keep agent context lean. Edit the `P#.md` for pillar content; edit MASTER only for global content.
+> **Anchor vs. per-pillar owner**: `context/MASTER.md` is a thin **global anchor** (the pillars + cross-cutting content — Identity, Pillars overview, Venue, Cross-pollination). Each `context/P#.md` **owns** its pillar's Decision Log, Tracked Literature, Anti-topics, and Curated Lists; the cloud scouting routine reads **one `P#.md`** to keep agent context lean. Edit the `P#.md` for pillar content; edit MASTER only for global content.
 
 ```
    ┌────────────────────────────────────────────────────────┐
@@ -76,9 +76,9 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
    │      Scouting      │         │   On-demand Analysis  │
    │ scheduled · per P# │         │     /analyze-paper    │
    │                    │         │                       │
-   │   author watch ·   │         │ one paper → deep-dive │
-   │  citation graph ·  │         │   → Layer 1 Design →  │
-   │   keyword sweep    │         │   impl → validation   │
+   │  citation graph ·  │         │ one paper → deep-dive │
+   │  keyword sweep ·   │         │   → Layer 1 Design →  │
+   │   curated lists    │         │   impl → validation   │
    └──────────┬─────────┘         └───────────┬───────────┘
               │ append new file               │ overwrite snapshot
               ▼                               ▼

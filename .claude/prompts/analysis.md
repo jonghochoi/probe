@@ -49,10 +49,9 @@ regenerate of both documents from the paper body).
 CONTEXT (read-only):
 - context/MASTER.md        — cross-pillar anchor: Identity & Purpose,
                                Pillars overview (P1–P4), Venue,
-                               Cross-pollination, cross-pillar Researchers.
+                               Cross-pollination.
 - context/P1–P4.md         — the per-pillar owners: Decision Log
                                (D1–D23 across pillars), Tracked Literature,
-                               Competitor / Kindred Monitoring, Researchers,
                                Anti-topics. A single paper often spans
                                multiple pillars, so read MASTER + every
                                P#.md, not a single extract.
@@ -198,7 +197,7 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 (B) PROBE 연동 — decision-grade, anchored to context/MASTER.md + the relevant context/P#.md:
   🎯 관련 Pillar / Decision (P#/D#) — which P1–P4 / D1–D23 this paper
        touches. Also note Identity tension/support and any competitor
-       implication (the relevant P#.md §7 Competitor / Kindred Monitoring).
+       implication (vs. the Tracked Literature in the relevant P#.md §5).
   ✨ 핀 논문 대비 델타  — what is genuinely new vs. the Tracked
        Literature already in the relevant context/P#.md §5 (name the pinned paper).
   ⚙️ 의사결정 함의     — what changes in MY training/evaluation pipeline

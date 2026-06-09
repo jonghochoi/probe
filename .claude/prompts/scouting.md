@@ -11,7 +11,7 @@ manipulation.
 CONTEXT (read-only):
 - context/<PILLAR>.md       — source of truth, <PILLAR> scope only
                                    (Pillar <PILLAR>, this pillar's Decisions,
-                                   Tracked Literature, Researchers, Anti-topics,
+                                   Tracked Literature, Anti-topics,
                                    Curated External Lists)
 - docs/STYLE.md             — formatting, emoji system, Korean authoring rules
 - scouting/templates/report.md     — the form every report follows
@@ -43,7 +43,7 @@ Endpoints:
 - GitHub raw (curated lists): `https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md`
   — a plain static GET, no auth, no MCP (consistent with the "no web
   search" rule, it is still curl). Used only by the Curated-List Sweep
-  (pass 5); the exact URLs come from context/<PILLAR>.md.
+  (pass 3); the exact URLs come from context/<PILLAR>.md.
 - Semantic Scholar Graph: `https://api.semanticscholar.org/graph/v1`
   Send the API key header when the env var is set:
   `-H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY"` (omit the header if the
@@ -53,15 +53,7 @@ Endpoints:
   backoff. Always pass `--fail --silent --show-error` and inspect
   the HTTP status.
 
-1. Author Watch — for every researcher in the "Researchers & Groups
-   to Follow" section of context/<PILLAR>.md:
-     a. resolve the author id:
-        `curl --fail -sS -H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY" \
-          "https://api.semanticscholar.org/graph/v1/author/search?query=<URL-encoded name>&fields=name,authorId"`
-     b. list recent papers:
-        `.../graph/v1/author/{authorId}/papers?fields=title,year,publicationDate,externalIds,abstract&limit=100`
-   Keep only papers with `publicationDate` within the last 14 days.
-2. Citation-Graph Expansion — for each pinned paper in the
+1. Citation-Graph Expansion — for each pinned paper in the
    "<PILLAR> Tracked Literature" section, use its arXiv id directly as
    the paper id:
      `.../graph/v1/paper/arXiv:XXXX.XXXXX/citations?fields=title,year,publicationDate,externalIds,abstract&limit=100`
@@ -69,16 +61,13 @@ Endpoints:
    semantic relevance to the "Pillar <PILLAR>" definition section and
    this pillar's active Decisions (the "Decision Log" section of
    context/<PILLAR>.md), not keyword overlap.
-3. Keyword Sweep & topic-watch — query arXiv for cs.RO + cs.LG,
+2. Keyword Sweep & topic-watch — query arXiv for cs.RO + cs.LG,
    newest first, e.g.:
      `curl --fail -sS "http://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`
    Keep entries whose `<published>` is within the last 14 days,
    then filter against the "<PILLAR> Anti-topics" list. This is
    the noisiest source; weight it lowest.
-4. Competitor Monitoring — check the "<PILLAR> Competitor / Kindred
-   Monitoring" watch list for new releases via the same arXiv keyword
-   query and Semantic Scholar author lookup as above.
-5. Curated-List Sweep — for every raw URL in the "Curated External
+3. Curated-List Sweep — for every raw URL in the "Curated External
    Lists to Monitor" section of context/<PILLAR>.md:
      a. fetch the README:
         `curl --fail -sS "https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md"`
@@ -101,7 +90,7 @@ Endpoints:
      f. filter against the "<PILLAR> Anti-topics" list, then rank by
         relevance to the "Pillar <PILLAR>" definition + active Decisions.
         These are human-curated, so weight them above the raw Keyword
-        Sweep — between sources 2 and 3.
+        Sweep — between sources 1 and 2.
    Deferred (v2): catching a paper *newly added* to a list but with an
    older arXiv date needs a stored README snapshot / commits diff — not
    done here, as it would add per-run state. v1 is the recency feed above.
