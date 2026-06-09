@@ -82,7 +82,9 @@ $$\mathcal{L}=\mathbb{E}_{\tau,\epsilon}\left[\|({\mathbf{A}}_{t}-\epsilon)-\mat
 
 MoSS 는 시점 $`t`$ 의 물리 센서 집합 $`{\mathbf{M}}=\{{\mathbf{m}}_{t}^{(i)}\in\mathbb{R}^{d_{i}}\}_{i=1}^{N}`$ 을 받아 모달리티 $`i`$ 마다 별도 스트림 $`\mathcal{A}_{\phi_{i}}`$ 를 둡니다. 액션 스트림과 물리 스트림은 다음과 같이 정의됩니다.
 
-$$\begin{aligned} &\text{Action stream}:&&\mathcal{A}_{\psi}({\mathbf{A}}_{t}^{\tau},{\mathbf{s}}_{t}~|~\{{\mathbf{h}}_{t}\}\cup{\mathbf{M}})\\ &\text{Physical stream }i:&&\mathcal{A}_{\phi_{i}}({\mathbf{m}}_{t}^{(i)}~|~\{{\mathbf{h}}_{t},{\mathbf{A}}_{t}^{\tau},{\mathbf{s}}_{t}\}\cup{\mathbf{M}}\backslash\{{\mathbf{m}}_{t}^{(i)}\})\end{aligned}$$
+```math
+\begin{aligned} &\text{Action stream}:&&\mathcal{A}_{\psi}({\mathbf{A}}_{t}^{\tau},{\mathbf{s}}_{t}~|~\{{\mathbf{h}}_{t}\}\cup{\mathbf{M}})\\ &\text{Physical stream }i:&&\mathcal{A}_{\phi_{i}}({\mathbf{m}}_{t}^{(i)}~|~\{{\mathbf{h}}_{t},{\mathbf{A}}_{t}^{\tau},{\mathbf{s}}_{t}\}\cup{\mathbf{M}}\backslash\{{\mathbf{m}}_{t}^{(i)}\})\end{aligned}
+```
 
 > "In practice, we construct each new sensory stream $`\mathcal{A}_{\phi_{i}}`$ by mirroring the architecture of the original action expert module $`\mathcal{A}_{\psi}`$ and randomly initializing its parameters. We then replace the self-attention layers in each stream with joint cross-modal self-attention layers." (§3.1)
 (같은 골격을 모달리티마다 복제하되, 셀프 어텐션을 조인트 크로스-모달 셀프 어텐션으로 갈아 끼웁니다. 이 한 줄이 결합의 전부입니다.)

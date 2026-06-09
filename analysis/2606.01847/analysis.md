@@ -98,9 +98,13 @@ Diffusion 기반 VLA 정책이 SE(3) 포즈를 평평한 $`\mathbb{R}^{12}`$ 벡
 
 기하 구조의 핵심은 SE(3) 정의와 exponential map 입니다.
 
-$$\mathrm{SE}(3)=\left\{\begin{pmatrix}R&\mathbf{t}\\ \mathbf{0}^{\top}&1\end{pmatrix}:R\in\mathrm{SO}(3),\,\mathbf{t}\in\mathbb{R}^{3}\right\}$$
+```math
+\mathrm{SE}(3)=\left\{\begin{pmatrix}R&\mathbf{t}\\ \mathbf{0}^{\top}&1\end{pmatrix}:R\in\mathrm{SO}(3),\,\mathbf{t}\in\mathbb{R}^{3}\right\}
+```
 
-$$\exp(\boldsymbol{\xi})=\begin{pmatrix}\exp_{\mathrm{SO}(3)}(\boldsymbol{\omega})&V(\boldsymbol{\omega})\mathbf{v}\\ \mathbf{0}^{\top}&1\end{pmatrix}$$
+```math
+\exp(\boldsymbol{\xi})=\begin{pmatrix}\exp_{\mathrm{SO}(3)}(\boldsymbol{\omega})&V(\boldsymbol{\omega})\mathbf{v}\\ \mathbf{0}^{\top}&1\end{pmatrix}
+```
 
 여기서 $`\exp_{\mathrm{SO}(3)}(\boldsymbol{\omega})=I+\frac{\sin\theta}{\theta}[\boldsymbol{\omega}]_{\times}+\frac{1-\cos\theta}{\theta^{2}}[\boldsymbol{\omega}]_{\times}^{2}`$ 는 Rodrigues 공식($`\theta=\|\boldsymbol{\omega}\|`$), $`V(\boldsymbol{\omega})=I+\frac{1-\cos\theta}{\theta^{2}}[\boldsymbol{\omega}]_{\times}+\frac{\theta-\sin\theta}{\theta^{3}}[\boldsymbol{\omega}]_{\times}^{2}`$ 는 회전과 평행이동의 결합을 설명하는 SO(3) 의 left Jacobian 입니다.
 

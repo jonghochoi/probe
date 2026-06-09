@@ -464,11 +464,26 @@ conventions below codify both.
   normative rules (github.com renders KaTeX since 2022-05):
 
   - **Inline** uses `` $`X`$ `` — backticks INSIDE the dollars. The
-    outside-dollar `` `$X$` `` (becomes inline code, KaTeX never runs)
-    and `\(…\)` / `\[…\]` (do not render on GitHub) are FORBIDDEN.
+    outside-dollar `` `$X$` `` (becomes inline code, KaTeX never runs),
+    the extra-backtick-wrapped `` `$`X`$` `` (a *valid* span wrapped in
+    one more backtick pair — GitHub parses it as code-span + literal
+    text + code-span, so the LaTeX leaks raw in every browser), and
+    `\(…\)` / `\[…\]` (do not render on GitHub) are all FORBIDDEN.
     Why: Markdown's italic pass runs before KaTeX and eats the `_` in
     subscripts unless the backtick form shields it.
-  - **Display** is `$$X$$` on its own line (no backticks).
+  - **Display** is `$$X$$` on its own line (no backticks) — for a
+    *single-row* equation only.
+  - **Multi-row display** (anything with a `\\` row break — `aligned`,
+    `pmatrix` / `bmatrix` / matrices, `cases`, or a bare `\\`) MUST use a
+    fenced ```` ```math ```` block, never `$$…\\…$$`. GitHub does not
+    render a `\\` row break inside `$$` in *any* form (single-line or with
+    the `$$` on their own lines) on any browser; only the ```` ```math ````
+    block renders it. Example:
+    ````
+    ```math
+    \begin{aligned} a &= b \\ c &= d \end{aligned}
+    ```
+    ````
   - **Boundary** — an inline `$` must not touch a Hangul / CJK syllable,
     middle-dot `·`, or bold marker `*` / `**`; separate with a space (or
     move the math outside the bold), or the delimiter goes invisible and
