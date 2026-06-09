@@ -29,6 +29,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
+| `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Per-pillar content (Decision Log, Tracked Literature,
@@ -267,6 +268,12 @@ checklist existed). Walk this list every time:
       referenced path must resolve after the latest restructure.
 - [ ] **Run a final `grep -rn '<new-doc-basename>' .`** — at least one
       inbound link must exist. Zero inbound links = orphan.
+- [ ] **Run `python3 scripts/check-doc-links.py`** — every local path
+      reference in `CLAUDE.md` / `README.md` must resolve. This lint is wired
+      into CI (`.github/workflows/check-doc-links.yml`) and is the automated
+      backstop for the dangling-path half of this checklist. (Pass the prompts
+      or `docs/STYLE.md` as explicit args to scan them too; they are off the
+      default set because they carry illustrative example paths.)
 
 ## Automatically-maintained indexes
 
