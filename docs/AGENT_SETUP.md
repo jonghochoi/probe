@@ -16,9 +16,9 @@ Only **three** things change versus a manual run:
 - **Retrieval** — Claude's built-in web search → direct `curl` calls to public REST APIs (arXiv + Semantic Scholar Graph). Same data sources, better citation accuracy and reproducibility. **No MCP server is involved** — cloud routine sessions cannot reach a local MCP server, so retrieval is plain `curl`.
 - **Output** — manual copy → the prompt itself commits the report file and pushes directly to `main` with `git push origin HEAD:main` (no PR is created; commit history *is* the research log). To prevent concurrent runs from racing on the shared branch, configure the RemoteTrigger to allow at most one active session per environment, and the prompt retains a `git pull --rebase origin main` retry as an in-prompt safety net.
 
-The repo's durable asset is the **prompt** (`.claude/prompts/scouting.md`, shared by P1–P4), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
+The repo's durable asset is the **prompt** (`.claude/prompts/scouting.md`, shared by P0–P5), not a config file. There is **no `.claude/routines/*.yaml`** auto-registration and no `claude routine register` CLI — scheduling is created through the **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule` CLI). You do not write new logic here; you understand and verify the prompt, then paste it into the form.
 
-> This guide uses **P1** as the worked example. The scouting prompt is now a single shared template (`.claude/prompts/scouting.md`); for another pillar, replace every `<PILLAR>` token in the template with `P2`/`P3`/`P4` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{2,3,4}.md` in your routine title/notes, and register one routine per pillar.
+> This guide uses **P1** as the worked example. The scouting prompt is now a single shared template (`.claude/prompts/scouting.md`); for another pillar, replace every `<PILLAR>` token in the template with `P0`/`P2`/`P3`/`P4`/`P5` (one global find/replace before pasting into the form), swap `context/P1.md` → `context/P{0,2,3,4,5}.md` in your routine title/notes, and register one routine per pillar.
 
 ### Prerequisites
 
@@ -90,7 +90,7 @@ The prompt is the routine body and is **self-contained**: it names its own conte
 
 ### Step 3 — The externalized prompt already exists
 
-`.claude/prompts/scouting.md` is committed — the scouting prompt, a single shared template for all four pillars (`<PILLAR>` substituted to `P1`/`P2`/`P3`/`P4` once before paste). It is the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
+`.claude/prompts/scouting.md` is committed — the scouting prompt, a single shared template for all six pillars (`<PILLAR>` substituted to `P0`/`P1`/`P2`/`P3`/`P4`/`P5` once before paste). It is the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
 
 | Retrieval step | Manual run | Routine (`curl` REST) |
 |---|---|---|

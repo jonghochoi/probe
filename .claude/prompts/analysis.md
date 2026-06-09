@@ -54,10 +54,10 @@ the existing files.
 
 CONTEXT (read-only):
 - context/MASTER.md        — cross-pillar anchor: Identity & Purpose,
-                               Pillars overview (P1–P4), Venue,
+                               Pillars overview (P0–P5), Venue,
                                Cross-pollination.
-- context/P1–P4.md         — the per-pillar owners: Decision Log
-                               (D1–D23 across pillars), Tracked Literature,
+- context/P0–P5.md         — the per-pillar owners: Decision Log
+                               (D1–D32 across pillars), Tracked Literature,
                                Anti-topics. A single paper often spans
                                multiple pillars, so read MASTER + every
                                P#.md, not a single extract.
@@ -161,10 +161,10 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
                         [Website](…)` (host-classified into badges by the index;
                         never fabricate a repo/site URL — omit if unsure),
                         plus two load-bearing classification rows the index reads
-                        (STYLE §5-7): `| 관련 Pillar | P#, … |` (controlled P1–P4,
+                        (STYLE §5-7): `| 관련 Pillar | P#, … |` (controlled P0–P5,
                         comma-separated, primary first — mirror the 🎯 section's
-                        pillar ties; the P5 evaluation pillar was retired, so any
-                        stray P5 is dropped; omit the row if none) and `| 태그 | … |`
+                        pillar ties; out-of-range pillars dropped; omit the row
+                        if none) and `| 태그 | … |`
                         (1–3 lowercase tags from the controlled vocabulary:
                         vla-arch, forgetting, peft, tactile, force,
                         egocentric-data, dexterity, flow-matching, optimizer,
@@ -232,7 +232,7 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
   `P4(VLM 사전학습 보존)` — so a cold reader is not lost; the code token
   stays verbatim and the gloss is a parenthetical, so `관련 Pillar`
   parsing is unaffected (STYLE §5-8). Later mentions may use the bare code.
-  🎯 관련 Pillar / Decision (P#/D#) — which P1–P4 / D1–D23 this paper
+  🎯 관련 Pillar / Decision (P#/D#) — which P0–P5 / D1–D32 this paper
        touches. Also note Identity tension/support and any competitor
        implication (vs. the Tracked Literature in the relevant P#.md §5).
   ✨ 핀 논문 대비 델타  — what is genuinely new vs. the Tracked

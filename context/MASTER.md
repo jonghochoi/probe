@@ -7,7 +7,7 @@
 
 > **Last updated**: 2026-06-04
 > **Maintainer**: \<your-name\>
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, Hardware, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics, Curated Lists) is **owned by `context/P1–P4.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, Hardware, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics, Curated Lists) is **owned by `context/P0–P5.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -15,7 +15,7 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P1–P4.md` are the **owners** of their pillar's Decision Log, Tracked Literature, Anti-topics, and Curated Lists. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P0–P5.md` are the **owners** of their pillar's Decision Log, Tracked Literature, Anti-topics, and Curated Lists. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
 - `[STABLE]`: changes rarely (identity, purpose, hardware)
@@ -35,18 +35,18 @@ All formatting rules (emoji system, link format, Korean authoring principles) ar
 
 ## 1. Identity [STABLE] [AGENT-INPUT]
 
-> Most VLA-style policies attempt to converge on dexterity via a **monolithic action decoder + vision-dominant observation**, and most attempts to push the ceiling bolt a **correction/residual module onto a frozen VLA**. I argue both are dead ends for *dexterous **hand** manipulation*: a correction module is structurally bounded by the VLA's own local output distribution and must be re-trained whenever the VLA's motion pattern shifts, so it cannot exceed the VLA ceiling — it only tracks it. RL-as-core is likewise not the answer for *generalized* dexterity: generalized tasks cannot be reward-engineered, which is why leading labs use RL only as a deploy-ready fine-tuning stage (π RLT), not as the source of capability. **I argue dexterity must be tackled at the VLA level itself**, via (1) an **anatomically heterogeneous Body/Hand action-expert decoder**, (2) **structured finger/palm-bound proprio-tactile input + multi-camera pre-fusion**, (3) a **System1-gated low-level Hand System0 RL stabilization module** (the *only* place RL is necessary, because slip/grasp-retention *is* reward-engineerable), and (4) **VLM-pretraining preservation** through VLA fine-tuning. Task specification stays goal-centric (arm-hand integrated).
+> Most VLA-style policies attempt to converge on dexterity via a **monolithic action decoder + vision-dominant observation**, and most attempts to push the ceiling bolt a **correction/residual module onto a frozen VLA**. I argue both are dead ends for *dexterous **hand** manipulation*: a correction module is structurally bounded by the VLA's own local output distribution and must be re-trained whenever the VLA's motion pattern shifts, so it cannot exceed the VLA ceiling — it only tracks it. RL-as-core is likewise not the answer for *generalized* dexterity: generalized tasks cannot be reward-engineered, which is why leading labs use RL only as a deploy-ready fine-tuning stage (π RLT), not as the source of capability. **I argue dexterity must be tackled at the VLA level itself**, via (1) an **anatomically heterogeneous Body/Hand action-expert decoder**, (2) **structured multimodal observation fusion** — multi-camera spatial-geometric grounding + per-finger proprio-tactile binding beyond flat concat, (3) a **System1-gated low-level Hand System0 RL stabilization module** (the *only* place RL is necessary, because slip/grasp-retention *is* reward-engineerable), and (4) **data-efficient adaptation through the VLM pretraining recipe** (lineage × egocentric-centric corpus × staged recipe), with prior-preservation as one downstream lever. Task specification stays goal-centric (arm-hand integrated). Two supporting pillars feed this core — **P0** scouts the datasets and benchmarks the pretraining corpus draws on, and **P5** (a later-phase bet) folds an action-conditioned world model into the stack.
 
 **Decomposition**
 - *Antagonist A*: VLA-output correction/residual modules — performance bounded by the VLA's local output distribution; re-train on every VLA motion-pattern shift; full-pipeline bottleneck
 - *Antagonist B*: RL-as-core for generalized dexterity — generalized tasks are not reward-engineerable; leading-lab RL use is deploy-ready fine-tuning only (π RLT), not capability source
 - *Antagonist C*: monolithic decoder treating arm/torso/finger as one homogeneous action space + simple concat of heterogeneous modalities
-- *Protagonist*: VLA-level tackling of dexterous **hand** manipulation — heterogeneous Body/Hand experts + structured input binding + System0 stabilization + VLM-prior preservation
+- *Protagonist*: VLA-level tackling of dexterous **hand** manipulation — heterogeneous Body/Hand experts + structured multimodal observation fusion + System0 stabilization + pretraining composed for data-efficient adaptation
 - *Stays goal-centric*: task specification (arm-hand integrated)
 - *RL's confined role*: System0 hand-level contact stabilization only (tractable reward: slip suppression, grasp retention)
 
 > *Maintainer's anchor (Korean original, preserved for self-reference)*:
-> 대다수 VLA-style policy는 monolithic action decoder + vision-dominant observation으로 dexterity를 수렴시키려 하고, 성능 한계를 넘으려는 시도는 frozen VLA 위에 correction/residual 모듈을 붙인다. 그러나 보정 모듈은 VLA 출력 주변 local distribution 내로 성능이 한정되고 VLA 모션 패턴이 바뀔 때마다 재학습해야 하므로 VLA ceiling을 넘지 못한다. RL-as-core 또한 generalized task를 reward engineering할 수 없어 해답이 아니며, 선도사는 RL을 deploy-ready fine-tuning(π RLT)으로만 쓴다. 나는 dexterous **hand** manipulation을 VLA-level에서 직접 tackle해야 한다고 본다: (1) anatomically heterogeneous Body/Hand action expert, (2) structured finger/palm proprio-tactile 입력 + multi-cam pre-fusion, (3) System1-gated 저수준 Hand System0 RL 안정화(slip/grasp 유지는 reward-engineerable하므로 RL이 필요한 유일 지점), (4) VLM-pretraining 보존. Task spec은 arm-hand 통합 goal-centric 유지.
+> 대다수 VLA-style policy는 monolithic action decoder + vision-dominant observation으로 dexterity를 수렴시키려 하고, 성능 한계를 넘으려는 시도는 frozen VLA 위에 correction/residual 모듈을 붙인다. 그러나 보정 모듈은 VLA 출력 주변 local distribution 내로 성능이 한정되고 VLA 모션 패턴이 바뀔 때마다 재학습해야 하므로 VLA ceiling을 넘지 못한다. RL-as-core 또한 generalized task를 reward engineering할 수 없어 해답이 아니며, 선도사는 RL을 deploy-ready fine-tuning(π RLT)으로만 쓴다. 나는 dexterous **hand** manipulation을 VLA-level에서 직접 tackle해야 한다고 본다: (1) anatomically heterogeneous Body/Hand action expert, (2) structured multimodal observation fusion (multi-cam spatial-geometric grounding + per-finger proprio-tactile binding, flat-concat 초월), (3) System1-gated 저수준 Hand System0 RL 안정화(slip/grasp 유지는 reward-engineerable하므로 RL이 필요한 유일 지점), (4) VLM 사전학습 recipe(lineage × egocentric 중심 corpus × staged recipe)를 통한 data-efficient adaptation — prior 보존은 그 하위 레버. Task spec은 arm-hand 통합 goal-centric 유지. 이 코어는 두 지원 pillar가 받친다 — **P0**는 사전학습 corpus 가 끌어다 쓰는 dataset/benchmark 를 스카우팅하고, **P5**(후기 단계)는 action-conditioned world model 을 stack 에 결합한다.
 
 ---
 
@@ -68,7 +68,7 @@ This document serves *two coupled functions*:
 Build a holistic system for human-level dexterous manipulation. Full stack envisioned: hardware that expresses rich contact, data collection preserving human interaction, control minimizing intent-execution gap, models absorbing multimodal supervision at scale, evaluation infrastructure enabling scalable + reproducible iteration. *Current scope-of-work focuses on modeling at the VLA level.*
 
 ### 3.2 Scope of work
-**Body expert and hand expert both directly designed and trained at the VLA level.** No outsourcing of dexterity to a post-hoc correction module (which would be distribution-bounded by the VLA). Pretrained VLM/π weights are leveraged *and explicitly preserved* (P4). The Hand System0 RL module is the single RL component; everything else is VLA-level (flow-matching) learning.
+**Body expert and hand expert both directly designed and trained at the VLA level.** No outsourcing of dexterity to a post-hoc correction module (which would be distribution-bounded by the VLA). Pretrained VLM/π weights are leveraged via a *deliberately composed pretraining recipe for data-efficient adaptation* (P4), with prior-preservation as one downstream lever. The Hand System0 RL module is the single RL component; everything else is VLA-level (flow-matching) learning.
 
 ### 3.3 Task philosophy
 **Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). System0 is a *further* low-level stabilization layer beneath the Hand expert, activated only when contact retention demands sub-policy-loop reaction speed. Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
@@ -113,7 +113,29 @@ Known gap: PhysX point contact vs. real fingertip viscoelastic deformation (P3/S
 
 ## 5. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
-Four pillars.
+**Six pillars (P0–P5).** P1–P4 are the architectural core; P0 (data) is the
+upstream supporting pillar; P5 (world model) is a later-phase capability bet.
+Decision-number allocation:
+
+| Pillar | Owns | Decisions |
+|---|---|---|
+| P0 — VLA Datasets & Benchmarks | data/benchmark scouting | D24–D27 |
+| P1 — Heterogeneous Body/Hand Action Expert | action-expert / action-space architecture | D1–D7 |
+| P2 — Structured Multimodal Observation Fusion | spatial + multimodal observation fusion | D8–D12 |
+| P3 — Hand-level System0 Module (RL-scoped) | low-level contact-stabilization RL | D13–D18 |
+| P4 — Pretraining for Data-Efficient Adaptation | lineage × corpus × recipe | D19–D23 |
+| P5 — World Model | action-conditioned world model integration | D28–D32 |
+
+### 5.0 P0. VLA Datasets & Benchmarks
+**Scope**: data is upstream of method. Dedicated scouting front-end for VLA datasets (robot action / human-egocentric video / mixed) + the scarce tactile/force/torque corpora + benchmarks/eval harnesses. Output feeds the P4 pretraining-corpus decisions and the catalogs (`analysis/catalogs/dataset.md` + `analysis/catalogs/benchmark.md`). Egocentric + tactile/torque emphasis sets the priority data axis.
+
+**Identity tie**: the pretraining corpus (P4 D22) and the egocentric data priority need an evidence-driven data front-end, not incidental scouting.
+
+**Tracked items**: priority data axis (D24), tactile/torque data scouting (D25), benchmark/eval scouting scope (D26), license/usability bar (D27).
+
+**Anti-topics**: method-only papers with no released data/benchmark; sub-pretraining-scale single-task sets; vision-only corpora pitched as sufficient for dexterity.
+
+**Literature anchor**: EgoDex, Ego-Exo4D, UniHand-2.0, AgiBot World, DROID, RH20T (F/T), ManiSkill 3, vla-eval. See `context/P0.md` §5 and the `dataset.md` / `benchmark.md` catalogs.
 
 ### 5.1 P1. Heterogeneous Body/Hand Action Expert
 **Scope**: Body vs Hand action-expert design. Body/torso/arm handle macro motion (object approach, transport, placement); fingers handle post-contact contact-rich precision. Either an explicit BodyExpert–HandExpert split, or a single ActionExpert with strongly separated body/hand latents (comparison group). Body output = both-wrist or tool-flange pose (embodiment-transfer easing); Hand output = finger joint command. Includes Body↔Hand information-sharing, input-modality separation, control-rate separation, and π backbone integration.
@@ -122,20 +144,22 @@ Four pillars.
 
 **Tracked items**: split form (D1), Body output space (D2), Hand output space (D3), Body↔Hand information sharing (D4), input-modality + control-rate separation (D5), coordination direction & flow (D6), π backbone integration / partition (D7).
 
-**Anti-topics**: monolithic decoders without arm-hand split; router-based MoE (different pattern; DexReMoE monitoring exception); post-hoc correction/residual-on-frozen-VLA without addressing distribution-bound limitation.
+**Anti-topics**: post-hoc correction/residual-on-frozen-VLA without addressing the distribution-bound limitation; pick-and-place-only VLAs with no action-architecture contribution. (Monolithic decoders + router/MoE action heads are surfaced as the comparison group, scored against the Body/Hand split — not rejected.)
 
-**Literature anchor**: π0/π0.5 (backbone); TwinBrainVLA (AsyMoT frozen-generalist + trainable-specialist), LaMP (dual-expert), Dexora (open-source bimanual), PriorVLA (frozen Prior + Adaptation, D7), Shared-Autonomy Arm-Hand VLA / DexGrasp-VLA (anatomical arm/hand split), Demystifying Action Space Design (D2 evidence). See `context/P1.md` §5.
+**Scouting lens**: the Body/Hand split stays the *north star*, but the retrieval lens spans the broader action-expert / action-space architecture family — recall wide, thesis unchanged.
 
-### 5.2 P2. Structured Input-Modality Binding
-**Scope**: replace simple concat/token-append with finger/palm-bound structured tokens. Each finger's joint state + that finger's tactile feature → one local embedding (~10 finger + 2 palm tokens). Topology-aware encoding (finger/hand identity, palm-relative fingertip pose, kinematic chain). Hand-level aggregation encoder. Multi-camera vision pre-fusion (cross-attention fuser → unified spatial embedding) before the VLM.
+**Literature anchor**: π0 (backbone); Dexora (open-source bimanual), LaMP (dual-expert), Shared-Autonomy Arm-Hand VLA / DexGrasp-VLA (anatomical arm/hand split). TwinBrainVLA / PriorVLA / Demystifying tracked off-pin. See `context/P1.md` §5.
 
-**Identity tie**: hand-level "observation elevation" — finger-wise contact semantics made explicit, not implicitly learned.
+### 5.2 P2. Structured Multimodal Observation Fusion
+**Scope**: elevate the observation on three axes — (a) **multi-camera spatial-geometric grounding** (geometry-grounded multi-view encoder → unified 3D-consistent embedding, vs flat per-camera concat); (b) **heterogeneous modality fusion beyond concat** (cross-attention / asymmetric fusion of vision + proprio + tactile + force, with per-finger/palm contact attribution preserved — ~10 finger + 2 palm tokens, topology-aware); (c) an **action/dynamics-aware vision encoder** (DynaFLIP / eVGGT family over a generic stem). The encoder *choice* is P2; the VLM *weights/lineage* are P4.
 
-**Tracked items**: finger/palm structured token construction (D8), topology-aware encoding (D9), hand-level aggregation encoder (D10), visuotactile/proprio-tactile encoder candidate (D11), multi-camera pre-fusion (D12).
+**Identity tie**: hand-level "observation elevation" — spatial information kept and registered, contact semantics attributed per finger, encoder action-aware — not implicitly learned from flat concat.
 
-**Anti-topics**: vision-only manipulation; pure tactile-only without structured binding; flat-concat fusion without per-finger attribution.
+**Tracked items**: multi-camera spatial-geometric grounding (D8), action/dynamics-aware vision encoder (D9), heterogeneous modality fusion beyond concat (D10), proprio-tactile-force token construction (D11), topology-aware encoding + hand-level aggregation (D12).
 
-**Literature anchor**: SaTA (Sharpa hardware), ForceFlow (contact-driven flow), Sparsh, ViTacFormer, DexViTac (kinematic-grounded tactile), Touch Dreaming (latent tactile prediction), Mirror Touch Net (visuo-tactile alignment), XL-VLA. See `context/P2.md` §5.
+**Anti-topics**: vision-only manipulation; flat-concat fusion that loses spatial registration or per-finger attribution; generic non-action-aware encoders pitched as sufficient.
+
+**Literature anchor**: VGGT (multi-view geometry), eVGGT (geometry encoder for manipulation), DynaFLIP (action/dynamics-aware encoder), ForceFlow (asymmetric multimodal fusion), ViTacFormer (cross-attention visuotactile). See `context/P2.md` §5.
 
 ### 5.3 P3. Hand-level System0 Module (RL-scoped)
 **Scope**: low-level RL contact-stabilization. System1 HandExpert emits finger commands; post-contact slip / grasp weakening / unstable contact need sub-policy-loop reaction. System0 = vision-excluded RL policy on tactile + finger joint state maintaining stable grasp/contact. Bypasses System1 output in nominal operation; activated only by System1 on/off signal during retention-critical intervals.
@@ -148,16 +172,27 @@ Four pillars.
 
 **Literature anchor**: HORA, AnyRotate (reward terms), DexSynRefine (residual RL + RMA contact adaptation), RMA (teacher-student adaptation), Static Friction Sim2Real, Contact-Aware Neural Dynamics, Beyond Binary (physics-grounded contact sim2real). See `context/P3.md` §5.
 
-### 5.4 P4. VLM Pretraining Preservation
-**Scope**: generalization/situation-understanding originates in the VLM backbone; full fine-tuning on deploy data over-specializes and erodes the pretrained prior. Decide VLM FT range (freeze / partial / LoRA-adapter / full), prior-preservation strategy, staged training recipe, multi-embodiment pretraining data, and the action-representation × VLM-preservation relationship. The **VLM lineage itself** (= initial weights × further-pretrain corpus) and the **multi-embodiment pretraining data catalog** are first-class P4 variables, not only the preservation strategy on top of them.
+### 5.4 P4. Pretraining for Data-Efficient Adaptation
+**Scope**: pretraining quality/composition is the upstream lever behind Genesis-style data-efficient adaptation (minutes of deploy data). Decide the **VLM backbone lineage** (= initial weights × further-pretrain corpus), the **pretraining data composition** (egocentric-only vs mixed dump — an *open* variable matching the in-house ego plan), the **staged recipe / curriculum**, and the **post-pretraining adaptation range** (freeze / PEFT / full) with its **prior-preservation strategy** (a downstream sub-lever, not the headline). Corpus scouting is shared with P0; a world-model pretraining objective is coordinated with P5.
 
-**Identity tie**: protects the VLA ceiling that the whole identity rests on; without it, the VLA-level pivot self-defeats.
+**Identity tie**: pretraining composition is what lets minutes of deploy data suffice — the lever the whole VLA-level pivot rests on.
 
-**Tracked items**: VLM FT range (D19), VLM backbone lineage choice (D19b), prior-preservation strategy (D20), staged training recipe (D21), multi-embodiment pretraining data (D22), action-representation × VLM-preservation (D23).
+**Tracked items**: VLM backbone lineage + post-pretraining adaptation range (D19), prior-preservation strategy (D20), staged pretraining + adaptation recipe (D21), pretraining data composition — egocentric vs mixed (D22), action-representation × pretraining/preservation (D23).
 
-**Anti-topics**: action-only papers ignoring backbone preservation; pick-and-place-only VLA without forgetting/over-specialization analysis.
+**Anti-topics**: deploy-fine-tuning papers with no pretraining-composition / lineage lever; pick-and-place-only VLA with no adaptation-efficiency or forgetting analysis.
 
-**Literature anchor**: π0/π0.5, VLM2VLA (LoRA + NL-action, forgetting mitigation), UAM (dual-stream preservation without full freeze), VLA-Adapter (Bridge Attention), PriorVLA (prior-preserving adaptation), multi-embodiment data survey [arXiv:2506.19121], ConSFT (conservative SFT, π0-tested). See `context/P4.md` §5.
+**Literature anchor**: π0/π0.5 (π lineage), GR00T N1 (cross-embodiment lineage), Being-H0.5 (human-video-centric pretraining), Xiaomi-Robotics-0 (open-weight lineage), Qwen-VLA (Qwen lineage + text-to-action pretraining), ConSFT (conservative adaptation). VLM2VLA / UAM tracked off-pin (preservation sub-lever). See `context/P4.md` §5.
+
+### 5.5 P5. World Model
+**Scope**: fold an action-conditioned world model (predictive model of environment dynamics) into the hand-centric VLA stack — as a latent dynamics prior / future-prediction auxiliary co-trained with the policy, eval-in-imagination, or RL-env. Hand-centric narrowing: **action-conditioned, egocentric, hand-object** world models with latent / 3D-flow (contact-relevant) prediction over raw-pixel generation. A *later-phase* capability bet.
+
+**Identity tie**: forward dynamics is the predictive sense a VLA lacks; heavily-pretrained world models are the lever behind Genesis-style adaptation — scoped to hand-object egocentric prediction.
+
+**Tracked items**: world-model role (D28), integration architecture (D29), prediction space (D30), action conditioning (D31), egocentric hand-object world model (D32).
+
+**Anti-topics**: action-free video generation without robot transfer; driving/navigation world models; locomotion model-based RL; world models with no manipulation eval.
+
+**Literature anchor**: DexWM (hand-object WM from human video), Being-H0.7 (latent world-action from ego video), WorldVLA (unified VLA+WM), LOME (action-conditioned egocentric WM), AHEAD (latent predictive WM for dynamic VLA), VLA-JEPA / ThinkJEPA (JEPA latent-prediction world models for VLA). See `context/P5.md` §5.
 
 ---
 
@@ -178,7 +213,7 @@ Four pillars.
 1 paper per month from an adjacent field that plausibly transfers. Rotating:
 - **Month A**: continual learning / catastrophic forgetting / PEFT (P4 adjacency)
 - **Month B**: VLA architecture advances broadly (π, OpenVLA, self-improving VLA)
-- **Month C**: structured / graph representation for multimodal binding (P2 adjacency)
+- **Month C**: spatial-geometric / multimodal fusion representation (P2 adjacency)
 - **Month D**: tactile sensing in prosthetics / neuroscience
 
 ---

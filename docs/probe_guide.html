@@ -676,7 +676,7 @@
         <span class="principle-icon">📌</span>
         <div>
           <div class="principle-title">정적 (<code>context/</code>) — 월 단위로 한 번 정도 바뀐다</div>
-          <div class="principle-desc">에이전트는 <em>읽기만</em> 합니다. 절대 쓰지 않습니다. <code>MASTER.md</code>(글로벌 앵커 — 네 pillar 개요·cross-cutting) + <code>P{1..4}.md</code>(pillar별 Decision Log·Tracked Literature 등 소유). 클라우드 루틴은 <code>P#.md</code> 하나만 읽어 컨텍스트를 가볍고 pillar-focused 하게 유지합니다.</div>
+          <div class="principle-desc">에이전트는 <em>읽기만</em> 합니다. 절대 쓰지 않습니다. <code>MASTER.md</code>(글로벌 앵커 — 여섯 pillar(P0–P5) 개요·cross-cutting) + <code>P{0..5}.md</code>(pillar별 Decision Log·Tracked Literature 등 소유). 클라우드 루틴은 <code>P#.md</code> 하나만 읽어 컨텍스트를 가볍고 pillar-focused 하게 유지합니다.</div>
         </div>
       </div>
       <div class="principle">
@@ -729,7 +729,7 @@
         <div class="step-body">
           <h4>Stage 3 — 완전 자동화 (Week 5+)</h4>
           <p>
-            <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">Claude Code Routines</a> RemoteTrigger 폼에 <code>.claude/prompts/scouting.md</code> 전문을 붙여넣되, 사전에 템플릿의 <code>&lt;PILLAR&gt;</code> 토큰을 대상 pillar(<code>P1</code>/<code>P2</code>/<code>P3</code>/<code>P4</code>) 로 1회 find/replace 해 두고, 레포·스케줄·환경을 지정. 단일 템플릿이 4개 pillar 루틴에 공유되므로 prompt 로직 수정은 한 파일만 고치면 됩니다(폼은 4개 모두 재붙여넣기). 클라우드 루틴은 <strong>로컬 MCP 서버에 도달할 수 없으므로</strong> 검색은 <code>curl</code> REST(arXiv + Semantic Scholar Graph)로만 수행. 환경의 <strong>Network access = Custom</strong>으로 <code>export.arxiv.org</code> / <code>arxiv.org</code> / <code>api.semanticscholar.org</code> 세 도메인을 허용해야 합니다. 산출물은 자체 commit + push 후 PR로 열립니다.
+            <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">Claude Code Routines</a> RemoteTrigger 폼에 <code>.claude/prompts/scouting.md</code> 전문을 붙여넣되, 사전에 템플릿의 <code>&lt;PILLAR&gt;</code> 토큰을 대상 pillar(<code>P0</code>/<code>P1</code>/<code>P2</code>/<code>P3</code>/<code>P4</code>/<code>P5</code>) 로 1회 find/replace 해 두고, 레포·스케줄·환경을 지정. 단일 템플릿이 6개 pillar 루틴에 공유되므로 prompt 로직 수정은 한 파일만 고치면 됩니다(폼은 6개 모두 재붙여넣기). 클라우드 루틴은 <strong>로컬 MCP 서버에 도달할 수 없으므로</strong> 검색은 <code>curl</code> REST(arXiv + Semantic Scholar Graph)로만 수행. 환경의 <strong>Network access = Custom</strong>으로 <code>export.arxiv.org</code> / <code>arxiv.org</code> / <code>api.semanticscholar.org</code> 세 도메인을 허용해야 합니다. 산출물은 자체 commit + push 후 PR로 열립니다.
           </p>
         </div>
       </div>
@@ -788,7 +788,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <h4>/analyze-paper &lt;id | url | pdf&gt;</h4>
         <p>인간이 이미 관심을 가진 한 편(보통 <code>context/P#.md</code> §5의 pinned/anchor 논문 중 아직 내재화하지 못한 것)을 읽고 한글 deep-dive를 남깁니다.</p>
         <dl class="mode-meta">
-          <dt>입력</dt>          <dd><code>context/MASTER.md</code>(cross-pillar anchor) + 네 <code>context/P#.md</code> 전부 (한 논문이 여러 pillar에 걸치므로)</dd>
+          <dt>입력</dt>          <dd><code>context/MASTER.md</code>(cross-pillar anchor) + 여섯 <code>context/P#.md</code> 전부 (한 논문이 여러 pillar에 걸치므로)</dd>
           <dt>본문 획득</dt>     <dd><code>arxiv.org/abs</code> → <code>/html</code> → ar5iv → abstract-only, 획득 레벨을 문서 헤더에 기록</dd>
           <dt>출력</dt>          <dd><code>analysis/&lt;arxiv-id&gt;.md</code> — 단일 한글, 매 실행 덮어쓰기</dd>
           <dt>구조</dt>          <dd>(A) 중립 요약 + (B) <code>MASTER.md</code> + <code>P#.md</code> 기반 decision-grade 함의</dd>
@@ -925,9 +925,9 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P1–P4 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.md</code> · <code>reproduction.md</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.md</code>(P0–P5 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.md</code> · <code>reproduction.md</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
-          <tr><td>컨텍스트</td>    <td><code>context/P{1..4}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트)</td></tr>
+          <tr><td>컨텍스트</td>    <td><code>context/P{0..5}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트)</td></tr>
           <tr><td>vendor</td>      <td><code>vendor/lerobot/</code> — byte-stable 스냅샷, 6개 baseline policy + configs (재현 패치의 적용 대상)</td></tr>
         </tbody>
       </table>
@@ -972,7 +972,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">CTX</span>
         <div>
           <div class="doc-title">context/MASTER.md</div>
-          <div class="doc-desc">글로벌 앵커 — Identity · Pillars(P1–P4) · Venue · Cross-pollination</div>
+          <div class="doc-desc">글로벌 앵커 — Identity · Pillars(P0–P5) · Venue · Cross-pollination</div>
         </div>
       </a>
       <a class="doc-item" href="../scouting/">
