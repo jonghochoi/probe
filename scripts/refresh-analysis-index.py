@@ -45,25 +45,29 @@ UNCLASSIFIED = "미분류"
 
 # Pillar display names mirror context/MASTER.md §5 Pillars (kept here only
 # because this script never reads the human-owned context/ tree). The taxonomy
-# covers the four pillars P1–P4; the P5 evaluation pillar was retired, so any
-# stray P5 in a 관련 Pillar row is stripped from the Pillars column.
+# covers the six pillars P0–P5; a P# outside that range is stripped from the
+# Pillars column.
 PILLAR_NAMES = {
+    "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",
-    "P2": "Structured Input-Modality Binding",
+    "P2": "Structured Multimodal Observation Fusion",
     "P3": "Hand-level System0 Module",
-    "P4": "VLM Pretraining Preservation",
+    "P4": "Pretraining for Data-Efficient Adaptation",
+    "P5": "World Model",
 }
-PILLAR_ORDER = ["P1", "P2", "P3", "P4", UNCLASSIFIED]
+PILLAR_ORDER = ["P0", "P1", "P2", "P3", "P4", "P5", UNCLASSIFIED]
 # One fixed color per pillar (distinct from the 빨주노초파 keyword palette).
 PILLAR_COLOR = {
+    "P0": "ff7f0e",  # orange
     "P1": "1f77b4",  # blue
     "P2": "9467bd",  # purple
     "P3": "2ca02c",  # green
     "P4": "d62728",  # red
+    "P5": "17becf",  # cyan
     UNCLASSIFIED: "888888",  # grey
 }
-# P1–P4 only; P5 (and anything else) is dropped at extraction time.
-PILLAR_RE = re.compile(r"P[1-4]")
+# P0–P5; anything outside the range is dropped at extraction time.
+PILLAR_RE = re.compile(r"P[0-5]")
 
 
 def find_analyses() -> list[Path]:

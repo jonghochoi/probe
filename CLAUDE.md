@@ -14,11 +14,11 @@ for **commit hygiene and document style** so the repo stays consistent.
 
 | Path | Owner | Role |
 |---|---|---|
-| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P1–P4), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
-| `context/P{1..4}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Four pillars; the P5 evaluation pillar was retired |
+| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
+| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32 |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). `README.md` is the folder's auto-generated deep-dive index (slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
-| `analysis/catalogs/` | agent (hand-curated) | Cross-paper reference material, separated from per-paper `<arxiv-id>/` deep-dives. `models.md` is an awesome-list-style flat curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), reverse-chronological within each section. `dataset.md` is the same style for VLA further-pretrain datasets, grouped into 🤖 Robot action / 👤 Human video / 🔀 Mixed sections with a facts line + lineage line per entry. Both files carry a shields.io `Updated` badge at the top. Methodology / strategy docs (`vlm-prior-preservation.md`, `peft-robotics.md`, `peft-genesis-strategy.md`) sit alongside as design references. Quarterly rebalance; not in `analysis/README.md` auto-regeneration scope |
+| `analysis/catalogs/` | agent (hand-curated) | Cross-paper reference material, separated from per-paper `<arxiv-id>/` deep-dives. `models.md` is an awesome-list-style flat curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), reverse-chronological within each section. `dataset.md` and `benchmark.md` use the `analysis/README.md` **table style** (one row per entry, **English** throughout, no H1 — just the `Updated` badge + emoji `##` section headers). `dataset.md` covers VLA further-pretrain datasets, grouped into 🤖 Robot action / 🔀 Mixed / 👤 Human video sections — columns `# / Dataset / Links / Source / Facts / Embodiment / License / Used by` (Source + Facts + Embodiment are `<br>`-bulleted; `Used by` lists the downstream models/policies trained on the corpus, with `(partial)`/`(core)` notes; `License` carries a commercial-use mark — no mark = commercial-OK, ❌ non-commercial, ⚠️ gated/agreement, ❓ unverified). `benchmark.md` is its evaluation-side sibling (P0 D26 output) for VLA eval harnesses / simulators / dexterous benchmarks, grouped into 🧪 Eval harness / 🎮 Simulator / ✋ Dexterous sections — columns `# / Benchmark / Links / Source / Details / Type / License / Use` (Source + Details `<br>`-bulleted, same License marks). `models.md` + both tables carry a shields.io `Updated` badge at the top. Quarterly rebalance; not in `analysis/README.md` auto-regeneration scope |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) + `.gitignore` are committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
@@ -204,7 +204,7 @@ Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
 This document-style rule is about Markdown **formatting only**. It does **not**
 apply to:
 
-- `context/MASTER.md`, `context/P{1..4}.md` — human-owned research input with
+- `context/MASTER.md`, `context/P{0..5}.md` — human-owned research input with
   its own `[STABLE]` / `[AGENT-INPUT]` section schema.
 - `.claude/prompts/**`, `.claude/commands/**` — agent prompts, free-form.
 - Agent-generated output and its templates — `scouting/templates/report.md`,
@@ -239,6 +239,11 @@ new doc be in?":
   GitHub-rendered top page is the public-facing entry, and the
   hand-tuned Korean onboarding lives one click away at
   `docs/probe_guide.html`.
+- **Exception 3 — Catalog tables in English.** `analysis/catalogs/dataset.md`
+  + `analysis/catalogs/benchmark.md`. Every cell (headers, source, facts,
+  embodiment, license, lineage/use) is authored in English so the tables stay
+  uniform and grep-able; they carry no H1, only the `Updated` badge + emoji
+  `##` section headers. (`models.md` keeps its awesome-list bullet form.)
 
 **No `_KO` / `_EN` filename suffix.** Location (the folder rule above) plus
 the H1 on line 1 are sufficient — `head -1 <file>` tells you the language
@@ -281,9 +286,9 @@ as single-color 노란 shields.io badges — same badge style for the `arXiv` ce
 inspects the filesystem for the vendor-neutral `impl` column (lerobot-pathed:
 `impl.md` vs `UNMAPPABLE.md`), and rewrites the block between
 `<!-- ANALYSIS_INDEX:START -->` / `<!-- ANALYSIS_INDEX:END -->` as one table
-**per primary Pillar** (P1…P4/미분류; primary = first
-`관련 Pillar` entry — the index taxonomy covers the four pillars P1–P4; the P5
-evaluation pillar was retired, and a stray `P5` is dropped at generation).
+**per primary Pillar** (P0…P5/미분류; primary = first
+`관련 Pillar` entry — the index taxonomy covers the six pillars P0–P5; a `P#`
+outside that range is dropped at generation).
 Everything outside the markers stays hand-maintained — the short folder intro above the index block.
 
 - **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**` or the script), committing the refresh as a `chore(analysis): refresh README.md` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage `analysis/README.md` or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.

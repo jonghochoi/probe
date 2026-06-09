@@ -12,7 +12,7 @@ Each run produces **one Korean file**:
 
 | File | Language | Purpose |
 |------|----------|---------|
-| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P1–P4); `YYYY-MM-DD` is the run date. The agent reads sibling files in the same `P#/` folder for de-duplication. |
+| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P0–P5); `YYYY-MM-DD` is the run date. The agent reads sibling files in the same `P#/` folder for de-duplication. |
 
 The report is written directly in Korean (no separate English file).
 Paper titles, arXiv links, and `P#/D#` tags stay verbatim in their
@@ -118,10 +118,12 @@ badge**, color-coded by category:
 
 | Category | Color | Source |
 |----------|-------|--------|
-| `P1` | `1f77b4` (blue) | pillar palette — matches `refresh-analysis-index.py` `PILLAR_COLOR` |
+| `P0` | `ff7f0e` (orange) | pillar palette — matches `refresh-analysis-index.py` `PILLAR_COLOR` |
+| `P1` | `1f77b4` (blue) | pillar palette |
 | `P2` | `9467bd` (purple) | pillar palette |
 | `P3` | `2ca02c` (green) | pillar palette |
 | `P4` | `d62728` (red) | pillar palette |
+| `P5` | `17becf` (cyan) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared decision color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
@@ -135,7 +137,7 @@ plus amber decisions appear.
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-9467bd.svg) | Structured Input-Modality Binding (pillar) |
+| <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-9467bd.svg) | Structured Multimodal Observation Fusion (pillar) |
 | <a id="ref-D4"></a>![D4](https://img.shields.io/badge/D4-d97706.svg) | Body↔Hand information sharing — FiLM, cross-attn/hidden-state deferred |
 ```
 
@@ -314,6 +316,13 @@ It applies to every `scouting/` and `analysis/` output.
   bullet list), not a comma/`·`/`—`-chained paragraph. Target: one
   eye-saccade per record. (Markdown needs a blank line both before and after
   a table, including when a `-` bullet follows.)
+- **Lists inside a table cell — use `<br>` + `•`, never `*`/`-`.** A GFM
+  table cell cannot hold a real list (`<ul>`) or a literal newline — a
+  newline ends the row, and a leading `*`/`-` renders as text, not a bullet.
+  To stack several items in one cell, join them with `<br>` and a literal
+  bullet glyph: `• a<br>• b<br>• c`. (This is how the `analysis/catalogs/`
+  dataset/benchmark tables render their multi-item Source / Facts /
+  Embodiment / Details cells.)
 - **No 📊 summary score table.** The 📊 section is the per-paper rationale
   only (one bold head carrying the total — `**HapTile (10/12)**` — then a
   bullet per dimension). A separate scores table duplicates it, so it is
@@ -560,9 +569,8 @@ the per-command prompts (`/analyze-paper`, `/implement-design`,
 "Automatically-maintained indexes".
 
 The generated `README.md` block is one plain-`##` table **per primary Pillar**
-(`P1`…`P4`, then `미분류`). The index taxonomy covers the four pillars P1–P4; the
-P5 evaluation pillar was retired, so a stray `P5` in a `관련 Pillar` row is
-dropped at generation. The
+(`P0`…`P5`, then `미분류`). The index taxonomy covers the six pillars P0–P5; a
+`P#` outside that range is dropped at generation. The
 *primary pillar* is the first entry of the `관련 Pillar` row; a paper appears
 in exactly one table but lists its full pillar set in the `Pillars` column.
 Empty pillar buckets are skipped. Within each table rows sort by `Refreshed`
@@ -596,7 +604,7 @@ exactly):
 | `원문 제목 (영문)` | Plain English title |
 | `링크` | `[arXiv:XXXX.XXXXX](…)`, optionally followed by `· [GitHub](…) · [HuggingFace](…) · [Website](…)` — include a non-arXiv link only if it exists and resolves; never fabricate one |
 | `분석 생성일` | `YYYY-MM-DD` |
-| `관련 Pillar` | Comma-separated `P#` (controlled `P1`–`P4`; the P5 evaluation pillar was retired); first = primary |
+| `관련 Pillar` | Comma-separated `P#` (controlled `P0`–`P5`); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
 
 The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
