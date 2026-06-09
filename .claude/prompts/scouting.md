@@ -39,7 +39,7 @@ are unreachable. Parse arXiv responses (Atom XML) and Semantic
 Scholar responses (JSON, via `jq`) directly.
 
 Endpoints:
-- arXiv:  `http://export.arxiv.org/api/query`
+- arXiv:  `https://export.arxiv.org/api/query`
 - GitHub raw (curated lists): `https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md`
   — a plain static GET, no auth, no MCP (consistent with the "no web
   search" rule, it is still curl). Used only by the Curated-List Sweep
@@ -63,7 +63,7 @@ Endpoints:
    context/<PILLAR>.md), not keyword overlap.
 2. Keyword Sweep & topic-watch — query arXiv for cs.RO + cs.LG,
    newest first, e.g.:
-     `curl --fail -sS "http://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`
+     `curl --fail -sS "https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`
    Keep entries whose `<published>` is within the last 14 days,
    then filter against the "<PILLAR> Anti-topics" list. This is
    the noisiest source; weight it lowest.
