@@ -479,6 +479,12 @@ conventions below codify both.
     subscripts unless the backtick form shields it.
   - **Display** is `$$X$$` on its own line (no backticks) — for a
     *single-row* equation only.
+  - **No equation-numbering macros** — `\tag`, `\label`, `\ref`,
+    `\eqref`, `\nonumber` are FORBIDDEN inside `$$…$$`. github.com's KaTeX
+    errors on them and dumps the raw LaTeX onto the page, wrapping it
+    character-by-character. Carry the paper's equation number in the
+    surrounding prose instead (`전이를 … 강제합니다 (식 1):`), then
+    reference it as `식 (N)` — the convention every analysis doc follows.
   - **Multi-row display** (anything with a `\\` row break — `aligned`,
     `pmatrix` / `bmatrix` / matrices, `cases`, or a bare `\\`) MUST use a
     fenced ```` ```math ```` block, never `$$…\\…$$`. GitHub does not

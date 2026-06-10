@@ -25,6 +25,11 @@ Auto-fixable (applied with --fix):
 Report-only (no safe auto-fix; cause a non-zero exit):
   - odd count of unescaped `$` on a line (unbalanced delimiters)
   - KaTeX-unsupported author macros (`\\newcommand`, `\\def`, `\\renewcommand`)
+  - GitHub-KaTeX-unsupported equation-numbering macros (`\\tag`, `\\label`,
+    `\\ref`, `\\eqref`, `\\nonumber`) — KaTeX on github.com errors on these
+    and dumps the raw LaTeX (it wraps character-by-character); number
+    equations in the surrounding prose instead (`(식 N)`), the convention
+    every other analysis doc follows. The fix is structural, not a token swap
   - multi-line `$$…\\…$$` (a `\\` row break inside display dollars) — GitHub
     renders `\\` only inside a ```math fenced block, so this must be moved
     there by hand (the fix is structural, not a token swap)
@@ -63,6 +68,10 @@ MACRO_SUBS = [
 ]
 # Author macros KaTeX cannot resolve; we surface them rather than guess a fix.
 UNSUPPORTED_MACRO = re.compile(r"\\(?:newcommand|renewcommand|def)\b")
+# §5-6 — equation-numbering macros github.com's KaTeX rejects: it errors and
+# leaks the raw LaTeX onto the page (wrapping it character-by-character). The
+# paper's equation numbers belong in prose (`(식 N)`), not in a `\tag`.
+GITHUB_UNSUPPORTED_MACRO = re.compile(r"\\(?:tag|label|ref|eqref|nonumber)\b")
 
 VALID_INLINE = re.compile(r"\$`[^`]*?`\$")      # the one allowed inline form
 DISPLAY = re.compile(r"\$\$.+?\$\$")            # display block (possibly inline)
@@ -223,6 +232,16 @@ def process_line(line: str) -> tuple[str, list[str], list[tuple[int, str]]]:
     for m in UNSUPPORTED_MACRO.finditer(line):
         issues.append(
             (m.start() + 1, f"KaTeX-unsupported macro `{m.group(0)}`")
+        )
+
+    # Report-only: equation-numbering macros github.com's KaTeX rejects.
+    for m in GITHUB_UNSUPPORTED_MACRO.finditer(line):
+        issues.append(
+            (
+                m.start() + 1,
+                f"GitHub-KaTeX-unsupported macro `{m.group(0)}` — number the "
+                "equation in prose (`(식 N)`), not with `\\tag`/`\\label` (§5-6)",
+            )
         )
 
     return line, fixes, issues
