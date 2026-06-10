@@ -296,6 +296,12 @@ scanned; only the scouting report is 개조식.)
 Two surface conventions (markdown, not register):
 
 - Use bold (`**text**`) for the bullet label and for emphasis.
+- When a bold span ends just before a Korean particle, do **not** close the
+  `**` right after a closing paren / punctuation glued to the particle —
+  `**용어(gloss)**을` renders the `**` literally (GFM right-flanking rule: a
+  `**` preceded by punctuation must be followed by whitespace or punctuation
+  to close). Close the bold on the Korean term and leave the gloss + particle
+  plain: `**용어**(gloss)을`.
 - Code blocks and inline code (`` `text` ``) are kept verbatim.
 
 **Meaning is never altered for style.** Restructuring prose into 개조식 must
