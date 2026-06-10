@@ -10,7 +10,7 @@ Pillar` entry), so the human-facing layout stays scannable as the corpus grows;
 a single page still supports Ctrl-F.
 
 It also maintains the bidirectional cross-link between the hand-curated
-`analysis/catalogs/models.md` and the deep-dive corpus: every catalog bullet
+`catalogs/models.md` and the deep-dive corpus: every catalog bullet
 whose arXiv id has an `analysis/<id>/` folder gets a `deep-dive` badge, and the
 matching index row gets a `catalog` badge back. Only the link badges are
 automated — catalog entry add/remove and its `Updated` badge stay hand-owned.
@@ -34,7 +34,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
 INDEX = ANALYSIS_DIR / "README.md"
-CATALOG = ANALYSIS_DIR / "catalogs" / "models.md"
+CATALOG = REPO_ROOT / "catalogs" / "models.md"
 
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
@@ -339,14 +339,14 @@ def link_badges(links: list[tuple[str, str]], arxiv_id: str) -> str:
     return " ".join(out)
 
 
-# ── Catalog cross-link (analysis/catalogs/models.md ↔ index) ─────────────
+# ── Catalog cross-link (catalogs/models.md ↔ index) ──────────────────────
 # Both directions share one purple badge color, distinct from the link/pillar/
 # keyword palettes, so a cross-link reads as "the same paper, the other surface".
 CROSSLINK_COLOR = "6f42c1"  # 보라 purple
 # Index → catalog: appended to a row's Links cell when the paper is curated.
 CATALOG_BADGE = (
     f"[![catalog](https://img.shields.io/badge/catalog-📚_models-{CROSSLINK_COLOR}.svg)]"
-    "(catalogs/models.md)"
+    "(../catalogs/models.md)"
 )
 # Catalog → index: injected into a models.md bullet after its arXiv badge.
 # Matches any prior injection (id-agnostic) so re-runs strip-then-readd cleanly.
@@ -359,15 +359,15 @@ CATALOG_ARXIV_BADGE_RE = re.compile(
 
 
 def _deep_dive_badge(stem: str) -> str:
-    """Deep-dive badge for a models.md bullet → `../<id>/analysis.md` (catalog is one level down)."""
+    """Deep-dive badge for a models.md bullet → `../analysis/<id>/analysis.md` (catalog sits at repo root, a sibling of analysis/)."""
     return (
         f" [![deep-dive](https://img.shields.io/badge/deep--dive-📄_analysis-{CROSSLINK_COLOR}.svg)]"
-        f"(../{stem}/analysis.md)"
+        f"(../analysis/{stem}/analysis.md)"
     )
 
 
 def load_catalog_ids() -> set[str]:
-    """Return the set of arXiv ids curated in analysis/catalogs/models.md.
+    """Return the set of arXiv ids curated in catalogs/models.md.
 
     Used for the reverse badge: an index row whose paper is in this set gets a
     `catalog` badge. Missing catalog file → empty set (reverse link disabled).

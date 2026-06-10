@@ -369,8 +369,8 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 ## 💡 컨텍스트 제안
 
 - **§8.4 핀 entry 업데이트** — `Being-H0.5` row 의 *VLM init* 컬럼을 `TBD` → `InternVL-3.5 (decoder-only, ~2B)` 로 갱신 권장. 추가로 *Open-weight* 여부·라이선스·코드 공개 일정을 GitHub release 확인 후 D19 lineage 카탈로그에 반영. 본 분석은 *제안만* — `context/MASTER.md` 는 수정하지 않습니다.
-- **analysis/catalogs/models.md 추가 entry 후보** — 본 논문은 *open-weight* + *cross-embodiment* + *MoT/MoF + 연속 + 이산 hybrid* 조합이라 카탈로그의 평면 큐레이션 entry 로 등재할 만한 사례. 다음 분기 카탈로그 재밸런스 때 entry 추가 검토.
-- **analysis/catalogs/pretrain_data.md 갱신** — UniHand-2.0 의 30 embodiment 표 1 row 들이 *lineage-stacking* 컬럼을 그대로 채울 수 있으므로 *데이터 catalog 빌드* 라는 D22 의 deferred 산출물을 본 논문을 seed 로 삼아 시작 가능. 단 mixing ratio 와 라이선스 호환성은 GitHub 공개 후 별도 확인.
+- **catalogs/models.md 추가 entry 후보** — 본 논문은 *open-weight* + *cross-embodiment* + *MoT/MoF + 연속 + 이산 hybrid* 조합이라 카탈로그의 평면 큐레이션 entry 로 등재할 만한 사례. 다음 분기 카탈로그 재밸런스 때 entry 추가 검토.
+- **catalogs/pretrain_data.md 갱신** — UniHand-2.0 의 30 embodiment 표 1 row 들이 *lineage-stacking* 컬럼을 그대로 채울 수 있으므로 *데이터 catalog 빌드* 라는 D22 의 deferred 산출물을 본 논문을 seed 로 삼아 시작 가능. 단 mixing ratio 와 라이선스 호환성은 GitHub 공개 후 별도 확인.
 - **D6 deferred trigger 후보** — Being-H0.5 의 *MoT shared self-attention* 이 5 embodiment 에서 강건한 결과를 보였으므로 우리 D6 deferred (B) cross-attention 의 *evidence 누적* 으로 한 줄 카운트 가능. trigger 자체는 우리 v1 FiLM 의 *bottleneck 관측* 이 떠야 점화.
 
 ---
