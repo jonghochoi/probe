@@ -1,6 +1,6 @@
 ![Updated](https://img.shields.io/badge/updated-2026--06--09-blue.svg)
 
-## 🤖 Robot action
+## 🤖 Robot Action
 
 | # | Dataset | Links | Source | Facts | Embodiment | License | Used by |
 |---|---|---|---|---|---|---|---|
@@ -19,13 +19,13 @@
 | 13 | **RT-1** | [![arXiv](https://img.shields.io/badge/arXiv-2212.06817-b31b1b.svg)](https://arxiv.org/abs/2212.06817) 🔒 closed (Google internal) | • Google Everyday Robot teleop | • ~130K traj<br>• 700+ tasks | • Google Everyday Robot 7-DOF + gripper<br>• 1 Hz token emission | Closed ❌ | RT-2 (successor) · absorbed into RT-X, redistributed as OXE sub-dataset |
 | 14 | **MolmoAct2-SO100/101** | [![arXiv](https://img.shields.io/badge/arXiv-2605.02881-b31b1b.svg)](https://arxiv.org/abs/2605.02881) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://allenai.org/blog/molmoact2) | • MolmoAct2 corpus on lerobot SO-ARM | • Scale ❓ | • SO-100 / SO-101<br>• Arm 6-DOF + 1-DOF parallel-jaw | Apache-2.0 | MolmoAct2 (part of the BimanualYAM + DROID-MolmoAct2 + SO100/101 aggregate) |
 
-## 🔀 Mixed (robot + human)
+## 🔀 Mixed (Robot + Human)
 
 | # | Dataset | Links | Source | Facts | Embodiment | License | Used by |
 |---|---|---|---|---|---|---|---|
 | 1 | **UniHand-2.0** | [![arXiv](https://img.shields.io/badge/arXiv-2601.12993-b31b1b.svg)](https://arxiv.org/abs/2601.12993) [![GitHub](https://img.shields.io/badge/GitHub-Code-black)](https://github.com/BeingBeyond/Being-H) | • BeingBeyond human-video → multi-hand retarget | • ~35K h (ego 16K + robot 14K + VL 5K)<br>• 400M+ samples<br>• 120B+ tokens | • 30 embodiments retarget (Inspire / xhand / LEAP / Allegro / ShadowHand)<br>• Hand 6–24 DOF | Apache-2.0 | Being-H0.5 |
 
-## 👤 Human video
+## 👤 Human Video
 
 | # | Dataset | Links | Source | Facts | Embodiment | License | Used by |
 |---|---|---|---|---|---|---|---|

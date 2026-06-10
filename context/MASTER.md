@@ -127,7 +127,7 @@ Decision-number allocation:
 | P5 — World Model | action-conditioned world model integration | D28–D32 |
 
 ### 5.0 P0. VLA Datasets & Benchmarks
-**Scope**: data is upstream of method. Dedicated scouting front-end for VLA datasets (robot action / human-egocentric video / mixed) + the scarce tactile/force/torque corpora + benchmarks/eval harnesses. Output feeds the P4 pretraining-corpus decisions and the catalogs (`analysis/catalogs/dataset.md` + `analysis/catalogs/benchmark.md`). Egocentric + tactile/torque emphasis sets the priority data axis.
+**Scope**: data is upstream of method. Dedicated scouting front-end for VLA datasets (robot action / human-egocentric video / mixed) + the scarce tactile/force/torque corpora + benchmarks/eval harnesses. Output feeds the P4 pretraining-corpus decisions and the catalogs (`catalogs/dataset.md` + `catalogs/benchmark.md`). Egocentric + tactile/torque emphasis sets the priority data axis.
 
 **Identity tie**: the pretraining corpus (P4 D22) and the egocentric data priority need an evidence-driven data front-end, not incidental scouting.
 

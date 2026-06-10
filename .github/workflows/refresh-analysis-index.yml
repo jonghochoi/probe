@@ -13,7 +13,7 @@ on:
       - 'analysis/**/analysis.md'
       - 'analysis/**/impl/**'
       - 'analysis/**/validation/**'
-      - 'analysis/catalogs/models.md'
+      - 'catalogs/models.md'
       - 'scripts/refresh-analysis-index.py'
       - '.github/workflows/refresh-analysis-index.yml'
 
@@ -39,13 +39,13 @@ jobs:
         run: python3 scripts/refresh-analysis-index.py
       - name: Commit and push if changed
         run: |
-          if git diff --quiet -- analysis/README.md analysis/catalogs/models.md; then
+          if git diff --quiet -- analysis/README.md catalogs/models.md; then
             echo "README.md / models.md unchanged — nothing to commit."
             exit 0
           fi
           git config user.name  'probe-index-bot'
           git config user.email 'probe-index-bot@users.noreply.github.com'
-          git add analysis/README.md analysis/catalogs/models.md
+          git add analysis/README.md catalogs/models.md
           git commit -m "chore(analysis): refresh README + catalog cross-links"
           # Retry on race with another push to main.
           for i in 1 2 3 4; do

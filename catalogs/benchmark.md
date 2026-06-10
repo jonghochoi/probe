@@ -1,13 +1,13 @@
 ![Updated](https://img.shields.io/badge/updated-2026--06--09-blue.svg)
 
-## 🧪 Eval harness
+## 🧪 Eval Harness
 
 | # | Benchmark | Links | Source | Details | Type | License | Use |
 |---|---|---|---|---|---|---|---|
 | 1 | **vla-eval** | [![arXiv](https://img.shields.io/badge/arXiv-2603.13966-b31b1b.svg)](https://arxiv.org/abs/2603.13966) | • Allen AI unified VLA evaluation harness | • Standardized cross-model evaluation protocol (same-condition comparison across models) | harness | Apache-2.0 | Common yardstick for methodology comparison |
 | 2 | **RoboArena** | [![arXiv](https://img.shields.io/badge/arXiv-2506.18123-b31b1b.svg)](https://arxiv.org/abs/2506.18123) | • Distributed real-robot evaluation network | • Double-blind pairwise comparison<br>• Generalist-policy evaluation on the DROID platform | real-robot | MIT | In-the-wild generalization eval (D26 real axis) |
 
-## 🎮 Simulator / sim benchmark
+## 🎮 Simulator / Sim Benchmark
 
 | # | Benchmark | Links | Source | Details | Type | License | Use |
 |---|---|---|---|---|---|---|---|
@@ -16,7 +16,7 @@
 | 3 | **LIBERO** | [![arXiv](https://img.shields.io/badge/arXiv-2306.03310-b31b1b.svg)](https://arxiv.org/abs/2306.03310) | • Lifelong manipulation benchmark | • Spatial / Object / Goal / Long (4 suites)<br>• LIBERO-90/100 (130 tasks total) | sim | MIT (code) / CC-BY-4.0 (data) | De facto standard for VLA eval (many LIBERO-Plus/X derivatives) |
 | 4 | **SimplerEnv (SIMPLER)** | [![arXiv](https://img.shields.io/badge/arXiv-2405.05941-b31b1b.svg)](https://arxiv.org/abs/2405.05941) | • Sim eval reproducing real-robot setups | • Reproduces Google RT / BridgeData WidowX setups<br>• Validates sim-real correlation | sim | MIT | Sim-real correlation eval without real robots |
 
-## ✋ Dexterous / contact-rich eval
+## ✋ Dexterous / Contact-rich Eval
 
 | # | Benchmark | Links | Source | Details | Type | License | Use |
 |---|---|---|---|---|---|---|---|
