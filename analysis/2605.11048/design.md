@@ -22,11 +22,11 @@
 - **입력 — RGB (fix/global view)**: shape `(B, T_obs, 3, 240, 320)`, dtype `float32`, normalization mean=0.5/std=0.5 → `[-1, 1]`
 - **입력 — proprioception**: shape `(B, T_obs, 7)`, dtype `float32`, MinMax normalization (6D EE pose + 1D gripper)
 - **입력 — force history**: shape `(B, H_force, 6)`, dtype `float32`, MinMax normalization (3D force + 3D torque, `H_force = 10`)
-- **입력 — flow time step**: scalar `k ∈ [0, 1]`, dtype `float32`, Fourier embedding (scale 0.2, untrainable)
+- **입력 — flow time step**: scalar $`k \in [0, 1]`$, dtype `float32`, Fourier embedding (scale 0.2, untrainable)
 - **출력 — hybrid action chunk**: shape `(B, T_action, 13)`, dtype `float32`, MinMax denormalize (6D delta pose + 1D gripper + 6D next-force, `T_action = 64`)
-- **실행 시 controller 전송**: action chunk 의 앞 7D `[Δp; gripper]` 만 robot controller 로. 뒤 6D `f_hat` 은 학습 신호 전용으로 *송신하지 않음*
+- **실행 시 controller 전송**: action chunk 의 앞 7D $`[\Delta p; \text{gripper}]`$ 만 robot controller 로. 뒤 6D `f_hat` 은 학습 신호 전용으로 *송신하지 않음*
 - **V2F handover 인터페이스 — VLM 입력**: `(I_fix, language_instruction)` → 픽셀 좌표 `(u_hat, v_hat)` (회귀 출력, dtype `float32`)
-- **V2F handover 인터페이스 — deprojection**: `(u_hat, v_hat, depth_map, camera_intrinsics, camera_extrinsics)` → robot base frame 의 3D waypoint `p_approach ∈ R^3`
+- **V2F handover 인터페이스 — deprojection**: `(u_hat, v_hat, depth_map, camera_intrinsics, camera_extrinsics)` → robot base frame 의 3D waypoint $`p_{\text{approach}} \in \mathbb{R}^3`$
 - **T_obs (observation horizon)** = 2 (Table 6), **T_action (action horizon)** = 64
 
 ---
@@ -86,7 +86,7 @@ def controller_dispatch(a0: Tensor) -> Tensor:
 - (불변식 1) **Hybrid action 의 force 차원은 controller 로 전송되지 않는다.** 실행 시 `controller_dispatch` 는 앞 7D 만 송신합니다 — 위반 시 모델이 force-control 루프에 직접 개입해 안정성 가정이 무너집니다.
 - (불변식 2) **V2F handover trigger 는 positional criterion 만으로 발화.** contact 확률·force threshold 같은 다른 신호는 사용하지 않으며, trigger 가 한 번 발화하면 episode 내 *되돌아가지 않음*.
 - (불변식 3) **Linear probability path.** 보간은 $`\mathbf{a}_{t}^{k}=(1-k)\mathbf{a}_{t}^{0}+k\mathbf{a}_{t}^{1}`$, target drift 는 상수 $`\mathbf{u}_{t}^{k}=\mathbf{a}_{t}^{1}-\mathbf{a}_{t}^{0}`$. 비선형 path 로의 일반화는 가정에 포함되지 않음.
-- (불변식 4) **Force history window 길이 $`H=10`$** 는 SR 의 결정 요인. 1-step 으로 줄이면 SR 이 약 85% → 55% 로 무너지므로 (Table 5) `H_force ≥ 10` 이 사실상 hard constraint.
+- (불변식 4) **Force history window 길이 $`H=10`$** 는 SR 의 결정 요인. 1-step 으로 줄이면 SR 이 약 85% → 55% 로 무너지므로 (Table 5) $`H_{\text{force}} \ge 10`$ 이 사실상 hard constraint.
 - (가정 1) **Action / state normalization 은 MinMax**, 이미지 normalization 은 `[-1, 1]` (mean=std=0.5) (Table 6). 정규화 통계의 데이터셋 split 출처는 원문에 명시되지 않아 *train split 전체의 per-dim min/max* 로 가정.
 - (가정 2) **ODE solver 는 deterministic numerical solver** 만 명시. step 수 (`Sampling Steps`) 는 "Variable, inference-time adjustable" 로 명시되어 hyperparameter 로 노출.
 - (가정 3) **V2F deprojection 의 camera calibration 정확도** 는 episode 내내 유효하다고 가정. 카메라 흔들림 / re-calibration drift 는 본 framework 범위 밖.

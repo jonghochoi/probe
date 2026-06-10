@@ -52,7 +52,7 @@ def eval_metrics(success_matrix_S, S0, held_out_H):
 ```
 
 - `sequential_finetune` — Seq. FT 레시피의 핵심. 망각 방지 장치(정규화/리플레이/격리) **없음**. 하이퍼파라미터 튜닝 없음(§4.1).
-- `grpo_loss` — KL 계수 `β = 0.0`. 명시적 KL 페널티 대신 on-policy 샘플링의 암묵 정규화에 의존.
+- `grpo_loss` — KL 계수 $`\beta = 0.0`$. 명시적 KL 페널티 대신 on-policy 샘플링의 암묵 정규화에 의존.
 - `apply_lora` — backbone 동결, 저랭크 어댑터만 학습. 학습 후 $`W_{\text{new}}\leftarrow W_0+BA`$ 병합 가능.
 - `eval_metrics` — ZS는 본 논문 도입 지표(held-out 작업 평균 성공률).
 
@@ -84,21 +84,21 @@ $$\rho_{t}(\theta)=\frac{\pi_{\theta}(a_{t}\mid s_{t},\ell)}{\pi_{\theta_{\text{
   | 이름 | 값 | 출처 |
   |------|----|----|
   | Optimizer | AdamW | §F, Table 6 |
-  | Learning rate | `2×10^{-5}` | §F, Table 6 |
-  | AdamW `β1 / β2` | `0.9 / 0.999` | §F, Table 6 |
-  | AdamW `ε` | `10^{-5}` | §F, Table 6 |
+  | Learning rate | $`2\times10^{-5}`$ | §F, Table 6 |
+  | AdamW $`\beta_1 / \beta_2`$ | `0.9 / 0.999` | §F, Table 6 |
+  | AdamW $`\epsilon`$ | $`10^{-5}`$ | §F, Table 6 |
   | Gradient clip norm | `1.0` | §F, Table 6 |
   | Global batch size | `8192` | §F, Table 6 |
-  | Discount `γ` | `0.99` | §F, Table 6 |
-  | GAE `λ` | `0.95` | §F, Table 6 |
+  | Discount $`\gamma`$ | `0.99` | §F, Table 6 |
+  | GAE $`\lambda`$ | `0.95` | §F, Table 6 |
   | Clip ratio (low/high) | `0.20 / 0.28` | §F, Table 6 |
-  | KL coefficient `β` | `0.0` | §F, Table 6 |
+  | KL coefficient $`\beta`$ | `0.0` | §F, Table 6 |
   | Entropy bonus | `0.0` | §F, Table 6 |
   | Rollout epochs | `16` | §F, Table 6 |
   | Group size | `8` | §F, Table 6 |
   | LoRA rank | `32` | §F, Table 6 |
 
-- 방법별 하이퍼 (§G, Table 7) — Seq. FT는 추가 하이퍼 없음. 참고: EWC `λ=1×10^6`, ER/DER `λ_replay=0.03`, SLCA slow/fast LR `4×10^{-6} / 4×10^{-5}`, RETAIN merge `λ=0.5`.
+- 방법별 하이퍼 (§G, Table 7) — Seq. FT는 추가 하이퍼 없음. 참고: EWC $`\lambda=1\times10^6`$, ER/DER $`\lambda_{\mathrm{replay}}=0.03`$, SLCA slow/fast LR $`4\times10^{-6} / 4\times10^{-5}`$, RETAIN merge $`\lambda=0.5`$.
 
 ---
 
@@ -107,7 +107,7 @@ $$\rho_{t}(\theta)=\frac{\pi_{\theta}(a_{t}\mid s_{t},\ell)}{\pi_{\theta_{\text{
 - **지표** — `AVG` (최종 평균 성공률, Eq.1) · **임계값** — 높을수록 좋음, 오라클(multitask)이 상한 · **비교 baseline** — Multitask Oracle.
 - **지표** — `NBT` (망각, Eq.2) · **임계값** — 낮을수록 좋음, 본 논문 결과는 일관되게 < 2% (음수 가능) · **비교 baseline** — 0 = 망각 없음.
 - **지표** — `FWT` (순방향 전이, Eq.3) · **임계값** — 양수가 유익한 전이 · **비교 baseline** — 작업 순서 의존.
-- **지표** — `ZS` (held-out 성능, Eq.4) · **임계값** — 높을수록 좋음, Seq. FT가 오라클을 자주 상회 · **비교 baseline** — Multitask Oracle ZS, 초기 체크포인트 대비 `ΔZS`.
+- **지표** — `ZS` (held-out 성능, Eq.4) · **임계값** — 높을수록 좋음, Seq. FT가 오라클을 자주 상회 · **비교 baseline** — Multitask Oracle ZS, 초기 체크포인트 대비 $`\Delta\mathrm{ZS}`$.
 - **메커니즘 진단** — `Fisher energy E_F` (큰 모델 0.02 vs 작은 모델 0.16), per-layer effective rank (LoRA 29.3±2.16 vs full-FT 208.6±148.5), nuclear norm (0.259 vs 0.609).
 
 ---
@@ -127,6 +127,6 @@ $$\rho_{t}(\theta)=\frac{\pi_{\theta}(a_{t}\mid s_{t},\ell)}{\pi_{\theta_{\text{
 ## 🚧 미해결 / 잠정
 
 - 관측/행동 텐서의 정확한 shape·정규화 통계는 원문이 "camera images / 7-dim action" 수준으로만 명시 — base VLA 규약을 따른다는 가정으로 메움.
-- `σ_t` 노이즈 스케줄의 구체 형태는 Flow-SDE(Chen et al., 2026) 참조로만 언급 — 원문에 수치 명시 없음.
+- $`\sigma_t`$ 노이즈 스케줄의 구체 형태는 Flow-SDE(Chen et al., 2026) 참조로만 언급 — 원문에 수치 명시 없음.
 - Seq. FT가 오라클보다 ZS에서 우위인 원인은 저자도 미해결("implicit regularization 가설")로 남김 — Layer 1 스펙으로 굳히지 않음.
-- `ΔAVG`/`ΔZS` 의 정확한 정의(초기 체크포인트 대비 변화)는 §4.2 표 각주 수준 — 본 분석은 본문 표기 그대로 보존.
+- $`\Delta\mathrm{AVG}`$/$`\Delta\mathrm{ZS}`$ 의 정확한 정의(초기 체크포인트 대비 변화)는 §4.2 표 각주 수준 — 본 분석은 본문 표기 그대로 보존.

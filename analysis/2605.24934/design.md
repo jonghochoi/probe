@@ -19,11 +19,11 @@
 학습·추론 시 정책이 입출력하는 텐서를 모달리티별로 한 줄씩 정의합니다. 시간 축은 의미 단위(`K` = `chunk_size`)로만 적습니다.
 
 - **입력 — RGB 이미지**: shape `(B, 3, 240, 320)`, dtype `float32`, [0,1] 정규화. 추론 시에는 인페인팅 없이 원본 로봇 카메라 프레임을 그대로 씁니다(학습 단계에서만 LaMa 인페인팅 + 가상 그리퍼 렌더를 적용). 16×16 patch embedding으로 컨텍스트화.
-- **입력 — ICT 토큰 시퀀스**: shape `(B, N_ent, 29)`, dtype `float32`. `N_ent`는 가변 — 최소 2(양손) + 태스크별 물체 수. 각 토큰 구성: `[τ(1) ‖ ^REF T_E(9) ‖ ^E T_LH(9) ‖ ^E T_RH(9) ‖ g(1)]`. SE(3) → 9-D 평탄화 = 정규화 translation(3) + 6-D rotation(6). 정규화 통계는 (원문에 명시 없음 — 데이터셋 전체 평균/표준편차로 가정).
+- **입력 — ICT 토큰 시퀀스**: shape `(B, N_ent, 29)`, dtype `float32`. `N_ent`는 가변 — 최소 2(양손) + 태스크별 물체 수. 각 토큰 구성: $`[\tau(1) \,\|\, {}^{\mathrm{REF}}T_E(9) \,\|\, {}^E T_{LH}(9) \,\|\, {}^E T_{RH}(9) \,\|\, g(1)]`$. SE(3) → 9-D 평탄화 = 정규화 translation(3) + 6-D rotation(6). 정규화 통계는 (원문에 명시 없음 — 데이터셋 전체 평균/표준편차로 가정).
 - **입력 — Flow time t**: shape `(B,)`, dtype `float32`, `t ~ U(0,1)`.
-- **입력 — Noise sample x₀**: shape `(B, K, D_a)`, dtype `float32`, `x₀ ~ N(0, I)`.
-- **출력 — Velocity field v_θ**: shape `(B, K, D_a)`, dtype `float32`. 학습 시 타깃은 `x₁ - x₀`.
-- **출력 — 양손 액션 청크 x₁**: shape `(B, K, D_a)` with `K=50`, `D_a = 2 × (3 + 6 + 1) = 20` (양손 × {3-D translation + 6-D rotation + 1-D binary grasp logit}).
+- **입력 — Noise sample x₀**: shape `(B, K, D_a)`, dtype `float32`, $`x_0 \sim N(0, I)`$.
+- **출력 — Velocity field v_θ**: shape `(B, K, D_a)`, dtype `float32`. 학습 시 타깃은 $`x_1 - x_0`$.
+- **출력 — 양손 액션 청크 x₁**: shape `(B, K, D_a)` with `K=50`, $`D_a = 2 \times (3 + 6 + 1) = 20`$ (양손 × {3-D translation + 6-D rotation + 1-D binary grasp logit}).
 - **출력 — 보조 헤드 (object motion)**: shape `(B, K, 9)` per manipulated object, 6-DoF 미래 궤적(translation 3 + rotation 6).
 - **출력 — 보조 헤드 (2D trace)**: shape `(B, K, 3, 2)`, 정규화 image 좌표로 anchor keypoint 3개 × K 스텝.
 - **출력 — 보조 헤드 (latent consistency)**: shape `(B, K, 29)`, ICT 손 토큰의 K-스텝 후 상태.
@@ -84,7 +84,7 @@ def safety_cage(target_delta):
 
 - **(시점/임바디먼트 불변)** — ICT의 entity-local 좌표는 카메라·그리퍼 외형·배경에 불변이어야 합니다. 학습-시 사람 손과 추론-시 로봇 그리퍼 사이에 visual 갭이 있더라도 ICT의 numerical 분포가 같을 때 정책이 zero-shot으로 동작합니다.
 - **(스테레오 깊이 가용)** — 손 keypoint의 metric depth가 ±1 cm 이내로 잡혀야 ICT의 ^REF·^E 변환이 의미를 가집니다. 단안 RGB만 쓰면 5~11 cm 깊이 오프셋이 ICT 기준 프레임에 쌓여 정책 학습이 무너집니다(부록 E.1).
-- **(파지 구간 강체 가정)** — kinematic latching `T_obj^t = T_hand^t · (T_hand^{t₀})⁻¹ · T_obj^{t₀}` 은 파지 시점 `t₀` 이후 물체와 손이 강체로 결합된다고 봅니다. in-hand re-grasp나 sliding이 일어나면 무효입니다.
+- **(파지 구간 강체 가정)** — kinematic latching $`T_{obj}^t = T_{hand}^t \cdot (T_{hand}^{t_0})^{-1} \cdot T_{obj}^{t_0}`$ 은 파지 시점 $`t_0`$ 이후 물체와 손이 강체로 결합된다고 봅니다. in-hand re-grasp나 sliding이 일어나면 무효입니다.
 - **(보조 라벨 노이즈 < 정책 학습 신호)** — object motion · 2D trace · latent consistency 헤드는 perception pipeline의 자동 라벨에 기대므로, 라벨 노이즈가 supervision 신호보다 작아야 보조 손실이 정책을 무너뜨리지 않습니다.
 - **(grasp 이진화 임계)** — deployment 시 grasp 스칼라 `g` 는 사람 엄지-검지 거리 정규화 값이고, 로봇 그리퍼의 닫힘/열림 임계가 학습 시 사람 핀치 임계와 맞물려야 합니다(원문은 binarize at deployment만 명시, 임계 값은 명시 없음 — 가정으로 메움).
 - **(액션 청크 내 연속성)** — `K=50` 스텝 청크가 한 forward pass에서 만들어지고 look-ahead 25 step으로 latency를 가린다 — 청크 내부 인접 timestep 차분이 controller 추종 범위 안에 든다는 운동학적 가정에 기댑니다.
@@ -107,27 +107,27 @@ $$\mathcal{L}_{\text{FM}}=\mathbb{E}_{t,\,\mathbf{x}_{0},\,\mathbf{x}_{1}}\Big[w
 | Object-dynamics 헤드 가중 (pos/rot) | `0.5 w_p` / `0.5 w_r` | 부록 C.1, Table 1 |
 | Visual-foresight 헤드 가중 `w_f` | `20` | 부록 C.1, Table 1 |
 | Temporal-consistency 헤드 가중 `w_c` | `[0.1, 1.0]` | 부록 C.1, Table 1 |
-| `λ_OM`, `λ_2D`, `λ_LC` | (원문 식 (3)에서 기호로만 정의; 구체 값은 위 헤드별 가중과 동일계열로 보고) | §3.4 식 (3), 부록 C.1 |
+| $`\lambda_{\text{OM}}`$, $`\lambda_{\text{2D}}`$, $`\lambda_{\text{LC}}`$ | (원문 식 (3)에서 기호로만 정의; 구체 값은 위 헤드별 가중과 동일계열로 보고) | §3.4 식 (3), 부록 C.1 |
 | 프레디션 호라이즌 `K` | `50` | 부록 F, Table 1 |
 | ICT 토큰 차원 | `29` | §3.3 식 (1) |
 | Transformer layers / heads / embed | `6` / `8` / `384` | 부록 C.1, Table 1 |
 | Dropout | `0.05` | 부록 C.1, Table 1 |
 | RGB patch / 입력 해상도 | `16 × 16` / `240 × 320` | 부록 C.1, Table 1 |
 | Optimizer | AdamW | 부록 C.1, Table 1 |
-| 베이스 학습률 | `1 × 10⁻⁴` | 부록 C.1, Table 1 |
+| 베이스 학습률 | $`1 \times 10^{-4}`$ | 부록 C.1, Table 1 |
 | Warmup steps / min-LR ratio | `200` / `0.05` | 부록 C.1, Table 1 |
 | Batch size / Epochs | `32` / `400` | 부록 C.1, Table 1 |
 | Gradient-norm clip / EMA decay | `1.0` / `0.999` | 부록 C.1, Table 1 |
-| 액션 타깃 노이즈 `σ_pos` / `σ_rot` | `1 mm` / `0.5°` | 부록 C.1, Table 1 |
+| 액션 타깃 노이즈 $`\sigma_{\mathrm{pos}}`$ / $`\sigma_{\mathrm{rot}}`$ | `1 mm` / `0.5°` | 부록 C.1, Table 1 |
 | Sub-step 보간 확률 | `0.5` | 부록 C.1, Table 1 |
 | ODE 적분 스텝 수 | `20` (Euler) | §3.4, §D.2 |
-| Region attention spotlight | `w(u,v) = exp(-((u-u₀)² + (v-v₀)²) / (2σ²))`, `σ` learnable | 부록 C.1 식 (8) |
-| State-noise injection | per-channel `Σ_s` on (pos, 6-D rot, grasp) | 부록 C.1 |
+| Region attention spotlight | $`w(u,v) = \exp(-((u-u_0)^2 + (v-v_0)^2) / (2\sigma^2))`$, $`\sigma`$ learnable | 부록 C.1 식 (8) |
+| State-noise injection | per-channel $`\Sigma_s`$ on (pos, 6-D rot, grasp) | 부록 C.1 |
 | Controller re-plan rate | `10 Hz` | §D.2 |
 | Step stride / look-ahead | `2` (실효 5 Hz) / `25` | §D.2 |
 | Grasp threshold | `0.6` (any-over-horizon, optional latch) | §D.2 |
 | Position smoothing α / quaternion blend | `0.5` (EMA) / SLERP, overlap blend `12` | §D.2 |
-| Safety cage (per-cycle) | 위치 `≤ 0.08 m` / 회전 `≤ 0.02 rad` | §D.2 |
+| Safety cage (per-cycle) | 위치 $`\le 0.08`$ m / 회전 $`\le 0.02`$ rad | §D.2 |
 | 데이터 — 태스크당 사람 영상 시간 | `30 min` (스케일 실험: `15 min`, `7~8 min`도 보고) | §3.1, §4.2 |
 | 데이터 — Aria RGB / SLAM | `30 fps · 2 MP` / `2 cam · 30 fps · VGA` | 부록 F, Table 1 |
 
@@ -161,7 +161,7 @@ $$\mathcal{L}_{\text{FM}}=\mathbb{E}_{t,\,\mathbf{x}_{0},\,\mathbf{x}_{1}}\Big[w
 ## 🚧 미해결 / 잠정
 
 - ICT의 SE(3) → 9-D 평탄화에서 translation 정규화 통계 출처 — (원문에 명시 없음 — 데이터셋 전체 mean/std로 가정).
-- `λ_OM`, `λ_2D`, `λ_LC` 의 절대값 — 본문 식 (3)은 기호로만 정의하고, 부록 C.1은 헤드별 *내부* 가중치(`0.5 w_p`, `w_f=20`, `w_c∈[0.1, 1.0]`)만 줍니다. 두 가중치 계열이 동일 스케일인지 별개 곱셈 인자인지 명시 없음 — 가정으로 메움.
+- $`\lambda_{\text{OM}}`$, $`\lambda_{\text{2D}}`$, $`\lambda_{\text{LC}}`$ 의 절대값 — 본문 식 (3)은 기호로만 정의하고, 부록 C.1은 헤드별 *내부* 가중치(`0.5 w_p`, `w_f=20`, $`w_c \in [0.1, 1.0]`$)만 줍니다. 두 가중치 계열이 동일 스케일인지 별개 곱셈 인자인지 명시 없음 — 가정으로 메움.
 - Grasp 이진화 임계값(사람 핀치 거리 정규화 결과를 deployment에서 0/1로 자르는 cut-off) — 부록 B.3은 정규화 절차만 적고 정확한 임계는 원문에 명시 없음 — 가정으로 메움.
 - 보조 헤드 visual_foresight의 "anchor keypoint 3개" 선택 규칙 — 부록 C.1은 `K×3×2` shape만 명시하고 3개 선정 휴리스틱은 비공개 — 가정으로 메움.
 - Latent consistency 헤드의 "K steps ahead" 마스킹 패턴 — masked MSE라고만 표기, 마스크 정의는 원문에 명시 없음 — 가정으로 메움.

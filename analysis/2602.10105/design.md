@@ -95,11 +95,11 @@ $$\min_{\mathbf{g},\,\{\mathbf{f}_{\mathbf{c}}\}}\quad\kappa_{w}\sum_{j=1}^{J}\B
 | `point_drop_ratio` (본문) | `30%` 제거 + 법선 30% 섭동 | §III-D |
 | `point_keep_ratio` (부록) | `0.85` (=15% 제거) | §A.2, Eq. (19) |
 | `noise_sample_ratio` (부록) | `15%` 표본 | §A.2 |
-| `normal_noise σ` (부록) | `0.015` | §A.2, Eq. (20) |
-| `kNN object δ` | `(원문 미명시)` | §A.2, Eq. (18) |
-| `stability threshold ε` | `(원문 미명시)` | §A.1, Eq. (15) |
-| `κ_w, κ_con, κ_coll, κ_hh` | `(원문 미명시)` | §III-C, Eq. (4) |
-| `λ_t, λ_r` (ranking 가중) | `(원문 미명시)` | §A.1, Eq. (10) |
+| `normal_noise` $`\sigma`$ (부록) | `0.015` | §A.2, Eq. (20) |
+| `kNN object` $`\delta`$ | `(원문 미명시)` | §A.2, Eq. (18) |
+| `stability threshold` $`\epsilon`$ | `(원문 미명시)` | §A.1, Eq. (15) |
+| $`\kappa_w, \kappa_{\text{con}}, \kappa_{\text{coll}}, \kappa_{\text{hh}}`$ | `(원문 미명시)` | §III-C, Eq. (4) |
+| $`\lambda_t, \lambda_r`$ (ranking 가중) | `(원문 미명시)` | §A.1, Eq. (10) |
 | world 원점 $`x`$ | `0.6` | §III-A |
 | 데모 수 / source | `~100` | §IV-B |
 

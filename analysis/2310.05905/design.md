@@ -71,11 +71,11 @@ def tail_execute(theta, omega_j):
 
 ## 📊 하이퍼파라미터·손실
 
-- 손실 식 (BC, Eq. 1):
+**손실 식 (BC, Eq. 1)**
 
-  $$\hat{\mathbf{\theta}}=\min_{\mathbf{\theta}}\sum_{k=1}^{K}\underset{s_{t},a_{t}\sim\mathcal{D}_{k}}{\mathbb{E}}\left[\sum_{t=0}^{l_{k}}\mathcal{L}\left(\pi(a|s_{\leq t},\mathcal{T}_{k};\mathbf{\theta}),a_{k}^{t}\right)\right]$$
+$$\hat{\mathbf{\theta}}=\min_{\mathbf{\theta}}\sum_{k=1}^{K}\underset{s_{t},a_{t}\sim\mathcal{D}_{k}}{\mathbb{E}}\left[\sum_{t=0}^{l_{k}}\mathcal{L}\left(\pi(a|s_{\leq t},\mathcal{T}_{k};\mathbf{\theta}),a_{k}^{t}\right)\right]$$
 
-  TAIL에서는 $`\mathbf{\theta}`$ 대신 $`\hat{\mathbf{\theta}}=\{\mathbf{\theta},\mathbf{\omega}\}`$ 의 $`\mathbf{\omega}`$ 에 대해 최적화($`\mathbf{\theta}`$ 동결). $`\mathcal{L}`$ = MSE 또는 음의 로그가능도.
+TAIL에서는 $`\mathbf{\theta}`$ 대신 $`\hat{\mathbf{\theta}}=\{\mathbf{\theta},\mathbf{\omega}\}`$ 의 $`\mathbf{\omega}`$ 에 대해 최적화($`\mathbf{\theta}`$ 동결). $`\mathcal{L}`$ = MSE 또는 음의 로그가능도.
 
 - LoRA (Eq. 2): $`h_{out}={\mathbf{W}}^{\top}h_{in}+\alpha{\mathbf{W}}_{up}^{\top}{\mathbf{W}}_{down}^{\top}h_{in}`$
 - Bottleneck (Eq. 3): $`h_{out}={\mathbf{W}}_{up}^{\top}\phi\left({\mathbf{W}}_{down}^{\top}({\mathbf{W}}^{\top}h_{in})\right)`$
@@ -85,7 +85,7 @@ def tail_execute(theta, omega_j):
   | 이름 | 값 | 출처 |
   |------|----|----|
   | LoRA `rank r` | `8` | §B.2 |
-  | LoRA `scaling α` | `8` | §B.2 |
+  | LoRA `scaling` $`\alpha`$ | `8` | §B.2 |
   | LoRA 적용 위치 | `W_Q`, `W_V` (attention 투영) | §B.2 |
   | Prefix 토큰 길이 | `30` | §B.2 |
   | Prefix 저랭크 표현 `r` | `16` | §B.2 |
@@ -96,7 +96,7 @@ def tail_execute(theta, omega_j):
   | 학습 에폭 | 100 (대부분 묶음) / 50 (LIBERO-10) | §5.2, §B.3 |
   | 배치 크기 | TAIL 18 / FFT·ER 14 / EWC 10 | §B.3 |
   | 시드 수 | 3 | §5.2 |
-  | 학습 파라미터 비율 (LoRA) | `2.02M / 172.24M ≈ 1.17%` | Table 3 |
+  | 학습 파라미터 비율 (LoRA) | $`2.02\mathrm{M} / 172.24\mathrm{M} \approx 1.17\%`$ | Table 3 |
 
 ---
 

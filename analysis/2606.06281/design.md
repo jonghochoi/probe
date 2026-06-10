@@ -23,8 +23,8 @@
 - **입력 (evetac)** — `O_evetac`: shape `(B, 16, 120, 160)`, dtype float, 정규화 `[-1/2, 1/2]`(무이벤트 회색 프레임 → 0), 200 Hz 센서의 timestep 당 16 event 프레임 스택. co-training 시 배치 절반에만 존재, 배포 시 제거.
 - **관측 윈도우** — `n_obs = 4`, 센서 프레임은 0.06 s 윈도우 균일 샘플링(15 Hz 제어).
 - **조건 토큰 (encoder 출력)** — `C`: shape `(B, N_cond, D)`, `D = 256`. 토큰 수(`N_cond`/`Tok/obs`)는 센서 설정 의존 — V+G+E 644, V+G 452, V+E 452, V 260 (§A.2 Table 4).
-- **출력 (action chunk)** — `A`: shape `(B, H, d_a)` = `(B, 16, 4)`, 로컬 프레임 delta `[Δx, Δy, Δz, Δψ]`, 정규화 minmax. 제어 루프는 처음 `n_act`(1–3) 스텝만 실행 후 재계획.
-- **플로우 매칭 텐서** — 노이즈 `x_0 ~ N(0, I)` shape `(B, H, d_a)`, 종점 `x_1 = Ā`(정규화 action chunk), 시간 `t ∈ [0,1]`.
+- **출력 (action chunk)** — `A`: shape `(B, H, d_a)` = `(B, 16, 4)`, 로컬 프레임 delta $`[\Delta x, \Delta y, \Delta z, \Delta\psi]`$, 정규화 minmax. 제어 루프는 처음 `n_act`(1–3) 스텝만 실행 후 재계획.
+- **플로우 매칭 텐서** — 노이즈 `x_0 ~ N(0, I)` shape `(B, H, d_a)`, 종점 `x_1 = Ā`(정규화 action chunk), 시간 $`t \in [0,1]`$.
 
 ---
 
@@ -66,8 +66,8 @@ def euler_sample(dit_head, C, K: int) -> Tensor:  # 추론
 
 - (가정 1) — 모든 센서 토큰과 액션 토큰은 공유 임베딩 폭 `D = 256` 를 가진다. cross-attention 이 중간 투영 없이 동작하려면 query(action)/kv(condition) 차원이 동일해야 한다.
 - (가정 2) — 정책은 로봇 상태(proprioception)·절대 위치를 입력받지 않는다. 따라서 출력은 반드시 로컬 프레임 상대 delta 여야 하며, 절대 위치 표현으로 바꾸면 가정이 깨진다.
-- (가정 3) — 액션은 4-DoF `[Δx, Δy, Δz, Δψ]` 로 병진 + z축 yaw 만 제어하고 pitch·roll 은 reset 시 latch 한 값으로 고정한다.
-- (가정 4) — 플로우 경로는 직선(straight-line): `x_t = t·x_1 + (1−t)·x_0`, 목표 속도 `u_t = dx_t/dt`(상수). 따라서 학습 노이즈 스케일 `σ = 0`.
+- (가정 3) — 액션은 4-DoF $`[\Delta x, \Delta y, \Delta z, \Delta\psi]`$ 로 병진 + z축 yaw 만 제어하고 pitch·roll 은 reset 시 latch 한 값으로 고정한다.
+- (가정 4) — 플로우 경로는 직선(straight-line): $`x_t = t \cdot x_1 + (1-t) \cdot x_0`$, 목표 속도 $`u_t = dx_t/dt`$(상수). 따라서 학습 노이즈 스케일 $`\sigma = 0`$.
 - (가정 5) — co-training 의 유효성은 "Evetac 미포함 절반 배치가 모델로 하여금 누락 특징을 잠재 보상하도록 규제"한다는 데 의존한다. 즉 두 modality 분포가 표현 공간에서 정렬 가능해야 한다.
 - (가정 6) — Evetac 정규화는 기본 회색 프레임(이벤트 없음)이 0 에 대응하도록 `[-1/2, 1/2]` 를 쓴다(다른 modality 의 `[0,1]` 와 비대칭).
 
@@ -75,9 +75,9 @@ def euler_sample(dit_head, C, K: int) -> Tensor:  # 추론
 
 ## 📊 하이퍼파라미터·손실
 
-- 손실 식 (masked MSE flow matching):
+**손실 식 (masked MSE flow matching)**
 
-  $$\mathcal{L}_{\mathrm{FM}}=\big\|\hat{\mathbf{v}}_{\theta}(\mathbf{x}_{t},t,\mathbf{C})-\mathbf{u}_{t}\big\|^{2}, \quad \mathbf{x}_{t}=t\cdot\mathbf{x}_{1}+(1{-}t)\cdot\mathbf{x}_{0},\ \ \mathbf{u}_{t}=\mathrm{d}\mathbf{x}_{t}/\mathrm{d}t$$
+$$\mathcal{L}_{\mathrm{FM}}=\big\|\hat{\mathbf{v}}_{\theta}(\mathbf{x}_{t},t,\mathbf{C})-\mathbf{u}_{t}\big\|^{2}, \quad \mathbf{x}_{t}=t\cdot\mathbf{x}_{1}+(1{-}t)\cdot\mathbf{x}_{0},\ \ \mathbf{u}_{t}=\mathrm{d}\mathbf{x}_{t}/\mathrm{d}t$$
 
 - AdaLN-Zero 변조: $`\mathrm{AdaLN}(\mathbf{Y};\mathbf{\beta},\mathbf{\gamma})=\mathrm{LN}(\mathbf{Y})\odot(1+\mathbf{\gamma})+\mathbf{\beta}`$, 게이팅 잔차 $`\mathbf{Y}\leftarrow\mathbf{Y}+g\,f(\mathrm{AdaLN}(\mathbf{Y};\mathbf{\beta},\mathbf{\gamma}))`$.
 
@@ -94,7 +94,7 @@ def euler_sample(dit_head, C, K: int) -> Tensor:  # 추론
   | dropout | `0.0` | §A.4, Table 6 |
   | `d_t` (time embedding dim) | `128` | §A.4, Table 6 |
   | time embedding | sinusoidal | §A.4, Table 6 |
-  | flow-matching noise `σ` | `0.0` | §A.4, Table 6 |
+  | flow-matching noise $`\sigma`$ | `0.0` | §A.4, Table 6 |
   | `K` (FM inference steps) | `10` | §A.4, Table 6 |
   | policy lr | `1e-4` | §A.4, Table 6 |
   | encoder lr | `1e-5` | §A.4, Table 6 |

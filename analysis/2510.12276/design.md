@@ -66,12 +66,12 @@ def sf_total_loss(L_action, L_align, alpha) -> "scalar":
 
 ## 📊 하이퍼파라미터·손실
 
-- 정렬 손실: `L_align = -(1/N) Σ_i S[ MLP·Γ(x^V_i), f^3D_i(I) + E ]` (S = cosine similarity, Γ = batch normalization).
-- 전체 손실: `L_SF = L_action + α · L_align`.
+- 정렬 손실: $`L_{\mathrm{align}} = -(1/N) \sum_i S[ \mathrm{MLP}\cdot\Gamma(x^V_i), f^{3D}_i(I) + E ]`$ (S = cosine similarity, Γ = batch normalization).
+- 전체 손실: $`L_{\mathrm{SF}} = L_{\mathrm{action}} + \alpha \cdot L_{\mathrm{align}}`$.
 
 | 이름 | 값 | 출처 |
 |------|----|----|
-| `α` (alignment 가중치) | `0.5` | §A, Tab. 3 (0/0.02/0.1/0.5/2.5/12.5 중 최적) |
+| $`\alpha`$ (alignment 가중치) | `0.5` | §A, Tab. 3 (0/0.02/0.1/0.5/2.5/12.5 중 최적) |
 | `align_layer` | 24 (of 32) | §2.3, Tab. 2 (layer sweep 1/8/16/24/32) |
 | target 모델 | VGGT backbone latent + PE | §2.1, §2.3, Tab. 2 |
 | projector | BatchNorm(Γ) + 2-layer MLP | §2.3 |

@@ -469,6 +469,26 @@ conventions below codify both.
   shortening, and variable definitions match the source body. The
   normative rules (github.com renders KaTeX since 2022-05):
 
+  - **Code-span vs. math — the boundary (decide first).** A backtick
+    code-span `` `X` `` and inline math `` $`X`$ `` render differently and
+    mean different things; pick by *what the token is*, not by habit:
+    - **Backtick code-span** — literal source tokens (identifiers,
+      function / module names, config keys, dtypes, CLI flags), tensor
+      **shapes** (`` `(B, T_action, D_action)` ``), dimension variables
+      (`` `d_action` ``), and numeric / resolution specs (`` `224×224` ``,
+      `` `30 fps` ``). Here `×` `·` `_` `,` are code punctuation, not math.
+    - **Inline math** — genuine paper notation: Greek letters, scalar /
+      vector variables, sub/superscripts that denote math, operators
+      (`=` `·` `≤` `≥` `≈` `→` `∈` `⊤` `Σ`), set / interval notation, and
+      equations. `` `λ` `` → `` $`\lambda`$ ``; `` `A ∈ R^{d×r}` `` →
+      `` $`A \in \mathbb{R}^{d\times r}`$ ``.
+    - **Tag convention** — `` `(원문 미명시)` ``, `` `🚧 매핑 불가` `` are a
+      deliberate annotation tag, neither code nor math; they stay backticked.
+    The discriminating signal is a Greek letter, a LaTeX `\macro`, a math
+    operator, a sub/superscript glyph, or an equation `=` — never `×` / `·` /
+    `_` alone (those occur in shapes and specs too). `check-analysis-math.py`
+    reports candidates in `design.md` (report-only — conversion is a
+    judgment call, since a shape or spec legitimately stays a code-span).
   - **Inline** uses `` $`X`$ `` — backticks INSIDE the dollars. The
     outside-dollar `` `$X$` `` (becomes inline code, KaTeX never runs),
     the extra-backtick-wrapped `` `$`X`$` `` (a *valid* span wrapped in
@@ -478,7 +498,16 @@ conventions below codify both.
     Why: Markdown's italic pass runs before KaTeX and eats the `_` in
     subscripts unless the backtick form shields it.
   - **Display** is `$$X$$` on its own line (no backticks) — for a
-    *single-row* equation only.
+    *single-row* equation only, and it MUST start at **column 0**.
+    github.com renders a display block — `$$…$$` and a ```` ```math ````
+    fence alike — ONLY at the top level: indented under a list item, BOTH
+    leak the raw source (the `$$` dumps raw LaTeX, the fence shows as a
+    plain code block). A formula that belongs to a list item must be pulled
+    OUT to column 0 — replace the intro bullet `- <label>:` with a bold
+    label `**<label>**` on its own line, then the `$$…$$` at column 0 (the
+    pattern every rendering analysis doc uses). Inline `` $`X`$ `` is the
+    only math that renders *inside* a list item, so a short formula may stay
+    inline instead.
   - **No equation-numbering macros** — `\tag`, `\label`, `\ref`,
     `\eqref`, `\nonumber` are FORBIDDEN inside `$$…$$`. github.com's KaTeX
     errors on them and dumps the raw LaTeX onto the page, wrapping it
@@ -490,7 +519,8 @@ conventions below codify both.
     fenced ```` ```math ```` block, never `$$…\\…$$`. GitHub does not
     render a `\\` row break inside `$$` in *any* form (single-line or with
     the `$$` on their own lines) on any browser; only the ```` ```math ````
-    block renders it. Example:
+    block renders it. The fence, too, must sit at **column 0** — an indented
+    ```` ```math ```` inside a list item shows as a code block. Example:
     ````
     ```math
     \begin{aligned} a &= b \\ c &= d \end{aligned}
@@ -501,11 +531,14 @@ conventions below codify both.
     move the math outside the bold), or the delimiter goes invisible and
     the source leaks. A literal `$` in prose is escaped `\$`.
   - **Macro whitelist (the only sanctioned auto-substitutions)** —
-    `\bm{X}` → `\mathbf{X}`, and `\mathds{X}` → `\mathbb{X}` (`\mathds`
+    `\bm{X}` → `\mathbf{X}`, `\mathds{X}` → `\mathbb{X}` (`\mathds`
     is not a KaTeX control sequence and otherwise fails the whole span;
-    `\mathbb` is the identical double-stroke glyph). Leave every other
-    unsupported macro as-is so the render failure is visible (§5-4).
-    Extend this list only by editing this rule.
+    `\mathbb` is the identical double-stroke glyph), and
+    `\operatorname{X}` → `\mathrm{X}` (`\operatorname` is valid KaTeX but
+    renders broken on github.com — it leaks the raw control word; `\mathrm`
+    is the same upright glyph and renders). Leave every other unsupported
+    macro as-is so the render failure is visible (§5-4). Extend this list
+    only by editing this rule.
   - The same wrapping + boundary apply to inline math **inside English
     verbatim blockquotes** — the quoted text stays byte-identical; the
     `$` delimiters are GitHub-rendering formatting, a separate concern.

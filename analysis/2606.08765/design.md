@@ -24,7 +24,7 @@
 - **입력 (kinematics / camera, 비학습)** — proprio `s` 로부터 FK; 센서 local offset `L_i`(고정), 카메라 외부 `R^c,t^c` + 내부 `K^c`(캘리브레이션 상수).
 - **중간 산출 (saliency)** — `S`: shape `(B, T_obs, n_cam, 1, H, W)`, float `[0,1]` 범위(force-modulated, `max` 집계로 bounded).
 - **증강 관측** — `X = Concat(I, S)`: shape `(B, T_obs, n_cam, 4, H, W)`.
-- **출력 (action)** — `a`: shape `(B, T_action, 22)`, float (arm 6 + hand 16 target command). 백본별 horizon: BC-MLP `T_action=1`, ACT/DP `T_action≈16–24`.
+- **출력 (action)** — `a`: shape `(B, T_action, 22)`, float (arm 6 + hand 16 target command). 백본별 horizon: BC-MLP $`T_{\mathrm{action}}=1`$, ACT/DP $`T_{\mathrm{action}}\approx 16\text{–}24`$.
 
 ---
 

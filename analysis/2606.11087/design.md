@@ -40,7 +40,7 @@ def qgf_grad(Q, s, a_hat_1) -> Tensor:
     """근사 denoised action 에서 critic gradient 평가 (식 9, Jacobian = I): grad_{a_hat_1} Q(s, a_hat_1)."""
 ```
 
-- `qgf_sample` — 책임: 추론 루프 전체. 입력 `s, v_theta(reference flow), Q(critic), guidance_weight(τ_g=1/β), T(flow steps)`; 출력 `a_1`. 외부 계약: `v_theta`·`Q` 의 *학습 방식에 불가지론적* (BC flow + IQL 이 기본값일 뿐).
+- `qgf_sample` — 책임: 추론 루프 전체. 입력 $`s`$, $`v_\theta`$(reference flow), $`Q`$(critic), `guidance_weight`($`\tau_g=1/\beta`$), $`T`$(flow steps); 출력 `a_1`. 외부 계약: `v_theta`·`Q` 의 *학습 방식에 불가지론적* (BC flow + IQL 이 기본값일 뿐).
 - `first_order_denoise` — 책임: ODE 전체 적분을 대체하는 1차 근사. Jacobian 을 항등으로 두므로 `a_hat_1` 은 gradient 평가점일 뿐 적분 경로에 직접 쓰이지 않음.
 - `qgf_grad` — 책임: critic 을 (근사적으로) 깨끗한 action 에서만 질의해 OOD gradient 회피. `Q` 의 backward 1회 호출.
 
@@ -58,10 +58,10 @@ def qgf_grad(Q, s, a_hat_1) -> Tensor:
 
 ## 📊 하이퍼파라미터·손실
 
-- KL-정규화 RL 목표의 closed-form 해(식 3): `π(a|s) ∝ π̂(a|s) · exp(Q(s,a))^{1/β}`
-- reference 정책 손실(식 2, flow matching): `L_FM = E[ || v_θ(x_t, t) − (x_1 − x_0) ||²₂ ]`
-- QGF gradient 추정량(식 9): `∇_{a_t} Q(s, a_1) ≈ Î^⊤ ∇_{â_1} Q(s, â_1)`, where `â_1 = a_t + v_θ(s, a_t, t)·(1−t)`, `Î = I`
-- denoising guidance 적분(Algorithm 1): `a_{t+δ} = a_t + δ·( v_θ(s, a_t, t) + (1/β)·g )`, `g = ∇_{â_1} Q(s, â_1)`
+- KL-정규화 RL 목표의 closed-form 해(식 3): $`\pi(a|s) \propto \hat\pi(a|s) \cdot \exp(Q(s,a))^{1/\beta}`$
+- reference 정책 손실(식 2, flow matching): $`L_{\mathrm{FM}} = \mathbb{E}[ \| v_\theta(x_t, t) - (x_1 - x_0) \|_2^2 ]`$
+- QGF gradient 추정량(식 9): $`\nabla_{a_t} Q(s, a_1) \approx \hat I^\top \nabla_{\hat a_1} Q(s, \hat a_1)`$, where $`\hat a_1 = a_t + v_\theta(s, a_t, t)\cdot(1-t)`$, $`\hat I = I`$
+- denoising guidance 적분(Algorithm 1): $`a_{t+\delta} = a_t + \delta\cdot( v_\theta(s, a_t, t) + (1/\beta)\cdot g )`$, $`g = \nabla_{\hat a_1} Q(s, \hat a_1)`$
 
 | 이름 | 값 | 출처 |
 |------|----|----|
@@ -82,7 +82,7 @@ def qgf_grad(Q, s, a_hat_1) -> Tensor:
 ## 🎯 평가 메트릭
 
 - **지표** — OGBench task success(정규화 성능) · **임계값** — (절대 임계값 원문 미명시; 막대그래프 비교) · **비교 baseline** — test-time: BFN·GradStep·QFQL·BPTT·CFGRL·RobustQ; train-time: FQL·EDP·QAM·DAC·QSM+BC
-- **보조 지표** — gradient 노이즈 민감도 `cos(G(s,a_t), G(s,a_t+ε))` (Fig. 3); denoised action 의 $`Q`$-value (Fig. 4, 단 OOD exploit 함정 주의); test-time FLOPs (Fig. 6)
+- **보조 지표** — gradient 노이즈 민감도 $`\cos(G(s,a_t), G(s,a_t+\epsilon))`$ (Fig. 3); denoised action 의 $`Q`$-value (Fig. 4, 단 OOD exploit 함정 주의); test-time FLOPs (Fig. 6)
 - **프로토콜** — single-task 20 tasks/10 seeds/500k steps; goal-conditioned 25 tasks/10 seeds/1M steps; 모든 비교군에 동일 IQL critic 사용
 
 ---

@@ -71,11 +71,11 @@ def continual_sft_step(policy, minibatch, normalization_stats):
 
 ## 📊 하이퍼파라미터·손실
 
-- 손실 식 (NLL SFT, Eq. 1): `L_SFT = E_{(o,a)~D}[ -log π_θ(a|o) ]`
+- 손실 식 (NLL SFT, Eq. 1): $`L_{\mathrm{SFT}} = \mathbb{E}_{(o,a)\sim D}[ -\log \pi_\theta(a|o) ]`$
 - 평가 지표 식:
-  - 평균 점수 (Eq. 2): `ρ̄_K = (1/K) Σ_{i=1..K} ρ_{i,K}`
-  - 망각 (Eq. 3): `NBT_i = (1/(K-i)) Σ_{j=i+1..K} (ρ_{i,i} - ρ_{i,j})`
-  - 순방향 전이 (Eq. 4): `FT_i = ρ_{i,i}^{(CL)} - ρ_i^{(single)}`
+  - 평균 점수 (Eq. 2): $`\bar\rho_K = (1/K) \sum_{i=1..K} \rho_{i,K}`$
+  - 망각 (Eq. 3): $`\mathrm{NBT}_i = (1/(K-i)) \sum_{j=i+1..K} (\rho_{i,i} - \rho_{i,j})`$
+  - 순방향 전이 (Eq. 4): $`\mathrm{FT}_i = \rho_{i,i}^{(\mathrm{CL})} - \rho_i^{(\mathrm{single})}`$
 - 하이퍼:
 
   | 이름 | 값 | 출처 |

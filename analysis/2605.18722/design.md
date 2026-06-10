@@ -28,7 +28,7 @@
 - **출력 — 예측 행동 $`\widehat{\mathbf{a}}_{t:t+L-1}`$** : shape `(B, L=32, 36)`,
   36-D 관절 명령 청크. 학습 시 DDPM, 추론 시 DPMSolver++ 샘플링.
 - **판별기 입력(클립 토큰)** : $`\xi_{t}=\big(s_{t},\ \mathbf{o}_{t},\ \ell,\ \mathbf{a}_{t:t+L-1},\ \widehat{\log\pi}_{t}\big)`$.
-  토큰 시퀀스 `[ s_t ; a_{t:t+L-1} ; logπ_t ]` + 학습된 위치 임베딩, 언어/이미지는 조건 스트림.
+  토큰 시퀀스 $`[ s_t ; a_{t:t+L-1} ; \log\pi_t ]`$ + 학습된 위치 임베딩, 언어/이미지는 조건 스트림.
 - **판별기 출력** : 클립 점수 $`d(C_{k})\in(0,1]`$ (sigmoid), 에피소드 가중치 $`w_{i}`$ 로 변환.
 
 ---
@@ -82,21 +82,28 @@ def policy(s_t, o_t, ell) -> action_chunk:
 
 ## 📊 하이퍼파라미터·손실
 
-- 품질 RMS (식 2–3):
-  $$A_{\text{ep}}(\tau)=\sqrt{\frac{1}{(T-6)D}\sum_{t=4}^{T-3}\sum_{k=1}^{D}a_{t,k}^{2}},\quad J_{\text{ep}}(\tau)=\sqrt{\frac{1}{(T-6)D}\sum_{t=4}^{T-3}\sum_{k=1}^{D}j_{t,k}^{2}}$$
-- log-π 대리 (식 4–5):
-  $$E_{t}=\frac{1}{|\mathcal{S}|\,L}\sum_{s\in\mathcal{S}}\sum_{\tau=t}^{t+L-1}\left\|\varepsilon_{\theta}\!\left(\mathbf{o}_{\tau},\,\ell,\,\mathbf{a}_{\tau:\tau+L-1},\,s_{\tau}\right)-\varepsilon\right\|_{2}^{2},\quad \widehat{\log\pi}_{t}=-\,\mathrm{zscore}(E_{t})$$
-- 판별기 PU 손실 (식 7):
-  $$\mathcal{L}_{D}=\eta\,\mathbb{E}_{\tau\in\mathcal{S}_{\mathrm{high}}}\!\big[-\log d(\tau)\big]+\mathbb{E}_{\tau\in\mathcal{U}}\!\big[-\log(1-d(\tau))\big]$$
-- 품질 가중 디퓨전 손실 (식 8):
-  $$\mathcal{L}_{\pi}=\sum_{i=1}^{L}w_{i}\;\big\|\varepsilon_{\theta}(\cdot)-\varepsilon\big\|_{2}^{2}$$
+**품질 RMS (식 2–3)**
+
+$$A_{\text{ep}}(\tau)=\sqrt{\frac{1}{(T-6)D}\sum_{t=4}^{T-3}\sum_{k=1}^{D}a_{t,k}^{2}},\quad J_{\text{ep}}(\tau)=\sqrt{\frac{1}{(T-6)D}\sum_{t=4}^{T-3}\sum_{k=1}^{D}j_{t,k}^{2}}$$
+
+**log-π 대리 (식 4–5)**
+
+$$E_{t}=\frac{1}{|\mathcal{S}|\,L}\sum_{s\in\mathcal{S}}\sum_{\tau=t}^{t+L-1}\left\|\varepsilon_{\theta}\!\left(\mathbf{o}_{\tau},\,\ell,\,\mathbf{a}_{\tau:\tau+L-1},\,s_{\tau}\right)-\varepsilon\right\|_{2}^{2},\quad \widehat{\log\pi}_{t}=-\,\mathrm{zscore}(E_{t})$$
+
+**판별기 PU 손실 (식 7)**
+
+$$\mathcal{L}_{D}=\eta\,\mathbb{E}_{\tau\in\mathcal{S}_{\mathrm{high}}}\!\big[-\log d(\tau)\big]+\mathbb{E}_{\tau\in\mathcal{U}}\!\big[-\log(1-d(\tau))\big]$$
+
+**품질 가중 디퓨전 손실 (식 8)**
+
+$$\mathcal{L}_{\pi}=\sum_{i=1}^{L}w_{i}\;\big\|\varepsilon_{\theta}(\cdot)-\varepsilon\big\|_{2}^{2}$$
 
 | 이름 | 값 | 출처 |
 |------|----|----|
 | `D` (상태 차원) | `36` | §III-C |
 | 사전선별 컷 | 하위 `20%` (Acc/Jerk 각각) 교집합 ≈ `18%` | §III-C |
 | 고품질 비율 $`\mathcal{S}_{\text{high}}`$ | ≈ `15%` | §III-C, D |
-| PU 가중 `η` | `0.5` | §III-D, Eq.(7) |
+| PU 가중 $`\eta`$ | `0.5` | §III-D, Eq.(7) |
 | 점수 클립 범위 | $`d\in[0.1,0.9]`$ | §III-D |
 | 행동 청크 `L` | `32` | §IV-A |
 | 정책 규모 | 28 layers / hidden 1024 / 16 heads | §IV-A |

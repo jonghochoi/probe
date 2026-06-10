@@ -23,7 +23,7 @@
 - **입력 — state**: `(B, T_state, d)` float, 통합 슬롯 공간. embodiment $`e`$ 의 raw state $`\mathbf{s}^{(e)}`$ 를 $`\Phi_e`$ 로 사영 후 active 슬롯에만 값을, 나머지에는 0 을 채움. 정규화는 *통계 정규화 없음* — Cartesian = world frame 기준 delta displacement, 회전 = Axis-Angle, joint = absolute radian, outlier filtering 만 적용 (§5.1.1).
 - **입력 — discrete motion token (학습 시 사람 손 데이터 한정)**: codebook $`\mathbb{C}`$, 길이 `(B, T_z)` long, mask token `[MASK]` 가 비율 $`\rho`$ 로 무작위 적용 (§5.2.3).
 - **출력 — action chunk**: `(B, T_action, d)` float, 동일한 통합 슬롯 공간. Rectified Flow 의 종착 분포가 raw physical magnitude 의 액션. embodiment $`e`$ 배포 시에는 inverse 매핑 $`\Phi_e^{-1}`$ 로 active 슬롯만 추출.
-- **출력 — discrete motion token 예측 (보조 채널)**: `(B, T_z, |\mathbb{C}|)` logits. masked 위치에 한해 cross-entropy loss.
+- **출력 — discrete motion token 예측 (보조 채널)**: $`(B, T_z, |\mathbb{C}|)`$ logits. masked 위치에 한해 cross-entropy loss.
 - **출력 — text logits**: `(B, T_text, V_vocab)` 표준 next-token 분포. VQA / motion description / planning task 의 응답에 사용.
 - **시간 축** — `chunk_size` 는 본문 LIBERO 실험에서 8 (§7.2.1). `T_state` 는 proprio 의 short history (논문 본문에 정확한 길이는 명시되지 않음 — *(원문에 명시 없음 — 가정으로 메움)*).
 

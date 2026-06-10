@@ -19,10 +19,10 @@
 CoRMA 의 학습·배포 단계별 텐서 계약입니다. 시간 축은 `H` (history length, 원문에서 구체 값 미명시) 와 step `t` 로 표기합니다.
 
 - **입력 (Stage 1 교사)** — `o_t`: deployable observation. shape `(B, D_obs)`, dtype `float32`, normalization 원문 미명시. 구성: proprioception + 6-axis force/torque + force-threshold flag + previous action. 교사 학습 시에만 `z_t` (Privileged $`Z`$) 가 concat 되어 `(B, D_obs + 6)`.
-- **입력 (Stage 2 adapter)** — `(o_{t-H+1:t}, a_{t-H+1:t})`: 시계열 history window. shape `(B, H, D_obs)` 와 `(B, H, D_act)`, dtype `float32`. history 길이 `H` 와 sampling 전략 (전체 trajectory 에서 windowed sampling) 만 명시되고 구체 값은 (원문에 명시 없음 — 가정으로 메움).
-- **입력 (Stage 3 배포)** — deploy 시 `o_t` 만 사용, oracle `z_t` 는 제거. adapter 가 history 로부터 `\hat{z}_t` 추론.
+- **입력 (Stage 2 adapter)** — $`(o_{t-H+1:t}, a_{t-H+1:t})`$: 시계열 history window. shape `(B, H, D_obs)` 와 `(B, H, D_act)`, dtype `float32`. history 길이 `H` 와 sampling 전략 (전체 trajectory 에서 windowed sampling) 만 명시되고 구체 값은 (원문에 명시 없음 — 가정으로 메움).
+- **입력 (Stage 3 배포)** — deploy 시 `o_t` 만 사용, oracle `z_t` 는 제거. adapter 가 history 로부터 $`\hat{z}_t`$ 추론.
 - **출력 (privileged Z)** — `z_t`: shape `(B, 6)`, dtype `float32`. 차원 정의: `[onset, lateral, guided, dir_x, dir_y, jam]`. 시뮬레이터 contact·force 동역학에서 계산. 정규화 가정 (원문에 명시 없음 — 가정으로 메움).
-- **출력 (adapter)** — `\hat{z}_t`: shape `(B, 6)`, dtype `float32`. policy 가 받는 conditioning. `u_t`: shape `(B, D_u)` (`D_u` 원문 미명시), contrastive head 의 표현 벡터, policy 에 미전달.
+- **출력 (adapter)** — $`\hat{z}_t`$: shape `(B, 6)`, dtype `float32`. policy 가 받는 conditioning. `u_t`: shape `(B, D_u)` (`D_u` 원문 미명시), contrastive head 의 표현 벡터, policy 에 미전달.
 - **출력 (policy action)** — `a_t`: shape `(B, D_act)`. FORGE 원본 6-DoF Franka task-space action 인터페이스를 따르며 Marvin 7-DoF 으로 옮길 때 robot-specific 제어 인터페이스만 교체. 구체 차원은 (원문에 명시 없음 — 가정으로 메움).
 - **부가 라벨** — `c_t`: 4-class force-regime label `{free, first_contact, guided_slide, jam}`. dtype `int32` 또는 one-hot. deployable force evidence 에서 산출, contrastive positive/negative 짝짓기 전용.
 
@@ -56,7 +56,7 @@ def stage2_loss(z_hat_t, z_t, u_t, u_pos, u_neg_set, tau, lambda_nce) -> scalar:
     """L_adapter = L_sem + lambda_nce * L_nce."""
 ```
 
-- 교사 / 배포 policy 는 동일 구조이며 conditioning 차원 (`z_t` vs `\hat{z}_t`) 만 다릅니다. RL-Games PPO 인터페이스를 따릅니다.
+- 교사 / 배포 policy 는 동일 구조이며 conditioning 차원 (`z_t` vs $`\hat{z}_t`$) 만 다릅니다. RL-Games PPO 인터페이스를 따릅니다.
 - adapter 의 readout token 은 learned 이고, causal Transformer 인코더의 마지막 토큰 표현 `h_t` 가 두 head 의 분기점입니다.
 - 두 head 는 독립 MLP 로 가정합니다 (원문 도식만 제공, 정확한 layer 구성은 명시 없음).
 - contrastive 짝짓기는 task identity 를 무시하고 label 만 씁니다. negative set $`\mathcal{N}_t`$ 의 sampling 전략 (in-batch vs queue) 은 (원문에 명시 없음 — 가정으로 메움).
@@ -68,7 +68,7 @@ def stage2_loss(z_hat_t, z_t, u_t, u_pos, u_neg_set, tau, lambda_nce) -> scalar:
 - (가정 1) 관련 assembly 과제 (PegInsert, GearMesh, NutThread) 는 *공유 가능한 semantic contact structure* 를 띤다. 6D Privileged $`Z`$ 가 task 간 적응 인터페이스로 충분하다는 핵심 가설.
 - (가정 2) deployable force / proprio / action history 만으로 `z_t` 의 의미 단위 정보를 추론할 수 있다. 다시 말해 force evidence 가 contact regime 의 충분 통계 역할을 한다는 뜻인 셈이다.
 - (가정 3) force-regime 4-라벨 (`free / first_contact / guided_slide / jam`) 은 정확한 물리 상태 추정이 아니라 *coarse* contrastive 짝짓기 규칙. label noise 가 있어도 InfoNCE 의 representation 구조화 효과는 살아남는다는 가정.
-- (가정 4) Stage 3 에서 policy 의 동작 분포는 oracle `z_t` 와 adapter 예측 `\hat{z}_t` 가 충분히 가까울 때 보존된다. 다시 말해 adapter regression error 가 policy 성능 저하 임계 밑이라는 암묵 가정이며, fine-tuning 단계가 이 mismatch 를 흡수한다.
+- (가정 4) Stage 3 에서 policy 의 동작 분포는 oracle `z_t` 와 adapter 예측 $`\hat{z}_t`$ 가 충분히 가까울 때 보존된다. 다시 말해 adapter regression error 가 policy 성능 저하 임계 밑이라는 암묵 가정이며, fine-tuning 단계가 이 mismatch 를 흡수한다.
 - (가정 5) adapter 는 frozen 으로 두고, policy 만 Stage 3 에서 fine-tune 하거나 평가할 수 있다. adapter 의 frozen 시점 이후 분포 시프트는 따로 다루지 않는다.
 - (가정 6) contrastive 항은 *약한 regularizer* 로 작용해야 한다. $`\lambda_{\mathrm{nce}}`$ 가 커지면 semantic regression 정확도가 하락하기 때문 (Appendix C ablation 증거).
 
@@ -76,13 +76,13 @@ def stage2_loss(z_hat_t, z_t, u_t, u_pos, u_neg_set, tau, lambda_nce) -> scalar:
 
 ## 📊 하이퍼파라미터·손실
 
-- 손실 식:
+**손실 식**
 
-  $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce}}\mathcal{L}_{\mathrm{nce}}$$
+$$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce}}\mathcal{L}_{\mathrm{nce}}$$
 
-  $$\mathcal{L}_{\mathrm{sem}}=\|\hat{z}_{t}-z_{t}\|_{2}^{2}$$
+$$\mathcal{L}_{\mathrm{sem}}=\|\hat{z}_{t}-z_{t}\|_{2}^{2}$$
 
-  $$\mathcal{L}_{\mathrm{nce}}=-\log\frac{\exp(\mathrm{sim}(u_{t},u^{+})/\tau)}{\exp(\mathrm{sim}(u_{t},u^{+})/\tau)+\sum_{u^{-}\in\mathcal{N}_{t}}\exp(\mathrm{sim}(u_{t},u^{-})/\tau)}$$
+$$\mathcal{L}_{\mathrm{nce}}=-\log\frac{\exp(\mathrm{sim}(u_{t},u^{+})/\tau)}{\exp(\mathrm{sim}(u_{t},u^{+})/\tau)+\sum_{u^{-}\in\mathcal{N}_{t}}\exp(\mathrm{sim}(u_{t},u^{-})/\tau)}$$
 
 - 하이퍼:
   | 이름 | 값 | 출처 |
@@ -111,9 +111,9 @@ def stage2_loss(z_hat_t, z_t, u_t, u_pos, u_neg_set, tau, lambda_nce) -> scalar:
 - **지표** — `real success rate` (verified) · **임계값** — `insertion_verified` 신호의 run_id 별 max · **비교 baseline** — FORGE 실로봇.
 - **지표** — `sim-to-real gap` (real − sim, 단위: percentage point) · **임계값** — 작을수록 좋음 · **비교 baseline** — FORGE gap.
 - **지표** — Wilson 95% CI 적용 verified success · **임계값** — CoRMA / FORGE CI 가 분리되는지로 finite-sample 안전성 판단 · **비교 baseline** — 동일 task / 동일 verification rule.
-- **지표** — Stage 2 adapter validation: mean `R²` / Pearson / cosine similarity / MSE · **임계값** — Table 2 의 RMA-Conv (0.43 R²) → CoRMA (0.88 R²) 격차 · **비교 baseline** — RMA-Conv, RMA-Transformer (MSE-only).
-- **지표** — adapter 임베딩 분리도 (PCA 시각화) · **임계값** — qualitative, force regime 별 cluster 분리 · **비교 baseline** — `\hat{z}_t` vs `u_t` 양 공간 비교 (Appendix E).
-- **지표** — predicted `\hat{z}_t` vs oracle `z_t` 산점도 (diagonal 집중도) · **임계값** — qualitative · **비교 baseline** — Appendix E.2.
+- **지표** — Stage 2 adapter validation: mean $`R^2`$ / Pearson / cosine similarity / MSE · **임계값** — Table 2 의 RMA-Conv (0.43 R²) → CoRMA (0.88 R²) 격차 · **비교 baseline** — RMA-Conv, RMA-Transformer (MSE-only).
+- **지표** — adapter 임베딩 분리도 (PCA 시각화) · **임계값** — qualitative, force regime 별 cluster 분리 · **비교 baseline** — $`\hat{z}_t`$ vs `u_t` 양 공간 비교 (Appendix E).
+- **지표** — predicted $`\hat{z}_t`$ vs oracle `z_t` 산점도 (diagonal 집중도) · **임계값** — qualitative · **비교 baseline** — Appendix E.2.
 
 ---
 

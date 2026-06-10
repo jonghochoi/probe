@@ -22,8 +22,8 @@
   - $`I_t^{\text{hand}}`$: eye-in-hand RGB 이미지 (RealSense D405). shape 본문 미명시. 정규화는 $`\pi_0`$ 백본 PaliGemma 규약을 따릅니다.
   - $`l_t`$: 토큰화된 한 문장 instruction ("pick up the object on the table and place it elsewhere"). 토크나이저는 PaliGemma 의 것.
   - $`q_t^{\text{hand}}`$: shape `(12,)`, float, 12-DoF 손 관절 위치. 정규화 통계는 본문에 명시되지 않음 — `(원문에 명시 없음 — 가정으로 메움)` 데이터셋 평균/표준편차.
-  - $`z_t^{\text{tac-f}}`$: shape `(5, d_{\text{mlp}})`, fingertip 별 합력 벡터 임베딩. 원천은 $`f_t^{\text{tac-f}} \in \mathbb{R}^{5\times 3}`$ (fingertip 별 3D 합력).
-  - $`z_t^{\text{tac-s}}`$: shape `(5, d_{\text{mlp}})`, fingertip 별 spatial CAE latent 임베딩. 원천은 $`f_t^{\text{tac-s}} \in \mathbb{R}^{5\times 128}`$ (CAE 출력 latent, 16×16×3 입력에서 압축).
+  - $`z_t^{\text{tac-f}}`$: shape $`(5, d_{\text{mlp}})`$, fingertip 별 합력 벡터 임베딩. 원천은 $`f_t^{\text{tac-f}} \in \mathbb{R}^{5\times 3}`$ (fingertip 별 3D 합력).
+  - $`z_t^{\text{tac-s}}`$: shape $`(5, d_{\text{mlp}})`$, fingertip 별 spatial CAE latent 임베딩. 원천은 $`f_t^{\text{tac-s}} \in \mathbb{R}^{5\times 128}`$ (CAE 출력 latent, 16×16×3 입력에서 압축).
 - **입력** — $`o_t^{\text{uni}}`$ (식 8) — $`[I_t, l_t, q_t^{\text{arm}}, q_t^{\text{hand}}]`$
   - $`I_t`$: 다중-뷰 RGB 묶음 (RealSense D435i 전역 2대 + eye-in-hand D405 1대). 정확한 shape·정규화는 본문 미명시.
   - $`q_t^{\text{arm}}`$: shape `(6,)`, float, UR3e 6-DoF 관절 위치.
@@ -125,7 +125,7 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{main}} + \lambda \left( \mathc
 | `train.steps` | `80,000` | §7.2 |
 | `inference.control_hz` | `30` | §7.2 |
 | `teleop.hz` | `90` (VR) / `30` (policy) | §3.3.2 |
-| `λ` (총 손실 보조 가중치) | (원문에 명시 없음 — 가정으로 메움) | §3.4.2 |
+| $`\lambda`$ (총 손실 보조 가중치) | (원문에 명시 없음 — 가정으로 메움) | §3.4.2 |
 | `d_s` (공유 latent 차원) | (원문에 명시 없음 — 가정으로 메움; $`\pi_0`$ 관례) | §7.3 |
 | `action_chunk_size` | (원문에 명시 없음 — 가정으로 메움; $`\pi_0`$ 기본 50) | — |
 
@@ -160,5 +160,5 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{main}} + \lambda \left( \mathc
 - 공유 latent 차원 $`d_s`$ 의 구체 수치, encoder/head 의 정확한 hidden width 가 §7.3 에 명시되지 않습니다. $`\pi_0`$ 백본의 표준 표현 차원을 따른다고 가정해야 합니다.
 - action chunk size $`H`$ 가 본문에 명시되지 않습니다. $`\pi_0`$ 기본값 (보통 50) 을 가정합니다.
 - proprioceptive 정규화 통계 ($`q_t^{\text{arm/hand}}`$ 의 평균/표준편차) 의 출처가 본문에 없습니다. 데이터셋 전체 통계를 사용한다고 가정합니다.
-- 음(陰)의 촉각 결과 ($`\pi_{\text{uni-enhance-tac}}`$ 95 → 82%) 의 phase-별 정량 분해 (도달 vs 접촉 단계 기여) 가 빠져 있어, selective gating 의 결정 신호 (`net_normal_force > τ_contact`) 의 임계값 $`τ_{\text{contact}}`$ 는 가정값으로 시작해야 합니다.
+- 음(陰)의 촉각 결과 ($`\pi_{\text{uni-enhance-tac}}`$ 95 → 82%) 의 phase-별 정량 분해 (도달 vs 접촉 단계 기여) 가 빠져 있어, selective gating 의 결정 신호 ($`\text{net\_normal\_force} > \tau_{\text{contact}}`$) 의 임계값 $`τ_{\text{contact}}`$ 는 가정값으로 시작해야 합니다.
 - Corrective 데이터셋 ($`\mathcal{D}_{\text{orient}}`$, $`\mathcal{D}_{\text{corner}}`$) 의 정확한 선택 기준 (어떤 실패 패턴을 corrective 로 분류했는지) 이 본문에 정성적으로만 기술됩니다 — 재현 시 분류 규칙을 직접 정해야 합니다.

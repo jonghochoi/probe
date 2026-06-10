@@ -132,7 +132,7 @@ def unified_action_expert(z_target: Tensor, a_target: Tensor, h: Tensor) -> Tens
 | `robot action representation` | `abs EEF (xyz) + Rotate6D orientation` | §4.1 |
 | `pretraining data` | `1700+ h cross-embodiment + human video` | §1, §4.1 |
 | `pretrain hardware` | `8× NVIDIA H200, 50 h` | §4.1 |
-| `flow-matching noise schedule` | `linear: x_τ = τ x + (1-τ) x_0, x_0 ~ N(0, I), τ ∈ [0,1]` | §3.2, §3.3 |
+| `flow-matching noise schedule` | linear: $`x_\tau = \tau x + (1-\tau) x_0,\ x_0 \sim \mathcal{N}(0, I),\ \tau \in [0,1]`$ | §3.2, §3.3 |
 | `frame interval k` | (원문에 명시 없음 — 가정으로 메움) | §3.1 |
 | `triplet loss coefficients` | (원문에 명시 없음 — 가정으로 메움) | §3.1 |
 

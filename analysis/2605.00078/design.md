@@ -19,15 +19,15 @@
 학습·추론 시 모델이 입출력하는 텐서를 모달리티별로 한 줄씩 정의합니다. 시간 축은 의미 단위(`H`·`T`·`K`·`L`)로만 적습니다.
 
 - **입력 — instruction `x`**: 자연어 토큰 시퀀스. shape `(B, N_x)`, dtype `int64`(tokenizer id). Understanding Expert(InternVL3.5)의 텍스트 토크나이저로 토큰화.
-- **입력 — context observations `o_{-H:0}`**: shape `(B, H, 3, 224, 224)`, dtype `float32` ([0,1] 정규화). horizon `H=4`. context 인코더는 V-JEPA2.1 ViT(*trainable*) → patch token sequence → Understanding Expert.
+- **입력 — context observations** $`o_{-H:0}`$: shape `(B, H, 3, 224, 224)`, dtype `float32` ([0,1] 정규화). horizon `H=4`. context 인코더는 V-JEPA2.1 ViT(*trainable*) → patch token sequence → Understanding Expert.
 - **입력 — state `s`**: 로봇 proprioception. shape `(B, D_s)`, dtype `float32`. `D_s`는 임바디먼트별 (예 PND Adam-U 31, Unitree G1 26, Franka FR3 13).
-- **입력 (학습 only) — future observations `\tilde{o}_{0:T}`**: shape `(B, T, 3, 256, 256)`, dtype `float32`. action chunk와 매칭되는 미래 RGB 프레임. frozen V-JEPA2.1 ViT → Perceiver resampler가 `K=16` 임베딩으로 압축.
+- **입력 (학습 only) — future observations** $`\tilde{o}_{0:T}`$: shape `(B, T, 3, 256, 256)`, dtype `float32`. action chunk와 매칭되는 미래 RGB 프레임. frozen V-JEPA2.1 ViT → Perceiver resampler가 `K=16` 임베딩으로 압축.
 - **입력 — latent queries `Q`**: shape `(B, K, d)`, dtype `float32`. learnable parameter, `K=16`. prior branch의 reasoning 슬롯.
 - **입력 (학습 only) — future embeddings `z^post`**: shape `(B, K, d)`, dtype `float32`. posterior branch의 reasoning 슬롯 자리에 들어가는 *teacher* 입력. `Q`와 일대일 매칭(같은 `K`, `d`).
 - **입력 — flow time `t`**: shape `(B,)`, dtype `float32`, `t ~ U(0,1)`.
-- **입력 — noised action `a_t`**: shape `(B, T, D_a)`, dtype `float32`. `a_t = t·a + (1-t)·ε`, `ε~N(0,I)`.
-- **출력 — velocity field**: shape `(B, T, D_a)`, dtype `float32`. prior branch는 `v_θ^prior(a_t, c, q)`, posterior branch는 `v_θ^post(a_t, c, z^post)`. 학습 시 target은 `u_t = a - ε`.
-- **출력 — action chunk `a_{0:T}`**: shape `(B, T, D_a)`, `T=20`. `D_a`는 임바디먼트별 (예 G1: 26, FR3: 13). 추론 시 prior branch만 사용해 flow matching ODE를 적분.
+- **입력 — noised action `a_t`**: shape `(B, T, D_a)`, dtype `float32`. $`a_t = t\cdot a + (1-t)\cdot\epsilon`$, $`\epsilon\sim N(0,I)`$.
+- **출력 — velocity field**: shape `(B, T, D_a)`, dtype `float32`. prior branch는 $`v_\theta^{\mathrm{prior}}(a_t, c, q)`$, posterior branch는 $`v_\theta^{\mathrm{post}}(a_t, c, z^{\mathrm{post}})`$. 학습 시 target은 $`u_t = a - \epsilon`$.
+- **출력 — action chunk** $`a_{0:T}`$: shape `(B, T, D_a)`, `T=20`. `D_a`는 임바디먼트별 (예 G1: 26, FR3: 13). 추론 시 prior branch만 사용해 flow matching ODE를 적분.
 - **출력 — aligned hidden states**: 마지막 `L=9` Transformer layer에서 latent reasoning 위치의 hidden state. shape `(B, K, d)` per layer per branch. alignment loss 계산용으로만 노출, 외부 인터페이스 없음.
 - **정규화 가정** — context image는 [0,1] 정규화 후 V-JEPA2.1 patch embedding. proprioception `s`는 데이터셋 평균/표준편차로 정규화(원문에 명시 없음 — 가정으로 메움). action `a`는 데이터셋 통계로 zero-mean/unit-variance 정규화(원문에 명시 없음 — UniHand 2.0 표준 포맷 가정).
 
@@ -131,9 +131,9 @@ $$\mathcal{R}_{\mathrm{norm}}(h)=\left[\mathrm{ReLU}(\tau-\|h\|_{2})\right]^{2},
 | alignment layer 수 `L` | `9` (마지막 9개 Transformer layer) | §4.1 |
 | context 이미지 해상도 | `224 × 224` | §4.1 |
 | future 이미지 해상도 | `256 × 256` | §4.1 |
-| alignment loss 가중 `w_align` | `1 × 10⁻³` | §4.1 |
-| norm regularizer 가중 `w_norm` | `1 × 10⁻⁴` | §4.1 |
-| rank regularizer 가중 `w_rank` | `1 × 10⁻⁴` | §4.1 |
+| alignment loss 가중 `w_align` | $`1 \times 10^{-3}`$ | §4.1 |
+| norm regularizer 가중 `w_norm` | $`1 \times 10^{-4}`$ | §4.1 |
+| rank regularizer 가중 `w_rank` | $`1 \times 10^{-4}`$ | §4.1 |
 | norm threshold `tau` | (원문에 명시 없음 — 가정으로 메움) | §3.3 식 (5) |
 | rank projection 차원 `n` | (원문에 명시 없음 — 가정으로 메움) | §3.3 식 (6) |
 | rank 수집 latent state 수 `M` | (원문에 명시 없음 — 가정으로 메움) | §3.3 식 (6) |
@@ -142,7 +142,7 @@ $$\mathcal{R}_{\mathrm{norm}}(h)=\left[\mathrm{ReLU}(\tau-\|h\|_{2})\right]^{2},
 | Context visual encoder | V-JEPA2.1 (trainable) | §4.1 |
 | Future visual encoder | V-JEPA2.1 (frozen) | §4.1 |
 | Future aggregator | Perceiver resampler → `K` 출력 | §3.2 식 (2) |
-| Effective post-training global batch | `≈ 128` trajectory chunks (sequence packing) | §4.1 |
+| Effective post-training global batch | $`\approx 128`$ trajectory chunks (sequence packing) | §4.1 |
 | Optimizer / 학습률 / 스케줄 | (원문에 명시 없음 — 가정으로 메움) | §4.1 |
 | Pretraining data | UniHand 2.0 (mixed human + robot manipulation) | §3.3, §4.1 |
 | Flow matching ODE 적분 스텝 | (원문에 명시 없음 — 가정으로 메움) | §3.3 |
@@ -151,7 +151,7 @@ $$\mathcal{R}_{\mathrm{norm}}(h)=\left[\mathrm{ReLU}(\tau-\|h\|_{2})\right]^{2},
 | Action expert로 흘려보내는 토큰 type | action, state | §3.3 |
 | Understanding Expert로 흘려보내는 토큰 type | instruction, observation, latent query (prior) / future embedding (posterior) | §3.3 |
 
-`λ_*` 류의 추가 가중 항은 본문 식 (1)–(8)에 등장하지 않습니다. `L_FM` 내부에 prior·posterior가 *동일 가중치(1:1)* 로 합산됩니다.
+$`\lambda_*`$ 류의 추가 가중 항은 본문 식 (1)–(8)에 등장하지 않습니다. `L_FM` 내부에 prior·posterior가 *동일 가중치(1:1)* 로 합산됩니다.
 
 ---
 
