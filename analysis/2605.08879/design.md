@@ -147,7 +147,7 @@ ConSFT 는 prior art 의 두 라인 — (a) PPO clip 으로 trust-region 을 *�
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 후보 base: `pi0` / `pi05` family. 두 백본 모두 flow-matching head 의 표준 SFT loss 가 명시되어 있어, *동일 loss 위에 `omega = sg(exp(-loss/tau))` 를 곱하는 in-place 변경* 으로 매핑 가능. `smolvla` 도 후보지만 본 논문 검증 backbone 은 아님. `act` / `diffusion` 은 flow-matching 이 아니므로 Eq. 3 의 ELBO 환원 가정이 그대로 성립하지 않아 *직접* 매핑은 불가, 손실 가중 아이디어만 차용 가능.
+- **`lerobot`** — 후보 base: `pi0` / `pi05` family. 두 백본 모두 flow-matching head 의 표준 SFT loss 가 명시되어 있어, *동일 loss 위에 $`\omega = \mathrm{sg}(\exp(-\mathrm{loss}/\tau))`$ 를 곱하는 in-place 변경* 으로 매핑 가능. `smolvla` 도 후보지만 본 논문 검증 backbone 은 아님. `act` / `diffusion` 은 flow-matching 이 아니므로 Eq. 3 의 ELBO 환원 가정이 그대로 성립하지 않아 *직접* 매핑은 불가, 손실 가중 아이디어만 차용 가능.
 
 ---
 

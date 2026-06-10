@@ -108,7 +108,7 @@ $$\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$$
 
   | 이름 | 값 | 출처 |
   |------|----|----|
-  | `gate_loss_weight` (`λ_1`) | `0.01` | §3.4 |
+  | `gate_loss_weight` ($`\lambda_1`$) | `0.01` | §3.4 |
   | `gate_threshold` | `0.5` | §3.2 (예시값으로 명시) |
   | `dual_stream_ratio` (fast:slow) | `3:1` | §3.4 |
   | `closed_loop_latency` | `< 0.04 s` | §1, §3.3 |
@@ -145,7 +145,7 @@ $$\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$$
 
 ## 🚧 미해결 / 잠정
 
-- `tactile_encoder` · `tactile_gate` 의 구체 hidden dimension / 깊이가 본문에 명시되지 않아 "경량 MLP" 정도로만 두었음. 첫 구현에서는 `[6 → 64 → 128]` 같은 안전한 default 를 잡아 두어야 한다.
+- `tactile_encoder` · `tactile_gate` 의 구체 hidden dimension / 깊이가 본문에 명시되지 않아 "경량 MLP" 정도로만 두었음. 첫 구현에서는 $`[6 \to 64 \to 128]`$ 같은 안전한 default 를 잡아 두어야 한다.
 - `chunk_size` $`H`$ 의 정확한 값이 본문에 명시되지 않아 vanilla GO-1 기본값을 상속한다고 본다. 슬로우 스트림 latent 가 살아남아야 하는 horizon 길이라 `dual_stream_ratio = 3` 과의 정합성을 함께 점검해야 한다.
 - 옵티마이저 / 학습률 / 배치 크기 / 학습 step 수가 본문에 명시되지 않음. 첫 구현에서는 vanilla GO-1 의 fine-tuning 설정을 변경 없이 잇는다고 본다.
 - Tactile Gate 라벨링 자동화: 원문은 사람 라벨링을 전제하지만, hardware contact 신호(촉각 에너지 임계 등)로 자동 추출이 가능한지는 다루지 않는다. 첫 구현에서는 사람 라벨 default 와 자동 라벨 옵션을 함께 검토한다.

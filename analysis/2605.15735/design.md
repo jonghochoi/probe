@@ -19,8 +19,8 @@
 - **입력 — 관찰 이미지** `I_t`: shape `(B, V, 3, H, W)`, dtype `float32 / bf16`, 정규화는 백본 VLM(Bagel/Qwen-VL 계열)의 ImageNet-style mean/std. ALOHA real 실험은 `V=3`(primary + left wrist + right wrist), 원본 해상도 `640×480`(4:3, §11.1). 시뮬레이션에서는 `V=1`.
 - **입력 — 언어 지시** `L`: tokenized string, shape `(B, T_L)`, 백본 VLM 의 tokenizer 와 동일. byte-level / SentencePiece 가정은 백본 의존.
 - **입력 — 시점 상태(proprioception)** `s_t`: shape `(B, D_state)`, action expert 에 직접 주입 (§9.1 의 $`\pi_0`$-style 와 동일 위치). dtype `float32`, 정규화 통계는 (원문에 명시 없음 — 데이터셋 mean/std 가정).
-- **출력 — 액션 청크** `a_{t:t+H}`: shape `(B, H, D_act)`. ALOHA bimanual 의 경우 `D_act` 는 양손 joint + gripper. Calvin `H=10`, RoboTwin `H=16` (3-step subsample → effective horizon 48), real-robot `H=24` (§12).
-- **출력 — 보조 목표 관찰** `\hat{I}_{t+1}`: shape `(B, 3, H, W)`, $`\mathcal{L}_{\text{wm}}`$ 학습 시에만 사용. 단일 step denoising 으로 *전체 이미지 재구성을 수행하지 않고* 중간 표상만 활용한다고 본문(§13)이 명시.
+- **출력 — 액션 청크** $`a_{t:t+H}`$: shape `(B, H, D_act)`. ALOHA bimanual 의 경우 `D_act` 는 양손 joint + gripper. Calvin `H=10`, RoboTwin `H=16` (3-step subsample → effective horizon 48), real-robot `H=24` (§12).
+- **출력 — 보조 목표 관찰** $`\hat{I}_{t+1}`$: shape `(B, 3, H, W)`, $`\mathcal{L}_{\text{wm}}`$ 학습 시에만 사용. 단일 step denoising 으로 *전체 이미지 재구성을 수행하지 않고* 중간 표상만 활용한다고 본문(§13)이 명시.
 - **토큰 라우팅 계약** — ViT 인코딩 토큰 → semantic expert($`E_{\text{sem}}`$), VAE 인코딩 토큰 → dorsal expert($`E_{\text{dor}}`$). Semantic token grid: ViT patch 14 → `14×18 = 252` tokens (640×480 입력 기준). Dorsal token grid: VAE stride 16 → `12×16 = 192` tokens (§11.1).
 - **시간 축** — 모든 시퀀스는 `chunk_size = H`, action sampling stride 는 데이터셋별. 절대 시점 좌표 미사용.
 
@@ -109,7 +109,7 @@ $$\Delta(f_{\text{VLA}})\;=\;1-\frac{S(f_{\text{VLA}})}{S(f_{\text{VLM}})}$$
 
 ## 🎯 평가 메트릭
 
-- **지표** — `Forgetting (Δ)` · **임계값** — *Δ ≤ 0.05* (95%+ 보존) · **비교 baseline** — 원본 VLM 점수 $`S(f_{\text{VLM}})`$
+- **지표** — Forgetting ($`\Delta`$) · **임계값** — *Δ ≤ 0.05* (95%+ 보존) · **비교 baseline** — 원본 VLM 점수 $`S(f_{\text{VLM}})`$
   - 측정 벤치마크: MMMU, MME-P, MME-S, MMBench, MM-Vet, MathVista, MMStar, TextVQA (Tab. 2).
 - **지표** — `Simulated Action Accuracy` · **임계값** — Calvin ABC-D 1,000 task × length 5 의 평균 task completion length · **비교 baseline** — Qwen-$`\pi_0`$ (2-expert), Variant 2a (VLM-init Dorsal), Variant 3a (Gen-init no WM).
 - **지표** — `RoboTwin Success Rate` · **임계값** — 16-task × 100 trial × unseen instructions 의 평균 success rate · **비교 baseline** — 동일 6-variant sweep.

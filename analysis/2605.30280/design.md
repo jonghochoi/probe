@@ -20,10 +20,10 @@
 
 - **입력 — 이미지 (multi-view RGB)**: shape `(B, V, 3, Himg, Wimg)` (V = 카메라 수; 뷰별 경계 토큰 `<|tag_start|> 〈image〉 <|tag_end|>` 로 감쌈, tag ∈ {`ego`, `cam_left_wrist`, `cam_right_wrist`, …}). 해상도·V 본문 미명시. T2A 단계에서는 이미지 완전 억제.
 - **입력 — 언어 (embodiment prompt + instruction)**: 토큰 시퀀스. 템플릿 `"The robot is {robot_tag} with {single arm / dual arms}[, waist][, and mobile base]. The control frequency is {FPS} Hz. Please predict the next {chunk_size} control actions to execute the following task: {ori_instruction}."` 임바디먼트 정보가 모델로 들어가는 유일한 인터페이스.
-- **입력 — 노이즈 행동 (flow-matching)**: `Yτ = (1−τ)Y0 + τY1`, `Y1 ~ N(0, I)`, shape `(B, H, K)`, `τ ∈ [0, 1]`.
-- **출력 — 행동 텐서 `Y`**: shape `(B, H, K)`, dtype float. 제어 모드별 활성 채널 `c ≤ K`, 앞쪽 `c` 차원에 유효값·나머지 0 패딩. 채널 마스크 `M ∈ {0,1}^{H×K}`, `M[h,k]=1 ⟺ k<c 이고 h<Htask`.
-- **정규화**: 데이터셋별 분위수 정규화 — 차원 `d`, 데이터셋 `k` 에서 `ãd = 2·(ad − q^k_01)/(q^k_99 − q^k_01) − 1`, `[−1,1]` 클리핑. (역정규화는 추론 시 데이터셋별 통계로 복원.)
-- **행동 의미 (제어 신호 유형)**: 조작 = ∆EEF 위치 / Euler·쿼터니언 회전 / 절대 관절 / 그리퍼 / 다지손 관절. 내비 = 웨이포인트당 `(∆x, ∆y, ∆θ)`. 인간 자기중심 = 손당 손목 SE(3) 상대(이동 3 + axis-angle 회전 3) + eigengrasp 10계수 = 손당 16, 양손 32차원. 데이터셋 원래 관습 보존(공유 물리 의미로 강제 변환하지 않음).
+- **입력 — 노이즈 행동 (flow-matching)**: $`Y_\tau = (1-\tau)Y_0 + \tau Y_1`$, $`Y_1 \sim N(0, I)`$, shape `(B, H, K)`, $`\tau \in [0, 1]`$.
+- **출력 — 행동 텐서 `Y`**: shape `(B, H, K)`, dtype float. 제어 모드별 활성 채널 $`c \le K`$, 앞쪽 `c` 차원에 유효값·나머지 0 패딩. 채널 마스크 $`M \in \{0,1\}^{H\times K}`$, $`M[h,k]=1 \iff k<c`$ 이고 $`h<H_{\mathrm{task}}`$.
+- **정규화**: 데이터셋별 분위수 정규화 — 차원 `d`, 데이터셋 `k` 에서 $`\tilde{a}_d = 2\cdot(a_d - q^k_{01})/(q^k_{99} - q^k_{01}) - 1`$, $`[-1,1]`$ 클리핑. (역정규화는 추론 시 데이터셋별 통계로 복원.)
+- **행동 의미 (제어 신호 유형)**: 조작 = ∆EEF 위치 / Euler·쿼터니언 회전 / 절대 관절 / 그리퍼 / 다지손 관절. 내비 = 웨이포인트당 $`(\Delta x, \Delta y, \Delta\theta)`$. 인간 자기중심 = 손당 손목 SE(3) 상대(이동 3 + axis-angle 회전 3) + eigengrasp 10계수 = 손당 16, 양손 32차원. 데이터셋 원래 관습 보존(공유 물리 의미로 강제 변환하지 않음).
 
 ---
 
@@ -61,7 +61,7 @@ def flow_logprob_ppo(denoise_states, params) -> log_prob:
     기본: 롤아웃당 denoising 스텝 1개 무작위 선택(추가 DiT forward 1회)."""
 ```
 
-- 손실/옵티마이저 관계: 행동 손실(플로우 매칭 MSE)은 `action_expert` 출력에, VL 손실(next-token CE)은 `vlm_backbone` 언어 헤드에 겁니다. 합동 손실 `L = λ_act·L_act + λ_vl·L_vl`. RL 단계는 `L = L_actor + cv·L_value`.
+- 손실/옵티마이저 관계: 행동 손실(플로우 매칭 MSE)은 `action_expert` 출력에, VL 손실(next-token CE)은 `vlm_backbone` 언어 헤드에 겁니다. 합동 손실 $`L = \lambda_{\mathrm{act}}\cdot L_{\mathrm{act}} + \lambda_{\mathrm{vl}}\cdot L_{\mathrm{vl}}`$. RL 단계는 $`L = L_{\mathrm{actor}} + c_v\cdot L_{\mathrm{value}}`$.
 
 ---
 
@@ -83,35 +83,35 @@ base 와 무관한 수학적/통계적 성질:
 식·기호 verbatim. 본문 미명시 값은 `(원문 미명시)`.
 
 - **플로우 매칭 행동 손실** (Eq. 1–2):
-  `ℓk = Σh M[h,k]·‖(vθ(Yτ,τ|o,x,e,z) − (Y1−Y0))[h,k]‖²₂ / Σh M[h,k]`,
-  `L_act = E[ (1/c) Σ_{k=0}^{c−1} ℓk ]`
-- **VL 손실** (Eq. 3): `L_vl = − Σi log pθ(wi | w_{<i}, o_{1:t})`
-- **합동 손실** (Eq. 4): `L = λ_act·L_act + λ_vl·L_vl`
-- **분위수 정규화** (Eq. 5): `ãd = 2·(ad − q^k_01)/(q^k_99 − q^k_01) − 1`, clip `[−1,1]`
-- **RL** (Eq. 6–7): `L_actor = −E[min(rt·Ât, clip(rt,1−ε,1+ε)·Ât)]`, `rt = πθ(at|st)/πθ_old(at|st)`, `L = L_actor + cv·L_value`
+  $`\ell_k = \sum_h M[h,k]\cdot\|(v_\theta(Y_\tau,\tau|o,x,e,z) - (Y_1-Y_0))[h,k]\|^2_2 / \sum_h M[h,k]`$,
+  $`L_{\mathrm{act}} = \mathbb{E}[ (1/c) \sum_{k=0}^{c-1} \ell_k ]`$
+- **VL 손실** (Eq. 3): $`L_{\mathrm{vl}} = - \sum_i \log p_\theta(w_i | w_{<i}, o_{1:t})`$
+- **합동 손실** (Eq. 4): $`L = \lambda_{\mathrm{act}}\cdot L_{\mathrm{act}} + \lambda_{\mathrm{vl}}\cdot L_{\mathrm{vl}}`$
+- **분위수 정규화** (Eq. 5): $`\tilde{a}_d = 2\cdot(a_d - q^k_{01})/(q^k_{99} - q^k_{01}) - 1`$, clip $`[-1,1]`$
+- **RL** (Eq. 6–7): $`L_{\mathrm{actor}} = -\mathbb{E}[\min(r_t\cdot\hat{A}_t, \mathrm{clip}(r_t,1-\epsilon,1+\epsilon)\cdot\hat{A}_t)]`$, $`r_t = \pi_\theta(a_t|s_t)/\pi_{\theta_{\mathrm{old}}}(a_t|s_t)`$, $`L = L_{\mathrm{actor}} + c_v\cdot L_{\mathrm{value}}`$
 
 | 이름 | 값 | 출처 |
 |------|----|----|
-| `λ_act` (SFT) | `1.0` (manip·nav 행동) | §4.1 |
-| `λ_vl` (SFT) | `0.1` (VL next-token) | §4.1 |
-| `λ_act`, `λ_vl` (pretrain) | (원문 미명시 — "gradient 크기 균형 위해 튜닝") | §2.5 |
+| $`\lambda_{\mathrm{act}}`$ (SFT) | `1.0` (manip·nav 행동) | §4.1 |
+| $`\lambda_{\mathrm{vl}}`$ (SFT) | `0.1` (VL next-token) | §4.1 |
+| $`\lambda_{\mathrm{act}}`$, $`\lambda_{\mathrm{vl}}`$ (pretrain) | (원문 미명시 — "gradient 크기 균형 위해 튜닝") | §2.5 |
 | `H` (조작 SFT/RL action chunk) | `16` | §4.1, §4.2, §5.1.1 |
 | `H` (VLN 웨이포인트) | `8` | §4.1 |
 | `K` (공유 채널 차원) | (원문 미명시 정수) | §2.4 |
-| 행동 전문가 파라미터 | `≈1.15B` (16 DiT 블록 × 70.8M = 1.13B) | §2.2 |
+| 행동 전문가 파라미터 | $`\approx 1.15\text{B}`$ (16 DiT 블록 × 70.8M = 1.13B) | §2.2 |
 | 백본 | `Qwen3.5-4B` | §1, §2.2 |
 | T2A step | `2,000` (정점; 40,000 과적합) | §5.2.1 |
-| T2A 데이터 비율 | `≈20% syn + 80% real` (vision-dropped) | §5.2.1 |
-| 타임스텝 분포 `p(τ)` | T2A = Sigmoid-Normal, CPT/SFT = Beta | §5.2.1 |
+| T2A 데이터 비율 | $`\approx`$ 20% syn + 80% real (vision-dropped) | §5.2.1 |
+| 타임스텝 분포 $`p(\tau)`$ | T2A = Sigmoid-Normal, CPT/SFT = Beta | §5.2.1 |
 | projection 설계 | Zero-Padding (`2·h·dmax`) | §5.2.2, Table 10 |
 | eigengrasp 차원 | 상위 `10` PCA 계수 (45→10) | §3.2.2 |
-| PPO `ε` | `0.2` | §4.2 |
-| GAE `γ` / `λ` | `0.99` / `0.95` | §4.2 |
-| value 계수 `cv` | `1` | §4.2 |
+| PPO $`\epsilon`$ | `0.2` | §4.2 |
+| GAE $`\gamma`$ / $`\lambda`$ | `0.99` / `0.95` | §4.2 |
+| value 계수 $`c_v`$ | `1` | §4.2 |
 | PPO epoch / 롤아웃 | `4` epoch/batch | §4.2 |
-| actor lr / value lr | `5×10⁻⁶` / `10⁻⁴` | §4.2 |
+| actor lr / value lr | $`5\times10^{-6}`$ / $`10^{-4}`$ | §4.2 |
 | 병렬 환경 `N` | `128` (반복당 8,192 transition chunk) | §4.2 |
-| 롤아웃/평가 온도 `τ` | `1.0` / `0.6` | §4.2 |
+| 롤아웃/평가 온도 $`\tau`$ | `1.0` / `0.6` | §4.2 |
 | RL 보상 | 희소 이진 (`R=1` 성공 / `R=0`) | §4.2 |
 
 ---
@@ -135,14 +135,14 @@ base 와 무관한 수학적/통계적 성질:
 
 ## 🔌 Foundry 힌트 (선택)
 
-- **`lerobot`** — 후보 base: `pi0` / `pi05` family 와 가장 가까움. 둘 다 "VLM 백본 + 플로우 매칭 액션 전문가" 구조를 공유하므로 액션 전문가 골격은 pi0 계열에 매핑 가능. 단 Qwen-VLA 고유 요소 — 임바디먼트 프롬프트 조건화, Zero-Padding projection, 통일 `H×K`+마스크 표현, T2A 사전 단계, 단계별 `p(τ)`, 플로우 매칭 PPO — 는 학습 레시피/데이터 계약 층의 추가이며 lerobot 의 단일 base 클래스로 직접 대응되지 않을 수 있음(여러 지점 패치 또는 부분 매핑 불가 가능성). 백본이 PaliGemma 가 아닌 Qwen3.5-4B 라는 점도 매핑 시 검토 필요.
+- **`lerobot`** — 후보 base: `pi0` / `pi05` family 와 가장 가까움. 둘 다 "VLM 백본 + 플로우 매칭 액션 전문가" 구조를 공유하므로 액션 전문가 골격은 pi0 계열에 매핑 가능. 단 Qwen-VLA 고유 요소 — 임바디먼트 프롬프트 조건화, Zero-Padding projection, 통일 `H×K`+마스크 표현, T2A 사전 단계, 단계별 $`p(\tau)`$, 플로우 매칭 PPO — 는 학습 레시피/데이터 계약 층의 추가이며 lerobot 의 단일 base 클래스로 직접 대응되지 않을 수 있음(여러 지점 패치 또는 부분 매핑 불가 가능성). 백본이 PaliGemma 가 아닌 Qwen3.5-4B 라는 점도 매핑 시 검토 필요.
 
 ---
 
 ## 🚧 미해결 / 잠정
 
 - 공유 채널 차원 `K` 의 정확한 정수값 — 본문 미명시(원문에 명시 없음 — `/implement-design` 시 가정으로 메움).
-- 사전학습(T2A/CPT) 단계의 `λ_act`, `λ_vl` 구체값 — 본문은 SFT 값(1.0/0.1)만 제시, 사전학습은 "gradient 균형 위해 튜닝" 으로만 기술.
+- 사전학습(T2A/CPT) 단계의 $`\lambda_{\mathrm{act}}`$, $`\lambda_{\mathrm{vl}}`$ 구체값 — 본문은 SFT 값(1.0/0.1)만 제시, 사전학습은 "gradient 균형 위해 튜닝" 으로만 기술.
 - 이미지 해상도·카메라 수 `V`·정확한 뷰 태그 집합 — 본문 미명시.
 - Qwen3.5-4B 의 상세 config(레이어 수, hidden, attention 비율) — 본문은 "하이브리드 어텐션" 정성 기술만 제시.
 - 미니배치 내 태스크군 샘플링 비율("fixed sampling ratio") 구체값 — §2.5 에 정성 언급만, 수치 미명시.

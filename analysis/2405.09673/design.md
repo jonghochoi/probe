@@ -75,13 +75,13 @@ def svd_rank_at_variance(W_finetuned, W_pretrained, var=0.90):
 - **(가정 1)** — `B_0 = 0` 초기화로 학습 시작 시점 `Delta = 0`, 즉 LoRA finetuned 모델은 base 모델과 정확히 동일하게 출발합니다. (망각 완화의 출발 조건)
 - **(가정 2)** — base 가중치 `W_pretrained` 는 학습 내내 동결되어 prior-loss 경로가 어댑터로 한정됩니다. 어댑터 랭크 `r` 이 작을수록 base 분포에서 벗어나기가 구조적으로 어렵습니다.
 - **(가정 3)** — finetuning 의 실제 가중치 변화 `Delta` 의 유효 랭크는 일반적으로 `r << d,k` 보다 훨씬 큽니다(어려운 도메인에서 10–100×). 그래서 저랭크 근사로는 어려운 신규 도메인 학습을 다 담지 못합니다.
-- **(가정 4)** — 스케일 스칼라는 `gamma_r = alpha/r`. `alpha` 를 `r` 에 비례(`alpha=2r`)시키지 않으면 높은 랭크가 `alpha/r` 로 깎여 이득이 사라집니다.
+- **(가정 4)** — 스케일 스칼라는 $`\gamma_r = \alpha/r`$. $`\alpha`$ 를 `r` 에 비례($`\alpha=2r`$)시키지 않으면 높은 랭크가 $`\alpha/r`$ 로 깎여 이득이 사라집니다.
 
 ---
 
 ## 📊 하이퍼파라미터·손실
 
-- 재매개화 식: `W_finetuned = W_pretrained + Delta`, `Delta = gamma_r * A * B` (`gamma_r = alpha/r`, `A ∈ R^{d×r}`, `B ∈ R^{r×k}`).
+- 재매개화 식: $`W_{\mathrm{finetuned}} = W_{\mathrm{pretrained}} + \Delta`$, $`\Delta = \gamma_r \cdot A \cdot B`$ ($`\gamma_r = \alpha/r`$, $`A \in \mathbb{R}^{d\times r}`$, $`B \in \mathbb{R}^{r\times k}`$).
 - 학습 목적: 표준 미세조정 손실(다음 토큰 예측 cross-entropy). 본 논문은 새 loss term 을 도입하지 않음.
 
 | 이름 | 값 | 출처 |

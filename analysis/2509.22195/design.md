@@ -101,7 +101,7 @@ $$p_{\theta}(\bar{a}_{i},m_{i},l_{i}|\bar{o}_{i},L)=p_{\theta}(l_{i}|\bar{o}_{i}
 
 ## 🎯 평가 메트릭
 
-- **지표 (멀티모달 보존)** — 다수 VQA 벤치마크(MMMU, MMStar, MME, OCRBench, MMB-en/cn, TextVQA, DocVQA, InfoVQA, AI2D, ChartQA, RealWorldQA) · **임계값** — base 모델 성능의 `≥85%` 유지 · **비교 baseline** — 원 backbone(Gemma-3-12B-IT), OpenVLA·ECoT(forgetting 비교군), MolmoAct· $`\pi_{0.5}`$(co-trained 비교군).
+- **지표 (멀티모달 보존)** — 다수 VQA 벤치마크(MMMU, MMStar, MME, OCRBench, MMB-en/cn, TextVQA, DocVQA, InfoVQA, AI2D, ChartQA, RealWorldQA) · **임계값** — base 모델 성능의 $`\ge 85\%`$ 유지 · **비교 baseline** — 원 backbone(Gemma-3-12B-IT), OpenVLA·ECoT(forgetting 비교군), MolmoAct· $`\pi_{0.5}`$(co-trained 비교군).
 - **지표 (조작 성공률)** — 과제별 success rate(부분 점수 포함 rubric), 과제당 30 trial(다국어 90) · **비교 baseline** — OpenVLA, ECoT, ablation VLM2VLA-AT · 셋업 — 6-DoF WidowX 250S, toy kitchen, Realsense D435.
 - **지표 (추론 일반화)** — ID / borderline / OOD(다국어 번역, 'Ash Ketchum' 의미 추론) 구분 평가; task decomposition 정확도(Fig. 6, 키워드 매칭). 대표 수치: Ash Ketchum 과제 VLM2VLA 60% vs VLM2VLA-AT 30%.
 - **지표 (지연)** — 1 action 사이클 wall-clock: median 6.1s / mean 10.5s / std 14.3s (A100, N=30).

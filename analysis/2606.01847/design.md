@@ -21,10 +21,10 @@
 - **입력 (관측)** — `vision`: $`K`$ 대 카메라 RGB-D → 통합 point cloud. GAT 인코딩 후 geometric feature `F_geo`: shape `(B, N, d)`, `N` = 비어있지 않은 voxel 수, `d` = feature dim (원문에 구체 값 명시 없음).
 - **입력 (언어)** — `language`: 명령 텍스트 → frozen CLIP text encoder → `F_lang`: shape `(B, L, d)`, `L` = 토큰 수.
 - **입력 (노이즈 포즈)** — `g_t`: 현재 궤적 추정 `(B, H)` 의 SE(3) 원소열 (각 원소는 $`4\times 4`$ homogeneous matrix, 또는 `(R, t)` 쌍). 회전 `R`: `(B, H, 3, 3)`, dtype float32, 제약 $`R^{\top}R=I,\ \det R=1`$; 평행이동 `t`: `(B, H, 3)`.
-- **입력 (diffusion time)** — `t`: 스칼라 timestep → sinusoidal embedding `τ(t)`: shape `(B, d_t)`.
-- **출력 (score / twist)** — 각 waypoint 당 6D twist `ξ = (ω, v)`: shape `(B, H, 6)`, dtype float32, 평평한 $`\mathfrak{se}(3)`$ 값(접공간). 각속도 `ω`: `(B, H, 3)`, 선속도 `v`: `(B, H, 3)` 은 별도 MLP 출력.
+- **입력 (diffusion time)** — `t`: 스칼라 timestep → sinusoidal embedding $`\tau(t)`$: shape `(B, d_t)`.
+- **출력 (score / twist)** — 각 waypoint 당 6D twist $`\xi = (\omega, v)`$: shape `(B, H, 6)`, dtype float32, 평평한 $`\mathfrak{se}(3)`$ 값(접공간). 각속도 $`\omega`$: `(B, H, 3)`, 선속도 `v`: `(B, H, 3)` 은 별도 MLP 출력.
 - **출력 (gripper)** — `(B, H, 1)`, sigmoid → binary open/close.
-- **정규화 가정** — 노이즈 twist `ξ ~ N(0, I_6)` (표준정규, 좌표축 독립). 평행이동 입력의 positional embedding 정규화 통계 출처는 원문에 명시 없음.
+- **정규화 가정** — 노이즈 twist $`\xi \sim N(0, I_6)`$ (표준정규, 좌표축 독립). 평행이동 입력의 positional embedding 정규화 통계 출처는 원문에 명시 없음.
 
 ---
 
@@ -53,7 +53,7 @@ def forward_noising(g_0, sigma_t, xi) -> SE3:
     """학습용 노이즈 주입: g_t = g_0 · exp(σ_t · ξ), ξ ~ N(0, I_6)."""
 ```
 
-- **외부 호출 계약** — `exp_se3` 는 미분가능해야 함(원문은 Theseus 로 구현). `denoising_transformer` 출력은 손실 함수의 score-matching 타깃 `ξ` 와 동일 좌표(접공간)에서 비교됨.
+- **외부 호출 계약** — `exp_se3` 는 미분가능해야 함(원문은 Theseus 로 구현). `denoising_transformer` 출력은 손실 함수의 score-matching 타깃 $`\xi`$ 와 동일 좌표(접공간)에서 비교됨.
 
 ---
 
@@ -72,7 +72,7 @@ def forward_noising(g_0, sigma_t, xi) -> SE3:
 
 $$\mathcal{L}=\lambda_{\mathrm{s}}\mathbb{E}_{t,\boldsymbol{\xi}}\left[\sum_{h=1}^{H}\|s_{\theta}(g_{t}^{h},t)-\boldsymbol{\xi}^{h}\|^{2}\right]+\lambda_{\mathrm{p}}\mathcal{L}_{\mathrm{pos}}+\lambda_{\mathrm{g}}\mathcal{L}_{\mathrm{grip}}$$
 
-  - 주 항: 접공간 denoising score matching (예측 twist vs 주입 twist `ξ`).
+  - 주 항: 접공간 denoising score matching (예측 twist vs 주입 twist $`\xi`$).
   - `L_pos`: 평행이동 성분 MSE.
   - `L_grip`: gripper 상태 binary cross-entropy.
 
@@ -85,10 +85,10 @@ $$\mathcal{L}=\lambda_{\mathrm{s}}\mathbb{E}_{t,\boldsymbol{\xi}}\left[\sum_{h=1
 
   | 이름 | 값 | 출처 |
   |------|----|----|
-  | `λ_s` (score matching 가중) | (원문 미명시) | §4.2.4, Eq. (8) |
-  | `λ_p` (position 가중) | (원문 미명시) | §4.2.4, Eq. (8) |
-  | `λ_g` (gripper 가중) | (원문 미명시) | §4.2.4, Eq. (8) |
-  | `σ_t` (noise schedule) | 함수 형태 원문 미명시 | §2.2, §4.1.1 |
+  | $`\lambda_s`$ (score matching 가중) | (원문 미명시) | §4.2.4, Eq. (8) |
+  | $`\lambda_p`$ (position 가중) | (원문 미명시) | §4.2.4, Eq. (8) |
+  | $`\lambda_g`$ (gripper 가중) | (원문 미명시) | §4.2.4, Eq. (8) |
+  | $`\sigma_t`$ (noise schedule) | 함수 형태 원문 미명시 | §2.2, §4.1.1 |
   | `H` (action horizon) | (원문 미명시) | §2.2 |
   | 학습 iteration | 300K–800K (셋업별) | §Table 1 |
   | 옵티마이저 / lr | (원문 미명시) | — |
@@ -120,8 +120,8 @@ $$\mathcal{L}=\lambda_{\mathrm{s}}\mathbb{E}_{t,\boldsymbol{\xi}}\left[\sum_{h=1
 
 ## 🚧 미해결 / 잠정
 
-- 손실 가중치 `λ_s, λ_p, λ_g` 의 구체 값이 본문에 없어 빈칸으로 둠.
-- noise schedule `σ_t`(및 `β_t`)의 함수 형태·범위가 명시되지 않음.
+- 손실 가중치 $`\lambda_s, \lambda_p, \lambda_g`$ 의 구체 값이 본문에 없어 빈칸으로 둠.
+- noise schedule $`\sigma_t`$(및 $`\beta_t`$)의 함수 형태·범위가 명시되지 않음.
 - action horizon `H`, feature dim `d`, voxel 수 `N` 등 텐서 shape 의 구체 값 미명시.
 - 옵티마이저 종류·learning rate·warmup 등 최적화 셋업 미명시.
 - 공개 코드/체크포인트 링크 미확인 — `exp_se3` 의 정확한 수치 구현(작은 각도 Taylor 분기 등)은 Theseus 관행을 따른다고 가정.

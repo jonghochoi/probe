@@ -26,13 +26,13 @@
 - **입력 — ActionQuery** `AQ`: 학습 임베딩 `(B, N_aq, d)`, `N_aq=64`(기본),
   `d=896`(hidden size). VLM 시퀀스에 삽입되어 attention 참여.
 - **입력 — proprioception** `P`: shape `(B, d_proprio)`, float. 2-layer MLP →
-  `σ0(P)` 임베딩 `(B, d)`. (원문에 `d_proprio` 명시 없음 — 임베디먼트별 가정.)
-- **입력 — 초기 액션** `A^{τ=0}`: 전부-0, shape `(B, H, d_action)`, `H=8`.
+  $`\sigma_0(P)`$ 임베딩 `(B, d)`. (원문에 `d_proprio` 명시 없음 — 임베디먼트별 가정.)
+- **입력 — 초기 액션** $`A^{\tau=0}`$: 전부-0, shape `(B, H, d_action)`, `H=8`.
   LN+MLP → `Ã^0` `(B, H, d)`.
 - **VLM 출력 조건 — Raw latent** `C^R`: 층별 `(B, M, S_v, d)` 또는 대응 층
   주입용 `(B, S_v, d)` × `M`. `M=24` (intermediate layers 1–24).
 - **VLM 출력 조건 — ActionQuery latent** `C^AQ`: 층별 `(B, N_aq, d)` × `M`.
-- **출력 — 액션 청크** `A^{M-1}`: shape `(B, H, d_action)`, float, `H=8`. (정규화
+- **출력 — 액션 청크** $`A^{M-1}`$: shape `(B, H, d_action)`, float, `H=8`. (정규화
   통계는 원문 미명시 — 데이터셋 표준화 가정.) `d_action` 은 임베디먼트 의존
   (LIBERO/CALVIN/실로봇 8-dim 보고).
 
@@ -171,7 +171,7 @@ $`\tanh(g)`$ 게이트로 자율 선별 주입** 하는 것입니다. 이로써 
   의존으로 가정.
 - **액션/관측 정규화 통계의 출처** — 본문 미명시 → "데이터셋 전체 평균/표준편차"
   로 가정.
-- **`σ1`/`σ2` MLP 의 층수·차원** — Bridge Attention 내 투영 MLP 의 구체 구성은
+- **$`\sigma_1`$/$`\sigma_2`$ MLP 의 층수·차원** — Bridge Attention 내 투영 MLP 의 구체 구성은
   본문에 수치 없음(VLA-Adapter 는 세 attention 투영층을 *공유* 해 97MB, Pro 는
   분리해 207MB 라는 정성 정보만 Appendix I).
 - **CA₂ 의 proprio concat 위치·기여** — ActionQuery 와 concat 후 σ2 통과는

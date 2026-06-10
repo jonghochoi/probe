@@ -22,7 +22,7 @@
 - **입력** — `weight`: 현재 weight $`\mathbf{\Theta}\in\mathbb{R}^{m\times n}`$, dtype 모델 정밀도.
 - **입력** — `gradient`: 현재 stochastic gradient $`\mathbf{G}\in\mathbb{R}^{m\times n}`$, dtype 모델 정밀도.
 - **입력 (per-head 모드 전용)** — `head_dim`: attention projection 의 head 분할 정보 `(num_heads, head_dim)`. reshape 시 $`\mathbb{R}^{d\times d}\to\mathbb{R}^{H\times d_h\times d}`$ 로 head 차원 분리.
-- **출력** — `weight_next`: 갱신된 weight $`\mathbf{\Theta}'\in\mathbb{R}^{m\times n}`$, dtype 모델 정밀도. `weight_next = weight - lr · highpass_NS(momentum)` 의 형태.
+- **출력** — `weight_next`: 갱신된 weight $`\mathbf{\Theta}'\in\mathbb{R}^{m\times n}`$, dtype 모델 정밀도. $`\text{weight\_next} = \text{weight} - \text{lr} \cdot \text{highpass\_NS}(\text{momentum})`$ 의 형태.
 - **내부 상태** — 매 step 의 정규화된 momentum $`\mathbf{X}\leftarrow \mathbf{M}/(\|\mathbf{M}\|_F+\epsilon)`$, singular value 가 $`[0,1]`$ 범위. 출력 update direction 의 spectral norm 은 $`\approx 1`$ (suppression 후 leading σ 가 1 에 고정).
 
 ---
@@ -68,7 +68,7 @@ def ns_polynomial_step(
 
 - 모듈 책임 — `pion_step` 은 학습 루프가 호출하는 외부 API, `highpass_ns` 는 NS 다항식 시퀀스, `ns_polynomial_step` 은 한 step 의 5차 다항식 적용.
 - 외부 호출 계약 — gradient/loss 와는 무관(옵티마이저는 backward 결과만 받음). LR 스케줄러는 일반 cosine/linear 사용 가능 — Muon 과 동일 인터페이스.
-- **per-head 모드** — `X` 가 attention projection 일 때 `(d, d) → (num_heads, d_h, d)` 로 reshape 후 `vmap` 또는 batched matmul 로 `highpass_ns` 적용. 나머지 단계 동일.
+- **per-head 모드** — `X` 가 attention projection 일 때 $`(d, d) \to (\text{num\_heads}, d_h, d)`$ 로 reshape 후 `vmap` 또는 batched matmul 로 `highpass_ns` 적용. 나머지 단계 동일.
 
 ---
 
@@ -97,12 +97,12 @@ def ns_polynomial_step(
 |------|----|------|
 | `k` (총 NS step) | `5` | §5, Pion algorithm |
 | `k_p` (Promotion step) | `{0,1,…,5}`, 권장 `k_p` 작게 | §5 (단일 hyperparameter) |
-| `k_s` (Suppression step) | `k - k_p`, 권장 `≥ 3` | §5 |
+| `k_s` (Suppression step) | `k - k_p`, 권장 $`\ge 3`$ | §5 |
 | `(a_p, b_p, c_p)` | `(1.875, -1.25, 0.375)` | Eq. (7) |
 | `(a_s, b_s, c_s)` | `(0, 2.5, -1.5)` | Eq. (8) |
-| `μ` (momentum coef) | (원문에 구체 명시 없음 — Appendix H 참조 필요) | §3 |
-| `η` (learning rate) | (원문에 구체 명시 없음 — Appendix H 참조 필요) | §3 |
-| `ε` (Frobenius 정규화 작은 상수) | `≥ 0` (값 미명시) | §3 |
+| $`\mu`$ (momentum coef) | (원문에 구체 명시 없음 — Appendix H 참조 필요) | §3 |
+| $`\eta`$ (learning rate) | (원문에 구체 명시 없음 — Appendix H 참조 필요) | §3 |
+| $`\epsilon`$ (Frobenius 정규화 작은 상수) | $`\ge 0`$ (값 미명시) | §3 |
 | Optimizer 배치 (VLA) | action 2D → Pion, vision/language 2D → Muon, 기타 → AdamW | §6.1 |
 | Optimizer 배치 (RLVR) | 전 2D → Pion (per-head), 기타 → AdamW | §6.1, §5 |
 | 모드 (VLA) | default (per-head 아님) | §5, §6.2 |
@@ -138,7 +138,7 @@ Pion 은 Muon 의 "균일 spectral whitening (모든 σ → 1)" 을 "spectral hi
 
 ## 🚧 미해결 / 잠정
 
-- `μ` (momentum coefficient), `η` (learning rate), `ε` (Frobenius 정규화 상수) 가 본문 §5 에 표로 정리되어 있지 않음 — Appendix H 의 task 별 표를 별도로 파싱해야 확정할 수 있음. 현재는 원문에 명시가 없어 Appendix 를 참조해야 한다고 보류해 둡니다.
+- $`\mu`$ (momentum coefficient), $`\eta`$ (learning rate), $`\epsilon`$ (Frobenius 정규화 상수) 가 본문 §5 에 표로 정리되어 있지 않음 — Appendix H 의 task 별 표를 별도로 파싱해야 확정할 수 있음. 현재는 원문에 명시가 없어 Appendix 를 참조해야 한다고 보류해 둡니다.
 - VLA / RLVR 각각의 `(k_p, k_s)` 권장 조합이 본문 §5 에서는 "k_s ≥ 3" 의 일반 가이드만 제시 — task 별 정확한 값은 Appendix H 의 표를 확인해야 함.
 - per-head 모드의 reshape 가 grouped-query attention (GQA) / multi-query attention (MQA) 구조 (Q, K, V head 수가 비대칭) 에서 어떻게 정의되는지 본문에 명시되지 않음 — Qwen3 의 attention 변형 여부에 따라 가정 필요.
 - LPMuon (reverse ablation) 의 정확한 계수는 Appendix L 이 제약 다항식 최적화 결과로 제시함 — Layer 1 Design 에서는 "fitted polynomial coefficients" 수준으로만 표기하고 값은 Appendix L 참조로 보류합니다.

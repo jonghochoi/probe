@@ -63,7 +63,7 @@ class BenchmarkInterface:
 - **(가정 2) 모델-비종속 가속** — 모델 공급 천장 $`\mu(B)`$ 가 모든 샤드 수에서 환경 수요 $`\lambda(K)`$ 를 초과($`\mu(B) > \lambda(K)`$ 운영 영역)하므로, 가속이 환경 병렬화에만 좌우되고 어떤 모델에도 전이된다.
 - **(가정 3) 운영점 안정 영역** — $`K`$ 증가가 throughput을 단조 증가시키지 않는다. $`K \approx 80`$ 초과 시 환경 오버헤드로 throughput 하락 → $`K^{*}`$ 는 공급 용량의 일부(예 78%)만 쓰는 지점으로 잡아 burst 흡수 여유 확보.
 - **(가정 4) action 모드 비식별성** — absolute action과 delta action은 동일 차원의 유효 벡터라 **데이터만으로 구분 불가**. 잘못 가정하면 position 누적으로 robot이 발산해 0%까지 떨어지므로, 모드는 config 외부 지정이 불변 전제.
-- **(가정 5) proprio/rotation 규약 일치** — proprioceptive state source와 quaternion→axis-angle 규약(`angle ∈ [0,2π]` vs `[0,π]`)이 시뮬레이터 컨벤션과 일치해야 한다. 불일치 시 −55pp / 95→56% 등 붕괴.
+- **(가정 5) proprio/rotation 규약 일치** — proprioceptive state source와 quaternion→axis-angle 규약($`\mathrm{angle} \in [0,2\pi]`$ vs $`[0,\pi]`$)이 시뮬레이터 컨벤션과 일치해야 한다. 불일치 시 −55pp / 95→56% 등 붕괴.
 
 ---
 

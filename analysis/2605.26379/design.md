@@ -25,7 +25,7 @@
 학습기는 $`y=f(x)`$ 로 되돌립니다. 분석 대상은 합성 $`h=f\circ g`$.
 
 - **입력 (latent)** — `z`: shape `(B, n)`, float, `z ~ N(0, I_n)` (Gaussian world 가정). `n` = 참 잠재차원.
-- **입력 (positive pair)** — `z_prime`: shape `(B, n)`, OU 전이 $`z'=\rho z+\sqrt{1-\rho^2}\,\eta`$, `eta ~ N(0, I_n)`, `eta ⊥ z`. `rho ∈ (0,1)`.
+- **입력 (positive pair)** — `z_prime`: shape `(B, n)`, OU 전이 $`z'=\rho z+\sqrt{1-\rho^2}\,\eta`$, $`\eta \sim \mathcal{N}(0, I_n)`$, $`\eta \perp z`$. $`\rho \in (0,1)`$.
 - **관측** — `x = g(z)`, `x_prime = g(z_prime)`: shape `(B, d_obs)` (2D 예제는 `d_obs=2`; pixel 예제 Reacher 는 `(B,3,64,64)`).
 - **출력 (embedding)** — `y = f(x)`: shape `(B, m)`, float. 정리는 **`m = n`** 을 가정(차원 정합). whitening 으로 `Cov(f(x)) = I_m` 목표, `f(x) ~ N(0, I_m)` 목표.
 - **정규화 가정** — embedding 은 표준 Gaussian target 으로 정규화(SIGReg). latent 는 표준정규(평균 0, 단위 공분산). 데이터는 online 합성(무한데이터, 매 step 새 샘플).
@@ -58,7 +58,7 @@ def orthogonality_error(Qhat, n):
 
 - **`ou_positive_pair`** — world 의 전이를 구현. `rho` 가 두 view 상관을 조절. 입력 `z (B,n)` → 출력 `z' (B,n)`.
 - **`alignment_loss` / `sigreg_loss`** — LeJEPA 두 항. SIGReg 의 정확한 estimator 는 Balestriero & LeCun(LeJEPA, [7]) 의 sliced characteristic-function 페널티(원문은 "성공한 상황"만 모델링하므로 내부 식은 인용으로 위임).
-- **`lejepa_loss`** — 두 항을 `lam ∈ [0,1]` 으로 결합. 옵티마이저는 이 스칼라를 최소화.
+- **`lejepa_loss`** — 두 항을 $`\lambda \in [0,1]`$ 으로 결합. 옵티마이저는 이 스칼라를 최소화.
 - **평가 모듈(`linear_identifiability_R2`, `orthogonality_error`)** — 학습에 들어가지 않음. 고정 평가셋(1만 점)에서 $`h=f\circ g`$ 의 복원 품질을 측정하는 *진단* 계약.
 
 ---
@@ -89,17 +89,17 @@ def orthogonality_error(Qhat, n):
 | `n` (latent dim) sweep | `{2^1, …, 2^10}` (RealNVP mixing + matched encoder) | §6.1 |
 | LR 스케줄 | 전반부 constant → 후반부 cosine decay to 0 | §H.4 |
 | 평가셋 크기 | 고정 `10,000` 점 | §H.5 |
-| 잠재분포 sweep | generalized normal `alpha ∈ {2^-3,…,2^5}` (`alpha=2` Gaussian) | §H.7 |
+| 잠재분포 sweep | generalized normal $`\alpha \in \{2^{-3},\ldots,2^5\}`$ ($`\alpha=2`$ Gaussian) | §H.7 |
 | 옵티마이저 / batch `B` / epochs | (원문에 명시 없음 — 가정으로 메움; online 무한데이터 regime 만 명시) | §H.4 |
 
 ---
 
 ## 🎯 평가 메트릭
 
-- **지표** — `Linear R^2 (bidirectional)`: OLS 로 $`\hat z=Az+b`$, $`\hat h=Bh+c`$ 적합 후 $`R^2(z\to h)`$, $`R^2(h\to z)`$ · **임계값** — `R^2 → 1` 이면 선형 identifiability 성립(scaling 에서 SIGReg/VICReg `>0.999` @ N=1024) · **비교 baseline** — SIGReg vs VICReg vs InfoNCE.
-- **지표** — `Orthogonality error` $`\|\hat Q^\top\hat Q-I_n\|_F/\sqrt{n}`$ · **임계값** — `→0` 이면 직교(Thm 5.1 일치; best `≈0.15`).
+- **지표** — `Linear R^2 (bidirectional)`: OLS 로 $`\hat z=Az+b`$, $`\hat h=Bh+c`$ 적합 후 $`R^2(z\to h)`$, $`R^2(h\to z)`$ · **임계값** — $`R^2 \to 1`$ 이면 선형 identifiability 성립(scaling 에서 SIGReg/VICReg `>0.999` @ N=1024) · **비교 baseline** — SIGReg vs VICReg vs InfoNCE.
+- **지표** — `Orthogonality error` $`\|\hat Q^\top\hat Q-I_n\|_F/\sqrt{n}`$ · **임계값** — $`\to 0`$ 이면 직교(Thm 5.1 일치; best $`\approx 0.15`$).
 - **지표** — `근사 bound 양`: 공분산편차 $`\varepsilon=\|\mathrm{Cov}(h(z))-I\|_F`$, 정렬갭 $`\delta`$(≥0 clamp), 직교복원오차 $`\min_{Q\in O(n)}\mathbb{E}[\|h(z)-Qz\|^2]`$(SVD) · **임계값** — 실측오차 ≤ 이론 bound(Fig.4a 대각선 아래).
-- **지표** — `Control cost` (planning): $`K=30`$ start-goal pair, path length `≥1`(ideal `1`) · **임계값** — Gaussian 인코더는 oracle 과 통계적으로 구분 불가 · **비교 baseline** — oracle(joint-space 직선) vs Trajectory 인코더.
+- **지표** — `Control cost` (planning): $`K=30`$ start-goal pair, path length $`\ge 1`$(ideal `1`) · **임계값** — Gaussian 인코더는 oracle 과 통계적으로 구분 불가 · **비교 baseline** — oracle(joint-space 직선) vs Trajectory 인코더.
 - **실무 corollary** — training loss 가 identifiability 의 신뢰 proxy(§H.9).
 
 ---
@@ -120,6 +120,6 @@ def orthogonality_error(Qhat, n):
 
 - **SIGReg 내부 estimator** — 원문은 "SIGReg 가 성공한 상황"만 모델링하고 구체식은 LeJEPA 원논문([7])에 위임. sliced characteristic-function 페널티의 정확한 형태·슬라이스 수는 본문 미명시 — 구현 시 [7] 참조 필요.
 - **옵티마이저·batch·step 수** — online 무한데이터 regime 만 명시, 구체 옵티마이저/배치/총 step 은 원문 미명시(가정으로 메움).
-- **`m≠n` 동작** — 차원 불일치 시 거동은 open problem 으로 남김(superposition / redundancy). Layer 1 스펙으로 굳히지 못함.
+- **$`m\ne n`$ 동작** — 차원 불일치 시 거동은 open problem 으로 남김(superposition / redundancy). Layer 1 스펙으로 굳히지 못함.
 - **action-conditioned 전이** — 본 논문은 인코더(상태)만 보장. 전이모델 $`\hat p(\hat z'\mid\hat z,a)`$ identifiability 는 persistent-excitation 조건 하 진행 중 연구로, 본 Design 범위 밖.
 - **비-OU/비정상 dynamics** — 접촉이 많은 실제 조작 dynamics 로의 일반화는 Thm 5.3 graceful degradation 외에는 미명세.

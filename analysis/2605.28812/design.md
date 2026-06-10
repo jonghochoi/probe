@@ -81,19 +81,19 @@ def calibrate_taxel_orientation(taxel_forces, joint_torques, joint_angles) -> R:
 |------|----|----|
 | `learning rate` (적응형 시작) | `5.0e-4` | §E.5 |
 | `target KL` | `0.016` | §E.5 |
-| `discount γ` | `0.99` | §E.5 |
-| `GAE λ` | `0.95` | §E.5 |
+| `discount` $`\gamma`$ | `0.99` | §E.5 |
+| `GAE` $`\lambda`$ | `0.95` | §E.5 |
 | `clip range` | `0.2` | §E.5 |
 | `entropy coef` | `0.005` | §E.5 |
 | `steps/env` | `64` (삽입) / `16` (균형) | §E.5 |
 | `epochs / minibatches` | `5` / `4` | §E.5 |
 | `action scale` | `0.03` (삽입) / `0.05` (균형) | §E.2 |
-| `action EMA α` | `0.5` | §E.2 |
+| `action EMA` $`\alpha`$ | `0.5` | §E.2 |
 | `PD gains (P, D)` | `(3.0, 0.1)` 삽입 / `(6.0, 0.15)` 균형 | §E.2 |
 | `seeds` | `5` | §E.5 |
-| 응력 spread `σ` | (원문 미명시) | §3.2 |
-| 정규화 `λ` | (원문 미명시) | §3.2 |
-| active 임계 `ε` | (원문 미명시) | §3.2 |
+| 응력 spread $`\sigma`$ | (원문 미명시) | §3.2 |
+| 정규화 $`\lambda`$ | (원문 미명시) | §3.2 |
+| active 임계 $`\epsilon`$ | (원문 미명시) | §3.2 |
 
 주요 보상 항(§E.3, Table 5) — 삽입: goal distance $`\exp(-0.5(d_{\rm{goal}}/0.015))`$ (w 1.0), goal reached $`\mathbb{1}(\|r_{\rm{goal}}\|\leq\epsilon)`$ (w 400.0), good contact $`\sum_{i}\mathbb{1}(\|f_{i}\|\geq 1.0)`$ (w 0.25), rotation·DOF deviation penalty (각 w 1.0). 균형: goal distance (w 1.0), plate contact (w 0.2), ball fallen $`\mathbb{1}(p_{\rm{ball,z}}\leq 0.2)`$ (w 200.0), action diff penalty (w 1.0) 등.
 
