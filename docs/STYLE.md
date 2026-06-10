@@ -320,7 +320,7 @@ It applies to every `scouting/` and `analysis/` output.
   table cell cannot hold a real list (`<ul>`) or a literal newline — a
   newline ends the row, and a leading `*`/`-` renders as text, not a bullet.
   To stack several items in one cell, join them with `<br>` and a literal
-  bullet glyph: `• a<br>• b<br>• c`. (This is how the `analysis/catalogs/`
+  bullet glyph: `• a<br>• b<br>• c`. (This is how the `catalogs/`
   dataset/benchmark tables render their multi-item Source / Facts /
   Embodiment / Details cells.)
 - **No 📊 summary score table.** The 📊 section is the per-paper rationale
@@ -639,11 +639,11 @@ bullet's term — the text before the em dash in the `- **<term>** — …` shap
 `python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
 
 **Catalog cross-link.** The same script maintains a bidirectional link between
-`analysis/catalogs/models.md` and this index. A catalog bullet whose arXiv id
+`catalogs/models.md` and this index. A catalog bullet whose arXiv id
 has an `analysis/<id>/` folder gets a `deep--dive-📄_analysis` badge (purple
 `6f42c1`) spliced in **right after its arXiv badge**, pointing at
-`../<id>/analysis.md`; the matching index row gets a `catalog-📚_models` badge
-(same purple) appended to its `Links` cell, pointing at `catalogs/models.md`.
+`../analysis/<id>/analysis.md`; the matching index row gets a `catalog-📚_models` badge
+(same purple) appended to its `Links` cell, pointing at `../catalogs/models.md`.
 The injection is idempotent — any prior `deep-dive` badge is stripped before
 re-adding, so a removed folder drops its badge on the next run. Only the badges
 are automated: catalog entry add/remove and the catalog's hand-owned `Updated`
