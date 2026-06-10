@@ -1,12 +1,5 @@
 # Design — VLA-Adapter: An Effective Paradigm for Tiny-Scale Vision-Language-Action Model
 
-> PROBE design 산출물 (Layer 1, vendor-agnostic). 단일 한글 문서이며,
-> 영문 1차 파일은 없습니다. `/analyze-paper` 가 `analysis/<id>/analysis.md` 와
-> 함께 자동 생성합니다 — 알고리즘 명세를 base 좌표계 없이 추출합니다.
-> base 매핑은 `/implement-design` 단계에서 이루어집니다. 형식·이모지·용어 규칙은
-> `docs/STYLE.md` §6 / §4 를 정확히 따릅니다. 재실행 시 이 파일을
-> 덮어씁니다.
-
 ---
 
 ## 📄 Design 메타
