@@ -1,5 +1,11 @@
 <!-- ANALYSIS_INDEX:START -->
 
+## P0 — VLA Datasets & Benchmarks
+
+| # | Analysis | Links | Title | Pillars | Keywords | Refreshed | impl |
+|---|---|---|---|---|---|---|---|
+| 1 | [`2602.10105/analysis.md`](2602.10105/analysis.md) | [![arXiv](https://img.shields.io/badge/arXiv-2602.10105-b31b1b.svg)](https://arxiv.org/abs/2602.10105) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://mujc2021.github.io/deximit/) | DexImit: Learning Bimanual Dexterous Manipulation from Monocular Human Videos | ![P0](https://img.shields.io/badge/P0-ff7f0e.svg) ![P3](https://img.shields.io/badge/P3-2ca02c.svg) | ![DexImit](https://img.shields.io/badge/DexImit-ffd700.svg) ![embodiment gap](https://img.shields.io/badge/embodiment_gap-ffd700.svg) ![near-metric scale reconstruction](https://img.shields.io/badge/near--metric_scale_reconstruction-ffd700.svg) ![align-render-align](https://img.shields.io/badge/align--render--align-ffd700.svg) ![Action-Centric Scheduling](https://img.shields.io/badge/Action--Centric_Scheduling-ffd700.svg) | 2026-06-10 | — |
+
 ## P1 — Heterogeneous Body/Hand Action Expert
 
 | # | Analysis | Links | Title | Pillars | Keywords | Refreshed | impl |
