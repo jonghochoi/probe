@@ -424,7 +424,7 @@ GIT — after both files are written:
   # permission.
   git push -u origin HEAD
 
-Do NOT stage `analysis/README.md` and do NOT run
+Do NOT stage `catalogs/analyses.md` and do NOT run
 `scripts/refresh-analysis-index.py` from this prompt. The index is
 regenerated post-merge on `main` by
 `.github/workflows/refresh-analysis-index.yml` so that parallel

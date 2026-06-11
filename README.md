@@ -102,7 +102,7 @@ The two entry points (logic in `.claude/prompts/<name>.md`; run them in a local 
 - `/analyze-paper <arXiv id | url | pdf url>` → `analysis.md` + `design.md`
 - `/reproduce-paper <arXiv id | design path> [--foundry <name>] [--max-rounds N]` — drives `/implement-design` → `/validate-impl` against a target foundry (default `lerobot`) until the verdict stabilizes (default `--max-rounds 3`)
 
-The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
+The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`catalogs/analyses.md`](catalogs/analyses.md).
 
 ---
 
