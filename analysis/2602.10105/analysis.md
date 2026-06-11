@@ -262,7 +262,7 @@ source trajectory 에 네 종류 증강을 적용합니다.
 
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
-- **P0(VLA Datasets & Benchmarks) — primary.** DexImit 은 본질적으로 인간 영상 → 로봇 데이터 변환 **데이터 엔진**으로, D24(priority data axis — egocentric/human-video 중심)의 직접 사례입니다. 인터넷·생성 영상에서 양손 dexterous 데이터를 합성한다는 점이 "data is upstream of method" 라는 P0 Identity 와 정확히 합치합니다. 산출 데이터는 `analysis/catalogs/dataset.md` 의 🔀 mixed(human→robot retarget) 계열로 분류될 수 있는 생성 코퍼스이며, D27(license/usability bar) 관점에서는 코드/데이터 공개 여부가 미확인이라 ❓ 표시 후보입니다.
+- **P0(VLA Datasets & Benchmarks) — primary.** DexImit 은 본질적으로 인간 영상 → 로봇 데이터 변환 **데이터 엔진**으로, D24(priority data axis — egocentric/human-video 중심)의 직접 사례입니다. 인터넷·생성 영상에서 양손 dexterous 데이터를 합성한다는 점이 "data is upstream of method" 라는 P0 Identity 와 정확히 합치합니다. 산출 데이터는 `analysis/catalogs/datasets.md` 의 🔀 mixed(human→robot retarget) 계열로 분류될 수 있는 생성 코퍼스이며, D27(license/usability bar) 관점에서는 코드/데이터 공개 여부가 미확인이라 ❓ 표시 후보입니다.
 - **P3(Hand-level System0, RL-scoped) — 보조·방법 대비.** force-closure grasp 합성(BODex) + stability rollout 은 "안정한 접촉/​grasp 유지"라는 P3 의 관심사와 주제는 겹치나, **방법이 다릅니다**: P3 는 tactile 입력 기반 RL System0 인 반면 DexImit 의 grasp 안정성은 오프라인 최적화 + 시뮬 rollout 검증입니다. 즉 P3 의 "RL 만이 유일한 RL 지점"이라는 Identity 와는 대조군 관계 — contact stability 를 RL 없이 데이터 생성 시점에 보장하는 대안적 접근입니다.
 - **Identity 긴장/지지** — P0 Identity(egocentric human video 우선)를 강하게 지지. 단, DexImit 은 데이터를 만들어 **DP3(non-VLA point-cloud policy)** 를 학습시키므로, PROBE 의 VLA-level 코어(P1–P4)와는 정책 아키텍처 층위가 다릅니다 — DexImit 은 "데이터 공급" 층에 위치하지 정책 아키텍처 주장은 아닙니다.
 - **경쟁자 함의** — P0 §5 비핀(methodology base)의 DexMimicGen(인간 seed 기반 sim 증강)과 같은 "데이터 생성 방법" 계열의 신규 경쟁자이며, baseline 으로 직접 비교된 DexMan [arXiv:2510.08475] · RigVid [46] 의 후속·상위 포지션을 주장합니다.
@@ -298,7 +298,7 @@ source trajectory 에 네 종류 증강을 적용합니다.
 
 ## 💡 컨텍스트 제안
 
-- **P0 §5 / `analysis/catalogs/dataset.md` 후보** — DexImit 은 "단안 인간 영상 → 양손 dexterous 로봇 데이터" 생성 방법으로, P0 §5 비핀의 DexMimicGen 과 같은 *데이터 생성 방법* 행에 나란히 추가하거나 카탈로그 🔀 mixed 계열의 생성-엔진 항목으로 등재할 후보입니다. (핀 cap 8 은 데이터셋/벤치마크 기준이므로, DexImit 은 핀이 아니라 methodology base 행이 적절.) 단, 코드/데이터 공개가 미확인이라 license 칸은 ❓ 로 두고 추후 확인 권장.
+- **P0 §5 / `analysis/catalogs/datasets.md` 후보** — DexImit 은 "단안 인간 영상 → 양손 dexterous 로봇 데이터" 생성 방법으로, P0 §5 비핀의 DexMimicGen 과 같은 *데이터 생성 방법* 행에 나란히 추가하거나 카탈로그 🔀 mixed 계열의 생성-엔진 항목으로 등재할 후보입니다. (핀 cap 8 은 데이터셋/벤치마크 기준이므로, DexImit 은 핀이 아니라 methodology base 행이 적절.) 단, 코드/데이터 공개가 미확인이라 license 칸은 ❓ 로 두고 추후 확인 권장.
 - **Decision 이동은 불필요** — D24~D27 의 v1 선택을 바꿀 근거는 아니며, egocentric/human-video 우선(D24) 노선을 지지하는 추가 evidence 로만 기록하면 충분합니다.
 - (context/ 파일은 수정하지 않았습니다.)
 

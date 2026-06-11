@@ -247,7 +247,7 @@ $$\hat{T}^{\mathrm{target}}_{t,k}=\hat{T}_{t}\Delta\hat{T}_{t,k}$$
 
 - **P0 §5 Tracked Literature** — RealDexUMI([arXiv:2606.06033])를 "wearable zero-gap dexterous 수집 인터페이스 + 공개 예정 데이터셋" 으로 P0 후보에 추가 검토. 현재 핀 8개(hard cap) 중 mixed/retarget 축(UniHand-2.0)과 대비되는 **retarget-free 축**의 대표로, quarterly rebalance 시 교체 후보. 단 데이터셋이 아직 미공개이므로 공개·라이선스 확인 후 승격 권장.
 - **D24(우선 데이터 축) 재검토 trigger** — 현재 v1 은 "egocentric 인간 영상 중심". RealDexUMI 류 "사람 착용 로봇 손" 데이터는 egocentric 도 robot-action 도 아닌 제3축(deployable dexterity-preserving)이라, D24 의 축 분류에 이 카테고리를 추가할지 사람 판단 요망.
-- **catalogs/dataset.md** — 데이터셋 공개 시 🔀 mixed 가 아닌 새 분류(사람 착용 로봇 손 / zero-gap)로 추가 검토. (지금은 미공개라 등재 보류.)
+- **catalogs/datasets.md** — 데이터셋 공개 시 🔀 mixed 가 아닌 새 분류(사람 착용 로봇 손 / zero-gap)로 추가 검토. (지금은 미공개라 등재 보류.)
 - 그 외 Decision 이동 제안 없음.
 
 > 💡 base 매핑은 `/implement-design analysis/2606.06033/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

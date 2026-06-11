@@ -14,6 +14,7 @@
 | 분석 생성일 | 2026-06-04 |
 | 관련 Pillar | P1 |
 | 태그 | sim2real, dataset |
+| 카탈로그 | benchmark/harness/vla-eval |
 
 <!-- 본문은 arXiv HTML(전문)로 확보. 모든 수치는 본문/표에서 받은 그대로 인용. -->
 

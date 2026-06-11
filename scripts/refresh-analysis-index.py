@@ -9,11 +9,25 @@ The generated block is one table per primary Pillar (primary = first `관련
 Pillar` entry), so the human-facing layout stays scannable as the corpus grows;
 a single page still supports Ctrl-F.
 
-It also maintains the bidirectional cross-link between the hand-curated
-`catalogs/models.md` and the deep-dive corpus: every catalog bullet
-whose arXiv id has an `analysis/<id>/` folder gets a `deep-dive` badge, and the
-matching index row gets a `catalog` badge back. Only the link badges are
-automated — catalog entry add/remove and its `Updated` badge stay hand-owned.
+It also maintains the cross-links between the hand-curated catalogs and the
+deep-dive corpus:
+
+- `catalogs/models.md` — every bullet whose arXiv id has an `analysis/<id>/`
+  folder gets a leading `📝` analysis badge spliced in right after the list
+  marker (arXiv-id matching, as ever); the matching index row gets a 📚 `catalog`
+  badge back.
+- `catalogs/datasets.md` / `catalogs/benchmarks.md` — hand-curated rich tables.
+  A paper opts in with a `카탈로그` (`target/section/handle`) meta row; the script
+  then **creates a skeleton row once** in that section (Links / Refreshed /
+  Analysis auto-filled, the rich Source/Facts/… columns seeded `❓`) and never
+  overwrites it again — a human backfills the `❓` cells. Every existing row's
+  trailing **Analysis** cell is kept fresh (a `📝` badge when its arXiv id has an
+  `analysis/<id>/` folder, `—` otherwise), and the matching index row gets a
+  🗂️ / 🎯 `catalog` badge when its id appears in that catalog file.
+
+Every other part of the catalogs (entry curation, the rich columns once a human
+fills them, the per-row Refreshed dates, the `models.md` lineage grouping) is
+hand-owned and never touched.
 
 Idempotent: re-running with no underlying change produces no diff.
 Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml`.
@@ -35,6 +49,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
 INDEX = ANALYSIS_DIR / "README.md"
 CATALOG = REPO_ROOT / "catalogs" / "models.md"
+CATALOG_DATASET = REPO_ROOT / "catalogs" / "datasets.md"
+CATALOG_BENCHMARK = REPO_ROOT / "catalogs" / "benchmarks.md"
 
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
@@ -76,6 +92,62 @@ PILLAR_COLOR = {
 # P0–P5; anything outside the range is dropped at extraction time.
 PILLAR_RE = re.compile(r"P[0-5]")
 
+# ── Catalog routing (`카탈로그` meta → skeleton-row upsert) ────────────────
+# An analysis opts a paper into the datasets.md / benchmarks.md tables with a
+# `카탈로그` row carrying comma-separated `target/section/handle` tokens. The
+# script then *creates a skeleton row once* (links + Analysis auto-filled, the
+# rich columns seeded `❓`) and never overwrites it again — a human backfills the
+# `❓` cells (docs/STYLE.md §5-7).
+CATALOG_ROW = re.compile(r"^\|\s*카탈로그\s*\|\s*(.+?)\s*\|\s*$")
+CATALOG_SECTIONS = {
+    "dataset": ("robot", "human", "mixed"),
+    "benchmark": ("harness", "sim", "dexterous"),
+}
+# (target, section) → the catalog's `##` header text. Dict order is irrelevant
+# here (rows are inserted into whichever section already exists in the file).
+SECTION_LABELS = {
+    ("dataset", "robot"): "🤖 Robot Action",
+    ("dataset", "human"): "👤 Human Video",
+    ("dataset", "mixed"): "🔀 Mixed (Robot + Human)",
+    ("benchmark", "harness"): "🧪 Eval Harness",
+    ("benchmark", "sim"): "🎮 Simulator / Sim Benchmark",
+    ("benchmark", "dexterous"): "✋ Dexterous / Contact-rich Eval",
+}
+# The four hand-owned rich columns seeded `❓` on skeleton creation (between the
+# auto Links cell and the auto Refreshed/Analysis tail). Same count for both
+# targets, so one skeleton shape serves both.
+CATALOG_RICH_COLS = {
+    "dataset": ("Source", "Facts", "Embodiment", "License"),
+    "benchmark": ("Source", "Details", "Type", "License"),
+}
+
+
+def _split_csv(value: str) -> list[str]:
+    return [tok.strip() for tok in value.split(",") if tok.strip()]
+
+
+def parse_catalog(value: str) -> list[tuple[str, str, str]]:
+    """Parse a `카탈로그` row value into `[(target, section, handle), …]`.
+
+    Format: comma-separated `target/section/handle` tokens. `none` (or empty)
+    routes nowhere. An invalid target/section or a missing handle is warned and
+    dropped (mirrors the P# out-of-range drop) so a typo never fabricates a row.
+    """
+    out: list[tuple[str, str, str]] = []
+    if value.strip().lower() == "none":
+        return out
+    for tok in _split_csv(value):
+        parts = [p.strip() for p in tok.split("/")]
+        if len(parts) != 3 or not all(parts):
+            sys.stderr.write(f"warning: malformed 카탈로그 token {tok!r} (want target/section/handle)\n")
+            continue
+        target, section, handle = parts
+        if target not in CATALOG_SECTIONS or section not in CATALOG_SECTIONS[target]:
+            sys.stderr.write(f"warning: invalid 카탈로그 target/section in {tok!r}\n")
+            continue
+        out.append((target, section, handle))
+    return out
+
 
 def find_analyses() -> list[Path]:
     """Return per-paper subdirectory paths (not templates or other dirs)."""
@@ -94,10 +166,6 @@ def find_analyses() -> list[Path]:
     return out
 
 
-def _split_csv(value: str) -> list[str]:
-    return [tok.strip() for tok in value.split(",") if tok.strip()]
-
-
 def extract_meta(paper_dir: Path) -> dict:
     """Pull title / links / refreshed / pillars out of the meta table.
 
@@ -109,13 +177,15 @@ def extract_meta(paper_dir: Path) -> dict:
     title = arxiv_id = arxiv_url = refreshed = ""
     links: list[tuple[str, str]] = []   # (kind, url), arXiv first
     pillars: list[str] = []
+    catalog: list[tuple[str, str, str]] = []
+    catalog_seen = False
     analysis_file = paper_dir / "analysis.md"
     try:
         text = analysis_file.read_text(encoding="utf-8")
     except OSError:
         return {
             "title": WARN, "arxiv_id": WARN, "arxiv_url": "",
-            "refreshed": WARN, "pillars": [], "links": [],
+            "refreshed": WARN, "pillars": [], "links": [], "catalog": [],
         }
 
     for line in text.splitlines():
@@ -147,6 +217,12 @@ def extract_meta(paper_dir: Path) -> dict:
                 # Keep declared order; first entry is the primary pillar.
                 pillars = [p for p in PILLAR_RE.findall(m.group(1))]
                 continue
+        if not catalog_seen:
+            m = CATALOG_ROW.match(line)
+            if m:
+                catalog = parse_catalog(m.group(1))
+                catalog_seen = True
+                continue
 
     return {
         "title": title or WARN,
@@ -155,6 +231,7 @@ def extract_meta(paper_dir: Path) -> dict:
         "refreshed": refreshed or WARN,
         "pillars": pillars,
         "links": links,
+        "catalog": catalog,
     }
 
 
@@ -339,54 +416,79 @@ def link_badges(links: list[tuple[str, str]], arxiv_id: str) -> str:
     return " ".join(out)
 
 
-# ── Catalog cross-link (catalogs/models.md ↔ index) ──────────────────────
+# ── Catalog cross-link (catalogs/ ↔ index) ───────────────────────────────
 # Both directions share one purple badge color, distinct from the link/pillar/
 # keyword palettes, so a cross-link reads as "the same paper, the other surface".
 CROSSLINK_COLOR = "6f42c1"  # 보라 purple
-# Index → catalog: appended to a row's Links cell when the paper is curated.
-CATALOG_BADGE = (
+# The forward analysis mark (front of a models.md bullet / the Analysis column of
+# datasets.md / benchmarks.md) is a white post-it `📝`, distinct from the purple
+# reverse badges.
+ANALYSIS_BADGE_COLOR = "ffffff"  # white
+ANALYSIS_BADGE_ICON = "📝"
+# Index → catalog: appended to a row's Links cell when the paper is curated in
+# that catalog file (keyed purely on arXiv-id presence — same model for all three).
+MODELS_BADGE = (
     f"[![catalog](https://img.shields.io/badge/catalog-📚_models-{CROSSLINK_COLOR}.svg)]"
     "(../catalogs/models.md)"
 )
-# Catalog → index: injected into a models.md bullet after its arXiv badge.
-# Matches any prior injection (id-agnostic) so re-runs strip-then-readd cleanly.
-DEEP_DIVE_RE = re.compile(r"\s*\[!\[deep-dive\][^\)]*\)\]\([^)]*\)")
-# The arXiv badge in a models.md bullet — we splice the deep-dive badge in right
-# after it (id always present when there is one), keeping trailing status emoji last.
+DATASET_BADGE = (
+    f"[![catalog](https://img.shields.io/badge/catalog-🗂️_dataset-{CROSSLINK_COLOR}.svg)]"
+    "(../catalogs/datasets.md)"
+)
+BENCHMARK_BADGE = (
+    f"[![catalog](https://img.shields.io/badge/catalog-🎯_benchmark-{CROSSLINK_COLOR}.svg)]"
+    "(../catalogs/benchmarks.md)"
+)
+# The arXiv badge in a catalog entry — its id keys both directions of the link.
 CATALOG_ARXIV_BADGE_RE = re.compile(
     r"\[!\[arXiv\]\(https://img\.shields\.io/badge/arXiv-(\d{4}\.\d{4,5})-b31b1b\.svg\)\]\([^)]*\)"
 )
+# A leading analysis badge in a models.md bullet — spliced right after the list
+# marker. Matched id-agnostically (and tolerant of the earlier `📄` / `📄_analysis`
+# icons and any color) so re-runs strip-then-readd cleanly.
+LEADING_DIVE_RE = re.compile(
+    r"^\[!\[\]\(https://img\.shields\.io/badge/(?:📝|📄)(?:_analysis)?-[0-9a-fA-F]{6}\.svg\)\]\([^)]*\)\s+"
+)
+# Legacy trailing `deep-dive` badge (the prior models.md format) — stripped on
+# migration so a re-run replaces it with the leading badge.
+LEGACY_DIVE_RE = re.compile(r"\s*\[!\[deep-dive\][^\)]*\)\]\([^)]*\)")
+# A models.md / catalog list bullet: leading whitespace + `*`/`-` marker.
+BULLET_RE = re.compile(r"^(\s*[*-]\s+)(.*)$")
 
 
-def _deep_dive_badge(stem: str) -> str:
-    """Deep-dive badge for a models.md bullet → `../analysis/<id>/analysis.md` (catalog sits at repo root, a sibling of analysis/)."""
+def _analysis_badge(stem: str) -> str:
+    """Single-field `📝` badge (white) linking the deep-dive →
+    `../analysis/<id>/analysis.md` (catalog sits at repo root, a sibling of
+    analysis/). Used both at the front of a models.md bullet and in the
+    dataset/benchmark Analysis column."""
     return (
-        f" [![deep-dive](https://img.shields.io/badge/deep--dive-📄_analysis-{CROSSLINK_COLOR}.svg)]"
+        f"[![](https://img.shields.io/badge/{ANALYSIS_BADGE_ICON}-{ANALYSIS_BADGE_COLOR}.svg)]"
         f"(../analysis/{stem}/analysis.md)"
     )
 
 
-def load_catalog_ids() -> set[str]:
-    """Return the set of arXiv ids curated in catalogs/models.md.
+def load_ids(path: Path) -> set[str]:
+    """Return the set of arXiv ids that appear anywhere in a catalog file.
 
     Used for the reverse badge: an index row whose paper is in this set gets a
-    `catalog` badge. Missing catalog file → empty set (reverse link disabled).
+    `catalog` badge for that catalog. Missing file → empty set (link disabled).
     """
     try:
-        text = CATALOG.read_text(encoding="utf-8")
+        text = path.read_text(encoding="utf-8")
     except OSError:
         return set()
     return set(ARXIV_ID_RE.findall(text))
 
 
-def enrich_catalog(analysis_ids: set[str]) -> bool:
-    """Inject/refresh deep-dive badges in models.md; return True if changed.
+def enrich_models(analysis_ids: set[str]) -> bool:
+    """Inject/refresh leading 📄 analysis links in models.md; return True if changed.
 
     For every bullet carrying an arXiv badge whose id has an `analysis/<id>/`
-    folder, splice a deep-dive badge right after the arXiv badge; strip any
-    existing deep-dive badge first so the op is idempotent and a deleted folder
-    drops its badge. Lines without an arXiv badge (id-less entries) are left
-    untouched. The hand-owned `Updated` badge is never modified.
+    folder, splice a `[📄](…)` link right after the list marker. Any existing
+    leading link (and any legacy trailing `deep-dive` badge) is stripped first
+    so the op is idempotent and a deleted folder drops its link. Bullets with no
+    arXiv badge (id-less entries) are left untouched. The hand-owned lineage
+    grouping and `Updated` badge are never modified.
     """
     try:
         original = CATALOG.read_text(encoding="utf-8")
@@ -395,12 +497,17 @@ def enrich_catalog(analysis_ids: set[str]) -> bool:
 
     out_lines: list[str] = []
     for line in original.splitlines():
-        stripped = DEEP_DIVE_RE.sub("", line)
-        m = CATALOG_ARXIV_BADGE_RE.search(stripped)
-        if m and m.group(1) in analysis_ids:
-            insert_at = m.end()
-            stripped = stripped[:insert_at] + _deep_dive_badge(m.group(1)) + stripped[insert_at:]
-        out_lines.append(stripped)
+        bm = BULLET_RE.match(line)
+        if not bm:
+            out_lines.append(line)
+            continue
+        marker, rest = bm.group(1), bm.group(2)
+        rest = LEGACY_DIVE_RE.sub("", rest)
+        rest = LEADING_DIVE_RE.sub("", rest)
+        am = CATALOG_ARXIV_BADGE_RE.search(rest)
+        if am and am.group(1) in analysis_ids:
+            rest = f"{_analysis_badge(am.group(1))} {rest}"
+        out_lines.append(marker + rest)
 
     updated = "\n".join(out_lines)
     if original.endswith("\n"):
@@ -408,6 +515,133 @@ def enrich_catalog(analysis_ids: set[str]) -> bool:
     if updated == original:
         return False
     CATALOG.write_text(updated, encoding="utf-8")
+    return True
+
+
+def enrich_catalog_table(path: Path, analysis_ids: set[str]) -> bool:
+    """Fill the trailing **Analysis** column of datasets.md / benchmarks.md.
+
+    The tables are hand-curated; the script owns only the last cell of each data
+    row. For a row whose arXiv id has an `analysis/<id>/` folder the cell becomes
+    a `[📄](…)` link, otherwise `—`. Header and separator rows (no arXiv badge)
+    are left untouched, as is everything outside the tables. Markdown table cells
+    never contain an unescaped `|`, so splitting the row on `|` is safe.
+    """
+    try:
+        original = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    out_lines: list[str] = []
+    for line in original.splitlines():
+        am = CATALOG_ARXIV_BADGE_RE.search(line)
+        if line.lstrip().startswith("|") and am:
+            cells = line.split("|")
+            aid = am.group(1)
+            cell = f" {_analysis_badge(aid)} " if aid in analysis_ids else " — "
+            cells[-2] = cell  # last content cell (cells[-1] is the trailing '')
+            line = "|".join(cells)
+        out_lines.append(line)
+
+    updated = "\n".join(out_lines)
+    if original.endswith("\n"):
+        updated += "\n"
+    if updated == original:
+        return False
+    path.write_text(updated, encoding="utf-8")
+    return True
+
+
+def _skeleton_row(target: str, handle: str, meta: dict) -> str:
+    """Build a fresh catalog row for `meta`: auto Links + Refreshed + Analysis,
+    the four rich columns seeded `❓` for a human to backfill. The `#` is left
+    `0`; `_renumber_table` fixes it once the row is in place."""
+    links = link_badges(meta["links"], meta["arxiv_id"])
+    refreshed = meta["refreshed"] if meta["refreshed"] != WARN else "—"
+    rich = ["❓"] * len(CATALOG_RICH_COLS[target])
+    cells = ["0", f"**{handle}**", links, *rich, refreshed, _analysis_badge(meta["stem"])]
+    return "| " + " | ".join(cells) + " |"
+
+
+def _renumber_table(table: list[str]) -> list[str]:
+    """Renumber the leading `#` cell of a markdown table's data rows 1..n.
+    `table[0]` is the header, `table[1]` the separator, the rest data rows."""
+    out = table[:2]
+    for idx, row in enumerate(table[2:], 1):
+        cells = row.split("|")
+        cells[1] = f" {idx} "
+        out.append("|".join(cells))
+    return out
+
+
+def upsert_catalog_rows(path: Path, target: str, rows: list[dict]) -> bool:
+    """Create a skeleton row for every analyzed paper routed here that is not yet
+    in the table; never touch a row that already exists.
+
+    Routing comes from each paper's `카탈로그` meta (`target/section/handle`). A
+    new row is appended to the end of its section's table — Links / Refreshed /
+    Analysis auto-filled, the rich columns `❓` — then the section's `#` column is
+    renumbered. Rows already carrying the paper's arXiv id are left untouched
+    (create-once; the human owns the cells thereafter), so the pass is idempotent.
+    A routed section with no table in the file is warned and skipped.
+    """
+    routed: dict[str, list[tuple[str, dict]]] = {}
+    for row in rows:
+        for t, section, handle in row.get("catalog", []):
+            if t == target:
+                routed.setdefault(section, []).append((handle, row))
+    if not routed:
+        return False
+    label_to_key = {SECTION_LABELS[(target, key)]: key for key in CATALOG_SECTIONS[target]}
+
+    try:
+        original = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    lines = original.splitlines()
+
+    out: list[str] = []
+    cur_key: str | None = None
+    seen_sections: set[str] = set()
+    i, n = 0, len(lines)
+    while i < n:
+        line = lines[i]
+        if line.startswith("## "):
+            cur_key = label_to_key.get(line[3:].strip())
+            out.append(line)
+            i += 1
+            continue
+        if cur_key and line.lstrip().startswith("|"):
+            j = i
+            while j < n and lines[j].lstrip().startswith("|"):
+                j += 1
+            table = lines[i:j]
+            existing = {m.group(1) for t in table if (m := CATALOG_ARXIV_BADGE_RE.search(t))}
+            for handle, meta in routed.get(cur_key, []):
+                if meta["arxiv_id"] not in existing:
+                    table.append(_skeleton_row(target, handle, meta))
+                    existing.add(meta["arxiv_id"])
+            out.extend(_renumber_table(table))
+            seen_sections.add(cur_key)
+            cur_key = None
+            i = j
+            continue
+        out.append(line)
+        i += 1
+
+    for section in routed:
+        if section not in seen_sections:
+            sys.stderr.write(
+                f"warning: 카탈로그 routes to {target}/{section} but {path.name} has no "
+                f"'{SECTION_LABELS[(target, section)]}' table; skipping\n"
+            )
+
+    updated = "\n".join(out)
+    if original.endswith("\n"):
+        updated += "\n"
+    if updated == original:
+        return False
+    path.write_text(updated, encoding="utf-8")
     return True
 
 
@@ -423,11 +657,13 @@ def primary_pillar(row: dict) -> str:
     return row["pillars"][0] if row["pillars"] else UNCLASSIFIED
 
 
-def build_block(rows: list[dict], catalog_ids: set[str]) -> str:
+def build_block(rows: list[dict], catalog_ids: dict[str, set[str]]) -> str:
     """Compose the generated block: one table per primary Pillar.
 
-    A row whose arXiv id is curated in `catalog_ids` gets a `catalog` badge
-    appended to its Links cell (the reverse half of the catalog cross-link).
+    A row whose arXiv id is curated in a catalog file gets that catalog's
+    `catalog` badge appended to its Links cell (the reverse half of the
+    cross-link): 📚 models / 🗂️ dataset / 🎯 benchmark, all keyed on arXiv-id
+    presence in the respective file.
     """
     if not rows:
         return (
@@ -451,6 +687,11 @@ def build_block(rows: list[dict], catalog_ids: set[str]) -> str:
         "| # | Analysis | Links | Title | Pillars | Keywords | Refreshed | impl |\n"
         "|---|---|---|---|---|---|---|---|\n"
     )
+    reverse_badge = {
+        "models": MODELS_BADGE,
+        "dataset": DATASET_BADGE,
+        "benchmark": BENCHMARK_BADGE,
+    }
     for key in PILLAR_ORDER:
         bucket = groups[key]
         if not bucket:
@@ -461,8 +702,9 @@ def build_block(rows: list[dict], catalog_ids: set[str]) -> str:
         for i, row in enumerate(bucket, 1):
             link = f"[`{row['stem']}/analysis.md`]({row['stem']}/analysis.md)"
             links_cell = link_badges(row["links"], row["arxiv_id"])
-            if row["arxiv_id"] in catalog_ids:
-                links_cell += f" {CATALOG_BADGE}"
+            for name in ("models", "dataset", "benchmark"):
+                if row["arxiv_id"] in catalog_ids.get(name, set()):
+                    links_cell += f" {reverse_badge[name]}"
             out.append(
                 f"| {i} | {link} | {links_cell} "
                 f"| {row['title']} | {pillar_badges(row['pillars'])} "
@@ -497,7 +739,6 @@ def rewrite_index(block: str) -> bool:
 def main() -> int:
     analyses = find_analyses()
     analysis_ids = {p.name for p in analyses}
-    catalog_ids = load_catalog_ids()
 
     rows: list[dict] = []
     for paper_dir in analyses:
@@ -507,13 +748,30 @@ def main() -> int:
         meta["impl"] = impl_state(paper_dir.name)
         rows.append(meta)
 
+    # 1. Create any missing skeleton rows (routed by `카탈로그`), then 2. fill the
+    # Analysis column. catalog_ids is read AFTER the upsert so the reverse index
+    # badges (🗂️/🎯) see freshly-created rows.
+    dataset_up = upsert_catalog_rows(CATALOG_DATASET, "dataset", rows)
+    benchmark_up = upsert_catalog_rows(CATALOG_BENCHMARK, "benchmark", rows)
+    dataset_enr = enrich_catalog_table(CATALOG_DATASET, analysis_ids)
+    benchmark_enr = enrich_catalog_table(CATALOG_BENCHMARK, analysis_ids)
+    dataset_changed = dataset_up or dataset_enr
+    benchmark_changed = benchmark_up or benchmark_enr
+
+    catalog_ids = {
+        "models": load_ids(CATALOG),
+        "dataset": load_ids(CATALOG_DATASET),
+        "benchmark": load_ids(CATALOG_BENCHMARK),
+    }
     block = build_block(rows, catalog_ids)
     index_changed = rewrite_index(block)
-    catalog_changed = enrich_catalog(analysis_ids)
+    models_changed = enrich_models(analysis_ids)
     print(
         f"refresh-analysis-index: {len(rows)} analyses · "
         f"README {'updated' if index_changed else 'no change'} · "
-        f"models.md {'updated' if catalog_changed else 'no change'}"
+        f"models.md {'updated' if models_changed else 'no change'} · "
+        f"datasets.md {'updated' if dataset_changed else 'no change'} · "
+        f"benchmarks.md {'updated' if benchmark_changed else 'no change'}"
     )
     return 0
 

@@ -228,7 +228,7 @@ $$\mathbf{r}_{\eta}(\mathbf{s}_{\zeta},\mathbf{g},\phi_{\zeta})$$
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
 - **분류상 위치** — 본 논문은 PROBE 의 모든 Pillar Anti-topic 이 명시적으로 배제하는 "Survey / position papers" 에 해당합니다. 즉 scout 라우팅으로는 통과하지 못하는 유형이며, 사람이 직접 지정해 manual 분석한 케이스입니다. 따라서 아래 Pillar 연결은 "방법 차용" 이 아니라 **전략·Identity 수준의 맥락 충돌/지지** 입니다.
-- **P4(VLM 사전학습 보존) — 1차 연결.** 논문의 핵심(비정형 경험 → 로봇 supervision 변환, 인간 영상·cross-embodiment 데이터·retargeting)은 P4 가 소유한 **D22(multi-embodiment pretraining data)** 와 **D19b(VLM backbone lineage = 초기 가중치 × further-pretrain corpus)** 의 상위 질문과 직결됩니다. 저자가 인용한 GR00T N1(egocentric human video + sim/real robot + synthetic 혼합)은 P4 §5 에 핀된 논문이며, 본 논문은 그 데이터 혼합을 "embodied autolabelling 이 부재한 채 수동 grounding 된 결과"로 재해석합니다. 즉 P4 의 데이터 카탈로그(`catalogs/dataset.md`) 작업의 *상위 프레이밍* 을 제공합니다.
+- **P4(VLM 사전학습 보존) — 1차 연결.** 논문의 핵심(비정형 경험 → 로봇 supervision 변환, 인간 영상·cross-embodiment 데이터·retargeting)은 P4 가 소유한 **D22(multi-embodiment pretraining data)** 와 **D19b(VLM backbone lineage = 초기 가중치 × further-pretrain corpus)** 의 상위 질문과 직결됩니다. 저자가 인용한 GR00T N1(egocentric human video + sim/real robot + synthetic 혼합)은 P4 §5 에 핀된 논문이며, 본 논문은 그 데이터 혼합을 "embodied autolabelling 이 부재한 채 수동 grounding 된 결과"로 재해석합니다. 즉 P4 의 데이터 카탈로그(`catalogs/datasets.md`) 작업의 *상위 프레이밍* 을 제공합니다.
 - **P3(Hand-level System0 / sim2real) — 2차 연결.** §2.3·§3.3 의 physics-grounded world model·sim2real·domain randomization·RMA(Kumar et al. — P3 §5 의 RMA 와 동일 계보) 논의는 P3 의 **D18(System0 sim2real)** 과 직접 맞닿습니다. 특히 ContactGaussian-WM(접촉 집약 differentiable contact world model)은 P3 §5 의 Contact-Aware Neural Dynamics 와 같은 "학습된 접촉 보정" 계보이며, 본 논문은 이를 "consequence prediction 이 픽셀이 아니라 접촉·힘을 보존해야 한다"는 일반 원칙으로 묶습니다.
 - **P2(구조적 입력-모달리티 결합) — 약한 연결.** wearable 센싱·촉각·힘을 "물리 세계의 labelling instrument" 로 보는 §3.1 의 관점은 P2 의 촉각·force 스트림 철학과 공명하나, P2 의 핵심(per-finger 구조적 토큰화)과는 해상도가 다릅니다.
 - **Identity 긴장 (핵심).** PROBE Identity 는 "dexterity 는 **VLA-level 에서 직접** tackle 해야 한다"고 봅니다. 본 논문은 정반대 altitude 에서 "VLA 는 한 레이어일 뿐이고 진짜 병목은 상류 grounding/data" 라고 주장합니다. 이는 PROBE 의 D-레벨 결정과 충돌하는 것이 아니라, PROBE 의 *작업 범위(scope-of-work)* 가 더 큰 스택의 일부임을 상기시키는 **Identity 수준의 외부 압력**입니다 (지지도 반박도 아닌 재배치).
@@ -247,7 +247,7 @@ $$\mathbf{r}_{\eta}(\mathbf{s}_{\zeta},\mathbf{g},\phi_{\zeta})$$
 
 ## ⚙️ 의사결정 함의
 
-- **P4 / D22 — 데이터 카탈로그의 상위 축 추가 후보.** 본 논문은 `catalogs/dataset.md` 의 further-pretrain corpus 를 분류할 때 "grounding 수준"(robot-native = 강 / human-video = 약 / sim-generated = 물리보존 의존)이라는 축을 제안합니다. v1 의 D22(=π pretrained prior 만 사용, 추가 co-train 없음)는 유지하되, 향후 human-video / egocentric 데이터를 도입할 때 "grounding 비용"을 데이터셋 평가 컬럼으로 추가하는 것을 검토할 수 있습니다. 구체 변경 대상: `dataset.md` 의 entry facts line.
+- **P4 / D22 — 데이터 카탈로그의 상위 축 추가 후보.** 본 논문은 `catalogs/datasets.md` 의 further-pretrain corpus 를 분류할 때 "grounding 수준"(robot-native = 강 / human-video = 약 / sim-generated = 물리보존 의존)이라는 축을 제안합니다. v1 의 D22(=π pretrained prior 만 사용, 추가 co-train 없음)는 유지하되, 향후 human-video / egocentric 데이터를 도입할 때 "grounding 비용"을 데이터셋 평가 컬럼으로 추가하는 것을 검토할 수 있습니다. 구체 변경 대상: `datasets.md` 의 entry facts line.
 - **P3 / D18 — world-model consequence 평가를 sim2real 체크에 반영.** "시각적 사실성 ≠ 제어 유용성, consequence(접촉·힘·안정성) 보존이 기준" 이라는 §3.3 의 원칙은 System0 sim2real 프로토콜(Chen et al. 2024 계보 촉각 sim2real)의 *평가 메트릭* 에 직접 적용 가능합니다. 즉 DR 의 성공을 "픽셀/렌더 품질"이 아니라 "접촉 상태·grasp 유지 결과의 sim-real 상관"으로 측정하도록 메트릭을 고정.
 - **scope-of-work 경계 재확인.** 본 논문이 옳다면, PROBE 의 VLA-level 작업(P1 이질적 디코더·P2 구조적 입력)은 *충분조건이 아니라 필요조건의 일부* 입니다. 다만 이는 PROBE 의 어떤 v1 결정(D1–D23)도 바꾸지 않습니다 — PROBE 는 의도적으로 modeling-at-VLA-level 에 scope 를 한정했고(MASTER §3.2), 본 논문은 그 scope 밖(data engine·retargeting·deployment)을 다루기 때문입니다. **변경 없음** 이 올바른 결론.
 - **구체 파이프라인 변경 — 없음(현 단계).** 본 논문은 position paper 라 즉시 적용할 config 키·하이퍼파라미터·loss term 이 없습니다. 유일하게 actionable 한 것은 위 두 *평가/카탈로그* 메트릭 후보이며, 학습 파이프라인 자체는 무변경입니다.
@@ -267,7 +267,7 @@ $$\mathbf{r}_{\eta}(\mathbf{s}_{\zeta},\mathbf{g},\phi_{\zeta})$$
 ## 💡 컨텍스트 제안
 
 - **핀 교체 — 제안 없음.** 본 논문은 position/survey paper 로, P3·P4 §5 의 8-핀 cap(구체 method/시스템 우선)에 추가할 후보가 아닙니다. Anti-topic("survey/position papers, read manually")에 부합하므로 핀 미등재가 올바릅니다.
-- **D22 평가 축 후보(검토만)** — 향후 human-video / egocentric 데이터를 `catalogs/dataset.md` 에 추가할 때 "grounding 수준(robot-native / weak-video / sim-generated)" 을 facts line 의 보조 축으로 둘지 사람이 판단. 지금 당장 D22 v1(π prior only)을 바꿀 근거는 아님.
+- **D22 평가 축 후보(검토만)** — 향후 human-video / egocentric 데이터를 `catalogs/datasets.md` 에 추가할 때 "grounding 수준(robot-native / weak-video / sim-generated)" 을 facts line 의 보조 축으로 둘지 사람이 판단. 지금 당장 D22 v1(π prior only)을 바꿀 근거는 아님.
 - **D18 평가 메트릭 메모(검토만)** — System0 sim2real 검증 메트릭을 "렌더 품질"이 아니라 "접촉·grasp 결과의 sim-real 상관"으로 정의하는 방향을 P3 real-robot transition 계획 시 참고. 현 단계 결정 변경 아님.
 - **종합** — PROBE Identity 의 scope-of-work(modeling at VLA level)는 의도적 한정이며, 본 논문은 그 밖의 스택을 다루므로 어떤 context/ 파일도 수정할 필요가 없습니다.
 
