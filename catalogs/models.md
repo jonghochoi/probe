@@ -29,6 +29,11 @@
 * **RT-2**, RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control. [![arXiv](https://img.shields.io/badge/arXiv-2307.15818-b31b1b.svg)](https://arxiv.org/abs/2307.15818) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://robotics-transformer2.github.io/)
 * **Genesis AI**, undisclosed VLA-only system.
 
+## 🌐 WAM
+
+### Donk (ByteDance)
+* **Donk**, Unified Video-Action Joint Denoising for Dexterous Action and Data Generation. [![arXiv](https://img.shields.io/badge/arXiv-2606.03868-b31b1b.svg)](https://arxiv.org/abs/2606.03868)
+
 ## 🧠 Open-weight VLM
 
 ### InternVL (OpenGVLab)
