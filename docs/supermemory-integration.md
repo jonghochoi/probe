@@ -15,7 +15,7 @@ supermemory는 PROBE 마크다운 코퍼스 **위에 얹는 시맨틱 retrieval 
 *파생 인덱스*로만 둔다 — 권위를 갖지 않는다.
 
 현재 PROBE 지식은 세 경로로만 접근된다 — `grep`, 직접 파일 읽기, 그리고 단 하나의
-자동 인덱스(`scripts/refresh-analysis-index.py`가 만드는 `analysis/README.md`).
+자동 인덱스(`scripts/refresh-analysis-index.py`가 만드는 `catalogs/analyses.md`).
 "에이전트가 새 연구를 도출"하려면 이걸로는 부족하다. 필요한 질의는 정확 문자열
 매칭이 아니라 *의미*에 걸리기 때문이다.
 

@@ -3,7 +3,7 @@
 
 Scans every per-paper subdirectory `analysis/<id>/` and reads metadata
 from its `analysis.md`, checks for foundry-specific impl artifacts, and
-rewrites the block between fixed markers in `analysis/README.md`.
+rewrites the block between fixed markers in `catalogs/analyses.md`.
 
 The generated block is one table per primary Pillar (primary = first `관련
 Pillar` entry), so the human-facing layout stays scannable as the corpus grows;
@@ -14,16 +14,18 @@ deep-dive corpus:
 
 - `catalogs/models.md` — every bullet whose arXiv id has an `analysis/<id>/`
   folder gets a leading `📝` analysis badge spliced in right after the list
-  marker (arXiv-id matching, as ever); the matching index row gets a 📚 `catalog`
-  badge back.
+  marker (arXiv-id matching, as ever).
 - `catalogs/datasets.md` / `catalogs/benchmarks.md` — hand-curated rich tables.
   A paper opts in with a `카탈로그` (`target/section/handle`) meta row; the script
   then **creates a skeleton row once** in that section (Links / Refreshed /
   Analysis auto-filled, the rich Source/Facts/… columns seeded `❓`) and never
   overwrites it again — a human backfills the `❓` cells. Every existing row's
   trailing **Analysis** cell is kept fresh (a `📝` badge when its arXiv id has an
-  `analysis/<id>/` folder, `—` otherwise), and the matching index row gets a
-  🗂️ / 🎯 `catalog` badge when its id appears in that catalog file.
+  `analysis/<id>/` folder, `—` otherwise).
+
+The cross-link is one-directional (catalog → deep-dive): the reverse `catalog`
+badge that used to sit in the index `Links` cell was dropped, since it pointed
+at a whole catalog file rather than a specific row.
 
 Every other part of the catalogs (entry curation, the rich columns once a human
 fills them, the per-row Refreshed dates, the `models.md` lineage grouping) is
@@ -47,7 +49,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
-INDEX = ANALYSIS_DIR / "README.md"
+# The generated deep-dive index lives alongside the hand-curated catalogs
+# (a sibling of models.md / datasets.md / benchmarks.md), so relative links
+# from a row point back up into ../analysis/<id>/.
+INDEX = REPO_ROOT / "catalogs" / "analyses.md"
 CATALOG = REPO_ROOT / "catalogs" / "models.md"
 CATALOG_DATASET = REPO_ROOT / "catalogs" / "datasets.md"
 CATALOG_BENCHMARK = REPO_ROOT / "catalogs" / "benchmarks.md"
@@ -442,30 +447,15 @@ def link_badges(links: list[tuple[str, str]], arxiv_id: str) -> str:
     return " ".join(out)
 
 
-# ── Catalog cross-link (catalogs/ ↔ index) ───────────────────────────────
-# Both directions share one purple badge color, distinct from the link/pillar/
-# keyword palettes, so a cross-link reads as "the same paper, the other surface".
-CROSSLINK_COLOR = "6f42c1"  # 보라 purple
-# The forward analysis mark (front of a models.md bullet / the Analysis column of
-# datasets.md / benchmarks.md) is a white post-it `📝`, distinct from the purple
-# reverse badges.
+# ── Catalog cross-link (catalog → index) ──────────────────────────────────
+# Only the forward mark survives: a white post-it `📝` on the catalog side
+# (front of a models.md bullet / the Analysis column of datasets.md /
+# benchmarks.md) pointing at the paper's deep-dive. The reverse badge (index
+# Links cell → catalog file) was dropped — it only pointed at a whole catalog
+# file, never a specific row, so it carried no navigational value.
 ANALYSIS_BADGE_COLOR = "ffffff"  # white
 ANALYSIS_BADGE_ICON = "📝"
-# Index → catalog: appended to a row's Links cell when the paper is curated in
-# that catalog file (keyed purely on arXiv-id presence — same model for all three).
-MODELS_BADGE = (
-    f"[![catalog](https://img.shields.io/badge/catalog-📚_models-{CROSSLINK_COLOR}.svg)]"
-    "(../catalogs/models.md)"
-)
-DATASET_BADGE = (
-    f"[![catalog](https://img.shields.io/badge/catalog-🗂️_dataset-{CROSSLINK_COLOR}.svg)]"
-    "(../catalogs/datasets.md)"
-)
-BENCHMARK_BADGE = (
-    f"[![catalog](https://img.shields.io/badge/catalog-🎯_benchmark-{CROSSLINK_COLOR}.svg)]"
-    "(../catalogs/benchmarks.md)"
-)
-# The arXiv badge in a catalog entry — its id keys both directions of the link.
+# The arXiv badge in a catalog entry — its id keys the forward mark.
 CATALOG_ARXIV_BADGE_RE = re.compile(
     r"\[!\[arXiv\]\(https://img\.shields\.io/badge/arXiv-(\d{4}\.\d{4,5})-b31b1b\.svg\)\]\([^)]*\)"
 )
@@ -491,19 +481,6 @@ def _analysis_badge(stem: str) -> str:
         f"[![](https://img.shields.io/badge/{ANALYSIS_BADGE_ICON}-{ANALYSIS_BADGE_COLOR}.svg)]"
         f"(../analysis/{stem}/analysis.md)"
     )
-
-
-def load_ids(path: Path) -> set[str]:
-    """Return the set of arXiv ids that appear anywhere in a catalog file.
-
-    Used for the reverse badge: an index row whose paper is in this set gets a
-    `catalog` badge for that catalog. Missing file → empty set (link disabled).
-    """
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:
-        return set()
-    return set(ARXIV_ID_RE.findall(text))
 
 
 def enrich_models(analysis_ids: set[str]) -> bool:
@@ -759,14 +736,8 @@ def primary_pillar(row: dict) -> str:
     return row["pillars"][0] if row["pillars"] else UNCLASSIFIED
 
 
-def build_block(rows: list[dict], catalog_ids: dict[str, set[str]]) -> str:
-    """Compose the generated block: one table per primary Pillar.
-
-    A row whose arXiv id is curated in a catalog file gets that catalog's
-    `catalog` badge appended to its Links cell (the reverse half of the
-    cross-link): 📚 models / 🗂️ dataset / 🎯 benchmark, all keyed on arXiv-id
-    presence in the respective file.
-    """
+def build_block(rows: list[dict]) -> str:
+    """Compose the generated block: one table per primary Pillar."""
     if not rows:
         return (
             "## 미분류\n\n"
@@ -789,11 +760,6 @@ def build_block(rows: list[dict], catalog_ids: dict[str, set[str]]) -> str:
         "| # | Analysis | Links | Title | Pillars | Keywords | Refreshed | impl |\n"
         "|---|---|---|---|---|---|---|---|\n"
     )
-    reverse_badge = {
-        "models": MODELS_BADGE,
-        "dataset": DATASET_BADGE,
-        "benchmark": BENCHMARK_BADGE,
-    }
     for key in PILLAR_ORDER:
         bucket = groups[key]
         if not bucket:
@@ -802,11 +768,8 @@ def build_block(rows: list[dict], catalog_ids: dict[str, set[str]]) -> str:
         out.append(f"## {title}\n\n")
         out.append(header)
         for i, row in enumerate(bucket, 1):
-            link = f"[`{row['stem']}/analysis.md`]({row['stem']}/analysis.md)"
+            link = f"[`{row['stem']}/analysis.md`](../analysis/{row['stem']}/analysis.md)"
             links_cell = link_badges(row["links"], row["arxiv_id"])
-            for name in ("models", "dataset", "benchmark"):
-                if row["arxiv_id"] in catalog_ids.get(name, set()):
-                    links_cell += f" {reverse_badge[name]}"
             out.append(
                 f"| {i} | {link} | {links_cell} "
                 f"| {row['title']} | {pillar_badges(row['pillars'])} "
@@ -819,7 +782,7 @@ def build_block(rows: list[dict], catalog_ids: dict[str, set[str]]) -> str:
 
 
 def rewrite_index(block: str) -> bool:
-    """Replace the marker block in analysis/README.md. Return True if changed."""
+    """Replace the marker block in catalogs/analyses.md. Return True if changed."""
     original = INDEX.read_text(encoding="utf-8")
     if MARKER_START not in original or MARKER_END not in original:
         sys.stderr.write(
@@ -850,9 +813,8 @@ def main() -> int:
         meta["impl"] = impl_state(paper_dir.name)
         rows.append(meta)
 
-    # 1. Create any missing skeleton entries (routed by `카탈로그`), then 2. fill
-    # the catalog marks. catalog_ids is read AFTER the upserts so the reverse
-    # index badges (📚/🗂️/🎯) see freshly-created entries.
+    # Create any missing skeleton entries (routed by `카탈로그`), then fill the
+    # forward catalog marks (the `📝` analysis badge on the catalog side).
     dataset_up = upsert_catalog_rows(CATALOG_DATASET, "dataset", rows)
     benchmark_up = upsert_catalog_rows(CATALOG_BENCHMARK, "benchmark", rows)
     models_up = upsert_models_bullets(CATALOG, rows)
@@ -861,17 +823,12 @@ def main() -> int:
     dataset_changed = dataset_up or dataset_enr
     benchmark_changed = benchmark_up or benchmark_enr
 
-    catalog_ids = {
-        "models": load_ids(CATALOG),
-        "dataset": load_ids(CATALOG_DATASET),
-        "benchmark": load_ids(CATALOG_BENCHMARK),
-    }
-    block = build_block(rows, catalog_ids)
+    block = build_block(rows)
     index_changed = rewrite_index(block)
     models_changed = models_up or enrich_models(analysis_ids)
     print(
         f"refresh-analysis-index: {len(rows)} analyses · "
-        f"README {'updated' if index_changed else 'no change'} · "
+        f"analyses.md {'updated' if index_changed else 'no change'} · "
         f"models.md {'updated' if models_changed else 'no change'} · "
         f"datasets.md {'updated' if dataset_changed else 'no change'} · "
         f"benchmarks.md {'updated' if benchmark_changed else 'no change'}"
