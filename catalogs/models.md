@@ -32,7 +32,7 @@
 ## 🌐 WAM
 
 ### Donk (ByteDance)
-* **Donk**, Unified Video-Action Joint Denoising for Dexterous Action and Data Generation. [![arXiv](https://img.shields.io/badge/arXiv-2606.03868-b31b1b.svg)](https://arxiv.org/abs/2606.03868)
+* [![](https://img.shields.io/badge/📝-ffffff.svg)](../analysis/2606.03868/analysis.md) **Donk**, Unified Video-Action Joint Denoising for Dexterous Action and Data Generation. [![arXiv](https://img.shields.io/badge/arXiv-2606.03868-b31b1b.svg)](https://arxiv.org/abs/2606.03868)
 
 ## 🧠 Open-weight VLM
 
