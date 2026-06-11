@@ -23,7 +23,7 @@
          benchmark=harness|sim|dexterous. 해당 섹션 표 끝에 skeleton row 1회 생성
          (Links/Refreshed/Analysis 자동, 나머지 리치 컬럼은 `❓` — 사람이 채움).
        • models: `models/group/series/handle`
-         group=vla|vlm, series=models.md 의 기존 `### ` 계보 subsection 이름
+         group=vla|vlm|wam, series=models.md 의 기존 `### ` 계보 subsection 이름
          (예: `Standalone`, `π (Physical Intelligence)`). 그 series 맨 위에
          skeleton bullet 1회 생성. 없는 series 는 skip(사람이 `###` 1회 추가).
      handle = 카탈로그 표시 이름(논문 title 과 다른 짧은 핸들, `/` 금지).

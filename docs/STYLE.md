@@ -700,7 +700,7 @@ folder drops the badge. (b) **Bullet upsert:** a paper with a
 `models/group/series/handle` `카탈로그` token that is **not yet listed** gets a
 skeleton bullet (`* **<handle>**, <title>. <link badges>`) inserted at the **top**
 of its `### <series>` lineage subsection (newest-first), then the badge above is
-applied. `group` ∈ {`vla` → 🤖 VLA, `vlm` → 🧠 Open-weight VLM}; `series` names an
+applied. `group` ∈ {`vla` → 🤖 VLA, `wam` → 🌐 WAM, `vlm` → 🧠 Open-weight VLM}; `series` names an
 existing `### ` subsection under that group (e.g. `Standalone`,
 `π (Physical Intelligence)`); `handle` is the bold display name. An already-listed
 arXiv id is never re-added (create-once; the human owns curation and ordering

@@ -119,6 +119,7 @@ SECTION_LABELS = {
 MODELS_GROUPS = {
     "vla": "🤖 VLA",
     "vlm": "🧠 Open-weight VLM",
+    "wam": "🌐 WAM",
 }
 # The four hand-owned rich columns seeded `❓` on skeleton creation (between the
 # auto Links cell and the auto Refreshed/Analysis tail). Same count for both
@@ -156,7 +157,7 @@ def parse_catalog(value: str) -> list[tuple[str, ...]]:
                 continue
             _, group, series, handle = parts
             if group not in MODELS_GROUPS:
-                sys.stderr.write(f"warning: invalid models group in {tok!r} (want vla|vlm)\n")
+                sys.stderr.write(f"warning: invalid models group in {tok!r} (want vla|vlm|wam)\n")
                 continue
             out.append(("models", group, series, handle))
         elif target in CATALOG_SECTIONS:
