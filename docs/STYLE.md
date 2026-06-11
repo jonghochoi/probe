@@ -633,6 +633,7 @@ exactly):
 | `분석 생성일` | `YYYY-MM-DD` |
 | `관련 Pillar` | Comma-separated `P#` (controlled `P0`–`P5`); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
+| `카탈로그` | *(optional)* Comma-separated `target/section/handle` routing tokens (or `none` / omit). Opts the paper into the datasets/benchmarks catalog — drives the skeleton-row upsert in "Catalog cross-links" below |
 
 The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
 pillar ties (primary first); a paper with no pillar tie omits the row and
@@ -650,16 +651,49 @@ bullet's term — the text before the em dash in the `- **<term>** — …` shap
 §5-6 mandates (it also tolerates a `: ` separator and caps long heads).
 `python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
 
-**Catalog cross-link.** The same script maintains a bidirectional link between
-`catalogs/models.md` and this index. A catalog bullet whose arXiv id
-has an `analysis/<id>/` folder gets a `deep--dive-📄_analysis` badge (purple
-`6f42c1`) spliced in **right after its arXiv badge**, pointing at
-`../analysis/<id>/analysis.md`; the matching index row gets a `catalog-📚_models` badge
-(same purple) appended to its `Links` cell, pointing at `../catalogs/models.md`.
-The injection is idempotent — any prior `deep-dive` badge is stripped before
-re-adding, so a removed folder drops its badge on the next run. Only the badges
-are automated: catalog entry add/remove and the catalog's hand-owned `Updated`
-badge are never touched by the script.
+**Catalog cross-links.** The same script wires this index to the three
+`catalogs/` files. None of the three carries a file-level `Updated` badge (the
+per-row `Refreshed` cell supplies that for datasets/benchmarks); they open
+directly on the first emoji `##` section header. Entry curation and the rich
+hand-owned cells are never overwritten — the script only adds the marks below.
+
+*Forward — `models.md` (arXiv-id matching).* A bullet whose arXiv id has an
+`analysis/<id>/` folder gets a single-field `📝` badge (white `ffffff`, empty
+alt) spliced in **at the front of the bullet, right after the list marker**,
+pointing at `../analysis/<id>/analysis.md`. Idempotent: any prior leading badge
+(and any legacy trailing `deep-dive` badge) is stripped before re-adding, so a
+removed folder drops the badge on the next run.
+
+*Forward — `datasets.md` / `benchmarks.md` (`카탈로그` routing + skeleton upsert).*
+These are hand-curated rich tables (`# / <Name> / Links / Source / … / License /
+Refreshed / Analysis`). A paper opts in with a `카탈로그` row =
+comma-separated `target/section/handle`:
+
+- `target` ∈ {`dataset`, `benchmark`}. `models` is **not** a target (it runs on
+  the arXiv-id matching above).
+- `section` controlled per target, 1:1 with the catalog's `##` headers:
+  - dataset: `robot` → 🤖 Robot Action · `human` → 👤 Human Video · `mixed` →
+    🔀 Mixed (Robot + Human)
+  - benchmark: `harness` → 🧪 Eval Harness · `sim` → 🎮 Simulator / Sim Benchmark
+    · `dexterous` → ✋ Dexterous / Contact-rich Eval
+- `handle` — the short catalog display name (distinct from the paper title; e.g.
+  `OXE`, `vla-eval`). No `/`.
+
+On each run the script, for every routed paper **not already a row** in that
+section's table, appends a **skeleton row** at the end of the section and
+renumbers the `#` column: Links (from the `링크` row), Refreshed (= `분석 생성일`),
+and the Analysis `📝` badge are auto-filled; the rich columns (Source/Facts/…)
+are seeded `❓` for a human to backfill. A row whose arXiv id is already present
+is **never touched** (create-once; the human owns its cells thereafter), except
+its trailing **Analysis** cell, which is kept fresh (`📝` when the folder exists,
+`—` otherwise). A malformed/out-of-vocabulary token is warned and dropped; a
+routed section absent from the file is warned and skipped. `none` or no row
+routes nowhere.
+
+*Reverse (catalog → index badge on the index `Links` cell).* An index row whose
+arXiv id appears in a catalog file gets that catalog's `catalog` badge appended
+to its `Links` cell — `catalog-📚_models`, `catalog-🗂️_dataset`, or
+`catalog-🎯_benchmark` (all the same purple `6f42c1`).
 
 ### 5-8. Readability / narrative layer
 

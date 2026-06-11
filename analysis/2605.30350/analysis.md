@@ -272,7 +272,7 @@ LIBERO 성공률 (%, §3.3 Table 1) — **LoRA Fine-tuned**:
 ## ⚙️ 의사결정 함의
 
 - **외부 시각 채널 vs VLM 개조(D20/D22 핵심 함의)** — DynaFLIP 은 "VLM 을 co-train/FT 해 dynamics 를 넣기" 대신 "frozen VLM + 외부 dynamics-aware 백본을 zero-init side-branch 로 주입" 하는 *prior-보존형 대안* 을 제시합니다. 우리 D20 deferred candidate 로 `model.aux_visual.enabled=true`, `model.aux_visual.encoder=<dynamics-aware backbone>`, `model.aux_visual.inject=controlnet_side_branch`, `train.freeze.{vlm_backbone,aux_visual}=true`, `train.trainable=[injection, action_expert_copy]` 형태의 주입 레시피를 등재할 수 있습니다.
-- **D22 데이터 카탈로그 후보** — 260K image–language–3D flow triplet(robot 190K + human 70K, TraceForge 변형 파이프라인)은 `catalogs/dataset.md` 의 🔀 Mixed 항목 후보입니다. 특히 "action-free 비디오만으로 3 신호 추출" 이라는 점이 우리 D22 v1((a) π prior 만 의존) 을 완화할 때의 저비용 경로입니다.
+- **D22 데이터 카탈로그 후보** — 260K image–language–3D flow triplet(robot 190K + human 70K, TraceForge 변형 파이프라인)은 `catalogs/datasets.md` 의 🔀 Mixed 항목 후보입니다. 특히 "action-free 비디오만으로 3 신호 추출" 이라는 점이 우리 D22 v1((a) π prior 만 의존) 을 완화할 때의 저비용 경로입니다.
 - **control-relevant score 를 진단 지표로** — frozen 백본 위 lightweight probe 로 joint·EE pose·물체 6D pose 를 예측해 $`S_m`$ 을 재는 절차(§D.5)는, 우리 backbone 후보(π 시각 vs +dynamics-aware 채널)를 *정책 학습 전에* 싸게 비교하는 진단 메트릭으로 도입할 수 있습니다. ablation 매트릭스에 "$`S_m`$ on frozen backbone" 한 줄 추가.
 - **손실 하이퍼 출발점** — 만약 dynamics-aware 보조 인코더를 자체 사전학습한다면 Table 3 값($`\tau=0.07`$, $`\alpha=1.0`$, $`\lambda_{\text{tcn}}=\lambda_{\text{act}}=1.0`$, $`K=7`$)을 v1 시작점으로 채택.
 - **결정 모호함 회피** — DynaFLIP 의 이득은 2-finger·arm 셋업에서만 측정됐으므로, 우리 dexterous hand 스택에 *백본 교체* 로 곧장 채택하기보다 "frozen π 시각 + DynaFLIP 형 side-branch 추가" 의 *가산적* 실험으로 먼저 격리합니다.
@@ -292,7 +292,7 @@ LIBERO 성공률 (%, §3.3 Table 1) — **LoRA Fine-tuned**:
 
 ## 💡 컨텍스트 제안
 
-- **`catalogs/dataset.md` 등재 후보** — DynaFLIP 의 260K image–language–3D flow triplet 코퍼스(robot 190K: AgiBot/Droid/OXE/Bridge + human 70K: Ego4D/SSv2, TraceForge 변형)는 D22 데이터 카탈로그의 🔀 Mixed 항목으로 한 줄 추가할 가치가 있습니다(action-free 비디오 → 3 신호 추출이라는 lineage 특징 포함).
+- **`catalogs/datasets.md` 등재 후보** — DynaFLIP 의 260K image–language–3D flow triplet 코퍼스(robot 190K: AgiBot/Droid/OXE/Bridge + human 70K: Ego4D/SSv2, TraceForge 변형)는 D22 데이터 카탈로그의 🔀 Mixed 항목으로 한 줄 추가할 가치가 있습니다(action-free 비디오 → 3 신호 추출이라는 lineage 특징 포함).
 - **P4 §5 추적(비-핀) 후보** — DynaFLIP 자체는 vision-encoder 논문이라 P4 핀 cap(8) 에 넣기보다, D20/D22 의 *방법론 base* 로 추적 유지를 제안합니다("frozen VLM + 외부 dynamics-aware 시각 채널 주입" 의 prior-보존 대안 사례).
 - **MASTER §7 Month C(cross-pollination) 기록** — simplex-volume higher-order multimodal alignment 는 "구조적/그래프 표현 for multimodal binding"(P2 인접) 의 이달 cross-pollination 1편으로 적합합니다. 핀은 아니되 P2 방법론 시야 확장용.
 - **신규 Decision 불요** — 기존 D7/D20/D22 의 *deferred candidate* 갱신으로 충분하며, 새 Decision 코드를 만들 근거는 없습니다. 본 분석은 어떤 `context/` 파일도 수정하지 않습니다.

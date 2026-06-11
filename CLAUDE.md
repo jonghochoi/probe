@@ -18,14 +18,14 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32 |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`). `README.md` is the folder's auto-generated deep-dive index (slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`). Most folders today hold only `analysis.md` + `design.md` |
-| `catalogs/` | agent (hand-curated) | Cross-paper reference material — a top-level sibling of `analysis/`, separated from per-paper `<arxiv-id>/` deep-dives. `models.md` is an awesome-list-style flat curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), reverse-chronological within each section, **no H1** (just the `Updated` badge + emoji `##` section headers, like its `dataset.md` / `benchmark.md` siblings). A `deep-dive` badge is *auto-injected* into any bullet whose arXiv id has an `analysis/<id>/` folder (see "Automatically-maintained indexes"); the bullet set and `Updated` badge stay hand-curated. `dataset.md` and `benchmark.md` use the `analysis/README.md` **table style** (one row per entry, **English** throughout, no H1 — just the `Updated` badge + emoji `##` section headers). `dataset.md` covers VLA further-pretrain datasets, grouped into 🤖 Robot action / 🔀 Mixed / 👤 Human video sections — columns `# / Dataset / Links / Source / Facts / Embodiment / License / Used by` (Source + Facts + Embodiment are `<br>`-bulleted; `Used by` lists the downstream models/policies trained on the corpus, with `(partial)`/`(core)` notes; `License` carries a commercial-use mark — no mark = commercial-OK, ❌ non-commercial, ⚠️ gated/agreement, ❓ unverified). `benchmark.md` is its evaluation-side sibling (P0 D26 output) for VLA eval harnesses / simulators / dexterous benchmarks, grouped into 🧪 Eval harness / 🎮 Simulator / ✋ Dexterous sections — columns `# / Benchmark / Links / Source / Details / Type / License / Use` (Source + Details `<br>`-bulleted, same License marks). `models.md` + both tables carry a shields.io `Updated` badge at the top. Quarterly rebalance; entry curation is out of `analysis/README.md` auto-regeneration scope (only `models.md`'s `deep-dive` cross-link badges are script-maintained) |
+| `catalogs/` | agent (hand-curated) | Cross-paper reference material — a top-level sibling of `analysis/`, separated from per-paper `<arxiv-id>/` deep-dives. **No H1** in any of the three files (they open directly on the first emoji `##` section header — no top badge). `models.md` is an awesome-list-style curation of VLA and open-weight VLM entries — one bullet per entry (name + paper title + arXiv badge + GitHub/HF badge), grouped under emoji `##` section headers (🤖 VLA / 🧠 Open-weight VLM) into **lineage `###` series subsections** (e.g. `### π (Physical Intelligence)`, `### Being-H`, `### Qwen-VL`; non-lineage entries under `### Standalone`), reverse-chronological within each series. A leading `📝` badge is *auto-injected* at the **front** of any bullet whose arXiv id has an `analysis/<id>/` folder by arXiv-id matching (see "Automatically-maintained indexes"); the bullet set and the lineage grouping stay hand-curated. `datasets.md` (VLA further-pretrain datasets) and `benchmarks.md` (P0 D26 output — VLA eval harnesses / simulators / dexterous benchmarks) are **hand-curated rich tables**: `datasets.md` columns `# / Dataset / Links / Source / Facts / Embodiment / License / Refreshed / Analysis` (sections 🤖 Robot Action / 👤 Human Video / 🔀 Mixed); `benchmarks.md` columns `# / Benchmark / Links / Source / Details / Type / License / Refreshed / Analysis` (sections 🧪 Eval Harness / 🎮 Simulator / ✋ Dexterous). The per-row `Refreshed` cell carries the date each row was last hand-curated (so there is no file-level `Updated` badge). A paper opts a row in via its analysis `카탈로그` (`target/section/handle`) meta: the script **creates the skeleton row once** (Links / Refreshed / `📝` Analysis auto-filled, the rich Source/Facts/… columns seeded `❓`) and never overwrites it again — a human backfills the `❓` cells. Quarterly rebalance; the only script-maintained surface is row *creation* + the `Analysis` column + the `models.md` leading badge — every rich cell once filled, per-row `Refreshed`, entry curation, and lineage grouping are hand-owned |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 6 baseline policies + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) + `.gitignore` are committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar); also maintains the bidirectional catalog cross-link badges (`deep-dive` in `catalogs/models.md` ↔ `catalog` in the index). Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
+| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar); also maintains the catalog cross-link marks (`📝` leading badge in `catalogs/models.md` by arXiv-id matching + `카탈로그`-routed skeleton-row creation and the `Analysis` column in `datasets.md` / `benchmarks.md` ↔ `catalog` badge in the index). Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
@@ -240,11 +240,12 @@ new doc be in?":
   GitHub-rendered top page is the public-facing entry, and the
   hand-tuned Korean onboarding lives one click away at
   `docs/probe_guide.html`.
-- **Exception 3 — Catalog tables in English.** `catalogs/dataset.md`
-  + `catalogs/benchmark.md`. Every cell (headers, source, facts,
+- **Exception 3 — Catalog tables in English.** `catalogs/datasets.md`
+  + `catalogs/benchmarks.md`. Every cell (headers, source, facts,
   embodiment, license, lineage/use) is authored in English so the tables stay
-  uniform and grep-able; they carry no H1, only the `Updated` badge + emoji
-  `##` section headers. (`models.md` keeps its awesome-list bullet form.)
+  uniform and grep-able; they carry no H1 and no top badge — they open
+  directly on the first emoji `##` section header. (`models.md` keeps its
+  awesome-list bullet form.)
 
 **No `_KO` / `_EN` filename suffix.** Location (the folder rule above) plus
 the H1 on line 1 are sufficient — `head -1 <file>` tells you the language
@@ -298,17 +299,30 @@ inspects the filesystem for the vendor-neutral `impl` column (lerobot-pathed:
 outside that range is dropped at generation).
 Everything outside the markers stays hand-maintained — the short folder intro above the index block.
 
-The same script also maintains the **bidirectional catalog cross-link** between
-`catalogs/models.md` and the index. Every catalog bullet whose arXiv id
-has an `analysis/<id>/` folder gets a `deep-dive` badge spliced in after its
-arXiv badge (idempotent strip-then-readd, so a deleted folder drops the badge),
-and the matching index row gets a `catalog` badge back in its `Links` cell. Only
-these link badges are automated — adding/removing catalog entries (the curation
-judgement) and the catalog's `Updated` badge stay hand-owned, so the script never
-conflates "human curated" with "cross-link refreshed".
+The same script also maintains the **catalog cross-links** between `catalogs/`
+and the index, never the curation (full spec in `docs/STYLE.md` §5-7):
 
-- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**`, `catalogs/models.md`, or the script), committing the refresh as a `chore(analysis): refresh README + catalog cross-links` bot commit (stages `analysis/README.md` + `catalogs/models.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage these files or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
-- **Don't hand-edit inside the markers** — overwritten on the next run. Put nothing there that isn't extractable from the meta table or foundry folder; extend the script or the meta-table spec instead. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
+1. **Forward — `models.md` (arXiv-id matching).** A bullet whose arXiv id has an
+   `analysis/<id>/` folder gets a `📝` badge spliced in at the **front** of the
+   bullet. Idempotent strip-then-readd, so a deleted folder drops the badge.
+2. **Forward — `datasets.md` / `benchmarks.md` (`카탈로그` routing).** A paper's
+   `카탈로그` (`target/section/handle`) meta opts it into a section's table: the
+   script appends a **skeleton row once** (Links / Refreshed / `📝` Analysis
+   auto-filled, the rich columns seeded `❓`) and renumbers `#`. A row that
+   already carries the paper's arXiv id is never overwritten — only its trailing
+   `Analysis` cell is kept fresh (`📝` / `—`).
+3. **Reverse (badge on the index).** An index row whose arXiv id appears in a
+   catalog file gets that catalog's `catalog` badge in its `Links` cell —
+   `📚 models` / `🗂️ dataset` / `🎯 benchmark`.
+
+Only these script-owned marks are automated — adding/removing catalog entries
+(the curation judgement), every rich `datasets.md` / `benchmarks.md` cell once a
+human fills its `❓`, each row's `Refreshed` date, and the `models.md` lineage
+`###` grouping stay hand-owned, so the script never conflates "human curated"
+with "cross-link refreshed".
+
+- **Where it runs** — post-merge on `main` only, via `.github/workflows/refresh-analysis-index.yml` (triggers on pushes touching `analysis/**/analysis.md|impl/**|validation/**`, `catalogs/*.md`, or the script), committing the refresh as a `chore(analysis): refresh README + catalog cross-links` bot commit (stages `analysis/README.md` + `catalogs/models.md` + `catalogs/datasets.md` + `catalogs/benchmarks.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage these files or invoke the script — PR-side regeneration produced an unresolvable conflict on the generated block whenever two analysis PRs landed in parallel; concentrating it on `main` removes that, at the cost of a brief stale window.
+- **Don't hand-edit the script-owned marks** — the `ANALYSIS_INDEX` block in `analysis/README.md` (between markers) and the catalog `Analysis` column / `models.md` leading badge are overwritten on the next run. Everything else in the catalogs is yours. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more
 
