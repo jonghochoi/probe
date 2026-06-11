@@ -14,6 +14,7 @@
 | 분석 생성일 | 2026-06-09 |
 | 관련 Pillar | P4, P1 |
 | 태그 | vla-arch, peft |
+| 카탈로그 | models/vla/Standalone/VLA-Adapter |
 
 ---
 

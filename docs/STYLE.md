@@ -666,7 +666,7 @@ exactly):
 | `분석 생성일` | `YYYY-MM-DD` |
 | `관련 Pillar` | Comma-separated `P#` (controlled `P0`–`P5`); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
-| `카탈로그` | *(optional)* Comma-separated `target/section/handle` routing tokens (or `none` / omit). Opts the paper into the datasets/benchmarks catalog — drives the skeleton-row upsert in "Catalog cross-links" below |
+| `카탈로그` | *(optional)* Comma-separated routing tokens (or `none` / omit) opting the paper into a catalog — `target/section/handle` for datasets/benchmarks, `models/group/series/handle` for models. Drives the skeleton upsert in "Catalog cross-links" below |
 
 The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
 pillar ties (primary first); a paper with no pillar tie omits the row and
@@ -690,20 +690,30 @@ per-row `Refreshed` cell supplies that for datasets/benchmarks); they open
 directly on the first emoji `##` section header. Entry curation and the rich
 hand-owned cells are never overwritten — the script only adds the marks below.
 
-*Forward — `models.md` (arXiv-id matching).* A bullet whose arXiv id has an
-`analysis/<id>/` folder gets a single-field `📝` badge (white `ffffff`, empty
-alt) spliced in **at the front of the bullet, right after the list marker**,
-pointing at `../analysis/<id>/analysis.md`. Idempotent: any prior leading badge
-(and any legacy trailing `deep-dive` badge) is stripped before re-adding, so a
-removed folder drops the badge on the next run.
+*Forward — `models.md` (badge by arXiv-id + bullet by `카탈로그` routing).* Two
+independent marks. (a) **Badge:** a bullet whose arXiv id has an `analysis/<id>/`
+folder gets a single-field `📝` badge (white `ffffff`, empty alt) spliced in **at
+the front of the bullet, right after the list marker**, pointing at
+`../analysis/<id>/analysis.md`. Idempotent: any prior leading badge (and any
+legacy trailing `deep-dive` badge) is stripped before re-adding, so a removed
+folder drops the badge. (b) **Bullet upsert:** a paper with a
+`models/group/series/handle` `카탈로그` token that is **not yet listed** gets a
+skeleton bullet (`* **<handle>**, <title>. <link badges>`) inserted at the **top**
+of its `### <series>` lineage subsection (newest-first), then the badge above is
+applied. `group` ∈ {`vla` → 🤖 VLA, `vlm` → 🧠 Open-weight VLM}; `series` names an
+existing `### ` subsection under that group (e.g. `Standalone`,
+`π (Physical Intelligence)`); `handle` is the bold display name. An already-listed
+arXiv id is never re-added (create-once; the human owns curation and ordering
+thereafter). A routed `### <series>` absent under its group is warned and skipped
+— brand-new lineage subsections are created by hand once, then auto-fill next run.
 
 *Forward — `datasets.md` / `benchmarks.md` (`카탈로그` routing + skeleton upsert).*
 These are hand-curated rich tables (`# / <Name> / Links / Source / … / License /
 Refreshed / Analysis`). A paper opts in with a `카탈로그` row =
 comma-separated `target/section/handle`:
 
-- `target` ∈ {`dataset`, `benchmark`}. `models` is **not** a target (it runs on
-  the arXiv-id matching above).
+- `target` ∈ {`dataset`, `benchmark`} (here; `models` uses the 4-part grammar
+  above).
 - `section` controlled per target, 1:1 with the catalog's `##` headers:
   - dataset: `robot` → 🤖 Robot Action · `human` → 👤 Human Video · `mixed` →
     🔀 Mixed (Robot + Human)

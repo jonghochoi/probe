@@ -16,14 +16,18 @@
 | 태그 | vla-arch, tactile |
 | 카탈로그 | dataset/human/EgoDex |
 
-<!-- `카탈로그` 행(선택): 이 논문이 datasets/benchmarks 카탈로그에 들어갈 자격이
-     있으면 `target/section/handle` (콤마로 다중) 로 적습니다. 자격 없으면 행
-     생략 또는 `none`. target=dataset|benchmark (models 는 제외 — models.md 는
-     arXiv-id 매칭으로 자동 cross-link). section 컨트롤드: dataset=robot|human|
-     mixed, benchmark=harness|sim|dexterous. handle = 카탈로그 표시 이름(논문
-     title 과 다른 짧은 핸들, `/` 금지). 스크립트가 이 행을 보고 해당 섹션 표 끝에
-     skeleton row 를 1회 생성합니다(Links/Refreshed/Analysis 자동, 나머지 리치
-     컬럼은 `❓` — 사람이 채움). 값 정의는 docs/STYLE.md §5-7. -->
+<!-- `카탈로그` 행(선택): 이 논문을 카탈로그에 등재할 자격이 있으면 라우팅 토큰을
+     (콤마로 다중) 적습니다. 자격 없으면 행 생략 또는 `none`. 문법은 target 별로:
+       • datasets/benchmarks: `target/section/handle`
+         target=dataset|benchmark, section: dataset=robot|human|mixed /
+         benchmark=harness|sim|dexterous. 해당 섹션 표 끝에 skeleton row 1회 생성
+         (Links/Refreshed/Analysis 자동, 나머지 리치 컬럼은 `❓` — 사람이 채움).
+       • models: `models/group/series/handle`
+         group=vla|vlm, series=models.md 의 기존 `### ` 계보 subsection 이름
+         (예: `Standalone`, `π (Physical Intelligence)`). 그 series 맨 위에
+         skeleton bullet 1회 생성. 없는 series 는 skip(사람이 `###` 1회 추가).
+     handle = 카탈로그 표시 이름(논문 title 과 다른 짧은 핸들, `/` 금지).
+     이미 등재된 arXiv id 는 재생성 안 함. 값 정의는 docs/STYLE.md §5-7. -->
 
 <!-- curl 호출이 실패했다면, 실패한 명령과 HTTP 상태를 여기에 verbatim 으로
      기록합니다. 가짜 결과로 대체하지 않습니다. 초록 only 인 경우 아래

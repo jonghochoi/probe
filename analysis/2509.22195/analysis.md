@@ -14,6 +14,7 @@
 | 분석 생성일 | 2026-05-28 |
 | 관련 Pillar | P4 |
 | 태그 | vla-arch, forgetting, peft |
+| 카탈로그 | models/vla/Standalone/VLM2VLA |
 
 ---
 
