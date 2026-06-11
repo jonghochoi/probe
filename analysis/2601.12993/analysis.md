@@ -14,7 +14,7 @@
 | 분석 생성일 | 2026-05-27 |
 | 관련 Pillar | P4, P1 |
 | 태그 | vla-arch, egocentric-data, dexterity |
-| 카탈로그 | dataset/mixed/UniHand-2.0 |
+| 카탈로그 | dataset/mixed/UniHand-2.0, models/vla/Being-H (BeingBeyond)/Being-H0.5 |
 
 ---
 

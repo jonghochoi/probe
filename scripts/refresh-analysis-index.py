@@ -92,12 +92,13 @@ PILLAR_COLOR = {
 # P0–P5; anything outside the range is dropped at extraction time.
 PILLAR_RE = re.compile(r"P[0-5]")
 
-# ── Catalog routing (`카탈로그` meta → skeleton-row upsert) ────────────────
-# An analysis opts a paper into the datasets.md / benchmarks.md tables with a
-# `카탈로그` row carrying comma-separated `target/section/handle` tokens. The
-# script then *creates a skeleton row once* (links + Analysis auto-filled, the
-# rich columns seeded `❓`) and never overwrites it again — a human backfills the
-# `❓` cells (docs/STYLE.md §5-7).
+# ── Catalog routing (`카탈로그` meta → skeleton upsert) ─────────────────────
+# An analysis opts a paper into a catalog with a `카탈로그` row of comma-separated
+# tokens. Two grammars by target:
+#   • datasets / benchmarks — `target/section/handle` (rich table; skeleton row)
+#   • models                — `models/group/series/handle` (awesome-list bullet)
+# In both cases the script *creates the entry once* and never overwrites it
+# again — a human owns the cells/curation thereafter (docs/STYLE.md §5-7).
 CATALOG_ROW = re.compile(r"^\|\s*카탈로그\s*\|\s*(.+?)\s*\|\s*$")
 CATALOG_SECTIONS = {
     "dataset": ("robot", "human", "mixed"),
@@ -113,6 +114,12 @@ SECTION_LABELS = {
     ("benchmark", "sim"): "🎮 Simulator / Sim Benchmark",
     ("benchmark", "dexterous"): "✋ Dexterous / Contact-rich Eval",
 }
+# models.md `group` token → its `##` header text. The `series` token then names
+# an existing `### ` lineage subsection under that group (e.g. `Standalone`).
+MODELS_GROUPS = {
+    "vla": "🤖 VLA",
+    "vlm": "🧠 Open-weight VLM",
+}
 # The four hand-owned rich columns seeded `❓` on skeleton creation (between the
 # auto Links cell and the auto Refreshed/Analysis tail). Same count for both
 # targets, so one skeleton shape serves both.
@@ -126,26 +133,44 @@ def _split_csv(value: str) -> list[str]:
     return [tok.strip() for tok in value.split(",") if tok.strip()]
 
 
-def parse_catalog(value: str) -> list[tuple[str, str, str]]:
-    """Parse a `카탈로그` row value into `[(target, section, handle), …]`.
+def parse_catalog(value: str) -> list[tuple[str, ...]]:
+    """Parse a `카탈로그` row value into routing tuples.
 
-    Format: comma-separated `target/section/handle` tokens. `none` (or empty)
-    routes nowhere. An invalid target/section or a missing handle is warned and
-    dropped (mirrors the P# out-of-range drop) so a typo never fabricates a row.
+    Two shapes by target:
+      • `dataset`/`benchmark` → `(target, section, handle)` (3 parts)
+      • `models`              → `("models", group, series, handle)` (4 parts)
+
+    `none` (or empty) routes nowhere. A malformed token, invalid section, or
+    invalid models group is warned and dropped (mirrors the P# out-of-range
+    drop) so a typo never fabricates an entry.
     """
-    out: list[tuple[str, str, str]] = []
+    out: list[tuple[str, ...]] = []
     if value.strip().lower() == "none":
         return out
     for tok in _split_csv(value):
         parts = [p.strip() for p in tok.split("/")]
-        if len(parts) != 3 or not all(parts):
-            sys.stderr.write(f"warning: malformed 카탈로그 token {tok!r} (want target/section/handle)\n")
+        target = parts[0] if parts else ""
+        if target == "models":
+            if len(parts) != 4 or not all(parts):
+                sys.stderr.write(f"warning: malformed 카탈로그 token {tok!r} (want models/group/series/handle)\n")
+                continue
+            _, group, series, handle = parts
+            if group not in MODELS_GROUPS:
+                sys.stderr.write(f"warning: invalid models group in {tok!r} (want vla|vlm)\n")
+                continue
+            out.append(("models", group, series, handle))
+        elif target in CATALOG_SECTIONS:
+            if len(parts) != 3 or not all(parts):
+                sys.stderr.write(f"warning: malformed 카탈로그 token {tok!r} (want target/section/handle)\n")
+                continue
+            _, section, handle = parts
+            if section not in CATALOG_SECTIONS[target]:
+                sys.stderr.write(f"warning: invalid 카탈로그 section in {tok!r}\n")
+                continue
+            out.append((target, section, handle))
+        else:
+            sys.stderr.write(f"warning: invalid 카탈로그 target in {tok!r} (want dataset|benchmark|models)\n")
             continue
-        target, section, handle = parts
-        if target not in CATALOG_SECTIONS or section not in CATALOG_SECTIONS[target]:
-            sys.stderr.write(f"warning: invalid 카탈로그 target/section in {tok!r}\n")
-            continue
-        out.append((target, section, handle))
     return out
 
 
@@ -587,9 +612,13 @@ def upsert_catalog_rows(path: Path, target: str, rows: list[dict]) -> bool:
     """
     routed: dict[str, list[tuple[str, dict]]] = {}
     for row in rows:
-        for t, section, handle in row.get("catalog", []):
-            if t == target:
-                routed.setdefault(section, []).append((handle, row))
+        for entry in row.get("catalog", []):
+            # datasets/benchmarks routing is a 3-tuple; models is a 4-tuple,
+            # handled separately by upsert_models_bullets.
+            if entry[0] != target or len(entry) != 3:
+                continue
+            _, section, handle = entry
+            routed.setdefault(section, []).append((handle, row))
     if not routed:
         return False
     label_to_key = {SECTION_LABELS[(target, key)]: key for key in CATALOG_SECTIONS[target]}
@@ -635,6 +664,78 @@ def upsert_catalog_rows(path: Path, target: str, rows: list[dict]) -> bool:
                 f"warning: 카탈로그 routes to {target}/{section} but {path.name} has no "
                 f"'{SECTION_LABELS[(target, section)]}' table; skipping\n"
             )
+
+    updated = "\n".join(out)
+    if original.endswith("\n"):
+        updated += "\n"
+    if updated == original:
+        return False
+    path.write_text(updated, encoding="utf-8")
+    return True
+
+
+def _models_bullet(handle: str, meta: dict) -> str:
+    """Build a fresh models.md bullet for `meta`: `* **<handle>**, <title>. <links>`.
+    The leading `📝` analysis badge is added by `enrich_models` on the same run."""
+    title = meta["title"] if meta["title"] != WARN else handle
+    links = link_badges(meta["links"], meta["arxiv_id"])
+    tail = f" {links}" if links not in ("—", WARN) else ""
+    return f"* **{handle}**, {title}.{tail}"
+
+
+def upsert_models_bullets(path: Path, rows: list[dict]) -> bool:
+    """Create a skeleton bullet for every analyzed paper routed to `models` that
+    is not yet listed; never touch an existing bullet.
+
+    Routing is `models/group/series/handle`. A new bullet is inserted at the
+    **top** of its `### <series>` lineage subsection (under the `## <group>`
+    header), newest-first per the reverse-chronological convention. A paper whose
+    arXiv id is already anywhere in the file is skipped (create-once; the human
+    owns curation and ordering thereafter), so the pass is idempotent. A routed
+    `### <series>` absent under its group is warned and skipped — brand-new
+    lineage subsections are added by hand once, then auto-fill on the next run.
+    """
+    # group_label -> {series -> [(handle, meta), …]}
+    routed: dict[str, dict[str, list[tuple[str, dict]]]] = {}
+    for row in rows:
+        for entry in row.get("catalog", []):
+            if entry[0] != "models" or len(entry) != 4:
+                continue
+            _, group, series, handle = entry
+            routed.setdefault(MODELS_GROUPS[group], {}).setdefault(series, []).append((handle, row))
+    if not routed:
+        return False
+
+    try:
+        original = path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    existing_ids = set(ARXIV_ID_RE.findall(original))
+
+    out: list[str] = []
+    cur_group: str | None = None
+    inserted: set[tuple[str, str]] = set()
+    for line in original.splitlines():
+        if line.startswith("## "):
+            cur_group = line[3:].strip()
+            out.append(line)
+            continue
+        out.append(line)
+        if line.startswith("### ") and cur_group in routed:
+            series = line[4:].strip()
+            for handle, meta in routed[cur_group].get(series, []):
+                if meta["arxiv_id"] not in existing_ids:
+                    out.append(_models_bullet(handle, meta))
+                    existing_ids.add(meta["arxiv_id"])
+                inserted.add((cur_group, series))
+
+    for group_label, by_series in routed.items():
+        for series in by_series:
+            if (group_label, series) not in inserted:
+                sys.stderr.write(
+                    f"warning: 카탈로그 routes to models/{group_label}/{series} but "
+                    f"{path.name} has no '### {series}' subsection there; skipping\n"
+                )
 
     updated = "\n".join(out)
     if original.endswith("\n"):
@@ -748,11 +849,12 @@ def main() -> int:
         meta["impl"] = impl_state(paper_dir.name)
         rows.append(meta)
 
-    # 1. Create any missing skeleton rows (routed by `카탈로그`), then 2. fill the
-    # Analysis column. catalog_ids is read AFTER the upsert so the reverse index
-    # badges (🗂️/🎯) see freshly-created rows.
+    # 1. Create any missing skeleton entries (routed by `카탈로그`), then 2. fill
+    # the catalog marks. catalog_ids is read AFTER the upserts so the reverse
+    # index badges (📚/🗂️/🎯) see freshly-created entries.
     dataset_up = upsert_catalog_rows(CATALOG_DATASET, "dataset", rows)
     benchmark_up = upsert_catalog_rows(CATALOG_BENCHMARK, "benchmark", rows)
+    models_up = upsert_models_bullets(CATALOG, rows)
     dataset_enr = enrich_catalog_table(CATALOG_DATASET, analysis_ids)
     benchmark_enr = enrich_catalog_table(CATALOG_BENCHMARK, analysis_ids)
     dataset_changed = dataset_up or dataset_enr
@@ -765,7 +867,7 @@ def main() -> int:
     }
     block = build_block(rows, catalog_ids)
     index_changed = rewrite_index(block)
-    models_changed = enrich_models(analysis_ids)
+    models_changed = models_up or enrich_models(analysis_ids)
     print(
         f"refresh-analysis-index: {len(rows)} analyses · "
         f"README {'updated' if index_changed else 'no change'} · "
