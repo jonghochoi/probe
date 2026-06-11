@@ -135,6 +135,56 @@ Scouting finds new papers *outward*; this mode reads **one specific paper** the 
 
 Network note: `/analyze-paper`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE.md` §5 (analysis) / §6 (Design + impl) / §7 (validation).
 
+### Bonus — Paper Q&A (open a GitHub Issue discussion for an analysis, answer `@claude` mentions)
+
+Scouting finds papers *outward*, analysis goes *deep* on one — this track makes a
+finished analysis a **collaborative review surface**: open a GitHub Issue for it,
+let teammates comment with questions, and an agent answers from the committed
+analysis doc. Three pieces, two runtimes:
+
+| Item | Value |
+|---|---|
+| Discuss (on-demand) | `/discuss-analysis <id> [--dry-run] [--reopen]` → creates/updates **one `paper-qa`-labelled Issue per paper** (메타 표 + TL;DR + blob links back to `analysis/<id>/`). Idempotent on a hidden `<!-- probe-paper-qa:<id> -->` body marker. Precondition: `analysis/<id>/analysis.md` exists (`/analyze-paper <id>` first). |
+| Answer (event-driven CI) | `.github/workflows/paper-qa.yml` runs `anthropics/claude-code-action@v1` in **tag mode** when a comment on a `paper-qa` Issue mentions `@claude`. It reads `.claude/prompts/qa-answer.md` and replies **in Korean, grounded in `analysis/<id>/`** (cites the section; says "분석 문서에 없음" rather than hallucinating). |
+| Sync to repo (deferred, manual) | `/sync-qa <id> [--force]` curates a **resolved** thread into `analysis/<id>/qa.md` on a branch/PR. Never auto-fires — pull it only when a thread is worth keeping. |
+| Runtimes | `/discuss-analysis` + `/sync-qa` run in the **cloud session** (MCP unreachable → they drive GitHub with the `gh` CLI). `paper-qa.yml` runs on a **GitHub runner** with the action's bundled GitHub MCP + `GITHUB_TOKEN`. Don't conflate them. |
+| Canonical prompts | `.claude/prompts/{discussion,qa-answer,qa-sync}.md`; thin wrappers `.claude/commands/{discuss-analysis,sync-qa}.md`. |
+
+**Secret + label setup (one-time):**
+
+1. Add **`ANTHROPIC_API_KEY`** (or `CLAUDE_CODE_OAUTH_TOKEN`) under repo **Settings →
+   Secrets and variables → Actions**. Unlike the scouting routines (cloud-session
+   billing), this action bills the Anthropic API key directly.
+2. The `paper-qa` label is created on first `/discuss-analysis` run
+   (`gh label create paper-qa … || true`); no manual step needed.
+3. Ensure `paper-qa.yml` is on `main` — for `issue_comment` events GitHub always runs
+   the **base-branch** copy of the workflow, so it must be merged before the first
+   `@claude` reply will fire.
+
+**Security / cost notes.** Issue comments are untrusted external input; tag mode runs
+the action with its **read-only default tool set** (no Bash/Write/Edit), and the answer
+prompt treats embedded "instructions" as data. The `github.event.sender.type != 'Bot'`
+gate stops the action answering its own comment (loop guard). `concurrency` serialises
+runs per Issue. There is no `--dry-run` for the action; a green run only means "no infra
+error" — read the posted comment. `/discuss-analysis --dry-run` covers the discussion
+step's first validation.
+
+**Shared-key cost governance.** Every `@claude` answer — context read *and* answer
+generation — bills the **single** `ANTHROPIC_API_KEY` secret; the colleague asking the
+question spends nothing (they only write a GitHub comment). So the bot's whole LLM cost
+concentrates on one payer, and the controls below cap it with defence-in-depth. The first
+three are wired into `paper-qa.yml`; the fourth is a Console-side backstop you set once.
+
+| Layer | Caps | Where |
+|---|---|---|
+| **Trigger permission** | *who* can spend — `author_association` gate runs the bot only for `OWNER`/`MEMBER`/`COLLABORATOR`, so an outside account on a public repo cannot burn the budget | `paper-qa.yml` `if:` |
+| **Per-call cost** | *cost per question* — `--model` pins a small model (Q&A is grounded retrieval, not deep reasoning) and `--max-turns 8` hard-caps the tool loop | `paper-qa.yml` `claude_args` |
+| **Runner time** | *Actions minutes* (a separate meter from API tokens) — `timeout-minutes: 10` kills a runaway job | `paper-qa.yml` job |
+| **Monthly budget** | *total spend* — set a **spend limit + usage alert** on a **dedicated** API key/workspace in the Anthropic Console so the key simply stops past the cap; isolate it from other usage for clean accounting | Anthropic Console (one-time) |
+
+Process rules help too: one `@claude` per question, don't re-trigger on trivial
+rephrasings, and close/`/sync-qa` a settled thread so the same question isn't re-answered.
+
 ---
 
 ## Troubleshooting
