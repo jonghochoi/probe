@@ -43,10 +43,12 @@ fail() { echo "ensure-foundry-runtime(${foundry}): $1" >&2; exit 1; }
 pin="$(sed -n 's/^| Pinned commit | `\([0-9a-f]\{7,40\}\)` |.*/\1/p' "$readme" | head -1)"
 [ -n "$pin" ] || fail "could not parse 'Pinned commit' SHA from $readme"
 
-# Map foundry -> clone URL. Adding a foundry is a one-line case arm here plus a
-# vendor/<name>/ snapshot; no other part of this script changes.
+# Map foundry -> clone URL + required python. Adding a foundry is a one-line
+# case arm here plus a vendor/<name>/ snapshot; no other part of this script
+# changes. The python version mirrors the foundry's `requires-python` floor so
+# `uv venv` never silently picks an older system default.
 case "$foundry" in
-  lerobot) url="https://github.com/jonghochoi/lerobot.git" ;;
+  lerobot) url="https://github.com/jonghochoi/lerobot.git"; pyver="3.12" ;;
   *) fail "no clone URL registered for foundry '${foundry}' — add a case arm" ;;
 esac
 
@@ -75,7 +77,7 @@ git -C "$src_dir" checkout -q FETCH_HEAD >>"$log" 2>&1 || fail "checkout $pin fa
 #    [tool.uv.sources], which has a version gap in some environments and makes
 #    uv's resolver fail; plain pip ignores that source and resolves torch from
 #    the default index. torch is the dominant cost (one-time per checkout).
-uv venv "$venv_dir" >>"$log" 2>&1 || fail "uv venv failed (see $log)"
+uv venv --python "$pyver" "$venv_dir" >>"$log" 2>&1 || fail "uv venv (python ${pyver}) failed (see $log)"
 "$py" -m ensurepip --upgrade >>"$log" 2>&1 || fail "ensurepip failed (see $log)"
 if ! "$py" -m pip install -e "${src_dir}[test]" >>"$log" 2>&1; then
   tail -n 5 "$log" >&2 || true
