@@ -29,6 +29,15 @@
      handle = 카탈로그 표시 이름(논문 title 과 다른 짧은 핸들, `/` 금지).
      이미 등재된 arXiv id 는 재생성 안 함. 값 정의는 docs/STYLE.md §5-7. -->
 
+<!-- `Design 적용` 행(선택, DESIGN APPLICABILITY gate): foundry 로 포팅
+     가능한 새 method/model 을 제안하는 논문이면 이 행을 생략합니다
+     (기본 ✅ 적용 → design.md 는 7개 섹션 정상 작성). 순수 데이터셋 /
+     벤치마크 / survey·position·study / non-policy tooling 이면
+       | Design 적용 | 🚫 비대상 (<dataset|benchmark|survey|tooling>) |
+     행을 위 메타 테이블에 추가하고 design.md 는 비대상 스텁으로 만듭니다
+     (analysis/templates/design.md 주석 참조). 분류 규칙·값 정의는
+     .claude/prompts/analysis.md gate + docs/STYLE.md §5-7/§6. -->
+
 <!-- curl 호출이 실패했다면, 실패한 명령과 HTTP 상태를 여기에 verbatim 으로
      기록합니다. 가짜 결과로 대체하지 않습니다. 초록 only 인 경우 아래
      (B) 모든 섹션 앞에 **(본문 미확보 — 잠정)** 를 붙입니다. -->

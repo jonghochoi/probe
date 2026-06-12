@@ -15,6 +15,7 @@
 | 관련 Pillar | P1 |
 | 태그 | sim2real, dataset |
 | 카탈로그 | benchmark/harness/vla-eval |
+| Design 적용 | 🚫 비대상 (benchmark) |
 
 <!-- 본문은 arXiv HTML(전문)로 확보. 모든 수치는 본문/표에서 받은 그대로 인용. -->
 
@@ -231,4 +232,4 @@ VLA 모델 평가에서 벤치마크마다 반복되는 의존성·전처리·�
 - **§13.B 연결** — vla-eval 가속 방법론은 §13.B "compute budget" 미해결 항목의 평가-측 비용 추정에 직접 입력(예: $`K^{*}`$ ·배치로 ablation wall-clock 산정).
 - context/MASTER.md 는 수정하지 않았습니다 — 위는 모두 제안입니다.
 
-> 💡 base 매핑은 `/implement-design analysis/2603.13966/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 본 논문은 Design 비대상(benchmark)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅(`benchmark/harness/vla-eval`)으로 전달됩니다.

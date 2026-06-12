@@ -17,6 +17,26 @@
      없는 항목은 "(원문에 명시 없음 — 가정으로 메움)" 한 줄로 정직하게
      비워둡니다. -->
 
+<!-- Design 적용 여부 (DESIGN APPLICABILITY gate, docs/STYLE.md §6):
+     이 논문이 foundry 로 포팅 가능한 새 model/architecture/학습목표/
+     알고리즘을 제안하면 ✅ 적용 — 이 메타 테이블에 `Design 적용` 행을
+     넣지 않고(기본 적용) 아래 7개 섹션을 정상 작성합니다.
+     순수 데이터셋 / 벤치마크·eval-harness / survey·position·study /
+     non-policy tooling 이면 🚫 비대상 — 위 메타 테이블에
+       | Design 적용 | 🚫 비대상 (<dataset|benchmark|survey|tooling>) |
+     행을 추가하고, 아래 🧮 데이터 계약 … 🚧 미해결 7개 섹션을 전부
+     지운 뒤 단 하나의 섹션만 남깁니다:
+
+       ## 🚫 Design 비대상
+       <이 논문은 foundry 로 포팅 가능한 Layer 1 알고리즘 기여가 없는
+        <사유> 논문이므로 Design 을 생성하지 않습니다. 가치는 카탈로그
+        라우팅(<카탈로그 토큰>) 또는 분석 문서로 전달됩니다. (해당 시)
+        부수 베이스라인은 핵심 기여가 아니라 매핑 대상에서 제외합니다.>
+
+     analysis.md 의 📄 논문 메타 `Design 적용` 행과 verdict 가 일치해야
+     합니다. 분류 규칙은 .claude/prompts/analysis.md 의 DESIGN
+     APPLICABILITY gate 가 SSOT. -->
+
 ---
 
 ## 🧮 데이터 계약

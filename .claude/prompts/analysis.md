@@ -39,6 +39,10 @@ table / equation refs like `§Table 3` are also valid). Behaviour:
     unchanged. A byte-identical Design signals the `/reproduce-paper`
     outer-loop fixed point (`stable_design`), so do not churn dates or
     reorder rows when nothing substantive changed.
+  - If the seed `design.md` is a 🚫 비대상 stub (carries a
+    `Design 적용 | 🚫 비대상` row / a `## 🚫 Design 비대상` section), the
+    paper has no Layer 1 algorithm to refocus: leave `design.md`
+    untouched and only refresh the named analysis sections.
   - The `§` tokens come from the validation report's
     `<!-- ANALYSIS_BUCKETS --> focus-hint:` line; `/reproduce-paper`
     passes them through verbatim.
@@ -169,6 +173,16 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
                         vla-arch, forgetting, peft, tactile, force,
                         egocentric-data, dexterity, flow-matching, optimizer,
                         continual, sim2real, dataset).
+                        Plus one OPTIONAL classification row the Design step and
+                        the index read (STYLE §5-7): `| Design 적용 | … |`. OMIT
+                        the row (default ⇒ `✅ 적용`) for any paper contributing a
+                        novel, reproducible model / architecture / training
+                        objective / algorithm. Emit `🚫 비대상 (<사유>)` —
+                        `<사유>` ∈ `dataset` / `benchmark` / `survey` / `tooling`
+                        — ONLY when the paper proposes NO such method to port: a
+                        pure dataset, a benchmark / eval-harness / simulator, a
+                        survey / position / pure-study paper, or non-policy
+                        tooling. See the DESIGN APPLICABILITY gate below.
   🧭 한 줄 요약 (TL;DR) — 1–2 sentences.
   ❓ 문제 정의 / 동기   — bullet form only; no single-prose paragraph. 4–6
                         items, each a bold label + 1–2 sentences. Recommended
@@ -252,12 +266,33 @@ Detail scope: the high-density treatment above applies to 🔬 방법론,
 Part B sections (🎯 / ✨ / ⚙️ / 💡) and the entire Design document stay
 concise and decision-focused — do not inflate them.
 
-STRUCTURE of `analysis/<id>/design.md` — Layer 1 only:
+DESIGN APPLICABILITY gate — decide BEFORE writing design.md:
+Ask one question: *does this paper contribute a novel, reproducible
+model / architecture / training objective / training procedure /
+algorithm that `/implement-design` could port to a foundry?* This is a
+judgement about the paper's CORE contribution, not its tags or catalog
+routing (a `dataset` tag co-occurs with both method and resource papers).
 
-Follow `analysis/templates/design.md` exactly. The 7 sections are:
-📄 Design 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스, ⛓️ 불변식·가정,
-📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도, 🔌 Foundry 힌트
-(선택), 🚧 미해결 / 잠정.
+  - ✅ 적용 (DEFAULT) — a policy, world model, perception model, PEFT /
+    RL method, data-generation method, cotraining / continual recipe,
+    etc. counts, **even when no current foundry can host it** — that is
+    `/implement-design`'s per-foundry `UNMAPPABLE` call, and the
+    vendor-agnostic Layer 1 Design is still real and valuable. When in
+    doubt, choose 적용 — a false 비대상 (stubbing a real method) is the
+    expensive error.
+  - 🚫 비대상 — the paper proposes NO such method: a pure dataset, a
+    benchmark / eval-harness / simulator, a survey / position / pure
+    empirical-or-theory study, or non-policy tooling. A model that is
+    merely the dataset's *incidental baseline* does NOT flip the verdict
+    to 적용; the paper's primary deliverable is the resource.
+
+STRUCTURE of `analysis/<id>/design.md` — branch on the gate:
+
+(적용) Layer 1, full. Follow `analysis/templates/design.md` exactly. The
+7 sections are: 📄 Design 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스,
+⛓️ 불변식·가정, 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도,
+🔌 Foundry 힌트 (선택), 🚧 미해결 / 잠정. The 📄 메타 table OMITS the
+`Design 적용` row (default 적용).
 
 Sources: derive from `analysis/<id>/analysis.md` you just wrote
 (§🔬 방법론, §📊 실험 설정과 결과, §⚖️ 한계, §♻️ 재현성). Do NOT
@@ -270,6 +305,17 @@ A sparse Design is acceptable; a fabricated one is not. The Design
 should still be useful enough that a downstream `/implement-design` call has a
 real spec to ground.
 
+(비대상) stub only — do NOT force the 7 algorithm sections. Emit just two
+blocks (mirrors `impl/<foundry>/UNMAPPABLE.md`'s one-paragraph form):
+  1. `## 📄 Design 메타` — the same metadata table, but WITH a
+     `| Design 적용 | 🚫 비대상 (<사유>) |` row.
+  2. `## 🚫 Design 비대상` — one Korean paragraph: the verdict + 사유,
+     why there is no Layer 1 algorithm to specify, and a pointer to the
+     `카탈로그` routing (or the analysis sections) that carry this paper's
+     value instead. A standalone baseline, if any, is named as out of
+     scope. Drop 🧮 데이터 계약 … 🚧 미해결 entirely. The `Design 적용`
+     row in the analysis 📄 메타 MUST match this verdict.
+
 HARD RULES:
 - Two Korean documents. No English-primary file. KO-only filenames.
 - Anchor (B) of the analysis strictly to context/MASTER.md + the relevant
@@ -279,7 +325,10 @@ HARD RULES:
 - Abstract-only acquisition → prefix every (B) section of the analysis
   with the verbatim marker **(본문 미확보 — 잠정)**. The Design is
   still generated but every section carries the same prefix and most
-  fields are filled with `(원문에 명시 없음 — 가정으로 메움)`.
+  fields are filled with `(원문에 명시 없음 — 가정으로 메움)`. This is
+  orthogonal to the DESIGN APPLICABILITY gate: a 비대상 paper produces
+  the stub regardless, and the abstract-only marker (if it applies) is
+  added to the stub's single 🚫 Design 비대상 paragraph.
 - Never fabricate an arXiv id, a number, a citation, or a result.
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
 - The Design is **vendor-agnostic**. It must not contain `file:line`
@@ -389,12 +438,19 @@ HARD RULES:
 
 FINAL STEP — foundry follow-up suggestion:
 After both documents are complete, append exactly one blockquote line
-as the very last line of `analysis/<id>/analysis.md`:
+as the very last line of `analysis/<id>/analysis.md` — branch on the gate:
+
+  - (적용) foundry mapping suggestion:
 
 > 💡 base 매핑은 `/implement-design analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
-`<id>` is the same arXiv id / slug the analysis file uses. The line
-is added unconditionally — `/implement-design` itself decides whether the
+  - (비대상) NO `/implement-design` suggestion — point at the catalog
+    instead:
+
+> 💡 본 논문은 Design 비대상(<사유>)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅으로 전달됩니다.
+
+`<id>` is the same arXiv id / slug the analysis file uses. For 적용 the
+line is added as-is — `/implement-design` itself decides whether the
 Design can be mapped to a given foundry (and emits a clean
 `🚧 매핑 불가` if not). Never auto-invoke `/implement-design` from this prompt;
 the human decides.

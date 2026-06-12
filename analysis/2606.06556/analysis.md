@@ -14,6 +14,7 @@
 | 분석 생성일 | 2026-06-09 |
 | 관련 Pillar | P4, P3 |
 | 태그 | dataset, egocentric-data, sim2real |
+| Design 적용 | 🚫 비대상 (survey) |
 
 > **문서 성격 주의** — 본 논문은 실험·벤치마크가 없는 **position / survey paper** 입니다. 따라서 아래 📊 섹션은 저자가 *인용한* 외부 시스템·데이터셋의 수치를 정리한 것이며, 본 논문 자체의 측정값이 아닙니다. PROBE 의 모든 Pillar Anti-topic 은 "Survey / position papers (read manually, not via agent)" 를 배제하므로, 본 분석은 사람이 직접 지정해 수행한 manual 분석임을 명시합니다.
 
@@ -273,4 +274,4 @@ $$\mathbf{r}_{\eta}(\mathbf{s}_{\zeta},\mathbf{g},\phi_{\zeta})$$
 
 ---
 
-> 💡 base 매핑은 `/implement-design analysis/2606.06556/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
+> 💡 본 논문은 Design 비대상(survey)이라 foundry 매핑 대상이 아닙니다. position paper 로서의 가치는 분석 문서 본문으로 전달됩니다.
