@@ -74,7 +74,10 @@ A. Round 0 — Gate.
       terminate normally — the reason is already recorded as one paragraph
       in that file. The `/implement-design` prompt §A has also appended a
       `🚧 매핑 불가` line to the end of `analysis/<id>/analysis.md`, so no
-      further edits are needed.
+      further edits are needed. (A 🚫 Design 비대상 paper — pure dataset /
+      benchmark / survey / tooling — reaches here via `/implement-design`'s
+      비대상 short-circuit, which writes the same `UNMAPPABLE.md`; the
+      reproduction loop has nothing to converge and ends at Round 0.)
    4. Execute `.claude/prompts/validation.md` once to generate the first validation
       report.
    5. Copy the report to `analysis/<id>/validation/<foundry>.round_0.md`

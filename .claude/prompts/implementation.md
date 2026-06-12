@@ -57,6 +57,16 @@ already exist:
 If either is missing, stop and tell the human to run `/analyze-paper
 <id>` first.
 
+DESIGN-비대상 SHORT-CIRCUIT — before reading anything else, check the
+Design's 📄 메타 table: if it carries a `| Design 적용 | 🚫 비대상 … |`
+row (equivalently a `## 🚫 Design 비대상` section), the paper proposes
+no foundry-portable method. Do NOT attempt a mapping. Write a single
+`analysis/<id>/impl/<foundry>/UNMAPPABLE.md` (the same one-paragraph
+form as §A's unmappable path below) whose paragraph cites the Design's
+🚫 비대상 verdict and 사유, then stop — no `impl.md`, no patch, no smoke
+test. This reuses the existing `UNMAPPABLE.md` channel; nothing new
+downstream.
+
 CONTEXT (read-only):
 - The Design document (passed as argument) — the authoritative spec.
   Read in full. Its Layer 1 sections (데이터 계약 · 모듈 인터페이스 ·

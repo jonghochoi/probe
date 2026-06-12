@@ -653,7 +653,9 @@ desc (ties by arXiv id desc). Per row:
   sanitizer strips inline CSS (`<span style=…>`), so a shields.io badge is the
   only way to color text per keyword on github.com;
 - an `impl` cell — lerobot-based: ✅ `impl/lerobot/impl.md` exists /
-  `UNMAPPABLE.md` / `—` not generated.
+  `UNMAPPABLE.md` / 🚫 비대상 (the analysis carries a `Design 적용 |
+  🚫 비대상` row — no impl is ever expected, distinct from a pending
+  `—`) / `—` not generated.
 
 **Load-bearing — the 논문 메타 rows the script reads from every
 `analysis/<id>/analysis.md`** (STYLE's contract; the author must emit them
@@ -667,6 +669,7 @@ exactly):
 | `관련 Pillar` | Comma-separated `P#` (controlled `P0`–`P5`); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
 | `카탈로그` | *(optional)* Comma-separated routing tokens (or `none` / omit) opting the paper into a catalog — `target/section/handle` for datasets/benchmarks, `models/group/series/handle` for models. Drives the skeleton upsert in "Catalog cross-links" below |
+| `Design 적용` | *(optional)* `🚫 비대상 (<dataset\|benchmark\|survey\|tooling>)` for a paper that proposes no foundry-portable method (pure dataset / benchmark / survey·position·study / non-policy tooling); OMIT the row otherwise (default `✅ 적용`). Drives the `design.md` form (full vs. 🚫 비대상 stub) and the index `impl` cell. SSOT for the classification rule is the DESIGN APPLICABILITY gate in `.claude/prompts/analysis.md`; see §6 |
 
 The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
 pillar ties (primary first); a paper with no pillar tie omits the row and
@@ -677,7 +680,9 @@ list): `vla-arch`, `forgetting`, `peft`, `tactile`, `force`,
 
 A missing / malformed scalar row yields `metadata` in that cell rather than
 an abort; a missing `관련 Pillar` row yields an empty set (the paper lands in
-`미분류`). The `태그` row is still authored (controlled vocabulary above) but is
+`미분류`). A missing `Design 적용` row is NOT an error — it means `✅ 적용`
+(the default), so only 🚫 비대상 papers carry the row. The `태그` row is still
+authored (controlled vocabulary above) but is
 no longer surfaced in the index. The
 `기술 키워드` bullet heads are load-bearing too: the index reads each
 bullet's term — the text before the em dash in the `- **<term>** — …` shape
@@ -818,6 +823,20 @@ Outputs (all under `analysis/<id>/`):
   sections in this order: 메타, 데이터 계약, 모듈 인터페이스,
   불변식·가정, 하이퍼파라미터·손실, 평가 메트릭, 변경
   의도, Foundry 힌트, 미해결 / 잠정.
+- **DESIGN APPLICABILITY (🚫 비대상 stub).** The 9-section form above is
+  for `✅ 적용` papers (the default). A paper that proposes no
+  foundry-portable method — a pure dataset, a benchmark / eval-harness /
+  simulator, a survey / position / pure study, or non-policy tooling —
+  is `🚫 비대상`: its `design.md` is a stub of just two `##` blocks,
+  📄 Design 메타 (carrying a `| Design 적용 | 🚫 비대상 (<사유>) |` row)
+  and 🚫 Design 비대상 (one paragraph — verdict, 사유, why no Layer 1
+  algorithm exists, and a pointer to the `카탈로그` routing that carries
+  the paper's value). The `analysis.md` 📄 메타 `Design 적용` row must
+  match. The classification rule (SSOT) is the DESIGN APPLICABILITY gate
+  in `.claude/prompts/analysis.md`; an incidental dataset baseline does
+  not flip a resource paper to 적용, and when in doubt choose 적용.
+  `/implement-design` short-circuits a 🚫 비대상 stub straight to
+  `UNMAPPABLE.md`.
 - The impl document follows `analysis/templates/impl.md` exactly. Six
   `##` sections in this order: 가이드 메타, 베이스 / 코드 좌표
   식별, 변경 지점 매핑, 핵심 변경 (diff), 실무 구현 주의,
@@ -843,6 +862,7 @@ plain. The `##` section emojis for this document family (added on top of §2 and
 | 🎯 | 평가 메트릭 | Design |
 | ✨ | 변경 의도 | Design |
 | 🔌 | Foundry 힌트 | Design |
+| 🚫 | Design 비대상 (🚫 비대상 stub only) | Design |
 | 🧱 | 베이스 / 코드 좌표 식별 | impl |
 | 🪛 | 변경 지점 매핑 | impl |
 | ⚙️ | 핵심 변경 (diff) | impl |

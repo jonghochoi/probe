@@ -105,6 +105,9 @@ PILLAR_RE = re.compile(r"P[0-5]")
 # In both cases the script *creates the entry once* and never overwrites it
 # again — a human owns the cells/curation thereafter (docs/STYLE.md §5-7).
 CATALOG_ROW = re.compile(r"^\|\s*카탈로그\s*\|\s*(.+?)\s*\|\s*$")
+# `Design 적용` row (optional): present only for 🚫 비대상 papers; a missing
+# row means ✅ 적용 (the default). The cell carries `🚫 비대상 (<사유>)`.
+DESIGN_ROW = re.compile(r"^\|\s*Design\s*적용\s*\|\s*(.+?)\s*\|\s*$")
 CATALOG_SECTIONS = {
     "dataset": ("robot", "human", "mixed"),
     "benchmark": ("harness", "sim", "dexterous"),
@@ -210,6 +213,7 @@ def extract_meta(paper_dir: Path) -> dict:
     pillars: list[str] = []
     catalog: list[tuple[str, str, str]] = []
     catalog_seen = False
+    design_na = False
     analysis_file = paper_dir / "analysis.md"
     try:
         text = analysis_file.read_text(encoding="utf-8")
@@ -217,6 +221,7 @@ def extract_meta(paper_dir: Path) -> dict:
         return {
             "title": WARN, "arxiv_id": WARN, "arxiv_url": "",
             "refreshed": WARN, "pillars": [], "links": [], "catalog": [],
+            "design_na": False,
         }
 
     for line in text.splitlines():
@@ -254,6 +259,11 @@ def extract_meta(paper_dir: Path) -> dict:
                 catalog = parse_catalog(m.group(1))
                 catalog_seen = True
                 continue
+        if not design_na:
+            m = DESIGN_ROW.match(line)
+            if m and "비대상" in m.group(1):
+                design_na = True
+                continue
 
     return {
         "title": title or WARN,
@@ -263,21 +273,26 @@ def extract_meta(paper_dir: Path) -> dict:
         "pillars": pillars,
         "links": links,
         "catalog": catalog,
+        "design_na": design_na,
     }
 
 
-def impl_state(stem: str) -> str:
-    """Return ✅ / 🚧 UNMAPPABLE / — for the impl column.
+def impl_state(stem: str, design_na: bool = False) -> str:
+    """Return ✅ / 🚧 UNMAPPABLE / 🚫 비대상 / — for the impl column.
 
     Vendor-neutral header, but pathed to the v0 foundry (`lerobot`): ✅ when
     `impl/lerobot/impl.md` exists, 🚧 UNMAPPABLE when `UNMAPPABLE.md` exists,
-    `—` when neither has been generated.
+    `—` when neither has been generated. A 🚫 비대상 paper (Design 적용 row)
+    never gets an impl — surface that as a distinct marker, not a pending `—`,
+    unless an impl artifact was somehow already generated.
     """
     base = ANALYSIS_DIR / stem / "impl" / "lerobot"
     if (base / "impl.md").is_file():
         return "✅"
     if (base / "UNMAPPABLE.md").is_file():
         return "🚧 UNMAPPABLE"
+    if design_na:
+        return "🚫 비대상"
     return "—"
 
 
@@ -810,7 +825,7 @@ def main() -> int:
         meta = extract_meta(paper_dir)
         meta["stem"] = paper_dir.name
         meta["keywords"] = extract_keywords(paper_dir)
-        meta["impl"] = impl_state(paper_dir.name)
+        meta["impl"] = impl_state(paper_dir.name, meta.get("design_na", False))
         rows.append(meta)
 
     # Create any missing skeleton entries (routed by `카탈로그`), then fill the
