@@ -13,10 +13,10 @@ known baseline, and emit an implementation guide
 | Field | Value |
 |---|---|
 | Source repository | `jonghochoi/lerobot` (fork of `huggingface/lerobot`) |
-| Pinned commit | `999e77ad7bc30774cccca58bd29f732a90600931` |
-| Vendor date | 2026-05-20 |
+| Pinned commit | `3410b40275f31d6fa66345c99cf076d36991a313` |
+| Vendor date | 2026-06-12 |
 | License | Apache-2.0 (see `LICENSE`; original headers preserved in each file) |
-| Scope | 6 baseline policies + `rtc/` + shared base + `configs/` + `processor/` + `datasets/` + `transforms/` + `utils/` |
+| Scope | 7 baseline policies + `rtc/` + shared base + `configs/` + `processor/` + `datasets/` + `transforms/` + `utils/` |
 
 ## What is vendored
 
@@ -35,6 +35,7 @@ vendor/lerobot/
 │   ├── smolvla/                                 SmolVLA (incl. smolvlm_with_expert.py)
 │   ├── act/                                     Action Chunking Transformer (ALOHA)
 │   ├── diffusion/                               Diffusion Policy
+│   ├── vla_jepa/                                VLA-JEPA — Qwen3-VL backbone + V-JEPA2 video world model + flow-matching DiT action head
 │   └── rtc/                                     Real-Time Chunking — inpainting/prefix-attention real-time inference for action-chunking policies
 ├── configs/                                     PreTrainedConfig, FeatureType, PolicyFeature, …
 ├── processor/                                   normalization + tokenization pipeline
@@ -53,7 +54,7 @@ this directory.
 ## Why it is here
 
 `/foundry` reads a Layer 1 Design (`analysis/<id>_design.md`), identifies
-whether the Design can ground in one of the six policies above (the
+whether the Design can ground in one of the seven policies above (the
 `foundry=lerobot` case), then produces a
 Korean implementation guide whose code references point inside this
 directory. The patch (`impl.patch`) is generated against the current state
@@ -69,8 +70,8 @@ upstream `lerobot` change is needed to support a new Design's baseline.
 Procedure:
 
 1. Update `jonghochoi/lerobot` to the desired commit and note its SHA.
-2. From the lerobot checkout, overwrite the seven policy directories
-   (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`, `rtc`) plus the
+2. From the lerobot checkout, overwrite the eight policy directories
+   (`pi0`, `pi05`, `pi0_fast`, `smolvla`, `act`, `diffusion`, `vla_jepa`, `rtc`) plus the
    policy-level shared files (`pretrained.py`, `factory.py`, `utils.py`,
    `pi_gemma.py`, `__init__.py`) and the `configs/`, `processor/`, `datasets/`,
    `transforms/`, and `utils/` trees under `vendor/lerobot/`. Do not modify the
