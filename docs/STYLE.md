@@ -653,9 +653,9 @@ desc (ties by arXiv id desc). Per row:
   sanitizer strips inline CSS (`<span style=…>`), so a shields.io badge is the
   only way to color text per keyword on github.com;
 - an `impl` cell — lerobot-based: ✅ `impl/lerobot/impl.md` exists /
-  `UNMAPPABLE.md` / 🚫 비대상 (the analysis carries a `Design 적용 |
-  🚫 비대상` row — no impl is ever expected, distinct from a pending
-  `—`) / `—` not generated.
+  `UNMAPPABLE.md` / 🚫 (the analysis carries a `Design 적용 |
+  🚫 비대상` row — Design 비대상, so no impl is ever expected, distinct from a
+  pending `—`) / `—` not generated.
 
 **Load-bearing — the 논문 메타 rows the script reads from every
 `analysis/<id>/analysis.md`** (STYLE's contract; the author must emit them
