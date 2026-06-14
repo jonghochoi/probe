@@ -278,12 +278,12 @@ def extract_meta(paper_dir: Path) -> dict:
 
 
 def impl_state(stem: str, design_na: bool = False) -> str:
-    """Return ✅ / 🚧 UNMAPPABLE / 🚫 비대상 / — for the impl column.
+    """Return ✅ / 🚧 UNMAPPABLE / 🚫 / — for the impl column.
 
     Vendor-neutral header, but pathed to the v0 foundry (`lerobot`): ✅ when
     `impl/lerobot/impl.md` exists, 🚧 UNMAPPABLE when `UNMAPPABLE.md` exists,
-    `—` when neither has been generated. A 🚫 비대상 paper (Design 적용 row)
-    never gets an impl — surface that as a distinct marker, not a pending `—`,
+    `—` when neither has been generated. A Design 비대상 paper (Design 적용 row)
+    never gets an impl — surface that as a bare 🚫 marker, not a pending `—`,
     unless an impl artifact was somehow already generated.
     """
     base = ANALYSIS_DIR / stem / "impl" / "lerobot"
@@ -292,7 +292,7 @@ def impl_state(stem: str, design_na: bool = False) -> str:
     if (base / "UNMAPPABLE.md").is_file():
         return "🚧 UNMAPPABLE"
     if design_na:
-        return "🚫 비대상"
+        return "🚫"
     return "—"
 
 
