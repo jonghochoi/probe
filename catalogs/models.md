@@ -18,6 +18,7 @@
 * **GR00T N1**, GR00T N1: An Open Foundation Model for Generalist Humanoid Robots. [![arXiv](https://img.shields.io/badge/arXiv-2503.14734-b31b1b.svg)](https://arxiv.org/abs/2503.14734) [![GitHub](https://img.shields.io/badge/GitHub-Code-black)](https://github.com/NVIDIA/Isaac-GR00T)
 
 ### Standalone
+* **FTP-1**, FTP-1: A Generalist Foundation Tactile Policy Across Tactile Sensors for Contact-Rich Manipulation. [![arXiv](https://img.shields.io/badge/arXiv-2606.13102-b31b1b.svg)](https://arxiv.org/abs/2606.13102) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://ftp1-policy.github.io/)
 * **PriorVLA**, PriorVLA: Prior-Preserving Adaptation for Vision-Language-Action Models. [![arXiv](https://img.shields.io/badge/arXiv-2605.10925-b31b1b.svg)](https://arxiv.org/abs/2605.10925)
 * **MolmoBot**, MolmoBot: Large-Scale Simulation Enables Zero-Shot Manipulation. [![arXiv](https://img.shields.io/badge/arXiv-2603.16861-b31b1b.svg)](https://arxiv.org/abs/2603.16861) [![GitHub](https://img.shields.io/badge/GitHub-Code-black)](https://github.com/allenai/molmospaces)
 * **Xiaomi-Robotics-0**, Xiaomi-Robotics-0: An Open-Sourced Vision-Language-Action Model with Real-Time Execution. [![arXiv](https://img.shields.io/badge/arXiv-2602.12684-b31b1b.svg)](https://arxiv.org/abs/2602.12684) [![GitHub](https://img.shields.io/badge/GitHub-Code-black)](https://github.com/XiaomiRobotics/Xiaomi-Robotics-0)
