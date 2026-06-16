@@ -1,0 +1,525 @@
+diff --git a/vendor/lerobot/policies/pi05/__init__.py b/vendor/lerobot/policies/pi05/__init__.py
+index 4f9a9de..5929d90 100644
+--- a/vendor/lerobot/policies/pi05/__init__.py
++++ b/vendor/lerobot/policies/pi05/__init__.py
+@@ -15,7 +15,15 @@
+ # limitations under the License.
+ 
+ from .configuration_pi05 import PI05Config
++from .configuration_pi05_bridge import PI05BridgeConfig
+ from .modeling_pi05 import PI05Policy
++from .modeling_pi05_bridge import PI05BridgePolicy
+ from .processor_pi05 import make_pi05_pre_post_processors
+ 
+-__all__ = ["PI05Config", "PI05Policy", "make_pi05_pre_post_processors"]
++__all__ = [
++    "PI05Config",
++    "PI05BridgeConfig",
++    "PI05Policy",
++    "PI05BridgePolicy",
++    "make_pi05_pre_post_processors",
++]
+diff --git a/vendor/lerobot/policies/pi05/configuration_pi05_bridge.py b/vendor/lerobot/policies/pi05/configuration_pi05_bridge.py
+new file mode 100644
+index 0000000..5d9df8e
+--- /dev/null
++++ b/vendor/lerobot/policies/pi05/configuration_pi05_bridge.py
+@@ -0,0 +1,50 @@
++#!/usr/bin/env python
++
++# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Config for the Bridge-Attention extension of pi0.5 (arXiv:2509.09372).
++
++Reproduction of VLA-Adapter's Bridge Attention *gating* mapped onto pi0.5's
++native dual-tower attention (impl §🪛, §⚙️): the action expert's attention to
++the VL prefix is scaled, per expert layer, by a learnable ``tanh(g)`` gate —
++the suffix-query x prefix-key logit block (VLA-Adapter ``attn_scores_adapter *
++ratio_g``). ``bridge_attention=False`` makes the policy behave exactly like
++vanilla pi0.5, so origin-vs-bridge is a single config flag with no
++training-script changes.
++"""
++
++from dataclasses import dataclass
++
++from lerobot.configs import PreTrainedConfig
++
++from .configuration_pi05 import PI05Config
++
++
++@PreTrainedConfig.register_subclass("pi05_bridge")
++@dataclass
++class PI05BridgeConfig(PI05Config):
++    # Toggle: False -> vanilla pi0.5; True -> VLA-Adapter bridge gating on the
++    # action expert's attention to the VL prefix.
++    bridge_attention: bool = False
++
++    # Per-expert-layer gate init g, applied as tanh(g) to the suffix->prefix
++    # attention logits. 0.0 = VLA-Adapter faithful (bridge neutralized at init,
++    # tanh(0)=0, opens during training). When warm-starting from a pretrained
++    # pi05 checkpoint, set high (e.g. 4.0, tanh~0.999) so the expert starts
++    # ~identical to vanilla pi0.5 and learns to *modulate* the bridge instead.
++    bridge_gate_init: float = 0.0
++
++    def __post_init__(self):
++        super().__post_init__()
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05.py b/vendor/lerobot/policies/pi05/modeling_pi05.py
+index aabd04c..24597c6 100644
+--- a/vendor/lerobot/policies/pi05/modeling_pi05.py
++++ b/vendor/lerobot/policies/pi05/modeling_pi05.py
+@@ -233,8 +233,71 @@ def resize_with_pad_torch(  # see openpi `resize_with_pad_torch` (exact copy)
+     return padded_images
+ 
+ 
++def _repeat_kv(hidden_states, n_rep):
++    """Expand grouped-query KV heads to full head count (transformers `repeat_kv`).
++
++    Reimplemented locally so the gated attention below carries no dependency on
++    transformers-internal symbols across versions.
++    """
++    batch, num_kv_heads, slen, head_dim = hidden_states.shape
++    if n_rep == 1:
++        return hidden_states
++    hidden_states = hidden_states[:, :, None, :, :].expand(batch, num_kv_heads, n_rep, slen, head_dim)
++    return hidden_states.reshape(batch, num_kv_heads * n_rep, slen, head_dim)
++
++
++def gated_eager_attention(
++    module, query, key, value, attention_mask, scaling, gate, prefix_len, dropout: float = 0.0
++):
++    """Eager attention with a VLA-Adapter "bridge" gate (arXiv:2509.09372).
++
++    Numerically identical to ``modeling_gemma.eager_attention_forward`` except
++    that the suffix-query x prefix-key logit block is multiplied by ``gate``
++    *before* the additive mask and softmax — the pi0.5 mapping of VLA-Adapter's
++    ``attn_scores_adapter * ratio_g`` (``MLPResNetBlock``). With the combined
++    sequence ordered ``[prefix(0:prefix_len); suffix(prefix_len:)]``, query rows
++    ``>= prefix_len`` are the action expert and key cols ``< prefix_len`` are the
++    VL prefix; prefix query rows are left untouched (gate=1 -> vanilla path).
++    """
++    key_states = _repeat_kv(key, module.num_key_value_groups)
++    value_states = _repeat_kv(value, module.num_key_value_groups)
++
++    attn_weights = torch.matmul(query, key_states.transpose(2, 3)) * scaling
++
++    if prefix_len is not None and 0 < prefix_len < attn_weights.shape[-2]:
++        # (T_q, T_k) multiplicative mask: 1 everywhere, tanh(g) on suffix->prefix.
++        gate = gate.to(attn_weights.dtype)
++        scale = torch.ones(
++            attn_weights.shape[-2],
++            attn_weights.shape[-1],
++            device=attn_weights.device,
++            dtype=attn_weights.dtype,
++        )
++        scale[prefix_len:, :prefix_len] = gate
++        attn_weights = attn_weights * scale
++
++    if attention_mask is not None:
++        causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
++        attn_weights = attn_weights + causal_mask
++
++    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
++    attn_weights = nn.functional.dropout(attn_weights, p=dropout, training=module.training)
++    attn_output = torch.matmul(attn_weights, value_states)
++    attn_output = attn_output.transpose(1, 2).contiguous()
++    return attn_output, attn_weights
++
++
+ # Define the complete layer computation function for gradient checkpointing
+-def compute_layer_complete(inputs_embeds, attention_mask, position_ids, adarms_cond, layers, rotary_emb):
++def compute_layer_complete(
++    inputs_embeds,
++    attention_mask,
++    position_ids,
++    adarms_cond,
++    layers,
++    rotary_emb,
++    bridge_gate=None,
++    prefix_len=None,
++):
+     query_states = []
+     key_states = []
+     value_states = []
+@@ -269,15 +332,27 @@ def compute_layer_complete(inputs_embeds, attention_mask, position_ids, adarms_c
+     batch_size = query_states.shape[0]
+     paligemma_layer = layers[0]
+     scaling = paligemma_layer.self_attn.scaling
+-    # Attention computation
+-    att_output, _ = modeling_gemma.eager_attention_forward(
+-        paligemma_layer.self_attn,
+-        query_states,
+-        key_states,
+-        value_states,
+-        attention_mask,
+-        scaling,
+-    )
++    # Attention computation (optionally with the VLA-Adapter bridge gate)
++    if bridge_gate is not None:
++        att_output, _ = gated_eager_attention(
++            paligemma_layer.self_attn,
++            query_states,
++            key_states,
++            value_states,
++            attention_mask,
++            scaling,
++            bridge_gate,
++            prefix_len,
++        )
++    else:
++        att_output, _ = modeling_gemma.eager_attention_forward(
++            paligemma_layer.self_attn,
++            query_states,
++            key_states,
++            value_states,
++            attention_mask,
++            scaling,
++        )
+     # Get head_dim from the current layer, not from the model
+     head_dim = paligemma_layer.self_attn.head_dim
+     att_output = att_output.reshape(batch_size, -1, 1 * 8 * head_dim)
+@@ -457,6 +532,14 @@ class PaliGemmaWithExpertModel(
+     def embed_language_tokens(self, tokens: torch.Tensor):
+         return self.paligemma.model.language_model.get_input_embeddings()(tokens)
+ 
++    def _bridge_gate(self, layer_idx):
++        """Per-layer bridge gate hook; base returns None (no gating).
++
++        Bridge-attention subclasses override this to return ``tanh(g_i)`` so the
++        action expert's attention to the VL prefix is gated per expert layer.
++        """
++        return None
++
+     def forward(
+         self,
+         attention_mask: torch.Tensor | None = None,
+@@ -504,8 +587,13 @@ class PaliGemmaWithExpertModel(
+                 and self.training
+             ) or (hasattr(self, "gradient_checkpointing") and self.gradient_checkpointing and self.training)
+ 
++            # Prefix length within the combined [prefix; suffix] sequence, used by
++            # the optional bridge gate to locate the suffix->prefix logit block.
++            prefix_len = inputs_embeds[0].shape[1] if inputs_embeds[0] is not None else None
++
+             # Process all layers with gradient checkpointing if enabled
+-            for layers in zip(paligemma_layers, gemma_expert_layers, strict=True):
++            for layer_idx, layers in enumerate(zip(paligemma_layers, gemma_expert_layers, strict=True)):
++                bridge_gate = self._bridge_gate(layer_idx)
+                 if use_gradient_checkpointing:
+                     inputs_embeds = torch.utils.checkpoint.checkpoint(
+                         compute_layer_complete,
+@@ -517,6 +605,8 @@ class PaliGemmaWithExpertModel(
+                         preserve_rng_state=False,
+                         layers=layers,
+                         rotary_emb=rotary_emb,
++                        bridge_gate=bridge_gate,
++                        prefix_len=prefix_len,
+                     )
+                 else:
+                     inputs_embeds = compute_layer_complete(
+@@ -526,6 +616,8 @@ class PaliGemmaWithExpertModel(
+                         adarms_cond,
+                         layers=layers,
+                         rotary_emb=rotary_emb,
++                        bridge_gate=bridge_gate,
++                        prefix_len=prefix_len,
+                     )
+ 
+             # final norm
+@@ -576,14 +668,8 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+                 f"PaliGemma expects square image resolution, invalid resolution: {config.image_resolution}"
+             )
+ 
+-        self.paligemma_with_expert = PaliGemmaWithExpertModel(
+-            paligemma_config,
+-            action_expert_config,
+-            use_adarms=[False, True],
+-            precision=config.dtype,
+-            image_size=config.image_resolution[0],
+-            freeze_vision_encoder=config.freeze_vision_encoder,
+-            train_expert_only=config.train_expert_only,
++        self.paligemma_with_expert = self._build_paligemma_with_expert(
++            paligemma_config, action_expert_config
+         )
+ 
+         self.action_in_proj = nn.Linear(config.max_action_dim, action_expert_config.width)
+@@ -602,6 +688,22 @@ class PI05Pytorch(nn.Module):  # see openpi `PI0Pytorch`
+             # Also compile the main forward pass used during training
+             self.forward = torch.compile(self.forward, mode=config.compile_mode)
+ 
++    def _build_paligemma_with_expert(self, paligemma_config, action_expert_config):
++        """Construct the PaliGemma-with-expert backbone.
++
++        Overridable seam for subclasses that swap in a bridge-attention variant
++        of the expert (VLA-Adapter gating) without duplicating ``__init__``.
++        """
++        return PaliGemmaWithExpertModel(
++            paligemma_config,
++            action_expert_config,
++            use_adarms=[False, True],
++            precision=self.config.dtype,
++            image_size=self.config.image_resolution[0],
++            freeze_vision_encoder=self.config.freeze_vision_encoder,
++            train_expert_only=self.config.train_expert_only,
++        )
++
+     def gradient_checkpointing_enable(self):
+         """Enable gradient checkpointing for memory optimization."""
+         self.gradient_checkpointing_enabled = True
+@@ -930,7 +1032,7 @@ class PI05Policy(PreTrainedPolicy):
+ 
+         # Initialize the core PI05 model
+         self.init_rtc_processor()
+-        self.model = PI05Pytorch(config, rtc_processor=self.rtc_processor)
++        self.model = self._build_model(config)
+ 
+         # Enable gradient checkpointing if requested
+         if config.gradient_checkpointing:
+@@ -940,6 +1042,11 @@ class PI05Policy(PreTrainedPolicy):
+ 
+         self.reset()
+ 
++    def _build_model(self, config: PI05Config) -> PI05Pytorch:
++        """Construct the core model. Overridable seam for subclasses that swap in
++        an alternative ``PI05Pytorch`` (e.g. a bridge-attention expert)."""
++        return PI05Pytorch(config, rtc_processor=self.rtc_processor)
++
+     @classmethod
+     def from_pretrained(
+         cls: builtins.type[T],
+diff --git a/vendor/lerobot/policies/pi05/modeling_pi05_bridge.py b/vendor/lerobot/policies/pi05/modeling_pi05_bridge.py
+new file mode 100644
+index 0000000..e9d5e59
+--- /dev/null
++++ b/vendor/lerobot/policies/pi05/modeling_pi05_bridge.py
+@@ -0,0 +1,219 @@
++#!/usr/bin/env python
++
++# Copyright 2025 Physical Intelligence and The HuggingFace Inc. team. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Bridge Attention on pi0.5 — gate-only port of VLA-Adapter (arXiv:2509.09372).
++
++VLA-Adapter's Bridge Attention learns, per policy block, a scalar
++``gating_factor`` (init 0 -> ``tanh`` -> ``ratio_g``) that scales how strongly
++the action query attends to a conditioning stream
++(``MLPResNetBlock``: ``attn_scores_adapter * ratio_g``). This module maps that
++*gating* idea onto pi0.5's native dual-tower attention while keeping the pi0.5
++backbone + flow-matching action expert intact (impl §⚙️):
++
++  - a learnable gate ``g_i`` per expert layer scales the suffix(action)-query x
++    prefix(VL)-key logit block by ``tanh(g_i)`` before softmax
++    (``gated_eager_attention`` in ``modeling_pi05``);
++  - at init ``g_i = bridge_gate_init`` (default 0 -> bridge neutralized,
++    VLA-Adapter faithful; set high to warm-start from a vanilla pi05 checkpoint).
++
++Training reuses pi0.5's fused ``compute_layer_complete`` (both towers
++concatenated), so the gate applies directly. Inference does NOT use pi0.5's
++KV-cache decode (which runs the expert standalone and would bypass the gate);
++instead it caches only the embedded prefix and re-runs the *fused* gated forward
++each denoise step, guaranteeing train/inference parity with one implementation.
++The KV-cache fast path is left as remaining work (impl §🚧).
++
++``bridge_attention=False`` defers entirely to vanilla pi0.5.
++"""
++
++import torch
++from torch import Tensor, nn
++
++from .configuration_pi05_bridge import PI05BridgeConfig
++from .modeling_pi05 import (
++    PaliGemmaWithExpertModel,
++    PI05Policy,
++    PI05Pytorch,
++    get_gemma_config,
++    make_att_2d_masks,
++)
++
++
++class PaliGemmaWithExpertModelBridge(PaliGemmaWithExpertModel):
++    """PaliGemma-with-expert whose action expert attends to the VL prefix through
++    a learnable per-layer gate (VLA-Adapter Bridge Attention, gate-only)."""
++
++    def __init__(self, *args, bridge_gate_init: float = 0.0, **kwargs):
++        super().__init__(*args, **kwargs)
++        expert_depth = len(self.gemma_expert.model.layers)
++        # One scalar gate per expert layer; tanh-mapped at use. Trained as a
++        # normal parameter (not frozen by freeze_vision_encoder/train_expert_only).
++        self.bridge_gates = nn.ParameterList(
++            [nn.Parameter(torch.tensor(float(bridge_gate_init))) for _ in range(expert_depth)]
++        )
++
++    def _bridge_gate(self, layer_idx):
++        return torch.tanh(self.bridge_gates[layer_idx])
++
++
++class PI05BridgePytorch(PI05Pytorch):
++    """pi0.5 core model with the optional VLA-Adapter bridge-attention gate."""
++
++    def __init__(self, config: PI05BridgeConfig, rtc_processor=None):
++        super().__init__(config, rtc_processor=rtc_processor)
++        self.config: PI05BridgeConfig = config
++
++    def _build_paligemma_with_expert(self, paligemma_config, action_expert_config):
++        if not self.config.bridge_attention:
++            # Vanilla pi0.5 backbone (no gates) — exact origin behavior.
++            return super()._build_paligemma_with_expert(paligemma_config, action_expert_config)
++        return PaliGemmaWithExpertModelBridge(
++            paligemma_config,
++            action_expert_config,
++            use_adarms=[False, True],
++            precision=self.config.dtype,
++            image_size=self.config.image_resolution[0],
++            freeze_vision_encoder=self.config.freeze_vision_encoder,
++            train_expert_only=self.config.train_expert_only,
++            bridge_gate_init=self.config.bridge_gate_init,
++        )
++
++    @torch.no_grad()
++    def sample_actions(
++        self, images, img_masks, tokens, masks, noise=None, num_steps=None, **kwargs
++    ) -> Tensor:
++        """Flow-matching inference with a gate-consistent fused forward.
++
++        Unlike vanilla pi0.5 (prefix KV-cache + standalone expert decode, which
++        bypasses the bridge gate), this caches only the *embedded* prefix and
++        re-runs the fused gated forward over ``[prefix; suffix]`` each denoise
++        step, so the gate applies exactly as in training. Cost: the transformer
++        layers recompute per step (the SigLIP vision tower runs once).
++        """
++        if not self.config.bridge_attention:
++            return super().sample_actions(
++                images, img_masks, tokens, masks, noise=noise, num_steps=num_steps, **kwargs
++            )
++
++        if num_steps is None:
++            num_steps = self.config.num_inference_steps
++
++        bsize = tokens.shape[0]
++        device = tokens.device
++
++        if noise is None:
++            actions_shape = (bsize, self.config.chunk_size, self.config.max_action_dim)
++            noise = self.sample_noise(actions_shape, device)
++
++        # Embed the VL prefix once (vision tower runs a single time).
++        prefix_embs, prefix_pad_masks, prefix_att_masks = self.embed_prefix(
++            images, img_masks, tokens, masks
++        )
++
++        dt = -1.0 / num_steps
++        x_t = noise
++        for step in range(num_steps):
++            time = 1.0 + step * dt
++            time_tensor = torch.tensor(time, dtype=torch.float32, device=device).expand(bsize)
++
++            def denoise_step_partial_call(input_x_t, current_timestep=time_tensor):
++                return self._bridge_denoise_step(
++                    prefix_embs=prefix_embs,
++                    prefix_pad_masks=prefix_pad_masks,
++                    prefix_att_masks=prefix_att_masks,
++                    x_t=input_x_t,
++                    timestep=current_timestep,
++                )
++
++            if self._rtc_enabled():
++                inference_delay = kwargs.get("inference_delay")
++                prev_chunk_left_over = kwargs.get("prev_chunk_left_over")
++                execution_horizon = kwargs.get("execution_horizon")
++
++                v_t = self.rtc_processor.denoise_step(
++                    x_t=x_t,
++                    prev_chunk_left_over=prev_chunk_left_over,
++                    inference_delay=inference_delay,
++                    time=time,
++                    original_denoise_step_partial=denoise_step_partial_call,
++                    execution_horizon=execution_horizon,
++                )
++            else:
++                v_t = denoise_step_partial_call(x_t)
++
++            x_t = x_t + dt * v_t
++
++            if self.rtc_processor is not None and self.rtc_processor.is_debug_enabled():
++                self.rtc_processor.track(time=time, x_t=x_t, v_t=v_t)
++
++        return x_t
++
++    def _bridge_denoise_step(self, prefix_embs, prefix_pad_masks, prefix_att_masks, x_t, timestep):
++        """One denoising step via a fused (gated) ``[prefix; suffix]`` forward."""
++        suffix_embs, suffix_pad_masks, suffix_att_masks, adarms_cond = self.embed_suffix(x_t, timestep)
++
++        if (
++            self.paligemma_with_expert.paligemma.model.language_model.layers[0].self_attn.q_proj.weight.dtype
++            == torch.bfloat16
++        ):
++            suffix_embs = suffix_embs.to(dtype=torch.bfloat16)
++            prefix_embs = prefix_embs.to(dtype=torch.bfloat16)
++
++        pad_masks = torch.cat([prefix_pad_masks, suffix_pad_masks], dim=1)
++        att_masks = torch.cat([prefix_att_masks, suffix_att_masks], dim=1)
++
++        att_2d_masks = make_att_2d_masks(pad_masks, att_masks)
++        position_ids = torch.cumsum(pad_masks, dim=1) - 1
++        att_2d_masks_4d = self._prepare_attention_masks_4d(att_2d_masks)
++
++        self.paligemma_with_expert.paligemma.model.language_model.config._attn_implementation = "eager"  # noqa: SLF001
++        self.paligemma_with_expert.gemma_expert.model.config._attn_implementation = "eager"  # noqa: SLF001
++
++        (_, suffix_out), _ = self.paligemma_with_expert.forward(
++            attention_mask=att_2d_masks_4d,
++            position_ids=position_ids,
++            past_key_values=None,
++            inputs_embeds=[prefix_embs, suffix_embs],
++            use_cache=False,
++            adarms_cond=[None, adarms_cond],
++        )
++
++        suffix_out = suffix_out[:, -self.config.chunk_size :]
++        suffix_out = suffix_out.to(dtype=torch.float32)
++        return self.action_out_proj(suffix_out)
++
++
++class PI05BridgePolicy(PI05Policy):
++    """pi0.5 policy variant exposing the VLA-Adapter bridge-attention reproduction.
++
++    Reuses pi0.5 processors (selected via ``isinstance(cfg, PI05Config)`` in the
++    policy factory) and the pi0.5 training/inference contracts unchanged.
++    """
++
++    config_class = PI05BridgeConfig
++    name = "pi05_bridge"
++
++    def _build_model(self, config: PI05BridgeConfig) -> PI05BridgePytorch:
++        return PI05BridgePytorch(config, rtc_processor=self.rtc_processor)
++
++
++def gate_count_for(action_expert_variant: str) -> int:
++    """Number of bridge gates a config implies (one per action-expert layer).
++
++    Exposed for the smoke test so it can assert the gate count without building
++    the heavy PaliGemma backbone.
++    """
++    return get_gemma_config(action_expert_variant).depth
