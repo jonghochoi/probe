@@ -19,7 +19,7 @@
 | 베이스 모델 / 코드 좌표 | `pi05` (PaliGemma prefix + Gemma-300m flow-matching action expert) |
 | 본문 확보 수준 | 전문(arXiv HTML) |
 | 패치 파일 | [`./impl.patch`](./impl.patch) — `git apply --check` 통과 |
-| 실행 테스트 | [`./test_pi05_bridge_smoke.py`](./test_pi05_bridge_smoke.py) — 미실행 (런타임 미가용; `/validate-impl §🧬` 에서 실행) |
+| 실행 테스트 | [`./test_pi05_bridge_smoke.py`](./test_pi05_bridge_smoke.py) — 7 passed (foundry runtime, 패치 적용 후) |
 | 가이드 생성일 | 2026-06-16 |
 
 > ⚠️ 이 가이드는 Design 전체가 아니라 **Bridge Attention 의 게이팅 부분만**
