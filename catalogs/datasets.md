@@ -17,6 +17,7 @@
 | 13 | **RT-1** | [![arXiv](https://img.shields.io/badge/arXiv-2212.06817-b31b1b.svg)](https://arxiv.org/abs/2212.06817) 🔒 closed (Google internal) | • Google Everyday Robot teleop | • ~130K traj<br>• 700+ tasks | • Google Everyday Robot 7-DOF + gripper<br>• 1 Hz token emission | Closed ❌ | 2026-06-09 | — |
 | 14 | **MolmoAct2-SO100/101** | [![arXiv](https://img.shields.io/badge/arXiv-2605.02881-b31b1b.svg)](https://arxiv.org/abs/2605.02881) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://allenai.org/blog/molmoact2) | • MolmoAct2 corpus on lerobot SO-ARM | • Scale ❓ | • SO-100 / SO-101<br>• Arm 6-DOF + 1-DOF parallel-jaw | Apache-2.0 | 2026-06-09 | — |
 | 15 | **OSCAR_robot** | [![arXiv](https://img.shields.io/badge/arXiv-2606.04463-b31b1b.svg)](https://arxiv.org/abs/2606.04463) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://wuzy2115.github.io/oscar-project-page/) [![HuggingFace](https://img.shields.io/badge/HuggingFace-Model-yellow)](https://huggingface.co/zywu2115/OSCAR-2B) | ❓ | ❓ | ❓ | ❓ | 2026-06-11 | [![](https://img.shields.io/badge/📝-ffffff.svg)](../analysis/2606.04463/analysis.md) |
+| 16 | **T-Rex** | [![arXiv](https://img.shields.io/badge/arXiv-2606.17055-b31b1b.svg)](https://arxiv.org/abs/2606.17055) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://tactile-rex.github.io/) | ❓ | ❓ | ❓ | ❓ | 2026-06-16 | [![](https://img.shields.io/badge/📝-ffffff.svg)](../analysis/2606.17055/analysis.md) |
 
 ## 👤 Human Video
 
