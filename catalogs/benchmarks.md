@@ -20,3 +20,4 @@
 | # | Benchmark | Links | Source | Details | Type | License | Refreshed | Analysis |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | **CATFA** | [![arXiv](https://img.shields.io/badge/arXiv-2509.23075-b31b1b.svg)](https://arxiv.org/abs/2509.23075) | • Tool-articulation / in-hand precision-manipulation eval set | • 5-tool precedent<br>• Tool grasping + finger manipulation eval | dexterous | ❓ no public license | 2026-06-09 | — |
+| 2 | **HT-Bench** | [![arXiv](https://img.shields.io/badge/arXiv-2606.19161-b31b1b.svg)](https://arxiv.org/abs/2606.19161) | ❓ | ❓ | ❓ | ❓ | 2026-06-22 | [![](https://img.shields.io/badge/📝-ffffff.svg)](../analysis/2606.19161/analysis.md) |
