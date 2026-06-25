@@ -42,11 +42,11 @@ PRECONDITION:
   automatically (auto-on). Do not ask the user.
 
 CONTEXT (read-only):
-- `.claude/prompts/analysis.md` — the `/analyze-paper` prompt body.
+- `.claude/prompts/analysis.txt` — the `/analyze-paper` prompt body.
   Invoke it as-is whenever a round requires re-running analysis.
-- `.claude/prompts/implementation.md` — the `/implement-design` prompt body. Invoke it
+- `.claude/prompts/implementation.txt` — the `/implement-design` prompt body. Invoke it
   as-is whenever a round requires re-mapping the foundry.
-- `.claude/prompts/validation.md` — the `/validate-impl` prompt body. Invoke it once
+- `.claude/prompts/validation.txt` — the `/validate-impl` prompt body. Invoke it once
   at the end of each round to update the verdict cells.
 - `analysis/templates/validation.md` meta header — the machine-parseable
   verdict cell format (📚 / 🔍 / 🧪 / 🧬 + ⚖️). Cell values are
@@ -66,9 +66,9 @@ A. Round 0 — Gate.
    Purpose: early-exit if the paper cannot be mapped to the foundry.
 
    1. If the design is absent (`analysis/<id>/design.md` missing), execute
-      `.claude/prompts/analysis.md` as-is. This is the standard
+      `.claude/prompts/analysis.txt` as-is. This is the standard
       behaviour when an arXiv id is provided as input.
-   2. Execute `.claude/prompts/implementation.md` once (`<design-path>
+   2. Execute `.claude/prompts/implementation.txt` once (`<design-path>
       --foundry <name>`).
    3. If the output is `analysis/<id>/impl/<foundry>/UNMAPPABLE.md`,
       terminate normally — the reason is already recorded as one paragraph
@@ -78,7 +78,7 @@ A. Round 0 — Gate.
       benchmark / survey / tooling — reaches here via `/implement-design`'s
       비대상 short-circuit, which writes the same `UNMAPPABLE.md`; the
       reproduction loop has nothing to converge and ends at Round 0.)
-   4. Execute `.claude/prompts/validation.md` once to generate the first validation
+   4. Execute `.claude/prompts/validation.txt` once to generate the first validation
       report.
    5. Copy the report to `analysis/<id>/validation/<foundry>.round_0.md`
       (`cp` one line). This copy is included in git for round tracking.
@@ -150,7 +150,7 @@ B. Round 1..N — Branch matrix (inner + outer combined).
 
    After executing a round (inner step):
 
-   1. Re-run `.claude/prompts/validation.md` to overwrite the report.
+   1. Re-run `.claude/prompts/validation.txt` to overwrite the report.
    2. Copy the report to `analysis/<id>/validation/<foundry>.round_<N>.md`.
    3. Parse the new verdict tuple + §🔎 machine markers.
 

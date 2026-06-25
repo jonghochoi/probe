@@ -3,7 +3,7 @@ description: 누적된 analysis DB 를 한 pillar/decision 범위로 가로질�
 argument-hint: <P0..P5 | D# | D#-D#> [--seed "<idea>" | --seed-file <path>] [--compare-only] [--top-k N]
 ---
 
-- **실행** — `.claude/prompts/hypothesize.md` 를 읽고 그대로 실행. 이 파일이 유일한 정보 원천 (로직 복제·변경 금지).
+- **실행** — `.claude/prompts/hypothesize.txt` 를 읽고 그대로 실행. 이 파일이 유일한 정보 원천 (로직 복제·변경 금지).
 - **인자** — `$ARGUMENTS` = 범위(pillar id 또는 decision id/range) + 옵션.
 - **`--seed`** — 사용자 연구 아이디어/가설을 top-down 으로 주입. 1급 후보로 DB 에 대고 grounding; ≥2 인용이면 정식 가설, 못 찾으면 `exploratory · ungrounded` 라벨로 표면화(드롭 안 함). 범위 없이 `--seed` 만 주면 관련 pillar 를 추론하고 선택을 밝힘.
 - **빈 인자 시** — 범위(`P0`–`P5` / `D#`)도 `--seed` 도 없으면 사용자에게 묻고 중단 (직접 선택 금지).

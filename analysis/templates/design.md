@@ -34,7 +34,7 @@
         부수 베이스라인은 핵심 기여가 아니라 매핑 대상에서 제외합니다.>
 
      analysis.md 의 📄 논문 메타 `Design 적용` 행과 verdict 가 일치해야
-     합니다. 분류 규칙은 .claude/prompts/analysis.md 의 DESIGN
+     합니다. 분류 규칙은 .claude/prompts/analysis.txt 의 DESIGN
      APPLICABILITY gate 가 SSOT. -->
 
 ---

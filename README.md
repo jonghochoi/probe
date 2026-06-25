@@ -95,9 +95,9 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 
 **Static vs. dynamic, never mixed.** `context/` is static — it changes monthly at most, and the agent only *reads* it. The tracks are dynamic and agent-written: `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks), and `analysis/` is an overwrite-snapshot regenerated on demand. Keeping the two apart is what stops the agent re-recommending last month's papers as the context bloats.
 
-**Analysis convergence loop.** A single `/analyze-paper` produces the deep-dive *and* a Layer 1 Design; `/implement-design` maps the Design onto a target foundry; `/validate-impl` statically checks the result. `/reproduce-paper` orchestrates the three as a bounded loop — fixing the impl against the foundry (inner loop) or re-extracting the Design from the paper (outer loop) until the verdict reaches a fixed point. Full branch matrix in [`.claude/prompts/reproduction.md`](.claude/prompts/reproduction.md).
+**Analysis convergence loop.** A single `/analyze-paper` produces the deep-dive *and* a Layer 1 Design; `/implement-design` maps the Design onto a target foundry; `/validate-impl` statically checks the result. `/reproduce-paper` orchestrates the three as a bounded loop — fixing the impl against the foundry (inner loop) or re-extracting the Design from the paper (outer loop) until the verdict reaches a fixed point. Full branch matrix in [`.claude/prompts/reproduction.txt`](.claude/prompts/reproduction.txt).
 
-The two entry points (logic in `.claude/prompts/<name>.md`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
+The two entry points (logic in `.claude/prompts/<name>.txt`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
 
 - `/analyze-paper <arXiv id | url | pdf url>` → `analysis.md` + `design.md`
 - `/reproduce-paper <arXiv id | design path> [--foundry <name>] [--max-rounds N]` — drives `/implement-design` → `/validate-impl` against a target foundry (default `lerobot`) until the verdict stabilizes (default `--max-rounds 3`)
@@ -108,7 +108,7 @@ The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwri
 
 ## Agent Stack
 
-Run `.claude/prompts/scouting.md` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md).
+Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md).
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
@@ -126,7 +126,7 @@ cd probe
 | **Paper search** | arXiv REST API via `curl` (Atom XML) |
 | **Citation graph** | Semantic Scholar Graph API (JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
 | **Code grounding** | CodeGraph MCP over `vendor/lerobot/` — `/implement-design` cites exact `file:line` |
-| **Prompts** | `.claude/prompts/scouting.md` (shared across pillars) + `analysis.md` · `implementation.md` · `validation.md` · `reproduction.md` (on-demand) |
+| **Prompts** | `.claude/prompts/scouting.txt` (shared across pillars) + `analysis.txt` · `implementation.txt` · `validation.txt` · `reproduction.txt` (on-demand) |
 | **Output** | Direct commits to `main` — the commit history *is* the research log |
 
 ---

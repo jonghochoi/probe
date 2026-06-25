@@ -358,7 +358,7 @@ arXiv token — the §4-4 fidelity bar still binds.
 
 ## 5. Paper Analysis Document (`analysis/`)
 
-The `/analyze-paper` slash command (prompt: `.claude/prompts/analysis.md`)
+The `/analyze-paper` slash command (prompt: `.claude/prompts/analysis.txt`)
 produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
 
 ### 5-1. File convention
@@ -544,7 +544,7 @@ conventions below codify both.
     `$` delimiters are GitHub-rendering formatting, a separate concern.
 
   The full arXiv-HTML → Markdown extraction procedure lives in
-  `.claude/prompts/analysis.md`; PR-time enforcement and auto-fix is
+  `.claude/prompts/analysis.txt`; PR-time enforcement and auto-fix is
   `scripts/check-analysis-math.py`
   (`.github/workflows/check-analysis-math.yml`). This subsection is the
   SSOT for the rules above — the prompt and the CI implement them.
@@ -606,7 +606,7 @@ conventions below codify both.
     `…/2604.23272/2604.23272v1/x1.png`); the unversioned URL auto-maps
     to the latest figure. ar5iv mirrors / project pages / cached
     hotlinks are out (link-rot). Full extraction detail:
-    `.claude/prompts/analysis.md` (FIGURE URLs).
+    `.claude/prompts/analysis.txt` (FIGURE URLs).
   - The alt text follows `Figure N — <short English label>` so the
     figure number survives even when the image fails to load.
   - The English caption blockquote is a verbatim token — kept
@@ -669,7 +669,7 @@ exactly):
 | `관련 Pillar` | Comma-separated `P#` (controlled `P0`–`P5`); first = primary |
 | `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
 | `카탈로그` | *(optional)* Comma-separated routing tokens (or `none` / omit) opting the paper into a catalog — `target/section/handle` for datasets/benchmarks, `models/group/series/handle` for models. Drives the skeleton upsert in "Catalog cross-links" below |
-| `Design 적용` | *(optional)* `🚫 비대상 (<dataset\|benchmark\|survey\|tooling>)` for a paper that proposes no foundry-portable method (pure dataset / benchmark / survey·position·study / non-policy tooling); OMIT the row otherwise (default `✅ 적용`). Drives the `design.md` form (full vs. 🚫 비대상 stub) and the index `impl` cell. SSOT for the classification rule is the DESIGN APPLICABILITY gate in `.claude/prompts/analysis.md`; see §6 |
+| `Design 적용` | *(optional)* `🚫 비대상 (<dataset\|benchmark\|survey\|tooling>)` for a paper that proposes no foundry-portable method (pure dataset / benchmark / survey·position·study / non-policy tooling); OMIT the row otherwise (default `✅ 적용`). Drives the `design.md` form (full vs. 🚫 비대상 stub) and the index `impl` cell. SSOT for the classification rule is the DESIGN APPLICABILITY gate in `.claude/prompts/analysis.txt`; see §6 |
 
 The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
 pillar ties (primary first); a paper with no pillar tie omits the row and
@@ -795,7 +795,7 @@ or `P#`/`D#` / arXiv / formula token.
 
 The `/analyze-paper` slash command emits a **Layer 1 Design**
 (vendor-agnostic) alongside the analysis. The `/implement-design` slash command
-(prompt: `.claude/prompts/implementation.md`) consumes that Design and
+(prompt: `.claude/prompts/implementation.txt`) consumes that Design and
 produces a **Layer 2** foundry-specific implementation. The two-layer
 split exists so the same Design can serve multiple foundries (the v0
 foundry is `lerobot`).
@@ -833,7 +833,7 @@ Outputs (all under `analysis/<id>/`):
   algorithm exists, and a pointer to the `카탈로그` routing that carries
   the paper's value). The `analysis.md` 📄 메타 `Design 적용` row must
   match. The classification rule (SSOT) is the DESIGN APPLICABILITY gate
-  in `.claude/prompts/analysis.md`; an incidental dataset baseline does
+  in `.claude/prompts/analysis.txt`; an incidental dataset baseline does
   not flip a resource paper to 적용, and when in doubt choose 적용.
   `/implement-design` short-circuits a 🚫 비대상 stub straight to
   `UNMAPPABLE.md`.
