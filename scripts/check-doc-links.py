@@ -33,7 +33,7 @@ Usage (repo root):
 
 No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
 (its Repository-map table) and `README.md`, where every path reference is meant
-to point at a real file. The agent-output spec (`docs/STYLE.md`) and the
+to point at a real file. The agent-output spec (`docs/style.md`) and the
 prompts are out of the default set — they are full of *illustrative* example
 paths (example arXiv ids, partial `impl/…` fragments) by design — but can be
 scanned explicitly by passing them as PATH args.
@@ -64,7 +64,7 @@ _MD_LINK = re.compile(r"\[(?:[^\]]*)\]\(([^)]+)\)")
 _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant to
-# point at real files. STYLE.md / prompts are intentionally excluded (they carry
+# point at real files. style.md / prompts are intentionally excluded (they carry
 # illustrative example paths) but can be passed explicitly as PATH args.
 _DEFAULT_DOCS = [
     "CLAUDE.md",

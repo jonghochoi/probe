@@ -17,17 +17,16 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32 |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
-| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`); the auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`), plus an optional paper↔code audit (`audit.md`, from `/audit-paper` — a reproducibility gate checking the paper against its *own* official repo, distinct from `/validate-impl`'s Design↔foundry audit). Most folders today hold only `analysis.md` + `design.md`. A paper that proposes no foundry-portable method (pure dataset / benchmark / survey / tooling) is **Design 비대상**: its `analysis.md` 📄 메타 carries a `Design 적용 | 🚫 비대상 (<사유>)` row and its `design.md` is a two-block stub (📄 메타 + 🚫 Design 비대상), not the 9-section Layer 1 form — `/implement-design` short-circuits it to `UNMAPPABLE.md` (rule in `.claude/prompts/analysis.txt` DESIGN APPLICABILITY gate + `docs/STYLE.md` §6) |
-| `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md`. See `docs/new-capabilities.md` |
+| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`); the auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`), plus an optional paper↔code audit (`audit.md`, from `/audit-paper` — a reproducibility gate checking the paper against its *own* official repo, distinct from `/validate-impl`'s Design↔foundry audit). Most folders today hold only `analysis.md` + `design.md`. A paper that proposes no foundry-portable method (pure dataset / benchmark / survey / tooling) is **Design 비대상**: its `analysis.md` 📄 메타 carries a `Design 적용 | 🚫 비대상 (<사유>)` row and its `design.md` is a two-block stub (📄 메타 + 🚫 Design 비대상), not the 9-section Layer 1 form — `/implement-design` short-circuits it to `UNMAPPABLE.md` (rule in `.claude/prompts/analysis.txt` DESIGN APPLICABILITY gate + `docs/style.md` §6) |
+| `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md` |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 7 baseline policies (incl. `vla_jepa`) + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
 | `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) + `.gitignore` are committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
-| `docs/STYLE.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `docs/new-capabilities.md` | human | Korean reader-facing overview of the research capabilities added on top of scouting + analysis: the `/hypothesize` synthesis track (`hypotheses/`), the `/audit-paper` reproducibility gate (`analysis/<id>/audit.md`), and the strengthened scouting scoring axes (Reproducibility + Methodology). Orientation doc, not a format spec |
+| `docs/style.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📎 deep-dive link + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
-| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/STYLE.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
+| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
@@ -190,9 +189,9 @@ exceptions.
 
 ### Reference / structural docs
 
-`CLAUDE.md`, `docs/STYLE.md`. Plain headers, **no emoji**.
+`CLAUDE.md`, `docs/style.md`. Plain headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
-`STYLE.md`. A folder README's H1 is the folder name (e.g. `# vendor/lerobot/`).
+`style.md`. A folder README's H1 is the folder name (e.g. `# vendor/lerobot/`).
 
 ### Shared rules (both families)
 
@@ -211,11 +210,11 @@ apply to:
 - `.claude/prompts/**`, `.claude/commands/**` — agent prompts, free-form.
 - Agent-generated output and its templates — `scouting/templates/report.md`,
   `analysis/templates/*.md`, dated reports, `analysis/<id>/analysis.md`.
-  These follow `docs/STYLE.md`'s own emoji system (one emoji on each `##`
+  These follow `docs/style.md`'s own emoji system (one emoji on each `##`
   header, `###` and below plain) plus its Korean / math conventions.
 - **Math / formula rendering** — the GitHub-KaTeX `$`-wrapping and substitution
   rules are an *output* convention, not a contributor-doc one, so they live in
-  `docs/STYLE.md` §5-6 (enforced by `scripts/check-analysis-math.py`), not here.
+  `docs/style.md` §5-6 (enforced by `scripts/check-analysis-math.py`), not here.
 
 Path correctness is **not** exempt: when a path moves, references inside
 prompts and context files are still updated even though their formatting is
@@ -234,13 +233,13 @@ new doc be in?":
   that those folders ship (`analysis/templates/`, `scouting/templates/`) are
   Korean as well.
 - **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
-  `docs/STYLE.md`. The audience is anyone reading PRs or
+  `docs/style.md`. The audience is anyone reading PRs or
   history; English keeps that surface grep-able and consistent with the
   enforced English commit-message rule.
 - **Exception 2 — Project front door in English.** `README.md`. The
   GitHub-rendered top page is the public-facing entry, and the
   hand-tuned Korean onboarding lives one click away at
-  `docs/probe_guide.html`.
+  `docs/probe-guide.html`.
 - **Exception 3 — Auto-generated analysis index in English.**
   `analysis/README.md` — the script-generated deep-dive index (English paper
   titles + keyword/pillar badges) plus a short hand-maintained structural
@@ -279,7 +278,7 @@ checklist existed). Walk this list every time:
       reference in `CLAUDE.md` / `README.md` must resolve. This lint is wired
       into CI (`.github/workflows/check-doc-links.yml`) and is the automated
       backstop for the dangling-path half of this checklist. (Pass the prompts
-      or `docs/STYLE.md` as explicit args to scan them too; they are off the
+      or `docs/style.md` as explicit args to scan them too; they are off the
       default set because they carry illustrative example paths.)
 
 ## Automatically-maintained indexes
@@ -288,7 +287,7 @@ One intentional exception to "no cross-link automation": the deep-dive index
 in `analysis/README.md`. The rows there key off bare arXiv ids (`2511.00139`),
 so the title-to-id mapping drifts if hand-maintained —
 `scripts/refresh-analysis-index.py` regenerates it. The script reads each
-analysis's `논문 메타` table (load-bearing rows in `docs/STYLE.md` §5-7 —
+analysis's `논문 메타` table (load-bearing rows in `docs/style.md` §5-7 —
 including the `관련 Pillar` classification row) plus up to 5 English
 `기술 키워드` bullet heads (math-bearing/non-English heads excluded, rendered
 as single-color 노란 shields.io badges — same badge style for the `arXiv` cell),
@@ -306,11 +305,8 @@ Everything outside the markers stays hand-maintained — the short folder intro 
 ## Where to read more
 
 - `README.md` — motivation, pipeline, agent stack + setup, references.
-- `docs/probe_guide.html` — Korean onboarding + operations manual.
-- `docs/STYLE.md` — the single source of truth for agent **output**
+- `docs/probe-guide.html` — Korean onboarding + operations manual.
+- `docs/style.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
 - `analysis/README.md` — the auto-generated deep-dive index. The scouting
-  track is described in `README.md` → Pipeline and `docs/AGENT_SETUP.md`.
-- `docs/new-capabilities.md` — Korean overview of the added research
-  capabilities: the `/hypothesize` synthesis track, the `/audit-paper`
-  reproducibility gate, and the strengthened scouting scoring axes.
+  track is described in `README.md` → Pipeline and `docs/agent-setup.md`.

@@ -4,7 +4,7 @@
 > foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>/analysis.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
-> `docs/STYLE.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
+> `docs/style.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
 > 파일을 덮어씁니다.
 
 ---
@@ -192,7 +192,7 @@ assertion verbatim) / `skipped` (테스트 부재 또는 런타임 미가용 —
      hand-edit 금지 — validation prompt 가 매 라운드 zero-state 로 재생성
      합니다. focus-hint 는 paper-extractable bucket 의 §X.Y 토큰을
      쉼표로 join 한 정렬된 set. § 기호 (U+00A7) 는 본문 인용 verbatim
-     규약 (`docs/STYLE.md` §4-1) 과 통일합니다. -->
+     규약 (`docs/style.md` §4-1) 과 통일합니다. -->
 
 ---
 

@@ -21,7 +21,7 @@ Safe to run manually from the repo root:
 
     python3 scripts/refresh-analysis-index.py
 
-Specification: docs/STYLE.md §5-7.
+Specification: docs/style.md §5-7.
 """
 
 from __future__ import annotations
@@ -180,7 +180,7 @@ def _englishize(head: str) -> str:
     `English (한글)`; we keep whichever side carries no Hangul. A head with no
     recoverable English (pure Korean) collapses to the empty string and is
     dropped by the caller — the English-only rule is enforced in
-    docs/STYLE.md §5-6 for new analyses.
+    docs/style.md §5-6 for new analyses.
     """
     if not HANGUL_RE.search(head):
         return head.strip()
@@ -199,7 +199,7 @@ def _englishize(head: str) -> str:
 def extract_keywords(paper_dir: Path) -> list[str]:
     """Return up to MAX_KEYWORDS English keyword labels from 기술 키워드.
 
-    Reads the `## 기술 키워드` section (spec'd in docs/STYLE.md §5-6) and
+    Reads the `## 기술 키워드` section (spec'd in docs/style.md §5-6) and
     takes each top-level bullet's head term — the text before the em dash `—`
     (the spec delimiter; a `: ` separator is tolerated for non-conforming
     bullets). English plain text only: a head carrying any math/markup
