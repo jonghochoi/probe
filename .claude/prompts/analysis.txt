@@ -270,8 +270,8 @@ DESIGN APPLICABILITY gate — decide BEFORE writing design.md:
 Ask one question: *does this paper contribute a novel, reproducible
 model / architecture / training objective / training procedure /
 algorithm that `/implement-design` could port to a foundry?* This is a
-judgement about the paper's CORE contribution, not its tags or catalog
-routing (a `dataset` tag co-occurs with both method and resource papers).
+judgement about the paper's CORE contribution, not its tags (a `dataset`
+tag co-occurs with both method and resource papers).
 
   - ✅ 적용 (DEFAULT) — a policy, world model, perception model, PEFT /
     RL method, data-generation method, cotraining / continual recipe,
@@ -311,7 +311,7 @@ blocks (mirrors `impl/<foundry>/UNMAPPABLE.md`'s one-paragraph form):
      `| Design 적용 | 🚫 비대상 (<사유>) |` row.
   2. `## 🚫 Design 비대상` — one Korean paragraph: the verdict + 사유,
      why there is no Layer 1 algorithm to specify, and a pointer to the
-     `카탈로그` routing (or the analysis sections) that carry this paper's
+     analysis sections that carry this paper's
      value instead. A standalone baseline, if any, is named as out of
      scope. Drop 🧮 데이터 계약 … 🚧 미해결 entirely. The `Design 적용`
      row in the analysis 📄 메타 MUST match this verdict.
@@ -444,10 +444,10 @@ as the very last line of `analysis/<id>/analysis.md` — branch on the gate:
 
 > 💡 base 매핑은 `/implement-design analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
 
-  - (비대상) NO `/implement-design` suggestion — point at the catalog
+  - (비대상) NO `/implement-design` suggestion — point at the analysis
     instead:
 
-> 💡 본 논문은 Design 비대상(<사유>)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅으로 전달됩니다.
+> 💡 본 논문은 Design 비대상(<사유>)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.
 
 `<id>` is the same arXiv id / slug the analysis file uses. For 적용 the
 line is added as-is — `/implement-design` itself decides whether the
@@ -480,7 +480,7 @@ GIT — after both files are written:
   # permission.
   git push -u origin HEAD
 
-Do NOT stage `catalogs/analyses.md` and do NOT run
+Do NOT stage `analysis/README.md` and do NOT run
 `scripts/refresh-analysis-index.py` from this prompt. The index is
 regenerated post-merge on `main` by
 `.github/workflows/refresh-analysis-index.yml` so that parallel

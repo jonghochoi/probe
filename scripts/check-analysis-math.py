@@ -157,7 +157,7 @@ def _scope_under(root: Path) -> list[Path]:
     out: list[Path] = []
     for p in sorted(root.rglob("*.md")):
         rel = p.relative_to(REPO_ROOT).as_posix()
-        if "/catalogs/" in f"/{rel}" or "/templates/" in f"/{rel}":
+        if "/templates/" in f"/{rel}":
             continue
         name = p.name
         if name in ("analysis.md", "design.md") or (

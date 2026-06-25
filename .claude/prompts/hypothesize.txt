@@ -34,14 +34,14 @@ Scope resolution:
   - With a positional `P#` / `D#`-range, that is the scope.
   - If ONLY a `--seed` is given (no positional), INFER the most relevant
     pillar / decision cluster by matching the seed against the Decision Logs +
-    `catalogs/analyses.md`, then proceed — but STATE the chosen scope (and any
+    `analysis/README.md`, then proceed — but STATE the chosen scope (and any
     strong runner-up pillars you dropped) in the output + provenance. Never
     silently guess.
   - If NEITHER a scope nor a seed is given, stop and ask — do not guess. A
     positional outside `P0–P5` / the Decision Log is likewise an error: stop.
 
 PRECONDITION:
-  - `catalogs/analyses.md` must exist (the corpus selector).
+  - `analysis/README.md` must exist (the corpus selector).
   - The scoped pillar/decision cluster must have **≥ 3 analyses** tied to it
     in the index. Triangulating a tension from 0–2 papers is not honest
     synthesis — if the corpus is too thin, STOP and report
@@ -52,7 +52,7 @@ PRECONDITION:
   - `context/P#.md` for the scoped pillar must exist (the Decision Log spine).
 
 CONTEXT (read-only):
-- `catalogs/analyses.md` — the auto-generated per-pillar deep-dive index.
+- `analysis/README.md` — the auto-generated per-pillar deep-dive index.
   Use it as the CORPUS SELECTOR: resolve which `analysis/<id>/` folders are
   tied to the scope, so you read only the relevant slice — never the whole DB.
 - `analysis/<id>/analysis.md` (the scoped slice only) — read these four
@@ -80,7 +80,7 @@ Stage 0 — SCOPE. Resolve the pillar/decision cluster. Enforce the ≥3-analysi
   precondition. A single run covers ONE pillar or ONE decision cluster — refuse
   "hypothesize everything"; the combinatorial surface is the main failure mode.
 
-Stage 1 — CORPUS ASSEMBLY. From `catalogs/analyses.md`, list the analyses tied
+Stage 1 — CORPUS ASSEMBLY. From `analysis/README.md`, list the analyses tied
   to the scope; read their four fuel sections (above). File-based — do not
   return raw section text inline; carry only the distilled claims forward.
 
@@ -209,7 +209,7 @@ RULES
 - Do NOT run training, evaluation, inference, or the foundry runtime. This
   command writes text only.
 - Do NOT edit any `context/` file; Decision-Log changes are proposals.
-- Do NOT stage or regenerate `catalogs/analyses.md` — this track does not feed
+- Do NOT stage or regenerate `analysis/README.md` — this track does not feed
   the index.
 - Honest emptiness beats a padded run: thin corpus, no real tension, or no
   groundable hypothesis are all valid outcomes — say so.
@@ -226,7 +226,7 @@ GIT — after the files are written:
   git push -u origin HEAD
 
 - Stage ONLY `hypotheses/<slug>/`. Never `git add` anything under `context/`,
-  `analysis/`, `catalogs/`, or `vendor/`. No `git add .`, no `-A`, no `-a`.
+  `analysis/`, or `vendor/`. No `git add .`, no `-A`, no `-a`.
 - Push only to the CURRENT working branch, never to `main`. Landing on `main`
   is the human's call.
 - On non-fast-forward rejection, `git pull --rebase origin HEAD` and retry up
