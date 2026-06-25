@@ -348,10 +348,9 @@ GIT — after the report is written:
   # permission.
   git push -u origin HEAD
 
-Do NOT stage `catalogs/analyses.md` and do NOT run
-`scripts/refresh-analysis-index.py` from this prompt. The index
-(including the validation bucket-count column) is regenerated
-post-merge on `main` by
+Do NOT stage `analysis/README.md` and do NOT run
+`scripts/refresh-analysis-index.py` from this prompt. The index is
+regenerated post-merge on `main` by
 `.github/workflows/refresh-analysis-index.yml` so that parallel
 validation runs cannot collide on the same generated block (see
 `CLAUDE.md` "Automatically-maintained indexes"). Local manual

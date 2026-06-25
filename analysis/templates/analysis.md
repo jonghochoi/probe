@@ -14,20 +14,6 @@
 | 분석 생성일 | YYYY-MM-DD |
 | 관련 Pillar | P1, P3 |
 | 태그 | vla-arch, tactile |
-| 카탈로그 | dataset/human/EgoDex |
-
-<!-- `카탈로그` 행(선택): 이 논문을 카탈로그에 등재할 자격이 있으면 라우팅 토큰을
-     (콤마로 다중) 적습니다. 자격 없으면 행 생략 또는 `none`. 문법은 target 별로:
-       • datasets/benchmarks: `target/section/handle`
-         target=dataset|benchmark, section: dataset=robot|human|mixed /
-         benchmark=harness|sim|dexterous. 해당 섹션 표 끝에 skeleton row 1회 생성
-         (Links/Refreshed/Analysis 자동, 나머지 리치 컬럼은 `❓` — 사람이 채움).
-       • models: `models/group/series/handle`
-         group=vla|vlm|wam, series=models.md 의 기존 `### ` 계보 subsection 이름
-         (예: `Standalone`, `π (Physical Intelligence)`). 그 series 맨 위에
-         skeleton bullet 1회 생성. 없는 series 는 skip(사람이 `###` 1회 추가).
-     handle = 카탈로그 표시 이름(논문 title 과 다른 짧은 핸들, `/` 금지).
-     이미 등재된 arXiv id 는 재생성 안 함. 값 정의는 docs/STYLE.md §5-7. -->
 
 <!-- `Design 적용` 행(선택, DESIGN APPLICABILITY gate): foundry 로 포팅
      가능한 새 method/model 을 제안하는 논문이면 이 행을 생략합니다

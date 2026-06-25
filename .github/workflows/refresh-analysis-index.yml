@@ -1,6 +1,6 @@
 name: Refresh analysis index
 
-# Regenerate catalogs/analyses.md on main whenever an analysis artifact
+# Regenerate analysis/README.md on main whenever an analysis artifact
 # changes. PR-time generation was retired because parallel /analyze-paper
 # runs all stage the same generated block and conflict on every merge
 # (CLAUDE.md "Automatically-maintained indexes"). The regen now happens
@@ -11,9 +11,6 @@ on:
     branches: [main]
     paths:
       - 'analysis/**/analysis.md'
-      - 'analysis/**/impl/**'
-      - 'analysis/**/validation/**'
-      - 'catalogs/*.md'
       - 'scripts/refresh-analysis-index.py'
       - '.github/workflows/refresh-analysis-index.yml'
 
@@ -35,18 +32,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Regenerate analyses.md + catalog cross-links
+      - name: Regenerate analysis/README.md index
         run: python3 scripts/refresh-analysis-index.py
       - name: Commit and push if changed
         run: |
-          if git diff --quiet -- catalogs/analyses.md catalogs/models.md catalogs/datasets.md catalogs/benchmarks.md; then
-            echo "index / catalogs unchanged — nothing to commit."
+          if git diff --quiet -- analysis/README.md; then
+            echo "index unchanged — nothing to commit."
             exit 0
           fi
           git config user.name  'probe-index-bot'
           git config user.email 'probe-index-bot@users.noreply.github.com'
-          git add catalogs/analyses.md catalogs/models.md catalogs/datasets.md catalogs/benchmarks.md
-          git commit -m "chore(analysis): refresh index + catalog cross-links"
+          git add analysis/README.md
+          git commit -m "chore(analysis): refresh index"
           # Retry on race with another push to main.
           for i in 1 2 3 4; do
             if git push origin HEAD:main; then exit 0; fi

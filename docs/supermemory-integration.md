@@ -15,7 +15,7 @@ supermemory는 PROBE 마크다운 코퍼스 **위에 얹는 시맨틱 retrieval 
 *파생 인덱스*로만 둔다 — 권위를 갖지 않는다.
 
 현재 PROBE 지식은 세 경로로만 접근된다 — `grep`, 직접 파일 읽기, 그리고 단 하나의
-자동 인덱스(`scripts/refresh-analysis-index.py`가 만드는 `catalogs/analyses.md`).
+자동 인덱스(`scripts/refresh-analysis-index.py`가 만드는 `analysis/README.md`).
 "에이전트가 새 연구를 도출"하려면 이걸로는 부족하다. 필요한 질의는 정확 문자열
 매칭이 아니라 *의미*에 걸리기 때문이다.
 
@@ -33,8 +33,8 @@ supermemory가 에이전트에 주는 것 4가지:
    "v1 선택을 뒤집는 새 문헌"을 에이전트가 찾아내게 한다.
 
 핵심: PROBE는 이미 고도로 구조화돼 있어(아래 §2) supermemory의 메타데이터 필터축에
-**거의 그대로 매핑**된다. 색인 가능한 시맨틱 단위가 150+개(42 결정 + 51 모델 +
-14 데이터셋 + 7 벤치 + 36 논문)이고, pillar·decision·tag·catalog의 다축 메타데이터가
+**거의 그대로 매핑**된다. 색인 가능한 시맨틱 단위가 결정(42)·분석 논문(36)·scouting
+리포트 단위로 풍부하고, pillar·decision·tag의 다축 메타데이터가
 이미 load-bearing이다.
 
 ## 2. 메타데이터 매핑 — PROBE 구조에서 supermemory 필터축으로
@@ -47,19 +47,17 @@ PROBE의 구조화된 메타데이터를 supermemory의 `containerTag` / `metada
 | `관련 Pillar`(primary = 첫 항목) | `containerTag` = primary P#; `containerTags` = 나열된 전체 + `metadata.pillars[]` | primary로 격리, 전체로 교차수분 |
 | `D#` 결정 연계 | `metadata.decisions[]` (예: `["D1","D2"]`) | decision 축 필터 |
 | `태그`(통제 어휘 12종) | `metadata.tags[]` | topic 축 필터 |
-| `카탈로그`(`target/section/handle`) | `metadata.catalog` | resource 축 |
 | arXiv id | `customId = arxiv:<id>` | 중복제거 + 갱신 추적 → 재수집 idempotent |
 | `발행일` / `분석 생성일` | `metadata.published` / `metadata.analyzed` | numeric range 필터 |
-| 문서 종류 | `metadata.doc_type` | `decision` / `lit` / `analysis` / `design` / `scouting` / `catalog` |
-| License(datasets/benchmarks) | `metadata.license` | 라이선스 필터 |
+| 문서 종류 | `metadata.doc_type` | `decision` / `lit` / `analysis` / `design` / `scouting` |
 
 이 매핑으로 에이전트는 "P1 ∩ D4 ∩ tag=tactile ∩ 2025년 이후" 같은 다축 질의를
 시맨틱 검색 위에서 던질 수 있다 — pillar(아키텍처 축) × decision(전술 축) ×
-tag(주제 축) × catalog(자원 축)의 최소 4개 독립 필터축.
+tag(주제 축)의 최소 3개 독립 필터축.
 
 **핵심 재사용 (새로 짜지 말 것).** `scripts/refresh-analysis-index.py`가 이미
 `논문 메타` 테이블의 load-bearing 행(`관련 Pillar` → `PILLAR_ROW`, `링크`, `태그`,
-`카탈로그` → `CATALOG_ROW`, `parse_catalog()`)을 정규식으로 파싱한다. 수집기의
+`분석 생성일`)을 정규식으로 파싱한다. 수집기의
 메타데이터 추출 로직은 이 파서를 **재사용하거나 그대로 본떠야** 한다 — 같은 행
 스펙을 두 곳에서 다르게 해석하면 인덱스와 supermemory가 어긋난다. 행 스펙의 SSOT는
 `docs/STYLE.md` §5-7이다.
@@ -85,8 +83,6 @@ tag(주제 축) × catalog(자원 축)의 최소 4개 독립 필터축.
   지식"이라 도출 에이전트의 근거화 단계에서 값지다.
 - **`scouting/P#/YYYY-MM-DD.md`** → 리포트당 1 doc, `containerTag = P#`,
   `metadata.date`. 주간 스냅샷이라 "최근 N주 동향" 시간축 질의의 소스가 된다.
-- **`catalogs/datasets.md` · `catalogs/benchmarks.md` · `catalogs/models.md`** →
-  행/엔트리당 1 doc, `metadata.doc_type = catalog`. 데이터셋·벤치·모델 회수.
 
 수집 전 정제: Math/KaTeX 수식과 shields.io 배지 마크업은 임베딩에 노이즈이므로
 청크 전 스트립을 권장한다(아래 §6).
@@ -133,8 +129,8 @@ supermemory는 두 형태로 운영된다. 각각을 PROBE의 구체 시나리�
 
 > **실제 사례.** PROBE가 팀 공유 KB로 자란 경우. 전용 임베딩이 고밀도 한글 Decision
 > Log의 회수율을 끌어올린다. 호스티드 MCP(`mcp.supermemory.ai`)가 제로 인프라로
-> Claude에 `recall`·`memory` 툴을 즉시 탑재한다. 커넥터로 `catalogs/`가 모니터링하는
-> awesome-list GitHub 저장소를 자동 수집할 수도 있다. 대가는 — 데이터가 SaaS로
+> Claude에 `recall`·`memory` 툴을 즉시 탑재한다. 커넥터로 외부 awesome-list GitHub
+> 저장소를 자동 수집할 수도 있다. 대가는 — 데이터가 SaaS로
 > 전송된다.
 
 - **적합** — 다수 연구원 공유 + 최고 회수율 요구 + 결정이 SaaS 반입을 막을 만큼
