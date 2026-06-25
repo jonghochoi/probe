@@ -119,16 +119,6 @@ cd probe
 # 3. Only then schedule it as a routine — bad prompt + automation = garbage on a timer.
 ```
 
-| Component | Technology |
-|---|---|
-| **Agent engine** | Claude (Sonnet 4.6 / Opus 4.8) via Claude Code |
-| **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
-| **Paper search** | arXiv REST API via `curl` (Atom XML) |
-| **Citation graph** | Semantic Scholar Graph API (JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Code grounding** | Direct `Grep` + `Read` over `vendor/lerobot/` — `/implement-design` cites exact `file:line` |
-| **Prompts** | `.claude/prompts/scouting.txt` (shared across pillars) + `analysis.txt` · `implementation.txt` · `validation.txt` · `reproduction.txt` (on-demand) |
-| **Output** | Direct commits to `main` — the commit history *is* the research log |
-
 ---
 
 ## References
