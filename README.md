@@ -125,7 +125,7 @@ cd probe
 | **Scheduler** | RemoteTrigger ([claude.ai/code/routines](https://claude.ai/code/routines)) — cloud cron, direct push to `main` |
 | **Paper search** | arXiv REST API via `curl` (Atom XML) |
 | **Citation graph** | Semantic Scholar Graph API (JSON via `jq`) — optional `SEMANTIC_SCHOLAR_API_KEY` |
-| **Code grounding** | CodeGraph MCP over `vendor/lerobot/` — `/implement-design` cites exact `file:line` |
+| **Code grounding** | Direct `Grep` + `Read` over `vendor/lerobot/` — `/implement-design` cites exact `file:line` |
 | **Prompts** | `.claude/prompts/scouting.txt` (shared across pillars) + `analysis.txt` · `implementation.txt` · `validation.txt` · `reproduction.txt` (on-demand) |
 | **Output** | Direct commits to `main` — the commit history *is* the research log |
 
@@ -138,7 +138,6 @@ PROBE vendors code and specs from external repos — kept in sync with upstream,
 | Source | What PROBE borrows |
 |---|---|
 | [huggingface/lerobot](https://github.com/huggingface/lerobot) | The pinned snapshot at `vendor/lerobot/` — the v0 foundry every `impl.patch` targets. Pinned commit + refresh in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
-| [colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) | The MCP server indexing `vendor/lerobot/`, so `/implement-design` grounds Design rows in exact `file:line`. See [`CLAUDE.md`](CLAUDE.md) § CodeGraph. |
 
 ---
 

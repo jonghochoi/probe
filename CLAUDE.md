@@ -20,14 +20,12 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`); the auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`), plus an optional paper↔code audit (`audit.md`, from `/audit-paper` — a reproducibility gate checking the paper against its *own* official repo, distinct from `/validate-impl`'s Design↔foundry audit). Most folders today hold only `analysis.md` + `design.md`. A paper that proposes no foundry-portable method (pure dataset / benchmark / survey / tooling) is **Design 비대상**: its `analysis.md` 📄 메타 carries a `Design 적용 | 🚫 비대상 (<사유>)` row and its `design.md` is a two-block stub (📄 메타 + 🚫 Design 비대상), not the 9-section Layer 1 form — `/implement-design` short-circuits it to `UNMAPPABLE.md` (rule in `.claude/prompts/analysis.txt` DESIGN APPLICABILITY gate + `docs/style.md` §6) |
 | `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md` |
 | `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 7 baseline policies (incl. `vla_jepa`) + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
-| `.codegraph/` | generated | Local CodeGraph knowledge graph over `vendor/lerobot/`. Only `config.json` (scope definition) + `.gitignore` are committed; the DB is built on demand by `scripts/ensure-codegraph.sh` (see the "CodeGraph" section below) |
 | `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/style.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📎 deep-dive link + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
-| `scripts/ensure-codegraph.sh` | human | On-demand builder for the `.codegraph/` index; invoked by `/implement-design` before its first codegraph call (see the "CodeGraph" section below) |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 
@@ -47,20 +45,17 @@ silently invalidate existing patches and break attribution. The only way it
 changes is the wholesale refresh procedure in `vendor/lerobot/README.md`;
 nothing else.
 
-## CodeGraph
+## Grounding `vendor/lerobot/`
 
-`vendor/lerobot/` is indexed by
-[CodeGraph](https://github.com/colbymchenry/codegraph) over MCP. The index
-(`.codegraph/codegraph.db`) is built **on demand, not at session start** —
-only commands that read `vendor/lerobot/` (today `/implement-design`) need it.
-They run `scripts/ensure-codegraph.sh` before their first codegraph call:
-builds the DB if missing (~3s for 120 `.py` files), no-op otherwise, then the
-MCP file watcher keeps it fresh. Only `.codegraph/config.json`
-(`scope=vendor/lerobot`) is committed; the DB is per-checkout and gitignored.
-
-- **Gotcha** — the build cannot be a plain `codegraph index`: `init` is required first and overwrites `config.json` with a default that drops `vendor/`. The script backs up and restores the committed config across `init`. Run it by hand to (re)build outside `/implement-design`.
-- **Prefer MCP tools over reading full `.py` files** when grounding a Design row in `file:line` — `codegraph_search`/`codegraph_node` (exact spans), `codegraph_context` (min surface for a change), `codegraph_callers`/`codegraph_callees` (binding site), `codegraph_impact` (cross-file consumers).
-- MCP server unreachable (no `npx`, offline)? Fall back to direct reads — `/implement-design` still completes.
+`/implement-design` grounds each Design row in a `file:line` coordinate from
+the pinned `vendor/lerobot/` snapshot. Use the built-in `Grep` + `Read` tools:
+`Grep` the symbol (`def <name>` / `class <name>`) to find the candidate, then
+`Read` that span to confirm it and record the line — re-read rather than
+carrying a stale line count, since manual counting is the biggest source of
+patch drift across vendor refreshes. Check the enclosing `class` and grep the
+symbol across `vendor/lerobot/` to confirm the binding site (a same-named
+method on a different policy is a common false positive) and to find callers
+outside the chosen base directory before finalizing a hunk.
 
 ## Foundry runtime
 
