@@ -7,3 +7,5 @@ config.json.bak
 cache/
 *.log
 .dirty
+daemon.pid
+daemon.sock
