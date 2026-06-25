@@ -108,10 +108,18 @@ padded or fabricated one. Retrieval-pass provenance lives in the
 For every candidate paper, score on a 0–3 scale:
   · Relevance       — which P# / D# does it touch?
   · Novelty         — genuinely new, or a delta over tracked work?
-  · Reproducibility — code / data / hardware details?
+  · Reproducibility — 0 paper-only · 1 partial (code OR data, incomplete) ·
+                      2 code + data public · 3 official repo + data +
+                      hardware/configs, plausibly runnable.
+  · Methodology     — experimental rigor: baselines, ablations, eval soundness,
+                      seeds/variance reported. 0 anecdotal · 1 weak ·
+                      2 solid · 3 strong & honest about limits.
   · Sim2Real        — real-robot evidence, or sim-only?
-The 📊 section carries NO summary table — just the per-paper rationale (one
-bold head with the total, then a bullet per dimension); a table duplicates it.
+Reproducibility + Methodology are the decision-grade axes (a high-novelty paper
+with neither is a lead, not a result) — weight them with Relevance, above the
+noisier Novelty / Sim2Real reads. The 📊 section carries NO summary table —
+just the per-paper rationale (one bold head with the total, then a bullet per
+dimension); a table duplicates it.
 
 ---
 
