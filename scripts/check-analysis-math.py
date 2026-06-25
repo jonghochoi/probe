@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check (and optionally fix) math formatting in analysis documents.
 
-Enforces the GitHub-KaTeX math conventions of `docs/STYLE.md` §5-6 across
+Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-6 across
 the analysis deep-dive docs: inline math MUST be the inside-dollar backtick
 form `` $`X`$ `` and display math `$$X$$` on its own line. The outside-dollar
 form `` `$X$` ``, the `\\(…\\)` / `\\[…\\]` delimiters, KaTeX-unsupported
@@ -54,7 +54,7 @@ re-checks. Idempotent: a clean tree re-runs with no diff.
 Exit codes: 0 = clean (no unfixable issues) / 1 = unfixable issues remain
 / 2 = nothing to scan (skipped).
 
-Specification: docs/STYLE.md §5-6.
+Specification: docs/style.md §5-6.
 """
 
 from __future__ import annotations

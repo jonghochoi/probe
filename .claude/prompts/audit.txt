@@ -38,7 +38,7 @@ CONTEXT (read-only):
   plain unauthenticated GET. Do NOT assume any MCP server or `gh` CLI. A
   shallow `git clone --depth 1` is acceptable when raw fetches are
   insufficient; never download weights or datasets.
-- `docs/STYLE.md` — emoji (§2), Korean authoring (§4), badge colors (§3-1).
+- `docs/style.md` — emoji (§2), Korean authoring (§4), badge colors (§3-1).
 
 If no official repo can be found, or it cannot be fetched (offline, 404,
 private), STOP short of fabricating: write the report with the gate verdict
@@ -83,7 +83,7 @@ Reproduction risks feed the gate too: claims may match yet severe run-blockers
 ---
 
 OUTPUT — Korean (`analysis/<id>/audit.md`)
-Author in Korean, 개조식 per `docs/STYLE.md` §4; one emoji per `##` header
+Author in Korean, 개조식 per `docs/style.md` §4; one emoji per `##` header
 (STYLE §2), `###`/below plain; verbatim paper titles, config keys, `file:line`,
 arXiv links. Sections, in order:
   ## 📄 메타          — paper id/title, claim source (analysis vs 직접 추출),

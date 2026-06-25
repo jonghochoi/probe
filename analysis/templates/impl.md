@@ -3,7 +3,7 @@
 > PROBE foundry 모드 산출물 (Layer 2, foundry-specific). 한글 단일
 > 문서이며, sibling Design (`analysis/<id>/design.md`) 을 입력으로
 > 받아 한 foundry 의 좌표계 위에서 변경 지점을 매핑합니다. 형식·이모지
-> ·용어 규칙은 `docs/STYLE.md` §6 / §4 를 정확히 따릅니다.
+> ·용어 규칙은 `docs/style.md` §6 / §4 를 정확히 따릅니다.
 > 재실행 시 이 파일과 sibling `impl.patch` 를 덮어씁니다.
 
 ---

@@ -17,7 +17,7 @@
      없는 항목은 "(원문에 명시 없음 — 가정으로 메움)" 한 줄로 정직하게
      비워둡니다. -->
 
-<!-- Design 적용 여부 (DESIGN APPLICABILITY gate, docs/STYLE.md §6):
+<!-- Design 적용 여부 (DESIGN APPLICABILITY gate, docs/style.md §6):
      이 논문이 foundry 로 포팅 가능한 새 model/architecture/학습목표/
      알고리즘을 제안하면 ✅ 적용 — 이 메타 테이블에 `Design 적용` 행을
      넣지 않고(기본 적용) 아래 7개 섹션을 정상 작성합니다.

@@ -13,7 +13,7 @@
 ## 🔑 참조 약어 풀이
 
 <!--
-STYLE.md §3-1 is authoritative. Summary:
+style.md §3-1 is authoritative. Summary:
   · ONLY P#/D# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc), one per distinct code.
   · Each code is a shields.io BADGE (STYLE §3-1): P# uses the pillar palette

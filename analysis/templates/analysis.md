@@ -22,7 +22,7 @@
        | Design 적용 | 🚫 비대상 (<dataset|benchmark|survey|tooling>) |
      행을 위 메타 테이블에 추가하고 design.md 는 비대상 스텁으로 만듭니다
      (analysis/templates/design.md 주석 참조). 분류 규칙·값 정의는
-     .claude/prompts/analysis.txt gate + docs/STYLE.md §5-7/§6. -->
+     .claude/prompts/analysis.txt gate + docs/style.md §5-7/§6. -->
 
 <!-- curl 호출이 실패했다면, 실패한 명령과 HTTP 상태를 여기에 verbatim 으로
      기록합니다. 가짜 결과로 대체하지 않습니다. 초록 only 인 경우 아래

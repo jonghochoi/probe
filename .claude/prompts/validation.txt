@@ -65,7 +65,7 @@ CONTEXT (read-only):
   to degrade to static-only) when it cannot.
 - `analysis/templates/validation.md` — the exact form the report must
   follow.
-- `docs/STYLE.md` — §7 (Validation report) + §4.
+- `docs/style.md` — §7 (Validation report) + §4.
 
 Do NOT edit any file under `context/`, `vendor/`, the Design, the
 originating analysis, or the impl guide/patch — those are immutable
@@ -301,7 +301,7 @@ G. 🔎 §🚧 분류 (separate `##` section in the report).
        table too, citing their §🪛 entry. Empty if none.
      - `focus-hint:` sorted, comma-separated, deduplicated `§X.Y`
        tokens from the `paper-extractable` rows. Use `§` (U+00A7) to
-       match `docs/STYLE.md` §4-1 verbatim quotation. Empty if no
+       match `docs/style.md` §4-1 verbatim quotation. Empty if no
        `paper-extractable` row.
 
    If any row was tagged `taxonomy-gap` (above), add one more line
@@ -331,7 +331,7 @@ HARD RULES:
 - Every `fail` row records the command + stderr verbatim. Every
   `partial` row names the specific missing-or-misaligned item.
 - Single Korean document. KO-only filename.
-- Emoji/header system per `docs/STYLE.md` §7.
+- Emoji/header system per `docs/style.md` §7.
 - Honesty over completeness — `partial` is a normal outcome. A
   fabricated `pass` is far worse than an honest `partial`.
 

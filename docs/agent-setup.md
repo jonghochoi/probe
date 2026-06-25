@@ -106,7 +106,7 @@ S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed direct
 
 There is no `--dry-run`. On the routine detail page use **Run now** — it opens a fresh session and executes once. A green run status only means "exited without an infra error", **not** that the prompt succeeded — open the session transcript and inspect the actual output (blocked network requests show up there). Check with the same rigor as a manual run:
 
-- Follows `scouting/templates/report.md` + `docs/STYLE.md`.
+- Follows `scouting/templates/report.md` + `docs/style.md`.
 - Both the English and Korean files were produced.
 - Every paper link resolves (no fabricated arXiv IDs).
 - The `Papers scanned:` header discloses **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
@@ -114,39 +114,3 @@ There is no `--dry-run`. On the routine detail page use **Run now** — it opens
 - The Anti-topics filter actually fired (an empty "did not pass filter" section is suspicious).
 
 If it is unsatisfactory, fix `scouting.txt` (or `context/P1.md`) and re-run — do not leave automation on with a bad prompt.
-
-### Bonus — On-demand paper deep-dive (`/analyze-paper` → `/implement-design` → `/validate-impl`, orchestrated by `/reproduce-paper`)
-
-Scouting finds new papers *outward*; this mode reads **one specific paper** the human already cares about (typically a pinned/anchor paper from `context/MASTER.md` §5 that you have not fully internalized) and leaves a Korean deep-dive **plus a vendor-agnostic Layer 1 Design**. From the Design, `/implement-design` produces a target-codebase patch and `/validate-impl` does static validation. `/reproduce-paper` is the superset — it drives all three through a converging inner loop and is the recommended entry point when you actually want the patch on a target foundry. None of these are scheduled routines — all are on-demand slash commands.
-
-| Item | Value |
-|---|---|
-| Invoke (orchestrated) | `/reproduce-paper <arXiv id \| analysis/<id>/design.md> [--foundry <name>] [--max-rounds N]` — runs analyze → implement → validate, then loops `/implement-design --feedback <prev-validation>` + `/validate-impl` until the validation verdict stabilises or the round cap is reached |
-| Invoke (step-by-step) | `/analyze-paper <arXiv id \| arXiv url \| pdf url>` → `/implement-design analysis/<id>/design.md [--foundry <name>]` → `/validate-impl analysis/<id>/design.md [--foundry <name>]` |
-| Slash commands | `.claude/commands/{analyze-paper,implement,validate,reproduce-paper}.md` (thin wrappers) |
-| Canonical prompts | `.claude/prompts/{analysis,implementation,validation,reproduction}.txt` (single source per stage) |
-| Input context | full `context/MASTER.md`, read-only (a paper spans multiple pillars, so the full doc, not an extract) |
-| Body acquisition | `curl`, full-text-preferred: `arxiv.org/abs` → `/html` → ar5iv → abstract-only, with the level recorded in the document header |
-| Outputs | `analysis/<id>/analysis.md` (deep-dive), `analysis/<id>/design.md` (Layer 1 Design — vendor-agnostic), `analysis/<id>/impl/<foundry>/impl.{md,patch}` (Layer 2), `analysis/<id>/validation/<foundry>.md` (validation), plus per-round validation copies `analysis/<id>/validation/<foundry>.round_<N>.md` when run via `/reproduce-paper` — all Korean, overwritten each run |
-| Structure | (A) formatted neutral summary + (B) `context/MASTER.md`-anchored decision-grade implications; Design is 7-section vendor-agnostic spec; impl carries foundry coordinates; validation carries 4-check report |
-| Retrieval | full-text `curl` only at `/analyze-paper` (no Semantic Scholar / MCP); `/implement-design`, `/validate-impl`, `/reproduce-paper` are local |
-| Foundries | v0 foundry is `lerobot` (= `vendor/lerobot/`). Future foundries are added as new `--foundry <name>` values without changing Design or prompts. |
-| Termination | `/reproduce-paper` exits on one of `all_pass` / `unmappable` / `stable_partial` / `stable_design` (focused re-extraction byte-identical) / `hold_and_report` (empty focus-hint) / `max_rounds_exhausted`. The validation §🔎 bucket classifier drives the inner/outer branch; `partial` stabilisation counts as a clean exit and only `paper-silent-experimental` gaps stay as 🚧 permanently. |
-
-Network note: `/analyze-paper`'s full-text fetch needs the session environment to allow `arxiv.org` / `ar5iv.labs.arxiv.org` / `export.arxiv.org` (same Custom-allowlist requirement as Step 1). When full text cannot be fetched (arXiv HTML exists only for LaTeX-source papers ~2023-12+; PDF-only/complex-macro/withdrawn papers; non-arXiv paywalls; policy block; 429), the failure is recorded verbatim in the header and part (B) is marked **(본문 미확보 — 잠정)**. Format/emoji/term rules live in `docs/STYLE.md` §5 (analysis) / §6 (Design + impl) / §7 (validation).
-
----
-
-## Troubleshooting
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Papers recommended are in your Anti-topics list | Anti-topics are too vague | Rewrite `context/P#.md` §5 with concrete exclusions (e.g. "any paper whose primary task is locomotion") |
-| "Decision implication" is generic ("tune DR wider") | Prompt isn't forcing specificity | Add to `scouting.txt`: "name a specific config key / hyperparameter / metric (not a hand-wave like 'tune X wider')" |
-| Same paper recommended two weeks in a row | Agent skipped the last-2-weeks context | Confirm the prompt's read-only "last 2 weeks of `scouting/`" reference is intact and those files exist |
-| `claude routine register` / a `.claude/routines/*.yaml` does nothing | That is not the execution mechanism | Register via the RemoteTrigger form ([claude.ai/code/routines](https://claude.ai/code/routines)) — Step 2/4 |
-| Agent silently edits `context/P#.md` | Prompt guard missing | Re-add the hard "never modify `context/P#.md`" guard (currently present in `scouting.txt` — do not remove it) |
-| Routine ran but PR is empty / every `curl` fails | Outbound network policy blocking the API domains | Set Network access = Custom and allow `export.arxiv.org` / `arxiv.org` / `api.semanticscholar.org`; check the verbatim error in the `Papers scanned:` header line |
-| Citation graph only partially filled / frequent HTTP 429 | Semantic Scholar rate-limited | Run keyless (recommended) or add a *valid approved* key; keep the ~3 s sleep + backoff. See the two-403 note in Step 1 |
-| Semantic Scholar returns 403 even with a key set | Invalid/unapproved key (free-domain emails no longer get keys) | Remove the `SEMANTIC_SCHOLAR_API_KEY` env var and run keyless (works at 200) |
-| `scouting.txt` tries to call MCP tools | Stale prompt (MCP residue) | Confirm the RETRIEVAL section is `curl` REST — MCP is unreachable from cloud sessions |

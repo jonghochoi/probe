@@ -2,7 +2,7 @@
 
 # 🛸 PROBE · Research Scout for Dexterous Manipulation
 
-<img src="docs/LOGO.png" alt="NEXUS Logo" width="600">
+<img src="docs/logo.png" alt="NEXUS Logo" width="600">
 
 **Stop drowning in arXiv. Start changing what you train next week.**
 
@@ -20,13 +20,13 @@
 
 > ### 📖 New here? Start with the onboarding guide.
 >
-> [`docs/probe_guide.html`](docs/probe_guide.html)
+> [`docs/probe-guide.html`](docs/probe-guide.html)
 > — download and open in a browser for a full visual walkthrough of PROBE.
 >
 > ```bash
 > git clone https://github.com/jonghochoi/probe.git
-> open probe/docs/probe_guide.html         # macOS
-> # xdg-open probe/docs/probe_guide.html   # Linux
+> open probe/docs/probe-guide.html         # macOS
+> # xdg-open probe/docs/probe-guide.html   # Linux
 > ```
 
 ---
@@ -108,7 +108,7 @@ The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwri
 
 ## Agent Stack
 
-Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/AGENT_SETUP.md`](docs/AGENT_SETUP.md).
+Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md).
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
