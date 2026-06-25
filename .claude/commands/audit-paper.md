@@ -3,7 +3,7 @@ description: 논문이 주장한 method/defaults/metric 이 논문 자체 공식
 argument-hint: <arXiv id | arXiv url | pdf url> [--repo <url>]
 ---
 
-- **실행** — `.claude/prompts/audit.md` 를 읽고 그대로 실행. 이 파일이 유일한 정보 원천 (로직 복제·변경 금지).
+- **실행** — `.claude/prompts/audit.txt` 를 읽고 그대로 실행. 이 파일이 유일한 정보 원천 (로직 복제·변경 금지).
 - **인자** — `$ARGUMENTS` = 감사할 논문 + 선택적 `--repo <url>`.
 - **빈 인자 시** — arXiv id / URL 또는 PDF URL 을 사용자에게 묻고 중단 (직접 선택 금지).
 - **구분** — `/validate-impl`(PROBE Design+patch ↔ foundry)과 다름. 이건 *논문 주장 ↔ 논문 자체 공식 코드*를 본다.
