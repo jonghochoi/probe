@@ -460,14 +460,21 @@ the human decides.
 GIT — after both files are written:
 
   git add analysis/<id>/analysis.md analysis/<id>/design.md
+  # Append the paper's ALIAS in trailing parens — " (<alias>)" — so the
+  # subject is identifiable without resolving the bare arXiv id. The alias
+  # is the paper's codename: the prefix BEFORE the first colon in the
+  # `원문 제목 (영문)` meta row / H1 (e.g. "LaST-HD: …" → LaST-HD,
+  # "Being-H0.7: …" → Being-H0.7). If the title carries no colon-delimited
+  # codename (a plain descriptive title), OMIT the parens entirely — never
+  # invent one.
   # Subject verb depends on whether this <id> was ALREADY analyzed.
   # Decide BEFORE overwriting the files (check whether
   # analysis/<id>/analysis.md already existed / was git-tracked):
   #   first-time analysis (folder newly created this run) →
-  #     git commit -m "analysis: add <id> deep-dive + design"
+  #     git commit -m "analysis: add <id> deep-dive + design (<alias>)"
   #   re-analysis (analysis/<id>/ pre-existed; you overwrote the
   #     regenerable snapshots) →
-  #     git commit -m "analysis: update <id> deep-dive + design"
+  #     git commit -m "analysis: update <id> deep-dive + design (<alias>)"
   # --focus re-extraction uses instead:
   #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
   # When the focused re-extraction is a no-op (Design byte-identical),
