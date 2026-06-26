@@ -38,6 +38,13 @@ CONTEXT (read-only):
   plain unauthenticated GET. Do NOT assume any MCP server or `gh` CLI. A
   shallow `git clone --depth 1` is acceptable when raw fetches are
   insufficient; never download weights or datasets.
+  Before fetching any files, resolve the exact commit SHA of the branch or
+  tag you will read — for GitHub repos use
+  `curl -sS https://api.github.com/repos/<owner>/<repo>/commits/<ref>`
+  and extract `.sha`. Record this SHA in the 📄 메타 table as
+  `Fetched commit` (full 40-char hex, not a branch name or "latest").
+  Never write a branch name alone — if the SHA cannot be resolved, write
+  `unknown (could not resolve)` and note it in 🔗 공식 코드.
 - `docs/style.md` — emoji (§2), Korean authoring (§4), badge colors (§3-1).
 
 If no official repo can be found, or it cannot be fetched (offline, 404,
