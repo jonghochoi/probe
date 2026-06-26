@@ -54,7 +54,7 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 
 ## Pipeline
 
-PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (reproduce). Each runs on its own trigger and writes to its own folder.
+PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (reproduce) — plus a read-only **synthesis sidecar** (`hypotheses/`, via `/hypothesize`) that reads back across the accumulated `analysis/` DB. Each runs on its own trigger and writes to its own folder.
 
 > **Pillars**: the static context is organized into a small set of research pillars, each owning its own Decision Log and Tracked Literature — canonical names and definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
@@ -97,12 +97,14 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 
 **Analysis convergence loop.** A single `/analyze-paper` produces the deep-dive *and* a Layer 1 Design; `/implement-design` maps the Design onto a target foundry; `/validate-impl` statically checks the result. `/reproduce-paper` orchestrates the three as a bounded loop — fixing the impl against the foundry (inner loop) or re-extracting the Design from the paper (outer loop) until the verdict reaches a fixed point. Full branch matrix in [`.claude/prompts/reproduction.txt`](.claude/prompts/reproduction.txt).
 
-The two entry points (logic in `.claude/prompts/<name>.txt`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
+The four top-level entry points (logic in `.claude/prompts/<name>.txt`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
 
-- `/analyze-paper <arXiv id | url | pdf url>` → `analysis.md` + `design.md`
+- `/analyze-paper <arXiv id | url | pdf url>` → `analysis/<id>/analysis.md` + `design.md` (deep-dive + Layer 1 Design)
+- `/audit-paper <arXiv id | url | pdf url> [--repo <url>]` → `analysis/<id>/audit.md` — a cheap reproducibility gate run *before* the funnel: does the paper's own released code match its claimed method / defaults / metrics?
 - `/reproduce-paper <arXiv id | design path> [--foundry <name>] [--max-rounds N]` — drives `/implement-design` → `/validate-impl` against a target foundry (default `lerobot`) until the verdict stabilizes (default `--max-rounds 3`)
+- `/hypothesize <P0..P5 | D# | D#-D#> [--seed "<idea>"] [--compare-only]` → `hypotheses/<slug>/hypotheses.md` — a read-only synthesis over the accumulated `analysis/` DB; emits ranked, `D#`-anchored, falsifiable hypotheses (all `inferred`/`unverified`, no experiment run)
 
-The agent never edits `context/MASTER.md` or `vendor/lerobot/`; each run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
+The agent never edits `context/MASTER.md`, `context/P#.md`, or `vendor/lerobot/`; each reproduction run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
 
 ---
 
