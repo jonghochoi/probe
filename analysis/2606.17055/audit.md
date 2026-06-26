@@ -10,7 +10,7 @@
 | 원문 제목 | T-Rex: Tactile-Reactive Dexterous Manipulation |
 | Claim source | `analysis/2606.17055/analysis.md` (사전 deep-dive 존재) |
 | 공식 레포 | https://github.com/ZhuoyangLiu2005/T-Rex (main 브랜치) |
-| Fetched commit | main (2026-06-26 기준 최신) |
+| Fetched commit | `43ff632259d76f08373c085c53111825060d029b` (main) |
 | Audit 생성일 | 2026-06-26 |
 | 검사 항목 | 검사 22 · 일치 15 · 불일치 4 · 누락 3 |
 
