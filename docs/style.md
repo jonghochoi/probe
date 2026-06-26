@@ -118,12 +118,12 @@ badge**, color-coded by category:
 
 | Category | Color | Source |
 |----------|-------|--------|
-| `P0` | `ff7f0e` (orange) | pillar palette — matches `refresh-analysis-index.py` `PILLAR_COLOR` |
-| `P1` | `1f77b4` (blue) | pillar palette |
-| `P2` | `9467bd` (purple) | pillar palette |
-| `P3` | `2ca02c` (green) | pillar palette |
-| `P4` | `d62728` (red) | pillar palette |
-| `P5` | `17becf` (cyan) | pillar palette |
+| `P0` | `f5d5d5` (pale red) | pillar palette — matches `refresh-analysis-index.py` `PILLAR_COLOR` |
+| `P1` | `f5e9d5` (pale orange) | pillar palette |
+| `P2` | `e2f5d5` (pale green) | pillar palette |
+| `P3` | `d5f5e7` (pale mint) | pillar palette |
+| `P4` | `d5def5` (pale blue) | pillar palette |
+| `P5` | `e0d5f5` (pale purple) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared decision color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
@@ -137,7 +137,7 @@ plus amber decisions appear.
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-9467bd.svg) | Structured Multimodal Observation Fusion (pillar) |
+| <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-e2f5d5.svg) | Structured Multimodal Observation Fusion (pillar) |
 | <a id="ref-D4"></a>![D4](https://img.shields.io/badge/D4-d97706.svg) | Body↔Hand information sharing — FiLM, cross-attn/hidden-state deferred |
 ```
 
@@ -634,9 +634,10 @@ in exactly one table but lists its full pillar set in the `Pillars` column.
 Empty pillar buckets are skipped. Within each table rows sort by `Refreshed`
 desc (ties by arXiv id desc). Per row:
 
-- a `Title` cell — a paperclip `[📎](<id>/analysis.md)` link to the paper's
-  deep-dive, followed by one space and the English title (the link folds the
-  former standalone analysis-link column into the title);
+- a `Title` cell — a white 📝 shields.io badge
+  `[![](https://img.shields.io/badge/📝-ffffff.svg)](../analysis/<id>/analysis.md)`
+  linking the paper's deep-dive, followed by one space and the English title
+  (the badge folds the former standalone analysis-link column into the title);
 - a `Links` cell — one shields.io badge per link in the `링크` row, classified
   by host and rendered in a **fixed order: arXiv → Website → GitHub →
   HuggingFace**. Badge styles: `arXiv-<id>-b31b1b.svg` (red, carries the id),
@@ -649,7 +650,7 @@ desc (ties by arXiv id desc). Per row:
   KaTeX / LaTeX / backticks) is excluded outright, and a head with no
   recoverable English is dropped (§5-6 enforces English heads); skipped heads
   are backfilled from later bullets. All keyword badges use one color (노
-  yellow, `ffd700`) — keywords are descriptive, not ranked, so a positional
+  grey, `e8e7e7`) — keywords are descriptive, not ranked, so a positional
   palette carried no meaning. GitHub's Markdown
   sanitizer strips inline CSS (`<span style=…>`), so a shields.io badge is the
   only way to color text per keyword on github.com;
