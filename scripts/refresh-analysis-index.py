@@ -7,9 +7,9 @@ from its `analysis.md`, then rewrites the block between fixed markers in
 
 The generated block is one table per primary Pillar (primary = first `관련
 Pillar` entry), so the human-facing layout stays scannable as the corpus grows;
-a single page still supports Ctrl-F. Each row carries a paperclip 📎 link to the
-paper's deep-dive in front of its title, plus Links / Pillars / Keywords /
-Refreshed cells.
+a single page still supports Ctrl-F. Each row carries a white 📝 shields.io
+badge linking the paper's deep-dive in front of its title, plus Links / Pillars
+/ Keywords / Refreshed cells.
 
 Everything outside the `<!-- ANALYSIS_INDEX:START -->` /
 `<!-- ANALYSIS_INDEX:END -->` markers (the short folder intro above the block)
@@ -66,12 +66,12 @@ PILLAR_NAMES = {
 PILLAR_ORDER = ["P0", "P1", "P2", "P3", "P4", "P5", UNCLASSIFIED]
 # One fixed color per pillar (distinct from the 빨주노초파 keyword palette).
 PILLAR_COLOR = {
-    "P0": "ff7f0e",  # orange
-    "P1": "1f77b4",  # blue
-    "P2": "9467bd",  # purple
-    "P3": "2ca02c",  # green
-    "P4": "d62728",  # red
-    "P5": "17becf",  # cyan
+    "P0": "f5d5d5",  # pale red
+    "P1": "f5e9d5",  # pale orange
+    "P2": "e2f5d5",  # pale green
+    "P3": "d5f5e7",  # pale mint
+    "P4": "d5def5",  # pale blue
+    "P5": "e0d5f5",  # pale purple
     UNCLASSIFIED: "888888",  # grey
 }
 # P0–P5; anything outside the range is dropped at extraction time.
@@ -170,7 +170,7 @@ MAX_KEYWORDS = 5
 KEYWORD_HEAD_CAP = 40  # badges stay short and scannable
 # All keyword badges share one color (노 yellow). Keywords are descriptive, not
 # ranked, so a per-position palette added visual noise without meaning.
-KEYWORD_COLOR = "ffd700"  # 노 yellow
+KEYWORD_COLOR = "e8e7e7"  # pale grey
 
 
 def _englishize(head: str) -> str:
@@ -260,7 +260,7 @@ def keyword_badges(labels: list[str]) -> str:
 
     GitHub's Markdown sanitizer strips inline CSS (`<span style=…>`), so a
     shields.io badge is the only way to color keyword text on github.com. All
-    keyword badges use one color (노 yellow) — keywords are descriptive, not
+    keyword badges use one color (pale grey) — keywords are descriptive, not
     ranked, so a positional palette carried no meaning.
     """
     if not labels:
@@ -331,7 +331,7 @@ def primary_pillar(row: dict) -> str:
     return row["pillars"][0] if row["pillars"] else UNCLASSIFIED
 
 
-# Columns: a 📎 deep-dive link spliced in front of the title, then Links /
+# Columns: a 📝 deep-dive badge spliced in front of the title, then Links /
 # Pillars / Keywords / Refreshed. Both the analysis-link and impl columns the
 # index used to carry were dropped — the link folds into the title cell.
 HEADER = (
@@ -367,10 +367,13 @@ def build_block(rows: list[dict]) -> str:
         out.append(f"## {title}\n\n")
         out.append(HEADER)
         for i, row in enumerate(bucket, 1):
-            clip = f"[📎]({row['stem']}/analysis.md)"
+            badge = (
+                "[![](https://img.shields.io/badge/📝-ffffff.svg)]"
+                f"(../analysis/{row['stem']}/analysis.md)"
+            )
             links_cell = link_badges(row["links"], row["arxiv_id"])
             out.append(
-                f"| {i} | {clip} {row['title']} | {links_cell} "
+                f"| {i} | {badge} {row['title']} | {links_cell} "
                 f"| {pillar_badges(row['pillars'])} "
                 f"| {keyword_badges(row['keywords'])} "
                 f"| {row['refreshed']} |\n"

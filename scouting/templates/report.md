@@ -17,7 +17,7 @@ style.md §3-1 is authoritative. Summary:
   · ONLY P#/D# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc), one per distinct code.
   · Each code is a shields.io BADGE (STYLE §3-1): P# uses the pillar palette
-    (P1 1f77b4, P2 9467bd, P3 2ca02c, P4 d62728), every D# shares d97706 (amber).
+    (P1 f5e9d5, P2 e2f5d5, P3 d5f5e7, P4 d5def5), every D# shares d97706 (amber).
     Format: `![CODE](https://img.shields.io/badge/CODE-<hex>.svg)`.
   · Legend row: <a id="ref-CODE"></a>![CODE](…badge…) | one-line meaning (English only).
     The anchor stays so body links resolve; the legend badge itself is not a link.
@@ -36,7 +36,7 @@ style.md §3-1 is authoritative. Summary:
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P#"></a>![P#](https://img.shields.io/badge/P%23-9467bd.svg) | <pillar name> (pillar) |
+| <a id="ref-P#"></a>![P#](https://img.shields.io/badge/P%23-e2f5d5.svg) | <pillar name> (pillar) |
 | <a id="ref-D#"></a>![D#](https://img.shields.io/badge/D%23-d97706.svg) | <decision title> — <concise gloss, ≤~12 words, commas not semicolons> |
 
 ---

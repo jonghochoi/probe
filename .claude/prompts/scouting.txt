@@ -182,7 +182,7 @@ no per-report info, so the report goes metadata → legend.
   - One table, rows ordered P# → D# (ascending), one row per distinct
     cited code. Omit the section if none are cited.
   - Each code is a shields.io BADGE color-coded by category: P# uses the
-    pillar palette (P1 `1f77b4`, P2 `9467bd`, P3 `2ca02c`, P4 `d62728`),
+    pillar palette (P0 `f5d5d5`, P1 `f5e9d5`, P2 `e2f5d5`, P3 `d5f5e7`, P4 `d5def5`, P5 `e0d5f5`),
     every D# shares `d97706` (amber). URL:
     `https://img.shields.io/badge/<CODE>-<hex>.svg`.
   - Each legend row: `| <a id="ref-CODE"></a>![CODE](…badge…) | <one-line meaning> |`
