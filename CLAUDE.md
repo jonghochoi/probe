@@ -107,10 +107,14 @@ Hard rules:
    for a first-time analysis (`update` instead of `add` when re-running
    `/analyze-paper` on an `<arxiv-id>` that already had a folder), and
    `audit: add <arxiv-id> paper-code audit (<alias>)`. The trailing
-   `(<alias>)` is the paper's codename — the prefix before the first colon
-   in the title's `원문 제목 (영문)` meta row (e.g. `LaST-HD`, `Being-H0.7`,
-   `T-Rex`) — appended so the bare arXiv id is identifiable at a glance; it
-   is omitted when the title has no colon-delimited codename.)
+   `(<alias>)` is the paper's codename, resolved in priority order: (1) the
+   prefix before the first colon in the title's `원문 제목 (영문)` meta row
+   (e.g. `LaST-HD`, `Being-H0.7`, `T-Rex`); (2) failing a colon, an acronym
+   the paper explicitly defines for itself as `ACRONYM (Full Expansion)` in
+   the title / abstract / intro whose expansion initials spell the acronym
+   (e.g. `Human Universal Grasping` → `HUG`); (3) otherwise omitted — a plain
+   descriptive title with neither a colon codename nor a self-defined acronym
+   gets no alias, and one is never invented.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
    `scout`/`scouting`, `analysis`, `context`,
    `prompts`, `config`, `style`, `docs`, `brand`, `CLAUDE.md`. Omit the scope
