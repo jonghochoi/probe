@@ -461,12 +461,21 @@ GIT — after both files are written:
 
   git add analysis/<id>/analysis.md analysis/<id>/design.md
   # Append the paper's ALIAS in trailing parens — " (<alias>)" — so the
-  # subject is identifiable without resolving the bare arXiv id. The alias
-  # is the paper's codename: the prefix BEFORE the first colon in the
-  # `원문 제목 (영문)` meta row / H1 (e.g. "LaST-HD: …" → LaST-HD,
-  # "Being-H0.7: …" → Being-H0.7). If the title carries no colon-delimited
-  # codename (a plain descriptive title), OMIT the parens entirely — never
-  # invent one.
+  # subject is identifiable without resolving the bare arXiv id. Resolve the
+  # alias in this priority order, and NEVER fabricate one:
+  #   1. Colon-delimited codename — the prefix BEFORE the first colon in the
+  #      `원문 제목 (영문)` meta row / H1 (e.g. "LaST-HD: …" → LaST-HD,
+  #      "Being-H0.7: …" → Being-H0.7).
+  #   2. Paper-defined acronym — when the title has NO colon but the paper
+  #      explicitly defines its own short name as `ACRONYM (Full Expansion)`
+  #      (or the reverse `Full Expansion (ACRONYM)`) in the title / abstract /
+  #      intro, AND the expansion's initials spell the acronym, use that
+  #      acronym (e.g. title "Human Universal Grasping" + the body's
+  #      "HUG (Human Universal Grasping)" → HUG). The alias must be
+  #      verifiable verbatim in the paper text, not inferred from the theme.
+  #   3. Otherwise OMIT the parens entirely — a plain descriptive title with
+  #      neither a colon codename nor a self-defined acronym gets no alias.
+  #      Never invent one.
   # Subject verb depends on whether this <id> was ALREADY analyzed.
   # Decide BEFORE overwriting the files (check whether
   # analysis/<id>/analysis.md already existed / was git-tracked):
