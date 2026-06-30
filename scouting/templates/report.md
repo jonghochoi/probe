@@ -149,6 +149,8 @@ where possible, no hedging; this section is the most over-written one (STYLE
   · Decision-Log triggers / falsifier evidence observed this run?
   · Month-trend note (only on the first run of the month).
   · Anti-topics filter health — count of papers excluded.
+  · Already-analyzed dedup — count of candidates dropped for already having
+    an analysis/<id>/ folder (0 if none).
 -->
 
 ---
