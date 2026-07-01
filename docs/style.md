@@ -855,9 +855,12 @@ refresh procedure.
   instead of being silently forged.
 - If the Design cannot ground in the target foundry, **neither**
   `impl.md` nor `impl.patch` is produced. Instead `/implement-design` writes
-  `analysis/<id>/impl/<foundry>/UNMAPPABLE.md` with one paragraph of
+  `analysis/<id>/impl/<foundry>/UNMAPPABLE.md` (template:
+  `analysis/templates/UNMAPPABLE.md`) with one paragraph of
   reason, and appends one line to `analysis/<id>/analysis.md`:
   `> 매핑 불가 (<foundry>) — Design 의 일부가 이 foundry 의 좌표계로 매핑되지 않습니다.`
+  (The 🚫 비대상 short-circuit writes the same stub but does not touch
+  `analysis.md`.)
 
 ### 6-5. Verify report (`/validate-impl` output)
 
