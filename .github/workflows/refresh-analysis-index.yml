@@ -1,18 +1,16 @@
 name: Refresh analysis index
 
-# Regenerate analysis/README.md on main whenever an analysis artifact
-# changes. PR-time generation was retired because parallel /analyze-paper
-# runs all stage the same generated block and conflict on every merge
-# (CLAUDE.md "Automatically-maintained indexes"). The regen now happens
-# exactly once, post-merge, on main — PRs never touch the index.
+# Regenerate analysis/README.md on demand. This is a MANUAL job: the human
+# fires it whenever they want the deep-dive index brought up to date (Actions
+# tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the
+# github MCP). The old push-on-merge trigger was retired because it stacked a
+# `chore(analysis): refresh index` bot commit onto main after every analysis
+# merge, cluttering history; batching several merges into one manual run keeps
+# the log clean. PR branches and the per-command prompts still never touch the
+# generated block (CLAUDE.md "Automatically-maintained indexes").
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'analysis/**/analysis.md'
-      - 'scripts/refresh-analysis-index.py'
-      - '.github/workflows/refresh-analysis-index.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write

@@ -621,10 +621,11 @@ conventions below codify both.
 which rewrites only the block between `<!-- ANALYSIS_INDEX:START -->` /
 `<!-- ANALYSIS_INDEX:END -->` — do not hand-edit inside the markers; the
 rest of the file (the short folder intro above the block) is hand-maintained.
-It runs **post-merge on `main` only**; the per-command prompts
-(`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage
-`analysis/README.md` or invoke the script. The *why* (parallel-PR conflict,
-the workflow) is in `CLAUDE.md` "Automatically-maintained indexes".
+It runs **on demand via a manual `workflow_dispatch`** (Actions tab →
+"Run workflow"); the per-command prompts (`/analyze-paper`,
+`/implement-design`, `/validate-impl`) do NOT stage `analysis/README.md` or
+invoke the script. The *why* (manual batching, the workflow) is in `CLAUDE.md`
+"Automatically-maintained indexes".
 
 The generated block is one plain-`##` table **per primary Pillar**
 (`P0`…`P5`, then `미분류`). The index taxonomy covers the six pillars P0–P5; a

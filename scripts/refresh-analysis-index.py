@@ -16,8 +16,9 @@ Everything outside the `<!-- ANALYSIS_INDEX:START -->` /
 stays hand-maintained.
 
 Idempotent: re-running with no underlying change produces no diff.
-Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml`.
-Safe to run manually from the repo root:
+Invoked on demand via the manual `workflow_dispatch` of
+`.github/workflows/refresh-analysis-index.yml`. Safe to run manually from the
+repo root:
 
     python3 scripts/refresh-analysis-index.py
 
