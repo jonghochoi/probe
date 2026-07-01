@@ -33,10 +33,11 @@ Usage (repo root):
 
 No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
 (its Repository-map table) and `README.md`, where every path reference is meant
-to point at a real file. The agent-output spec (`docs/style.md`) and the
-prompts are out of the default set — they are full of *illustrative* example
-paths (example arXiv ids, partial `impl/…` fragments) by design — but can be
-scanned explicitly by passing them as PATH args.
+to point at a real file, plus the `context/` files (MASTER + P0-P5) the
+scheduled routine reads every run. The agent-output spec (`docs/style.md`) and
+the prompts are out of the default set — they are full of *illustrative*
+example paths (example arXiv ids, partial `impl/…` fragments) by design — but
+can be scanned explicitly by passing them as PATH args.
 
 Exit codes: 0 = clean / 1 = unresolved references found / 2 = nothing to scan.
 """
@@ -57,18 +58,33 @@ _KNOWN_EXTENSIONS = (
 
 # A backtick token carrying any of these is a glob/placeholder/URL/command, not
 # a concrete path we can resolve — skip it (precision guard). Includes the U+2026
-# ellipsis used as an elision placeholder (`…/2604.../x1.png`).
-_SKIP_CHARS = set("*<>{}#|=+$%@:` …")
+# ellipsis used as an elision placeholder (`…/2604.../x1.png`) and the U+2013
+# en dash used in range placeholders (`context/P0–P5.md`).
+_SKIP_CHARS = set("*<>{}#|=+$%@:` …–")
+
+# Date/id placeholder segments (`scouting/P0/YYYY-MM-DD.md`, `arXiv:XXXX.XXXXX`)
+# mark a pattern, not a concrete file — skip tokens carrying them.
+_PLACEHOLDER_SEGMENTS = re.compile(r"YYYY|XXXX")
 
 _MD_LINK = re.compile(r"\[(?:[^\]]*)\]\(([^)]+)\)")
 _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant to
-# point at real files. style.md / prompts are intentionally excluded (they carry
-# illustrative example paths) but can be passed explicitly as PATH args.
+# point at real files, plus the human-owned context files the scheduled routine
+# reads every run (their `docs/style.md`-style pointers must resolve — an
+# uppercase `docs/STYLE.md` once drifted here unnoticed). style.md / prompts are
+# intentionally excluded (they carry illustrative example paths) but can be
+# passed explicitly as PATH args.
 _DEFAULT_DOCS = [
     "CLAUDE.md",
     "README.md",
+    "context/MASTER.md",
+    "context/P0.md",
+    "context/P1.md",
+    "context/P2.md",
+    "context/P3.md",
+    "context/P4.md",
+    "context/P5.md",
 ]
 
 
@@ -106,6 +122,8 @@ def _qualifies_as_path_token(tok: str) -> bool:
     if "/" not in tok:
         return False
     if any(c in _SKIP_CHARS for c in tok):
+        return False
+    if _PLACEHOLDER_SEGMENTS.search(tok):
         return False
     return tok.lower().endswith(_KNOWN_EXTENSIONS)
 
