@@ -912,3 +912,61 @@ Rules specific to this family:
 - Every 일치/불일치 row grounds in a `file:line` or config key actually
   read (unread = unstated); 누락 (no corresponding code at all) stays
   distinct from 불일치 (code does it differently).
+
+## 7. Hypothesis Synthesis Documents (`hypotheses/`)
+
+The `/hypothesize` slash command (prompt: `.claude/prompts/hypothesize.txt`)
+reads the accumulated `analysis/` DB across one pillar / decision cluster
+and emits ranked, falsifiable, `D#`-anchored hypotheses. Read-only
+synthesis — no experiment runs; every hypothesis ships labeled
+`inferred` · `unverified`.
+
+Outputs (all under `hypotheses/<slug>/`; templates in
+`hypotheses/templates/`):
+
+- `hypotheses.md`            — the ranked hypotheses (template:
+                               `hypotheses/templates/hypotheses.md`).
+- `hypotheses.provenance.md` — source accounting sidecar (template:
+                               `hypotheses/templates/hypotheses.provenance.md`).
+- `compare.md`               — `--compare-only` runs emit just this
+                               (template: `hypotheses/templates/compare.md`).
+
+### 7-1. Section order and emoji
+
+Same §2 rule: one emoji at the start of each `##` header, `###` and body
+plain.
+
+`hypotheses.md` — six `##` sections in this order:
+
+| Emoji | Section |
+|-------|---------|
+| 🧭 | 범위 / 요약 |
+| 🔀 | 합의·불일치 매트릭스 |
+| ⚡ | 텐션 |
+| 💡 | 가설 |
+| 🏆 | 순위 |
+| 🚧 | 제안 (Decision Log) |
+
+`hypotheses.provenance.md` — four `##` sections: 📚 코퍼스, 🧶 텐션 →
+가설 계보, 🏷️ 검증 상태, 🕳️ 범위 공백. `compare.md` — 🧭 범위 / 요약 +
+🔀 합의·불일치 매트릭스 only.
+
+### 7-2. Load-bearing conventions
+
+- **매트릭스 shape.** One row per (D#, 분석) pair: D# / 분석 링크 /
+  Push 방향 / 확신도 (강·중·약, derived from ♻️ 재현성 + methodology,
+  never vibes) / 근거 한 줄. `--compare-only` reuses the identical
+  table.
+- **Label vocabulary is closed and verbatim**: `inferred`, `unverified`,
+  `user-seeded`, `exploratory · ungrounded`,
+  and the measurement-ladder labels `implementable` /
+  `proxy-consistent` / `indicative` / `empirically-verified`. A Rung 0–1
+  pass is never reported as "the hypothesis is true".
+- **Every mined hypothesis carries ≥2 grounding citations + a D#
+  anchor** or is dropped; the one exception is a `--seed` hypothesis,
+  kept but labeled `exploratory · ungrounded`.
+- Hypotheses are numbered `H1`, `H2`, … in rank order; §🏆 shows the
+  four 0–3 axes (증거 강도 / 결정 레버리지 / 검증 가능성 / 비용 역수)
+  as per-axis bullets, not a table.
+- 개조식 (§4-4), P#/D# shields.io badges with the §3-1 palette on first
+  mention, honest emptiness ("없음") over padded sections.
