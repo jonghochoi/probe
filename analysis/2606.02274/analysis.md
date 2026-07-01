@@ -214,7 +214,7 @@ $$d_{j}=d_{min}+(d_{max}-d_{min})\cdot\frac{j(j+1)}{M(M+1)}$$
 - **D12 (멀티카메라 pre-fusion)에 새 옵션 추가 검토.** 현재 v1 은 cross-attention fuser. 본 논문은 "extrinsic 기반 BEV 정사영 → 통일 spatial embedding"이라는 **기하 융합** 옵션을 제시한다. 구체적으로: 우리 데이터에 **카메라 extrinsic 이 있다면** D12 의 deferred 후보로 "geometric BEV fuser"를 등재하고 이 fuser 가 "viewpoint-specific contact cue 손실"(D12 의 (iii) trigger 와 유사)을 일으키는지로 둘을 비교. config 키 수준: `vision_fusion: {cross_attention | geometric_bev}`.
 - **D2/D23 출력 표현 — 공유 프레임 $`SE(3)`$ 표준화.** Body 출력(D2 v1 = both-wrist/tool-flange pose)을 **통일 BEV/world 프레임의 절대 $`SE(3)`$** 로 표현하면 embodiment-transfer 가 쉬워진다는 실증. 우리 flow-matching 헤드(D23 iii)의 액션 정규화 통계를 "임베디먼트별 로컬"이 아니라 "공유 프레임 절대 포즈" 기준으로 잡는 선택지를 검토.
 - **D22 카탈로그에 정합 schema 직접 차용.** D22 가 요구하는 카탈로그의 input/output schema 컬럼(카메라 수·해상도·FPS, action space, 통일 TCP·extrinsic)을 본 논문 파이프라인이 그대로 구현. 데이터 카탈로그 build 시 **TCP 규약 통일 + OpenCV intrinsic/extrinsic 표준 + EE-속도 시간 정규화**를 표준 전처리로 채택 검토.
-- **메트릭 함의** — "카메라/base 포즈 섭동 하 성공률 유지"를 P5 D26 의 robustness 메트릭(perturbation 하 success drop)에 정량 항목으로 추가 가능. baseline 이 <10% 로 붕괴하는 강섭동 셋업은 우리 falsifier 의 강한 OOD 조건 템플릿이 된다.
+- **메트릭 함의** — "카메라/base 포즈 섭동 하 성공률 유지"를 P0 D26 의 robustness 메트릭(perturbation 하 success drop)에 정량 항목으로 추가 가능. baseline 이 <10% 로 붕괴하는 강섭동 셋업은 우리 falsifier 의 강한 OOD 조건 템플릿이 된다.
 
 ---
 
