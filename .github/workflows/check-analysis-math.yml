@@ -5,10 +5,12 @@ name: Check analysis math
 # PR-time (not post-merge like the index refresh) so malformed math is caught
 # and cleaned BEFORE it lands on main and leaks the source on github.com.
 #
-# Flow: run the checker with --fix, push the normalized result back to the PR
-# branch as a bot commit, then re-run without --fix so any unfixable finding
-# (unbalanced `$`, unsupported macro) fails the check. The push retriggers the
-# workflow, which then finds nothing to fix and passes — so it self-terminates.
+# Flow: run the checker with --fix (tolerating a non-zero exit — unfixable
+# findings must not abort the job before the fixes are pushed), push the
+# normalized result back to the PR branch as a bot commit, then re-run without
+# --fix so any unfixable finding (unbalanced `$`, unsupported macro) fails the
+# check. The final re-check step owns the pass/fail verdict; the bot push does
+# NOT retrigger the workflow (GITHUB_TOKEN pushes never start new runs).
 
 on:
   pull_request:
@@ -40,7 +42,10 @@ jobs:
         with:
           python-version: '3.x'
       - name: Auto-fix math formatting
-        run: python3 scripts/check-analysis-math.py --fix
+        # The script exits 1 when unfixable issues remain even in --fix mode;
+        # tolerate that here so the fixes it DID write still get committed and
+        # pushed. The trailing "Re-check" step owns the pass/fail verdict.
+        run: python3 scripts/check-analysis-math.py --fix || true
       - name: Commit and push fixes if changed
         run: |
           if git diff --quiet; then
