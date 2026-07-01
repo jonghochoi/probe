@@ -86,9 +86,9 @@ not just textually applicable but *correct*, `/validate-impl` runs the impl's
 sibling smoke test against the **whole** upstream package at the pinned commit.
 `scripts/ensure-foundry-runtime.sh <foundry>` builds that runtime on demand:
 
-1. Parse the pinned-commit SHA from `vendor/<foundry>/README.md` (the same provenance row `/implement-design` and `/validate-impl` cite).
+1. Parse the pinned-commit SHA **and the source repository** from the `vendor/<foundry>/README.md` provenance table (the same rows `/implement-design` and `/validate-impl` cite) — the clone URL is derived from the `Source repository` row, so moving/renaming the fork only requires updating the README.
 2. Clone the source at that SHA (depth-1) into `.foundry-runtime/<foundry>/src`.
-3. venv + `pip install -e .[test]` — plain `pip`, not `uv pip install` (lerobot's `pyproject.toml` pins torch to a cu128 index with a version gap in some environments; pip resolves from the default index).
+3. `uv venv` (hard prerequisite — the script fails fast with a clear message when `uv` is missing) + `pip install -e .[test]` — plain `pip`, not `uv pip install` (lerobot's `pyproject.toml` pins torch to a cu128 index with a version gap in some environments; pip resolves from the default index).
 4. Touch a `.ready` marker holding the SHA so re-runs are a no-op.
 
 - Prints the venv python on its last stdout line; exits non-zero (reason on stderr) when it can't build — offline, install failure, unknown foundry.
