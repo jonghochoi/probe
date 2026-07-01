@@ -316,14 +316,26 @@ Once at the end of the loop:
 git push origin HEAD:<branch>
 ```
 
-`<branch>` is the current working branch (e.g. `main` or a feature
-branch mandated by the system environment). If the environment's branch
-policy overrides this prompt's default (`main`), follow that policy.
+`<branch>` is the CURRENT working branch. Push only to that branch,
+never to `main`. Merging the branch into `main` requires the human's
+explicit permission. Never auto-merge, fast-forward, or push to `main`
+on your own.
+
+- If the push to the working branch is rejected as non-fast-forward,
+  run `git pull --rebase origin HEAD` (the same working branch) and
+  retry the push. Repeat this rebase-and-retry loop up to 5 times with
+  exponential backoff (1s, 2s, 4s, 8s, 16s between attempts). On rebase
+  conflict, STOP and report — do not resolve automatically.
+- On transient network failure, retry push up to 4 times with
+  exponential backoff (2s, 4s, 8s, 16s).
+- Never use --no-verify, --no-gpg-sign, or any force-push.
 
 `<id>` is extracted from the design path or the input arXiv id —
 regex `analysis/(.*)/design\.md$` or the input itself. `<foundry>` is
 the `--foundry` argument verbatim.
 
-This prompt does NOT call `scripts/refresh-analysis-index.py` directly
-— the delegated analyze-paper / implement / validate prompts already call it
-in their own GIT steps, so a duplicate call would be redundant.
+This prompt does NOT call `scripts/refresh-analysis-index.py` — neither
+do the delegated analyze-paper / implement / validate prompts. The
+deep-dive index is refreshed on demand via the manual
+`workflow_dispatch` of `.github/workflows/refresh-analysis-index.yml`;
+never stage `analysis/README.md` from this prompt.
