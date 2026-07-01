@@ -31,6 +31,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 | `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` / `hypotheses/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
+| `scripts/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 scripts/check-commit-style.py -` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Per-pillar content (Decision Log, Tracked Literature,
