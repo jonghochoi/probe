@@ -15,6 +15,11 @@ Everything outside the `<!-- ANALYSIS_INDEX:START -->` /
 `<!-- ANALYSIS_INDEX:END -->` markers (the short folder intro above the block)
 stays hand-maintained.
 
+The corpus parsing (meta-table extraction, keyword extraction) lives in the
+shared `probe_corpus` module so this script and the supermemory PoC ingestor
+read the `논문 메타` table identically; this file keeps only the
+index-presentation logic (badges, per-pillar tables, marker rewriting).
+
 Idempotent: re-running with no underlying change produces no diff.
 Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml`.
 Safe to run manually from the repo root:
@@ -29,10 +34,17 @@ from __future__ import annotations
 import re
 import sys
 import urllib.parse
-from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-ANALYSIS_DIR = REPO_ROOT / "analysis"
+from probe_corpus import (
+    ARXIV_ID_RE,
+    REPO_ROOT,
+    UNCLASSIFIED,
+    WARN,
+    extract_keywords,
+    extract_meta,
+    find_analyses,
+)
+
 # The generated deep-dive index is the analysis folder's own README; rows link
 # down into <id>/analysis.md with a path relative to that README.
 INDEX = REPO_ROOT / "analysis" / "README.md"
@@ -40,21 +52,10 @@ INDEX = REPO_ROOT / "analysis" / "README.md"
 MARKER_START = "<!-- ANALYSIS_INDEX:START -->"
 MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
 
-# Rows we extract from the 논문 메타 table.
-TITLE_ROW = re.compile(r"^\|\s*원문\s*제목\s*\(영문\)\s*\|\s*(.+?)\s*\|\s*$")
-LINK_ROW = re.compile(r"^\|\s*링크\s*\|\s*(.+?)\s*\|\s*$")
-MD_LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-ARXIV_ID_RE = re.compile(r"(\d{4}\.\d{4,5})")
-REFRESHED_ROW = re.compile(r"^\|\s*분석\s*생성일\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*$")
-PILLAR_ROW = re.compile(r"^\|\s*관련\s*Pillar\s*\|\s*(.+?)\s*\|\s*$")
-
-WARN = "⚠️ metadata"
-UNCLASSIFIED = "미분류"
-
 # Pillar display names mirror context/MASTER.md §5 Pillars (kept here only
 # because this script never reads the human-owned context/ tree). The taxonomy
 # covers the six pillars P0–P5; a P# outside that range is stripped from the
-# Pillars column.
+# Pillars column (by PILLAR_RE in probe_corpus at extraction time).
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",
@@ -74,173 +75,10 @@ PILLAR_COLOR = {
     "P5": "e0d5f5",  # pale purple
     UNCLASSIFIED: "888888",  # grey
 }
-# P0–P5; anything outside the range is dropped at extraction time.
-PILLAR_RE = re.compile(r"P[0-5]")
 
-
-def find_analyses() -> list[Path]:
-    """Return per-paper subdirectory paths (not templates or other dirs)."""
-    out: list[Path] = []
-    for path in sorted(ANALYSIS_DIR.iterdir()):
-        if not path.is_dir():
-            continue
-        name = path.name
-        # `templates` is the skeleton, not a paper.
-        if name.startswith("_") or name == "templates":
-            continue
-        # Accept arXiv ids or arbitrary slug directory names.
-        out.append(path)
-    return out
-
-
-def extract_meta(paper_dir: Path) -> dict:
-    """Pull title / links / refreshed / pillars out of the meta table.
-
-    The `링크` row may carry several links (arXiv + GitHub / HuggingFace /
-    project site); each is classified by host and rendered as its own badge.
-    Missing or malformed scalar rows produce the `⚠️ metadata` placeholder for
-    that cell rather than aborting; a missing pillar row yields an empty list.
-    """
-    title = arxiv_id = arxiv_url = refreshed = ""
-    links: list[tuple[str, str]] = []   # (kind, url), arXiv first
-    pillars: list[str] = []
-    analysis_file = paper_dir / "analysis.md"
-    try:
-        text = analysis_file.read_text(encoding="utf-8")
-    except OSError:
-        return {
-            "title": WARN, "arxiv_id": WARN, "arxiv_url": "",
-            "refreshed": WARN, "pillars": [], "links": [],
-        }
-
-    for line in text.splitlines():
-        if not title:
-            m = TITLE_ROW.match(line)
-            if m:
-                title = m.group(1).strip()
-                continue
-        if not links:
-            m = LINK_ROW.match(line)
-            if m and MD_LINK.search(m.group(1)):
-                for _label, url in MD_LINK.findall(m.group(1)):
-                    url = url.strip()
-                    kind = classify_link(url)
-                    links.append((kind, url))
-                    if kind == "arxiv" and not arxiv_id:
-                        am = ARXIV_ID_RE.search(url) or ARXIV_ID_RE.search(_label)
-                        if am:
-                            arxiv_id, arxiv_url = am.group(1), url
-                continue
-        if not refreshed:
-            m = REFRESHED_ROW.match(line)
-            if m:
-                refreshed = m.group(1).strip()
-                continue
-        if not pillars:
-            m = PILLAR_ROW.match(line)
-            if m:
-                # Keep declared order; first entry is the primary pillar.
-                pillars = [p for p in PILLAR_RE.findall(m.group(1))]
-                continue
-
-    return {
-        "title": title or WARN,
-        "arxiv_id": arxiv_id or WARN,
-        "arxiv_url": arxiv_url,
-        "refreshed": refreshed or WARN,
-        "pillars": pillars,
-        "links": links,
-    }
-
-
-# 기술 키워드 bullet head: `- **<term>** — …` (em dash separates head/def).
-# The `## 🔑 기술 키워드` header carries the §2 emoji; accept it with or without.
-KEYWORD_HEADER_RE = re.compile(r"^##\s+(?:🔑\s*)?기술\s*키워드")
-KEYWORD_BULLET_RE = re.compile(r"^-\s+(.+)$")
-# Secondary cut for bullets that use `term: def` instead of the spec's em dash.
-KEYWORD_COLON_RE = re.compile(r":\s")
-# Hangul (incl. Jamo) — a keyword head must reduce to English before it ships.
-HANGUL_RE = re.compile(r"[가-힣ᄀ-ᇿ㄰-㆏]")
-# `<a> (<b>)` split used to recover the English half of a bilingual head.
-PAREN_RE = re.compile(r"^(.*?)\s*\(([^()]*)\)\s*(.*)$")
-# Any math/markup markup → the keyword is excluded outright (English plain
-# text only): inline KaTeX `$`…`$`, `$…$`, raw LaTeX, backticks.
-MATH_RE = re.compile(r"[`$\\]")
-MAX_KEYWORDS = 5
-KEYWORD_HEAD_CAP = 40  # badges stay short and scannable
 # All keyword badges share one color (노 yellow). Keywords are descriptive, not
 # ranked, so a per-position palette added visual noise without meaning.
 KEYWORD_COLOR = "e8e7e7"  # pale grey
-
-
-def _englishize(head: str) -> str:
-    """Reduce a keyword head to its English form, dropping any Korean gloss.
-
-    Bilingual heads in the corpus take the shape `한글 (English)` or
-    `English (한글)`; we keep whichever side carries no Hangul. A head with no
-    recoverable English (pure Korean) collapses to the empty string and is
-    dropped by the caller — the English-only rule is enforced in
-    docs/style.md §5-6 for new analyses.
-    """
-    if not HANGUL_RE.search(head):
-        return head.strip()
-    m = PAREN_RE.match(head)
-    if m:
-        inner = m.group(2).strip()
-        outer = f"{m.group(1)} {m.group(3)}".strip()
-        if inner and not HANGUL_RE.search(inner):
-            return inner
-        if outer and not HANGUL_RE.search(outer):
-            return outer
-    cleaned = re.sub(r"\s{2,}", " ", HANGUL_RE.sub(" ", head)).strip(" -–—·,/")
-    return "" if HANGUL_RE.search(cleaned) else cleaned
-
-
-def extract_keywords(paper_dir: Path) -> list[str]:
-    """Return up to MAX_KEYWORDS English keyword labels from 기술 키워드.
-
-    Reads the `## 기술 키워드` section (spec'd in docs/style.md §5-6) and
-    takes each top-level bullet's head term — the text before the em dash `—`
-    (the spec delimiter; a `: ` separator is tolerated for non-conforming
-    bullets). English plain text only: a head carrying any math/markup
-    (`MATH_RE` — inline KaTeX, LaTeX, backticks) is excluded outright, and a
-    head with no recoverable English (`_englishize`) is dropped too. The scan
-    continues past skipped heads to fill up to MAX_KEYWORDS. Empty list when
-    the section is missing.
-    """
-    analysis_file = paper_dir / "analysis.md"
-    try:
-        text = analysis_file.read_text(encoding="utf-8")
-    except OSError:
-        return []
-
-    in_section = False
-    labels: list[str] = []
-    for line in text.splitlines():
-        if not in_section:
-            if KEYWORD_HEADER_RE.match(line):
-                in_section = True
-            continue
-        # End of section: next ## header or a horizontal rule.
-        if line.startswith("## ") or line.strip() == "---":
-            break
-        m = KEYWORD_BULLET_RE.match(line)
-        if not m:
-            continue
-        head = m.group(1).split("—", 1)[0].replace("**", "").strip()
-        head = KEYWORD_COLON_RE.split(head, maxsplit=1)[0].strip()
-        # Exclude math keywords outright — no $…$, KaTeX, LaTeX, or backticks.
-        if MATH_RE.search(head):
-            continue
-        head = re.sub(r"\s{2,}", " ", _englishize(head)).strip()
-        if not head:
-            continue
-        if len(head) > KEYWORD_HEAD_CAP:
-            head = head[: KEYWORD_HEAD_CAP - 1].rstrip() + "…"
-        labels.append(head)
-        if len(labels) >= MAX_KEYWORDS:
-            break
-    return labels
 
 
 def _shields_escape(text: str) -> str:
@@ -273,18 +111,6 @@ def pillar_badges(pillars: list[str]) -> str:
     if not pillars:
         return "—"
     return " ".join(_badge(p, PILLAR_COLOR.get(p, PILLAR_COLOR[UNCLASSIFIED])) for p in pillars)
-
-
-def classify_link(url: str) -> str:
-    """Bucket a meta-table link by host: arxiv / github / hf / web."""
-    host = urllib.parse.urlparse(url).netloc.lower()
-    if "arxiv.org" in host:
-        return "arxiv"
-    if "github.com" in host:
-        return "github"
-    if "huggingface.co" in host:
-        return "hf"
-    return "web"
 
 
 # Per-kind shields.io badge: (alt/left label, right label, color). arXiv is
