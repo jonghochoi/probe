@@ -27,7 +27,7 @@
 - Pillars: structure stable; tracked items within can evolve as evidence accumulates
 
 **Output formatting & authoring rules**
-All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`docs/STYLE.md`** — the single source of truth. The agent must read `docs/STYLE.md` before producing any output. Do not duplicate formatting rules here; edit `docs/STYLE.md` instead.
+All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`docs/style.md`** — the single source of truth. The agent must read `docs/style.md` before producing any output. Do not duplicate formatting rules here; edit `docs/style.md` instead.
 
 **Audience**: maintainer (self, future-self) + AI retrieval agent + future collaborators. Keep terminology accessible without sacrificing precision.
 
