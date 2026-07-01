@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """supermemory PoC — Korean retrieval-quality eval (§6 risk #1).
 
-The integration note (`docs/supermemory-integration.md` §6) flags Korean
-embedding recall as the #1 risk: PROBE bodies are dense Korean, and self-hosted
-supermemory embeds with a built-in local model the user can't swap. Before
-committing to full indexing, measure it.
+Korean embedding recall is the #1 risk (docs/supermemory-poc-runbook.md §3):
+PROBE bodies are dense Korean, and self-hosted supermemory embeds with a
+built-in local model the user can't swap. Before committing to full indexing,
+measure it.
 
 This harness runs a small, hand-picked set of Korean concept queries — each
 tied to the one `analysis/<id>` that should answer it — against a running
@@ -25,7 +25,7 @@ Usage
 
 Query file (optional): JSON array of {"query": "...", "expect": "<arxiv-id>"}.
 
-Specification: docs/supermemory-integration.md §6, docs/supermemory-poc-runbook.md.
+Specification: docs/supermemory-poc-runbook.md §3.
 """
 
 from __future__ import annotations

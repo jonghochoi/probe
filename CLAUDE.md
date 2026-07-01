@@ -24,12 +24,11 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/style.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `docs/supermemory-integration.md` | human | Design/recommendation for layering [supermemory](https://supermemory.ai) as a semantic-retrieval index over the markdown corpus — metadata mapping (§2), per-source ingest design (§3), self-hosted vs hosted trade-offs (§5). Design only; the PoC lives in the `supermemory_*` scripts + runbook |
-| `docs/supermemory-poc-runbook.md` | human | Runbook for the supermemory PoC (cut 1) — what the sandbox can verify (`--dry-run`), how to run live ingest + Korean-recall eval in your own env (`npx supermemory local` + a generation-LLM key), and the §6 go/no-go gate |
-| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📝 deep-dive badge + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Corpus parsing is imported from `scripts/probe_corpus.py` (shared with the supermemory ingestor); this file keeps only index-presentation logic. Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
-| `scripts/probe_corpus.py` | human | Shared stdlib parser for the `analysis/` tree — `논문 메타` extraction + keyword extraction (single source consumed by both `refresh-analysis-index.py` and the supermemory ingestor, so the index and the retrieval layer read the row spec identically) + supermemory-document builder (`build_analysis_doc`) + embedding-noise stripping (`strip_noise`). Row-spec SSOT is `docs/style.md` §5-7 |
-| `scripts/supermemory_ingest.py` | human | supermemory PoC ingestor (cut 1) — builds one document per `analysis/<id>/analysis.md` (§2-3 mapping in `docs/supermemory-integration.md`) and either emits JSON (`--dry-run`, the only sandbox-verifiable path) or POSTs to a running server (`/v3/documents`). See `docs/supermemory-poc-runbook.md` |
-| `scripts/supermemory_eval.py` | human | supermemory PoC — Korean retrieval-quality eval (§6 risk #1): runs a small hand-picked Korean concept-query set against `/v3/search` and reports hit-rank / hit@k / MRR. Live-only (needs an ingested server); the go/no-go gate for full indexing |
+| `docs/supermemory-poc-runbook.md` | human | supermemory PoC single reference — design rationale (§0 metadata mapping + self-hosted/hosted trade-offs) plus the runbook: what the sandbox can verify (`--dry-run`), how to run live ingest + Korean-recall eval in your own env (`npx supermemory local` + a generation-LLM key), and the §3 go/no-go gate |
+| `scripts/corpus.py` | human | Shared stdlib parser for the `analysis/` tree — `논문 메타` extraction + keyword extraction (single source consumed by both `refresh-analysis-index.py` and the supermemory ingestor, so the index and the retrieval layer read the row spec identically) + supermemory-document builder (`build_analysis_doc`) + embedding-noise stripping (`strip_noise`). Row-spec SSOT is `docs/style.md` §5-7 |
+| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📝 deep-dive badge + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Corpus parsing is imported from `scripts/corpus.py` (shared with the supermemory ingestor); this file keeps only index-presentation logic. Invoked post-merge on `main` by `.github/workflows/refresh-analysis-index.yml` (PR-side regeneration was retired to eliminate parallel-PR conflicts on the generated block) |
+| `scripts/supermemory_ingest.py` | human | supermemory PoC ingestor (cut 1) — builds one document per `analysis/<id>/analysis.md` (§0.1 mapping in `docs/supermemory-poc-runbook.md`) and either emits JSON (`--dry-run`, the only sandbox-verifiable path) or POSTs to a running server (`/v3/documents`) |
+| `scripts/supermemory_eval.py` | human | supermemory PoC — Korean retrieval-quality eval (the §3 risk-#1 gate): runs a small hand-picked Korean concept-query set against `/v3/search` and reports hit-rank / hit@k / MRR. Live-only (needs an ingested server); the go/no-go gate for full indexing |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-6 across `analysis/<id>/{analysis,design}.md` + `impl/<foundry>/impl.md`; also wired into CI |
 | `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
@@ -49,6 +48,18 @@ foundry — the target of every `foundry=lerobot` impl patch under
 silently invalidate existing patches and break attribution. The only way it
 changes is the wholesale refresh procedure in `vendor/lerobot/README.md`;
 nothing else.
+
+## Script file naming
+
+Python files under `scripts/` use **`snake_case`** — it is the only convention
+that works for a file that is both run and imported (a hyphenated name can never
+be `import`ed, since `-` is not a valid identifier). New modules follow it:
+`corpus.py` is imported by `refresh-analysis-index.py` and the `supermemory_*`
+scripts, so it (and any importer of it) must be `snake_case`. The older
+hyphenated CLI scripts (`refresh-analysis-index.py`, `check-analysis-math.py`,
+`check-doc-links.py`) predate this and are pure entry points (never imported);
+they stay as-is to avoid churn across CI workflows, prompts, and committed
+artifacts. Don't add new hyphenated `.py` files.
 
 ## Grounding `vendor/lerobot/`
 

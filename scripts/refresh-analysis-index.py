@@ -16,7 +16,7 @@ Everything outside the `<!-- ANALYSIS_INDEX:START -->` /
 stays hand-maintained.
 
 The corpus parsing (meta-table extraction, keyword extraction) lives in the
-shared `probe_corpus` module so this script and the supermemory PoC ingestor
+shared `corpus` module so this script and the supermemory PoC ingestor
 read the `논문 메타` table identically; this file keeps only the
 index-presentation logic (badges, per-pillar tables, marker rewriting).
 
@@ -35,7 +35,7 @@ import re
 import sys
 import urllib.parse
 
-from probe_corpus import (
+from corpus import (
     ARXIV_ID_RE,
     REPO_ROOT,
     UNCLASSIFIED,
@@ -55,7 +55,7 @@ MARKER_END = "<!-- ANALYSIS_INDEX:END -->"
 # Pillar display names mirror context/MASTER.md §5 Pillars (kept here only
 # because this script never reads the human-owned context/ tree). The taxonomy
 # covers the six pillars P0–P5; a P# outside that range is stripped from the
-# Pillars column (by PILLAR_RE in probe_corpus at extraction time).
+# Pillars column (by PILLAR_RE in corpus at extraction time).
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",

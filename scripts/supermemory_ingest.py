@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """supermemory PoC ingestor — PROBE `analysis/` corpus → supermemory documents.
 
-Cut 1 of the integration in `docs/supermemory-integration.md`: build one
-supermemory document per `analysis/<id>/analysis.md`, mapped to supermemory's
-`customId` / `containerTags` / `metadata` fields (§2-3), and either emit them as
-JSON (`--dry-run`) or POST them to a running server (`/v3/documents`).
+Cut 1 of the supermemory integration: build one document per
+`analysis/<id>/analysis.md`, mapped to supermemory's `customId` /
+`containerTags` / `metadata` fields (docs/supermemory-poc-runbook.md §0.1), and
+either emit them as JSON (`--dry-run`) or POST them to a running server
+(`/v3/documents`).
 
-The corpus parsing is shared with the deep-dive index via `probe_corpus`
+The corpus parsing is shared with the deep-dive index via `corpus`
 (`build_analysis_doc`), so both read the `논문 메타` table identically.
 
 Usage
@@ -32,7 +33,7 @@ Notes
 - The live `/v3/documents` request/response contract should be confirmed against
   a running server; wire-field names are centralized in `_wire_payload` below.
 
-Specification: docs/supermemory-integration.md §2-3, docs/supermemory-poc-runbook.md.
+Specification: docs/supermemory-poc-runbook.md §0.1.
 """
 
 from __future__ import annotations
@@ -44,7 +45,7 @@ import sys
 import urllib.error
 import urllib.request
 
-from probe_corpus import build_analysis_doc, find_analyses
+from corpus import build_analysis_doc, find_analyses
 
 DEFAULT_BASE_URL = "http://localhost:6767"
 

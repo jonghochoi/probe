@@ -4,9 +4,8 @@
 This module is the single implementation of the `논문 메타` table parsing that
 both `refresh-analysis-index.py` (the deep-dive index) and the supermemory PoC
 ingestor (`supermemory_ingest.py`) consume. Keeping one parser is deliberate:
-the supermemory design note (`docs/supermemory-integration.md` §2) warns that
-interpreting the same row spec in two places lets the index and the retrieval
-layer drift apart. The row-spec SSOT is `docs/style.md` §5-7.
+interpreting the same row spec in two places would let the index and the
+retrieval layer drift apart. The row-spec SSOT is `docs/style.md` §5-7.
 
 It owns:
   - corpus discovery (`find_analyses`)
@@ -17,9 +16,9 @@ It owns:
     stripping (`strip_noise`)
 
 Pure stdlib, no `main` — importable from either sibling script (both live in
-`scripts/`, so `import probe_corpus` resolves via `sys.path[0]`).
+`scripts/`, so `import corpus` resolves via `sys.path[0]`).
 
-Specification: docs/style.md §5-7, docs/supermemory-integration.md §2-3.
+Specification: docs/style.md §5-7, docs/supermemory-poc-runbook.md §0.1.
 """
 
 from __future__ import annotations
@@ -283,7 +282,7 @@ def build_analysis_doc(paper_dir: Path) -> dict | None:
     """Build one supermemory document from an `analysis/<id>/analysis.md`.
 
     Maps the 논문 메타 table to supermemory fields per
-    docs/supermemory-integration.md §2-3: `customId = arxiv:<id>`,
+    docs/supermemory-poc-runbook.md §0.1: `customId = arxiv:<id>`,
     `containerTag` = primary pillar, `containerTags` = all pillars, plus a
     `metadata` block (doc_type / pillars / tags / dates / title / keywords).
     Body is noise-stripped. Returns None when the arXiv id can't be recovered
