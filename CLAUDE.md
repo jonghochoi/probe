@@ -15,7 +15,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | Path | Owner | Role |
 |---|---|---|
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
-| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32 |
+| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
 | `catalogs/` | human | Hand-curated catalog deliverables kept outside the `context/P#.md` §5 pin caps — `datasets.md` + `benchmarks.md` (P0 curation targets, `context/P0.md` §2) and `models.md` (P4 D19 lineage candidates). The routine *proposes* rows in its reports; a human lands them |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`); the auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`), plus an optional paper↔code audit (`audit.md`, from `/audit-paper` — a reproducibility gate checking the paper against its *own* official repo, distinct from `/validate-impl`'s Design↔foundry audit). Most folders today hold only `analysis.md` + `design.md`. A paper that proposes no foundry-portable method (pure dataset / benchmark / survey / tooling) is **Design 비대상**: its `analysis.md` 📄 메타 carries a `Design 적용 | 🚫 비대상 (<사유>)` row and its `design.md` is a two-block stub (📄 메타 + 🚫 Design 비대상), not the 9-section Layer 1 form — `/implement-design` short-circuits it to `UNMAPPABLE.md` (rule in `.claude/prompts/analysis.txt` DESIGN APPLICABILITY gate + `docs/style.md` §6) |
@@ -286,6 +286,34 @@ checklist existed). Walk this list every time:
       backstop for the dangling-path half of this checklist. (Pass the prompts
       or `docs/style.md` as explicit args to scan them too; they are off the
       default set because they carry illustrative example paths.)
+
+## When adding a new pillar (P6+)
+
+The six existing pillars share an identical §1–§6 skeleton, and several
+surfaces key off the pillar set — none of them update automatically. Walk
+this list end to end; a half-added pillar silently drops out of the index
+and the lints:
+
+- [ ] **Copy `context/_TEMPLATE.md` to `context/P<N>.md`** and fill every
+      `<placeholder>`. Keep the §1–§6 section spine and the
+      `[STABLE]`/`[LIVING]`/`[AGENT-INPUT]` markers exactly — the pipeline
+      and the hypothesize track pattern-match on them.
+- [ ] **Allocate a fresh, contiguous Decision range** (`D33+` — never reuse
+      or renumber an existing `D#`). Record the allocation in three places:
+      the new `P<N>.md` §3 header, the `context/P{0..5}.md` row of this
+      file's Repository map, and `context/MASTER.md` §5's pillar table.
+- [ ] **Add the pillar overview** to `context/MASTER.md` §5 (scope, identity
+      tie, tracked items — mirror the existing §5.N blocks).
+- [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for
+      it (replace every `<PILLAR>` token in `.claude/prompts/scouting.txt`
+      per `docs/agent-setup.md`).
+- [ ] **Extend the pillar-keyed tooling**: the `PILLAR_COLOR` palette +
+      pillar range in `scripts/refresh-analysis-index.py` (an out-of-range
+      `P#` is dropped at generation), the §3-1 palette table in
+      `docs/style.md`, and the default scan set in
+      `scripts/check-doc-links.py`.
+- [ ] **Run `python3 scripts/check-doc-links.py`** — the new file's path
+      references (and every doc now referencing it) must resolve.
 
 ## Automatically-maintained indexes
 
