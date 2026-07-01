@@ -140,7 +140,9 @@ class Issue:
 
 
 def in_scope_files(paths: list[Path]) -> list[Path]:
-    """Resolve the scan set: analysis.md / design.md / impl/**/impl.md."""
+    """Resolve the scan set: analysis.md / design.md / impl/**/impl.md /
+    validation/*.md (incl. reproduce-loop `*.round_N.md` snapshots) /
+    audit.md."""
     out: list[Path] = []
     if paths:
         for p in paths:
@@ -160,8 +162,10 @@ def _scope_under(root: Path) -> list[Path]:
         if "/templates/" in f"/{rel}":
             continue
         name = p.name
-        if name in ("analysis.md", "design.md") or (
-            name == "impl.md" and "/impl/" in f"/{rel}"
+        if (
+            name in ("analysis.md", "design.md", "audit.md")
+            or (name == "impl.md" and "/impl/" in f"/{rel}")
+            or "/validation/" in f"/{rel}"
         ):
             out.append(p)
     return out
