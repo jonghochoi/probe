@@ -149,6 +149,7 @@ A. Mapping feasibility (Layer 2 gate).
    If the Design cannot be mapped to this foundry with reasonable
    confidence, DO NOT produce `impl.md` or `impl.patch`. Instead,
    write a single file `analysis/<id>/impl/<foundry>/UNMAPPABLE.md`
+   (template: `analysis/templates/UNMAPPABLE.md`)
    containing one paragraph stating why (specific contract or
    interface the foundry cannot satisfy). Also append one blockquote
    line as the very last line of `analysis/<id>/analysis.md`:
