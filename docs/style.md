@@ -756,6 +756,8 @@ Outputs (all under `analysis/<id>/`):
 - `analysis/<id>/validation/<foundry>.md`         — Korean static
                                                validation report
                                                (`/validate-impl`).
+- `analysis/<id>/audit.md`                   — Korean paper↔code audit
+                                               (`/audit-paper`, §6-6).
 
 ### 6-1. File convention
 
@@ -877,3 +879,36 @@ can rely on this implementation:
 
 The verifier executes no code beyond `git apply --check`. `partial` is
 a normal outcome and far better than a fabricated `pass`.
+
+### 6-6. Paper↔code audit report (`/audit-paper` output)
+
+`analysis/<id>/audit.md` checks a different pair from §6-5: the *paper's
+own claims* against the *paper's own official repo* — a reproducibility
+gate run before spending `/reproduce-paper` rounds. It follows
+`analysis/templates/audit.md` — seven `##` sections in this order, one
+emoji each (§2 as usual; `###` and below plain):
+
+| Emoji | Section |
+|-------|---------|
+| 📄 | 메타 |
+| 🔗 | 공식 코드 |
+| ✅ | 일치 |
+| ⚠️ | 불일치 |
+| 🕳️ | 누락 |
+| ♻️ | 재현 리스크 |
+| 🚦 | 재현 게이트 |
+
+Rules specific to this family:
+
+- **🚦, not 🎯, for the gate.** §5-2/§6-2 already bind 🎯 to 관련
+  Pillar / 평가 메트릭; the audit gate uses 🚦 to avoid overloading it.
+- **Severity groups are plain `###` headers** inside ⚠️ 불일치
+  (`### FATAL` / `### MAJOR` / `### MINOR`) — never `### 🔶 MAJOR`;
+  emoji on `###` violates §2. Severity emojis (🔴/🔶/⚠️) may appear in
+  table cells and inline verdict tags only.
+- Gate verdict vocabulary is closed: `✅ 재현 추천` / `⚠️ 주의 후 재현`
+  / `🛑 재현 비추천` / `🚫 audit 불가` (no fetchable official code —
+  an honest "no code to check", never a fabricated pass).
+- Every 일치/불일치 row grounds in a `file:line` or config key actually
+  read (unread = unstated); 누락 (no corresponding code at all) stays
+  distinct from 불일치 (code does it differently).
