@@ -81,8 +81,11 @@ CONTEXT (read-only):
 - For `--foundry lerobot`:
   - `vendor/lerobot/README.md` — pinned commit SHA; the `impl.md` meta
     header MUST cite the same SHA.
-  - `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`
-    — the candidate base policies. Beyond the chosen base policy, the
+  - `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion,vla_jepa}/`
+    — the candidate base policies (every policy dir under
+    `vendor/lerobot/policies/` except the shared `rtc/`; re-list that
+    directory rather than trusting this enumeration if they ever
+    disagree). Beyond the chosen base policy, the
     snapshot also covers groundable surface for non-policy changes:
     `vendor/lerobot/policies/rtc/` (real-time chunking / inference-time
     action handling), `vendor/lerobot/datasets/` (the standard
@@ -119,11 +122,13 @@ A. Mapping feasibility (Layer 2 gate).
    in the foundry's code surface with reasonable confidence.
 
    For `--foundry lerobot`: pick exactly one base under
-   `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion}/`.
+   `vendor/lerobot/policies/{pi0,pi05,pi0_fast,smolvla,act,diffusion,vla_jepa}/`.
    Signals: the Design's `변경 의도` and `foundry 힌트` sections, plus
    architectural fingerprints (PaliGemma + flow matching → pi0 family;
    action chunking + transformer enc/dec → ACT; DDPM/DDIM head →
-   Diffusion Policy; small VLM + action expert → SmolVLA). Changes that
+   Diffusion Policy; small VLM + action expert → SmolVLA; JEPA-style
+   latent world-model / predictive-embedding objective → VLA-JEPA,
+   the natural base for P5 World Model designs). Changes that
    are not policy-internal still ground against the wider snapshot:
    real-time / inference-time action handling → `policies/rtc/`; data
    contract, sampling, or stats → `datasets/`; augmentation →
