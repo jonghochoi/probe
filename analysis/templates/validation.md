@@ -4,8 +4,9 @@
 > foundry 의 impl 가이드/패치를 원천 분석 문서 (`analysis/<id>/analysis.md`) 와
 > foundry 코드에 대조한 정적 검증 결과입니다. 코드는 실행하지
 > 않습니다 (`git apply --check` 만 허용). 형식·이모지·용어 규칙은
-> `docs/style.md` §7 / §4 를 정확히 따릅니다. 재실행 시 이
-> 파일을 덮어씁니다.
+> `docs/style.md` §6-5 / §4 를 정확히 따릅니다. 재실행 시 이
+> 파일을 덮어씁니다 (`/reproduce-paper` 루프는 덮어쓰기 직전 스냅샷을
+> `<foundry>.round_<N>.md` 로 보존 — §6-5).
 
 ---
 
@@ -16,6 +17,7 @@
 | 상위 Design | [`../design.md`](../design.md) |
 | Originating analysis | [`../analysis.md`](../analysis.md) |
 | Foundry | `lerobot` (또는 다른 등록된 foundry 이름) |
+| Foundry pinned commit | `<vendor/<foundry>/README.md 의 Pinned commit SHA verbatim>` |
 | 구현 가이드 | [`../impl/<foundry>/impl.md`](../impl/<foundry>/impl.md) · [`../impl/<foundry>/impl.patch`](../impl/<foundry>/impl.patch) |
 | 검증 생성일 | YYYY-MM-DD (`TZ=Asia/Seoul`) |
 | 📚 문헌 대조 | `pass` / `fail` / `partial` |
