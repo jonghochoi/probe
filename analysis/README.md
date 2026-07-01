@@ -6,9 +6,9 @@ when generated, foundry impl + validation artifacts (schema in `CLAUDE.md`).
 
 The table below is an **auto-generated index** — one section per primary
 Pillar, the 📝 badge in front of each title links to that paper's deep-dive. It is
-rewritten between the markers by `scripts/refresh-analysis-index.py` (post-merge
-on `main`); do not hand-edit inside the markers. Everything above them is
-hand-maintained.
+rewritten between the markers by `scripts/refresh-analysis-index.py` (run
+manually on demand); do not hand-edit inside the markers. Everything above them
+is hand-maintained.
 
 <!-- ANALYSIS_INDEX:START -->
 
