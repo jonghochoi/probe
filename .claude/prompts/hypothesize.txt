@@ -167,7 +167,9 @@ OUTPUT — Korean (`hypotheses/<slug>/…`)
 
 Derive a short slug from the pillar + the dominant theme (lowercase, hyphens,
 ≤5 words — e.g. `p1-body-hand-coupling`). Write all files under
-`hypotheses/<slug>/`. Author in Korean, 개조식 (명사형 종결) per `docs/style.md`
+`hypotheses/<slug>/`, following the templates in `hypotheses/templates/`
+exactly (canonical form: `docs/style.md` §7). Author in Korean, 개조식
+(명사형 종결) per `docs/style.md`
 §4; keep paper titles, `P#`/`D#` tags, arXiv links, config/metric names, and
 formulas verbatim. One emoji per `##` header only (STYLE §2), `###` and below
 plain. Use P#/D# shields.io badges with the §3-1 palette on first mention.
