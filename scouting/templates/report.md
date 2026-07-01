@@ -113,10 +113,14 @@ style.md §3-1 is authoritative. Summary:
 ## 📊 점수 요약
 
 <!-- NO summary table — it duplicates the per-paper rationale below (STYLE §4-5).
-     Surface a paper only if every dimension scores ≥ 2; if fewer than 3 qualify,
-     say so and do not pad. The rationale is 개조식 (STYLE §4-4): one bold paper
-     head carrying the total (`**HapTile (10/12)**`), then a nested bullet per
-     dimension (`- Relevance 3 — <명사형 근거>`). -->
+     The rubric is FIVE dimensions, 0–3 each, total /15 (canonical
+     definitions: .claude/prompts/scouting.txt; codified in STYLE §4-5):
+       Relevance · Novelty · Reproducibility · Methodology · Sim2Real
+     Surface a paper only if every one of the five dimensions scores ≥ 2;
+     if fewer than 3 qualify, say so and do not pad. The rationale is
+     개조식 (STYLE §4-4): one bold paper head carrying the total
+     (`**HapTile (13/15)**`), then a nested bullet per dimension
+     (`- Relevance 3 — <명사형 근거>`), all five dimensions listed. -->
 
 ---
 

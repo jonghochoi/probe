@@ -328,9 +328,17 @@ It applies to every `scouting/` and `analysis/` output.
   To stack several items in one cell, join them with `<br>` and a literal
   bullet glyph: `• a<br>• b<br>• c`.
 - **No 📊 summary score table.** The 📊 section is the per-paper rationale
-  only (one bold head carrying the total — `**HapTile (10/12)**` — then a
+  only (one bold head carrying the total — `**HapTile (13/15)**` — then a
   bullet per dimension). A separate scores table duplicates it, so it is
   dropped.
+- **The scouting rubric is five fixed dimensions, 0–3 each, total /15**:
+  Relevance · Novelty · Reproducibility · Methodology · Sim2Real
+  (definitions live in `.claude/prompts/scouting.txt`). The surfacing
+  gate — every dimension ≥ 2 — quantifies over all five, so the
+  dimension set is load-bearing: never add, drop, or rename a dimension
+  in a report, and always show all five bullets per paper. (Reports
+  dated before 2026-07 used a four-dimension /12 rubric without
+  Sim2Real; their totals are not comparable to /15 totals.)
 - **Conclusion before enumeration.** When a long list resolves to one
   verdict ("10편 전원 재등장·제외"), state the verdict first, then the list —
   the reader must not parse every item to reach the point.
