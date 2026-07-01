@@ -90,8 +90,11 @@ Reproduction risks feed the gate too: claims may match yet severe run-blockers
 ---
 
 OUTPUT — Korean (`analysis/<id>/audit.md`)
-Author in Korean, 개조식 per `docs/style.md` §4; one emoji per `##` header
-(STYLE §2), `###`/below plain; verbatim paper titles, config keys, `file:line`,
+Follow `analysis/templates/audit.md` exactly (canonical form:
+`docs/style.md` §6-6). Author in Korean, 개조식 per `docs/style.md` §4; one
+emoji per `##` header (STYLE §2), `###`/below plain — severity groups inside
+⚠️ 불일치 are plain `### FATAL` / `### MAJOR` / `### MINOR`, never
+`### 🔶 MAJOR`; verbatim paper titles, config keys, `file:line`,
 arXiv links. Sections, in order:
   ## 📄 메타          — paper id/title, claim source (analysis vs 직접 추출),
                         official repo URL + commit/branch fetched, audit 생성일,
@@ -105,7 +108,8 @@ arXiv links. Sections, in order:
                         unreleased component) — kept distinct from divergence
   ## ♻️ 재현 리스크    — run-blockers even when claims match: seeds, unpinned
                         deps, hardcoded paths, env / determinism gaps
-  ## 🎯 재현 게이트   — the one rolled-up gate verdict + a one-line rationale
+  ## 🚦 재현 게이트   — the one rolled-up gate verdict + a one-line rationale
+                        (🚦, not 🎯 — §5-2/§6-2 already bind 🎯 elsewhere)
 
 If `analysis/<id>/` does not exist yet, still write to `analysis/<id>/audit.md`
 (create the folder) so the artifact lives beside the future deep-dive.
