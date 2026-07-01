@@ -5,12 +5,17 @@ name: Check analysis math
 # PR-time (not post-merge like the index refresh) so malformed math is caught
 # and cleaned BEFORE it lands on main and leaks the source on github.com.
 #
-# Flow: run the checker with --fix (tolerating a non-zero exit — unfixable
-# findings must not abort the job before the fixes are pushed), push the
-# normalized result back to the PR branch as a bot commit, then re-run without
-# --fix so any unfixable finding (unbalanced `$`, unsupported macro) fails the
-# check. The final re-check step owns the pass/fail verdict; the bot push does
-# NOT retrigger the workflow (GITHUB_TOKEN pushes never start new runs).
+# Two jobs:
+#   autofix — same-repo branches only (fork PRs get a read-only token): run the
+#             checker with --fix (tolerating a non-zero exit — unfixable
+#             findings must not abort the job before the fixes are pushed),
+#             push the normalized result back to the PR branch as a bot commit,
+#             then re-run without --fix so any unfixable finding (unbalanced
+#             `$`, unsupported macro) fails the check. The final re-check step
+#             owns the pass/fail verdict; the bot push does NOT retrigger the
+#             workflow (GITHUB_TOKEN pushes never start new runs).
+#   check   — fork PRs only: the same lint read-only (no fix, no push), so an
+#             external PR still cannot land source-leaking math unchecked.
 
 on:
   pull_request:
@@ -20,18 +25,18 @@ on:
       - '.github/workflows/check-analysis-math.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: check-analysis-math-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
+  autofix:
     runs-on: ubuntu-latest
-    # Same-repo branches only — fork PRs get a read-only token and cannot be
-    # auto-fixed-and-pushed. (PROBE develops on internal branches.)
     if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -64,4 +69,15 @@ jobs:
           done
           git push origin HEAD:${{ github.head_ref }}
       - name: Re-check for unfixable issues
+        run: python3 scripts/check-analysis-math.py
+
+  check:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check math formatting (read-only)
         run: python3 scripts/check-analysis-math.py
