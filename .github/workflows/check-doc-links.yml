@@ -21,6 +21,13 @@ on:
       - 'scripts/check-doc-links.py'
       - '.github/workflows/check-doc-links.yml'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: check-doc-links-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
