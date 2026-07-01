@@ -13,7 +13,7 @@ easy to miss.
 |---|---|---|
 | Vendored snapshot | `vendor/<name>/` | Read-only, byte-stable partial copy for reading and `git apply --check` — the coordinate system every `impl.md`/`impl.patch` grounds in |
 | Provenance table | `vendor/<name>/README.md` | `Source repository` + `Pinned commit` + `Vendor date` + `License` + `Scope` rows; the SHA every impl/validation meta table cites |
-| Runtime case arm | `scripts/ensure-foundry-runtime.sh` | Clone URL + `requires-python` floor, keyed by foundry name; builds the executable `.foundry-runtime/<name>/` on demand |
+| Runtime case arm | `scripts/ensure-foundry-runtime.sh` | `requires-python` floor keyed by foundry name (the registration gate); the clone URL derives from the README's `Source repository` row. Builds the executable `.foundry-runtime/<name>/` on demand |
 | Impl/validation outputs | `analysis/<id>/impl/<name>/`, `analysis/<id>/validation/<name>.md` | Created per paper by the pipeline once the foundry exists |
 
 ## Checklist
@@ -25,13 +25,16 @@ easy to miss.
    the upstream `LICENSE`. The snapshot does not need to import or run —
    partial trees are expected (the runtime, not the snapshot, executes).
 2. **Write `vendor/<name>/README.md`** — mirror `vendor/lerobot/README.md`:
-   the provenance table (the `Pinned commit` row format is load-bearing —
-   `| Pinned commit | `<sha>` |` — `ensure-foundry-runtime.sh` parses it),
-   the vendored-tree listing, the "not vendored" boundary, and a refresh
+   the provenance table (the `Pinned commit` and `Source repository` row
+   formats are load-bearing — `| Pinned commit | `<sha>` |` and
+   `| Source repository | `<owner>/<repo>` … |` —
+   `ensure-foundry-runtime.sh` parses both; the clone URL is
+   `https://github.com/<owner>/<repo>.git`), the vendored-tree listing,
+   the "not vendored" boundary, and a refresh
    procedure. State explicitly that hand-edits are forbidden and a pin bump
    invalidates every existing `impl.patch` under `*/<name>/`.
 3. **Register the runtime** — add one `case` arm in
-   `scripts/ensure-foundry-runtime.sh` (`<name>) url="…"; pyver="…" ;;`).
+   `scripts/ensure-foundry-runtime.sh` (`<name>) pyver="…" ;;`).
    Nothing else in the script changes. If the upstream package needs
    install quirks (index pins, extras), keep them inside the arm or the
    install step with a comment, as the lerobot torch/cu128 note does.

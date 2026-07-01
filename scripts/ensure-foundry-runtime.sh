@@ -37,19 +37,31 @@ fail() { echo "ensure-foundry-runtime(${foundry}): $1" >&2; exit 1; }
 
 [ -f "$readme" ] || fail "no vendor/${foundry}/README.md — unknown foundry"
 
+# uv creates the runtime venv (pinned python version); hard prerequisite.
+command -v uv >/dev/null 2>&1 || \
+  fail "uv is not installed — required to create the runtime venv (https://docs.astral.sh/uv/)"
+
 # Pin SHA + source repo are parsed from the vendor README provenance table
-# (the same rows /implement and /validate cite). Keep this the single source of
-# truth so the runtime can never drift from the snapshot it mirrors.
-pin="$(sed -n 's/^| Pinned commit | `\([0-9a-f]\{7,40\}\)` |.*/\1/p' "$readme" | head -1)"
+# (the same rows /implement and /validate cite). Keep those rows the single
+# source of truth so the runtime can never drift from the snapshot it mirrors.
+# Both parses tolerate case/whitespace drift in the row label and cell padding
+# (a human edits that table by hand during the refresh procedure).
+pin="$(sed -nE 's/^\|[[:space:]]*[Pp]inned[[:space:]]+[Cc]ommit[[:space:]]*\|[[:space:]]*`([0-9a-fA-F]{7,40})`.*/\1/p' "$readme" | head -1)"
 [ -n "$pin" ] || fail "could not parse 'Pinned commit' SHA from $readme"
 
-# Map foundry -> clone URL + required python. Adding a foundry is a one-line
-# case arm here plus a vendor/<name>/ snapshot; no other part of this script
-# changes. The python version mirrors the foundry's `requires-python` floor so
-# `uv venv` never silently picks an older system default.
+repo="$(sed -nE 's/^\|[[:space:]]*[Ss]ource[[:space:]]+[Rr]epository[[:space:]]*\|[[:space:]]*`([A-Za-z0-9._/-]+)`.*/\1/p' "$readme" | head -1)"
+[ -n "$repo" ] || fail "could not parse 'Source repository' from $readme"
+url="https://github.com/${repo}.git"
+
+# Map foundry -> required python. Adding a foundry is a one-line case arm here
+# plus a vendor/<name>/ snapshot (see docs/foundry-onboarding.md); no other
+# part of this script changes. The python version mirrors the foundry's
+# `requires-python` floor so `uv venv` never silently picks an older system
+# default. The case arm doubles as the registration gate — an unregistered
+# foundry fails here even when a vendor/<name>/README.md exists.
 case "$foundry" in
-  lerobot) url="https://github.com/jonghochoi/lerobot.git"; pyver="3.12" ;;
-  *) fail "no clone URL registered for foundry '${foundry}' — add a case arm" ;;
+  lerobot) pyver="3.12" ;;
+  *) fail "foundry '${foundry}' not registered — add a case arm" ;;
 esac
 
 # Idempotent: once built at the recorded pin, do nothing.
