@@ -39,6 +39,23 @@ cross-cutting content. Edit the `P#.md` for pillar content; edit `MASTER.md`
 only for global content. (The earlier "MASTER is SSOT, regenerate the extracts
 from it" model no longer holds.)
 
+**Decision-Log entry format.** Every entry in a `P#.md` §3 Decision Log has
+exactly this shape (used 32× across the six pillars; the scouting /
+hypothesize prompts and lint tooling pattern-match on it, so it is
+load-bearing, not cosmetic):
+
+```
+#### [D<n>] <Decision title> (P<m>)
+- **v1**: <current first-attempt choice — **bold** the chosen alternative;
+  tracked/deferred alternatives named inline; `OPEN` decisions append
+  ` — **OPEN**` to the title line and mark the bullet `(working, not settled)`>
+```
+
+One `####` heading + one `- **v<k>**:` bullet per decision. `D<n>` stays
+within the pillar's allocated range and is never renumbered; superseding a
+choice bumps the bullet to `**v2**:` (etc.) in place — the old version's
+rationale lives outside the context file, not as a second bullet.
+
 `vendor/lerobot/` is read-only to **both** the agent and contributors. It is
 a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the v0
 foundry — the target of every `foundry=lerobot` impl patch under
