@@ -20,13 +20,21 @@ Invoked on demand via the manual `workflow_dispatch` of
 `.github/workflows/refresh-analysis-index.yml`. Safe to run manually from the
 repo root:
 
-    python3 scripts/refresh-analysis-index.py
+    python3 scripts/refresh-analysis-index.py            # regenerate
+    python3 scripts/refresh-analysis-index.py --check    # lint only
+
+`--check` writes nothing: it exits non-zero when any paper dir is missing its
+`analysis.md`, any extracted meta cell degraded to the `⚠️ metadata`
+placeholder, or a paper landed in the 미분류 bucket (no `관련 Pillar` row) —
+the failures that otherwise surface only as broken badges in the published
+index after the next manual refresh.
 
 Specification: docs/style.md §5-7.
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 import urllib.parse
@@ -79,9 +87,15 @@ PILLAR_COLOR = {
 PILLAR_RE = re.compile(r"P[0-5]")
 
 
-def find_analyses() -> list[Path]:
-    """Return per-paper subdirectory paths (not templates or other dirs)."""
+def find_analyses() -> tuple[list[Path], list[Path]]:
+    """Return (paper_dirs, skipped_dirs).
+
+    A paper dir must carry an `analysis.md`; a dir without one (a stray
+    folder, a half-written run) is skipped from the index rather than
+    emitted as an all-WARN row, and reported so `--check` can flag it.
+    """
     out: list[Path] = []
+    skipped: list[Path] = []
     for path in sorted(ANALYSIS_DIR.iterdir()):
         if not path.is_dir():
             continue
@@ -90,8 +104,11 @@ def find_analyses() -> list[Path]:
         if name.startswith("_") or name == "templates":
             continue
         # Accept arXiv ids or arbitrary slug directory names.
-        out.append(path)
-    return out
+        if (path / "analysis.md").is_file():
+            out.append(path)
+        else:
+            skipped.append(path)
+    return out, skipped
 
 
 def extract_meta(paper_dir: Path) -> dict:
@@ -169,8 +186,8 @@ PAREN_RE = re.compile(r"^(.*?)\s*\(([^()]*)\)\s*(.*)$")
 MATH_RE = re.compile(r"[`$\\]")
 MAX_KEYWORDS = 5
 KEYWORD_HEAD_CAP = 40  # badges stay short and scannable
-# All keyword badges share one color (노 yellow). Keywords are descriptive, not
-# ranked, so a per-position palette added visual noise without meaning.
+# All keyword badges share one color (pale grey). Keywords are descriptive,
+# not ranked, so a per-position palette added visual noise without meaning.
 KEYWORD_COLOR = "e8e7e7"  # pale grey
 
 
@@ -368,9 +385,12 @@ def build_block(rows: list[dict]) -> str:
         out.append(f"## {title}\n\n")
         out.append(HEADER)
         for i, row in enumerate(bucket, 1):
+            # The index is analysis/README.md itself, so the link is relative
+            # to that file — plain `<stem>/analysis.md`, no `../analysis/`
+            # round-trip.
             badge = (
                 "[![](https://img.shields.io/badge/📝-ffffff.svg)]"
-                f"(../analysis/{row['stem']}/analysis.md)"
+                f"({row['stem']}/analysis.md)"
             )
             links_cell = link_badges(row["links"], row["arxiv_id"])
             out.append(
@@ -404,8 +424,42 @@ def rewrite_index(block: str) -> bool:
     return True
 
 
+def check_rows(rows: list[dict], skipped: list[Path]) -> int:
+    """Lint-only pass: report degraded metadata, write nothing."""
+    problems = 0
+    for path in skipped:
+        problems += 1
+        print(f"analysis/{path.name}/: no analysis.md — dir skipped from the index")
+    for row in rows:
+        stem = row["stem"]
+        for field in ("title", "arxiv_id", "refreshed"):
+            if row[field] == WARN:
+                problems += 1
+                print(f"analysis/{stem}/analysis.md: 논문 메타 row for {field} "
+                      f"missing/malformed (would render as '{WARN}')")
+        if not row["pillars"]:
+            problems += 1
+            print(f"analysis/{stem}/analysis.md: no 관련 Pillar row — "
+                  f"would land in the {UNCLASSIFIED} bucket")
+    if problems:
+        print(f"\nrefresh-analysis-index --check: {problems} problem(s) "
+              f"across {len(rows)} analyses")
+        return 1
+    print(f"refresh-analysis-index --check: {len(rows)} analyses clean")
+    return 0
+
+
 def main() -> int:
-    analyses = find_analyses()
+    parser = argparse.ArgumentParser(
+        description="Regenerate (or, with --check, lint) the analysis index."
+    )
+    parser.add_argument(
+        "--check", action="store_true",
+        help="write nothing; exit 1 on missing analysis.md / degraded meta",
+    )
+    args = parser.parse_args()
+
+    analyses, skipped = find_analyses()
 
     rows: list[dict] = []
     for paper_dir in analyses:
@@ -414,6 +468,13 @@ def main() -> int:
         meta["keywords"] = extract_keywords(paper_dir)
         rows.append(meta)
 
+    if args.check:
+        return check_rows(rows, skipped)
+
+    for path in skipped:
+        sys.stderr.write(
+            f"warning: analysis/{path.name}/ has no analysis.md — skipped\n"
+        )
     block = build_block(rows)
     index_changed = rewrite_index(block)
     print(
