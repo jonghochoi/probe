@@ -1,0 +1,32 @@
+name: Check commit style
+
+# Validate the PR title against the CLAUDE.md commit grammar. PROBE
+# squash-merges, so the PR title IS the commit subject that lands on main —
+# linting it here enforces the style CLAUDE.md itself calls the most
+# drift-prone ("always start the description with an imperative verb").
+#
+# Runs on title edits too, so fixing the title re-runs the gate without a push.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-commit-style-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check PR title against CLAUDE.md commit style
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python3 scripts/check-commit-style.py "$PR_TITLE"
