@@ -873,8 +873,16 @@ refresh procedure.
 ### 6-5. Verify report (`/validate-impl` output)
 
 The validation report is the static check of a Design + foundry patch
-against the originating analysis and the foundry code. It is the
-single deliverable — there is no manifest, no graduated status.
+against the originating analysis and the foundry code. There is no
+manifest and no graduated status; `analysis/<id>/validation/<foundry>.md`
+is always the current verdict. One qualification: a `/reproduce-paper`
+run snapshots the report at each round boundary as
+`validation/<foundry>.round_<N>.md` (a plain copy made *before* the next
+round overwrites the live file), so a converged loop leaves
+`<foundry>.round_0.md … round_<K>.md` beside the final `<foundry>.md` as
+the convergence log. Round copies are frozen history — regeneration
+never rewrites them, and readers cite the live file unless auditing the
+loop itself.
 
 Four `##` sections drive the verdict (`pass` / `fail` / `partial` per
 section), followed by 종합 판정 summarising whether the analysis
