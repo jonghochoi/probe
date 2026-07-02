@@ -133,10 +133,15 @@ GIT — after the report is written:
   git add analysis/<id>/audit.md
   # Append the paper's ALIAS in trailing parens — " (<alias>)" — so the
   # subject is identifiable without resolving the bare arXiv id. The alias
-  # is the paper's codename: the prefix BEFORE the first colon in the
-  # `원문 제목 (영문)` meta row of analysis/<id>/analysis.md (e.g.
-  # "T-Rex: …" → T-Rex). If the title carries no colon-delimited codename,
-  # OMIT the parens entirely — never invent one.
+  # is the paper's codename, resolved in the same priority order as
+  # /analyze-paper (canonical rule: CLAUDE.md "Commit message style"):
+  #   (1) the prefix BEFORE the first colon in the `원문 제목 (영문)` meta
+  #       row of analysis/<id>/analysis.md (e.g. "T-Rex: …" → T-Rex);
+  #   (2) failing a colon, an acronym the paper explicitly defines for
+  #       itself as `ACRONYM (Full Expansion)` in the title / abstract /
+  #       intro whose expansion initials spell the acronym
+  #       (e.g. `Human Universal Grasping` → HUG);
+  #   (3) otherwise OMIT the parens entirely — never invent one.
   # Subject verb depends on whether this <id> was ALREADY audited.
   # Decide BEFORE overwriting the file (check whether
   # analysis/<id>/audit.md already existed / was git-tracked):
