@@ -127,7 +127,7 @@ Decision-number allocation:
 | P5 — World Model | action-conditioned world model integration | D28–D32 |
 
 ### 5.0 P0. VLA Datasets & Benchmarks
-**Scope**: data is upstream of method. Dedicated scouting front-end for VLA datasets (robot action / human-egocentric video / mixed) + the scarce tactile/force/torque corpora + benchmarks/eval harnesses. Output feeds the P4 pretraining-corpus decisions and the catalogs (`catalogs/datasets.md` + `catalogs/benchmarks.md`). Egocentric + tactile/torque emphasis sets the priority data axis.
+**Scope**: data is upstream of method. Dedicated scouting front-end for VLA datasets (robot action / human-egocentric video / mixed) + the scarce tactile/force/torque corpora + benchmarks/eval harnesses. Output feeds the P4 pretraining-corpus decisions. Egocentric + tactile/torque emphasis sets the priority data axis.
 
 **Identity tie**: the pretraining corpus (P4 D22) and the egocentric data priority need an evidence-driven data front-end, not incidental scouting.
 
@@ -135,7 +135,7 @@ Decision-number allocation:
 
 **Anti-topics**: method-only papers with no released data/benchmark; sub-pretraining-scale single-task sets; vision-only corpora pitched as sufficient for dexterity.
 
-**Literature anchor**: EgoDex, Ego-Exo4D, UniHand-2.0, AgiBot World, DROID, RH20T (F/T), ManiSkill 3, vla-eval. See `context/P0.md` §5 and the `datasets.md` / `benchmarks.md` catalogs.
+**Literature anchor**: EgoDex, Ego-Exo4D, UniHand-2.0, AgiBot World, DROID, RH20T (F/T), ManiSkill 3, vla-eval. See `context/P0.md` §5.
 
 ### 5.1 P1. Heterogeneous Body/Hand Action Expert
 **Scope**: Body vs Hand action-expert design. Body/torso/arm handle macro motion (object approach, transport, placement); fingers handle post-contact contact-rich precision. Either an explicit BodyExpert–HandExpert split, or a single ActionExpert with strongly separated body/hand latents (comparison group). Body output = both-wrist or tool-flange pose (embodiment-transfer easing); Hand output = finger joint command. Includes Body↔Hand information-sharing, input-modality separation, control-rate separation, and π backbone integration.

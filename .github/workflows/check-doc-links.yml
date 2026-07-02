@@ -16,7 +16,6 @@ on:
       - 'README.md'
       - 'docs/**'
       - 'context/**'
-      - 'catalogs/**'
       - '.claude/**'
       - 'scripts/check-doc-links.py'
       - '.github/workflows/check-doc-links.yml'
