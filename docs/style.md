@@ -336,9 +336,7 @@ It applies to every `scouting/` and `analysis/` output.
   (definitions live in `.claude/prompts/scouting.txt`). The surfacing
   gate — every dimension ≥ 2 — quantifies over all five, so the
   dimension set is load-bearing: never add, drop, or rename a dimension
-  in a report, and always show all five bullets per paper. (Reports
-  dated before 2026-07 used a four-dimension /12 rubric without
-  Sim2Real; their totals are not comparable to /15 totals.)
+  in a report, and always show all five bullets per paper.
 - **Conclusion before enumeration.** When a long list resolves to one
   verdict ("10편 전원 재등장·제외"), state the verdict first, then the list —
   the reader must not parse every item to reach the point.

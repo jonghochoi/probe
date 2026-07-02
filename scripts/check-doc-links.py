@@ -71,10 +71,9 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant to
 # point at real files, plus the human-owned context files the scheduled routine
-# reads every run (their `docs/style.md`-style pointers must resolve — an
-# uppercase `docs/STYLE.md` once drifted here unnoticed). style.md / prompts are
-# intentionally excluded (they carry illustrative example paths) but can be
-# passed explicitly as PATH args.
+# reads every run (their `docs/style.md`-style pointers must resolve). style.md
+# / prompts are intentionally excluded (they carry illustrative example paths)
+# but can be passed explicitly as PATH args.
 _DEFAULT_DOCS = [
     "CLAUDE.md",
     "README.md",
