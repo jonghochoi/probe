@@ -2,10 +2,10 @@
 
 Read-only reference snapshot of selected `lerobot` policy code. PROBE itself
 is a Korean paper-analysis + scouting framework and does not run this code —
-it is vendored as the **v0 foundry**, so the `/foundry` command can map a
-Design (Layer 1, vendor-agnostic) onto **concrete file/line locations** of a
-known baseline, and emit an implementation guide
-(`analysis/<id>_impl/lerobot/impl.md`) plus a unified-diff patch
+it is vendored as the **v0 foundry**, so the `/implement-design` command can
+map a Design (Layer 1, vendor-agnostic) onto **concrete file/line locations**
+of a known baseline, and emit an implementation guide
+(`analysis/<id>/impl/lerobot/impl.md`) plus a unified-diff patch
 (`impl.patch` next to it) against this snapshot.
 
 ## Provenance
@@ -47,15 +47,17 @@ vendor/lerobot/
 Not vendored: `lerobot.optim`, `lerobot.model`, `lerobot.envs`, `lerobot.types`,
 `lerobot.rl`, robot drivers, training scripts, tests. The vendored `.py` files
 still `import` from those modules — that is intentional: the snapshot is for
-**reading and diff'ing**, not for running. If you want to actually execute any
-of this code, install `lerobot` from the pinned commit instead of relying on
-this directory.
+**reading and diff'ing**, not for running. To actually execute any of this
+code (e.g. an impl's smoke test), use `scripts/ensure-foundry-runtime.sh
+lerobot` — it installs the **whole** upstream package at the pinned commit
+into the gitignored `.foundry-runtime/lerobot/` and prints the venv python;
+`/validate-impl §🧬` and `/implement-design §G` invoke it automatically.
 
 ## Why it is here
 
-`/foundry` reads a Layer 1 Design (`analysis/<id>_design.md`), identifies
-whether the Design can ground in one of the seven policies above (the
-`foundry=lerobot` case), then produces a
+`/implement-design` reads a Layer 1 Design (`analysis/<id>/design.md`),
+identifies whether the Design can ground in one of the seven policies above
+(the `foundry=lerobot` case), then produces a
 Korean implementation guide whose code references point inside this
 directory. The patch (`impl.patch`) is generated against the current state
 of this snapshot, so the snapshot itself must stay byte-stable until the
@@ -82,13 +84,15 @@ Procedure:
 3. Replace `LICENSE` if upstream changed it (it has not, at the pinned
    commit, but check).
 4. Update **Pinned commit** and **Vendor date** in the table above.
-5. Re-run `/foundry <design-path> --foundry lerobot` for every Design that
-   already has an `impl.md` under `*/lerobot/`, and verify the regenerated
-   `impl.patch` still applies cleanly to the new snapshot. Then re-run
-   `/verify <design-path> --foundry lerobot` so `manifest.implementation.
-   lerobot.apply_check` and `manifest.validation.lerobot.*` reflect the
-   refreshed state. Patches that no longer apply must be rebuilt; their
-   guide files keep `(잠정)` markers until they are.
+5. Re-run `/implement-design <design-path> --foundry lerobot` for every
+   Design that already has an `impl.md` under `*/impl/lerobot/`, and verify
+   the regenerated `impl.patch` still applies cleanly to the new snapshot.
+   Then re-run `/validate-impl <design-path> --foundry lerobot` so each
+   paper's `validation/lerobot.md` (its 📄 검증 메타 cites the pinned SHA)
+   reflects the refreshed state. Patches that no longer apply must be
+   rebuilt; their guide files keep `(잠정)` markers until they are.
+   Delete any stale `.foundry-runtime/lerobot/` so the runtime rebuilds at
+   the new pin on next use (the `.ready` marker stores the old SHA).
 
 ## License & attribution
 
