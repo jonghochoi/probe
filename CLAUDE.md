@@ -123,14 +123,22 @@ Hard rules:
    `switch`, `migrate`, `restructure`, `clarify`, `re-align`, `unify`,
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
-   `deps`. Don't invent new types. (The bare `scout:` / `analysis:` prefixes
-   are *generated routine commits*, not human commits — do not imitate them when
-   authoring code/doc changes. Their canonical formats are:
-   `scout: P{N} report YYYY-MM-DD` and
+   `deps`. Don't invent new types. (The bare `scout:` / `analysis:` /
+   `audit:` / `foundry:` / `validation:` / `reproduce(...)` / `hypothesize:`
+   prefixes are *generated routine commits*, not human commits — do not
+   imitate them when authoring code/doc changes. Their canonical formats,
+   one per generating prompt:
+   `scout: P{N} report YYYY-MM-DD`,
    `analysis: add <arxiv-id> deep-dive + design (<alias>)`
    for a first-time analysis (`update` instead of `add` when re-running
-   `/analyze-paper` on an `<arxiv-id>` that already had a folder), and
-   `audit: add <arxiv-id> paper-code audit (<alias>)`. The trailing
+   `/analyze-paper` on an `<arxiv-id>` that already had a folder),
+   `audit: add|update <arxiv-id> paper-code audit (<alias>)`,
+   `foundry: map <arxiv-id> onto <foundry>` (`/implement-design`),
+   `validation: <arxiv-id> on <foundry>` (`/validate-impl`),
+   `reproduce(<arxiv-id>, <foundry>, round <N>): <action>` (the
+   `/reproduce-paper` round-boundary snapshot commit), and
+   `hypothesize: add|update <slug> hypotheses` (`add <slug> compare
+   matrix` for `--compare-only`). The trailing
    `(<alias>)` is the paper's codename, resolved in priority order: (1) the
    prefix before the first colon in the title's `원문 제목 (영문)` meta row
    (e.g. `LaST-HD`, `Being-H0.7`, `T-Rex`); (2) failing a colon, an acronym
