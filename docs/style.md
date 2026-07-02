@@ -653,7 +653,9 @@ desc (ties by arXiv id desc). Per row:
   `Website-Link-blue`, `GitHub-Code-black`, `HuggingFace-Model-yellow`. Any
   non-arXiv/GitHub/HuggingFace URL renders as the generic `Website` badge;
 - a `Pillars` cell — every `P#` from the `관련 Pillar` row as a fixed-color
-  badge (P1 blue, P2 purple, P3 green, P4 red);
+  badge (the §3-1 pale palette: P0 red, P1 orange, P2 green, P3 mint,
+  P4 blue, P5 purple — `PILLAR_COLOR` in
+  `scripts/refresh-analysis-index.py`);
 - a `Keywords` cell — up to 5 `기술 키워드` head terms, each a colored
   shields.io badge. English plain text only: a head carrying any math (inline
   KaTeX / LaTeX / backticks) is excluded outright, and a head with no
