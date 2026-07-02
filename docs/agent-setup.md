@@ -4,7 +4,7 @@ This guide takes you from zero to a scheduled, self-running PROBE agent — clou
 
 > ### Run manually for 1–2 weeks first
 >
-> Do **not** automate on day one. Open a [Claude.ai](https://claude.ai) conversation with Sonnet or Opus, paste `context/MASTER.md`, run the `.claude/prompts/scouting.txt` template by hand (one global find/replace of `<PILLAR>` → `P1`/`P2`/`P3`/`P4` before pasting), and iterate until the report quality is where you want it. The prompt that survives manual iteration is the prompt you deploy as a routine. Bad prompt + full automation = garbage generated on schedule, run after run.
+> Do **not** automate on day one. Open a [Claude.ai](https://claude.ai) conversation with Sonnet or Opus, paste `context/MASTER.md`, run the `.claude/prompts/scouting.txt` template by hand (one global find/replace of `<PILLAR>` → `P0`…`P5` before pasting), and iterate until the report quality is where you want it. The prompt that survives manual iteration is the prompt you deploy as a routine. Bad prompt + full automation = garbage generated on schedule, run after run.
 
 ---
 
@@ -25,7 +25,7 @@ The repo's durable asset is the **prompt** (`.claude/prompts/scouting.txt`, shar
 | Item | Note |
 |---|---|
 | Claude Code Pro plan | Routines need cloud execution. The Pro daily cap easily covers the scouting cadence. |
-| GitHub repo connected to Claude Code | Required for PR output (this repo). |
+| GitHub repo connected to Claude Code | Required — the routine pushes its report directly to `main` in this repo. |
 | Outbound network policy | The routine's cloud environment must allow `export.arxiv.org` and `api.semanticscholar.org` — see Step 1. |
 | `SEMANTIC_SCHOLAR_API_KEY` | Optional. Set as an environment variable (there is no secret store). See Step 1. |
 | MCP servers | **Not required** — MCP is unreachable from cloud sessions; retrieval is `curl` REST. |
@@ -80,17 +80,17 @@ There is no YAML and no `claude routine register`. Create the schedule in the [c
 |---|---|
 | Name | `probe-weekly-scout` |
 | Prompt (Instructions) | Paste the full body of `.claude/prompts/scouting.txt` after replacing every `<PILLAR>` with `P1` (one global find/replace; the file shows the exact instruction at the top). Model selector → **Sonnet**. |
-| Repositories | This repo. Output is pushed to a `claude/`-prefixed branch and reviewed via PR. |
+| Repositories | This repo. The routine commits its single report file and pushes it directly to `main` (no PR — commit history *is* the research log; see "Output" above). |
 | Environment | The Step 1 environment (`SEMANTIC_SCHOLAR_API_KEY` if used + Network access = Custom). |
 | Trigger (Schedule) | A scheduled recurring cadence of your choosing (the form takes local time → UTC; min interval 1 h). For exact cron, after creating run the CLI `/schedule update` with your chosen schedule. |
 | Connectors | None — remove all (retrieval is `curl`, not an MCP connector). |
-| Permissions | Default (`claude/` branch push) is sufficient — PR output needs no unrestricted push. |
+| Permissions | Must allow pushing to `main` — the prompt's GIT step runs `git push origin HEAD:main`. The default `claude/`-branch-only push is NOT sufficient for the scouting routine. |
 
 The prompt is the routine body and is **self-contained**: it names its own context files (`context/P1.md`, the last 2 weeks of `scouting/`), the `curl` procedure, output rules and guards. The form has no `context_files` field — the agent clones the repo and reads files per the prompt. The prompt is **pillar-scoped**: it reads the `context/P#.md` extract (skeleton §1–§6; Identity=§1, Pillar=§2, Decision Log=§3, Anti-topics=§4, Tracked Literature=§5, Curated Lists=§6; no Researchers/Competitor/Cross-pollination sections), never the full doc.
 
 ### Step 3 — The externalized prompt already exists
 
-`.claude/prompts/scouting.txt` is committed — the scouting prompt, a single shared template for all six pillars (`<PILLAR>` substituted to `P0`/`P1`/`P2`/`P3`/`P4`/`P5` once before paste). It is the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (PR creation stays with the harness):
+`.claude/prompts/scouting.txt` is committed — the scouting prompt, a single shared template for all six pillars (`<PILLAR>` substituted to `P0`/`P1`/`P2`/`P3`/`P4`/`P5` once before paste). It is the manual-run prompt with the **retrieval instructions** swapped from built-in web search to explicit `curl` REST, plus a trailing **commit/push step** so each scheduled run self-persists its report (pushed directly to `main`; no PR is created by the prompt or the harness):
 
 | Retrieval step | Manual run | Routine (`curl` REST) |
 |---|---|---|
@@ -107,7 +107,7 @@ S2 = Semantic Scholar Graph API (JSON via `jq`); arXiv is Atom XML parsed direct
 There is no `--dry-run`. On the routine detail page use **Run now** — it opens a fresh session and executes once. A green run status only means "exited without an infra error", **not** that the prompt succeeded — open the session transcript and inspect the actual output (blocked network requests show up there). Check with the same rigor as a manual run:
 
 - Follows `scouting/templates/report.md` + `docs/style.md`.
-- Both the English and Korean files were produced.
+- The single Korean report landed at `scouting/P#/YYYY-MM-DD.md` (no language-suffixed twin — see CLAUDE.md "Document language convention").
 - Every paper link resolves (no fabricated arXiv IDs).
 - The `Papers scanned:` header discloses **no** `curl` 403 / network-block errors (if it does → the Custom allowlist is missing).
 - Decision implications are concrete (a specific config key / hyperparameter / metric, not "tune DR wider").
