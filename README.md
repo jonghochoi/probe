@@ -110,7 +110,7 @@ The agent never edits `context/MASTER.md`, `context/P#.md`, or `vendor/lerobot/`
 
 ## Agent Stack
 
-Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup — cloud routines, network allowlist, the on-demand analysis trio and its `/reproduce-paper` orchestrator, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md).
+Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup for the scheduled scouting routine — cloud routines, network allowlist, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md). The on-demand commands (`/analyze-paper` → `/implement-design` → `/validate-impl`, orchestrated by `/reproduce-paper`) need no routine setup: run them from any Claude Code session; their logic lives in `.claude/prompts/` and their output format in `docs/style.md`.
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
