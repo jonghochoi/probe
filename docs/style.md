@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.29 (2026-08-03) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.30 (2026-08-03) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -401,6 +401,36 @@ two or more raw tildes — the condition that actually breaks a render. A lone
 tilde renders literally and is not an error, but it becomes one the moment
 another lands in the same context, so prefer the table above everywhere.
 
+### 4-7. No bare URL in Korean prose — the following particle joins the href
+
+GitHub autolinks a bare `https://…` in body text. When it decides where the
+URL ends it strips *trailing punctuation* (`.` `,` `)` `?` …) but **not
+Hangul**, which it reads as an ordinary URL character. A Korean particle
+written straight after the URL is therefore swallowed into the link target,
+and the rendered link 404s while the source looks correct:
+
+| | Write | Not |
+|---|---|---|
+| URL with a following particle | `[프로젝트 페이지](https://example.org/x/) 하나뿐이며` | `프로젝트 페이지(https://example.org/x/)만` |
+| URL as the sentence subject | `[공식 저장소](https://example.org/r)에서 받습니다` | `https://example.org/r 에서 받습니다` |
+
+The rule is simple: **in Korean prose a URL is always an explicit
+`[텍스트](…)` link, never bare.** The particle then attaches to the link
+text or sits outside the brackets, and no Hangul can reach the href. This
+also keeps the prose readable — a raw URL mid-sentence is noise.
+
+**Where a bare URL is still correct** — these are not autolinked (or not
+rendered at all), so nothing can be glued to them:
+
+- inside a code span or fenced code block (a `curl` command, a config value);
+- inside an HTML comment (`<!-- … -->`), e.g. the 📄 메타 retrieval-failure
+  record (§5-4);
+- inside an English verbatim blockquote, which is byte-locked (§5-6) — leave
+  it and keep the Korean explanation line free of an adjacent bare URL.
+
+The 📄 메타 `링크` row (§5-7) is already an explicit-link format, so it is
+unaffected.
+
 ---
 
 ## 5. Paper Analysis Document (`analysis/`)
@@ -661,6 +691,35 @@ conventions below codify both.
   - Abstract-only acquisition, or a non-arXiv-HTML source
     (PDF-only), means no figure URLs are available — omit the
     figure citations entirely. No placeholders, no guessing.
+  - **Size ceiling — check bytes, not just the status code.** github.com
+    serves every external image through its **camo** proxy, which refuses
+    any response over roughly **5 MB** and renders the literal text
+    `Content length exceeded` in place of the figure. arXiv returns
+    `HTTP 200` for these all the same, so a status-code check passes while
+    the page is broken. Measure before committing the hotlink:
+
+    ```bash
+    curl -sSL -o /dev/null -w '%{size_download}\n' "https://arxiv.org/html/<id>/<file>"
+    ```
+
+    Over the ceiling, **do not drop the figure and do not swap in a
+    different one** — only the inline render fails, the arXiv asset itself
+    is fine. Downgrade the embed `![…](…)` to a link `[…](…)`, keep the
+    verbatim English caption blockquote and the Korean explanation exactly
+    as they are, and state the size and the reason beside the link so the
+    reader knows why this one is not inlined:
+
+    ```markdown
+    🔗 [Figure N — short label](https://arxiv.org/html/<id>/<file>) (arXiv 원본 6.4 MB — GitHub 이미지 프록시 상한을 넘어 인라인 렌더가 불가하므로 링크로 둡니다)
+
+    > "Figure N: <English caption verbatim>" (§n)
+    (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
+    ```
+
+    A link-form figure still counts against the cap below. Teaser /
+    overview composites are the usual offenders — they tile many panels
+    into one file — and they are also the figure an analysis most wants,
+    so expect this case to recur rather than treating it as an anomaly.
   - Cap: never more than 5 figures per analysis. This is a decision
     tool, not a slide deck.
 
