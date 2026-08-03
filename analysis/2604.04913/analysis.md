@@ -58,7 +58,7 @@
 - **discriminative vs generative world model** — 전자는 단일 결정론적 미래(조건부 평균으로 붕괴), 후자는 다양한 미래 분포를 표본화 — 본 논문은 전자를 후자로 값싸게 바꾸는 것이 목표.
 - **frame compression** — delta 가 아니라 한 프레임 전체 특징맵을 단일 frame token 으로 압축하는 중간 단계 — capacity 부족으로 delta 압축에 밀림(ablation 의 step 2).
 - **single-pass diverse generation** — diffusion 의 반복 denoising 없이 서로 다른 노이즈 쿼리를 서로 다른 미래로 한 번에 사상하는 추론 방식.
-- **dense forecasting benchmark** — 미래 프레임에 대한 segmentation mIoU / depth RMSE 로 world model 을 평가하는 프로토콜(VSPW·Cityscapes·KITTI, short ~0.2s / mid ~0.6s).
+- **dense forecasting benchmark** — 미래 프레임에 대한 segmentation mIoU / depth RMSE 로 world model 을 평가하는 프로토콜(VSPW·Cityscapes·KITTI, short 약 0.2s / mid 약 0.6s).
 - **Cosmos** — 픽셀 재구성용 latent 공간에서 동작하는 대형 생성형 world model — 본 논문의 주 비교 대상(4B/12B + 7B diffusion decoder).
 
 ---
@@ -138,7 +138,7 @@ $$L_{\mathrm{tok}}=\|\,x_{t}-\hat{x}_{t}\,\|^{2}.$$
 
 ## 📊 실험 설정과 결과
 
-**평가 프로토콜.** dense forecasting benchmark(DINO-world)로 short(~0.2s, 직접 예측) / mid(~0.6s, 3-step autoregressive rollout) 정확도를 segmentation mIoU·depth RMSE 로 측정. 4-frame context, frozen VFM 특징에 학습한 linear seg/depth head 를 예측 미래 특징에 적용. 테스트시 20 표본을 뽑아 **best**(GT 에 가장 가까운 표본)와 **mean**(특징공간 평균 후 head 적용) 둘 다 보고.
+**평가 프로토콜.** dense forecasting benchmark(DINO-world)로 short(약 0.2s, 직접 예측) / mid(약 0.6s, 3-step autoregressive rollout) 정확도를 segmentation mIoU·depth RMSE 로 측정. 4-frame context, frozen VFM 특징에 학습한 linear seg/depth head 를 예측 미래 특징에 적용. 테스트시 20 표본을 뽑아 **best**(GT 에 가장 가까운 표본)와 **mean**(특징공간 평균 후 head 적용) 둘 다 보고.
 
 **Table 2 — 효율적 생성형 world model 로 가는 단계별 ablation** (mid ~0.6s mIoU, $`256\times256`$, best-of-20, 괄호는 mean):
 

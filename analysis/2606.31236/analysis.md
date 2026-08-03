@@ -122,7 +122,7 @@ $$\mathcal{L}_{\text{align}}^{(i,j)}=-\frac{1}{N}\sum_{n=1}^{N}\log\frac{\exp(\t
 
 - **데이터** — 10개 3D-printed 물체(point/edge/area contact 기하)로 quasi-static 그립을 반복. 3개 pair-dataset $`\mathcal{D}_{DE},\mathcal{D}_{EF},\mathcal{D}_{FD}`$, 6개 마운팅 config(L/R swap 포함), 총 2,670 trajectory / 145k frame, episode-level ~20% val. 각 쌍의 한 센서에는 load 시 $`180^\circ`$ 회전을 적용해 접촉 영역을 정렬. Contact gating 은 Daimon depth abs-mean > $`0.003`$ 또는 FlexiTac pressure grid mean > $`0.01`$.
 - **옵티마이저 / 스케줄** — Adam, LR $`1\times10^{-4}`$, weight decay $`1\times10^{-4}`$, batch 64, 300 epoch, seed 42. $`\lambda_{\text{recon}}{=}1.0`$, KL $`\beta`$ 0→0.1 linear warmup(30 epoch), align $`\lambda_{\text{align}}`$ 0→1 warmup, temperature $`\tau=0.01`$ (NT-Xent variant 0.03).
-- **Downstream 정책** — 모든 정책은 ACT(DETR-style CVAE decoder). GELLO teleoperation 으로 task 당 ~50 episode(~10k frame) 수집. LR $`1\times10^{-5}`$, batch 8, 50,000 step, action-chunk 64. TactX latent 정책은 frozen VAE encoder 로 오프라인 계산한 16-D $`\mu`$ 를 raw 촉각 입력 대신 넣고, 손가락별 MLP adapter $`16\!\to\!64\!\to\!128\!\to\!512`$ 로 하나의 tactile token 을 만듭니다. 작은 per-task 데이터의 mode collapse 완화를 위해 $`\lambda_{\mathrm{KL}}`$ 를 10→1 로 낮춥니다.
+- **Downstream 정책** — 모든 정책은 ACT(DETR-style CVAE decoder). GELLO teleoperation 으로 task 당 약 50 episode(약 10k frame) 수집. LR $`1\times10^{-5}`$, batch 8, 50,000 step, action-chunk 64. TactX latent 정책은 frozen VAE encoder 로 오프라인 계산한 16-D $`\mu`$ 를 raw 촉각 입력 대신 넣고, 손가락별 MLP adapter $`16\!\to\!64\!\to\!128\!\to\!512`$ 로 하나의 tactile token 을 만듭니다. 작은 per-task 데이터의 mode collapse 완화를 위해 $`\lambda_{\mathrm{KL}}`$ 를 10→1 로 낮춥니다.
 
 ---
 

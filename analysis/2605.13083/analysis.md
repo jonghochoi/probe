@@ -156,7 +156,7 @@ $$IoU_{vol}=\frac{\sum^{i,j}min(P_{i,j},\hat{P}_{i,j})}{\sum^{i,j}max(P_{i,j},\h
 | Ego + wL + wR | 0.5030 (↑5.0%) | 0.4575 (↑6.1%) | 0.0436 (↓4.4%) | 0.4496 (↑2.3%) | 0.3852 (↑2.9%) | 0.0601 (↓2.3%) |
 
 > "Overall, Ego + wL + wR improves Contact IoU from 0.4792 to 0.5030 and Volumetric IoU from 0.4311 to 0.4575 on seen objects, and from 0.4396 to 0.4496 and 0.3743 to 0.3852 on unseen objects, respectively." (§4.2, Table 2)
-(한글 해설 — 손목 뷰 추가는 특히 접촉 위치(Contact IoU)와 압력 크기(Volumetric IoU)에서 일관된 개선을 줍니다. 단, unseen object 의 개선폭(~2–3%)은 seen(~5–6%)보다 작습니다.)
+(한글 해설 — 손목 뷰 추가는 특히 접촉 위치(Contact IoU)와 압력 크기(Volumetric IoU)에서 일관된 개선을 줍니다. 단, unseen object 의 개선폭(약 2–3%)은 seen(약 5–6%)보다 작습니다.)
 
 > "We also find that a single wrist view already captures much of the complementary evidence ... Thus, the main benefit comes from adding at least one contact-aware viewpoint, while the second wrist view provides additional gains mainly under stronger bimanual occlusion." (§4.2)
 (한글 해설 — **한 개의 손목 뷰만으로도 보완 증거의 대부분이 확보**되고(Ego+wL 과 Ego+wL+wR 의 전체 수치가 거의 동일), 두 번째 손목 뷰의 추가 이득은 강한 양손 occlusion 상황에 한정됩니다 — fisheye 가 반대 손까지 종종 관측하기 때문.)

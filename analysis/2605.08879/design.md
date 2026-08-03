@@ -131,7 +131,7 @@ shape 4 개 (`lambda`, `c_curvature`, `kappa`, `omega_min`) 는 이 논문의 �
 - **지표 — Target task success rate** · **임계값** — vanilla SFT 와 동률 이상 (예: $`\pi_{0}`$ LIBERO-Spatial 90%) · **비교 baseline** — vanilla SFT.
 - **지표 — Prior task average success rate** (held-out suite 평균) · **임계값** — vanilla SFT 대비 절대 +20%p 이상 · **비교 baseline** — SFT, LwF (KL/MSE), ER (1:1 replay), LoRA (r=16).
 - **지표 — Absolute drop from base** (`` $`\downarrow`$ ``) · **임계값** — `` $`\downarrow \le 0.15`$ `` (LIBERO 평균) 가 본 논문 ConSFT 도달치 · **비교 baseline** — base model 의 zero-shot.
-- **지표 — Global update sparsity `` $`S`$ ``** (Eq. 8, `` $`\delta=10^{-3}`$ ``) · **임계값** — vanilla SFT 의 ~70% 수준 (PPO 는 ~85%) 보다 *늦게* 붕괴하는 곡선 형태 · **비교 baseline** — vanilla SFT 의 sparsity 시계열.
+- **지표 — Global update sparsity `` $`S`$ ``** (Eq. 8, `` $`\delta=10^{-3}`$ ``) · **임계값** — vanilla SFT 의 약 70% 수준 (PPO 는 약 85%) 보다 *늦게* 붕괴하는 곡선 형태 · **비교 baseline** — vanilla SFT 의 sparsity 시계열.
 - **지표 — Layer-wise sparsity profile** (Attention / MLP) · **임계값** — Attention/MLP 모두 layer-wise sparsity 가 임계 step (early phase) 이전에 50% 이상 유지 · **비교 baseline** — vanilla SFT 의 dense overwrite 패턴.
 - **지표 — Real-world prior task success (test-tube + 의미 grasping, $`\pi_{0.5}`$ 단일팔)** · **임계값** — target 70% 도달 시점에 prior task 평균 절대 +20%p · **비교 baseline** — vanilla SFT, LwF.
 

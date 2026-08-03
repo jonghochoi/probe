@@ -129,7 +129,7 @@ $`|I_{\text{gate}}(B_i)|`$ 이 클수록 제거 시 즉각 loss 증가가 커서
 ### 학습 셋업
 
 - **구현(GateProbe)** — 게이트는 가상(virtual): 아키텍처를 바꾸거나 학습 파라미터를 넣지 않습니다. 각 블록 input norm 에 forward pre-hook 을 걸어 $`h_{i-1}, h_i`$ 를 캡처하고 `retain_grad()` 호출 후 표준 forward-backward 1회를 돌립니다. 작은 calibration set 1회 통과면 충분합니다(π0.5 · 18 블록 · calibration batch 64 × size 8, 단일 H200 에서 24.9 s).
-- **모델 4종** — π0.5(dual-stream flow-matching, PaliGemma 언어 18층 + 별도 Gemma 액션 expert 18층, SigLIP 비전), OpenVLA-OFT(Llama-2-7B 32층 + SigLIP + MLP 액션 헤드, LoRA), Lingbot-VLA(Qwen2.5-VL-3B 36층 + Qwen2 액션 expert, flow-matching, ~4B), GigaBrain-0(PaliGemma2-3B + Gemma2 26층, diffusion 액션 헤드, ~3.5B).
+- **모델 4종** — π0.5(dual-stream flow-matching, PaliGemma 언어 18층 + 별도 Gemma 액션 expert 18층, SigLIP 비전), OpenVLA-OFT(Llama-2-7B 32층 + SigLIP + MLP 액션 헤드, LoRA), Lingbot-VLA(Qwen2.5-VL-3B 36층 + Qwen2 액션 expert, flow-matching, 약 4B), GigaBrain-0(PaliGemma2-3B + Gemma2 26층, diffusion 액션 헤드, 약 3.5B).
 - **벤치마크** — LIBERO(Spatial/Object/Goal/Long 4-suite, suite 당 10 task, task 당 20 trial; 메인 연구), LIBERO-Plus(배경·텍스처·시점·로봇 pose·언어·조명·noise·layout 섭동 확장), RoboTwin 2.0(양팔 조작, 강한 domain randomization).
 - **회복 학습(LIBERO)** — π0.5: full fine-tuning, AdamW, global bsz 32, 30K steps, lr `5×10⁻⁵`(10K warmup 후 constant), bf16. OpenVLA-OFT: LoRA rank 32, L1 action regression, AdamW, bsz 16, 50K steps, lr `5×10⁻⁴`. Compute-matched 비교 시엔 dropped 모델의 compute 감소만큼 bsz·step 을 스케일하고 데이터·최적화 프로토콜은 고정합니다.
 
@@ -241,7 +241,7 @@ compute-matched 설정으로 섭동 카테고리별 평가. 언어 redundancy �
 ![Figure 2 — Real-world setup and results](https://arxiv.org/html/2606.27755/x2.png)
 
 > "Figure 2: Real-world experimental setup and main results." (§5)
-(UFACTORY xArm 850 + G2 gripper, wrist RealSense D435 + 3인칭 카메라, Jetson Thor 구동. Meta Quest 3 teleop 10 Hz, ~110K frame(~600 grasp). warehouse parcel sorting: 변형 가능한 soft-body 패키지를 컨테이너에서 컨베이어/슬롯으로 이송.)
+(UFACTORY xArm 850 + G2 gripper, wrist RealSense D435 + 3인칭 카메라, Jetson Thor 구동. Meta Quest 3 teleop 10 Hz, 약 110K frame(약 600 grasp). warehouse parcel sorting: 변형 가능한 soft-body 패키지를 컨테이너에서 컨베이어/슬롯으로 이송.)
 
 Env 1 에서 Drop-9(65.0%)가 full model(63.3%)을 근소 상회, Drop-16 은 55.0% 로 열화. Env 2 는 full 75.0% / Drop-9 71.7% / Drop-16 66.7% — 시뮬레이션 패턴(절반 제거는 유지, 2/18 유지는 중간 열화)을 재현.
 
@@ -266,7 +266,7 @@ Env 1 에서 Drop-9(65.0%)가 full model(63.3%)을 근소 상회, Drop-16 은 55
 
 - **코드** — 공개: [github.com/s1ghhh/VLADrop](https://github.com/s1ghhh/VLADrop) (초록·본문 명시).
 - **모델·벤치마크** — 4개 VLA 모두 공개 체크포인트/구현 기반(π0.5·OpenVLA-OFT·Lingbot-VLA·GigaBrain-0), 벤치마크는 공개(LIBERO / LIBERO-Plus / RoboTwin 2.0). 학습 하이퍼파라미터는 Appendix H 에 표(Table 14/15)로 명시.
-- **하드웨어** — profiling·latency 측정은 단일 H200 GPU 명시. 실물 로봇은 UFACTORY xArm 850 + G2 gripper + Jetson Thor + RealSense D435 로 구체적. teleop 데이터 규모(~110K frame, ~600 grasp) 명시.
+- **하드웨어** — profiling·latency 측정은 단일 H200 GPU 명시. 실물 로봇은 UFACTORY xArm 850 + G2 gripper + Jetson Thor + RealSense D435 로 구체적. teleop 데이터 규모(약 110K frame, 약 600 grasp) 명시.
 - **미공개/모호** — GateProbe 의 kept-block lookup 은 LIBERO 는 표(Table 9)로 제공되나, 실물 로봇 데이터셋 자체는 산업 시나리오라 공개 여부 불명. drop index 는 dataset-specific 이라 신규 task 재현 시 재-profiling 필요.
 
 ---
