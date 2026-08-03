@@ -14,10 +14,6 @@ Accepted shapes:
   <type>: <description>                 style|deps
   scout: P<N> report YYYY-MM-DD         generated routine commits, formats per
   analysis: add|update <id> …           CLAUDE.md "generated routine commits"
-  audit: add|update <id> …
-  foundry: map <id> onto <foundry>
-  validation: <id> on <foundry>
-  reproduce(<id>, <foundry>, round <N>): …
   hypothesize: add|update <slug> …
 
 Checked for the human shapes: allowed type; description starts lowercase; no
@@ -42,11 +38,7 @@ _HUMAN = re.compile(rf"^({_TYPES})(\(([^)\s]+)\))?: (.+)$")
 
 _GENERATED = [
     re.compile(r"^scout: P\d report \d{4}-\d{2}-\d{2}$"),
-    re.compile(r"^analysis: (add|update) \S+ .+"),
-    re.compile(r"^audit: (add|update) \S+ paper-code audit.*"),
-    re.compile(r"^foundry: map \S+ onto \S+$"),
-    re.compile(r"^validation: \S+ on \S+$"),
-    re.compile(r"^reproduce\(\S+, \S+, round \d+\): .+"),
+    re.compile(r"^analysis: (add|update) \S+ deep-dive.*"),
     re.compile(r"^hypothesize: (add|update) \S+ .+"),
 ]
 

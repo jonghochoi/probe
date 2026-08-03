@@ -1,6 +1,6 @@
 name: Check analysis math
 
-# Validate the GitHub-KaTeX math conventions (docs/style.md §5-6) on every PR
+# Validate the GitHub-KaTeX math conventions (docs/style.md §5-5) on every PR
 # that touches an analysis doc, and auto-fix what is safely fixable. This runs
 # PR-time (not post-merge like the index refresh) so malformed math is caught
 # and cleaned BEFORE it lands on main and leaks the source on github.com.

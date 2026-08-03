@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Check (and optionally fix) math formatting in analysis documents.
 
-Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-6 across
+Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-5 across
 the analysis deep-dive docs: inline math MUST be the inside-dollar backtick
 form `` $`X`$ `` and display math `$$X$$` on its own line. The outside-dollar
 form `` `$X$` ``, the `\\(…\\)` / `\\[…\\]` delimiters, KaTeX-unsupported
 macros (`\\bm`, `\\mathds`), and `$` glued to Hangul/CJK/bold all break
 rendering on github.com and leak the source.
 
-Scope: `analysis/<id>/analysis.md`, `analysis/<id>/design.md`, and
-`analysis/<id>/impl/<foundry>/impl.md`. Catalogs, templates, and README.md
-are out of scope.
+Scope: `analysis/<id>/analysis.md`. Templates and README.md are out of scope.
 
 Auto-fixable (applied with --fix):
   1. `` `$X$` ``            -> `` $`X`$ ``        (forbidden outside-dollar form)
@@ -39,7 +37,7 @@ Report-only (no safe auto-fix; cause a non-zero exit):
     raw LaTeX) or an indented ```math fence (renders as a code block). GitHub
     renders display math ONLY at column 0, so both must be pulled out to the
     top level (the fix is structural, not a token swap)
-  - paper math in a PLAIN backtick span (§5-6 boundary) — e.g. `` `λ` ``,
+  - paper math in a PLAIN backtick span (§5-5 boundary) — e.g. `` `λ` ``,
     `` `A ∈ R^{d×r}` ``, `` `L = λ_act·L_act` `` masquerading as a code token.
     Convert to inline `` $`X`$ `` if it is math; a literal identifier, tensor
     shape (`` `(B, T, d)` ``), or numeric/resolution spec (`` `224×224` ``)
@@ -54,7 +52,7 @@ re-checks. Idempotent: a clean tree re-runs with no diff.
 Exit codes: 0 = clean (no unfixable issues) / 1 = unfixable issues remain
 / 2 = nothing to scan (skipped).
 
-Specification: docs/style.md §5-6.
+Specification: docs/style.md §5-5.
 """
 
 from __future__ import annotations
@@ -67,12 +65,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
 
-# §5-6 rule 2 — inline-math delimiter neighbours that GitHub's KaTeX parser
+# §5-5 rule 2 — inline-math delimiter neighbours that GitHub's KaTeX parser
 # accepts. Opener `$` may follow these; closer `$` may precede these.
 OPENER_OK = set(" \t([{<")   # plus start-of-line
 CLOSER_OK = set(" \t.,;:!?)]}>")  # plus end-of-line
 
-# §5-6 rule 5 — the only sanctioned macro substitutions.
+# §5-5 rule 5 — the only sanctioned macro substitutions.
 MACRO_SUBS = [
     (re.compile(r"\\bm\{"), r"\\mathbf{"),
     (re.compile(r"\\mathds\{"), r"\\mathbb{"),
@@ -88,28 +86,10 @@ MACRO_SUBS = [
 INDENTED_DISPLAY = re.compile(r"^[ \t]+\$\$")
 # Author macros KaTeX cannot resolve; we surface them rather than guess a fix.
 UNSUPPORTED_MACRO = re.compile(r"\\(?:newcommand|renewcommand|def)\b")
-# §5-6 — equation-numbering macros github.com's KaTeX rejects: it errors and
+# §5-5 — equation-numbering macros github.com's KaTeX rejects: it errors and
 # leaks the raw LaTeX onto the page (wrapping it character-by-character). The
 # paper's equation numbers belong in prose (`(식 N)`), not in a `\tag`.
 GITHUB_UNSUPPORTED_MACRO = re.compile(r"\\(?:tag|label|ref|eqref|nonumber)\b")
-
-# §5-6 boundary rule — signals that a PLAIN backtick span is really paper math
-# wearing a code-variable costume (Greek letter, math operator, LaTeX macro,
-# sub/superscript glyph, or an equation shape), not a literal code token. `×`
-# (U+00D7) and `·` (U+00B7) are DELIBERATELY excluded: they are codepoint-
-# distinct from the Greek/operator ranges and occur in shapes/specs the repo
-# keeps as code (`224×224`, `30 fps · 2 MP`), so they never fire on their own.
-_GREEK = r"Ͱ-Ͽἀ-῿"
-_MATH_OP = r"∈∉⊂⊆⊕⊗≤≥≈≠≅→←↦⇒⊤⊥∑∏∫∇∂√∞∝∀∃∥‖⟨⟩⌊⌋⌈⌉"  # NB: ×, · excluded
-_SUPERSUB = r"²³¹⁰-₟⁺-⁾"
-MATH_SIGNAL = re.compile(rf"[{_GREEK}{_MATH_OP}{_SUPERSUB}]|\\[A-Za-z]+|\^\{{|_\{{")
-# An equation shape: `=` flanked by expressions, with an operator/Greek in the
-# body — catches ASCII-only `L = λ_act·L_act` while skipping `temperature=0.7`.
-MATH_EQUATION = re.compile(rf"[^\s=]\s*=\s*[^\s=].*[·×+\-/Σ{_GREEK}]")
-TAG_HANGUL = re.compile(r"[가-힣]")            # Korean annotation tag
-TAG_EMOJI = re.compile(r"^\s*[\U0001F300-\U0001FAFF☀-➿]")  # 🚧 ✅ ⚠ …
-PLAIN_BACKTICK = re.compile(r"`([^`\n]+?)`")
-_MASK = re.compile(r"\$`[^`]*?`\$|`\$[^`$]+?\$`|\$\$.+?\$\$")  # blank these first
 
 VALID_INLINE = re.compile(r"\$`[^`]*?`\$")      # the one allowed inline form
 DISPLAY = re.compile(r"\$\$.+?\$\$")            # display block (possibly inline)
@@ -140,9 +120,7 @@ class Issue:
 
 
 def in_scope_files(paths: list[Path]) -> list[Path]:
-    """Resolve the scan set: analysis.md / design.md / impl/**/impl.md /
-    validation/*.md (incl. reproduce-loop `*.round_N.md` snapshots) /
-    audit.md."""
+    """Resolve the scan set: every `analysis/<id>/analysis.md`."""
     out: list[Path] = []
     if paths:
         for p in paths:
@@ -161,12 +139,7 @@ def _scope_under(root: Path) -> list[Path]:
         rel = p.relative_to(REPO_ROOT).as_posix()
         if "/templates/" in f"/{rel}":
             continue
-        name = p.name
-        if (
-            name in ("analysis.md", "design.md", "audit.md")
-            or (name == "impl.md" and "/impl/" in f"/{rel}")
-            or "/validation/" in f"/{rel}"
-        ):
+        if p.name == "analysis.md":
             out.append(p)
     return out
 
@@ -180,15 +153,10 @@ def _apply_macro_subs(math: str, fixes: list[str]) -> str:
     return math
 
 
-def process_line(
-    line: str, check_backticks: bool = False
-) -> tuple[str, list[str], list[tuple[int, str]]]:
+def process_line(line: str) -> tuple[str, list[str], list[tuple[int, str]]]:
     """Return (new_line, fixes, issues) for one non-code-block line.
 
-    `issues` is a list of (col, reason) for unfixable findings. The plain-
-    backtick math boundary check (§5-6) runs only when `check_backticks` is
-    set — it is scoped to `design.md` (the per-paper Design docs where the
-    code-vs-math boundary concentrates), not the prose-heavy `analysis.md`.
+    `issues` is a list of (col, reason) for unfixable findings.
     """
     fixes: list[str] = []
     issues: list[tuple[int, str]] = []
@@ -203,7 +171,7 @@ def process_line(
                 len(line) - len(line.lstrip()) + 1,
                 "indented `$$` display block — GitHub does not render display "
                 "math inside a list; move it to column 0 (a ```math fence "
-                "does not help — it also fails in a list) (§5-6)",
+                "does not help — it also fails in a list) (§5-5)",
             )
         )
 
@@ -283,7 +251,7 @@ def process_line(
 
     line = re.sub(r"\x00(\d+)\x00", _restore, line)
 
-    # 6. Boundary spacing for inline `$`...`$` spans (§5-6 rule 2).
+    # 6. Boundary spacing for inline `$`...`$` spans (§5-5 rule 2).
     line, bfix = _fix_boundaries(line)
     if bfix:
         fixes.append("boundary spacing around inline `$`")
@@ -300,49 +268,16 @@ def process_line(
             (
                 m.start() + 1,
                 f"GitHub-KaTeX-unsupported macro `{m.group(0)}` — number the "
-                "equation in prose (`(식 N)`), not with `\\tag`/`\\label` (§5-6)",
+                "equation in prose (`(식 N)`), not with `\\tag`/`\\label` (§5-5)",
             )
         )
-
-    # Report-only: paper math sitting in a PLAIN backtick span (§5-6 boundary).
-    if check_backticks:
-        _report_math_in_backticks(line, issues)
 
     return line, fixes, issues
 
 
-def _report_math_in_backticks(line: str, issues: list[tuple[int, str]]) -> None:
-    """Flag a plain backtick code-span whose body is really paper math.
-
-    §5-6 boundary rule: math notation (Greek letters, operators, LaTeX macros,
-    sub/superscripts, equations) belongs in inline math `` $`X`$ ``, not a
-    backtick code-span. Report-only — converting is a judgment call (a literal
-    identifier, tensor shape, or numeric/resolution spec legitimately stays a
-    code-span), so we surface candidates rather than rewrite them.
-
-    Valid inline/display math is masked to equal-length blanks first so the
-    detector never sees the inner backticks of a real `` $`X`$ `` span and the
-    reported column stays accurate."""
-    masked = _MASK.sub(lambda m: " " * len(m.group(0)), line)
-    for m in PLAIN_BACKTICK.finditer(masked):
-        body = m.group(1)
-        if not (MATH_SIGNAL.search(body) or MATH_EQUATION.search(body)):
-            continue
-        if TAG_HANGUL.search(body) or TAG_EMOJI.match(body):
-            continue  # Korean annotation / status-emoji tag — neither code nor math
-        shown = body if len(body) <= 40 else body[:39] + "…"
-        issues.append(
-            (
-                m.start() + 1,
-                f"math content in a plain backtick span `{shown}` — convert to "
-                "inline `$`X`$` if it is paper math (§5-6)",
-            )
-        )
-
-
 def _fix_boundaries(line: str) -> tuple[str, bool]:
     """Insert a space where an inline `$`…`$ ` delimiter is glued to a
-    Hangul/CJK syllable or middle-dot `·` (§5-6 rule 2).
+    Hangul/CJK syllable or middle-dot `·` (§5-5 rule 2).
 
     Bold markers `*`/`**` are deliberately NOT touched here: the prescribed
     fix is structural (move the math outside the bold span), which a space
@@ -391,8 +326,6 @@ def check_file(path: Path, fix: bool) -> tuple[bool, list[str], list[Issue]]:
     """Process one file. Return (changed, fix_descriptions, issues)."""
     text = path.read_text(encoding="utf-8")
     lines = text.split("\n")
-    # The plain-backtick math boundary check (§5-6) is scoped to design.md.
-    check_bt = path.name == "design.md"
     fence = False
     new_lines: list[str] = []
     fix_descs: list[str] = []
@@ -418,19 +351,18 @@ def check_file(path: Path, fix: bool) -> tuple[bool, list[str], list[Issue]]:
                         len(line) - len(stripped) + 1,
                         "indented ```math display fence — GitHub does not render "
                         "a display-math fence inside a list (it shows as a code "
-                        "block); move it to column 0 (§5-6)",
+                        "block); move it to column 0 (§5-5)",
                     )
                 )
             fence = not fence
             new_lines.append(line)
             continue
         has_math = "$" in line or "\\(" in line or "\\[" in line
-        # design.md also processes backtick-only lines (math-in-backticks).
-        if fence or not (has_math or (check_bt and "`" in line)):
+        if fence or not has_math:
             new_lines.append(line)
             continue
 
-        new_line, fixes, line_issues = process_line(line, check_bt)
+        new_line, fixes, line_issues = process_line(line)
         for col, reason in line_issues:
             issues.append(Issue(path, n, col, reason))
         if fixes:

@@ -25,7 +25,7 @@
        5. curl -L --fail -sS "https://arxiv.org/pdf/2606.10614" -o paper.pdf → HTTP 200 (7.1 MB, 23 pages)
      `pdftotext` 미설치(command -v pdftotext → none) → PyMuPDF(fitz) 로 텍스트 추출(약 70k chars).
      전문(PDF) 기반 분석이므로 (B) 섹션에 (본문 미확보) 마커는 붙이지 않습니다.
-     PDF 텍스트 추출이므로 STYLE §5-6 규칙에 따라 figure hotlink 은 생략합니다. -->
+     PDF 텍스트 추출이므로 STYLE §5-5 규칙에 따라 figure hotlink 은 생략합니다. -->
 
 ---
 

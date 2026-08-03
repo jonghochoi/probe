@@ -17,18 +17,14 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
-| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`); the auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Per-paper schema, filled as artifacts are produced: deep-dive analysis (`analysis.md`), Layer 1 Design (`design.md`), foundry-specific impl guides (`impl/<foundry>/impl.{md,patch}` + `test_*.py`), and verification reports (`validation/<foundry>.md`), plus an optional paper↔code audit (`audit.md`, from `/audit-paper` — a reproducibility gate checking the paper against its *own* official repo, distinct from `/validate-impl`'s Design↔foundry audit). Most folders today hold only `analysis.md` + `design.md`. A paper that proposes no foundry-portable method (pure dataset / benchmark / survey / tooling) is **Design 비대상**: its `analysis.md` 📄 메타 carries a `Design 적용 | 🚫 비대상 (<사유>)` row and its `design.md` is a two-block stub (📄 메타 + 🚫 Design 비대상), not the 9-section Layer 1 form — `/implement-design` short-circuits it to `UNMAPPABLE.md` (rule in `.claude/prompts/analysis.txt` DESIGN APPLICABILITY gate + `docs/style.md` §6) |
-| `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md`. Templates in `hypotheses/templates/`; format spec `docs/style.md` §7 |
-| `vendor/lerobot/` | external | Read-only pinned `lerobot` snapshot — 7 baseline policies (incl. `vla_jepa`) + `rtc` + configs + processor + `datasets/` (standard LeRobotDataset format) + `transforms/` + `utils/`; the v0 foundry (target of every `foundry=lerobot` impl patch). Refresh procedure in its own `README.md` |
-| `.foundry-runtime/` | generated | Per-checkout *executable* foundry runtime (full upstream clone at the pinned commit + venv), built on demand by `scripts/ensure-foundry-runtime.sh` so `/validate-impl §🧬` can RUN a foundry's smoke test. Gitignored, multi-GB, never committed (see the "Foundry runtime" section below) |
+| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`), each holding exactly one artifact — the Korean deep-dive `analysis.md`, from `/analyze-paper`. The auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Format spec: `docs/style.md` §5 |
+| `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md`. Templates in `hypotheses/templates/`; format spec `docs/style.md` §6 |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/style.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `docs/foundry-onboarding.md` | human | Checklist for registering a new foundry — snapshot scope, provenance-table format, runtime case arm, prompt touchpoints, invariants (expands the one-line summary in "Foundry runtime" below) |
 | `docs/agent-setup.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
-| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📝 deep-dive badge + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Invoked on demand via the manual `workflow_dispatch` of `.github/workflows/refresh-analysis-index.yml` (the human fires it whenever the index should be refreshed, batching several merges into one refresh commit). `--check` is a write-nothing lint (missing `analysis.md` / degraded meta rows), run PR-time by `.github/workflows/check-analysis-meta.yml` |
-| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-6 across `analysis/<id>/{analysis,design,audit}.md` + `impl/<foundry>/impl.md` + `validation/*.md` (incl. `*.round_N.md` snapshots); also wired into CI |
-| `scripts/ensure-foundry-runtime.sh` | human | On-demand builder for the `.foundry-runtime/` execution runtime; invoked by `/validate-impl` (§🧬) and `/implement-design` (§G) to install a foundry at its pinned commit and run impl smoke tests (see the "Foundry runtime" section below) |
+| `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📝 deep-dive badge + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Invoked on demand via the manual `workflow_dispatch` of `.github/workflows/refresh-analysis-index.yml` (the human fires it whenever the index should be refreshed, batching several merges into one refresh commit). `--check` is a write-nothing lint (missing `analysis.md` / degraded meta rows), run PR-time by `.github/workflows/check-analysis-meta.yml`. Per-command prompts never stage this file |
+| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-5 across every `analysis/<id>/analysis.md`; also wired into CI |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 | `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` / `hypotheses/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
 | `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `analysis/` / `scouting/` / `hypotheses/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6. Local use: `python3 scripts/check-render-tilde.py` |
@@ -59,44 +55,6 @@ within the pillar's allocated range and is never renumbered; superseding a
 choice bumps the bullet to `**v2**:` (etc.) in place — the old version's
 rationale lives outside the context file, not as a second bullet.
 
-`vendor/lerobot/` is read-only to **both** the agent and contributors. It is
-a byte-stable snapshot of upstream `lerobot` at a pinned commit, and the v0
-foundry — the target of every `foundry=lerobot` impl patch under
-`analysis/<id>/impl/lerobot/impl.patch`. Hand-editing files inside it would
-silently invalidate existing patches and break attribution. The only way it
-changes is the wholesale refresh procedure in `vendor/lerobot/README.md`;
-nothing else.
-
-## Grounding `vendor/lerobot/`
-
-`/implement-design` grounds each Design row in a `file:line` coordinate from
-the pinned `vendor/lerobot/` snapshot. Use the built-in `Grep` + `Read` tools:
-`Grep` the symbol (`def <name>` / `class <name>`) to find the candidate, then
-`Read` that span to confirm it and record the line — re-read rather than
-carrying a stale line count, since manual counting is the biggest source of
-patch drift across vendor refreshes. Check the enclosing `class` and grep the
-symbol across `vendor/lerobot/` to confirm the binding site (a same-named
-method on a different policy is a common false positive) and to find callers
-outside the chosen base directory before finalizing a hunk.
-
-## Foundry runtime
-
-The vendored `vendor/lerobot/` snapshot is *partial, read-only* (its `.py`
-files import non-vendored modules, so it cannot run). To check an impl patch is
-not just textually applicable but *correct*, `/validate-impl` runs the impl's
-sibling smoke test against the **whole** upstream package at the pinned commit.
-`scripts/ensure-foundry-runtime.sh <foundry>` builds that runtime on demand:
-
-1. Parse the pinned-commit SHA **and the source repository** from the `vendor/<foundry>/README.md` provenance table (the same rows `/implement-design` and `/validate-impl` cite) — the clone URL is derived from the `Source repository` row, so moving/renaming the fork only requires updating the README.
-2. Clone the source at that SHA (depth-1) into `.foundry-runtime/<foundry>/src`.
-3. `uv venv` (hard prerequisite — the script fails fast with a clear message when `uv` is missing) + `pip install -e .[test]` — plain `pip`, not `uv pip install` (lerobot's `pyproject.toml` pins torch to a cu128 index with a version gap in some environments; pip resolves from the default index).
-4. Touch a `.ready` marker holding the SHA so re-runs are a no-op.
-
-- Prints the venv python on its last stdout line; exits non-zero (reason on stderr) when it can't build — offline, install failure, unknown foundry.
-- **Degrades gracefully** — runtime unavailable → `/validate-impl §🧬` records `skipped`, never a fabricated pass; static verdicts (📚/🔍/🧪/📐) still stand. torch is the one-time cost; the marker makes re-runs free.
-- Committed surface stays the vendored snapshot only — `.foundry-runtime/` is gitignored, never staged. The patch is authored against `vendor/<foundry>/` paths; `/validate-impl` translates the prefix to the upstream layout (`git apply -p3 --directory=src/lerobot`).
-- Adding a foundry = one `case` arm (clone URL) + a `vendor/<name>/` snapshot with the same `Pinned commit` row; nothing else in the *script* changes — the full procedure (snapshot scope, README format, prompt touchpoints, smoke check) is `docs/foundry-onboarding.md`.
-
 ## Commit message style
 
 All commits follow a single, consistent style — derived from this repo's own
@@ -122,19 +80,13 @@ Hard rules:
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types. (The bare `scout:` / `analysis:` /
-   `audit:` / `foundry:` / `validation:` / `reproduce(...)` / `hypothesize:`
-   prefixes are *generated routine commits*, not human commits — do not
-   imitate them when authoring code/doc changes. Their canonical formats,
-   one per generating prompt:
+   `hypothesize:` prefixes are *generated routine commits*, not human
+   commits — do not imitate them when authoring code/doc changes. Their
+   canonical formats, one per generating prompt:
    `scout: P{N} report YYYY-MM-DD`,
-   `analysis: add <arxiv-id> deep-dive + design (<alias>)`
+   `analysis: add <arxiv-id> deep-dive (<alias>)`
    for a first-time analysis (`update` instead of `add` when re-running
-   `/analyze-paper` on an `<arxiv-id>` that already had a folder),
-   `audit: add|update <arxiv-id> paper-code audit (<alias>)`,
-   `foundry: map <arxiv-id> onto <foundry>` (`/implement-design`),
-   `validation: <arxiv-id> on <foundry>` (`/validate-impl`),
-   `reproduce(<arxiv-id>, <foundry>, round <N>): <action>` (the
-   `/reproduce-paper` round-boundary snapshot commit), and
+   `/analyze-paper` on an `<arxiv-id>` that already had a folder), and
    `hypothesize: add|update <slug> hypotheses` (`add <slug> compare
    matrix` for `--compare-only`). The trailing
    `(<alias>)` is the paper's codename, resolved in priority order: (1) the
@@ -226,7 +178,7 @@ exceptions.
 
 `CLAUDE.md`, `docs/style.md`. Plain headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
-`style.md`. A folder README's H1 is the folder name (e.g. `# vendor/lerobot/`).
+`style.md`. A folder README's H1 is the folder name (e.g. `# analysis/`).
 
 ### Shared rules (both families)
 
@@ -249,7 +201,7 @@ apply to:
   header, `###` and below plain) plus its Korean / math conventions.
 - **Math / formula rendering** — the GitHub-KaTeX `$`-wrapping and substitution
   rules are an *output* convention, not a contributor-doc one, so they live in
-  `docs/style.md` §5-6 (enforced by `scripts/check-analysis-math.py`), not here.
+  `docs/style.md` §5-5 (enforced by `scripts/check-analysis-math.py`), not here.
 
 Path correctness is **not** exempt: when a path moves, references inside
 prompts and context files are still updated even though their formatting is
@@ -350,7 +302,7 @@ One intentional exception to "no cross-link automation": the deep-dive index
 in `analysis/README.md`. The rows there key off bare arXiv ids (`2511.00139`),
 so the title-to-id mapping drifts if hand-maintained —
 `scripts/refresh-analysis-index.py` regenerates it. The script reads each
-analysis's `논문 메타` table (load-bearing rows in `docs/style.md` §5-7 —
+analysis's `논문 메타` table (load-bearing rows in `docs/style.md` §5-6 —
 including the `관련 Pillar` classification row) plus up to 5 English
 `기술 키워드` bullet heads (math-bearing/non-English heads excluded, rendered
 as single-color 노란 shields.io badges — same badge style for the `arXiv` cell),
@@ -362,7 +314,7 @@ outside that range is dropped at generation). Each row is a 📝 deep-dive badge
 title, then Links / Pillars / Keywords / Refreshed cells.
 Everything outside the markers stays hand-maintained — the short folder intro above the index block.
 
-- **Where it runs** — on demand only, via a **manual `workflow_dispatch`** of `.github/workflows/refresh-analysis-index.yml` (Actions tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the github MCP). The run regenerates the block and, if it changed, commits it to `main` as a `chore(analysis): refresh index` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze-paper`, `/implement-design`, `/validate-impl`) do NOT stage this file or invoke the script. The earlier push-on-merge trigger stacked one bot commit onto `main` after *every* analysis merge, cluttering history; firing the job manually batches several merges into a single refresh commit — the trade-off is that the index stays stale until someone fires it.
+- **Where it runs** — on demand only, via a **manual `workflow_dispatch`** of `.github/workflows/refresh-analysis-index.yml` (Actions tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the github MCP). The run regenerates the block and, if it changed, commits it to `main` as a `chore(analysis): refresh index` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze-paper`, `/hypothesize`) do NOT stage this file or invoke the script. The earlier push-on-merge trigger stacked one bot commit onto `main` after *every* analysis merge, cluttering history; firing the job manually batches several merges into a single refresh commit — the trade-off is that the index stays stale until someone fires it.
 - **Don't hand-edit the script-owned block** — the `ANALYSIS_INDEX` block in `analysis/README.md` (between markers) is overwritten on the next run. The folder intro above the markers is yours. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more

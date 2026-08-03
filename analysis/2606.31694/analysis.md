@@ -19,7 +19,7 @@
   1. curl --fail "https://arxiv.org/abs/2606.31694"   → HTTP 200 (메타/초록 확보)
   2. curl --fail "https://arxiv.org/html/2606.31694"  → HTTP 200 (전문 확보, 203,885 bytes)
   참고. https://faerber-lab.github.io/RCT/ → HTTP 403 (프로젝트 페이지, 봇 차단 — 링크만 기록)
-  전문(arXiv HTML) 확보이므로 figure hotlink 4장을 STYLE §5-6 형식으로 삽입.
+  전문(arXiv HTML) 확보이므로 figure hotlink 4장을 STYLE §5-5 형식으로 삽입.
   모든 수치/인용은 수신한 본문에서 받은 그대로이며 추론·보정·반올림하지 않음. -->
 
 ---

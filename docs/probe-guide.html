@@ -522,7 +522,7 @@
       문제는 <code>cs.RO</code> + <code>cs.LG</code>에 매일 50 ~ 100편이 새로 올라온다는 것입니다. 그 중 <em>Hand-centric dexterous manipulation + Sim-to-Real</em>에 실제로 연관된 논문은 주당 3 ~ 5편 — <strong>3 ~ 5% 신호율</strong>입니다.
     </p>
     <p>
-      직접 필터링하면 매주 몇 시간이 사라집니다. 포기하면 누군가 이미 풀어 놓은 문제를 다시 풉니다. PROBE는 그 3 ~ 5%를 대신 찾아오고 — <strong>다운로드 폴더에서 죽게 두지 않습니다.</strong> 단순 요약 대신 <strong>두 갈래로 의사결정 재료</strong>를 만듭니다 — outward (찾기), focused (재현):
+      직접 필터링하면 매주 몇 시간이 사라집니다. 포기하면 누군가 이미 풀어 놓은 문제를 다시 풉니다. PROBE는 그 3 ~ 5%를 대신 찾아오고 — <strong>다운로드 폴더에서 죽게 두지 않습니다.</strong> 단순 요약 대신 <strong>두 갈래로 의사결정 재료</strong>를 만듭니다 — outward (찾기), focused (깊이 읽기):
     </p>
     <div class="callout callout-info">
       <span class="callout-icon">🎯</span>
@@ -563,7 +563,7 @@
           </div>
           <div class="compare-item">
             <span class="compare-icon">🗂️</span>
-            <span>"좋은 논문이긴 한데, 직접 재현은 못 할 거야"</span>
+            <span>"같은 주제 논문끼리 뭐가 엇갈리는지 정리가 안 된다"</span>
           </div>
         </div>
       </div>
@@ -595,8 +595,8 @@
             <span><code>/analyze-paper</code>가 Decision Log에 묶인 한글 deep-dive를 만든다</span>
           </div>
           <div class="compare-item">
-            <span class="compare-icon">🩹</span>
-            <span><code>/reproduce-paper</code>가 <code>vendor/lerobot/</code> 대비 unified diff 패치를 만든다</span>
+            <span class="compare-icon">🧪</span>
+            <span><code>/hypothesize</code>가 누적 DB를 가로질러 반증가능한 가설을 뽑는다</span>
           </div>
         </div>
       </div>
@@ -647,28 +647,19 @@
           <li>슬래시 커맨드 호출 시</li>
           <li>· <code>/analyze-paper &lt;id|url|pdf&gt;</code></li>
           <li>· full-text 우선 (arxiv/html → ar5iv → abstract)</li>
-          <li>· 중립 요약 + decision-grade 함의 + Layer 1 Design</li>
-          <li>· 후속 <code>/reproduce-paper</code> — lerobot 베이스 대비 patch</li>
+          <li>· 중립 요약 + decision-grade 함의</li>
+          <li>· P#/D# 앵커 + 컨텍스트 제안</li>
         </ul>
         <div class="pipe-out">
-          <code>analysis/&lt;id&gt;/analysis.md · design.md</code>
-          <code>analysis/&lt;id&gt;/impl/&lt;foundry&gt;/impl.{md,patch}</code>
-          <span class="text-muted">한글 deep-dive + Design, 덮어쓰기</span>
+          <code>analysis/&lt;id&gt;/analysis.md</code>
+          <span class="text-muted">한글 deep-dive, 덮어쓰기</span>
         </div>
       </div>
     </div>
 
-    <h3>사이드카 ①: reproduction funnel (on-demand)</h3>
+    <h3>사이드카: hypothesize (read-only 합성)</h3>
     <p>
-      FOCUSED 컬럼의 후속 트랙. <code>/analyze-paper</code>가 "왜 / 무엇을"이라면, 재현 퍼널은 "어디를 / 어떻게"를 채웁니다. 한 편의 <code>analysis/&lt;id&gt;/design.md</code>(Layer 1 Design)를 받아, 논문이 베이스로 삼은 lerobot 정책(<code>pi0</code> / <code>pi05</code> / <code>pi0_fast</code> / <code>smolvla</code> / <code>act</code> / <code>diffusion</code> 중 하나)을 식별하고, 그 baseline 대비 변경 지점을 한글 가이드와 unified diff로 산출합니다. baseline은 <code>vendor/lerobot/</code>에 byte-stable 스냅샷으로 보관되며, 패치는 <code>git apply --check</code>로 검증됩니다.
-    </p>
-    <p>
-      퍼널은 한 커맨드 — <code>/reproduce-paper</code> — 로 호출하며, 그 내부에서 <code>/implement-design</code>(Design→foundry 매핑) → <code>/validate-impl</code>(정적 검증) 을 verdict 가 고정점에 닿을 때까지 수렴 루프로 돌립니다(기본 <code>--max-rounds 3</code>). 진입 <em>전</em>에는 <code>/audit-paper</code> 가 값싼 재현성 게이트를 칩니다 — 논문 주장이 논문 <em>자체</em>의 공식 repo 와 맞는지 확인해, 어긋나면 비싼 라운드를 낭비하기 전에 거릅니다.
-    </p>
-
-    <h3>사이드카 ②: hypothesize (read-only 합성)</h3>
-    <p>
-      재현 퍼널이 한 편을 깊이 판다면, <code>/hypothesize &lt;P0..P5 | D# | D#-D#&gt;</code>는 <strong>이미 쌓인</strong> <code>analysis/&lt;id&gt;/</code> deep-dive 들을 한 pillar/decision 범위로 <em>가로질러</em> 읽어, 인간 소유 Decision Log(D1–D32)에 대한 tension 을 채굴하고 순위화·반증가능한 가설 + 합의·불일치 매트릭스를 <code>hypotheses/&lt;slug&gt;/</code>에 남깁니다. <strong>실험은 실행하지 않습니다</strong> — 산출물은 <em>검증된 결론</em>이 아니라 test-ready 실험 명세이며, 모든 가설은 <code>inferred</code>/<code>unverified</code> 라벨로 출하(경험적 검증은 사람 몫). <code>--seed "&lt;아이디어&gt;"</code>로 사용자 가설을 top-down 주입할 수 있습니다. 사전조건: 범위에 묶인 분석 ≥3편.
+      <code>/analyze-paper</code>가 한 편을 깊이 판다면, <code>/hypothesize &lt;P0..P5 | D# | D#-D#&gt;</code>는 <strong>이미 쌓인</strong> <code>analysis/&lt;id&gt;/</code> deep-dive 들을 한 pillar/decision 범위로 <em>가로질러</em> 읽어, 인간 소유 Decision Log(D1–D32)에 대한 tension 을 채굴하고 순위화·반증가능한 가설 + 합의·불일치 매트릭스를 <code>hypotheses/&lt;slug&gt;/</code>에 남깁니다. <strong>실험은 실행하지 않습니다</strong> — 산출물은 <em>검증된 결론</em>이 아니라 test-ready 실험 명세이며, 모든 가설은 <code>inferred</code>/<code>unverified</code> 라벨로 출하(경험적 검증은 사람 몫). <code>--seed "&lt;아이디어&gt;"</code>로 사용자 가설을 top-down 주입할 수 있습니다. 사전조건: 범위에 묶인 분석 ≥3편.
     </p>
   </section>
 
@@ -789,36 +780,17 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
   <!-- ── On-demand modes ─────────────────────────────────────────── -->
   <section id="on-demand">
     <h2>On-demand 모드 — 슬래시 커맨드</h2>
-    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드들은 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파거나(재현 퍼널), 이미 쌓인 DB를 가로질러 합성합니다(hypothesize). 스케줄링 없이 로컬/웹 세션에서 호출합니다. 모든 로직은 <code>.claude/prompts/&lt;name&gt;.txt</code>에 있고, <code>/&lt;name&gt;</code> 래퍼는 그 파일을 읽어 실행할 뿐입니다.</p>
+    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드들은 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파거나(analyze-paper), 이미 쌓인 DB를 가로질러 합성합니다(hypothesize). 스케줄링 없이 로컬/웹 세션에서 호출합니다. 모든 로직은 <code>.claude/prompts/&lt;name&gt;.txt</code>에 있고, <code>/&lt;name&gt;</code> 래퍼는 그 파일을 읽어 실행할 뿐입니다.</p>
 
-    <p class="text-muted">상위 레벨에서 직접 호출하는 커맨드는 네 개입니다. <code>/implement-design</code>·<code>/validate-impl</code>은 <code>/reproduce-paper</code>가 내부에서 돌리는 하위 단계입니다.</p>
+    <p class="text-muted">직접 호출하는 커맨드는 두 개입니다.</p>
     <div class="card-grid">
       <div class="mode-card">
         <h4>/analyze-paper &lt;id | url | pdf&gt;</h4>
-        <p>인간이 이미 관심을 가진 한 편(보통 <code>context/P#.md</code> §5의 pinned/anchor 논문 중 아직 내재화하지 못한 것)을 읽고 한글 deep-dive + Layer 1 Design을 남깁니다.</p>
+        <p>인간이 이미 관심을 가진 한 편(보통 <code>context/P#.md</code> §5의 pinned/anchor 논문 중 아직 내재화하지 못한 것)을 읽고 한글 deep-dive를 남깁니다.</p>
         <dl class="mode-meta">
           <dt>본문 획득</dt>     <dd><code>arxiv.org/abs</code> → <code>/html</code> → ar5iv → abstract-only, 획득 레벨을 문서 헤더에 기록</dd>
-          <dt>출력</dt>          <dd><code>analysis/&lt;id&gt;/analysis.md</code> + <code>design.md</code> — 매 실행 덮어쓰기</dd>
-          <dt>구조</dt>          <dd>(A) 중립 요약 + (B) Decision Log 기반 decision-grade 함의 + (C) vendor-agnostic Layer 1 Design</dd>
-        </dl>
-      </div>
-      <div class="mode-card">
-        <h4>/audit-paper &lt;id&gt; [--repo &lt;url&gt;]</h4>
-        <p>재현 퍼널 진입 <em>전</em>의 값싼 재현성 게이트. 논문이 주장한 method/defaults/metric 이 논문 <em>자체</em>의 공식 repo 와 일치하는가? 어긋나면 비싼 <code>/reproduce-paper</code> 라운드를 낭비하기 전에 거릅니다.</p>
-        <dl class="mode-meta">
-          <dt>비교 쌍</dt>       <dd>논문 주장 ↔ 논문 자체 공식 코드 (<code>/validate-impl</code>의 Design↔vendor 와 다름)</dd>
-          <dt>출력</dt>          <dd><code>analysis/&lt;id&gt;/audit.md</code> — 한글 재현 게이트 보고서</dd>
-          <dt>정직성</dt>        <dd>공식 코드를 못 찾으면 <code>🚫 audit 불가</code>로 보고 — 가짜 pass 없음</dd>
-        </dl>
-      </div>
-      <div class="mode-card">
-        <h4>/reproduce-paper &lt;id | design-path&gt;</h4>
-        <p><code>/analyze-paper</code>의 후속. Design을 target foundry(기본 <code>vendor/lerobot/</code>) 좌표계로 매핑하고 정적 검증하는 과정을 verdict가 고정점에 닿을 때까지 수렴 루프로 돌립니다.</p>
-        <dl class="mode-meta">
-          <dt>옵션</dt>          <dd><code>--foundry &lt;name&gt;</code>(기본 <code>lerobot</code>) · <code>--max-rounds N</code>(기본 3)</dd>
-          <dt>하위 단계</dt>     <dd><code>/implement-design</code>(Design→foundry 매핑) → <code>/validate-impl</code>(정적 검증)</dd>
-          <dt>출력</dt>          <dd><code>impl/&lt;foundry&gt;/impl.{md,patch}</code>(<code>git apply --check</code> 통과) + <code>validation/&lt;foundry&gt;.md</code></dd>
-          <dt>분기 매트릭스</dt>  <dd><code>.claude/prompts/reproduction.txt</code></dd>
+          <dt>출력</dt>          <dd><code>analysis/&lt;id&gt;/analysis.md</code> — 매 실행 덮어쓰기</dd>
+          <dt>구조</dt>          <dd>(A) 중립 요약 + (B) Decision Log 기반 decision-grade 함의</dd>
         </dl>
       </div>
       <div class="mode-card">
@@ -834,7 +806,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 
     <div class="callout callout-tip">
       <span class="callout-icon">💡</span>
-      <p>이 모드들은 <strong>스케줄된 루틴이 아닙니다.</strong> 필요할 때 직접 호출하세요. <code>/analyze-paper</code>·<code>/audit-paper</code>의 full-text 획득에는 세션 환경에 <code>arxiv.org</code> / <code>ar5iv.labs.arxiv.org</code> / <code>export.arxiv.org</code> 허용이 필요합니다(Stage 3와 동일한 Custom allowlist).</p>
+      <p>이 모드들은 <strong>스케줄된 루틴이 아닙니다.</strong> 필요할 때 직접 호출하세요. <code>/analyze-paper</code>의 full-text 획득에는 세션 환경에 <code>arxiv.org</code> / <code>ar5iv.labs.arxiv.org</code> / <code>export.arxiv.org</code> 허용이 필요합니다(Stage 3와 동일한 Custom allowlist).</p>
     </div>
   </section>
 
@@ -950,10 +922,9 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.txt</code>(P0–P5 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.txt</code> · <code>audit.txt</code> · <code>implementation.txt</code> · <code>validation.txt</code> · <code>reproduction.txt</code> · <code>hypothesize.txt</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.txt</code>(P0–P5 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.txt</code> · <code>hypothesize.txt</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
           <tr><td>컨텍스트</td>    <td><code>context/P{0..5}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트)</td></tr>
-          <tr><td>vendor</td>      <td><code>vendor/lerobot/</code> — byte-stable 스냅샷, 6개 baseline policy + configs (재현 패치의 적용 대상)</td></tr>
         </tbody>
       </table>
     </div>
@@ -1011,14 +982,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">FOC</span>
         <div>
           <div class="doc-title">analysis/README.md</div>
-          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze-paper</code> · <code>/audit-paper</code> · <code>/reproduce-paper</code> · <code>/hypothesize</code></div>
-        </div>
-      </a>
-      <a class="doc-item" href="../vendor/lerobot/README.md">
-        <span class="doc-tag">VEND</span>
-        <div>
-          <div class="doc-title">vendor/lerobot/README.md</div>
-          <div class="doc-desc">읽기 전용 lerobot 스냅샷 — pinned commit, refresh 절차, 라이선스</div>
+          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze-paper</code> · <code>/hypothesize</code></div>
         </div>
       </a>
       <a class="doc-item" href="../brand.py">

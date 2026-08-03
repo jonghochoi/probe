@@ -25,7 +25,7 @@
      5. command -v pdftotext                                        → 부재
      6. curl -L --fail -sS "https://arxiv.org/pdf/2605.30280" -o paper.pdf → HTTP 200, 12.6MB, 34p
         → PyMuPDF(fitz) 로 전문 텍스트 추출 성공. arXiv HTML 부재로
-        figure hotlink 은 수집하지 않음(§5-6 PDF-only 규칙). 표/수식은
+        figure hotlink 은 수집하지 않음(§5-5 PDF-only 규칙). 표/수식은
         텍스트 추출 과정에서 일부 서식 손상 가능 — 수치는 받은 그대로
         인용하며 추정·보정하지 않음. -->
 

@@ -49,7 +49,7 @@ PROBE의 구조화된 메타데이터를 supermemory의 `containerTag` / `metada
 | `태그`(통제 어휘 12종) | `metadata.tags[]` | topic 축 필터 |
 | arXiv id | `customId = arxiv:<id>` | 중복제거 + 갱신 추적 → 재수집 idempotent |
 | `발행일` / `분석 생성일` | `metadata.published` / `metadata.analyzed` | numeric range 필터 |
-| 문서 종류 | `metadata.doc_type` | `decision` / `lit` / `analysis` / `design` / `scouting` |
+| 문서 종류 | `metadata.doc_type` | `decision` / `lit` / `analysis` / `scouting` |
 
 이 매핑으로 에이전트는 "P1 ∩ D4 ∩ tag=tactile ∩ 2025년 이후" 같은 다축 질의를
 시맨틱 검색 위에서 던질 수 있다 — pillar(아키텍처 축) × decision(전술 축) ×
@@ -60,7 +60,7 @@ tag(주제 축)의 최소 3개 독립 필터축.
 `분석 생성일`)을 정규식으로 파싱한다. 수집기의
 메타데이터 추출 로직은 이 파서를 **재사용하거나 그대로 본떠야** 한다 — 같은 행
 스펙을 두 곳에서 다르게 해석하면 인덱스와 supermemory가 어긋난다. 행 스펙의 SSOT는
-`docs/style.md` §5-7이다.
+`docs/style.md` §5-6이다.
 
 ## 3. 소스별 수집 매핑 (개념 설계)
 
@@ -78,9 +78,6 @@ tag(주제 축)의 최소 3개 독립 필터축.
 - **`analysis/<id>/analysis.md`** → 논문당 1 doc, `customId = arxiv:<id>`,
   `논문 메타` 전체를 metadata로. **본문이 한글**이므로 임베딩 모델의 한국어 처리력이
   회수 품질을 좌우한다(→ §5·§6의 1순위 리스크).
-- **`analysis/<id>/design.md`** → `metadata.doc_type = design`, 같은 arXiv id 계열로
-  analysis와 링크. Layer 1 Design(데이터 계약·불변식·메트릭)이 "구현 가능한 형태의
-  지식"이라 도출 에이전트의 근거화 단계에서 값지다.
 - **`scouting/P#/YYYY-MM-DD.md`** → 리포트당 1 doc, `containerTag = P#`,
   `metadata.date`. 주간 스냅샷이라 "최근 N주 동향" 시간축 질의의 소스가 된다.
 
@@ -90,7 +87,7 @@ tag(주제 축)의 최소 3개 독립 필터축.
 ## 4. "연구 도출 에이전트" 워크플로 (개념)
 
 supermemory는 retrieval 기층일 뿐이고, 도출 로직은 그 위에 올리는 별도 루프다(미래의
-slash-command로 구현 가능). 기존 PROBE 파이프라인(scouting → analysis → design)을
+slash-command로 구현 가능). 기존 PROBE 파이프라인(scouting → analysis)을
 대체하지 않고 *그 산출물을 재료로* 쓴다.
 
 1. **시드** — 개념/공백을 받아 전 P# hybrid `search`로 관련 결정·논문 회수.
@@ -98,7 +95,7 @@ slash-command로 구현 가능). 기존 PROBE 파이프라인(scouting → analy
    pillar 경계를 넘는 연결 후보(=`MASTER.md` Cross-pollination의 자동화).
 3. **모순/공백 탐지** — `metadata.doc_type = decision` memory + 최근 scouting을 함께
    회수해, v1 선택을 약화시키는 신규 문헌이 있는지 모델에 판단시킨다.
-4. **근거화** — 제안 아이디어를 Tracked Literature·analysis·design으로 뒷받침/반증.
+4. **근거화** — 제안 아이디어를 Tracked Literature·analysis로 뒷받침/반증.
 5. **출력** — scouting-style 신규 제안. 사람이 검토 후 `context/P#.md`에 반영.
 
 ## 5. 배포 방식 — 셀프호스팅 vs 호스티드 (실제 사례 대비)
@@ -165,7 +162,7 @@ supermemory는 두 형태로 운영된다. 각각을 PROBE의 구체 시나리�
 - **`context/`는 human read-only.** 수집은 `context/P{0..5}.md`를 읽기만 하고 절대
   되쓰지 않는다 — PROBE의 핵심 불변식이다.
 - **임베딩 노이즈 제거.** Math/KaTeX 수식과 shields.io 배지 마크업은 의미가 없으니
-  수집 전 스트립을 권장한다(`docs/style.md` §5-6의 수식 규칙 참조).
+  수집 전 스트립을 권장한다(`docs/style.md` §5-5의 수식 규칙 참조).
 
 ## 다음 단계 (참고)
 

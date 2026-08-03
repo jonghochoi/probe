@@ -24,7 +24,7 @@
   5. curl -L --fail "https://arxiv.org/pdf/2606.22332" -o paper.pdf → 200 (24p, 13MB)
      `command -v pdftotext` → 미설치. 대안으로 `pypdf` (pip install) 로 전문(24p)
      텍스트 추출 성공 → 본문 확보 수준을 'PDF 텍스트(pypdf)' 로 정직 기록.
-  PDF 텍스트 확보이므로 STYLE §5-6 규칙에 따라 figure hotlink 은 생략(arXiv HTML
+  PDF 텍스트 확보이므로 STYLE §5-5 규칙에 따라 figure hotlink 은 생략(arXiv HTML
   소스 부재). 모든 수치/인용은 추출 본문에서 받은 그대로이며, 추출 아티팩트(리거처·
   공백 손실)만 원문 표기로 정규화함. -->
 
