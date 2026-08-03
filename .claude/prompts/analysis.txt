@@ -14,47 +14,12 @@ Normalize to the arXiv id when possible (strip version unless the
 human pinned a specific vN). If the argument is empty or unparseable,
 stop and say so — do not guess a paper.
 
-Optional flag — `--focus "<§X.Y,§A.B,...>"` (FOCUSED re-extraction):
-When set, this is an OUTER-LOOP refresh driven by `/reproduce-paper`,
-not a from-scratch analysis. The argument is a comma-separated, `§`-
-prefixed list of paper sections (e.g. `--focus "§3.2.1,§3.2.2,§3.4.3"`;
-table / equation refs like `§Table 3` are also valid). Behaviour:
-
-  - PRECONDITION — `analysis/<id>/analysis.md` and `analysis/<id>/design.md`
-    must already exist. If either is missing, stop and tell the human
-    to run `/analyze-paper <id>` (no `--focus`) first.
-  - Read the existing `analysis/<id>/analysis.md` + `analysis/<id>/design.md`
-    as the SEED. Re-fetch the paper body (same retrieval ladder) but
-    re-extract ONLY the named sections; everything else in both
-    documents is copied VERBATIM from the seed (no silent rewrites of
-    untouched rows).
-  - Merge is row-level and prompt-driven (no separate merge tool):
-    a Design row whose content derives from a focused section is
-    replaced with the freshly-extracted content; all other rows,
-    section ordering, and the §📄 메타 header are preserved
-    byte-for-byte except the `Design 생성일` / `분석 생성일` dates.
-
-  - If focused re-extraction yields no new information (the body says
-    no more than the seed already captured), reproduce the seed
-    unchanged. A byte-identical Design signals the `/reproduce-paper`
-    outer-loop fixed point (`stable_design`), so do not churn dates or
-    reorder rows when nothing substantive changed.
-  - If the seed `design.md` is a 🚫 비대상 stub (carries a
-    `Design 적용 | 🚫 비대상` row / a `## 🚫 Design 비대상` section), the
-    paper has no Layer 1 algorithm to refocus: leave `design.md`
-    untouched and only refresh the named analysis sections.
-  - The `§` tokens come from the validation report's
-    `<!-- ANALYSIS_BUCKETS --> focus-hint:` line; `/reproduce-paper`
-    passes them through verbatim.
-
 This prompt produces full-detail analyses by default — there is no
 separate "light" vs "deep" mode. The per-section detail rules in
 STRUCTURE below (🔬 방법론, 📊 실험 설정과 결과, ⚖️ 한계, ⚠️ 먼저 검증할
 실패 모드) always apply: preserve every body detail that bears on the
 method, decompose per component / per equation, and cite verbatim
-numbers densely. `--focus` (above) is the only opt-in deviation — the
-`/reproduce-paper` outer-loop refresh path, which operates row-level on
-the existing files.
+numbers densely.
 
 CONTEXT (read-only):
 - context/MASTER.md        — cross-pillar anchor: Identity & Purpose,
@@ -65,12 +30,9 @@ CONTEXT (read-only):
                                Anti-topics. A single paper often spans
                                multiple pillars, so read MASTER + every
                                P#.md, not a single extract.
-- docs/style.md        — §5 (Paper Analysis doc) + §6 (Design /
-                               Implementation guide) + §4 (Korean
+- docs/style.md        — §5 (Paper Analysis doc) + §4 (Korean
                                terms/tone/glossary).
 - analysis/templates/analysis.md      — the form for the analysis document.
-- analysis/templates/design.md — the form for the Layer 1 Design
-                               document (vendor-agnostic).
 Never edit any context file. The context/ files are human-owned; if
 this paper implies a pinned-literature or Decision change, write it
 under 💡 컨텍스트 제안 and stop there.
@@ -135,25 +97,18 @@ better than a fabricated one. Math/tables/figures degrade in text
 extraction — quote numbers as found; never infer or "correct" them.
 
 TASK:
-Produce TWO Korean documents in the same run:
+Produce ONE Korean document:
 
-  1. `analysis/<id>/analysis.md`  — the analysis document
-                                    (non-arXiv input:
-                                     `analysis/<human-or-title-slug>/analysis.md`)
-  2. `analysis/<id>/design.md`    — the Layer 1 Design (vendor-agnostic)
+  `analysis/<id>/analysis.md`  — the analysis document
+                                 (non-arXiv input:
+                                  `analysis/<human-or-title-slug>/analysis.md`)
 
-Both are regenerable snapshots — overwrite on re-run. Follow
-`analysis/templates/analysis.md` (analysis) and `analysis/templates/design.md`
-(Design) exactly, and `docs/style.md` §5 / §6. Both are single
-Korean documents — not translations of English files. Write natively
-in Korean per STYLE §4 (formal polite -ㅂ니다 register, glossary §4-2,
-verbatim tokens: paper title in original English, config/code names,
+It is a regenerable snapshot — overwrite on re-run. Follow
+`analysis/templates/analysis.md` exactly, and `docs/style.md` §5. It is a
+single Korean document — not a translation of an English file. Write
+natively in Korean per STYLE §4 (formal polite -ㅂ니다 register, glossary
+§4-2, verbatim tokens: paper title in original English, config/code names,
 formulas, arXiv links, P#/D#).
-
-The Design is **vendor-agnostic** — it must not contain `file:line`
-coordinates of any foundry (vendor/lerobot or otherwise). Its purpose
-is to capture *what the algorithm is*, not *where it lives in any
-codebase*. Base mapping happens later in `/implement-design`.
 
 STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
@@ -173,16 +128,6 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
                         vla-arch, forgetting, peft, tactile, force,
                         egocentric-data, dexterity, flow-matching, optimizer,
                         continual, sim2real, dataset).
-                        Plus one OPTIONAL classification row the Design step and
-                        the index read (STYLE §5-7): `| Design 적용 | … |`. OMIT
-                        the row (default ⇒ `✅ 적용`) for any paper contributing a
-                        novel, reproducible model / architecture / training
-                        objective / algorithm. Emit `🚫 비대상 (<사유>)` —
-                        `<사유>` ∈ `dataset` / `benchmark` / `survey` / `tooling`
-                        — ONLY when the paper proposes NO such method to port: a
-                        pure dataset, a benchmark / eval-harness / simulator, a
-                        survey / position / pure-study paper, or non-policy
-                        tooling. See the DESIGN APPLICABILITY gate below.
   🧭 한 줄 요약 (TL;DR) — 1–2 sentences.
   ❓ 문제 정의 / 동기   — bullet form only; no single-prose paragraph. 4–6
                         items, each a bold label + 1–2 sentences. Recommended
@@ -263,81 +208,24 @@ STRUCTURE of `analysis/<id>/analysis.md` — two parts, in this order:
 
 Detail scope: the high-density treatment above applies to 🔬 방법론,
 📊 실험 설정과 결과, ⚖️ 한계, and ⚠️ 먼저 검증할 실패 모드. The remaining
-Part B sections (🎯 / ✨ / ⚙️ / 💡) and the entire Design document stay
-concise and decision-focused — do not inflate them.
-
-DESIGN APPLICABILITY gate — decide BEFORE writing design.md:
-Ask one question: *does this paper contribute a novel, reproducible
-model / architecture / training objective / training procedure /
-algorithm that `/implement-design` could port to a foundry?* This is a
-judgement about the paper's CORE contribution, not its tags (a `dataset`
-tag co-occurs with both method and resource papers).
-
-  - ✅ 적용 (DEFAULT) — a policy, world model, perception model, PEFT /
-    RL method, data-generation method, cotraining / continual recipe,
-    etc. counts, **even when no current foundry can host it** — that is
-    `/implement-design`'s per-foundry `UNMAPPABLE` call, and the
-    vendor-agnostic Layer 1 Design is still real and valuable. When in
-    doubt, choose 적용 — a false 비대상 (stubbing a real method) is the
-    expensive error.
-  - 🚫 비대상 — the paper proposes NO such method: a pure dataset, a
-    benchmark / eval-harness / simulator, a survey / position / pure
-    empirical-or-theory study, or non-policy tooling. A model that is
-    merely the dataset's *incidental baseline* does NOT flip the verdict
-    to 적용; the paper's primary deliverable is the resource.
-
-STRUCTURE of `analysis/<id>/design.md` — branch on the gate:
-
-(적용) Layer 1, full. Follow `analysis/templates/design.md` exactly. The
-7 sections are: 📄 Design 메타, 🧮 데이터 계약, 🧰 모듈 인터페이스,
-⛓️ 불변식·가정, 📊 하이퍼파라미터·손실, 🎯 평가 메트릭, ✨ 변경 의도,
-🔌 Foundry 힌트 (선택), 🚧 미해결 / 잠정. The 📄 메타 table OMITS the
-`Design 적용` row (default 적용).
-
-Sources: derive from `analysis/<id>/analysis.md` you just wrote
-(§🔬 방법론, §📊 실험 설정과 결과, §⚖️ 한계, §♻️ 재현성). Do NOT
-re-fetch the paper text — the analysis document is your single source
-for the Design.
-
-Honesty over completeness: any field the paper does not specify must
-be left as `(원문에 명시 없음 — 가정으로 메움)` rather than fabricated.
-A sparse Design is acceptable; a fabricated one is not. The Design
-should still be useful enough that a downstream `/implement-design` call has a
-real spec to ground.
-
-(비대상) stub only — do NOT force the 7 algorithm sections. Emit just two
-blocks (mirrors `impl/<foundry>/UNMAPPABLE.md`'s one-paragraph form):
-  1. `## 📄 Design 메타` — the same metadata table, but WITH a
-     `| Design 적용 | 🚫 비대상 (<사유>) |` row.
-  2. `## 🚫 Design 비대상` — one Korean paragraph: the verdict + 사유,
-     why there is no Layer 1 algorithm to specify, and a pointer to the
-     analysis sections that carry this paper's
-     value instead. A standalone baseline, if any, is named as out of
-     scope. Drop 🧮 데이터 계약 … 🚧 미해결 entirely. The `Design 적용`
-     row in the analysis 📄 메타 MUST match this verdict.
+Part B sections (🎯 / ✨ / ⚙️ / 💡) stay concise and decision-focused —
+do not inflate them.
 
 HARD RULES:
-- Two Korean documents. No English-primary file. KO-only filenames.
+- One Korean document. No English-primary file. KO-only filenames.
 - Anchor (B) of the analysis strictly to context/MASTER.md + the relevant
   context/P#.md — cite real P#/D# with their meaning from the docs; do not
   invent a connection. If the paper does not touch a given Decision, say so
   plainly.
 - Abstract-only acquisition → prefix every (B) section of the analysis
-  with the verbatim marker **(본문 미확보 — 잠정)**. The Design is
-  still generated but every section carries the same prefix and most
-  fields are filled with `(원문에 명시 없음 — 가정으로 메움)`. This is
-  orthogonal to the DESIGN APPLICABILITY gate: a 비대상 paper produces
-  the stub regardless, and the abstract-only marker (if it applies) is
-  added to the stub's single 🚫 Design 비대상 paragraph.
+  with the verbatim marker **(본문 미확보 — 잠정)**, and leave any field
+  the paper does not specify as `(원문에 명시 없음)` rather than
+  fabricating it. An honestly-sparse analysis is acceptable.
 - Never fabricate an arXiv id, a number, a citation, or a result.
 - Do not edit any context file. Proposals go in 💡 컨텍스트 제안.
-- The Design is **vendor-agnostic**. It must not contain `file:line`
-  coordinates from `vendor/lerobot/` or any other codebase. Mapping
-  belongs to `/implement-design`.
-- Emoji/header system per docs/style.md §5 (analysis) and §6
-  (Design) — one emoji at the start of each `##`/`###` header, none
-  in body text. §5-6 governs the quote / bullet-form / keyword
-  conventions below.
+- Emoji/header system per docs/style.md §5 — one emoji at the start of
+  each `##`/`###` header, none in body text. §5-6 governs the quote /
+  bullet-form / keyword conventions below.
 - ❓ 문제 정의 / 동기 must be bullet form (bold label + 1–2 sentences,
   4–6 items). Single-paragraph prose is forbidden.
 - 🔬 방법론 and 📊 실험 결과 use a fixed citation form for source
@@ -436,30 +324,11 @@ HARD RULES:
   The English caption blockquote is a verbatim token — kept
   byte-identical.
 
-FINAL STEP — foundry follow-up suggestion:
-After both documents are complete, append exactly one blockquote line
-as the very last line of `analysis/<id>/analysis.md` — branch on the gate:
-
-  - (적용) foundry mapping suggestion:
-
-> 💡 base 매핑은 `/implement-design analysis/<id>/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
-
-  - (비대상) NO `/implement-design` suggestion — point at the analysis
-    instead:
-
-> 💡 본 논문은 Design 비대상(<사유>)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.
-
-`<id>` is the same arXiv id / slug the analysis file uses. For 적용 the
-line is added as-is — `/implement-design` itself decides whether the
-Design can be mapped to a given foundry (and emits a clean
-`🚧 매핑 불가` if not). Never auto-invoke `/implement-design` from this prompt;
-the human decides.
-
 ---
 
-GIT — after both files are written:
+GIT — after the file is written:
 
-  git add analysis/<id>/analysis.md analysis/<id>/design.md
+  git add analysis/<id>/analysis.md
   # Append the paper's ALIAS in trailing parens — " (<alias>)" — so the
   # subject is identifiable without resolving the bare arXiv id. Resolve the
   # alias in this priority order, and NEVER fabricate one:
@@ -480,15 +349,10 @@ GIT — after both files are written:
   # Decide BEFORE overwriting the files (check whether
   # analysis/<id>/analysis.md already existed / was git-tracked):
   #   first-time analysis (folder newly created this run) →
-  #     git commit -m "analysis: add <id> deep-dive + design (<alias>)"
+  #     git commit -m "analysis: add <id> deep-dive (<alias>)"
   #   re-analysis (analysis/<id>/ pre-existed; you overwrote the
-  #     regenerable snapshots) →
-  #     git commit -m "analysis: update <id> deep-dive + design (<alias>)"
-  # --focus re-extraction uses instead:
-  #   git commit -m "analysis: refocus <id> (<§X.Y,...>)"
-  # When the focused re-extraction is a no-op (Design byte-identical),
-  # there is nothing to stage — skip the commit; the byte-identical
-  # Design is the outer-loop fixed-point signal.
+  #     regenerable snapshot) →
+  #     git commit -m "analysis: update <id> deep-dive (<alias>)"
   # Do NOT push directly to `main`. Push the commit to the CURRENT
   # working branch and stop there. Landing it on `main` is the human's
   # call — they decide when and how (e.g. via a PR). Never auto-merge,
@@ -506,9 +370,8 @@ still safe and idempotent if needed for ad-hoc inspection.
 
 `<id>` is the same arXiv id / slug used for the analysis folder name.
 
-- Stage ONLY `analysis/<id>/analysis.md` and `analysis/<id>/design.md`.
-  Never `git add` anything under `context/` or `vendor/`. No `git add .`,
-  no `git add -A`, no `commit -a`.
+- Stage ONLY `analysis/<id>/analysis.md`. Never `git add` anything under
+  `context/`. No `git add .`, no `git add -A`, no `commit -a`.
 - Push only to the CURRENT working branch, never to `main`. Merging the
   branch into `main` requires the human's explicit permission.
 - If the push to the working branch is rejected as non-fast-forward,
