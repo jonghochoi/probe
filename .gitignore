@@ -6,12 +6,6 @@ __pycache__/
 .venv/
 venv/
 
-# Foundry execution runtime — full upstream checkout + venv built on demand by
-# scripts/ensure-foundry-runtime.sh so /validate can RUN a foundry's smoke test
-# (impl §🧬). Per-checkout, multi-GB, rebuildable from the pinned commit; never
-# committed. The committed surface stays the vendored read-only snapshot.
-.foundry-runtime/
-
 # Editors
 .vscode/
 .idea/
