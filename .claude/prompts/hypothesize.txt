@@ -7,10 +7,10 @@ hypotheses. The deliverable is an **experiment specification**, never a
 verified conclusion — the empirical work is the human's to run (see the
 MEASUREMENT LADDER below for why).
 
-This is the read-only synthesis track. It stands on three existing assets:
-the per-paper `analysis/<id>/` deep-dives, the per-pillar `context/P#.md`
-Decision Log (D1–D32), and — only as a *named follow-up*, never invoked here —
-the `/implement-design` + `/validate-impl` foundry loop.
+This is the read-only synthesis track. It stands on two existing assets:
+the per-paper `analysis/<id>/` deep-dives and the per-pillar `context/P#.md`
+Decision Log (D1–D32). Every experiment it proposes is a *named follow-up*
+for the human — PROBE runs none of them.
 
 INPUT:
 The first positional argument scopes the run to a bounded slice:
@@ -61,8 +61,7 @@ CONTEXT (read-only):
     ⚙️ 의사결정 함의            — the per-paper "change D# to …" claim
     ⚠️ 먼저 검증할 실패 모드     — paper-local hypotheses; recurring = strong
     ✨ 핀 논문 대비 델타        — where it contradicts pinned literature
-  plus ♻️ 재현성 + `analysis/<id>/design.md` (적용 vs 🚫 비대상) to judge
-  foundry-portability.
+  plus ♻️ 재현성 to judge how cheaply the paper's claim can be re-checked.
 - `context/P#.md` — the Decision Log (current `v1` per D#) + Anti-topics.
   This is the SPINE every hypothesis anchors to. **Never edit any
   `context/` file** — propose Decision-Log changes in the output only.
@@ -105,10 +104,7 @@ Stage 3 — HYPOTHESIS SYNTHESIS. Each hypothesis MUST carry, or it is dropped:
     - a predicted **measurable** effect (name the metric / config / loss term —
       vague is failure, mirroring ⚙️ 의사결정 함의's bar);
     - a **measurement protocol** mapped to the MEASUREMENT LADDER below: name
-      the *cheapest informative rung* and what a pass/fail at that rung means;
-    - a **foundry-portability** verdict: portable (a Design delta
-      `/implement-design` + `/validate-impl` could later check at Rung 0–1) vs
-      evidence-only (dataset/benchmark/conceptual).
+      the *cheapest informative rung* and what a pass/fail at that rung means.
 
 Stage 4 — RANK. Score each hypothesis on four 0–3 axes and surface the top-K:
     - 증거 강도 (evidence)     — how many / how reproducible the grounding papers
@@ -120,10 +116,9 @@ Stage 4 — RANK. Score each hypothesis on four 0–3 axes and surface the top-K
 
 Stage 5 — EXPERIMENT (NOT THIS COMMAND). Out of scope here, stated so the
   reader knows where the loop goes:
-    - Portable hypothesis → the human (or a separate heavy job) authors the
-      Design delta and runs `/implement-design` + `/validate-impl`. That checks
-      Rung 0–1 (implementable / proxy-consistent) automatically; it does NOT
-      establish the empirical claim.
+    - Rung 0–1 (implementable / proxy-consistent) is a cheap desk check the
+      human runs against their own stack; it does NOT establish the empirical
+      claim.
     - The empirical rung (full pretrain/finetune + multi-seed real-robot / sim
       success-rate eval) is GPU-days, hardware time, and high variance — a
       human-batched OPEN loop, never an autonomous closed one. PROBE proposes
@@ -152,8 +147,8 @@ honestly. PROBE can only ever *propose* rungs; it runs none of them here.
 
   | Rung | What it checks | Auto? | Honest label |
   |------|----------------|-------|--------------|
-  | 0 | foundry smoke — patch applies, builds, forward-pass shapes | auto (later, via /validate-impl §🧬) | `implementable` |
-  | 1 | proxy — param/FLOPs/latency Δ, overfit-one-batch, grad flow | auto (later) | `proxy-consistent` |
+  | 0 | spec check — the method is specified precisely enough to code | NO — human, desk check | `implementable` |
+  | 1 | proxy — param/FLOPs/latency Δ, overfit-one-batch, grad flow | NO — human, cheap run | `proxy-consistent` |
   | 2 | sim micro-eval — small training / few-task sim | semi (sim2real + variance caveats) | `indicative` |
   | 3 | full empirical — pretrain/finetune + multi-seed robot/sim eval | NO — human, batched | `empirically-verified` |
 
@@ -179,7 +174,7 @@ plain. Use P#/D# shields.io badges with the §3-1 palette on first mention.
   ## 🔀 합의·불일치 매트릭스 — the Stage-2 matrix (also the `--compare-only` body)
   ## ⚡ 텐션               — the four classes, each tension a bullet with its source ids
   ## 💡 가설               — the ranked hypotheses; per hypothesis the Stage-3 fields
-                            + its 🪜 측정 rung + foundry-portability + `inferred` label.
+                            + its 🪜 측정 rung + `inferred` label.
                             A `--seed` hypothesis appears here tagged
                             `user-seeded` (+ `exploratory` if ungrounded),
                             always shown regardless of `--top-k`
@@ -208,8 +203,7 @@ RULES
   supported.
 - Never fabricate an analysis id, citation, Decision, or result. If the corpus
   contradicts itself, report the contradiction — do not resolve it by fiat.
-- Do NOT run training, evaluation, inference, or the foundry runtime. This
-  command writes text only.
+- Do NOT run training, evaluation, or inference. This command writes text only.
 - Do NOT edit any `context/` file; Decision-Log changes are proposals.
 - Do NOT stage or regenerate `analysis/README.md` — this track does not feed
   the index.
@@ -227,8 +221,8 @@ GIT — after the files are written:
   git commit -m "hypothesize: add <slug> hypotheses"
   git push -u origin HEAD
 
-- Stage ONLY `hypotheses/<slug>/`. Never `git add` anything under `context/`,
-  `analysis/`, or `vendor/`. No `git add .`, no `-A`, no `-a`.
+- Stage ONLY `hypotheses/<slug>/`. Never `git add` anything under `context/`
+  or `analysis/`. No `git add .`, no `-A`, no `-a`.
 - Push only to the CURRENT working branch, never to `main`. Landing on `main`
   is the human's call.
 - On non-fast-forward rejection, `git pull --rebase origin HEAD` and retry up
