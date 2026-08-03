@@ -81,7 +81,7 @@ VLA 모델 평가에서 벤치마크마다 반복되는 의존성·전처리·�
 - **벤치마크** — 통합자는 핀 고정된 의존성을 가진 전용 Docker 이미지 안에서 네 메서드(`reset`, `step`, `make_obs`, `get_step_result`)를 구현합니다.
 - **선언적 config** — 벤치마크 + 모델 서버 두 개의 YAML config가 각 평가를 구동합니다. 모든 Docker 이미지는 버전 태그와 함께 `ghcr.io`에 게시되고 필요한 에셋(scene 파일, 텍스처, robot description)을 번들로 묶어, 평가 전체가 `vla-eval serve`와 `vla-eval run` 두 명령으로 끝납니다. 모든 실행은 하니스 버전·벤치마크 구성·에피소드별 메트릭을 기록한 구조화 JSON 결과 파일을 산출해 정확한 재현을 가능케 합니다.
 
-지원 범위는 14개 벤치마크(action space 6D~14D, Docker 이미지 4.7~35.6GB)와 6개 모델 서버(CogACT, OpenVLA, OpenVLA-OFT, $`\pi_{0}`$ / $`\pi_{0}`$-FAST, GR00T N1, X-VLA)입니다.
+지원 범위는 14개 벤치마크(action space 6D–14D, Docker 이미지 4.7–35.6GB)와 6개 모델 서버(CogACT, OpenVLA, OpenVLA-OFT, $`\pi_{0}`$ / $`\pi_{0}`$-FAST, GR00T N1, X-VLA)입니다.
 
 ### 학습 목표 / 손실
 

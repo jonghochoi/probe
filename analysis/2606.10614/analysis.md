@@ -76,7 +76,7 @@
 
 핵심 아이디어는 단순합니다. 사람과 로봇은 손 모양·관절·외형이 전혀 달라(embodiment gap) pixel 이나 관절각 수준에서는 직접 비교가 안 됩니다. 하지만 "손목이 어디 있고 다섯 손끝이 공간 어디에 있는가"라는 **6개 3D 점**만 보면, 같은 컵을 집는 사람 손과 로봇 손의 궤적은 거의 똑같이 생겼습니다. 그래서 관찰도 행동도 전부 이 6점으로만 표현하면, 사람 영상에서 배운 "다음 6점은 어디로 가야 한다"는 정책이 곧바로 로봇에게도 유효한 명령이 됩니다 — 중간의 retargeting 단계가 사라집니다.
 
-정책 자체는 언어모델처럼 동작하는 **autoregressive transformer** 입니다. 입력은 언어 지시 + task-relevant 객체의 3D 점들 + 현재 손 6점이고, 출력은 미래 손 6점 궤적입니다. 한 step 을 예측하면 그것을 다음 step 입력으로 되먹여 chunk 를 채웁니다. 이 정책을 인터넷 규모 egocentric 사람 영상(VITRA ~1M)으로 먼저 사전학습해 "사람 손이 물체를 어떻게 다루는가"의 일반 prior 를 심고, 태스크별 소량 사람 시연(예: 100~500개)으로 fine-tuning 합니다. 로봇 teleoperation 은 어느 단계에도 없습니다.
+정책 자체는 언어모델처럼 동작하는 **autoregressive transformer** 입니다. 입력은 언어 지시 + task-relevant 객체의 3D 점들 + 현재 손 6점이고, 출력은 미래 손 6점 궤적입니다. 한 step 을 예측하면 그것을 다음 step 입력으로 되먹여 chunk 를 채웁니다. 이 정책을 인터넷 규모 egocentric 사람 영상(VITRA 약 1M)으로 먼저 사전학습해 "사람 손이 물체를 어떻게 다루는가"의 일반 prior 를 심고, 태스크별 소량 사람 시연(예: 100–500개)으로 fine-tuning 합니다. 로봇 teleoperation 은 어느 단계에도 없습니다.
 
 점 표현의 약점은 "힘"입니다. 손이 물체에 닿아 꽉 쥐는 동안에도 손끝 점은 더 이상 움직이지 않으므로, 점만으로는 가볍게 댄 것과 세게 쥔 것을 구분할 수 없습니다. 이를 메우려고 fine-tuning 때만 손끝별 접촉 여부(binary 5-vector)를 사람이 얇게 주석하고, 정책이 손 궤적과 함께 contact 도 예측하게 합니다. 배포 시 contact 가 켜지면 해당 손가락에 닫힘 offset(=힘)을 점진적으로 넣습니다.
 
@@ -125,7 +125,7 @@ $$M'(\beta, V) := (\Theta, \hat{T})$$
 
 ### 학습 셋업
 
-**데이터.** 사전학습은 VITRA(~1M episode, 240시간; Ego4D + Ego-Exo4D + SSv2 + EPIC-KITCHENS, HaWoR 손 키포인트 + 언어 캡션 제공). fine-tuning 은 태스크별 자체 수집 — ego-view 카메라와 맨손만 필요해 작업자 1명이 시간당 ~200개 수집(teleoperation 보다 훨씬 빠름). 태스크당 500개(~1.2시간 영상, ~3시간 작업).
+**데이터.** 사전학습은 VITRA(약 1M episode, 240시간; Ego4D + Ego-Exo4D + SSv2 + EPIC-KITCHENS, HaWoR 손 키포인트 + 언어 캡션 제공). fine-tuning 은 태스크별 자체 수집 — ego-view 카메라와 맨손만 필요해 작업자 1명이 시간당 약 200개 수집(teleoperation 보다 훨씬 빠름). 태스크당 500개(약 1.2시간 영상, 약 3시간 작업).
 
 - **객체점 추출** — Qwen3.5-VL-8B-Instruct 로 task-relevant 객체 식별 → SAM3 text-query segmentation + memory 추적 → mask 당 128점 uniform 샘플 → depth 로 3D lift(사전학습: Depth-Anything-3 단안 / fine-tuning·배포: ZED stereo) → extrinsics 변환으로 world 좌표 $`P^{3D}_t`$.
 - **손점 추출** — 사전학습은 VITRA 의 HaWoR 키포인트 직접 사용, fine-tuning 은 scale-consistent HaWoR.
@@ -208,7 +208,7 @@ $$M'(\beta, V) := (\Theta, \hat{T})$$
 
 - **코드/모델** — 본문(PDF)에서 공식 코드·체크포인트·프로젝트 페이지 링크를 확인하지 못했습니다(arXiv abs 페이지에 GitHub/HF/website 링크 없음). 공개 여부 미상.
 - **데이터** — 사전학습 corpus 는 외부 공개 데이터 VITRA(및 그 GitHub 의 전처리 캡션 사용 명시). fine-tuning 데이터는 자체 수집(공개 언급 없음). VITRA 가 집계한 Ego4D/Ego-Exo4D 는 gated(P0 D27 라이선스 ⚠️).
-- **하드웨어** — OpenArm bimanual + Inspire RH56F1 손 + ZED 2i 로 명시. 학습은 단일 A100(사전학습 ~36 GPU-h, fine-tuning ~4 h/task)로 비교적 가벼움.
+- **하드웨어** — OpenArm bimanual + Inspire RH56F1 손 + ZED 2i 로 명시. 학습은 단일 A100(사전학습 약 36 GPU-h, fine-tuning 약 4 h/task)로 비교적 가벼움.
 - **하이퍼파라미터** — 부록 A(학습)·B(baseline)·F(scale-consistent HaWoR)·G(residual RL: Table 5–7 에 γ·ensemble·lr 등)까지 상세 기재되어 재구현 정보는 풍부.
 
 ---

@@ -138,7 +138,7 @@ $`(1-t)`$ 가중은 $`\hat{\mathbf{x}}_{0}`$ 가 의미 있어지는 near-clean 
 per-ablation 판독:
 
 - **3D loss 제거** — test SR 73.0% → 32.7% (40점↓), FC 14.6 → 35.7 mm (2배↑). 명시적 fingertip 기하 supervision 이 가장 load-bearing 한 컴포넌트.
-- **crop 제거 / point paint 제거** — 각각 val SR ~10점, test SR ~15점 손실. "타깃 주변 dense PC context"와 "풍부한 per-point 특징"이 모두 중요.
+- **crop 제거 / point paint 제거** — 각각 val SR 약 10점, test SR 약 15점 손실. "타깃 주변 dense PC context"와 "풍부한 per-point 특징"이 모두 중요.
 - **모달리티 축** — RGB-only 는 val SR 26.8% / FC 95 mm 로 붕괴하지만 PC-only 는 val SR 64.2% / test 70.7% 로 강한 standalone baseline. RGB 의 역할은 fingertip placement 를 날카롭게 하는 의미 grounding.
 
 > "PC-only remains a strong standalone baseline at $`64.2\%`$ val SR and $`70.7\%`$ test SR, while RGB-only collapses to $`26.8\%`$ val SR and $`29.7\%`$ test SR." (§5.2, Table 2)

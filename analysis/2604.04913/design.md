@@ -95,7 +95,7 @@ def bom_loss(z_gt_next, z_cand) -> scalar:
 
 ## 🎯 평가 메트릭
 
-- **지표** — dense forecasting: segmentation `mIoU ↑`(VSPW 124-class / Cityscapes 19-class), depth `RMSE ↓`(KITTI, Garg region). horizon: short ~0.2s(직접 예측) / mid ~0.6s(3-step autoregressive rollout).
+- **지표** — dense forecasting: segmentation `mIoU ↑`(VSPW 124-class / Cityscapes 19-class), depth `RMSE ↓`(KITTI, Garg region). horizon: short 약 0.2s(직접 예측) / mid 약 0.6s(3-step autoregressive rollout).
 - **표본 집계** — `best`(20 표본 중 GT 특징에 last-step feature loss 최소) + `mean`(20 특징 평균 후 head 1회 적용). 둘 다 강해야 유효(노이즈성 다양성 배제).
 - **효율** — `GFLOPs`(DeepSpeed FLOPs Profiler, square 입력 doubled), 학습 `Time` / `Mem`(step 0 대비 상대).
 - **비교 baseline** — Copy last(하한) · DINO-world†(결정론, 재구현) · Cosmos-4B/12B(대형 pixel 생성형) · Present(상한). 핵심 주장: best 가 모든 메트릭에서 Cosmos 능가, mean 은 결정론 baseline 수준 회복, FLOPs $`\sim2{,}000\times`$ ·params $`35\times`$ 절감.

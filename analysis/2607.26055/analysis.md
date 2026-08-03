@@ -44,7 +44,7 @@ $`\pi\mathbf{R}^{2}`$ 는 action chunking 플로우 정책의 조건화를 **매
 - **지연 적응형 계단(staircase) 노이즈 스케줄** — chunk 를 세 구역(clamp 된 clean front $`[0,d)`$ / 선형 ramp 인 interior $`[d,H-d)`$ / 순수 노이즈 tail $`[H-d,H)`$)으로 나눈 per-position 스케줄을 제안하고, 학습 시 $`d`$ 를 무작위화해 하나의 모델이 가변 지연에 적응하게 합니다.
 - **호출당 1 NFE 방출 사이클** — 한 번의 Euler substep 이 스케줄을 $`d`$ 슬롯만큼 오른쪽으로 밀어 $`d`$ 개의 clean 액션을 방출하고, 버퍼가 $`d`$ 만큼 슬라이드하며 뒤에 노이즈 슬롯을 붙여 스케줄이 정확히 재생산되도록 설계했습니다.
 - **최소 아키텍처 변경** — DiT 의 공유 AdaLN 변조를 chunk 위치별 $`(\gamma_{p},\beta_{p})`$ 쌍으로 바꾸는 한 줄 수준 변경만으로 기존 플로우 액션 헤드에 이식되며, 사전학습 파라미터에서 초기화되므로 GR00T-N1.7 fine-tuning 으로 획득됩니다.
-- **실기 검증** — xArm6 + XHand 실환경 4개 접촉 집약 과제에서 최강 baseline(Train-Time RTC) 대비 모든 지표를 앞서며, 반응성이 결정적인 과제에서 약 20~30 %p 절대 향상을 보고합니다.
+- **실기 검증** — xArm6 + XHand 실환경 4개 접촉 집약 과제에서 최강 baseline(Train-Time RTC) 대비 모든 지표를 앞서며, 반응성이 결정적인 과제에서 약 20–30 %p 절대 향상을 보고합니다.
 
 ---
 
@@ -57,7 +57,7 @@ $`\pi\mathbf{R}^{2}`$ 는 action chunking 플로우 정책의 조건화를 **매
 - **Inpaint Conditioning** — 추론 중 이미 실행 중인 in-flight 액션을 노이즈 없는 값으로 고정해 새 chunk 를 그 뒤에 이어 붙이도록 유도하는 조건화. 이미지 인페인팅의 액션 시퀀스판입니다.
 - **Per-Position AdaLN** — DiT 블록을 노이즈 레벨로 변조하는 AdaLN 을 chunk 위치마다 별도의 $`(\gamma_{p},\beta_{p})`$ 로 분리한 변경. 위치마다 노이즈 레벨이 다른 diffusion forcing 을 기존 헤드에 얹기 위한 최소 개조입니다.
 - **Delay Embedding** — 정수 지연값 $`d_{\mathrm{vis}}`$ 를 인덱스로 하는 학습된 룩업 테이블. slow 특징이 "얼마나 오래된 것인지"를 모델에 알려주는 나이표에 해당하며, zero-init 이라 학습 전에는 무지연 변형과 정확히 같습니다.
-- **NFE (Number of Function Evaluations)** — 한 번의 정책 호출에서 수행하는 네트워크 순전파 횟수. 표준 플로우가 호출당 4~16 회를 쓰는 반면 본 논문은 1 회로 고정합니다.
+- **NFE (Number of Function Evaluations)** — 한 번의 정책 호출에서 수행하는 네트워크 순전파 횟수. 표준 플로우가 호출당 4–16 회를 쓰는 반면 본 논문은 1 회로 고정합니다.
 - **Execution Horizon (h)** — 예측된 chunk 중 실제로 실행하는 액션 개수. 크면 open-loop 구간이 길어져 반응성이 떨어지고, 작으면 replanning 부하가 커지는 전형적 트레이드오프의 축입니다.
 
 ---
@@ -218,7 +218,7 @@ $$\mathbf{x}_{p}\;\leftarrow\;\mathbf{x}_{p}+\Delta\tau_{p}\cdot v_{\theta}(\mat
 | $`\pi\mathbf{R}^{2}`$ | 10/20 | 55/80 | 12/20 | 24/40 | 16/20 | 68/80 | 11/20 |
 
 > "$`\pi\mathbf{R}^{2}`$ with asynchronous vision–language inference operates near the per-control-tick limit ( $`d{=}1`$ at $`25`$  Hz, with occasional increases to $`d{=}2`$ under network delays), whereas all flow-based baselines incur the full GR00T pipeline latency of $`d\in{4,5}`$ ." (§4.2)
-(측정된 지연 격차가 4~5배이며, 이것이 아래 성능 격차의 직접 원인이라는 것이 논문의 인과 주장입니다.)
+(측정된 지연 격차가 4–5배이며, 이것이 아래 성능 격차의 직접 원인이라는 것이 논문의 인과 주장입니다.)
 
 > "Train-Time RTC [7] is the strongest baseline; however, $`\pi\mathbf{R}^{2}`$ outperforms it across all metrics, with the largest gains on reactivity-critical tasks such as Tidy Up Book, Insert Box, and Catch Book, achieving approximately $`20\sim 30`$ % absolute improvement." (§4.2)
 (초록의 "실환경 최대 30 %" 는 Catch Book 의 11/20 대 5/20, 즉 55 % 대 25 % 입니다.)
@@ -283,7 +283,7 @@ $$\mathbf{x}_{p}\;\leftarrow\;\mathbf{x}_{p}+\Delta\tau_{p}\cdot v_{\theta}(\mat
 ## 🎯 관련 Pillar / Decision (P# / D#)
 
 - **P1(Heterogeneous Body/Hand Action Expert) — 주 pillar.** 본 논문은 action-expert 의 **조건화 주기 설계**를 정면으로 다룹니다.
-  - `D5`(input-modality + control-rate separation) — v1 은 `(ii) modality-separated + (α) shared rate` 입니다. 본 논문은 modality-separated 를 지지하는 동시에 `(α) shared rate` 를 정면으로 반박합니다: proprioception 은 매 tick, vision-language 는 비동기라는 **rate-separated** 조건화가 VLA 규모에서 구현 가능하고 20~30 %p 가치가 있음을 보였습니다. 우리 Decision Log 에서 이 논문이 가장 강하게 건드리는 지점입니다.
+  - `D5`(input-modality + control-rate separation) — v1 은 `(ii) modality-separated + (α) shared rate` 입니다. 본 논문은 modality-separated 를 지지하는 동시에 `(α) shared rate` 를 정면으로 반박합니다: proprioception 은 매 tick, vision-language 는 비동기라는 **rate-separated** 조건화가 VLA 규모에서 구현 가능하고 20–30 %p 가치가 있음을 보였습니다. 우리 Decision Log 에서 이 논문이 가장 강하게 건드리는 지점입니다.
   - `D4`(Body↔Hand information sharing) — v1 은 `a_b → (γ,β)` FiLM 단일 지점 변조입니다. 본 논문의 per-position AdaLN/FiLM 은 같은 변조 계층을 **chunk 위치 축**으로 확장한 것이라, 우리 hand head 의 FiLM 이 body intent 와 노이즈 레벨 두 소스를 동시에 받아야 하는 설계 문제를 새로 만듭니다.
   - `D7`(π backbone integration / partition) — v1 은 `π0 action expert 를 slice 하고 양쪽 FT` 입니다. 본 논문은 백본 동결 + 액션 헤드만 학습이라는 더 보수적인 분할로 같은 효과를 얻었고, 아키텍처 변경을 AdaLN 한 줄로 제한했습니다. 우리 slice-후-FT 계획에 "변경 최소화" 참조점이 됩니다.
   - `D1`(split form) / `D6`(coordination direction & flow) — 직접 건드리지 않습니다. 본 논문은 단일 액션 헤드를 전제하며 Body/Hand 분할 자체는 논외입니다.
@@ -339,7 +339,7 @@ $$\mathbf{x}_{p}\;\leftarrow\;\mathbf{x}_{p}+\Delta\tau_{p}\cdot v_{\theta}(\mat
 
 ## 💡 컨텍스트 제안
 
-- **`D5`(P1) 를 `OPEN` 으로 승격 제안** — 현재 v1 은 `(ii) modality-separated + (α) shared rate` 입니다. 본 논문은 VLA 규모에서 rate 분리가 구현 가능하고 20~30 %p 가치가 있음을 보인 첫 직접 증거이므로, `(α) shared rate` 를 확정 선택지로 두기 어렵습니다. `#### [D5] Input-modality + control-rate separation (P1) — **OPEN**` 으로 바꾸고 bullet 을 `(working, not settled)` 로 표시하는 것을 제안드립니다. 결정 자체를 v2 로 넘기는 것은 위 ⚠️ 1~3 번 측정 이후가 적절합니다.
+- **`D5`(P1) 를 `OPEN` 으로 승격 제안** — 현재 v1 은 `(ii) modality-separated + (α) shared rate` 입니다. 본 논문은 VLA 규모에서 rate 분리가 구현 가능하고 20–30 %p 가치가 있음을 보인 첫 직접 증거이므로, `(α) shared rate` 를 확정 선택지로 두기 어렵습니다. `#### [D5] Input-modality + control-rate separation (P1) — **OPEN**` 으로 바꾸고 bullet 을 `(working, not settled)` 로 표시하는 것을 제안드립니다. 결정 자체를 v2 로 넘기는 것은 위 ⚠️ 1–3 번 측정 이후가 적절합니다.
 - **P1 §5 Tracked Literature 에 지연/반응성 계열 추가 제안** — 현재 P1 핀 4편(π0 · Dexora · LaMP · DexGrasp-VLA)에는 지연 축 논문이 없습니다. 본 논문($`\pi\mathbf{R}^{2}`$, [arXiv:2607.26055](https://arxiv.org/abs/2607.26055))을 D5 앵커로 핀하거나, 최소한 **Methodology base (non-pinned)** 에 본 논문 + Train-Time RTC([arXiv:2512.05964](https://arxiv.org/abs/2512.05964)) + RTC([arXiv:2506.07339](https://arxiv.org/abs/2506.07339)) 3편을 "지연 하 chunk 실행" 계보로 묶어 추가하는 것을 제안드립니다. 뒤 두 편은 이미 본 저장소에 분석 문서가 있으나 어느 pillar 에도 핀되어 있지 않습니다.
 - **`D13`(P3) 서술의 정당화 근거 이동 제안** — System0 의 존재 이유를 "System1 이 느리다"에서 "슬립 억제는 System1 의 제어 tick 으로도 늦다"로 좁히는 방향의 문구 조정을 제안드립니다. 결정 자체(v1 선택지)는 바꾸지 않되, 근거가 이 논문으로 반박되는 부분을 남겨두면 이후 스카우팅이 잘못된 축으로 논문을 모읍니다.
 - **`D26`(P0) 범위에 반응성 스트레스 평가 추가 제안** — 벤치마크 스카우팅 범위에 낙하 물체 포착 · 접촉 후 힘 조절 같은 동적 반응 과제를 명시적으로 넣는 것을 제안드립니다. 현재 in-hand rotation / articulated-tool 중심 범위로는 본 논문류의 기여가 우리 평가에 잡히지 않습니다.

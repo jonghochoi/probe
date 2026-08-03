@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.28 (2026-06-09) · **Scope:** All files under `scouting/` and `analysis/`
+> **Version:** v1.29 (2026-08-03) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -357,6 +357,49 @@ It applies to every `scouting/` and `analysis/` output.
 These are fidelity-neutral: restructuring prose into a table or bullets must
 not add, drop, or reorder any fact, number, date, citation, or `P#`/`D#` /
 arXiv token — the §4-4 fidelity bar still binds.
+
+### 4-6. No raw `~` in prose — it is a strikethrough delimiter on GitHub
+
+GitHub's strikethrough extension accepts a **single** tilde, not just the
+doubled `~~`. A raw `~` in body text therefore opens a strikethrough run, and
+the next raw `~` **in the same inline context** closes it — silently striking
+out every character in between on the rendered page. The failure is invisible
+in the source and invisible in most local previews (CommonMark requires `~~`);
+it appears only on github.com, which is where these documents are read.
+
+The pairing scope is one *inline context*, not one line: a paragraph, a single
+list item, one table cell, or one blockquote line. Two tildes on different
+lines of the same paragraph still pair; two tildes in different table cells do
+not.
+
+**Write ranges and approximations like this instead:**
+
+| Intent | Write | Not |
+|---|---|---|
+| Numeric / date range | `4.7–35.6GB`, `2026-06-01–06-19`, `1–4편` (en dash `–`, U+2013) | `4.7~35.6GB` |
+| Approximation | `약 300M`, `약 2×`, `약 110K frame` | `~300M` |
+| Paper notation `\sim` | `` $`\sim 50`$ `` (inline math, §5-6) | `~50` |
+| Open-ended range | `2026-05-11–`, or spell it (`2026-05-11 이후`) | `2026-05-11~` |
+
+**Where a raw `~` is still correct** — these are parsed before the
+strikethrough scan (or not rendered at all), so they never pair and must not
+be "fixed":
+
+- inside a fenced code block or an inline code span (`` `d ~ Uniform{1,…,d_max}` ``);
+- inside display math `$$…$$` or a ```` ```math ```` fence, where `~` is the
+  LaTeX non-breaking space and changing it alters the formula;
+- inside an HTML comment (`<!-- … -->`), which does not render;
+- a deliberate `~~strikethrough~~`, which is the doubled form.
+
+**English verbatim blockquotes are exempt and are never edited** — the quoted
+sentence is a byte-locked token (§5-6). If a quoted sentence genuinely contains
+a raw `~`, leave it and keep the Korean explanation line tilde-free so nothing
+pairs with it.
+
+`python3 scripts/check-render-tilde.py` reports every inline context carrying
+two or more raw tildes — the condition that actually breaks a render. A lone
+tilde renders literally and is not an error, but it becomes one the moment
+another lands in the same context, so prefer the table above everywhere.
 
 ---
 

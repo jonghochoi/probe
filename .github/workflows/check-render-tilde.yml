@@ -1,0 +1,43 @@
+name: Check render tilde
+
+# Verify that no agent output carries two raw `~` in the same inline context.
+# GitHub's strikethrough extension accepts a SINGLE tilde, so a second one in
+# the same paragraph / list item / table cell / blockquote line closes the run
+# and strikes out everything between them on the rendered page. The breakage is
+# invisible in the source and in CommonMark previews (which require `~~`), and
+# shows up only on github.com — exactly where these documents are read.
+#
+# Lint-only (no auto-fix / bot commit): the correct replacement depends on
+# intent — an en dash for a range (`1~4편` → `1–4편`) versus 약 for an
+# approximation (`~300M` → `약 300M`) — so it needs human judgment, unlike the
+# mechanical math fixes. Rule + substitution table: docs/style.md §4-6.
+#
+# A lone tilde renders literally and is NOT flagged; only the pairing
+# condition fails the job.
+
+on:
+  pull_request:
+    paths:
+      - 'analysis/**/*.md'
+      - 'scouting/**/*.md'
+      - 'hypotheses/**/*.md'
+      - 'scripts/check-render-tilde.py'
+      - '.github/workflows/check-render-tilde.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-render-tilde-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check prose tildes do not pair into a strikethrough
+        run: python3 scripts/check-render-tilde.py

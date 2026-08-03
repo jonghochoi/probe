@@ -136,7 +136,7 @@ $$r_{\text{base}}=s_{\text{rot}}r_{\text{rot}}-s_{\text{v}}\,p_{\text{v}}-s_{\te
 - **VAE 최적화** — Adam, learning rate $`1\mathrm{e}{-4}`$, $`(\beta_{1},\beta_{2})=(0.95,0.999)`$, weight decay $`1\mathrm{e}{-6}`$.
 - **Grasp 데이터** — D(R,O) Grasp [30] 가 제공한 필터링된 GenDexGrasp [13] 데이터셋(Allegro/Barrett/Shadow 3종, 8–22 DoF, **24,764개 유효 grasp**)을 canonical URDF 로 변환. zero-shot 실험용 LEAP 변형 데이터셋은 **69,917개 grasp**.
 - **Grasp 모델 최적화** — MLP diffusion(hidden 512·256, step embedding 64), 1000 timestep "sample" prediction, Adam initial lr $`1\mathrm{e}{-3}`$ + cosine annealing → $`1\mathrm{e}{-7}`$. 추론은 10-step DDIM sampler, **0.13초**.
-- **In-hand RL** — IsaacGym, MLP `[512,256,128]` + 단일 GRU(hidden 256) + ELU, PPO. LEAP 정책 400 gradient iteration(~200M env step), Shadow 정책 1,000 update iteration(~500M env step). 주요 PPO 하이퍼: $`\gamma=0.99`$, GAE $`\lambda=0.95`$, horizon 32, minibatch 32768, lr $`5\times 10^{-3}`$, clip $`\epsilon=0.2`$, KL threshold 0.02.
+- **In-hand RL** — IsaacGym, MLP `[512,256,128]` + 단일 GRU(hidden 256) + ELU, PPO. LEAP 정책 400 gradient iteration(약 200M env step), Shadow 정책 1,000 update iteration(약 500M env step). 주요 PPO 하이퍼: $`\gamma=0.99`$, GAE $`\lambda=0.95`$, horizon 32, minibatch 32768, lr $`5\times 10^{-3}`$, clip $`\epsilon=0.2`$, KL threshold 0.02.
 - **LEAP 변형 생성 (§IV-D)** — link 유무를 손가락별로 변화시켜 $`4^{4}=256`$ 개 변형(leap_xyzw, $`x,y,z,w\in\{0,1,2,3\}`$) 구성, grasp 데이터는 Lightning Grasp [37] 로 생성 후 D(R,O) 필터링. grasping 데이터셋은 $`x+y+z+w\geq 8`$ 을 만족하는 66개 변형으로 구축.
 
 ---

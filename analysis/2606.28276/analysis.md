@@ -330,7 +330,7 @@ Table L.2 요약 (F1 Score ↑, 평균±표준편차):
 - **코드** — 본문에 코드 공개 언급이 없습니다. 프로젝트 페이지(https://research.nvidia.com/labs/gear/simfoundry/)가 초록에 명시되어 있으나, 본 분석 환경에서는 네트워크 정책으로 접근이 차단되어(`curl` → `CONNECT tunnel failed, response 403`) 코드 배포 여부를 확인하지 못했습니다. cousins 생성용 VLM 프롬프트 템플릿 전문은 부록 Fig F.1 / F.2 로 공개됩니다.
 - **모델 의존성** — 파이프라인이 명시적으로 나열한 구성 요소: DepthAnything3, FoundationStereo, SAM3, SAM2, Gemini-Pro-3(-Image-Preview), PriorDepthAnything, Hunyuan2.1, TRELLIS.2, FoundationPose, P3-SAM, VOID, CoACD, PyBullet, IsaacLab, NerfStudio, COLMAP. 핵심 장면 이해·관절·cousins 제안이 모두 폐쇄형 Gemini API 에 걸려 있어 완전 재현은 API 접근 + 비결정성 감수를 전제합니다.
 - **데이터** — 학습 데이터는 태스크당 인간 데모 10–15개(JoyLo/VR 텔레옵) + MimicGen 증식으로 생성되며, 데이터셋 자체의 공개 언급은 없습니다.
-- **하드웨어** — 재구성: RTX 3090 24GB 1대(물체당 ~5분, 배경 인페인팅 ~90분/장면). 로봇: DROID(Franka Panda + ZED-2×2 + 손목 ZED-Mini), YAM 양완 워크셀(손목 RealSense D405×2 + 상단 카메라). 정책: π0 / π0.5 (DROID joint-position 체크포인트), GR00T N1.6/N1.7, DreamZero, from-scratch 플로우 매칭.
+- **하드웨어** — 재구성: RTX 3090 24GB 1대(물체당 약 5분, 배경 인페인팅 약 90분/장면). 로봇: DROID(Franka Panda + ZED-2×2 + 손목 ZED-Mini), YAM 양완 워크셀(손목 RealSense D405×2 + 상단 카메라). 정책: π0 / π0.5 (DROID joint-position 체크포인트), GR00T N1.6/N1.7, DreamZero, from-scratch 플로우 매칭.
 
 ---
 
