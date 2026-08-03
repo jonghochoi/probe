@@ -289,5 +289,3 @@ GR1 평균 기준 FLARE 55.0% vs UWM 29.5%로, 초록의 "up to 26%" 우위는 �
 - **D22 증거(egocentric co-training)** — 액션-프리 인간 ego 비디오에 alignment-only를 거는 레시피를 D22(egocentric vs mixed) open ablation의 실증 데이터 포인트로 메모 추가 검토.
 
 context/MASTER.md 및 context/P#.md 는 절대 수정하지 않습니다. 위 항목은 사람이 검토할 후보 제안입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2505.15659/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

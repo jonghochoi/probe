@@ -15,7 +15,6 @@
 | 관련 Pillar | P0, P4, P1, P2 |
 | 태그 | dexterity, dataset, vla-arch |
 | 카탈로그 | benchmark/dexterous/DexJoCo |
-| Design 적용 | 🚫 비대상 (benchmark) |
 
 <!-- 본문은 arXiv HTML(전문)로 확보. 모든 수치는 본문/표에서 받은 그대로 인용. -->
 
@@ -257,7 +256,7 @@ $$\mathcal{P}(a_{t:t+k-1})=\pi_{\theta}(a_{t:t+k-1}\mid s_{t-h+1:t},l)$$
 - **prior-preservation 기본값 강화 (P4 D20)** — π0.5를 dexterous hand로 적응시킬 때 **사전학습 action-head 가중치는 유지하고 추가 손 차원만 random init**(partial pretrain-AH)하는 것을 기본으로 채택. config 키: action-head 초기화 모드 = `partial-reinit`(전체 reinit 대비 +약 3.8pp). 우리 학습 스크립트의 head 초기화 분기에 못 박을 것.
 - **multi-task degradation 모니터링 (P4 D21/D22)** — multi-task 합동 학습이 DP-T를 전 태스크 퇴화시켰으므로, 우리가 corpus를 다태스크로 합성할 때 per-task 성공률 회귀를 ablation 지표로 추적(π0.5가 DP-T보다 견고하다는 점도 backbone 선택 근거).
 - **언어 조건화 검증 메트릭 (P1/P4)** — 태스크 스펙을 언어 지시에 의존시키려면 **NMI(instruction↔output)·JS divergence**로 실제 조건화 여부를 falsify. DexJoCo 사례(NMI 0.018)는 "언어를 받는다 ≠ 조건화한다"를 보여, 우리 goal-centric 스펙이 언어에 과의존하지 않도록 경계.
-- **평가 자원 후보 + 포맷 정렬 (P0 D26/D27)** — DexJoCo는 **LeRobot 포맷 export**를 지원하므로 우리 `vendor/lerobot` foundry와 데이터 경로가 직접 호환됩니다. tool-use 태스크(Hammer/Water Plant/Pinch Tongs)는 우리 phase-2 tool-articulation flagship과 의미적으로 겹쳐 보조 eval 후보. 단 Allegro·tactile 부재·MuJoCo 제약(아래 ⚠️) 확인 후 채택.
+- **평가 자원 후보 + 포맷 정렬 (P0 D26/D27)** — DexJoCo는 **LeRobot 포맷 export**를 지원하므로 LeRobot 계열 데이터 경로와 직접 호환됩니다. tool-use 태스크(Hammer/Water Plant/Pinch Tongs)는 우리 phase-2 tool-articulation flagship과 의미적으로 겹쳐 보조 eval 후보. 단 Allegro·tactile 부재·MuJoCo 제약(아래 ⚠️) 확인 후 채택.
 
 ---
 
@@ -277,5 +276,3 @@ $$\mathcal{P}(a_{t:t+k-1})=\pi_{\theta}(a_{t:t+k-1}\mid s_{t-h+1:t},l)$$
 - **P4 D20 노트 보강 후보** — "partial pretrain-AH > full reinit(+약 3.8pp, DexJoCo)" 한 줄을 prior-preservation 외부 증거로 D20 옆에 메모 검토(핀 교체는 사람 판단).
 - **P0 D26 phasing 연결** — DexJoCo tool-use 태스크(Hammer/Water Plant/Pinch Tongs)는 MASTER §3.5 phase-2 tool-articulation(CATFA precedent)과 의미적으로 겹쳐, 보조 eval 레퍼런스로 추적 가치. 단 Allegro·tactile 부재로 우리 식별성 평가 축은 별도 필요.
 - context/ 파일은 수정하지 않았습니다 — 위는 모두 제안입니다.
-
-> 💡 본 논문은 Design 비대상(benchmark)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅(`benchmark/dexterous/DexJoCo`)으로 전달됩니다.

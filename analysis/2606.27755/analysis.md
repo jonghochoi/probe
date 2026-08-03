@@ -317,5 +317,3 @@ Env 1 에서 Drop-9(65.0%)가 full model(63.3%)을 근소 상회, Drop-16 은 55
 - Decision/deferred trigger 이동 제안: 없음(현 v1 선택을 뒤집을 만큼의 dexterity-domain 증거는 아직 부족).
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.27755/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -235,5 +235,3 @@ $$d_{j}=d_{min}+(d_{max}-d_{min})\cdot\frac{j(j+1)}{M(M+1)}$$
 - **D22 카탈로그 방법론 참조 추가 제안** — D22 의 "Reference" 에 본 논문의 데이터 정합 파이프라인(공간 TCP/extrinsic 통일 + cross-trajectory 시간 정렬)을 schema 통일 방법론 사례로 1줄 병기 제안.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.02274/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

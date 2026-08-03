@@ -15,7 +15,6 @@
 | 관련 Pillar | P0, P2 |
 | 태그 | tactile, egocentric-data, dataset |
 | 카탈로그 | dataset/human/EgoTouch |
-| Design 적용 | 🚫 비대상 (dataset) |
 
 ---
 
@@ -259,5 +258,3 @@ $$IoU_{vol}=\frac{\sum^{i,j}min(P_{i,j},\hat{P}_{i,j})}{\sum^{i,j}max(P_{i,j},\h
 - **`catalogs/dataset.md` 추가 후보** — EgoTouch 를 👤 human-ego × tactile 신규 항목으로 등재(D25). 라이선스 미확인이므로 ❓ 플래그.
 - **P0 §5 핀 교체 검토(쿼터 리밸런스)** — tactile/접촉 corpus 가 RH20T(로봇 F/T) 1개뿐인데, **인간 egocentric dense pressure** 축은 비어 있습니다. EgoTouch 공개·라이선스 확인 시 OpenTouch 와 묶어 "egocentric tactile" 슬롯 신설을 고려할 만합니다(append 아님, 8핀 cap 내 교체).
 - 그 외 Decision/trigger 이동 제안: 없음.
-
-> 💡 본 논문은 Design 비대상(dataset)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅(`dataset/human/EgoTouch`)으로 전달됩니다.

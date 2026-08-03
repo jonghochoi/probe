@@ -258,5 +258,3 @@ $$L_{\mathrm{tok}}=\|\,x_{t}-\hat{x}_{t}\,\|^{2}.$$
 - **태그 어휘 확장(STYLE §5-7) 재확인.** 본 논문도 통제 태그 어휘에 `world-model` 슬롯이 없어 least-wrong `flow-matching` 으로 우회했습니다(2605.26379 선례와 동일). 어휘에 `world-model` 추가 검토를 다시 제안합니다. (docs/STYLE.md 미수정 — 사람 결정.)
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2604.04913/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

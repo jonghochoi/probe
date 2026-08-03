@@ -18,11 +18,7 @@
 <!-- 본문 확보 retrieval ladder 기록 (verbatim):
   1. curl --fail "https://arxiv.org/abs/2606.29948"   → 200 (메타/초록 확보)
   2. curl --fail "https://arxiv.org/html/2606.29948"  → 200 (전문 확보, 260KB)
-  Design 적용 = ✅ (기본) — HTT 는 foundry 로 포팅 가능한 self-supervised
-  촉각 표현학습 method(MAE 재구성 + cross-modal alignment) 를 제안하므로
-  메타 테이블에서 `Design 적용` 행을 생략(기본 적용). HPT 데이터셋은 co-primary
-  기여이나 method 가 포팅 대상이라 적용으로 판정. 모든 수치/인용은 arXiv HTML
-  본문에서 받은 그대로. -->
+  모든 수치/인용은 arXiv HTML 본문에서 받은 그대로. -->
 
 ---
 
@@ -269,5 +265,3 @@ $$\mathcal{L}_{\text{HTT}}=\mathcal{L}_{\text{MAE}}+\alpha_{t}\cdot\mathcal{L}_{
 - **P0 §5 / catalogs** — HPT 데이터셋을 D25(tactile/torque scouting) 신규 릴리스로 **공개 시점에** `catalogs/datasets.md` 등록 후보로 대기 표시(현재 미공개라 즉시 핀 교체는 보류). RH20T(wrist F/T)와 상보적인 "손끝 optical+array 동기화" 축.
 - **P2 §5** — Sparsh("D11 pretraining deferred") 옆에 HTT 를 **비핀 methodology-base 후보**로 추가 검토. Sparsh 가 미룬 이종 센서 통합 사전학습을 실제 수행한 후속선상이라, D11 pretraining deferred 트리거를 재검토할 근거. (핀 캡 8 준수 — 즉시 승격보다 후보 등재 제안.)
 - 그 외 Decision 이동/트리거 변경 제안 없음. context 파일은 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.29948/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

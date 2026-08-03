@@ -280,5 +280,3 @@ step-wise: $`\|\mathbf{e}_{a}\|_{2}\leq\|\mathbf{L}_{k}\|_{2}\|\boldsymbol{\epsi
 
 - **P1 §5 off-pin 코멘트 갱신 제안(사람 판단).** 현재 "13k+ real rollouts; joint=stability/task=generalization (D2 evidence)" 는 정확합니다. 다만 이번 분석으로 **D3·D5(horizon)·P4 D23** 까지 증거가 닿음이 드러났으니, role 설명을 "D2/D3 좌표 비대칭 + horizon-abstraction 결합 + D23 transfer 좌표" 로 확장하면 검색 시 연결이 풍부해집니다. (핀 승격은 불필요 — study/benchmark 성격이라 off-pin 유지가 적절.)
 - **Decision 이동 없음.** 본 논문은 기존 v1 선택(D2=pose, D3=joint, D23=flow-matching)을 *지지·정당화* 하지 D-값을 뒤집지 않습니다. 다만 "horizon 을 abstraction 별로 분리" 라는 신규 설계 변수는 D5 deferred 후보로 기록할 가치가 있습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2602.23408/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

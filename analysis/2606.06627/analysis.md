@@ -261,5 +261,3 @@ per-ablation 읽기:
 - **P0 D24 evidence 보강** — "scene diversity > raw hours"(TriHands 5× 적은 시간에 EgoDex 전 과제 우위)는 egocentric priority axis 의 정량 근거. 핀 교체보다는 D24 rationale 의 보조 증거로 기록 검토.
 - **P4 D22(OPEN) 입력** — egocentric vs mixed 결정에 "손 라벨 품질"을 *제3의 축* 으로 추가하는 것을 제안. 현재 D22 는 ego/mixed 비율만 보지만, 본 논문은 라벨 품질이 전이의 게이팅 변수임을 보임.
 - **P1/P4 비교군 추가 후보** — PiZero(공유 action decoder)에 대한 본 논문의 반례를, 공유 vs 분리 decoder 논쟁(D7)의 tracked 비교군으로 둘지 검토. 핀은 아님.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.06627/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

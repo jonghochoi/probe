@@ -382,5 +382,3 @@ $$\hat{v}_{\theta}(\mathbf{x}_{t}|t,\;\mathbf{Z}_{i}^{\text{obj}},\mathbf{Z}_{i}
 - **MASTER §4.2 visuotactile sim 항목** — Sharpa Deform Map sim 렌더링 protocol TBD 에 대한 대안 경로로 "학습된 촉각 생성 모델" 트랙(UniTac-류)을 후보 목록에 추가할 것을 제안합니다. 채택 전제 조건은 위 ⚠️ 의 Deform Map 도메인 갭 체크 통과입니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.31451/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

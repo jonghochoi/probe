@@ -274,5 +274,3 @@ P5 §5 의 핀 **VLA-JEPA(Sun et al., arXiv:2602.10098)** 와 비교하면 결�
 - **P5 §5 methodology-base 추가 후보.** 본 논문(arXiv:2605.26379)을 P5 의 *non-pinned methodology base* 로 추가 제안 — JEPA latent-WM(D30) 노선 전체의 *이론적 토대*이자 SIGReg vs VICReg vs InfoNCE 정규화 선택의 근거. 핀 8개(hard cap)를 건드리지 않고 "Methodology base(non-pinned)" 표에 LeJEPA-identifiability 행으로. (사람 판단 필요; context 파일은 미수정.)
 - **D30 rationale 보강.** D30(prediction space = latent/3D-flow)의 v1 선택에 "JEPA latent 예측은 Gaussian latent·isotropic exploration 조건에서 선형 identifiability 가 *증명*됨(2605.26379)"이라는 근거 한 줄을 deferred-rationale 후보로.
 - **태그 어휘 확장 제안(STYLE §5-7).** 통제 태그 어휘에 `world-model`·`ssl`(또는 `jepa`) 후보 추가 검토 — 본 논문처럼 World Model/SSL 이론 papers 가 현 어휘(vla-arch…dataset)에 정직하게 맞지 않음. (docs/STYLE.md 는 미수정; 사람 결정.)
-
-> 💡 base 매핑은 `/implement-design analysis/2605.26379/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

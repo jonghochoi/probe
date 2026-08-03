@@ -14,7 +14,6 @@
 | 분석 생성일 | 2026-07-02 |
 | 관련 Pillar | P0 |
 | 태그 | sim2real, dataset |
-| Design 적용 | 🚫 비대상 (tooling) |
 
 <!-- 본문은 arXiv HTML(전문)로 확보. Website 링크는 논문 초록에 verbatim 으로
      명시된 프로젝트 페이지 URL 이며, 본 분석 환경에서는 네트워크 정책으로
@@ -380,5 +379,3 @@ Table L.2 요약 (F1 Score ↑, 평균±표준편차):
 - **Decision 이동 없음** — D24 의 egocentric 우선축, D18 의 접촉 sim2real 범위를 바꿀 증거는 본 논문에 없습니다.
 
 ---
-
-> 💡 본 논문은 Design 비대상(tooling)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.

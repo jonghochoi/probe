@@ -276,5 +276,3 @@ T-Rex 는 PROBE 의 핵심 가설 다수를 직접 건드리며, 특히 **타깃
 - **P1 §5 Tracked Literature 핀 검토** — control-rate separation 의 실증 사례로 T-Rex 를 D5 근거 항목에 추가 검토(현 핀 TwinBrainVLA(AsyMoT)와 함께 "asynchronous MoT" 라인).
 - **D5 v1 재검토 트리거** — "(α) shared rate" 입장을 유지할지, split-rate 를 in-hand rotation ablation 으로 falsify 할지 결정 필요. 본 논문은 그 트리거를 당기는 첫 직접 증거입니다.
 - **P3 가정 점검** — "fast reactive 층 = RL only" 가정에 대해, T-Rex 의 imitation-flow-matching tactile expert 가 RL 없이도 contact refinement 를 달성한다는 반례를 기록(결정 변경 제안이 아니라 가정 falsifier 후보로).
-
-> 💡 base 매핑은 `/implement-design analysis/2606.17055/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

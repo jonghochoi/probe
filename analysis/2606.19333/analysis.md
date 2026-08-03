@@ -434,5 +434,3 @@ P0 §5 의 핀 논문 **UniHand-2.0**([arXiv:2601.12993](https://arxiv.org/abs/2
   retarget 을 통한 데이터 생성" 을 supplement 로 명시할지 여부를 사람이 판단하도록 제안합니다.
 - **핀 교체는 비권장** — 본 논문은 데이터셋 릴리스가 아닌 *데이터 생성 방법*이라 P0 §5 의 8-핀
   데이터셋/벤치마크 캡에 직접 들어가기보다 methodology base 또는 catalog 항목이 더 적합합니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.19333/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

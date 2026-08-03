@@ -242,5 +242,3 @@ $$\mathcal{L}=\mathcal{L}_{a}+\lambda_{1}*\mathcal{L}_{g}$$
 - **D11 Non-negotiable 항목 추가 후보** — 현재 (1) no Sharpa lock-in, (2) preserve contact-relevant features 두 줄. 본 논문 발견에 비추어 (3) "촉각 토큰 수를 finger 토큰 단위로 통제 (raw V-T 이미지를 그대로 token sequence 에 푸는 것 금지)" 를 추가 후보로 검토하고자 합니다. PROBE D8 식 binding 을 사후적으로 정당화하는 항목이기도 합니다.
 - **D14 v1 라인에 본 논문 임계값 명시** — 현재 v1 "binary on/off" 만. 본 논문이 제공한 "BCE 손실 + threshold 0.5 + λ = 0.01 멀티태스크" 구체 하이퍼파라미터를 v1 의 "안전한 첫 시작점" 으로 한 줄 명시하면 구현 진입 시 시행착오를 줄입니다.
 - **D26 robustness sub-metric 추가** — Table 2 의 "modality-agnostic" 비교를 PROBE 평가 프로토콜의 robustness 카테고리에 sub-metric 으로 흡수. "동일 가중치 · 추론 시 촉각 OFF 시 평균 성공률 drop ≤ 10%p" 같은 임계값으로 본 논문 결과를 PROBE 데이터점으로 변환 가능.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.07308/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

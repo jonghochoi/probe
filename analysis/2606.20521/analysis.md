@@ -14,7 +14,6 @@
 | 분석 생성일 | 2026-06-22 |
 | 관련 Pillar | P4, P0, P5 |
 | 태그 | egocentric-data, vla-arch, flow-matching |
-| Design 적용 | 🚫 비대상 (survey) |
 
 <!-- 본문 확보 과정 기록:
   - curl --fail -sS "https://arxiv.org/abs/2606.20521"           → 200 (메타)
@@ -250,5 +249,3 @@ AgiBot bimanual 플랫폼, 3개 과제(컵 받침에 놓기, 과일·채소 분�
 - context/ 파일은 수정하지 않았습니다(제안만).
 
 ---
-
-> 💡 본 논문은 Design 비대상(survey — 통제 비교 study)이라 foundry 매핑 대상이 아닙니다. 가치는 카탈로그가 아니라 본 분석 문서의 🎯/⚙️/💡 (P4 D22·P0 D24 의사결정 근거)로 전달됩니다.

@@ -245,5 +245,3 @@ ablation은 세 요소를 하나씩 제거했을 때의 붕괴를 보여줍니�
 - **§12 Cross-pollination Month A 후보로 기록 권장** — 본 논문은 "continual learning / catastrophic forgetting / PEFT (P4 adjacency)" 정의에 정확히 부합하는 이번 달 크로스폴리네이션 1편으로 적합합니다.
 - **P4 핀 교체 검토 (deferred)** — 현재 P4 핀(8개)은 보존 *전략*에 치우쳐 있습니다. 본 논문(또는 동시기 [arXiv:2603.03818])은 "보존이 학습 동역학에서 자연 발생"하는 축을 대표하므로, 다음 분기 rebalance 시 RT-2처럼 비교적 오래된 핀과의 교체 후보로 검토합니다. (제안만 — `context/MASTER.md`는 수정하지 않습니다.)
 - **D25 falsifier 측정 절차 보강 제안** — VLM-preservation 검증에 ZS 지표 + Fisher energy $`E_{F}`$ + per-layer effective rank를 정량 측정 항목으로 추가하는 안을 D26 평가 프로토콜 논의에 올립니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2603.11653/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

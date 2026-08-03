@@ -355,5 +355,3 @@ $$\nabla_\epsilon \mathcal{C}_{\mathrm{test}}(o) = \beta\, \nabla_o \mathcal{C}_
 - **Decision 변경 제안 없음** — D28/D30 의 v1(latent 우선, raw-pixel deferred)을 뒤집을 증거는 아닙니다. 다만 D30 의 raw-pixel tracked 사유("eval-in-imagination 현실성")에 "비관적 스티어링 가능성"이 근거로 하나 추가된 상태라는 점을 기록해 둘 만합니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.00267/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

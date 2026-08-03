@@ -14,7 +14,6 @@
 | 분석 생성일 | 2026-07-01 |
 | 관련 Pillar | P0, P2, P3 |
 | 태그 | dataset, tactile |
-| Design 적용 | 🚫 비대상 (dataset) |
 
 <!-- 본문 확보 retrieval ladder 기록 (verbatim):
   1. curl --fail "https://arxiv.org/abs/2606.31694"   → HTTP 200 (메타/초록 확보)
@@ -263,5 +262,3 @@ $$m=d_{\mathrm{inter}}-d_{\mathrm{intra}}$$
 - **P0 §D26(benchmark/eval scouting scope) — 평가 위생(hygiene) 기준 추가 제안** — "촉각 벤치마크는 contact-sequence 식별자를 노출하고 frame-random 점수와 함께 held-out 결과를 반드시 병기"를 벤치마크 채택 기준(license/usability bar, D27)에 준하는 *평가 위생 체크*로 승격하는 것을 제안합니다.
 - **P2 §D11 — swappable sensor head 논거 보강(제안)** — RCT 의 held-out-sensor 결과(sensor-instance robustness 가 별개 병목)를 D11 의 "no Sharpa lock-in / common token format" 비협상 조건의 실증 근거로 §5 nearby-work 에 각주 다는 것을 제안합니다.
 - context/ 파일은 수정하지 않았습니다 — 위는 모두 제안입니다.
-
-> 💡 본 논문은 Design 비대상(dataset)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.

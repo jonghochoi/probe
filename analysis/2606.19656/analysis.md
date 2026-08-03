@@ -264,5 +264,3 @@ $$\bar{e}_{n,m}=\bar{v}_{n,m}+\alpha*\bar{d}_{n,m}$$
 - **P4 §5 methodology base 후보** — BC-SR 는 D20(prior-preservation) 의 **inference-time** 변종이라는 점에서 ConSFT(손실-단계 보존)와 직교하는 참조입니다. 핀 교체까지는 불필요하나, P4 의 "preservation 레버" 논의에 *non-pinned methodology base* 로 1줄 추가해 둘 가치가 있습니다 — "BC-SR (arXiv:2606.19656): online RL finetuning 중 후보 집합에 초기 정책 샘플을 섞는 inference-time prior 보존".
 - **P3 §5 methodology base 후보** — "RL finetuning 의 탐색/sample-efficiency" 라는 메타 축이 현재 P3 핀(모두 contact-stabilization RL)에 비어 있습니다. PROBE 가 deploy fine-tuning 단계를 구체화하면 DF-ExpEnse(+ 토대 DSRL/ResFiT)를 그 축의 참조로 둘 수 있습니다 — 단 PPO↔SAC 불일치(위 실패 모드)를 함께 메모.
 - **그 외** — Decision/deferred trigger 이동 제안 없음. context/ 파일은 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.19656/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

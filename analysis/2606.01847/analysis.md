@@ -259,5 +259,3 @@ ABCD→D 에서 Euclidean baseline 은 다양한 환경에서 학습 불안정·
 - **P1 §5 핀 교체는 권장하지 않음(추적 등록 수준).** 본 논문은 anatomical Body/Hand split 이 아니라 action **표현 geometry** 축이라 P1 의 8-pin 핵심(split/decoder 계열)과 결이 다릅니다. 다만 D2(Body output space)의 "회전 표현" 하위 질문에 대한 **유일한 기하학적 reference** 이므로 P1 §5 "Methodology base (non-pinned)" 테이블에 *Lie Diffuser Actor (arXiv:2606.01847) — SE(3)-intrinsic action 파라미터화 / D2 회전표현 evidence* 로 1줄 추가를 제안합니다.
 - **D2 의 deferred 후보에 "rotation parameterization" 축 신설 검토.** 현 D2 는 joint vs task(EE pose) 의 거시 선택만 다룹니다. 그 아래 "EE pose 의 회전 표현(flat9d / rot6d / so3-tangent)" 을 deferred 변수로 명시할지 사람의 판단을 구합니다.
 - context/ 파일은 수정하지 않았습니다. 위는 제안일 뿐입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.01847/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

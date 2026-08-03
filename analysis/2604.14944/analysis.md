@@ -14,7 +14,6 @@
 | 분석 생성일 | 2026-07-01 |
 | 관련 Pillar | P0, P1, P3, P2 |
 | 태그 | dataset, dexterity, tactile |
-| Design 적용 | 🚫 비대상 (dataset) |
 
 ---
 
@@ -269,5 +268,3 @@ BODex refinement 초기화 (Table 4) — retrieval 기반 초기화가 vanilla·
 - **`catalogs/datasets.md` / `catalogs/benchmarks.md` 추가 후보** — HRDexDB 를 🔀 mixed(human→robot) × dexterity × tactile 데이터 + ✋ dexterous 벤치마크로 등재(D25/D26). License CC BY 4.0(D27 만족) 기록. 공개 시점의 실제 다운로드/코드 링크 확인 필요.
 - **P0 §5 핀 검토(쿼터 리밸런스)** — paired human-robot **dexterous** 축은 현재 핀에 비어 있습니다(RH20T 는 parallel-jaw). HRDexDB 공개·규모 확장(1,000 objects) 확인 시, cross-embodiment dexterous grasp 슬롯 신설을 고려할 만합니다(append 아님, 8핀 cap 내 교체).
 - 그 외 Decision/trigger 이동 제안: 없음.
-
-> 💡 본 논문은 Design 비대상(dataset)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.

@@ -281,5 +281,3 @@ $$\mathrm{cIoU}=\frac{\sum_{i,j}\min(P_{i,j},\hat{P}_{i,j})}{\sum_{i,j}\max(P_{i
 ## 💡 컨텍스트 제안
 
 - **P0/P2 후보 추적 등재 제안** — HT-Bench를 P0 §5 benchmark 추적군의 "full-hand 촉각 + egocentric 멀티태스크 벤치마크" 후보로, HandTouch를 P2 §5의 visuotactile 인코더 비교군(ViTacFormer 인접)으로 추적 검토. 단, 데이터/코드 공개 확인 전까지는 D27 미충족으로 표시. (context 파일은 수정하지 않으며 제안만 남깁니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2606.19161/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

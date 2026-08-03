@@ -303,5 +303,3 @@ LIBERO 실험은 π0/GR00T-N1.5/SmolVLA 를 10% subset 으로 100k step·global 
 - **P4 §5 Tracked Literature 후보(핀 아님, methodology base 행)** — 본 논문을 D19(adaptation range)·D20(prior-preservation 대안: 보존이 아닌 절제) 비교축으로 "methodology base (non-pinned)" 표에 추가 검토 제안. ConSFT(보존형)와 직교쌍을 이루어 D20 의 설계 공간을 넓힌다. (핀 8개 cap 은 유지 — 핀 교체까지는 불요.)
 - **D19 deferred candidate 명시** — "post-pretraining adaptation range" 의 deferred 후보에 `pre-finetuning structural layer pruning (CKA-guided)` 을 한 줄 추가 제안. 현재 freeze/PEFT/full 축과 직교하는 "깊이" 축.
 - 그 외 Decision 이동/핀 교체 트리거는 현 시점 근거 부족 — **보류**. (context/ 파일은 수정하지 않음.)
-
-> 💡 base 매핑은 `/implement-design analysis/2606.20246/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

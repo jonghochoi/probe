@@ -290,5 +290,3 @@ $$\mathcal{B}=\mathcal{B}_{\mathrm{prev}}\cup\mathcal{B}_{\mathrm{dagger}},|\mat
 - **P0 미공개 추적 항목.** OOL Glove + 예고된 2,000시간 인간 손 데이터셋은 공개 시 `catalogs/datasets.md`(👤 human) 등재 후보 — 현재 미공개라 카탈로그 미적격(그래서 본 분석은 `카탈로그` 라우팅을 비웁니다). vision-based EgoDex 와 구별되는 **glove 기반 수집** 옵션으로 메모.
 - **P4 D22 OPEN ablation 데이터.** LaST-HD 의 mixed≈robot-only(in-domain) 증거는 D22 의 egocentric-vs-mixed deferred 논의에 인용할 만한 구체 데이터 포인트.
 - 위 제안은 모두 사람 검토용이며, 본 분석은 `context/` 파일을 수정하지 않습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.23685/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

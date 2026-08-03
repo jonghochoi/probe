@@ -265,5 +265,3 @@ per-object 세부(Table 7·8)는 APT 의 우위가 색·형태가 distractor 와
 - **P4 §5 methodology base 후보** — APT(arXiv:2606.12366) 를 "사전학습 단계 prior 보존(VA-prior pretraining)" 증거로 비-pin methodology base 에 추가 검토. ConSFT(적응 단계 보존) 와 짝지어 "보존을 어느 단계에서 푸는가"의 대조군으로 유용. (pin 8개 cap 은 유지 — 교체가 아니라 base 행 추가 제안.)
 - **D19 deferred trigger 후보** — "action expert 사전학습이 선행되면 VLM joint FT 가 freeze 를 능가" 가설을 D19=(a) freeze 의 *insufficiency trigger* 후보로 기록 제안. 단, 우리 lineage·flow-matching·dexterity 조건에서 재현되는지 위 실패 모드 검증이 선행 조건.
 - context/ 파일은 수정하지 않았습니다. 위는 제안일 뿐입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.12366/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -267,5 +267,3 @@ $$\mathcal{L}_{\mathrm{adapter}}=\mathcal{L}_{\mathrm{sem}}+\lambda_{\mathrm{nce
 - §10.2 (Bounded RL-in-VLA precedents) 와 §10.3 (Architectural siblings) 에는 바로 해당하지 않으므로 신규 carryover 는 필요 없습니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2605.22082/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

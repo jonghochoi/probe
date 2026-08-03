@@ -288,5 +288,3 @@ PhysisForcing 로 학습한 Wan2.2-TI2V-5B 를 Fast-WAM 의 video DiT 로 drop-i
 - **D30 deferred trigger 관찰 포인트** — "raw-pixel 을 언제 다시 볼 것인가"의 트리거로, 본 논문의 "추론 비용 0 물리 정합" 증거를 기록해 두면 향후 eval-in-imagination 실험 시점 결정에 유용합니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.28128/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -277,5 +277,3 @@ ablation 은 single H100 기준이라 base 평균이 92.7 로 위 표(8×H100, 9
 - (context/ 파일은 수정하지 않았습니다 — 위는 제안일 뿐입니다.)
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2510.12276/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

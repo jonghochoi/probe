@@ -300,5 +300,3 @@ $$x_\tau = \tau a_0 + (1 - \tau) a_1$$
 - **P0 §5 methodology base 행 추가 후보** — EgoEngine(arXiv:2606.12604)을 DexImit·DexMimicGen 옆 "human video → robot data 생성 방법" 행으로 추가 검토. 핀 cap 8(데이터셋/벤치마크 기준)이라 핀이 아닌 methodology base 가 적절. 코드/데이터 공개 확인 후 `catalogs/datasets.md` 등재 여부 결정 권장.
 - **Decision 이동 불필요** — D24~D27, D22 의 v1/working 선택을 바꿀 근거는 아니며, egocentric 우선(D24)·egocentric-centric corpus(D22)를 지지하는 추가 evidence 로만 기록하면 충분합니다.
 - (context/ 파일은 수정하지 않았습니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2606.12604/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -317,5 +317,3 @@ $$r_{\mathrm{retract}}=B_{\mathrm{retract}}\mathbb{I}\!\left[d(o_{t},g_{M})<\eps
 - **Decision 이동 트리거 없음** — 본 논문이 우리 v1 결정을 뒤집을 근거는 아직 아닙니다. RL-as-core 는 여전히 우리 Identity 의 Antagonist 이며, 본 논문은 "goal 정의 가능한 sparse task 에 한정된 성공"이라 우리 System0-scoped 원칙을 오히려 뒷받침합니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.26428/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

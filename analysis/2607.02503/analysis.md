@@ -283,5 +283,3 @@ joint inference 모드에서 시각·촉각을 함께 예측하고, OmniVTA를 �
 
 - **P5 §5 Tracked Literature 후보(non-pinned methodology base).** VT-WAM은 Fast-WAM 계열을 촉각 동역학으로 확장한 최신 시각-촉각 WAM으로, P5의 촉각-WAM 축을 대표합니다. 다만 P5 pin 상한(8)이 차 있어 즉시 pin보다는 methodology base 행에 "VT-WAM ([arXiv:2607.02503](https://arxiv.org/abs/2607.02503)) — 촉각 변형 동역학을 예측하는 시각-촉각 WAM + 접촉 게이트 어텐션 유도(D28/D30)"로 추가를 제안합니다.
 - **P2 §5 non-pinned 후보.** AVTAG(접촉 구간 hinge ranking으로 촉각 저활용 교정)는 D10 "촉각 저활용 방지" 논지의 강한 실증이므로, P2 methodology base에 병기 후보입니다. 최종 판단은 사람이 결정하시면 됩니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2607.02503/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

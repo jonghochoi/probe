@@ -15,7 +15,6 @@
 | 관련 Pillar | P1 |
 | 태그 | sim2real, dataset |
 | 카탈로그 | benchmark/harness/vla-eval |
-| Design 적용 | 🚫 비대상 (benchmark) |
 
 <!-- 본문은 arXiv HTML(전문)로 확보. 모든 수치는 본문/표에서 받은 그대로 인용. -->
 
@@ -231,5 +230,3 @@ VLA 모델 평가에서 벤치마크마다 반복되는 의존성·전처리·�
 - **D26 노트 보강 제안** — D26 v1의 "AutoEval-style automation" 옆에 "vla-eval(four-method 통합 + 구조화 JSON 재현 로그) = sim ablation 실행 인프라 후보" 한 줄 추가 검토.
 - **§13.B 연결** — vla-eval 가속 방법론은 §13.B "compute budget" 미해결 항목의 평가-측 비용 추정에 직접 입력(예: $`K^{*}`$ ·배치로 ablation wall-clock 산정).
 - context/MASTER.md 는 수정하지 않았습니다 — 위는 모두 제안입니다.
-
-> 💡 본 논문은 Design 비대상(benchmark)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅(`benchmark/harness/vla-eval`)으로 전달됩니다.

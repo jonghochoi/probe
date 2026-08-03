@@ -15,7 +15,6 @@
 | 관련 Pillar | P3, P2, P0 |
 | 태그 | tactile, dexterity, sim2real |
 | 카탈로그 | benchmark/sim/TactileGenesis |
-| Design 적용 | 🚫 비대상 (benchmark) |
 
 <!-- 본문 확보 retrieval ladder 기록 (verbatim):
   1. curl --fail "https://arxiv.org/abs/2606.22332"            → 200 (메타/초록 확보)
@@ -264,5 +263,3 @@ task별 최적 센서는 task 의존적이되 force/torque 가 robust default �
 - **MASTER §4.2 Simulation 노트 제안** — "visuotactile sim 프로토콜 TBD(Chen et al. / Akinola Isaac Gym tactile library 참조)" 옆에 "Genesis World + Tactile Genesis = Isaac Gym tactile(TacSL) 대비 약 3배 throughput 후보" 한 줄 추가 검토.
 - **MASTER §4.1 하드웨어 노트 제안** — in-house custom hand 사양 결정 시 "palm·proximal phalanx 촉각 커버리지 우선(손끝-only 한계, arXiv:2606.22332)" 입력 검토.
 - context/ 파일은 수정하지 않았습니다 — 위는 모두 제안입니다.
-
-> 💡 본 논문은 Design 비대상(benchmark)이라 foundry 매핑 대상이 아닙니다. 가치는 `카탈로그` 라우팅(`benchmark/sim/TactileGenesis`)으로 전달됩니다.

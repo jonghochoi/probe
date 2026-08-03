@@ -14,7 +14,6 @@
 | 분석 생성일 | 2026-08-02 |
 | 관련 Pillar | P0, P2, P4, P3 |
 | 태그 | dataset, dexterity |
-| Design 적용 | 🚫 비대상 (benchmark) |
 
 <!-- 본문·부록 전체를 arXiv HTML(전문)로 확보했습니다. 모든 수치는 본문/표에서
      받은 그대로 인용했습니다.
@@ -377,5 +376,3 @@ asset 은 PartNet-Mobility, ManiTwin, NVIDIA Isaac Lab/Isaac Sim, AutoBio, 공�
 - **Decision 이동 / deferred trigger 발동 — 없음.** ⚖️ 에 정리한 교란(시각 변이 미평가, 임베디먼트 전이 미평가, 적응 예산 불균형, proprio 차단) 때문에 이 논문 단독으로 어떤 `D#` 의 v1 을 v2 로 올릴 근거는 되지 못합니다.
 
 ---
-
-> 💡 본 논문은 Design 비대상(benchmark)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.

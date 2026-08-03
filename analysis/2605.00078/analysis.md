@@ -332,5 +332,3 @@ Being-H0.7은 **P5(World Model)** 와 **P4(VLM 사전학습 보존)** 에 직접
 2. **Being-H0.7 피닝 상태 확인** — `context/P5.md` §5 핀 목록에 Being-H0.7이 이미 등재되어 있습니다. 분석 결과 D28/D29/D30과의 정렬이 확인되었으므로 현행 Role 설명(`Prior/Posterior latent reasoning (D28/D29)`)이 적절합니다.
 
 3. **V-JEPA2.1 시각 인코더 추적 제안** — InternVL3.5 + Qwen3 + V-JEPA2.1 조합이 Being-H0.7에서 사용됩니다. P2(structured multimodal observation fusion) D9(action/dynamics-aware vision encoder) 후보로 V-JEPA2.1을 `catalogs/models.md`에 추가 검토할 수 있습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.00078/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

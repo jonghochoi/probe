@@ -251,5 +251,3 @@ P4 의 핀 라인업과 비교했을 때 — π0 ([arXiv:2410.24164]), π0.5 ([a
 - **Decision Log 변경 제안 없음** — D19~D23 어느 것도 *현 시점*에서 v1 을 바꿀 결정적 증거는 아님. UAM 결과는 *deferred trigger* 측에 후보를 더하는 정도가 적절. 정식 변경은 4-contribution ablation 결과를 본 뒤 판단.
 
 context/MASTER.md 는 수정하지 않았습니다 — 위 항목은 maintainer 검토용 제안일 뿐입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.15735/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

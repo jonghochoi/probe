@@ -332,7 +332,7 @@ RTC 의 오버헤드는 전적으로 denoising 스텝의 역전파에서 나오�
 
 ## ⚙️ 의사결정 함의
 
-- **배포 실행 전략의 기본값** — 우리 스택의 Body/Hand flow 전문가(D23 v1 continuous flow-matching head) 실기 배포 시, 동기 추론 대신 RTC 형 비동기 실행을 기본값으로 두는 것이 합리적입니다. 도입 파라미터는 논문 값에서 시작: `n_denoise=5`, `beta=5`, `s_min=H/2`, `delay_buffer=10`. lerobot foundry 에는 이미 `policies/rtc` 모듈이 존재하므로 도입 비용이 낮습니다.
+- **배포 실행 전략의 기본값** — 우리 스택의 Body/Hand flow 전문가(D23 v1 continuous flow-matching head) 실기 배포 시, 동기 추론 대신 RTC 형 비동기 실행을 기본값으로 두는 것이 합리적입니다. 도입 파라미터는 논문 값에서 시작: `n_denoise=5`, `beta=5`, `s_min=H/2`, `delay_buffer=10`. 오픈소스 `lerobot` 에는 이미 `policies/rtc` 모듈이 존재하므로 도입 비용이 낮습니다.
 - **chunk 길이 $`H`$ 의 정량 설계 규칙** — 실시간 제약 $`d\leq s\leq H-d`$ 에서, 우리 하드웨어의 실측 $`d`$ (모델 지연 + Deform Map 전처리 + 네트워크)를 먼저 재고 $`H > 2d`$ 를 보장해야 합니다. 우리는 π0.5 대비 Hand 전문가·촉각 토큰이 추가되므로 $`d`$ 는 논문의 6보다 커질 가능성이 높습니다 — $`H=50`$ 유지 여부를 실측 후 결정해야 합니다.
 - **System0 게이팅 창의 수치화 (D13/D14)** — System0 가 커버해야 하는 반응 창을 "RTC freeze 구간 = $`d\cdot\Delta t`$ "로 명시적으로 정의할 수 있습니다. System1 이 어떤 실행 전략을 쓰든 이 창 안의 slip 대응은 구조적으로 불가능하므로, System0 의 발동 조건·대역 설계(D14 binary gate)의 요구 사양이 됩니다.
 - **평가 지표 추가** — 데모 과제 평가에 (1) **average throughput**(완료 비율/에피소드 시간)과 (2) **최대 가속도(2차 차분)** 를 넣는 것이 좋습니다. 전자는 속도·성공률을 한 번에 보는 지표로 Phase 1 인핸드 회전 평가에 그대로 이식 가능하고, 후자는 chunk 경계 OOD 잡음의 싼 프록시로 논문이 직접 검증한 지표입니다.
@@ -356,5 +356,3 @@ RTC 의 오버헤드는 전적으로 denoising 스텝의 역전파에서 나오�
 - **P1 §5 methodology base(non-pinned)에 추가 제안** — `RTC (Real-Time Chunking) | arXiv:2506.07339 | flow VLA 비동기 실시간 실행층; D5 제어율·chunk 설계의 지연 제약 근거 + D7 π lineage 배포 경로`. 핀 교체까지는 불요(아키텍처 기여가 아니라 실행층이므로 non-pinned 이 적절)하다고 판단합니다.
 - **P3 D13/D14 rationale 보강 제안** — System0 요구 사양에 "System1 반응 지연 하한 $`d\cdot\Delta t`$ (RTC 기준 실기 120–320ms, arXiv:2506.07339)"를 인용 근거로 추가하면, System0 의 존재 이유가 외부 정량 근거로 받쳐집니다. Decision 변경은 아니며 근거 추가입니다.
 - Decision v1 자체를 움직일 필요는 없습니다 — 본 논문은 D5/D7/D13/D14 의 현 선택과 모두 양립합니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2506.07339/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

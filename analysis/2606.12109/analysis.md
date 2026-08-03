@@ -281,5 +281,3 @@ Nut Assembly 의 정지는 인간 시연의 structural velocity damping 이 만�
 - **P1 §5 또는 P4 §5 methodology-base 후보** — InDex 는 "arm/hand 학습 파이프라인 2-stage 분리 + 1차원 intent 승계" 라는, 우리 D1(split form)·D20(preservation) 양쪽에 걸친 신선한 데이터 포인트다. 핀 cap(8) 교체까지는 아니더라도 P1 또는 P4 의 **non-pinned methodology base** 에 추가를 검토할 만하다(특히 D7 구현 하이퍼파라미터·MLP vs diffusion ablation 의 정량 근거 때문).
 - **D4 가설 보강 메모** — "스칼라 single-point conditioning 만으로 충분" 이라는 우리 v1 을 지지하는 ablation(w/o Intent 17.0 → with 85.8)을 D4 deferred 근거 노트에 남겨둘 가치가 있음.
 - 그 외 핀 교체·Decision 이동을 강제할 만한 변화는 없음(시뮬레이션 전용·코드 미공개로 증거 강도 제한적).
-
-> 💡 base 매핑은 `/implement-design analysis/2606.12109/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

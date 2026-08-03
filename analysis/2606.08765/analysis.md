@@ -297,5 +297,3 @@ DP + RGB-S 의 Pick-and-Place 세부값은 Normal 78.5 / Occluded 39.7 로, visi
 - **P2 §5 Tracked Literature 핀 후보** — RGB-S 는 D10/D11 의 강한 증거(가림 조건에서 cross-attention·FiLM·CLIP 을 일관되게 능가)이며, 기존 핀 ViTacFormer 의 직접 비교 상위 결과입니다. 핀 cap(8) 중 현재 5편이므로, RGB-S 를 **P2 핀에 추가**하거나(명시 기하 grounding 노선 대표) 최소한 methodology base 의 DexViTac 옆에 등재 제안. 인간 판단 필요.
 - **P4 D20 cross-pillar 메모** — zero-init 입력 채널 conditioning 을 D20 prior-preservation 의 *입력측 어댑터* 사례로 P4 §5 methodology base 에 메모 추가 검토(현재 D20 은 action-side adapter + conservative SFT 중심). 직교 레버로 가치가 있습니다.
 - **catalogs** — 데이터셋/벤치마크 신규 공개가 없으므로 `catalogs/` 등재 대상 아님(method-only).
-
-> 💡 base 매핑은 `/implement-design analysis/2606.08765/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

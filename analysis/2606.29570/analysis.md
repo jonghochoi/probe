@@ -265,5 +265,3 @@ dart 삽입 과제에서 chunk $`K=64`$, cutoff $`\lambda`$ 로 상위 주파수
 - **P1 §5 non-pinned 후보** — 이 논문을 P1 Methodology base(non-pinned)에 "spectral coarse-to-fine action 표현 / body→hand 인과 흐름의 주파수영역 대안(D6/D23 evidence)" 역할로 추가 검토를 제안합니다(핀 교체는 아님 — 해부학축이 아니라 주파수축이므로 north star 와는 직교).
 - **D23 tracked 변수** — "action representation" 선택지 지도에 **DCT coarse/fine 분해 + `low→high` 인과 위계**를 FAST 계열의 확장으로 명시 등재할 것을 제안합니다.
 - (context/ 파일은 수정하지 않았습니다 — 위는 사람 판단용 제안입니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2606.29570/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -429,5 +429,3 @@ ALOHA), EC-3(Unitree G1 7-DoF 팔 + Inspire Hand 6-DoF)로 전이합니다.
   `catalogs/` 의 학습 레시피 방법론 문서로 분리 정리할 가치가 있습니다
   (D21 보강 근거).
 - context/MASTER.md 는 수정하지 않았습니다 — 위는 사람 판단을 위한 제안일 뿐입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.18722/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

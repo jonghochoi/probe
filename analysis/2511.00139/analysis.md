@@ -278,5 +278,3 @@ $$\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{main}}+\lambda\left(\mathcal{L}_
 - **§10.3 watch trigger 갱신 (선택)** — 현재 트리거는 "in-hand reorientation 또는 articulated-tool 로 확장"이다. 본 논문 §5.2 future work 에 selective sensor gating / attention-based tactile weighting 이 명시돼 있다. 단계별 촉각 gating 후속 발표를 트리거에 한 줄 보태면 P2 (D8/D11) 영향 모니터링이 더 빨라집니다.
 - **D19 deferred 트리거 보강 (선택)** — 본 논문은 D19 의 deferred 후보 (d) LoRA · (c) selective unfreeze 대신 사실상 (e) full-FT 로 가는 데이터 포인트다. D19 deferred 줄에 full-FT 가 데이터 100 traj 규모에서 88.7% 를 달성한다는 외부 근거 ([arXiv:2511.00139](https://arxiv.org/abs/2511.00139)) 를 한 줄 각주로 추가할지 검토해 주십시오. 결정 변경이 아니라 근거 등록 수준입니다.
 - **D25 falsifier 의 차폐 항 추가 (선택)** — P2 의 multi-camera pre-fusion (D12) 의 효용을 정량 falsifier 로 묶을 재현 가능한 프로토콜이 본 논문에 제공된다. D25 falsifier 의 보조 항목으로 단일 카메라 차폐 시 성공률 drop ≥ X% 면 D12 의 cross-attn fuser 무효를 추가할지 고려해 주십시오.
-
-> 💡 base 매핑은 `/implement-design analysis/2511.00139/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

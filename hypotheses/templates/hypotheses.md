@@ -70,7 +70,6 @@
 - 근거 (≥2): [`<id>`](../../analysis/<id>/analysis.md) — <한 줄>; [`<id>`](../../analysis/<id>/analysis.md) — <한 줄>
 - 예측 효과: <메트릭/설정/손실항 이름 + 방향/크기>
 - 측정 프로토콜: Rung <0–3> (<`implementable` / `proxy-consistent` / `indicative` / `empirically-verified` 목표 라벨>) — <pass/fail 이 뜻하는 바 한 줄>
-- Foundry 이식성: portable (Design delta 로 `/implement-design`+`/validate-impl` 검사 가능) / evidence-only
 - 상태: `inferred` · `unverified`
 
 ### H2 — …

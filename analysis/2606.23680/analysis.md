@@ -263,5 +263,3 @@ $$\mathcal{L}=\lambda_{a}\|\hat{a}_{t}-a^{T}_{t}\|_{2}^{2}+\lambda_{s}\|\mu^{q}_
 - **P1 §5 base 후보 추가 고려** — CoorDex 를 [D1]/[D4] 의 "RL+모션 prior 도메인에서의 hybrid 분리" 비핀 methodology base 로 등재할지 검토(현 핀 4편은 모두 IL/VLA 계열이라, RL 측 대조군이 없음). 핀 교체가 아니라 base 행 추가 제안.
 - **P3 §5 잔차 RL 대조군** — DexSynRefine 옆에 "latent-prior residual RL" 대비 항목으로 메모할 가치. 단 휴머노이드 전신 의존성 때문에 핀 승격은 비권장.
 - 그 외 Decision/deferred trigger 이동 제안 없음.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.23680/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

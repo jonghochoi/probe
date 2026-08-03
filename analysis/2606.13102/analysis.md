@@ -286,5 +286,3 @@ tactile expert 는 300M Transformer 이며(상세 App. B.4: width 1024, depth 18
 - **P0 §5 / catalog** — FTP-1-Dataset 을 `catalogs/datasets.md` 🔀 Mixed 에 등재(본 분석 카탈로그 라우팅으로 skeleton row 생성 예정). D25 tactile/torque 데이터 anchor 갱신 후보.
 - **하드웨어 메모** — MASTER §4.1 의 "Tactile encoder uses swappable sensor head + common token format (P2)" 가정을 FTP-1 의 MTTS 가 실증함 — 설계 가정의 외부 증거로 기록 가치.
 - context/ 파일은 수정하지 않았습니다(제안만).
-
-> 💡 base 매핑은 `/implement-design analysis/2606.13102/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

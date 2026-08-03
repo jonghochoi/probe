@@ -14,7 +14,6 @@
 | 분석 생성일 | 2026-07-09 |
 | 관련 Pillar | P0, P3, P5 |
 | 태그 | sim2real, dataset |
-| Design 적용 | 🚫 비대상 (benchmark) |
 
 <!-- 본문은 arXiv HTML(전문, v3)로 확보. 모든 수치는 본문/표에서 받은 그대로 인용.
      retrieval ladder:
@@ -267,5 +266,3 @@ RoboDojo 의 출발점은 "generalist 정책은 빠르게 좋아지는데, 무�
 - **D26 노트 보강 제안** — D26 v1 의 "real(RoboArena-class)" 옆에 "RoboDojo-RealEval(원격 클라우드 표준화 rig, 3 embodiment) = sim+real 통합 real 후보; 단 dexterous hand 없음" 한 줄 추가 검토.
 - **watch trigger 등록 제안** — §7 확장 로드맵(dexterous hand·tactile·humanoid·mobile)이 실제 릴리스되면 P0 identity-relevant 벤치로 재평가. tactile 축이 붙는 순간 P2/P3 연결도 발생.
 - context/MASTER.md·context/P0.md 는 수정하지 않았습니다 — 위는 모두 제안입니다.
-
-> 💡 본 논문은 Design 비대상(benchmark)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.
