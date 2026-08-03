@@ -30,10 +30,9 @@ Project story:
 
     And when one vein is worth mining, the same drone digs in:
     PROBE takes a single chosen paper and drills it into a Korean
-    deep-dive plus a vendor-agnostic Layer 1 Design, then maps that
-    Design onto a target foundry and statically validates the patch.
+    deep-dive anchored to the human's own Decision Log.
     Two tracks, one psionic core — outward scouting and focused
-    reproduction.
+    analysis.
 
     My life for Aiur.
 

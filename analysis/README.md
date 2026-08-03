@@ -1,8 +1,8 @@
 # analysis/
 
 On-demand deep-dive corpus — one subfolder per paper (`<arxiv-id>/`), each
-holding a Korean deep-dive (`analysis.md`) + Layer 1 Design (`design.md`) and,
-when generated, foundry impl + validation artifacts (schema in `CLAUDE.md`).
+holding a single Korean deep-dive (`analysis.md`) written by `/analyze-paper`
+(format spec in `docs/style.md` §5).
 
 The table below is an **auto-generated index** — one section per primary
 Pillar, the 📝 badge in front of each title links to that paper's deep-dive. It is

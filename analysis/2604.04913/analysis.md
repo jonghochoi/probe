@@ -15,7 +15,7 @@
 | 관련 Pillar | P5 |
 | 태그 | flow-matching |
 
-<!-- 태그 주의: 통제 어휘(STYLE §5-7)에 `world-model` 이 없어 본 논문(생성형
+<!-- 태그 주의: 통제 어휘(STYLE §5-6)에 `world-model` 이 없어 본 논문(생성형
      world model)에 정직히 맞는 태그가 없습니다. BoM 단일-패스 생성이 diffusion/
      flow 의 대체재라는 "연속 생성 목표" 슬롯으로서 least-wrong 인 `flow-matching`
      을 authored — 어휘 확장 제안은 §💡 컨텍스트 제안 참조(2605.26379 선례). -->
@@ -255,6 +255,6 @@ $$L_{\mathrm{tok}}=\|\,x_{t}-\hat{x}_{t}\,\|^{2}.$$
 
 - **P5 Tracked Literature — non-pinned methodology base 후보로만.** DeltaWorld(delta token + BoM, feature-space *생성형* WM)는 VLA-JEPA(latent 결정론)·Ctrl-World(pixel 생성형)의 빈 칸 — "feature-space 생성형 + token-efficiency" — 을 메우는 방법론 base 입니다. 다만 평가가 주행/일반 비디오·action-free 라 **P5 §4 anti-topic("driving" + "no manipulation eval")** 에 해당하므로, *pinned* 승격이 아니라 §5 의 "Methodology base(non-pinned)"에 (DINO-world 계보를 잇는 token-efficient WM 으로) 추가하는 선만 제안합니다. 최종 판단은 사람.
 - **D30 보강 메모.** "latent 예측"의 한 극단으로 *delta(차분) 예측*을 D30 의 deferred 후보 어휘에 기록해 두는 것을 제안 — VLA-JEPA latent 대비 token-efficiency 트레이드오프를 추적하기 위함.
-- **태그 어휘 확장(STYLE §5-7) 재확인.** 본 논문도 통제 태그 어휘에 `world-model` 슬롯이 없어 least-wrong `flow-matching` 으로 우회했습니다(2605.26379 선례와 동일). 어휘에 `world-model` 추가 검토를 다시 제안합니다. (docs/STYLE.md 미수정 — 사람 결정.)
+- **태그 어휘 확장(STYLE §5-6) 재확인.** 본 논문도 통제 태그 어휘에 `world-model` 슬롯이 없어 least-wrong `flow-matching` 으로 우회했습니다(2605.26379 선례와 동일). 어휘에 `world-model` 추가 검토를 다시 제안합니다. (docs/STYLE.md 미수정 — 사람 결정.)
 
 ---

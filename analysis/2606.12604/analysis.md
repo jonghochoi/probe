@@ -19,7 +19,7 @@
      ar5iv(https://ar5iv.labs.arxiv.org/html/2606.12604) → HTTP 403 으로 전문 HTML
      확보 실패. PDF(https://arxiv.org/pdf/2606.12604, 11 페이지 본문 + 부록 = 총 27p)
      를 내려받아 PyMuPDF 로 텍스트 추출(pdftotext 미설치). 전문 본문 + 부록 전체
-     확보 — 초록 only 아님. PDF 추출이라 그림 hotlink 은 생략(STYLE §5-6: PDF/초록
+     확보 — 초록 only 아님. PDF 추출이라 그림 hotlink 은 생략(STYLE §5-5: PDF/초록
      확보 시 figure citation 생략). 수식/표는 PDF 추출 과정에서 줄바꿈이 깨지므로
      본문 식 번호 기준으로 재구성하여 인용. -->
 

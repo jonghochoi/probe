@@ -29,7 +29,7 @@ placeholder, or a paper landed in the 미분류 bucket (no `관련 Pillar` row) 
 the failures that otherwise surface only as broken badges in the published
 index after the next manual refresh.
 
-Specification: docs/style.md §5-7.
+Specification: docs/style.md §5-6.
 """
 
 from __future__ import annotations
@@ -198,7 +198,7 @@ def _englishize(head: str) -> str:
     `English (한글)`; we keep whichever side carries no Hangul. A head with no
     recoverable English (pure Korean) collapses to the empty string and is
     dropped by the caller — the English-only rule is enforced in
-    docs/style.md §5-6 for new analyses.
+    docs/style.md §5-5 for new analyses.
     """
     if not HANGUL_RE.search(head):
         return head.strip()
@@ -217,7 +217,7 @@ def _englishize(head: str) -> str:
 def extract_keywords(paper_dir: Path) -> list[str]:
     """Return up to MAX_KEYWORDS English keyword labels from 기술 키워드.
 
-    Reads the `## 기술 키워드` section (spec'd in docs/style.md §5-6) and
+    Reads the `## 기술 키워드` section (spec'd in docs/style.md §5-5) and
     takes each top-level bullet's head term — the text before the em dash `—`
     (the spec delimiter; a `: ` separator is tolerated for non-conforming
     bullets). English plain text only: a head carrying any math/markup
@@ -350,8 +350,8 @@ def primary_pillar(row: dict) -> str:
 
 
 # Columns: a 📝 deep-dive badge spliced in front of the title, then Links /
-# Pillars / Keywords / Refreshed. Both the analysis-link and impl columns the
-# index used to carry were dropped — the link folds into the title cell.
+# Pillars / Keywords / Refreshed. The separate analysis-link column the index
+# used to carry was dropped — the link folds into the title cell.
 HEADER = (
     "| # | Title | Links | Pillars | Keywords | Refreshed |\n"
     "|---|---|---|---|---|---|\n"

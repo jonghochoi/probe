@@ -2,7 +2,7 @@
 
 > `/hypothesize --compare-only` 산출물. 가설 합성 없이 합의·불일치
 > 매트릭스까지만 — 한 pillar 의 값싼 cross-paper read 입니다. 형식 규칙은
-> `docs/style.md` §7 / §4. 출처 회계는 sibling
+> `docs/style.md` §6 / §4. 출처 회계는 sibling
 > `hypotheses.provenance.md` 참조. 재실행 시 덮어씁니다.
 
 ---

@@ -45,8 +45,8 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 | 50–100 papers/day → skim titles, remember none | 3–5 papers/run → scored, tied to your open questions |
 | Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
-| "I'll read that paper properly later" → never does | `/analyze-paper` → Korean deep-dive **+ a vendor-agnostic Layer 1 Design** anchored to your Decision Log |
-| "Great paper, but I'll never reproduce it" | `/reproduce-paper` drives Design → impl → validation in a converging loop, shipping a unified-diff patch against a target foundry (default `lerobot`) |
+| "I'll read that paper properly later" → never does | `/analyze-paper` → a Korean deep-dive anchored to your Decision Log |
+| "That's the fifth paper claiming the opposite" | `/hypothesize` reads back across the whole corpus and hands you ranked, falsifiable hypotheses |
 
 **Division of labor.** PROBE is a scout — it does not fight. The agent owns citation-graph expansion, anti-topic filtering, scoring, and cross-pollination. The human owns every judgement call: direction, Decision-Log curation, evaluation thresholds, per-pillar context refresh, and discarding. The agent **never** edits any `context/` file — it proposes in a report; the human decides.
 
@@ -54,7 +54,7 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 
 ## Pipeline
 
-PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (reproduce) — plus a read-only **synthesis sidecar** (`hypotheses/`, via `/hypothesize`) that reads back across the accumulated `analysis/` DB. Each runs on its own trigger and writes to its own folder.
+PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (read deeply) — plus a read-only **synthesis sidecar** (`hypotheses/`, via `/hypothesize`) that reads back across the accumulated `analysis/` DB. Each runs on its own trigger and writes to its own folder.
 
 > **Pillars**: the static context is organized into a small set of research pillars, each owning its own Decision Log and Tracked Literature — canonical names and definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
@@ -76,17 +76,17 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
    │      Scouting      │         │   On-demand Analysis  │
    │ scheduled · per P# │         │     /analyze-paper    │
    │                    │         │                       │
-   │  citation graph ·  │         │ one paper → deep-dive │
-   │  keyword sweep ·   │         │   → Layer 1 Design →  │
-   │   curated lists    │         │   impl → validation   │
+   │  citation graph ·  │         │ one paper → Korean    │
+   │  keyword sweep ·   │         │   deep-dive, anchored │
+   │   curated lists    │         │   to the Decision Log │
    └──────────┬─────────┘         └───────────┬───────────┘
               │ append new file               │ overwrite snapshot
               ▼                               ▼
    ┌────────────────────┐         ┌───────────────────────┐
    │     scouting/      │         │       analysis/       │
-   │  P#/YYYY-MM-DD.md  │         │   <id>/analysis.md +  │
-   │    3–5 papers,     │         │   design.md (+ impl/  │
-   │   decision-grade   │         │      validation)      │
+   │  P#/YYYY-MM-DD.md  │         │   <id>/analysis.md    │
+   │    3–5 papers,     │         │    one folder per     │
+   │   decision-grade   │         │         paper         │
    └──────────┬─────────┘         └───────────┬───────────┘
               └───────────────┬───────────────┘
                               ▼  informs
@@ -95,22 +95,18 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 
 **Static vs. dynamic, never mixed.** `context/` is static — it changes monthly at most, and the agent only *reads* it. The tracks are dynamic and agent-written: `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks), and `analysis/` is an overwrite-snapshot regenerated on demand. Keeping the two apart is what stops the agent re-recommending last month's papers as the context bloats.
 
-**Analysis convergence loop.** A single `/analyze-paper` produces the deep-dive *and* a Layer 1 Design; `/implement-design` maps the Design onto a target foundry; `/validate-impl` statically checks the result. `/reproduce-paper` orchestrates the three as a bounded loop — fixing the impl against the foundry (inner loop) or re-extracting the Design from the paper (outer loop) until the verdict reaches a fixed point. Full branch matrix in [`.claude/prompts/reproduction.txt`](.claude/prompts/reproduction.txt).
+The two on-demand entry points (logic in `.claude/prompts/<name>.txt`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
 
-The four top-level entry points (logic in `.claude/prompts/<name>.txt`; run them in a local session, one-shot `claude -p "/analyze-paper 2410.07864"`, or on the web):
-
-- `/analyze-paper <arXiv id | url | pdf url>` → `analysis/<id>/analysis.md` + `design.md` (deep-dive + Layer 1 Design)
-- `/audit-paper <arXiv id | url | pdf url> [--repo <url>]` → `analysis/<id>/audit.md` — a cheap reproducibility gate run *before* the funnel: does the paper's own released code match its claimed method / defaults / metrics?
-- `/reproduce-paper <arXiv id | design path> [--foundry <name>] [--max-rounds N]` — drives `/implement-design` → `/validate-impl` against a target foundry (default `lerobot`) until the verdict stabilizes (default `--max-rounds 3`)
+- `/analyze-paper <arXiv id | url | pdf url>` → `analysis/<id>/analysis.md` — a Korean deep-dive: neutral paper summary, then the decision-grade half anchored to your `P#`/`D#`
 - `/hypothesize <P0..P5 | D# | D#-D#> [--seed "<idea>"] [--compare-only]` → `hypotheses/<slug>/hypotheses.md` — a read-only synthesis over the accumulated `analysis/` DB; emits ranked, `D#`-anchored, falsifiable hypotheses (all `inferred`/`unverified`, no experiment run)
 
-The agent never edits `context/MASTER.md`, `context/P#.md`, or `vendor/lerobot/`; each reproduction run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
+The agent never edits `context/MASTER.md` or `context/P#.md`; each analysis run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
 
 ---
 
 ## Agent Stack
 
-Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup for the scheduled scouting routine — cloud routines, network allowlist, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md). The on-demand commands (`/analyze-paper` → `/implement-design` → `/validate-impl`, orchestrated by `/reproduce-paper`) need no routine setup: run them from any Claude Code session; their logic lives in `.claude/prompts/` and their output format in `docs/style.md`.
+Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup for the scheduled scouting routine — cloud routines, network allowlist, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md). The on-demand commands (`/analyze-paper`, `/hypothesize`) need no routine setup: run them from any Claude Code session; their logic lives in `.claude/prompts/` and their output format in `docs/style.md`.
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
@@ -120,16 +116,6 @@ cd probe
 # 2. Generate a first Scouting Report by hand; review it ruthlessly; tune the prompt.
 # 3. Only then schedule it as a routine — bad prompt + automation = garbage on a timer.
 ```
-
----
-
-## References
-
-PROBE vendors code and specs from external repos — kept in sync with upstream, not rewritten.
-
-| Source | What PROBE borrows |
-|---|---|
-| [huggingface/lerobot](https://github.com/huggingface/lerobot) | The pinned snapshot at `vendor/lerobot/` — the v0 foundry every `impl.patch` targets. Pinned commit + refresh in [`vendor/lerobot/README.md`](vendor/lerobot/README.md). |
 
 ---
 

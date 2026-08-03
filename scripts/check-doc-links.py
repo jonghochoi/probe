@@ -36,8 +36,8 @@ No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
 to point at a real file, plus the `context/` files (MASTER + P0-P5) the
 scheduled routine reads every run. The agent-output spec (`docs/style.md`) and
 the prompts are out of the default set — they are full of *illustrative*
-example paths (example arXiv ids, partial `impl/…` fragments) by design — but
-can be scanned explicitly by passing them as PATH args.
+example paths (example arXiv ids, `<id>` placeholders) by design — but can be
+scanned explicitly by passing them as PATH args.
 
 Exit codes: 0 = clean / 1 = unresolved references found / 2 = nothing to scan.
 """
