@@ -261,5 +261,3 @@ per-task 로 보면 baseline 성공률이 낮은 task 에서 이득이 특히 �
 - **P2 §5 트래킹 후보** — PVI 를 D9/D10 의 "주입 경로(injection mechanism)" 측면 증거로 off-pin 트래킹 제안. 단, PVI 자체는 encoder 가 아니라 **주입 방식** 기여이므로, DynaFLIP(encoder) 핀과는 다른 축(주입)으로 기록하는 것이 정확합니다.
 - **P4 D20 노트** — "zero-init/behavior-preserving 잔차" 가 성능이 아닌 안정성 명분이라는 PVI ablation 을, prior-preservation 채택 시 "보존 metric 을 반드시 함께 측정" 하라는 caveat 의 근거로 기록 제안.
 - 핀 교체 제안 없음(P2 의 핵심 핀은 encoder 계열이 유지).
-
-> 💡 base 매핑은 `/implement-design analysis/2603.12772/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

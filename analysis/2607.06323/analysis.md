@@ -329,5 +329,3 @@ Raw·VQ-VAE 정책은 고-jitter 구간이 빈번한 반면 LAMP 는 대부분�
 - **이름 충돌 표기** — P1 핀 LaMP(2603.25399)와 본 LAMP(2607.06323)의 혼동 방지를 위해, 향후 문서에서 두 논문 모두 arXiv id 병기를 권장합니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2607.06323/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

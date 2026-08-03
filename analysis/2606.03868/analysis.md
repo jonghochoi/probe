@@ -293,5 +293,3 @@ open video baseline 은 paired action 을 생성하지 못해 비디오 지표�
 - (context/ 파일은 수정하지 않았습니다 — 위는 제안일 뿐입니다.)
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.03868/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

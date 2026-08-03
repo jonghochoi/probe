@@ -388,5 +388,3 @@ OOD 일반화 범주는 물체 일반화(당근·오이 껍질 벗기기, 다른
 - **P0 §5 핀 후보 — H-Tac([arXiv:2607.01067])** — D25(tactile/torque data scouting)가 "새 contact-modality 릴리스 고우선 플래그" 를 명시하므로, H-Tac 은 그 정의상 등재 후보입니다. 8핀 cap 고려 시 RH20T(손목 F/T 단일 지점)와의 교체 또는 methodology base 등재를 사람 판단으로 제안합니다. 단, 공개 상태(프로젝트 페이지·라이선스)를 먼저 확인할 것 — 본 분석 환경에서는 네트워크 차단으로 미확인.
 - **P4 D22 증거 등재** — D22(OPEN)의 "egocentric-centric corpus" 서술에 tactile 정렬 축의 증거로 TTP 를 methodology base 로 추가 제안. "corpus 구성에서 modality 커버리지(촉각)가 태스크군별 전이 이득을 좌우한다" 는 본 논문의 실증이 D22 ablation 설계에 직접 참고가 됩니다.
 - **P2 D11 deferred 후보 명시** — "UniTacHand 351-taxel MANO-표면 공통 tactile 공간" 을 D11 의 common-token-format deferred 후보로 기록해 둘 가치가 있습니다(Sharpa 락인 회피 요건과 정합, 단 per-finger 분해는 별도 유지). (사람 판단 사항 — context 파일은 수정하지 않았습니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2607.01067/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

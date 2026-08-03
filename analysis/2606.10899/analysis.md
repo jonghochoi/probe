@@ -356,5 +356,3 @@ $$\mathcal{L}=\lambda_{\mathrm{pos}}\mathcal{L}_{\mathrm{pos}}+\lambda_{\mathrm{
 - **P2 Tracked Literature 후보** — MV-Actor 는 P2 §5 의 VGGT/eVGGT(geometry-grounding 인코더) 핀을 *대체* 하지 않되, "feed-forward 재구성 spatial token 을 양팔 정책에 통합 + cross-view semantic interaction" 의 구체 패턴을 보여주는 **D8/D9 통합 사례** 로 비-핀(Methodology base) 추가를 제안합니다(핀 cap 8 유지). reprojection-consistent semantic sharing 은 현재 핀들에 없는 메커니즘입니다.
 - **카탈로그** — 새 데이터셋/벤치마크 기여가 없어 `datasets.md`/`benchmarks.md` 라우팅 대상은 아닙니다. 하나의 정책 아키텍처로서 `models.md` VLA 등재 여부는 사람 판단에 맡깁니다(현재 메타에 `카탈로그` 행 미기입).
 - **Decision 이동 없음** — 기존 D8 v1/D9 v1 노선을 *지지* 하는 증거이므로 결정 변경 트리거는 아닙니다. context 파일은 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.10899/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

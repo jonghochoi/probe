@@ -14,7 +14,7 @@
 
 | 분석 | Primary D# tie | 읽은 섹션 |
 |------|----------------|-----------|
-| [`<id>`](../../analysis/<id>/analysis.md) | D# | 🎯 / ⚙️ / ⚠️ / ✨ (+♻️, design.md) |
+| [`<id>`](../../analysis/<id>/analysis.md) | D# | 🎯 / ⚙️ / ⚠️ / ✨ (+♻️) |
 | … | | |
 
 ---

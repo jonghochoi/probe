@@ -267,5 +267,3 @@ $$\mathrm{ADE}=\frac{1}{|\mathcal{S}|}\sum_{(t,n)\,\in\,\mathcal{S}}\|\hat{p}(t,
 - **P5** — MolmoMotion 을 P5 methodology-base(또는 핀 후보)로 추적 검토 권장: "world-frame 3D-flow 모션 prior + transfer-by-init" 라는 D28/D30 증거. 다만 **객체-중심**이라 D32(hand-object egocentric 우선)의 down-weight 대상에 가까우므로, 핀(8개 cap)보다는 methodology-base 등재가 적절할 수 있음(World Guidance/AHEAD 옆).
 - **P0** — MolmoMotion-1M(👤 ego 중심, Apache-2.0) + PointMotionBench(111 cat / 61 motion, human-verified)를 `catalogs/datasets.md` / `catalogs/benchmarks.md` 후보로 제안. 단 hand-tracking·tactile 축은 아니므로 "객체 3D 모션" 라벨로 분류.
 - **P4** — "모션 예측 = 사전학습 과제" 라인을 D22(data composition) 증거 풀에 추가 검토. 단, context/ 파일은 수정하지 않으며 위는 제안일 뿐입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.18558/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

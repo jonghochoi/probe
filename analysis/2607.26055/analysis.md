@@ -344,5 +344,3 @@ $$\mathbf{x}_{p}\;\leftarrow\;\mathbf{x}_{p}+\Delta\tau_{p}\cdot v_{\theta}(\mat
 - **`D13`(P3) 서술의 정당화 근거 이동 제안** — System0 의 존재 이유를 "System1 이 느리다"에서 "슬립 억제는 System1 의 제어 tick 으로도 늦다"로 좁히는 방향의 문구 조정을 제안드립니다. 결정 자체(v1 선택지)는 바꾸지 않되, 근거가 이 논문으로 반박되는 부분을 남겨두면 이후 스카우팅이 잘못된 축으로 논문을 모읍니다.
 - **`D26`(P0) 범위에 반응성 스트레스 평가 추가 제안** — 벤치마크 스카우팅 범위에 낙하 물체 포착 · 접촉 후 힘 조절 같은 동적 반응 과제를 명시적으로 넣는 것을 제안드립니다. 현재 in-hand rotation / articulated-tool 중심 범위로는 본 논문류의 기여가 우리 평가에 잡히지 않습니다.
 - **`D11`(P2) 에 대조군 기록 제안** — "per-finger 토큰화 없이 flat concat + 고빈도 갱신만으로 힘 변조를 얻은 사례"로 본 논문을 D11 의 반증 후보 참조로 기록해 두시길 제안드립니다. Decision 을 바꾸자는 것이 아니라, D11 의 비용을 정당화할 때 비교되어야 할 baseline 이 생겼다는 뜻입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2607.26055/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

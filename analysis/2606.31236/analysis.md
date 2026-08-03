@@ -245,5 +245,3 @@ Cross-sensor zero-shot 전이(각 항목 10회 중 성공 수, mean±std over 3 
 - **P2 non-pinned(Methodology base) 후보로 TactX 등재 검토** — D11 의 "swappable sensor head + common token format" 를 데이터 주도로 실현한 첫 cross-transduction-modality 사례이므로, Sparsh/DexViTac 옆에 non-pinned 로 추가할 가치가 있습니다. Pinned 교체까지는 과함(parallel-jaw·정적 접촉 한계).
 - **D11 rationale 보강 후보** — "공통 token 포맷을 공학적으로 맞출지(현 v1) vs paired 데이터로 학습할지(TactX 경로)" 를 D11 의 deferred candidate 로 기록해 두면, 향후 다센서 실험 설계 시 분기점이 명확해집니다.
 - 위 제안은 사람의 판단 사항이며, context/ 파일은 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.31236/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

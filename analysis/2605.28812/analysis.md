@@ -231,5 +231,3 @@ OOD 초기화에서 `cop` 의 성공률 하락이 가장 작습니다(0.78 → 0
 - **P2 / D11 촉각 특징 후보 보강** — D11 의 "resultant force vector" 옵션에 본 논문(arXiv:2605.28812)을 물리 기반 구체 사례로 연결할 것을 제안합니다. 단, P2 핀 슬롯은 8개로 가득 차 있어 분기별 rebalance 시 "replace, don't append" 규칙을 따라야 하므로, 즉시 핀 교체보다 **competitor/watch 수준 추적**을 권합니다.
 - **핀 교체는 보류 권고** — 본 논문은 RL-as-core·비전 없는 단일 손 과제로 Identity 핵심(VLA-level 분할)과는 거리가 있어, 핀 승격보다 P3·P2 방법론 참고 자료로 두는 편이 적절합니다.
 - 그 외 신규 컨텍스트 변경 제안: 없음.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.28812/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

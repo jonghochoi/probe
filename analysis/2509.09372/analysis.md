@@ -537,5 +537,3 @@ long-horizon(spoon→cup→plate) 4 범주를 각 10 회 평균하며 ACT·OFT �
 - context/ 파일은 수정하지 않았습니다. 위는 사람 검토용 제안입니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2509.09372/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

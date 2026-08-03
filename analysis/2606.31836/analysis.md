@@ -15,7 +15,6 @@
 | 관련 Pillar | P0, P2, P3 |
 | 태그 | dataset, tactile, dexterity |
 | 카탈로그 | dataset/robot/RoboTacDex |
-| Design 적용 | 🚫 비대상 (dataset) |
 
 <!-- 본문 확보: arXiv HTML(/html/2606.31836) 및 ar5iv 는 각각 HTTP 404 / 403 로
      실패. PDF(https://arxiv.org/pdf/2606.31836, 7쪽)를 받아 PyMuPDF 로 전문
@@ -263,5 +262,3 @@ DP 로 UnscrewBottle(촉각-풍부 task)에서 촉각 유무를 비교. 촉각�
 - context/MASTER.md 및 context/P0.md 는 수정하지 않았습니다 — 위는 모두 제안입니다.
 
 ---
-
-> 💡 본 논문은 Design 비대상(dataset)이라 foundry 매핑 대상이 아닙니다. 가치는 분석 문서 본문으로 전달됩니다.

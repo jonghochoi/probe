@@ -296,5 +296,3 @@ $$r_{\text{base}}=s_{\text{rot}}r_{\text{rot}}-s_{\text{v}}\,p_{\text{v}}-s_{\te
 - **P3 §5 methodology base 후보** — 본 논문(arXiv:2602.16712)을 in-hand reorientation 보상·아키텍처 참고로 P3 methodology base 에 추가 검토 가능(단, cross-embodiment 가 주제라 우리 단일 손 scope 와 어긋나므로 핀 승격은 비권장). 사람 판단 영역.
 - **P1 §5 comparison-group 메모** — action-space 설계 논쟁(Demystifying Action Space Design)에 "morphology-conditioned 통일 joint space" 라는 축을 추가하는 데이터 포인트로 비공식 기록 권장.
 - 그 외 핀 교체/Decision 이동 제안 없음.
-
-> 💡 base 매핑은 `/implement-design analysis/2602.16712/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

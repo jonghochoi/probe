@@ -265,5 +265,3 @@ $$\mathcal{L}=\lambda_{\text{mse}}\,\mathcal{L}_{\text{mse}}+\lambda_{\text{dino
 - **P2 §5 methodology base(non-pinned) 후보로 TDV 등재 검토.** D9(action/dynamics-aware encoder)의 *라벨 없는 자기지도* 대안으로, DynaFLIP/eVGGT 와 다른 supervision 축을 대표. pin 승격까지는 아니어도 비교군 가치 있음. (핀 교체는 사람 판단 — 제안만.)
 - **P5 §5 methodology base 후보(보류 권고).** JEPA 잠재 예측 계열이지만 action-free 라 §4 anti-topic 에 걸리므로 *pin 부적격*. ThinkJEPA/JEPA-VLA 와 같은 줄의 "방법론 base, action 조건화 시 재검토" 메모로만.
 - context/ 파일은 수정하지 않았습니다 — 위는 제안일 뿐입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.15956/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

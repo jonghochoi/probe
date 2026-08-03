@@ -257,5 +257,3 @@ P1 §5 핀(Pinned) 비교 대상은 Dexora([arXiv:2605.18722](https://arxiv.org/
 - **P1 §5 의 DQ-RISE arXiv id 불일치 정정 (중요)** — `context/P1.md` §5 Methodology base 의 DQ-RISE 항목은 `[arXiv:2605.03363]` 로 등재돼 있으나, 본 분석 대상 "Learning Dexterous Manipulation with Quantized Hand State (DQ-RISE)" 의 실제 id 는 **2509.17450** (v1 2025-09-22, v2 2026-03-16) 입니다. 두 id 가 같은 논문을 가리키는지(개정·재투고), 혹은 서로 다른 후속작인지 사람이 확인해 주십시오. 같은 논문이라면 §5 의 id 를 2509.17450 으로 정정할 것을 제안합니다.
 - **D3 후보 축 보강 (선택)** — D3(Hand output space) 의 deferred 후보에 "양자화 hand state code + continuous relaxation" 을 본 논문 근거([arXiv:2509.17450])와 함께 한 줄 등록할지 검토해 주십시오. 현재 D3 v1 은 연속 joint command 단일안이라, 양자화 대안의 외부 실증을 근거로 남겨 두면 추후 결정에 유용합니다.
 - **D1 불변식 후보 (선택)** — "분리된 Body/Hand head 는 동일 생성 패러다임(flow-matching)을 공유한다" 를 D1 의 불변식 후보로 기록할지 검토해 주십시오. DQ-RISE-C 의 2.50% 붕괴가 그 근거(이종 생성 패러다임 혼용 시 gradient 충돌)입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2509.17450/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -301,5 +301,3 @@ source trajectory 에 네 종류 증강을 적용합니다.
 - **P0 §5 / `analysis/catalogs/datasets.md` 후보** — DexImit 은 "단안 인간 영상 → 양손 dexterous 로봇 데이터" 생성 방법으로, P0 §5 비핀의 DexMimicGen 과 같은 *데이터 생성 방법* 행에 나란히 추가하거나 카탈로그 🔀 mixed 계열의 생성-엔진 항목으로 등재할 후보입니다. (핀 cap 8 은 데이터셋/벤치마크 기준이므로, DexImit 은 핀이 아니라 methodology base 행이 적절.) 단, 코드/데이터 공개가 미확인이라 license 칸은 ❓ 로 두고 추후 확인 권장.
 - **Decision 이동은 불필요** — D24~D27 의 v1 선택을 바꿀 근거는 아니며, egocentric/human-video 우선(D24) 노선을 지지하는 추가 evidence 로만 기록하면 충분합니다.
 - (context/ 파일은 수정하지 않았습니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2602.10105/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

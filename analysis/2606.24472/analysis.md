@@ -226,7 +226,7 @@ RoboCasa24 task-family 분해(Table 7)는 GT 가 Pick&Place 13.1→18.1%, Others
 - **Teacher target 품질** — 저자 명시. $`\pi^{3}`$X teacher 는 occlusion·반사·blur·약한 prior 뷰에서 target 이 부정확하며, gating 은 bias 를 줄이되 제거하지 못합니다. RoboTwin2.0 의 GT 49.0 vs $`\pi^{3}`$X 41.0(baseline 44.0 보다도 낮음)이 이 위험을 실증 — 깨끗한 합성 장면에서 teacher 가 오히려 해가 됩니다.
 - **아키텍처 의존성** — 저자 명시. two-tower(GR00T 1.5)처럼 action model 이 geometry-aware token 을 직접 소비하지 않고 cross-attention 으로만 닿으면 이득이 감쇠합니다. 즉 이 방법의 효과는 token 인터페이스가 action 경로에 직결된 single-stream 계열($`\pi_{0}`$/$`\pi_{0.5}`$)에 한정될 수 있어, 적용 전 backbone 의 token→action 경로 구조를 먼저 따져야 합니다.
 - **action-space 결함은 미해결** — 저자 명시. visual-token 표현만 바꾸므로 action space·demonstration 부족·약한 language–action grounding 에 뿌리를 둔 실패는 손대지 못합니다. 기하 향상은 "공간·물체 민감 task" 에 국한되며 long-horizon 조합(L-10)·고수준 의미 실패에는 상대적으로 작은 이득(+3.9)에 그칩니다.
-- **offline 비용** — 저자 명시. teacher cache 생성과 보조 head 학습이 offline 비용을 추가합니다(배포 시엔 불필요). 추론 부담은 없지만, foundry 적용 시 LeRobot episode 전체에 대한 $`\pi^{3}`$X forward + cache 저장 파이프라인이 선행돼야 합니다.
+- **offline 비용** — 저자 명시. teacher cache 생성과 보조 head 학습이 offline 비용을 추가합니다(배포 시엔 불필요). 추론 부담은 없지만, 우리 스택에 적용할 경우 LeRobot episode 전체에 대한 $`\pi^{3}`$X forward + cache 저장 파이프라인이 선행돼야 합니다.
 - **단일 task RoboTwin 진단** — 추론된 갭. RoboTwin2.0 평가가 handover_block 단일 task 라 bimanual·다카메라(>2 view) 일반화 주장의 표본이 좁습니다.
 
 ---
@@ -282,5 +282,3 @@ RoboCasa24 task-family 분해(Table 7)는 GT 가 Pick&Place 13.1→18.1%, Others
 
 - **P2 §5 핀 후보** — G$`^3`$VLA([arXiv:2606.24472])는 D8 의 "인코더 교체 없는 token-level 기하 주입" 이라는 별도 설계점을 대표하며, eVGGT(교체 노선)와 직접 대비됩니다. 현 핀이 모두 "더 나은 기하 인코더" 쪽이므로, "사전학습 VLA 보존형 어댑터" 축의 대표로 비-핀 methodology base 등재를 사람에게 제안합니다(8핀 cap 고려 시 append 아닌 교체 검토).
 - **D8 v1 보강** — D8 v1 이 "unified 3D-consistent 임베딩으로 flat concat 대체" 단일 노선인데, 본 논문은 "token 인터페이스 보존 + ray/PRoPE bias 추가" 라는 lower-risk 대안이 $`\pi_{0}`$ 계열에서 +3.5 를 낸다는 증거를 줍니다. D8 deferred candidate 로 "어댑터형 기하 주입" 을 명시해 둘 가치가 있습니다. (사람 판단 사항 — context 파일은 수정하지 않았습니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2606.24472/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

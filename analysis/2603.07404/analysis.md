@@ -240,5 +240,3 @@ $$\mathcal{L} = \mathbb{E}[\mathcal{L}_{\text{task}}] + 10^{-2}\,\mathbb{E}[\mat
 - **P4 §7 Competitor / Kindred Monitoring 추가 후보** — LoRA-SP를 "rank-adaptive PEFT" 항목으로 추적 등재 검토. overlap: PEFT로 cross-task interference 완화 / difference: 우리 frozen-backbone+split-heads 대비 동적 adapter capacity / watch trigger: 코드 공개 시 추론 비용 실측·다임바디먼트 일반화 결과. (현재 핀 8개 cap이 차 있어 §7 추적 행으로만 제안.)
 - **D21 Stage 3(LoRA) 메모 보강 후보** — "LoRA로 갈 경우 고정 rank가 아니라 energy-target 기반 동적 할당(LoRA-SP)을 우선 검토"라는 단서를 deferred 후보 설명에 덧붙이는 것을 제안합니다.
 - 위는 모두 사람 결정용 제안이며, 어떤 context/ 파일도 본 분석에서 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2603.07404/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

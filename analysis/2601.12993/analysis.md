@@ -375,5 +375,3 @@ $$\mathcal{L}_{\text{UAC}}=\sum_{i\geq d}\left\|\hat{v}_{i}-v_{i}^{*}\right\|_{2
 - **D6 deferred trigger 후보** — Being-H0.5 의 *MoT shared self-attention* 이 5 embodiment 에서 강건한 결과를 보였으므로 우리 D6 deferred (B) cross-attention 의 *evidence 누적* 으로 한 줄 카운트 가능. trigger 자체는 우리 v1 FiLM 의 *bottleneck 관측* 이 떠야 점화.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2601.12993/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -268,5 +268,3 @@ $$M'(\beta, V) := (\Theta, \hat{T})$$
 - **P1 comparison-group 메모** — keypoint 통합 action space + AR 디코딩을, action-space 비교군의 task-space 극단 사례로 P1 scouting 메모에 남길 만합니다(핀 교체는 불필요).
 - **catalog** — 새 dataset/benchmark/공개 model 을 내놓지 않으므로 `catalogs/` 등재는 제안하지 않습니다.
 - 그 외 핀 교체·Decision 이동 제안: 없음.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.10614/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

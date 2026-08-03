@@ -296,5 +296,3 @@ LIBERO 성공률 (%, §3.3 Table 1) — **LoRA Fine-tuned**:
 - **P4 §5 추적(비-핀) 후보** — DynaFLIP 자체는 vision-encoder 논문이라 P4 핀 cap(8) 에 넣기보다, D20/D22 의 *방법론 base* 로 추적 유지를 제안합니다("frozen VLM + 외부 dynamics-aware 시각 채널 주입" 의 prior-보존 대안 사례).
 - **MASTER §7 Month C(cross-pollination) 기록** — simplex-volume higher-order multimodal alignment 는 "구조적/그래프 표현 for multimodal binding"(P2 인접) 의 이달 cross-pollination 1편으로 적합합니다. 핀은 아니되 P2 방법론 시야 확장용.
 - **신규 Decision 불요** — 기존 D7/D20/D22 의 *deferred candidate* 갱신으로 충분하며, 새 Decision 코드를 만들 근거는 없습니다. 본 분석은 어떤 `context/` 파일도 수정하지 않습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.30350/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -307,5 +307,3 @@ t-SNE에서 미지(unseen) force–tactile 에피소드(pressing/twisting/slidin
 - **카탈로그** — 공개 예고된 2,700-에피소드 데이터셋은 단일 task-군·sub-pretraining-scale이라 P0 anti-topic에 가까워 현재는 등재 보류 권장(공개 후 규모·라이선스 확인 시 재평가).
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.11184/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

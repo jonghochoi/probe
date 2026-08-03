@@ -305,5 +305,3 @@ $$\tilde{q}_{t}=(1-\alpha_{t})\,\tilde{q}_{t-1}+\alpha_{t}\,q_{t}$$
 - **P1 §5 비핀 비교군 추가 후보** — Co-VLA(arXiv:2606.20285)를 "shared–residual 가법 분해 + 배포-시 latent 컨트롤러(LAC)" 사례로 P1 Methodology base(non-pinned) 표에 등재 검토. D1/D4 의 *가법 합성* 비교군 + D7 *full-FT vs freeze* 긴장 사례로 가치가 있습니다(핀 cap 8 은 유지 — 비핀 권장).
 - **D4 후보 확장 제안** — D4(Body↔Hand information sharing) deferred 후보에 "shared-latent additive composition"을 FiLM/gated-cross-attention(LaMP)과 나란히 기록할 것을 제안합니다. (context 파일은 직접 수정하지 않음.)
 - 그 외 핀 교체·Decision 이동은 없음.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.20285/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

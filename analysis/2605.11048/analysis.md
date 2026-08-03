@@ -254,5 +254,3 @@ Ablation (Stamp, Table 5):
 - **현 핀 교체 후보 없음 (P1/P3/P4/P5).** P3 의 antagonist 증거이지만 *핀* 자리는 RL-side (HORA/AnyRotate) 가 차지하는 게 일관성이 있습니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2605.11048/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

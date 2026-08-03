@@ -272,5 +272,3 @@ prior 샘플은 $`{}^{c}\mathbf{R}^{r}_{0}\sim\mathcal{U}(SO(3))`$, $`{}^{c}\mat
 - **`catalogs/datasets.md` 👤 Human 섹션 등재 후보** — internet video 자동 4D HOI 소스로, EgoDex·UniHand와 나란히 둘 가치가 있습니다(라이선스·검증 품질 단서는 ⚠️ 플래그와 함께). 본 분석의 `카탈로그` 메타가 이를 라우팅합니다.
 - **P0 §5 pin 교체는 보류 권장** — 데이터 자체보다 "엔진 + 리타게팅 알고리즘"이 기여라, 현 pin(EgoDex/UniHand-2.0)을 대체하기보다 methodology base(비-pin)나 datasets.md 카탈로그 행으로 추적하는 것이 적절합니다. 최종 판단은 사람 몫.
 - context/ 파일은 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.17385/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -257,5 +257,3 @@ vision-only 변형은 ViT 31%, ViT-CNN 26% 로(Figure 4 본문), Key in Lock·Li
 - **신규 deferred 후보** — "train-only privileged 센서 co-training"을 D11 보조 학습 신호의 deferred 후보로 등록 제안(우리 Deform Map 고주파 채널·외부 force 센서에 적용 가능). 본 제안은 사람 검토용이며 context 파일은 수정하지 않았습니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.06281/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

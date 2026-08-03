@@ -248,5 +248,3 @@ PROBE 스택으로 전이될 때 의심할 점과 가장 싼 sanity check 순서
 - **§8.4 P4 Pinned 후보** — PriorVLA / VLM2VLA 와 함께 또는 둘 중 하나를 대체해 ConSFT 를 핀 후보로 고려. "prior-data-free + 메모리 0" 이라는 차별점이 명확합니다. 단, dexterous contact-precision 검증이 없다는 점은 분명히 약점. 다음 분기 rebalance 때 결정 권고.
 - **D25 falsifier 의 (e) 조건 명세화** — 현재 "+VLM-preservation" 이 추상적인데, ConSFT 손실을 default 인스턴스로 못 박으면 ablation 재현성과 비교 가능성이 올라갑니다.
 - **§10.2 "Bounded RL-in-VLA precedents" 확장 검토** — ConSFT 는 RL 이 아니지만 "RL 의 trust-region 효과를 SFT 로 옮긴 것" 이므로, "RL = capability source 가 아닌 fine-tuning 도구" 라는 antagonist 프레임을 *더 약화* 시키는 증거이기도 합니다. RL 의 핵심 장점을 RL 없이 얻는다면 P3 System0 의 정당화 논거 (slip/grasp 가 reward-engineerable 한 유일 지점) 는 그대로 유지되지만, "다른 곳엔 RL 안 쓴다" 의 정당화는 한층 단단해집니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.08879/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -227,7 +227,7 @@ Each data point represents 2048 trials, and 95% Wilson score intervals are shade
 - **코드** — 공식 repo 링크는 없습니다. 다만 손실·샘플링 전체 구현(JAX)이 Algorithm 1 로 논문에 그대로 수록되어 방법 자체의 재구현 난도는 낮습니다.
 - **모델** — 실환경 실험의 π0.6 base 는 비공개 모델(model card 인용)이며, π\*0.6 실험 셋업도 Physical Intelligence 내부 자산입니다. 시뮬레이션 축은 공개 벤치마크(Kinetix, arXiv:2410.23208)와 소형 MLP-Mixer 정책이라 재현 가능성이 높습니다.
 - **데이터 / 하드웨어** — 실환경 태스크 데이터는 비공개. 추론 하드웨어는 원격 H100 서버, 로봇 제어는 50 Hz 로 명시됩니다.
-- **비교 기준** — 추론 시점 RTC 는 공개 논문(arXiv:2506.07339)의 알고리즘이며, `lerobot` 등 공개 foundry 에 인페인팅 기반 RTC 구현이 존재해 baseline 재현 경로는 열려 있습니다.
+- **비교 기준** — 추론 시점 RTC 는 공개 논문(arXiv:2506.07339)의 알고리즘이며, `lerobot` 등 공개 코드베이스에 인페인팅 기반 RTC 구현이 존재해 baseline 재현 경로는 열려 있습니다.
 
 ---
 
@@ -274,5 +274,3 @@ Each data point represents 2048 trials, and 95% Wilson score intervals are shade
 - **Decision 변경 제안 없음** — D1–D32 의 v1 선택을 바꿀 근거는 없습니다. D5/D7 의 구현 세부에 참조 자료로 흡수되는 수준입니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2512.05964/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

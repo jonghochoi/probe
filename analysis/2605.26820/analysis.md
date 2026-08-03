@@ -245,5 +245,3 @@ P1(아키텍처)·P2(구조적 입력)·P3(System0)의 결정에는 직접 닿�
 - **§8 Cross-pollination Month A 후보로 기록 권장** — 본 논문은 "continual learning / catastrophic forgetting / PEFT (P4 adjacency)" 정의에 정확히 부합하는 이번 달 크로스폴리네이션 1편으로 적합합니다. 단, $`\pi_{0.5}`$ 백본을 직접 다루므로 P4 본류로 분류해도 무방합니다.
 - **P4 §7 경쟁자 모니터링에 추가 검토** — ConSFT와 동일 $`\pi_{0.5}`$ ·동일 forgetting-mitigation 목표를 다른 수단(replay + 구현 디테일)으로 공략하는 kindred work로, 다음 rebalance 시 §7 표에 watch trigger("실환경 continual VLA 벤치마크 결과")와 함께 올리는 안을 제안합니다.
 - **D21 평가 프로토콜 보강 제안** — 순차 누적 학습으로 D21을 확장할 경우 causality 준수(통계 미리 계산 금지)와 normalization 통계 동결을 평가 프로토콜의 명시 항목으로 추가하는 안을 검토합니다. (제안만 — `context/` 파일은 수정하지 않습니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2605.26820/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

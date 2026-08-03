@@ -209,5 +209,3 @@ t-SNE 분석(Figure 8)은 동일 200개 관측을 7개 phase 라벨로 각각 �
 
 - **§8.1 methodology base FiLM 항목의 보조 증거로 비핀(non-pin) 기록 검토** — "토큰 주입은 희석되고 per-layer FiLM 은 박힌다 + t-SNE phase 분리"는 D4 의 single-point vs multi-layer 논쟁(deferred 트리거)에 외부 정량 근거로 곧장 쓸 수 있습니다. 핀이 아니라 D4 노트 또는 catalogs 의 FiLM 참고 자료 수준에서 인용 후보로 둘 만합니다.
 - 본 제안은 기록 후보일 뿐이며 `context/MASTER.md` 는 수정하지 않았습니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2605.29407/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

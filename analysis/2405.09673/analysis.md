@@ -224,5 +224,3 @@ P4 핀 중 **VLM2VLA** ([arXiv:2509.22195], LoRA + NL-action, forgetting mitigat
 - **P4 methodology base 추가 후보** — 본 논문(arXiv:2405.09673)을 P4 의 "methodology base"(continual learning / PEFT) 항목으로 추가 검토를 제안합니다. 현재 §8.4 핀은 모두 VLA/VLM 적용 논문이고, LoRA 의 학습-망각 trade-off 를 정량화한 *기반* PEFT 연구는 부재합니다. 다만 핀 8개 cap 을 넘기지 않도록 핀이 아닌 methodology base 라인(§8.1 의 FiLM/PCGrad 형식)으로 다는 것이 적절해 보입니다.
 - **D19/D21 deferred trigger 보강 후보** — D19 (d) LoRA 와 D21 Stage 3 의 deferred 설명에, LoRA 채택 시 "r=256· $`\alpha=2r`$ ·all-linear·IFT 한정" 기본값을 본 논문 근거로 부기하는 것을 제안합니다(트리거 자체는 변경 없음).
 - **Cross-pollination 기록** — §12 Month A(continual learning / forgetting / PEFT) 슬롯에 부합하는 크로스폴리네이션 후보입니다.
-
-> 💡 base 매핑은 `/implement-design analysis/2405.09673/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

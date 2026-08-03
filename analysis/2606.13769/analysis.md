@@ -329,5 +329,3 @@ UR3 + 2-finger gripper, 3 task(Pick into Sink, Pour Almonds, Unfold Towel; 데�
 - **D31 문구 정련 제안.** 현재 D31 v1 의 "action-conditioned" 와 §4 anti-topic("action-free video generation") 사이에 $`\mu_{0}`$ 같은 *action-free trace 사전학습 + 로봇 전이 입증* 케이스가 회색지대로 남습니다. "action-free 라도 explicit motion(trace/flow) 예측 + downstream 로봇 전이가 있으면 허용" 식으로 D31/anti-topic 경계를 명문화할지 검토 제안.
 - **P0 데이터 엔진 항목 신설 검토.** TraceExtract 를 in-house ego 수집의 자동 3D-trace 라벨러로 평가하는 항목을 P0(D24/D26 인접)에 둘지 — context 파일은 수정하지 않고 제안만 둡니다.
 - **카탈로그.** $`\mu_{0}`$ 는 WAM(world-action model) 계열 카탈로그(`catalogs/models.md` 🌐 WAM) 등재 가치가 있으나 현재 WAM 하위에 적합한 `### ` 계보 subsection 이 없어(Donk 뿐) 라우팅 토큰은 보류합니다 — 사람이 WAM `### Standalone` 을 추가하면 등재 권장.
-
-> 💡 base 매핑은 `/implement-design analysis/2606.13769/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

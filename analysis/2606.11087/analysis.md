@@ -270,5 +270,3 @@ $$\nabla_{a_{t}}Q(s,a_{1})\approx\hat{J}^{\top}\,\nabla_{\hat{a}_{1}}Q(s,\hat{a}
 - 그 외 핀 교체·Decision 이동 트리거 변경 제안은 **없음** (QGF 는 RL-as-core 한정(P3)·heterogeneous decoder 결정(P1 D1–D7)을 바꿀 근거를 제공하지 않습니다).
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.11087/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

@@ -251,5 +251,3 @@ $$\Delta^{\mathrm{ft}}=\mathrm{CA}\!\bigl(\mathrm{LN}(Z^{(\ell)}),\;Z^{\mathrm{f
 - **D5(P1) deferred trigger 메모** — "control-rate separation: shared → async" 를 deferred 후보로 기록 제안. 현 v1(shared rate)은 단순성 우선 선택이나, DAM-VLA 의 +54%p 증거는 contact-rich 본격 진입 시 재방문 트리거가 될 수 있음.
 - **D20(P4) 후보 확장 메모** — prior-preservation 후보에 "zero-init gated cross-attention adapter" 추가 제안(현 action-side split-head adapter 와 동급 후보).
 - 그 외 핀 교체/Decision 이동 제안 없음. (context/ 파일은 수정하지 않았습니다.)
-
-> 💡 base 매핑은 `/implement-design analysis/2606.12105/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

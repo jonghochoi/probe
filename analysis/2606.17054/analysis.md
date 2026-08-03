@@ -247,5 +247,3 @@ per-ablation 판독:
 - 위 모두 사람 검토용 제안이며 `context/` 파일은 수정하지 않았습니다.
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.17054/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.

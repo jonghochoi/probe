@@ -292,5 +292,3 @@ P5 §5 의 raw-pixel / eval-in-imagination 핀은 **Ctrl-World**([arXiv:2510.101
 - **D30 단서 보강** — "raw-pixel 은 eval-in-imagination 현실성 위해 tracked" 단서에 OSCAR 를 raw-pixel 평가자의 실증 데이터 포인트로 각주 추가 제안 (예측 공간 v1 선택 자체는 불변).
 
 ---
-
-> 💡 base 매핑은 `/implement-design analysis/2606.04463/design.md [--foundry <name>]` 로 생성하실 수 있습니다. 기본 foundry 는 `lerobot` 입니다.
