@@ -3,7 +3,7 @@ name: Check decision refs
 # Verify that every D# decision citation in agent outputs resolves to the
 # per-pillar Decision Log (context/P#.md §3) and that explicit `P# / D#` ties
 # agree with the pillar that owns the decision (allocation per CLAUDE.md).
-# A typo'd or renumbered D# in an analysis/scouting/hypotheses doc is a silent
+# A typo'd or renumbered D# in an analysis/scouting doc is a silent
 # provenance break — this gate catches it PR-time.
 #
 # Lint-only (no auto-fix / bot commit): a wrong decision tie needs human
@@ -14,7 +14,6 @@ on:
     paths:
       - 'analysis/**/*.md'
       - 'scouting/**/*.md'
-      - 'hypotheses/**/*.md'
       - 'context/**'
       - 'scripts/check-decision-refs.py'
       - '.github/workflows/check-decision-refs.yml'

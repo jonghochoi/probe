@@ -594,10 +594,6 @@
             <span class="compare-icon">🔬</span>
             <span><code>/analyze</code>가 Decision Log에 묶인 한글 deep-dive를 만든다</span>
           </div>
-          <div class="compare-item">
-            <span class="compare-icon">🧪</span>
-            <span><code>/hypothesize</code>가 누적 DB를 가로질러 반증가능한 가설을 뽑는다</span>
-          </div>
         </div>
       </div>
     </div>
@@ -619,9 +615,9 @@
 
   <!-- ── Pipeline ─────────────────────────────────────────────────── -->
   <section id="pipeline">
-    <h2>파이프라인 — 두 갈래 + 합성 사이드카</h2>
+    <h2>파이프라인 — 두 갈래</h2>
     <p>
-      PROBE는 <strong>하나의 정적 컨텍스트를 공유하는 두 갈래의 산출물</strong>입니다 — outward (<code>scouting/</code>), focused (<code>analysis/</code>) — 여기에 누적된 <code>analysis/</code> DB를 거꾸로 가로질러 읽는 <strong>읽기 전용 합성 사이드카</strong>(<code>hypotheses/</code>, <code>/hypothesize</code>)가 더해집니다. 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌며, 자기 폴더에 씁니다.
+      PROBE는 <strong>하나의 정적 컨텍스트를 공유하는 두 갈래의 산출물</strong>입니다 — outward (<code>scouting/</code>), focused (<code>analysis/</code>). 각 갈래는 서로 다른 질문에 답하고, 서로 다른 주기로 돌며, 자기 폴더에 씁니다.
     </p>
 
     <div class="pipe-grid">
@@ -656,11 +652,6 @@
         </div>
       </div>
     </div>
-
-    <h3>사이드카: hypothesize (read-only 합성)</h3>
-    <p>
-      <code>/analyze</code>가 한 편을 깊이 판다면, <code>/hypothesize &lt;P0..P5 | D# | D#-D#&gt;</code>는 <strong>이미 쌓인</strong> <code>analysis/&lt;id&gt;/</code> deep-dive 들을 한 pillar/decision 범위로 <em>가로질러</em> 읽어, 인간 소유 Decision Log(D1–D32)에 대한 tension 을 채굴하고 순위화·반증가능한 가설 + 합의·불일치 매트릭스를 <code>hypotheses/&lt;slug&gt;/</code>에 남깁니다. <strong>실험은 실행하지 않습니다</strong> — 산출물은 <em>검증된 결론</em>이 아니라 test-ready 실험 명세이며, 모든 가설은 <code>inferred</code>/<code>unverified</code> 라벨로 출하(경험적 검증은 사람 몫). <code>--seed "&lt;아이디어&gt;"</code>로 사용자 가설을 top-down 주입할 수 있습니다. 사전조건: 범위에 묶인 분석 ≥3편.
-    </p>
   </section>
 
   <!-- ── Static vs Dynamic ───────────────────────────────────────── -->
@@ -780,9 +771,9 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
   <!-- ── On-demand modes ─────────────────────────────────────────── -->
   <section id="on-demand">
     <h2>On-demand 모드 — 슬래시 커맨드</h2>
-    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드들은 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파거나(analyze), 이미 쌓인 DB를 가로질러 합성합니다(hypothesize). 스케줄링 없이 로컬/웹 세션에서 호출합니다. 모든 로직은 <code>.claude/prompts/&lt;name&gt;.txt</code>에 있고, <code>/&lt;name&gt;</code> 래퍼는 그 파일을 읽어 실행할 뿐입니다.</p>
+    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드는 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 팝니다(analyze). 스케줄링 없이 로컬/웹 세션에서 호출합니다. 모든 로직은 <code>.claude/prompts/&lt;name&gt;.txt</code>에 있고, <code>/&lt;name&gt;</code> 래퍼는 그 파일을 읽어 실행할 뿐입니다.</p>
 
-    <p class="text-muted">직접 호출하는 커맨드는 두 개입니다.</p>
+    <p class="text-muted">직접 호출하는 커맨드는 하나입니다.</p>
     <div class="card-grid">
       <div class="mode-card">
         <h4>/analyze &lt;id | url | pdf&gt;</h4>
@@ -793,20 +784,11 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <dt>구조</dt>          <dd>(A) 중립 요약 + (B) Decision Log 기반 decision-grade 함의</dd>
         </dl>
       </div>
-      <div class="mode-card">
-        <h4>/hypothesize &lt;P0..P5 | D# | D#-D#&gt;</h4>
-        <p>누적된 <code>analysis/&lt;id&gt;/</code> deep-dive들을 한 pillar/decision 범위로 <em>가로질러</em> 읽어, Decision Log(D1–D32)에 대한 tension을 채굴하고 순위화·반증가능한 가설을 합성합니다. <strong>읽기 전용 — 실험을 실행하지 않습니다.</strong></p>
-        <dl class="mode-meta">
-          <dt>옵션</dt>          <dd><code>--seed "&lt;아이디어&gt;"</code>(top-down 주입) · <code>--compare-only</code> · <code>--top-k N</code></dd>
-          <dt>사전조건</dt>      <dd><code>analysis/README.md</code> 존재 + 범위에 묶인 분석 ≥3편 (미달이면 정직하게 중단)</dd>
-          <dt>출력</dt>          <dd><code>hypotheses/&lt;slug&gt;/hypotheses.md</code> — <code>D#</code>-앵커 가설 + 합의·불일치 매트릭스 (모두 <code>inferred</code>/<code>unverified</code>)</dd>
-        </dl>
-      </div>
     </div>
 
     <div class="callout callout-tip">
       <span class="callout-icon">💡</span>
-      <p>이 모드들은 <strong>스케줄된 루틴이 아닙니다.</strong> 필요할 때 직접 호출하세요. <code>/analyze</code>의 full-text 획득에는 세션 환경에 <code>arxiv.org</code> / <code>ar5iv.labs.arxiv.org</code> / <code>export.arxiv.org</code> 허용이 필요합니다(Stage 3와 동일한 Custom allowlist).</p>
+      <p>이 모드는 <strong>스케줄된 루틴이 아닙니다.</strong> 필요할 때 직접 호출하세요. <code>/analyze</code>의 full-text 획득에는 세션 환경에 <code>arxiv.org</code> / <code>ar5iv.labs.arxiv.org</code> / <code>export.arxiv.org</code> 허용이 필요합니다(Stage 3와 동일한 Custom allowlist).</p>
     </div>
   </section>
 
@@ -922,7 +904,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
           <tr><td>스케줄러</td>    <td>RemoteTrigger (<a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a>) — cloud cron, GitHub PR 출력</td></tr>
           <tr><td>논문 검색</td>   <td>arXiv REST API (<code>export.arxiv.org/api/query</code>, Atom XML) via <code>curl</code></td></tr>
           <tr><td>인용 추적</td>   <td>Semantic Scholar Graph API (<code>api.semanticscholar.org/graph/v1</code>, JSON via <code>jq</code>) — 선택적 <code>SEMANTIC_SCHOLAR_API_KEY</code></td></tr>
-          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.txt</code>(P0–P5 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.txt</code> · <code>hypothesize.txt</code></td></tr>
+          <tr><td>프롬프트</td>    <td><code>.claude/prompts/scouting.txt</code>(P0–P5 공유 템플릿, <code>&lt;PILLAR&gt;</code> 치환) · <code>analysis.txt</code></td></tr>
           <tr><td>출력</td>        <td>GitHub PR — 커밋 이력 <em>이</em> 연구 로그</td></tr>
           <tr><td>컨텍스트</td>    <td><code>context/P{0..5}.md</code>(정적, 사람, pillar별) + <code>scouting/</code>(동적, 에이전트)</td></tr>
         </tbody>
@@ -982,7 +964,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">FOC</span>
         <div>
           <div class="doc-title">analysis/README.md</div>
-          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze</code> · <code>/hypothesize</code></div>
+          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze</code></div>
         </div>
       </a>
       <a class="doc-item" href="../brand.py">

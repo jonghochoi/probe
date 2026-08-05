@@ -18,7 +18,6 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`), each holding exactly one artifact — the Korean deep-dive `analysis.md`, from `/analyze`. The auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Format spec: `docs/style.md` §5 |
-| `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md`. Templates in `hypotheses/templates/`; format spec `docs/style.md` §6 |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/style.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
@@ -26,8 +25,8 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📝 deep-dive badge + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Invoked on demand via the manual `workflow_dispatch` of `.github/workflows/refresh-analysis-index.yml` (the human fires it whenever the index should be refreshed, batching several merges into one refresh commit). `--check` is a write-nothing lint (missing `analysis.md` / degraded meta rows), run PR-time by `.github/workflows/check-analysis-meta.yml`. Per-command prompts never stage this file |
 | `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-5 across every `analysis/<id>/analysis.md`; also wired into CI |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
-| `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` / `hypotheses/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
-| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `analysis/` / `scouting/` / `hypotheses/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6. Local use: `python3 scripts/check-render-tilde.py` |
+| `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
+| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `analysis/` / `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6. Local use: `python3 scripts/check-render-tilde.py` |
 | `scripts/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 scripts/check-commit-style.py -` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
@@ -40,7 +39,7 @@ from it" model no longer holds.)
 
 **Decision-Log entry format.** Every entry in a `P#.md` §3 Decision Log has
 exactly this shape (used 32× across the six pillars; the scouting /
-hypothesize prompts and lint tooling pattern-match on it, so it is
+analysis prompts and lint tooling pattern-match on it, so it is
 load-bearing, not cosmetic):
 
 ```
@@ -79,16 +78,14 @@ Hard rules:
    `switch`, `migrate`, `restructure`, `clarify`, `re-align`, `unify`,
    `standardize`, `allow`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
-   `deps`. Don't invent new types. (The bare `scout:` / `analysis:` /
-   `hypothesize:` prefixes are *generated routine commits*, not human
+   `deps`. Don't invent new types. (The bare `scout:` / `analysis:`
+   prefixes are *generated routine commits*, not human
    commits — do not imitate them when authoring code/doc changes. Their
    canonical formats, one per generating prompt:
-   `scout: P{N} report YYYY-MM-DD`,
+   `scout: P{N} report YYYY-MM-DD` and
    `analysis: add <arxiv-id> deep-dive (<alias>)`
    for a first-time analysis (`update` instead of `add` when re-running
-   `/analyze` on an `<arxiv-id>` that already had a folder), and
-   `hypothesize: add|update <slug> hypotheses` (`add <slug> compare
-   matrix` for `--compare-only`). The trailing
+   `/analyze` on an `<arxiv-id>` that already had a folder). The trailing
    `(<alias>)` is the paper's codename, resolved in priority order: (1) the
    prefix before the first colon in the title's `원문 제목 (영문)` meta row
    (e.g. `LaST-HD`, `Being-H0.7`, `T-Rex`); (2) failing a colon, an acronym
@@ -278,7 +275,7 @@ and the lints:
 - [ ] **Copy `context/_TEMPLATE.md` to `context/P<N>.md`** and fill every
       `<placeholder>`. Keep the §1–§6 section spine and the
       `[STABLE]`/`[LIVING]`/`[AGENT-INPUT]` markers exactly — the pipeline
-      and the hypothesize track pattern-match on them.
+      pattern-matches on them.
 - [ ] **Allocate a fresh, contiguous Decision range** (`D33+` — never reuse
       or renumber an existing `D#`). Record the allocation in three places:
       the new `P<N>.md` §3 header, the `context/P{0..5}.md` row of this
@@ -314,7 +311,7 @@ outside that range is dropped at generation). Each row is a 📝 deep-dive badge
 title, then Links / Pillars / Keywords / Refreshed cells.
 Everything outside the markers stays hand-maintained — the short folder intro above the index block.
 
-- **Where it runs** — on demand only, via a **manual `workflow_dispatch`** of `.github/workflows/refresh-analysis-index.yml` (Actions tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the github MCP). The run regenerates the block and, if it changed, commits it to `main` as a `chore(analysis): refresh index` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze`, `/hypothesize`) do NOT stage this file or invoke the script. The earlier push-on-merge trigger stacked one bot commit onto `main` after *every* analysis merge, cluttering history; firing the job manually batches several merges into a single refresh commit — the trade-off is that the index stays stale until someone fires it.
+- **Where it runs** — on demand only, via a **manual `workflow_dispatch`** of `.github/workflows/refresh-analysis-index.yml` (Actions tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the github MCP). The run regenerates the block and, if it changed, commits it to `main` as a `chore(analysis): refresh index` bot commit (stages `analysis/README.md`). PR branches and the `/analyze` prompt do NOT stage this file or invoke the script. The earlier push-on-merge trigger stacked one bot commit onto `main` after *every* analysis merge, cluttering history; firing the job manually batches several merges into a single refresh commit — the trade-off is that the index stays stale until someone fires it.
 - **Don't hand-edit the script-owned block** — the `ANALYSIS_INDEX` block in `analysis/README.md` (between markers) is overwritten on the next run. The folder intro above the markers is yours. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more

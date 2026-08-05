@@ -32,7 +32,6 @@ import sys
 DEFAULT_GLOBS = (
     "analysis/**/*.md",
     "scouting/**/*.md",
-    "hypotheses/**/*.md",
 )
 
 FENCE_RE = re.compile(r"^\s*(```|~~~)")

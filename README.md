@@ -46,7 +46,6 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 | Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | "I'll read that paper properly later" → never does | `/analyze` → a Korean deep-dive anchored to your Decision Log |
-| "That's the fifth paper claiming the opposite" | `/hypothesize` reads back across the whole corpus and hands you ranked, falsifiable hypotheses |
 
 **Division of labor.** PROBE is a scout — it does not fight. The agent owns citation-graph expansion, anti-topic filtering, scoring, and cross-pollination. The human owns every judgement call: direction, Decision-Log curation, evaluation thresholds, per-pillar context refresh, and discarding. The agent **never** edits any `context/` file — it proposes in a report; the human decides.
 
@@ -54,7 +53,7 @@ PROBE finds those 3–5 for you and refuses to let them die in your downloads fo
 
 ## Pipeline
 
-PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (read deeply) — plus a read-only **synthesis sidecar** (`hypotheses/`, via `/hypothesize`) that reads back across the accumulated `analysis/` DB. Each runs on its own trigger and writes to its own folder.
+PROBE has **two output tracks** sharing one static, human-owned context — outward `scouting/` (find) and focused `analysis/` (read deeply). Each runs on its own trigger and writes to its own folder.
 
 > **Pillars**: the static context is organized into a small set of research pillars, each owning its own Decision Log and Tracked Literature — canonical names and definitions in [`context/MASTER.md`](context/MASTER.md) §5.
 >
@@ -95,10 +94,9 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 
 **Static vs. dynamic, never mixed.** `context/` is static — it changes monthly at most, and the agent only *reads* it. The tracks are dynamic and agent-written: `scouting/` is append-only (one dated file per pillar per run; the next run reads only that pillar's last ~2 weeks), and `analysis/` is an overwrite-snapshot regenerated on demand. Keeping the two apart is what stops the agent re-recommending last month's papers as the context bloats.
 
-The two on-demand entry points (logic in `.claude/prompts/<name>.txt`; run them in a local session, one-shot `claude -p "/analyze 2410.07864"`, or on the web):
+The on-demand entry point (logic in `.claude/prompts/analysis.txt`; run it in a local session, one-shot `claude -p "/analyze 2410.07864"`, or on the web):
 
 - `/analyze <arXiv id | url | pdf url>` → `analysis/<id>/analysis.md` — a Korean deep-dive: neutral paper summary, then the decision-grade half anchored to your `P#`/`D#`
-- `/hypothesize <P0..P5 | D# | D#-D#> [--seed "<idea>"] [--compare-only]` → `hypotheses/<slug>/hypotheses.md` — a read-only synthesis over the accumulated `analysis/` DB; emits ranked, `D#`-anchored, falsifiable hypotheses (all `inferred`/`unverified`, no experiment run)
 
 The agent never edits `context/MASTER.md` or `context/P#.md`; each analysis run overwrites its `analysis/<id>/` snapshot (no append); input is one paper named explicitly on the command — there is no automatic `scouting/` → `analysis/` hand-off. The deep-dive index lives at [`analysis/README.md`](analysis/README.md).
 
@@ -106,7 +104,7 @@ The agent never edits `context/MASTER.md` or `context/P#.md`; each analysis run 
 
 ## Agent Stack
 
-Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup for the scheduled scouting routine — cloud routines, network allowlist, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md). The on-demand commands (`/analyze`, `/hypothesize`) need no routine setup: run them from any Claude Code session; their logic lives in `.claude/prompts/` and their output format in `docs/style.md`.
+Run `.claude/prompts/scouting.txt` by hand for a week or two before automating — the prompt that survives manual iteration is the one you deploy. A single template is shared across all pillars; replace `<PILLAR>` with the target pillar id before each run. Full setup for the scheduled scouting routine — cloud routines, network allowlist, troubleshooting — lives in [`docs/agent-setup.md`](docs/agent-setup.md). The on-demand `/analyze` command needs no routine setup: run it from any Claude Code session; its logic lives in `.claude/prompts/` and its output format in `docs/style.md`.
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git
