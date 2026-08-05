@@ -221,9 +221,8 @@ new doc be in?":
   history; English keeps that surface grep-able and consistent with the
   enforced English commit-message rule.
 - **Exception 2 — Project front door in English.** `README.md`. The
-  GitHub-rendered top page is the public-facing entry, and the
-  hand-tuned Korean onboarding lives one click away at
-  `docs/probe-guide.html`.
+  GitHub-rendered top page is the public-facing entry and the single
+  onboarding surface for a newcomer.
 - **Exception 3 — Auto-generated analysis index in English.**
   `analysis/README.md` — the script-generated deep-dive index (English paper
   titles + keyword/pillar badges) plus a short hand-maintained structural
@@ -317,7 +316,6 @@ Everything outside the markers stays hand-maintained — the short folder intro 
 ## Where to read more
 
 - `README.md` — motivation, pipeline, agent stack + setup, references.
-- `docs/probe-guide.html` — Korean onboarding + operations manual.
 - `docs/style.md` — the single source of truth for agent **output**
   format (this file governs commits and *contributor* docs, not output).
 - `analysis/README.md` — the auto-generated deep-dive index. The scouting
