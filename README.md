@@ -2,8 +2,6 @@
 
 # 🛸 PROBE · Research Scout for Dexterous Manipulation
 
-<img src="docs/logo.png" alt="PROBE Logo" width="600">
-
 **Stop drowning in arXiv. Start changing what you train next week.**
 
 *Citation-graph expansion · Anti-topic filtering · Weekly decision-grade Scouting Reports*
