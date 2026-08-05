@@ -3,7 +3,7 @@
 
 The Decision Log is allocated per pillar (`context/P#.md` §3, entries shaped
 `#### [D<n>] <title> (P<m>)` — see CLAUDE.md "Decision-Log entry format"), and
-analysis / scouting / hypotheses outputs cite decisions constantly (`P1 / D4`,
+analysis / scouting outputs cite decisions constantly (`P1 / D4`,
 `[![D6]](…)`, "feeds P4 D22"). Nothing verified those citations: a typo'd
 `D14` in a P1 doc, or a decision renumbered in `context/`, went undetected.
 This lint closes that gap with two checks:
@@ -23,9 +23,9 @@ citations.
 Usage (repo root):
     python3 scripts/check-decision-refs.py [PATH ...]
 
-No PATH -> scan the default set: `analysis/**/*.md`, `scouting/P*/*.md`, and
-`hypotheses/**/*.md` (templates excluded — they carry `D<a>`-style
-placeholders and illustrative ids).
+No PATH -> scan the default set: `analysis/**/*.md` and `scouting/P*/*.md`
+(templates excluded — they carry `D<a>`-style placeholders and illustrative
+ids).
 
 Exit codes: 0 = clean / 1 = bad citation(s) found / 2 = no Decision Log parsed.
 """
@@ -108,7 +108,6 @@ def _gather_default_docs() -> list[str]:
     patterns = [
         "analysis/**/*.md",
         "scouting/P*/*.md",
-        "hypotheses/**/*.md",
     ]
     docs: list[str] = []
     for pat in patterns:

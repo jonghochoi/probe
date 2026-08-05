@@ -1,5 +1,5 @@
 # PROBE Style Guide
-> **Version:** v1.31 (2026-08-03) · **Scope:** All files under `scouting/`, `analysis/`, and `hypotheses/`
+> **Version:** v1.32 (2026-08-05) · **Scope:** All files under `scouting/` and `analysis/`
 > This document is the single source of truth for formatting rules.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 
@@ -714,8 +714,8 @@ which rewrites only the block between `<!-- ANALYSIS_INDEX:START -->` /
 `<!-- ANALYSIS_INDEX:END -->` — do not hand-edit inside the markers; the
 rest of the file (the short folder intro above the block) is hand-maintained.
 It runs **on demand via a manual `workflow_dispatch`** (Actions tab →
-"Run workflow"); the per-command prompts (`/analyze`, `/hypothesize`)
-do NOT stage `analysis/README.md` or invoke the script. The *why* (manual batching, the workflow) is in `CLAUDE.md`
+"Run workflow"); the `/analyze` prompt does NOT stage
+`analysis/README.md` or invoke the script. The *why* (manual batching, the workflow) is in `CLAUDE.md`
 "Automatically-maintained indexes".
 
 The generated block is one plain-`##` table **per primary Pillar**
@@ -823,63 +823,3 @@ order). They govern the prose *between and around* those locked tokens.
 These are fidelity-neutral (§4-4 / §4-5 bar): improving readability must
 not add, drop, or reorder any fact, number, quotation, citation polarity,
 or `P#`/`D#` / arXiv / formula token.
-
----
-
-## 6. Hypothesis Synthesis Documents (`hypotheses/`)
-
-The `/hypothesize` slash command (prompt: `.claude/prompts/hypothesize.txt`)
-reads the accumulated `analysis/` DB across one pillar / decision cluster
-and emits ranked, falsifiable, `D#`-anchored hypotheses. Read-only
-synthesis — no experiment runs; every hypothesis ships labeled
-`inferred` · `unverified`.
-
-Outputs (all under `hypotheses/<slug>/`; templates in
-`hypotheses/templates/`):
-
-- `hypotheses.md`            — the ranked hypotheses (template:
-                               `hypotheses/templates/hypotheses.md`).
-- `hypotheses.provenance.md` — source accounting sidecar (template:
-                               `hypotheses/templates/hypotheses.provenance.md`).
-- `compare.md`               — `--compare-only` runs emit just this
-                               (template: `hypotheses/templates/compare.md`).
-
-### 6-1. Section order and emoji
-
-Same §2 rule: one emoji at the start of each `##` header, `###` and body
-plain.
-
-`hypotheses.md` — six `##` sections in this order:
-
-| Emoji | Section |
-|-------|---------|
-| 🧭 | 범위 / 요약 |
-| 🔀 | 합의·불일치 매트릭스 |
-| ⚡ | 텐션 |
-| 💡 | 가설 |
-| 🏆 | 순위 |
-| 🚧 | 제안 (Decision Log) |
-
-`hypotheses.provenance.md` — four `##` sections: 📚 코퍼스, 🧶 텐션 →
-가설 계보, 🏷️ 검증 상태, 🕳️ 범위 공백. `compare.md` — 🧭 범위 / 요약 +
-🔀 합의·불일치 매트릭스 only.
-
-### 6-2. Load-bearing conventions
-
-- **매트릭스 shape.** One row per (D#, 분석) pair: D# / 분석 링크 /
-  Push 방향 / 확신도 (강·중·약, derived from ♻️ 재현성 + methodology,
-  never vibes) / 근거 한 줄. `--compare-only` reuses the identical
-  table.
-- **Label vocabulary is closed and verbatim**: `inferred`, `unverified`,
-  `user-seeded`, `exploratory · ungrounded`,
-  and the measurement-ladder labels `implementable` /
-  `proxy-consistent` / `indicative` / `empirically-verified`. A Rung 0–1
-  pass is never reported as "the hypothesis is true".
-- **Every mined hypothesis carries ≥2 grounding citations + a D#
-  anchor** or is dropped; the one exception is a `--seed` hypothesis,
-  kept but labeled `exploratory · ungrounded`.
-- Hypotheses are numbered `H1`, `H2`, … in rank order; §🏆 shows the
-  four 0–3 axes (증거 강도 / 결정 레버리지 / 검증 가능성 / 비용 역수)
-  as per-axis bullets, not a table.
-- 개조식 (§4-4), P#/D# shields.io badges with the §3-1 palette on first
-  mention, honest emptiness ("없음") over padded sections.

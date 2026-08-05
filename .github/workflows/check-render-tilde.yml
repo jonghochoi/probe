@@ -20,7 +20,6 @@ on:
     paths:
       - 'analysis/**/*.md'
       - 'scouting/**/*.md'
-      - 'hypotheses/**/*.md'
       - 'scripts/check-render-tilde.py'
       - '.github/workflows/check-render-tilde.yml'
 
