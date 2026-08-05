@@ -435,7 +435,7 @@ unaffected.
 
 ## 5. Paper Analysis Document (`analysis/`)
 
-The `/analyze-paper` slash command (prompt: `.claude/prompts/analysis.txt`)
+The `/analyze` slash command (prompt: `.claude/prompts/analysis.txt`)
 produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
 
 ### 5-1. File convention
@@ -714,7 +714,7 @@ which rewrites only the block between `<!-- ANALYSIS_INDEX:START -->` /
 `<!-- ANALYSIS_INDEX:END -->` — do not hand-edit inside the markers; the
 rest of the file (the short folder intro above the block) is hand-maintained.
 It runs **on demand via a manual `workflow_dispatch`** (Actions tab →
-"Run workflow"); the per-command prompts (`/analyze-paper`, `/hypothesize`)
+"Run workflow"); the per-command prompts (`/analyze`, `/hypothesize`)
 do NOT stage `analysis/README.md` or invoke the script. The *why* (manual batching, the workflow) is in `CLAUDE.md`
 "Automatically-maintained indexes".
 
