@@ -16,19 +16,6 @@
 
 ---
 
-> ### 📖 New here? Start with the onboarding guide.
->
-> [`docs/probe-guide.html`](docs/probe-guide.html)
-> — download and open in a browser for a full visual walkthrough of PROBE.
->
-> ```bash
-> git clone https://github.com/jonghochoi/probe.git
-> open probe/docs/probe-guide.html         # macOS
-> # xdg-open probe/docs/probe-guide.html   # Linux
-> ```
-
----
-
 ## Why PROBE
 
 Running dexterous-manipulation research is a full-time job — reward curves, tactile pipelines, Sim-to-Real gaps. Meanwhile **50–100 new papers land on `cs.RO` + `cs.LG` every day**, and maybe 3–5 a week actually touch hand-centric dexterous manipulation. That is a 3–5% signal rate in a firehose, and the cost of missing the right paper is re-solving a problem someone already published.
