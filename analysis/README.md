@@ -1,7 +1,7 @@
 # analysis/
 
 On-demand deep-dive corpus — one subfolder per paper (`<arxiv-id>/`), each
-holding a single Korean deep-dive (`analysis.md`) written by `/analyze-paper`
+holding a single Korean deep-dive (`analysis.md`) written by `/analyze`
 (format spec in `docs/style.md` §5).
 
 The table below is an **auto-generated index** — one section per primary

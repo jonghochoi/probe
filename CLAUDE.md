@@ -17,7 +17,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
-| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`), each holding exactly one artifact — the Korean deep-dive `analysis.md`, from `/analyze-paper`. The auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Format spec: `docs/style.md` §5 |
+| `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`), each holding exactly one artifact — the Korean deep-dive `analysis.md`, from `/analyze`. The auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Format spec: `docs/style.md` §5 |
 | `hypotheses/` | agent | Output of the `/hypothesize` synthesis track — one `<slug>/` per run holding `hypotheses.md` (ranked, `D#`-anchored, falsifiable hypotheses + a 합의·불일치 매트릭스) + `hypotheses.provenance.md` (corpus accounting + tension→hypothesis lineage + per-hypothesis verification state). Read-only synthesis over the accumulated `analysis/` DB; ships every hypothesis labeled `inferred`/`unverified` (no experiment is run — the empirical rung is human). `--compare-only` runs emit just `compare.md`. Templates in `hypotheses/templates/`; format spec `docs/style.md` §6 |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
@@ -86,7 +86,7 @@ Hard rules:
    `scout: P{N} report YYYY-MM-DD`,
    `analysis: add <arxiv-id> deep-dive (<alias>)`
    for a first-time analysis (`update` instead of `add` when re-running
-   `/analyze-paper` on an `<arxiv-id>` that already had a folder), and
+   `/analyze` on an `<arxiv-id>` that already had a folder), and
    `hypothesize: add|update <slug> hypotheses` (`add <slug> compare
    matrix` for `--compare-only`). The trailing
    `(<alias>)` is the paper's codename, resolved in priority order: (1) the
@@ -314,7 +314,7 @@ outside that range is dropped at generation). Each row is a 📝 deep-dive badge
 title, then Links / Pillars / Keywords / Refreshed cells.
 Everything outside the markers stays hand-maintained — the short folder intro above the index block.
 
-- **Where it runs** — on demand only, via a **manual `workflow_dispatch`** of `.github/workflows/refresh-analysis-index.yml` (Actions tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the github MCP). The run regenerates the block and, if it changed, commits it to `main` as a `chore(analysis): refresh index` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze-paper`, `/hypothesize`) do NOT stage this file or invoke the script. The earlier push-on-merge trigger stacked one bot commit onto `main` after *every* analysis merge, cluttering history; firing the job manually batches several merges into a single refresh commit — the trade-off is that the index stays stale until someone fires it.
+- **Where it runs** — on demand only, via a **manual `workflow_dispatch`** of `.github/workflows/refresh-analysis-index.yml` (Actions tab → "Run workflow", `gh workflow run refresh-analysis-index.yml`, or the github MCP). The run regenerates the block and, if it changed, commits it to `main` as a `chore(analysis): refresh index` bot commit (stages `analysis/README.md`). PR branches and the per-command prompts (`/analyze`, `/hypothesize`) do NOT stage this file or invoke the script. The earlier push-on-merge trigger stacked one bot commit onto `main` after *every* analysis merge, cluttering history; firing the job manually batches several merges into a single refresh commit — the trade-off is that the index stays stale until someone fires it.
 - **Don't hand-edit the script-owned block** — the `ANALYSIS_INDEX` block in `analysis/README.md` (between markers) is overwritten on the next run. The folder intro above the markers is yours. Running it by hand (`python3 scripts/refresh-analysis-index.py`) is safe and idempotent for inspection — just don't commit the result on a feature branch.
 
 ## Where to read more

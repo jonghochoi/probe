@@ -592,7 +592,7 @@
           </div>
           <div class="compare-item">
             <span class="compare-icon">🔬</span>
-            <span><code>/analyze-paper</code>가 Decision Log에 묶인 한글 deep-dive를 만든다</span>
+            <span><code>/analyze</code>가 Decision Log에 묶인 한글 deep-dive를 만든다</span>
           </div>
           <div class="compare-item">
             <span class="compare-icon">🧪</span>
@@ -645,7 +645,7 @@
         <div class="pipe-sub">On-demand Analysis</div>
         <ul>
           <li>슬래시 커맨드 호출 시</li>
-          <li>· <code>/analyze-paper &lt;id|url|pdf&gt;</code></li>
+          <li>· <code>/analyze &lt;id|url|pdf&gt;</code></li>
           <li>· full-text 우선 (arxiv/html → ar5iv → abstract)</li>
           <li>· 중립 요약 + decision-grade 함의</li>
           <li>· P#/D# 앵커 + 컨텍스트 제안</li>
@@ -659,7 +659,7 @@
 
     <h3>사이드카: hypothesize (read-only 합성)</h3>
     <p>
-      <code>/analyze-paper</code>가 한 편을 깊이 판다면, <code>/hypothesize &lt;P0..P5 | D# | D#-D#&gt;</code>는 <strong>이미 쌓인</strong> <code>analysis/&lt;id&gt;/</code> deep-dive 들을 한 pillar/decision 범위로 <em>가로질러</em> 읽어, 인간 소유 Decision Log(D1–D32)에 대한 tension 을 채굴하고 순위화·반증가능한 가설 + 합의·불일치 매트릭스를 <code>hypotheses/&lt;slug&gt;/</code>에 남깁니다. <strong>실험은 실행하지 않습니다</strong> — 산출물은 <em>검증된 결론</em>이 아니라 test-ready 실험 명세이며, 모든 가설은 <code>inferred</code>/<code>unverified</code> 라벨로 출하(경험적 검증은 사람 몫). <code>--seed "&lt;아이디어&gt;"</code>로 사용자 가설을 top-down 주입할 수 있습니다. 사전조건: 범위에 묶인 분석 ≥3편.
+      <code>/analyze</code>가 한 편을 깊이 판다면, <code>/hypothesize &lt;P0..P5 | D# | D#-D#&gt;</code>는 <strong>이미 쌓인</strong> <code>analysis/&lt;id&gt;/</code> deep-dive 들을 한 pillar/decision 범위로 <em>가로질러</em> 읽어, 인간 소유 Decision Log(D1–D32)에 대한 tension 을 채굴하고 순위화·반증가능한 가설 + 합의·불일치 매트릭스를 <code>hypotheses/&lt;slug&gt;/</code>에 남깁니다. <strong>실험은 실행하지 않습니다</strong> — 산출물은 <em>검증된 결론</em>이 아니라 test-ready 실험 명세이며, 모든 가설은 <code>inferred</code>/<code>unverified</code> 라벨로 출하(경험적 검증은 사람 몫). <code>--seed "&lt;아이디어&gt;"</code>로 사용자 가설을 top-down 주입할 수 있습니다. 사전조건: 범위에 묶인 분석 ≥3편.
     </p>
   </section>
 
@@ -780,12 +780,12 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
   <!-- ── On-demand modes ─────────────────────────────────────────── -->
   <section id="on-demand">
     <h2>On-demand 모드 — 슬래시 커맨드</h2>
-    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드들은 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파거나(analyze-paper), 이미 쌓인 DB를 가로질러 합성합니다(hypothesize). 스케줄링 없이 로컬/웹 세션에서 호출합니다. 모든 로직은 <code>.claude/prompts/&lt;name&gt;.txt</code>에 있고, <code>/&lt;name&gt;</code> 래퍼는 그 파일을 읽어 실행할 뿐입니다.</p>
+    <p>정기 스카우트가 <em>outward</em>로 새 논문을 찾는다면, 이 모드들은 인간이 이미 관심을 가진 <strong>특정 한 편</strong>을 깊이 파거나(analyze), 이미 쌓인 DB를 가로질러 합성합니다(hypothesize). 스케줄링 없이 로컬/웹 세션에서 호출합니다. 모든 로직은 <code>.claude/prompts/&lt;name&gt;.txt</code>에 있고, <code>/&lt;name&gt;</code> 래퍼는 그 파일을 읽어 실행할 뿐입니다.</p>
 
     <p class="text-muted">직접 호출하는 커맨드는 두 개입니다.</p>
     <div class="card-grid">
       <div class="mode-card">
-        <h4>/analyze-paper &lt;id | url | pdf&gt;</h4>
+        <h4>/analyze &lt;id | url | pdf&gt;</h4>
         <p>인간이 이미 관심을 가진 한 편(보통 <code>context/P#.md</code> §5의 pinned/anchor 논문 중 아직 내재화하지 못한 것)을 읽고 한글 deep-dive를 남깁니다.</p>
         <dl class="mode-meta">
           <dt>본문 획득</dt>     <dd><code>arxiv.org/abs</code> → <code>/html</code> → ar5iv → abstract-only, 획득 레벨을 문서 헤더에 기록</dd>
@@ -806,7 +806,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
 
     <div class="callout callout-tip">
       <span class="callout-icon">💡</span>
-      <p>이 모드들은 <strong>스케줄된 루틴이 아닙니다.</strong> 필요할 때 직접 호출하세요. <code>/analyze-paper</code>의 full-text 획득에는 세션 환경에 <code>arxiv.org</code> / <code>ar5iv.labs.arxiv.org</code> / <code>export.arxiv.org</code> 허용이 필요합니다(Stage 3와 동일한 Custom allowlist).</p>
+      <p>이 모드들은 <strong>스케줄된 루틴이 아닙니다.</strong> 필요할 때 직접 호출하세요. <code>/analyze</code>의 full-text 획득에는 세션 환경에 <code>arxiv.org</code> / <code>ar5iv.labs.arxiv.org</code> / <code>export.arxiv.org</code> 허용이 필요합니다(Stage 3와 동일한 Custom allowlist).</p>
     </div>
   </section>
 
@@ -982,7 +982,7 @@ Week 5+:   완전 자동화   Claude Code Routines (클라우드, 노트북 꺼�
         <span class="doc-tag">FOC</span>
         <div>
           <div class="doc-title">analysis/README.md</div>
-          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze-paper</code> · <code>/hypothesize</code></div>
+          <div class="doc-desc">on-demand FOCUSED 트랙 deep-dive 인덱스 — <code>/analyze</code> · <code>/hypothesize</code></div>
         </div>
       </a>
       <a class="doc-item" href="../brand.py">
