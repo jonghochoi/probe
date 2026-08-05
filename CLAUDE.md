@@ -96,7 +96,7 @@ Hard rules:
    gets no alias, and one is never invented.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
    `scout`/`scouting`, `analysis`, `context`,
-   `prompts`, `config`, `style`, `docs`, `brand`, `CLAUDE.md`. Omit the scope
+   `prompts`, `config`, `style`, `docs`, `CLAUDE.md`. Omit the scope
    only for repo-wide changes.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
