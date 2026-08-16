@@ -155,7 +155,14 @@ R1. FOUR ACTS. Section count varies per paper; the acts are always four.
     inflating it. For such a paper act 4 leans on what it adds to our corpus
     rather than on Decision conflict.
 
-R2. SECTION TITLES DESCRIBE *THIS* PAPER. Template titles are banned —
+R2. THE BODY OPENS WITH ONE `#` H1 CARRYING YOUR THESIS — the one sentence
+    you would say if you had only one. It is NOT the paper's title: the
+    header already prints that from front matter `title:`, so repeating it
+    wastes the first line. Write the claim
+    (`# πR² — 지연을 없애는 대신, 지연을 스케줄의 인자로 넣었다`), then the
+    first act heading. Exactly one H1, before act 1.
+
+    SECTION TITLES DESCRIBE *THIS* PAPER. Template titles are banned —
     "왜 이 문제가 생기는가", "우리에게 무슨 의미인가" fit any paper and
     therefore say nothing. Skimming the titles alone must convey the paper's
     argument. Good: "픽셀은 3D를 모른다" · "RGB 는 절대 dropout 하지 않는다" ·
