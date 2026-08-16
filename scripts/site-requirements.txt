@@ -1,0 +1,6 @@
+markdown-it-py==3.0.0
+mdurl==0.1.2
+mdit-py-plugins==0.4.2
+Pygments==2.19.1
+fonttools==4.63.0
+brotli==1.1.0
