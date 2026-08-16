@@ -341,6 +341,30 @@ abbr.dref {
 }
 .qwhy[hidden] { display: none; }
 
+/* ── Readable layer: collapsible detail (R3) ──────────────────────────── */
+details.fold {
+  margin: 1.2rem 0; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface-2);
+}
+details.fold > summary {
+  padding: .6rem .95rem; cursor: pointer; font-size: .86rem; font-weight: 700;
+  color: var(--text-muted); list-style: none;
+}
+details.fold > summary::-webkit-details-marker { display: none; }
+/* The disclosure triangle is drawn rather than inherited so it can rotate
+   with the open state and match the flow connector's chevron. */
+details.fold > summary::before {
+  content: ""; display: inline-block; width: 6px; height: 6px;
+  margin-right: .5rem; vertical-align: .12em;
+  border-right: 2px solid var(--amber-soft); border-bottom: 2px solid var(--amber-soft);
+  transform: rotate(-45deg); transition: transform .15s;
+}
+details.fold[open] > summary::before { transform: rotate(45deg); }
+details.fold > summary:hover { color: var(--orange-deep); }
+.fold-body { padding: 0 .95rem .3rem; }
+.fold-body > :first-child { margin-top: 0; }
+.fold-body .table-wrap { margin-top: 0; }
+
 /* ── Readable layer: equation + symbol table (R7) ─────────────────────── */
 .eqblock { margin: 1.3rem 0; }
 .eqread {

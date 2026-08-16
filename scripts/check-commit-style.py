@@ -14,6 +14,7 @@ Accepted shapes:
   <type>: <description>                 style|deps
   scout: P<N> report YYYY-MM-DD         generated routine commits, formats per
   analysis: add|update <id> …           CLAUDE.md "generated routine commits"
+  readable: add|update <id> rewrite …   (/readable-paper)
 
 Checked for the human shapes: allowed type; description starts lowercase; no
 trailing period; ≤72 chars total; no manual "(#NN)" suffix (GitHub appends the
@@ -38,6 +39,7 @@ _HUMAN = re.compile(rf"^({_TYPES})(\(([^)\s]+)\))?: (.+)$")
 _GENERATED = [
     re.compile(r"^scout: P\d report \d{4}-\d{2}-\d{2}$"),
     re.compile(r"^analysis: (add|update) \S+ deep-dive.*"),
+    re.compile(r"^readable: (add|update) \S+ rewrite.*"),
 ]
 
 # Common non-imperative first words seen in the wild (past tense, gerund,
