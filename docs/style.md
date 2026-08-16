@@ -431,6 +431,33 @@ rendered at all), so nothing can be glued to them:
 The 📄 메타 `링크` row (§5-6) is already an explicit-link format, so it is
 unaffected.
 
+### 4-8. Never close `**` between a closing paren and a particle
+
+CommonMark closes an emphasis run only where the delimiter is *right-flanking*,
+and a `**` sitting between a punctuation mark and a letter is not. In English
+that shape is rare. In Korean it is the most ordinary sentence in the corpus —
+a parenthetical gloss, then a particle:
+
+```
+**느린 채널(비전·언어)과 빠른 채널(고유수용감각)**로 쪼개    ← publishes ** literally
+```
+
+The run never closes, so both markers are printed as asterisks. Nothing errors,
+the source reads correctly, and the sentence still makes sense on the page —
+which is exactly why it survives review. It is the same class of failure as the
+tilde in §4-6: legible in the source, wrong in the render.
+
+| Write | Not |
+|---|---|
+| `**느린 채널**(비전·언어)과 **빠른 채널**(고유수용감각)로` | `**느린 채널(비전·언어)과 빠른 채널(고유수용감각)**로` |
+| `**계단 스케줄**로` (letter before the marker — closes fine) | — |
+
+The rule in one line: **the character immediately before a closing `**` must
+not be punctuation** when a letter follows it. Bold the phrase, not the phrase
+plus its parenthesis. `build-site.py` reports any `**…**` that survives into
+the rendered HTML, so a readable rewrite cannot publish this silently; the
+`analysis/` track has no such build and relies on this rule.
+
 ---
 
 ## 5. Paper Analysis Document (`analysis/`)
@@ -848,7 +875,8 @@ The site takes all of its metadata from here — there is no other source.
 |---|---|
 | `readable_of` | must equal the file name — **mismatch fails the build** |
 | `title` | required. The paper's title, as the card and page heading |
-| `summary` | required. Landing-card preview: 2–3 sentences, plain text, read cold |
+| `tagline` | required. **One line naming what the paper does**, printed under the body H1. The H1 is our thesis — often a metaphor — and on its own it does not tell a reader which paper they opened; the page header prints the paper's own title. This is the sentence between them (`πR² — 무거운 VLA 백본을 그대로 둔 채 25 Hz 폐루프 힘 반응을 얻는 법`) |
+| `summary` | required. 2–3 sentences, read cold. Printed **on the page** as the `한 문단 요약` block between the thesis line and act 1, and flattened for the landing card. Authored as markdown — `**강조**` and `` $`math`$ `` render on the page and are stripped for the card, so bold the three or four phrases that carry the argument (§4-8 applies) |
 | `authors` | one line, as printed |
 | `pillars` | **ours**, not the paper's. First entry decides the card's group; empty → 미분류, which beats a wrong pillar |
 | `tags` | flow list, feeds the filter chips |
@@ -857,9 +885,9 @@ The site takes all of its metadata from here — there is no other source.
 | `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
 | `figures` | cited figure ids, verbatim from the original (`[S1.F1, S4.F4]`) |
 | `terms` | count of inline term anchors |
-| `generator` | `readable-paper/v1` |
+| `generator` | `readable-paper/v2` |
 
-#### Body rules (R1–R13)
+#### Body rules (R1–R14)
 
 Free-form Korean markdown under a fixed four-act spine. A rigid section
 schema would turn a re-telling back into a form to fill in.
@@ -867,10 +895,10 @@ schema would turn a re-telling back into a form to fill in.
 | # | Rule |
 |---|---|
 | R1 | **Four acts**, always: `1 무엇이 문제인가` / `2 무엇을 바꿨나` / `3 정말 되는가` / `4 우리는 무엇을 하나`. Section count varies. Act 2 legitimately thins on dataset / benchmark / survey papers — state that rather than inflate it |
-| R2 | **One `#` H1 opens the body**, carrying the rewrite's thesis in a sentence — not the paper's title, which the page header already prints from `title:`. Then: **section titles describe *this* paper**, template titles banned, one line of English keyword subtitle beneath each, no 원문 절번호 in the title |
+| R2 | **The heading spine is three levels and none of them render as their own tag.** `#` — the rewrite's thesis in one sentence, not the paper's title (the header prints that from `title:`); make it the line worth remembering, a metaphor if the paper has one. `##` — a numbered act (`## 1 무엇이 문제인가`), which renders as a divider band, *not* a heading: it names the question and carries no content. `###` — a section, which renders as the page's `<h2>` and **must carry its English keyword line in the heading itself**, after a `\|`: `### 청크를 던져놓고 눈을 감는다 \| Action Chunking · Open-loop Execution · Reactivity`. Written as the paragraph after the heading instead, it renders as body text, never reaches the TOC, and reads as a stray sentence — **the build warns**. `####` — a sub-point inside a section. Section titles describe *this* paper; template titles banned; no 원문 절번호 in the title |
 | R3 | **Density high** — ~20 lines per section, ~420 per paper. Only derivations, configs, task definitions and appendix detail are collapsed, via a `::: details <summary>` container (a hand-written `<details>` is escaped — `html=False`). The container body stays markdown, so tables work inside it |
 | R4 | **Background = inline anchors only.** `[용어](term:id)` at first occurrence + a ` ```probe-term ` fence. No primer, no glossary. 12–20 anchors |
-| R5 | **Five kinds of context**, deliberately planted: 계보 · 숫자의 지형 · 대조 · 출처·배경 · 코퍼스 지도. Verify a lineage before claiming it |
+| R5 | **Five kinds of context**, deliberately planted: 계보 · 숫자의 지형 · 대조 · 출처·배경 · 코퍼스 지도. Three of them have a component and **must use it** — prose satisfies the rule while showing the reader nothing, which is how a page ends up flat no matter how good the sentences are. 계보 → ` ```probe-lineage ` (dated rail, ≤1 entry marked `current`). 숫자의 지형 → ` ```probe-scale ` (each row's `n` is the *number*, `value` its printed form; bars are linear, `us: true` marks ours). 대조 → ` ```probe-split ` for 2–3 things held apart (`tone`: `cold`/`warm`/`plain`), or ` ```probe-parts ` for one object decomposed into named regions (`tone`: `settled`/`partial`/`open`). 출처·배경 lives in `co-ctx` callouts and term anchors; 코퍼스 지도 in Act 4. **The build warns when a rewrite uses none of the three components.** Verify a lineage before claiming it |
 | R6 | **Paper's own figures first**, hotlinked via ` ```probe-figure ` — never mirrored (§5-5). Korean caption + `(Figure N, 원문 §x.y)`. Inline-SVG figures have no raster: redraw or omit. Where the paper has no counterpart, ` ```probe-flow ` — never ASCII art, never raw HTML |
 | R7 | Inline math is `` $`X`$ ``; a bare `$X$` is not math and renders literally, because there is no plain-`$` rule by design. A display equation goes in a ` ```probe-eq ` fence carrying its reading line and `기호 / 이름 / 설명` table, **first occurrence only**. Raw HTML is escaped (`html=False`), so the fence is the only route |
 | R8 | **Code** highlighted by language; scrolling confined to the block |
@@ -884,7 +912,7 @@ schema would turn a re-telling back into a form to fill in.
 
 `docs/voice/base/` (pinned snapshot — `docs/voice/PROVENANCE.md`). Take the
 불변 DNA 9조 and deep mode's **restoration floor**; do **not** take deep
-mode's outline-only skeleton (R1–R13 own the structure) or its
+mode's outline-only skeleton (R1–R14 own the structure) or its
 ` ``` `-wrapped section bodies (a github.com line-break workaround that would
 publish as literal code blocks here).
 

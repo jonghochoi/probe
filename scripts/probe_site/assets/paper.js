@@ -38,42 +38,36 @@
     if (why) why.hidden = false;
   });
 
-  /* ── TOC + scroll-spy ─────────────────────────────────────────────── */
-  var tocEl = document.querySelector("[data-toc]");
-  var spy = null;
+  /* ── TOC scroll-spy ───────────────────────────────────────────────── */
+  // The contents themselves are server-rendered (pages.py `_toc`), because the
+  // act grouping is structure the renderer knows and the DOM no longer states.
+  // All that is left here is marking which section the reader is in.
+  var tocEl = document.querySelector(".toc");
 
-  function buildToc() {
-    if (!tocEl) return;
-    var heads = [].slice.call(document.querySelectorAll(".article h2.h-sec, .article h3[id]"));
-    tocEl.innerHTML = '<div class="toc-title">목차</div>' + heads.map(function (h) {
-      var lv = h.tagName === "H3" ? " lv3" : "";
-      var txt = h.textContent.replace(/#$/, "").trim();
-      return '<a class="' + lv.trim() + '" href="#' + h.id + '">' + escapeHtml(txt) + "</a>";
-    }).join("");
-
-    if (spy) spy.disconnect();
+  function spyToc() {
+    if (!tocEl || !("IntersectionObserver" in window)) return;
     var links = {};
-    tocEl.querySelectorAll("a").forEach(function (a) {
+    [].forEach.call(tocEl.querySelectorAll("a[href^='#']"), function (a) {
       links[a.getAttribute("href").slice(1)] = a;
     });
-    spy = new IntersectionObserver(function (entries) {
+    var heads = Object.keys(links)
+      .map(function (id) { return document.getElementById(id); })
+      .filter(Boolean);
+    if (!heads.length) return;
+
+    var spy = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
         var a = links[en.target.id];
         if (!a) return;
-        if (en.isIntersecting) {
-          tocEl.querySelectorAll("a.active").forEach(function (x) { x.classList.remove("active"); });
-          a.classList.add("active");
-        }
+        [].forEach.call(tocEl.querySelectorAll("a.active"), function (x) {
+          x.classList.remove("active");
+        });
+        a.classList.add("active");
       });
-    }, { rootMargin: "-70px 0px -75% 0px" });
+    }, { rootMargin: "-12% 0px -75% 0px" });
     heads.forEach(function (h) { spy.observe(h); });
   }
 
-  function escapeHtml(s) {
-    return s.replace(/[&<>"]/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
-    });
-  }
-
-  buildToc();
+  spyToc();
 })();

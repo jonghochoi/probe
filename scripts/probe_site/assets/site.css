@@ -176,21 +176,100 @@ nav {
   border-left: 2px solid transparent; margin-left: -.85rem; padding-left: .85rem;
   transition: color .12s, border-color .12s;
 }
-.toc a:hover { color: var(--text); }
-.toc a.lv3 { padding-left: 1.7rem; font-size: .76rem; }
+.toc a:hover { color: var(--text); background: var(--orange-soft); }
 .toc a.active { color: var(--orange-deep); border-left-color: var(--orange); font-weight: 600; }
+
+/* Grouped under the four acts, counted continuously across them: the number a
+   reader sees beside a section is its position in the whole document, not its
+   position within the act, so "section 6 of 9" stays answerable at a glance. */
+.toc { counter-reset: tocsec; }
+.toc-grp { margin-bottom: .85rem; }
+.toc-grp:last-child { margin-bottom: 0; }
+.toc-gh {
+  display: flex; align-items: baseline; gap: .45rem;
+  padding: .15rem .3rem .3rem; margin-bottom: .28rem;
+  border-bottom: 1px solid var(--border);
+}
+.toc-n {
+  font-size: .72rem; font-weight: 800; color: #fff; background: var(--orange);
+  border-radius: 3px; padding: .02rem .34rem; line-height: 1.5;
+}
+.toc-gl { font-size: .73rem; font-weight: 700; color: var(--text-muted); }
+.toc a { counter-increment: tocsec; border-radius: 6px; }
+.toc-k { display: block; font-size: .81rem; font-weight: 600; }
+.toc-k::before {
+  content: counter(tocsec); color: var(--orange); font-weight: 800;
+  margin-right: .4rem; font-size: .72rem; font-variant-numeric: tabular-nums;
+}
+.toc-e {
+  display: block; font-size: .68rem; color: var(--text-muted);
+  margin-left: 1rem; line-height: 1.35;
+}
 
 .article { min-width: 0; max-width: var(--content-max); }
 
 /* ── Prose ────────────────────────────────────────────────────────────── */
+/* The body H1 is the rewrite's thesis (R2), not the paper's title — the page
+   header above already printed that. It is the largest thing on the page
+   because it is the one sentence a reader should leave with. */
+.article h1.thesis {
+  font-size: clamp(1.6rem, 3.4vw, 2.15rem); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.32; margin: .25rem 0 1.4rem;
+}
+
+/* An act divider, not a heading: it names which of the four questions the
+   sections below answer and has no content of its own. */
+.pdiv {
+  display: flex; align-items: center; gap: .6rem;
+  margin: 3.9rem 0 -1rem; padding-bottom: .5rem;
+}
+.pdiv::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
+.pdiv .pn {
+  font-size: .78rem; font-weight: 800; color: #fff; background: var(--orange);
+  border-radius: 4px; padding: .08rem .45rem;
+}
+.pdiv .pt {
+  font-size: .82rem; font-weight: 800; letter-spacing: .02em;
+  color: var(--orange-deep);
+}
+
 .article h2.h-sec {
-  font-size: 1.28rem; font-weight: 750; letter-spacing: -.01em;
-  margin: 2.75rem 0 .9rem; padding-top: .5rem;
+  font-size: 1.42rem; font-weight: 750; letter-spacing: -.015em;
+  line-height: 1.35; margin: 2.9rem 0 .3rem; padding-top: .5rem;
   scroll-margin-top: calc(var(--nav-h) + 1rem);
 }
 .article h2.h-sec:first-child { margin-top: .25rem; }
-.article h3 { font-size: 1.02rem; font-weight: 700; margin: 1.9rem 0 .6rem; }
+/* The English keyword line belongs to the title, so it sits inside the <h2>
+   and is excluded from its weight and size rather than being a paragraph the
+   section happens to open with. */
+.article h2.h-sec .en {
+  display: block; font-size: .74rem; font-weight: 600; letter-spacing: .01em;
+  color: var(--text-muted); margin-top: .3rem;
+}
+.article h3, .article h4.h-sub {
+  font-size: 1.02rem; font-weight: 700; margin: 1.9rem 0 .6rem;
+}
 .article h4 { font-size: .93rem; font-weight: 700; margin: 1.4rem 0 .5rem; color: var(--text-muted); }
+
+/* Between our thesis and the paper's own title: what this paper does. */
+.article .thesis-sub {
+  font-size: 1rem; color: var(--text-muted); line-height: 1.6;
+  margin: -1rem 0 1.3rem;
+}
+
+/* ── The one-paragraph summary (front matter `summary`) ────────────────── */
+.tldr {
+  border: 1px solid var(--border); border-left: 3px solid var(--orange);
+  border-radius: var(--radius); background: var(--surface);
+  padding: 1rem 1.15rem; margin: 1.4rem 0 2rem;
+}
+.tldr-label {
+  display: block; font-size: .66rem; font-weight: 800; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--orange-deep); margin-bottom: .45rem;
+}
+.tldr p { margin: 0; font-size: .96rem; line-height: 1.75; }
 .article p { margin: .8rem 0; }
 .article ul, .article ol { margin: .8rem 0 .8rem 1.2rem; }
 .article li { margin: .35rem 0; }
@@ -312,7 +391,13 @@ abbr.dref {
 .quiz {
   margin: 1.6rem 0; padding: .95rem 1.1rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-left: 3px solid var(--orange); border-radius: var(--radius);
+}
+/* Labelled, because an unlabelled bold question mid-article reads as the
+   author asking rhetorically rather than as a section boundary to answer at. */
+.q-label {
+  display: block; font-size: .66rem; font-weight: 800; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--orange-deep); margin-bottom: .45rem;
 }
 .quiz .qq { font-weight: 700; font-size: .9rem; margin-bottom: .6rem; }
 .qopts { display: flex; flex-direction: column; gap: .3rem; }
@@ -434,6 +519,104 @@ details.fold > summary:hover { color: var(--orange-deep); }
 .fs-label { display: block; font-weight: 700; }
 .fs-note { display: block; color: var(--text-muted); font-size: .82rem; margin-top: .12rem; }
 
+/* ── Readable layer: planted context (R5) ─────────────────────────────── */
+/* Four components for the three kinds of context that previously had nowhere
+   to go but prose: 계보, 숫자의 지형, and 대조 in its two shapes. They share a
+   tinted ground so the reader learns them as one family — "this is background
+   the paper assumes, not the paper's own argument". */
+.lineage, .scale, .split, .parts { margin: 1.5rem 0; }
+.lineage, .scale, .parts {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-2); padding: .95rem 1.1rem;
+}
+.ln-title, .sc-title, .pt-title {
+  font-size: .68rem; font-weight: 800; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: .7rem;
+}
+
+/* 계보 — a dated rail. */
+.ln-list { list-style: none; margin: 0; display: grid; gap: .8rem; }
+.ln-item {
+  display: grid; grid-template-columns: 4.6rem minmax(0, 1fr);
+  column-gap: .85rem; margin: 0; align-items: baseline;
+}
+.ln-when {
+  font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: var(--orange-deep); font-variant-numeric: tabular-nums;
+}
+.ln-what { font-weight: 700; font-size: .93rem; }
+.ln-note {
+  grid-column: 2; font-size: .85rem; color: var(--text-muted);
+  line-height: 1.6; margin-top: .15rem;
+}
+/* The paper being read, tinted so the reader can see where they are standing
+   in the line they have just been walked down. */
+.ln-item.cur {
+  background: var(--orange-soft); border-radius: 8px;
+  padding: .5rem .6rem; margin: -.15rem -.6rem;
+}
+.ln-item.cur .ln-what { color: var(--orange-deep); }
+
+/* 숫자의 지형 — one number against the others of its kind. */
+.sc-row {
+  display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 4.5rem;
+  align-items: center; gap: .7rem; padding: .28rem 0; font-size: .85rem;
+}
+.sc-bar {
+  display: block; height: .6rem; border-radius: 3px;
+  background: var(--border-soft); overflow: hidden;
+}
+.sc-bar i {
+  display: block; height: 100%; background: var(--text-muted); opacity: .5;
+  /* A hairline so a row that rounds to well under 1% is still visible as a
+     row rather than reading as a missing bar. */
+  min-width: 3px; border-radius: 3px;
+}
+.sc-v {
+  text-align: right; font-size: .8rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sc-row.us .sc-label, .sc-row.us .sc-v { font-weight: 700; color: var(--text); }
+.sc-row.us .sc-bar i { background: var(--orange); opacity: 1; }
+
+/* 대조 — held apart in the layout, not in consecutive paragraphs. */
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+.split:has(.sp-card:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sp-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); padding: .85rem .95rem; font-size: .86rem;
+}
+.sp-head { display: flex; align-items: center; gap: .45rem; font-weight: 800; margin: 0 0 .45rem; }
+.sp-tag {
+  font-size: .66rem; font-weight: 700; padding: .06rem .4rem; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--text-muted); background: var(--surface-2);
+}
+.sp-body p:first-child { margin-top: 0; }
+.sp-body p:last-child { margin-bottom: 0; }
+.sp-note {
+  margin: .5rem 0 0; padding-top: .5rem; border-top: 1px dashed var(--border);
+  font-size: .79rem; font-style: italic; color: var(--text-muted);
+}
+.sp-cold { border-top: 2px solid var(--blue); }
+.sp-warm { border-top: 2px solid var(--orange); }
+.sp-cold .sp-head { color: var(--blue); }
+.sp-warm .sp-head { color: var(--orange-deep); }
+
+/* One object decomposed into named regions. */
+.pt-row {
+  display: grid; grid-template-columns: 10rem minmax(0, 1fr);
+  gap: .85rem; padding: .55rem .6rem; border-radius: 7px; font-size: .86rem;
+}
+.pt-row + .pt-row { margin-top: .3rem; }
+.pt-label { font-family: var(--mono); font-size: .78rem; font-weight: 700; }
+.pt-label code { background: none; padding: 0; color: inherit; font-size: 1em; }
+.pt-range { margin-left: .35rem; font-weight: 400; color: var(--text-muted); }
+.pt-settled { background: color-mix(in srgb, var(--green) 10%, transparent); }
+.pt-partial { background: color-mix(in srgb, var(--amber) 12%, transparent); }
+.pt-open    { background: var(--surface); border: 1px solid var(--border); }
+.pt-settled .pt-label { color: var(--green); }
+.pt-partial .pt-label { color: var(--amber); }
+
 .fence-error {
   margin: 1rem 0; padding: .7rem .9rem; font-size: .85rem;
   color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent);
@@ -542,6 +725,16 @@ details.fold > summary:hover { color: var(--orange-deep); }
   .shell { padding: 1.25rem .9rem 5rem; }
   .paper-head-inner { padding: 1.5rem .9rem 0; }
   .nav-links a { padding: .3rem .45rem; }
+  /* The R5 components are all two- or three-track grids. Below this width the
+     tracks are narrower than the Korean text they hold, so each one stacks
+     rather than wrapping every second word. */
+  .split { grid-template-columns: 1fr; }
+  .split:has(.sp-card:nth-child(3)) { grid-template-columns: 1fr; }
+  .pt-row { grid-template-columns: 1fr; gap: .25rem; }
+  .sc-row { grid-template-columns: 1fr 3.6rem; row-gap: .2rem; }
+  .sc-label { grid-column: 1 / -1; }
+  .ln-item { grid-template-columns: 1fr; }
+  .ln-note { grid-column: 1; }
 }
 
 @media print {

@@ -1,10 +1,18 @@
-"""The three ` ```probe-* ` fences of the readable layer.
+"""The ` ```probe-* ` fences of the readable layer.
 
 `readable.md` is markdown with JSON where structure is needed: an inline term
 definition, a cited figure, a per-section quiz. JSON because the nesting
 (quiz options, answer, explanation) parses strictly with the stdlib and fails
 loudly when malformed — a silently half-parsed quiz would publish with no
 right answer and nobody would notice.
+
+Four of these fences exist because §5-8 R5 asks for five kinds of planted
+context and only two of them had anywhere to go. 계보 became a paragraph of
+prose, 숫자의 지형 became a sentence with numbers in it, and 대조 became two
+adjacent paragraphs the reader had to hold side by side themselves. The rule
+was already right; the page had no component to satisfy it with, so every one
+of them flattened into undifferentiated body text. `probe-lineage`,
+`probe-scale`, `probe-split` and `probe-parts` are those shapes made real.
 
 Rendering these is not optional decoration. Without it the fences fall through
 to the code highlighter and a term definition is published as a block of JSON,
@@ -20,7 +28,10 @@ from __future__ import annotations
 import html
 import json
 
-FENCES = ("probe-term", "probe-figure", "probe-quiz", "probe-eq", "probe-flow")
+FENCES = (
+    "probe-term", "probe-figure", "probe-quiz", "probe-eq", "probe-flow",
+    "probe-lineage", "probe-scale", "probe-split", "probe-parts",
+)
 
 
 class FenceError(ValueError):
@@ -131,6 +142,7 @@ def quiz(data: dict, index: int, inline_md) -> str:
     )
     return (
         f'<section class="quiz" data-quiz>'
+        f'<span class="q-label">확인</span>'
         f'<p class="qq">{inline_md(question)}</p>'
         f'<div class="qopts">{choices}</div>'
         f'<div class="qwhy" hidden>{inline_md(why)}</div>'
@@ -208,6 +220,181 @@ def flow(data: dict, inline_md) -> str:
     title = (data.get("title") or "").strip()
     head = f'<p class="flow-title">{_esc(title)}</p>' if title else ""
     return f'<div class="flow">{head}<ol class="fsteps">{items}</ol></div>'
+
+
+# ── ```probe-lineage ────────────────────────────────────────────────────────
+
+def lineage(data: dict, inline_md) -> str:
+    """R5's 계보 — the papers this one stands on, in date order.
+
+    A dated rail rather than a paragraph naming three prior works: the reader's
+    question is *what moved between them*, and a list answers that in one
+    downward scan. Exactly one entry may be `current` — the paper being read —
+    which is what turns a bibliography into a position.
+    """
+    items = data.get("items")
+    if not isinstance(items, list) or not items:
+        raise FenceError("probe-lineage: `items` must be a non-empty list")
+    current = [i for i in items if isinstance(i, dict) and i.get("current")]
+    if len(current) > 1:
+        raise FenceError(
+            f"probe-lineage: {len(current)} entries marked `current` — "
+            f"exactly one (the paper being read) or none"
+        )
+
+    rows = ""
+    for item in items:
+        if not isinstance(item, dict) or not item.get("what"):
+            raise FenceError(f"probe-lineage: each item needs `what` (got {item!r})")
+        note = str(item.get("note", "")).strip()
+        link = str(item.get("link", "")).strip()
+        if link and not link.startswith(("http://", "https://")):
+            raise FenceError(
+                f"probe-lineage[{item['what'][:32]}…]: `link` must be absolute"
+            )
+        tail = (
+            f' <a href="{_esc(link)}" target="_blank" rel="noopener">'
+            f"{_esc(item.get('link_label') or link)}</a>"
+            if link else ""
+        )
+        rows += (
+            f'<li class="ln-item{" cur" if item.get("current") else ""}">'
+            f'<span class="ln-when">{_esc(item.get("when", ""))}</span>'
+            f'<span class="ln-what">{inline_md(str(item["what"]))}</span>'
+            + (f'<span class="ln-note">{inline_md(note)}{tail}</span>' if note else "")
+            + "</li>"
+        )
+    title = str(data.get("title", "")).strip()
+    head = f'<p class="ln-title">{_esc(title)}</p>' if title else ""
+    return f'<div class="lineage">{head}<ol class="ln-list">{rows}</ol></div>'
+
+
+# ── ```probe-scale ──────────────────────────────────────────────────────────
+
+def scale(data: dict, inline_md) -> str:
+    """R5's 숫자의 지형 — one number placed against the others of its kind.
+
+    Bars are linear in `n` against the largest row, deliberately. A log scale
+    would make every row look comparable, which is the opposite of the point:
+    when the paper's own row is a stub next to the top of the range, the reader
+    should see the stub.
+    """
+    rows_in = data.get("rows")
+    if not isinstance(rows_in, list) or not rows_in:
+        raise FenceError("probe-scale: `rows` must be a non-empty list")
+
+    numbers = []
+    for row in rows_in:
+        if not isinstance(row, dict) or not row.get("label"):
+            raise FenceError(f"probe-scale: each row needs `label` (got {row!r})")
+        if "n" not in row:
+            raise FenceError(
+                f"probe-scale[{row['label']}]: missing `n` — the numeric value the "
+                f"bar is drawn from (`value` is only its printed form)"
+            )
+        try:
+            numbers.append(float(row["n"]))
+        except (TypeError, ValueError):
+            raise FenceError(
+                f"probe-scale[{row['label']}]: `n` must be a number, got {row['n']!r}"
+            ) from None
+    top = max(numbers) or 1.0
+
+    rows = ""
+    for row, n in zip(rows_in, numbers):
+        width = max(n / top * 100.0, 0.0)
+        rows += (
+            f'<div class="sc-row{" us" if row.get("us") else ""}">'
+            f'<span class="sc-label">{inline_md(str(row["label"]))}</span>'
+            f'<span class="sc-bar"><i style="width:{width:.4g}%"></i></span>'
+            f'<span class="sc-v">{_esc(row.get("value", row["n"]))}</span>'
+            "</div>"
+        )
+    title = str(data.get("title", "")).strip()
+    head = f'<p class="sc-title">{_esc(title)}</p>' if title else ""
+    return f'<div class="scale">{head}{rows}</div>'
+
+
+# ── ```probe-split ──────────────────────────────────────────────────────────
+
+_SPLIT_TONES = {"cold", "warm", "plain"}
+
+
+def split(data: dict, inline_md) -> str:
+    """R5's 대조 — two or three things the paper holds apart, held apart here.
+
+    The paper's contrast is structural (this channel is slow, that one is
+    fast); rendering it as consecutive paragraphs asks the reader to rebuild
+    the parallel from prose. Cards put the parallel in the layout.
+    """
+    cards = data.get("cards")
+    if not isinstance(cards, list) or not 2 <= len(cards) <= 3:
+        raise FenceError(
+            f"probe-split: `cards` must be a list of 2–3, got "
+            f"{len(cards) if isinstance(cards, list) else type(cards).__name__}"
+        )
+    out = ""
+    for card in cards:
+        if not isinstance(card, dict) or not card.get("title") or not card.get("body"):
+            raise FenceError(f"probe-split: each card needs `title` and `body` (got {card!r})")
+        tone = str(card.get("tone", "plain")).strip() or "plain"
+        if tone not in _SPLIT_TONES:
+            raise FenceError(
+                f"probe-split[{card['title']}]: `tone` must be one of "
+                f"{', '.join(sorted(_SPLIT_TONES))} — got {tone!r}"
+            )
+        tag = str(card.get("tag", "")).strip()
+        note = str(card.get("note", "")).strip()
+        out += (
+            f'<div class="sp-card sp-{_esc(tone)}">'
+            f'<p class="sp-head">{inline_md(str(card["title"]))}'
+            + (f'<span class="sp-tag">{_esc(tag)}</span>' if tag else "")
+            + "</p>"
+            f'<div class="sp-body">{inline_md(str(card["body"]))}</div>'
+            + (f'<p class="sp-note">{inline_md(note)}</p>' if note else "")
+            + "</div>"
+        )
+    return f'<div class="split">{out}</div>'
+
+
+# ── ```probe-parts ──────────────────────────────────────────────────────────
+
+_PART_TONES = {"settled", "partial", "open"}
+
+
+def parts(data: dict, inline_md) -> str:
+    """One object decomposed into named regions — R5's 대조 in its other shape.
+
+    A schedule split into front/interior/tail, a loss into its terms, a
+    pipeline into its stages. The `label` is set in mono because it is the
+    paper's own name for the region, and `range` carries the math that bounds
+    it. `tone` says whether the region is pinned, in transition, or free.
+    """
+    rows_in = data.get("rows")
+    if not isinstance(rows_in, list) or not rows_in:
+        raise FenceError("probe-parts: `rows` must be a non-empty list")
+    out = ""
+    for row in rows_in:
+        if not isinstance(row, dict) or not row.get("label") or not row.get("body"):
+            raise FenceError(f"probe-parts: each row needs `label` and `body` (got {row!r})")
+        tone = str(row.get("tone", "open")).strip() or "open"
+        if tone not in _PART_TONES:
+            raise FenceError(
+                f"probe-parts[{row['label']}]: `tone` must be one of "
+                f"{', '.join(sorted(_PART_TONES))} — got {tone!r}"
+            )
+        rng = str(row.get("range", "")).strip()
+        out += (
+            f'<div class="pt-row pt-{_esc(tone)}">'
+            f'<div class="pt-label"><code>{_esc(row["label"])}</code>'
+            + (f'<span class="pt-range">{inline_md(rng)}</span>' if rng else "")
+            + "</div>"
+            f'<div class="pt-body">{inline_md(str(row["body"]))}</div>'
+            "</div>"
+        )
+    title = str(data.get("title", "")).strip()
+    head = f'<p class="pt-title">{_esc(title)}</p>' if title else ""
+    return f'<div class="parts">{head}{out}</div>'
 
 
 def error_block(message: str) -> str:

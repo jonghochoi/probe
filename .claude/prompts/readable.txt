@@ -80,7 +80,7 @@ TAKE from the voice:
     Confident assertion of an opinion reads as AI.
 
 DO NOT take from the voice:
-  - **deep 모드의 개조식 전용 골격.** Our structure is R1–R13 below: four
+  - **deep 모드의 개조식 전용 골격.** Our structure is R1–R14 below: four
     acts, prose + callouts, per-section quizzes. Outline-only would fight it.
   - **The ``` -wrapped section bodies.** That is a workaround for github.com
     collapsing line breaks. This file is rendered by `scripts/build-site.py`,
@@ -103,40 +103,48 @@ reports it.
     ---
     readable_of: 2607.26055        # MUST equal the file name
     title: "πR²: Reactive Real-time Flow Policies"
+    tagline: πR² — 무거운 VLA 백본을 그대로 둔 채 25 Hz 폐루프 힘 반응을 얻는 법
     authors: Sungjae Park, Shubham Tulsiani (Carnegie Mellon University)
     pillars: P1, P3                # ours — the first decides the card's group
     tags: [vla-arch, flow-matching, force]
     links: [arxiv|https://arxiv.org/abs/2607.26055, code|https://github.com/…]
     published: 2026-07-28          # the paper's date, from arXiv
     generated: 2026-08-16          # yours — this sorts the landing page
-    generator: readable-paper/v1
+    generator: readable-paper/v2
     arxiv_html: 2607.26055v1       # the exact version you actually read
     arxiv_fetched: 2026-08-16
     figures: [S1.F1, S4.F4, S4.F5] # figure ids you cited, verbatim
     terms: 16                      # count of inline term anchors
-    summary: >                     # landing-card preview, 2–3 sentences
+    summary: >                     # 한 문단 요약 — on the page AND on the card
       …
     ---
 
   - `readable_of` ≠ the file name → the build FAILS. This catches the
     copy-paste that lands a rewrite under the wrong id.
-  - `title` and `summary` are required; the rest degrade.
+  - `title`, `tagline` and `summary` are required; the rest degrade.
+  - `tagline` is ONE line saying what the paper does. Your H1 is a thesis and
+    often a metaphor — on its own it does not tell a reader which paper they
+    opened, and the page header prints the paper's own title. This is the
+    sentence between them.
   - `pillars` are OUR classification, not the paper's — read `context/P#.md`
     and pick honestly. No plausible fit → leave it empty and the card lands in
     미분류, which is better than a pillar it does not belong to.
   - `links` are `kind|url` pairs; kinds are fixed at `arxiv` `code` `weights`
     `data` `site` `demo` (R10). An unknown kind is dropped at build rather
     than guessed at, and only URLs confirmed in the paper go here.
-  - `summary` is what the landing card shows. Two to three sentences, no
-    markdown, no lead-in — it is read cold, beside every other card.
+  - `summary` is printed TWICE: as the `한 문단 요약` block at the top of the
+    page, and flattened onto the landing card. Two to three sentences, no
+    lead-in — it is read cold, beside every other card. Write it as markdown
+    and **bold the three or four phrases that carry the argument**; the page
+    renders them and the card strips them. Mind R14 when you do.
 
-Body: free-form Korean markdown under the R1–R13 rules. No fixed section
+Body: free-form Korean markdown under the R1–R14 rules. No fixed section
 schema beyond the four acts — a rigid spine would turn a re-telling back into
 a form to fill in.
 
 
 ════════════════════════════════════════════════════════════════════════
-R1–R13 — the output rules (full spec: docs/style.md §5-8)
+R1–R14 — the output rules (full spec: docs/style.md §5-8)
 ════════════════════════════════════════════════════════════════════════
 
 R1. FOUR ACTS. Section count varies per paper; the acts are always four.
@@ -146,7 +154,9 @@ R1. FOUR ACTS. Section count varies per paper; the acts are always four.
     3 정말 되는가       — experiments, numbers, ablations
     4 우리는 무엇을 하나 — our layer: `D#` impact, and what we would check
 
-    Mark each act with an `## <n> <이름>` heading; sections are `###`.
+    Mark each act with an `## <n> <이름>` heading; sections are `###`. Keep
+    the act number — the page renders the act as a numbered divider band and
+    the table of contents groups the sections under it.
 
     **Act 2 thins out on some papers and that is fine.** A dataset, a
     benchmark or a survey proposes little method — Act 2 then covers what
@@ -155,22 +165,34 @@ R1. FOUR ACTS. Section count varies per paper; the acts are always four.
     inflating it. For such a paper act 4 leans on what it adds to our corpus
     rather than on Decision conflict.
 
-R2. THE BODY OPENS WITH ONE `#` H1 CARRYING YOUR THESIS — the one sentence
-    you would say if you had only one. It is NOT the paper's title: the
-    header already prints that from front matter `title:`, so repeating it
-    wastes the first line. Write the claim
-    (`# πR² — 지연을 없애는 대신, 지연을 스케줄의 인자로 넣었다`), then the
-    first act heading. Exactly one H1, before act 1.
+R2. THE HEADING SPINE — three levels, none of which render as their own tag.
+
+        # 관절은 눈보다 천 배 빠르다                    ← thesis
+        ## 1 무엇이 문제인가                            ← act → divider band
+        ### 청크를 던져놓고 눈을 감는다 | Action Chunking · Open-loop Execution
+        #### 한 번의 호출에서 벌어지는 일               ← sub-point
+
+    THE `#` H1 CARRIES YOUR THESIS — the one sentence you would say if you
+    had only one. It is NOT the paper's title: the header already prints that
+    from front matter `title:`, so repeating it wastes the first line. Make it
+    the line worth remembering — if the paper has a metaphor in it, this is
+    where it goes (`# 관절은 눈보다 천 배 빠르다`). Exactly one H1, before
+    act 1. The `한 문단 요약` block is printed under it from `summary:`; do
+    not write one into the body.
+
+    THE ENGLISH KEYWORD LINE GOES IN THE `###` HEADING, after a `|`. Not the
+    paragraph below it. The renderer folds it into the section title and the
+    table of contents shows it; written as a paragraph it becomes ordinary
+    body text, never reaches the TOC, and reads as a stray sentence the
+    section happens to open with. THE BUILD WARNS if a section has no `|`.
+
+        ### 지연이 커질수록 격차가 벌어진다 | Effective Delay · Deployment under VLA Latency
 
     SECTION TITLES DESCRIBE *THIS* PAPER. Template titles are banned —
     "왜 이 문제가 생기는가", "우리에게 무슨 의미인가" fit any paper and
     therefore say nothing. Skimming the titles alone must convey the paper's
     argument. Good: "픽셀은 3D를 모른다" · "RGB 는 절대 dropout 하지 않는다" ·
     "990 ms 의 벽" · "FFN 하나를 공유했더니 전부 무너졌다".
-
-    Under each title, one line of ENGLISH KEYWORD SUBTITLE — the section's
-    original terms (`Phased Training · Branch Dropout · appearance anchor`).
-    This is the search and skim surface.
 
     Do NOT put the paper's section number in the title. Origin is traceable
     through figure captions (`원문 §4.3`) and `Eq. n` labels.
@@ -208,16 +230,70 @@ R4. BACKGROUND KNOWLEDGE — INLINE ANCHORS ONLY. Explain a term where it
 R5. CONTEXT — FIVE KINDS, PLANTED DELIBERATELY. These are what the original
     paper cannot give you; they come from reading across our corpus.
 
+    THREE OF THEM HAVE A COMPONENT AND MUST USE IT. Written as prose they
+    satisfy the rule and show the reader nothing — that is exactly how a page
+    ends up reading flat no matter how good the sentences are. THE BUILD WARNS
+    if a rewrite uses none of the three.
+
     1. 계보 — the line of work this sits in, in time order. **If our corpus
-       already analyzed a paper in that line, link it** (πR²: RTC 2506.07339
-       → Train-Time RTC 2512.05964 → this paper).
-    2. 숫자의 지형 — key numbers as comparison bars, next to adjacent values
-       (human, hardware limit, another paper).
-    3. 대조 — a corpus paper that prescribed something different for the
-       same problem.
+       already analyzed a paper in that line, link it.**
+
+        ```probe-lineage
+        {"title": "이 문제를 푸는 계보 — 우리가 이미 읽은 논문들",
+         "items": [
+           {"when": "2025-06", "what": "RTC — Real-Time Execution of …",
+            "note": "…무엇이 장점이고 무엇이 남았나…",
+            "link": "https://arxiv.org/abs/2506.07339",
+            "link_label": "arXiv:2506.07339"},
+           {"when": "2026-07", "what": "πR² — 지금 읽는 논문", "current": true,
+            "note": "…앞의 것들과 무엇이 다른가…"}]}
+        ```
+
+       At most one entry carries `current: true` — the paper being read. That
+       is what turns a bibliography into a position.
+
+    2. 숫자의 지형 — the paper's key number placed against the others of its
+       kind (human, hardware limit, another paper we read).
+
+        ```probe-scale
+        {"title": "25 Hz 는 어디쯤인가 — 제어 주파수의 지형",
+         "rows": [{"label": "[PID 제어기](term:pid)", "n": 500, "value": "500+ Hz"},
+                  {"label": "πR² 폐루프", "n": 25, "value": "25 Hz", "us": true}]}
+        ```
+
+       `n` is the NUMBER (the bar is drawn from it, linearly, against the
+       largest row); `value` is how it prints. `us: true` marks this paper's
+       row. Bars are linear on purpose — when our row is a stub next to the
+       top of the range, the reader should see the stub.
+
+    3. 대조 — two or three things held apart, or one object decomposed.
+
+        ```probe-split
+        {"cards": [{"title": "느린 채널", "tag": "비동기", "tone": "cold",
+                    "body": "…", "note": "거친 공간·과제 안내"},
+                   {"title": "빠른 채널", "tag": "매 tick", "tone": "warm",
+                    "body": "…", "note": "정밀도가 요구하는 미세 운동 조정"}]}
+        ```
+
+        ```probe-parts
+        {"rows": [{"label": "front", "range": "$`[0,d)`$", "tone": "settled",
+                   "body": "진행 중인 행동. …"},
+                  {"label": "interior", "range": "$`[d,H{-}d)`$",
+                   "tone": "partial", "body": "…선형 램프…"},
+                  {"label": "tail", "range": "$`[H{-}d,H)`$", "tone": "open",
+                   "body": "…순수 노이즈…"}]}
+        ```
+
+       `probe-split` for a contrast (2–3 cards, `tone`: `cold`/`warm`/`plain`);
+       `probe-parts` for one thing cut into named regions (`tone`: `settled`
+       = pinned, `partial` = in transition, `open` = free). Also the right
+       component for a corpus paper that prescribed something different for
+       the same problem.
+
     4. 출처·배경 — where the technique came from, and why it arrives now.
+       A `co-ctx` callout and term anchors.
     5. 코퍼스 지도 — where this sits among what we have read, plus the
-       question nobody has answered yet.
+       question nobody has answered yet. Act 4.
 
     Do not invent a lineage. Check what we have actually written — `readable/`
     for a site link, `context/P#.md` §Tracked Literature otherwise — before
@@ -332,6 +408,20 @@ R13. IMPLEMENTATION TRAP — never put `display:block` on an inline tag. Three
      separate bugs came from `.X b{display:block}` catching body emphasis and
      breaking the line at every `<b>`. Titles get their own class
      (`<span class="th">`). If you must, use a `>` child combinator.
+
+R14. AUTHORING TRAP — a `**` run cannot close between a closing paren and a
+     Korean particle. CommonMark requires the closing delimiter to be
+     right-flanking, and `)**로` is not, so BOTH markers publish as literal
+     asterisks. The source reads correctly and the sentence still makes sense
+     on the page, which is why it survives review.
+
+         **느린 채널(비전·언어)과 빠른 채널(고유수용감각)**로   ← breaks
+         **느린 채널**(비전·언어)과 **빠른 채널**(고유수용감각)로   ← correct
+
+     Bold the phrase, not the phrase plus its parenthesis. The build reports
+     any `**…**` that survives into the rendered HTML. Same family as the
+     `~` strikethrough trap (docs/style.md §4-6) — invisible in the source,
+     wrong in the render.
 
 
 ════════════════════════════════════════════════════════════════════════

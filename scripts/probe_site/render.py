@@ -61,6 +61,29 @@ def _render_details(self, tokens, idx, options, env) -> str:
     )
 
 
+# `## 1 무엇이 문제인가` → ("1", "무엇이 문제인가"). The number is the act's rail
+# marker; without one the renderer falls back to counting acts as they appear.
+_ACT_NUM = re.compile(r"^\s*(\d{1,2})[.)]?\s+(.*)$")
+
+
+def _split_act(text: str) -> tuple[str, str]:
+    m = _ACT_NUM.match(text.strip())
+    return (m.group(1), m.group(2).strip()) if m else ("", text.strip())
+
+
+def _split_keyword_line(text: str) -> tuple[str, str]:
+    """`제목 | Keyword · Keyword` → (제목, keywords).
+
+    §5-8 R2 has always asked for a line of English keywords under each section
+    title. Written as the paragraph after the heading it renders as body text
+    and never reaches the table of contents, so it reads as a stray sentence
+    the section opens with. Carried *in* the heading it is part of the section's
+    identity and the TOC can show it.
+    """
+    ko, sep, en = text.partition("|")
+    return (ko.strip(), en.strip()) if sep else (text.strip(), "")
+
+
 def _slugify(text: str, index: int) -> str:
     """Deterministic ASCII id.
 
@@ -76,12 +99,21 @@ class DocRenderer:
     """Renders one document kind, collecting its TOC as it goes."""
 
     def __init__(self, katex, *, decisions: dict | None = None,
-                 base_prefix: str = ""):
+                 base_prefix: str = "", lead_html: str = ""):
         self.katex = katex
         self.decisions = decisions or {}
         self.base_prefix = base_prefix
+        # Emitted immediately after the body H1 closes. The one-paragraph
+        # summary is the first thing a reader wants and the front matter
+        # already carries it, so the page prints it instead of reserving it
+        # for the landing card and opening the article on paragraph one.
+        self.lead_html = lead_html
         self.toc: list[dict] = []
         self._heading_seq = 0
+        self._acts_seen = 0
+        self._pending_close = ""
+        self._context_kinds: set[str] = set()
+        self._sections_without_keywords: list[str] = []
         # Readable-layer bookkeeping. Collected while rendering and checked at
         # the end of `render()`, because the checks are cross-token: a term
         # anchor with no definition, a section with no quiz.
@@ -125,9 +157,21 @@ class DocRenderer:
 
     # ── headings ────────────────────────────────────────────────────────
     def _heading_open(self, tokens, idx, options, env):
+        """Three heading levels, three different components.
+
+        The markdown spine is unchanged — `#` thesis, `##` act, `###` section —
+        but the levels no longer map onto `<h1>/<h2>/<h3>`. An act is a rail
+        marker, not a heading: it names which of the four questions we are
+        answering and carries no content of its own, so it renders as a divider
+        band and the section under it gets the real `<h2>`. Rendering the act as
+        a heading is what made every section read as a subordinate `<h3>` — a
+        section title one notch above body text, which is why the page scanned
+        flat no matter how good the prose was.
+        """
         token = tokens[idx]
         level = int(token.tag[1])
-        raw = tokens[idx + 1].content if idx + 1 < len(tokens) else ""
+        inline = tokens[idx + 1] if idx + 1 < len(tokens) else None
+        raw = inline.content if inline else ""
         emoji, label = split_emoji(raw)
 
         self._heading_seq += 1
@@ -135,33 +179,65 @@ class DocRenderer:
         # closes the quiz tally for the section before it — R11.
         if level <= 3:
             self._close_section()
-            self._current_section = (label or raw).strip() if level == 3 else ""
-        anchor = _slugify(label or raw, self._heading_seq)
+            # The keyword line is part of the heading now, so strip it before
+            # the name is used in a warning — "제목 | Keywords (0 quiz)" reads
+            # like the pipe is part of the problem.
+            self._current_section = (
+                _split_keyword_line(label or raw)[0] if level == 3 else ""
+            )
 
-        # Guard against a duplicate slug colliding across a long document.
-        existing = {e["id"] for e in self.toc}
+        # Every branch below emits its own markup, so the inline token must not
+        # also render: markdown-it would print the heading text a second time
+        # between our open and close.
+        def take_inline() -> None:
+            if inline is not None:
+                inline.children = []
+                inline.content = ""
+
+        if level == 1:
+            self._pending_close = "</h1>\n" + self.lead_html
+            return '<h1 class="thesis">'
+
+        if level == 2:
+            number, act = _split_act(label or raw)
+            self._acts_seen += 1
+            self.toc.append({"kind": "act", "n": number or str(self._acts_seen),
+                             "label": act})
+            take_inline()
+            self._pending_close = ""
+            return (
+                '<div class="pdiv">'
+                f'<span class="pn">{html.escape(number or str(self._acts_seen))}</span>'
+                f'<span class="pt">{self._inline(act)}</span>'
+                "</div>\n"
+            )
+
+        ko, en = _split_keyword_line(label or raw)
+        anchor = _slugify(ko, self._heading_seq)
+        existing = {e.get("id") for e in self.toc}
         if anchor in existing:
             anchor = f"{anchor}-{self._heading_seq}"
 
-        # H1 is the page title, rendered by the shell — not a TOC entry.
-        if 2 <= level <= 3:
-            self.toc.append(
-                {"id": anchor, "level": level,
-                 "emoji": emoji, "label": label or raw}
+        if level == 3:
+            if not en:
+                self._sections_without_keywords.append(ko)
+            self.toc.append({"kind": "sec", "id": anchor, "label": ko, "en": en,
+                             "emoji": emoji})
+            take_inline()
+            self._pending_close = (
+                (f'<span class="en">{html.escape(en)}</span>' if en else "")
+                + f'<a class="anchor" href="#{anchor}" aria-label="이 섹션 링크">#</a>'
+                + "</h2>\n"
             )
-        token.attrSet("id", anchor)
-        cls = f"h-sec h{level}" + (" has-emoji" if emoji else "")
-        token.attrSet("class", cls)
-        self._pending_anchor = anchor
-        return f'<{token.tag} id="{anchor}" class="{cls}">'
+            return f'<h2 class="h-sec sec" id="{anchor}">{self._inline(ko)}'
+
+        # H4+ stays an ordinary heading — a sub-point inside a section.
+        take_inline()
+        self._pending_close = f"</{token.tag}>\n"
+        return f'<{token.tag} class="h-sub" id="{anchor}">{self._inline(ko)}'
 
     def _heading_close(self, tokens, idx, options, env):
-        anchor = getattr(self, "_pending_anchor", "")
-        link = (
-            f'<a class="anchor" href="#{anchor}" aria-label="이 섹션 링크">#</a>'
-            if anchor else ""
-        )
-        return f"{link}</{tokens[idx].tag}>\n"
+        return getattr(self, "_pending_close", f"</{tokens[idx].tag}>\n")
 
     # ── figures ─────────────────────────────────────────────────────────
     def _image(self, tokens, idx, options, env):
@@ -219,10 +295,16 @@ class DocRenderer:
         return highlight(code, lexer, formatter)
 
     # ── readable-layer fences ───────────────────────────────────────────
+    def inline(self, text: str) -> str:
+        """Markdown inline-only — no paragraph wrapper.
+
+        Used for fence payloads (a term body carrying `**bold**` and math) and
+        for the front-matter lines the page prints above the article.
+        """
+        return self.md.renderInline(ghmath.mask_source(text))
+
     def _inline(self, text: str) -> str:
-        """Markdown inside a JSON payload — inline only, so a definition body
-        can carry `**bold**`, `` `code` `` and `$math$` without the paragraph
-        wrapper that `render()` would add."""
+        # Fence payloads arrive from a source that `render()` already masked.
         return self.md.renderInline(text)
 
     def _probe_fence(self, info: str, content: str) -> str:
@@ -244,6 +326,18 @@ class DocRenderer:
                 return probefence.equation(data, self.katex.block, self._inline)
             if info == "probe-flow":
                 return probefence.flow(data, self._inline)
+            if info == "probe-lineage":
+                self._context_kinds.add("계보")
+                return probefence.lineage(data, self._inline)
+            if info == "probe-scale":
+                self._context_kinds.add("숫자의 지형")
+                return probefence.scale(data, self._inline)
+            if info == "probe-split":
+                self._context_kinds.add("대조")
+                return probefence.split(data, self._inline)
+            if info == "probe-parts":
+                self._context_kinds.add("대조")
+                return probefence.parts(data, self._inline)
         except probefence.FenceError as exc:
             # Reported AND rendered: a build warning the reader never sees is
             # how a broken quiz stays broken.
@@ -270,6 +364,21 @@ class DocRenderer:
             self.problems.append(
                 "sections without exactly one quiz: "
                 + ", ".join(self._sections_without_quiz)
+            )
+        if self._sections_without_keywords:
+            self.problems.append(
+                "sections with no `| English keyword` line in the heading (R2): "
+                + ", ".join(self._sections_without_keywords)
+            )
+        # R5 names five kinds of planted context; three of them now have a
+        # component each. Warn when a rewrite uses none of them — that is the
+        # exact failure this build was flat before: the rule was satisfied in
+        # prose and nothing on the page showed it.
+        if not self._context_kinds:
+            self.problems.append(
+                "no planted-context component (R5): expected at least one of "
+                "```probe-lineage (계보) / ```probe-scale (숫자의 지형) / "
+                "```probe-split · ```probe-parts (대조)"
             )
 
     # ── links ───────────────────────────────────────────────────────────
@@ -312,14 +421,39 @@ class DocRenderer:
             return text
         return _decorate_refs(text, self.decisions)
 
+    def _check_stray_emphasis(self, out: str) -> None:
+        """`**bold**` that never became bold.
+
+        CommonMark will not close a `**` run that sits between a punctuation
+        mark and a letter, which in Korean prose is the extremely ordinary
+        shape `**…(괄호)**로` — a closing paren, then a particle. The emphasis
+        silently publishes as literal asterisks, and because the sentence still
+        reads fine in the source nobody catches it. Cheap to detect after the
+        fact, so detect it after the fact.
+        """
+        # Code spans are exempt — a document *about* this trap quotes the
+        # broken form on purpose — and a match may not cross a tag boundary,
+        # or two unrelated `**` inside adjacent code spans pair up.
+        prose = re.sub(r"<code\b[^>]*>.*?</code>", "", out, flags=re.S)
+        for stray in set(re.findall(r"\*\*[^*<>\n]{1,60}\*\*", prose)):
+            self.problems.append(
+                f"unrendered emphasis published as literal asterisks: {stray!r} "
+                f"— a `**` run cannot close between punctuation and a letter; "
+                f"move the closing marker off the parenthesis"
+            )
+
     # ── entry point ─────────────────────────────────────────────────────
     def render(self, source: str) -> str:
         self.toc = []
         self._heading_seq = 0
+        self._acts_seen = 0
+        self._context_kinds = set()
+        self._sections_without_keywords = []
         masked = ghmath.mask_source(source)
         out = self.md.render(masked)
         self._close_section()
         self._check()
+        self._check_stray_emphasis(self.lead_html + out)
         return out
 
 

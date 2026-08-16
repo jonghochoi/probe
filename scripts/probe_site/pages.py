@@ -242,6 +242,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
     there is no tab strip and no second source to reconcile against.
     """
     renderer = DocRenderer(katex, decisions=decisions)
+    renderer.lead_html = _lead(paper, renderer)
     rendered = renderer.render(paper.body)
     if problems is not None:
         problems.extend(
@@ -250,7 +251,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
     body = f"""{_header(paper)}
 <div class="shell">
-  <aside class="toc" data-toc></aside>
+  <aside class="toc">{_toc(renderer.toc)}</aside>
   <main class="article">
     <section class="view">{rendered}</section>
   </main>
@@ -266,6 +267,67 @@ def paper_page(paper: Paper, katex, decisions: dict,
     )
 
 
+
+
+def _lead(paper: Paper, renderer: DocRenderer) -> str:
+    """`tagline` and `summary`, printed between the thesis line and act 1.
+
+    `summary` was already required, already written, and already read cold —
+    but it only ever appeared on the landing card, so a reader arriving on the
+    paper page went straight from the thesis line into paragraph one with no
+    idea what the next 400 lines were going to argue. Both go through the
+    inline renderer rather than `esc()`: the emphasis in a summary is what
+    makes it scannable, and a summary that opens with math is common enough
+    that escaping it would publish backticks.
+    """
+    out = ""
+    if paper.tagline:
+        out += f'<p class="thesis-sub">{renderer.inline(paper.tagline)}</p>\n'
+    if paper.summary_md:
+        out += (
+            '<div class="tldr"><span class="tldr-label">한 문단 요약</span>'
+            f"<p>{renderer.inline(paper.summary_md)}</p></div>\n"
+        )
+    return f"\n{out}" if out else ""
+
+
+def _toc(entries: list[dict]) -> str:
+    """Table of contents, grouped under its acts and rendered server-side.
+
+    Built from the renderer's own heading pass rather than scraped from the DOM
+    by `paper.js`: the act grouping and the English keyword line are structure
+    the renderer knows and the rendered HTML no longer spells out. Server-side
+    also means the contents survive with JavaScript off, which for a document
+    this long is the difference between a page you can navigate and a scroll.
+    """
+    if not entries:
+        return ""
+    groups: list[str] = []
+    open_group = False
+    for entry in entries:
+        if entry.get("kind") == "act":
+            if open_group:
+                groups.append("</div>")
+            groups.append(
+                '<div class="toc-grp"><div class="toc-gh">'
+                f'<span class="toc-n">{c.esc(entry["n"])}</span>'
+                f'<span class="toc-gl">{c.esc(entry["label"])}</span></div>'
+            )
+            open_group = True
+            continue
+        link = (
+            f'<a href="#{c.esc(entry["id"])}">'
+            f'<span class="toc-k">{c.esc(entry["label"])}</span>'
+            + (f'<span class="toc-e">{c.esc(entry["en"])}</span>' if entry.get("en") else "")
+            + "</a>"
+        )
+        if not open_group:
+            groups.append('<div class="toc-grp">')
+            open_group = True
+        groups.append(link)
+    if open_group:
+        groups.append("</div>")
+    return '<div class="toc-title">목차</div>' + "".join(groups)
 
 
 def _header(paper: Paper) -> str:
