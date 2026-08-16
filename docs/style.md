@@ -868,7 +868,7 @@ schema would turn a re-telling back into a form to fill in.
 |---|---|
 | R1 | **Four acts**, always: `1 무엇이 문제인가` / `2 무엇을 바꿨나` / `3 정말 되는가` / `4 우리는 무엇을 하나`. Section count varies. Act 2 legitimately thins on dataset / benchmark / survey papers — state that rather than inflate it |
 | R2 | **Section titles describe *this* paper.** Template titles banned. One line of English keyword subtitle beneath each. No 원문 절번호 in the title |
-| R3 | **Density high** — ~20 lines per section, ~420 per paper. Only derivations, configs, task definitions and appendix detail go in `<details>` |
+| R3 | **Density high** — ~20 lines per section, ~420 per paper. Only derivations, configs, task definitions and appendix detail are collapsed, via a `::: details <summary>` container (a hand-written `<details>` is escaped — `html=False`). The container body stays markdown, so tables work inside it |
 | R4 | **Background = inline anchors only.** `[용어](term:id)` at first occurrence + a ` ```probe-term ` fence. No primer, no glossary. 12–20 anchors |
 | R5 | **Five kinds of context**, deliberately planted: 계보 · 숫자의 지형 · 대조 · 출처·배경 · 코퍼스 지도. Verify a lineage before claiming it |
 | R6 | **Paper's own figures first**, hotlinked via ` ```probe-figure ` — never mirrored (§5-5). Korean caption + `(Figure N, 원문 §x.y)`. Inline-SVG figures have no raster: redraw or omit. Where the paper has no counterpart, ` ```probe-flow ` — never ASCII art, never raw HTML |

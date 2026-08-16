@@ -85,10 +85,12 @@ Hard rules:
    prefixes are *generated routine commits*, not human
    commits — do not imitate them when authoring code/doc changes. Their
    canonical formats, one per generating prompt:
-   `scout: P{N} report YYYY-MM-DD` and
+   `scout: P{N} report YYYY-MM-DD`,
    `analysis: add <arxiv-id> deep-dive (<alias>)`
    for a first-time analysis (`update` instead of `add` when re-running
-   `/analyze` on an `<arxiv-id>` that already had a folder). The trailing
+   `/analyze` on an `<arxiv-id>` that already had a folder), and
+   `readable: add <arxiv-id> rewrite (<alias>)` for `/readable-paper`
+   (`update` when redoing an existing rewrite). The trailing
    `(<alias>)` is the paper's codename, resolved in priority order: (1) the
    prefix before the first colon in the title's `원문 제목 (영문)` meta row
    (e.g. `LaST-HD`, `Being-H0.7`, `T-Rex`); (2) failing a colon, an acronym

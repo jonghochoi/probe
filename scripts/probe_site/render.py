@@ -24,6 +24,7 @@ import html
 import re
 
 from markdown_it import MarkdownIt
+from mdit_py_plugins.container import container_plugin
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name, guess_lexer
@@ -47,6 +48,17 @@ def split_emoji(header_text: str) -> tuple[str, str]:
     """`🔬 방법론` → (`🔬`, `방법론`); plain text → (`""`, text)."""
     m = _LEADING_EMOJI.match(header_text.strip())
     return (m.group(1), m.group(2).strip()) if m else ("", header_text.strip())
+
+
+def _render_details(self, tokens, idx, options, env) -> str:
+    token = tokens[idx]
+    if token.nesting != 1:
+        return "</div></details>\n"
+    summary = token.info.strip()[len("details"):].strip() or "자세히"
+    return (
+        f'<details class="fold"><summary>{html.escape(summary)}</summary>'
+        f'<div class="fold-body">'
+    )
 
 
 def _slugify(text: str, index: int) -> str:
@@ -90,6 +102,12 @@ class DocRenderer:
             {"html": False, "linkify": False, "typographer": False},
         )
         md.enable(["table", "strikethrough"])
+        # `::: details <summary>` → a real <details>. R3 wants configs and
+        # derivations collapsed, and the parser runs with `html=False`, so a
+        # hand-written `<details>` would be escaped into visible angle
+        # brackets. A container keeps the body as markdown (tables included),
+        # which a JSON fence could not.
+        container_plugin(md, "details", render=_render_details)
         ghmath.install(md, self.katex.inline, self.katex.block)
         callouts.install(md)
 

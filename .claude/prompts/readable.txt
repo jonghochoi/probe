@@ -171,7 +171,17 @@ R2. SECTION TITLES DESCRIBE *THIS* PAPER. Template titles are banned —
 R3. DENSITY: HIGH. Roughly 20 lines per section expanded, ~420 lines per
     paper. Quotes, numbers and our callouts stay in the body. Only
     **equation derivations, training configs, task definitions and appendix
-    detail** go inside `<details>`.
+    detail** are collapsed, with a container:
+
+        ::: details 학습 하이퍼파라미터
+        | 항목 | 값 |
+        |---|---|
+        | … | … |
+        :::
+
+    NOT a hand-written `<details>` — the parser runs with `html=False`, so it
+    is escaped and published as visible angle brackets. The container body is
+    ordinary markdown, so tables and math work inside it.
 
 R4. BACKGROUND KNOWLEDGE — INLINE ANCHORS ONLY. Explain a term where it
     FIRST appears. No document-level primer, no per-section primer, no
