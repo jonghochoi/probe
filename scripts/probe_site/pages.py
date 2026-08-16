@@ -266,30 +266,6 @@ def paper_page(paper: Paper, katex, decisions: dict,
     )
 
 
-def _drop_h1(source: str) -> str:
-    lines = source.split("\n")
-    for i, line in enumerate(lines):
-        if line.startswith("# "):
-            return "\n".join(lines[:i] + lines[i + 1:])
-    return source
-
-
-def _drop_meta_section(source: str) -> str:
-    """Remove the leading `## 📄 …` meta table.
-
-    Every row of it is already in the page header as a chip, so rendering it
-    again pushes the actual content a full screen down. The one row the header
-    lacked (`발행일 / 버전`) became a header chip instead.
-    """
-    lines = source.split("\n")
-    start = None
-    for i, line in enumerate(lines):
-        if line.startswith("## ") and "📄" in line:
-            start = i
-            continue
-        if start is not None and line.startswith("## "):
-            return "\n".join(lines[:start] + lines[i:])
-    return "\n".join(lines[:start]) if start is not None else source
 
 
 def _header(paper: Paper) -> str:

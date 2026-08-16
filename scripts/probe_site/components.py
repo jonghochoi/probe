@@ -8,15 +8,6 @@ from __future__ import annotations
 
 import html
 
-LINK_LABEL = {
-    "arxiv": "arXiv",
-    "web": "Website",
-    "github": "GitHub",
-    "hf": "HuggingFace",
-}
-LINK_ORDER = {"arxiv": 0, "web": 1, "github": 2, "hf": 3}
-
-
 # A reticle in the brand orange, inlined as a data URI so the zero-third-party
 # rule holds and no extra request is made for 16 px of decoration.
 FAVICON = (
@@ -52,14 +43,6 @@ def tag_chips(tags: list[str]) -> str:
     return "".join(chip(t, "tag") for t in tags)
 
 
-def link_chips(links: list[tuple[str, str]], arxiv_id: str) -> str:
-    out = []
-    for kind, url in sorted(links, key=lambda kv: LINK_ORDER.get(kv[0], 9)):
-        label = LINK_LABEL.get(kind, "Link")
-        if kind == "arxiv" and arxiv_id and not arxiv_id.startswith("⚠"):
-            label = f"arXiv:{arxiv_id}"
-        out.append(chip(label, "src-link", href=url))
-    return "".join(out)
 
 
 def callout(icon: str, body_html: str, cls: str = "") -> str:
