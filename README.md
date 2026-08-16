@@ -15,6 +15,25 @@
 
 ---
 
+> ### 🔭 Reading the analyses
+>
+> **[jonghochoi.github.io/probe](https://jonghochoi.github.io/probe/)** is the
+> reading site: papers re-written in Korean from their arXiv originals, so a
+> reader gets the mechanism without opening the paper. `/readable-paper <id>`
+> writes one into `readable/`; the site is exactly that set. The `analysis/`
+> deep-dives are a separate track and stay on GitHub. Built by
+> `scripts/build-site.py` and deployed from Actions; the generated HTML is
+> never committed.
+>
+> ```bash
+> pip install -r scripts/site-requirements.txt
+> npm install --no-save --prefix scripts/probe_site \
+>   katex@0.16.22 pretendard @fontsource/jetbrains-mono
+> python3 scripts/build-site.py --serve        # http://127.0.0.1:8000/probe/
+> ```
+
+---
+
 ## Why PROBE
 
 Running dexterous-manipulation research is a full-time job — reward curves, tactile pipelines, Sim-to-Real gaps. Meanwhile **50–100 new papers land on `cs.RO` + `cs.LG` every day**, and maybe 3–5 a week actually touch hand-centric dexterous manipulation. Missing the right one means re-solving a problem someone already published.

@@ -1,0 +1,104 @@
+name: Deploy site
+
+# Build the reading site from readable/ and publish it to GitHub Pages.
+#
+# The generated HTML is NOT committed — 95 pages and ~15 MB of bot commit on
+# every merge would bury the history this repo is read through. The artifact is
+# built fresh on each push to main instead.
+#
+# On a pull request the site is BUILT BUT NOT DEPLOYED, so broken markdown, a
+# `readable_of` mismatch or a new KaTeX failure is caught before it merges.
+#
+# One-time manual setup, which no workflow file can do for you:
+#   Settings → Pages → Source: GitHub Actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'readable/**'
+      - 'scripts/build-site.py'
+      - 'scripts/probe_site/**'
+      - 'scripts/probe_refs.py'
+      - 'scripts/site-requirements.txt'
+      - '.github/workflows/deploy-site.yml'
+  pull_request:
+    paths:
+      - 'readable/**'
+      - 'scripts/build-site.py'
+      - 'scripts/probe_site/**'
+      - 'scripts/probe_refs.py'
+      - 'scripts/site-requirements.txt'
+      - '.github/workflows/deploy-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Never cancel a deploy in flight — a half-uploaded artifact would leave the
+  # published site inconsistent. PR builds are cancellable; they publish nothing.
+  group: deploy-site-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: pip
+          cache-dependency-path: scripts/site-requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install build dependencies
+        run: pip install -r scripts/site-requirements.txt
+
+      - name: Install KaTeX and the webfont sources
+        # ONE npm call. There is no package.json here, so npm rebuilds the tree
+        # from scratch on every invocation and a second `install --no-save`
+        # prunes whatever the first one put there — splitting this line silently
+        # removes KaTeX and breaks the math render.
+        run: |
+          npm install --no-save --prefix scripts/probe_site \
+            katex@0.16.22 pretendard @fontsource/jetbrains-mono
+
+      - name: Cache rendered formulas
+        # Formulas are keyed by sha256(tex|display), so a warm cache turns the
+        # KaTeX stage into a no-op and a cold one costs a single batched node
+        # call, not one per formula.
+        uses: actions/cache@v4
+        with:
+          path: .site-cache
+          key: katex-${{ hashFiles('readable/*.md') }}
+          restore-keys: katex-
+
+      - name: Build
+        run: python3 scripts/build-site.py --out .site --strict
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .site
+
+  deploy:
+    # Pull requests stop after `build` — they are a gate, not a release.
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
