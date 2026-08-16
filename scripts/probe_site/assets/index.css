@@ -1,0 +1,255 @@
+/* Landing + memo hub. Loaded only by those two pages; every paper page skips
+   it. Tokens all come from site.css, so dark mode needs no work here beyond
+   the two places that need a real surface color instead of a tint. */
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.hero {
+  background:
+    radial-gradient(120% 140% at 12% 0%, rgba(217,119,87,.32) 0%, transparent 58%),
+    linear-gradient(160deg, #241a15 0%, #1a1310 55%, #150f0c 100%);
+  color: #f6ece5;
+  border-bottom: 1px solid var(--border);
+}
+.hero-inner { max-width: 1240px; margin: 0 auto; padding: 3.6rem 1.25rem 2.8rem; }
+.hero.slim .hero-inner { padding: 2.4rem 1.25rem 2rem; }
+.hero-eyebrow {
+  font-size: .72rem; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--amber-soft); margin-bottom: .7rem;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.4vw, 2.7rem); font-weight: 800;
+  letter-spacing: -.025em; line-height: 1.2; margin-bottom: .7rem;
+}
+.hero-sub {
+  font-size: .95rem; line-height: 1.75; color: #cbb8ac; max-width: 62ch;
+}
+.hero-sub strong { color: #f6ece5; font-weight: 700; }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 2.2rem; margin-top: 1.9rem; }
+.hero-stats dt {
+  font-size: .72rem; font-weight: 600; letter-spacing: .06em;
+  color: #9b8579; margin-bottom: .15rem;
+}
+.hero-stats dd { font-size: 1.55rem; font-weight: 800; letter-spacing: -.02em; }
+
+/* ── Filter bar ───────────────────────────────────────────────────────── */
+/* With JS off the controls would be inert decoration, so they remove
+   themselves and the full grid below stays perfectly readable. */
+.filters {
+  display: none;
+  position: sticky; top: var(--nav-h); z-index: 90;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+html.js .filters { display: block; }
+.filters-inner {
+  max-width: 1240px; margin: 0 auto; padding: .8rem 1.25rem .55rem;
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.filter-row { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.filter-row.facets { gap: .3rem; }
+.filter-spacer { flex: 1; }
+
+.search {
+  display: flex; align-items: center; gap: .45rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 999px; padding: .32rem .8rem;
+  flex: 1 1 260px; max-width: 420px;
+  transition: border-color .15s;
+}
+.search:focus-within { border-color: var(--amber-soft); }
+.search span { opacity: .5; font-size: .82rem; }
+.search input {
+  font: inherit; font-size: .86rem; color: var(--text);
+  background: none; border: none; outline: none; width: 100%;
+}
+.search input::placeholder { color: var(--text-muted); opacity: .8; }
+
+.facet-chip {
+  font: inherit; font-size: .74rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: .32rem;
+  padding: .22rem .55rem; border-radius: 999px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); transition: all .14s; white-space: nowrap;
+}
+.facet-chip:hover { border-color: var(--amber-soft); color: var(--text); }
+.facet-chip .n {
+  font-size: .66rem; font-weight: 700; opacity: .55;
+  font-variant-numeric: tabular-nums;
+}
+.facet-chip[aria-pressed="true"] {
+  background: var(--orange); border-color: var(--orange); color: #fff;
+}
+.facet-chip[aria-pressed="true"] .n { opacity: .8; }
+.facet-chip.pillar[aria-pressed="false"] { border-left: 4px solid var(--pna); }
+.facet-chip.pillar[data-p="P0"][aria-pressed="false"] { border-left-color: var(--p0); }
+.facet-chip.pillar[data-p="P1"][aria-pressed="false"] { border-left-color: var(--p1); }
+.facet-chip.pillar[data-p="P2"][aria-pressed="false"] { border-left-color: var(--p2); }
+.facet-chip.pillar[data-p="P3"][aria-pressed="false"] { border-left-color: var(--p3); }
+.facet-chip.pillar[data-p="P4"][aria-pressed="false"] { border-left-color: var(--p4); }
+.facet-chip.pillar[data-p="P5"][aria-pressed="false"] { border-left-color: var(--p5); }
+
+.sort { display: flex; gap: .1rem; background: var(--surface-2);
+        border: 1px solid var(--border); border-radius: 999px; padding: .12rem; }
+.sort button {
+  font: inherit; font-size: .74rem; font-weight: 600;
+  padding: .22rem .65rem; border-radius: 999px; cursor: pointer;
+  background: none; border: none; color: var(--text-muted); transition: all .14s;
+}
+.sort button:hover { color: var(--text); }
+.sort button[aria-pressed="true"] {
+  background: var(--surface); color: var(--orange-deep);
+  box-shadow: 0 1px 3px rgba(60,30,15,.12);
+}
+
+.filter-row.status {
+  font-size: .74rem; color: var(--text-muted); gap: .6rem;
+  font-variant-numeric: tabular-nums;
+}
+.linkish {
+  font: inherit; font-size: inherit; background: none; border: none;
+  color: var(--orange-deep); cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* ── Corpus grid ──────────────────────────────────────────────────────── */
+.corpus { max-width: 1240px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+.pgroup { margin-bottom: 2.6rem; }
+.pgroup[hidden] { display: none; }
+.pgroup-head {
+  display: flex; align-items: baseline; gap: .6rem;
+  margin-bottom: .95rem; padding-bottom: .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.pgroup-head h2 {
+  font-size: 1.02rem; font-weight: 750; letter-spacing: -.01em;
+}
+.pgroup-count {
+  margin-left: auto; font-size: .74rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.grid {
+  display: grid; gap: .85rem;
+  grid-template-columns: repeat(auto-fill, minmax(305px, 1fr));
+}
+.grid.flat[hidden] { display: none; }
+
+.card {
+  display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.card[hidden] { display: none; }
+.card:hover {
+  border-color: var(--amber-soft); box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.card-body {
+  display: block; padding: .9rem 1rem .55rem;
+  text-decoration: none; color: inherit; flex: 1;
+}
+.card-top {
+  display: flex; align-items: center; gap: .3rem;
+  margin-bottom: .55rem; min-height: 22px;
+}
+.card-id {
+  font-size: .7rem; font-weight: 600; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.card-badges { margin-left: auto; display: flex; gap: .2rem; font-size: .82rem; }
+/* ↗ = this card leaves the site for the analysis on github.com. Quiet: it is
+   the majority state, not an exception worth flagging on every card. */
+.card-badges .badge.ext { color: var(--text-muted); opacity: .5; font-size: .8rem; }
+.card:hover .badge.ext { opacity: .9; color: var(--orange-deep); }
+/* 🚫 marks a paper with no foundry-portable method. It is a classification,
+   not a fault, so the emoji's stock red is drained out of it — otherwise a
+   whole dataset-heavy pillar reads as a wall of errors. */
+.card-badges .badge.na { filter: grayscale(1); opacity: .32; font-size: .74rem; }
+.card-title {
+  font-size: .93rem; font-weight: 750; line-height: 1.45;
+  letter-spacing: -.008em; margin-bottom: .4rem;
+  /* Titles run to 120 characters; three lines keeps the grid on a rhythm
+     without truncating so hard that the paper becomes unidentifiable. */
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card:hover .card-title { color: var(--orange-deep); }
+.card-preview {
+  font-size: .81rem; line-height: 1.62; color: var(--text-muted);
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-foot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
+  padding: .5rem 1rem .75rem; font-size: .7rem; color: var(--text-muted);
+}
+.card-foot .chip.tag {
+  font-size: .68rem; padding: .1rem .4rem; cursor: pointer;
+  font-family: inherit; transition: all .14s;
+}
+.card-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange-deep); }
+.card-foot time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.corpus-empty {
+  text-align: center; color: var(--text-muted); font-size: .88rem;
+  padding: 3.5rem 1rem;
+}
+
+/* ── Memo hub ─────────────────────────────────────────────────────────── */
+.hub { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+.hub-actions {
+  display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+  margin-bottom: 1.4rem;
+}
+.hub-actions button, .filebtn {
+  font: inherit; font-size: .78rem; font-weight: 600;
+  padding: .35rem .75rem; border-radius: 8px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); transition: all .15s;
+}
+.hub-actions button:hover, .filebtn:hover {
+  border-color: var(--amber-soft); color: var(--orange-deep);
+}
+.hub-actions .primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+.hub-actions .primary:hover { background: var(--orange-deep); color: #fff; }
+.hub-status { font-size: .74rem; color: var(--text-muted); }
+
+.memo-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .95rem 1.1rem; margin-bottom: .7rem;
+}
+.memo-card-head {
+  display: flex; align-items: baseline; gap: .5rem; margin-bottom: .5rem;
+}
+.memo-card-head a {
+  font-size: .9rem; font-weight: 700; text-decoration: none; color: var(--text);
+}
+.memo-card-head a:hover { color: var(--orange-deep); }
+.memo-card-head time {
+  margin-left: auto; font-size: .72rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.memo-card pre {
+  font-family: inherit; font-size: .84rem; line-height: 1.65;
+  white-space: pre-wrap; word-break: break-word; color: var(--text-muted);
+}
+.memo-card .published {
+  display: inline-block; margin-top: .5rem; font-size: .72rem;
+  color: var(--green); font-weight: 600;
+}
+
+.notfound { text-align: center; padding: 6rem 1.25rem; }
+.notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange-deep); }
+.notfound p { color: var(--text-muted); margin-top: .6rem; }
+
+@media (max-width: 640px) {
+  .hero-inner { padding: 2.4rem .9rem 2rem; }
+  .hero-stats { gap: 1.4rem; }
+  .filters-inner { padding: .65rem .9rem .45rem; }
+  .corpus { padding: 1.5rem .9rem 4rem; }
+  .grid { grid-template-columns: 1fr; }
+  /* The tag rail is the least load-bearing control on a narrow screen and the
+     one that wraps into four lines; search plus pillar chips stay. */
+  .filter-row.facets[data-facet-group="tag"] { display: none; }
+}
