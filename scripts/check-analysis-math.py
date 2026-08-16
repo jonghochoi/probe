@@ -8,7 +8,8 @@ form `` `$X$` ``, the `\\(…\\)` / `\\[…\\]` delimiters, KaTeX-unsupported
 macros (`\\bm`, `\\mathds`), and `$` glued to Hangul/CJK/bold all break
 rendering on github.com and leak the source.
 
-Scope: `analysis/<id>/analysis.md`. Templates and README.md are out of scope.
+Scope: `analysis/<id>/analysis.md` and `readable/<id>.md` — both carry the
+same GitHub-KaTeX dialect. Templates and README.md are out of scope.
 
 Auto-fixable (applied with --fix):
   1. `` `$X$` ``            -> `` $`X`$ ``        (forbidden outside-dollar form)
@@ -64,6 +65,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
+READABLE_DIR = REPO_ROOT / "readable"
 
 # §5-5 rule 2 — inline-math delimiter neighbours that GitHub's KaTeX parser
 # accepts. Opener `$` may follow these; closer `$` may precede these.
@@ -120,7 +122,7 @@ class Issue:
 
 
 def in_scope_files(paths: list[Path]) -> list[Path]:
-    """Resolve the scan set: every `analysis/<id>/analysis.md`."""
+    """Resolve the scan set: `analysis/<id>/analysis.md` + `readable/*.md`."""
     out: list[Path] = []
     if paths:
         for p in paths:
@@ -130,7 +132,7 @@ def in_scope_files(paths: list[Path]) -> list[Path]:
             elif p.is_dir():
                 out.extend(_scope_under(p))
         return sorted(set(out))
-    return _scope_under(ANALYSIS_DIR)
+    return _scope_under(ANALYSIS_DIR) + _scope_under(READABLE_DIR)
 
 
 def _scope_under(root: Path) -> list[Path]:
@@ -139,7 +141,7 @@ def _scope_under(root: Path) -> list[Path]:
         rel = p.relative_to(REPO_ROOT).as_posix()
         if "/templates/" in f"/{rel}":
             continue
-        if p.name == "analysis.md":
+        if p.name == "analysis.md" or p.parent.name == "readable":
             out.append(p)
     return out
 

@@ -23,7 +23,8 @@ citations.
 Usage (repo root):
     python3 scripts/check-decision-refs.py [PATH ...]
 
-No PATH -> scan the default set: `analysis/**/*.md` and `scouting/P*/*.md`
+No PATH -> scan the default set: `analysis/**/*.md`, `readable/*.md` and
+`scouting/P*/*.md`
 (templates excluded — they carry `D<a>`-style placeholders and illustrative
 ids).
 
@@ -107,6 +108,7 @@ def check_file(path: str, owners: dict[int, int]) -> list[tuple[int, str]]:
 def _gather_default_docs() -> list[str]:
     patterns = [
         "analysis/**/*.md",
+        "readable/*.md",
         "scouting/P*/*.md",
     ]
     docs: list[str] = []

@@ -823,3 +823,70 @@ order). They govern the prose *between and around* those locked tokens.
 These are fidelity-neutral (§4-4 / §4-5 bar): improving readability must
 not add, drop, or reorder any fact, number, quotation, citation polarity,
 or `P#`/`D#` / arXiv / formula token.
+
+### 5-8. Readable rewrite (`readable/<arxiv-id>.md`)
+
+Output of `/readable-paper` (prompt: `.claude/prompts/readable.txt`), and the
+**only** thing the GitHub Pages site publishes. A separate track from §5-7,
+which governs `analysis.md`'s prose: the two share no files and no schema.
+
+**Source contract.** Facts come from the paper's arXiv HTML original (parsed
+by `scripts/probe_site/arxiv.py`); *our view* — `D#` impact, tensions, what we
+would check — comes from `context/`. `analysis/` is neither read nor written.
+No HTML edition (~4% of papers) means **no rewrite is written**: an
+abstract-based fallback would be indistinguishable on the page from a real one.
+
+**Why it does not live under `analysis/<id>/`.** That folder's contract is one
+artifact per paper, and a folder holding only a rewrite is reported as a
+metadata failure by `refresh-analysis-index.py --check`.
+
+#### Front matter (build-validated)
+
+The site takes all of its metadata from here — there is no other source.
+
+| Key | Rule |
+|---|---|
+| `readable_of` | must equal the file name — **mismatch fails the build** |
+| `title` | required. The paper's title, as the card and page heading |
+| `summary` | required. Landing-card preview: 2–3 sentences, plain text, read cold |
+| `authors` | one line, as printed |
+| `pillars` | **ours**, not the paper's. First entry decides the card's group; empty → 미분류, which beats a wrong pillar |
+| `tags` | flow list, feeds the filter chips |
+| `links` | `kind\|url` pairs; kinds fixed at `arxiv` `code` `weights` `data` `site` `demo` (R10). Unknown kinds are dropped rather than guessed at |
+| `published` / `generated` | the paper's date / this rewrite's. `generated` sorts the landing page |
+| `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
+| `figures` | cited figure ids, verbatim from the original (`[S1.F1, S4.F4]`) |
+| `terms` | count of inline term anchors |
+| `generator` | `readable-paper/v1` |
+
+#### Body rules (R1–R13)
+
+Free-form Korean markdown under a fixed four-act spine. A rigid section
+schema would turn a re-telling back into a form to fill in.
+
+| # | Rule |
+|---|---|
+| R1 | **Four acts**, always: `1 무엇이 문제인가` / `2 무엇을 바꿨나` / `3 정말 되는가` / `4 우리는 무엇을 하나`. Section count varies. Act 2 legitimately thins on dataset / benchmark / survey papers — state that rather than inflate it |
+| R2 | **Section titles describe *this* paper.** Template titles banned. One line of English keyword subtitle beneath each. No 원문 절번호 in the title |
+| R3 | **Density high** — ~20 lines per section, ~420 per paper. Only derivations, configs, task definitions and appendix detail go in `<details>` |
+| R4 | **Background = inline anchors only.** `[용어](term:id)` at first occurrence + a ` ```probe-term ` fence. No primer, no glossary. 12–20 anchors |
+| R5 | **Five kinds of context**, deliberately planted: 계보 · 숫자의 지형 · 대조 · 출처·배경 · 코퍼스 지도. Verify a lineage before claiming it |
+| R6 | **Paper's own figures first**, hotlinked via ` ```probe-figure ` — never mirrored (§5-5). Korean caption + `(Figure N, 원문 §x.y)`. Inline-SVG figures have no raster: redraw or omit. Where the paper has no counterpart, ` ```probe-flow ` — never ASCII art, never raw HTML |
+| R7 | Inline math is `` $`X`$ ``; a bare `$X$` is not math and renders literally, because there is no plain-`$` rule by design. A display equation goes in a ` ```probe-eq ` fence carrying its reading line and `기호 / 이름 / 설명` table, **first occurrence only**. Raw HTML is escaped (`html=False`), so the fence is the only route |
+| R8 | **Code** highlighted by language; scrolling confined to the block |
+| R9 | **Five callout roles**, authored as GFM alerts so the source also renders on github.com — `[!NOTE]`→`co-key` 작동 원리 · `[!TIP]`→`co-win` 확인된 이득 · `[!WARNING]`→`co-warn` 한계·비용 · `[!CAUTION]`→`co-ten` 우리와 충돌 · `[!IMPORTANT]`→`co-ctx` 논문 밖 맥락 (text after the marker is an optional label). **`co-ten` is Act-4 only** (a problem the paper names about itself is `co-warn`), and **author-stated limitations close Act 3** — they are an input to our verification plan, not a footnote to it |
+| R10 | **Resource chips** come from `links:` — confirmed URLs only, ordered arXiv → code → weights → data → site → demo. Unconfirmed slots stay **empty**; a short row is reproducibility information |
+| R11 | **Exactly one ` ```probe-quiz ` per section**, 3 options, 1 answer; the explanation must say why the other two fail |
+| R12 | Visual rules belong to the site (Pretendard 15px/1.7, JetBrains Mono 0.83rem/1.62). No inline styles |
+| R13 | Never `display:block` on an inline tag — it catches body `<b>` and breaks the line at every emphasis. Titles get a dedicated class |
+
+#### Voice
+
+`docs/voice/base/` (pinned snapshot — `docs/voice/PROVENANCE.md`). Take the
+불변 DNA 9조 and deep mode's **restoration floor**; do **not** take deep
+mode's outline-only skeleton (R1–R13 own the structure) or its
+` ``` `-wrapped section bodies (a github.com line-break workaround that would
+publish as literal code blocks here).
+
+Facts are the paper's; opinions are ours and must anchor to a `D#` that
+exists. Where our context holds no position, relay without one.
