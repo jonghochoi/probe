@@ -64,7 +64,6 @@ class Figure:
     number: str          # "1", "3(a)"
     caption: str
     section: str = ""    # id of the enclosing section
-    panels: list[str] = field(default_factory=list)  # ids of sub-figures
 
     @property
     def linkable(self) -> bool:
@@ -313,8 +312,6 @@ class _Extractor(HTMLParser):
             if not self._figs:
                 return
             fig = self._figs.pop()
-            if self._figs:
-                self._figs[-1].panels.append(fig.id)
             if self._in_table:
                 self._in_table -= 1
                 self.tables.append(Table(

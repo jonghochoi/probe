@@ -53,22 +53,6 @@ def _mask_row_pipes(line: str) -> str:
     )
 
 
-def find_table_pipe_collisions(text: str) -> list[tuple[int, str]]:
-    """Report table rows whose inline math contains a literal `|`.
-
-    These rows are already mis-rendering on github.com — GFM splits the row
-    before the math is parsed, so the cell tears. The site renders them
-    correctly via Hook A, but `--check` still reports them so the underlying
-    corpus bug stays visible instead of being silently papered over.
-    """
-    out: list[tuple[int, str]] = []
-    for lineno, line in enumerate(text.splitlines(), start=1):
-        if not line.lstrip().startswith("|"):
-            continue
-        for m in _INLINE_SPAN.finditer(line):
-            if "|" in m.group(2):
-                out.append((lineno, m.group(0)))
-    return out
 
 
 def mask_source(text: str) -> str:
