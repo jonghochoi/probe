@@ -108,6 +108,9 @@ def build(args) -> int:
     for html in final.values():
         charset |= set(_TEXT_ONLY.sub(" ", html))
     stats = assets_out.copy_all(out, charset)
+    # An asset-pipeline failure is a page failure: a mangled KaTeX stylesheet
+    # publishes every formula in the body font and no reader reports it.
+    problems.extend(stats["problems"])
 
     warn = len(getattr(katex, "warnings", []))
     kb = (stats["pretendard"] + stats["mono"]) / 1024
