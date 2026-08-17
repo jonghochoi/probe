@@ -62,7 +62,7 @@ jobs:
         # prunes whatever the first one put there — splitting this line silently
         # removes KaTeX and breaks the math render.
         run: |
-          npm install --no-save --prefix site/probe_site \
+          npm install --no-save --prefix site/builder \
             katex@0.16.22 pretendard @fontsource/jetbrains-mono
 
       - name: Cache rendered formulas

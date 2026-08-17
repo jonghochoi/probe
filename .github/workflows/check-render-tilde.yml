@@ -19,7 +19,6 @@ on:
   pull_request:
     paths:
       - 'analysis/**/*.md'
-      - 'readable/*.md'
       - 'scouting/**/*.md'
       - 'scripts/check-render-tilde.py'
       - '.github/workflows/check-render-tilde.yml'

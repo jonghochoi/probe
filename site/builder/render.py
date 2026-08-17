@@ -1,8 +1,8 @@
 """Markdown → HTML for the PROBE corpus.
 
 Owns the configured `MarkdownIt` and every renderer override. The math dialect
-lives in `mdext.ghmath`; everything else — headings/anchors, figures, the
-quote+gloss component, links, tables, code — is here.
+lives in `mdext.ghmath`; everything else — headings/anchors, figures, links,
+tables, code — is here.
 
 Parser configuration, and why:
 
@@ -10,9 +10,10 @@ Parser configuration, and why:
                       `<!-- provenance -->` comments that must not be
                       published. `ghmath.mask_source` strips the comments; the
                       one anchor is re-emitted by us.
-    linkify=False     AUTHORING §3-4 forbids bare URLs in Korean prose (the
-                      following particle joins the href), so auto-linking would
-                      only ever fire on a bug.
+    linkify=False     A bare URL is not a link here (AUTHORING §3-3): the
+                      corpus writes explicit `[text](url)` links, and leaving
+                      autolink off keeps a stray URL visibly unlinked rather
+                      than half-linked with a Korean particle in the href.
     typographer=False The corpus contains typographic quotes verbatim inside
                       byte-locked English quotations; smartening would mutate
                       quoted source text.
@@ -32,7 +33,7 @@ from pygments.util import ClassNotFound
 
 from .mdext import callouts, ghmath, probefence
 
-# `Figure 3 — RGB-DF 동기 생성` → ("Figure 3", "RGB-DF 동기 생성")
+# `Figure 3 — <한글 캡션>` → ("Figure 3", "<한글 캡션>")
 _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re.I)
 
 
@@ -74,7 +75,7 @@ def _split_act(text: str) -> tuple[str, str]:
 def _split_keyword_line(text: str) -> tuple[str, str]:
     """`제목 | Keyword · Keyword` → (제목, keywords).
 
-    §5-8 R2 has always asked for a line of English keywords under each section
+    AUTHORING §2-2 (R2) asks for a line of English keywords on each section
     title. Written as the paragraph after the heading it renders as body text
     and never reaches the table of contents, so it reads as a stray sentence
     the section opens with. Carried *in* the heading it is part of the section's
@@ -442,6 +443,59 @@ class DocRenderer:
                 f"move the closing marker off the parenthesis"
             )
 
+    def _check_leaked_math(self, source: str, out: str) -> None:
+        """Math notation that reached the page as literal text.
+
+        `ghmath` accepts exactly three forms (AUTHORING §3-1). Anything else —
+        a bare `$x_t$`, the outside-dollar `` `$x$` ``, `\\(x\\)`, or a `$$`
+        block indented under a list item — is not an error to the parser: it is
+        ordinary text, so it renders as itself and the page publishes raw TeX.
+        Nothing upstream can catch this, because the source is valid Markdown.
+
+        Two passes, because the two failures are visible at different stages.
+        `\\(` and `\\[` are Markdown *escapes*: by the time the HTML exists the
+        backslash is gone and only `(x)` remains, indistinguishable from prose,
+        so those are caught in the source. The rest survive into the output and
+        are caught there, after code spans have become real tags.
+
+        A lone `$` is deliberately NOT math here (Korean prose quotes prices),
+        so only a *pair* enclosing something that looks like notation counts.
+        """
+        src = _CODE_SPAN.sub("", _CODE_FENCE.sub("", source))
+        # Hangul between the delimiters means it is an escaped parenthesis in
+        # ordinary prose, not a formula someone reached for the wrong syntax for.
+        found = re.search(r"\\[(\[][^가-힣\n]{1,60}?\\[)\]]", src)
+        if found:
+            self.problems.append(
+                f"math published as literal text: {found.group(0)[:60]!r} — "
+                r"`\(…\)` / `\[…\]` delimiters do not render; inline math is $`X`$"
+            )
+
+        # Fenced code is exempt everywhere; an inline code span is exempt for
+        # every check EXCEPT the outside-dollar one, which is precisely a math
+        # span that became a code span.
+        prose = re.sub(r"<(script|style|pre)\b.*?</\1>", "", out, flags=re.S)
+        outside = re.search(r"<code\b[^>]*>\s*\$[^<]+\$\s*</code>", prose)
+        if outside:
+            self.problems.append(
+                f"math published as literal text: {outside.group(0)[:60]!r} — the "
+                "outside-dollar form `` `$X$` ``; the backticks go INSIDE the dollars"
+            )
+
+        prose = re.sub(r"<code\b[^>]*>.*?</code>", "", prose, flags=re.S)
+        checks = (
+            (r"\$\$", "a `$$` block that did not render — it must sit at column 0, "
+                      "never indented under a list item"),
+            (r"\$[^$\n<]*(?:\\[A-Za-z]+|[_^]|[α-ωΑ-Ω])[^$\n<]*\$",
+             "a bare `$X$` — inline math is $`X`$ here, backticks inside the dollars"),
+        )
+        for pattern, why in checks:
+            found = re.search(pattern, prose)
+            if found:
+                self.problems.append(
+                    f"math published as literal text: {found.group(0)[:60]!r} — {why}"
+                )
+
     # ── entry point ─────────────────────────────────────────────────────
     def render(self, source: str) -> str:
         self.toc = []
@@ -454,8 +508,14 @@ class DocRenderer:
         self._close_section()
         self._check()
         self._check_stray_emphasis(self.lead_html + out)
+        self._check_leaked_math(source, self.lead_html + out)
         return out
 
+
+# Code is exempt from the leaked-math scan: a document *about* the trap quotes
+# the broken forms on purpose, and `$` is ordinary shell syntax.
+_CODE_FENCE = re.compile(r"^```.*?^```", re.M | re.S)
+_CODE_SPAN = re.compile(r"`[^`\n]*`")
 
 _DREF_HTML = re.compile(r"(?<![A-Za-z0-9_&#])D(\d{1,2})(?![\d;])")
 _DESIGNATOR_TAIL = re.compile(
@@ -477,15 +537,6 @@ def _decorate_refs(text: str, decisions: dict) -> str:
         tip = html.escape(f"P{pillar} · {title}", quote=True)
         return f'<abbr class="dref" title="{tip}">D{n}</abbr>'
     return _DREF_HTML.sub(sub, text)
-
-
-# A blockquote whose last paragraph is a parenthesized Korean gloss, or a
-# parenthesized Korean paragraph immediately after one. Both shapes exist in the
-# corpus; they normalize to the same component.
-_BQ = re.compile(r"<blockquote>\s*(.*?)\s*</blockquote>", re.DOTALL)
-
-
-
 
 
 

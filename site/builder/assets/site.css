@@ -25,7 +25,6 @@
   --border-soft: #f4ebe5;
   --text:        #1f1611;
   --text-muted:  #7a6a60;
-  --quote-bg:    #fdfaf8;
 
   /* Latin glyphs come from Pretendard too — a separate Latin face next to
      Korean text gives two different x-heights on the same line. */
@@ -64,7 +63,6 @@
   --border-soft: #27211c;
   --text:        #ece4de;
   --text-muted:  #a2938a;
-  --quote-bg:    #1f1a16;
   --fig-pad:     #f2ede9;   /* arXiv figures are white PNGs — pad, don't invert */
   --shadow:      0 2px 12px rgba(0,0,0,.4);
   --shadow-lg:   0 8px 34px rgba(0,0,0,.55);

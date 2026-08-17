@@ -42,8 +42,10 @@ PILLAR_NAMES = {
 PILLAR_ORDER = ["P0", "P1", "P2", "P3", "P4", "P5", UNCLASSIFIED]
 PILLAR_RE = re.compile(r"\bP[0-5]\b")
 
-# Link kind → (emoji, label, sort rank). R10 fixes both the icons and the
-# order; a rewrite declares `links:` as `kind|url` pairs.
+# Link kind → (emoji, label, sort rank). THE single source for the chips'
+# icons, labels and display order — AUTHORING §2-10 deliberately does not
+# restate them, and states only the kind names, which is what an author types.
+# A rewrite declares `links:` as `kind|url` pairs in any order; this sorts them.
 LINK_KINDS = {
     "arxiv": ("📄", "arXiv", 0),
     "code": ("💻", "GitHub", 1),

@@ -1,6 +1,6 @@
 """GitHub-flavored KaTeX dialect support for markdown-it-py.
 
-`site/AUTHORING.md` §3-1 mandates a GitHub-specific math dialect that no standard
+`site/AUTHORING.md` §3-1 fixes three accepted math forms that no standard
 Markdown parser understands:
 
     inline   $`X`$          ← backticks INSIDE the dollars

@@ -1,7 +1,7 @@
 """GFM alert syntax → the readable layer's five callout roles (R9).
 
-    > [!NOTE] 왜 fast 채널이 필요한가
-    > proprioception 은 …
+    > [!NOTE] <선택 라벨>
+    > <본문>
 
 `site/AUTHORING.md` §2-9 fixes five roles and five colors, and GitHub's own five
 alert types already carry exactly those colors — note/blue, tip/green,
