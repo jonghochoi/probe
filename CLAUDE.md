@@ -14,14 +14,14 @@ for **commit hygiene and document style** so the repo stays consistent.
 
 | Path | Owner | Role |
 |---|---|---|
-| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination. No longer holds per-pillar Decision Log / Tracked Literature |
+| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination |
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
 | `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat, no per-paper folder), from `/analyze`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter (`analysis_of`, title, authors, pillars, tags, links, summary). Contract: `site/AUTHORING.md` — not `docs/style.md`, which governs `scouting/` only |
-| `analysis_legacy/` | frozen | The retired deep-dive corpus — one `<arxiv-id>/analysis.md` per paper, written by the old `/analyze` mode against `docs/style.md` §5. **Read by nothing** (prompt, site build and every lint skip it) and never regenerated; kept only until those papers are re-written under `analysis/`. Its `README.md` is the last generated index snapshot; the generator, the meta lint and the format spec are gone |
+| `analysis_legacy/` | frozen | Legacy corpus — one `<arxiv-id>/analysis.md` per paper, in a format nothing else in the repo uses. **Read by nothing** (prompt, site build and every lint skip it) and never regenerated; kept until those papers are re-written under `analysis/`. Its `README.md` is a static index of what the folder holds |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
-| `docs/style.md` | human | **Single source of truth for the `scouting/` output format** (emoji, links, Korean authoring). The reading-site track is NOT covered — `analysis/<id>.md` is governed by `site/AUTHORING.md`. Its §5 (the retired deep-dive format) was removed with that mode |
+| `docs/style.md` | human | **Single source of truth for the `scouting/` output format** (emoji, links, Korean authoring). The reading-site track is NOT covered — `analysis/<id>.md` is governed by `site/AUTHORING.md` |
 | `docs/agent-setup.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
 | `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `analysis/<id>.md`: front matter, body rules R1–R15, render traps, what the build enforces), `build-site.py` + `builder/` (the static-site generator: a landing briefing, a corpus-wide glossary harvested from the rewrites' own ` ```probe-term ` fences, plus one page per rewrite), and `requirements.txt`. Nothing but `analysis/` is published and `analysis_legacy/` is not read at all. `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
@@ -34,8 +34,7 @@ never edit the source. Per-pillar content (Decision Log, Tracked Literature,
 Anti-topics, Curated Lists) is **owned by
 the relevant `P#.md`**; `MASTER.md` is a thin global anchor holding only
 cross-cutting content. Edit the `P#.md` for pillar content; edit `MASTER.md`
-only for global content. (The earlier "MASTER is SSOT, regenerate the extracts
-from it" model no longer holds.)
+only for global content.
 
 **Decision-Log entry format.** Every entry in a `P#.md` §3 Decision Log has
 exactly this shape (used 32× across the six pillars; the scouting / analyze
@@ -226,11 +225,10 @@ new doc be in?":
 - **Exception 2 — Project front door in English.** `README.md`. The
   GitHub-rendered top page is the public-facing entry and the single
   onboarding surface for a newcomer.
-- **Exception 3 — The frozen legacy index in English.**
-  `analysis_legacy/README.md` — the last generated snapshot of the retired
-  deep-dive index (English paper titles + keyword/pillar badges) above a short
-  structural intro. A folder README whose H1 is the folder name
-  (`# analysis_legacy/`). Frozen: nothing regenerates it.
+- **Exception 3 — The legacy folder index in English.**
+  `analysis_legacy/README.md` — a static index of that folder (English paper
+  titles + keyword/pillar badges) above a short structural intro. A folder
+  README whose H1 is the folder name (`# analysis_legacy/`).
 
 **No `_KO` / `_EN` filename suffix.** Location (the folder rule above) plus
 the H1 on line 1 are sufficient — `head -1 <file>` tells you the language

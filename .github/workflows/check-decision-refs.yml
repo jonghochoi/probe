@@ -4,8 +4,8 @@ name: Check decision refs
 # per-pillar Decision Log (context/P#.md §3) and that explicit `P# / D#` ties
 # agree with the pillar that owns the decision (allocation per CLAUDE.md).
 # A typo'd or renumbered D# in an analysis/scouting doc is a silent
-# provenance break — this gate catches it PR-time. The frozen
-# analysis_legacy/ corpus is out of scope (see the linter's docstring).
+# provenance break — this gate catches it PR-time. The analysis_legacy/ corpus
+# is out of scope (see the linter's docstring).
 #
 # Lint-only (no auto-fix / bot commit): a wrong decision tie needs human
 # judgment (was the D# wrong, or the P#?), unlike mechanical math fixes.

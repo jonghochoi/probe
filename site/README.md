@@ -2,7 +2,7 @@
 
 Everything the reading site is made of — the authoring rules, the static-site
 generator, and its build-time dependencies. The site publishes
-`analysis/<arxiv-id>.md` and nothing else; the frozen `analysis_legacy/` corpus
+`analysis/<arxiv-id>.md` and nothing else; the legacy `analysis_legacy/` corpus
 is not read at all.
 
 The corpus itself stays at the repo root (`analysis/`), next to the other

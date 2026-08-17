@@ -1,17 +1,14 @@
 # analysis_legacy/
 
-**Frozen corpus — retired format.** One subfolder per paper (`<arxiv-id>/`),
-each holding a single Korean deep-dive (`analysis.md`) written by the retired
-deep-dive `/analyze` mode. It is kept only so these papers stay readable until
-they are re-written in the current format under `analysis/` (contract:
-`site/AUTHORING.md`), and it is read by nothing: the prompt, the site build and
-the lints all skip it.
+**Legacy corpus.** One subfolder per paper (`<arxiv-id>/`), each holding a
+single Korean deep-dive (`analysis.md`) in a format nothing else in the repo
+uses. It is kept only so these papers stay readable until they are re-written
+under `analysis/` (contract: `site/AUTHORING.md`), and it is read by nothing:
+the prompt, the site build and the lints all skip it.
 
-Nothing here is regenerated or maintained. The index below is the last
-generated snapshot — one section per primary Pillar, the 📝 badge in front of
-each title linking to that paper's deep-dive — and the generator, the format
-spec (`docs/style.md` §5) and the metadata lints that produced it are gone.
-Dates and pillar ties are as of that snapshot.
+Nothing here is generated or maintained. The index below is static — one
+section per primary Pillar, the 📝 badge in front of each title linking to that
+paper's deep-dive; dates and pillar ties are as written.
 
 ## P0 — VLA Datasets & Benchmarks
 

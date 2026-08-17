@@ -93,8 +93,8 @@ class Figure:
         """False only for a figure LaTeXML drew as inline `<svg>` — a TikZ/PGF
         picture with no file behind it. A figure exported to a standalone
         `.svg` and embedded with `<object data>` IS linkable and reads as one
-        here; the two used to be conflated, and the conflation is what made a
-        paper's own diagrams look unavailable.
+        here — conflating the two makes a paper's own diagrams look
+        unavailable.
 
         An unlinkable figure still belongs in the list: the paper *has* it, and
         the prompt needs to know it exists before deciding whether to redraw it

@@ -24,8 +24,8 @@ terms of this renderer.
 ## 1. File and Front Matter Contract
 
 One rewrite per paper, `analysis/<arxiv-id>.md` — flat, one file per paper, no
-per-paper folder. (`analysis_legacy/<id>/analysis.md` is the frozen corpus of
-the retired deep-dive format; nothing here reads or writes it.)
+per-paper folder. (`analysis_legacy/` is a legacy corpus in a different format;
+nothing here reads or writes it.)
 
 The site takes **all** of its metadata from this front matter — there is no
 other source, so a missing field is a hole on the landing page.
@@ -295,9 +295,8 @@ paper's own figure list is walked:
 - **"Unlinkable" means one specific thing**: LaTeXML drew the figure as inline
   `<svg>` (a TikZ/PGF picture), so there is no file behind it. A figure
   exported to a standalone `.svg` and embedded with `<object data>` is an
-  ordinary file and hotlinks like a PNG. `arxiv.py` used to conflate the two
-  and report every `.svg` figure as unavailable — which is how one rewrite came
-  to redraw a paper's own pipeline and schedule diagrams by hand. If a figure
+  ordinary file and hotlinks like a PNG. Conflating the two costs a paper its
+  own pipeline and schedule diagrams, redrawn by hand for nothing. If a figure
   looks unavailable, check what the extractor actually says before redrawing.
 - **Never mirror an image into the repo** — hotlink only, on copyright
   grounds. A relative `url` means someone did, and the build rejects it.
