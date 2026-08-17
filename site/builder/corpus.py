@@ -27,6 +27,13 @@ READABLE_DIR = REPO_ROOT / "readable"
 ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 UNCLASSIFIED = "미분류"
 
+_FENCE = re.compile(r"^```.*?^```", re.S | re.M)
+_SPACE = re.compile(r"\s")
+
+# A `metric:` longer than this stops being a value and becomes a sentence — it
+# is printed inside a chip on a card, so it has to survive at one line.
+METRIC_MAX = 40
+
 # Pillar display names mirror context/MASTER.md §5. Duplicated from
 # `scripts/refresh-analysis-index.py` rather than shared: that script parses the
 # analysis corpus and this one does not, so a shared module would exist only to
@@ -106,6 +113,44 @@ class Paper:
             if spec and url.strip():
                 ranked.append((spec[2], spec[0], spec[1], url.strip()))
         return [(emoji, label, url) for _, emoji, label, url in sorted(ranked)]
+
+    @property
+    def metric(self) -> str:
+        """The result the paper is remembered by, in one printable fragment.
+
+        `399.5 → 129.2 ms`, `25 Hz 폐루프`. The number is always *in* the
+        summary already, but as prose — a card cannot pull it out of a sentence,
+        so the rewrite states it once as its own field. Optional: a paper whose
+        contribution is not a single number leaves it empty rather than having
+        one invented for it.
+        """
+        return self.front.get("metric", "").strip()
+
+    @property
+    def term_count(self) -> int:
+        """`terms:` as a number — it is authored as a count and printed as one."""
+        try:
+            return int(str(self.front.get("terms", "")).strip())
+        except ValueError:
+            return 0
+
+    @property
+    def figure_count(self) -> int:
+        return len(frontmatter.as_list(self.front.get("figures", "")))
+
+    @property
+    def read_minutes(self) -> int:
+        """Minutes of prose, at 500 자/분.
+
+        Fenced blocks are excluded on purpose. Term panels are collapsed until
+        the reader opens one, quizzes are answered rather than read, and a
+        figure is looked at — counting all three would roughly double the
+        number and promise a longer sit than the page actually asks for. What
+        is left is the text you read top to bottom, which is what the estimate
+        is for.
+        """
+        prose = _FENCE.sub("", self.body)
+        return max(1, round(len(_SPACE.sub("", prose)) / 500))
 
     @property
     def tagline(self) -> str:
@@ -237,5 +282,34 @@ def discover() -> tuple[list[Paper], list[str]]:
             if not front.get(required):
                 problems.append(f"readable/{path.name}: missing `{required}`")
 
-        papers.append(Paper(stem=stem, path=path, front=front, body=body))
+        paper = Paper(stem=stem, path=path, front=front, body=body)
+        if len(paper.metric) > METRIC_MAX:
+            problems.append(
+                f"readable/{path.name}: `metric` is {len(paper.metric)} chars — "
+                f"keep it under {METRIC_MAX}, it prints inside a chip"
+            )
+        papers.append(paper)
     return papers, problems
+
+
+# ── Neighbours ──────────────────────────────────────────────────────────────
+
+def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
+    """The nearest few rewrites, by shared tags first and pillars second.
+
+    Tags weigh double because they are the specific claim — two papers tagged
+    `flow-matching` are about the same machinery, while two papers sharing P1
+    may only both be policies. Papers with nothing in common are dropped rather
+    than padded out to `limit`: an unrelated suggestion costs more trust than an
+    empty row costs space.
+    """
+    mine_t, mine_p = set(paper.tags), set(paper.pillars)
+    scored = []
+    for other in corpus:
+        if other.stem == paper.stem:
+            continue
+        score = 2 * len(mine_t & set(other.tags)) + len(mine_p & set(other.pillars))
+        if score:
+            scored.append((score, other.date, other))
+    scored.sort(key=lambda row: (row[0], row[1]), reverse=True)
+    return [row[2] for row in scored[:limit]]

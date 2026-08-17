@@ -165,6 +165,52 @@ nav {
 .chip.link:hover { border-color: var(--amber-soft); color: var(--orange-deep); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
+/* The paper's headline number, from front matter `metric`. Also styled in
+   index.css for the landing list — same component, two stylesheets, because
+   the paper page deliberately does not load the landing one. */
+.metric {
+  display: inline-flex; align-items: center;
+  font-family: var(--mono); font-size: .7rem; font-weight: 600;
+  padding: .08rem .42rem; border-radius: 999px;
+  background: var(--orange-soft); color: var(--orange-deep);
+  border: 1px solid var(--amber-soft); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.head-size {
+  font-size: .72rem; color: var(--text-muted); margin-left: .2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Related, under the article ───────────────────────────────────────── */
+.related { margin-top: 3.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+.related-h {
+  font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: .7rem;
+}
+.rel-list { display: grid; gap: .5rem; }
+.rel-item {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: .1rem .8rem; align-items: baseline;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .7rem .9rem;
+  text-decoration: none; color: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+.rel-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.rel-p {
+  grid-column: 1 / -1; font-size: .68rem; font-weight: 700;
+  color: var(--text-muted); letter-spacing: .04em;
+}
+.rel-title { font-size: .88rem; font-weight: 700; letter-spacing: -.01em; line-height: 1.45; }
+.rel-item:hover .rel-title { color: var(--orange-deep); }
+.rel-size {
+  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-variant-numeric: tabular-nums; grid-row: 2; grid-column: 2;
+}
+.rel-tagline {
+  grid-column: 1; font-size: .78rem; line-height: 1.55; color: var(--text-muted);
+}
+
 /* ── Layout ───────────────────────────────────────────────────────────── */
 .shell {
   max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 6rem;

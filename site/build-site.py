@@ -43,7 +43,7 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, corpus, pages
+from builder import assets_out, corpus, pages, terms
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from probe_refs import harvest_decisions
 
@@ -80,12 +80,16 @@ def build(args) -> int:
     render_problems: list[str] = []
     for paper in papers:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
-            paper, katex, decisions, render_problems
+            paper, katex, decisions, render_problems,
+            neighbours=corpus.related(paper, papers),
         )
     problems += render_problems
 
     # The landing page indexes whatever was built — with `--only`, a subset.
-    rendered[out / "index.html"] = pages.landing_page(papers)
+    rendered[out / "index.html"] = pages.landing_page(papers, katex)
+    rendered[out / "terms" / "index.html"] = pages.terms_page(
+        terms.collect(papers), katex, decisions
+    )
     rendered[out / "memos" / "index.html"] = pages.memos_page()
     rendered[out / "404.html"] = pages.not_found_page()
 
