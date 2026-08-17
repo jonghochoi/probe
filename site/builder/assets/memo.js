@@ -129,7 +129,7 @@ if (root) {
     if (!anchorEl) return;
     if (!anchor) { anchorEl.hidden = true; return; }
     const el = document.getElementById(anchor);
-    const label = el ? el.textContent.replace(/#$/, "").trim() : anchor;
+    const label = el ? el.textContent.trim() : anchor;
     anchorEl.hidden = false;
     anchorEl.innerHTML = `📍 <a href="#${anchor}">${label}</a> 을(를) 읽던 중`;
   }

@@ -33,6 +33,11 @@ from pygments.util import ClassNotFound
 
 from .mdext import callouts, ghmath, probefence
 
+# Printed above the thesis line on every rewrite: the reader has arrived from
+# an index of papers and needs to know in one glance that this page is our
+# re-telling, not the paper.
+EYEBROW = "읽기 쉬운 버전 · 원문에서 직접 발췌"
+
 # `Figure 3 — <한글 캡션>` → ("Figure 3", "<한글 캡션>")
 _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re.I)
 
@@ -126,6 +131,7 @@ class DocRenderer:
         self._sections_seen = 0
         self._sections_without_quiz: list[str] = []
         self._current_section = ""
+        self._term_panels: dict[str, str] = {}
         self.md = self._build()
 
     # ── parser construction ─────────────────────────────────────────────
@@ -142,7 +148,11 @@ class DocRenderer:
         # which a JSON fence could not.
         container_plugin(md, "details", render=_render_details)
         ghmath.install(md, self.katex.inline, self.katex.block)
-        callouts.install(md)
+        # The label goes through the inline renderer, not `escape()`. A callout
+        # titled `` $`d`$ 가 변해도 견디는 이유 `` published its own math source
+        # as visible backticks and dollars — the one place on the page where
+        # markdown reached the reader unrendered.
+        callouts.install(md, self._inline)
 
         rules = md.renderer.rules
         rules["heading_open"] = self._heading_open
@@ -196,8 +206,13 @@ class DocRenderer:
                 inline.content = ""
 
         if level == 1:
-            self._pending_close = "</h1>\n" + self.lead_html
-            return '<h1 class="thesis">'
+            # The thesis line, its tagline and the one-paragraph summary are one
+            # masthead, closed by a rule: everything above it is what the
+            # rewrite claims, everything below is the argument for it.
+            self._pending_close = "</h1>\n" + self.lead_html + "</header>\n"
+            return ('<header class="lead">'
+                    f'<p class="eyebrow">{EYEBROW}</p>'
+                    '<h1 class="thesis">')
 
         if level == 2:
             number, act = _split_act(label or raw)
@@ -225,9 +240,13 @@ class DocRenderer:
             self.toc.append({"kind": "sec", "id": anchor, "label": ko, "en": en,
                              "emoji": emoji})
             take_inline()
+            # The heading keeps its `id` — the contents, the scroll-spy and the
+            # memo anchor all resolve against it — but prints no `#` link. A
+            # glyph that appears under the cursor on every heading is a fourth
+            # thing moving on the page and buys a copyable URL the address bar
+            # already holds.
             self._pending_close = (
                 (f'<span class="en">{html.escape(en)}</span>' if en else "")
-                + f'<a class="anchor" href="#{anchor}" aria-label="이 섹션 링크">#</a>'
                 + "</h2>\n"
             )
             return f'<h2 class="h-sec" id="{anchor}">{self._inline(ko)}'
@@ -274,26 +293,52 @@ class DocRenderer:
             return self.katex.block(ghmath.normalize_tex(token.content))
         if info in probefence.FENCES:
             return self._probe_fence(info, token.content)
+        # R8 — the info string is `<lang> <한글 캡션>`. A block of transcribed
+        # pseudocode with nothing above it makes the reader decode the code to
+        # find out why it is on the page; the caption states that in one line
+        # and the language chip says what they are looking at.
+        lang, _, caption = info.partition(" ")
+        lang, caption = lang.strip(), caption.strip()
         code = token.content
+        if lang and not caption:
+            self.problems.append(
+                f"code fence ```{lang} has no caption (R8) — the info string is "
+                f"`{lang} <한글 캡션>`, one line saying what the block shows"
+            )
         lexer = None
-        if info:
+        if lang:
             try:
-                lexer = get_lexer_by_name(info.split()[0])
+                lexer = get_lexer_by_name(lang)
             except ClassNotFound:
                 lexer = None
-        if lexer is None and info in ("", "text"):
-            return (
-                f'<pre class="hl plain"><code>{html.escape(code)}</code></pre>'
+        if lexer is None and lang in ("", "text"):
+            return self._code_box(
+                lang, caption, f'<pre class="hl plain"><code>{html.escape(code)}</code></pre>'
             )
         if lexer is None:
             try:
                 lexer = guess_lexer(code)
             except ClassNotFound:
-                return f'<pre class="hl plain"><code>{html.escape(code)}</code></pre>'
+                return self._code_box(
+                    lang, caption,
+                    f'<pre class="hl plain"><code>{html.escape(code)}</code></pre>',
+                )
         # No `style=` here: the token *classes* are style-independent, so one
         # highlight pass serves both themes and only the CSS differs.
         formatter = HtmlFormatter(nowrap=False, cssclass="hl")
-        return highlight(code, lexer, formatter)
+        return self._code_box(lang, caption, highlight(code, lexer, formatter))
+
+    @staticmethod
+    def _code_box(lang: str, caption: str, body: str) -> str:
+        head = ""
+        if lang or caption:
+            head = (
+                '<div class="code-head">'
+                + (f'<span class="code-lang">{html.escape(lang)}</span>' if lang else "")
+                + (f'<span class="code-cap">{html.escape(caption)}</span>' if caption else "")
+                + "</div>"
+            )
+        return f'<div class="code">{head}{body}</div>'
 
     # ── readable-layer fences ───────────────────────────────────────────
     def inline(self, text: str) -> str:
@@ -312,11 +357,13 @@ class DocRenderer:
         try:
             data = probefence.parse(info, content)
             if info == "probe-term":
-                tid, out = probefence.term(data, self._inline)
+                tid, _ = probefence.term(data, self._inline)
                 if tid in self._terms_defined:
                     self.problems.append(f"term `{tid}` defined more than once")
                 self._terms_defined[tid] = self._terms_defined.get(tid, 0) + 1
-                return out
+                # The panel itself was emitted at the anchor; the fence is only
+                # its source, so in document flow it renders to nothing.
+                return ""
             if info == "probe-figure":
                 return probefence.figure(data)
             if info == "probe-quiz":
@@ -390,8 +437,10 @@ class DocRenderer:
             tid = href[len("term:"):].strip()
             self._terms_used.add(tid)
             # markdown-it emits link_open / …inline… / link_close, so the
-            # matching close is rewritten by `_link_close` via this flag.
-            self._term_depth = getattr(self, "_term_depth", 0) + 1
+            # matching close is rewritten by `_link_close` via this flag, which
+            # also carries the id the panel is looked up by.
+            self._term_stack = getattr(self, "_term_stack", [])
+            self._term_stack.append(tid)
             return (
                 f'<button type="button" class="tref" data-term="{html.escape(tid, quote=True)}" '
                 f'aria-expanded="false">'
@@ -410,9 +459,17 @@ class DocRenderer:
         return f"<a {attrs}>"
 
     def _link_close(self, tokens, idx, options, env):
-        if getattr(self, "_term_depth", 0):
-            self._term_depth -= 1
-            return '<span class="ti" aria-hidden="true">ⓘ</span></button>'
+        stack = getattr(self, "_term_stack", None)
+        if stack:
+            tid = stack.pop()
+            # The definition follows the word immediately (R4). Its panel was
+            # built before the render pass — see `_prescan_terms` — because the
+            # ```probe-term fence that carries it always sits *after* the
+            # paragraph doing the anchoring.
+            return (
+                '<span class="ti" aria-hidden="true">ⓘ</span></button>'
+                + self._term_panels.get(tid, "")
+            )
         return "</a>"
 
     # ── D# / P# tooltips ────────────────────────────────────────────────
@@ -497,6 +554,28 @@ class DocRenderer:
                 )
 
     # ── entry point ─────────────────────────────────────────────────────
+    _TERM_FENCE = re.compile(r"^```probe-term[ \t]*\n(.*?)\n```[ \t]*$", re.M | re.S)
+
+    def _prescan_terms(self, masked: str) -> None:
+        """Build every term panel before the document renders.
+
+        R4 puts the definition at the anchor, but the fence that carries it
+        comes *after* the paragraph doing the anchoring — markdown-it is a
+        single forward pass, so by the time the anchor is rendered the fence has
+        not been seen. One cheap pre-pass over the source resolves that; the
+        fence pass still runs afterwards and owns every validation message, so a
+        malformed payload is reported exactly once.
+        """
+        self._term_panels = {}
+        for match in self._TERM_FENCE.finditer(masked):
+            try:
+                tid, panel = probefence.term(
+                    probefence.parse("probe-term", match.group(1)), self._inline
+                )
+            except probefence.FenceError:
+                continue
+            self._term_panels.setdefault(tid, panel)
+
     def render(self, source: str) -> str:
         self.toc = []
         self._heading_seq = 0
@@ -504,6 +583,7 @@ class DocRenderer:
         self._context_kinds = set()
         self._sections_without_keywords = []
         masked = ghmath.mask_source(source)
+        self._prescan_terms(masked)
         out = self.md.render(masked)
         self._close_section()
         self._check()

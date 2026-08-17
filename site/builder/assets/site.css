@@ -20,7 +20,7 @@
   --violet:      #7c5cd9;   /* co-ctx only — 논문 밖 맥락 */
   --bg:          #faf7f5;
   --surface:     #ffffff;
-  --surface-2:   #fdfbfa;
+  --surface-2:   #f4efeb;
   --border:      #ecdfd7;
   --border-soft: #f4ebe5;
   --text:        #1f1611;
@@ -36,7 +36,11 @@
   --shadow:      0 2px 12px rgba(60,30,15,.08);
   --shadow-lg:   0 8px 34px rgba(60,30,15,.16);
   --nav-h:       56px;
-  --content-max: 78ch;      /* 1100px is too wide for Korean long-form prose */
+  /* No `--content-max`: the column falls out of the shell's own arithmetic —
+     1180 less padding, rail and gutter, about 88ch of Korean. Capping the
+     article on top of that left a wide empty gutter to its right AND wrapped
+     every component's text one or two lines early, which reads as slack inside
+     the components rather than as a comfortable measure. */
   --toc-w:       15.5rem;   /* wide enough that a section title wraps at most once */
 
   /* Pillar palette — docs/style.md §3-1 */
@@ -58,7 +62,7 @@
   --violet:      #a894ea;
   --bg:          #14110f;
   --surface:     #1c1815;
-  --surface-2:   #221d19;
+  --surface-2:   #241d18;
   --border:      #332b25;
   --border-soft: #27211c;
   --text:        #ece4de;
@@ -163,8 +167,8 @@ nav {
 
 /* ── Layout ───────────────────────────────────────────────────────────── */
 .shell {
-  max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.25rem 6rem;
-  display: grid; grid-template-columns: var(--toc-w) minmax(0, 1fr); gap: 2.5rem;
+  max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 6rem;
+  display: grid; grid-template-columns: var(--toc-w) minmax(0, 1fr); gap: 2.6rem;
   align-items: start;
 }
 
@@ -215,7 +219,16 @@ nav {
   margin-left: 1rem; line-height: 1.35;
 }
 
-.article { min-width: 0; max-width: var(--content-max); }
+.article { min-width: 0; }
+
+/* ── Masthead ─────────────────────────────────────────────────────────── */
+/* Thesis, tagline and summary are one unit, closed by the orange rule: above
+   it is what this rewrite claims, below it the argument. */
+.lead { border-bottom: 2px solid var(--orange); padding-bottom: 1.4rem; margin-bottom: 1rem; }
+.eyebrow {
+  font-size: .72rem; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--orange-deep); margin-bottom: .7rem;
+}
 
 /* ── Prose ────────────────────────────────────────────────────────────── */
 /* The body H1 is the rewrite's thesis (R2), not the paper's title — the page
@@ -233,7 +246,7 @@ nav {
   margin: 3.9rem 0 -1rem; padding-bottom: .5rem;
 }
 .pdiv::after {
-  content: ""; flex: 1; height: 1px; background: var(--border);
+  content: ""; flex: 1; height: 2px; background: var(--orange); opacity: .28;
 }
 .pdiv .pn {
   font-size: .78rem; font-weight: 800; color: #fff; background: var(--orange);
@@ -244,12 +257,18 @@ nav {
   color: var(--orange-deep);
 }
 
+/* A hairline over every section. Nine sections down a long page, the gap
+   alone stopped reading as a boundary — the eye needs the line to know a new
+   question started. The act divider already draws one, so a section opening an
+   act does not draw a second. */
 .article h2.h-sec {
   font-size: 1.42rem; font-weight: 750; letter-spacing: -.015em;
-  line-height: 1.35; margin: 2.9rem 0 .3rem; padding-top: .5rem;
+  line-height: 1.35; margin: 3.2rem 0 .3rem; padding-top: 1.6rem;
+  border-top: 1px solid var(--border);
   scroll-margin-top: calc(var(--nav-h) + 1rem);
 }
 .article h2.h-sec:first-child { margin-top: .25rem; }
+.pdiv + h2.h-sec { border-top: none; padding-top: .6rem; }
 /* The English keyword line belongs to the title, so it sits inside the <h2>
    and is excluded from its weight and size rather than being a paragraph the
    section happens to open with. */
@@ -257,10 +276,13 @@ nav {
   display: block; font-size: .74rem; font-weight: 600; letter-spacing: .01em;
   color: var(--text-muted); margin-top: .3rem;
 }
+/* Sub-headings take the accent, not grey. Muted, a `####` inside a section
+   sat *below* body text in weight and read as a caption for the paragraph
+   above it rather than as the opening of the one below. */
 .article h3, .article h4.h-sub {
-  font-size: 1.02rem; font-weight: 700; margin: 1.9rem 0 .6rem;
+  font-size: 1.02rem; font-weight: 700; margin: 2rem 0 .5rem;
+  color: var(--orange-deep);
 }
-.article h4 { font-size: .93rem; font-weight: 700; margin: 1.4rem 0 .5rem; color: var(--text-muted); }
 
 /* Between our thesis and the paper's own title: what this paper does. */
 .article .thesis-sub {
@@ -269,31 +291,43 @@ nav {
 }
 
 /* ── The one-paragraph summary (front matter `summary`) ────────────────── */
+/* One family: every card whose signal is a 3px left border squares off on
+   that edge. Rounding it bent the accent into a curve and each such card read
+   as a slightly different component. `.tdef` and the five callouts already
+   did this; `.tldr` and `.quiz` were the two that did not. */
 .tldr {
   border: 1px solid var(--border); border-left: 3px solid var(--orange);
-  border-radius: var(--radius); background: var(--surface);
-  padding: 1rem 1.15rem; margin: 1.4rem 0 2rem;
+  border-radius: 0 var(--radius) var(--radius) 0; background: var(--surface);
+  /* No bottom margin: `.lead` already reserves the space down to its rule, and
+     stacking the two put a paragraph of air between the summary and act 1. */
+  padding: 1rem 1.15rem; margin: 1.4rem 0 0;
 }
 .tldr-label {
   display: block; font-size: .66rem; font-weight: 800; letter-spacing: .11em;
   text-transform: uppercase; color: var(--orange-deep); margin-bottom: .45rem;
 }
 .tldr p { margin: 0; font-size: .96rem; line-height: 1.75; }
-.article p { margin: .8rem 0; }
-.article ul, .article ol { margin: .8rem 0 .8rem 1.2rem; }
-.article li { margin: .35rem 0; }
-.article li > ul, .article li > ol { margin: .3rem 0 .3rem 1rem; }
+/* Prose margins belong to PROSE, and the selectors say where prose is: the
+   article's own flow, and the two containers that hold markdown bodies.
+   `.article p` / `.article li` are (0,1,1) and beat every component's own
+   (0,1,0) spacing rule, so each one silently inherited body-paragraph margins
+   on top of the spacing it had asked for — a 계보 list carried a stray 25px
+   band and a 1.2rem indent it never set, every split card's heading and note
+   were pushed apart by 12.8px twice over, and the equation reading line sat a
+   full paragraph gap above its formula. Every component in this file owns its
+   internal spacing; nothing may reach in from out here. */
+.view > p, .c-body > p, .fold-body > p { margin: .8rem 0; }
+.view > ul, .view > ol,
+.c-body ul, .c-body ol, .fold-body ul, .fold-body ol {
+  margin: .8rem 0 .8rem 1.2rem;
+}
+.view > ul li, .view > ol li, .c-body li, .fold-body li { margin: .35rem 0; }
+.view li > ul, .view li > ol,
+.c-body li > ul, .fold-body li > ul { margin: .3rem 0 .3rem 1rem; }
 .article hr {
   border: none; border-top: 1px solid var(--border-soft); margin: 2.25rem 0;
 }
 .article strong { font-weight: 700; }
-
-.anchor {
-  opacity: 0; margin-left: .4rem; text-decoration: none;
-  color: var(--text-muted); font-weight: 400; transition: opacity .15s;
-}
-.h-sec:hover .anchor, h3:hover .anchor { opacity: .5; }
-.anchor:hover { opacity: 1 !important; color: var(--orange-deep); }
 
 /* Inline code vs math: code is an identifier, math is notation (§5-6). */
 .article code {
@@ -305,12 +339,44 @@ nav {
 }
 .article pre { margin: 1.1rem 0; }
 .article pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
-/* Colors come from pygments.css — `friendly` in light, `nord-darker` in dark,
+/* R8 — a code block is a framed card with a header: the language on the left,
+   the caption on the right. A bare highlighted block made the reader decode
+   the code to find out why it was on the page. */
+/* The card's ground is the highlighter's own — `friendly` in light and
+   `nord-darker` in dark, per `render.py`'s LIGHT_STYLE / DARK_STYLE — so the
+   header band can be a translucent overlay of it rather than a second,
+   slightly-wrong warm grey sitting on top of a cool one. */
+.code {
+  margin: 1.3rem 0; border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  background: #f0f0f0;
+}
+[data-theme="dark"] .code { background: #242933; }
+.code-head {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .42rem .85rem;
+  background: rgba(0,0,0,.05); border-bottom: 1px solid rgba(0,0,0,.09);
+}
+[data-theme="dark"] .code-head {
+  background: rgba(255,255,255,.055); border-bottom-color: rgba(255,255,255,.09);
+}
+.code-lang {
+  font-family: var(--mono); font-size: .66rem; font-weight: 800;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--orange-deep);
+}
+.code-cap { font-size: .75rem; color: var(--text-muted); margin-left: auto; }
+/* Pygments wraps its `<pre>` in a `<div class="hl">`, so the padding goes on
+   the `<pre>` ALONE. A `pre.hl, div.hl pre, .hl` list padded the wrapper and
+   the pre both, and every code block on the site carried a doubled 30px band
+   above its first line and below its last.
+
+   Colors come from pygments.css — `friendly` in light, `nord-darker` in dark,
    each scoped so the pair swaps on specificity alone. Only the typography and
    the box belong here. Ligatures stay on: JetBrains Mono's `->` / `!=` / `=>`
    are the reason to pick it over a system mono. */
-pre.hl, div.hl pre, .hl {
-  border-radius: var(--radius); padding: .95rem 1.1rem;
+.hl { margin: 0; padding: 0; background: none; border-radius: 0; }
+.code pre {
+  margin: 0; padding: .9rem 1.05rem; border-radius: 0;
   overflow-x: auto; font-size: .83rem; line-height: 1.62;
   font-family: var(--mono);
   font-variant-ligatures: normal;
@@ -334,7 +400,8 @@ figure.fig img {
 figure.fig figcaption {
   margin-top: .5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.55;
 }
-.fig-num { font-weight: 700; color: var(--orange-deep); }
+.fig-num { font-weight: 800; color: var(--orange-deep); }
+.fig-src { font-style: italic; color: var(--text-muted); }
 
 /* ── Tables ───────────────────────────────────────────────────────────── */
 .table-wrap {
@@ -348,7 +415,8 @@ figure.fig figcaption {
   border-bottom: 1px solid var(--border-soft); vertical-align: top;
 }
 .table-wrap th {
-  background: var(--surface-2); font-weight: 700; font-size: .78rem;
+  background: var(--surface-2); font-weight: 700; font-size: .72rem;
+  letter-spacing: .03em; text-transform: uppercase;
   color: var(--text-muted); white-space: nowrap;
 }
 .table-wrap tr:last-child td { border-bottom: none; }
@@ -358,7 +426,7 @@ figure.fig figcaption {
   margin: 1.15rem 0; padding: .3rem 0;
   overflow-x: auto; overflow-y: hidden; text-align: center;
 }
-.katex { font-size: 1.02em; }
+.katex { font-size: 1.04em; }
 .math-error { color: var(--red); }
 
 /* ── D# tooltips ──────────────────────────────────────────────────────── */
@@ -369,30 +437,38 @@ abbr.dref {
 }
 
 /* ── Readable layer: inline term anchors (R4) ─────────────────────────── */
+/* Dotted, at full accent strength. A 1px dash in the pale `--amber-soft` was
+   the same weight as an underline artefact — under 15px Korean it read as
+   nothing, and a term whose marker is invisible is a term nobody opens. */
 .tref {
   font: inherit; background: none; border: none; padding: 0; cursor: pointer;
-  color: inherit; border-bottom: 1px dashed var(--amber-soft);
-  transition: color .14s, border-color .14s;
+  color: inherit; border-bottom: 1.5px dotted var(--orange);
+  transition: color .14s, border-color .14s, background .14s;
 }
 .tref:hover, .tref[aria-expanded="true"] {
   color: var(--orange-deep); border-bottom-color: var(--orange-deep);
+  background: var(--orange-soft);
 }
-.tref .ti { font-size: .78em; vertical-align: .25em; margin-left: .12em; opacity: .7; }
+.tref .ti { font-size: .72em; vertical-align: .3em; margin-left: .1em; color: var(--orange); }
 
+/* The panel opens where the word is, inside the paragraph, so `.tbox` is an
+   inline wrapper and only the card inside it becomes a block. */
+.tbox[hidden] { display: none; }
 .tdef {
-  display: block; margin: .65rem 0 .9rem;
-  padding: .7rem .95rem; font-size: .87rem; line-height: 1.68;
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-left: 3px solid var(--amber-soft);
+  display: block; margin: .7rem 0;
+  padding: .75rem .95rem; font-size: .89rem; line-height: 1.68;
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--orange);
   border-radius: 0 var(--radius) var(--radius) 0;
+  animation: tdef-in .18s ease;
 }
-.tdef[hidden] { display: none; }
+@keyframes tdef-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
 /* R13 — the title needs its own class. `display:block` on a bare `b` would
    also catch every `<b>` in the definition body and break the line at each
    emphasis. */
 .tdef .th {
   display: block; font-weight: 800; font-size: .83rem;
-  color: var(--orange-deep); margin-bottom: .18rem;
+  color: var(--orange-deep); margin-bottom: .15rem;
 }
 .tdef .tbody b, .tdef .tbody strong { display: inline; font-weight: 700; color: var(--text); }
 
@@ -400,7 +476,8 @@ abbr.dref {
 .quiz {
   margin: 1.6rem 0; padding: .95rem 1.1rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--orange); border-radius: var(--radius);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 /* Labelled, because an unlabelled bold question mid-article reads as the
    author asking rhetorically rather than as a section boundary to answer at. */
@@ -409,65 +486,89 @@ abbr.dref {
   text-transform: uppercase; color: var(--orange-deep); margin-bottom: .45rem;
 }
 .quiz .qq { font-weight: 700; font-size: .9rem; margin-bottom: .6rem; }
-.qopts { display: flex; flex-direction: column; gap: .3rem; }
+.qopts { display: flex; flex-direction: column; gap: .33rem; }
+/* A full-width button, not a radio: the radio dot read as a form to fill in
+   and invited a second pick, where the check has one shot at it. */
 .qopt {
-  display: flex; gap: .5rem; align-items: flex-start;
-  padding: .42rem .6rem; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--border-soft); font-size: .87rem;
+  display: block; width: 100%; text-align: left;
+  padding: .48rem .75rem; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg);
+  font: inherit; font-size: .87rem; color: var(--text);
   transition: background .14s, border-color .14s;
 }
-.qopt:hover { border-color: var(--amber-soft); }
-.qopt input { margin-top: .35em; accent-color: var(--orange); flex-shrink: 0; }
-/* Answered state is driven by a class on the section, so both the chosen
+.qopt:hover { border-color: var(--orange); }
+/* Answered state is driven by an attribute on the section, so both the chosen
    wrong option and the right one can be marked at once. */
 .quiz[data-answered] .qopt { cursor: default; }
 .quiz[data-answered] .qopt[data-correct="1"] {
   background: color-mix(in srgb, var(--green) 12%, transparent);
-  border-color: color-mix(in srgb, var(--green) 40%, transparent);
+  border-color: color-mix(in srgb, var(--green) 45%, transparent);
+  font-weight: 700;
 }
 .quiz[data-answered] .qopt[data-chosen="1"][data-correct="0"] {
   background: color-mix(in srgb, var(--red) 10%, transparent);
-  border-color: color-mix(in srgb, var(--red) 36%, transparent);
+  border-color: color-mix(in srgb, var(--red) 40%, transparent);
+  opacity: .75;
 }
 .qwhy {
-  margin-top: .7rem; padding-top: .6rem; font-size: .85rem; line-height: 1.65;
-  border-top: 1px dashed var(--border); color: var(--text-muted);
+  margin-top: .6rem; padding-left: .75rem; font-size: .85rem; line-height: 1.65;
+  border-left: 2px solid var(--orange); color: var(--text-muted);
 }
 .qwhy[hidden] { display: none; }
 
 /* ── Readable layer: collapsible detail (R3) ──────────────────────────── */
 details.fold {
-  margin: 1.2rem 0; border: 1px solid var(--border);
-  border-radius: var(--radius); background: var(--surface-2);
+  margin: 1.25rem 0; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface); overflow: hidden;
 }
+/* Open state takes the accent border — with the fold shut and open looking
+   alike, a reader scrolling back could not tell which ones they had already
+   pulled. */
+details.fold[open] { border-color: var(--orange); }
 details.fold > summary {
-  padding: .6rem .95rem; cursor: pointer; font-size: .86rem; font-weight: 700;
-  color: var(--text-muted); list-style: none;
+  padding: .65rem .95rem; cursor: pointer; font-size: .85rem; font-weight: 700;
+  color: var(--orange-deep); list-style: none; user-select: none;
 }
+details.fold > summary:hover { background: var(--orange-soft); }
 details.fold > summary::-webkit-details-marker { display: none; }
 /* The disclosure triangle is drawn rather than inherited so it can rotate
    with the open state and match the flow connector's chevron. */
 details.fold > summary::before {
   content: ""; display: inline-block; width: 6px; height: 6px;
   margin-right: .5rem; vertical-align: .12em;
-  border-right: 2px solid var(--amber-soft); border-bottom: 2px solid var(--amber-soft);
+  border-right: 2px solid var(--orange); border-bottom: 2px solid var(--orange);
   transform: rotate(-45deg); transition: transform .15s;
 }
 details.fold[open] > summary::before { transform: rotate(45deg); }
-details.fold > summary:hover { color: var(--orange-deep); }
-.fold-body { padding: 0 .95rem .3rem; }
+.fold-body { padding: .2rem .95rem .8rem; border-top: 1px solid var(--border); }
 .fold-body > :first-child { margin-top: 0; }
 .fold-body .table-wrap { margin-top: 0; }
 
 /* ── Readable layer: equation + symbol table (R7) ─────────────────────── */
 .eqblock { margin: 1.3rem 0; }
+/* The reading line is a rule, not a boxed callout: it belongs to the equation
+   under it, and a second frame would compete with the formula for the eye. */
 .eqread {
-  font-size: .86rem; color: var(--text-muted); margin-bottom: .1rem;
+  font-size: .88rem; color: var(--text-muted);
+  border-left: 2px solid var(--orange); padding-left: .75rem; margin: 0 0 .2rem;
 }
 .eqread em { color: var(--text); font-style: normal; font-weight: 600; }
-.eqblock .table-wrap { margin-top: .5rem; }
-.eqblock .table-wrap table { font-size: .8rem; }
-.eqsym { white-space: nowrap; }
+.eqblock .math-display { margin: .5rem 0; }
+
+/* A three-track grid, not a table. The 기호/이름/설명 header restated what a
+   glance already tells you and cost a band of chrome directly under the
+   formula, which is the one place the eye should run straight down. */
+.symtab { margin-top: .5rem; border-top: 1px solid var(--border); }
+.sym-row {
+  display: grid; grid-template-columns: 7rem 10rem minmax(0, 1fr);
+  gap: .6rem; align-items: baseline;
+  padding: .42rem .2rem; border-bottom: 1px solid var(--border-soft);
+  font-size: .85rem;
+}
+.sym-row:last-child { border-bottom: none; }
+.sym-k { white-space: nowrap; }
+.sym-n { font-weight: 700; font-size: .83rem; }
+.sym-d { color: var(--text-muted); font-size: .82rem; }
 
 /* ── Readable layer: five callout roles (R9) ──────────────────────────── */
 /* Backgrounds stay pale on purpose — the signal is the left border and the
@@ -544,35 +645,40 @@ details.fold > summary:hover { color: var(--orange-deep); }
    tinted ground so the reader learns them as one family — "this is background
    the paper assumes, not the paper's own argument". */
 .lineage, .scale, .split, .parts { margin: 1.5rem 0; }
+/* One framed shape for all three — a titled bar over a body — so the reader
+   learns them as one family rather than three differently-dressed boxes. */
 .lineage, .scale, .parts {
   border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--surface-2); padding: .95rem 1.1rem;
+  overflow: hidden;
 }
-.ln-title, .sc-title, .pt-title {
-  font-size: .68rem; font-weight: 800; letter-spacing: .09em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: .7rem;
+.box-head {
+  padding: .5rem .9rem; background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: .68rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-muted);
 }
+.box-body { padding: .9rem 1.1rem; }
 
 /* 계보 — a dated rail. */
-.ln-list { list-style: none; margin: 0; display: grid; gap: .8rem; }
+.ln-list { list-style: none; margin: 0; display: grid; gap: .7rem; }
 .ln-item {
-  display: grid; grid-template-columns: 4.6rem minmax(0, 1fr);
-  column-gap: .85rem; margin: 0; align-items: baseline;
+  display: grid; grid-template-columns: 4.4rem minmax(0, 1fr);
+  column-gap: 1rem; margin: 0; align-items: baseline;
 }
 .ln-when {
-  font-family: var(--mono); font-size: .72rem; font-weight: 600;
-  color: var(--orange-deep); font-variant-numeric: tabular-nums;
+  font-family: var(--mono); font-size: .74rem; font-weight: 800;
+  color: var(--orange); font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.ln-what { font-weight: 700; font-size: .93rem; }
-.ln-note {
-  grid-column: 2; font-size: .85rem; color: var(--text-muted);
-  line-height: 1.6; margin-top: .15rem;
-}
+.ln-text { display: block; font-size: .88rem; line-height: 1.62; }
+.ln-what { display: block; font-weight: 700; font-size: .87rem; margin-bottom: .12rem; }
+.ln-note { display: block; font-size: .84rem; color: var(--text-muted); line-height: 1.6; }
 /* The paper being read, tinted so the reader can see where they are standing
-   in the line they have just been walked down. */
-.ln-item.cur {
-  background: var(--orange-soft); border-radius: 8px;
-  padding: .5rem .6rem; margin: -.15rem -.6rem;
+   in the line they have just been walked down. The tint wraps the text cell
+   only: the date column is the rail the eye runs down, and tinting it breaks
+   the rail exactly where the reader is meant to be looking. */
+.ln-item.cur .ln-text {
+  background: var(--orange-soft); border-radius: 5px;
+  padding: .35rem .4rem; margin: 0 -.4rem;
 }
 .ln-item.cur .ln-what { color: var(--orange-deep); }
 
@@ -610,31 +716,40 @@ details.fold > summary:hover { color: var(--orange-deep); }
   font-size: .66rem; font-weight: 700; padding: .06rem .4rem; border-radius: 999px;
   border: 1px solid var(--border); color: var(--text-muted); background: var(--surface-2);
 }
-.sp-body p:first-child { margin-top: 0; }
+.sp-body p { margin: 0 0 .4rem; }
 .sp-body p:last-child { margin-bottom: 0; }
+/* No rule above the note. The card is already bounded and its body already
+   ends; a dashed line inside it cut a small card into two smaller ones. */
 .sp-note {
-  margin: .5rem 0 0; padding-top: .5rem; border-top: 1px dashed var(--border);
-  font-size: .79rem; font-style: italic; color: var(--text-muted);
+  margin: .55rem 0 0; font-size: .79rem; font-style: italic;
+  color: var(--text-muted);
 }
-.sp-cold { border-top: 2px solid var(--blue); }
-.sp-warm { border-top: 2px solid var(--orange); }
+/* No accent band on these. The 3px left border is this system's mark for a
+   single-column aside — the 요약 block, the five callouts, a term panel, a
+   quiz — and wearing it made each half of a two-up comparison read as its own
+   callout interrupting the flow, which is the opposite of holding two things
+   side by side. A card inside a multi-card grid is keyed by its heading. */
 .sp-cold .sp-head { color: var(--blue); }
 .sp-warm .sp-head { color: var(--orange-deep); }
 
 /* One object decomposed into named regions. */
+/* Rows run edge to edge and divide themselves: the regions are one object cut
+   into parts, and floating them as separate rounded chips said the opposite. */
 .pt-row {
-  display: grid; grid-template-columns: 10rem minmax(0, 1fr);
-  gap: .85rem; padding: .55rem .6rem; border-radius: 7px; font-size: .86rem;
+  display: grid; grid-template-columns: 9rem minmax(0, 1fr);
+  gap: .9rem; padding: .7rem .95rem; font-size: .87rem;
+  border-bottom: 1px solid var(--border); align-items: baseline;
 }
-.pt-row + .pt-row { margin-top: .3rem; }
-.pt-label { font-family: var(--mono); font-size: .78rem; font-weight: 700; }
+.pt-row:last-child { border-bottom: none; }
+.pt-label { font-family: var(--mono); font-size: .8rem; font-weight: 800; }
 .pt-label code { background: none; padding: 0; color: inherit; font-size: 1em; }
 .pt-range { margin-left: .35rem; font-weight: 400; color: var(--text-muted); }
-.pt-settled { background: color-mix(in srgb, var(--green) 10%, transparent); }
-.pt-partial { background: color-mix(in srgb, var(--amber) 12%, transparent); }
-.pt-open    { background: var(--surface); border: 1px solid var(--border); }
+.pt-settled { background: color-mix(in srgb, var(--green) 9%, transparent); }
+.pt-partial { background: color-mix(in srgb, var(--amber) 11%, transparent); }
+.pt-open    { background: var(--surface-2); }
 .pt-settled .pt-label { color: var(--green); }
 .pt-partial .pt-label { color: var(--amber); }
+.pt-open .pt-label    { color: var(--text-muted); }
 
 .fence-error {
   margin: 1rem 0; padding: .7rem .9rem; font-size: .85rem;
@@ -754,9 +869,10 @@ details.fold > summary:hover { color: var(--orange-deep); }
   .sc-label { grid-column: 1 / -1; }
   .ln-item { grid-template-columns: 1fr; }
   .ln-note { grid-column: 1; }
+  .sym-row { grid-template-columns: 1fr; gap: .1rem; }
 }
 
 @media print {
-  nav, .memo, .memo-fab, .scrim, .toc, .anchor { display: none !important; }
+  nav, .memo, .memo-fab, .scrim, .toc { display: none !important; }
   .shell { grid-template-columns: 1fr; }
 }
