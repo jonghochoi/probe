@@ -281,6 +281,7 @@ def discover() -> tuple[list[Paper], list[str]]:
         for required in ("title", "summary"):
             if not front.get(required):
                 problems.append(f"readable/{path.name}: missing `{required}`")
+        problems += _source_coverage(path.name, front, body)
 
         paper = Paper(stem=stem, path=path, front=front, body=body)
         if len(paper.metric) > METRIC_MAX:
@@ -290,6 +291,49 @@ def discover() -> tuple[list[Paper], list[str]]:
             )
         papers.append(paper)
     return papers, problems
+
+
+# ── Source coverage ─────────────────────────────────────────────────────────
+# The build cannot fetch the paper, so it cannot know what a rewrite left on
+# the table. What it CAN do is hold the author's own declarations to the body:
+# `figures:` and `appendix:` are the two places a rewrite states what it drew
+# on, and both used to drift silently because nothing read them back.
+
+_FIG_ID = re.compile(r'^\s*\{\s*"id"\s*:\s*"([^"]+)"', re.M)
+
+
+def _source_coverage(name: str, front: dict, body: str) -> list[str]:
+    problems: list[str] = []
+
+    declared = set(frontmatter.as_list(front.get("figures", "")))
+    cited = {
+        m.group(1)
+        for block in re.findall(r"```probe-figure\n(.*?)```", body, re.S)
+        for m in [_FIG_ID.search(block)] if m
+    }
+    for fid in sorted(cited - declared):
+        problems.append(
+            f"readable/{name}: figure `{fid}` is shown in the body but missing "
+            f"from `figures:` — the list is the rewrite's record of what it read"
+        )
+    for fid in sorted(declared - cited):
+        problems.append(
+            f"readable/{name}: `figures:` declares `{fid}` but the body never "
+            f"shows it — drop it or add the `probe-figure` fence"
+        )
+
+    # `appendix:` is a declaration, not something the build can verify against
+    # the paper — but an author who has to write the list has to look, and the
+    # sections most often skipped (limitations, the rig, the training recipe,
+    # the per-task tables) live exactly there. `appendix: none` is a valid
+    # answer for a paper that has none; silence is not.
+    if "appendix" not in front:
+        problems.append(
+            f"readable/{name}: missing `appendix:` — list the appendix sections "
+            f"this rewrite drew on (e.g. `[A, B, D.2, G]`), or `none` if the "
+            f"paper has no appendix"
+        )
+    return problems
 
 
 # ── Neighbours ──────────────────────────────────────────────────────────────

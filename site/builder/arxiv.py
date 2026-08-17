@@ -35,9 +35,32 @@ UA = "probe-readable/1.0 (+https://github.com/jonghochoi/probe)"
 TIMEOUT = 30
 
 # `<section id="S3" class="ltx_section">` → level 1; SS → 2; SSS → 3.
-_LEVEL = {"ltx_section": 1, "ltx_subsection": 2, "ltx_subsubsection": 3}
+#
+# `ltx_appendix` sits at level 1 with the numbered sections: LaTeXML gives an
+# appendix its own top-level `<section>` (`A4`), and leaving it out of this map
+# did not merely skip it — the appendix body landed on whatever section was
+# still open (usually nothing, so it was dropped outright) and its `<h2>` title
+# overwrote the last section appended. That silently cost every rewrite the
+# whole appendix, limitations sections included.
+#
+# `ltx_paragraph` is `\paragraph{Task.}` — the level the appendices of this
+# corpus are actually organised at, so it is a heading here rather than a bold
+# run leaking into the enclosing section's prose.
+_LEVEL = {
+    "ltx_section": 1, "ltx_appendix": 1,
+    "ltx_subsection": 2, "ltx_subsubsection": 3, "ltx_paragraph": 4,
+}
+# Which `<hN class="ltx_title_*">` sets a section title. Restricted on purpose:
+# `ltx_title_abstract` and `ltx_title_bibliography` are headings of blocks that
+# are NOT sections, and treating them as titles renames the section above them.
+_TITLE_OF = {
+    "ltx_title_section", "ltx_title_appendix", "ltx_title_subsection",
+    "ltx_title_subsubsection", "ltx_title_paragraph",
+}
 _DROP = {"script", "style", "noscript"}
+_HEADINGS = ("h1", "h2", "h3", "h4", "h5", "h6")
 _VERSIONED = re.compile(r"^(\d{4}\.\d{4,5})(v\d+)?$")
+_APPENDIX_ID = re.compile(r"^A\d+\b")
 
 
 class Unavailable(RuntimeError):
@@ -67,10 +90,15 @@ class Figure:
 
     @property
     def linkable(self) -> bool:
-        """False for a TikZ/PGF figure — drawn as inline SVG, so there is no
-        raster to hotlink. It still belongs in the list: the paper *has* that
-        figure, and the prompt needs to know it exists before deciding whether
-        to redraw it (R6) or leave the point unillustrated."""
+        """False only for a figure LaTeXML drew as inline `<svg>` — a TikZ/PGF
+        picture with no file behind it. A figure exported to a standalone
+        `.svg` and embedded with `<object data>` IS linkable and reads as one
+        here; the two used to be conflated, and the conflation is what made a
+        paper's own diagrams look unavailable.
+
+        An unlinkable figure still belongs in the list: the paper *has* it, and
+        the prompt needs to know it exists before deciding whether to redraw it
+        (R6) or leave the point unillustrated."""
         return bool(self.url)
 
 
@@ -92,6 +120,23 @@ class Paper:
     sections: list[Section] = field(default_factory=list)
     figures: list[Figure] = field(default_factory=list)
     tables: list[Table] = field(default_factory=list)
+
+    @property
+    def appendix(self) -> list[Section]:
+        """The appendix sections, in order — LaTeXML ids them `A<n>[.SS<m>]`.
+
+        Split out because the appendix is where this corpus keeps the things a
+        rewrite cannot be written without: the hardware rig, the training
+        recipe, the per-task tables, the algorithm listing, and — routinely —
+        the paper's own Limitations section. It is a source, not an annex, and
+        having to notice it in a flat section list is how it gets skipped.
+        """
+        return [s for s in self.sections if _APPENDIX_ID.match(s.id)]
+
+    @property
+    def body(self) -> list[Section]:
+        """The numbered sections — everything before the appendix."""
+        return [s for s in self.sections if not _APPENDIX_ID.match(s.id)]
 
 
 # ── Fetch ───────────────────────────────────────────────────────────────────
@@ -215,7 +260,7 @@ class _Extractor(HTMLParser):
                     self.sections.append(section)
                     return
 
-        if tag in ("h1", "h2", "h3", "h4") and any(c.startswith("ltx_title") for c in cls):
+        if tag in _HEADINGS and (cls & _TITLE_OF or "ltx_title_document" in cls):
             self._mode = "doctitle" if "ltx_title_document" in cls else "title"
             self._buf = []
             return
@@ -242,8 +287,13 @@ class _Extractor(HTMLParser):
             ))
             return
 
-        if tag == "img" and self._figs and not self._figs[-1].url:
-            src = a.get("src", "")
+        # `<img src>` is the common case; `<object data>` / `<embed src>` is how
+        # LaTeXML embeds a figure exported as a standalone `.svg`. Those are
+        # ordinary files on arXiv and hotlink exactly like a PNG — reading only
+        # `<img>` reported a paper's pipeline and schedule diagrams as
+        # unlinkable, which pushed the rewrite into redrawing them by hand.
+        if tag in ("img", "object", "embed") and self._figs and not self._figs[-1].url:
+            src = a.get("src") or a.get("data") or ""
             if src:
                 self._figs[-1].url = src if src.startswith("http") else f"{self.base}/{src}"
             return
@@ -269,20 +319,20 @@ class _Extractor(HTMLParser):
                 self._skip -= 1
             return
 
-        if tag in ("h1", "h2", "h3", "h4") and self._mode.startswith(("title", "doctitle")):
+        if tag in _HEADINGS and self._mode.startswith(("title", "doctitle")):
             text = self._flush()
             if self._mode.startswith("doctitle"):
                 self.title = self.title or text
-            elif self.sections:
-                self.sections[-1].title = text
+            elif self._current is not None:
+                self._current.title = text
             self._mode = ""
             return
 
         if tag == "span" and self._mode.endswith("-tag"):
             tagtext = self._flush().strip()
             base = self._mode[: -len("-tag")]
-            if base == "title" and self.sections:
-                self.sections[-1].number = tagtext
+            if base == "title" and self._current is not None:
+                self._current.number = tagtext
             elif base == "caption" and self._figs:
                 # "Figure 3:" / "Table 1:" → "3" / "1"
                 m = re.search(r"([\d.]+[a-z]?)", tagtext)
@@ -373,12 +423,23 @@ if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id>`
         # A traceback here would read as a bug in this script; it is a fact
         # about the paper, and the caller must stop rather than fall back.
         sys.exit(f"unavailable: {exc}")
+    linkable = [f for f in paper.figures if f.linkable]
+    appendix = paper.appendix
     print(f"{paper.version}  {paper.title}")
     print(f"  abstract {len(paper.abstract)} chars · "
-          f"{len(paper.sections)} sections · {len(paper.figures)} figures · "
+          f"{len(paper.sections)} sections ({len(appendix)} in the appendix) · "
+          f"{len(paper.figures)} figures ({len(linkable)} linkable) · "
           f"{len(paper.tables)} tables\n")
-    for s in paper.sections:
-        print(f"  {'  ' * (s.level - 1)}{s.anchor:9} {s.title[:56]:58} {len(s.text):6} chars")
-    print()
+    for group, label in ((paper.body, "본문"), (appendix, "부록")):
+        if not group:
+            continue
+        print(f"  ── {label} ──")
+        for s in group:
+            print(f"  {'  ' * (s.level - 1)}{s.anchor:11} {s.title[:54]:56} "
+                  f"{len(s.text):6} chars")
+        print()
     for f in paper.figures:
-        print(f"  {f.id:12} Fig {f.number:4} {f.url}")
+        # An unlinkable figure is a decision to make, not a line to skim past:
+        # R6 wants the paper's own figure wherever one exists.
+        print(f"  {f.id:12} Fig {f.number:4} "
+              f"{f.url or '— inline SVG, no file to hotlink (R6: redraw or skip)'}")
