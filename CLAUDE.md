@@ -17,16 +17,16 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination |
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
-| `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat, no per-paper folder), from `/analyze`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter (`analysis_of`, title, authors, pillars, tags, links, summary). Contract: `site/AUTHORING.md` — not `docs/style.md`, which governs `scouting/` only |
+| `scouting/AUTHORING.md` | human | **Single source of truth for the `scouting/` output format** (emoji, links, Korean authoring) — the sibling of `site/AUTHORING.md`, each contract sitting with the track it governs. The reading-site track is NOT covered: `analysis/<id>.md` is governed by `site/AUTHORING.md`. `scouting/templates/` holds the report skeleton it describes |
+| `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat, no per-paper folder), from `/analyze`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter (`analysis_of`, title, authors, pillars, tags, links, summary). Contract: `site/AUTHORING.md` — not `scouting/AUTHORING.md`, which governs `scouting/` only |
 | `analysis_legacy/` | frozen | Legacy corpus — one `<arxiv-id>/analysis.md` per paper, in a format nothing else in the repo uses. **Read by nothing** (prompt, site build and every lint skip it) and never regenerated; kept until those papers are re-written under `analysis/`. Its `README.md` is a static index of what the folder holds |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
-| `docs/style.md` | human | **Single source of truth for the `scouting/` output format** (emoji, links, Korean authoring). The reading-site track is NOT covered — `analysis/<id>.md` is governed by `site/AUTHORING.md` |
-| `docs/agent-setup.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
+| `SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
 | `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `analysis/<id>.md`: front matter, body rules R1–R15, render traps, what the build enforces), `build-site.py` + `builder/` (the static-site generator: a landing briefing, a memo hub, plus one page per rewrite), and `requirements.txt`. Nothing but `analysis/` is published and `analysis_legacy/` is not read at all. `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 | `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
-| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6; the rewrite track is exempt (`site/AUTHORING.md` §3-4). Local use: `python3 scripts/check-render-tilde.py` |
+| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `scouting/AUTHORING.md` §4-6; the rewrite track is exempt (`site/AUTHORING.md` §3-4). Local use: `python3 scripts/check-render-tilde.py` |
 | `scripts/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 scripts/check-commit-style.py -` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
@@ -171,10 +171,11 @@ exceptions.
 
 ### Reference / structural docs
 
-`CLAUDE.md`, `docs/style.md`, `site/AUTHORING.md`, `site/README.md`. Plain
-headers, **no emoji**.
+`CLAUDE.md`, `SETUP.md`, `scouting/AUTHORING.md`, `site/AUTHORING.md`,
+`site/README.md`. Plain headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
-`style.md`. A folder README's H1 is the folder name (e.g. `# analysis/`).
+`scouting/AUTHORING.md`. A folder README's H1 is the folder name
+(e.g. `# analysis/`).
 
 ### Shared rules (both families)
 
@@ -192,7 +193,7 @@ apply to:
   its own `[STABLE]` / `[AGENT-INPUT]` section schema.
 - `.claude/prompts/**`, `.claude/commands/**` — agent prompts, free-form.
 - Agent-generated output and its templates — `scouting/templates/report.md`
-  and the dated reports. These follow `docs/style.md`'s own emoji system (one
+  and the dated reports. These follow `scouting/AUTHORING.md`'s own emoji system (one
   emoji on each `##` header, `###` and below plain) plus its Korean
   conventions.
 - `analysis/<id>.md` and the reading site — a separate track with its own
@@ -217,11 +218,11 @@ new doc be in?":
 - **Default — Korean (한글).** All agent outputs — the per-paper rewrites
   `analysis/<id>.md` and the `scouting/` reports — are Korean. Templates that
   those folders ship (`scouting/templates/`) are Korean as well.
-- **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
-  `docs/style.md`, `site/AUTHORING.md`, `site/README.md`. The audience is
-  anyone reading PRs or
-  history; English keeps that surface grep-able and consistent with the
-  enforced English commit-message rule.
+- **Exception 1 — Contributor / style / operator docs in English.**
+  `CLAUDE.md`, `SETUP.md`, `scouting/AUTHORING.md`, `site/AUTHORING.md`,
+  `site/README.md`. The audience is anyone reading PRs or history; English
+  keeps that surface grep-able and consistent with the enforced English
+  commit-message rule.
 - **Exception 2 — Project front door in English.** `README.md`. The
   GitHub-rendered top page is the public-facing entry and the single
   onboarding surface for a newcomer.
@@ -245,8 +246,8 @@ thread and the commit body are where the change lives; a comment that also
 carries it goes stale the next time the rule moves, and a reader cannot tell
 which half is current.
 
-What this rules out, in a comment, a docstring, a rule in `AUTHORING.md` /
-`docs/style.md`, or a prompt:
+What this rules out, in a comment, a docstring, a rule in
+`scouting/AUTHORING.md` / `site/AUTHORING.md`, or a prompt:
 
 - **Past forms** — "X used to be Y", "this was previously a Z", "no longer
   holds", "the earlier trigger did …".
@@ -274,23 +275,26 @@ becomes a silent orphan. Walk this list every time:
 - [ ] **Classify the doc** — narrative/onboarding (H1 emoji allowed) or
       reference/structural (plain headers). Pick one consistently per the
       table above and do not mix levels.
-- [ ] **Pick the location** — onboarding / formatting guides live under
-      `docs/`; the reading site's own rules live under `site/`; contributor /
-      governance docs sit at the repo root next to `CLAUDE.md`.
+- [ ] **Pick the location** — a doc governing one track lives in that track's
+      folder (`scouting/AUTHORING.md`, `site/AUTHORING.md`); repo-wide
+      contributor, governance and operator docs sit at the repo root next to
+      `CLAUDE.md`. Those two are the only options — a doc that fits neither
+      belongs in one of them rewritten, not in a new folder.
 - [ ] **Add a row to the "Repository map" table in this file (`CLAUDE.md`).**
       That table is the canonical path index; the root `README.md` links only
       the headline docs in prose, so wire a new doc in here.
 - [ ] **If it pins paths that live elsewhere** (templates, prompts, output
       files), grep the new doc against the current layout — every
-      referenced path must resolve after the latest restructure.
+      referenced path must resolve.
 - [ ] **Run a final `grep -rn '<new-doc-basename>' .`** — at least one
       inbound link must exist. Zero inbound links = orphan.
 - [ ] **Run `python3 scripts/check-doc-links.py`** — every local path
-      reference in `CLAUDE.md` / `README.md` must resolve. This lint is wired
-      into CI (`.github/workflows/check-doc-links.yml`) and is the automated
-      backstop for the dangling-path half of this checklist. (Pass the prompts
-      or `docs/style.md` as explicit args to scan them too; they are off the
-      default set because they carry illustrative example paths.)
+      reference in `CLAUDE.md` / `README.md` / `SETUP.md` must resolve. This
+      lint is wired into CI (`.github/workflows/check-doc-links.yml`) and is
+      the automated backstop for the dangling-path half of this checklist.
+      (Pass the prompts or the two `AUTHORING.md` files as explicit args to
+      scan them too; they are off the default set because they carry
+      illustrative example paths.)
 
 ## When adding a new pillar (P6+)
 
@@ -311,21 +315,22 @@ and the lints:
       tie, tracked items — mirror the existing §5.N blocks).
 - [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for
       it (replace every `<PILLAR>` token in `.claude/prompts/scouting.txt`
-      per `docs/agent-setup.md`).
+      per `SETUP.md`).
 - [ ] **Extend the pillar-keyed tooling**: `PILLAR_NAMES` / `PILLAR_ORDER` /
       `PILLAR_RE` in `site/builder/corpus.py` (an out-of-range `P#` lands
       the paper in 미분류 on the site), the §3-1 palette table in
-      `docs/style.md` (the palette's source of truth), and the default scan
-      set in `scripts/check-doc-links.py`.
+      `scouting/AUTHORING.md` (the palette's source of truth), and the default
+      scan set in `scripts/check-doc-links.py`.
 - [ ] **Run `python3 scripts/check-doc-links.py`** — the new file's path
       references (and every doc now referencing it) must resolve.
 
 ## Where to read more
 
 - `README.md` — motivation, pipeline, agent stack + setup, references.
-- `docs/style.md` — the output format for the `scouting/` track (this file
-  governs commits and *contributor* docs, not output).
+- `scouting/AUTHORING.md` — the output format for the `scouting/` track (this
+  file governs commits and *contributor* docs, not output).
 - `site/AUTHORING.md` — the output format for the reading-site track
   (`analysis/<id>.md`); `site/README.md` maps the generator around it.
-- The scouting track is described in `README.md` → Pipeline and
-  `docs/agent-setup.md`.
+- `SETUP.md` — deploying the scouting routine (RemoteTrigger form, network
+  allowlist, first-run verification); the track itself is described in
+  `README.md` → Pipeline.

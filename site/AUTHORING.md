@@ -14,10 +14,10 @@ against that page — not against how github.com would render the same file.
 Where the two disagree, the page wins, and §3-4 lists the sibling track's rules
 that deliberately do **not** apply here.
 
-`docs/style.md` governs `scouting/`, which *is* read as rendered Markdown on
-github.com. It does not apply to this track, and this guide does not
-cross-reference it — the rules the two tracks share are restated here in the
-terms of this renderer.
+`scouting/AUTHORING.md` governs `scouting/`, which *is* read as rendered
+Markdown on github.com. It does not apply to this track, and this guide does
+not cross-reference it — the rules the two tracks share are restated here in
+the terms of this renderer.
 
 ---
 
@@ -623,9 +623,9 @@ code span a bare URL is fine and stays literal.
 
 ### 3-4. Rules from the sibling track that do NOT apply here
 
-`scouting/` is read as Markdown *on github.com*, and `docs/style.md` carries
-rules for that surface. Two of them are dead letters on this track — do not
-carry them over, and do not "fix" a rewrite to satisfy them:
+`scouting/` is read as Markdown *on github.com*, and `scouting/AUTHORING.md`
+carries rules for that surface. Two of them are dead letters on this track — do
+not carry them over, and do not "fix" a rewrite to satisfy them:
 
 - **The single-`~` strikethrough trap.** github.com's GFM treats one tilde as a
   strikethrough delimiter, so two raw tildes in a paragraph strike out

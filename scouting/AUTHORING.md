@@ -1,7 +1,11 @@
-# PROBE Style Guide
-> **Version:** v1.34 (2026-08-17) · **Scope:** All files under `scouting/`
-> This document is the single source of truth for formatting rules **on that track**.
-> Agent reads this file before producing any output. Never modify output format without updating this guide first.
+# Scouting Report Authoring Guide
+> **Version:** v1.35 (2026-08-17) · **Scope:** every `scouting/P#/YYYY-MM-DD.md`
+> — the dated reports the scheduled routine writes, plus the templates in
+> `scouting/templates/`.
+> This document is the single source of truth for that format.
+> `.claude/prompts/scouting.txt` owns the *procedure* (retrieval, scoring,
+> commit) and defers to this file for the output contract. Agent reads this
+> file before producing any output; change a rule here first, then the prompt.
 >
 > The reading site is a separate track with its own contract: `analysis/<id>.md`
 > is governed by `site/AUTHORING.md`, not by this guide. Nothing here applies to it.
