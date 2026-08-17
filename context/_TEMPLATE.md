@@ -7,7 +7,7 @@
 > `context/MASTER.md`.
 > **Agent usage**: *static* context. The retrieval agent reads (never writes)
 > this file. Findings go to `scouting/P<N>/YYYY-MM-DD.md` (one per run).
-> **Formatting & authoring rules**: `docs/style.md` (single source of
+> **Formatting & authoring rules**: `scouting/AUTHORING.md` (single source of
 > truth — agent must read it before producing output).
 
 ---
@@ -68,7 +68,7 @@ Excluded from the digest unless an unusually strong tie to P<N> or a P<N> Decisi
 ## 5. P<N> Tracked Literature [LIVING] [AGENT-INPUT]
 
 > Hard cap 8 pinned. Rebalance quarterly; replace, don't append.
-> **Format rule**: every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs. Canonical: `docs/style.md` §3.
+> **Format rule**: every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs. Canonical: `scouting/AUTHORING.md` §3.
 
 ### P<N> Pinned — <Pillar Name>
 | Paper | arXiv | Year | Role |

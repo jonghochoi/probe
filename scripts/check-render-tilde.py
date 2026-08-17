@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Report prose tildes that pair into a GitHub strikethrough (docs/style.md §4-6).
+"""Report prose tildes that pair into a GitHub strikethrough (scouting/AUTHORING.md §4-6).
 
 Scope is the github.com-rendered track — `scouting/`. The reading site
 (`analysis/`) is not one: its parser needs the doubled `~~`, so a pair of single
@@ -35,6 +35,15 @@ import sys
 
 DEFAULT_GLOBS = (
     "scouting/**/*.md",
+)
+
+# The track's format contract lives inside the scanned tree but is a
+# human-owned spec, not an agent output. It states the rule by showing the
+# forbidden forms (`~300M`, `4.7~35.6GB`, the `~함 / ~음` verb endings) in
+# prose and in its substitution table, so it fails its own check by
+# construction — skip it in the default scan.
+DEFAULT_EXCLUDES = (
+    "scouting/AUTHORING.md",
 )
 
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
@@ -121,14 +130,15 @@ def main() -> int:
             if p.endswith(".md"):
                 paths.append(p)
     else:
-        paths = [f for g in DEFAULT_GLOBS for f in glob.glob(g, recursive=True)]
+        paths = [f for g in DEFAULT_GLOBS for f in glob.glob(g, recursive=True)
+                 if f not in DEFAULT_EXCLUDES]
     paths = sorted(set(paths))
 
     findings, singles = scan(paths)
 
     for path, lineno, count, excerpt in findings:
         print(f"{path}:{lineno} — {count} raw tildes in one inline context "
-              f"→ renders as strikethrough (docs/style.md §4-6): {excerpt}")
+              f"→ renders as strikethrough (scouting/AUTHORING.md §4-6): {excerpt}")
 
     if findings:
         files = len({f[0] for f in findings})

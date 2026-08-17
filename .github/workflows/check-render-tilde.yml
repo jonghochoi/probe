@@ -10,7 +10,7 @@ name: Check render tilde
 # Lint-only (no auto-fix / bot commit): the correct replacement depends on
 # intent — an en dash for a range (`1~4편` → `1–4편`) versus 약 for an
 # approximation (`~300M` → `약 300M`) — so it needs human judgment, unlike the
-# mechanical math fixes. Rule + substitution table: docs/style.md §4-6.
+# mechanical math fixes. Rule + substitution table: scouting/AUTHORING.md §4-6.
 #
 # A lone tilde renders literally and is NOT flagged; only the pairing
 # condition fails the job.

@@ -32,12 +32,13 @@ Usage (repo root):
     python3 scripts/check-doc-links.py [PATH ...]
 
 No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
-(its Repository-map table) and `README.md`, where every path reference is meant
-to point at a real file, plus the `context/` files (MASTER + P0-P5) the
-scheduled routine reads every run. The agent-output spec (`docs/style.md`) and
-the prompts are out of the default set — they are full of *illustrative*
-example paths (example arXiv ids, `<id>` placeholders) by design — but can be
-scanned explicitly by passing them as PATH args.
+(its Repository-map table), `README.md` and `SETUP.md`, where every path
+reference is meant to point at a real file, plus the `context/` files
+(MASTER + P0-P5) the scheduled routine reads every run. The agent-output specs
+(`scouting/AUTHORING.md`, `site/AUTHORING.md`) and the prompts are out of the
+default set — they are full of *illustrative* example paths (example arXiv ids,
+`<id>` placeholders) by design — but can be scanned explicitly by passing them
+as PATH args.
 
 Exit codes: 0 = clean / 1 = unresolved references found / 2 = nothing to scan.
 """
@@ -71,12 +72,14 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant to
 # point at real files, plus the human-owned context files the scheduled routine
-# reads every run (their `docs/style.md`-style pointers must resolve). style.md
-# / prompts are intentionally excluded (they carry illustrative example paths)
+# reads every run (their `scouting/AUTHORING.md`-style pointers must resolve).
+# The output specs (`scouting/AUTHORING.md`, `site/AUTHORING.md`) and the
+# prompts are intentionally excluded (they carry illustrative example paths)
 # but can be passed explicitly as PATH args.
 _DEFAULT_DOCS = [
     "CLAUDE.md",
     "README.md",
+    "SETUP.md",
     "context/MASTER.md",
     "context/P0.md",
     "context/P1.md",

@@ -14,7 +14,7 @@ on:
     paths:
       - 'CLAUDE.md'
       - 'README.md'
-      - 'docs/**'
+      - 'SETUP.md'
       - 'context/**'
       - '.claude/**'
       - 'scripts/check-doc-links.py'

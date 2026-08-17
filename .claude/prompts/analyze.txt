@@ -35,7 +35,7 @@ must look like, and this prompt does not restate it:
       bare URLs in Korean prose
   §4  what the build enforces vs. what only review catches
 
-`docs/style.md` governs `scouting/` and does NOT apply to this track. Do not
+`scouting/AUTHORING.md` governs `scouting/` and does NOT apply to this track. Do not
 read it for rewrite rules and do not carry its conventions over.
 
 This prompt owns the PROCEDURE below: which paper, where the facts come from,
