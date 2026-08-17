@@ -221,10 +221,25 @@ def equation(data: dict, katex_block, inline_md) -> str:
 
 def flow(data: dict, inline_md) -> str:
     """A hand-drawn step diagram — R6's fallback for a point the paper does
-    not illustrate. HTML/CSS boxes, never ASCII art."""
+    not illustrate. HTML/CSS boxes, never ASCII art.
+
+    `why` is required and prints under the diagram. A redrawn figure competes
+    with figures the authors already drew, and when it wins by accident the
+    reader gets a box of our labels in place of the paper's own picture — with
+    nothing on the page saying an original existed. Naming the gap is cheap;
+    having to name it is the check.
+    """
     steps = data.get("steps")
     if not isinstance(steps, list) or not steps:
         raise FenceError("probe-flow: `steps` must be a non-empty list")
+    why = str(data.get("why", "")).strip()
+    if not why:
+        raise FenceError(
+            "probe-flow: `why` is required — state which figure of the paper "
+            "would have covered this point and why it cannot be used "
+            "(no such figure / inline SVG with no file to hotlink). "
+            "If the paper does illustrate it, use `probe-figure` instead"
+        )
     items = "".join(
         f'<li class="fstep"><span class="fs-label">{inline_md(str(s.get("label", "")))}</span>'
         + (f'<span class="fs-note">{inline_md(str(s["note"]))}</span>' if s.get("note") else "")
@@ -235,7 +250,10 @@ def flow(data: dict, inline_md) -> str:
     )
     title = (data.get("title") or "").strip()
     head = f'<p class="flow-title">{_esc(title)}</p>' if title else ""
-    return f'<div class="flow">{head}<ol class="fsteps">{items}</ol></div>'
+    # Printed, not merely required: the reader deserves to know this box is
+    # ours and what the paper had in its place.
+    note = f'<p class="flow-why"><em class="fig-src">{_esc(why)}</em></p>'
+    return f'<div class="flow">{head}<ol class="fsteps">{items}</ol>{note}</div>'
 
 
 # ── ```probe-lineage ────────────────────────────────────────────────────────

@@ -68,11 +68,25 @@ ACQUISITION:
 
     cd site && python3 -m builder.arxiv <id>
 
-prints the section tree, figure ids + absolute URLs, and table count. Import
+prints the section tree — split into `── 본문 ──` and `── 부록 ──` with a char
+count per section — plus figure ids, absolute URLs, and the table count. Import
 it (`from builder.arxiv import load`) to get the full text: `load(id)`
-returns `Paper(version, title, abstract, sections, figures, tables)`, with
-math preserved as `$…$` from `<math alttext>` and every figure carrying the
-`id` that goes verbatim into the `figures:` front-matter list.
+returns `Paper(version, title, abstract, sections, figures, tables)` with
+`.body` / `.appendix` splitting the sections, math preserved as `$…$` from
+`<math alttext>`, and every figure carrying the `id` that goes verbatim into
+the `figures:` front-matter list.
+
+TWO LISTS IT PRINTS THAT ARE CHECKLISTS, NOT MENUS:
+
+  * The `── 부록 ──` block. The appendix is the second half of the source, not
+    supplementary reading — limitations, the rig, the observation vector, the
+    training recipe, baseline asymmetries, the evaluation protocol and the
+    per-task tables live there. AUTHORING R15 states what to mine and the
+    `appendix:` front-matter key records what you took.
+  * The figure list. A figure printed with a URL is one you can hotlink; only
+    `— inline SVG, no file to hotlink` means there is no file behind it.
+    AUTHORING R6 ranks the paper's own figures ahead of anything you draw, and
+    `probe-flow` now REQUIRES a `why` naming the gap it fills.
 
 **NO HTML EDITION → STOP.** `arxiv.Unavailable` means arXiv has no HTML build
 for this paper (~4% of this corpus). Tell the human, name the paper, and stop.
@@ -137,7 +151,15 @@ PROCEDURE
      - Is every `co-ten` about one of OUR decisions? (R9)
      - Do the author-stated limitations close Act 3, not Act 4? (R9)
      - Is every resource link confirmed in the paper? (R10)
-     - Is every figure id in `figures:` actually cited in the body?
+     - Is the figure that carries the paper's CENTRAL mechanism on the page?
+       Walk `arxiv.py`'s figure list once more and name, for each linkable
+       figure you left out, why. (R6)
+     - Does any `probe-flow` on the page survive that walk — i.e. is its `why`
+       still true now that you have seen every figure? (R6)
+     - Which appendix sections did you take something from, and does
+       `appendix:` list exactly those? Limitations, the rig, the observation
+       vector, the training recipe and the baseline asymmetry are the five
+       that get skipped. (R15)
      - Does every opinion anchor to a `D#` that actually exists?
 
 9. COMMIT — one paper per commit:

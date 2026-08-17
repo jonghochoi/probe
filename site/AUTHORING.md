@@ -46,6 +46,7 @@ generator: readable-paper/v2
 arxiv_html: <arxiv-id>v<n>       # the exact version actually read
 arxiv_fetched: YYYY-MM-DD
 figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
+appendix: [<A>, <B.2>, <G>]      # appendix sections drawn on, or `none`
 terms: <n>                       # count of inline term anchors
 metric: <the headline number>    # optional — omit rather than invent one
 summary: >                       # 한 문단 요약 — on the page AND on the card
@@ -65,7 +66,8 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `links` | `kind\|url` pairs; kinds fixed at `arxiv` `code` `weights` `data` `site` `demo` (R10). Unknown kinds are dropped rather than guessed at |
 | `published` / `generated` | the paper's date / this rewrite's. `generated` sorts the landing page |
 | `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
-| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them |
+| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **The build matches this list against the `probe-figure` fences in the body both ways** — an id in one and not the other is reported |
+| `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — see R15. An empty value is not accepted, because "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate |
 | `terms` | count of inline term anchors |
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment: `TTFA 399.5 → 129.2 ms`, `폐루프 25 Hz · denoising 1 스텝`. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
 | `generator` | `readable-paper/v2` |
@@ -83,7 +85,7 @@ take a hedge (`~인 것 같아요`), not a flat assertion.
 
 ---
 
-## 2. Body Rules (R1–R14)
+## 2. Body Rules (R1–R15)
 
 Free-form Korean markdown under a fixed four-act spine. There is no section
 schema beyond the acts — a rigid spine would turn a re-telling back into a form
@@ -273,27 +275,67 @@ arXiv:
      "caption": "<한글 캡션>", "source": "Figure <n>, 원문 §<x.y>"}
     ```
 
+**"First" is a ranking, and it is the rule most easily lost.** The authors drew
+their figures to carry the paper's argument, and the reader can hold ours
+against the original. So before any hand-made component goes on the page, the
+paper's own figure list is walked:
+
+- **The figure that carries the paper's central mechanism is not optional.**
+  If the paper illustrates the thing the rewrite is named after — the schedule,
+  the pipeline, the architecture — that figure is cited, in the section that
+  explains it. A rewrite whose Act 2 has no figure while the paper has one is
+  wrong regardless of how good the prose is.
+- **Read `arxiv.py`'s figure list as a checklist, not as a menu.** Its CLI
+  prints the linkable count and marks every unlinkable figure explicitly. A
+  figure that shows a mechanism, a timeline, a rig or a task set and is *not*
+  in the rewrite is a decision to be able to defend.
+- **Appendix figures count.** They are usually the rig, the task set, the
+  ablation curves and the error analysis — see R15.
+- **"Unlinkable" means one specific thing**: LaTeXML drew the figure as inline
+  `<svg>` (a TikZ/PGF picture), so there is no file behind it. A figure
+  exported to a standalone `.svg` and embedded with `<object data>` is an
+  ordinary file and hotlinks like a PNG. `arxiv.py` used to conflate the two
+  and report every `.svg` figure as unavailable — which is how one rewrite came
+  to redraw a paper's own pipeline and schedule diagrams by hand. If a figure
+  looks unavailable, check what the extractor actually says before redrawing.
 - **Never mirror an image into the repo** — hotlink only, on copyright
   grounds. A relative `url` means someone did, and the build rejects it.
 - `loading=lazy` + `no-referrer` are the renderer's job, not yours.
 - Caption: translate the original caption to Korean. The origin goes in
   `source`, never in `caption`.
+- **A caption is plain text.** It is escaped, not parsed — `**강조**` and
+  `` $`math`$ `` inside a caption publish as their own characters. Write Greek
+  letters and symbols as themselves (`α`, `s_min`, `H−d`) and carry emphasis in
+  the paragraph next to the figure, which *is* markdown. The build reports the
+  two most common cases, but not every one.
 - **`source` is split on its first comma** — the head becomes the figure-number
   badge that leads the caption (`Figure 3 — …`), the tail becomes the italic
   origin at the end (`(원문 §3.2)`). Write it as `Figure <n>, 원문 §<x.y>` and
   both halves land where they belong; write it as one run with no comma and the
   whole thing prints as the origin with no badge.
-- Some figures are inline SVG (TikZ) and have no hotlinkable raster —
+- Some figures are inline SVG (TikZ) and have no hotlinkable file —
   `arxiv.py` reports these with an empty `url` / `linkable == False`. Redraw or
-  leave the point unillustrated; never link a broken URL.
+  leave the point unillustrated; never link a broken URL. **An algorithm
+  listing is one of these**, and transcribing it as a captioned code block
+  (R8) beats redrawing it as boxes: it is the paper's own artifact, line
+  numbers and all, and it says more per line than a flow diagram can.
 - Where the paper has NO corresponding figure and a sequence still needs
   showing, use `probe-flow` — never ASCII art, never raw HTML:
 
       ```probe-flow
       {"title": "<이 흐름의 이름>",
+       "why": "<원문의 어느 그림도 이 지점을 덮지 못하는 이유>",
        "steps": [{"label": "<단계>", "note": "<조건이나 빈도>"},
                  {"label": "<단계>"}]}
       ```
+
+  **`why` is required and prints under the diagram.** A redrawn box competes
+  with figures the authors already made, and when it wins by accident the page
+  shows our labels where the paper had a picture, with nothing saying an
+  original existed. Name which figure would have covered the point and why it
+  cannot serve (no such figure / inline SVG with no file). If the answer is
+  "the paper does illustrate this", the fence is the wrong component — use
+  `probe-figure`.
 
 ### 2-7. R7 — Math
 
@@ -456,6 +498,41 @@ obvious throwaways beside the answer.
 - **R14. A `**` run cannot close between a closing paren and a Korean
   particle** — see §3-2.
 
+### 2-13. R15 — The appendix is a source, not an annex
+
+In this corpus the appendix is where the paper keeps what a rewrite cannot be
+written without. It is not supplementary reading that a thorough author gets to
+last; it is the second half of the source, and R3's restoration floor is not
+reachable without it.
+
+What lives there, measured on the two papers this rule came from:
+
+| Usually in the appendix | Why the rewrite needs it |
+|---|---|
+| **Limitations / Future Work** | R9 requires the author-stated limitations to close Act 3. On many papers that section exists ONLY in the appendix |
+| Related Work | the honest input to the 계보 component (R5) — the authors' own placement of their work |
+| The rig | robot, DoF count, cameras, sensors, control rate, **what the observation vector actually contains**. The main text says "proprioception"; the appendix says which 45 numbers |
+| Training recipe | steps, batch, what was frozen, how a new parameter was initialised, which rows share a checkpoint |
+| Baseline settings | the one hyperparameter that is not symmetric between the method and its strongest baseline |
+| Evaluation protocol | trial count, time limit, how a partial-credit score decomposes |
+| Algorithm listings | the method as executable steps — see R6 on transcribing them |
+| Per-task tables, ablation curves, error analysis | the numbers Act 3 argues from, and the figures that show their shape |
+
+Working rule:
+
+- **Walk the appendix section list before writing, the way you walk the figure
+  list.** `arxiv.py`'s CLI prints it as its own `── 부록 ──` block with a char
+  count per section; a section with real content that the rewrite ignores is a
+  decision to be able to defend.
+- **Cite the section you took it from** — `(부록 D.2)`, `원문 부록 F.4` — in
+  prose and in a figure's `source`. It is the only way a reader can go back,
+  and it is how a mis-attribution gets caught.
+- **`appendix:` in the front matter lists what you drew on.** The build cannot
+  check it against the paper, so the key exists to make the sweep a step you
+  performed rather than one you meant to.
+- Appendix detail is exactly what `::: details` (R3) is for. Collapsing it is
+  fine; leaving it out is not.
+
 ---
 
 ## 3. What Publishes as Literal Text
@@ -544,9 +621,9 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 
 | Rule | Enforced by |
 |---|---|
-| Front matter required keys, `readable_of` == file name | `site/builder/corpus.py` |
+| Front matter required keys, `readable_of` == file name, `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
-| `probe-*` fence schemas — term, eq, figure, flow, lineage, scale, split, parts | `site/builder/mdext/probefence.py` |
+| `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |

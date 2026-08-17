@@ -684,6 +684,9 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .fs-label { display: block; font-weight: 700; }
 .fs-note { display: block; color: var(--text-muted); font-size: .82rem; margin-top: .12rem; }
+/* Says this box is ours and what the paper had instead (R6). Set like a figure
+   origin, because that is the line it stands in for. */
+.flow-why { margin: .6rem 0 0; font-size: .78rem; line-height: 1.5; }
 
 /* ── Readable layer: planted context (R5) ─────────────────────────────── */
 /* Four components for the three kinds of context that previously had nowhere
