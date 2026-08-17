@@ -38,7 +38,7 @@
   --nav-h:       56px;
   /* No `--content-max`: the column falls out of the shell's own arithmetic —
      1180 less padding, rail and gutter, about 88ch of Korean. Capping the
-     article on top of that left a wide empty gutter to its right AND wrapped
+     article on top of that leaves a wide empty gutter to its right AND wraps
      every component's text one or two lines early, which reads as slack inside
      the components rather than as a comfortable measure. */
   --toc-w:       15.5rem;   /* wide enough that a section title wraps at most once */
@@ -689,8 +689,8 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .flow-why { margin: .6rem 0 0; font-size: .78rem; line-height: 1.5; }
 
 /* ── Readable layer: planted context (R5) ─────────────────────────────── */
-/* Four components for the three kinds of context that previously had nowhere
-   to go but prose: 계보, 숫자의 지형, and 대조 in its two shapes. They share a
+/* Four components for the three kinds of context that have nowhere else to go
+   but prose: 계보, 숫자의 지형, and 대조 in its two shapes. They share a
    tinted ground so the reader learns them as one family — "this is background
    the paper assumes, not the paper's own argument". */
 .lineage, .scale, .split, .parts { margin: 1.5rem 0; }
@@ -775,7 +775,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 /* No accent band on these. The 3px left border is this system's mark for a
    single-column aside — the 요약 block, the five callouts, a term panel, a
-   quiz — and wearing it made each half of a two-up comparison read as its own
+   quiz — and wearing it makes each half of a two-up comparison read as its own
    callout interrupting the flow, which is the opposite of holding two things
    side by side. A card inside a multi-card grid is keyed by its heading. */
 .sp-cold .sp-head { color: var(--blue); }
@@ -793,12 +793,27 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .pt-label { font-family: var(--mono); font-size: .8rem; font-weight: 800; }
 .pt-label code { background: none; padding: 0; color: inherit; font-size: 1em; }
 .pt-range { margin-left: .35rem; font-weight: 400; color: var(--text-muted); }
-.pt-settled { background: color-mix(in srgb, var(--green) 9%, transparent); }
-.pt-partial { background: color-mix(in srgb, var(--amber) 11%, transparent); }
-.pt-open    { background: var(--surface-2); }
-.pt-settled .pt-label { color: var(--green); }
-.pt-partial .pt-label { color: var(--amber); }
-.pt-open .pt-label    { color: var(--text-muted); }
+/* The state, printed under the region's name. The color groups the rows and
+   this says what the group is — without it two rows sharing a wash read as a
+   palette that ran out rather than as two regions in the same condition. */
+.pt-state {
+  display: block; margin-top: .2rem; font-family: var(--ko);
+  font-size: .72rem; font-weight: 700; letter-spacing: .01em;
+}
+/* Four slots, handed out in the order the states first appear. They carry no
+   meaning of their own — the word beside them does — so they only have to stay
+   apart from each other and readable as small bold text on their own wash. */
+.pt-s1 { background: color-mix(in srgb, var(--green) 9%, transparent); }
+.pt-s2 { background: color-mix(in srgb, var(--amber) 11%, transparent); }
+.pt-s3 { background: color-mix(in srgb, var(--blue) 8%, transparent); }
+.pt-s4 { background: color-mix(in srgb, var(--violet) 9%, transparent); }
+.pt-s0 { background: var(--surface-2); }
+.pt-s1 .pt-label, .pt-s1 .pt-state { color: var(--green); }
+.pt-s2 .pt-label, .pt-s2 .pt-state { color: var(--amber); }
+.pt-s3 .pt-label, .pt-s3 .pt-state { color: var(--blue); }
+.pt-s4 .pt-label, .pt-s4 .pt-state { color: var(--violet); }
+.pt-s0 .pt-label { color: var(--text-muted); }
+.pt-s0 .pt-state { color: var(--text-muted); }
 
 .fence-error {
   margin: 1rem 0; padding: .7rem .9rem; font-size: .85rem;

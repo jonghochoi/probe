@@ -23,7 +23,7 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `.claude/commands/**` | human | Slash-command wrappers |
 | `docs/style.md` | human | **Single source of truth for the `scouting/` output format** (emoji, links, Korean authoring). The reading-site track is NOT covered — `analysis/<id>.md` is governed by `site/AUTHORING.md` |
 | `docs/agent-setup.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
-| `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `analysis/<id>.md`: front matter, body rules R1–R15, render traps, what the build enforces), `build-site.py` + `builder/` (the static-site generator: a landing briefing, a corpus-wide glossary harvested from the rewrites' own ` ```probe-term ` fences, plus one page per rewrite), and `requirements.txt`. Nothing but `analysis/` is published and `analysis_legacy/` is not read at all. `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
+| `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `analysis/<id>.md`: front matter, body rules R1–R15, render traps, what the build enforces), `build-site.py` + `builder/` (the static-site generator: a landing briefing, a memo hub, plus one page per rewrite), and `requirements.txt`. Nothing but `analysis/` is published and `analysis_legacy/` is not read at all. `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 | `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
 | `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6; the rewrite track is exempt (`site/AUTHORING.md` §3-4). Local use: `python3 scripts/check-render-tilde.py` |
@@ -236,12 +236,40 @@ in one command. Do not add a language suffix to a new document just to
 disambiguate; if the rule above does not place the doc unambiguously, the
 doc is in the wrong folder.
 
+## No change history in code or guides
+
+Code comments, docstrings and guides describe **what the repo is now**. When a
+requirement changes, the text that stated the old requirement is rewritten to
+state the new one — not annotated with what it used to say. `git log`, the PR
+thread and the commit body are where the change lives; a comment that also
+carries it goes stale the next time the rule moves, and a reader cannot tell
+which half is current.
+
+What this rules out, in a comment, a docstring, a rule in `AUTHORING.md` /
+`docs/style.md`, or a prompt:
+
+- **Past forms** — "X used to be Y", "this was previously a Z", "no longer
+  holds", "the earlier trigger did …".
+- **Change narration** — "renamed from", "moved out of", "added in the
+  restructure", "kept for now".
+- **Incident logs** — "three separate bugs came from this", "which is how one
+  rewrite ended up redrawing a figure". The failure mode is worth stating; its
+  history is not. Write it in the present, as the thing that happens: "a rule
+  like `.X b{display:block}` catches body emphasis and breaks the line".
+
+Rationale is not history and stays. "This is a barrier because stage N needs
+every stage N-1 result" explains a live design; "this used to be a pipeline"
+explains nothing a reader can act on. When a rule's reason is a failure mode,
+state the failure mode in the present tense and drop the date it happened.
+
+Dead code and dead rules are deleted, not commented out or marked deprecated —
+the same rule, applied to the code itself.
+
 ## When adding a new top-level doc
 
 Probe has no cross-link automation — every doc reference is hand-maintained.
 A new doc that is only added to the filesystem without updating the index
-becomes a silent orphan (the last restructure produced one before this
-checklist existed). Walk this list every time:
+becomes a silent orphan. Walk this list every time:
 
 - [ ] **Classify the doc** — narrative/onboarding (H1 emoji allowed) or
       reference/structural (plain headers). Pick one consistently per the

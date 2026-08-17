@@ -105,10 +105,9 @@ class DocRenderer:
     """Renders one document kind, collecting its TOC as it goes."""
 
     def __init__(self, katex, *, decisions: dict | None = None,
-                 base_prefix: str = "", lead_html: str = ""):
+                 lead_html: str = ""):
         self.katex = katex
         self.decisions = decisions or {}
-        self.base_prefix = base_prefix
         # Emitted immediately after the body H1 closes. The one-paragraph
         # summary is the first thing a reader wants and the front matter
         # already carries it, so the page prints it instead of reserving it
@@ -152,7 +151,7 @@ class DocRenderer:
         # titled `` $`d`$ 가 변해도 견디는 이유 `` published its own math source
         # as visible backticks and dollars — the one place on the page where
         # markdown reached the reader unrendered.
-        callouts.install(md, self._inline)
+        callouts.install(md, self._inline, self.problems.append)
 
         rules = md.renderer.rules
         rules["heading_open"] = self._heading_open
@@ -170,14 +169,14 @@ class DocRenderer:
     def _heading_open(self, tokens, idx, options, env):
         """Three heading levels, three different components.
 
-        The markdown spine is unchanged — `#` thesis, `##` act, `###` section —
-        but the levels no longer map onto `<h1>/<h2>/<h3>`. An act is a rail
-        marker, not a heading: it names which of the four questions we are
-        answering and carries no content of its own, so it renders as a divider
-        band and the section under it gets the real `<h2>`. Rendering the act as
-        a heading is what made every section read as a subordinate `<h3>` — a
-        section title one notch above body text, which is why the page scanned
-        flat no matter how good the prose was.
+        The markdown spine is `#` thesis, `##` act, `###` section, and the
+        levels do not map onto `<h1>/<h2>/<h3>`. An act is a rail marker, not a
+        heading: it names which of the four questions we are answering and
+        carries no content of its own, so it renders as a divider band and the
+        section under it gets the real `<h2>`. Rendering the act as a heading
+        instead pushes every section down to a subordinate `<h3>` — a section
+        title one notch above body text, which makes the page scan flat no
+        matter how good the prose is.
         """
         token = tokens[idx]
         level = int(token.tag[1])

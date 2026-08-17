@@ -6,7 +6,6 @@ from collections import Counter
 from pathlib import Path
 
 from . import components as c
-from . import terms as _terms
 from .corpus import PILLAR_NAMES, PILLAR_ORDER, UNCLASSIFIED, Paper
 from .render import DocRenderer
 
@@ -314,75 +313,6 @@ def memos_page() -> str:
     )
 
 
-def terms_page(entries: list, katex, decisions: dict) -> str:
-    """The glossary — every ` ```probe-term ` in the corpus, in one list.
-
-    The definitions are not rewritten for this page: the same body that renders
-    collapsed under the paragraph that introduced the term renders open here,
-    followed by the rewrites it was written in. That is the whole point of
-    harvesting rather than authoring — a glossary maintained by hand would
-    start disagreeing with the papers on its second week.
-    """
-    renderer = DocRenderer(katex, decisions=decisions, base_prefix="../")
-    cards = []
-    for term in entries:
-        sources = "".join(
-            f'<a href="../p/{c.esc(stem)}/index.html">{c.esc(title)}</a>'
-            for stem, title in term.sources
-        )
-        hay = f"{term.title} {term.tid} {term.body}".lower()
-        cards.append(
-            f'<article class="tcard" id="{c.esc(term.anchor)}" data-term-card '
-            f'data-hay="{c.esc(hay)}">\n'
-            f'  <h2 class="tcard-title">{c.esc(term.title)}'
-            f'<a class="anchor" href="#{c.esc(term.anchor)}" aria-label="이 용어 링크">#</a></h2>\n'
-            f'  <div class="tcard-body">{renderer.inline(_terms.body_md(term))}</div>\n'
-            f'  <p class="tcard-src"><span>나온 곳</span>{sources}</p>\n'
-            f"</article>"
-        )
-
-    body = f"""<header class="mast slim">
-  <div class="mast-inner">
-    <div class="mast-line">
-      <h1>용어</h1>
-      <span class="mast-rule"></span>
-      <p class="mast-count">{len(entries)}개</p>
-    </div>
-    <p class="mast-sub">
-      재작성본이 본문에서 정의한 용어를 모았습니다. 같은 용어를 여러 편이 정의했다면
-      <strong>가장 최근에 쓴 정의</strong>를 싣고, 나머지는 아래 링크로 갑니다.
-    </p>
-  </div>
-</header>
-
-<div class="filters" data-filters>
-  <div class="filters-inner">
-    <label class="search">
-      <span aria-hidden="true">🔍</span>
-      <input type="search" data-q autocomplete="off" spellcheck="false"
-             placeholder="용어 · 설명으로 검색" aria-label="용어 검색">
-    </label>
-    <span class="filter-spacer"></span>
-    <span class="status" data-result-count>{len(entries)}개</span>
-  </div>
-</div>
-
-<main class="glossary" data-glossary>
-  {"".join(cards)}
-  <p class="corpus-empty" data-empty hidden>그런 용어는 아직 없습니다.</p>
-  {'<p class="corpus-empty">아직 정의된 용어가 없습니다.</p>' if not entries else ""}
-</main>
-"""
-    return c.page(
-        title="용어 · PROBE",
-        description="재작성본이 정의한 용어를 한데 모은 사전",
-        body=body,
-        depth=1,
-        scripts=["glossary.js"],
-        extra_head='<link rel="stylesheet" href="../assets/index.css">',
-    )
-
-
 def not_found_page() -> str:
     body = f"""<main class="hub notfound">
   <h1>404</h1>
@@ -466,13 +396,12 @@ def _related(neighbours: list[Paper]) -> str:
 def _lead(paper: Paper, renderer: DocRenderer) -> str:
     """`tagline` and `summary`, printed between the thesis line and act 1.
 
-    `summary` was already required, already written, and already read cold —
-    but it only ever appeared on the landing card, so a reader arriving on the
-    paper page went straight from the thesis line into paragraph one with no
-    idea what the next 400 lines were going to argue. Both go through the
-    inline renderer rather than `esc()`: the emphasis in a summary is what
-    makes it scannable, and a summary that opens with math is common enough
-    that escaping it would publish backticks.
+    A reader arriving here needs to know what the next 400 lines will argue
+    before paragraph one starts arguing it, and the front matter already
+    carries that sentence. Both go through the inline renderer rather than
+    `esc()`: the emphasis in a summary is what makes it scannable, and a
+    summary that opens with math is common enough that escaping it would
+    publish backticks.
     """
     out = ""
     if paper.tagline:
@@ -490,7 +419,7 @@ def _toc(entries: list[dict]) -> str:
 
     Built from the renderer's own heading pass rather than scraped from the DOM
     by `paper.js`: the act grouping and the English keyword line are structure
-    the renderer knows and the rendered HTML no longer spells out. Server-side
+    the renderer knows and the rendered HTML does not spell out. Server-side
     also means the contents survive with JavaScript off, which for a document
     this long is the difference between a page you can navigate and a scroll.
     """

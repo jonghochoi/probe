@@ -230,33 +230,6 @@ html.js .rail {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Glossary ─────────────────────────────────────────────────────────── */
-.glossary { max-width: 860px; margin: 0 auto; padding: 1.6rem 1.25rem 5rem; }
-.tcard {
-  padding: .95rem 0 1rem; border-bottom: 1px solid var(--border-soft);
-}
-.tcard[hidden] { display: none; }
-.tcard-title {
-  font-size: .98rem; font-weight: 750; letter-spacing: -.015em;
-  scroll-margin-top: calc(var(--nav-h) + 1rem);
-}
-.tcard-title .anchor {
-  margin-left: .35rem; font-size: .8rem; color: var(--text-muted);
-  text-decoration: none; opacity: 0; transition: opacity .14s;
-}
-.tcard:hover .tcard-title .anchor { opacity: .6; }
-.tcard-body {
-  font-size: .87rem; line-height: 1.8; color: var(--text-muted); margin-top: .3rem;
-}
-.tcard-body strong { color: var(--text); font-weight: 700; }
-.tcard-src {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem;
-  margin-top: .5rem; font-size: .74rem;
-}
-.tcard-src span { color: var(--text-muted); opacity: .8; }
-.tcard-src a { color: var(--orange-deep); text-decoration: none; }
-.tcard-src a:hover { text-decoration: underline; text-underline-offset: 2px; }
-
 .corpus-empty {
   text-align: center; color: var(--text-muted); font-size: .88rem;
   padding: 3.5rem 1rem;
@@ -322,7 +295,6 @@ html.js .rail {
   .mast-rule { display: none; }
   .filters-inner { padding: .5rem .9rem; }
   .deck { padding: 1.1rem .9rem 4rem; }
-  .glossary { padding: 1.1rem .9rem 4rem; }
   /* A five-column row cannot survive a phone, so it becomes a block: title
      and one line under it, with the numbers folded onto one trailing row. */
   .listhead { display: none; }

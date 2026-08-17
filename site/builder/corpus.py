@@ -273,12 +273,13 @@ def discover() -> tuple[list[Paper], list[str]]:
                 f"but the file is '{stem}'"
             )
             continue
-        for required in ("title", "summary"):
+        for required in ("title", "summary", "tagline"):
             if not front.get(required):
                 problems.append(f"analysis/{path.name}: missing `{required}`")
         problems += _source_coverage(path.name, front, body)
 
         paper = Paper(stem=stem, path=path, front=front, body=body)
+        problems += _tagline_echo(path.name, paper.title, paper.tagline)
         if len(paper.metric) > METRIC_MAX:
             problems.append(
                 f"analysis/{path.name}: `metric` is {len(paper.metric)} chars — "
@@ -288,11 +289,37 @@ def discover() -> tuple[list[Paper], list[str]]:
     return papers, problems
 
 
+# ── Tagline ─────────────────────────────────────────────────────────────────
+# The tagline prints directly under the title — on the landing row, on the lead
+# block and on the paper page's masthead. The title is right there, so a
+# tagline that opens by naming the paper again spends its one line saying what
+# the line above it already said, and the pair reads as a stutter.
+
+def _tagline_echo(name: str, title: str, tagline: str) -> list[str]:
+    """The paper's own name, restated in the line printed under it."""
+    if not title or not tagline:
+        return []
+    head = title.split(":")[0].strip()
+    # A `Name: What it does` title puts the codename before the colon; a title
+    # with no colon has no separable name, so only its first word can echo.
+    echo = head if (":" in title and len(head.split()) <= 5) else title.split()[0]
+    if len(echo) < 2:
+        return []
+    line = tagline.strip()
+    if echo.lower() in line.lower():
+        return [
+            f"analysis/{name}: `tagline` repeats the title's own name "
+            f"({echo!r}) — the title prints directly above it, so the tagline "
+            f"only has to say what the paper does"
+        ]
+    return []
+
+
 # ── Source coverage ─────────────────────────────────────────────────────────
 # The build cannot fetch the paper, so it cannot know what a rewrite left on
 # the table. What it CAN do is hold the author's own declarations to the body:
 # `figures:` and `appendix:` are the two places a rewrite states what it drew
-# on, and both used to drift silently because nothing read them back.
+# on, and a declaration nothing reads back drifts from the body silently.
 
 _FIG_ID = re.compile(r'^\s*\{\s*"id"\s*:\s*"([^"]+)"', re.M)
 
