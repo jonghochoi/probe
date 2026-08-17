@@ -109,7 +109,7 @@ class KatexRenderer:
             ]
         }
         # ESM ignores NODE_PATH, so `katex` must resolve by directory walk from
-        # katex-render.mjs — i.e. it lives in `probe_site/node_modules`, which
+        # katex-render.mjs — i.e. it lives in `builder/node_modules`, which
         # the workflow creates with `npm install --no-save --prefix`.
         env = dict(os.environ)
         try:

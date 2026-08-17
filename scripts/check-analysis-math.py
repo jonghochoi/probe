@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """Check (and optionally fix) math formatting in analysis documents.
 
-Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-5 (and, for
-the rewrite track, `site/AUTHORING.md` §3-1 — the same dialect stated for its
-own audience): inline math MUST be the inside-dollar backtick
+Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-5 across
+the analysis deep-dive docs: inline math MUST be the inside-dollar backtick
 form `` $`X`$ `` and display math `$$X$$` on its own line. The outside-dollar
 form `` `$X$` ``, the `\\(…\\)` / `\\[…\\]` delimiters, KaTeX-unsupported
 macros (`\\bm`, `\\mathds`), and `$` glued to Hangul/CJK/bold all break
 rendering on github.com and leak the source.
 
-Scope: `analysis/<id>/analysis.md` and `readable/<id>.md` — separate tracks
-with separate style guides, but both are read on github.com and both carry the
-same GitHub-KaTeX dialect. Templates and README.md are out of scope.
+Scope: `analysis/<id>/analysis.md`. The reading site is deliberately NOT here:
+its pages are HTML, and `site/build-site.py` checks the dialect against what its
+own parser accepts. Templates and README.md are out of scope.
 
 Auto-fixable (applied with --fix):
   1. `` `$X$` ``            -> `` $`X`$ ``        (forbidden outside-dollar form)
@@ -67,7 +66,6 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
-READABLE_DIR = REPO_ROOT / "readable"
 
 # §5-5 rule 2 — inline-math delimiter neighbours that GitHub's KaTeX parser
 # accepts. Opener `$` may follow these; closer `$` may precede these.
@@ -124,7 +122,7 @@ class Issue:
 
 
 def in_scope_files(paths: list[Path]) -> list[Path]:
-    """Resolve the scan set: `analysis/<id>/analysis.md` + `readable/*.md`."""
+    """Resolve the scan set: `analysis/<id>/analysis.md`."""
     out: list[Path] = []
     if paths:
         for p in paths:
@@ -134,7 +132,7 @@ def in_scope_files(paths: list[Path]) -> list[Path]:
             elif p.is_dir():
                 out.extend(_scope_under(p))
         return sorted(set(out))
-    return _scope_under(ANALYSIS_DIR) + _scope_under(READABLE_DIR)
+    return _scope_under(ANALYSIS_DIR)
 
 
 def _scope_under(root: Path) -> list[Path]:
@@ -143,7 +141,7 @@ def _scope_under(root: Path) -> list[Path]:
         rel = p.relative_to(REPO_ROOT).as_posix()
         if "/templates/" in f"/{rel}":
             continue
-        if p.name == "analysis.md" or p.parent.name == "readable":
+        if p.name == "analysis.md":
             out.append(p)
     return out
 

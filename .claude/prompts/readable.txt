@@ -65,10 +65,10 @@ failure this mode exists to prevent.
 
 ACQUISITION:
 
-    cd site && python3 -m probe_site.arxiv <id>
+    cd site && python3 -m builder.arxiv <id>
 
 prints the section tree, figure ids + absolute URLs, and table count. Import
-it (`from probe_site.arxiv import load`) to get the full text: `load(id)`
+it (`from builder.arxiv import load`) to get the full text: `load(id)`
 returns `Paper(version, title, abstract, sections, figures, tables)`, with
 math preserved as `$…$` from `<math alttext>` and every figure carrying the
 `id` that goes verbatim into the `figures:` front-matter list.
@@ -91,7 +91,7 @@ take a hedge (`~인 것 같아요`); flat assertion of an opinion reads as AI.
 PROCEDURE
 ════════════════════════════════════════════════════════════════════════
 
-1. FETCH the original (`probe_site.arxiv`). On `Unavailable`, stop (above).
+1. FETCH the original (`builder.arxiv`). On `Unavailable`, stop (above).
    There is no other precondition — the paper does not need to have been
    analyzed first, and you must not go looking for one.
 
@@ -112,11 +112,22 @@ PROCEDURE
 
 7. VERIFY before reporting done:
      python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
-     python3 scripts/check-analysis-math.py
-     python3 scripts/check-render-tilde.py
      python3 scripts/check-decision-refs.py
-   The build validates the front matter, the fences and the quiz shape.
-   `--strict` must exit 0. Do not report success on a build you did not run.
+
+   The build is the gate: front matter, fences, quiz shape, the heading
+   spine, term anchors, and every construct that would publish as literal
+   text instead of rendering. `--strict` must exit 0. Do not report success
+   on a build you did not run.
+
+   `check-decision-refs.py` is the one lint outside it, and it is not a
+   formatting check — it verifies each `D#` you cite exists. A citation that
+   does not resolve is dropped to plain text on the page, tooltip and all,
+   which the build has no way to notice.
+
+   Do NOT run `check-analysis-math.py` or `check-render-tilde.py` here. They
+   enforce github.com's markdown rendering for the `analysis/` + `scouting/`
+   tracks; this track is HTML, its parser differs, and they no longer scan
+   `readable/`.
 
 8. SELF-CHECK — answer these honestly before committing:
      - Could a reader who never opens the paper explain the mechanism?

@@ -11,7 +11,7 @@ CDN request, and (with the default `--katex=server`) no math JavaScript.
     python3 site/build-site.py --check               # lint, write nothing
 
 Requires `pip install -r site/requirements.txt`, plus Node with
-`npm install --no-save --prefix site/probe_site katex@0.16.22` for
+`npm install --no-save --prefix site/builder katex@0.16.22` for
 server-side math (`--katex=client` renders in the browser instead).
 """
 
@@ -43,9 +43,9 @@ except ImportError:
     )
     raise SystemExit(2)
 
+from builder import assets_out, corpus, pages
+from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from probe_refs import harvest_decisions
-from probe_site import assets_out, corpus, pages
-from probe_site.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 
 
 def build(args) -> int:
@@ -120,7 +120,7 @@ def build(args) -> int:
     if not stats["pretendard"]:
         sys.stderr.write(
             "warning: no Pretendard subset written — install the build fonts with\n"
-            "         npm install --no-save --prefix site/probe_site \\\n"
+            "         npm install --no-save --prefix site/builder \\\n"
             "           katex@0.16.22 pretendard @fontsource/jetbrains-mono\n"
             "         (the site falls back to system fonts)\n"
         )

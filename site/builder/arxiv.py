@@ -85,8 +85,8 @@ class Table:
 
 @dataclass
 class Paper:
-    id: str              # as fetched, e.g. "2607.26055"
-    version: str         # "2607.26055v1" — what `arxiv_html:` records
+    id: str              # as fetched, e.g. "<arxiv-id>"
+    version: str         # "<arxiv-id>v<n>" — what `arxiv_html:` records
     title: str
     abstract: str
     sections: list[Section] = field(default_factory=list)
@@ -120,7 +120,7 @@ def fetch(paper_id: str) -> tuple[str, str]:
 
 
 def resolve_version(html: str, paper_id: str) -> str:
-    """Recover the exact version from an asset path (`2607.26055v1/fig/x.png`)."""
+    """Recover the exact version from an asset path (`<id>v<n>/fig/x.png`)."""
     m = re.search(rf"{re.escape(paper_id)}(v\d+)/", html)
     return f"{paper_id}{m.group(1)}" if m else paper_id
 
@@ -346,7 +346,7 @@ def _as_markdown(rows: list[list[str]]) -> str:
 
 def parse(html: str, paper_id: str) -> Paper:
     version = resolve_version(html, paper_id.split("v")[0])
-    # Asset srcs are already version-prefixed ("2607.26055v1/fig/x.png") and
+    # Asset srcs are already version-prefixed ("<id>v<n>/fig/x.png") and
     # resolve against /html/, not against the paper page itself.
     ex = _Extractor(BASE)
     ex.feed(html)
@@ -364,7 +364,7 @@ def load(paper_id: str) -> Paper:
     return parse(html, paper_id)
 
 
-if __name__ == "__main__":  # `python3 -m probe_site.arxiv 2607.26055`
+if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id>`
     import sys
 
     try:

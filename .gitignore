@@ -12,7 +12,7 @@ venv/
 # installed on demand with `npm install --no-save`.
 .site/
 .site-cache/
-site/probe_site/node_modules/
+site/builder/node_modules/
 
 # Editors
 .vscode/

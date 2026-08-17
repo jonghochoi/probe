@@ -3,9 +3,9 @@
  * The cards are already in the DOM — this only toggles `hidden` and, for the
  * flat sorts, moves nodes between the pillar groups and a single flat grid.
  * Nothing is fetched and nothing is templated, so the page works from
- * `file://` and degrades to "all 92 papers, grouped" with JS off.
+ * `file://` and degrades to "every paper, grouped by pillar" with JS off.
  *
- * Filter state lives in the URL hash (`#q=flow&p=P1&t=dexterity&s=recent`) so a
+ * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=recent`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke.
  */
