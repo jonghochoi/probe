@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Report prose tildes that pair into a GitHub strikethrough (docs/style.md §4-6).
+"""Report prose tildes that pair into a GitHub strikethrough.
+
+The rule is stated per track: `docs/style.md` §4-6 for `analysis/` and
+`scouting/`, `site/AUTHORING.md` §3-2 for `readable/`.
 
 GitHub's strikethrough extension accepts a SINGLE `~`, not just the doubled
 `~~`. Two raw tildes in the same inline context therefore strike out every
@@ -31,6 +34,7 @@ import sys
 
 DEFAULT_GLOBS = (
     "analysis/**/*.md",
+    "readable/*.md",
     "scouting/**/*.md",
 )
 

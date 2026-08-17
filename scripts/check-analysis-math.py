@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Check (and optionally fix) math formatting in analysis documents.
 
-Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-5 across
-the analysis deep-dive docs: inline math MUST be the inside-dollar backtick
+Enforces the GitHub-KaTeX math conventions of `docs/style.md` §5-5 (and, for
+the rewrite track, `site/AUTHORING.md` §3-1 — the same dialect stated for its
+own audience): inline math MUST be the inside-dollar backtick
 form `` $`X`$ `` and display math `$$X$$` on its own line. The outside-dollar
 form `` `$X$` ``, the `\\(…\\)` / `\\[…\\]` delimiters, KaTeX-unsupported
 macros (`\\bm`, `\\mathds`), and `$` glued to Hangul/CJK/bold all break
 rendering on github.com and leak the source.
 
-Scope: `analysis/<id>/analysis.md` and `readable/<id>.md` — both carry the
+Scope: `analysis/<id>/analysis.md` and `readable/<id>.md` — separate tracks
+with separate style guides, but both are read on github.com and both carry the
 same GitHub-KaTeX dialect. Templates and README.md are out of scope.
 
 Auto-fixable (applied with --fix):

@@ -10,7 +10,7 @@ has to agree with its schema.
 One rewrite per file, `readable/<arxiv-id>.md`. It deliberately does NOT live
 under `analysis/<id>/`: that folder's contract is one artifact per paper
 (`analysis.md`), and a folder holding only a rewrite is reported as a metadata
-failure by `refresh-analysis-index.py --check`.
+failure by `scripts/refresh-analysis-index.py --check`.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 UNCLASSIFIED = "미분류"
 
 # Pillar display names mirror context/MASTER.md §5. Duplicated from
-# `refresh-analysis-index.py` rather than shared: that script parses the
+# `scripts/refresh-analysis-index.py` rather than shared: that script parses the
 # analysis corpus and this one does not, so a shared module would exist only to
 # hold these ten lines and would couple two tracks with no other contact.
 PILLAR_NAMES = {

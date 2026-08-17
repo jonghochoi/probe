@@ -21,15 +21,16 @@
 > reading site: papers re-written in Korean from their arXiv originals, so a
 > reader gets the mechanism without opening the paper. `/readable-paper <id>`
 > writes one into `readable/`; the site is exactly that set. The `analysis/`
-> deep-dives are a separate track and stay on GitHub. Built by
-> `scripts/build-site.py` and deployed from Actions; the generated HTML is
-> never committed.
+> deep-dives are a separate track and stay on GitHub. Everything the site is
+> made of lives in `site/` — the format contract (`site/AUTHORING.md`) and the
+> generator — and it deploys from Actions; the generated HTML is never
+> committed.
 >
 > ```bash
-> pip install -r scripts/site-requirements.txt
-> npm install --no-save --prefix scripts/probe_site \
+> pip install -r site/requirements.txt
+> npm install --no-save --prefix site/probe_site \
 >   katex@0.16.22 pretendard @fontsource/jetbrains-mono
-> python3 scripts/build-site.py --serve        # http://127.0.0.1:8000/probe/
+> python3 site/build-site.py --serve        # http://127.0.0.1:8000/probe/
 > ```
 
 ---

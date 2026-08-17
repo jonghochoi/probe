@@ -6,18 +6,18 @@ definition, a cited figure, a per-section quiz. JSON because the nesting
 loudly when malformed — a silently half-parsed quiz would publish with no
 right answer and nobody would notice.
 
-Four of these fences exist because §5-8 R5 asks for five kinds of planted
-context and only two of them had anywhere to go. 계보 became a paragraph of
-prose, 숫자의 지형 became a sentence with numbers in it, and 대조 became two
-adjacent paragraphs the reader had to hold side by side themselves. The rule
+Four of these fences exist because AUTHORING §2-5 (R5) asks for five kinds of
+planted context and only two of them had anywhere to go. 계보 became a
+paragraph of prose, 숫자의 지형 became a sentence with numbers in it, and 대조
+became two adjacent paragraphs the reader had to hold side by side. The rule
 was already right; the page had no component to satisfy it with, so every one
 of them flattened into undifferentiated body text. `probe-lineage`,
 `probe-scale`, `probe-split` and `probe-parts` are those shapes made real.
 
 Rendering these is not optional decoration. Without it the fences fall through
 to the code highlighter and a term definition is published as a block of JSON,
-so `.claude/prompts/readable.txt` and this module are one contract: the prompt
-tells the agent the build validates its fences, and this is where that is true.
+so `site/AUTHORING.md` and this module are one contract: the guide tells the
+agent the build validates its fences, and this is where that is true.
 
 The only other fence language the corpus uses is `math`, so these names do not
 collide with anything an author might mean literally.
@@ -89,7 +89,7 @@ def figure(data: dict) -> str:
         raise FenceError(f"probe-figure[{data.get('id', '?')}]: missing `url`")
     if not url.startswith(("http://", "https://")):
         # Mirroring a paper's figure into the repo is a copyright problem
-        # (style.md §5-6); a relative URL here means someone did.
+        # (AUTHORING §2-6); a relative URL here means someone did.
         raise FenceError(
             f"probe-figure[{data.get('id', '?')}]: `url` must be absolute — "
             f"figures are hotlinked, never mirrored"

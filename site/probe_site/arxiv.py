@@ -60,7 +60,7 @@ class Section:
 @dataclass
 class Figure:
     id: str              # "S1.F1" — goes verbatim into readable.md front matter
-    url: str             # absolute; hotlinked, never mirrored (style.md §5-6)
+    url: str             # absolute; hotlinked, never mirrored (AUTHORING §2-6)
     number: str          # "1", "3(a)"
     caption: str
     section: str = ""    # id of the enclosing section

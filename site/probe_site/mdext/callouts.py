@@ -3,7 +3,7 @@
     > [!NOTE] 왜 fast 채널이 필요한가
     > proprioception 은 …
 
-`docs/style.md` §5-9 fixes five roles and five colors, and GitHub's own five
+`site/AUTHORING.md` §2-9 fixes five roles and five colors, and GitHub's own five
 alert types already carry exactly those colors — note/blue, tip/green,
 important/purple, warning/amber, caution/red. Reusing them means the same
 source renders as a recognisable callout on github.com as well, with no
