@@ -1,8 +1,8 @@
-# Readable Rewrite Authoring Guide
+# Analysis Rewrite Authoring Guide
 
-> **Scope:** every `readable/<arxiv-id>.md` — the corpus the reading site
+> **Scope:** every `analysis/<arxiv-id>.md` — the corpus the reading site
 > publishes. This file is the single source of truth for that format.
-> `.claude/prompts/readable.txt` owns the *procedure* (which paper, where the
+> `.claude/prompts/analyze.txt` owns the *procedure* (which paper, where the
 > facts come from, how to verify and commit) and defers to this file for the
 > output contract; `site/build-site.py` implements it. Change a rule here
 > first, then the build.
@@ -11,29 +11,28 @@
 language: what a reader gets is `site/build-site.py`'s output, rendered by
 `markdown-it-py` plus this repo's own extensions. Every rule below is judged
 against that page — not against how github.com would render the same file.
-Where the two disagree, the page wins, and §3-4 lists the sibling tracks' rules
+Where the two disagree, the page wins, and §3-4 lists the sibling track's rules
 that deliberately do **not** apply here.
 
-`docs/style.md` governs `scouting/` and `analysis/`, which *are* read as
-rendered Markdown on github.com. It does not apply to this track, and this
-guide does not cross-reference it — the rules the two tracks share are restated
-here in the terms of this renderer.
+`docs/style.md` governs `scouting/`, which *is* read as rendered Markdown on
+github.com. It does not apply to this track, and this guide does not
+cross-reference it — the rules the two tracks share are restated here in the
+terms of this renderer.
 
 ---
 
 ## 1. File and Front Matter Contract
 
-One rewrite per paper, `readable/<arxiv-id>.md`. It deliberately does **not**
-live under `analysis/<id>/`: that folder's contract is one artifact per paper
-(`analysis.md`), and a folder holding only a rewrite is reported as a metadata
-failure by `scripts/refresh-analysis-index.py --check`.
+One rewrite per paper, `analysis/<arxiv-id>.md` — flat, one file per paper, no
+per-paper folder. (`analysis_legacy/<id>/analysis.md` is the frozen corpus of
+the retired deep-dive format; nothing here reads or writes it.)
 
 The site takes **all** of its metadata from this front matter — there is no
 other source, so a missing field is a hole on the landing page.
 
 ```yaml
 ---
-readable_of: <arxiv-id>          # MUST equal the file name
+analysis_of: <arxiv-id>          # MUST equal the file name
 title: "<the paper's own title, verbatim>"
 tagline: <one line: what this paper does>
 authors: <first authors et al. (affiliation)>
@@ -42,7 +41,7 @@ tags: [<tag>, <tag>]
 links: [arxiv|<url>, code|<url>]
 published: YYYY-MM-DD            # the paper's date, from arXiv
 generated: YYYY-MM-DD            # yours — this sorts the landing page
-generator: readable-paper/v2
+generator: analyze/v2
 arxiv_html: <arxiv-id>v<n>       # the exact version actually read
 arxiv_fetched: YYYY-MM-DD
 figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
@@ -56,7 +55,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 
 | Key | Rule |
 |---|---|
-| `readable_of` | must equal the file name — **mismatch fails the build**. This catches the copy-paste that lands a rewrite under the wrong id |
+| `analysis_of` | must equal the file name — **mismatch fails the build**. This catches the copy-paste that lands a rewrite under the wrong id |
 | `title` | required. The paper's title, as the card and the page header print it |
 | `tagline` | required. **One line naming what the paper does**, printed under the body H1. The H1 is our thesis and often a metaphor, so on its own it does not tell a reader which paper they opened; the header prints the paper's own title. This is the sentence between them |
 | `summary` | required. 2–3 sentences, read cold. Printed **on the page** as the `한 문단 요약` block between the thesis line and act 1, and flattened for the landing card. Authored as markdown — `**강조**` and `` $`math`$ `` render on the page and are stripped for the card, so bold the three or four phrases that carry the argument (§3-2 applies) |
@@ -70,11 +69,12 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — see R15. An empty value is not accepted, because "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate |
 | `terms` | count of inline term anchors |
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment: `TTFA 399.5 → 129.2 ms`, `폐루프 25 Hz · denoising 1 스텝`. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
-| `generator` | `readable-paper/v2` |
+| `generator` | `analyze/v2` |
 
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed
 by `site/builder/arxiv.py`); *our view* — `D#` impact, tensions, what we
-would check — comes from `context/`. `analysis/` is neither read nor written.
+would check — comes from `context/`. `analysis_legacy/` is neither read nor
+written.
 No HTML edition (~4% of papers) means **no rewrite is written**: an
 abstract-based fallback would be indistinguishable on the page from a real one.
 
@@ -219,7 +219,8 @@ already covered a paper in that line, link it.
 
 At most one entry carries `current: true` — the paper being read. That is what
 turns a bibliography into a position. **Do not invent a lineage**: check
-`readable/` for a site link and `context/P#.md` §Tracked Literature otherwise,
+the rest of `analysis/` for a site link and `context/P#.md` §Tracked
+Literature otherwise,
 and verify each link resolves before citing it.
 
 **2. 숫자의 지형** — the paper's key number placed against the others of its
@@ -595,12 +596,11 @@ broken link, just not a link. Every URL is explicit `[텍스트](…)` link synt
 which also keeps the prose readable: a raw URL mid-sentence is noise. Inside a
 code span a bare URL is fine and stays literal.
 
-### 3-4. Rules from the sibling tracks that do NOT apply here
+### 3-4. Rules from the sibling track that do NOT apply here
 
-`analysis/` and `scouting/` are read as Markdown *on github.com*, and
-`docs/style.md` carries rules for that surface. Two of them are dead letters on
-this track — do not carry them over, and do not "fix" a rewrite to satisfy
-them:
+`scouting/` is read as Markdown *on github.com*, and `docs/style.md` carries
+rules for that surface. Two of them are dead letters on this track — do not
+carry them over, and do not "fix" a rewrite to satisfy them:
 
 - **The single-`~` strikethrough trap.** github.com's GFM treats one tilde as a
   strikethrough delimiter, so two raw tildes in a paragraph strike out
@@ -621,7 +621,7 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 
 | Rule | Enforced by |
 |---|---|
-| Front matter required keys, `readable_of` == file name, `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
+| Front matter required keys, `analysis_of` == file name, `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping (R9) | `site/builder/mdext/callouts.py` |
@@ -645,8 +645,7 @@ python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
 python3 scripts/check-decision-refs.py
 ```
 
-`--strict` must exit 0. `scripts/check-analysis-math.py` and
-`scripts/check-render-tilde.py` are **not** part of this track — they enforce
-github.com's Markdown rendering for `analysis/` and `scouting/`, and no longer
-scan `readable/`. Everything in §1–§3 that is not in the tables above is
+`--strict` must exit 0. `scripts/check-render-tilde.py` is **not** part of this
+track — it enforces github.com's Markdown rendering for `scouting/` and does not
+scan `analysis/`. Everything in §1–§3 that is not in the tables above is
 enforced by review, not by code, which is why the prompt's self-check exists.

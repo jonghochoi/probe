@@ -10,8 +10,6 @@
       "Write(scouting/**)",
       "Edit(scripts/**)",
       "Write(scripts/**)",
-      "Edit(readable/**)",
-      "Write(readable/**)",
       "Edit(site/**)",
       "Write(site/**)",
       "Edit(CLAUDE.md)",

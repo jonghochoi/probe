@@ -68,10 +68,9 @@ def mask_source(text: str) -> str:
 
 # ── Hook D — the single normalization choke point ────────────────────────────
 
-# Sanctioned macro substitutions, mirroring `check-analysis-math.py`'s
-# MACRO_SUBS. AUTHORING §3-1: extend this list only by editing that rule.
-# Every *other* unsupported macro is deliberately left broken so the render
-# failure stays visible (§5-4 honesty).
+# Sanctioned macro substitutions. AUTHORING §3-1 is the rule; extend this list
+# only by editing it. Every *other* unsupported macro is deliberately left
+# broken so the render failure stays visible rather than being papered over.
 MACRO_SUBS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\\bm\{"), r"\\mathbf{"),
     (re.compile(r"\\mathds\{"), r"\\mathbb{"),
@@ -82,8 +81,8 @@ MACRO_SUBS: tuple[tuple[re.Pattern[str], str], ...] = (
 def normalize_tex(tex: str) -> str:
     """Hook D — undo Hook A's masking, then apply the sanctioned macro subs.
 
-    Never writes to the source file: rewriting the corpus is
-    `check-analysis-math.py --fix`'s job, and the two must not fight.
+    Never writes to the source file — the corpus is what the author wrote,
+    and normalization happens on the way to the page.
     """
     tex = tex.replace(PIPE_SENTINEL, "|")
     for pattern, replacement in MACRO_SUBS:
@@ -143,9 +142,9 @@ def _inline_math(state, silent: bool) -> bool:
 def _block_math(state, start_line: int, end_line: int, silent: bool) -> bool:
     """Match a line that is exactly `$$…$$`.
 
-    AUTHORING §3-1 requires column 0; an indented one is a corpus bug that
-    `check-analysis-math.py` already reports, and rendering it as written keeps
-    that bug visible rather than quietly compensating for it.
+    AUTHORING §3-1 requires column 0; an indented one is a corpus bug, and
+    rendering it as written keeps that bug visible rather than quietly
+    compensating for it.
     """
     if state.sCount[start_line] != 0:
         return False

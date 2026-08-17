@@ -42,7 +42,7 @@ EYEBROW = "읽기 쉬운 버전 · 원문에서 직접 발췌"
 _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re.I)
 
 
-# `## 🔬 방법론` — a leading emoji is optional in a readable rewrite, but when
+# `## 🔬 방법론` — a leading emoji is optional in a rewrite, but when
 # present it belongs to the heading's display, not to its slug.
 _LEADING_EMOJI = re.compile(
     r"^([\U0001F300-\U0001FAFF☀-➿⬀-⯿〰〽]"
@@ -186,7 +186,7 @@ class DocRenderer:
         emoji, label = split_emoji(raw)
 
         self._heading_seq += 1
-        # A readable section is an H3 (H2 is one of the four acts). Each one
+        # A rewrite's section is an H3 (H2 is one of the four acts). Each one
         # closes the quiz tally for the section before it — R11.
         if level <= 3:
             self._close_section()
@@ -340,7 +340,7 @@ class DocRenderer:
             )
         return f'<div class="code">{head}{body}</div>'
 
-    # ── readable-layer fences ───────────────────────────────────────────
+    # ── rewrite-layer fences ────────────────────────────────────────────
     def inline(self, text: str) -> str:
         """Markdown inline-only — no paragraph wrapper.
 
@@ -449,9 +449,10 @@ class DocRenderer:
             token.attrSet("target", "_blank")
             token.attrSet("rel", "noopener")
         else:
-            # Intra-corpus links must land on site pages, not raw markdown.
-            href = re.sub(r"^\.\./([^/]+)/analysis\.md$", r"../\1/", href)
-            href = re.sub(r"^\./analysis\.md$", "#view=analysis", href)
+            # Intra-corpus links must land on site pages, not raw markdown: a
+            # sibling rewrite is `../<id>.md` in the corpus and `../<id>/` on
+            # the site.
+            href = re.sub(r"^\.\./(\d{4}\.\d{4,5})\.md$", r"../\1/", href)
             token.attrSet("href", href)
         attrs = " ".join(
             f'{k}="{html.escape(str(v), quote=True)}"' for k, v in token.attrs.items()

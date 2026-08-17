@@ -1,16 +1,12 @@
-"""Discover the readable rewrites the site publishes.
+"""Discover the analysis rewrites the site publishes.
 
-The site is the readable layer and nothing else. `analysis/` is not read at
-all: a rewrite is written from the paper's own arXiv HTML, so everything the
-site needs — title, authors, pillars, tags, links, the card preview — is
-declared in the rewrite's own front matter. That keeps the two tracks fully
-decoupled; `analysis/` stays a GitHub-read markdown corpus and the site never
-has to agree with its schema.
+A rewrite is written from the paper's own arXiv HTML, so everything the site
+needs — title, authors, pillars, tags, links, the card preview — is declared in
+the rewrite's own front matter. There is no second source to reconcile against;
+`analysis_legacy/` (the frozen deep-dive corpus of the retired `/analyze`
+format) is not read at all.
 
-One rewrite per file, `readable/<arxiv-id>.md`. It deliberately does NOT live
-under `analysis/<id>/`: that folder's contract is one artifact per paper
-(`analysis.md`), and a folder holding only a rewrite is reported as a metadata
-failure by `scripts/refresh-analysis-index.py --check`.
+One rewrite per file, `analysis/<arxiv-id>.md` — flat, no per-paper folder.
 """
 
 from __future__ import annotations
@@ -22,7 +18,7 @@ from pathlib import Path
 from . import frontmatter
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-READABLE_DIR = REPO_ROOT / "readable"
+ANALYSIS_DIR = REPO_ROOT / "analysis"
 
 ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 UNCLASSIFIED = "미분류"
@@ -34,10 +30,10 @@ _SPACE = re.compile(r"\s")
 # is printed inside a chip on a card, so it has to survive at one line.
 METRIC_MAX = 40
 
-# Pillar display names mirror context/MASTER.md §5. Duplicated from
-# `scripts/refresh-analysis-index.py` rather than shared: that script parses the
-# analysis corpus and this one does not, so a shared module would exist only to
-# hold these ten lines and would couple two tracks with no other contact.
+# Pillar display names mirror context/MASTER.md §5 — the one place a pillar id
+# turns into a heading a reader sees. Adding a pillar means extending all three
+# of PILLAR_NAMES / PILLAR_ORDER / PILLAR_RE (CLAUDE.md "When adding a new
+# pillar"); an out-of-range `P#` lands the paper in 미분류.
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",
@@ -252,41 +248,41 @@ def _plain(md: str, limit: int = 240) -> str:
 # ── Discovery ───────────────────────────────────────────────────────────────
 
 def discover() -> tuple[list[Paper], list[str]]:
-    """Every `readable/<id>.md`, plus the problems found reading them."""
+    """Every `analysis/<id>.md`, plus the problems found reading them."""
     papers: list[Paper] = []
     problems: list[str] = []
-    if not READABLE_DIR.is_dir():
+    if not ANALYSIS_DIR.is_dir():
         return papers, problems
 
-    for path in sorted(READABLE_DIR.glob("*.md")):
+    for path in sorted(ANALYSIS_DIR.glob("*.md")):
         stem = path.stem
         if not ID_RE.match(stem):
-            problems.append(f"readable/{path.name}: name is not an arXiv id — skipped")
+            problems.append(f"analysis/{path.name}: name is not an arXiv id — skipped")
             continue
         try:
             front, body = frontmatter.parse(path.read_text(encoding="utf-8"))
         except ValueError as exc:
-            problems.append(f"readable/{path.name}: {exc}")
+            problems.append(f"analysis/{path.name}: {exc}")
             continue
 
-        declared = front.get("readable_of", "")
+        declared = front.get("analysis_of", "")
         if declared and declared != stem:
             # A copy-paste that landed a rewrite under the wrong id would
             # otherwise publish one paper's text under another's title.
             problems.append(
-                f"readable/{path.name}: readable_of is '{declared}' "
+                f"analysis/{path.name}: analysis_of is '{declared}' "
                 f"but the file is '{stem}'"
             )
             continue
         for required in ("title", "summary"):
             if not front.get(required):
-                problems.append(f"readable/{path.name}: missing `{required}`")
+                problems.append(f"analysis/{path.name}: missing `{required}`")
         problems += _source_coverage(path.name, front, body)
 
         paper = Paper(stem=stem, path=path, front=front, body=body)
         if len(paper.metric) > METRIC_MAX:
             problems.append(
-                f"readable/{path.name}: `metric` is {len(paper.metric)} chars — "
+                f"analysis/{path.name}: `metric` is {len(paper.metric)} chars — "
                 f"keep it under {METRIC_MAX}, it prints inside a chip"
             )
         papers.append(paper)
@@ -313,12 +309,12 @@ def _source_coverage(name: str, front: dict, body: str) -> list[str]:
     }
     for fid in sorted(cited - declared):
         problems.append(
-            f"readable/{name}: figure `{fid}` is shown in the body but missing "
+            f"analysis/{name}: figure `{fid}` is shown in the body but missing "
             f"from `figures:` — the list is the rewrite's record of what it read"
         )
     for fid in sorted(declared - cited):
         problems.append(
-            f"readable/{name}: `figures:` declares `{fid}` but the body never "
+            f"analysis/{name}: `figures:` declares `{fid}` but the body never "
             f"shows it — drop it or add the `probe-figure` fence"
         )
 
@@ -329,7 +325,7 @@ def _source_coverage(name: str, front: dict, body: str) -> list[str]:
     # answer for a paper that has none; silence is not.
     if "appendix" not in front:
         problems.append(
-            f"readable/{name}: missing `appendix:` — list the appendix sections "
+            f"analysis/{name}: missing `appendix:` — list the appendix sections "
             f"this rewrite drew on (e.g. `[A, B, D.2, G]`), or `none` if the "
             f"paper has no appendix"
         )

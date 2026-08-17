@@ -19,12 +19,12 @@
 >
 > **[jonghochoi.github.io/probe](https://jonghochoi.github.io/probe/)** is the
 > reading site: papers re-written in Korean from their arXiv originals, so a
-> reader gets the mechanism without opening the paper. `/readable-paper <id>`
-> writes one into `readable/`; the site is exactly that set. The `analysis/`
-> deep-dives are a separate track and stay on GitHub. Everything the site is
+> reader gets the mechanism without opening the paper. `/analyze <id>` writes
+> one into `analysis/`; the site is exactly that set. Everything the site is
 > made of lives in `site/` — the format contract (`site/AUTHORING.md`) and the
 > generator — and it deploys from Actions; the generated HTML is never
-> committed.
+> committed. (`analysis_legacy/` holds the retired deep-dive format, frozen on
+> GitHub until those papers are re-written.)
 >
 > ```bash
 > pip install -r site/requirements.txt
@@ -49,7 +49,7 @@ PROBE finds them and refuses to let them die in your downloads folder. It answer
 | 50–100 papers/day → skim titles, remember none | 3–5 papers/run → scored, tied to your open questions |
 | Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
-| "I'll read that paper properly later" → never does | `/analyze` → a Korean deep-dive anchored to your Decision Log |
+| "I'll read that paper properly later" → never does | `/analyze` → a Korean re-telling of the paper, published to the reading site |
 
 **Division of labor.** PROBE is a scout — it does not fight.
 
@@ -85,16 +85,16 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
    │ scheduled · per P# │         │       /analyze        │
    │                    │         │                       │
    │  citation graph ·  │         │ one paper → Korean    │
-   │  keyword sweep ·   │         │   deep-dive, anchored │
-   │   curated lists    │         │   to the Decision Log │
+   │  keyword sweep ·   │         │  re-telling from the  │
+   │   curated lists    │         │   arXiv HTML original │
    └──────────┬─────────┘         └───────────┬───────────┘
               │ append new file               │ overwrite snapshot
               ▼                               ▼
    ┌────────────────────┐         ┌───────────────────────┐
    │     scouting/      │         │       analysis/       │
-   │  P#/YYYY-MM-DD.md  │         │   <id>/analysis.md    │
-   │    3–5 papers,     │         │    one folder per     │
-   │   decision-grade   │         │         paper         │
+   │  P#/YYYY-MM-DD.md  │         │       <id>.md         │
+   │    3–5 papers,     │         │   one file per paper, │
+   │   decision-grade   │         │  published as a page  │
    └──────────┬─────────┘         └───────────┬───────────┘
               └───────────────┬───────────────┘
                               ▼  informs
@@ -108,14 +108,15 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 | `context/` | human | monthly at most | agent reads only |
 | `scouting/` | agent | scheduled, per pillar | append — one dated file per run |
 | `analysis/` | agent | on demand | overwrite — one snapshot per paper |
+| `analysis_legacy/` | — | frozen | the retired deep-dive format, kept until re-written |
 
 Keeping the two apart is what stops the agent re-recommending last month's papers as the context bloats.
 
 The on-demand entry point — run it in a local session, one-shot `claude -p "/analyze 2410.07864"`, or on the web:
 
-- `/analyze <arXiv id | url | pdf url>` → `analysis/<id>/analysis.md` — a Korean deep-dive: neutral paper summary, then the decision-grade half anchored to your `P#`/`D#`
+- `/analyze <arXiv id>` → `analysis/<id>.md` — a Korean re-telling written from the paper's arXiv HTML original, with our own reading anchored to your `P#`/`D#`. It publishes as a page on the reading site; the format contract is [`site/AUTHORING.md`](site/AUTHORING.md)
 
-One paper per run, named explicitly — there is no automatic `scouting/` → `analysis/` hand-off. Deep-dive index: [`analysis/README.md`](analysis/README.md).
+One paper per run, named explicitly — there is no automatic `scouting/` → `analysis/` hand-off. A paper with no arXiv HTML edition is skipped rather than written from its abstract.
 
 ---
 
@@ -123,7 +124,7 @@ One paper per run, named explicitly — there is no automatic `scouting/` → `a
 
 - **One template, all pillars** — `.claude/prompts/scouting.txt`; replace `<PILLAR>` with the target pillar id before each run.
 - **Scheduled scouting** — cloud routines, network allowlist, troubleshooting: [`docs/agent-setup.md`](docs/agent-setup.md).
-- **On-demand `/analyze`** — no routine setup; runs from any Claude Code session. Logic lives in `.claude/prompts/`, output format in [`docs/style.md`](docs/style.md).
+- **On-demand `/analyze`** — no routine setup; runs from any Claude Code session. Logic lives in `.claude/prompts/analyze.txt`, output format in [`site/AUTHORING.md`](site/AUTHORING.md). The scouting format lives in [`docs/style.md`](docs/style.md).
 
 ```bash
 git clone https://github.com/jonghochoi/probe.git

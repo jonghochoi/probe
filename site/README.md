@@ -2,24 +2,25 @@
 
 Everything the reading site is made of — the authoring rules, the static-site
 generator, and its build-time dependencies. The site publishes
-`readable/<arxiv-id>.md` and nothing else; `analysis/` is not read at all.
+`analysis/<arxiv-id>.md` and nothing else; the frozen `analysis_legacy/` corpus
+is not read at all.
 
-The corpus itself stays at the repo root (`readable/`), next to the other two
-agent-written tracks (`analysis/`, `scouting/`). This folder is human-owned
-tooling and rules; the agent writes into `readable/` and reads from here.
+The corpus itself stays at the repo root (`analysis/`), next to the other
+agent-written track (`scouting/`). This folder is human-owned tooling and rules;
+the agent writes into `analysis/` and reads from here.
 
 ## Layout
 
 | Path | Role |
 |---|---|
-| `AUTHORING.md` | **The format contract for `readable/<id>.md`** — front matter, body rules R1–R15, render traps, what the build enforces. `.claude/prompts/readable.txt` defers to it; edit this file first, then the code |
+| `AUTHORING.md` | **The format contract for `analysis/<id>.md`** — front matter, body rules R1–R15, render traps, what the build enforces. `.claude/prompts/analyze.txt` defers to it; edit this file first, then the code |
 | `build-site.py` | Build entry point. `--out` writes the tree, `--only <id>` builds one rewrite, `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews under the deployed path |
 | `builder/corpus.py` | Rewrite discovery, front-matter validation (including R6's `figures:` ↔ body agreement and R15's required `appendix:`), pillar names, the R10 link vocabulary |
 | `builder/render.py` | Markdown → HTML, plus the rule checks that have no other home (R2, R4, R5, R11, R14) |
 | `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
 | `builder/pages.py`, `components.py` | Page assembly — the landing briefing (newest rewrite as a lead block, everything else as one row each, facets in a left rail), the glossary, the memo hub and the paper page |
-| `builder/terms.py` | The corpus-wide glossary. Harvests every ` ```probe-term ` fence in `readable/` and groups it by id — nothing is authored for that page. A term defined by several rewrites shows the most recently written definition and links all of them |
-| `builder/arxiv.py` | LaTeXML extraction of an arXiv original. Serves the prompt rather than the build: `python3 -m builder.arxiv <id>` from this folder prints the section tree — `── 본문 ──` and `── 부록 ──` separately, since R15 makes the appendix a checklist — plus figure ids and URLs, marking the inline-SVG figures that genuinely have no file to hotlink. Raises `Unavailable` when a paper has no HTML edition, which is `/readable-paper`'s stop condition |
+| `builder/terms.py` | The corpus-wide glossary. Harvests every ` ```probe-term ` fence in `analysis/` and groups it by id — nothing is authored for that page. A term defined by several rewrites shows the most recently written definition and links all of them |
+| `builder/arxiv.py` | LaTeXML extraction of an arXiv original. Serves the prompt rather than the build: `python3 -m builder.arxiv <id>` from this folder prints the section tree — `── 본문 ──` and `── 부록 ──` separately, since R15 makes the appendix a checklist — plus figure ids and URLs, marking the inline-SVG figures that genuinely have no file to hotlink. Raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |
 | `builder/fonts.py`, `assets/` | Webfont subsetting and the site's CSS/JS. Visual rules live here, not in a rewrite (R12) |
 | `requirements.txt` | Build-time Python dependencies |

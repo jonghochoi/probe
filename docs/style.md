@@ -1,10 +1,12 @@
 # PROBE Style Guide
-> **Version:** v1.33 (2026-08-17) · **Scope:** All files under `scouting/` and `analysis/`
-> This document is the single source of truth for formatting rules **on those two tracks**.
+> **Version:** v1.34 (2026-08-17) · **Scope:** All files under `scouting/`
+> This document is the single source of truth for formatting rules **on that track**.
 > Agent reads this file before producing any output. Never modify output format without updating this guide first.
 >
-> The reading site is a separate track with its own contract: `readable/<id>.md`
+> The reading site is a separate track with its own contract: `analysis/<id>.md`
 > is governed by `site/AUTHORING.md`, not by this guide. Nothing here applies to it.
+> The frozen `analysis_legacy/` corpus followed this guide's retired §5 and is
+> no longer governed by anything — it is kept as a snapshot, not maintained.
 
 ---
 
@@ -64,7 +66,7 @@ Context-Suggestions `###` subsections carry **no emoji**.
 - One emoji per `##` header, at the start, after `## ` and a space.
 - No emoji on `#`, on `###` or deeper, on table headers, in table cells, or in
   body text.
-- Do not use an emoji not listed in this guide (§2-1, §5-2, §6-2).
+- Do not use an emoji not listed in this guide (§2-1).
 - Emojis are not translated — use the symbols exactly as listed.
 
 #### Correct example
@@ -121,7 +123,7 @@ badge**, color-coded by category:
 
 | Category | Color | Source |
 |----------|-------|--------|
-| `P0` | `f5d5d5` (pale red) | pillar palette — matches `refresh-analysis-index.py` `PILLAR_COLOR` |
+| `P0` | `f5d5d5` (pale red) | pillar palette — this table is the palette's source of truth |
 | `P1` | `f5e9d5` (pale orange) | pillar palette |
 | `P2` | `e2f5d5` (pale green) | pillar palette |
 | `P3` | `d5f5e7` (pale mint) | pillar palette |
@@ -131,9 +133,9 @@ badge**, color-coded by category:
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
 message). All `D#` share one color (they are codes, not a ranked palette);
-`P#` follows the per-pillar palette so the badge color matches the analysis
-index. A scouting report is single-pillar, so in practice one pillar color
-plus amber decisions appear.
+`P#` follows the per-pillar palette so one pillar always reads as one color
+across reports. A scouting report is single-pillar, so in practice one pillar
+color plus amber decisions appear.
 
 ```markdown
 ## 🔑 Reference Legend
@@ -274,9 +276,9 @@ verbatim in their original form versus which prose is Korean.
 
 The **scouting report** (`scouting/`) is **개조식**: a scanned decision
 document, not flowing prose. Its body content is written as terse outline
-bullets, not 합니다/됩니다 paragraphs. (The `analysis/` deep-dives keep their
-explanatory 합니다/됩니다 register — §5-3, §6-1 — since they are read, not
-scanned; only the scouting report is 개조식.)
+bullets, not 합니다/됩니다 paragraphs. (The reading-site rewrites under
+`analysis/` keep an explanatory 합니다/됩니다 register — `site/AUTHORING.md` —
+since they are read, not scanned; only the scouting report is 개조식.)
 
 - **명사형 종결.** End body items on a noun or nominalized form
   (`~함 / ~음 / ~필요 / 명사`), not a full polite sentence. `D11 인코더 학습
@@ -294,7 +296,7 @@ scanned; only the scouting report is 개조식.)
   (e.g. the 🔄 Decision-Log signal becomes one sub-bullet per D#).
 - **Where it applies.** All body content — paper (a)–(d), 📊 score rationale,
   💡 context suggestions, 🔄 synthesis. Exempt: table cells (a `;` may separate
-  distinct entries there) and verbatim English citation blockquotes (§5-5).
+  distinct entries there) and verbatim English citation blockquotes.
 
 Two surface conventions (markdown, not register):
 
@@ -317,7 +319,7 @@ fidelity bar that governs every edit.
 A decision-grade report is *scanned* by a reader hunting for the one row
 that matters, not read prose-first end to end. §4-4 governs the register
 inside a bullet; this rule governs the *layout above the sentence*.
-It applies to every `scouting/` and `analysis/` output.
+It applies to every `scouting/` output.
 
 - **Repetitive records become a table, never a run-on sentence.** Wherever
   the report enumerates the same shape N times — dropped paper → reason
@@ -381,7 +383,7 @@ not.
 |---|---|---|
 | Numeric / date range | `4.7–35.6GB`, `2026-06-01–06-19`, `1–4편` (en dash `–`, U+2013) | `4.7~35.6GB` |
 | Approximation | `약 300M`, `약 2×`, `약 110K frame` | `~300M` |
-| Paper notation `\sim` | `` $`\sim 50`$ `` (inline math, §5-5) | `~50` |
+| Paper notation `\sim` | `` $`\sim 50`$ `` (inline math) | `~50` |
 | Open-ended range | `2026-05-11–`, or spell it (`2026-05-11 이후`) | `2026-05-11~` |
 
 **Where a raw `~` is still correct** — these are parsed before the
@@ -395,7 +397,7 @@ be "fixed":
 - a deliberate `~~strikethrough~~`, which is the doubled form.
 
 **English verbatim blockquotes are exempt and are never edited** — the quoted
-sentence is a byte-locked token (§5-5). If a quoted sentence genuinely contains
+sentence is a byte-locked token (§4-1). If a quoted sentence genuinely contains
 a raw `~`, leave it and keep the Korean explanation line tilde-free so nothing
 pairs with it.
 
@@ -426,13 +428,9 @@ also keeps the prose readable — a raw URL mid-sentence is noise.
 rendered at all), so nothing can be glued to them:
 
 - inside a code span or fenced code block (a `curl` command, a config value);
-- inside an HTML comment (`<!-- … -->`), e.g. the 📄 메타 retrieval-failure
-  record (§5-4);
-- inside an English verbatim blockquote, which is byte-locked (§5-5) — leave
+- inside an HTML comment (`<!-- … -->`), e.g. a retrieval-failure record;
+- inside an English verbatim blockquote, which is byte-locked (§4-1) — leave
   it and keep the Korean explanation line free of an adjacent bare URL.
-
-The 📄 메타 `링크` row (§5-6) is already an explicit-link format, so it is
-unaffected.
 
 ### 4-8. Never close `**` between a closing paren and a particle
 
@@ -457,398 +455,5 @@ tilde in §4-6: legible in the source, wrong in the render.
 
 The rule in one line: **the character immediately before a closing `**` must
 not be punctuation** when a letter follows it. Bold the phrase, not the phrase
-plus its parenthesis. These tracks have no build step to catch it, so the rule
+plus its parenthesis. This track has no build step to catch it, so the rule
 is the only defense — nothing errors and review is what has to notice.
-
----
-
-## 5. Paper Analysis Document (`analysis/`)
-
-The `/analyze` slash command (prompt: `.claude/prompts/analysis.txt`)
-produces a deep-dive on **one** paper at `analysis/<arxiv-id>/analysis.md`.
-
-### 5-1. File convention
-
-- **Korean single document.** Like every other PROBE output, a paper
-  analysis is a single Korean document — there is no English source
-  file. It is written natively in Korean per §4 (tone, glossary,
-  verbatim tokens), not translated. The filename carries no language
-  suffix — every PROBE output is Korean, so marking it is redundant.
-- Filename: `analysis/<arxiv-id>/analysis.md` (e.g.
-  `analysis/2401.12345/analysis.md`); non-arXiv PDF input uses a
-  human-chosen slug as the folder name.
-- Regenerable snapshot — re-running overwrites the file, never appends.
-- The document follows `analysis/templates/analysis.md` exactly: part (A) a
-  neutral structured summary, part (B) `context/MASTER.md`-anchored
-  decision-grade implications.
-
-### 5-2. Emoji system
-
-Same rule as §2: one emoji at the start of each `##` header, `###` and body
-plain. The `##` section emojis for this document type (in addition to §2):
-
-| Emoji | Section | Part |
-|-------|---------|------|
-| 📄 | 논문 메타 | A |
-| 🧭 | 한 줄 요약 (TL;DR) | A |
-| ❓ | 문제 정의 / 동기 | A |
-| 🧩 | 핵심 기여 | A |
-| 🔑 | 기술 키워드 | A |
-| 🔬 | 방법론 | A |
-| 📊 | 실험 설정과 결과 | A |
-| ⚖️ | 한계 | A |
-| ♻️ | 재현성 | A |
-| 🎯 | 관련 Pillar / Decision (P# / D#) | B |
-| ✨ | 핀 논문 대비 델타 | B |
-| ⚙️ | 의사결정 함의 | B |
-| ⚠️ | 먼저 검증할 실패 모드 | B |
-| 💡 | 컨텍스트 제안 | B |
-
-Use these header names verbatim. Part (B) reuses the 🎯 ✨ ⚙️ ⚠️ 💡 semantics
-from §2. Do not use an emoji not listed in §2 or here.
-
-### 5-3. Korean & verbatim rules
-
-§4 applies in full. Specifically: original English paper title,
-config/code names, formulas, arXiv links, and `P#`/`D#` tags
-are kept verbatim; technical terms use the §4-2 glossary; tone is
-formal 합니다/됩니다 체.
-
-### 5-4. Body-acquisition honesty
-
-The 메타 header MUST state the actual full-text level reached
-(`전문(arXiv HTML)` / `전문(ar5iv)` / `PDF 텍스트(pdftotext)` /
-`초록 only`). If only the abstract was obtained, every part (B)
-section is prefixed **(본문 미확보 — 잠정)**. Failed `curl` calls are
-recorded verbatim (command + HTTP status); fabricated content is never
-substituted.
-
-### 5-5. Quotation, bullet-form, keyword, math, and figure conventions
-
-방법론 and 실험 결과 must keep the source body traceable;
-문제 정의 / 동기 and 기술 키워드 must stay scannable. The
-conventions below codify both.
-
-- **English-verbatim blockquote citation** — Anchor claims (the
-  sentence that nails the design intent), every formula, and every
-  key numeric claim sit inside a `>` blockquote with the English
-  source text verbatim and a Korean explanation line directly below.
-  Fixed format:
-
-  ```markdown
-  > "We model the action distribution with conditional flow matching." (§3.2)
-  (한글 해설 — 이 문장이 왜 핵심인지.)
-  ```
-
-  Source marker is `(§n)` or `(§n, Table k)`. If the section number
-  is unclear in the source body, write `(§?)` — do not guess. The
-  English text is never paraphrased; the entire blockquote is a
-  verbatim token, kept byte-identical.
-
-  - **Explanation line reads as connected prose, not a terse gloss.**
-    The Korean line(s) below the quote may run 1–3 sentences and
-    should lead with the *intuition* — why this matters, how it works,
-    what it changes — rather than restating the English. The intuition
-    may also come *before* the quote, with the blockquote then standing
-    as the verbatim *evidence* for a claim already made in prose. Only
-    the English quote + `(§n)` marker are byte-locked; the surrounding
-    explanation is where readability lives (§5-7). This is the single
-    biggest lever for absorbing an explainer-tool's readability without
-    losing PROBE's source traceability.
-
-- **Formula verbatim + GitHub KaTeX rendering** — Keep the original
-  LaTeX / Unicode notation; no paraphrase, symbol substitution, or
-  shortening, and variable definitions match the source body. The
-  normative rules (github.com renders KaTeX since 2022-05):
-
-  - **Code-span vs. math — the boundary (decide first).** A backtick
-    code-span `` `X` `` and inline math `` $`X`$ `` render differently and
-    mean different things; pick by *what the token is*, not by habit:
-    - **Backtick code-span** — literal source tokens (identifiers,
-      function / module names, config keys, dtypes, CLI flags), tensor
-      **shapes** (`` `(B, T_action, D_action)` ``), dimension variables
-      (`` `d_action` ``), and numeric / resolution specs (`` `224×224` ``,
-      `` `30 fps` ``). Here `×` `·` `_` `,` are code punctuation, not math.
-    - **Inline math** — genuine paper notation: Greek letters, scalar /
-      vector variables, sub/superscripts that denote math, operators
-      (`=` `·` `≤` `≥` `≈` `→` `∈` `⊤` `Σ`), set / interval notation, and
-      equations. `` `λ` `` → `` $`\lambda`$ ``; `` `A ∈ R^{d×r}` `` →
-      `` $`A \in \mathbb{R}^{d\times r}`$ ``.
-    - **Tag convention** — `` `(원문 미명시)` `` is a deliberate annotation
-      tag, neither code nor math; it stays backticked.
-    The discriminating signal is a Greek letter, a LaTeX `\macro`, a math
-    operator, a sub/superscript glyph, or an equation `=` — never `×` / `·` /
-    `_` alone (those occur in shapes and specs too).
-  - **Inline** uses `` $`X`$ `` — backticks INSIDE the dollars. The
-    outside-dollar `` `$X$` `` (becomes inline code, KaTeX never runs),
-    the extra-backtick-wrapped `` `$`X`$` `` (a *valid* span wrapped in
-    one more backtick pair — GitHub parses it as code-span + literal
-    text + code-span, so the LaTeX leaks raw in every browser), and
-    `\(…\)` / `\[…\]` (do not render on GitHub) are all FORBIDDEN.
-    Why: Markdown's italic pass runs before KaTeX and eats the `_` in
-    subscripts unless the backtick form shields it.
-  - **Display** is `$$X$$` on its own line (no backticks) — for a
-    *single-row* equation only, and it MUST start at **column 0**.
-    github.com renders a display block — `$$…$$` and a ```` ```math ````
-    fence alike — ONLY at the top level: indented under a list item, BOTH
-    leak the raw source (the `$$` dumps raw LaTeX, the fence shows as a
-    plain code block). A formula that belongs to a list item must be pulled
-    OUT to column 0 — replace the intro bullet `- <label>:` with a bold
-    label `**<label>**` on its own line, then the `$$…$$` at column 0 (the
-    pattern every rendering analysis doc uses). Inline `` $`X`$ `` is the
-    only math that renders *inside* a list item, so a short formula may stay
-    inline instead.
-  - **No equation-numbering macros** — `\tag`, `\label`, `\ref`,
-    `\eqref`, `\nonumber` are FORBIDDEN inside `$$…$$`. github.com's KaTeX
-    errors on them and dumps the raw LaTeX onto the page, wrapping it
-    character-by-character. Carry the paper's equation number in the
-    surrounding prose instead (`전이를 … 강제합니다 (식 1):`), then
-    reference it as `식 (N)` — the convention every analysis doc follows.
-  - **Multi-row display** (anything with a `\\` row break — `aligned`,
-    `pmatrix` / `bmatrix` / matrices, `cases`, or a bare `\\`) MUST use a
-    fenced ```` ```math ```` block, never `$$…\\…$$`. GitHub does not
-    render a `\\` row break inside `$$` in *any* form (single-line or with
-    the `$$` on their own lines) on any browser; only the ```` ```math ````
-    block renders it. The fence, too, must sit at **column 0** — an indented
-    ```` ```math ```` inside a list item shows as a code block. Example:
-    ````
-    ```math
-    \begin{aligned} a &= b \\ c &= d \end{aligned}
-    ```
-    ````
-  - **Boundary** — an inline `$` must not touch a Hangul / CJK syllable,
-    middle-dot `·`, or bold marker `*` / `**`; separate with a space (or
-    move the math outside the bold), or the delimiter goes invisible and
-    the source leaks. A literal `$` in prose is escaped `\$`.
-  - **Macro whitelist (the only sanctioned auto-substitutions)** —
-    `\bm{X}` → `\mathbf{X}`, `\mathds{X}` → `\mathbb{X}` (`\mathds`
-    is not a KaTeX control sequence and otherwise fails the whole span;
-    `\mathbb` is the identical double-stroke glyph), and
-    `\operatorname{X}` → `\mathrm{X}` (`\operatorname` is valid KaTeX but
-    renders broken on github.com — it leaks the raw control word; `\mathrm`
-    is the same upright glyph and renders). Leave every other unsupported
-    macro as-is so the render failure is visible (§5-4). Extend this list
-    only by editing this rule.
-  - The same wrapping + boundary apply to inline math **inside English
-    verbatim blockquotes** — the quoted text stays byte-identical; the
-    `$` delimiters are GitHub-rendering formatting, a separate concern.
-
-  The full arXiv-HTML → Markdown extraction procedure lives in
-  `.claude/prompts/analysis.txt`; PR-time enforcement and auto-fix is
-  `scripts/check-analysis-math.py`
-  (`.github/workflows/check-analysis-math.yml`). This subsection is the
-  SSOT for the rules above — the prompt and the CI implement them.
-
-- **Bullet form (문제 정의 / 동기)** — Do not write a single
-  paragraph. Use 4–6 items, each a bold label + 1–2 sentences.
-  Recommended Korean labels (verbatim): `풀고자 하는 문제`,
-  `기존 접근의 한계`, `본 논문의 가설`, `왜 지금 중요한가`.
-
-- **기술 키워드** — 5–10 key terms needed to read the paper,
-  each formatted as `- **<original / abbrev>** — <one-line analogy
-  or plain definition>`. **The bold head term MUST be a plain English
-  word or abbreviation** (the paper's original term); any Korean gloss
-  goes only *after* the em dash, never in the head, and math notation
-  (`$…$`, LaTeX) belongs in the definition, not the head. This is
-  load-bearing — the head is lifted into the `analysis/README.md` keyword
-  badges (§5-6), which drop any head that is non-English or math-bearing,
-  so a math-symbol keyword (e.g. `$`\pi_0`$`) simply won't surface there.
-  For terms in the
-  §4-2 glossary, still lead with the English original (glossary
-  translation may follow the em dash) and add a short analogy.
-  Analogies are allowed only when they do not distort the paper's
-  claim; when no faithful analogy fits, write a plain definition.
-
-- **Methodology decomposition** — Split 방법론 into four H3
-  subsections wherever possible, with verbatim Korean headers:
-  `### 직관`, `### 아키텍처`, `### 학습 목표 / 손실`,
-  `### 학습 셋업`. Detail preservation comes first. H3 headers
-  carry no emoji (same as the §2 H3-plain rule).
-
-  - **`### 직관` is REQUIRED, and it is the plain-language layer.**
-    Write the whole method so a reader with no prior context follows it:
-    2–4 short paragraphs explaining *what the method does, why, and how*
-    in accessible prose, with **no verbatim quotes and no formulas** —
-    those belong in the `### 아키텍처` / `### 학습 목표 / 손실`
-    subsections that follow. 직관 is where an explainer-tool's
-    "what + why" opening is absorbed; the rigor lives below it, not
-    inside it. (Abstract-only acquisition: keep 직관 brief and mark
-    **(본문 미확보 — 잠정)** — do not speculate past the abstract.)
-
-- **arXiv figure hotlink + English caption verbatim** — Insert 1–5
-  high-value figures, typically one architecture / pipeline diagram
-  under the methodology and one or two key ablation figures under
-  the results. PROBE never copies figures into the repo; it
-  hotlinks the arXiv HTML source URL (avoiding both copyright
-  republication and `_assets/` size bloat). Fixed format:
-
-  ```markdown
-  ![Figure N — short label](https://arxiv.org/html/<id>/figs/<file>)
-
-  > "Figure N: <English caption verbatim>" (§n)
-  (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
-  ```
-
-  - URL is the arXiv HTML `<img src>` as an absolute
-    `https://arxiv.org/html/<id>/<file>` — bare (unversioned) id, then
-    the figure filename only. **Strip the version segment from both the
-    id and the `src`** or the path doubles into a 404 (e.g.
-    `…/2604.23272/2604.23272v1/x1.png`); the unversioned URL auto-maps
-    to the latest figure. ar5iv mirrors / project pages / cached
-    hotlinks are out (link-rot). Full extraction detail:
-    `.claude/prompts/analysis.txt` (FIGURE URLs).
-  - The alt text follows `Figure N — <short English label>` so the
-    figure number survives even when the image fails to load.
-  - The English caption blockquote is a verbatim token — kept
-    byte-identical, never paraphrased.
-  - Abstract-only acquisition, or a non-arXiv-HTML source
-    (PDF-only), means no figure URLs are available — omit the
-    figure citations entirely. No placeholders, no guessing.
-  - **Size ceiling — check bytes, not just the status code.** github.com
-    serves every external image through its **camo** proxy, which refuses
-    any response over roughly **5 MB** and renders the literal text
-    `Content length exceeded` in place of the figure. arXiv returns
-    `HTTP 200` for these all the same, so a status-code check passes while
-    the page is broken. Measure before committing the hotlink:
-
-    ```bash
-    curl -sSL -o /dev/null -w '%{size_download}\n' "https://arxiv.org/html/<id>/<file>"
-    ```
-
-    Over the ceiling, **do not drop the figure and do not swap in a
-    different one** — only the inline render fails, the arXiv asset itself
-    is fine. Downgrade the embed `![…](…)` to a link `[…](…)`, keep the
-    verbatim English caption blockquote and the Korean explanation exactly
-    as they are, and state the size and the reason beside the link so the
-    reader knows why this one is not inlined:
-
-    ```markdown
-    🔗 [Figure N — short label](https://arxiv.org/html/<id>/<file>) (arXiv 원본 6.4 MB — GitHub 이미지 프록시 상한을 넘어 인라인 렌더가 불가하므로 링크로 둡니다)
-
-    > "Figure N: <English caption verbatim>" (§n)
-    (한글 해설 — 이 그림이 본문의 어떤 주장을 시각화하는지 한 줄.)
-    ```
-
-    A link-form figure still counts against the cap below. Teaser /
-    overview composites are the usual offenders — they tile many panels
-    into one file — and they are also the figure an analysis most wants,
-    so expect this case to recur rather than treating it as an anomaly.
-  - Cap: never more than 5 figures per analysis. This is a decision
-    tool, not a slide deck.
-
-### 5-6. Auto-maintained analysis index
-
-`analysis/README.md` is generated by `scripts/refresh-analysis-index.py`,
-which rewrites only the block between `<!-- ANALYSIS_INDEX:START -->` /
-`<!-- ANALYSIS_INDEX:END -->` — do not hand-edit inside the markers; the
-rest of the file (the short folder intro above the block) is hand-maintained.
-It runs **on demand via a manual `workflow_dispatch`** (Actions tab →
-"Run workflow"); the `/analyze` prompt does NOT stage
-`analysis/README.md` or invoke the script. The *why* (manual batching, the workflow) is in `CLAUDE.md`
-"Automatically-maintained indexes".
-
-The generated block is one plain-`##` table **per primary Pillar**
-(`P0`…`P5`, then `미분류`). The index taxonomy covers the six pillars P0–P5; a
-`P#` outside that range is dropped at generation. The
-*primary pillar* is the first entry of the `관련 Pillar` row; a paper appears
-in exactly one table but lists its full pillar set in the `Pillars` column.
-Empty pillar buckets are skipped. Within each table rows sort by `Refreshed`
-desc (ties by arXiv id desc). Per row:
-
-- a `Title` cell — a white 📝 shields.io badge
-  `[![](https://img.shields.io/badge/📝-ffffff.svg)](../analysis/<id>/analysis.md)`
-  linking the paper's deep-dive, followed by one space and the English title
-  (the badge folds the former standalone analysis-link column into the title);
-- a `Links` cell — one shields.io badge per link in the `링크` row, classified
-  by host and rendered in a **fixed order: arXiv → Website → GitHub →
-  HuggingFace**. Badge styles: `arXiv-<id>-b31b1b.svg` (red, carries the id),
-  `Website-Link-blue`, `GitHub-Code-black`, `HuggingFace-Model-yellow`. Any
-  non-arXiv/GitHub/HuggingFace URL renders as the generic `Website` badge;
-- a `Pillars` cell — every `P#` from the `관련 Pillar` row as a fixed-color
-  badge (the §3-1 pale palette: P0 red, P1 orange, P2 green, P3 mint,
-  P4 blue, P5 purple — `PILLAR_COLOR` in
-  `scripts/refresh-analysis-index.py`);
-- a `Keywords` cell — up to 5 `기술 키워드` head terms, each a colored
-  shields.io badge. English plain text only: a head carrying any math (inline
-  KaTeX / LaTeX / backticks) is excluded outright, and a head with no
-  recoverable English is dropped (§5-5 enforces English heads); skipped heads
-  are backfilled from later bullets. All keyword badges use one color (노
-  grey, `e8e7e7`) — keywords are descriptive, not ranked, so a positional
-  palette carried no meaning. GitHub's Markdown
-  sanitizer strips inline CSS (`<span style=…>`), so a shields.io badge is the
-  only way to color text per keyword on github.com;
-- a `Refreshed` cell — the `분석 생성일` date.
-
-**Load-bearing — the 논문 메타 rows the script reads from every
-`analysis/<id>/analysis.md`** (STYLE's contract; the author must emit them
-exactly):
-
-| Row label | Required format |
-|---|---|
-| `원문 제목 (영문)` | Plain English title |
-| `링크` | `[arXiv:XXXX.XXXXX](…)`, optionally followed by `· [GitHub](…) · [HuggingFace](…) · [Website](…)` — include a non-arXiv link only if it exists and resolves; never fabricate one |
-| `분석 생성일` | `YYYY-MM-DD` |
-| `관련 Pillar` | Comma-separated `P#` (controlled `P0`–`P5`); first = primary |
-| `태그` | Comma-separated lowercase tags from the controlled vocabulary below |
-
-The `관련 Pillar` row mirrors the `관련 Pillar / Decision` section's
-pillar ties (primary first); a paper with no pillar tie omits the row and
-lands in `미분류`. **Controlled tag vocabulary** (extend only by editing this
-list): `vla-arch`, `forgetting`, `peft`, `tactile`, `force`,
-`egocentric-data`, `dexterity`, `flow-matching`, `optimizer`, `continual`,
-`sim2real`, `dataset`. Pick the 1–3 most load-bearing.
-
-A missing / malformed scalar row yields `metadata` in that cell rather than
-an abort; a missing `관련 Pillar` row yields an empty set (the paper lands in
-`미분류`). The `태그` row is still authored (controlled vocabulary above) but
-is no longer surfaced in the index. The
-`기술 키워드` bullet heads are load-bearing too: the index reads each
-bullet's term — the text before the em dash in the `- **<term>** — …` shape
-§5-5 mandates (it also tolerates a `: ` separator and caps long heads).
-`python3 scripts/refresh-analysis-index.py` by hand is safe and idempotent.
-
-### 5-7. Readability / narrative layer
-
-A paper analysis is *read* (unlike a scouting report, which is *scanned* —
-§4-4), and it is also a decision tool anchored to `context/`. The rules
-below raise readability to an explainer-tool standard **without touching any
-machine-readable contract** (the 메타 table rows §5-6, keyword heads §5-5,
-verbatim `(§n)` anchors §5-5, KaTeX §5-5, the emoji system §5-2, Part A→B
-order). They govern the prose *between and around* those locked tokens.
-
-- **Lead with intuition, then evidence.** Every (A) section earns its
-  density only after the reader knows *why* it matters. The required
-  `### 직관` (§5-5) carries the plain-language opening; within other
-  sections, an intuition sentence may precede a verbatim quote that then
-  serves as its evidence (§5-5 explanation-line rule). Restating the
-  English in Korean is not an explanation — say what it *means*.
-
-- **Short connected paragraphs over fragment dumps.** Part (A) explanatory
-  prose (합니다/됩니다 체, §5-3) favors 1–4-sentence paragraphs that connect
-  ideas with "왜 중요한가" expansion, not a wall of terse fragments. The
-  mandated bullet sections stay bulleted (❓ 문제 정의 / 동기 §5-5, 🧩
-  핵심 기여, 🔑 기술 키워드); everything else may breathe as prose. An
-  architecture walk-through may use **bold inline labels + nested lists**
-  (e.g. `- **CA₁ (Raw 주입)** — …`) — this is explicitly sanctioned, it
-  reads better than a paragraph for component-by-component structure.
-
-- **Expand a `D#` / `P#` on first use.** Part (B) anchors to Decision and
-  Pillar codes, but a cold reader stalls on bare `D20` / `P4`. On the
-  *first* occurrence in the document, attach a one-clause inline gloss:
-  `D20(prior-preservation strategy)`, `P4(VLM 사전학습 보존)`. The code
-  token itself stays verbatim (§4-1) — the gloss is a parenthetical, so the
-  `관련 Pillar` row's `P[1-4]` parsing (§5-6) is unaffected. Later mentions
-  may use the bare code.
-
-- **⚖️ 한계 carries discursive insight; ⚠️ 먼저 검증할 실패 모드 stays
-  lab-specific.** Split the two register the explainer-tool blends:
-  - `⚖️ 한계` — author-stated weaknesses + inferred gaps, each with a
-    1–2-sentence *discursive* read of the mechanism and why it matters
-    (the "비판적 통찰" quality).
-  - `⚠️ 먼저 검증할 실패 모드` — keep PROBE's differentiator: concrete
-    transfer risk to *our* stack, cheapest sanity check first. Do **not**
-    dilute it into generic critique; the generic critique belongs in ⚖️.
-
-These are fidelity-neutral (§4-4 / §4-5 bar): improving readability must
-not add, drop, or reorder any fact, number, quotation, citation polarity,
-or `P#`/`D#` / arXiv / formula token.

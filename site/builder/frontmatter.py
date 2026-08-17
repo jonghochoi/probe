@@ -1,6 +1,6 @@
 """Minimal `---`-fenced front-matter parser.
 
-`readable.md` carries flat scalars plus one folded block (`summary: >`).
+`analysis/<id>.md` carries flat scalars plus one folded block (`summary: >`).
 Pulling in PyYAML for that would add a dependency whose feature surface
 (anchors, tags, implicit typing) is entirely unwanted here — a stray `yes`
 becoming `True` is a real YAML footgun. Flat keys only; genuine nesting is

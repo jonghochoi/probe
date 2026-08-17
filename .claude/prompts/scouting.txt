@@ -17,7 +17,7 @@ CONTEXT (read-only):
 - scouting/templates/report.md     — the form every report follows
 - scouting/<PILLAR>/YYYY-MM-DD.md — this pillar's recent reports (last
                                    ~2 weeks, ~4 files), for de-duplication only
-- analysis/                 — folder names are arXiv ids already deep-dived
+- analysis/, analysis_legacy/      — names are arXiv ids already written up
                                    (any pillar — not <PILLAR>-scoped), for
                                    de-duplication only; read top-level names
                                    only, never the contents
@@ -36,9 +36,10 @@ Resolve the run date once with `TZ=Asia/Seoul date +%Y-%m-%d` (the
 schedule is Asia/Seoul) and use that exact value for both the
 report filename and the git commit below.
 
-Before retrieval, resolve the already-analyzed set once: run `ls analysis/`
-(bare arXiv ids, one per folder, any pillar) and hold the result for the
-rest of this run — every pass below drops a candidate whose id is in this
+Before retrieval, resolve the already-analyzed set once: run
+`ls analysis/ analysis_legacy/` (bare arXiv ids — one `<id>.md` file per
+rewrite, one `<id>/` folder per legacy deep-dive, any pillar) and hold the
+result for the rest of this run — every pass below drops a candidate whose id is in this
 set, the same way they drop ids already in Tracked Literature or recent
 reports. This is a local directory listing, not an API call, so it costs
 nothing and runs before any pass.
@@ -94,7 +95,8 @@ Endpoints:
         14-day window, so nothing recent is dropped, while the 600+-entry
         lists collapse to a handful before any per-id lookup.
      d. drop ids already in this pillar's "Tracked Literature", in the
-        last ~2 weeks of reports, or in the `analysis/` set resolved above.
+        last ~2 weeks of reports, or in the already-analyzed set resolved
+        above.
      e. for the few survivors only, fetch the publication date
         (`.../graph/v1/paper/arXiv:XXXX.XXXXX?fields=title,publicationDate,externalIds,abstract`,
         or the arXiv API) and keep only those within the last 14 days.
@@ -217,9 +219,9 @@ no per-report info, so the report goes metadata → legend.
 RULES:
 - Do not recommend any paper already covered in this pillar's recent
   reports — the last ~2 weeks (~4 files `scouting/<PILLAR>/YYYY-MM-DD.md`).
-- Do not recommend any paper that already has a deep-dive folder under
-  `analysis/<arxiv-id>/` (any pillar — checked via the `ls analysis/` set
-  resolved at the top of RETRIEVAL).
+- Do not recommend any paper already written up as `analysis/<arxiv-id>.md`
+  or `analysis_legacy/<arxiv-id>/` (any pillar — checked via the
+  already-analyzed set resolved at the top of RETRIEVAL).
 - Do not edit context/<PILLAR>.md. If a pinned paper should be
   replaced, write the suggestion under 💡 Context Suggestions.
 - If fewer than 3 papers pass score >= 2, say so. Do not pad.

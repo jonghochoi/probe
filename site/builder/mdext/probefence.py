@@ -1,6 +1,6 @@
-"""The ` ```probe-* ` fences of the readable layer.
+"""The ` ```probe-* ` fences of the rewrite layer.
 
-`readable.md` is markdown with JSON where structure is needed: an inline term
+`analysis/<id>.md` is markdown with JSON where structure is needed: an inline term
 definition, a cited figure, a per-section quiz. JSON because the nesting
 (quiz options, answer, explanation) parses strictly with the stdlib and fails
 loudly when malformed — a silently half-parsed quiz would publish with no
