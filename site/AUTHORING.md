@@ -57,7 +57,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 |---|---|
 | `analysis_of` | must equal the file name — **mismatch fails the build**. This catches the copy-paste that lands a rewrite under the wrong id |
 | `title` | required. The paper's title, as the card and the page header print it |
-| `tagline` | required. **One line naming what the paper does**, printed under the body H1. The H1 is our thesis and often a metaphor, so on its own it does not tell a reader which paper they opened; the header prints the paper's own title. This is the sentence between them |
+| `tagline` | required. **One line naming what the paper does**, printed under the body H1 and under the title on the landing page. The H1 is our thesis and often a metaphor, so on its own it does not tell a reader which paper they opened; the header prints the paper's own title. This is the sentence between them. **It never restates the paper's name** — `<코드명> — <무엇을 하는가>` printed under a title that already reads `<코드명>: <…>` spends the one line the tagline has on the word directly above it. Open with what the paper does, not with the codename; **the build reports the echo** |
 | `summary` | required. 2–3 sentences, read cold. Printed **on the page** as the `한 문단 요약` block between the thesis line and act 1, and flattened for the landing card. Authored as markdown — `**강조**` and `` $`math`$ `` render on the page and are stripped for the card, so bold the three or four phrases that carry the argument (§3-2 applies) |
 | `authors` | one line, as printed |
 | `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly. First entry decides the card's group; empty → 미분류, which beats a wrong pillar |
@@ -68,7 +68,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **The build matches this list against the `probe-figure` fences in the body both ways** — an id in one and not the other is reported |
 | `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — see R15. An empty value is not accepted, because "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate |
 | `terms` | count of inline term anchors |
-| `metric` | **optional.** The one result the paper is remembered by, as a printable fragment: `TTFA 399.5 → 129.2 ms`, `폐루프 25 Hz · denoising 1 스텝`. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
+| `metric` | **optional.** The one result the paper is remembered by, as a printable fragment — `<지표> <전> → <후> <단위>` for a number the paper moved, `<수치> <단위> · <함께 성립한 조건>` for one it holds under a constraint. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
 | `generator` | `analyze/v2` |
 
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed
@@ -248,17 +248,33 @@ reader should see the stub.
     ```
 
     ```probe-parts
-    {"rows": [{"label": "<구간 이름>", "range": "<표기>", "tone": "settled",
+    {"rows": [{"label": "<구간 이름>", "range": "<표기>", "state": "<이 구간의 상태>",
                "body": "<이 구간이 무엇인가>"},
-              {"label": "<구간 이름>", "range": "<표기>", "tone": "open",
+              {"label": "<구간 이름>", "range": "<표기>", "state": "<이 구간의 상태>",
                "body": "<이 구간이 무엇인가>"}]}
     ```
 
 `probe-split` for a contrast (2–3 cards; `tone`: `cold` / `warm` / `plain`);
-`probe-parts` for one thing cut into named regions (`tone`: `settled` = pinned,
-`partial` = in transition, `open` = free). `probe-split` is also the right
-component for a corpus paper that prescribed something different for the same
-problem.
+`probe-parts` for one thing cut into named regions. `probe-split` is also the
+right component for a corpus paper that prescribed something different for the
+same problem.
+
+**`state` is the rewrite's own word**, not a value from a fixed list. Each
+paper cuts its object into the conditions *that* paper argues about — how
+pinned down a region is, which channel a block belongs to, which stage owns it
+— so the fence takes those words and hands out a color per distinct state, in
+the order the states first appear. Write them as short parallel phrases: one
+grammatical shape across the rows, so the column reads as one question answered
+once per region.
+
+- **Rows in the same state get the same color, and that is the point** — two
+  regions wearing one wash means the rewrite says they are in one condition,
+  and the printed state says which. Colors are grouping, never row identity.
+- **Every row carries a state, or none does.** A half-labelled band claims the
+  unlabelled rows have no state; those rows render neutral and read as leftovers.
+- **At most four distinct states carry a color.** Past four the color stops
+  sorting anything — merge the states that mean the same thing, or the
+  decomposition is a table.
 
 **4. 출처·배경** — where the technique came from, and why it arrives now. A
 `co-ctx` callout and term anchors.
@@ -414,6 +430,16 @@ is used. Never write the `co-*` class by hand.
 - **Author-stated limitations close ACT 3**, as `co-warn`. They must not land
   after Act 4's verification plan — the authors' admission is an INPUT to our
   plan, not a footnote to it.
+- **One point per callout, and at most 400 printed characters** — counted on
+  what the reader sees, so emphasis markers and TeX macros cost nothing. A
+  callout is an aside: the page pulls it out of the flow, sets it on a pale
+  wash and expects the eye to take it in one stop. Past that length it is a
+  section wearing a border, the paragraph it interrupted is gone by the time
+  the reader comes back, and a page whose callouts run 100 characters in one
+  place and 500 in the next reads as if the rule changed mid-document. **The
+  build reports an over-long body.** A run of author-stated limitations is one
+  clause each inside the callout, with the elaboration in a `::: details` under
+  it — not one paragraph each inside the band.
 
 ### 2-10. R10 — Resource links
 
@@ -475,7 +501,7 @@ obvious throwaways beside the answer.
   - **A 3px left accent band means "aside".** It is reserved for the
     single-column asides — the 요약 block, the five callouts, a term panel, a
     quiz. A card that sits inside a multi-card grid (`probe-split`) is keyed by
-    its heading color instead; giving it a band made each half read as its own
+    its heading color instead — a band there makes each half read as its own
     callout interrupting the flow rather than as one of two things held side
     by side.
   - **Every component owns its internal spacing, and prose margins stop at
@@ -491,10 +517,10 @@ obvious throwaways beside the answer.
     moving on the page, and it buys a URL the address bar already holds. Do
     not add one back, and do not link sections to each other by `#id` in prose
     where a plain reference reads better.
-- **R13. Never `display:block` on an inline tag** (a site-side rule kept here
-  because it keeps recurring). Three separate bugs came from a rule like
-  `.X b{display:block}` catching body emphasis and breaking the line at every
-  `<b>`. Titles get their own class; if you must, use a `>` child combinator.
+- **R13. Never `display:block` on an inline tag** (a site-side rule, stated
+  here because authors hit it). A rule like `.X b{display:block}` catches body
+  emphasis too and breaks the line at every `<b>`. Titles get their own class;
+  if you must, use a `>` child combinator.
 - **R14. A `**` run cannot close between a closing paren and a Korean
   particle** — see §3-2.
 
@@ -620,10 +646,10 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 
 | Rule | Enforced by |
 |---|---|
-| Front matter required keys, `analysis_of` == file name, `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
+| Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title (§1), `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
-| `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts | `site/builder/mdext/probefence.py` |
-| GFM alert → `co-*` role mapping (R9) | `site/builder/mdext/callouts.py` |
+| `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts (incl. its all-or-none `state` and the four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
+| GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |
 

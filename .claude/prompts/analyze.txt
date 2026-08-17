@@ -10,8 +10,8 @@ those papers are migrated. You do not touch it — you neither read it nor write
 to it. Everything here comes from the paper itself and from `context/`.
 
 INPUT:
-The paper is the invocation argument: a bare arXiv id (`2607.26055`), an
-arXiv URL, or a versioned id (`2607.26055v1`). Normalize to the bare id.
+The paper is the invocation argument: a bare arXiv id (`YYMM.NNNNN`), an
+arXiv URL, or a versioned id (`YYMM.NNNNNv2`). Normalize to the bare id.
 If the argument is empty or unparseable, stop and ask — do not pick a paper.
 
 Optional flag — `--refresh`: `analysis/<id>.md` already exists and you are
@@ -149,6 +149,11 @@ PROCEDURE
      - Does every section title name something specific to THIS paper? (R2)
      - Is every `co-ten` about one of OUR decisions? (R9)
      - Do the author-stated limitations close Act 3, not Act 4? (R9)
+     - Does every callout hold ONE point, inside the 400-character ceiling?
+       An overflowing one keeps its headline and the rest moves into body
+       prose or a `::: details`. (R9)
+     - Does `tagline:` say what the paper DOES without naming the paper? The
+       title prints directly above it. (§1)
      - Is every resource link confirmed in the paper? (R10)
      - Is the figure that carries the paper's CENTRAL mechanism on the page?
        Walk `arxiv.py`'s figure list once more and name, for each linkable

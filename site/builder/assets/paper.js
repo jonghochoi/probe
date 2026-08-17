@@ -38,7 +38,7 @@
 
   /* ── TOC scroll-spy ───────────────────────────────────────────────── */
   // The contents themselves are server-rendered (pages.py `_toc`), because the
-  // act grouping is structure the renderer knows and the DOM no longer states.
+  // act grouping is structure the renderer knows and the DOM does not state.
   // All that is left here is marking which section the reader is in.
   var tocEl = document.querySelector(".toc");
 

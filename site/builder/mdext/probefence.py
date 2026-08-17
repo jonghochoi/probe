@@ -6,13 +6,12 @@ definition, a cited figure, a per-section quiz. JSON because the nesting
 loudly when malformed — a silently half-parsed quiz would publish with no
 right answer and nobody would notice.
 
-Four of these fences exist because AUTHORING §2-5 (R5) asks for five kinds of
-planted context and only two of them had anywhere to go. 계보 became a
-paragraph of prose, 숫자의 지형 became a sentence with numbers in it, and 대조
-became two adjacent paragraphs the reader had to hold side by side. The rule
-was already right; the page had no component to satisfy it with, so every one
-of them flattened into undifferentiated body text. `probe-lineage`,
-`probe-scale`, `probe-split` and `probe-parts` are those shapes made real.
+Four of these fences carry the planted context AUTHORING §2-5 (R5) asks for.
+Written as prose, 계보 is a paragraph, 숫자의 지형 is a sentence with numbers in
+it, and 대조 is two adjacent paragraphs the reader has to hold side by side —
+all three satisfy the rule and flatten into undifferentiated body text.
+`probe-lineage`, `probe-scale`, `probe-split` and `probe-parts` are those
+shapes made real.
 
 Rendering these is not optional decoration. Without it the fences fall through
 to the code highlighter and a term definition is published as a block of JSON,
@@ -401,7 +400,11 @@ def split(data: dict, inline_md) -> str:
 
 # ── ```probe-parts ──────────────────────────────────────────────────────────
 
-_PART_TONES = {"settled", "partial", "open"}
+# Color slots, not meanings. A row's `state` is the paper's own word for the
+# condition that region is in, and the slot it lands in is decided by the order
+# the states appear — so two rows in the same state are the same color because
+# they say the same word, and the word is printed next to the color.
+PART_STATE_SLOTS = 4
 
 
 def parts(data: dict, inline_md) -> str:
@@ -409,27 +412,48 @@ def parts(data: dict, inline_md) -> str:
 
     A schedule split into front/interior/tail, a loss into its terms, a
     pipeline into its stages. The `label` is set in mono because it is the
-    paper's own name for the region, and `range` carries the math that bounds
-    it. `tone` says whether the region is pinned, in transition, or free.
+    paper's own name for the region, `range` carries the math that bounds it,
+    and `state` names the condition it is in. That vocabulary belongs to the
+    rewrite — each paper cuts its object into the conditions that paper argues
+    about — so the fence takes the words rather than supplying a fixed set.
+
+    Rows sharing a state share a color, which is the whole reason the color is
+    there. Either every row carries a state or none does — a half-labelled band
+    says the unlabelled rows have no state, which is never what is meant.
     """
     rows_in = data.get("rows")
     if not isinstance(rows_in, list) or not rows_in:
         raise FenceError("probe-parts: `rows` must be a non-empty list")
+
+    states = [str(row.get("state", "")).strip() if isinstance(row, dict) else ""
+              for row in rows_in]
+    if any(states) and not all(states):
+        missing = [str(r.get("label", "?")) for r, s in zip(rows_in, states) if not s]
+        raise FenceError(
+            f"probe-parts: `state` is on some rows but not {', '.join(missing)} — "
+            f"give every row a state or none of them"
+        )
+    slots: dict[str, int] = {}
+    for state in states:
+        if state and state not in slots:
+            slots[state] = len(slots) + 1
+    if len(slots) > PART_STATE_SLOTS:
+        raise FenceError(
+            f"probe-parts: {len(slots)} distinct states "
+            f"({', '.join(slots)}) — at most {PART_STATE_SLOTS} carry a color; "
+            f"merge the ones that mean the same thing, or use a table"
+        )
+
     out = ""
-    for row in rows_in:
+    for row, state in zip(rows_in, states):
         if not isinstance(row, dict) or not row.get("label") or not row.get("body"):
             raise FenceError(f"probe-parts: each row needs `label` and `body` (got {row!r})")
-        tone = str(row.get("tone", "open")).strip() or "open"
-        if tone not in _PART_TONES:
-            raise FenceError(
-                f"probe-parts[{row['label']}]: `tone` must be one of "
-                f"{', '.join(sorted(_PART_TONES))} — got {tone!r}"
-            )
         rng = str(row.get("range", "")).strip()
         out += (
-            f'<div class="pt-row pt-{_esc(tone)}">'
+            f'<div class="pt-row pt-s{slots.get(state, 0)}">'
             f'<div class="pt-label"><code>{_esc(row["label"])}</code>'
             + (f'<span class="pt-range">{inline_md(rng)}</span>' if rng else "")
+            + (f'<span class="pt-state">{_esc(state)}</span>' if state else "")
             + "</div>"
             f'<div class="pt-body">{inline_md(str(row["body"]))}</div>'
             "</div>"

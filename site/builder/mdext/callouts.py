@@ -32,16 +32,38 @@ ROLES = {
 }
 MARKER = re.compile(r"^\[!(\w+)\][ \t]*(.*)$")
 
+# A callout is an aside: one point, pulled out of the flow so the eye catches
+# it. Past this it stops being an aside and becomes a section wearing a border
+# — the reader loses the paragraph it interrupted, and the pale wash it is set
+# on runs long enough to read as a second column. Measured on the body's
+# printed characters, so emphasis markers and TeX macros do not count against
+# an author who wrote a short sentence with a formula in it. §2-9.
+BODY_MAX = 400
 
-def install(md, inline_md=None) -> None:
+_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+_MATH = re.compile(r"\$`([^`]*)`\$")
+_TEX_NOISE = re.compile(r"\\[A-Za-z]+|[{}\\]")
+_MARKUP = re.compile(r"[*_`~]")
+_WS = re.compile(r"\s+")
+
+
+def body_length(text: str) -> int:
+    """Characters a reader sees — markup stripped, math counted as it prints."""
+    text = _LINK.sub(r"\1", text)
+    text = _MATH.sub(lambda m: _TEX_NOISE.sub("", m.group(1)), text)
+    return len(_WS.sub("", _MARKUP.sub("", text)))
+
+
+def install(md, inline_md=None, report=None) -> None:
     """`inline_md` renders the label. Without it the label is escaped, which
-    publishes any math or emphasis in a callout title as its own source."""
-    md.core.ruler.push("probe_alerts", _rule)
+    publishes any math or emphasis in a callout title as its own source.
+    `report` takes one message per over-long callout body."""
+    md.core.ruler.push("probe_alerts", lambda state: _rule(state, report))
     md.renderer.rules["blockquote_open"] = _opener(inline_md)
     md.renderer.rules["blockquote_close"] = _close
 
 
-def _rule(state) -> None:
+def _rule(state, report=None) -> None:
     tokens = state.tokens
     for i, token in enumerate(tokens):
         if token.type != "blockquote_open" or i + 2 >= len(tokens):
@@ -59,11 +81,36 @@ def _rule(state) -> None:
             continue
 
         cls, default_label = role
-        token.meta = {"role": cls, "label": m.group(2).strip() or default_label}
+        label = m.group(2).strip() or default_label
+        token.meta = {"role": cls, "label": label}
         # Drop the marker line from both the raw content and the already-parsed
         # children; leaving it in either place publishes `[!NOTE]` as body text.
         inline.content = rest
         _strip_first_line(inline)
+        if report is not None:
+            length = body_length(_body_text(tokens, i))
+            if length > BODY_MAX:
+                report(
+                    f"callout `{label}` runs {length} chars — a callout holds one "
+                    f"point in at most {BODY_MAX} (R9); move the rest into body "
+                    f"prose or a `::: details` block"
+                )
+
+
+def _body_text(tokens, open_idx: int) -> str:
+    """Every inline run inside one callout, marker line already removed."""
+    depth = 0
+    parts = []
+    for token in tokens[open_idx + 1:]:
+        if token.type == "blockquote_open":
+            depth += 1
+        elif token.type == "blockquote_close":
+            if depth == 0:
+                break
+            depth -= 1
+        elif token.type == "inline":
+            parts.append(token.content)
+    return "\n".join(parts)
 
 
 def _strip_first_line(inline) -> None:
