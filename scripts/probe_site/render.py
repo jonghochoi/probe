@@ -229,7 +229,7 @@ class DocRenderer:
                 + f'<a class="anchor" href="#{anchor}" aria-label="이 섹션 링크">#</a>'
                 + "</h2>\n"
             )
-            return f'<h2 class="h-sec sec" id="{anchor}">{self._inline(ko)}'
+            return f'<h2 class="h-sec" id="{anchor}">{self._inline(ko)}'
 
         # H4+ stays an ordinary heading — a sub-point inside a section.
         take_inline()

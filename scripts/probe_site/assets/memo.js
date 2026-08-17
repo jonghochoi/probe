@@ -152,8 +152,10 @@ if (root) {
   addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
   addEventListener("beforeunload", flush);
 
-  // Freeze the section the reader was on when they start writing.
-  const heads = () => [...document.querySelectorAll('.article h2.h-sec, .article h3[id]')];
+  // Freeze the section the reader was on when they start writing. Two levels,
+  // section and sub-point — an act is a divider band, not a heading, so it has
+  // no id to anchor to. (`h3` was the section tag before the spine changed.)
+  const heads = () => [...document.querySelectorAll('.article h2.h-sec, .article h4.h-sub[id]')];
   let topmost = "";
   const obs = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) topmost = e.target.id; });
