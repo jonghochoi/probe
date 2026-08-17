@@ -47,6 +47,7 @@ arxiv_html: <arxiv-id>v<n>       # the exact version actually read
 arxiv_fetched: YYYY-MM-DD
 figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
 terms: <n>                       # count of inline term anchors
+metric: <the headline number>    # optional — omit rather than invent one
 summary: >                       # 한 문단 요약 — on the page AND on the card
   …
 ---
@@ -66,6 +67,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
 | `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them |
 | `terms` | count of inline term anchors |
+| `metric` | **optional.** The one result the paper is remembered by, as a printable fragment: `TTFA 399.5 → 129.2 ms`, `폐루프 25 Hz · denoising 1 스텝`. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
 | `generator` | `readable-paper/v2` |
 
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed

@@ -17,7 +17,8 @@ tooling and rules; the agent writes into `readable/` and reads from here.
 | `builder/corpus.py` | Rewrite discovery, front-matter validation, pillar names, the R10 link vocabulary |
 | `builder/render.py` | Markdown → HTML, plus the rule checks that have no other home (R2, R4, R5, R11, R14) |
 | `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
-| `builder/pages.py`, `components.py` | Landing page and paper page assembly |
+| `builder/pages.py`, `components.py` | Page assembly — the landing briefing (newest rewrite as a lead block, everything else as one row each, facets in a left rail), the glossary, the memo hub and the paper page |
+| `builder/terms.py` | The corpus-wide glossary. Harvests every ` ```probe-term ` fence in `readable/` and groups it by id — nothing is authored for that page. A term defined by several rewrites shows the most recently written definition and links all of them |
 | `builder/arxiv.py` | LaTeXML extraction of an arXiv original. Serves the prompt rather than the build: `python3 -m builder.arxiv <id>` from this folder prints the section tree, figure ids and URLs. Raises `Unavailable` when a paper has no HTML edition, which is `/readable-paper`'s stop condition |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |
 | `builder/fonts.py`, `assets/` | Webfont subsetting and the site's CSS/JS. Visual rules live here, not in a rewrite (R12) |

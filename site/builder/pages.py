@@ -6,6 +6,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import components as c
+from . import terms as _terms
 from .corpus import PILLAR_NAMES, PILLAR_ORDER, UNCLASSIFIED, Paper
 from .render import DocRenderer
 
@@ -21,106 +22,119 @@ DISCUSSIONS_NEW = f"https://github.com/{REPO}/discussions/new?category=paper-not
 # than they save. Search covers everything the chips leave out.
 TAG_FACETS = 12
 
-def landing_page(papers: list[Paper]) -> str:
-    """The corpus index — pillar-grouped card grid over a sticky filter bar.
+def landing_page(papers: list[Paper], katex=None) -> str:
+    """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
-    Every card is server-rendered with its facets on `data-` attributes rather
+    The page answers "what should I read" before "what is here". The most
+    recent rewrite is printed as a lead block with its thesis, summary and
+    numbers; everything else is one scannable row per paper, sorted newest
+    first. Facets live in a left rail rather than a chip bank above the list,
+    which is what lets the rows start in the first screen.
+
+    Every row is server-rendered with its facets on `data-` attributes rather
     than hydrated from an inline JSON blob. That keeps the page fully readable
-    with JavaScript off (the filter bar hides itself, the cards stay), and the
-    filter script only ever toggles `hidden` on nodes that already exist.
+    with JavaScript off (the filter bar and the rail hide themselves, the rows
+    stay, newest first), and the filter script only ever reorders and toggles
+    `hidden` on nodes that already exist.
     """
     ordered = sorted(papers, key=lambda p: p.date, reverse=True)
     tag_counts = Counter(t for p in ordered for t in p.tags)
     facets = [t for t, _ in tag_counts.most_common(TAG_FACETS)]
 
-    by_pillar: dict[str, list[Paper]] = {}
-    for paper in ordered:
-        by_pillar.setdefault(paper.primary, []).append(paper)
-
-    groups = []
-    for key in PILLAR_ORDER:
-        bucket = by_pillar.get(key)
-        if not bucket:
-            continue
-        name = PILLAR_NAMES.get(key, "필러 미지정")
-        cards = "".join(_card(p) for p in bucket)
-        groups.append(
-            f'<section class="pgroup" data-pgroup="{c.esc(key)}">\n'
-            f'  <header class="pgroup-head">\n'
-            f'    <span class="chip pillar" data-p="{c.esc(key)}">{c.esc(key)}</span>\n'
-            f"    <h2>{c.esc(name)}</h2>\n"
-            f'    <span class="pgroup-count" data-group-count>{len(bucket)}</span>\n'
-            f"  </header>\n"
-            f'  <div class="grid">{cards}</div>\n'
-            f"</section>"
-        )
+    # Taglines and the lead summary are authored markdown — emphasis is what
+    # makes a summary scannable, and a summary that opens with math is common
+    # enough that escaping it would publish backticks. `decisions` is left
+    # empty on purpose: a `D#` tooltip needs `paper.js`, which this page does
+    # not load.
+    renderer = DocRenderer(katex) if katex is not None else None
 
     # Counted over *every* declared pillar, not just the primary one: the filter
     # keeps a paper that touches the pillar anywhere, so a count of primaries
-    # would promise fewer results than the click delivers. The group headings
-    # below still count primaries — a different question, asked in place.
+    # would promise fewer results than the click delivers. The pillar
+    # separators in the list still count primaries — a different question,
+    # asked in place.
     touches = Counter(p for paper in ordered for p in (paper.pillars or [UNCLASSIFIED]))
-    pillar_chips = "".join(
-        f'<button type="button" class="facet-chip pillar" data-p="{c.esc(k)}" '
+    primaries = Counter(p.primary for p in ordered)
+
+    rail_pillars = "".join(
+        f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
-        f"{c.esc(k)}<span class=\"n\">{touches[k]}</span></button>"
+        f'<span class="sw"></span><b>{c.esc(k)}</b>'
+        f'<span class="rn">{touches[k]}</span></button>'
         for k in PILLAR_ORDER if touches.get(k)
     )
-    tag_chips = "".join(
-        f'<button type="button" class="facet-chip" data-facet-tag="{c.esc(t)}" '
-        f'aria-pressed="false">{c.esc(t)}<span class="n">{tag_counts[t]}</span></button>'
+    rail_tags = "".join(
+        f'<button type="button" class="rail-item" data-facet-tag="{c.esc(t)}" '
+        f'aria-pressed="false"><b>{c.esc(t)}</b>'
+        f'<span class="rn">{tag_counts[t]}</span></button>'
         for t in facets
     )
 
-    body = f"""<header class="hero">
-  <div class="hero-inner">
-    <p class="hero-eyebrow">hand-centric dexterous manipulation</p>
-    <h1>읽은 논문 {len(ordered)}편</h1>
-    <p class="hero-sub">
-      논문 원문에서 다시 쓴 한글 판입니다. 원문을 열지 않고도 메커니즘까지 이해되도록,
-      요청한 논문을 한 편씩 새로 씁니다.
+    # One separator per pillar, parked in the list and shown only by the
+    # pillar sort. Rendering them up front keeps the sort a reordering of
+    # existing nodes — the script never builds markup.
+    seps = "".join(
+        f'<div class="rsep" data-sep="{c.esc(k)}" hidden>'
+        f'<span class="chip pillar" data-p="{c.esc(k)}">{c.esc(k)}</span>'
+        f"<h2>{c.esc(PILLAR_NAMES.get(k, '필러 미지정'))}</h2>"
+        f'<span class="rsep-n" data-sep-count>{primaries[k]}</span></div>'
+        for k in PILLAR_ORDER if primaries.get(k)
+    )
+    rows = "".join(
+        _row(p, renderer, lead=(i == 0)) for i, p in enumerate(ordered)
+    )
+
+    body = f"""<header class="mast">
+  <div class="mast-inner">
+    <div class="mast-line">
+      <h1>손 중심 조작 연구, 다시 쓴 판</h1>
+      <span class="mast-rule"></span>
+      <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
+    </div>
+    <p class="mast-sub">
+      원문을 열지 않고도 메커니즘까지 이해되도록, 논문을 한 편씩 새로 씁니다.
     </p>
-    <dl class="hero-stats">
-      <div><dt>논문</dt><dd>{len(ordered)}</dd></div>
-      <div><dt>Pillar</dt><dd>{len([k for k in PILLAR_ORDER if by_pillar.get(k)])}</dd></div>
-      <div><dt>태그</dt><dd>{len(tag_counts)}</dd></div>
-    </dl>
   </div>
 </header>
 
 <div class="filters" data-filters>
   <div class="filters-inner">
-    <div class="filter-row">
-      <label class="search">
-        <span aria-hidden="true">🔍</span>
-        <input type="search" data-q autocomplete="off" spellcheck="false"
-               placeholder="제목 · 요약 · 태그 · 저자 · arXiv id 로 검색"
-               aria-label="논문 검색">
-      </label>
-      <span class="filter-spacer"></span>
-      <div class="sort" role="group" aria-label="정렬">
-        <button type="button" data-sort="pillar" aria-pressed="true">Pillar 별</button>
-        <button type="button" data-sort="recent" aria-pressed="false">최신순</button>
-        <button type="button" data-sort="title" aria-pressed="false">제목순</button>
-      </div>
+    <label class="search">
+      <span aria-hidden="true">🔍</span>
+      <input type="search" data-q autocomplete="off" spellcheck="false"
+             placeholder="제목 · 요약 · 태그 · 저자 · arXiv id 로 검색"
+             aria-label="논문 검색">
+    </label>
+    <div class="sort" role="group" aria-label="정렬">
+      <button type="button" data-sort="recent" aria-pressed="true">최신순</button>
+      <button type="button" data-sort="pillar" aria-pressed="false">Pillar 별</button>
+      <button type="button" data-sort="title" aria-pressed="false">제목순</button>
     </div>
-    <div class="filter-row facets" data-facet-group="pillar">{pillar_chips}</div>
-    <div class="filter-row facets" data-facet-group="tag">{tag_chips}</div>
-    <div class="filter-row status">
-      <span data-result-count>{len(ordered)}편</span>
-      <button type="button" class="linkish" data-reset hidden>필터 초기화</button>
-    </div>
+    <span class="filter-spacer"></span>
+    <span class="status" data-result-count>{len(ordered)}편</span>
+    <button type="button" class="linkish" data-reset hidden>필터 초기화</button>
   </div>
 </div>
 
-<main class="corpus" data-corpus>
-  {_first_run() if not ordered else ""}
-  {"".join(groups)}
-  <div class="grid flat" data-flat hidden></div>
-  <p class="corpus-empty" data-empty hidden>
-    조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
-  </p>
-</main>
+<div class="deck">
+  <aside class="rail" data-rail>
+    <p class="rail-h">Pillar</p>
+    {rail_pillars}
+    <p class="rail-h">태그</p>
+    {rail_tags}
+  </aside>
+  <main class="corpus" data-corpus>
+    {_first_run() if not ordered else ""}
+    {_lead_block(ordered[0], renderer) if ordered else ""}
+    <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
+      <span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>Pillar</span><span>분량</span>
+    </div>
+    <div class="rows" data-rows>{seps}{rows}</div>
+    <p class="corpus-empty" data-empty hidden>
+      조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
+    </p>
+  </main>
+</div>
 """
     return c.page(
         title="PROBE · 논문 분석",
@@ -141,39 +155,121 @@ def _first_run() -> str:
     return (
         '<p class="corpus-empty">아직 재작성한 논문이 없습니다.<br>'
         '<code>/readable-paper &lt;arXiv id&gt;</code> 로 첫 편을 추가하면 '
-        "여기에 카드가 생깁니다.</p>"
+        "여기에 첫 줄이 생깁니다.</p>"
     )
 
 
-def _card(paper: Paper) -> str:
-    tags = paper.tags
+def _facets(paper: Paper) -> str:
+    """The `data-` attributes the filter script reads off a row."""
+    hay = " ".join(
+        [paper.stem, paper.title, paper.tagline, paper.preview, paper.authors,
+         *paper.tags]
+    ).lower()
+    return (
+        f'data-id="{c.esc(paper.stem)}" '
+        f'data-pillars="{c.esc(" ".join(paper.pillars) or UNCLASSIFIED)}" '
+        f'data-primary="{c.esc(paper.primary)}" '
+        f'data-tags="{c.esc(" ".join(paper.tags))}" '
+        f'data-date="{c.esc(paper.date)}" '
+        f'data-title="{c.esc(paper.title.lower())}" '
+        f'data-hay="{c.esc(hay)}"'
+    )
+
+
+def _size(paper: Paper, *, short: bool = False) -> str:
+    """본문 27분 · 용어 18 · 그림 5 — how much of a sit this is.
+
+    Printed before the reader commits, which is the only moment the number is
+    worth anything. All three come from what the rewrite already declares.
+    `short` drops the figure count and the label for the list, where the column
+    heading already says 분량 and the row has one line to give it.
+    """
+    if short:
+        bits = [f"{paper.read_minutes}분"]
+        if paper.term_count:
+            bits.append(f"용어 {paper.term_count}")
+        return " · ".join(bits)
+    bits = [f"본문 {paper.read_minutes}분"]
+    if paper.term_count:
+        bits.append(f"용어 {paper.term_count}")
+    if paper.figure_count:
+        bits.append(f"그림 {paper.figure_count}")
+    return " · ".join(bits)
+
+
+def _md(renderer, text: str) -> str:
+    """Authored markdown where there is a renderer, escaped text where not."""
+    return renderer.inline(text) if renderer is not None else c.esc(text)
+
+
+def _metric_chip(paper: Paper) -> str:
+    return (
+        f'<span class="metric">{c.esc(paper.metric)}</span>' if paper.metric else ""
+    )
+
+
+def _lead_block(paper: Paper, renderer=None) -> str:
+    """The newest rewrite, printed rather than summarised.
+
+    A grid of equal cards makes every paper look equally likely to be the one
+    you came for. The one written most recently is the one a returning reader
+    has not seen, so it gets the space — and with it the thesis line, which is
+    ours and appears nowhere else on this page.
+    """
     tag_buttons = "".join(
         f'<button type="button" class="chip tag" data-tag-jump="{c.esc(t)}">{c.esc(t)}</button>'
-        for t in tags[:3]
+        for t in paper.tags[:3]
     )
-    date = paper.date
-    hay = " ".join([paper.stem, paper.title, paper.preview, paper.authors, *tags]).lower()
-
-    return f"""<article class="card" data-card
-  data-id="{c.esc(paper.stem)}"
-  data-pillars="{c.esc(" ".join(paper.pillars) or UNCLASSIFIED)}"
-  data-tags="{c.esc(" ".join(tags))}"
-  data-date="{c.esc(date)}"
-  data-title="{c.esc(paper.title.lower())}"
-  data-hay="{c.esc(hay)}">
-  <a class="card-body" href="p/{c.esc(paper.stem)}/index.html">
-    <div class="card-top">
-      {"".join(c.chip(p, "pillar", data={"p": p}) for p in paper.pillars[:2])}
-      <span class="card-id">{c.esc(paper.stem)}</span>
-    </div>
-    <h3 class="card-title">{c.esc(paper.title)}</h3>
-    <p class="card-preview">{c.esc(paper.preview)}</p>
-  </a>
-  <div class="card-foot">
-    {tag_buttons}
-    <span class="filter-spacer"></span>
-    {f'<time datetime="{c.esc(date)}">{c.esc(date)}</time>' if date[:1].isdigit() else ""}
+    links = "".join(
+        c.chip(f"{emoji} {label}", "src-link", href=url)
+        for emoji, label, url in paper.links
+    )
+    return f"""<article class="lead" data-lead>
+  <div class="lead-top">
+    <span class="lead-flag">가장 최근</span>
+    <span class="lead-when">{c.esc(paper.date)} · arXiv {c.esc(paper.stem)}</span>
   </div>
+  <a class="lead-body" href="p/{c.esc(paper.stem)}/index.html">
+    <h2 class="lead-title">{c.esc(paper.title)}</h2>
+    <p class="lead-tagline">{_md(renderer, paper.tagline)}</p>
+    <p class="lead-sum">{_md(renderer, paper.summary_md)}</p>
+  </a>
+  <div class="lead-foot">
+    {"".join(c.chip(p, "pillar", data={"p": p}) for p in paper.pillars)}
+    {_metric_chip(paper)}
+    {tag_buttons}
+    {links}
+    <span class="filter-spacer"></span>
+    <span class="lead-size">{c.esc(_size(paper))}</span>
+  </div>
+</article>"""
+
+
+def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
+    """One paper, one line.
+
+    `data-lead-dup` marks the row the lead block is currently standing in for.
+    The row still exists — it has to, or filtering and the other two sorts
+    would silently lose a paper — but it ships `hidden`, so with JavaScript
+    off the paper appears once (in the lead) instead of twice. The script
+    reveals it the moment the lead block stops being the right thing to show.
+    """
+    # Two chips, not every pillar: a third one wraps the column onto a second
+    # line and makes the row taller than its own title. `data-pillars` still
+    # carries all of them, so filtering is unaffected.
+    pillars = "".join(
+        c.chip(p, "pillar", data={"p": p}) for p in paper.pillars[:2]
+    )
+    return f"""<article class="row" data-card{' data-lead-dup hidden' if lead else ''}
+  {_facets(paper)}>
+  <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
+  <span class="row-id">{c.esc(paper.stem)}</span>
+  <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
+    <span class="row-title">{c.esc(paper.title)}{_metric_chip(paper)}</span>
+    <span class="row-tagline">{_md(renderer, paper.tagline)}</span>
+  </a>
+  <span class="row-pillars">{pillars}</span>
+  <span class="row-size">{c.esc(_size(paper, short=True))}</span>
 </article>"""
 
 
@@ -183,10 +279,10 @@ def memos_page() -> str:
     Nothing here can be server-rendered: the memos live in the reader's browser
     and never reach the build. The page is the export/import surface for them.
     """
-    body = """<header class="hero slim">
-  <div class="hero-inner">
+    body = """<header class="mast slim">
+  <div class="mast-inner">
     <h1>메모</h1>
-    <p class="hero-sub">
+    <p class="mast-sub">
       논문을 읽으며 남긴 메모입니다. <strong>이 브라우저에만</strong> 저장되어 있어
       다른 기기에서는 보이지 않고, 사이트 데이터를 지우면 사라집니다.
       남길 메모는 내보내거나 Discussions 로 발행하세요.
@@ -218,6 +314,75 @@ def memos_page() -> str:
     )
 
 
+def terms_page(entries: list, katex, decisions: dict) -> str:
+    """The glossary — every ` ```probe-term ` in the corpus, in one list.
+
+    The definitions are not rewritten for this page: the same body that renders
+    collapsed under the paragraph that introduced the term renders open here,
+    followed by the rewrites it was written in. That is the whole point of
+    harvesting rather than authoring — a glossary maintained by hand would
+    start disagreeing with the papers on its second week.
+    """
+    renderer = DocRenderer(katex, decisions=decisions, base_prefix="../")
+    cards = []
+    for term in entries:
+        sources = "".join(
+            f'<a href="../p/{c.esc(stem)}/index.html">{c.esc(title)}</a>'
+            for stem, title in term.sources
+        )
+        hay = f"{term.title} {term.tid} {term.body}".lower()
+        cards.append(
+            f'<article class="tcard" id="{c.esc(term.anchor)}" data-term-card '
+            f'data-hay="{c.esc(hay)}">\n'
+            f'  <h2 class="tcard-title">{c.esc(term.title)}'
+            f'<a class="anchor" href="#{c.esc(term.anchor)}" aria-label="이 용어 링크">#</a></h2>\n'
+            f'  <div class="tcard-body">{renderer.inline(_terms.body_md(term))}</div>\n'
+            f'  <p class="tcard-src"><span>나온 곳</span>{sources}</p>\n'
+            f"</article>"
+        )
+
+    body = f"""<header class="mast slim">
+  <div class="mast-inner">
+    <div class="mast-line">
+      <h1>용어</h1>
+      <span class="mast-rule"></span>
+      <p class="mast-count">{len(entries)}개</p>
+    </div>
+    <p class="mast-sub">
+      재작성본이 본문에서 정의한 용어를 모았습니다. 같은 용어를 여러 편이 정의했다면
+      <strong>가장 최근에 쓴 정의</strong>를 싣고, 나머지는 아래 링크로 갑니다.
+    </p>
+  </div>
+</header>
+
+<div class="filters" data-filters>
+  <div class="filters-inner">
+    <label class="search">
+      <span aria-hidden="true">🔍</span>
+      <input type="search" data-q autocomplete="off" spellcheck="false"
+             placeholder="용어 · 설명으로 검색" aria-label="용어 검색">
+    </label>
+    <span class="filter-spacer"></span>
+    <span class="status" data-result-count>{len(entries)}개</span>
+  </div>
+</div>
+
+<main class="glossary" data-glossary>
+  {"".join(cards)}
+  <p class="corpus-empty" data-empty hidden>그런 용어는 아직 없습니다.</p>
+  {'<p class="corpus-empty">아직 정의된 용어가 없습니다.</p>' if not entries else ""}
+</main>
+"""
+    return c.page(
+        title="용어 · PROBE",
+        description="재작성본이 정의한 용어를 한데 모은 사전",
+        body=body,
+        depth=1,
+        scripts=["glossary.js"],
+        extra_head='<link rel="stylesheet" href="../assets/index.css">',
+    )
+
+
 def not_found_page() -> str:
     body = f"""<main class="hub notfound">
   <h1>404</h1>
@@ -235,7 +400,8 @@ def not_found_page() -> str:
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
-               problems: list[str] | None = None) -> str:
+               problems: list[str] | None = None,
+               neighbours: list[Paper] | None = None) -> str:
     """One paper's readable rewrite.
 
     One document per page: the site publishes rewrites and nothing else, so
@@ -254,6 +420,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
   <aside class="toc">{_toc(renderer.toc)}</aside>
   <main class="article">
     <section class="view">{rendered}</section>
+    {_related(neighbours or [])}
   </main>
 </div>
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/readable/{paper.stem}.md", DISCUSSIONS_NEW)}
@@ -267,6 +434,33 @@ def paper_page(paper: Paper, katex, decisions: dict,
     )
 
 
+
+
+def _related(neighbours: list[Paper]) -> str:
+    """The nearest rewrites, at the end of the one just read.
+
+    Placed after the article rather than in the sidebar: it is a next step, not
+    a navigation aid, and it should not compete with the table of contents
+    while there is still text above it. Empty when nothing shares a tag or a
+    pillar — see `corpus.related`.
+    """
+    if not neighbours:
+        return ""
+    items = "".join(
+        f'<a class="rel-item" href="../{c.esc(p.stem)}/index.html">\n'
+        f'  <span class="rel-p">{"".join(c.esc(x) + " " for x in p.pillars[:2])}</span>\n'
+        f'  <span class="rel-title">{c.esc(p.title)}</span>\n'
+        f'  <span class="rel-tagline">{c.esc(p.tagline)}</span>\n'
+        f'  <span class="rel-size">{c.esc(_size(p))}</span>\n'
+        f"</a>"
+        for p in neighbours
+    )
+    return (
+        '<section class="related">'
+        '<h2 class="related-h">같은 갈래의 다른 글</h2>'
+        f'<div class="rel-list">{items}</div>'
+        "</section>"
+    )
 
 
 def _lead(paper: Paper, renderer: DocRenderer) -> str:
@@ -351,6 +545,8 @@ def _header(paper: Paper) -> str:
       {chips}
       {c.chip(f'발행 {paper.published}') if paper.published else ""}
       {c.chip(f'작성 {paper.date}') if paper.date else ""}
+      {_metric_chip(paper)}
+      <span class="head-size">{c.esc(_size(paper))}</span>
     </div>
   </div>
 </header>"""

@@ -1,11 +1,11 @@
 /* Landing-page filter, sort and deep-link state.
  *
- * The cards are already in the DOM — this only toggles `hidden` and, for the
- * flat sorts, moves nodes between the pillar groups and a single flat grid.
- * Nothing is fetched and nothing is templated, so the page works from
- * `file://` and degrades to "every paper, grouped by pillar" with JS off.
+ * The rows are already in the DOM — this only toggles `hidden` and reorders
+ * nodes inside the one list container. Nothing is fetched and nothing is
+ * templated, so the page works from `file://` and degrades to "every paper,
+ * newest first" with JS off.
  *
- * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=recent`) so a
+ * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke.
  */
@@ -17,19 +17,21 @@ const root = document.querySelector("[data-corpus]");
 const bar = document.querySelector("[data-filters]");
 if (!root || !bar) return;
 
+const list = root.querySelector("[data-rows]");
 const cards = [...root.querySelectorAll("[data-card]")];
-const groups = [...root.querySelectorAll("[data-pgroup]")];
-const flat = root.querySelector("[data-flat]");
+const seps = [...root.querySelectorAll("[data-sep]")];
+const lead = root.querySelector("[data-lead]");
+const listhead = root.querySelector("[data-listhead]");
 const emptyMsg = root.querySelector("[data-empty]");
 const countEl = bar.querySelector("[data-result-count]");
 const input = bar.querySelector("[data-q]");
 const sortBtns = [...bar.querySelectorAll("[data-sort]")];
 const resetBtns = [...document.querySelectorAll("[data-reset]")];
 
-// Where each card started, so a flat sort can be undone exactly.
-const home = new Map(cards.map((el) => [el, el.parentNode]));
+const SORTS = ["recent", "pillar", "title"];
+const PILLARS = seps.map((s) => s.dataset.sep);
 
-const state = { q: "", pillars: new Set(), tags: new Set(), sort: "pillar" };
+const state = { q: "", pillars: new Set(), tags: new Set(), sort: "recent" };
 
 /* ── State ↔ URL ──────────────────────────────────────────────────────── */
 function readHash() {
@@ -37,7 +39,7 @@ function readHash() {
   state.q = h.get("q") || "";
   state.pillars = new Set((h.get("p") || "").split(",").filter(Boolean));
   state.tags = new Set((h.get("t") || "").split(",").filter(Boolean));
-  state.sort = ["pillar", "recent", "title"].includes(h.get("s")) ? h.get("s") : "pillar";
+  state.sort = SORTS.includes(h.get("s")) ? h.get("s") : "recent";
 }
 
 function writeHash() {
@@ -45,17 +47,17 @@ function writeHash() {
   if (state.q) h.set("q", state.q);
   if (state.pillars.size) h.set("p", [...state.pillars].join(","));
   if (state.tags.size) h.set("t", [...state.tags].join(","));
-  if (state.sort !== "pillar") h.set("s", state.sort);
+  if (state.sort !== "recent") h.set("s", state.sort);
   const hash = h.toString();
   history.replaceState(null, "", hash ? `#${hash}` : location.pathname + location.search);
 }
 
 function syncControls() {
   if (input.value !== state.q) input.value = state.q;
-  bar.querySelectorAll("[data-facet-pillar]").forEach((b) => {
+  document.querySelectorAll("[data-facet-pillar]").forEach((b) => {
     b.setAttribute("aria-pressed", state.pillars.has(b.dataset.facetPillar) ? "true" : "false");
   });
-  bar.querySelectorAll("[data-facet-tag]").forEach((b) => {
+  document.querySelectorAll("[data-facet-tag]").forEach((b) => {
     b.setAttribute("aria-pressed", state.tags.has(b.dataset.facetTag) ? "true" : "false");
   });
   sortBtns.forEach((b) => b.setAttribute("aria-pressed", b.dataset.sort === state.sort ? "true" : "false"));
@@ -83,41 +85,70 @@ function matches(card) {
   return true;
 }
 
+/* ── Order ────────────────────────────────────────────────────────────── */
+function ordered(shown) {
+  const byDate = (a, b) => b.dataset.date.localeCompare(a.dataset.date);
+  if (state.sort === "title") {
+    return shown.slice().sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
+  }
+  if (state.sort !== "pillar") return shown.slice().sort(byDate);
+  // Pillar order comes from the separators, which the build emitted in
+  // `PILLAR_ORDER`: the JS never has to know the pillar taxonomy.
+  const rank = (el) => {
+    const i = PILLARS.indexOf(el.dataset.primary);
+    return i === -1 ? PILLARS.length : i;
+  };
+  return shown.slice().sort((a, b) => rank(a) - rank(b) || byDate(a, b));
+}
+
 /* ── Apply ────────────────────────────────────────────────────────────── */
 function apply() {
-  let visible = 0;
+  const dirty = !!(state.q || state.pillars.size || state.tags.size);
+  // The lead block stands in for the newest paper only while it *is* the top
+  // of the list. Filter or re-sort and it stops being that, so it steps aside
+  // and its row takes over — the paper is never in both places, and never in
+  // neither.
+  const leadOn = !!lead && !dirty && state.sort === "recent";
+  if (lead) lead.hidden = !leadOn;
+
+  const shown = [];
   cards.forEach((card) => {
     const ok = matches(card);
-    card.hidden = !ok;
-    if (ok) visible++;
+    if (ok) shown.push(card);
+    card.hidden = !ok || (leadOn && card.hasAttribute("data-lead-dup"));
   });
 
+  const rows = ordered(shown);
   if (state.sort === "pillar") {
-    cards.forEach((card) => {
-      const parent = home.get(card);
-      if (card.parentNode !== parent) parent.appendChild(card);
+    seps.forEach((sep) => {
+      const mine = rows.filter((r) => r.dataset.primary === sep.dataset.sep);
+      sep.hidden = mine.length === 0;
+      const n = sep.querySelector("[data-sep-count]");
+      if (n) n.textContent = mine.length;
     });
-    groups.forEach((g) => {
-      const shown = [...g.querySelectorAll("[data-card]")].filter((c) => !c.hidden);
-      g.hidden = shown.length === 0;
-      const n = g.querySelector("[data-group-count]");
-      if (n) n.textContent = shown.length;
+    // Each separator is moved into place by the row loop below, at the moment
+    // its pillar first appears — so it lands above its own rows and nowhere
+    // else, whatever the filter left standing.
+    let current = null;
+    rows.forEach((row) => {
+      if (row.dataset.primary !== current) {
+        current = row.dataset.primary;
+        const sep = seps.find((s) => s.dataset.sep === current);
+        if (sep) list.appendChild(sep);
+      }
+      list.appendChild(row);
     });
-    flat.hidden = true;
   } else {
-    const key = state.sort === "title" ? "title" : "date";
-    const dir = state.sort === "title" ? 1 : -1;
-    cards
-      .slice()
-      .sort((a, b) => dir * a.dataset[key].localeCompare(b.dataset[key]))
-      .forEach((card) => flat.appendChild(card));
-    groups.forEach((g) => { g.hidden = true; });
-    flat.hidden = false;
+    seps.forEach((sep) => { sep.hidden = true; });
+    rows.forEach((row) => list.appendChild(row));
   }
+  // Rows filtered out keep their DOM position; only the visible ones are
+  // reordered, which is enough because nothing hidden is ever painted.
 
+  const visible = shown.length;
   countEl.textContent = visible === cards.length ? `${visible}편` : `${visible} / ${cards.length}편`;
   if (emptyMsg) emptyMsg.hidden = visible > 0;
-  const dirty = !!(state.q || state.pillars.size || state.tags.size);
+  if (listhead) listhead.hidden = visible - (leadOn ? 1 : 0) < 1;
   resetBtns.forEach((b) => { b.hidden = !dirty; });
 }
 
@@ -128,7 +159,7 @@ let debounce = null;
 input.addEventListener("input", () => {
   state.q = input.value;
   if (debounce) clearTimeout(debounce);
-  // Filtering 92 nodes is instant; the delay is only so the hash does not get
+  // Filtering is instant; the delay is only so the hash does not get
   // rewritten on every keystroke.
   apply();
   debounce = setTimeout(writeHash, 250);
@@ -138,29 +169,26 @@ function toggleSet(set, value) {
   if (set.has(value)) set.delete(value); else set.add(value);
 }
 
-bar.addEventListener("click", (e) => {
+// One handler for the sort group in the bar and the facet rail beside the
+// list — they set the same state and differ only in where they sit.
+document.addEventListener("click", (e) => {
   const p = e.target.closest("[data-facet-pillar]");
   const t = e.target.closest("[data-facet-tag]");
   const s = e.target.closest("[data-sort]");
+  const jump = e.target.closest("[data-tag-jump]");
   if (p) { toggleSet(state.pillars, p.dataset.facetPillar); refresh(); }
   else if (t) { toggleSet(state.tags, t.dataset.facetTag); refresh(); }
   else if (s) { state.sort = s.dataset.sort; refresh(); }
-});
-
-// A tag on a card is also a filter — that is how you find the neighbours of
-// the paper you are looking at.
-root.addEventListener("click", (e) => {
-  const chip = e.target.closest("[data-tag-jump]");
-  if (!chip) return;
-  toggleSet(state.tags, chip.dataset.tagJump);
-  refresh();
-  bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
-});
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest("[data-reset]")) return;
-  state.q = ""; state.pillars.clear(); state.tags.clear();
-  refresh();
+  // A tag on the lead block is also a filter — that is how you find the
+  // neighbours of the paper you are looking at.
+  else if (jump) {
+    toggleSet(state.tags, jump.dataset.tagJump);
+    refresh();
+    bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  } else if (e.target.closest("[data-reset]")) {
+    state.q = ""; state.pillars.clear(); state.tags.clear();
+    refresh();
+  }
 });
 
 addEventListener("hashchange", () => { readHash(); syncControls(); apply(); });
