@@ -33,9 +33,11 @@ ROLES = {
 MARKER = re.compile(r"^\[!(\w+)\][ \t]*(.*)$")
 
 
-def install(md) -> None:
+def install(md, inline_md=None) -> None:
+    """`inline_md` renders the label. Without it the label is escaped, which
+    publishes any math or emphasis in a callout title as its own source."""
     md.core.ruler.push("probe_alerts", _rule)
-    md.renderer.rules["blockquote_open"] = _open
+    md.renderer.rules["blockquote_open"] = _opener(inline_md)
     md.renderer.rules["blockquote_close"] = _close
 
 
@@ -80,17 +82,20 @@ def _strip_first_line(inline) -> None:
     inline.children = children
 
 
-def _open(tokens, idx, options, env):
-    meta = getattr(tokens[idx], "meta", None) or {}
-    role = meta.get("role")
-    if not role:
-        return "<blockquote>"
-    label = html.escape(meta.get("label", ""), quote=True)
-    return (
-        f'<div class="callout {role}">'
-        f'<span class="c-label">{label}</span>'
-        f'<div class="c-body">'
-    )
+def _opener(inline_md):
+    def _open(tokens, idx, options, env):
+        meta = getattr(tokens[idx], "meta", None) or {}
+        role = meta.get("role")
+        if not role:
+            return "<blockquote>"
+        raw = meta.get("label", "")
+        label = inline_md(raw) if inline_md else html.escape(raw, quote=True)
+        return (
+            f'<div class="callout {role}">'
+            f'<span class="c-label">{label}</span>'
+            f'<div class="c-body">'
+        )
+    return _open
 
 
 def _close(tokens, idx, options, env):

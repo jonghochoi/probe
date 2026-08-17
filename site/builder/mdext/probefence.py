@@ -57,9 +57,16 @@ def parse(info: str, content: str) -> dict:
 def term(data: dict, inline_md) -> tuple[str, str]:
     """Return `(term_id, html)` for a definition panel.
 
-    Rendered collapsed, directly under the paragraph that introduced the term
-    (R4): background belongs where the reader hits the word, not in a glossary
-    they would have to leave the sentence to reach.
+    The panel is emitted **at the anchor**, not after the paragraph holding it
+    (R4). Hoisting it to the end of the block put the definition one or two
+    sentences below the word that needed it, so the reader had to find their
+    way back into the sentence they left; opening it in place splits the
+    paragraph exactly where they stopped reading.
+
+    That placement is why this is a `<span>` wrapper and not a `<div>`: the
+    anchor sits inside a `<p>`, and a block-level child there is invalid markup
+    the parser would hoist somewhere else. The inner panel takes
+    `display:block` from CSS instead.
     """
     tid = data.get("id", "").strip()
     if not tid:
@@ -70,13 +77,14 @@ def term(data: dict, inline_md) -> tuple[str, str]:
         raise FenceError(f"probe-term[{tid}]: missing `body`")
 
     return tid, (
-        f'<div class="tdef" id="term-{_esc(tid)}" hidden>'
+        f'<span class="tbox" data-term="{_esc(tid)}" hidden>'
+        f'<span class="tdef">'
         # A dedicated title class, never a bare `b` — R13: `display:block` on an
         # inline tag also catches every `<b>` in the body and breaks the line at
         # each emphasis.
         f'<span class="th">{_esc(title) or _esc(tid)}</span>'
         f'<span class="tbody">{inline_md(body)}</span>'
-        f"</div>"
+        f"</span></span>"
     )
 
 
@@ -96,12 +104,19 @@ def figure(data: dict) -> str:
         )
     caption = data.get("caption", "").strip()
     source = data.get("source", "").strip()
+    # `source` is authored as `Figure <n>, 원문 §<x.y>` (R6). The figure number
+    # is what a reader matches against the PDF open beside them, so it leads the
+    # caption as a badge instead of trailing it in a parenthesis at the end of
+    # three lines of Korean; only the origin stays at the back.
+    num, _, origin = source.partition(",")
+    num, origin = num.strip(), origin.strip()
     cap = ""
     if caption or source:
         cap = (
             "<figcaption>"
+            + (f'<span class="fig-num">{_esc(num)}</span> — ' if num else "")
             + _esc(caption)
-            + (f' <span class="fig-src">({_esc(source)})</span>' if source else "")
+            + (f' <em class="fig-src">({_esc(origin)})</em>' if origin else "")
             + "</figcaption>"
         )
     return (
@@ -133,15 +148,17 @@ def quiz(data: dict, index: int, inline_md) -> str:
     if not why:
         raise FenceError(f"probe-quiz[{question[:32]}…]: missing `why`")
 
-    name = f"quiz{index}"
+    # Buttons, not radios. A radio dot reads as a form the reader is filling in
+    # and can be re-picked; the question is a single check with one shot at it,
+    # and a full-width button says that without a legend explaining it.
     choices = "".join(
-        f'<label class="qopt"><input type="radio" name="{name}" '
-        f'value="{i}" data-correct="{"1" if i == answer else "0"}">'
-        f"<span>{inline_md(str(opt).strip())}</span></label>"
+        f'<button type="button" class="qopt" '
+        f'data-correct="{"1" if i == answer else "0"}">'
+        f"{inline_md(str(opt).strip())}</button>"
         for i, opt in enumerate(options)
     )
     return (
-        f'<section class="quiz" data-quiz>'
+        f'<section class="quiz" data-quiz="{index}">'
         f'<span class="q-label">확인</span>'
         f'<p class="qq">{inline_md(question)}</p>'
         f'<div class="qopts">{choices}</div>'
@@ -171,6 +188,10 @@ def equation(data: dict, katex_block, inline_md) -> str:
     if not isinstance(symbols, list):
         raise FenceError(f"probe-eq[{tex[:32]}…]: `symbols` must be a list")
 
+    # A three-track grid, not a `<table>` with a 기호/이름/설명 header row. The
+    # header restated what every glance already tells you — a formula, a name,
+    # a sentence — and cost a boxed band of chrome directly under the equation,
+    # which is the one place the eye should travel straight down.
     rows = ""
     for entry in symbols:
         if not isinstance(entry, dict) or not entry.get("sym"):
@@ -179,21 +200,16 @@ def equation(data: dict, katex_block, inline_md) -> str:
                 f"(got {entry!r})"
             )
         rows += (
-            "<tr>"
+            '<div class="sym-row">'
             # The corpus math dialect is GitHub's `$`X`$`, so the symbol cell
             # goes through the same inline rule as body math rather than a
             # second, ambiguous plain-`$` one.
-            f'<td class="eqsym">{inline_md("$`" + str(entry["sym"]) + "`$")}</td>'
-            f'<td>{_esc(entry.get("name", ""))}</td>'
-            f'<td>{inline_md(str(entry.get("note", "")))}</td>'
-            "</tr>"
+            f'<span class="sym-k">{inline_md("$`" + str(entry["sym"]) + "`$")}</span>'
+            f'<span class="sym-n">{_esc(entry.get("name", ""))}</span>'
+            f'<span class="sym-d">{inline_md(str(entry.get("note", "")))}</span>'
+            "</div>"
         )
-    table = (
-        '<div class="table-wrap"><table><thead><tr>'
-        "<th>기호</th><th>이름</th><th>설명</th></tr></thead>"
-        f"<tbody>{rows}</tbody></table></div>"
-        if rows else ""
-    )
+    table = f'<div class="symtab">{rows}</div>' if rows else ""
     return (
         '<div class="eqblock">'
         f'<p class="eqread">읽으면 — <em>{_esc(read)}</em></p>'
@@ -257,16 +273,24 @@ def lineage(data: dict, inline_md) -> str:
             f"{_esc(item.get('link_label') or link)}</a>"
             if link else ""
         )
+        # Title and note share one cell so the `current` tint can wrap the
+        # entry's text without swallowing the date beside it — the date is the
+        # rail the reader scans down, and tinting it breaks that column.
         rows += (
             f'<li class="ln-item{" cur" if item.get("current") else ""}">'
             f'<span class="ln-when">{_esc(item.get("when", ""))}</span>'
+            f'<span class="ln-text">'
             f'<span class="ln-what">{inline_md(str(item["what"]))}</span>'
             + (f'<span class="ln-note">{inline_md(note)}{tail}</span>' if note else "")
-            + "</li>"
+            + "</span></li>"
         )
     title = str(data.get("title", "")).strip()
-    head = f'<p class="ln-title">{_esc(title)}</p>' if title else ""
-    return f'<div class="lineage">{head}<ol class="ln-list">{rows}</ol></div>'
+    # The three planted-context components share one framed shape — a titled
+    # bar over a body — so the reader learns them as one family on first sight
+    # instead of three differently-dressed boxes (R5).
+    head = f'<div class="box-head">{_esc(title)}</div>' if title else ""
+    return (f'<div class="lineage">{head}'
+            f'<div class="box-body"><ol class="ln-list">{rows}</ol></div></div>')
 
 
 # ── ```probe-scale ──────────────────────────────────────────────────────────
@@ -311,8 +335,8 @@ def scale(data: dict, inline_md) -> str:
             "</div>"
         )
     title = str(data.get("title", "")).strip()
-    head = f'<p class="sc-title">{_esc(title)}</p>' if title else ""
-    return f'<div class="scale">{head}{rows}</div>'
+    head = f'<div class="box-head">{_esc(title)}</div>' if title else ""
+    return f'<div class="scale">{head}<div class="box-body">{rows}</div></div>'
 
 
 # ── ```probe-split ──────────────────────────────────────────────────────────
@@ -393,7 +417,9 @@ def parts(data: dict, inline_md) -> str:
             "</div>"
         )
     title = str(data.get("title", "")).strip()
-    head = f'<p class="pt-title">{_esc(title)}</p>' if title else ""
+    head = f'<div class="box-head">{_esc(title)}</div>' if title else ""
+    # No `box-body` here: the rows run edge to edge and divide themselves, so
+    # an inset wrapper would only add a margin the dividers have to stop short of.
     return f'<div class="parts">{head}{out}</div>'
 
 

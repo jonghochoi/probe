@@ -29,7 +29,8 @@ must look like, and this prompt does not restate it:
   §1  file + front-matter contract (every key, and which ones fail the build)
   §2  body rules R1–R14 — the four acts, the heading spine, density, term
       anchors, the five planted-context kinds and their ` ```probe-* ` fences,
-      figures, math, callouts, resource links, quizzes
+      figures, math, code blocks (language AND caption on the fence line),
+      callouts, resource links, quizzes
   §3  render traps — the inline-math dialect, raw `~`, `**` before a particle,
       bare URLs in Korean prose
   §4  what the build enforces vs. what only review catches

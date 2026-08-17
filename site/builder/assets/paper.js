@@ -12,8 +12,10 @@
   document.addEventListener("click", function (e) {
     var ref = e.target.closest && e.target.closest(".tref");
     if (ref) {
-      var def = document.getElementById("term-" + ref.dataset.term);
-      if (!def) return;
+      // The panel is the anchor's own next sibling — R4 opens the definition
+      // where the word is, so there is nothing to look up by id.
+      var def = ref.nextElementSibling;
+      if (!def || !def.classList.contains("tbox")) return;
       var open = def.hidden;
       def.hidden = !open;
       ref.setAttribute("aria-expanded", open ? "true" : "false");
@@ -24,15 +26,11 @@
     if (!opt) return;
     var quiz = opt.closest("[data-quiz]");
     // Answer once: re-picking after seeing the explanation teaches nothing.
-    if (!quiz || quiz.hasAttribute("data-answered")) { e.preventDefault(); return; }
+    if (!quiz || quiz.hasAttribute("data-answered")) return;
     quiz.setAttribute("data-answered", "");
-    var input = opt.querySelector("input");
-    if (input) input.checked = true;   // before disabling — a disabled input
     [].forEach.call(quiz.querySelectorAll(".qopt"), function (o) {
-      var i = o.querySelector("input");
-      o.dataset.correct = i && i.dataset.correct === "1" ? "1" : "0";
       o.dataset.chosen = o === opt ? "1" : "0";
-      if (i) i.disabled = true;        // ...would not take the check
+      o.disabled = true;
     });
     var why = quiz.querySelector(".qwhy");
     if (why) why.hidden = false;

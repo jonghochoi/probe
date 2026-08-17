@@ -180,6 +180,12 @@ by the renderer, with the definition body in a fence:
 | `title` | the term as the paper writes it |
 | `body` | one or two sentences — definition, then why it matters *here* |
 
+**The definition opens at the anchor, inside the paragraph** — not under it.
+The fence may sit anywhere after the paragraph (the renderer pre-scans them);
+where you *write* it does not change where it *opens*. So do not try to place a
+fence for visual reasons, and do not repeat an anchor to "bring the definition
+closer" — it is already there.
+
 Aim for 12–20 anchors and count them into `terms:`. Every anchor needs a
 definition and every definition needs an anchor — the build reports both
 halves, and a duplicate `id`.
@@ -268,7 +274,13 @@ arXiv:
 - **Never mirror an image into the repo** — hotlink only, on copyright
   grounds. A relative `url` means someone did, and the build rejects it.
 - `loading=lazy` + `no-referrer` are the renderer's job, not yours.
-- Caption: translate the original caption to Korean and append the origin.
+- Caption: translate the original caption to Korean. The origin goes in
+  `source`, never in `caption`.
+- **`source` is split on its first comma** — the head becomes the figure-number
+  badge that leads the caption (`Figure 3 — …`), the tail becomes the italic
+  origin at the end (`(원문 §3.2)`). Write it as `Figure <n>, 원문 §<x.y>` and
+  both halves land where they belong; write it as one run with no comma and the
+  whole thing prints as the origin with no badge.
 - Some figures are inline SVG (TikZ) and have no hotlinkable raster —
   `arxiv.py` reports these with an empty `url` / `linkable == False`. Redraw or
   leave the point unillustrated; never link a broken URL.
@@ -297,16 +309,40 @@ arXiv:
   The reading line is the point of the fence — the build rejects an equation
   without one. Do NOT hand-write raw HTML for an equation; the parser runs with
   `html=False`.
+  Formulas are set in KaTeX's own faces (KaTeX_Main / KaTeX_Math), vendored
+  with the site and checked at build time. If math on a page ever looks like
+  the body font, that is a build failure, not something to work around in the
+  source.
+
+  `symbols` renders as a three-track grid — 기호 / 이름 / 설명 — with **no
+  header row**: a labelled band directly under the formula is chrome in the one
+  place the eye should run straight down, and the three columns say what they
+  are. `read` renders above the formula against an accent rule.
 - **Explain DISPLAY equations only.** Inline symbols are handled by term
   anchors (R4).
 - **First occurrence only.** A symbol that returns later gets a back reference
   or nothing.
 
-### 2-8. R8 — Code
+### 2-8. R8 — Code: language **and** caption
 
 Pygments language highlighting — the paper's pseudocode, our mapping code,
-configs, diffs. Always tag the fence language. Horizontal scrolling is confined
-to the block; body text never shifts.
+configs, diffs. The info string carries two things:
+
+    ```<lang> <한글 캡션>
+    <code>
+    ```
+
+    ```python 학습 스텝 — 계단 스케줄 + 앞부분 마스킹
+
+- **The language is mandatory** and prints as the chip on the left of the
+  block's header bar.
+- **The caption is mandatory too, and the build warns without one.** Everything
+  after the first space is the caption. A block of transcribed pseudocode with
+  nothing above it makes the reader decode the code to find out why it is on
+  the page; one line naming what it shows is what turns it into an exhibit.
+  Write it in Korean, as a noun phrase, and say what the block *demonstrates* —
+  not what language it is in, which the chip already said.
+- Horizontal scrolling is confined to the block; body text never shifts.
 
 ### 2-9. R9 — Callouts: five roles, mechanically applied
 
@@ -367,6 +403,11 @@ The explanation must say why the *other* two are wrong; an explanation that
 only restates the answer teaches nothing. The build checks one quiz per section
 and exactly one correct option.
 
+Options render as full-width buttons and answer on the first click — right and
+wrong are both marked, `why` opens, and the question locks. Write the options
+so a single pass is enough: three that a reader could plausibly hold, not two
+obvious throwaways beside the answer.
+
 ### 2-12. R12–R14 — Implementation and authoring traps
 
 - **R12. Visual rules are the site's, not the author's.** Typography, spacing
@@ -374,6 +415,38 @@ and exactly one correct option.
   `LIGHT_STYLE` / `DARK_STYLE` in `site/builder/render.py`. Do not write inline
   styles or `<style>` blocks. Callout backgrounds stay pale; the signal is the
   left border and the label color.
+
+  The page also *adds* chrome your source never mentions, and re-adding it by
+  hand duplicates it: the masthead eyebrow (`읽기 쉬운 버전 · 원문에서 직접
+  발췌`), the rule that closes the thesis + tagline + summary block, the hairline
+  over every `###` section, the act divider's bar, and each component's title
+  band. Write the content; the page frames it.
+
+  Two standing rules inside that frame:
+
+  - **Every left-accent card squares off on that edge** — `border-radius: 0
+    var(--radius) var(--radius) 0`. The 요약 block, the five callouts, a term
+    panel and a quiz all signal with a 3px left border, and rounding it bends
+    the accent into a curve so each card reads as a different component.
+  - **A 3px left accent band means "aside".** It is reserved for the
+    single-column asides — the 요약 block, the five callouts, a term panel, a
+    quiz. A card that sits inside a multi-card grid (`probe-split`) is keyed by
+    its heading color instead; giving it a band made each half read as its own
+    callout interrupting the flow rather than as one of two things held side
+    by side.
+  - **Every component owns its internal spacing, and prose margins stop at
+    the article's own flow.** Body-paragraph and list margins apply to the
+    article flow plus the two markdown-body containers (a callout body, a
+    `::: details` body) and nowhere else. Never reach for a blank paragraph, a
+    `&nbsp;` line or a `<br>` to open space around a component — the component
+    already sets what it needs, and an inserted spacer is the one thing the
+    stylesheet cannot take back.
+  - **A `###` section prints no `#` anchor link.** It keeps its `id` — the
+    contents, the scroll-spy and the memo anchor all resolve against it — but
+    a glyph that appears under the cursor on every heading is a fourth thing
+    moving on the page, and it buys a URL the address bar already holds. Do
+    not add one back, and do not link sections to each other by `#id` in prose
+    where a plain reference reads better.
 - **R13. Never `display:block` on an inline tag** (a site-side rule kept here
   because it keeps recurring). Three separate bugs came from a rule like
   `.X b{display:block}` catching body emphasis and breaking the line at every
@@ -470,10 +543,11 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | Rule | Enforced by |
 |---|---|
 | Front matter required keys, `readable_of` == file name | `site/builder/corpus.py` |
-| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
+| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow, lineage, scale, split, parts | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
+| The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |
 
 One check sits outside the build, because it is about meaning rather than
 rendering:
