@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the PROBE reading site.
 
-Renders every `readable/<id>.md` into a static page tree under `--out`.
+Renders every `analysis/<id>.md` into a static page tree under `--out`.
 Build-time dependencies only — the published site ships no runtime Python, no
 CDN request, and (with the default `--katex=server`) no math JavaScript.
 

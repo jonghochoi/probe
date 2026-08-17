@@ -1,13 +1,13 @@
 name: Deploy site
 
-# Build the reading site from readable/ and publish it to GitHub Pages.
+# Build the reading site from analysis/ and publish it to GitHub Pages.
 #
 # The generated HTML is NOT committed — 95 pages and ~15 MB of bot commit on
 # every merge would bury the history this repo is read through. The artifact is
 # built fresh on each push to main instead.
 #
-# On a pull request the site is BUILT BUT NOT DEPLOYED, so broken markdown, a
-# `readable_of` mismatch or a new KaTeX failure is caught before it merges.
+# On a pull request the site is BUILT BUT NOT DEPLOYED, so broken markdown, an
+# `analysis_of` mismatch or a new KaTeX failure is caught before it merges.
 #
 # One-time manual setup, which no workflow file can do for you:
 #   Settings → Pages → Source: GitHub Actions
@@ -16,13 +16,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'readable/**'
+      - 'analysis/**'
       - 'site/**'
       - 'scripts/probe_refs.py'
       - '.github/workflows/deploy-site.yml'
   pull_request:
     paths:
-      - 'readable/**'
+      - 'analysis/**'
       - 'site/**'
       - 'scripts/probe_refs.py'
       - '.github/workflows/deploy-site.yml'
@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .site-cache
-          key: katex-${{ hashFiles('readable/*.md') }}
+          key: katex-${{ hashFiles('analysis/*.md') }}
           restore-keys: katex-
 
       - name: Build

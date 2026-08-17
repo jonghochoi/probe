@@ -14,8 +14,9 @@ supermemory는 PROBE 마크다운 코퍼스 **위에 얹는 시맨틱 retrieval 
 진실 원천(SSOT)은 여전히 git에 든 마크다운이고, supermemory는 언제든 재생성 가능한
 *파생 인덱스*로만 둔다 — 권위를 갖지 않는다.
 
-현재 PROBE 지식은 세 경로로만 접근된다 — `grep`, 직접 파일 읽기, 그리고 단 하나의
-자동 인덱스(`scripts/refresh-analysis-index.py`가 만드는 `analysis/README.md`).
+현재 PROBE 지식은 두 경로로만 접근된다 — `grep`, 그리고 직접 파일 읽기. 유일한
+구조화 지점은 재작성본(`analysis/<id>.md`)의 front matter와 리딩 사이트의 필터
+칩뿐이다.
 "에이전트가 새 연구를 도출"하려면 이걸로는 부족하다. 필요한 질의는 정확 문자열
 매칭이 아니라 *의미*에 걸리기 때문이다.
 
@@ -44,23 +45,22 @@ PROBE의 구조화된 메타데이터를 supermemory의 `containerTag` / `metada
 
 | PROBE 구조 | supermemory 필드 | 비고 |
 |---|---|---|
-| `관련 Pillar`(primary = 첫 항목) | `containerTag` = primary P#; `containerTags` = 나열된 전체 + `metadata.pillars[]` | primary로 격리, 전체로 교차수분 |
+| front matter `pillars`(primary = 첫 항목) | `containerTag` = primary P#; `containerTags` = 나열된 전체 + `metadata.pillars[]` | primary로 격리, 전체로 교차수분 |
 | `D#` 결정 연계 | `metadata.decisions[]` (예: `["D1","D2"]`) | decision 축 필터 |
-| `태그`(통제 어휘 12종) | `metadata.tags[]` | topic 축 필터 |
+| front matter `tags` | `metadata.tags[]` | topic 축 필터 |
 | arXiv id | `customId = arxiv:<id>` | 중복제거 + 갱신 추적 → 재수집 idempotent |
-| `발행일` / `분석 생성일` | `metadata.published` / `metadata.analyzed` | numeric range 필터 |
+| front matter `published` / `generated` | `metadata.published` / `metadata.analyzed` | numeric range 필터 |
 | 문서 종류 | `metadata.doc_type` | `decision` / `lit` / `analysis` / `scouting` |
 
 이 매핑으로 에이전트는 "P1 ∩ D4 ∩ tag=tactile ∩ 2025년 이후" 같은 다축 질의를
 시맨틱 검색 위에서 던질 수 있다 — pillar(아키텍처 축) × decision(전술 축) ×
 tag(주제 축)의 최소 3개 독립 필터축.
 
-**핵심 재사용 (새로 짜지 말 것).** `scripts/refresh-analysis-index.py`가 이미
-`논문 메타` 테이블의 load-bearing 행(`관련 Pillar` → `PILLAR_ROW`, `링크`, `태그`,
-`분석 생성일`)을 정규식으로 파싱한다. 수집기의
-메타데이터 추출 로직은 이 파서를 **재사용하거나 그대로 본떠야** 한다 — 같은 행
-스펙을 두 곳에서 다르게 해석하면 인덱스와 supermemory가 어긋난다. 행 스펙의 SSOT는
-`docs/style.md` §5-6이다.
+**핵심 재사용 (새로 짜지 말 것).** `site/builder/frontmatter.py` + `corpus.py` 가
+이미 재작성본의 front matter(`pillars`, `tags`, `links`, `published`, `generated`)를
+파싱하고 검증한다. 수집기의 메타데이터 추출 로직은 이 파서를 **재사용하거나 그대로
+본떠야** 한다 — 같은 키를 두 곳에서 다르게 해석하면 사이트와 supermemory가 어긋난다.
+키 스펙의 SSOT는 `site/AUTHORING.md` §1이다.
 
 ## 3. 소스별 수집 매핑 (개념 설계)
 
@@ -75,9 +75,10 @@ tag(주제 축)의 최소 3개 독립 필터축.
 - **`context/P{0..5}.md` §5 Tracked Literature** → 행당 1 doc,
   `customId = arxiv:<id>`, `metadata`에 role·year. 결정과 문헌을 같은
   `containerTag` 안에 두어 "이 결정을 떠받치는 논문" 회수가 한 질의에 걸린다.
-- **`analysis/<id>/analysis.md`** → 논문당 1 doc, `customId = arxiv:<id>`,
-  `논문 메타` 전체를 metadata로. **본문이 한글**이므로 임베딩 모델의 한국어 처리력이
-  회수 품질을 좌우한다(→ §5·§6의 1순위 리스크).
+- **`analysis/<id>.md`** → 논문당 1 doc, `customId = arxiv:<id>`, front matter
+  전체를 metadata로. **본문이 한글**이므로 임베딩 모델의 한국어 처리력이 회수 품질을
+  좌우한다(→ §5·§6의 1순위 리스크). 동결된 `analysis_legacy/<id>/analysis.md` 는
+  포맷이 다르므로 색인 대상에서 제외하거나 별도 `doc_type` 으로 분리한다.
 - **`scouting/P#/YYYY-MM-DD.md`** → 리포트당 1 doc, `containerTag = P#`,
   `metadata.date`. 주간 스냅샷이라 "최근 N주 동향" 시간축 질의의 소스가 된다.
 
@@ -154,7 +155,7 @@ supermemory는 두 형태로 운영된다. 각각을 PROBE의 구체 시나리�
 ## 6. 주의·경계 (Caveats)
 
 - **한글 임베딩 품질 검증이 1순위 리스크.** PROBE 본문은 한글이라 로컬 임베딩 모델이
-  약하면 회수가 무너진다. PoC 첫 단계에서 대표 `analysis/<id>/analysis.md` 몇 편으로
+  약하면 회수가 무너진다. PoC 첫 단계에서 대표 `analysis/<id>.md` 몇 편으로
   retrieval 정확도를 *반드시* 측정한 뒤 본격 색인을 결정한다.
 - **SSOT는 마크다운 + git.** supermemory는 파생/재생성 가능한 인덱스이지 권위가
   아니다. 소스 변경 시 재수집하며, `customId`(arXiv id·`decision:P#:D#`)가 갱신을
@@ -162,10 +163,11 @@ supermemory는 두 형태로 운영된다. 각각을 PROBE의 구체 시나리�
 - **`context/`는 human read-only.** 수집은 `context/P{0..5}.md`를 읽기만 하고 절대
   되쓰지 않는다 — PROBE의 핵심 불변식이다.
 - **임베딩 노이즈 제거.** Math/KaTeX 수식과 shields.io 배지 마크업은 의미가 없으니
-  수집 전 스트립을 권장한다(`docs/style.md` §5-5의 수식 규칙 참조).
+  수집 전 스트립을 권장한다(`site/AUTHORING.md` §3-1의 수식 규칙 참조).
 
 ## 다음 단계 (참고)
 
-이 문서는 설계/추천까지다. 진행을 결정하면 다음이 후속 작업 — (1) `refresh-analysis-index.py`
-파서를 재사용한 수집기, (2) 한글 회수 품질 PoC 측정, (3) 도출 에이전트 slash-command.
+이 문서는 설계/추천까지다. 진행을 결정하면 다음이 후속 작업 — (1) `site/builder/`
+front-matter 파서를 재사용한 수집기, (2) 한글 회수 품질 PoC 측정, (3) 도출 에이전트
+slash-command.
 이 문서는 그 작업들의 설계 기준점으로 둔다.

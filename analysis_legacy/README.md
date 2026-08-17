@@ -1,16 +1,17 @@
-# analysis/
+# analysis_legacy/
 
-On-demand deep-dive corpus — one subfolder per paper (`<arxiv-id>/`), each
-holding a single Korean deep-dive (`analysis.md`) written by `/analyze`
-(format spec in `docs/style.md` §5).
+**Frozen corpus — retired format.** One subfolder per paper (`<arxiv-id>/`),
+each holding a single Korean deep-dive (`analysis.md`) written by the retired
+deep-dive `/analyze` mode. It is kept only so these papers stay readable until
+they are re-written in the current format under `analysis/` (contract:
+`site/AUTHORING.md`), and it is read by nothing: the prompt, the site build and
+the lints all skip it.
 
-The table below is an **auto-generated index** — one section per primary
-Pillar, the 📝 badge in front of each title links to that paper's deep-dive. It is
-rewritten between the markers by `scripts/refresh-analysis-index.py` (run
-manually on demand); do not hand-edit inside the markers. Everything above them
-is hand-maintained.
-
-<!-- ANALYSIS_INDEX:START -->
+Nothing here is regenerated or maintained. The index below is the last
+generated snapshot — one section per primary Pillar, the 📝 badge in front of
+each title linking to that paper's deep-dive — and the generator, the format
+spec (`docs/style.md` §5) and the metadata lints that produced it are gone.
+Dates and pillar ties are as of that snapshot.
 
 ## P0 — VLA Datasets & Benchmarks
 
@@ -133,5 +134,3 @@ is hand-maintained.
 | 12 | [![](https://img.shields.io/badge/📝-ffffff.svg)](2606.04463/analysis.md) OSCAR: Omni-Embodiment Action-Conditioned World Model for Robotics | [![arXiv](https://img.shields.io/badge/arXiv-2606.04463-b31b1b.svg)](https://arxiv.org/abs/2606.04463) [![Website](https://img.shields.io/badge/Website-Link-blue)](https://wuzy2115.github.io/oscar-project-page/) [![HuggingFace](https://img.shields.io/badge/HuggingFace-Model-yellow)](https://huggingface.co/zywu2115/OSCAR-2B) | ![P5](https://img.shields.io/badge/P5-e0d5f5.svg) ![P0](https://img.shields.io/badge/P0-f5d5d5.svg) | ![Action-conditioned world model](https://img.shields.io/badge/Action--conditioned_world_model-e8e7e7.svg) ![2D kinematic skeleton rendering](https://img.shields.io/badge/2D_kinematic_skeleton_rendering-e8e7e7.svg) ![Rectified flow](https://img.shields.io/badge/Rectified_flow-e8e7e7.svg) ![DiT (Diffusion Transformer)](https://img.shields.io/badge/DiT_%28Diffusion_Transformer%29-e8e7e7.svg) ![WAN 2.1 VAE](https://img.shields.io/badge/WAN_2.1_VAE-e8e7e7.svg) | 2026-06-11 |
 | 13 | [![](https://img.shields.io/badge/📝-ffffff.svg)](2606.03868/analysis.md) Unified Video-Action Joint Denoising for Dexterous Action and Data Generation | [![arXiv](https://img.shields.io/badge/arXiv-2606.03868-b31b1b.svg)](https://arxiv.org/abs/2606.03868) | ![P5](https://img.shields.io/badge/P5-e0d5f5.svg) ![P0](https://img.shields.io/badge/P0-f5d5d5.svg) ![P1](https://img.shields.io/badge/P1-f5e9d5.svg) | ![World Action Model (WAM)](https://img.shields.io/badge/World_Action_Model_%28WAM%29-e8e7e7.svg) ![TI2VA / T2VA](https://img.shields.io/badge/TI2VA_%2F_T2VA-e8e7e7.svg) ![Joint video-action denoising](https://img.shields.io/badge/Joint_video--action_denoising-e8e7e7.svg) ![Flow matching](https://img.shields.io/badge/Flow_matching-e8e7e7.svg) ![MANO](https://img.shields.io/badge/MANO-e8e7e7.svg) | 2026-06-10 |
 | 14 | [![](https://img.shields.io/badge/📝-ffffff.svg)](2605.26379/analysis.md) When Does LeJEPA Learn a World Model? | [![arXiv](https://img.shields.io/badge/arXiv-2605.26379-b31b1b.svg)](https://arxiv.org/abs/2605.26379) [![GitHub](https://img.shields.io/badge/GitHub-Code-black)](https://github.com/klindtlab/lejepa-identifiability) | ![P5](https://img.shields.io/badge/P5-e0d5f5.svg) ![P4](https://img.shields.io/badge/P4-d5def5.svg) | ![JEPA (Joint-Embedding Predictive Archit…](https://img.shields.io/badge/JEPA_%28Joint--Embedding_Predictive_Archit%E2%80%A6-e8e7e7.svg) ![LeJEPA](https://img.shields.io/badge/LeJEPA-e8e7e7.svg) ![SIGReg (Sketched Isotropic Gaussian Reg…](https://img.shields.io/badge/SIGReg_%28Sketched_Isotropic_Gaussian_Reg%E2%80%A6-e8e7e7.svg) ![Linear identifiability](https://img.shields.io/badge/Linear_identifiability-e8e7e7.svg) ![OU (Ornstein–Uhlenbeck) transition](https://img.shields.io/badge/OU_%28Ornstein%E2%80%93Uhlenbeck%29_transition-e8e7e7.svg) | 2026-06-10 |
-
-<!-- ANALYSIS_INDEX:END -->

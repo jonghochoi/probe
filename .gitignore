@@ -6,7 +6,7 @@ __pycache__/
 .venv/
 venv/
 
-# Generated site + its build caches. Rebuildable from readable/ by
+# Generated site + its build caches. Rebuildable from analysis/ by
 # site/build-site.py, so the artifact is deployed from Actions rather than
 # committed. node_modules/ holds the build-time KaTeX and webfont sources,
 # installed on demand with `npm install --no-save`.

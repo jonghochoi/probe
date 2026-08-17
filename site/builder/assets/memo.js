@@ -66,7 +66,7 @@ const MemoStore = {
       return JSON.stringify({ v: 1, exportedAt: new Date().toISOString(), memos }, null, 2);
     }
     return memos.map((m) =>
-      `## ${m.title || m.paperId}\n\`analysis/${m.paperId}/\` · ${m.updatedAt.slice(0, 10)}\n\n${m.body}\n`
+      `## ${m.title || m.paperId}\n\`analysis/${m.paperId}.md\` · ${m.updatedAt.slice(0, 10)}\n\n${m.body}\n`
     ).join("\n---\n\n");
   },
 

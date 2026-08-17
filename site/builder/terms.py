@@ -1,6 +1,6 @@
 """The corpus-wide glossary, harvested from the rewrites themselves.
 
-Every ` ```probe-term ` fence in `readable/` is already a definition written
+Every ` ```probe-term ` fence in `analysis/` is already a definition written
 for a reader who hit the word mid-sentence (R4). Collected across the corpus
 they are also the site's second entry point: someone who arrives asking what
 action chunking is does not yet know which paper to open.

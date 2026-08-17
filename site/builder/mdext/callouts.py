@@ -1,4 +1,4 @@
-"""GFM alert syntax → the readable layer's five callout roles (R9).
+"""GFM alert syntax → the rewrite layer's five callout roles (R9).
 
     > [!NOTE] <선택 라벨>
     > <본문>

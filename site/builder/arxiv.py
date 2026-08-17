@@ -1,14 +1,14 @@
 """Structural extraction from an arXiv HTML paper.
 
-`/readable-paper` rewrites from the paper itself, not from `analysis.md` — the
-analysis is a summary and drops most of what a first-time reader needs
+`/analyze` rewrites from the paper itself, not from a summary of it — a summary
+drops most of what a first-time reader needs
 (preliminaries, curation detail, hardware, most figures). This module is what
 turns the 400 KB LaTeXML page into the sections, figures and tables the prompt
 works from.
 
 arXiv's HTML is LaTeXML output, which is far more tractable than a PDF: every
 section carries a stable `id` (`S3.SS1`), every figure carries the `id` that
-`readable.md`'s `figures:` front-matter records (`S1.F1`), and every formula
+the rewrite's `figures:` front-matter records (`S1.F1`), and every formula
 keeps its TeX in `<math alttext>`. That last one matters most — the math
 survives the trip as `$…$` instead of being lost to entity soup.
 
@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 
 BASE = "https://arxiv.org/html"
-UA = "probe-readable/1.0 (+https://github.com/jonghochoi/probe)"
+UA = "probe-analyze/1.0 (+https://github.com/jonghochoi/probe)"
 TIMEOUT = 30
 
 # `<section id="S3" class="ltx_section">` → level 1; SS → 2; SSS → 3.
@@ -82,7 +82,7 @@ class Section:
 
 @dataclass
 class Figure:
-    id: str              # "S1.F1" — goes verbatim into readable.md front matter
+    id: str              # "S1.F1" — goes verbatim into the rewrite front matter
     url: str             # absolute; hotlinked, never mirrored (AUTHORING §2-6)
     number: str          # "1", "3(a)"
     caption: str

@@ -154,7 +154,7 @@ def _first_run() -> str:
     """
     return (
         '<p class="corpus-empty">아직 재작성한 논문이 없습니다.<br>'
-        '<code>/readable-paper &lt;arXiv id&gt;</code> 로 첫 편을 추가하면 '
+        '<code>/analyze &lt;arXiv id&gt;</code> 로 첫 편을 추가하면 '
         "여기에 첫 줄이 생깁니다.</p>"
     )
 
@@ -402,7 +402,7 @@ def not_found_page() -> str:
 def paper_page(paper: Paper, katex, decisions: dict,
                problems: list[str] | None = None,
                neighbours: list[Paper] | None = None) -> str:
-    """One paper's readable rewrite.
+    """One paper's analysis rewrite.
 
     One document per page: the site publishes rewrites and nothing else, so
     there is no tab strip and no second source to reconcile against.
@@ -412,7 +412,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
     rendered = renderer.render(paper.body)
     if problems is not None:
         problems.extend(
-            f"readable/{paper.stem}.md: {p}" for p in renderer.problems
+            f"analysis/{paper.stem}.md: {p}" for p in renderer.problems
         )
 
     body = f"""{_header(paper)}
@@ -423,7 +423,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
     {_related(neighbours or [])}
   </main>
 </div>
-{c.memo_panel(paper.stem, paper.title, f"{BLOB}/readable/{paper.stem}.md", DISCUSSIONS_NEW)}
+{c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
     return c.page(
         title=f"{paper.title} · PROBE",

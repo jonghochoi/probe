@@ -23,10 +23,10 @@ citations.
 Usage (repo root):
     python3 scripts/check-decision-refs.py [PATH ...]
 
-No PATH -> scan the default set: `analysis/**/*.md`, `readable/*.md` and
-`scouting/P*/*.md`
+No PATH -> scan the default set: `analysis/*.md` and `scouting/P*/*.md`
 (templates excluded — they carry `D<a>`-style placeholders and illustrative
-ids).
+ids; the frozen `analysis_legacy/` corpus is excluded too — it is a snapshot of
+a retired format, not a doc a `context/` edit should be able to break).
 
 Exit codes: 0 = clean / 1 = bad citation(s) found / 2 = no Decision Log parsed.
 """
@@ -107,8 +107,7 @@ def check_file(path: str, owners: dict[int, int]) -> list[tuple[int, str]]:
 
 def _gather_default_docs() -> list[str]:
     patterns = [
-        "analysis/**/*.md",
-        "readable/*.md",
+        "analysis/*.md",
         "scouting/P*/*.md",
     ]
     docs: list[str] = []
