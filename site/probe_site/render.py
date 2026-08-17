@@ -10,7 +10,7 @@ Parser configuration, and why:
                       `<!-- provenance -->` comments that must not be
                       published. `ghmath.mask_source` strips the comments; the
                       one anchor is re-emitted by us.
-    linkify=False     docs/style.md §4-7 forbids bare URLs in Korean prose (the
+    linkify=False     AUTHORING §3-4 forbids bare URLs in Korean prose (the
                       following particle joins the href), so auto-linking would
                       only ever fire on a bug.
     typographer=False The corpus contains typographic quotes verbatim inside
@@ -247,7 +247,7 @@ class DocRenderer:
         m = _FIG_ALT.match(alt)
         num, caption = (m.group(1), m.group(2)) if m else ("", alt)
         # arXiv may reject hotlinks by referer; the site never mirrors the
-        # images (docs/style.md §5-6 forbids it on copyright grounds).
+        # images (AUTHORING §2-6 forbids it on copyright grounds).
         img = (
             f'<img src="{html.escape(src, quote=True)}" '
             f'alt="{html.escape(alt, quote=True)}" '

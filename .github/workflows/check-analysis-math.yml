@@ -21,6 +21,7 @@ on:
   pull_request:
     paths:
       - 'analysis/**/*.md'
+      - 'readable/*.md'
       - 'scripts/check-analysis-math.py'
       - '.github/workflows/check-analysis-math.yml'
 

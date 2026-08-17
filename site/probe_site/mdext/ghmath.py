@@ -1,6 +1,6 @@
 """GitHub-flavored KaTeX dialect support for markdown-it-py.
 
-`docs/style.md` §5-6 mandates a GitHub-specific math dialect that no standard
+`site/AUTHORING.md` §3-1 mandates a GitHub-specific math dialect that no standard
 Markdown parser understands:
 
     inline   $`X`$          ← backticks INSIDE the dollars
@@ -69,7 +69,7 @@ def mask_source(text: str) -> str:
 # ── Hook D — the single normalization choke point ────────────────────────────
 
 # Sanctioned macro substitutions, mirroring `check-analysis-math.py`'s
-# MACRO_SUBS. docs/style.md §5-6: extend this list only by editing that rule.
+# MACRO_SUBS. AUTHORING §3-1: extend this list only by editing that rule.
 # Every *other* unsupported macro is deliberately left broken so the render
 # failure stays visible (§5-4 honesty).
 MACRO_SUBS: tuple[tuple[re.Pattern[str], str], ...] = (
@@ -143,7 +143,7 @@ def _inline_math(state, silent: bool) -> bool:
 def _block_math(state, start_line: int, end_line: int, silent: bool) -> bool:
     """Match a line that is exactly `$$…$$`.
 
-    docs/style.md §5-6 requires column 0; an indented one is a corpus bug that
+    AUTHORING §3-1 requires column 0; an indented one is a corpus bug that
     `check-analysis-math.py` already reports, and rendering it as written keeps
     that bug visible rather than quietly compensating for it.
     """

@@ -20,16 +20,15 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `analysis/` | agent | One subfolder per paper (`<arxiv-id>/`), each holding exactly one artifact — the Korean deep-dive `analysis.md`, from `/analyze`. The auto-generated deep-dive **index** is this folder's own `README.md` (one plain `## P#` table per primary Pillar, body between `<!-- ANALYSIS_INDEX -->` markers — see "Automatically-maintained indexes"; slash-command invocation + rules live in the root `README.md` → Pipeline). Format spec: `docs/style.md` §5 |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
 | `.claude/commands/**` | human | Slash-command wrappers |
-| `docs/style.md` | human | **Single source of truth for agent output format** (emoji, links, Korean authoring) |
-| `docs/voice/` | external | Pinned snapshot of the authoring voice `/readable-paper` writes in — `base/{voice.md,examples.md}` copied byte-for-byte from `revoice` at the commit recorded in `PROVENANCE.md`. Vendored rather than linked so PROBE generates without `revoice` present and a voice change cannot silently alter output; read-only, refreshed by the procedure in `PROVENANCE.md` |
+| `docs/style.md` | human | **Single source of truth for the `scouting/` + `analysis/` output format** (emoji, links, Korean authoring, math). The reading-site track is NOT covered — `readable/<id>.md` is governed by `site/AUTHORING.md` |
 | `docs/agent-setup.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
 | `scripts/refresh-analysis-index.py` | human | Regenerator for the `analysis/README.md` deep-dive index (one table per primary Pillar, each row a 📝 deep-dive badge + title + Links / Pillars / Keywords / Refreshed). Rewrites only the block between the `<!-- ANALYSIS_INDEX -->` markers. Invoked on demand via the manual `workflow_dispatch` of `.github/workflows/refresh-analysis-index.yml` (the human fires it whenever the index should be refreshed, batching several merges into one refresh commit). `--check` is a write-nothing lint (missing `analysis.md` / degraded meta rows), run PR-time by `.github/workflows/check-analysis-meta.yml`. Per-command prompts never stage this file |
-| `readable/` | agent | The site's corpus — one `<arxiv-id>.md` per paper, from `/readable-paper`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter (title, authors, pillars, tags, links, summary). Independent of `analysis/`: the rewrite track neither reads nor writes it, so the two can diverge freely. Contract: `docs/style.md` §5-8 |
-| `scripts/build-site.py` + `scripts/probe_site/` | human | Static-site generator for the reading site — a landing index plus one page per `readable/<id>.md`. Nothing else is published, and `analysis/` is not read at all. Build-time dependencies only (`scripts/site-requirements.txt` + an on-demand `npm install --no-save` of KaTeX and the webfont sources); the published site makes **zero** third-party requests and needs no runtime Python. `scripts/probe_site/arxiv.py` (LaTeXML extraction of an arXiv original; raises `Unavailable` when a paper has no HTML edition, which is `/readable-paper`'s stop condition) and `scripts/probe_site/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying) |
-| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules in `docs/style.md` §5-5 across every `analysis/<id>/analysis.md` and `readable/<id>.md`; also wired into CI |
+| `readable/` | agent | The site's corpus — one `<arxiv-id>.md` per paper, from `/readable-paper`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter (title, authors, pillars, tags, links, summary). Independent of `analysis/`: the rewrite track neither reads nor writes it, so the two can diverge freely. Contract: `site/AUTHORING.md` |
+| `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `readable/<id>.md`: front matter, body rules R1–R14, render traps, what the build enforces), `build-site.py` + `probe_site/` (the static-site generator: a landing index plus one page per rewrite), and `requirements.txt`. Nothing but `readable/` is published and `analysis/` is not read at all. `site/probe_site/arxiv.py` (LaTeXML extraction of an arXiv original; raises `Unavailable` when a paper has no HTML edition, which is `/readable-paper`'s stop condition) and `site/probe_site/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
+| `scripts/check-analysis-math.py` | human | Linter/auto-fixer enforcing the GitHub-KaTeX math-formatting rules across every `analysis/<id>/analysis.md` and `readable/<id>.md` — the same dialect, stated per track in `docs/style.md` §5-5 and `site/AUTHORING.md` §3-1; also wired into CI |
 | `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
-| `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
-| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `analysis/` / `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6. Local use: `python3 scripts/check-render-tilde.py` |
+| `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `readable/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
+| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `analysis/` / `readable/` / `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `docs/style.md` §4-6 (`site/AUTHORING.md` §3-2 for the rewrite track). Local use: `python3 scripts/check-render-tilde.py` |
 | `scripts/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 scripts/check-commit-style.py -` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
@@ -101,7 +100,7 @@ Hard rules:
    gets no alias, and one is never invented.)
 3. **`<scope>`** — lowercase, matches a folder or module in the repo:
    `scout`/`scouting`, `analysis`, `context`,
-   `prompts`, `config`, `style`, `docs`, `CLAUDE.md`. Omit the scope
+   `prompts`, `config`, `style`, `docs`, `site`, `CLAUDE.md`. Omit the scope
    only for repo-wide changes.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
@@ -178,7 +177,8 @@ exceptions.
 
 ### Reference / structural docs
 
-`CLAUDE.md`, `docs/style.md`. Plain headers, **no emoji**.
+`CLAUDE.md`, `docs/style.md`, `site/AUTHORING.md`, `site/README.md`. Plain
+headers, **no emoji**.
 Numbered headers (`## N.`, `### N-M.`) are allowed and match the existing
 `style.md`. A folder README's H1 is the folder name (e.g. `# analysis/`).
 
@@ -201,9 +201,13 @@ apply to:
   `analysis/templates/*.md`, dated reports, `analysis/<id>/analysis.md`.
   These follow `docs/style.md`'s own emoji system (one emoji on each `##`
   header, `###` and below plain) plus its Korean / math conventions.
+- `readable/<id>.md` and the reading site — a separate track with its own
+  contract in `site/AUTHORING.md` (four-act spine, ` ```probe-* ` fences, GFM
+  alert callouts), enforced by `site/build-site.py`.
 - **Math / formula rendering** — the GitHub-KaTeX `$`-wrapping and substitution
   rules are an *output* convention, not a contributor-doc one, so they live in
-  `docs/style.md` §5-5 (enforced by `scripts/check-analysis-math.py`), not here.
+  `docs/style.md` §5-5 and `site/AUTHORING.md` §3-1 (both enforced by
+  `scripts/check-analysis-math.py`), not here.
 
 Path correctness is **not** exempt: when a path moves, references inside
 prompts and context files are still updated even though their formatting is
@@ -222,7 +226,8 @@ new doc be in?":
   that those folders ship (`analysis/templates/`, `scouting/templates/`) are
   Korean as well.
 - **Exception 1 — Contributor / style docs in English.** `CLAUDE.md`,
-  `docs/style.md`. The audience is anyone reading PRs or
+  `docs/style.md`, `site/AUTHORING.md`, `site/README.md`. The audience is
+  anyone reading PRs or
   history; English keeps that surface grep-able and consistent with the
   enforced English commit-message rule.
 - **Exception 2 — Project front door in English.** `README.md`. The
@@ -291,7 +296,9 @@ and the lints:
       per `docs/agent-setup.md`).
 - [ ] **Extend the pillar-keyed tooling**: the `PILLAR_COLOR` palette +
       pillar range in `scripts/refresh-analysis-index.py` (an out-of-range
-      `P#` is dropped at generation), the §3-1 palette table in
+      `P#` is dropped at generation), `PILLAR_NAMES` / `PILLAR_ORDER` /
+      `PILLAR_RE` in `site/probe_site/corpus.py` (an out-of-range `P#` lands
+      the paper in 미분류 on the site), the §3-1 palette table in
       `docs/style.md`, and the default scan set in
       `scripts/check-doc-links.py`.
 - [ ] **Run `python3 scripts/check-doc-links.py`** — the new file's path
@@ -321,7 +328,9 @@ Everything outside the markers stays hand-maintained — the short folder intro 
 ## Where to read more
 
 - `README.md` — motivation, pipeline, agent stack + setup, references.
-- `docs/style.md` — the single source of truth for agent **output**
-  format (this file governs commits and *contributor* docs, not output).
+- `docs/style.md` — the output format for the `scouting/` + `analysis/`
+  tracks (this file governs commits and *contributor* docs, not output).
+- `site/AUTHORING.md` — the output format for the reading-site track
+  (`readable/<id>.md`); `site/README.md` maps the generator around it.
 - `analysis/README.md` — the auto-generated deep-dive index. The scouting
   track is described in `README.md` → Pipeline and `docs/agent-setup.md`.

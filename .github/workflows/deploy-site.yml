@@ -17,18 +17,14 @@ on:
     branches: [main]
     paths:
       - 'readable/**'
-      - 'scripts/build-site.py'
-      - 'scripts/probe_site/**'
+      - 'site/**'
       - 'scripts/probe_refs.py'
-      - 'scripts/site-requirements.txt'
       - '.github/workflows/deploy-site.yml'
   pull_request:
     paths:
       - 'readable/**'
-      - 'scripts/build-site.py'
-      - 'scripts/probe_site/**'
+      - 'site/**'
       - 'scripts/probe_refs.py'
-      - 'scripts/site-requirements.txt'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
 
@@ -51,14 +47,14 @@ jobs:
         with:
           python-version: '3.x'
           cache: pip
-          cache-dependency-path: scripts/site-requirements.txt
+          cache-dependency-path: site/requirements.txt
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
       - name: Install build dependencies
-        run: pip install -r scripts/site-requirements.txt
+        run: pip install -r site/requirements.txt
 
       - name: Install KaTeX and the webfont sources
         # ONE npm call. There is no package.json here, so npm rebuilds the tree
@@ -66,7 +62,7 @@ jobs:
         # prunes whatever the first one put there — splitting this line silently
         # removes KaTeX and breaks the math render.
         run: |
-          npm install --no-save --prefix scripts/probe_site \
+          npm install --no-save --prefix site/probe_site \
             katex@0.16.22 pretendard @fontsource/jetbrains-mono
 
       - name: Cache rendered formulas
@@ -80,7 +76,7 @@ jobs:
           restore-keys: katex-
 
       - name: Build
-        run: python3 scripts/build-site.py --out .site --strict
+        run: python3 site/build-site.py --out .site --strict
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'

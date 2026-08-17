@@ -13,6 +13,7 @@ on:
   pull_request:
     paths:
       - 'analysis/**/*.md'
+      - 'readable/*.md'
       - 'scouting/**/*.md'
       - 'context/**'
       - 'scripts/check-decision-refs.py'

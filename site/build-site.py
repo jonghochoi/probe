@@ -5,13 +5,13 @@ Renders every `readable/<id>.md` into a static page tree under `--out`.
 Build-time dependencies only — the published site ships no runtime Python, no
 CDN request, and (with the default `--katex=server`) no math JavaScript.
 
-    python3 scripts/build-site.py --out .site           # full build
-    python3 scripts/build-site.py --only 2607.06559     # one rewrite
-    python3 scripts/build-site.py --serve               # build + preview
-    python3 scripts/build-site.py --check               # lint, write nothing
+    python3 site/build-site.py --out .site           # full build
+    python3 site/build-site.py --only 2607.06559     # one rewrite
+    python3 site/build-site.py --serve               # build + preview
+    python3 site/build-site.py --check               # lint, write nothing
 
-Requires `pip install -r scripts/site-requirements.txt`, plus Node with
-`npm install --no-save --prefix scripts/probe_site katex@0.16.22` for
+Requires `pip install -r site/requirements.txt`, plus Node with
+`npm install --no-save --prefix site/probe_site katex@0.16.22` for
 server-side math (`--katex=client` renders in the browser instead).
 """
 
@@ -29,12 +29,16 @@ _TEXT_ONLY = re.compile(r"<(script|style)[^>]*>.*?</\1>|<[^>]+>", re.S)
 
 _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
+# `probe_refs` stays in `scripts/`: the Decision-Log parser has two consumers
+# and the other one (`check-decision-refs.py`) lints the whole repo, so it must
+# not have to import out of the site folder.
+sys.path.insert(1, str(_HERE.parent / "scripts"))
 
 try:
     import markdown_it  # noqa: F401
 except ImportError:
     sys.stderr.write(
-        "error: site build needs `pip install -r scripts/site-requirements.txt`\n"
+        "error: site build needs `pip install -r site/requirements.txt`\n"
         "       (build-time only — the generated site has no runtime deps)\n"
     )
     raise SystemExit(2)
@@ -116,7 +120,7 @@ def build(args) -> int:
     if not stats["pretendard"]:
         sys.stderr.write(
             "warning: no Pretendard subset written — install the build fonts with\n"
-            "         npm install --no-save --prefix scripts/probe_site \\\n"
+            "         npm install --no-save --prefix site/probe_site \\\n"
             "           katex@0.16.22 pretendard @fontsource/jetbrains-mono\n"
             "         (the site falls back to system fonts)\n"
         )
