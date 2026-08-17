@@ -3,8 +3,7 @@
 A rewrite is written from the paper's own arXiv HTML, so everything the site
 needs — title, authors, pillars, tags, links, the card preview — is declared in
 the rewrite's own front matter. There is no second source to reconcile against;
-`analysis_legacy/` (the frozen deep-dive corpus of the retired `/analyze`
-format) is not read at all.
+the legacy `analysis_legacy/` corpus is not read at all.
 
 One rewrite per file, `analysis/<arxiv-id>.md` — flat, no per-paper folder.
 """

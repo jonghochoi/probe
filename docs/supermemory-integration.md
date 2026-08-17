@@ -77,8 +77,8 @@ tag(주제 축)의 최소 3개 독립 필터축.
   `containerTag` 안에 두어 "이 결정을 떠받치는 논문" 회수가 한 질의에 걸린다.
 - **`analysis/<id>.md`** → 논문당 1 doc, `customId = arxiv:<id>`, front matter
   전체를 metadata로. **본문이 한글**이므로 임베딩 모델의 한국어 처리력이 회수 품질을
-  좌우한다(→ §5·§6의 1순위 리스크). 동결된 `analysis_legacy/<id>/analysis.md` 는
-  포맷이 다르므로 색인 대상에서 제외하거나 별도 `doc_type` 으로 분리한다.
+  좌우한다(→ §5·§6의 1순위 리스크). `analysis_legacy/<id>/analysis.md` 는 포맷이
+  다르므로 색인 대상에서 제외하거나 별도 `doc_type` 으로 분리한다.
 - **`scouting/P#/YYYY-MM-DD.md`** → 리포트당 1 doc, `containerTag = P#`,
   `metadata.date`. 주간 스냅샷이라 "최근 N주 동향" 시간축 질의의 소스가 된다.
 

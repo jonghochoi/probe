@@ -5,10 +5,9 @@ its ORIGINAL text, and write `analysis/<arxiv-id>.md` — a Korean document a
 reader can understand *without opening the paper*. That file is what the site
 publishes; it is the only thing the site publishes.
 
-`analysis_legacy/` is the frozen corpus of the retired deep-dive format, kept
-only until those papers are migrated. You do not touch it — you neither read it
-nor write to it. Everything here comes from the paper itself and from
-`context/`.
+`analysis_legacy/` is a legacy corpus in a different format, kept only until
+those papers are migrated. You do not touch it — you neither read it nor write
+to it. Everything here comes from the paper itself and from `context/`.
 
 INPUT:
 The paper is the invocation argument: a bare arXiv id (`2607.26055`), an
@@ -177,7 +176,7 @@ SCOPE
 ════════════════════════════════════════════════════════════════════════
 
 ON-DEMAND, ONE PAPER AT A TIME. There is no batch rollout and no backfill of
-the frozen `analysis_legacy/` corpus. The site is exactly the set of rewrites
+the `analysis_legacy/` corpus. The site is exactly the set of rewrites
 that exist, so writing one is what puts that paper on the site at all.
 
 If asked to "do all of them", say no and explain the cost: each rewrite reads

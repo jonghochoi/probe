@@ -23,8 +23,8 @@
 > one into `analysis/`; the site is exactly that set. Everything the site is
 > made of lives in `site/` — the format contract (`site/AUTHORING.md`) and the
 > generator — and it deploys from Actions; the generated HTML is never
-> committed. (`analysis_legacy/` holds the retired deep-dive format, frozen on
-> GitHub until those papers are re-written.)
+> committed. (`analysis_legacy/` holds the legacy corpus, on GitHub until those
+> papers are re-written.)
 >
 > ```bash
 > pip install -r site/requirements.txt
@@ -108,7 +108,7 @@ PROBE has **two output tracks** sharing one static, human-owned context — outw
 | `context/` | human | monthly at most | agent reads only |
 | `scouting/` | agent | scheduled, per pillar | append — one dated file per run |
 | `analysis/` | agent | on demand | overwrite — one snapshot per paper |
-| `analysis_legacy/` | — | frozen | the retired deep-dive format, kept until re-written |
+| `analysis_legacy/` | — | frozen | legacy corpus, kept until re-written |
 
 Keeping the two apart is what stops the agent re-recommending last month's papers as the context bloats.
 

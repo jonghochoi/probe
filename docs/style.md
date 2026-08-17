@@ -5,8 +5,6 @@
 >
 > The reading site is a separate track with its own contract: `analysis/<id>.md`
 > is governed by `site/AUTHORING.md`, not by this guide. Nothing here applies to it.
-> The frozen `analysis_legacy/` corpus followed this guide's retired §5 and is
-> no longer governed by anything — it is kept as a snapshot, not maintained.
 
 ---
 
