@@ -2,10 +2,10 @@
 
 **Run date:** YYYY-MM-DD
 **Agent version:** v0.1
-<!-- Papers scanned: ONE-LINE summary only (STYLE §4-5) — provenance lives
+<!-- Papers scanned: ONE-LINE summary only (AUTHORING §4-5) — provenance lives
      here. If a tool call failed, state it verbatim inline (e.g.
      "일부 쿼리 HTTP 429 실패"); never fabricate. -->
-**Papers scanned:** <N from arXiv> + <M from citation graph> + <K from author watch>
+**Papers scanned:** <N from arXiv> + <M from citation graph> + <K from curated lists>
 **Papers surfaced (every dimension ≥ 2):** <count>
 
 ---
@@ -16,8 +16,8 @@
 `scouting/AUTHORING.md` §3-1 is authoritative. Summary:
   · ONLY P#/D# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc), one per distinct code.
-  · Each code is a shields.io BADGE (STYLE §3-1): P# uses the pillar palette
-    (P1 f5e9d5, P2 e2f5d5, P3 d5f5e7, P4 d5def5), every D# shares d97706 (amber).
+  · Each code is a shields.io BADGE (AUTHORING §3-1): P# uses the pillar palette
+    (P0 f5d5d5, P1 f5e9d5, P2 e2f5d5, P3 d5f5e7, P4 d5def5, P5 e0d5f5), every D# shares d97706 (amber).
     Format: `![CODE](https://img.shields.io/badge/CODE-<hex>.svg)`.
   · Legend row: <a id="ref-CODE"></a>![CODE](…badge…) | one-line meaning (English only).
     The anchor stays so body links resolve; the legend badge itself is not a link.
@@ -44,11 +44,11 @@
 ## 🥇 논문 1 — 우선순위 ★★★
 
 **<Paper Title>**
-[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <author-watch | citation-graph | keyword-sweep>
+[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · source: <citation-graph | curated-list | keyword-sweep>
 
 ### (a) 관련 Pillar / Decision
 <!-- The decision TIE only — a single line of LINKED BADGES, nothing else
-     (STYLE §3-1). `[![P2](…)](#ref-P2) / [![D11](…)](#ref-D11) [![D8](…)](#ref-D8)`
+     (AUTHORING §3-1). `[![P2](…)](#ref-P2) / [![D11](…)](#ref-D11) [![D8](…)](#ref-D8)`
      ( ` / ` between pillar and decisions, a SPACE between decision badges); NO
      Korean gloss next to any badge, NO body bullets here — the paper substance
      goes in (b). The four sections read as ONE STORY: tie → contribution →
@@ -112,13 +112,13 @@
 
 ## 📊 점수 요약
 
-<!-- NO summary table — it duplicates the per-paper rationale below (STYLE §4-5).
+<!-- NO summary table — it duplicates the per-paper rationale below (AUTHORING §4-5).
      The rubric is FIVE dimensions, 0–3 each, total /15 (canonical
-     definitions: .claude/prompts/scouting.txt; codified in STYLE §4-5):
+     definitions: .claude/prompts/scouting.txt; codified in AUTHORING §4-5):
        Relevance · Novelty · Reproducibility · Methodology · Sim2Real
      Surface a paper only if every one of the five dimensions scores ≥ 2;
      if fewer than 3 qualify, say so and do not pad. The rationale is
-     개조식 (STYLE §4-4): one bold paper head carrying the total
+     개조식 (AUTHORING §4-4): one bold paper head carrying the total
      (`**HapTile (13/15)**`), then a nested bullet per dimension
      (`- Relevance 3 — <명사형 근거>`), all five dimensions listed. -->
 
@@ -127,7 +127,7 @@
 ## 💡 컨텍스트 제안
 
 <!-- Agent proposes edits to the relevant context/P#.md. Human decides. Agent must NOT edit any context/ file directly.
-     Every sub-section below is 개조식 (STYLE §4-4): labelled bullets
+     Every sub-section below is 개조식 (AUTHORING §4-4): labelled bullets
      (대상/제안/근거/트리거 …, 명사형 종결), not prose paragraphs. -->
 
 ### Tracked literature
@@ -162,12 +162,12 @@ where possible, no hedging; this section is the most over-written one (STYLE
 ## 🚫 필터 통과 실패 후보 논문
 
 <!-- Reference appendix — kept LAST so the decision content (papers, scores,
-     context suggestions) stays up top (STYLE §4-5). -->
+     context suggestions) stays up top (AUTHORING §4-5). -->
 
 | Paper | Link | Reason dropped |
 |-------|------|----------------|
 <!-- Paper column: short name (+ author "et al." if helpful) only. Do NOT repeat
-     the arXiv id here — the Link column already carries it (STYLE §4-5). -->
+     the arXiv id here — the Link column already carries it (AUTHORING §4-5). -->
 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Anti-topic: <specific rule from the pillar's §4 Anti-topics> |
 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Novelty < 2 (delta over pinned:<name>) |
 | <title> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | Sim2Real = 0 (sim-only, no real-robot evidence) |

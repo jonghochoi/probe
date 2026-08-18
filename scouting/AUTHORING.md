@@ -116,8 +116,8 @@ does not use; never list competitor codenames, Identity, or the falsifier.
 **Placement.** A single `## 🔑 Reference Legend` section, immediately
 after the top metadata block and immediately before the first
 `## 🥇 Paper` section. It is the first content section of the report.
-(There is no boilerplate intro blockquote — it repeated every file and
-carried no per-report information, so the report goes metadata → legend.)
+There is no boilerplate intro blockquote — it would repeat in every file and
+carry no per-report information, so the report goes metadata → legend.
 
 **Format.** One compact table, rows ordered `P#` → `D#` (ascending),
 one row per distinct cited code. Each code renders as a **shields.io
