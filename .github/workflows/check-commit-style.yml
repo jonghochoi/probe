@@ -29,4 +29,4 @@ jobs:
       - name: Check PR title against CLAUDE.md commit style
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: python3 scripts/check-commit-style.py "$PR_TITLE"
+        run: python3 linters/check-commit-style.py "$PR_TITLE"

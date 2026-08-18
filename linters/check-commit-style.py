@@ -22,8 +22,8 @@ PR number on squash-merge); first word not an obvious non-imperative
 (added/adding/updates/…).
 
 Usage:
-    python3 scripts/check-commit-style.py "<subject>" [...]
-    git log --format=%s main..HEAD | python3 scripts/check-commit-style.py -
+    python3 linters/check-commit-style.py "<subject>" [...]
+    git log --format=%s main..HEAD | python3 linters/check-commit-style.py -
 
 Exit codes: 0 = all subjects pass / 1 = violation(s) / 2 = nothing to check.
 """

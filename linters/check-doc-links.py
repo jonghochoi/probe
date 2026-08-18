@@ -29,12 +29,12 @@ referencing doc's own directory (standard Markdown link semantics + the repo's
 habit of citing root-relative paths in prose).
 
 Usage (repo root):
-    python3 scripts/check-doc-links.py [PATH ...]
+    python3 linters/check-doc-links.py [PATH ...]
 
 No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
 (its Repository-map table), `README.md` and `SETUP.md`, where every path
 reference is meant to point at a real file, plus the `context/` files
-(MASTER + P0-P5) the scheduled routine reads every run. The agent-output specs
+(MASTER + every pillar) the scheduled routine reads every run. The agent-output specs
 (`scouting/AUTHORING.md`, `site/AUTHORING.md`) and the prompts are out of the
 default set — they are full of *illustrative* example paths (example arXiv ids,
 `<id>` placeholders) by design — but can be scanned explicitly by passing them
@@ -45,6 +45,7 @@ Exit codes: 0 = clean / 1 = unresolved references found / 2 = nothing to scan.
 from __future__ import annotations
 
 import argparse
+import glob
 import os
 import re
 import sys
@@ -76,18 +77,17 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 # The output specs (`scouting/AUTHORING.md`, `site/AUTHORING.md`) and the
 # prompts are intentionally excluded (they carry illustrative example paths)
 # but can be passed explicitly as PATH args.
-_DEFAULT_DOCS = [
+#
+# The pillar files are globbed, not listed, so adding a pillar needs no edit
+# here — `context/_TEMPLATE.md` is skipped because it is a skeleton of
+# placeholders, not a doc whose paths resolve.
+_DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",
     "SETUP.md",
     "context/MASTER.md",
-    "context/P0.md",
-    "context/P1.md",
-    "context/P2.md",
-    "context/P3.md",
-    "context/P4.md",
-    "context/P5.md",
 ]
+_CONTEXT_PILLAR_GLOB = "context/P[0-9].md"
 
 
 def _resolves(candidate: str, doc_dir: str) -> bool:
@@ -169,7 +169,12 @@ def check_file(path: str) -> list[tuple[int, str]]:
 
 
 def _gather_default_docs() -> list[str]:
-    return [d for d in _DEFAULT_DOCS if os.path.exists(os.path.join(_REPO_ROOT, d))]
+    docs = [d for d in _DEFAULT_ROOT_DOCS if os.path.exists(os.path.join(_REPO_ROOT, d))]
+    docs += sorted(
+        os.path.relpath(p, _REPO_ROOT)
+        for p in glob.glob(os.path.join(_REPO_ROOT, _CONTEXT_PILLAR_GLOB))
+    )
+    return docs
 
 
 def main(argv: list[str] | None = None) -> int:

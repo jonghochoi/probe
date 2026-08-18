@@ -403,10 +403,10 @@ sentence is a byte-locked token (§4-1). If a quoted sentence genuinely contains
 a raw `~`, leave it and keep the Korean explanation line tilde-free so nothing
 pairs with it.
 
-`python3 scripts/check-render-tilde.py` reports every inline context carrying
-two or more raw tildes — the condition that actually breaks a render. A lone
-tilde renders literally and is not an error, but it becomes one the moment
-another lands in the same context, so prefer the table above everywhere.
+Two or more raw tildes in one inline context is the condition that actually
+breaks a render. A lone tilde renders literally and is not an error, but it
+becomes one the moment another lands in the same context, so prefer the table
+above everywhere.
 
 ### 4-7. No bare URL in Korean prose — the following particle joins the href
 
