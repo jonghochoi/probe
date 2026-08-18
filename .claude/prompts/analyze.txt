@@ -8,8 +8,8 @@ publishes; it is the only thing the site publishes.
 ONE FILE, TWO SURFACES. The page has two tabs and they both come out of
 this one run:
 
-  상세   the full re-telling            AUTHORING §1–§3
-  한눈에  one screen — thesis, narrative, four evidence cards   AUTHORING §4
+  요약   one screen — thesis, narrative, four evidence cards   AUTHORING §4
+  상세   the full re-telling                                  AUTHORING §1–§3
 
 Both are written from the SAME reading of the original. The short surface is
 NOT written by shortening the long one — see AUTHORING G1, and step 6 below.
@@ -43,7 +43,7 @@ must look like, and this prompt does not restate it:
       callouts, resource links, quizzes
   §3  render traps — the inline-math dialect, raw `~`, `**` before a particle,
       bare URLs in Korean prose
-  §4  the 한눈에 section G1–G7 — the four-part spine, the narrative's length
+  §4  the 요약 section G1–G7 — the four-part spine, the narrative's length
       band and register, the fact rail, four evidence cards, and what this
       surface may NOT carry
   §5  what the build enforces vs. what only review catches
@@ -180,14 +180,14 @@ PROCEDURE
        vector, the training recipe and the baseline asymmetry are the five
        that get skipped. (R15)
      - Does every opinion anchor to a `D#` that actually exists?
-     - 한눈에 — is every number on it also in the original, and does each of
+     - 요약 — is every number on it also in the original, and does each of
        the four cards carry a figure, an equation or a scale rather than three
        lines of prose? (G6)
-     - 한눈에 — does the narrative read as one person talking, with no bullets
+     - 요약 — does the narrative read as one person talking, with no bullets
        and no heading, and does it close on the paper's OWN stated limit? (G4)
-     - 한눈에 — is there any `D#`, any `context/` reference, any of our act-4
+     - 요약 — is there any `D#`, any `context/` reference, any of our act-4
        view on that surface? There must be none. (G7)
-     - 한눈에 — do the four card titles, read alone in order, make the
+     - 요약 — do the four card titles, read alone in order, make the
        argument? (G6)
 
 9. COMMIT — one paper per commit:

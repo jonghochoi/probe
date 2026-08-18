@@ -11,13 +11,14 @@
 
 | Tab | What it is | Rules |
 |---|---|---|
+| 요약 | one screen: our thesis, a narrative, the evidence in four cards | §4 |
 | 상세 | the full re-telling — four acts, term anchors, quizzes | §1–§3 |
-| 한눈에 | one screen: our thesis, a narrative, the evidence in four cards | §4 |
 
 Both are written **in the same `/analyze` run, from the same reading of the
-arXiv original**, and they live in one `analysis/<id>.md`. The short surface is
-not a summary of the long one — see G1, which is the rule it most often
-violates.
+arXiv original**, and they live in one `analysis/<id>.md`. 요약 is the tab a
+reader opens first, and its name says what they want from it — but it is not
+made by summarising 상세. It is a second reading of the paper, written from the
+original like the body is; see G1, which is the rule it most often violates.
 
 **Both are required.** A file carrying only the body is an incomplete rewrite,
 not a shorter one: the page would publish an empty tab. Bringing an existing

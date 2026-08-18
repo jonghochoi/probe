@@ -81,7 +81,7 @@
     // The surface belongs in the URL: a link to one surface of a paper is a
     // thing people send each other, and the back button should undo a switch.
     if (push && history.replaceState) {
-      history.replaceState(null, "", key === "full" ? location.pathname : "#" + key);
+      history.replaceState(null, "", key === "glance" ? location.pathname : "#" + key);
     }
   }
 
@@ -90,7 +90,7 @@
       tab.addEventListener("click", function () { showSurface(tab.dataset.tab, true); });
     });
     var hash = (location.hash || "").slice(1);
-    showSurface(hash === "glance" ? hash : "full", false);
+    showSurface(hash === "full" ? hash : "glance", false);
   }
 
   spyToc();

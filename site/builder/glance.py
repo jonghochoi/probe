@@ -1,4 +1,4 @@
-"""The 한눈에 surface — AUTHORING §4 (G1–G7).
+"""The 요약 surface — AUTHORING §4 (G1–G7).
 
 One screen: the claim, a narrative, the conditions beside it, and the evidence
 in four cards. Parsing and validation live here rather than in `render.py`
