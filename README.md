@@ -26,8 +26,7 @@
 ## Why PROBE
 
 **50–100 new papers** land on `cs.RO` + `cs.LG` every day. Maybe 3–5 a week
-touch hand-centric dexterous manipulation. PROBE finds those and answers one
-question:
+touch dexterous manipulation. PROBE finds those and answers one question:
 
 > *"If this paper is right, what do I change in my training / evaluation
 > pipeline next week?"*
