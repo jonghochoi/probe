@@ -27,7 +27,7 @@ READ IT BEFORE YOU WRITE. It is the single source of truth for what a rewrite
 must look like, and this prompt does not restate it:
 
   §1  file + front-matter contract (every key, and which ones fail the build)
-  §2  body rules R1–R14 — the four acts, the heading spine, density, term
+  §2  body rules R1–R15 — the four acts, the heading spine, density, term
       anchors, the five planted-context kinds and their ` ```probe-* ` fences,
       figures, math, code blocks (language AND caption on the fence line),
       callouts, resource links, quizzes
@@ -86,7 +86,7 @@ TWO LISTS IT PRINTS THAT ARE CHECKLISTS, NOT MENUS:
   * The figure list. A figure printed with a URL is one you can hotlink; only
     `— inline SVG, no file to hotlink` means there is no file behind it.
     AUTHORING R6 ranks the paper's own figures ahead of anything you draw, and
-    `probe-flow` now REQUIRES a `why` naming the gap it fills.
+    `probe-flow` REQUIRES a `why` naming the gap it fills.
 
 **NO HTML EDITION → STOP.** `arxiv.Unavailable` means arXiv has no HTML build
 for this paper (~4% of this corpus). Tell the human, name the paper, and stop.
