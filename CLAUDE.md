@@ -27,7 +27,7 @@ the repo stays consistent.
 | `analysis_legacy/` | frozen | Legacy corpus — one `<arxiv-id>/analysis.md` per paper, in a format nothing else in the repo uses. **Read by nothing** (prompt, site build and every lint skip it) and never regenerated; kept until those papers are re-written under `analysis/`. Its `README.md` is a static index of what the folder holds |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token) and `analyze.txt` (`/analyze`) |
 | `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, which only points `/analyze` at its prompt and at `site/AUTHORING.md` |
-| `assets/` | human | Images the root `README.md` embeds, and nothing else — the reading-site banner as a light/dark pair (`reading-site.svg`, `reading-site-dark.svg`) selected by `<picture>` + `prefers-color-scheme`. Hand-authored SVG whose text is live `<text>`, so the fonts are stacks (`ui-monospace`, `system-ui`) and the layout is left-aligned to tolerate the substitution. The site's own images live under `site/builder/assets/` and are unrelated |
+| `assets/` | human | Images the root `README.md` embeds, and nothing else — the brand lockup (`wordmark.svg`) that **is** the README's H1, and the reading-site banner (`reading-site.svg`), each as a light/dark pair (`-dark.svg`) selected by `<picture>` + `prefers-color-scheme`. Hand-authored SVG whose text is live `<text>`, so the fonts are stacks (`ui-monospace`, `system-ui`) and the layout is left-aligned to tolerate the substitution. The lockup redraws `site/builder/components.py`'s `mark()` with its animation inlined, since a README image carries no external stylesheet; keep the two drawings in step. The site's own images live under `site/builder/assets/` and are unrelated |
 | `site/` | human | The reading site's generator — `build-site.py` + `builder/` (a landing briefing, a memo hub, plus one page per rewrite) and `requirements.txt`. Only `analysis/` is published; `analysis_legacy/` is not read. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed**. A rewrite publishes as two tabs and the short one has its own module — `site/builder/glance.py` (한눈에), which refuses any `D#` on its surface. Two modules serve the prompt rather than the build: `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation). Folder map: `site/README.md` |
 | `linters/check-doc-links.py` | human | Linter verifying local path references resolve in `CLAUDE.md`, `README.md`, `SETUP.md`, `context/MASTER.md` and `context/P#.md` (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
 | `linters/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
@@ -178,17 +178,20 @@ convention** — it does not strip emoji.
 
 ### Narrative / onboarding docs
 
-`README.md`. The H1 may carry **one leading thematic emoji**, placed at the
-start of the header text after the `#` and a space (`# 🛸 …`). Exactly one
-emoji, at the start — never at the end, never inside body text. One H1 per
-document.
+`README.md`. The H1 is the **brand lockup** — the `<picture>` pair in
+`assets/` on one line inside the `#`, with the project name as the image's
+`alt` so the heading still reads as text everywhere the image does not. A
+narrative doc with no lockup of its own may instead carry **one leading
+thematic emoji**, placed at the start of the header text after the `#` and a
+space (`# 🛸 …`) — exactly one, at the start, never at the end and never
+inside body text. One H1 per document.
 
 **Internal consistency per level (hard rule).** Each header level used in a
-document must be uniformly emoji or uniformly plain — no mixing within the
+document must be uniformly marked or uniformly plain — no mixing within the
 same level in the same doc. The canonical narrative pattern in this repo is
-**emoji at H1 only, plain at H2 and below**, used by `README.md`. If you add a
-new H2/H3, it stays plain; outliers must be brought into line, not left as
-exceptions.
+**the mark at H1 only, plain at H2 and below**, used by `README.md`. If you
+add a new H2/H3, it stays plain; outliers must be brought into line, not left
+as exceptions.
 
 ### Reference / structural docs
 
