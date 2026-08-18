@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛸 PROBE · Research Scout
+# <picture><source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg"><img src="assets/wordmark.svg" width="300" alt="PROBE · Research Scout"></picture>
 
 **Stop drowning in arXiv. Start changing what you train next week.**
 

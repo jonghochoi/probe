@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="272" height="96" viewBox="0 0 272 96" role="img" aria-label="PROBE — Research Scout">
+  <style>
+    .hull   { fill: #E8916F; }
+    .iris   { fill: #FFF6F1; }
+    .pupil  { fill: #2A1A12; }
+    .stalk  { stroke: #F0A183; stroke-width: 5; stroke-linecap: round; }
+    .beacon { fill: #F0A183; animation: beacon 2.6s ease-in-out infinite; }
+    .shadow { fill: #F0A183; opacity: .55; }
+    .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .lid    { animation: blink 5.4s ease-in-out infinite; }
+    .eL .lid { transform-origin: 36px 46px; }
+    .eR .lid { transform-origin: 60px 46px; }
+    @keyframes bob    { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes beacon { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+    @keyframes blink  { 0%, 88%, 100% { transform: scaleY(1); } 92% { transform: scaleY(.06); } 96% { transform: scaleY(1); } }
+    @media (prefers-reduced-motion: reduce) { .rig, .lid, .beacon { animation: none; } }
+  </style>
+
+  <g transform="translate(4 5) scale(.92)">
+    <ellipse class="shadow" cx="48" cy="84" rx="20" ry="4"/>
+    <g class="rig">
+      <path class="stalk" d="M48 20 V13" fill="none"/>
+      <circle class="beacon" cx="48" cy="10" r="5"/>
+      <rect class="hull" x="17" y="21" width="62" height="54" rx="19"/>
+      <g class="eL"><g class="lid">
+        <circle class="iris" cx="36" cy="46" r="11"/>
+        <circle class="pupil" cx="36" cy="46" r="5"/>
+      </g></g>
+      <g class="eR"><g class="lid">
+        <circle class="iris" cx="60" cy="46" r="11"/>
+        <circle class="pupil" cx="60" cy="46" r="5"/>
+      </g></g>
+    </g>
+  </g>
+
+  <text x="106" y="55" fill="#F2EAE4" letter-spacing="-1"
+        font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="42" font-weight="700">PROBE</text>
+  <text x="108" y="79" fill="#C98A6D" letter-spacing="3.4"
+        font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="12">RESEARCH SCOUT</text>
+</svg>
