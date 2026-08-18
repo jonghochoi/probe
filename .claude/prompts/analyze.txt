@@ -26,7 +26,8 @@ THE FORMAT CONTRACT LIVES IN `site/AUTHORING.md`
 READ IT BEFORE YOU WRITE. It is the single source of truth for what a rewrite
 must look like, and this prompt does not restate it:
 
-  §1  file + front-matter contract (every key, and which ones fail the build)
+  §1  file + front-matter contract (every key, and which ones fail the build),
+      plus the SOURCE and STANCE contracts the procedure below implements
   §2  body rules R1–R15 — the four acts, the heading spine, density, term
       anchors, the five planted-context kinds and their ` ```probe-* ` fences,
       figures, math, code blocks (language AND caption on the fence line),
@@ -94,12 +95,9 @@ Do NOT fall back to the abstract. A document that is secretly abstract-based
 is worse than none, because nothing on the page says so.
 
 Never fabricate. If a number is not in the paper, it does not go in the
-document. If the paper is ambiguous, say the paper is ambiguous.
-
-STANCE DISCIPLINE. Facts are the paper's. Opinions are ours and must anchor to
-a `D#` in the Decision Log — do not invent a position `context/` does not
-hold. Where our context has no view, relay without one. Subjective judgements
-take a hedge (`~인 것 같아요`); flat assertion of an opinion reads as AI.
+document. If the paper is ambiguous, say the paper is ambiguous. Which of the
+two sources a sentence may draw on is AUTHORING §1's stance contract, and
+step 8 below checks the document against it.
 
 
 ════════════════════════════════════════════════════════════════════════

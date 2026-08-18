@@ -81,7 +81,7 @@ abstract-based fallback would be indistinguishable on the page from a real one.
 **Stance.** Facts are the paper's. Opinions are ours and must anchor to a `D#`
 that exists in the Decision Log — never invent a position `context/` does not
 hold. Where our context has no view, relay without one. Subjective judgements
-take a hedge (`~인 것 같아요`), not a flat assertion.
+take a hedge (`~인 것 같아요`); a flat assertion of an opinion reads as AI.
 
 ---
 
