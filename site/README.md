@@ -5,8 +5,8 @@ generator, and its build-time dependencies. The site publishes
 `analysis/<arxiv-id>.md` and nothing else; the legacy `analysis_legacy/` corpus
 is not read at all.
 
-One rewrite becomes **three tabs on one page** — 상세 (the body), 한눈에 (one
-screen) and 발표 (a deck). All three come out of the same source file and the
+One rewrite becomes **two tabs on one page** — 상세 (the body) and 한눈에 (one
+screen). Both come out of the same source file and the
 same `/analyze` run; `AUTHORING.md` §4 and §5 are their contracts.
 
 The corpus itself stays at the repo root (`analysis/`), next to the other
@@ -17,14 +17,12 @@ the agent writes into `analysis/` and reads from here.
 
 | Path | Role |
 |---|---|
-| `AUTHORING.md` | **The format contract for `analysis/<id>.md`** — front matter, body rules R1–R15, render traps, the 한눈에 rules G1–G7 and the 발표 rules S1–S9, what the build enforces. `.claude/prompts/analyze.txt` defers to it; edit this file first, then the code |
+| `AUTHORING.md` | **The format contract for `analysis/<id>.md`** — front matter, body rules R1–R15, render traps, the 한눈에 rules G1–G7, what the build enforces. `.claude/prompts/analyze.txt` defers to it; edit this file first, then the code |
 | `build-site.py` | Build entry point. `--out` writes the tree, `--only <id>` builds one rewrite, `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews under the deployed path |
 | `builder/corpus.py` | Rewrite discovery, front-matter validation (including R6's `figures:` ↔ body agreement, R15's required `appendix:` and the tagline-echo check), pillar names, the R10 link vocabulary |
 | `builder/render.py` | Markdown → HTML, plus the rule checks that have no other home (R2, R4, R5, R11, R14) |
 | `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas), `callouts.py` (R9 GFM alerts → `co-*`, and the callout length ceiling), `ghmath.py` (the `` $`x`$ `` dialect) |
 | `builder/glance.py` | The 한눈에 tab — the four-part spine, the narrative's length band and bullet ban, the fact rail, exactly four evidence cards, and the refusal of any `D#` or `context/` material on this surface (G1–G7) |
-| `builder/deck.py` | The 발표 tab — slide count band, chapters and their contiguity, the required note and anticipated question, the five-diagram ceiling, the `why` on every drawn diagram, and staged reveals matching a component's own groups (S1–S9) |
-| `builder/diagrams.py` | Draws the five diagram kinds (`bars` `timeline` `matrix` `lanes` `slope`) from a slide's declared data, and plays a `film` by stepping background geometry across the hotlinked original — no image is cut into the repo (S5, S7, R12) |
 | `builder/pages.py`, `components.py` | Page assembly — the landing briefing (newest rewrite as a lead block, everything else as one row each, facets in a left rail), the memo hub and the paper page |
 | `builder/arxiv.py` | LaTeXML extraction of an arXiv original. Serves the prompt rather than the build: `python3 -m builder.arxiv <id>` from this folder prints the section tree — `── 본문 ──` and `── 부록 ──` separately, since R15 makes the appendix a checklist — plus figure ids and URLs, marking the inline-SVG figures that genuinely have no file to hotlink. Raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |

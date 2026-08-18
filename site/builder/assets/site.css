@@ -18,6 +18,14 @@
   --amber:       #c47f16;
   --red:         #d64545;
   --violet:      #7c5cd9;   /* co-ctx only — 논문 밖 맥락 */
+  /* The four act cards on 한눈에, cool to warm in the order the acts run, so
+     the row reads as a sequence rather than four categories. Deliberately not
+     the callout roles' colours: a reader who learned red = 우리와 충돌 on 상세
+     should not meet a red card that means 문제. */
+  --act1:        #5b7b99;
+  --act2:        #3e8c7e;
+  --act3:        #c08a3e;
+  --act4:        var(--orange);
   --bg:          #faf7f5;
   --surface:     #ffffff;
   --surface-2:   #f4efeb;
@@ -38,8 +46,6 @@
   --nav-h:       56px;
   /* The deck presents on its own ground — a slide is not a page, and a light
      slide in a dark room is a lamp pointed at the audience. */
-  --deck-bg:     #1b1512;
-  --deck-ink:    #f7f2ee;
   /* No `--content-max`: the column falls out of the shell's own arithmetic —
      1180 less padding, rail and gutter, about 88ch of Korean. Capping the
      article on top of that leaves a wide empty gutter to its right AND wraps
@@ -64,6 +70,9 @@
   --amber:       #e8bb6a;
   --red:         #f08a8a;
   --violet:      #a894ea;
+  --act1:        #8fb0cc;
+  --act2:        #63b5a4;
+  --act3:        #dca95e;
   --bg:          #14110f;
   --surface:     #1c1815;
   --surface-2:   #241d18;
@@ -945,7 +954,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   .shell { grid-template-columns: 1fr; }
 }
 
-/* ── Three surfaces: the tab strip ─────────────────────────────────────── */
+/* ── Two surfaces: the tab strip ─────────────────────────────────────── */
 /* The strip sits inside the paper header's own width so the tabs line up with
    the title above them, but the panels below use their own — the article keeps
    its reading column while the glance and the deck run wide. */
@@ -1008,6 +1017,17 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .gr-v strong, .gr-v b { font-family: var(--mono); color: var(--orange-deep); }
 .gr-n { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
 
+/* Korean breaks between any two syllables by default, so a card title splits
+   a word down the middle — "완성 시각을 / 다르게" is fine, "다르게 주 / 면
+   된다" is not. `keep-all` moves the break to the space. It is scoped to this
+   surface, whose lines are short enough that a long unbroken run cannot
+   overflow the box. */
+.glance .gh-thesis, .glance .gh-line, .glance .ga-t, .glance .ga-c,
+.glance .g-narr-body p, .glance .gr-v, .glance .gr-n {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 .g-acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
 @media (max-width: 1100px) { .g-acts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .g-acts { grid-template-columns: 1fr; } }
@@ -1016,12 +1036,14 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   box-shadow: var(--shadow); padding: .95rem; display: grid; gap: .6rem;
   align-content: start; position: relative;
 }
-/* One colour per act, in the order the acts run — the same four the body's
-   dividers number, so a reader crossing tabs lands on the same map. */
-.g-act[data-n="1"] { border-top: 3px solid var(--red); }
-.g-act[data-n="2"] { border-top: 3px solid var(--violet); }
-.g-act[data-n="3"] { border-top: 3px solid var(--orange); }
-.g-act[data-n="4"] { border-top: 3px solid var(--green); }
+/* One colour per act, in the order the acts run. The body numbers its acts
+   but does not colour them, so this row is the only place the four carry a
+   colour and it is free to say something: the ramp runs cool to warm and
+   lands on the brand accent, which is the card holding the evidence. */
+.g-act[data-n="1"] { border-top: 3px solid var(--act1); }
+.g-act[data-n="2"] { border-top: 3px solid var(--act2); }
+.g-act[data-n="3"] { border-top: 3px solid var(--act3); }
+.g-act[data-n="4"] { border-top: 3px solid var(--act4); }
 .ga-n { font-family: var(--mono); font-size: .7rem; color: var(--text-muted); }
 .ga-t { font-size: .98rem; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; text-wrap: balance; }
 .ga-c { font-size: .84rem; color: var(--text-muted); line-height: 1.6; }
@@ -1030,107 +1052,6 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .ga-eq { overflow-x: auto; font-size: .92rem; }
 .ga-s { font-family: var(--mono); font-size: .68rem; color: var(--green); border-top: 1px dashed var(--border); padding-top: .5rem; }
 .g-act .scale { margin: 0; }
-
-/* ── 발표 ──────────────────────────────────────────────────────────────── */
-.deck { display: grid; gap: .9rem; }
-.dk-stage {
-  position: relative; aspect-ratio: 16 / 9; container-type: size;
-  background: var(--deck-bg, #1b1512); color: var(--deck-ink, #f7f2ee);
-  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg);
-}
-.dk-stage:fullscreen { border-radius: 0; width: 100vw; height: 100vh; aspect-ratio: auto; }
-.dk-slide {
-  position: absolute; inset: 0; padding: 7cqw 6cqw 5.5cqw;
-  display: grid; gap: 2.2cqw; align-content: center; overflow: hidden;
-}
-.dk-slide > * { min-width: 0; min-height: 0; }
-.dk-kicker { font-family: var(--mono); font-size: 1.35cqw; letter-spacing: .18em; text-transform: uppercase; color: var(--orange); }
-.dk-title { font-size: 4.2cqw; line-height: 1.2; letter-spacing: -.025em; font-weight: 700; text-wrap: balance; }
-.dk-title.dk-sm { font-size: 3.1cqw; }
-.dk-body { font-size: 1.8cqw; line-height: 1.65; opacity: .8; max-width: 46ch; }
-.dk-list { list-style: none; display: grid; gap: 1.1cqw; font-size: 1.8cqw; }
-.dk-list li { padding-left: 1.6cqw; border-left: 2px solid var(--orange); line-height: 1.55; }
-.dk-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3cqw; align-items: start; }
-.dk-colhead { font-family: var(--mono); font-size: 1.2cqw; letter-spacing: .12em; text-transform: uppercase; opacity: .55; margin-bottom: 1.2cqw; display: block; }
-.dk-cover { align-content: end; padding-bottom: 9cqw; }
-.dk-cover .dk-title { font-size: 5.2cqw; }
-.dk-rule { width: 8cqw; height: 3px; background: var(--orange); }
-.dk-foot {
-  position: absolute; left: 6cqw; right: 6cqw; bottom: 2.6cqw; z-index: 3;
-  display: flex; justify-content: space-between; gap: 2cqw; align-items: center;
-  font-family: var(--mono); font-size: 1.15cqw; opacity: .5;
-}
-/* A print figure on a dark slide keeps its own white plate — inverting a
-   paper's figure changes what it says. */
-.dk-bleed {
-  position: absolute; inset: 0; display: grid; place-items: center;
-  grid-template-rows: minmax(0, 1fr); padding: 3.5cqw 5cqw 16cqw;
-}
-.dk-bleed img {
-  max-width: 100%; max-height: 100%; object-fit: contain;
-  background: #fff; border-radius: 6px; padding: 1.2cqw;
-}
-.dk-cap {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
-  padding: 5cqw 6cqw 2.4cqw; display: grid; gap: .7cqw;
-  background: linear-gradient(transparent, var(--deck-bg, #1b1512) 55%);
-}
-.dk-cap .dk-title { font-size: 3.2cqw; }
-.dk-src { font-family: var(--mono); font-size: 1.15cqw; opacity: .62; }
-.dk-dg { display: grid; place-items: center; }
-.dk-dg .dgfig { margin: 0; width: 100%; }
-.dk-dg svg { width: 100%; height: auto; max-height: 56cqh; }
-.dk-dg figcaption { font-family: var(--mono); font-size: 1.1cqw; opacity: .5; margin-top: 1cqw; }
-.dk-chapters {
-  position: absolute; top: 2.6cqw; left: 6cqw; right: 6cqw; z-index: 4;
-  display: flex; gap: 1.6cqw; align-items: center;
-  font-family: var(--mono); font-size: 1.1cqw;
-}
-.dk-ch { display: flex; align-items: center; gap: .6cqw; opacity: .34; transition: opacity .2s; }
-.dk-bead { width: .9cqw; height: .9cqw; border-radius: 50%; background: currentColor; }
-.dk-ch[data-done] { opacity: .55; }
-.dk-ch[data-on] { opacity: 1; color: var(--orange); }
-[data-rev] { opacity: 0; transition: opacity .28s ease; }
-[data-rev].on { opacity: 1; }
-
-/* Motion, cut out of the hotlinked original by background geometry — the frames
-   are the paper's own and nothing is copied into the repo (S7). */
-.dk-film-stage { display: grid; gap: 1.6cqw; }
-.dk-film-stage:has(.dk-clipwrap + .dk-clipwrap) { grid-template-columns: 1fr 1fr; gap: 2.6cqw; }
-.dk-cliplab { font-family: var(--mono); font-size: 1.25cqw; letter-spacing: .06em; opacity: .5; margin-bottom: .8cqw; }
-.dk-cliplab.us { color: var(--orange); font-weight: 700; opacity: 1; }
-.dk-clip { aspect-ratio: 16 / 9; border-radius: 6px; background-repeat: no-repeat; }
-.dk-filmnote { grid-column: 1 / -1; font-family: var(--mono); font-size: 1.1cqw; opacity: .5; }
-@media (prefers-reduced-motion: reduce) { .dk-clip { animation: none !important; } }
-
-.dk-bar { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
-.dk-btn {
-  border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
-  border-radius: 7px; padding: .3rem .6rem; font: inherit; font-size: .8rem; cursor: pointer;
-}
-.dk-btn:hover { color: var(--orange-deep); border-color: var(--orange); }
-.dk-count, .dk-hint { font-family: var(--mono); font-size: .8rem; color: var(--text-muted); }
-.dk-spacer { flex: 1; }
-.dk-film { display: flex; gap: .4rem; overflow-x: auto; padding-bottom: .3rem; }
-.dk-thumb {
-  flex: 0 0 auto; width: 6.6rem; aspect-ratio: 16/9; cursor: pointer;
-  border: 1px solid var(--border); border-radius: 6px; padding: .35rem .4rem;
-  background: var(--deck-bg, #1b1512); color: var(--deck-ink, #f7f2ee);
-  font: inherit; font-size: .58rem; line-height: 1.35; text-align: left;
-  overflow: hidden; opacity: .5; transition: opacity .15s, border-color .15s;
-}
-.dk-thumb b { display: block; font-family: var(--mono); font-size: .55rem; color: var(--orange); }
-.dk-thumb[aria-current="true"] { opacity: 1; border-color: var(--orange); }
-.dk-notes {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: .8rem 1rem; font-size: .84rem; color: var(--text-muted); display: grid; gap: .5rem;
-}
-.dk-nl { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; color: var(--orange-deep); }
-.dk-qa { border-top: 1px dashed var(--border); padding-top: .5rem; }
-
-/* `hidden` loses to a component that sets its own `display`, and every slide
-   does — one unhidden deck would print all eleven on top of each other. */
-.dk-slide[hidden], .dk-chapters[hidden], .dk-qa[hidden] { display: none !important; }
 /* The act card is a quarter of the row, so a scale inside it gives the label
    less room than the number it is labelling. */
 .g-act .sc-row { grid-template-columns: minmax(0, 1fr) 3.5rem auto; font-size: .72rem; }

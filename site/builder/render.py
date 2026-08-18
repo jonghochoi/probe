@@ -189,7 +189,7 @@ class DocRenderer:
         # closes the quiz tally for the section before it — R11.
         if level <= 3:
             self._close_section()
-            # The keyword line is part of the heading now, so strip it before
+            # The keyword line is part of the heading, so strip it before
             # the name is used in a warning — "제목 | Keywords (0 quiz)" reads
             # like the pipe is part of the problem.
             self._current_section = (
@@ -294,8 +294,8 @@ class DocRenderer:
             return self._probe_fence(info, token.content)
         if info in probefence.SURFACE_FENCES:
             message = (
-                f"```{info} belongs to the 한눈에 / 발표 surface — it is inside "
-                f"the article, so its `::: glance` or `::: deck` container is "
+                f"```{info} belongs to the 한눈에 surface — it is inside "
+                f"the article, so its `::: glance` container is "
                 f"missing or closed early"
             )
             self.problems.append(message)
@@ -425,10 +425,10 @@ class DocRenderer:
                 "sections with no `| English keyword` line in the heading (R2): "
                 + ", ".join(self._sections_without_keywords)
             )
-        # R5 names five kinds of planted context; three of them now have a
-        # component each. Warn when a rewrite uses none of them — that is the
-        # exact failure this build was flat before: the rule was satisfied in
-        # prose and nothing on the page showed it.
+        # R5 names five kinds of planted context and three of them have a
+        # component each. Warn when a rewrite uses none of the three: written
+        # as prose they satisfy the rule and show the reader nothing, which is
+        # how a page ends up reading flat however good the sentences are.
         if not self._context_kinds:
             self.problems.append(
                 "no planted-context component (R5): expected at least one of "
@@ -587,7 +587,7 @@ class DocRenderer:
     def check_text(self, source: str, out: str) -> None:
         """Run the literal-text checks over a surface rendered outside `render`.
 
-        The glance and the deck go through `inline()` component by component,
+        The glance goes through `inline()` component by component,
         so nothing would otherwise scan them for the two traps that are valid
         markdown and publish as themselves (§3-1, §3-2). They are the same
         traps on every surface, so they get the same pass.

@@ -14,7 +14,6 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import deck as deck_mod
 from . import frontmatter
 from . import glance as glance_mod
 
@@ -27,16 +26,16 @@ UNCLASSIFIED = "미분류"
 _FENCE = re.compile(r"^```.*?^```", re.S | re.M)
 _SPACE = re.compile(r"\s")
 
-# `::: glance` / `::: deck` — the two short surfaces, carved out of the source
-# before the article renders. They are containers rather than files so that one
-# paper stays one file (AUTHORING, "One file, three surfaces"), and carved out
-# rather than rendered inline because each has its own component vocabulary and
-# its own validation.
-_SURFACE = re.compile(r"^:::[ \t]*(glance|deck)[ \t]*\n(.*?)^:::[ \t]*$", re.M | re.S)
+# `::: glance` — the short surface, carved out of the source before the
+# article renders. It is a container rather than a file so that one paper stays
+# one file (AUTHORING, "One file, two surfaces"), and carved out rather than
+# rendered inline because it has its own component vocabulary and its own
+# validation.
+_SURFACE = re.compile(r"^:::[ \t]*(glance)[ \t]*\n(.*?)^:::[ \t]*$", re.M | re.S)
 
 
 def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
-    """`(article, {"glance": …, "deck": …})` — missing keys stay absent."""
+    """`(article, {"glance": …})` — a missing key stays absent."""
     found = {m.group(1): m.group(2) for m in _SURFACE.finditer(source)}
     return _SURFACE.sub("", source), found
 
@@ -81,7 +80,6 @@ class Paper:
     body: str                    # the whole source below the front matter
     article: str = ""            # the body with the two surfaces carved out
     glance: object | None = None  # glance.Glance, or None when absent
-    deck: object | None = None    # deck.Deck, or None when absent
 
     @property
     def title(self) -> str:
@@ -298,18 +296,13 @@ def discover() -> tuple[list[Paper], list[str]]:
 
         article, surfaces = split_surfaces(body)
         paper = Paper(stem=stem, path=path, front=front, body=body, article=article)
-        for key, parse, attr in (
-            ("glance", glance_mod.parse, "glance"),
-            ("deck", deck_mod.parse, "deck"),
-        ):
-            if key not in surfaces:
-                problems.append(
-                    f"analysis/{path.name}: no `::: {key}` section — a rewrite "
-                    f"publishes three surfaces and this one would ship an empty tab"
-                )
-                continue
-            model, found = parse(surfaces[key])
-            setattr(paper, attr, model)
+        if "glance" not in surfaces:
+            problems.append(
+                f"analysis/{path.name}: no `::: glance` section — a rewrite "
+                f"publishes two surfaces and this one would ship an empty tab"
+            )
+        else:
+            paper.glance, found = glance_mod.parse(surfaces["glance"])
             problems += [f"analysis/{path.name}: {line}" for line in found]
         problems += _tagline_echo(path.name, paper.title, paper.tagline)
         if len(paper.metric) > METRIC_MAX:
@@ -354,10 +347,9 @@ def _tagline_echo(name: str, title: str, tagline: str) -> list[str]:
 # on, and a declaration nothing reads back drifts from the body silently.
 
 _FIG_ID = re.compile(r'^\s*\{\s*"id"\s*:\s*"([^"]+)"', re.M)
-# The glance and the deck cite a figure by id inside their own fences, so the
-# `figures:` list is checked against all three surfaces at once — one list, or
-# a figure shown on the deck quietly stops being part of what the rewrite says
-# it read.
+# The glance cites a figure by id inside its own fences, so the `figures:`
+# list is checked against both surfaces at once — one list, or a figure shown
+# on the glance quietly stops being part of what the rewrite says it read.
 _FIG_REF = re.compile(r'"figure"\s*:\s*"([^"]+)"')
 
 
@@ -375,13 +367,27 @@ def _source_coverage(name: str, front: dict, body: str) -> list[str]:
         problems.append(
             f"analysis/{name}: figure `{fid}` is cited but missing from "
             f"`figures:` — the list is the rewrite's record of what it read, "
-            f"across all three surfaces"
+            f"across both surfaces"
         )
     for fid in sorted(declared - cited):
         problems.append(
             f"analysis/{name}: `figures:` declares `{fid}` but no surface shows "
-            f"it — drop it, or cite it from the body, the glance or the deck"
+            f"it — drop it, or cite it from the body or the glance"
         )
+
+    # The glance cites a figure by id and takes the URL from the body's own
+    # `probe-figure` (that is what keeps one figure on one hotlink). An id the
+    # body never declares therefore resolves to no URL and the card publishes
+    # with its caption and an empty space where the figure was.
+    known = set(figure_urls(body))
+    _, surfaces = split_surfaces(body)
+    for fid in sorted({m.group(1).strip() for m in _FIG_REF.finditer(surfaces.get("glance", ""))}):
+        if fid and fid not in known:
+            problems.append(
+                f"analysis/{name}: the glance cites figure `{fid}` but no "
+                f"`probe-figure` in the body declares its URL — the card would "
+                f"publish an empty frame. Cite it from the body too, or drop it"
+            )
 
     # `appendix:` is a declaration, not something the build can verify against
     # the paper — but an author who has to write the list has to look, and the
@@ -400,9 +406,9 @@ def _source_coverage(name: str, front: dict, body: str) -> list[str]:
 def figure_urls(body: str) -> dict[str, str]:
     """`{figure id: url}` from the body's `probe-figure` fences.
 
-    The glance and the deck cite a figure by id and take the URL from here, so
-    one figure keeps one hotlink: the body already declared where it lives, and
-    a second URL on another surface could drift from it with nothing noticing.
+    The glance cites a figure by id and takes the URL from here, so one figure
+    keeps one hotlink: the body already declared where it lives, and a second
+    URL on another surface could drift from it with nothing noticing.
     """
     out: dict[str, str] = {}
     for block in re.findall(r"```probe-figure\n(.*?)```", body, re.S):
