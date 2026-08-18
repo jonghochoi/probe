@@ -83,7 +83,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `links` | `kind\|url` pairs; kinds fixed at `arxiv` `code` `weights` `data` `site` `demo` (R10). Unknown kinds are dropped rather than guessed at |
 | `published` / `generated` | the paper's date / this rewrite's. `generated` sorts the landing page |
 | `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
-| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **One list for both surfaces** — the build matches it both ways against every figure id cited anywhere in the file (body and glance), and an id in one and not the other is reported |
+| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **One list for both surfaces** — the build matches it both ways against every figure id cited anywhere in the file (body and brief), and an id in one and not the other is reported |
 | `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — see R15. An empty value is not accepted, because "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate |
 | `terms` | count of inline term anchors |
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment — `<지표> <전> → <후> <단위>` for a number the paper moved, `<수치> <단위> · <함께 성립한 조건>` for one it holds under a constraint. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
@@ -657,7 +657,7 @@ not carry them over, and do not "fix" a rewrite to satisfy them:
 
 ---
 
-## 4. The Glance Section (G1–G7)
+## 4. The Brief Section (G1–G7)
 
 One screen that answers "what is this paper, and why should I care" before the
 reader commits to §1–§3. It is a **second reading of the original**, not a
@@ -665,14 +665,14 @@ digest of the body.
 
 ### 4-1. G1 — Written from the original, like the body
 
-The glance draws on the same parsed original as the body and cites the same
+The brief draws on the same parsed original as the body and cites the same
 way. It is never written by re-reading `analysis/<id>.md` and shortening it:
 
 - a digest of a digest inherits every choice the body already made — which
   figure was dropped, which number was rounded — and adds nothing;
 - the two surfaces rank the paper's material differently. A figure that sits
-  mid-body is often the one the glance leads with;
-- a glance derived from the body goes stale the moment the body is edited, and
+  mid-body is often the one the brief leads with;
+- a brief derived from the body goes stale the moment the body is edited, and
   nothing on the page says so.
 
 What the two surfaces **do** share, as inputs rather than text: the thesis line
@@ -785,7 +785,7 @@ not decoration** — a rail of restated adjectives is worse than no rail.
 - `source` is required on every card. Every number on this tab is traceable in
   one glance without leaving it.
 
-### 4-7. G7 — What the glance may not contain
+### 4-7. G7 — What the brief may not contain
 
 - **No `D#`, no `context/` material, no our-view opinion.** Our layer is act 4
   of the body. Mixing it in here puts a claim the paper never made one card
@@ -814,15 +814,15 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |
 
 The short surface is checked in the same pass, against the same source file.
-Each row is a **hard failure**, not a warning — a glance that leaks our view is
+Each row is a **hard failure**, not a warning — a brief that leaks our view is
 not something a reader can be asked to discount:
 
 | Rule | Enforced by |
 |---|---|
-| The glance spine — hub, narrative, rail, exactly four `probe-act` (G2, G6); narrative length band and its bullet ban (G4); rail item count (G5) | `site/builder/glance.py` |
+| The brief's spine — hub, narrative, rail, exactly four `probe-act` (G2, G6); narrative length band and its bullet ban (G4); rail item count (G5) | `site/builder/glance.py` |
 | A `D#`, a `context/` path, or an act-4 opinion anywhere in `::: glance` (G7) | `site/builder/glance.py` |
 | `probe-hub` / `probe-rail` / `probe-act` payload shapes (§4-3, §4-5, §4-6) | `site/builder/glance.py` |
-| A figure the glance cites whose URL no `probe-figure` in the body declares (§4-6) | `site/builder/corpus.py` |
+| A figure the brief cites whose URL no `probe-figure` in the body declares (§4-6) | `site/builder/corpus.py` |
 | `figures:` ↔ every `probe-figure`, `probe-hub` and `probe-act` figure id, across both surfaces (R6) | `site/builder/corpus.py` |
 
 One check sits outside the build, because it is about meaning rather than

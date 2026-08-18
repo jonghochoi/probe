@@ -335,7 +335,7 @@ def not_found_page() -> str:
 # paper is worth the long read, and that is the question the short surface
 # answers. `en` is printed beside the Korean label because the tab strip is
 # also how a contributor finds the rule set: 요약 is §4 and 상세 is §1–§3.
-TABS = (("glance", "요약", "GLANCE"), ("full", "상세", "FULL"))
+TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"))
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
@@ -343,7 +343,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
                neighbours: list[Paper] | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
-    The body and the glance are two readings of the same paper for two
+    The brief and the body are two readings of the same paper for two
     different sits, so they are two panels of one page rather than two pages:
     the header, the resource links and the memo panel are the same paper's,
     and a reader switching surface has not left the paper.
