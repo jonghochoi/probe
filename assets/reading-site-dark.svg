@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="96" viewBox="0 0 560 96" role="img" aria-label="Read the analyses at jonghochoi.github.io/probe">
+  <defs>
+    <clipPath id="card">
+      <rect x="0" y="0" width="560" height="96" rx="8"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="560" height="96" fill="#1C1815"/>
+    <rect width="4" height="96" fill="#E8916F"/>
+  </g>
+  <rect x=".5" y=".5" width="559" height="95" rx="7.5" fill="none" stroke="#3D3129"/>
+
+  <text x="30" y="28" fill="#C98A6D" letter-spacing="2.4"
+        font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="10">THE READING SITE</text>
+
+  <text x="30" y="57" fill="#F2EAE4"
+        font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="20" font-weight="700">jonghochoi.github.io/probe</text>
+
+  <text x="30" y="78" fill="#A08D80"
+        font-family="system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif"
+        font-size="12">논문 한 편을 원문에서 다시 쓴 한글 재작성본</text>
+
+  <path d="M516 48h22m-8-8 8 8-8 8" fill="none" stroke="#E8916F"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

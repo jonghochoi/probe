@@ -11,7 +11,13 @@
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-**[Read the analyses → jonghochoi.github.io/probe](https://jonghochoi.github.io/probe/)**
+<a href="https://jonghochoi.github.io/probe/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/reading-site-dark.svg">
+    <img src="assets/reading-site.svg" width="560"
+         alt="Read the analyses — jonghochoi.github.io/probe">
+  </picture>
+</a>
 
 </div>
 
