@@ -32,6 +32,13 @@ FENCES = (
     "probe-lineage", "probe-scale", "probe-split", "probe-parts",
 )
 
+# The two short surfaces have their own fences, validated by `glance.py` and
+# `deck.py` where the counts across a surface can be seen. Named here so the
+# body renderer can say so: one of these in the article is a section that ended
+# up outside its `:::` container, and highlighting it as code would publish the
+# JSON as a code block.
+SURFACE_FENCES = ("probe-hub", "probe-rail", "probe-act", "probe-slide")
+
 
 class FenceError(ValueError):
     """Malformed fence payload — carries a message fit for a build warning."""

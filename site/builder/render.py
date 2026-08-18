@@ -292,6 +292,14 @@ class DocRenderer:
             return self.katex.block(ghmath.normalize_tex(token.content))
         if info in probefence.FENCES:
             return self._probe_fence(info, token.content)
+        if info in probefence.SURFACE_FENCES:
+            message = (
+                f"```{info} belongs to the 한눈에 / 발표 surface — it is inside "
+                f"the article, so its `::: glance` or `::: deck` container is "
+                f"missing or closed early"
+            )
+            self.problems.append(message)
+            return probefence.error_block(message)
         # R8 — the info string is `<lang> <한글 캡션>`. A block of transcribed
         # pseudocode with nothing above it makes the reader decode the code to
         # find out why it is on the page; the caption states that in one line
@@ -575,6 +583,17 @@ class DocRenderer:
             except probefence.FenceError:
                 continue
             self._term_panels.setdefault(tid, panel)
+
+    def check_text(self, source: str, out: str) -> None:
+        """Run the literal-text checks over a surface rendered outside `render`.
+
+        The glance and the deck go through `inline()` component by component,
+        so nothing would otherwise scan them for the two traps that are valid
+        markdown and publish as themselves (§3-1, §3-2). They are the same
+        traps on every surface, so they get the same pass.
+        """
+        self._check_stray_emphasis(out)
+        self._check_leaked_math(source, out)
 
     def render(self, source: str) -> str:
         self.toc = []

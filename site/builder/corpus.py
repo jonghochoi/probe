@@ -14,7 +14,9 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import deck as deck_mod
 from . import frontmatter
+from . import glance as glance_mod
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
@@ -24,6 +26,19 @@ UNCLASSIFIED = "미분류"
 
 _FENCE = re.compile(r"^```.*?^```", re.S | re.M)
 _SPACE = re.compile(r"\s")
+
+# `::: glance` / `::: deck` — the two short surfaces, carved out of the source
+# before the article renders. They are containers rather than files so that one
+# paper stays one file (AUTHORING, "One file, three surfaces"), and carved out
+# rather than rendered inline because each has its own component vocabulary and
+# its own validation.
+_SURFACE = re.compile(r"^:::[ \t]*(glance|deck)[ \t]*\n(.*?)^:::[ \t]*$", re.M | re.S)
+
+
+def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
+    """`(article, {"glance": …, "deck": …})` — missing keys stay absent."""
+    found = {m.group(1): m.group(2) for m in _SURFACE.finditer(source)}
+    return _SURFACE.sub("", source), found
 
 # A `metric:` longer than this stops being a value and becomes a sentence — it
 # is printed inside a chip on a card, so it has to survive at one line.
@@ -63,7 +78,10 @@ class Paper:
     stem: str                    # arXiv id — the file name
     path: Path
     front: dict
-    body: str
+    body: str                    # the whole source below the front matter
+    article: str = ""            # the body with the two surfaces carved out
+    glance: object | None = None  # glance.Glance, or None when absent
+    deck: object | None = None    # deck.Deck, or None when absent
 
     @property
     def title(self) -> str:
@@ -144,7 +162,7 @@ class Paper:
         is left is the text you read top to bottom, which is what the estimate
         is for.
         """
-        prose = _FENCE.sub("", self.body)
+        prose = _FENCE.sub("", self.article or self.body)
         return max(1, round(len(_SPACE.sub("", prose)) / 500))
 
     @property
@@ -278,7 +296,21 @@ def discover() -> tuple[list[Paper], list[str]]:
                 problems.append(f"analysis/{path.name}: missing `{required}`")
         problems += _source_coverage(path.name, front, body)
 
-        paper = Paper(stem=stem, path=path, front=front, body=body)
+        article, surfaces = split_surfaces(body)
+        paper = Paper(stem=stem, path=path, front=front, body=body, article=article)
+        for key, parse, attr in (
+            ("glance", glance_mod.parse, "glance"),
+            ("deck", deck_mod.parse, "deck"),
+        ):
+            if key not in surfaces:
+                problems.append(
+                    f"analysis/{path.name}: no `::: {key}` section — a rewrite "
+                    f"publishes three surfaces and this one would ship an empty tab"
+                )
+                continue
+            model, found = parse(surfaces[key])
+            setattr(paper, attr, model)
+            problems += [f"analysis/{path.name}: {line}" for line in found]
         problems += _tagline_echo(path.name, paper.title, paper.tagline)
         if len(paper.metric) > METRIC_MAX:
             problems.append(
@@ -322,6 +354,11 @@ def _tagline_echo(name: str, title: str, tagline: str) -> list[str]:
 # on, and a declaration nothing reads back drifts from the body silently.
 
 _FIG_ID = re.compile(r'^\s*\{\s*"id"\s*:\s*"([^"]+)"', re.M)
+# The glance and the deck cite a figure by id inside their own fences, so the
+# `figures:` list is checked against all three surfaces at once — one list, or
+# a figure shown on the deck quietly stops being part of what the rewrite says
+# it read.
+_FIG_REF = re.compile(r'"figure"\s*:\s*"([^"]+)"')
 
 
 def _source_coverage(name: str, front: dict, body: str) -> list[str]:
@@ -333,15 +370,17 @@ def _source_coverage(name: str, front: dict, body: str) -> list[str]:
         for block in re.findall(r"```probe-figure\n(.*?)```", body, re.S)
         for m in [_FIG_ID.search(block)] if m
     }
+    cited |= {m.group(1).strip() for m in _FIG_REF.finditer(body) if m.group(1).strip()}
     for fid in sorted(cited - declared):
         problems.append(
-            f"analysis/{name}: figure `{fid}` is shown in the body but missing "
-            f"from `figures:` — the list is the rewrite's record of what it read"
+            f"analysis/{name}: figure `{fid}` is cited but missing from "
+            f"`figures:` — the list is the rewrite's record of what it read, "
+            f"across all three surfaces"
         )
     for fid in sorted(declared - cited):
         problems.append(
-            f"analysis/{name}: `figures:` declares `{fid}` but the body never "
-            f"shows it — drop it or add the `probe-figure` fence"
+            f"analysis/{name}: `figures:` declares `{fid}` but no surface shows "
+            f"it — drop it, or cite it from the body, the glance or the deck"
         )
 
     # `appendix:` is a declaration, not something the build can verify against
@@ -356,6 +395,22 @@ def _source_coverage(name: str, front: dict, body: str) -> list[str]:
             f"paper has no appendix"
         )
     return problems
+
+
+def figure_urls(body: str) -> dict[str, str]:
+    """`{figure id: url}` from the body's `probe-figure` fences.
+
+    The glance and the deck cite a figure by id and take the URL from here, so
+    one figure keeps one hotlink: the body already declared where it lives, and
+    a second URL on another surface could drift from it with nothing noticing.
+    """
+    out: dict[str, str] = {}
+    for block in re.findall(r"```probe-figure\n(.*?)```", body, re.S):
+        fid = _FIG_ID.search(block)
+        url = re.search(r'"url"\s*:\s*"([^"]+)"', block)
+        if fid and url:
+            out.setdefault(fid.group(1).strip(), url.group(1).strip())
+    return out
 
 
 # ── Neighbours ──────────────────────────────────────────────────────────────
