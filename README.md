@@ -35,7 +35,7 @@ question:
 | Without PROBE | With PROBE |
 |---|---|
 | 😵‍💫 50–100 papers/day → skim titles, remember none → "I'll check arXiv this weekend" → never happens | 😌 3–5 papers/run → scored, tied to your open questions, landing in your repo on a fixed cadence, per pillar |
-| 🫤 Survey mode: "this is interesting" | 😤 Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
+| 🫤 Survey mode: "this is interesting" | 🫡 Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | 😩 Re-discovering already-published solutions | 🧐 Citation graph surfaces the prior art before you waste the week |
 | 🙈 "I'll read that paper properly later" → never does | 🤓 `/analyze` → a Korean re-telling, published to the reading site |
 
