@@ -1,0 +1,37 @@
+name: Check scouting format
+
+# Verify that scouting reports follow the output contract in
+# scouting/AUTHORING.md. The scouting track has no build step — a report is
+# written by the scheduled routine and pushed straight to main — so this gate
+# is the only thing between a contract violation and the reader: an oversized
+# `Papers scanned:` log, a Reproducibility score that contradicts its own
+# rationale, a ★★★ promotion for a paper with no public artifact.
+#
+# Lint-only, no auto-fix: every violation is a judgement the agent (or a human)
+# has to remake — which evidence the score rests on, which detail the
+# provenance line drops.
+
+on:
+  pull_request:
+    paths:
+      - 'scouting/**/*.md'
+      - 'linters/check-scouting-format.py'
+      - '.github/workflows/check-scouting-format.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-scouting-format-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check scouting reports against the output contract
+        run: python3 linters/check-scouting-format.py

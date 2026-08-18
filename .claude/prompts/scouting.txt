@@ -41,7 +41,7 @@ must look like, and this prompt does not restate it:
 
   §1  the output file convention — one Korean `scouting/<PILLAR>/<date>.md`
   §2  the emoji system — one emoji per `##`, the canonical SECTION ORDER
-      (🔑 legend → 🥇🥈🥉🌱 papers → 📊 → 💡 → 🔄 → 🚫 last), `###` plain
+      (🔑 legend → 🥇🥈🥉🌱 papers → 📊 → 🔍 → 💡 → 🔄 → 🚫 last), `###` plain
   §3  the link rule (arXiv → DOI → `[no public link]`) and where a link must
       appear, plus §3-1 the Reference Legend: badge palette, `ref-` anchors,
       first-occurrence-per-`##`-section linking, the badges-ONLY (a) line,
@@ -52,6 +52,14 @@ must look like, and this prompt does not restate it:
   §4-6 – §4-8  the render traps that survive review: a raw `~` striking out
       a line, a bare URL swallowing the following particle, a `**` that never
       closes before a Korean particle
+  §5  the scoring contract — the four-dimension gate (§5-1), Reproducibility
+      scored from quoted evidence (§5-2), the code label and the priority
+      ceiling (§5-3), the 🔍 근접 후보 section (§5-4)
+  §6  the metadata block — the two lines it holds and the 400-character cap
+      on `Papers scanned:`
+  §7  section discipline — 💡 proposals made once and rolled up (§7-1), 🔄 in
+      3–5 bullets with no "not applicable" filler (§7-2), one paper per table
+      row and aliases carrying their id in prose (§7-3)
 
 `scouting/templates/report.md` is the form every report follows — write into
 it exactly.
@@ -144,6 +152,33 @@ THREE PASSES, ranked by signal — 1 above 3 above 2:
    older arXiv date needs a stored README snapshot / commits diff — not
    done here, as it would add per-run state. v1 is the recency feed above.
 
+Then TWO STEPS over what the three passes returned. They rank nothing — they
+decide what carries over and what the Reproducibility score may claim:
+
+**CARRY-FORWARD RE-CHECK.** Read the `## 🔍 근접 후보` table and the
+Reproducibility-dropped rows of `## 🚫` in this pillar's last ~2 weeks of
+reports, and put each of those arXiv ids through the evidence step below.
+This is the ONE place a paper may repeat across reports: a candidate whose
+repository has since gone public is promoted to a full paper section this run
+and the promotion is named in 🔄; one still waiting stays a 🔍 row. It costs a
+single metadata call per carried id, and it is what turns "코드 공개 시 재검토"
+from a sentence into a mechanism.
+
+**REPRODUCIBILITY EVIDENCE.** For every candidate that reaches scoring,
+resolve the code signal from the API. Never infer it, and never defer it to
+"프로젝트 페이지 확인 필요":
+
+  curl --fail -sS "https://export.arxiv.org/api/query?id_list=XXXX.XXXXX"
+
+Read TWO fields of that response:
+  · `<arxiv:comment>` — where authors put "Code: https://github.com/…",
+    "Project page: …", "will be released upon acceptance", and the venue
+    ("Accepted to IROS 2026", "Submitted to RA-L").
+  · `<summary>` — the abstract body, same signals.
+Score Reproducibility on what those two fields literally say (AUTHORING §5-2)
+and carry the matched substring into the report verbatim. The comment field is
+also where the venue on the paper header line comes from.
+
 Never fabricate a citation or an arXiv ID; every link must come from an actual
 API response you received. If any curl call fails (non-zero exit, HTTP error,
 empty body after retries), do NOT silently skip it and do NOT invent results:
@@ -159,26 +194,77 @@ SCORING
 ════════════════════════════════════════════════════════════════════════
 
 Five fixed dimensions, 0–3 each, total /15. Never add, drop or rename one —
-the surfacing gate quantifies over all five, so the set is load-bearing:
+all five are always shown, and four of them gate:
 
   · Relevance       — which P# / D# does it touch?
   · Novelty         — genuinely new, or a delta over tracked work?
-  · Reproducibility — 0 paper-only · 1 partial (code OR data, incomplete) ·
-                      2 code + data public · 3 official repo + data +
-                      hardware/configs, plausibly runnable.
+  · Reproducibility — scored ONLY from the evidence step above, on what the
+                      arXiv comment field / abstract literally says:
+                      0 no repository, page, or release statement anywhere ·
+                      1 project page only, or a promise ("will be released",
+                        "release soon", "upon acceptance") ·
+                      2 a code repository URL is stated ·
+                      3 repository + data/checkpoints + hardware/configs.
   · Methodology     — experimental rigor: baselines, ablations, eval soundness,
                       seeds/variance reported. 0 anecdotal · 1 weak ·
                       2 solid · 3 strong & honest about limits.
   · Sim2Real        — real-robot evidence, or sim-only?
 
-Reproducibility + Methodology are the decision-grade axes (a high-novelty
-paper with neither is a lead, not a result) — weight them with Relevance,
-above the noisier Novelty / Sim2Real reads.
+**The surfacing gate is FOUR dimensions ≥ 2** — Relevance, Novelty,
+Methodology, Sim2Real — not the total (AUTHORING §5-1). A paper carried by two
+strong axes and a zero does not surface; say the run found fewer than three
+and stop. Padding a report to three is the one failure this gate exists to
+prevent.
 
-**The surfacing gate is every dimension ≥ 2**, not the total. A paper carried
-by two strong axes and a zero does not surface; say the run found fewer than
-three and stop. Padding a report to three is the one failure this gate exists
-to prevent.
+Reproducibility is scored and shown but does NOT gate. A preprint posted this
+week has no repository yet, so gating on it measures the paper's age rather
+than its quality, and it stalls whole runs on the one axis time fixes by
+itself. It sets the PRIORITY CEILING instead (AUTHORING §5-3):
+
+  Repro 2–3 -> label `코드 공개`      -> may reach ★★★
+  Repro 1   -> label `코드 공개 예정` -> caps at ★★
+  Repro 0   -> label `코드 미공개`    -> caps at ★★
+
+Rank within a ceiling by Relevance, then the /15 total, then Venue tier.
+Methodology stays the decision-grade axis it always was — a high-novelty paper
+without it is a lead, not a result.
+
+Reproducibility is the axis that goes wrong most often. Two hard rules:
+  · Evaluation on a public benchmark (LIBERO, CALVIN, SIMPLER, DexYCB …) is
+    NOT reproducibility evidence — it says the paper is comparable, not that
+    the artifact is obtainable. Never score >= 2 on benchmark coverage.
+  · A rationale scoring >= 2 while its own text says "코드 공개 미확인"
+    contradicts itself. If the signal is absent, the score is 0 and the bullet
+    says it is absent — the evidence step already looked.
+Every 📊 Reproducibility bullet quotes the substring it scored on.
+
+A paper missing exactly ONE of the four gate dimensions (scores 1, rest >= 2)
+is not dropped — it becomes a `## 🔍 근접 후보` row, re-checked every run by
+the carry-forward step above.
+
+VENUE PRIORITY — the arXiv comment field states acceptance when it exists.
+Record it on the paper header line and use it as the final rank tiebreak:
+
+  Tier 1  CoRL, RSS
+  Tier 2  ICRA, IROS
+  Tier 3  T-RO, RA-L (journal — archival weight)
+  Tier 4  arXiv raw (cs.RO, cs.LG) — noisiest, lowest default weight
+  —       NeurIPS/ICML robotics workshops — read only if pinned author
+
+A paper with no acceptance statement is `arXiv preprint` (Tier 4). Venue never
+gates and never overrides the rubric; it breaks ties only.
+
+CROSS-POLLINATION BUDGET — ONE adjacent-field paper per MONTH (the 🌱
+section). Before adding one, check this pillar's recent reports: if any report
+from the current month already carries a 🌱 section, skip it this run. The
+target field rotates monthly:
+
+  Month A  continual learning / catastrophic forgetting / PEFT (P4 adjacency)
+  Month B  VLA architecture advances broadly (π, OpenVLA, self-improving VLA)
+  Month C  spatial-geometric / multimodal fusion representation (P2 adjacency)
+  Month D  tactile sensing in prosthetics / neuroscience
+
+A 🌱 pick is scored on the same rubric and carries the same labels.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -200,40 +286,68 @@ PROCEDURE
 4. RETRIEVE, three passes, in the order above. Every pass drops a candidate
    whose id is in the already-analyzed set, in this pillar's Tracked
    Literature, or in the last ~2 weeks of reports — the same three filters,
-   applied the same way in each pass. Anti-topics filter what survives.
+   applied the same way in each pass. Anti-topics filter what survives. Then
+   run the carry-forward re-check and the Reproducibility evidence step.
 
 5. SCORE every surviving candidate on the five dimensions, then keep the top
-   3–5 that clear the gate.
+   3–5 that clear the four-dimension gate.
 
 6. WRITE `scouting/<PILLAR>/<run date>.md` directly in Korean, into the
-   template's form. A paper that did not make the cut goes in the 🚫 table
-   with its reason — that table is why the report can be short without
-   looking empty.
+   template's form. A paper one axis short goes in the 🔍 table, one that is
+   out goes in the 🚫 table with its reason — those two tables are why the
+   report can be short without looking empty.
 
-7. SELF-CHECK — answer these honestly before committing:
+7. LINT — the mechanical half of the self-check, before the questions below:
+
+     python3 linters/check-scouting-format.py scouting/<PILLAR>/<run date>.md
+
+   This report goes straight to `main` with no PR, so no reviewer and no CI
+   stands between what you write and what the team reads — the lint has to run
+   HERE or it does not run in time to matter. Every violation names the
+   contract section that governs it (`AUTHORING §6`, `§5-2`, …): read that
+   section, FIX THE REPORT, re-run until it exits 0. Fix the report, never the
+   linter — a failure means the output is off-contract, not that the rule is
+   wrong. Do NOT stage a report the lint still rejects.
+
+   If the linter itself cannot run (interpreter missing, file unreadable), say
+   so verbatim in the commit body and continue — a report that reached the team
+   beats one blocked on a broken checker. Never skip the step silently.
+
+8. SELF-CHECK — the judgement half. The lint has already checked the
+   structure; these are the questions it cannot answer. Answer them honestly
+   before committing:
      - Does every arXiv link resolve, and did every id come from a response
        you actually received? (a fabricated id is the one unrecoverable
        failure of this mode)
      - Is every surfaced paper absent from the already-analyzed set, from
-       Tracked Literature, and from the last ~2 weeks of reports?
-     - Does every surfaced paper clear every dimension ≥ 2 — and if fewer
-       than three do, does the report SAY so instead of padding?
-     - Are all five score bullets present for each paper, with the total on
-       the bold head? (AUTHORING §4-5)
+       Tracked Literature, and from the last ~2 weeks of reports — except a
+       🔍 candidate the carry-forward step legitimately promoted?
+     - Does every surfaced paper clear the four gate dimensions ≥ 2 — and if
+       fewer than three do, does the report SAY so instead of padding?
+     - Does every Reproducibility bullet quote the evidence string it scored
+       on, with no score resting on benchmark coverage? (AUTHORING §5-2)
+     - Is each paper's code label the one its Reproducibility score implies,
+       and does no ★★★ sit on a paper without a public artifact? (§5-3)
+     - Was every 🔍 row and Reproducibility-dropped 🚫 row from the last ~2
+       weeks actually re-checked this run, not just copied forward?
      - Is each (a) line badges only — no Korean gloss, no body bullets — and
        are (b)–(d) free of `D#` / `deferred` / `v1` / config-key names?
        (AUTHORING §3-1)
      - Does the 🔑 legend list exactly the codes the body cites — no more —
        with meanings derived from `context/<PILLAR>.md` rather than invented?
-     - Is every curl failure disclosed verbatim in the `Papers scanned:`
-       line rather than quietly dropped?
+     - Is every curl failure that was STILL failing at the end disclosed
+       verbatim in the `Papers scanned:` line — and is a retry that
+       eventually succeeded left out of it entirely? (AUTHORING §6)
+     - Does 💡 roll up standing proposals into the 미결 제안 line instead of
+       re-arguing them, and does 🔄 omit every item that does not apply this
+       run? (AUTHORING §7-1, §7-2)
      - Is the body 개조식 (명사형 종결) throughout, with no raw `~`, no bare
        URL before a particle, and no `**` closing after a paren? (AUTHORING
        §4-4, §4-6 – §4-8)
      - Does any context change you want live in 💡 Context Suggestions —
        and is `context/<PILLAR>.md` itself untouched?
 
-8. COMMIT AND PUSH — per GIT below. Both pushes, every run.
+9. COMMIT AND PUSH — per GIT below. Both pushes, every run.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -243,7 +357,6 @@ GIT
 The scheduled run must persist its output by pushing the single report file
 directly to `main`. No PR is created — neither by you nor by the harness.
 
-  TODAY=$(TZ=Asia/Seoul date +%Y-%m-%d)
   git add scouting/<PILLAR>/${TODAY}.md
   git commit -m "scout: <PILLAR> report ${TODAY}"
   git push origin HEAD:main
