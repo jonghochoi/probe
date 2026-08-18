@@ -20,6 +20,11 @@ the arXiv original**, and they live in one `analysis/<id>.md`. The two short
 surfaces are not summaries of the long one — see G1 and S1, which is the rule
 the other two most often violate.
 
+**All three are required.** A file carrying only the body is an incomplete
+rewrite, not a shorter one: the page would publish two empty tabs. Bringing an
+existing rewrite up to this contract is a `/analyze <id> --refresh` run, which
+re-reads the original — the one thing a from-the-body shortcut cannot do.
+
 **The output is an HTML page.** A rewrite is Markdown only as a source
 language: what a reader gets is `site/build-site.py`'s output, rendered by
 `markdown-it-py` plus this repo's own extensions. Every rule below is judged
