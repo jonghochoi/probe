@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛸 PROBE · Research Scout for Dexterous Manipulation
+# 🛸 PROBE · Research Scout
 
 **Stop drowning in arXiv. Start changing what you train next week.**
 
