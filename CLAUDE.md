@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-PROBE is a research-scouting agent for hand-centric dexterous manipulation. A
-human owns the static research context in `context/`; two agent tracks read it
-and write decision-grade Korean output — a scheduled per-pillar routine into
+PROBE is a research-scouting agent for dexterous manipulation. A human owns
+the static research context in `context/`; two agent tracks read it and
+write decision-grade Korean output — a scheduled per-pillar routine into
 `scouting/`, and on-demand `/analyze` into `analysis/`, which the reading site
 publishes. See `README.md` for the motivation and the pipeline; this file is
 the contributor-facing reference for **commit hygiene and document style** so
