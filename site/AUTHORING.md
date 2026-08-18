@@ -696,7 +696,7 @@ arrive before the reason they matter.
     ```probe-hub
     {"thesis": "<한 문장 — 논문 제목이 아니라 우리의 테제>",
      "line": "<무엇을 어떻게 바꾸는가 — 한 줄>",
-     "figure": "<figure id>",
+     "figure": "<figure id>", "caption": "<한 줄 캡션>",
      "facts": [{"k": "<지표 이름>", "v": "<값 · 단위>"},
                {"k": "<지표 이름>", "v": "<값 · 단위>"}]}
     ```
@@ -706,7 +706,10 @@ arrive before the reason they matter.
 - `facts` — **2 to 4**, and each must be a number the paper itself states. Past
   four they stop being headlines and become a table.
 - `figure` is optional and, when present, is the figure a reader would keep if
-  they could keep only one. Its id goes in `figures:` like any other (R6).
+  they could keep only one. **It is cited by id, never by URL** — the body's
+  own `probe-figure` fence already declared where that figure lives, and a
+  second URL here could drift from it with nothing noticing. Its id goes in
+  `figures:` like any other (R6).
 
 ### 4-4. G4 — The narrative
 
@@ -715,7 +718,7 @@ report. The body argues; this talks.
 
 | | |
 |---|---|
-| Length | **8–10 연**, roughly 900–1,100 printed characters (about 1 분 40 초 읽기) |
+| Length | **8–10 연**, 900–1,100 printed characters (about 1 분 40 초 읽기). The build rejects outside **8–10 연 / 750–1,350 자** — "roughly" is the author's business, "a paragraph" and "the body again" are the build's |
 | Shape | stanzas of 2–4 sentences, one move per stanza: 무슨 일 → 그 결과 → 이유 |
 | Register | 폴라이트-캐주얼 종결 (`~요` / `~ㅂ니다`), 괄호 방백 허용, 감탄은 진짜일 때만 |
 | Closing | the last stanza is a **한 줄 토** built from the paper's own stated limits |
@@ -837,9 +840,9 @@ Per-kind keys:
 | `kind` | Extra keys | Use |
 |---|---|---|
 | `cover` | — | title, authors, id. No chapter |
-| `figure` | `figure`: `<figure id>` | the paper's own figure, full bleed, with a one-line claim over it |
+| `figure` | `figure`: `<figure id>`, `url`: `<absolute url>`, `caption` | the paper's own figure, full bleed, with a one-line claim over it |
 | `diagram` | `diagram`: {…} (§5-5), `why` | what the paper states only as a table, an equation or prose |
-| `film` | `figure`, `film`: {…} (§5-7) | a filmstrip figure played at its stated frame interval |
+| `film` | `figure`, `url`, `film`: {…} (§5-7) | a filmstrip figure played at its stated frame interval |
 | `text` | `body`: `["<줄>"]` or `{"cols": [["<줄>"], ["<줄>"]]}` | contrasts and the closing slide |
 
 Any slide may carry `"steps": <2–4>` (§5-6).
@@ -864,15 +867,14 @@ Every drawn diagram is a claim we own and have to verify; five is the point
 where a reviewer can still check them all against the original.
 
 Authors supply **data, not drawings**. Hand-written SVG is not accepted (R12 —
-visual rules belong to the site), and neither is an image file. The build draws
-one of five shapes:
+visual rules belong to the site), and neither is an image file. The data is the
+slide's own `diagram` key — one fence per slide holds, so a diagram never
+drifts from the claim above it:
 
-    ```probe-diagram
-    {"kind": "bars|timeline|matrix|lanes|slope",
-     "title": "<이 그림이 말하는 것>",
-     "unit": "<단위>",
-     "note": "<축·색이 무엇인지 한 줄>"}
-    ```
+    "diagram": {"kind": "bars|timeline|matrix|lanes|slope",
+                "title": "<이 그림이 말하는 것>",
+                "unit": "<단위>",
+                "note": "<축·색이 무엇인지 한 줄>"}
 
 | `kind` | Shape | Extra keys |
 |---|---|---|
@@ -900,10 +902,15 @@ two shapes qualify:
 - a **comparison** whose halves are spoken in order (먼저 A, 그다음 B);
 - **numbers that accumulate** into a conclusion.
 
-A photograph, a single figure, or a list of parallel items does not qualify —
-they are taken in at once, and a reveal there only makes the presenter
-remember a click count. The reveal order must match `note`, or the presenter
-is reading one script while the screen runs another.
+A photograph or a single figure does not qualify — they are taken in at once,
+and a reveal there only makes the presenter remember a click count.
+
+**The reveal unit is the component's own**, and `steps` must equal it: a
+diagram's groups (the 기존 bars and then the 이후 bars; one panel and then the
+other; one lane and then the other), a text slide's columns or lines. A count
+that does not match lands a reveal mid-thought, so **the build rejects it**.
+The reveal order must match `note`, or the presenter is reading one script
+while the screen runs another.
 
 ### 5-7. S7 — Motion comes from the original or not at all
 
@@ -911,10 +918,16 @@ A rollout filmstrip printed as one figure can be **played** instead of shown,
 which is the strongest thirty seconds a deck gets. It is allowed under three
 conditions, all required:
 
-    "film": {"frames": <n>, "interval_ms": <n>, "slow": <2–4>,
-             "rows": ["<행 라벨>", "<행 라벨>"]}
+    "film": {"cols": <프레임 수>, "rows": <원문 그림의 행 수>,
+             "box": [<x>, <y>, <w>, <h>],
+             "interval_ms": <원문이 밝힌 간격>, "slow": <2–4>,
+             "tracks": [{"row": <행 번호>, "label": "<라벨>"},
+                        {"row": <행 번호>, "label": "<라벨>", "us": true}]}
 
 1. The figure **is** a filmstrip — evenly spaced frames of one continuous take.
+   `box` is where that strip sits inside the figure, in fractions, when the
+   published figure holds other panels beside it; `tracks` picks the one or two
+   rows played side by side.
 2. The **original states the frame interval**; `interval_ms` copies it. Without
    a stated interval the playback speed would be ours, and a speed we invented
    is a claim about the system's timing.
@@ -984,7 +997,8 @@ asked to discount:
 | A `D#`, a `context/` path, or an act-4 opinion anywhere in `::: glance` or `::: deck` (G7, S2) | `site/builder/glance.py`, `site/builder/deck.py` |
 | Slide count band, required `chapter` / `note` / `qa`, the fixed chapter vocabulary and their contiguity (S3, S8, S9) | `site/builder/deck.py` |
 | **Five drawn diagrams per deck** (S5), the required `why` on every one (S4), and the `steps` ceiling of four slides (S6) | `site/builder/deck.py` |
-| `probe-hub` / `probe-rail` / `probe-act` / `probe-slide` / `probe-diagram` schemas, including the five diagram kinds and their row shapes (§4-3, §4-5, §4-6, §5-3, §5-5) | `site/builder/mdext/probefence.py` |
+| `probe-hub` / `probe-rail` / `probe-act` / `probe-slide` payload shapes (§4-3, §4-5, §4-6, §5-3) | `site/builder/glance.py`, `site/builder/deck.py` |
+| The five diagram kinds and their row shapes, and `steps` matching a component's own reveal groups (§5-5, S6) | `site/builder/diagrams.py`, `site/builder/deck.py` |
 | Drawing the five diagram kinds from data — the author supplies no geometry and no colour (S5) | `site/builder/diagrams.py` |
 | `film` accepted only with a stated `interval_ms` and `slow` in 2–4, frames cut from the hotlinked original (S7) | `site/builder/diagrams.py` |
 | `figures:` ↔ every `probe-figure`, `probe-hub`, `probe-act` and `probe-slide` figure id, across all three surfaces (R6) | `site/builder/corpus.py` |
