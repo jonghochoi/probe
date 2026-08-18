@@ -294,7 +294,7 @@ class DocRenderer:
             return self._probe_fence(info, token.content)
         if info in probefence.SURFACE_FENCES:
             message = (
-                f"```{info} belongs to the 한눈에 surface — it is inside "
+                f"```{info} belongs to the 요약 surface — it is inside "
                 f"the article, so its `::: glance` container is "
                 f"missing or closed early"
             )

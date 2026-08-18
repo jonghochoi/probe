@@ -330,10 +330,12 @@ def not_found_page() -> str:
     )
 
 
-# The two surfaces, in the order a reader meets them. `en` is printed beside
-# the Korean label because the tab strip is also how a contributor finds the
-# rule set: 상세 is §1–§3 and 한눈에 is §4.
-TABS = (("full", "상세", "FULL"), ("glance", "한눈에", "GLANCE"))
+# The two surfaces, in the order a reader meets them — the one-screen 요약
+# first, because a reader arrives at a paper page not yet knowing whether the
+# paper is worth the long read, and that is the question the short surface
+# answers. `en` is printed beside the Korean label because the tab strip is
+# also how a contributor finds the rule set: 요약 is §4 and 상세 is §1–§3.
+TABS = (("glance", "요약", "GLANCE"), ("full", "상세", "FULL"))
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
@@ -361,7 +363,10 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
     body = f"""{_header(paper)}
 {_tabstrip()}
-<div class="panel" id="p-full" role="tabpanel" aria-labelledby="t-full">
+<div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
+  {glance_html or _missing("요약")}
+</div>
+<div class="panel" id="p-full" role="tabpanel" aria-labelledby="t-full" hidden>
   <div class="shell">
     <aside class="toc">{_toc(renderer.toc)}</aside>
     <main class="article">
@@ -369,9 +374,6 @@ def paper_page(paper: Paper, katex, decisions: dict,
       {_related(neighbours or [])}
     </main>
   </div>
-</div>
-<div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance" hidden>
-  {glance_html or _missing("한눈에")}
 </div>
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """

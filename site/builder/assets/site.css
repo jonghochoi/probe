@@ -18,7 +18,7 @@
   --amber:       #c47f16;
   --red:         #d64545;
   --violet:      #7c5cd9;   /* co-ctx only — 논문 밖 맥락 */
-  /* The four act cards on 한눈에, cool to warm in the order the acts run, so
+  /* The four act cards on 요약, cool to warm in the order the acts run, so
      the row reads as a sequence rather than four categories. Deliberately not
      the callout roles' colours: a reader who learned red = 우리와 충돌 on 상세
      should not meet a red card that means 문제. */
@@ -1017,7 +1017,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .tab[aria-selected="true"] { color: var(--orange-deep); border-bottom-color: var(--orange); }
 .panel.wide { max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.25rem 5rem; }
 
-/* ── 한눈에 ────────────────────────────────────────────────────────────── */
+/* ── 요약 ─────────────────────────────────────────────────────────────── */
 .g-hub {
   background: var(--surface); border: 1px solid var(--border);
   border-top: 3px solid var(--orange); border-radius: var(--radius);
