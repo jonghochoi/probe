@@ -1,17 +1,32 @@
 name: Check scouting format
 
 # Verify that scouting reports follow the output contract in
-# scouting/AUTHORING.md. The scouting track has no build step — a report is
-# written by the scheduled routine and pushed straight to main — so this gate
-# is the only thing between a contract violation and the reader: an oversized
-# `Papers scanned:` log, a Reproducibility score that contradicts its own
-# rationale, a ★★★ promotion for a paper with no public artifact.
+# scouting/AUTHORING.md — an oversized `Papers scanned:` log, a Reproducibility
+# score that contradicts its own rationale, a ★★★ promotion for a paper with no
+# public artifact.
+#
+# The scouting track has no build step and no PR: the scheduled routine pushes
+# each report straight to `main`. A `pull_request` trigger alone would therefore
+# never see a scouting report at all, so this workflow fires on BOTH events:
+#
+#   push (main)     — the path scouting reports actually take. Post-hoc, so it
+#                     reports rather than blocks; the blocking gate is the
+#                     pre-commit self-check the routine runs itself
+#                     (.claude/prompts/scouting.txt → SELF-CHECK).
+#   pull_request    — a human editing reports, the linter, or the contract.
 #
 # Lint-only, no auto-fix: every violation is a judgement the agent (or a human)
 # has to remake — which evidence the score rests on, which detail the
 # provenance line drops.
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scouting/**/*.md'
+      - 'linters/check-scouting-format.py'
+      - '.github/workflows/check-scouting-format.yml'
   pull_request:
     paths:
       - 'scouting/**/*.md'
@@ -21,8 +36,10 @@ on:
 permissions:
   contents: read
 
+# `head_ref` is empty on push events — fall back to the full ref so pushes
+# group per branch instead of colliding on one empty key.
 concurrency:
-  group: check-scouting-format-${{ github.head_ref }}
+  group: check-scouting-format-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
