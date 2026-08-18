@@ -37,11 +37,11 @@ TIMEOUT = 30
 # `<section id="S3" class="ltx_section">` → level 1; SS → 2; SSS → 3.
 #
 # `ltx_appendix` sits at level 1 with the numbered sections: LaTeXML gives an
-# appendix its own top-level `<section>` (`A4`), and leaving it out of this map
-# did not merely skip it — the appendix body landed on whatever section was
-# still open (usually nothing, so it was dropped outright) and its `<h2>` title
-# overwrote the last section appended. That silently cost every rewrite the
-# whole appendix, limitations sections included.
+# appendix its own top-level `<section>` (`A4`), and an appendix missing from
+# this map does not merely go unmapped — its body lands on whatever section is
+# still open (usually nothing, so it is dropped outright) and its `<h2>` title
+# overwrites the last section appended. That costs a rewrite the whole
+# appendix, limitations sections included, and nothing warns.
 #
 # `ltx_paragraph` is `\paragraph{Task.}` — the level the appendices of this
 # corpus are actually organised at, so it is a heading here rather than a bold

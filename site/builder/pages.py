@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 
 from . import components as c
-from . import corpus, deck as deck_mod, glance as glance_mod
+from . import corpus, glance as glance_mod
 from .corpus import PILLAR_NAMES, PILLAR_ORDER, UNCLASSIFIED, Paper
 from .render import DocRenderer
 
@@ -329,21 +329,21 @@ def not_found_page() -> str:
     )
 
 
-# The three surfaces, in the order a reader meets them. `en` is printed beside
+# The two surfaces, in the order a reader meets them. `en` is printed beside
 # the Korean label because the tab strip is also how a contributor finds the
-# rule set: 상세 is §1–§3, 한눈에 is §4, 발표 is §5.
-TABS = (("full", "상세", "FULL"), ("glance", "한눈에", "GLANCE"), ("deck", "발표", "DECK"))
+# rule set: 상세 is §1–§3 and 한눈에 is §4.
+TABS = (("full", "상세", "FULL"), ("glance", "한눈에", "GLANCE"))
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
                problems: list[str] | None = None,
                neighbours: list[Paper] | None = None) -> str:
-    """One paper's rewrite — three tabs cut from one source file.
+    """One paper's rewrite — two tabs cut from one source file.
 
-    The body, the glance and the deck are three readings of the same paper for
-    three different sits, so they are three panels of one page rather than
-    three pages: the header, the resource links and the memo panel are the
-    same paper's, and a reader switching surface has not left the paper.
+    The body and the glance are two readings of the same paper for two
+    different sits, so they are two panels of one page rather than two pages:
+    the header, the resource links and the memo panel are the same paper's,
+    and a reader switching surface has not left the paper.
     """
     renderer = DocRenderer(katex, decisions=decisions)
     renderer.lead_html = _lead(paper, renderer)
@@ -351,10 +351,8 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
     urls = corpus.figure_urls(paper.body)
     glance_html = glance_mod.render(paper.glance, renderer, katex, urls)
-    deck_html = deck_mod.render(paper.deck, renderer)
-    for source, out in ((paper.glance, glance_html), (paper.deck, deck_html)):
-        if out:
-            renderer.check_text(paper.body, out)
+    if glance_html:
+        renderer.check_text(paper.body, glance_html)
     if problems is not None:
         problems.extend(
             f"analysis/{paper.stem}.md: {p}" for p in renderer.problems
@@ -374,9 +372,6 @@ def paper_page(paper: Paper, katex, decisions: dict,
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance" hidden>
   {glance_html or _missing("한눈에")}
 </div>
-<div class="panel wide" id="p-deck" role="tabpanel" aria-labelledby="t-deck" hidden>
-  {deck_html or _missing("발표")}
-</div>
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
     return c.page(
@@ -384,14 +379,14 @@ def paper_page(paper: Paper, katex, decisions: dict,
         description=paper.preview,
         body=body,
         depth=2,
-        scripts=["paper.js", "deck.js", "memo.js"],
+        scripts=["paper.js", "memo.js"],
     )
 
 
 def _tabstrip() -> str:
-    """The three surfaces. Server-rendered and `hidden`-toggled, so the page is
-    readable with JavaScript off — the first panel stays open and the other two
-    are reachable by their anchors."""
+    """The two surfaces. Server-rendered and `hidden`-toggled, so the page is
+    readable with JavaScript off — the first panel stays open and the second is
+    reachable by its anchor."""
     buttons = "".join(
         f'<button type="button" class="tab" role="tab" id="t-{key}" '
         f'aria-controls="p-{key}" aria-selected="{"true" if i == 0 else "false"}" '

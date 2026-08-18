@@ -61,7 +61,7 @@ def _check_intact(before: str, after: str) -> list[str]:
 
 
 ASSET_FILES = ("site.css", "index.css", "theme.js", "paper.js", "memo.js",
-               "filter.js", "hub.js", "deck.js")
+               "filter.js", "hub.js")
 
 
 def asset_text() -> str:

@@ -1,6 +1,7 @@
-/* Paper page: term anchors, quizzes, TOC scroll-spy.
+/* Paper page: the tab strip, term anchors, quizzes, TOC scroll-spy.
    No framework, no bundler. Without this file the page is still fully
-   readable — term definitions render expanded and quizzes show their options.
+   readable — the first tab is open and the other is reachable by its anchor,
+   term definitions render expanded and quizzes show their options.
    (The theme toggle lives in theme.js — every page has the nav button.) */
 
 (function () {
@@ -65,6 +66,31 @@
       });
     }, { rootMargin: "-12% 0px -75% 0px" });
     heads.forEach(function (h) { spy.observe(h); });
+  }
+
+  /* ── The two surfaces: the tab strip ──────────────────────────────── */
+  var tabs = [].slice.call(document.querySelectorAll(".tabs .tab"));
+
+  function showSurface(key, push) {
+    tabs.forEach(function (tab) {
+      var on = tab.dataset.tab === key;
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+      var panel = document.getElementById(tab.getAttribute("aria-controls"));
+      if (panel) panel.hidden = !on;
+    });
+    // The surface belongs in the URL: a link to one surface of a paper is a
+    // thing people send each other, and the back button should undo a switch.
+    if (push && history.replaceState) {
+      history.replaceState(null, "", key === "full" ? location.pathname : "#" + key);
+    }
+  }
+
+  if (tabs.length) {
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () { showSurface(tab.dataset.tab, true); });
+    });
+    var hash = (location.hash || "").slice(1);
+    showSurface(hash === "glance" ? hash : "full", false);
   }
 
   spyToc();
