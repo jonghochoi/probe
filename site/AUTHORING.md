@@ -658,7 +658,7 @@ rendering:
 
 | Rule | Enforced by |
 |---|---|
-| every `D#` cited exists in the Decision Log | `scripts/check-decision-refs.py` |
+| every `D#` cited exists in the Decision Log | `linters/check-decision-refs.py` |
 
 A `D#` that does not resolve is not a render failure — it silently loses its
 tooltip and prints as plain text, so the build cannot see it as wrong.
@@ -667,10 +667,8 @@ Verify before reporting a rewrite done:
 
 ```bash
 python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
-python3 scripts/check-decision-refs.py
+python3 linters/check-decision-refs.py
 ```
 
-`--strict` must exit 0. `scripts/check-render-tilde.py` is **not** part of this
-track — it enforces github.com's Markdown rendering for `scouting/` and does not
-scan `analysis/`. Everything in §1–§3 that is not in the tables above is
+`--strict` must exit 0. Everything in §1–§3 that is not in the tables above is
 enforced by review, not by code, which is why the prompt's self-check exists.

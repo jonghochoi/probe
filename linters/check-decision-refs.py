@@ -21,7 +21,7 @@ matches immediately preceded by figure/table/appendix designators (`Fig. D2`,
 citations.
 
 Usage (repo root):
-    python3 scripts/check-decision-refs.py [PATH ...]
+    python3 linters/check-decision-refs.py [PATH ...]
 
 No PATH -> scan the default set: `analysis/*.md` and `scouting/P*/*.md`
 (templates excluded — they carry `D<a>`-style placeholders and illustrative

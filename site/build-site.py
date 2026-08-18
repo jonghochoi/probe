@@ -29,10 +29,6 @@ _TEXT_ONLY = re.compile(r"<(script|style)[^>]*>.*?</\1>|<[^>]+>", re.S)
 
 _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
-# `probe_refs` stays in `scripts/`: the Decision-Log parser has two consumers
-# and the other one (`check-decision-refs.py`) lints the whole repo, so it must
-# not have to import out of the site folder.
-sys.path.insert(1, str(_HERE.parent / "scripts"))
 
 try:
     import markdown_it  # noqa: F401
@@ -44,8 +40,8 @@ except ImportError:
     raise SystemExit(2)
 
 from builder import assets_out, corpus, pages
+from builder.decisions import harvest_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
-from probe_refs import harvest_decisions
 
 
 def build(args) -> int:

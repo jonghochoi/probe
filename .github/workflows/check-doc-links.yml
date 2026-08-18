@@ -6,8 +6,12 @@ name: Check doc links
 # the CLAUDE.md "When adding a new top-level doc" checklist, catching a dangling
 # path reference (a moved/renamed file, an orphaned doc) before it lands on main.
 #
-# Lint-only (no auto-fix / bot commit): a broken path reference needs human
-# judgment to repair, unlike the mechanical math-formatting fixes.
+# Lint-only, no auto-fix: repairing a broken path reference means deciding
+# where the file went, which only a human knows.
+#
+# The trigger mirrors the linter's default scan set. The prompts under
+# `.claude/` are not in it — they carry illustrative example paths by design —
+# so a prompt edit does not fire this gate.
 
 on:
   pull_request:
@@ -16,8 +20,7 @@ on:
       - 'README.md'
       - 'SETUP.md'
       - 'context/**'
-      - '.claude/**'
-      - 'scripts/check-doc-links.py'
+      - 'linters/check-doc-links.py'
       - '.github/workflows/check-doc-links.yml'
 
 permissions:
@@ -36,4 +39,4 @@ jobs:
         with:
           python-version: '3.x'
       - name: Check doc path references resolve
-        run: python3 scripts/check-doc-links.py
+        run: python3 linters/check-doc-links.py

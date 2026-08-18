@@ -7,8 +7,8 @@ name: Check decision refs
 # provenance break — this gate catches it PR-time. The analysis_legacy/ corpus
 # is out of scope (see the linter's docstring).
 #
-# Lint-only (no auto-fix / bot commit): a wrong decision tie needs human
-# judgment (was the D# wrong, or the P#?), unlike mechanical math fixes.
+# Lint-only, no auto-fix: a wrong decision tie needs human judgment — was the
+# D# wrong, or the P#?
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ on:
       - 'analysis/*.md'
       - 'scouting/**/*.md'
       - 'context/**'
-      - 'scripts/check-decision-refs.py'
+      - 'linters/check-decision-refs.py'
       - '.github/workflows/check-decision-refs.yml'
 
 permissions:
@@ -35,4 +35,4 @@ jobs:
         with:
           python-version: '3.x'
       - name: Check decision citations resolve
-        run: python3 scripts/check-decision-refs.py
+        run: python3 linters/check-decision-refs.py

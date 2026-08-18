@@ -22,10 +22,12 @@ the agent writes into `analysis/` and reads from here.
 | `builder/arxiv.py` | LaTeXML extraction of an arXiv original. Serves the prompt rather than the build: `python3 -m builder.arxiv <id>` from this folder prints the section tree — `── 본문 ──` and `── 부록 ──` separately, since R15 makes the appendix a checklist — plus figure ids and URLs, marking the inline-SVG figures that genuinely have no file to hotlink. Raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |
 | `builder/fonts.py`, `assets/` | Webfont subsetting and the site's CSS/JS. Visual rules live here, not in a rewrite (R12) |
+| `builder/decisions.py` | The `context/P*.md` §3 Decision-Log parser, so a `D<n>` citation in a rewrite renders as a tooltip carrying the decision's title |
 | `requirements.txt` | Build-time Python dependencies |
 
-`scripts/probe_refs.py` stays under `scripts/` — the Decision-Log parser is
-shared with `check-decision-refs.py`, which lints the whole repo.
+`linters/check-decision-refs.py` lints the same citations across the whole repo
+and parses the log itself — it must run without the site's build dependencies,
+so the two parsers stay separate.
 
 ## Building locally
 

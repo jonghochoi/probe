@@ -25,10 +25,9 @@ for **commit hygiene and document style** so the repo stays consistent.
 | `SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
 | `assets/` | human | Images the root `README.md` embeds, and nothing else — the reading-site banner as a light/dark pair (`reading-site.svg`, `reading-site-dark.svg`) selected by `<picture>` + `prefers-color-scheme`. Hand-authored SVG: text is live `<text>`, so the fonts are stacks (`ui-monospace`, `system-ui`) that resolve on the reader's machine and the layout is left-aligned to tolerate the substitution. The site's own images live under `site/builder/assets/` and are unrelated |
 | `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `analysis/<id>.md`: front matter, body rules R1–R15, render traps, what the build enforces), `build-site.py` + `builder/` (the static-site generator: a landing briefing, a memo hub, plus one page per rewrite), and `requirements.txt`. Nothing but `analysis/` is published and `analysis_legacy/` is not read at all. `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
-| `scripts/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
-| `scripts/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
-| `scripts/check-render-tilde.py` | human | Linter reporting prose tildes that pair into a GitHub strikethrough across `scouting/` outputs (GFM accepts a **single** `~` as a strikethrough delimiter, so two raw tildes in one inline context silently strike out everything between them on github.com). Flags only the pairing condition — a lone tilde renders literally; code spans, display math (LaTeX `~` = non-breaking space), and HTML comments are excluded. Rule + substitution table: `scouting/AUTHORING.md` §4-6; the rewrite track is exempt (`site/AUTHORING.md` §3-4). Local use: `python3 scripts/check-render-tilde.py` |
-| `scripts/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 scripts/check-commit-style.py -` |
+| `linters/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `SETUP.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
+| `linters/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
+| `linters/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Per-pillar content (Decision Log, Tracked Literature,
@@ -289,7 +288,7 @@ becomes a silent orphan. Walk this list every time:
       referenced path must resolve.
 - [ ] **Run a final `grep -rn '<new-doc-basename>' .`** — at least one
       inbound link must exist. Zero inbound links = orphan.
-- [ ] **Run `python3 scripts/check-doc-links.py`** — every local path
+- [ ] **Run `python3 linters/check-doc-links.py`** — every local path
       reference in `CLAUDE.md` / `README.md` / `SETUP.md` must resolve. This
       lint is wired into CI (`.github/workflows/check-doc-links.yml`) and is
       the automated backstop for the dangling-path half of this checklist.
@@ -319,10 +318,10 @@ and the lints:
       per `SETUP.md`).
 - [ ] **Extend the pillar-keyed tooling**: `PILLAR_NAMES` / `PILLAR_ORDER` /
       `PILLAR_RE` in `site/builder/corpus.py` (an out-of-range `P#` lands
-      the paper in 미분류 on the site), the §3-1 palette table in
-      `scouting/AUTHORING.md` (the palette's source of truth), and the default
-      scan set in `scripts/check-doc-links.py`.
-- [ ] **Run `python3 scripts/check-doc-links.py`** — the new file's path
+      the paper in 미분류 on the site) and the §3-1 palette table in
+      `scouting/AUTHORING.md` (the palette's source of truth). The lints pick
+      the new pillar up on their own — both glob `context/P*.md`.
+- [ ] **Run `python3 linters/check-doc-links.py`** — the new file's path
       references (and every doc now referencing it) must resolve.
 
 ## Where to read more

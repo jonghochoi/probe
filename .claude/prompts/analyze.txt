@@ -127,7 +127,7 @@ PROCEDURE
 
 7. VERIFY before reporting done:
      python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
-     python3 scripts/check-decision-refs.py
+     python3 linters/check-decision-refs.py
 
    The build is the gate: front matter, fences, quiz shape, the heading
    spine, term anchors, and every construct that would publish as literal
@@ -138,10 +138,6 @@ PROCEDURE
    formatting check — it verifies each `D#` you cite exists. A citation that
    does not resolve is dropped to plain text on the page, tooltip and all,
    which the build has no way to notice.
-
-   Do NOT run `check-render-tilde.py` here. It enforces github.com's markdown
-   rendering for the `scouting/` track; this track is HTML, its parser differs,
-   and the lint does not scan `analysis/`.
 
 8. SELF-CHECK — answer these honestly before committing:
      - Could a reader who never opens the paper explain the mechanism?
