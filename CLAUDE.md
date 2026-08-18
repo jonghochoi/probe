@@ -5,36 +5,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this repo is
 
 PROBE is a research-scouting agent for hand-centric dexterous manipulation. A
-human owns the static research context; a scheduled Claude routine reads it and
-writes decision-grade reports. See `README.md` for the full motivation,
-pipeline, and operations guide; this file is the contributor-facing reference
-for **commit hygiene and document style** so the repo stays consistent.
+human owns the static research context in `context/`; two agent tracks read it
+and write decision-grade Korean output — a scheduled per-pillar routine into
+`scouting/`, and on-demand `/analyze` into `analysis/`, which the reading site
+publishes. See `README.md` for the motivation and the pipeline; this file is
+the contributor-facing reference for **commit hygiene and document style** so
+the repo stays consistent.
 
 ## Repository map
 
 | Path | Owner | Role |
 |---|---|---|
+| `README.md` | human | Project front door — motivation, the pipeline, and which track to trigger for what. It links the headline docs in prose; **this table is the full path index** |
+| `SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; on-demand `/analyze` needs no routine setup |
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination |
-| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). The pipeline reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
-| `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence) |
-| `scouting/AUTHORING.md` | human | **Single source of truth for the `scouting/` output format** (emoji, links, Korean authoring) — the sibling of `site/AUTHORING.md`, each contract sitting with the track it governs. The reading-site track is NOT covered: `analysis/<id>.md` is governed by `site/AUTHORING.md`. `scouting/templates/` holds the report skeleton it describes |
-| `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat, no per-paper folder), from `/analyze`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter (`analysis_of`, title, authors, pillars, tags, links, summary). Contract: `site/AUTHORING.md` — not `scouting/AUTHORING.md`, which governs `scouting/` only |
+| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics, and Curated Lists (identical §1–§6 skeleton). A run reads one `P#.md`. Six pillars P0–P5 (P0 data, P1–P4 architecture core, P5 World Model). Decision allocation: P1 D1–D7, P2 D8–D12, P3 D13–D18, P4 D19–D23, P0 D24–D27, P5 D28–D32. New pillar: copy `context/_TEMPLATE.md` and walk "When adding a new pillar" below |
+| `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence). `scouting/templates/report.md` is the skeleton they fill |
+| `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — emoji system, the Reference Legend and its pillar palette (§3-1), link rules, Korean authoring principles |
+| `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat, no per-paper folder), from `/analyze`. A Korean re-telling written from the paper's **arXiv HTML original**, carrying its own metadata in front matter. Contract: `site/AUTHORING.md`, never `scouting/AUTHORING.md` |
+| `site/AUTHORING.md` | human | Format contract for `analysis/<id>.md` — front matter (§1), body rules R1–R15 (§2), what publishes as literal text including the KaTeX math forms (§3), enforcement (§4) |
 | `analysis_legacy/` | frozen | Legacy corpus — one `<arxiv-id>/analysis.md` per paper, in a format nothing else in the repo uses. **Read by nothing** (prompt, site build and every lint skip it) and never regenerated; kept until those papers are re-written under `analysis/`. Its `README.md` is a static index of what the folder holds |
-| `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) |
-| `.claude/commands/**` | human | Slash-command wrappers |
-| `SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; the on-demand commands need no routine setup |
-| `assets/` | human | Images the root `README.md` embeds, and nothing else — the reading-site banner as a light/dark pair (`reading-site.svg`, `reading-site-dark.svg`) selected by `<picture>` + `prefers-color-scheme`. Hand-authored SVG: text is live `<text>`, so the fonts are stacks (`ui-monospace`, `system-ui`) that resolve on the reader's machine and the layout is left-aligned to tolerate the substitution. The site's own images live under `site/builder/assets/` and are unrelated |
-| `site/` | human | **Everything the reading site is made of** — `AUTHORING.md` (the format contract for `analysis/<id>.md`: front matter, body rules R1–R15, render traps, what the build enforces), `build-site.py` + `builder/` (the static-site generator: a landing briefing, a memo hub, plus one page per rewrite), and `requirements.txt`. Nothing but `analysis/` is published and `analysis_legacy/` is not read at all. `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation) serve the prompt rather than the build. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed** — `.github/workflows/deploy-site.yml` builds it fresh (PRs build without deploying). Folder map: `site/README.md` |
-| `linters/check-doc-links.py` | human | Linter verifying local path references in `CLAUDE.md` / `README.md` / `SETUP.md` / `context/*.md` resolve; wired into CI by `.github/workflows/check-doc-links.yml`. Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
-| `linters/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/` / `scouting/` outputs exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar; wired into CI by `.github/workflows/check-decision-refs.yml` |
-| `linters/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats); the PR-title gate is `.github/workflows/check-commit-style.yml` (squash-merge makes the PR title the landing subject). Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
+| `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token) and `analyze.txt` (`/analyze`) |
+| `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, which only points `/analyze` at its prompt and at `site/AUTHORING.md` |
+| `assets/` | human | Images the root `README.md` embeds, and nothing else — the reading-site banner as a light/dark pair (`reading-site.svg`, `reading-site-dark.svg`) selected by `<picture>` + `prefers-color-scheme`. Hand-authored SVG whose text is live `<text>`, so the fonts are stacks (`ui-monospace`, `system-ui`) and the layout is left-aligned to tolerate the substitution. The site's own images live under `site/builder/assets/` and are unrelated |
+| `site/` | human | The reading site's generator — `build-site.py` + `builder/` (a landing briefing, a memo hub, plus one page per rewrite) and `requirements.txt`. Only `analysis/` is published; `analysis_legacy/` is not read. `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews locally under the deployed path. Generated HTML is **never committed**. Two modules serve the prompt rather than the build: `site/builder/arxiv.py` (LaTeXML extraction of an arXiv original — body **and appendix** sections, figures including the `<object>`-embedded SVGs, tables; raises `Unavailable` when a paper has no HTML edition, which is `/analyze`'s stop condition) and `site/builder/mdext/probefence.py` (the ` ```probe-* ` fences and their validation). Folder map: `site/README.md` |
+| `linters/check-doc-links.py` | human | Linter verifying local path references resolve in `CLAUDE.md`, `README.md`, `SETUP.md`, `context/MASTER.md` and `context/P#.md` (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step of "When adding a new top-level doc" below |
+| `linters/check-decision-refs.py` | human | Linter verifying every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
+| `linters/check-commit-style.py` | human | Linter validating commit subjects / PR titles against the "Commit message style" grammar below (type set, casing, length, non-imperative first words, generated-routine formats). Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
+| `.github/workflows/` | human | Four gates. The three lints above run PR-time (`check-doc-links`, `check-decision-refs`, `check-commit-style` — the last reads the **PR title**, since squash-merge makes it the landing subject). `deploy-site.yml` builds the site on every PR touching `analysis/` or `site/` and deploys to Pages only from `main` |
 
 `context/` is read-only to the agent — it may *propose* changes in a report,
 never edit the source. Per-pillar content (Decision Log, Tracked Literature,
-Anti-topics, Curated Lists) is **owned by
-the relevant `P#.md`**; `MASTER.md` is a thin global anchor holding only
-cross-cutting content. Edit the `P#.md` for pillar content; edit `MASTER.md`
-only for global content.
+Anti-topics, Curated Lists) is **owned by the relevant `P#.md`**; `MASTER.md`
+is a thin global anchor holding only cross-cutting content. Edit the `P#.md`
+for pillar content, `MASTER.md` only for global content.
 
 **Decision-Log entry format.** Every entry in a `P#.md` §3 Decision Log has
 exactly this shape (used 32× across the six pillars; the scouting / analyze
@@ -73,9 +77,9 @@ Hard rules:
    colon must be a verb in imperative mood. Past tense (`added`, `fixed`),
    gerunds (`adding`), and noun-first phrases (`new mode for X`) are forbidden.
    Verbs already used in this repo's history (use one of these or a close
-   synonym): `add`, `fix`, `remove`, `drop`, `rename`, `move`, `refactor`,
-   `switch`, `migrate`, `restructure`, `clarify`, `re-align`, `unify`,
-   `standardize`, `allow`.
+   synonym): `add`, `drop`, `remove`, `prune`, `move`, `rename`, `restructure`,
+   `reduce`, `compress`, `tighten`, `retire`, `restore`, `recover`, `keep`,
+   `render`, `codify`, `re-align`, `re-cut`.
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types. (The bare `scout:` / `analysis:`
    prefixes are *generated routine commits*, not human
@@ -92,10 +96,11 @@ Hard rules:
    (e.g. `Human Universal Grasping` → `HUG`); (3) otherwise omitted — a plain
    descriptive title with neither a colon codename nor a self-defined acronym
    gets no alias, and one is never invented.)
-3. **`<scope>`** — lowercase, matches a folder or module in the repo:
-   `scout`/`scouting`, `analysis`, `context`,
-   `prompts`, `config`, `style`, `docs`, `site`, `CLAUDE.md`. Omit the scope
-   only for repo-wide changes.
+3. **`<scope>`** — lowercase, naming the folder or track the change touches:
+   `site`, `scouting`, `analysis`, `context`, `prompts`, `linters`,
+   `ci` (`.github/workflows/`), `config`. Omit the scope for repo-wide
+   changes — a docs pass across several tracks is `docs: …`, never
+   `docs(docs): …`.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
    does, not why (the why goes in the body).
@@ -107,11 +112,11 @@ Hard rules:
 Good (from this repo's history):
 
 ```
-feat(analysis): add math-formatting checker + PR auto-fix CI
-refactor(scouting): re-shelve reports per pillar (P#/YYYY-MM-DD.md)
-docs(style): codify arXiv figure URL + KaTeX math substitution rules
-feat(catalogs): add P4 prior-preservation reference + rename lineage corpus
-refactor: streamline guide docs — renames, compression, cross-updates
+feat(site): add callout, tagline and parts-state rules
+fix(site): recover the appendix and the SVG figures from arXiv originals
+refactor(site): drop five helpers left without callers
+chore(ci): add the GitHub Pages deploy workflow
+docs: codify the body H1 as the rewrite's thesis line
 ```
 
 Bad (don't do this):
@@ -149,6 +154,21 @@ one logical area or needs context to be reviewable. When present:
    explanation in body prose.
 8. **Backticks** around paths (`context/MASTER.md`), identifiers, CLI flags
    (`--dry-run`), and shell commands.
+
+## Local checks
+
+CI runs each of these on the PR. Run the ones your change touches before
+pushing, so a red gate is not the first you hear of it.
+
+| Change touches | Command |
+|---|---|
+| any doc in the index set | `python3 linters/check-doc-links.py` |
+| `analysis/`, `scouting/`, `context/` | `python3 linters/check-decision-refs.py` |
+| anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
+| `analysis/` or `site/` | `python3 site/build-site.py --check --strict` |
+
+The site build is the only one with dependencies:
+`pip install -r site/requirements.txt`.
 
 ## Document Markdown style
 
@@ -289,12 +309,12 @@ becomes a silent orphan. Walk this list every time:
 - [ ] **Run a final `grep -rn '<new-doc-basename>' .`** — at least one
       inbound link must exist. Zero inbound links = orphan.
 - [ ] **Run `python3 linters/check-doc-links.py`** — every local path
-      reference in `CLAUDE.md` / `README.md` / `SETUP.md` must resolve. This
-      lint is wired into CI (`.github/workflows/check-doc-links.yml`) and is
-      the automated backstop for the dangling-path half of this checklist.
-      (Pass the prompts or the two `AUTHORING.md` files as explicit args to
-      scan them too; they are off the default set because they carry
-      illustrative example paths.)
+      reference in the index set (`CLAUDE.md`, `README.md`, `SETUP.md`,
+      `context/MASTER.md`, `context/P#.md`) must resolve. This lint is the
+      automated backstop for the dangling-path half of this checklist. Pass
+      the prompts or either `AUTHORING.md` as explicit args to scan them too;
+      they are off the default set because they carry illustrative example
+      paths.
 
 ## When adding a new pillar (P6+)
 
@@ -326,7 +346,7 @@ and the lints:
 
 ## Where to read more
 
-- `README.md` — motivation, pipeline, agent stack + setup, references.
+- `README.md` — motivation, the pipeline, and which track to trigger for what.
 - `scouting/AUTHORING.md` — the output format for the `scouting/` track (this
   file governs commits and *contributor* docs, not output).
 - `site/AUTHORING.md` — the output format for the reading-site track
