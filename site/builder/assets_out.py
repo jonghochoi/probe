@@ -60,8 +60,8 @@ def _check_intact(before: str, after: str) -> list[str]:
     return problems
 
 
-ASSET_FILES = ("site.css", "index.css", "theme.js", "paper.js", "memo.js",
-               "filter.js", "hub.js")
+ASSET_FILES = ("site.css", "index.css", "theme.js", "brand.js", "paper.js",
+               "memo.js", "filter.js", "hub.js")
 
 
 def asset_text() -> str:

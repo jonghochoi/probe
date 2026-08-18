@@ -86,7 +86,8 @@ def landing_page(papers: list[Paper], katex=None) -> str:
     body = f"""<header class="mast">
   <div class="mast-inner">
     <div class="mast-line">
-      <h1>손 중심 조작 연구, 다시 쓴 판</h1>
+      <span class="mast-brand">{c.mark(30)}</span>
+      <h1>Dexterous Manipulation, 다시 쓴 판</h1>
       <span class="mast-rule"></span>
       <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
     </div>
@@ -137,7 +138,7 @@ def landing_page(papers: list[Paper], katex=None) -> str:
 """
     return c.page(
         title="PROBE · 논문 분석",
-        description=f"손 중심 조작 연구 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
+        description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
         depth=0,
         scripts=["filter.js"],
