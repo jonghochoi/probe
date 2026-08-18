@@ -3,13 +3,35 @@
    the two places that need a real surface color instead of a tint. */
 
 /* ── Masthead ─────────────────────────────────────────────────────────── */
-/* One line, not a hero. The old dark gradient panel spent the whole first
-   screen on three counts; the list is what the page is for, so the title
-   states what this is and gets out of the way. */
-.mast { background: var(--surface); border-bottom: 1px solid var(--border); }
-.mast-inner { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 1.2rem; }
+/* One line, not a hero. The list is what the page is for, so the title states
+   what this is and gets out of the way — which is also why the brand arrives
+   as a mark on that line and a wash behind it, and costs no height at all. */
+.mast {
+  position: relative; overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(120% 150% at 88% -30%, var(--orange-soft) 0%, transparent 58%),
+    var(--surface);
+}
+/* A scan grid, faded out before it reaches the text. Two gradients and a mask
+   rather than an image, so it costs no request and follows the theme: in dark
+   `--orange-soft` is a near-black ember and the whole ground sinks. */
+.mast::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
+  mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
+}
+.mast-inner {
+  position: relative;
+  max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 1.2rem;
+}
 .mast.slim .mast-inner { padding: 1.7rem 1.25rem 1.4rem; }
 .mast-line { display: flex; align-items: baseline; gap: .8rem; }
+.mast-brand { flex: none; display: grid; place-items: center; }
 .mast h1 {
   font-size: clamp(1.15rem, 2.6vw, 1.45rem); font-weight: 800;
   letter-spacing: -.025em; line-height: 1.3; white-space: nowrap;

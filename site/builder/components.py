@@ -8,19 +8,55 @@ from __future__ import annotations
 
 import html
 
-# A reticle in the brand orange, inlined as a data URI so the zero-third-party
-# rule holds and no extra request is made for 16 px of decoration.
+# The mark at 16 px, inlined as a data URI so the zero-third-party rule holds
+# and no extra request is made for a tab icon. Two shapes and two tones: the
+# hull and the pupil are all that survives at this size, and they are enough —
+# a tab full of favicons is scanned for silhouette, not for detail.
 FAVICON = (
     "data:image/svg+xml,"
     "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
     "%3Crect width='32' height='32' rx='8' fill='%23D97757'/%3E"
-    "%3Ccircle cx='16' cy='16' r='7.5' fill='none' stroke='%23fff' stroke-width='3'/%3E"
-    "%3Ccircle cx='16' cy='16' r='2' fill='%23fff'/%3E%3C/svg%3E"
+    "%3Ccircle cx='16' cy='5.6' r='2.1' fill='%23fff'/%3E"
+    "%3Crect x='5.5' y='9' width='21' height='18' rx='6.4' fill='%23fff'/%3E"
+    "%3Ccircle cx='12.2' cy='18' r='2.5' fill='%232a1a12'/%3E"
+    "%3Ccircle cx='19.8' cy='18' r='2.5' fill='%232a1a12'/%3E%3C/svg%3E"
 )
 
 
 def esc(text: str) -> str:
     return html.escape(str(text), quote=True)
+
+
+def mark(size: int) -> str:
+    """The animated PROBE mark — a probe that looks back at the reader.
+
+    One `viewBox` serves every size; the caller picks the pixel box. Geometry
+    only: the idle bob, the blink, the wink and the beacon are keyframes in
+    `site.css`, and `brand.js` steers the pupils after the pointer. Two eyes
+    rather than one, because a single eye reads as "something moved" while a
+    pair reads as "it is looking at you" — which is the whole point of putting
+    a face on a scouting agent. Decorative in every slot it appears in — the
+    logo and the masthead both name the site in text right next to it — so it
+    stays out of the accessibility tree.
+    """
+    eyes = "".join(
+        f'<g class="eye {side}"><g class="lid">'
+        f'<circle class="iris" cx="{x}" cy="46" r="11"/>'
+        f'<circle class="pupil" cx="{x}" cy="46" r="5"/>'
+        "</g></g>"
+        for side, x in (("eL", 36), ("eR", 60))
+    )
+    return (
+        f'<svg class="probe-mark" width="{size}" height="{size}" '
+        'viewBox="0 0 96 96" aria-hidden="true" focusable="false">'
+        '<ellipse class="shadow" cx="48" cy="84" rx="20" ry="4"/>'
+        '<g class="rig">'
+        '<path class="stalk" d="M48 20 V13"/>'
+        '<circle class="beacon" cx="48" cy="10" r="5"/>'
+        '<rect class="hull" x="17" y="21" width="62" height="54" rx="19"/>'
+        f"{eyes}"
+        "</g></svg>"
+    )
 
 
 def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None) -> str:
@@ -114,7 +150,7 @@ def page(
     # theme.js is unconditional — the nav button it drives is on every page.
     script_tags = "".join(
         f'<script src="{up}assets/{s}" defer></script>'
-        for s in ["theme.js", *(scripts or [])]
+        for s in ["theme.js", "brand.js", *(scripts or [])]
     )
     return f"""<!DOCTYPE html>
 <html lang="ko" data-theme="light">
@@ -152,7 +188,7 @@ document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 def nav(up: str) -> str:
     return f"""<nav>
   <div class="nav-inner">
-    <a class="nav-logo" href="{up}index.html">PROBE <span>· 분석</span></a>
+    <a class="nav-logo" href="{up}index.html">{mark(19)}PROBE <span>· 분석</span></a>
     <span class="nav-spacer"></span>
     <ul class="nav-links">
       <li><a href="{up}index.html">논문</a></li>
