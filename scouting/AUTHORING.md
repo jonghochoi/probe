@@ -1,5 +1,5 @@
 # Scouting Report Authoring Guide
-> **Version:** v1.35 (2026-08-17) · **Scope:** every `scouting/P#/YYYY-MM-DD.md`
+> **Version:** v1.36 (2026-08-18) · **Scope:** every `scouting/P#/YYYY-MM-DD.md`
 > — the dated reports the scheduled routine writes, plus the templates in
 > `scouting/templates/`.
 > This document is the single source of truth for that format.
@@ -49,13 +49,16 @@ The table also fixes the canonical **section order** (top to bottom). The
 | 🥉 | Paper N — PRIORITY ★ |
 | 🌱 | Paper N — CROSS-POLLINATION (인접 분야 픽) |
 | 📊 | Scoring Summary (점수 요약) |
+| 🔍 | Near-Miss Candidates (근접 후보) |
 | 💡 | Context Suggestions (컨텍스트 제안) |
 | 🔄 | Run-over-Run Synthesis (직전 리포트 대비 종합) |
 | 🚫 | Candidate Papers That Did Not Pass Filter (필터 통과 실패 후보 논문) |
 
 Retrieval-pass provenance — including verbatim disclosure of any tool
-failure (e.g. `일부 쿼리 HTTP 429 실패`) — is summarized in the
-`Papers scanned:` header line, not a dedicated section.
+failure that is still failing at the end of the run (e.g.
+`일부 쿼리 HTTP 429 실패`) — is summarized in the `Papers scanned:` header
+line, not a dedicated section. A retry that eventually succeeded is not a
+failure and is not reported at all (§6).
 
 ### 2-2. Subsection (`###`) headers are plain
 
@@ -97,9 +100,12 @@ Every paper entry must include a direct link. Precedence:
 
 Links must appear:
 - In the paper header (immediately below the bold title)
-- In the Scoring Summary table (`Link` column)
+- In the Near-Miss Candidates table (`Link` column)
 - In the Candidate Papers table (`Link` column)
 - Inline in Context Suggestions when an arXiv ID is mentioned
+
+The 📊 section carries no table and therefore no `Link` column (§4-5) — a
+paper scored there already has its link in its own header.
 
 Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
 
@@ -338,12 +344,9 @@ It applies to every `scouting/` output.
   only (one bold head carrying the total — `**HapTile (13/15)**` — then a
   bullet per dimension). A separate scores table duplicates it, so it is
   dropped.
-- **The scouting rubric is five fixed dimensions, 0–3 each, total /15**:
-  Relevance · Novelty · Reproducibility · Methodology · Sim2Real
-  (definitions live in `.claude/prompts/scouting.txt`). The surfacing
-  gate — every dimension ≥ 2 — quantifies over all five, so the
-  dimension set is load-bearing: never add, drop, or rename a dimension
-  in a report, and always show all five bullets per paper.
+- **The rubric is five fixed dimensions and the gate is four of them** — §5
+  is authoritative. Never add, drop, or rename a dimension in a report, and
+  always show all five bullets per paper.
 - **Conclusion before enumeration.** When a long list resolves to one
   verdict ("10편 전원 재등장·제외"), state the verdict first, then the list —
   the reader must not parse every item to reach the point.
@@ -352,9 +355,9 @@ It applies to every `scouting/` output.
   cell, do not belong inline in Korean sentences. Put them in a dedicated
   cell; never repeat an id a sibling cell already shows (e.g. the 🚫
   `Paper` column drops the id its `Link` column already carries).
-- **`Papers scanned:` is a one-line summary**, not a full query log —
-  per-query counts and any HTTP-error disclosure live once in that header
-  line (§2-1), never a separate block.
+- **`Papers scanned:` is a one-line summary**, not a full query log — §6
+  caps it and names what belongs in it. A retrieval funnel restated anywhere
+  else in the report (typically in 🔄) is a duplicate and is dropped.
 - **No enumeration markers in body.** 개조식 uses bullets (§4-4); do not fall
   back to `①②` / `1. 2.` / `첫째·둘째` running inside a sentence.
 - **P#/D# codes render as color-coded badges** (§3-1) — pillar palette for
@@ -459,3 +462,190 @@ The rule in one line: **the character immediately before a closing `**` must
 not be punctuation** when a letter follows it. Bold the phrase, not the phrase
 plus its parenthesis. This track has no build step to catch it, so the rule
 is the only defense — nothing errors and review is what has to notice.
+
+---
+
+## 5. Scoring Contract
+
+The rubric is **five dimensions, 0–3 each, total /15** — Relevance · Novelty ·
+Reproducibility · Methodology · Sim2Real. The per-dimension definitions live in
+`.claude/prompts/scouting.txt`; this section owns what the report must *show*
+and what the gate quantifies over.
+
+### 5-1. The surfacing gate is four dimensions
+
+A paper is surfaced as a `## 🥇 / 🥈 / 🥉` section when **Relevance, Novelty,
+Methodology and Sim2Real are each ≥ 2**. Reproducibility is scored, shown, and
+used for ranking (§5-3), but it is **not** part of the gate.
+
+A fresh preprint almost never has a public repository on the day it posts, so a
+Reproducibility term inside an AND-gate does not measure research quality — it
+measures how long the paper has been up, and it stalls a run into surfacing
+nothing while the same paper's Relevance and Methodology are the strongest of
+the week. Reproducibility governs how far a paper may be promoted, not whether
+the reader gets to see it.
+
+The metadata field is `**Papers surfaced (4축 게이트 통과):**` (§6). When fewer
+than 3 papers clear the gate, say so and do not pad.
+
+### 5-2. Reproducibility is scored from quoted evidence, never inferred
+
+The evidence is a **string the retrieval pass actually received** — the arXiv
+`<arxiv:comment>` field, or the abstract body. Both come back in the same API
+response the run already makes, so this costs no extra call.
+
+| Score | Condition |
+|---|---|
+| 3 | Repository URL present **and** data / checkpoints **and** hardware or config detail |
+| 2 | A code repository URL is stated (`github.com/…`, `Code: …`) |
+| 1 | Project page only, or a promise (`code will be released`, `release soon`, `upon acceptance`) |
+| 0 | No repository, page, or release statement anywhere in the abstract or the comment field |
+
+**Evaluation on a public benchmark is not reproducibility evidence.** LIBERO,
+CALVIN, SIMPLER, DexYCB and their siblings say the *paper* is comparable, not
+that the *artifact* is obtainable. A rationale bullet reading
+`Reproducibility 2 — 공개 벤치마크 4종 검증` is wrong at the rubric level, and a
+bullet that scores ≥ 2 while its own text says `코드 공개 미확인` contradicts
+itself. Neither is publishable.
+
+Each 📊 rationale bullet **quotes the evidence it scored on**:
+
+```markdown
+- Reproducibility 2 — arXiv comment "Code: https://github.com/LeapWM/leapbot-wa"
+- Reproducibility 1 — arXiv comment "Code and model checkpoints will be released upon acceptance"
+- Reproducibility 0 — 초록·arXiv comment 모두 코드·프로젝트 페이지 신호 없음
+```
+
+An absent signal is stated as absent. `초록상 미확인` / `공개 여부 확인 필요`
+is not an outcome — the comment field either carries a URL or it does not, and
+the run has already read it.
+
+### 5-3. The Reproducibility label and the priority ceiling
+
+Every paper header carries the label its Reproducibility score implies, as
+plain text (emoji stay on `##` headers — §2):
+
+| Score | Label | Priority ceiling |
+|---|---|---|
+| 2–3 | `코드 공개` | ★★★ |
+| 1 | `코드 공개 예정` | ★★ |
+| 0 | `코드 미공개` | ★★ |
+
+A paper the team cannot run yet is still worth reading, but it does not
+outrank one they can — so `★★★` is reserved for a paper with an obtainable
+artifact. Rank within a ceiling by Relevance, then by the /15 total.
+
+### 5-4. 🔍 Near-Miss Candidates
+
+`## 🔍 근접 후보` is the standing home for two kinds of paper, and it is the
+mechanism that makes "재검토 권고" actually happen:
+
+1. **One axis short** — exactly one of the four gate dimensions scores 1 and
+   the rest are ≥ 2.
+2. **Carried forward** — a candidate listed in this section, or dropped for
+   Reproducibility, in this pillar's last ~2 weeks of reports. Every run
+   re-reads those entries and re-checks the code signal (§5-2). A candidate
+   whose repository is now public is **promoted to a full paper section this
+   run** and named in 🔄 as a promotion.
+
+One table, most recent first, no per-paper `###` subsections:
+
+```markdown
+| Paper | Link | R·N·M·S2R | 코드 | 재검토 조건 |
+|---|---|---|---|---|
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·2·2 | 공개 예정 | 저장소 공개 시 승격 |
+```
+
+Omit the section when it has no rows. A paper appears in 🔍 or in 🚫, never
+both — 🚫 is for candidates that are out, 🔍 for candidates that are waiting.
+
+---
+
+## 6. Report Metadata Block
+
+The block between the H1 and the first `---` is exactly two lines:
+
+```markdown
+# Probe 스카우트 리포트 — YYYY-MM-DD · Pillar P#
+
+**Papers scanned:** <one-line summary, ≤ 400 characters>
+**Papers surfaced (4축 게이트 통과):** <integer>
+```
+
+- **No `Run date:` line.** The filename, the H1 and that field carry the same
+  date three times; the H1 is the one a reader sees.
+- **No `Agent version:` line.** A constant across every report is not
+  information — the report's provenance is its commit.
+- **`Papers surfaced` is an integer and nothing else.** Prose about *why* the
+  count is low belongs in 📊; the field is the count.
+- **`Papers scanned` is capped at 400 characters** and names, at most: the
+  source passes run, an order-of-magnitude count per pass, and any failure
+  still unresolved when the run ended. It is a provenance line, not an audit
+  trail — a reader checks that the sweep ran, then moves on.
+
+What the line does **not** carry: per-query breakdowns, stage-by-stage funnel
+arithmetic (`661건 → 507편 → 226편 → 190편 → 19편`), per-pin request counts,
+or retry narration. A retry that succeeded is a non-event; only a call still
+failing at the end of the run is disclosed, verbatim.
+
+```markdown
+**Papers scanned:** citation-graph 8핀 280편 + keyword sweep 110편(14일 44편)
++ curated list 4종 13편 — keyword sweep 1개 쿼리 HTTP 429 최종 실패
+```
+
+---
+
+## 7. Section Discipline
+
+§4-4 governs the register inside a bullet and §4-5 the layout above it. This
+section governs what each `##` section is allowed to repeat.
+
+### 7-1. 💡 Context Suggestions — a proposal is made once
+
+A suggestion the human has not yet acted on is **still open**, not new. Re-stating
+it every run buries the run's actual finding under a paragraph the reader has
+already read and already decided about.
+
+- A proposal already made in this pillar's last ~2 weeks of reports is **not
+  restated**. It is rolled up into one line naming the open proposals and the
+  date each was first made:
+
+  ```markdown
+  - **미결 제안 2건** — WAM 아키텍처 전용 논문 Anti-topic(최초 2026-07-27), D24 리밸런싱(최초 2026-08-06)
+  ```
+
+- Escalation is a count, not a re-argument. `3회 연속 관찰` is a fact worth one
+  clause; the rationale stays where it was first written.
+- A proposal disappears from the rollup when the human lands it in
+  `context/P#.md` — that file is the accept/decline record, and the agent
+  never edits it (§1).
+- A subsection with nothing new says so in one bullet (`제안 없음 — …`) and stops.
+
+### 7-2. 🔄 Run-over-Run Synthesis — 3–5 bullets
+
+Cover, one bullet each and only when the run has something to say: papers
+already covered (verdict first), contradictions with recent findings,
+Decision-Log triggers, 🔍 promotions this run, Anti-topic filter health as a
+count, already-analyzed dedup count.
+
+- **Never restate the retrieval funnel.** Anti-topic filter health is a count
+  and a reason (`5편 제외 — WAM 아키텍처 4편, Sim2Real 미달 1편`), not the
+  pipeline arithmetic from `Papers scanned` (§6).
+- **A "not applicable" item is omitted, not narrated.** `월간 트렌드: 첫 리포트
+  아님 — 생략` and `재등장 여부 — 해당 없음(N/A)` are lines that exist only to
+  report their own emptiness. Drop the bullet.
+
+### 7-3. Paper names must be unambiguous across reports
+
+Codenames collide — two unrelated papers both self-titling `Faster-WAM` is an
+ordinary occurrence in this corpus, and the reports read side by side across
+pillars. A bare alias is only safe where a `Link` column resolves it in the
+same row.
+
+- In **prose** (💡, 🔄, 📊 heads), an alias carries its id on first use in the
+  section: `Faster-WAM(2608.04404)`.
+- In the 🚫 and 🔍 tables the `Paper` column stays alias-only — the `Link`
+  column is the disambiguator (§4-5).
+- One table row is **one paper**. A cell like `Faster-WAM 외 2편 (ω-0, WAM-Diff2)`
+  against a single link hides two papers behind a third one's id; give each its
+  own row.
