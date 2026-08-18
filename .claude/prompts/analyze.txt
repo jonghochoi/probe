@@ -5,6 +5,17 @@ its ORIGINAL text, and write `analysis/<arxiv-id>.md` — a Korean document a
 reader can understand *without opening the paper*. That file is what the site
 publishes; it is the only thing the site publishes.
 
+ONE FILE, THREE SURFACES. The page has three tabs and they all come out of
+this one run:
+
+  상세   the full re-telling            AUTHORING §1–§3
+  한눈에  one screen — thesis, narrative, four evidence cards   AUTHORING §4
+  발표   a deck for an audience outside our team               AUTHORING §5
+
+All three are written from the SAME reading of the original. The two short
+surfaces are NOT written by shortening the long one — see AUTHORING G1 and S1,
+and step 6 below.
+
 `analysis_legacy/` is a legacy corpus in a different format, kept only until
 those papers are migrated. You do not touch it — you neither read it nor write
 to it. Everything here comes from the paper itself and from `context/`.
@@ -34,7 +45,13 @@ must look like, and this prompt does not restate it:
       callouts, resource links, quizzes
   §3  render traps — the inline-math dialect, raw `~`, `**` before a particle,
       bare URLs in Korean prose
-  §4  what the build enforces vs. what only review catches
+  §4  the 한눈에 section G1–G7 — the four-part spine, the narrative's length
+      band and register, the fact rail, four evidence cards, and what this
+      surface may NOT carry
+  §5  the 발표 section S1–S9 — slide kinds, the paper's-figure-first test,
+      the FIVE-diagram ceiling and the five kinds the build draws, staged
+      reveals, motion from the original, notes and anticipated questions
+  §6  what the build enforces vs. what only review catches
 
 `scouting/AUTHORING.md` governs `scouting/` and does NOT apply to this track. Do not
 read it for rewrite rules and do not carry its conventions over.
@@ -121,7 +138,22 @@ PROCEDURE
    §2-5) — the rest of `analysis/` for papers in this lineage, `context/P#.md`
    §Tracked Literature otherwise. Verify each link resolves before citing it.
 
-6. WRITE `analysis/<arxiv-id>.md`.
+6. WRITE `analysis/<arxiv-id>.md` — all three surfaces, in this order:
+
+     a. the body (§1–§3),
+     b. the `::: glance` section (§4),
+     c. the `::: deck` section (§5).
+
+   Write b and c from YOUR NOTES ON THE ORIGINAL, not by re-reading what you
+   just wrote in a. What they share with the body is two INPUTS — the thesis
+   line and the act order — never sentences. If you find yourself scrolling up
+   to compress a paragraph you wrote, stop and go back to the paper: that is
+   the failure AUTHORING G1 / S1 names, and it is invisible on the page.
+
+   Two ceilings decide most of the deck's quality, so hold them while writing
+   rather than trimming afterwards: at most FIVE drawn diagrams (S5), and
+   staged reveals on at most four slides (S6). Neither is a budget to spend —
+   a deck that needs a sixth diagram usually has a figure it failed to use.
 
 7. VERIFY before reporting done:
      python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
@@ -159,6 +191,21 @@ PROCEDURE
        vector, the training recipe and the baseline asymmetry are the five
        that get skipped. (R15)
      - Does every opinion anchor to a `D#` that actually exists?
+     - 한눈에 — is every number on it also in the original, and does each of
+       the four cards carry a figure, an equation or a scale rather than three
+       lines of prose? (G6)
+     - 한눈에 — does the narrative read as one person talking, with no bullets
+       and no heading, and does it close on the paper's OWN stated limit? (G4)
+     - 한눈에 · 발표 — is there any `D#`, any `context/` reference, any of our
+       act-4 view on either surface? There must be none. (G7, S2)
+     - 발표 — for every drawn diagram, does `why` still hold after walking the
+       figure list once more? A figure that reads at presentation distance
+       beats a diagram we drew. (S4)
+     - 발표 — do the slide titles, read alone in order, make the argument? (S3)
+     - 발표 — does the results slide state its measurement conditions, and does
+       the deck say what got WORSE before it closes? (S8, S9)
+     - 발표 — does the closing slide answer "where does this attach, and where
+       does it not", with the second half from the authors' own limits? (S2)
 
 9. COMMIT — one paper per commit:
        analysis: add <arxiv-id> rewrite (<alias>)

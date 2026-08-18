@@ -5,6 +5,10 @@ generator, and its build-time dependencies. The site publishes
 `analysis/<arxiv-id>.md` and nothing else; the legacy `analysis_legacy/` corpus
 is not read at all.
 
+One rewrite becomes **three tabs on one page** — 상세 (the body), 한눈에 (one
+screen) and 발표 (a deck). All three come out of the same source file and the
+same `/analyze` run; `AUTHORING.md` §4 and §5 are their contracts.
+
 The corpus itself stays at the repo root (`analysis/`), next to the other
 agent-written track (`scouting/`). This folder is human-owned tooling and rules;
 the agent writes into `analysis/` and reads from here.
@@ -13,7 +17,7 @@ the agent writes into `analysis/` and reads from here.
 
 | Path | Role |
 |---|---|
-| `AUTHORING.md` | **The format contract for `analysis/<id>.md`** — front matter, body rules R1–R15, render traps, what the build enforces. `.claude/prompts/analyze.txt` defers to it; edit this file first, then the code |
+| `AUTHORING.md` | **The format contract for `analysis/<id>.md`** — front matter, body rules R1–R15, render traps, the 한눈에 rules G1–G7 and the 발표 rules S1–S9, what the build enforces. `.claude/prompts/analyze.txt` defers to it; edit this file first, then the code |
 | `build-site.py` | Build entry point. `--out` writes the tree, `--only <id>` builds one rewrite, `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews under the deployed path |
 | `builder/corpus.py` | Rewrite discovery, front-matter validation (including R6's `figures:` ↔ body agreement, R15's required `appendix:` and the tagline-echo check), pillar names, the R10 link vocabulary |
 | `builder/render.py` | Markdown → HTML, plus the rule checks that have no other home (R2, R4, R5, R11, R14) |
@@ -24,6 +28,12 @@ the agent writes into `analysis/` and reads from here.
 | `builder/fonts.py`, `assets/` | Webfont subsetting and the site's CSS/JS. Visual rules live here, not in a rewrite (R12) |
 | `builder/decisions.py` | The `context/P*.md` §3 Decision-Log parser, so a `D<n>` citation in a rewrite renders as a tooltip carrying the decision's title |
 | `requirements.txt` | Build-time Python dependencies |
+
+The 한눈에 and 발표 tabs are contracts before they are code: `AUTHORING.md` §4
+and §5 define them, and §6 names the module each check belongs to — `glance.py`
+for the four-part spine and this surface's refusal of any `D#`, `deck.py` for
+the slide bands and the five-diagram ceiling, `diagrams.py` for drawing the
+five diagram kinds from a slide's declared data.
 
 `linters/check-decision-refs.py` lints the same citations across the whole repo
 and parses the log itself — it must run without the site's build dependencies,

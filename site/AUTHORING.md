@@ -7,6 +7,19 @@
 > output contract; `site/build-site.py` implements it. Change a rule here
 > first, then the build.
 
+**One file, three surfaces.** A rewrite publishes as three tabs on one page:
+
+| Tab | What it is | Rules |
+|---|---|---|
+| 상세 | the full re-telling — four acts, term anchors, quizzes | §1–§3 |
+| 한눈에 | one screen: our thesis, a narrative, the evidence in four cards | §4 |
+| 발표 | a deck for an audience outside the team | §5 |
+
+All three are written **in the same `/analyze` run, from the same reading of
+the arXiv original**, and they live in one `analysis/<id>.md`. The two short
+surfaces are not summaries of the long one — see G1 and S1, which is the rule
+the other two most often violate.
+
 **The output is an HTML page.** A rewrite is Markdown only as a source
 language: what a reader gets is `site/build-site.py`'s output, rendered by
 `markdown-it-py` plus this repo's own extensions. Every rule below is judged
@@ -41,7 +54,7 @@ tags: [<tag>, <tag>]
 links: [arxiv|<url>, code|<url>]
 published: YYYY-MM-DD            # the paper's date, from arXiv
 generated: YYYY-MM-DD            # yours — this sorts the landing page
-generator: analyze/v2
+generator: analyze/v3
 arxiv_html: <arxiv-id>v<n>       # the exact version actually read
 arxiv_fetched: YYYY-MM-DD
 figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
@@ -65,11 +78,11 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `links` | `kind\|url` pairs; kinds fixed at `arxiv` `code` `weights` `data` `site` `demo` (R10). Unknown kinds are dropped rather than guessed at |
 | `published` / `generated` | the paper's date / this rewrite's. `generated` sorts the landing page |
 | `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
-| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **The build matches this list against the `probe-figure` fences in the body both ways** — an id in one and not the other is reported |
+| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **One list for all three surfaces** — the build matches it both ways against every figure id cited anywhere in the file (body, glance, deck), and an id in one and not the other is reported |
 | `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — see R15. An empty value is not accepted, because "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate |
 | `terms` | count of inline term anchors |
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment — `<지표> <전> → <후> <단위>` for a number the paper moved, `<수치> <단위> · <함께 성립한 조건>` for one it holds under a constraint. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
-| `generator` | `analyze/v2` |
+| `generator` | `analyze/v3` |
 
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed
 by `site/builder/arxiv.py`); *our view* — `D#` impact, tensions, what we
@@ -639,7 +652,309 @@ not carry them over, and do not "fix" a rewrite to satisfy them:
 
 ---
 
-## 4. Enforcement
+## 4. The Glance Section (G1–G7)
+
+One screen that answers "what is this paper, and why should I care" before the
+reader commits to §1–§3. It is a **second reading of the original**, not a
+digest of the body.
+
+### 4-1. G1 — Written from the original, like the body
+
+The glance draws on the same parsed original as the body and cites the same
+way. It is never written by re-reading `analysis/<id>.md` and shortening it:
+
+- a digest of a digest inherits every choice the body already made — which
+  figure was dropped, which number was rounded — and adds nothing;
+- the two surfaces rank the paper's material differently. A figure that sits
+  mid-body is often the one the glance leads with;
+- a glance derived from the body goes stale the moment the body is edited, and
+  nothing on the page says so.
+
+What the two surfaces **do** share, as inputs rather than text: the thesis line
+(the body's `#`) and the act order. Nothing is copied sentence for sentence.
+
+### 4-2. G2 — The spine, in this order
+
+```
+probe-hub      중심 주장 카드 — the thesis, one line, a few numbers, one figure
+<내러티브>       flowing Korean prose, no bullets
+probe-rail     팩트 레일 — 어떤 판본 · 무엇에 · 얼마나 · 어떤 조건에서
+probe-act ×4   the evidence, one card per act
+```
+
+Four parts, always, in that order. The reader's path is
+**claim → story → conditions → evidence**; reordering them makes the numbers
+arrive before the reason they matter.
+
+### 4-3. G3 — `probe-hub`, the claim in one card
+
+    ```probe-hub
+    {"thesis": "<한 문장 — 논문 제목이 아니라 우리의 테제>",
+     "line": "<무엇을 어떻게 바꾸는가 — 한 줄>",
+     "figure": "<figure id>",
+     "facts": [{"k": "<지표 이름>", "v": "<값 · 단위>"},
+               {"k": "<지표 이름>", "v": "<값 · 단위>"}]}
+    ```
+
+- `thesis` is the body's `#` — the same sentence, because a page cannot argue
+  two theses. It is **not** the paper's title, which the header already prints.
+- `facts` — **2 to 4**, and each must be a number the paper itself states. Past
+  four they stop being headlines and become a table.
+- `figure` is optional and, when present, is the figure a reader would keep if
+  they could keep only one. Its id goes in `figures:` like any other (R6).
+
+### 4-4. G4 — The narrative
+
+Flowing Korean prose — a colleague telling you what the paper does, not a
+report. The body argues; this talks.
+
+| | |
+|---|---|
+| Length | **8–10 연**, roughly 900–1,100 printed characters (about 1 분 40 초 읽기) |
+| Shape | stanzas of 2–4 sentences, one move per stanza: 무슨 일 → 그 결과 → 이유 |
+| Register | 폴라이트-캐주얼 종결 (`~요` / `~ㅂ니다`), 괄호 방백 허용, 감탄은 진짜일 때만 |
+| Closing | the last stanza is a **한 줄 토** built from the paper's own stated limits |
+
+Hard constraints:
+
+- **No bullets, no headings, no numbered lists.** A list here is a summary
+  wearing prose clothes, and the tab already has cards for that.
+- **Every number in it appears elsewhere with a citation** — the rail or an act
+  card. The narrative itself carries no source marks; it would break the read.
+- **No opinion the paper does not hold.** Relaying is the whole job here; our
+  own position lives in the body's act 4 and nowhere on this tab (G7).
+- **Not the body's summary paragraph.** `summary:` is 2–3 sentences read cold;
+  this is a different artifact at ten times the length and must not restate it
+  phrase for phrase.
+
+### 4-5. G5 — `probe-rail`, the conditions beside the prose
+
+    ```probe-rail
+    {"items": [{"k": "<항목>", "v": "<값>", "note": "<선택 — 한 줄>"}]}
+    ```
+
+**5–7 items.** The rail is the answer to the questions a reader forms while
+reading the narrative, so it is keyed by question, not by a fixed schema:
+
+| The question | Typical item |
+|---|---|
+| 무엇을 읽었나 | the exact version and date |
+| 무엇에 적용했나 | the models, backbones or datasets the method was put on |
+| 얼마나 | the two or three headline numbers |
+| 어떤 조건에서 | rig, hardware, control rate, trial count — whatever the claim depends on |
+| 무엇과 비교했나 | baselines and benchmarks |
+| 저자는 무엇을 못 한다고 했나 | the author-stated limits, in three or four words |
+
+The last row is not optional padding: without it the tab reads as advocacy.
+The rail fills the column the narrative leaves empty, so it is **information,
+not decoration** — a rail of restated adjectives is worse than no rail.
+
+### 4-6. G6 — `probe-act`, four cards and no more
+
+    ```probe-act
+    {"n": <1–4>, "title": "<주장형 제목 — 이 논문에만 맞는>",
+     "claim": "<한 줄>",
+     "figure": "<figure id>",
+     "eq": "<LaTeX, 구분자 없이>",
+     "scale": {"rows": [{"label": "<비교 대상>", "n": <number>, "value": "<표기>"}]},
+     "source": "<원문 §<x> · Table <n> · 부록 <X>>"}
+    ```
+
+- **Exactly four**, `n` = 1…4, mapping to the body's four acts. The act *names*
+  on the card are the ones this paper earns (문제 / 관찰 / 방법 / 증거 is the
+  common shape, not a fixed vocabulary), but the count is fixed — a fifth card
+  means the tab is becoming the body.
+- **Each card carries at least one of `figure` / `eq` / `scale`.** A card of
+  three prose lines is the failure this tab exists to avoid.
+- `title` follows R2: a claim about *this* paper, never a template heading.
+- `source` is required on every card. Every number on this tab is traceable in
+  one glance without leaving it.
+
+### 4-7. G7 — What the glance may not contain
+
+- **No `D#`, no `context/` material, no our-view opinion.** Our layer is act 4
+  of the body. Mixing it in here puts a claim the paper never made one card
+  away from the paper's own numbers. **The build rejects a `D#` on this tab.**
+- **No number that is not in the original.** Nothing is computed for effect;
+  a ratio the paper does not state is not ours to print.
+- **No sentence copied from the body.** Same facts, written again.
+
+---
+
+## 5. The Deck Section (S1–S9)
+
+A deck for presenting the paper to people **outside our team**. It is the one
+surface where the audience does not know our context and cannot be told to
+read something first.
+
+### 5-1. S1 — Same source, same independence
+
+S1 is G1 for slides: written from the original in the same run, never by
+turning the body into bullets. A slide deck derived from a document reliably
+becomes that document at 40 % scale, in a font too large for it.
+
+### 5-2. S2 — The audience is outside the team
+
+- **No `D#` and no `context/` citation.** The build rejects both here, for the
+  same reason as G7 plus one more: they are unreadable to the audience.
+- The closing slide is **적용 범위** — where the method attaches and where it
+  does not, the second half taken from the author-stated limits. A deck that
+  ends on results ends on advocacy.
+- Our own reading of the paper stays on the 상세 tab. If an internal review
+  needs it, the answer is to open that tab, not to grow the deck.
+
+### 5-3. S3 — One container, one fence per slide
+
+    ::: deck
+    ```probe-slide
+    {"kind": "cover|figure|diagram|film|text",
+     "chapter": "<문제|관찰|방법|결과|정리>",
+     "kicker": "<짧은 라벨>",
+     "title": "<한 줄 — 주장. 토픽 이름이 아니다>",
+     "source": "<원문 근거 — 그림 번호 · 절 · 표>",
+     "note": "<발표자 노트 — 이 장에서 무엇을 말하나>",
+     "qa": "<예상 질문 하나와 그 답>"}
+    ```
+    :::
+
+**11 ± 2 slides.** `note` and `qa` are required on every slide except the
+cover; `title` carries a claim, so that reading only the titles is the talk.
+`chapter` is required on every slide except the cover, and the five values are
+fixed — the page draws a progress row from them.
+
+The deck is **a panel on the paper's page**, presented from the page itself —
+full screen, keyboard, presenter notes. There is no export: a second artifact
+would be a second thing to keep in step with the original, and the page is
+already the thing that is always current.
+
+Per-kind keys:
+
+| `kind` | Extra keys | Use |
+|---|---|---|
+| `cover` | — | title, authors, id. No chapter |
+| `figure` | `figure`: `<figure id>` | the paper's own figure, full bleed, with a one-line claim over it |
+| `diagram` | `diagram`: {…} (§5-5), `why` | what the paper states only as a table, an equation or prose |
+| `film` | `figure`, `film`: {…} (§5-7) | a filmstrip figure played at its stated frame interval |
+| `text` | `body`: `["<줄>"]` or `{"cols": [["<줄>"], ["<줄>"]]}` | contrasts and the closing slide |
+
+Any slide may carry `"steps": <2–4>` (§5-6).
+
+### 5-4. S4 — The paper's own figure first, again
+
+R6 governs here too, with one addition: a figure drawn for **print** often
+cannot be read from the back of a room. The test is legibility, not preference.
+
+- Reads at presentation distance → `kind: figure`. Cite it, say one thing over
+  it, move on.
+- Axis labels or cell text too small, or the point exists only as a table or an
+  equation → `kind: diagram`, and `why` states which original figure would have
+  covered the point and why it cannot serve (no such figure / inline SVG with
+  no file / unreadable at distance). **`why` is required and the build rejects
+  a diagram without one** — the same rule and the same reason as `probe-flow`.
+
+### 5-5. S5 — Five drawn diagrams, and five kinds to draw them with
+
+**At most five `kind: diagram` slides per deck. The build rejects a sixth.**
+Every drawn diagram is a claim we own and have to verify; five is the point
+where a reviewer can still check them all against the original.
+
+Authors supply **data, not drawings**. Hand-written SVG is not accepted (R12 —
+visual rules belong to the site), and neither is an image file. The build draws
+one of five shapes:
+
+    ```probe-diagram
+    {"kind": "bars|timeline|matrix|lanes|slope",
+     "title": "<이 그림이 말하는 것>",
+     "unit": "<단위>",
+     "note": "<축·색이 무엇인지 한 줄>"}
+    ```
+
+| `kind` | Shape | Extra keys |
+|---|---|---|
+| `bars` | ranked values, optionally 기존 vs 이후, against a floor | `rows`: `[{"label", "before", "after"}]` or `[{"label", "n"}]`; `baseline`: `{"label", "n"}`; `lower_better` |
+| `timeline` | one axis of time, one row per condition, segments named | `rows`: `[{"label", "segments": [{"name", "len"}], "mark": "<끝점 라벨>"}]`; `grid`: `<눈금 간격>` |
+| `matrix` | a grid whose cells carry one of two states — before / after side by side | `panels`: `[{"label", "cells": [[0,1,…]]}]`; `axis`: `{"x", "y"}` |
+| `lanes` | two actors and what passes between them | `lanes`: `[{"label", "blocks", "active"}]`; `handoffs`: `[{"at": <n>, "label"}]` |
+| `slope` | before → after pairs on a shared scale | `pairs`: `[{"group", "label", "before", "after"}]` |
+
+Rules that hold across all five:
+
+- **Every value comes from the original**, and `source` on the slide names
+  where. A diagram is the easiest place to smuggle in a number nobody checked.
+- **Do not redraw a figure that already reads.** That is what S4 decides, and
+  `why` is where the decision is written down.
+- **Colour is the site's** — a diagram declares meaning (`baseline`,
+  `lower_better`, which row is the paper's), never a colour.
+
+### 5-6. S6 — Progressive reveal, on comparisons only
+
+`"steps": <n>` splits a slide into `n` reveals, advanced by the same key that
+advances slides. **At most four slides in a deck carry it**, and only these
+two shapes qualify:
+
+- a **comparison** whose halves are spoken in order (먼저 A, 그다음 B);
+- **numbers that accumulate** into a conclusion.
+
+A photograph, a single figure, or a list of parallel items does not qualify —
+they are taken in at once, and a reveal there only makes the presenter
+remember a click count. The reveal order must match `note`, or the presenter
+is reading one script while the screen runs another.
+
+### 5-7. S7 — Motion comes from the original or not at all
+
+A rollout filmstrip printed as one figure can be **played** instead of shown,
+which is the strongest thirty seconds a deck gets. It is allowed under three
+conditions, all required:
+
+    "film": {"frames": <n>, "interval_ms": <n>, "slow": <2–4>,
+             "rows": ["<행 라벨>", "<행 라벨>"]}
+
+1. The figure **is** a filmstrip — evenly spaced frames of one continuous take.
+2. The **original states the frame interval**; `interval_ms` copies it. Without
+   a stated interval the playback speed would be ours, and a speed we invented
+   is a claim about the system's timing.
+3. `slow` is 2–4×. Real time is usually too fast to read from a seat, and the
+   footer says the true interval and the factor.
+
+Frames are cut **at render time from the hotlinked original**. Nothing is
+copied into the repository — R6's hotlink rule is not relaxed by cropping.
+
+**Every asset on this tab comes from the paper's arXiv original.** A project
+page, a demo video, a repository README or any other host is not collected,
+even when the paper links it: those hosts move, disappear and carry numbers
+from an older version of the work, and a deck that half-loads in front of an
+audience is worse than one without motion.
+
+### 5-8. S8 — Notes carry the talk, footers carry the conditions
+
+- `note` — what the presenter says here, in one or two sentences. For a
+  `steps` slide it names the order of the reveals.
+- `qa` — **one** anticipated question and its answer, on every slide. The
+  questions that actually come are about measurement conditions and scope;
+  writing them down is how the deck stops being a wall.
+- A **results** slide states its measurement conditions in `source` — the rate,
+  the horizon, how many trials, mean ± sd. "그 숫자는 뭘 기준으로" is the first
+  question asked and the cheapest one to pre-empt.
+
+### 5-9. S9 — Chapters, and the shape of a deck
+
+The five chapters are fixed — 문제 · 관찰 · 방법 · 결과 · 정리 — and the page
+draws a progress row from them. Slides within a chapter are contiguous; a deck
+that revisits 문제 after 결과 is two talks.
+
+A deck that satisfies every rule above and still feels flat is usually missing
+one of these, in the order they go missing:
+
+1. **The mechanism that carries the result to the user.** A method slide
+   without the deployment path leaves "why does that make it faster / better"
+   unanswered.
+2. **The cost.** A slide stating what got worse, in the paper's own numbers,
+   before the audience asks. Outside the team, this is what buys the rest.
+3. **The scope.** Where it attaches and where it does not — S2's closing slide.
+
+---
+
+## 6. Enforcement
 
 Everything is checked by the build, which is the same pipeline that produces
 the page — so a rule is enforced against the artifact a reader actually gets.
@@ -652,6 +967,22 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |
+
+The two short surfaces are checked in the same pass, against the same source
+file. Each row is a **hard failure**, not a warning — a glance that leaks our
+view or a deck of eleven redrawn diagrams is not something a reader can be
+asked to discount:
+
+| Rule | Enforced by |
+|---|---|
+| The glance spine — hub, narrative, rail, exactly four `probe-act` (G2, G6); narrative length band and its bullet ban (G4); rail item count (G5) | `site/builder/glance.py` |
+| A `D#`, a `context/` path, or an act-4 opinion anywhere in `::: glance` or `::: deck` (G7, S2) | `site/builder/glance.py`, `site/builder/deck.py` |
+| Slide count band, required `chapter` / `note` / `qa`, the fixed chapter vocabulary and their contiguity (S3, S8, S9) | `site/builder/deck.py` |
+| **Five drawn diagrams per deck** (S5), the required `why` on every one (S4), and the `steps` ceiling of four slides (S6) | `site/builder/deck.py` |
+| `probe-hub` / `probe-rail` / `probe-act` / `probe-slide` / `probe-diagram` schemas, including the five diagram kinds and their row shapes (§4-3, §4-5, §4-6, §5-3, §5-5) | `site/builder/mdext/probefence.py` |
+| Drawing the five diagram kinds from data — the author supplies no geometry and no colour (S5) | `site/builder/diagrams.py` |
+| `film` accepted only with a stated `interval_ms` and `slow` in 2–4, frames cut from the hotlinked original (S7) | `site/builder/diagrams.py` |
+| `figures:` ↔ every `probe-figure`, `probe-hub`, `probe-act` and `probe-slide` figure id, across all three surfaces (R6) | `site/builder/corpus.py` |
 
 One check sits outside the build, because it is about meaning rather than
 rendering:
@@ -670,5 +1001,9 @@ python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
 python3 linters/check-decision-refs.py
 ```
 
-`--strict` must exit 0. Everything in §1–§3 that is not in the tables above is
+`--strict` must exit 0. Everything in §1–§5 that is not in the tables above is
 enforced by review, not by code, which is why the prompt's self-check exists.
+The rules code cannot see are the ones that decide whether the two short
+surfaces are worth having: whether the narrative sounds like a person, whether
+a drawn diagram was worth drawing, and whether the deck's titles read as an
+argument when you skim them alone.
