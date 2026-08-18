@@ -89,9 +89,24 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
   main` retry as an in-prompt backstop).
 - The form has no `context_files` field and needs none: the prompt names its
   own inputs (`context/P1.md` §1–§6, the last 2 weeks of `scouting/`), the
-  `curl` procedure, the output rules and the guards. Being pillar-scoped, it
-  omits the monthly Cross-pollination rule, whose source is
-  `context/MASTER.md` §7.
+  `curl` procedure, the scoring contract and the guards. A pillar-scoped run
+  never reads `context/MASTER.md`, so the two tables it would need from there
+  — Venue Priority and the monthly Cross-pollination Budget — are inlined in
+  the prompt's SCORING section. Keep them in sync with `context/MASTER.md`
+  §6–§7 when either moves.
+
+### 3-1. Re-paste after every prompt change
+
+The form stores a **copy** of the prompt body, not a reference to the file. A
+routine keeps running the text it was created with, so a merged change to
+`.claude/prompts/scouting.txt` reaches nothing until each routine is edited
+and the body re-pasted — with that routine's `<PILLAR>` substitution redone.
+
+Six pillars means six routines to update, every time. Re-paste all of them in
+one pass rather than one at a time: a half-updated fleet has pillars scoring
+on different contracts, which is exactly the drift the scoring contract
+(`scouting/AUTHORING.md` §5) exists to prevent. After the last one, run
+**Run now** on a single pillar and walk §4 before letting the cadence resume.
 
 ## 4. First run
 
@@ -99,10 +114,16 @@ Use **Run now** on the routine detail page. A green status only means "exited
 without an infra error" — open the transcript and check the output with the
 same rigor as a manual run:
 
+- [ ] The transcript shows `linters/check-scouting-format.py` running on the
+      report and exiting 0 (PROCEDURE step 7). A run that skipped it, or
+      committed while it still reported violations, is the failure to catch
+      here — CI on `main` only reports after the fact.
 - [ ] Follows `scouting/templates/report.md` + `scouting/AUTHORING.md`.
 - [ ] One Korean report at `scouting/P#/YYYY-MM-DD.md`, no language-suffixed
       twin (`CLAUDE.md` → "Document language convention").
 - [ ] Every paper link resolves — no fabricated arXiv IDs.
+- [ ] Each Reproducibility bullet quotes the evidence string it scored on, and
+      none rests on public-benchmark coverage (`scouting/AUTHORING.md` §5-2).
 - [ ] The `Papers scanned:` header discloses **no** `curl` 403 / network-block
       error; one there means the Custom allowlist is missing.
 - [ ] Decision implications are concrete — a specific config key,
@@ -110,5 +131,6 @@ same rigor as a manual run:
 - [ ] The Anti-topics filter fired; an empty "did not pass filter" section is
       suspicious.
 
-If anything fails, fix `.claude/prompts/scouting.txt` (or `context/P1.md`) and
-re-run — do not leave automation on with a bad prompt.
+If anything fails, fix `.claude/prompts/scouting.txt` (or `context/P1.md`),
+**re-paste the corrected body into every routine** (§3-1) and re-run — do not
+leave automation on with a bad prompt.
