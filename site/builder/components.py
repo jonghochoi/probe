@@ -195,7 +195,7 @@ document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 def nav(up: str) -> str:
     return f"""<nav>
   <div class="nav-inner">
-    <a class="nav-logo" href="{up}index.html">{mark(19)}PROBE <span>· 분석</span></a>
+    <a class="nav-logo" href="{up}index.html">{mark(19)}PROBE</a>
     <span class="nav-spacer"></span>
     <ul class="nav-links">
       <li><a href="{up}index.html">논문</a></li>

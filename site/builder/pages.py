@@ -137,7 +137,7 @@ def landing_page(papers: list[Paper], katex=None) -> str:
 </div>
 """
     return c.page(
-        title="PROBE · 논문 분석",
+        title="PROBE",
         description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
         depth=0,
