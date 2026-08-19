@@ -52,7 +52,7 @@
    themselves and the full grid below stays perfectly readable. */
 .filters {
   display: none;
-  position: sticky; top: var(--nav-h); z-index: 90;
+  position: sticky; top: var(--nav-h); z-index: var(--z-raised);
   background: color-mix(in srgb, var(--bg) 94%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -71,9 +71,9 @@ html.js .filters { display: block; }
 .search {
   display: flex; align-items: center; gap: .45rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 999px; padding: .32rem .8rem;
+  border-radius: var(--radius-pill); padding: .32rem .8rem;
   flex: 1 1 260px; max-width: 420px;
-  transition: border-color .15s;
+  transition: border-color var(--dur-short) var(--ease-out);
 }
 .search:focus-within { border-color: var(--amber-soft); }
 .search span { opacity: .5; font-size: .82rem; }
@@ -84,21 +84,24 @@ html.js .filters { display: block; }
 .search input::placeholder { color: var(--text-muted); opacity: .8; }
 
 .sort { display: flex; gap: .1rem; background: var(--surface-2);
-        border: 1px solid var(--border); border-radius: 999px; padding: .12rem; }
+        border: 1px solid var(--border); border-radius: var(--radius-pill); padding: .12rem; }
 .sort button {
   font: inherit; font-size: .74rem; font-weight: 600;
-  padding: .22rem .65rem; border-radius: 999px; cursor: pointer;
-  background: none; border: none; color: var(--text-muted); transition: all .14s;
+  padding: .22rem .65rem; border-radius: var(--radius-pill); cursor: pointer;
+  background: none; border: none; color: var(--text-muted);
+  transition: color var(--dur-short) var(--ease-out),
+              background var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
 }
 .sort button:hover { color: var(--text); }
 .sort button[aria-pressed="true"] {
-  background: var(--surface); color: var(--orange-deep);
-  box-shadow: 0 1px 3px rgba(60,30,15,.12);
+  background: var(--surface); color: var(--orange);
+  box-shadow: var(--shadow-sm);
 }
 
 .linkish {
   font: inherit; font-size: inherit; background: none; border: none;
-  color: var(--orange-deep); cursor: pointer; padding: 0;
+  color: var(--orange); cursor: pointer; padding: 0;
   text-decoration: underline; text-underline-offset: 2px;
 }
 
@@ -124,9 +127,9 @@ html.js .rail {
 .rail-item {
   font: inherit; font-size: .76rem; width: 100%;
   display: flex; align-items: center; gap: .4rem;
-  padding: .18rem .3rem; border-radius: 5px; cursor: pointer;
+  padding: .18rem .3rem; border-radius: var(--radius-xs); cursor: pointer;
   background: none; border: none; color: var(--text-muted);
-  transition: background .14s, color .14s;
+  transition: background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
 }
 .rail-item b {
   font-weight: 600; color: var(--text); overflow: hidden;
@@ -137,7 +140,7 @@ html.js .rail {
   font-variant-numeric: tabular-nums;
 }
 .rail-item .sw {
-  width: 9px; height: 9px; border-radius: 2px; flex: none; background: var(--pna);
+  width: 9px; height: 9px; border-radius: var(--radius-xs); flex: none; background: var(--pna);
 }
 .rail-item[data-p="P0"] .sw { background: var(--p0); }
 .rail-item[data-p="P1"] .sw { background: var(--p1); }
@@ -148,7 +151,7 @@ html.js .rail {
 .rail-item:hover { background: var(--surface-2); color: var(--text); }
 .rail-item[aria-pressed="true"] { background: var(--orange); }
 .rail-item[aria-pressed="true"] b,
-.rail-item[aria-pressed="true"] .rn { color: #fff; opacity: 1; }
+.rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
 
 /* ── Lead: the newest rewrite, printed ────────────────────────────────── */
 .lead {
@@ -160,8 +163,8 @@ html.js .rail {
 .lead-top { display: flex; align-items: center; gap: .5rem; margin-bottom: .55rem; }
 .lead-flag {
   font-size: .64rem; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: #fff; background: var(--orange);
-  padding: .1rem .4rem; border-radius: 3px;
+  text-transform: uppercase; color: var(--accent-ink); background: var(--orange);
+  padding: .1rem .4rem; border-radius: var(--radius-xs);
 }
 .lead-when {
   font-size: .72rem; color: var(--text-muted);
@@ -172,7 +175,7 @@ html.js .rail {
   font-size: clamp(1.1rem, 2.4vw, 1.35rem); font-weight: 800;
   letter-spacing: -.025em; line-height: 1.35; text-wrap: balance;
 }
-.lead-body:hover .lead-title { color: var(--orange-deep); }
+.lead-body:hover .lead-title { color: var(--orange); }
 .lead-tagline {
   font-size: .85rem; color: var(--text); margin-top: .25rem; font-weight: 600;
 }
@@ -190,17 +193,19 @@ html.js .rail {
 }
 .lead-foot .chip.tag {
   font-size: .68rem; padding: .1rem .4rem; cursor: pointer;
-  font-family: inherit; transition: all .14s;
+  font-family: inherit;
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
 }
-.lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange-deep); }
+.lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange); }
 
 /* The one value the paper is remembered by (front matter `metric`). Reads as
    a reading, not a label: mono digits, the brand wash behind them. */
 .metric {
   display: inline-flex; align-items: center;
   font-family: var(--mono); font-size: .7rem; font-weight: 600;
-  padding: .08rem .42rem; border-radius: 999px;
-  background: var(--orange-soft); color: var(--orange-deep);
+  padding: .08rem .42rem; border-radius: var(--radius-pill);
+  background: var(--orange-soft); color: var(--orange);
   border: 1px solid var(--amber-soft); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -232,7 +237,7 @@ html.js .rail {
   line-height: 1.45; letter-spacing: -.01em;
 }
 .row-title .metric { margin-left: .4rem; vertical-align: 1px; }
-.row-main:hover .row-title { color: var(--orange-deep); }
+.row-main:hover .row-title { color: var(--orange); }
 .row-tagline {
   display: block; font-size: .79rem; line-height: 1.55; color: var(--text-muted);
   margin-top: .1rem;
@@ -265,15 +270,22 @@ html.js .rail {
 }
 .hub-actions button, .filebtn {
   font: inherit; font-size: .78rem; font-weight: 600;
-  padding: .35rem .75rem; border-radius: 8px; cursor: pointer;
+  padding: .35rem .75rem; border-radius: var(--radius-sm); cursor: pointer;
   background: var(--surface); border: 1px solid var(--border);
-  color: var(--text-muted); transition: all .15s;
+  color: var(--text-muted);
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
 }
 .hub-actions button:hover, .filebtn:hover {
-  border-color: var(--amber-soft); color: var(--orange-deep);
+  border-color: var(--amber-soft); color: var(--orange);
 }
-.hub-actions .primary { background: var(--orange); border-color: var(--orange); color: #fff; }
-.hub-actions .primary:hover { background: var(--orange-deep); color: #fff; }
+.hub-actions .primary {
+  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
+}
+.hub-actions .primary:hover {
+  background: color-mix(in oklab, var(--orange) 88%, var(--text));
+  border-color: color-mix(in oklab, var(--orange) 88%, var(--text));
+}
 .hub-status { font-size: .74rem; color: var(--text-muted); }
 
 .memo-card {
@@ -286,7 +298,7 @@ html.js .rail {
 .memo-card-head a {
   font-size: .9rem; font-weight: 700; text-decoration: none; color: var(--text);
 }
-.memo-card-head a:hover { color: var(--orange-deep); }
+.memo-card-head a:hover { color: var(--orange); }
 .memo-card-head time {
   margin-left: auto; font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
@@ -301,7 +313,7 @@ html.js .rail {
 }
 
 .notfound { text-align: center; padding: 6rem 1.25rem; }
-.notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange-deep); }
+.notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 
 @media (max-width: 900px) {

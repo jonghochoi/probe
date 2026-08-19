@@ -636,31 +636,3 @@ def _decorate_refs(text: str, decisions: dict) -> str:
         tip = html.escape(f"P{pillar} · {title}", quote=True)
         return f'<abbr class="dref" title="{tip}">D{n}</abbr>'
     return _DREF_HTML.sub(sub, text)
-
-
-
-# Paired themes: the code block follows the page instead of staying dark on a
-# light page. Both are chosen for a warm ground — the cream `--bg` and the
-# near-black `#14110f` — where a theme built for neutral grey goes muddy.
-LIGHT_STYLE = "friendly"
-DARK_STYLE = "nord-darker"
-
-
-def pygments_css() -> str:
-    """Both themes, scoped so specificity alone switches them.
-
-    `.hl` is (0,1,0) and `[data-theme="dark"] .hl` is (0,1,1), so the dark
-    rules win whenever the attribute is set and lose when it is not — no
-    media query, and the manual toggle keeps working in both directions.
-    """
-    light = HtmlFormatter(style=LIGHT_STYLE, cssclass="hl").get_style_defs(".hl")
-    dark = HtmlFormatter(style=DARK_STYLE, cssclass="hl").get_style_defs(
-        '[data-theme="dark"] .hl'
-    )
-    # `get_style_defs` opens with a bare `pre { line-height: 125% }`, which is
-    # unscoped and would silently override the 1.62 set in site.css for every
-    # `<pre>` on the page — including ones Pygments never touched.
-    drop = "pre { line-height: 125%; }"
-    return "\n".join(
-        part.replace(drop, "").strip() for part in (light, dark)
-    ) + "\n"

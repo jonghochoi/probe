@@ -171,7 +171,6 @@ def page(
 <link rel="stylesheet" href="{up}assets/fonts.css">
 <link rel="stylesheet" href="{up}assets/katex/katex.min.css">
 <link rel="stylesheet" href="{up}assets/site.css">
-<link rel="stylesheet" href="{up}assets/pygments.css">
 {extra_head}
 <script>
 /* Runs before first paint. Two jobs: set the theme (otherwise a dark-mode
