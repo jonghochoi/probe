@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="96" viewBox="12 0 72 96" role="img" aria-label="PROBE — on target">
+  <style>
+    .hull   { fill: #D97757; }
+    .iris   { fill: #FFFAF7; }
+    .joy    { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .stalk  { stroke: #CC785C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #CC785C; }
+    .wave   { fill: none; stroke: #CC785C; stroke-width: 2.6;
+              stroke-linecap: round; opacity: 0; }
+    .shadow { fill: #CC785C; opacity: .55; }
+    .rig { animation: bob 3.4s ease-in-out infinite; }
+    .w1  { animation: ping 2.6s ease-in-out infinite; }
+    .w2  { animation: ping 2.6s ease-in-out .34s infinite; }
+    @keyframes bob  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes ping { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .rig, .wave { animation: none; }
+      .wave { opacity: .5; }
+    }
+  </style>
+
+  <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>
+  <g class="rig">
+    <path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/>
+    <path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/>
+    <path class="stalk" d="M48 26 V19"/>
+    <circle class="beacon" cx="48" cy="16" r="5"/>
+    <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+    <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><path class="joy" d="M30 54 a6.5 6.5 0 0 1 12 0"/></g></g>
+    <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><path class="joy" d="M54 54 a6.5 6.5 0 0 1 12 0"/></g></g>
+  </g>
+</svg>
