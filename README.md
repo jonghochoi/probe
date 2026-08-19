@@ -50,19 +50,13 @@ decides.
 
 ---
 
-## How it works
+## Who owns what
 
-```
-   context/   static · human-owned · read-only on every run
-      │       MASTER.md — global anchor · P#.md — per-pillar Decision Log
-      ▼
-   PROBE ───── scheduled, one pillar per run ────►  scouting/P#/YYYY-MM-DD.md
-      │                                             3–5 papers, decision-grade
-      └─────── /analyze <arXiv id> ──────────────►  analysis/<id>.md
-      │                                             one paper, a published page
-      ▼  informs
-   Human — read, judge, discard, refresh context/
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/flow-dark.svg">
+  <img src="assets/flow.svg" width="880"
+       alt="PROBE pipeline — the day's arXiv narrowed to 3–5 papers, out to a scouting report and an analysis page, and back through the human into context/">
+</picture>
 
 | Folder | Written by | Cadence | Write mode |
 |---|---|---|---|
