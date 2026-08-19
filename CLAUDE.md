@@ -95,8 +95,14 @@ Hard rules:
    (e.g. `LaST-HD`, `Being-H0.7`, `T-Rex`); (2) failing a colon, an acronym
    the paper explicitly defines for itself as `ACRONYM (Full Expansion)` in
    the title / abstract / intro whose expansion initials spell the acronym
-   (e.g. `Human Universal Grasping` → `HUG`); (3) otherwise omitted — a plain
-   descriptive title with neither a colon codename nor a self-defined acronym
+   (e.g. `Human Universal Grasping` → `HUG`); (3) failing both, the name the
+   authors give their own method in the paper's own prose — introduced as
+   "we propose X" / "we call it X" / "our X" and used as the method's
+   designator from there on — **even when the paper never expands it**
+   (e.g. `DQ-RISE`). It qualifies only if it reads as a proper name: capitals,
+   digits or a hyphenated compound, not a descriptive noun phrase, so
+   "our quantized hand state policy" yields nothing; (4) otherwise omitted —
+   a plain descriptive title whose method is never given a name of its own
    gets no alias, and one is never invented.)
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
    `site`, `scouting`, `analysis`, `context`, `prompts`, `linters`,
