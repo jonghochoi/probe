@@ -89,8 +89,24 @@
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () { showSurface(tab.dataset.tab, true); });
     });
-    var hash = (location.hash || "").slice(1);
-    showSurface(hash === "full" ? hash : "glance", false);
+    // A link into the body — a section, a term, a figure — names an element
+    // that lives inside 상세. Landing on 요약 with it hidden makes the page look
+    // like it ignored the link, so the surface follows the target.
+    function surfaceForHash() {
+      var hash = (location.hash || "").slice(1);
+      var target = hash && document.getElementById(hash);
+      var full = document.getElementById("p-full");
+      var deep = target && full && full.contains(target);
+      showSurface(hash === "full" || deep ? "full" : "glance", false);
+      // The browser scrolls to the target as it arrives, while the panel is
+      // still hidden, so nothing moves. Now that it is open, do it again.
+      if (deep) target.scrollIntoView();
+    }
+
+    surfaceForHash();
+    // Changing only the fragment does not reload the document, so the same
+    // link followed from this page has to be handled rather than waited for.
+    addEventListener("hashchange", surfaceForHash);
   }
 
   spyToc();

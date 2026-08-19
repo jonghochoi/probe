@@ -183,6 +183,20 @@ class Paper:
         """The summary flattened for the landing card and `<meta>`."""
         return _plain(self.front.get("summary", ""))
 
+    @property
+    def search_key(self) -> str:
+        """The identity fields, compacted — a hit here outranks one in the body."""
+        return _haystack([
+            self.stem, self.title, self.tagline, self.authors, self.metric,
+            *self.tags, *self.pillars,
+            *(PILLAR_NAMES[p] for p in self.pillars if p in PILLAR_NAMES),
+        ])
+
+    @property
+    def search_hay(self) -> str:
+        """Everything the landing filter may match, compacted (`HAY_MAX` cap)."""
+        return _haystack(_fragments(self))
+
 
 # ── Math → plain text ───────────────────────────────────────────────────────
 # A card preview is clamped plain text: no KaTeX runs there. Deleting the math
@@ -258,6 +272,83 @@ def _plain(md: str, limit: int = 240) -> str:
     text = re.sub(r"[*_`>#]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text[: limit - 1] + "…" if len(text) > limit else text
+
+
+# ── Search haystack ─────────────────────────────────────────────────────────
+# What the landing filter can match a query against. The card preview is 240
+# clamped characters — a preview, not an index — so a reader searching for a
+# term the rewrite spends a whole section on finds nothing. The haystack is
+# built instead from the parts of a rewrite that *name* things: headings, term
+# panels, figure captions, the summary in full. The prose that explains them is
+# left out; it is where lexical matching pays the most bytes for the least
+# recall, and it is what the semantic index is for.
+#
+# Two fields per paper, because where a word appears is itself a signal:
+# `search_key` is the identity (title, tagline, tags, authors, metric, id), and
+# `search_hay` is everything. A hit in the first outranks a hit in the second.
+#
+# Both are emitted **compacted** — lowercased with whitespace and punctuation
+# removed — so the browser never has to normalise a 7 KB string per keystroke,
+# and so a Korean particle glued to a query word ("힘제어를") still finds the
+# text that spells it apart ("힘 제어"). Fragments are joined with `·`, which
+# survives compaction and stops a phrase from matching across two of them.
+HAY_JOIN = " · "
+HAY_MAX = 8000
+
+_HEADING = re.compile(r"^#{1,4}[ \t]+(.+?)[ \t]*$", re.M)
+_FENCE_KIND = re.compile(r"^```probe-([a-z]+)[ \t]*\n(.*?)^```[ \t]*$", re.M | re.S)
+# JSON string values, escapes intact — the fences are hand-authored JSON and a
+# `\"` inside a Korean sentence is ordinary.
+_JSON_STR = r'"{}"\s*:\s*"((?:[^"\\]|\\.)*)"'
+# The keys that carry named content across every fence kind the surfaces use.
+HAY_KEYS = ("title", "body", "caption", "claim", "label", "note")
+
+_PUNCT = re.compile(r"[^0-9a-z가-힣ㄱ-ㅎㅏ-ㅣ·]+")
+
+
+def compact(text: str) -> str:
+    """Lowercase, strip whitespace and punctuation, keep `·` as the barrier.
+
+    The one normalisation both sides of the match run through: the build calls
+    it on the haystack, `filter.js` calls its twin on the query.
+    """
+    return _PUNCT.sub("", text.lower())
+
+
+def _fragments(paper: "Paper") -> list[str]:
+    """The named parts of one rewrite, in the order a reader meets them."""
+    source = paper.body
+    out = [
+        paper.stem, paper.title, paper.tagline, paper.authors, paper.metric,
+        *paper.tags, *paper.pillars,
+        *(PILLAR_NAMES[p] for p in paper.pillars if p in PILLAR_NAMES),
+        _plain(paper.summary_md, limit=10_000),
+    ]
+    # Headings carry both languages — `### 한글 제목 | English · Subtitle` — and
+    # the English half is often the only place the paper's own term appears.
+    out += [h.replace("|", " ") for h in _HEADING.findall(paper.article or source)]
+    # Term panels are the 한/영 bridge: `title` is `flow matching`, `body` is the
+    # Korean explanation. They are the highest-value bytes in here.
+    for _kind, payload in _FENCE_KIND.findall(source):
+        for key in HAY_KEYS:
+            out += [
+                v.replace('\\"', '"')
+                for v in re.findall(_JSON_STR.format(key), payload)
+            ]
+    return out
+
+
+def _haystack(fragments: list[str]) -> str:
+    """Compacted, deduplicated, capped."""
+    seen: set[str] = set()
+    kept: list[str] = []
+    for frag in fragments:
+        piece = compact(_plain(frag, limit=2_000))
+        if not piece or piece in seen:
+            continue
+        seen.add(piece)
+        kept.append(piece)
+    return compact(HAY_JOIN).join(kept)[:HAY_MAX]
 
 
 # ── Discovery ───────────────────────────────────────────────────────────────

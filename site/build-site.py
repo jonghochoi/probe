@@ -18,6 +18,8 @@ server-side math (`--katex=client` renders in the browser instead).
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import re
 import shutil
 import sys
@@ -42,6 +44,7 @@ except ImportError:
 from builder import assets_out, corpus, pages
 from builder.decisions import harvest_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
+from builder.render import DocRenderer
 
 
 def build(args) -> int:
@@ -52,6 +55,9 @@ def build(args) -> int:
         if not papers:
             sys.stderr.write(f"error: no rewrite matched {args.only}\n")
             return 2
+
+    if args.index:
+        return write_index(Path(args.index), papers, problems)
 
     if args.check:
         for line in problems:
@@ -82,7 +88,8 @@ def build(args) -> int:
     problems += render_problems
 
     # The landing page indexes whatever was built — with `--only`, a subset.
-    rendered[out / "index.html"] = pages.landing_page(papers, katex)
+    rendered[out / "index.html"] = pages.landing_page(
+        papers, katex, search_api=args.search_api)
     rendered[out / "memos" / "index.html"] = pages.memos_page()
     rendered[out / "404.html"] = pages.not_found_page()
 
@@ -101,10 +108,11 @@ def build(args) -> int:
     # The font subset is cut from the *assembled* pages, so it must be computed
     # after the KaTeX splice — and from the asset sources too, since the JS
     # writes Korean UI strings that appear in no page's markup.
-    charset = set(assets_out.asset_text())
+    extras = assets_out.OPTIONAL["search"] if args.search_api else ()
+    charset = set(assets_out.asset_text(extras))
     for html in final.values():
         charset |= set(_TEXT_ONLY.sub(" ", html))
-    stats = assets_out.copy_all(out, charset)
+    stats = assets_out.copy_all(out, charset, extras)
     # An asset-pipeline failure is a page failure: a mangled KaTeX stylesheet
     # publishes every formula in the body font and no reader reports it.
     problems.extend(stats["problems"])
@@ -129,6 +137,34 @@ def build(args) -> int:
     if args.strict and (problems or warn):
         sys.stderr.write("error: --strict and the build was not clean\n")
         return 1
+    return 0
+
+
+def write_index(path: Path, papers, problems: list[str]) -> int:
+    """Cut the rewrites into chunks and write them as JSONL.
+
+    Chunking needs the renderer — a chunk carries the anchor of the section it
+    deep-links into, and that comes from the `DocRenderer` the page is built
+    with rather than from a second slug parser. Nothing here reaches the
+    network: embedding and upload are `site/search/indexer.py`, so this half
+    runs in CI with no key.
+    """
+    from search import chunks as chunk_mod
+
+    out = []
+    for paper in papers:
+        renderer = DocRenderer(ClientRenderer())
+        renderer.render(paper.article or paper.body)
+        out += chunk_mod.from_rewrite(paper, renderer.toc)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as fh:
+        for chunk in out:
+            fh.write(json.dumps(chunk.as_dict(), ensure_ascii=False) + "\n")
+    print(f"build-site --index: {len(out)} chunk(s) "
+          f"across {len(papers)} rewrite(s) → {path}")
+    for line in problems:
+        sys.stderr.write(f"warning: {line}\n")
     return 0
 
 
@@ -169,10 +205,15 @@ def main() -> int:
     ap.add_argument("--out", default=".site", help="output directory (default: .site)")
     ap.add_argument("--only", nargs="*", help="build only these arXiv ids")
     ap.add_argument("--check", action="store_true", help="lint only; write nothing")
+    ap.add_argument("--index", metavar="FILE",
+                    help="write the search index (JSONL) and build no pages")
     ap.add_argument("--strict", action="store_true", help="fail on any warning")
     ap.add_argument("--serve", action="store_true", help="serve --out after building")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--katex", choices=("server", "client"), default="server")
+    ap.add_argument("--search-api", default=os.environ.get("PROBE_SEARCH_API", ""),
+                    metavar="URL",
+                    help="semantic-search endpoint; omitted, the site makes no requests")
     args = ap.parse_args()
 
     code = build(args)

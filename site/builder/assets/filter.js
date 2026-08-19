@@ -5,6 +5,10 @@
  * templated, so the page works from `file://` and degrades to "every paper,
  * newest first" with JS off.
  *
+ * Matching runs over two compacted haystacks the build put on every row —
+ * the paper's identity and everything the rewrite names — so a term the
+ * rewrite defines is findable even though the card only prints a summary.
+ *
  * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke.
@@ -23,6 +27,7 @@ const seps = [...root.querySelectorAll("[data-sep]")];
 const lead = root.querySelector("[data-lead]");
 const listhead = root.querySelector("[data-listhead]");
 const emptyMsg = root.querySelector("[data-empty]");
+const partialMsg = root.querySelector("[data-partial]");
 const countEl = bar.querySelector("[data-result-count]");
 const input = bar.querySelector("[data-q]");
 const sortBtns = [...bar.querySelectorAll("[data-sort]")];
@@ -60,11 +65,56 @@ function syncControls() {
   document.querySelectorAll("[data-facet-tag]").forEach((b) => {
     b.setAttribute("aria-pressed", state.tags.has(b.dataset.facetTag) ? "true" : "false");
   });
-  sortBtns.forEach((b) => b.setAttribute("aria-pressed", b.dataset.sort === state.sort ? "true" : "false"));
+  // While a query ranks the list, none of the three is what the rows are in —
+  // pressing 최신순 during a relevance sort would be the control lying about
+  // the order. Clicking one still takes the list back.
+  const ranked = !!state.q.trim() && state.sort === "recent";
+  sortBtns.forEach((b) => b.setAttribute(
+    "aria-pressed", !ranked && b.dataset.sort === state.sort ? "true" : "false"));
+}
+
+/* ── Query normalisation ──────────────────────────────────────────────── */
+/* The build compacts both haystacks with one rule (`corpus.compact`): lowercase,
+ * then drop everything that is not a letter, a digit, or the `·` that fences one
+ * fragment off from the next. The query goes through the same mill — minus the
+ * `·`, which is the haystack's barrier and never a reader's word — so "힘 제어"
+ * finds text that spells it "힘제어" and the other way round. Korean spacing is
+ * not stable enough to match on, and neither is ours.
+ */
+const DROP = /[^0-9a-z가-힣ㄱ-ㅎㅏ-ㅣ]+/g;
+function compact(s) { return s.toLowerCase().normalize("NFC").replace(DROP, ""); }
+
+/* A query is typed as speech — "액션청킹은", "지연을", "그리퍼로" — while the text
+ * spells the word bare. Strip one trailing particle and try both forms; longest
+ * first, so "으로" never loses to "로". The guard keeps a short word whole: "은" is
+ * a particle, "가치" is not.
+ */
+const PARTICLES = [
+  "으로부터", "로부터", "에서는", "에게서", "이라는", "으로는", "까지", "부터",
+  "처럼", "보다", "에서", "에게", "한테", "이나", "으로", "라는", "라고", "이란",
+  "은", "는", "이", "가", "을", "를", "의", "에", "와", "과", "로", "도", "만", "랑",
+].sort((a, b) => b.length - a.length);
+
+function bare(term) {
+  for (const p of PARTICLES) {
+    if (term.length > p.length + 1 && term.endsWith(p)) return term.slice(0, -p.length);
+  }
+  return term;
+}
+
+function parse(q) {
+  return q.split(/\s+/).map(compact).filter(Boolean).map((t) => ({ t, b: bare(t) }));
 }
 
 /* ── Matching ─────────────────────────────────────────────────────────── */
-function matches(card) {
+/* Where a word lands is itself a signal: `data-key` is the paper's identity
+ * (title, tagline, tags, authors, metric, id) and `data-hay` is everything the
+ * rewrite names — headings, term panels, figure captions. A title hit and a
+ * footnote hit are not the same claim, so they do not score the same.
+ */
+const KEY_HIT = 3, HAY_HIT = 1;
+
+function facetOk(card) {
   if (state.pillars.size) {
     const own = card.dataset.pillars.split(" ");
     // A paper is kept if it touches ANY selected pillar — the pillars are
@@ -75,19 +125,27 @@ function matches(card) {
     const own = card.dataset.tags.split(" ");
     if (![...state.tags].every((t) => own.includes(t))) return false;
   }
-  if (state.q) {
-    const hay = card.dataset.hay;
-    // Every whitespace-separated term must appear: typing more narrows.
-    if (!state.q.toLowerCase().split(/\s+/).filter(Boolean).every((t) => hay.includes(t))) {
-      return false;
-    }
-  }
   return true;
 }
 
+function score(card, terms) {
+  const key = card.dataset.key || "", hay = card.dataset.hay || "";
+  let total = 0, hit = 0;
+  for (const { t, b } of terms) {
+    const inKey = key.includes(t) || (b !== t && key.includes(b));
+    const inHay = inKey || hay.includes(t) || (b !== t && hay.includes(b));
+    if (inHay) { hit += 1; total += inKey ? KEY_HIT : HAY_HIT; }
+  }
+  return { total, hit };
+}
+
 /* ── Order ────────────────────────────────────────────────────────────── */
-function ordered(shown) {
+function ordered(shown, scored) {
   const byDate = (a, b) => b.dataset.date.localeCompare(a.dataset.date);
+  // A query asks a question, and "newest" is not an answer to it. While one is
+  // typed the default sort ranks by how well a paper answers it; the three sort
+  // buttons still override, so asking for 최신순 during a search still gets it.
+  if (scored) return shown.slice().sort((a, b) => b._score - a._score || byDate(a, b));
   if (state.sort === "title") {
     return shown.slice().sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
   }
@@ -103,6 +161,7 @@ function ordered(shown) {
 
 /* ── Apply ────────────────────────────────────────────────────────────── */
 function apply() {
+  const terms = parse(state.q);
   const dirty = !!(state.q || state.pillars.size || state.tags.size);
   // The lead block stands in for the newest paper only while it *is* the top
   // of the list. Filter or re-sort and it stops being that, so it steps aside
@@ -111,14 +170,34 @@ function apply() {
   const leadOn = !!lead && !dirty && state.sort === "recent";
   if (lead) lead.hidden = !leadOn;
 
-  const shown = [];
+  const pool = cards.filter(facetOk);
+  let shown = pool, partial = false;
+  if (terms.length) {
+    pool.forEach((card) => {
+      const { total, hit } = score(card, terms);
+      card._score = total;
+      card._hit = hit;
+    });
+    // Every term must land — typing more narrows, which is what a reader
+    // expects. But a query nobody wrote for is the normal case here: one wrong
+    // word ("액션청킹 촉각") should not empty a corpus that answers most of it.
+    // So when nothing matches in full, the bar drops to "any term" and the page
+    // says so, rather than showing 0편 and letting the reader conclude we have
+    // never read anything on the subject.
+    shown = pool.filter((card) => card._hit === terms.length);
+    if (!shown.length) {
+      shown = pool.filter((card) => card._hit > 0);
+      partial = shown.length > 0;
+    }
+  }
+
+  const scored = terms.length > 0 && state.sort === "recent";
+  const keep = new Set(shown);
   cards.forEach((card) => {
-    const ok = matches(card);
-    if (ok) shown.push(card);
-    card.hidden = !ok || (leadOn && card.hasAttribute("data-lead-dup"));
+    card.hidden = !keep.has(card) || (leadOn && card.hasAttribute("data-lead-dup"));
   });
 
-  const rows = ordered(shown);
+  const rows = ordered(shown, scored);
   if (state.sort === "pillar") {
     seps.forEach((sep) => {
       const mine = rows.filter((r) => r.dataset.primary === sep.dataset.sep);
@@ -146,7 +225,9 @@ function apply() {
   // reordered, which is enough because nothing hidden is ever painted.
 
   const visible = shown.length;
-  countEl.textContent = visible === cards.length ? `${visible}편` : `${visible} / ${cards.length}편`;
+  const count = visible === cards.length ? `${visible}편` : `${visible} / ${cards.length}편`;
+  countEl.textContent = scored ? `${count} · 관련도순` : count;
+  if (partialMsg) partialMsg.hidden = !partial;
   if (emptyMsg) emptyMsg.hidden = visible > 0;
   if (listhead) listhead.hidden = visible - (leadOn ? 1 : 0) < 1;
   resetBtns.forEach((b) => { b.hidden = !dirty; });

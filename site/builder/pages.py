@@ -21,7 +21,7 @@ DISCUSSIONS_NEW = f"https://github.com/{REPO}/discussions/new?category=paper-not
 # than they save. Search covers everything the chips leave out.
 TAG_FACETS = 12
 
-def landing_page(papers: list[Paper], katex=None) -> str:
+def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
     The page answers "what should I read" before "what is here". The most
@@ -102,7 +102,7 @@ def landing_page(papers: list[Paper], katex=None) -> str:
     <label class="search">
       <span aria-hidden="true">🔍</span>
       <input type="search" data-q autocomplete="off" spellcheck="false"
-             placeholder="제목 · 요약 · 태그 · 저자 · arXiv id 로 검색"
+             placeholder="제목 · 본문 · 용어 · 태그 · 저자 · arXiv id 로 검색"
              aria-label="논문 검색">
     </label>
     <div class="sort" role="group" aria-label="정렬">
@@ -129,6 +129,10 @@ def landing_page(papers: list[Paper], katex=None) -> str:
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
       <span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>Pillar</span><span>분량</span>
     </div>
+    <div class="sem" data-sem hidden></div>
+    <p class="corpus-partial" data-partial hidden>
+      모든 단어를 포함하는 논문이 없어, <b>일부만 일치</b>하는 논문을 관련도순으로 보여줍니다.
+    </p>
     <div class="rows" data-rows>{seps}{rows}</div>
     <p class="corpus-empty" data-empty hidden>
       조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
@@ -141,8 +145,11 @@ def landing_page(papers: list[Paper], katex=None) -> str:
         description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
         depth=0,
-        scripts=["filter.js"],
+        # `semantic.js` ships only when the build was handed an endpoint, so a
+        # default build makes no request and needs no network to be correct.
+        scripts=["filter.js"] + (["semantic.js"] if search_api else []),
         extra_head='<link rel="stylesheet" href="assets/index.css">',
+        body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
     )
 
 
@@ -160,11 +167,12 @@ def _first_run() -> str:
 
 
 def _facets(paper: Paper) -> str:
-    """The `data-` attributes the filter script reads off a row."""
-    hay = " ".join(
-        [paper.stem, paper.title, paper.tagline, paper.preview, paper.authors,
-         *paper.tags]
-    ).lower()
+    """The `data-` attributes the filter script reads off a row.
+
+    The two haystacks are built and compacted in `corpus` — the row carries
+    them ready to match, so a keystroke costs the script a substring test and
+    nothing else (`corpus.HAY_MAX` bounds what one row can weigh).
+    """
     return (
         f'data-id="{c.esc(paper.stem)}" '
         f'data-pillars="{c.esc(" ".join(paper.pillars) or UNCLASSIFIED)}" '
@@ -172,7 +180,8 @@ def _facets(paper: Paper) -> str:
         f'data-tags="{c.esc(" ".join(paper.tags))}" '
         f'data-date="{c.esc(paper.date)}" '
         f'data-title="{c.esc(paper.title.lower())}" '
-        f'data-hay="{c.esc(hay)}"'
+        f'data-key="{c.esc(paper.search_key)}" '
+        f'data-hay="{c.esc(paper.search_hay)}"'
     )
 
 

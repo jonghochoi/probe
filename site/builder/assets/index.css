@@ -262,6 +262,72 @@ html.js .rail {
   padding: 3.5rem 1rem;
 }
 
+/* Says the bar dropped from "every term" to "any term". It sits above the rows
+   rather than replacing them: the rows are the answer, this is the caveat. */
+.corpus-partial {
+  color: var(--text-muted); font-size: .82rem;
+  padding: .55rem .75rem; margin: 0 0 .5rem;
+  border-left: 2px solid var(--amber-soft); background: var(--surface-2);
+}
+.corpus-partial b { color: var(--text); font-weight: 600; }
+
+/* ── Semantic results ─────────────────────────────────────────────────── */
+/* Above the list, not instead of it. The rows below are the corpus; this is a
+   remote index's opinion about which passage answers the question, and it has
+   to be able to disappear — on a failed request the block is removed and the
+   page is the page it was without it. */
+.sem { margin: 0 0 1.1rem; }
+.sem[hidden] { display: none; }
+.sem-head {
+  font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--orange); margin-bottom: .4rem;
+}
+.sem-head span {
+  font-weight: 500; letter-spacing: 0; text-transform: none;
+  color: var(--text-muted);
+}
+
+/* The terms the query was read as. Quiet — it explains the results, it is not
+   one of them — but always present when the endpoint expanded anything. */
+.sem-read {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
+  font-size: .68rem; color: var(--text-muted); margin: -.15rem 0 .5rem;
+}
+.sem-term {
+  font-family: var(--mono); font-size: .66rem;
+  padding: .05rem .32rem; border-radius: 3px;
+  background: var(--surface-2); color: var(--text);
+}
+.sem-hit {
+  display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto;
+  gap: .6rem; align-items: start;
+  padding: .5rem .65rem; border-radius: 6px;
+  text-decoration: none; color: inherit;
+  border: 1px solid transparent; transition: background .14s, border-color .14s;
+}
+.sem-hit:hover { background: var(--surface); border-color: var(--border); }
+.sem-kind {
+  font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+  padding: .1rem .3rem; border-radius: 3px; text-align: center;
+  background: var(--surface-2); color: var(--text-muted);
+}
+/* The paper-level hit is the one that stands for the whole rewrite rather than
+   for a passage inside it, so it reads as the heading of the group it leads. */
+.sem-kind.k-paper { background: var(--orange-soft); color: var(--orange); }
+.sem-body { display: block; min-width: 0; }
+.sem-body b { font-size: .86rem; font-weight: 700; display: block; }
+.sem-hit:hover .sem-body b { color: var(--orange); }
+.sem-ctx {
+  display: block; font-size: .7rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sem-snip {
+  font-size: .78rem; line-height: 1.6; color: var(--text-muted); margin-top: .2rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sem-facets { display: flex; gap: .2rem; flex: none; }
+
 /* ── Memo hub ─────────────────────────────────────────────────────────── */
 .hub { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
 .hub-actions {

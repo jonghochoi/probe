@@ -38,6 +38,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # On the job so the index step's `if` can read them. Both are empty until
+      # an InsForge project exists, which is what makes that step skip.
+      INSFORGE_URL: ${{ secrets.INSFORGE_URL }}
+      INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -74,7 +79,21 @@ jobs:
           restore-keys: katex-
 
       - name: Build
+        # `PROBE_SEARCH_API` is a repository *variable*, not a secret: it is the
+        # public endpoint the published page posts to. Unset, the build emits no
+        # semantic script and the site makes no requests at all.
+        env:
+          PROBE_SEARCH_API: ${{ vars.PROBE_SEARCH_API }}
         run: python3 site/build-site.py --out .site --strict
+
+      - name: Refresh the search index
+        # Only from main, and only once the project secrets exist — until then
+        # the step skips and the site falls back to its own lexical filter.
+        # Chunking is offline; this step is the only one that needs a key.
+        if: github.event_name != 'pull_request' && env.INSFORGE_URL != ''
+        run: |
+          python3 site/build-site.py --index .search/index.jsonl
+          python3 site/search/indexer.py .search/index.jsonl
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'

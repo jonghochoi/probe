@@ -139,6 +139,7 @@ def page(
     scripts: list[str] | None = None,
     extra_head: str = "",
     base: str = "",
+    body_attrs: str = "",
 ) -> str:
     """Full document shell.
 
@@ -183,7 +184,7 @@ if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 </script>
 </head>
-<body>
+<body{" " + body_attrs if body_attrs else ""}>
 {nav(up)}
 {body}
 {script_tags}
