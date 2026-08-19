@@ -501,6 +501,13 @@ class DocRenderer:
         # broken form on purpose — and a match may not cross a tag boundary,
         # or two unrelated `**` inside adjacent code spans pair up.
         prose = re.sub(r"<code\b[^>]*>.*?</code>", "", out, flags=re.S)
+        # Only text nodes are prose. A tag is collapsed to an empty pair rather
+        # than deleted: that drops attribute values — which are not on the page
+        # as text and carry markup of their own, so a `D#` tooltip quoting a
+        # Decision title that ends in `**OPEN**` is not a broken emphasis run —
+        # while leaving the `<`/`>` the pattern relies on to stop a match from
+        # spanning two elements.
+        prose = re.sub(r"<[^>]*>", "<>", prose)
         for stray in set(re.findall(r"\*\*[^*<>\n]{1,60}\*\*", prose)):
             self.problems.append(
                 f"unrendered emphasis published as literal asterisks: {stray!r} "
