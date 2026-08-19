@@ -194,7 +194,9 @@ PROCEDURE
        analysis: add <arxiv-id> rewrite (<alias>)
    `update` instead of `add` when redoing an existing one. `<alias>` resolves
    exactly as in CLAUDE.md's commit rules: the codename before the first colon
-   in the title, else a self-defined acronym, else omitted. Never invent one.
+   in the title, else a self-defined acronym, else the proper name the authors
+   give their own method in prose (unexpanded is fine), else omitted. Never
+   invent one.
 
    Stage `analysis/<id>.md` and nothing else. This track does not touch
    `analysis_legacy/` at all.
