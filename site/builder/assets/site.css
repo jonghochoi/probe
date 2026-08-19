@@ -264,7 +264,6 @@ nav {
   color: var(--orange); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
 }
-.nav-logo span { color: var(--text); font-weight: 400; }
 
 /* ── The mark ─────────────────────────────────────────────────────────── */
 /* A probe that looks back. It sits in the nav on every page and in the
