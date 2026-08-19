@@ -50,7 +50,68 @@ CREATE TABLE IF NOT EXISTS probe_query_cache (
   hits        INT NOT NULL DEFAULT 1,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-ALTER TABLE probe_query_cache ENABLE ROW LEVEL SECURITY;
+ALTER TABLE probe_query_cache ENABLE ROW LEVEL SECURITY;   -- no policy: no direct reads
+
+-- The cache is reached the way the index is, through functions rather than as a
+-- table. The endpoint holds the project's anon key, and a key shipped inside a
+-- static site is not a secret: a policy letting it read and write these rows
+-- lets a browser do the same, and a cache a browser can write is a cache that
+-- can be made to answer for the corpus.
+-- One row or none, rather than a bare value: a set-returning function is the
+-- shape `probe_search` already proves through the proxy.
+CREATE OR REPLACE FUNCTION probe_cache_get(q_norm TEXT)
+RETURNS TABLE (result JSONB)
+LANGUAGE sql VOLATILE SECURITY DEFINER
+SET search_path = public
+AS $$
+  -- Counting the hit here rather than in a second call keeps a cached answer
+  -- one round trip, which is the whole reason the cache is on the path.
+  UPDATE probe_query_cache c
+     SET hits = c.hits + 1
+   WHERE c.q_norm = probe_cache_get.q_norm
+  RETURNING c.result;
+$$;
+
+CREATE OR REPLACE FUNCTION probe_cache_put(q_norm TEXT, result JSONB)
+RETURNS VOID
+LANGUAGE sql VOLATILE SECURITY DEFINER
+SET search_path = public
+AS $$
+  -- Two readers can miss the same query at once. The second answer is worth no
+  -- more than the first, so the row that landed first stays.
+  INSERT INTO probe_query_cache (q_norm, result)
+  VALUES (probe_cache_put.q_norm, probe_cache_put.result)
+  ON CONFLICT (q_norm) DO NOTHING;
+$$;
+
+REVOKE ALL ON FUNCTION probe_cache_get, probe_cache_put FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION probe_cache_get, probe_cache_put TO anon, authenticated;
+
+-- A cached answer is only true of the index it was computed from: a paper
+-- added after the fact is missing from every answer already stored, and a
+-- reading site's queries repeat, so the entries that go stale are the popular
+-- ones. The rule sits on the index rather than in the indexer so it holds for
+-- whoever writes the table — a re-index, a backfill, a hand-run statement.
+-- Per statement, not per row: one re-index writes in batches of hundreds.
+CREATE OR REPLACE FUNCTION probe_cache_clear() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  DELETE FROM probe_query_cache;
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS probe_chunks_clear_cache ON probe_chunks;
+CREATE TRIGGER probe_chunks_clear_cache
+  AFTER INSERT OR UPDATE OR DELETE ON probe_chunks
+  FOR EACH STATEMENT EXECUTE FUNCTION probe_cache_clear();
+
+DROP TRIGGER IF EXISTS probe_chunks_truncate_clear_cache ON probe_chunks;
+CREATE TRIGGER probe_chunks_truncate_clear_cache
+  AFTER TRUNCATE ON probe_chunks
+  FOR EACH STATEMENT EXECUTE FUNCTION probe_cache_clear();
 
 -- ── Search ──────────────────────────────────────────────────────────────────
 -- Two arms, fused by Reciprocal Rank Fusion. RRF is used rather than a weighted
