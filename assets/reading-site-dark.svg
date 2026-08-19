@@ -7,7 +7,6 @@
 
   <g clip-path="url(#card)">
     <rect width="560" height="96" fill="#1C1815"/>
-    <rect width="4" height="96" fill="#E8916F"/>
   </g>
   <rect x=".5" y=".5" width="559" height="95" rx="7.5" fill="none" stroke="#3D3129"/>
 
