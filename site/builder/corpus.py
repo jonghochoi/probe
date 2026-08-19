@@ -21,6 +21,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
 
 ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
+# `generated:` — the day, and optionally the time that orders one day's
+# rewrites against each other.
+_GENERATED = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}))?")
 UNCLASSIFIED = "미분류"
 
 _FENCE = re.compile(r"^```.*?^```", re.S | re.M)
@@ -102,9 +105,32 @@ class Paper:
         return frontmatter.as_list(self.front.get("tags", ""))
 
     @property
+    def generated_at(self) -> str:
+        """`generated:` normalised to `YYYY-MM-DD HH:MM` — the corpus's order.
+
+        The time is what separates rewrites written on the same day, and a day
+        now routinely carries several. A rewrite that states only the date is
+        read as `00:00`, so it sorts to the head of its own day rather than
+        landing wherever the file name happens to put it.
+        """
+        m = _GENERATED.match(self.front.get("generated", "").strip())
+        return f"{m.group(1)} {m.group(2) or '00:00'}" if m else ""
+
+    @property
     def date(self) -> str:
-        d = self.front.get("generated", "")
-        return d if d[:1].isdigit() else ""
+        """The day, which is all any chip or row prints."""
+        return self.generated_at[:10]
+
+    @property
+    def order_key(self) -> tuple[str, str]:
+        """Newest first under `reverse=True`, arXiv id descending on a tie.
+
+        The tie-break is the point: sorting on the timestamp alone leaves
+        equal rewrites in discovery order — `sorted(glob(...))`, i.e. arXiv id
+        *ascending* — so the oldest id of the newest day takes the lead block
+        and a paper added after it never displaces it.
+        """
+        return (self.generated_at, self.stem)
 
     @property
     def published(self) -> str:
@@ -383,6 +409,15 @@ def discover() -> tuple[list[Paper], list[str]]:
         for required in ("title", "summary", "tagline"):
             if not front.get(required):
                 problems.append(f"analysis/{path.name}: missing `{required}`")
+        # `generated` is the landing page's order and picks its lead block, so a
+        # value the parser cannot read is not a cosmetic slip — it drops the
+        # rewrite to the bottom of the corpus without saying so.
+        if not _GENERATED.match(front.get("generated", "").strip()):
+            problems.append(
+                f"analysis/{path.name}: `generated` is "
+                f"{front.get('generated', '')!r} — write it as "
+                f"`YYYY-MM-DD HH:MM`, which is what orders the landing page"
+            )
         problems += _source_coverage(path.name, front, body)
 
         article, surfaces = split_surfaces(body)
@@ -528,6 +563,6 @@ def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
             continue
         score = 2 * len(mine_t & set(other.tags)) + len(mine_p & set(other.pillars))
         if score:
-            scored.append((score, other.date, other))
+            scored.append((score, other.generated_at, other))
     scored.sort(key=lambda row: (row[0], row[1]), reverse=True)
     return [row[2] for row in scored[:limit]]

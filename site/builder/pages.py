@@ -35,8 +35,11 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     with JavaScript off (the filter bar and the rail hide themselves, the rows
     stay, newest first), and the filter script only ever reorders and toggles
     `hidden` on nodes that already exist.
+
+    Order is `Paper.order_key`, and the rows carry the same key on `data-date`
+    so the script's 최신순 reproduces this list rather than a near-miss of it.
     """
-    ordered = sorted(papers, key=lambda p: p.date, reverse=True)
+    ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     tag_counts = Counter(t for p in ordered for t in p.tags)
     facets = [t for t, _ in tag_counts.most_common(TAG_FACETS)]
 
@@ -178,7 +181,7 @@ def _facets(paper: Paper) -> str:
         f'data-pillars="{c.esc(" ".join(paper.pillars) or UNCLASSIFIED)}" '
         f'data-primary="{c.esc(paper.primary)}" '
         f'data-tags="{c.esc(" ".join(paper.tags))}" '
-        f'data-date="{c.esc(paper.date)}" '
+        f'data-date="{c.esc(paper.generated_at)}" '
         f'data-title="{c.esc(paper.title.lower())}" '
         f'data-key="{c.esc(paper.search_key)}" '
         f'data-hay="{c.esc(paper.search_hay)}"'

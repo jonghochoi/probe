@@ -58,7 +58,7 @@ pillars: P<a>, P<b>              # ours — the first decides the card's group
 tags: [<tag>, <tag>]
 links: [arxiv|<url>, code|<url>]
 published: YYYY-MM-DD            # the paper's date, from arXiv
-generated: YYYY-MM-DD            # yours — this sorts the landing page
+generated: YYYY-MM-DD HH:MM      # yours — this sorts the landing page
 generator: analyze/v3
 arxiv_html: <arxiv-id>v<n>       # the exact version actually read
 arxiv_fetched: YYYY-MM-DD
@@ -81,7 +81,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly. First entry decides the card's group; empty → 미분류, which beats a wrong pillar |
 | `tags` | flow list, feeds the landing page's filter chips. Free vocabulary; the bar offers the most common facets and search covers the tail |
 | `links` | `kind\|url` pairs; kinds fixed at `arxiv` `code` `weights` `data` `site` `demo` (R10). Unknown kinds are dropped rather than guessed at |
-| `published` / `generated` | the paper's date / this rewrite's. `generated` sorts the landing page |
+| `published` / `generated` | the paper's date / this rewrite's, as the clock reads when you write it. `generated` **orders the landing page and picks its lead block**, so it carries the time as well as the day: a day routinely holds several rewrites, and on a bare date they tie and fall back to arXiv id, which parks the oldest id of the newest day in the 가장 최근 slot and leaves it there. A value the build cannot read is reported |
 | `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
 | `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **One list for both surfaces** — the build matches it both ways against every figure id cited anywhere in the file (body and brief), and an id in one and not the other is reported |
 | `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — see R15. An empty value is not accepted, because "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate |

@@ -141,7 +141,12 @@ function score(card, terms) {
 
 /* ── Order ────────────────────────────────────────────────────────────── */
 function ordered(shown, scored) {
-  const byDate = (a, b) => b.dataset.date.localeCompare(a.dataset.date);
+  // `data-date` is the build's own order key (`YYYY-MM-DD HH:MM`), and the
+  // id breaks a tie the same way the build does — 최신순 has to land on the
+  // list the page shipped with, not one row off it.
+  const byDate = (a, b) =>
+    b.dataset.date.localeCompare(a.dataset.date) ||
+    b.dataset.id.localeCompare(a.dataset.id);
   // A query asks a question, and "newest" is not an answer to it. While one is
   // typed the default sort ranks by how well a paper answers it; the three sort
   // buttons still override, so asking for 최신순 during a search still gets it.
