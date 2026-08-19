@@ -1,39 +1,32 @@
 # Agent Setup Guide
 
-Deploying the scheduled scouting routine: a cloud session that commits its own
-reports straight to `main`. On-demand `/analyze` needs none of this — it runs
-from any Claude Code session.
+Deploying the scheduled scouting routine — a cloud session that commits its
+own reports straight to `main`. On-demand `/analyze` needs none of this and
+runs from any Claude Code session.
 
-Scheduling is created in the **RemoteTrigger form** at
-[claude.ai/code/routines](https://claude.ai/code/routines) (or the `/schedule`
-CLI), not in a repo config file; the durable asset is the shared prompt
-`.claude/prompts/scouting.txt`. Register **one routine per pillar** (P0–P5) —
-the steps below use P1 as the worked example.
-
-| | Manual run | Scheduled routine |
-|---|---|---|
-| Execution | your laptop | cloud, on a cadence |
-| Retrieval | built-in web search | `curl` to arXiv + Semantic Scholar REST — **no MCP** (cloud sessions cannot reach a local MCP server) |
-| Output | copy by hand | the prompt commits and runs `git push origin HEAD:main` — no PR; commit history *is* the research log |
+| | Scheduled scouting routine |
+|---|---|
+| **Where** | The **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) or the `/schedule` CLI, never a repo config file |
+| **Durable asset** | The shared prompt `.claude/prompts/scouting.txt`. Register one routine per pillar (P0–P5) — P1 is the worked example below |
+| **Retrieval** | `curl` to arXiv and Semantic Scholar, never MCP — a cloud session cannot reach a local MCP server |
+| **Output** | The prompt commits and runs `git push origin HEAD:main`. No PR — commit history *is* the research log |
 
 ## 1. Prerequisites
 
 | Item | Note |
 |---|---|
-| Claude Code Pro plan | Routines need cloud execution; the daily cap covers the scouting cadence |
+| Claude Code Pro plan | Routines need cloud execution. The daily cap covers the scouting cadence |
 | GitHub repo connected | The routine pushes to `main` in this repo |
-| Network policy = Custom | The default **Trusted** policy blocks arXiv and S2 — §2-1 |
-| `SEMANTIC_SCHOLAR_API_KEY` | Optional, and **prefer keyless** — §2-2 |
 
 ## 2. Environment
 
 Both settings live in one dialog: routine → **Edit routine** → cloud icon →
-gear → **Update cloud environment**. Changes apply to **new sessions only**;
+gear → **Update cloud environment**. Changes apply to **new sessions only** —
 the next scheduled run picks them up.
 
 ### 2-1. Network allowlist
 
-**Trusted** allows only package registries and GitHub; everything else gets
+**Trusted** allows only package registries and GitHub. Everything else gets
 `HTTP 403` with `x-deny-reason: host_not_allowed`. Set **Network access →
 Custom** and list one host per line:
 
@@ -80,56 +73,52 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
 | Prompt (Instructions) | The full body of `.claude/prompts/scouting.txt`, every `<PILLAR>` replaced by `P1`. Model → **Sonnet** |
 | Repositories | This repo |
 | Environment | The one from §2 |
-| Trigger | A recurring cadence of your choosing (the form takes local time → UTC; min interval 1 h) |
+| Trigger | A recurring cadence of your choosing (the form takes local time → UTC, min interval 1 h) |
 | Connectors | None — retrieval is `curl`, not a connector |
-| Permissions | Must allow pushing to `main`; the default `claude/`-branch-only push is not sufficient |
+| Permissions | Must allow pushing to `main` — the default `claude/`-branch-only push is not sufficient |
 
-- Set the environment to **at most one active session**, so concurrent runs do
-  not race on the shared branch (the prompt keeps a `git pull --rebase origin
-  main` retry as an in-prompt backstop).
-- The form has no `context_files` field and needs none: the prompt names its
+- Set the environment to **at most one active session** — concurrent runs race
+  on the shared branch. The prompt keeps a `git pull --rebase` retry as a
+  backstop.
+- The form has no `context_files` field and needs none — the prompt names its
   own inputs (`context/P1.md` §1–§6, the last 2 weeks of `scouting/`), the
-  `curl` procedure, the scoring contract and the guards. A pillar-scoped run
-  never reads `context/MASTER.md`, so the two tables it would need from there
-  — Venue Priority and the monthly Cross-pollination Budget — are inlined in
-  the prompt's SCORING section. Keep them in sync with `context/MASTER.md`
-  §6–§7 when either moves.
+  `curl` procedure, the scoring contract and the guards.
+- A pillar-scoped run never reads `context/MASTER.md`, so the two tables it
+  would need from there — Venue Priority and the monthly Cross-pollination
+  Budget — are inlined in the prompt's SCORING section. Keep them in sync with
+  `context/MASTER.md` §6–§7 when either moves.
 
 ### 3-1. Re-paste after every prompt change
 
 The form stores a **copy** of the prompt body, not a reference to the file. A
-routine keeps running the text it was created with, so a merged change to
-`.claude/prompts/scouting.txt` reaches nothing until each routine is edited
-and the body re-pasted — with that routine's `<PILLAR>` substitution redone.
+merged change to `.claude/prompts/scouting.txt` reaches nothing until every
+routine is edited and the body re-pasted, `<PILLAR>` substitution redone.
 
-Six pillars means six routines to update, every time. Re-paste all of them in
-one pass rather than one at a time: a half-updated fleet has pillars scoring
-on different contracts, which is exactly the drift the scoring contract
-(`scouting/AUTHORING.md` §5) exists to prevent. After the last one, run
-**Run now** on a single pillar and walk §4 before letting the cadence resume.
+- Six pillars means six routines to update, every time.
+- Re-paste all six in one pass. A half-updated fleet has pillars scoring on
+  different contracts — exactly the drift the scoring contract
+  (`scouting/AUTHORING.md` §5) exists to prevent.
+- After the last one, **Run now** on a single pillar and walk §4 before
+  letting the cadence resume.
 
 ## 4. First run
 
 Use **Run now** on the routine detail page. A green status only means "exited
-without an infra error" — open the transcript and check the output with the
-same rigor as a manual run:
+without an infra error" — open the transcript. Report format and evidence
+rules belong to the prompt's SELF-CHECK (step 8) and
+`linters/check-scouting-format.py`. What a first run checks is that those
+gates fired, and that the environment is sound:
 
 - [ ] The transcript shows `linters/check-scouting-format.py` running on the
       report and exiting 0 (PROCEDURE step 7). A run that skipped it, or
       committed while it still reported violations, is the failure to catch
       here — CI on `main` only reports after the fact.
-- [ ] Follows `scouting/templates/report.md` + `scouting/AUTHORING.md`.
-- [ ] One Korean report at `scouting/P#/YYYY-MM-DD.md`, no language-suffixed
-      twin (`CLAUDE.md` → "Document language convention").
-- [ ] Every paper link resolves — no fabricated arXiv IDs.
-- [ ] Each Reproducibility bullet quotes the evidence string it scored on, and
-      none rests on public-benchmark coverage (`scouting/AUTHORING.md` §5-2).
 - [ ] The `Papers scanned:` header discloses **no** `curl` 403 / network-block
-      error; one there means the Custom allowlist is missing.
+      error. One there means the Custom allowlist is missing.
+- [ ] The Anti-topics filter fired. An empty "did not pass filter" section is
+      suspicious.
 - [ ] Decision implications are concrete — a specific config key,
       hyperparameter or metric, not "tune DR wider".
-- [ ] The Anti-topics filter fired; an empty "did not pass filter" section is
-      suspicious.
 
 If anything fails, fix `.claude/prompts/scouting.txt` (or `context/P1.md`),
 **re-paste the corrected body into every routine** (§3-1) and re-run — do not
