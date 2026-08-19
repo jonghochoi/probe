@@ -22,6 +22,9 @@ What the drawing has to keep saying, whatever is moved:
     (x=468), so the read is "both documents feed one run".
   - Both output chips join the same return rail: the human judges against
     `scouting/` and `analysis/` together, not one of them.
+  - The two wires the human owns — the `context/` drop and the return rail —
+    run at the same washed opacity, so the wires at full strength are exactly
+    the ones the agent writes.
   - The mark is `site/builder/components.py`'s `mark()` redrawn with its
     animation inlined, since a README image carries no external stylesheet.
     Keep the two drawings in step.
@@ -163,7 +166,8 @@ CSS = f"""
     .wire {{ fill: none; stroke: {{ACCENT}}; stroke-width: 1.6; stroke-linecap: round;
             stroke-linejoin: round; }}
     .flow {{ stroke-dasharray: 7 7; animation: march 1.1s linear infinite; }}
-    .head {{ fill: {{ACCENT}}; }}
+    .head  {{ fill: {{ACCENT}}; }}
+    .human {{ opacity: .55; }}
 
     .d    {{ fill: {{BORDER}}; opacity: .85; }}
     .mk   {{ fill: {{BORDER}}; opacity: .9; }}
@@ -284,8 +288,10 @@ def drawing() -> str:
   <text class="note" x="308" y="95">global anchor</text>
   <text class="path" x="488" y="76" font-size="13">P#.md</text>
   <text class="note" x="488" y="95">per-pillar Decision Log</text>
-  <path class="wire flow" d="M{AXIS} 108 V138"/>
-  {arrow_d(AXIS, 146)}
+  <g class="human">
+    <path class="wire flow" d="M{AXIS} 108 V138"/>
+    {arrow_d(AXIS, 146)}
+  </g>
 
   <text class="lab" x="44" y="112">ARXIV cs.RO + cs.LG</text>
   {field()}
@@ -314,7 +320,7 @@ def drawing() -> str:
         letter-spacing="1.6" fill="{{INK}}">HUMAN</text>
   <text class="m" x="848" y="57" text-anchor="end" font-size="9.5"
         letter-spacing=".2" fill="{{MUTED}}">judge · discard · refresh</text>
-  <g opacity=".55">
+  <g class="human">
     <path class="wire flow" d="M832 152 H{RAIL} M832 250 H{RAIL} V75 q0 -8 -8 -8 H664"/>
     {arrow_l(656, 67)}
   </g>
