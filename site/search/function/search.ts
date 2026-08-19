@@ -195,7 +195,9 @@ export default async function (req: Request): Promise<Response> {
   const plain = pillars.length === 0;
   const key = `${normalise(q)}|${limit}`;
   if (plain) {
-    const { data } = await db.from("probe_query_cache").select("result").eq("q_norm", key).limit(1);
+    // Through `probe_cache_get`, not the table: this key is the project's anon
+    // key, and the cache is closed to it for the same reason the index is.
+    const { data } = await db.rpc("probe_cache_get", { q_norm: key });
     if (data?.[0]?.result) {
       return json({ ...data[0].result, cached: true, tookMs: Date.now() - started });
     }
@@ -244,7 +246,7 @@ export default async function (req: Request): Promise<Response> {
   // misread one, and a search that silently rewrites itself cannot be trusted.
   const result = { q, hits, expanded: expansion.terms, pillars: want };
   if (plain) {
-    await db.from("probe_query_cache").insert({ q_norm: key, result });
+    await db.rpc("probe_cache_put", { q_norm: key, result });
   }
   return json({ ...result, cached: false, tookMs: Date.now() - started });
 }

@@ -26,8 +26,8 @@ A rewrite yields about 43 chunks, so the index tracks the corpus closely:
 
 | Corpus | Chunks | Full re-index |
 |---|---|---|
-| 3 rewrites | ~130 | ~12 K tokens |
-| 90 rewrites | ~3,900 | ~360 K tokens, cents |
+| 7 rewrites — what is published | 299 | ~34 K tokens |
+| 95 rewrites — with the legacy backlog ported | ~4,100 | ~460 K tokens, cents |
 
 A normal run embeds only what changed, so the second column is the cost of
 rebuilding from nothing rather than the cost of a merge.
@@ -37,7 +37,7 @@ rebuilding from nothing rather than the cost of a merge.
 | Path | Role |
 |---|---|
 | `chunks.py` | Cuts the rewrites into chunks. Pure — no network, no key. Anchors come from the same `DocRenderer` the page is built with, so a hit deep-links into markup that exists |
-| `schema.sql` | The InsForge migration: `probe_chunks` (pgvector HNSW + a `simple` tsvector), `probe_query_cache`, and `probe_search` — a `SECURITY DEFINER` function fusing the two arms with Reciprocal Rank Fusion |
+| `schema.sql` | The InsForge migration: `probe_chunks` (pgvector HNSW + a `simple` tsvector), `probe_query_cache`, and the three `SECURITY DEFINER` functions that are the only way in — `probe_search`, fusing the two arms with Reciprocal Rank Fusion, and `probe_cache_get` / `probe_cache_put`. A statement trigger on `probe_chunks` empties the cache, so an answer never outlives the index it was computed from |
 | `indexer.py` | Embeds and uploads. Stdlib only. Re-runs cost one embedding per changed chunk, because every chunk carries a `content_hash` |
 | `function/search.ts` | The endpoint: read the query into search terms, embed, call `probe_search`, return the list. The model writes terms and nothing else — it does not summarise and does not rank |
 
@@ -84,10 +84,13 @@ which is the number that matters as the corpus grows toward the legacy backlog.
 
 ## What keeps this safe
 
-- **The table has no read policy.** `probe_search` is `SECURITY DEFINER`, so the
-  endpoint can be asked questions and cannot be asked for the corpus. Every page
-  it indexes is public already, but a table a browser can `select *` from is a
-  corpus a scraper takes in one request.
+- **Neither table has a policy.** Both are reached through `SECURITY DEFINER`
+  functions, so the endpoint can be asked questions and cannot be asked for the
+  corpus. Every page it indexes is public already, but a table a browser can
+  `select *` from is a corpus a scraper takes in one request — and the endpoint
+  carries the anon key a browser has, so what the key can reach directly is
+  what a reader can reach directly. The cache is closed for the second half of
+  that: a cache a browser can write is a cache that can be made to answer.
 - **The endpoint is public on purpose.** A key shipped inside a static site is
   not a secret, so the design does not pretend to have one. The ceiling is the
   query cache, a length cap, a per-isolate rate limit, and the project's own
