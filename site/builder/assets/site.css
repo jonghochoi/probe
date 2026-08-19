@@ -207,6 +207,14 @@ html {
      page past the viewport on a phone, and the horizontal scrollbar that
      follows reads as a broken page rather than as a wide element. */
   overflow-x: clip;
+  /* The gutter is reserved whether or not the page currently overflows, so a
+     view that changes height does not change width. Without it, switching the
+     landing sort or a paper's tab can cross the one-viewport line, and the
+     scrollbar arriving or leaving narrows the viewport under every centered
+     `max-width` container — the whole frame jumps sideways to make room for a
+     bar the reader did not ask for. Where scrollbars are overlays the gutter
+     is zero-width, so this costs nothing there. */
+  scrollbar-gutter: stable;
 }
 
 body {
