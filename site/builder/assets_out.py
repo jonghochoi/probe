@@ -61,9 +61,17 @@ def _check_intact(before: str, after: str) -> list[str]:
 
 ASSET_FILES = ("site.css", "index.css", "theme.js", "brand.js", "paper.js",
                "memo.js", "filter.js", "hub.js")
+# Shipped only when the build was given the endpoint it talks to. A tree with
+# no endpoint carries nothing about search: no script to load, and none of its
+# Korean strings dragged into the webfont subset for a file nobody fetches.
+OPTIONAL = {"search": ("semantic.js",)}
 
 
-def asset_text() -> str:
+def _files(extras: tuple[str, ...] = ()) -> tuple[str, ...]:
+    return ASSET_FILES + extras
+
+
+def asset_text(extras: tuple[str, ...] = ()) -> str:
     """Every character the assets themselves contribute to the page.
 
     The JS files carry Korean UI strings that never appear in the markup —
@@ -72,15 +80,16 @@ def asset_text() -> str:
     """
     return "".join(
         (_ASSETS / name).read_text(encoding="utf-8")
-        for name in ASSET_FILES if (_ASSETS / name).is_file()
+        for name in _files(extras) if (_ASSETS / name).is_file()
     )
 
 
-def copy_all(out: Path, charset: set[str] | None = None) -> dict:
+def copy_all(out: Path, charset: set[str] | None = None,
+             extras: tuple[str, ...] = ()) -> dict:
     dest = out / "assets"
     dest.mkdir(parents=True, exist_ok=True)
 
-    for name in ASSET_FILES:
+    for name in _files(extras):
         src = _ASSETS / name
         if src.is_file():
             shutil.copy2(src, dest / name)
