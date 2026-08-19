@@ -31,12 +31,12 @@ touch dexterous manipulation. PROBE finds those and answers one question:
 > *"If this paper is right, what do I change in my training / evaluation
 > pipeline next week?"*
 
-| Without PROBE | With PROBE |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-lost-dark.svg"><img src="assets/probe-lost.svg" width="22" align="absmiddle" alt=""></picture> Without PROBE | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt=""></picture> With PROBE |
 |---|---|
-| 😵‍💫 50–100 papers/day → skim titles, remember none → "I'll check arXiv this weekend" → never happens | 😌 3–5 papers/run → scored, tied to your open questions, landing in your repo on a fixed cadence, per pillar |
-| 🫤 Survey mode: "this is interesting" | 😎 Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
-| 😩 Re-discovering already-published solutions | 🧐 Citation graph surfaces the prior art before you waste the week |
-| 🙈 "I'll read that paper properly later" → never does | 🤓 `/analyze` → a Korean re-telling, published to the reading site |
+| 50–100 papers/day → skim titles, remember none → "I'll check arXiv this weekend" → never happens | 3–5 papers/run → scored, tied to your open questions, landing in your repo on a fixed cadence, per pillar |
+| Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
+| Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
+| "I'll read that paper properly later" → never does | `/analyze` → a Korean re-telling, published to the reading site |
 
 **PROBE is a scout — it does not fight.**
 

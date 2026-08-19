@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="96" viewBox="12 0 72 96" role="img" aria-label="PROBE — out of it">
+  <style>
+    .hull   { fill: #8B7C74; }
+    .iris   { fill: #F2EAE5; }
+    .cross  { fill: none; stroke: #5A4A41; stroke-width: 3.2; stroke-linecap: round; }
+    .stalk  { stroke: #7E706A; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #7E706A; }
+    .shadow { fill: #7E706A; opacity: .55; }
+    .rig { animation: drift 4.6s ease-in-out infinite; transform-origin: 48px 72px; }
+    @keyframes drift { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    @media (prefers-reduced-motion: reduce) { .rig { animation: none; } }
+  </style>
+
+  <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>
+  <g class="rig">
+    <path class="stalk" d="M48 26 q-2 -6 -8 -7"/>
+    <circle class="beacon" cx="39" cy="18" r="5"/>
+    <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+    <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="10.5"/><path class="cross" d="M30.5 46.5 L41.5 57.5 M41.5 46.5 L30.5 57.5"/></g></g>
+    <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="10.5"/><path class="cross" d="M54.5 46.5 L65.5 57.5 M65.5 46.5 L54.5 57.5"/></g></g>
+  </g>
+</svg>
