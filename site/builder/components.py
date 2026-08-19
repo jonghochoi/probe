@@ -31,29 +31,37 @@ def mark(size: int) -> str:
     """The animated PROBE mark — a probe that looks back at the reader.
 
     One `viewBox` serves every size; the caller picks the pixel box. Geometry
-    only: the idle bob, the blink, the wink and the beacon are keyframes in
-    `site.css`, and `brand.js` steers the pupils after the pointer. Two eyes
-    rather than one, because a single eye reads as "something moved" while a
-    pair reads as "it is looking at you" — which is the whole point of putting
-    a face on a scouting agent. Decorative in every slot it appears in — the
-    logo and the masthead both name the site in text right next to it — so it
-    stays out of the accessibility tree.
+    only: the idle bob, the blink, the mood swap and the beacon's signal are
+    keyframes in `site.css`, and `brand.js` steers the pupils after the
+    pointer. Two eyes rather than one, because a single eye reads as
+    "something moved" while a pair reads as "it is looking at you" — which is
+    the whole point of putting a face on a scouting agent. Each eye ships both
+    of its faces at once — the round pupil and the `joy` arc it smiles with —
+    because a stroke cannot be tweened into a disc, so the mood keyframes
+    cross-fade between them and each face holds half the cycle. The two signal
+    arcs sit at fixed radii a clear gap apart and light in sequence, the way a
+    reception meter fills. Decorative in every slot it appears in — the logo
+    and the masthead both name the site in text right next to it — so it stays
+    out of the accessibility tree.
     """
     eyes = "".join(
         f'<g class="eye {side}"><g class="lid">'
-        f'<circle class="iris" cx="{x}" cy="46" r="11"/>'
-        f'<circle class="pupil" cx="{x}" cy="46" r="5"/>'
+        f'<circle class="iris" cx="{x}" cy="52" r="11"/>'
+        f'<circle class="pupil" cx="{x}" cy="52" r="5"/>'
+        f'<path class="joy" d="M{x - 6} 54 a6.5 6.5 0 0 1 12 0"/>'
         "</g></g>"
         for side, x in (("eL", 36), ("eR", 60))
     )
     return (
         f'<svg class="probe-mark" width="{size}" height="{size}" '
         'viewBox="0 0 96 96" aria-hidden="true" focusable="false">'
-        '<ellipse class="shadow" cx="48" cy="84" rx="20" ry="4"/>'
+        '<ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>'
         '<g class="rig">'
-        '<path class="stalk" d="M48 20 V13"/>'
-        '<circle class="beacon" cx="48" cy="10" r="5"/>'
-        '<rect class="hull" x="17" y="21" width="62" height="54" rx="19"/>'
+        '<path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/>'
+        '<path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/>'
+        '<path class="stalk" d="M48 26 V19"/>'
+        '<circle class="beacon" cx="48" cy="16" r="5"/>'
+        '<rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>'
         f"{eyes}"
         "</g></svg>"
     )
