@@ -1,6 +1,6 @@
 /* The mark's pupils follow the pointer. Loaded on every page, since the nav
-   carries the mark everywhere; the idle bob, blink, wink and beacon are pure
-   CSS and run without this file. */
+   carries the mark everywhere; the idle bob, the blink, the mood swap and the
+   beacon's signal are pure CSS and run without this file. */
 
 (function () {
   "use strict";
