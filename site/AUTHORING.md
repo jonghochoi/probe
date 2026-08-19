@@ -89,6 +89,17 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment — `<지표> <전> → <후> <단위>` for a number the paper moved, `<수치> <단위> · <함께 성립한 조건>` for one it holds under a constraint. The number is already in `summary`, but as prose — the landing list cannot pull it out of a sentence, so it is stated once here and printed as a chip beside the title. Under 40 characters (**longer fails the build**), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
 | `generator` | `analyze/v3` |
 
+**Chrome.** The frame around the reading surface — the browser title, the nav,
+the masthead and the tab titles — names the site `PROBE` and the paper, and
+nothing else. It never carries a category word for the corpus (`분석`,
+`논문 분석`): the site publishes exactly one corpus, so a qualifier beside the
+brand separates the page from nothing that the nav's own links do not already
+say. This binds the front matter as well as the generator, because `title` and
+`metric` print inside the masthead — and **the build reports it**, on every
+page it emits, so a rewrite added tomorrow is checked by the same rule. Only
+the frame is bound: 분석 as ordinary prose about the paper (`§5 는 통째로 비용
+분석입니다`) is body text, and the thesis block under the H1 is body text too.
+
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed
 by `site/builder/arxiv.py`); *our view* — `D#` impact, tensions, what we
 would check — comes from `context/`. `analysis_legacy/` is neither read nor
@@ -807,6 +818,7 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | Rule | Enforced by |
 |---|---|
 | Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title (§1), `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
+| The chrome carrying no category word for the corpus, on every assembled page (§1) | `site/builder/pages.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts (incl. its all-or-none `state` and the four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |

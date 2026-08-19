@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 
 from . import components as c
@@ -20,6 +21,48 @@ DISCUSSIONS_NEW = f"https://github.com/{REPO}/discussions/new?category=paper-not
 # and a long tail of one-offs; past this point the chips cost more scanning
 # than they save. Search covers everything the chips leave out.
 TAG_FACETS = 12
+
+# Words the chrome may not print. The site is exactly one corpus, so a
+# category word beside the brand — `PROBE · 분석`, a `논문 분석` tab title —
+# names the whole site rather than a section of it, and a reader learns
+# nothing from it that the nav's own links do not already say. Korean only:
+# the English `analysis` is a path (`analysis/<id>.md`, the source link in the
+# masthead) and stays.
+CHROME_BANNED = ("분석",)
+
+# The chrome — what the generator frames every page with, above the reading
+# surface. `header class="lead"` is deliberately absent: that one holds the
+# thesis line and the authored summary, where 분석 is ordinary prose about the
+# paper ("§5 는 통째로 비용 분석입니다").
+_CHROME = re.compile(
+    r"<title>.*?</title>"
+    r"|<nav\b[^>]*>.*?</nav>"
+    r"|<header class=\"(?:mast|paper-head)[^\"]*\">.*?</header>"
+    r"|<div class=\"tabs\"[^>]*>.*?</div>",
+    re.S,
+)
+_TAGS = re.compile(r"<[^>]+>")
+
+
+def chrome_problems(html: str, where: str) -> list[str]:
+    """Report any `CHROME_BANNED` word printed in an assembled page's chrome.
+
+    Run against the finished HTML rather than the strings that produced it,
+    because the chrome has two authors: the generator writes the nav, the tab
+    titles and the masthead labels, and the rewrite's own front matter writes
+    the `title` and the `metric` chip printed among them. One check over the
+    artifact covers a regression from either side, on every page the build
+    emits — including the ones a new rewrite adds.
+    """
+    found = []
+    for region in _CHROME.finditer(html):
+        text = _TAGS.sub(" ", region.group(0))
+        found += [w for w in CHROME_BANNED if w in text and w not in found]
+    return [
+        f"{where}: the page chrome prints `{w}` — the site publishes one "
+        f"corpus, so a category word beside the brand separates nothing"
+        for w in found
+    ]
 
 def landing_page(papers: list[Paper], katex=None) -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.

@@ -166,7 +166,7 @@ pushing, so a red gate is not the first you hear of it.
 | any doc in the index set | `python3 linters/check-doc-links.py` |
 | `analysis/`, `scouting/`, `context/` | `python3 linters/check-decision-refs.py` |
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `analysis/` or `site/` | `python3 site/build-site.py --check --strict` |
+| `analysis/` or `site/` | `python3 site/build-site.py --out /tmp/probe-check --strict` — the render and chrome rules are only reached by a build that renders; `--check` alone stops at front matter |
 
 The site build is the only one with dependencies:
 `pip install -r site/requirements.txt`.

@@ -95,6 +95,10 @@ def build(args) -> int:
 
     final = {p: katex.splice(h) for p, h in rendered.items()}
     for path, html in final.items():
+        # The chrome is checked on every page, not just the rewrites: the nav
+        # and the page title are shared, so one regression there lands on the
+        # whole site at once.
+        problems += pages.chrome_problems(html, path.relative_to(out).as_posix())
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(html, encoding="utf-8")
 
