@@ -14,7 +14,6 @@ import shutil
 from pathlib import Path
 
 from . import fonts
-from .render import pygments_css
 
 _HERE = Path(__file__).resolve().parent
 _ASSETS = _HERE / "assets"
@@ -86,7 +85,6 @@ def copy_all(out: Path, charset: set[str] | None = None) -> dict:
         if src.is_file():
             shutil.copy2(src, dest / name)
 
-    (dest / "pygments.css").write_text(pygments_css(), encoding="utf-8")
     font_stats = fonts.emit(dest, charset or set())
 
     stats = {"fonts": 0, "katex": False, "problems": [], **font_stats}

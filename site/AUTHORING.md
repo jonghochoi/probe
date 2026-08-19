@@ -499,10 +499,10 @@ obvious throwaways beside the answer.
 ### 2-12. R12–R14 — Implementation and authoring traps
 
 - **R12. Visual rules are the site's, not the author's.** Typography, spacing
-  and color live in `site/builder/assets/`; the code-highlight themes are
-  `LIGHT_STYLE` / `DARK_STYLE` in `site/builder/render.py`. Do not write inline
-  styles or `<style>` blocks. Callout backgrounds stay pale; the signal is the
-  left border and the label color.
+  and color live in `site/builder/assets/`, including the code-highlight map —
+  Pygments lexes a fence and emits its token classes, and `site.css` colors
+  them by role. Do not write inline styles or `<style>` blocks. Callout
+  backgrounds stay pale; the signal is the left border and the label color.
 
   The page also *adds* chrome your source never mentions, and re-adding it by
   hand duplicates it: the masthead eyebrow (`읽기 쉬운 버전 · 원문에서 직접
