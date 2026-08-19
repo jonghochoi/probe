@@ -34,8 +34,6 @@
     .mk   { fill: #E8CDBD; opacity: .9; }
     .tv   { fill: #D97757; opacity: 0; }
     .keep { fill: #D97757; animation: keep 9s linear infinite; }
-    .cull { fill: none; stroke: #7A6A60; stroke-width: 1.5; stroke-linecap: round;
-            opacity: 0; }
     .scan { animation: scan 9s linear infinite; }
     @keyframes scan {
       0%        { transform: translateX(0); opacity: 0; }
@@ -70,18 +68,13 @@
       36%           { fill: #D97757; transform: scale(1); }
       41%, 100% { fill: #E8CDBD; transform: scale(1); }
     }
-    #t1 { animation: trav1 9s ease-in-out infinite; }
+    #t1 { animation: trav1 9s ease-out infinite; }
     @keyframes trav1 {
-      0%, 36%  { transform: translate(0, 0) scale(1); opacity: 0; }
-      37%  { transform: translate(0, 0) scale(1); opacity: 1; }
-      50%       { transform: translate(168px, -45px) scale(1); opacity: 1; }
-      58%, 100% { transform: translate(199px, -53px) scale(.35); opacity: 0; }
-    }
-    #x1 { animation: cull1 9s linear infinite; }
-    @keyframes cull1 {
-      0%, 50%       { opacity: 0; transform: scale(.6); }
-      53%       { opacity: .75; transform: scale(1); }
-      61%, 100% { opacity: 0; transform: scale(1.3); }
+      0%, 36%    { transform: translate(0, 0) scale(1); opacity: 0; fill: #D97757; }
+      37%    { transform: translate(0, 0) scale(1); opacity: 1; fill: #D97757; }
+      49%       { transform: translate(168px, -45px) scale(1); opacity: 1; fill: #D97757; }
+      53%       { transform: translate(168px, -45px) scale(1); opacity: .9; fill: #7A6A60; }
+      65%, 100% { transform: translate(190px, -51px) scale(.72); opacity: 0; fill: #7A6A60; }
     }
     #m2 { animation: mark2 9s linear infinite; }
     @keyframes mark2 {
@@ -91,18 +84,13 @@
       38%           { fill: #D97757; transform: scale(1); }
       43%, 100% { fill: #E8CDBD; transform: scale(1); }
     }
-    #t2 { animation: trav2 9s ease-in-out infinite; }
+    #t2 { animation: trav2 9s ease-out infinite; }
     @keyframes trav2 {
-      0%, 38%  { transform: translate(0, 0) scale(1); opacity: 0; }
-      39%  { transform: translate(0, 0) scale(1); opacity: 1; }
-      52%       { transform: translate(118px, 29px) scale(1); opacity: 1; }
-      60%, 100% { transform: translate(139px, 34px) scale(.35); opacity: 0; }
-    }
-    #x2 { animation: cull2 9s linear infinite; }
-    @keyframes cull2 {
-      0%, 52%       { opacity: 0; transform: scale(.6); }
-      55%       { opacity: .75; transform: scale(1); }
-      63%, 100% { opacity: 0; transform: scale(1.3); }
+      0%, 38%    { transform: translate(0, 0) scale(1); opacity: 0; fill: #D97757; }
+      39%    { transform: translate(0, 0) scale(1); opacity: 1; fill: #D97757; }
+      51%       { transform: translate(118px, 29px) scale(1); opacity: 1; fill: #D97757; }
+      55%       { transform: translate(118px, 29px) scale(1); opacity: .9; fill: #7A6A60; }
+      67%, 100% { transform: translate(133px, 32px) scale(.72); opacity: 0; fill: #7A6A60; }
     }
     #m3 { animation: mark3 9s linear infinite; }
     @keyframes mark3 {
@@ -127,18 +115,13 @@
       42%           { fill: #D97757; transform: scale(1); }
       47%, 100% { fill: #E8CDBD; transform: scale(1); }
     }
-    #t4 { animation: trav4 9s ease-in-out infinite; }
+    #t4 { animation: trav4 9s ease-out infinite; }
     @keyframes trav4 {
-      0%, 42%  { transform: translate(0, 0) scale(1); opacity: 0; }
-      43%  { transform: translate(0, 0) scale(1); opacity: 1; }
-      56%       { transform: translate(82px, 17px) scale(1); opacity: 1; }
-      64%, 100% { transform: translate(97px, 20px) scale(.35); opacity: 0; }
-    }
-    #x4 { animation: cull4 9s linear infinite; }
-    @keyframes cull4 {
-      0%, 56%       { opacity: 0; transform: scale(.6); }
-      59%       { opacity: .75; transform: scale(1); }
-      67%, 100% { opacity: 0; transform: scale(1.3); }
+      0%, 42%    { transform: translate(0, 0) scale(1); opacity: 0; fill: #D97757; }
+      43%    { transform: translate(0, 0) scale(1); opacity: 1; fill: #D97757; }
+      55%       { transform: translate(82px, 17px) scale(1); opacity: 1; fill: #D97757; }
+      59%       { transform: translate(82px, 17px) scale(1); opacity: .9; fill: #7A6A60; }
+      71%, 100% { transform: translate(93px, 19px) scale(.72); opacity: 0; fill: #7A6A60; }
     }
     #m5 { animation: mark5 9s linear infinite; }
     @keyframes mark5 {
@@ -159,7 +142,7 @@
     @media (prefers-reduced-motion: reduce) {
       .rig, .lid, .wave, .flow { animation: none; }
       .wave { opacity: .5; }
-      .scan, .tv, .cull { display: none; }
+      .scan, .tv { display: none; }
       .mk, .keep { animation: none; }
       .mk { fill: #D97757; }
       .keep { opacity: 1; }
@@ -187,7 +170,7 @@
         stroke-width="1.2" stroke-dasharray="5 5" stroke-linejoin="round"/>
   <text class="note" x="266" y="200" font-size="10.5">citation graph ·</text>
   <text class="note" x="266" y="218" font-size="10.5">anti-topics · scoring</text>
-  <circle class="keep" cx="404" cy="186" r="4"/><circle class="keep" cx="404" cy="206" r="4"/><circle class="keep" cx="404" cy="226" r="4"/><g transform="translate(73 188)"><circle class="tv" id="t0" r="3.4"/></g><g transform="translate(98 288)"><circle class="tv" id="t1" r="3.4"/></g><g transform="translate(123 138)"><circle class="tv" id="t2" r="3.4"/></g><g transform="translate(148 213)"><circle class="tv" id="t3" r="3.4"/></g><g transform="translate(198 163)"><circle class="tv" id="t4" r="3.4"/></g><g transform="translate(223 238)"><circle class="tv" id="t5" r="3.4"/></g><g transform="translate(281 239)"><path class="cull" id="x1" d="M-4 -4 L4 4 M-4 4 L4 -4"/></g><g transform="translate(252 169)"><path class="cull" id="x2" d="M-4 -4 L4 4 M-4 4 L4 -4"/></g><g transform="translate(288 182)"><path class="cull" id="x4" d="M-4 -4 L4 4 M-4 4 L4 -4"/></g>
+  <circle class="keep" cx="404" cy="186" r="4"/><circle class="keep" cx="404" cy="206" r="4"/><circle class="keep" cx="404" cy="226" r="4"/><g transform="translate(73 188)"><circle class="tv" id="t0" r="3.4"/></g><g transform="translate(98 288)"><circle class="tv" id="t1" r="3.4"/></g><g transform="translate(123 138)"><circle class="tv" id="t2" r="3.4"/></g><g transform="translate(148 213)"><circle class="tv" id="t3" r="3.4"/></g><g transform="translate(198 163)"><circle class="tv" id="t4" r="3.4"/></g><g transform="translate(223 238)"><circle class="tv" id="t5" r="3.4"/></g>
 
   <g transform="translate(422 158) scale(0.96)"><ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig"><path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/><path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/><path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/><rect class="hull" x="17" y="27" width="62" height="54" rx="19"/><g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="52" r="5"/></g></g><g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="52" r="5"/></g></g></g></g>
   <text class="path" x="468" y="284" text-anchor="middle" font-size="14">PROBE</text>

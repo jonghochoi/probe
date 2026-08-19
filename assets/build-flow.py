@@ -28,7 +28,8 @@ What the drawing has to keep saying, whatever is moved:
 
 The picking cycle earns every state it shows, in this order: a uniform field,
 a scan band that marks six as it passes their column, six dispatched toward the
-filter, three culled inside it (an × where each dies), three landed in the kept
+filter, three culled inside it — each stays a circle, turns from the accent to
+the muted ink and fades out as it drifts to a halt — three landed in the kept
 column. Nothing is marked before the scan reaches it and nothing sits at its
 destination before it travels.
 
@@ -107,19 +108,15 @@ def pick_css() -> str:
         if p["land"] is None:
             dx, dy = 404 - p["x"], 206 - p["y"]
             mx, my = dx * p["cull"], dy * p["cull"]
-            f0, f1 = dep + 14, dep + 22
-            out.append(f"""    #t{i} {{ animation: trav{i} {CYCLE} ease-in-out infinite; }}
+            gx, gy = mx * 1.13, my * 1.13
+            stop, grey, gone = dep + 13, dep + 17, dep + 29
+            out.append(f"""    #t{i} {{ animation: trav{i} {CYCLE} ease-out infinite; }}
     @keyframes trav{i} {{
-      0%, {dep}%  {{ transform: translate(0, 0) scale(1); opacity: 0; }}
-      {dep + 1}%  {{ transform: translate(0, 0) scale(1); opacity: 1; }}
-      {f0}%       {{ transform: translate({mx:.0f}px, {my:.0f}px) scale(1); opacity: 1; }}
-      {f1}%, 100% {{ transform: translate({mx * 1.18:.0f}px, {my * 1.18:.0f}px) scale(.35); opacity: 0; }}
-    }}
-    #x{i} {{ animation: cull{i} {CYCLE} linear infinite; }}
-    @keyframes cull{i} {{
-      0%, {f0}%       {{ opacity: 0; transform: scale(.6); }}
-      {f0 + 3}%       {{ opacity: .75; transform: scale(1); }}
-      {f1 + 3}%, 100% {{ opacity: 0; transform: scale(1.3); }}
+      0%, {dep}%    {{ transform: translate(0, 0) scale(1); opacity: 0; fill: {{ACCENT}}; }}
+      {dep + 1}%    {{ transform: translate(0, 0) scale(1); opacity: 1; fill: {{ACCENT}}; }}
+      {stop}%       {{ transform: translate({mx:.0f}px, {my:.0f}px) scale(1); opacity: 1; fill: {{ACCENT}}; }}
+      {grey}%       {{ transform: translate({mx:.0f}px, {my:.0f}px) scale(1); opacity: .9; fill: {{MUTED}}; }}
+      {gone}%, 100% {{ transform: translate({gx:.0f}px, {gy:.0f}px) scale(.72); opacity: 0; fill: {{MUTED}}; }}
     }}
 """)
         else:
@@ -172,8 +169,6 @@ CSS = f"""
     .mk   {{ fill: {{BORDER}}; opacity: .9; }}
     .tv   {{ fill: {{ACCENT}}; opacity: 0; }}
     .keep {{ fill: {{ACCENT}}; animation: keep {CYCLE} linear infinite; }}
-    .cull {{ fill: none; stroke: {{MUTED}}; stroke-width: 1.5; stroke-linecap: round;
-            opacity: 0; }}
     .scan {{ animation: scan {CYCLE} linear infinite; }}
     @keyframes scan {{
       0%        {{ transform: translateX(0); opacity: 0; }}
@@ -189,7 +184,7 @@ CSS = f"""
     @media (prefers-reduced-motion: reduce) {{
       .rig, .lid, .wave, .flow {{ animation: none; }}
       .wave {{ opacity: .5; }}
-      .scan, .tv, .cull {{ display: none; }}
+      .scan, .tv {{ display: none; }}
       .mk, .keep {{ animation: none; }}
       .mk {{ fill: {{ACCENT}}; }}
       .keep {{ opacity: 1; }}
@@ -274,13 +269,7 @@ def overlay() -> str:
         at(p["x"], p["y"], f'<circle class="tv" id="t{i}" r="3.4"/>')
         for i, p in enumerate(PICKS)
     )
-    culls = "".join(
-        at(p["x"] + (404 - p["x"]) * p["cull"] * 1.09,
-           p["y"] + (206 - p["y"]) * p["cull"] * 1.09,
-           f'<path class="cull" id="x{i}" d="M-4 -4 L4 4 M-4 4 L4 -4"/>')
-        for i, p in enumerate(PICKS) if p["land"] is None
-    )
-    return keep + fly + culls
+    return keep + fly
 
 
 def drawing() -> str:
