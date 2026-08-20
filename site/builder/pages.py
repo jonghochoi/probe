@@ -22,6 +22,24 @@ DISCUSSIONS_NEW = f"https://github.com/{REPO}/discussions/new?category=paper-not
 # than they save. Search covers everything the chips leave out.
 TAG_FACETS = 12
 
+def _shelf_facets(cls: str) -> str:
+    """New / Starred / Unread, in whichever of its two homes.
+
+    Server-rendered with a zero count and no pressed state, because which
+    papers are starred, read or new is the reader's and the build cannot know
+    any of it. New ships `hidden` and stays hidden until there is something new
+    to point at — a zero that never moves is furniture.
+    """
+    flags = (("fresh", "New"), ("star", "Starred"), ("unread", "Unread"))
+    return "".join(
+        f'<button type="button" class="{c.esc(cls)}" data-facet-flag="{key}" '
+        f'aria-pressed="false"{" hidden" if key == "fresh" else ""}>'
+        f'<span class="sw {key}" aria-hidden="true"></span><b>{label}</b>'
+        f'<span class="rn" data-flag-count="{key}">0</span></button>'
+        for key, label in flags
+    )
+
+
 def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
@@ -68,28 +86,25 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     touches = Counter(p for paper in ordered for p in (paper.pillars or [UNCLASSIFIED]))
     primaries = Counter(p.primary for p in ordered)
 
-    # The reader's own two filters sit above the corpus's, because they answer
-    # a question the corpus cannot: not "which papers are about X" but "which
-    # ones are mine" and "which ones are left". Their counts are the only
-    # numbers on this page the build does not know — `filter.js` fills them
-    # from the shelf, and the pair hides itself when nothing is scripted.
+    # The reader's own three filters answer a question the corpus cannot: not
+    # "which papers are about X" but "which ones are mine", "which ones are
+    # left" and "which ones are new here". Their counts are the only numbers on
+    # this page the build does not know — `filter.js` fills them from the
+    # shelf, and the group hides itself when nothing is scripted.
     #
-    # The two labels are the rail's only English: the column is 10.5rem of
-    # control strip, and `Starred` names the ★ beside it in the width `아직 안
-    # 읽음` needs two lines for. The group's heading stays Korean, and so does
-    # every surface that speaks in sentences — 내 서재's tabs, the paper header.
-    rail_mine = (
-        '<p class="rail-h" data-mine-h>내 서재</p>'
-        '<button type="button" class="rail-item mine" data-facet-flag="fresh" '
-        'aria-pressed="false" hidden><span class="sw fresh" aria-hidden="true">'
-        '</span><b>New</b><span class="rn" data-flag-count="fresh">0</span></button>'
-        '<button type="button" class="rail-item mine" data-facet-flag="star" '
-        'aria-pressed="false"><span class="sw star" aria-hidden="true"></span>'
-        '<b>Starred</b><span class="rn" data-flag-count="star">0</span></button>'
-        '<button type="button" class="rail-item mine" data-facet-flag="unread" '
-        'aria-pressed="false"><span class="sw unread" aria-hidden="true"></span>'
-        '<b>Unread</b><span class="rn" data-flag-count="unread">0</span></button>'
-    )
+    # They are the only English on either surface: a facet is a control, not a
+    # sentence, and `Starred` names the ★ beside it in the width `아직 안 읽음`
+    # needs two lines for. Everything that speaks in sentences stays Korean —
+    # the group heading, 내 서재's tabs, the paper header.
+    #
+    # The same three are printed twice, once for the rail and once for the
+    # filter bar, because the rail leaves at 900px and these three would leave
+    # with it — and unlike the pillars and tags below them, nothing else on a
+    # phone can reach what they select. Exactly one copy is ever on screen
+    # (`index.css`); `filter.js` binds every copy it finds, so the pair never
+    # disagrees.
+    rail_mine = _shelf_facets("rail-item mine")
+    bar_mine = _shelf_facets("barflag")
     rail_pillars = "".join(
         f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
@@ -148,6 +163,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
       <button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>
       <button type="button" data-sort="title" aria-pressed="false">제목순</button>
     </div>
+    <div class="barflags" role="group" aria-label="내 서재">{bar_mine}</div>
     <span class="filter-spacer"></span>
     <span class="status" data-result-count>{len(ordered)}편</span>
     {f'<span class="status when" data-corpus-when>· 최근 {c.esc(ordered[0].date)}</span>' if ordered else ""}

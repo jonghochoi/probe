@@ -298,19 +298,22 @@ function countFlags() {
     if (shelf.Stars.has(card.dataset.id)) star++;
     if (!shelf.Reads.isDone(card.dataset.id)) unread++;
   });
+  // Every copy: the three facets are printed once for the rail and once for
+  // the filter bar, and only one of the two is on screen at any width.
   const set = (key, n) => {
-    const el = document.querySelector(`[data-flag-count="${key}"]`);
-    if (el) el.textContent = n;
+    document.querySelectorAll(`[data-flag-count="${key}"]`)
+      .forEach((el) => { el.textContent = n; });
   };
   set("fresh", fresh);
   set("star", star);
   set("unread", unread);
   // `New 0` is not a filter anyone would press, and on most visits that is
-  // what it says — so the row is there only while there is something new.
+  // what it says — so the control is there only while there is something new.
   // It stays while the filter is on, or turning the last one off would take
   // the control away mid-click.
-  const row = document.querySelector('[data-facet-flag="fresh"]');
-  if (row) row.hidden = fresh === 0 && !state.fresh;
+  const show = !(fresh === 0 && !state.fresh);
+  document.querySelectorAll('[data-facet-flag="fresh"]')
+    .forEach((el) => { el.hidden = !show; });
 }
 
 function refresh() { syncControls(); countFlags(); shelf && shelf.paint(); apply(); writeHash(); }
