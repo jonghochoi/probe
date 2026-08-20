@@ -18,8 +18,8 @@
 `scouting/AUTHORING.md` §3-1 is authoritative. Summary:
   · ONLY P#/D# codes that this report actually cites. No others.
   · One table, rows ordered P# → D# (asc), one per distinct code.
-  · Each code is a shields.io BADGE (AUTHORING §3-1): P# uses the pillar palette
-    (P0 f5d5d5, P1 f5e9d5, P2 e2f5d5, P3 d5f5e7, P4 d5def5, P5 e0d5f5), every
+  · Each code is a shields.io BADGE (AUTHORING §3-1): P# takes its hex from the
+    pillar palette table there, which is the palette's source of truth; every
     D# shares d97706 (amber).
     Format: `![CODE](https://img.shields.io/badge/CODE-<hex>.svg)`.
   · Legend row: <a id="ref-CODE"></a>![CODE](…badge…) | one-line meaning (English only).
@@ -54,14 +54,14 @@
 
 ### (a) 관련 Pillar / Decision
 <!-- The decision TIE only — a single line of LINKED BADGES, nothing else
-     (AUTHORING §3-1). `[![P2](…)](#ref-P2) / [![D11](…)](#ref-D11) [![D8](…)](#ref-D8)`
+     (AUTHORING §3-1). `[![P<n>](…)](#ref-P<n>) / [![D<a>](…)](#ref-D<a>) [![D<b>](…)](#ref-D<b>)`
      ( ` / ` between pillar and decisions, a SPACE between decision badges); NO
      Korean gloss next to any badge, NO body bullets here — the paper substance
      goes in (b). The four sections read as ONE STORY: tie → contribution →
      what it means for us → what to check.
      PAPER-FOCUSED (do NOT plaster internal decision bookkeeping): in (b)–(d),
-     avoid `D11`/`deferred`/`v1`/config-key/`*.yaml` names — a reader should not
-     stop to ask "what is D11? what is deferred?". The decision link is the (a)
+     avoid `D<n>`/`deferred`/`v1`/config-key/`*.yaml` names — a reader should not
+     stop to ask "what is D<n>? what is deferred?". The decision link is the (a)
      badges; concrete context-edit proposals live in 💡 Context Suggestions. -->
 
 ### (b) 핵심 기여
@@ -70,7 +70,7 @@
 
 ### (c) 시사점
 <!-- 개조식 bullets: what this could mean for us, in PLAIN terms (e.g. "공개
-     기준점 확보", "도입 비용 낮음") — not "D11 v1 …" / config-key plumbing. -->
+     기준점 확보", "도입 비용 낮음") — not "D<n> v1 …" / config-key plumbing. -->
 
 ### (d) 먼저 확인할 점
 <!-- 개조식 bullets: the paper's own limits + the cheapest transfer caveat,

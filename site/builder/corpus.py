@@ -47,9 +47,10 @@ def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
 METRIC_MAX = 40
 
 # Pillar display names mirror context/MASTER.md §5 — the one place a pillar id
-# turns into a heading a reader sees. Adding a pillar means extending all three
-# of PILLAR_NAMES / PILLAR_ORDER / PILLAR_RE (CLAUDE.md "When adding a new
-# pillar"); an out-of-range `P#` lands the paper in 미분류.
+# turns into a heading a reader sees. This dict is the pillar set for the whole
+# build: the display order is its declaration order and the id pattern is built
+# from its keys, so adding a pillar is one entry here. An id outside it lands
+# the paper in 미분류.
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",
@@ -58,8 +59,8 @@ PILLAR_NAMES = {
     "P4": "Pretraining for Data-Efficient Adaptation",
     "P5": "World Model",
 }
-PILLAR_ORDER = ["P0", "P1", "P2", "P3", "P4", "P5", UNCLASSIFIED]
-PILLAR_RE = re.compile(r"\bP[0-5]\b")
+PILLAR_ORDER = [*PILLAR_NAMES, UNCLASSIFIED]
+PILLAR_RE = re.compile(r"\b(?:%s)\b" % "|".join(map(re.escape, PILLAR_NAMES)))
 
 # Link kind → (emoji, label, sort rank). THE single source for the chips'
 # icons, labels and display order — AUTHORING §2-10 deliberately does not
