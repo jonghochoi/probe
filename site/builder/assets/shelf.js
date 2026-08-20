@@ -363,9 +363,61 @@ if (acts) {
     btn.setAttribute("aria-pressed", "false");
     btn.setAttribute("aria-label", `${label} 에 책갈피`);
     btn.innerHTML = FLAG;
-    btn.addEventListener("click", () => Marks.set(id, anchor, label, title));
+    btn.addEventListener("click", (e) => {
+      // The row is a link with a button in its own column. A tap that lands on
+      // the button must not also count as a tap on the row.
+      e.preventDefault();
+      e.stopPropagation();
+      Marks.set(id, anchor, label, title);
+    });
     row.appendChild(btn);
   });
+
+  /* ── 책갈피, from wherever the reader is ─────────────────────────────── */
+  // The contents are exact but they are also at the top of the article, and a
+  // reader who stops reading is at the bottom of it. This marks the section on
+  // screen, which is the one they mean, and it is the same store and the same
+  // toggle — placing it twice takes it off.
+  const fab = document.querySelector("[data-mark-fab]");
+  const full = document.getElementById("p-full");
+  let here = "", hereLabel = "";
+
+  if (fab && full) {
+    // A section heading carries its English keyword line inside it; the label
+    // a 책갈피 shows is the Korean half, the same half the contents print.
+    const headLabel = (h) => {
+      const en = h.querySelector(".en");
+      return (en ? h.textContent.replace(en.textContent, "") : h.textContent).trim();
+    };
+    const heads = [...full.querySelectorAll("h2.h-sec[id], h4.h-sub[id]")];
+    if (heads[0]) { here = heads[0].id; hereLabel = headLabel(heads[0]); }
+
+    if (heads.length && "IntersectionObserver" in window) {
+      // The same band the memo layer anchors in, so the two features never
+      // disagree about which section the reader is on.
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          here = e.target.id;
+          hereLabel = headLabel(e.target);
+          paintMarks();
+        });
+      }, { rootMargin: "-70px 0px -75% 0px" });
+      heads.forEach((h) => obs.observe(h));
+    }
+
+    fab.addEventListener("click", () => {
+      if (here) Marks.set(id, here, hereLabel, title);
+    });
+
+    // 책갈피 is a place in 상세, so the button belongs to that surface only.
+    // The tab strip swaps `hidden` on the panel; watching the attribute keeps
+    // this independent of who does the swapping.
+    const followSurface = () => { fab.hidden = full.hidden; };
+    new MutationObserver(followSurface).observe(
+      full, { attributes: true, attributeFilter: ["hidden"] });
+    followSurface();
+  }
 
   function paintMarks() {
     const mark = Marks.get(id);
@@ -373,6 +425,13 @@ if (acts) {
       btn.setAttribute(
         "aria-pressed", mark && mark.anchor === btn.dataset.markAt ? "true" : "false");
     });
+    if (fab) {
+      const on = !!mark && mark.anchor === here;
+      fab.setAttribute("aria-pressed", on ? "true" : "false");
+      const label = on ? "이 자리의 책갈피 빼기" : "여기에 책갈피";
+      fab.setAttribute("aria-label", label);
+      fab.title = label;
+    }
   }
   paintMarks();
   document.addEventListener("probe:shelf-change", paintMarks);

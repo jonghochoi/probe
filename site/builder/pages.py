@@ -530,6 +530,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
     </main>
   </div>
 </div>
+{c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
     return c.page(
