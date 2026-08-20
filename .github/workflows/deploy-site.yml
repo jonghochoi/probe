@@ -97,6 +97,11 @@ jobs:
         # the step skips and the site falls back to its own lexical filter.
         # Chunking is offline; this step is the only one that needs a key.
         if: github.event_name != 'pull_request' && env.INSFORGE_URL != ''
+        env:
+          # The embeddings go straight to OpenRouter, so the indexer needs its
+          # key. Set, it is used as it stands; unset, the indexer asks InsForge
+          # to vend one, which only an organisation on a paid plan will do.
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           python3 site/build-site.py --index .search/index.jsonl
           python3 site/search/indexer.py .search/index.jsonl

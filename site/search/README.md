@@ -31,12 +31,12 @@ LaTeX, `url` and `link` are targets, `tone` drives layout. A quiz gives up its
 `why` alone, since its options are written to include wrong statements and a
 result must not hand one back as the corpus speaking.
 
-A rewrite yields about 43 chunks, so the index tracks the corpus closely:
+A rewrite yields about 44 chunks, so the index tracks the corpus closely:
 
 | Corpus | Chunks | Full re-index |
 |---|---|---|
-| 22 rewrites — what is published | 959 | ~140 K tokens |
-| 106 rewrites — a corpus grown five-fold | ~4,600 | ~680 K tokens, cents |
+| 34 rewrites — what is published | 1,502 | ~220 K tokens |
+| 100 rewrites — where a full rebuild still costs cents | ~4,400 | ~660 K tokens |
 
 A normal run embeds only what changed, so the second column is the cost of
 rebuilding from nothing rather than the cost of a merge.
