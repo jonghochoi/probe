@@ -304,7 +304,6 @@ def drawing() -> str:
   {overlay()}
 
   {mark(422, 158, .96)}
-  <text class="path" x="{AXIS}" y="284" text-anchor="middle" font-size="14">PROBE</text>
 
   <path class="wire flow" d="M516 206 C548 206, 552 152, 578 152"/>
   {arrow_r(586, 152)}
