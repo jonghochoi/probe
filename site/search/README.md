@@ -18,16 +18,25 @@ removes itself on any failure — offline, `file://`, a 502, an answer slower th
 ## What is indexed
 
 `analysis/<id>.md`, and nothing else — the same corpus the site publishes. A
-chunk is one section, one term panel, one figure caption, or the paper as a
-whole. Sections rather than documents, because a rewrite is 60 KB and "the paper
-is somewhere in here" is the answer the reader already had.
+chunk is one section, one term panel, one figure caption, the 요약 surface, or
+the paper as a whole. Sections rather than documents, because a rewrite is
+60 KB and "the paper is somewhere in here" is the answer the reader already had.
+
+Both surfaces, and a section carries the panels it holds. A term and a figure
+are chunks of their own — a term is the 한/영 bridge a reader searches by name,
+a caption is a different sentence about a different thing — and every other
+panel stays inside the section it argues for, contributing the keys that carry
+prose. What a panel keeps out is addressing and machinery: `tex` and `sym` are
+LaTeX, `url` and `link` are targets, `tone` drives layout. A quiz gives up its
+`why` alone, since its options are written to include wrong statements and a
+result must not hand one back as the corpus speaking.
 
 A rewrite yields about 43 chunks, so the index tracks the corpus closely:
 
 | Corpus | Chunks | Full re-index |
 |---|---|---|
-| 7 rewrites — what is published | 299 | ~34 K tokens |
-| 95 rewrites — with the legacy backlog ported | ~4,100 | ~460 K tokens, cents |
+| 19 rewrites — what is published | 827 | ~120 K tokens |
+| 95 rewrites — with the legacy backlog ported | ~4,100 | ~600 K tokens, cents |
 
 A normal run embeds only what changed, so the second column is the cost of
 rebuilding from nothing rather than the cost of a merge.
