@@ -45,6 +45,12 @@ jobs:
       INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the landing page orders the corpus by the commit that
+          # landed each rewrite, and the default one-commit clone carries none of
+          # those. The build reports the shallow clone rather than ordering off
+          # it, so `--strict` would fail here instead of publishing a wrong 최근.
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:

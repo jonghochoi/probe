@@ -142,27 +142,28 @@ function score(card, terms) {
 
 /* ── Order ────────────────────────────────────────────────────────────── */
 function ordered(shown, scored) {
-  // `data-date` is the build's own order key (`YYYY-MM-DD HH:MM`), and the
-  // id breaks a tie the same way the build does — 최신순 has to land on the
-  // list the page shipped with, not one row off it.
-  const byDate = (a, b) =>
-    b.dataset.date.localeCompare(a.dataset.date) ||
+  // `data-order` is the build's own order key — the rank the rewrite landed
+  // at, zero-padded so a string compare reproduces it, then the day it was
+  // written — and the id breaks a tie the same way the build does: 최신순 has
+  // to land on the list the page shipped with, not one row off it.
+  const byOrder = (a, b) =>
+    b.dataset.order.localeCompare(a.dataset.order) ||
     b.dataset.id.localeCompare(a.dataset.id);
   // A query asks a question, and "newest" is not an answer to it. While one is
   // typed the default sort ranks by how well a paper answers it; the three sort
   // buttons still override, so asking for 최신순 during a search still gets it.
-  if (scored) return shown.slice().sort((a, b) => b._score - a._score || byDate(a, b));
+  if (scored) return shown.slice().sort((a, b) => b._score - a._score || byOrder(a, b));
   if (state.sort === "title") {
     return shown.slice().sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
   }
-  if (state.sort !== "pillar") return shown.slice().sort(byDate);
+  if (state.sort !== "pillar") return shown.slice().sort(byOrder);
   // Pillar order comes from the separators, which the build emitted in
   // `PILLAR_ORDER`: the JS never has to know the pillar taxonomy.
   const rank = (el) => {
     const i = PILLARS.indexOf(el.dataset.primary);
     return i === -1 ? PILLARS.length : i;
   };
-  return shown.slice().sort((a, b) => rank(a) - rank(b) || byDate(a, b));
+  return shown.slice().sort((a, b) => rank(a) - rank(b) || byOrder(a, b));
 }
 
 /* ── Apply ────────────────────────────────────────────────────────────── */
