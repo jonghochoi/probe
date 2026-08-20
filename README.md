@@ -2,9 +2,9 @@
 
 # <picture><source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg"><img src="assets/wordmark.svg" width="300" alt="PROBE · Research Scout"></picture>
 
-**Stop drowning in arXiv. Start changing what you train next week.**
+**Stop drowning in arXiv. Start from three to five papers a run, decision-grade.**
 
-*Citation-graph expansion · Anti-topic filtering · Decision-grade scouting reports*
+*Reports in Korean, published to a reading site.*
 
 [![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
 [![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
@@ -26,30 +26,33 @@
 ## Why PROBE
 
 **50–100 new papers** land on `cs.RO` + `cs.LG` every day. Maybe 3–5 a week
-touch dexterous manipulation. PROBE finds those and answers one question:
+touch dexterous manipulation. PROBE finds those and answers three things
+about each:
 
-> *"If this paper is right, what do I change in my training / evaluation
-> pipeline next week?"*
+> *"Is this paper actually new, did it run on real hardware, and can I
+> get the code?"*
 
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-lost-dark.svg"><img src="assets/probe-lost.svg" width="22" align="absmiddle" alt=""></picture> Without PROBE | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt=""></picture> With PROBE |
+| Without PROBE <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-lost-dark.svg"><img src="assets/probe-lost.svg" width="22" align="absmiddle" alt=""></picture> | With PROBE <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt=""></picture> |
 |---|---|
-| 50–100 papers/day → skim titles, remember none → "I'll check arXiv this weekend" → never happens | 3–5 papers/run → scored, tied to your open questions, landing in your repo on a fixed cadence, per pillar |
+| 50–100 papers/day → skim titles, remember none → "I'll check arXiv this weekend" → never happens | 3–5 papers/run → scored, tied to your open decisions, landing in your repo on a fixed cadence, per pillar |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
-| "I'll read that paper properly later" → never does | `/analyze` → a Korean re-telling, published to the reading site |
+| "I'll read that paper properly later" → never does | The one you do pick comes back as a Korean page you can finish in a sitting |
 
-**PROBE is a scout — it does not fight.**
+<div align="center">
 
-| | Owns |
-|---|---|
-| **Agent** | citation-graph expansion · anti-topic filtering · scoring · cross-pollination |
-| **Human** | direction · Decision-Log curation · evaluation thresholds · discarding |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/tagline-dark.svg">
+  <img src="assets/tagline.svg" width="880"
+       alt="PROBE marks the target. Reading it is still your week.">
+</picture>
 
-The agent **never** edits a `context/` file. It proposes in a report, the human
-decides.
+</div>
 
 ---
 
-## Who owns what
+## How it works
+
+<div align="center">
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/flow-dark.svg">
@@ -57,19 +60,27 @@ decides.
        alt="PROBE pipeline — the day's arXiv narrowed to 3–5 papers, out to a scouting report and an analysis page, and back through the human into context/">
 </picture>
 
+</div>
+
+The agent **never** edits a `context/` file. It proposes in a report, the human
+decides.
+
 | Folder | Written by | Cadence | Write mode |
-|---|---|---|---|
-| `context/` | human | monthly at most | agent reads only |
-| `scouting/` | agent | scheduled, per pillar | append — one dated file per run |
-| `analysis/` | agent | on demand | overwrite — one snapshot per paper |
+|---|:---:|---|---|
+| `context/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/human-dark.svg"><img src="assets/human.svg" width="22" align="absmiddle" alt="human"></picture> | monthly at most | agent reads only |
+| `scouting/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt="agent"></picture> | scheduled, per pillar | append — one dated file per run |
+| `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one snapshot per paper |
 
-Keeping static and dynamic apart is what stops the agent re-recommending last
-month's papers as the context bloats.
+One folder the agent only reads, two it only adds to — that split is what
+stops it re-recommending last month's papers as `context/` grows.
 
-**Pillars.** Each `context/P#.md` owns one pillar's Decision Log and Tracked
-Literature. `MASTER.md` holds cross-cutting content only, and a scouting run
-reads just **one `P#.md`** — names in
-[`context/MASTER.md`](context/MASTER.md) §5.
+**Pillars.** The context split is what keeps one run narrow.
+
+- `context/MASTER.md` — cross-cutting content only; every run reads it.
+- `context/P#.md` — one pillar's decision log, tracked literature and
+  anti-topics; a scouting run reads **exactly one**.
+
+Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 
 ---
 
@@ -86,3 +97,4 @@ reads just **one `P#.md`** — names in
 - **Starting from empty** — fill `context/`, generate one report by hand, review
   it ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a
   timer.
+
