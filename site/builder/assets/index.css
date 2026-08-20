@@ -276,6 +276,30 @@ html.js .filters { display: block; }
   box-shadow: var(--shadow-sm);
 }
 
+/* ── 내 서재's three, in the filter bar ───────────────────────────────── */
+/* The rail leaves at 900px and these three would leave with it — and unlike
+   the pillars and the tags, nothing else on a phone can reach what they
+   select: a star is not a word the search box can match. So the bar carries
+   its own copy, and exactly one of the two is on screen at any width. */
+.barflags { display: none; gap: .25rem; }
+@media (max-width: 900px) { html.js .barflags { display: flex; } }
+.barflag {
+  font: inherit; font-size: .74rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: .32rem;
+  padding: .22rem .6rem; border-radius: var(--radius-pill); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); white-space: nowrap;
+  transition: background var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.barflag .sw { width: 9px; height: 9px; flex: none; }
+.barflag b { font-weight: 600; color: var(--text); }
+.barflag .rn { font-size: .68rem; opacity: .6; font-variant-numeric: tabular-nums; }
+.barflag[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); }
+.barflag[aria-pressed="true"] b,
+.barflag[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
+.barflag[hidden] { display: none; }
+
 .linkish {
   font: inherit; font-size: inherit; background: none; border: none;
   color: var(--orange); cursor: pointer; padding: 0;
@@ -348,28 +372,28 @@ html.js .rail {
    The star's box is 11px against the others' 9 because a five-pointed outline
    encloses about half the ink of a disc at the same size; matched by box it
    reads as the smaller mark. */
-.rail-item .sw.star,
-.rail-item .sw.unread,
-.rail-item .sw.fresh {
+.sw.star,
+.sw.unread,
+.sw.fresh {
   position: relative; background: none; border-radius: 0;
 }
-.rail-item .sw.star::before,
-.rail-item .sw.unread::before,
-.rail-item .sw.fresh::before {
+.sw.star::before,
+.sw.unread::before,
+.sw.fresh::before {
   content: ""; position: absolute; left: 50%; top: 50%;
   transform: translate(-50%, -50%);
   width: 9px; height: 9px; box-sizing: border-box;
 }
-.rail-item .sw.unread::before { border: 1.5px solid var(--amber-soft); border-radius: 50%; }
-.rail-item .sw.fresh::before { background: var(--orange); border-radius: 50%; }
-.rail-item .sw.star::before {
+.sw.unread::before { border: 1.5px solid var(--amber-soft); border-radius: 50%; }
+.sw.fresh::before { background: var(--orange); border-radius: 50%; }
+.sw.star::before {
   width: 11px; height: 11px; background: var(--orange);
   -webkit-mask: var(--star-mask) center / contain no-repeat;
   mask: var(--star-mask) center / contain no-repeat;
 }
-.rail-item[aria-pressed="true"] .sw.star::before { background: var(--accent-ink); }
-.rail-item[aria-pressed="true"] .sw.unread::before { border-color: var(--accent-ink); }
-.rail-item[aria-pressed="true"] .sw.fresh::before { background: var(--accent-ink); }
+[aria-pressed="true"] .sw.star::before { background: var(--accent-ink); }
+[aria-pressed="true"] .sw.unread::before { border-color: var(--accent-ink); }
+[aria-pressed="true"] .sw.fresh::before { background: var(--accent-ink); }
 .rail-item[hidden] { display: none; }
 
 /* ── 책갈피: one line back to where the reader stopped ────────────────── */
@@ -659,12 +683,17 @@ html.js .rowstar, html.js .lh-star { display: block; }
 /* Three lists on one page, and the tab strip is what keeps them one page: the
    reader's shelf is a single thing, cut three ways. */
 .hub { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+/* Four tabs, and on a narrow phone they are wider than the screen: the strip
+   scrolls sideways rather than breaking 즐겨찾기 across two lines. */
 .hub-tabs {
   display: flex; gap: .1rem; margin-bottom: 1.1rem;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto; scrollbar-width: none;
 }
+.hub-tabs::-webkit-scrollbar { display: none; }
 .hub-tabs button {
   font: inherit; font-size: .84rem; font-weight: 700; cursor: pointer;
+  flex: none; white-space: nowrap;
   display: inline-flex; align-items: center; gap: .35rem;
   background: none; border: none; padding: .5rem .8rem;
   color: var(--text-muted); border-bottom: 2px solid transparent;
@@ -785,6 +814,15 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
   .mast-br { display: inline; }
 }
 @media (max-width: 680px) {
+  /* The bar is one column on a phone: search, then the two control groups on
+     a line of their own, then the count. `filter-spacer` collapses so the
+     status does not get pushed off the end. */
+  .filters-inner { row-gap: .45rem; }
+  .barflags { flex-wrap: wrap; }
+  /* 34편 and 최근 <date> are one phrase; letting the spacer grow on a narrow
+     bar splits them across two lines. It becomes the line break instead, so
+     the pair lands together under the controls. */
+  .filters-inner .filter-spacer { flex-basis: 100%; height: 0; }
   .mast-inner { padding: 1.2rem .9rem 1rem; }
   .mast-line { flex-wrap: wrap; gap: .4rem; }
   .mast h1 { white-space: normal; }
