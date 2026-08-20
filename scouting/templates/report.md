@@ -144,9 +144,13 @@
 <!-- AUTHORING §5-4. Two kinds of row:
        1. exactly ONE of the four gate dimensions scores 1, the rest ≥ 2;
        2. carried forward — listed here, or dropped for Reproducibility, in
-          this pillar's last ~2 weeks. Re-check the code signal EVERY run; a
+          this pillar's last ~4 weeks. Re-check the code signal EVERY run; a
           candidate whose repo is now public is promoted to a full paper
           section this run and named in 🔄.
+     A row that clears ALL FOUR gate dimensions does not belong here — it is a
+     surfaced paper, whatever its code status (§5-1). Two or more axes short is
+     a 🚫 row. A row expires 4 weeks after it first appears: promote it or drop
+     it, and name the retirement in 🔄.
      A paper appears in 🔍 or in 🚫, never both. Omit the section if empty. -->
 
 | Paper | Link | R·N·M·S2R | 코드 | 재검토 조건 |
