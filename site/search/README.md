@@ -36,7 +36,7 @@ A rewrite yields about 43 chunks, so the index tracks the corpus closely:
 | Corpus | Chunks | Full re-index |
 |---|---|---|
 | 22 rewrites — what is published | 959 | ~140 K tokens |
-| 106 rewrites — with the legacy backlog ported | ~4,600 | ~680 K tokens, cents |
+| 106 rewrites — a corpus grown five-fold | ~4,600 | ~680 K tokens, cents |
 
 A normal run embeds only what changed, so the second column is the cost of
 rebuilding from nothing rather than the cost of a merge.
@@ -101,7 +101,7 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
    publishing the site depend on a service the site does not need.
 
 `--dry-run` prints the token estimate before anyone runs a full re-index in CI,
-which is the number that matters as the corpus grows toward the legacy backlog.
+which is the number that matters as the corpus grows.
 
 ## What keeps this safe
 

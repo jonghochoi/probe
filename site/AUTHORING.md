@@ -42,8 +42,7 @@ the terms of this renderer.
 ## 1. File and Front Matter Contract
 
 One rewrite per paper, `analysis/<arxiv-id>.md` — flat, one file per paper, no
-per-paper folder. (`analysis_legacy/` is a legacy corpus in a different format;
-nothing here reads or writes it.)
+per-paper folder.
 
 The site takes **all** of its metadata from this front matter — there is no
 other source, so a missing field is a hole on the landing page.
@@ -91,8 +90,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed
 by `site/builder/arxiv.py`); *our view* — `D#` impact, tensions, what we
-would check — comes from `context/`. `analysis_legacy/` is neither read nor
-written.
+would check — comes from `context/`.
 No HTML edition (~4% of papers) means **no rewrite is written**: an
 abstract-based fallback would be indistinguishable on the page from a real one.
 
