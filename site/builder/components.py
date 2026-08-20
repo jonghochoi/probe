@@ -67,6 +67,129 @@ def mark(size: int) -> str:
     )
 
 
+# The masthead diagram's geometry, in its own viewBox units. The four pieces
+# are the only numbers that have to agree with anything: each one departs a
+# line of the original and lands on the part of the rewrite it becomes, and
+# `index.css` moves them between exactly these coordinates.
+_ART_PIECES = ((66, 62), (66, 80), (66, 98), (66, 116))
+_ART_ACTS = (214, 298, 382, 466)
+_ART_ROWS = ((44, 44), (44, 44), (44, 44), (44, 38),
+             (44, 44), (44, 44), (36, 44), (44, 30))
+
+
+def mast_art() -> str:
+    """The landing masthead's diagram — the tagline beside it, drawn.
+
+    The sentence it answers is "원문을 열지 않고도 메커니즘까지 이해되도록,
+    논문을 한 편씩 새로 씁니다", and the drawing carries it in one loop: a scan
+    crosses an arXiv original that stays shut (it keeps its 열지 않음 tag the
+    whole way) and lifts **four pieces** out of it; the four line up over the
+    mark; then two of them cross to the 요약 tab and become its act cards and
+    its summary, and — once the tab turns — the last two become the term panel
+    and the figure of 상세. Nothing appears in the rewrite that a piece did not
+    carry there, which is what makes the picture an argument rather than an
+    ornament: the two tabs are visibly one reading of one paper.
+
+    The rack over the mark is what keeps the loop honest at the seam. Pieces
+    held in the open say "two still to place" for the whole middle of the
+    cycle, and the remaining pair slides back to centre as the first pair
+    leaves, so the wait reads as deliberate rather than as a stall.
+
+    `mark()` is nested rather than redrawn, so the face here is the same
+    drawing as the one in the nav — same tokens, same blink, same pupils under
+    `brand.js`. Geometry only: every beat is a keyframe in `index.css`.
+
+    The tagline states all of this in text immediately to the left, so the
+    figure is decorative and stays out of the accessibility tree.
+    """
+    rows = "".join(
+        f'<rect x="18" y="{y}" width="{w1}" height="3" rx="1.5"/>'
+        f'<rect x="68" y="{y}" width="{w2}" height="3" rx="1.5"/>'
+        for y, (w1, w2) in zip(range(56, 128, 9), _ART_ROWS)
+    )
+    pieces = "".join(
+        f'<circle class="ma-dot ma-d{i + 1}" cx="{x}" cy="{y}" r="3.4"/>'
+        for i, (x, y) in enumerate(_ART_PIECES)
+    )
+    acts = "".join(
+        f'<g class="ma-act ma-a{i + 1}">'
+        f'<rect class="ma-card" x="{x}" y="64" width="76" height="42" rx="6"/>'
+        f'<rect class="ma-act-bar" x="{x}" y="64" width="76" height="3" rx="1.5"/>'
+        f'<rect x="{x + 8}" y="78" width="46" height="3" rx="1.5"/>'
+        f'<rect x="{x + 8}" y="87" width="56" height="3" rx="1.5"/>'
+        f'<rect x="{x + 8}" y="96" width="34" height="3" rx="1.5"/>'
+        "</g>"
+        for i, x in enumerate(_ART_ACTS)
+    )
+    return (
+        # The box stops just under the rewrite card (its foot is at 160): the
+        # masthead's own padding is the margin, and a viewBox taller than the
+        # drawing would push the filter bar down with empty space.
+        '<svg class="mast-art" viewBox="0 0 560 164" aria-hidden="true" '
+        'focusable="false">'
+        "<defs>"
+        '<linearGradient id="ma-scan" x1="0" y1="0" x2="0" y2="1">'
+        '<stop offset="0" class="ma-scan-0"/><stop offset="1" class="ma-scan-1"/>'
+        "</linearGradient>"
+        '<clipPath id="ma-clip">'
+        '<rect x="6" y="26" width="118" height="132" rx="8"/></clipPath>'
+        "</defs>"
+
+        # The original — read, never opened.
+        '<text class="ma-label" x="6" y="17">arXiv 원문 · PDF</text>'
+        '<rect class="ma-sheet" x="6" y="26" width="118" height="132" rx="8"/>'
+        '<rect class="ma-head" x="18" y="40" width="62" height="6" rx="3"/>'
+        f'<g class="ma-type">{rows}</g>'
+        '<rect class="ma-veil" x="6" y="26" width="118" height="132" rx="8"/>'
+        '<g clip-path="url(#ma-clip)"><g class="ma-band">'
+        '<rect x="6" y="26" width="118" height="26" fill="url(#ma-scan)"/>'
+        '<rect class="ma-edge" x="6" y="51" width="118" height="1.3"/>'
+        "</g></g>"
+        '<rect class="ma-pill" x="18" y="132" width="54" height="15" rx="7.5"/>'
+        '<text class="ma-pill-t" x="45" y="142.5">열지 않음</text>'
+
+        # The rewrite, in the two tabs the site actually publishes. Its sheet
+        # starts where the original's does, so the two labels sit on one line
+        # and the drawing reads as this document becoming that one.
+        '<text class="ma-label" x="200" y="17">PROBE 재작성 · 한글</text>'
+        '<rect class="ma-sheet" x="200" y="26" width="356" height="132" rx="10"/>'
+        '<text class="ma-tab ma-tab-1" x="216" y="46">요약</text>'
+        '<text class="ma-tab ma-tab-2" x="254" y="46">상세</text>'
+        '<line class="ma-rule" x1="212" y1="52" x2="544" y2="52"/>'
+        '<rect class="ma-tabbar" x="214" y="50.6" width="26" height="2.4" rx="1.2"/>'
+        f'<g class="ma-glance">{acts}'
+        '<g class="ma-sum">'
+        '<rect x="214" y="118" width="300" height="3.4" rx="1.7"/>'
+        '<rect x="214" y="128" width="262" height="3.4" rx="1.7"/></g></g>'
+        '<g class="ma-detail">'
+        '<rect class="ma-thesis" x="214" y="64" width="188" height="7" rx="3.5"/>'
+        '<g class="ma-body">'
+        '<rect x="214" y="82" width="322" height="3.4" rx="1.7"/>'
+        '<rect x="214" y="92" width="308" height="3.4" rx="1.7"/>'
+        '<rect x="214" y="102" width="266" height="3.4" rx="1.7"/></g>'
+        '<g class="ma-term">'
+        '<rect class="ma-term-bg" x="214" y="112" width="158" height="40" rx="6"/>'
+        '<rect class="ma-term-edge" x="214" y="112" width="3" height="40"/>'
+        '<rect x="226" y="122" width="72" height="3" rx="1.5"/>'
+        '<rect x="226" y="131" width="128" height="3" rx="1.5"/>'
+        '<rect x="226" y="140" width="104" height="3" rx="1.5"/></g>'
+        '<g class="ma-fig">'
+        '<rect class="ma-card" x="384" y="112" width="158" height="40" rx="6"/>'
+        '<g class="ma-fig-plot">'
+        '<rect x="396" y="122" width="26" height="20" rx="3"/>'
+        '<rect x="440" y="122" width="26" height="20" rx="3"/>'
+        '<rect x="484" y="122" width="26" height="20" rx="3"/>'
+        '<path d="M424 132 h13 M468 132 h13"/></g></g></g>'
+
+        # The four pieces sit under the mark, so a piece in transit passes
+        # behind the face and lands in front of the page it becomes.
+        f'<g class="ma-rack"><rect x="132" y="57.4" width="58" height="1.2" rx=".6"/></g>'
+        f"{pieces}"
+        f'<g transform="translate(140,66)">{mark(42)}</g>'
+        "</svg>"
+    )
+
+
 def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None) -> str:
     attrs = "".join(f' data-{k}="{esc(v)}"' for k, v in (data or {}).items())
     inner = esc(label)
