@@ -37,7 +37,11 @@ MODEL = os.environ.get("PROBE_EMBED_MODEL", "openai/text-embedding-3-small")
 DIMS = 1536
 # Batches keep the request count down without making one failure expensive.
 EMBED_BATCH = 64
-WRITE_BATCH = 200
+# A row carries its 1536-float embedding, so it serialises to about 22 KB and a
+# write batch is sized by bytes rather than rows: 50 rows is ~1.6 MB, which the
+# records endpoint accepts, and 100 is ~3.2 MB, which it drops mid-body as a
+# 500 "socket hang up" that no amount of retrying gets past.
+WRITE_BATCH = 50
 
 
 class Fail(SystemExit):
