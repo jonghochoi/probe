@@ -36,8 +36,10 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     stay, newest first), and the filter script only ever reorders and toggles
     `hidden` on nodes that already exist.
 
-    Order is `Paper.order_key`, and the rows carry the same key on `data-date`
-    so the script's 최신순 reproduces this list rather than a near-miss of it.
+    Order is `Paper.order_key` — the order the rewrites landed on `main`, which
+    is the order a reader watched them appear — and the rows carry that key on
+    `data-order`, so the script's 최신순 reproduces this list rather than a
+    near-miss of it.
 
     How large the corpus is and how fresh it is are stated once, in the filter
     bar: the count there is the live one — it answers 몇 편 after a filter as
@@ -192,7 +194,7 @@ def _facets(paper: Paper) -> str:
         f'data-pillars="{c.esc(" ".join(paper.pillars) or UNCLASSIFIED)}" '
         f'data-primary="{c.esc(paper.primary)}" '
         f'data-tags="{c.esc(" ".join(paper.tags))}" '
-        f'data-date="{c.esc(paper.generated_at)}" '
+        f'data-order="{c.esc(paper.order_token)}" '
         f'data-title="{c.esc(paper.title.lower())}" '
         f'data-key="{c.esc(paper.search_key)}" '
         f'data-hay="{c.esc(paper.search_hay)}"'
@@ -235,8 +237,8 @@ def _lead_block(paper: Paper, renderer=None) -> str:
     """The newest rewrite, printed rather than summarised.
 
     A grid of equal cards makes every paper look equally likely to be the one
-    you came for. The one written most recently is the one a returning reader
-    has not seen, so it gets the space — and with it the thesis line, which is
+    you came for. The one that landed most recently is the one a returning
+    reader has not seen, so it gets the space — and with it the thesis line, which is
     ours and appears nowhere else on this page.
     """
     tag_buttons = "".join(
@@ -543,7 +545,7 @@ def _header(paper: Paper) -> str:
     <div class="chip-row">
       {chips}
       {c.chip(f'발행 {paper.published}') if paper.published else ""}
-      {c.chip(f'작성 {paper.date}') if paper.date else ""}
+      {c.chip(f'등재 {paper.date}') if paper.date else ""}
       {_metric_chip(paper)}
       <span class="head-size">{c.esc(_size(paper))}</span>
     </div>

@@ -11,6 +11,7 @@ One rewrite per file, `analysis/<arxiv-id>.md` — flat, no per-paper folder.
 from __future__ import annotations
 
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -21,8 +22,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 ANALYSIS_DIR = REPO_ROOT / "analysis"
 
 ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
-# `generated:` — the day, and optionally the time that orders one day's
-# rewrites against each other.
+# `generated:` — the day a rewrite was written, and optionally the clock time
+# that separates two written on the same day.
 _GENERATED = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}))?")
 UNCLASSIFIED = "미분류"
 
@@ -76,6 +77,95 @@ LINK_KINDS = {
 }
 
 
+# ── Landing order ───────────────────────────────────────────────────────────
+
+# 최근 means the order the rewrites appeared on the site, and that is the order
+# their files landed on `main` — not the clock `generated:` recorded. A rewrite
+# written on Monday and merged on Friday shows up after everything merged
+# before it, and the landing page has to agree with what the reader watched
+# happen. History here is squash-merged, so the commit that lands
+# `analysis/<id>.md` is one commit and git's own walk order is the merge order.
+#
+# A rewrite redone lands again: `analysis: update <id> rewrite (<alias>)` is a
+# new paper to a returning reader, so it takes the newest slot. Which is why a
+# landing is not "any commit that touched the file" — a repo-wide docs or
+# refactor pass touches half the corpus in one commit and would shuffle the
+# whole list into that commit. Only two things land a rewrite: the commit that
+# adds the file, and a generated `analysis:` commit naming that paper's own id.
+_LANDED = re.compile(r"^analysis/(\d{4}\.\d{4,5})\.md$")
+_RELANDS = re.compile(r"^analysis:\s+(?:add|update)\s+(\d{4}\.\d{4,5})\b")
+
+
+@dataclass(frozen=True)
+class Landing:
+    """Where a rewrite sits in the merge order, and the day it got there."""
+
+    rank: int    # 1 is the first rewrite ever landed; higher is more recent
+    date: str    # `YYYY-MM-DD` of the commit that landed this version
+
+
+def landings() -> tuple[dict[str, Landing], str]:
+    """`{arxiv id: Landing}` read from git, plus the reason it came back empty.
+
+    One `git log` over `analysis/`, newest commit first, keeping the first
+    landing each file meets — its most recent one. A rewrite that lands twice
+    (re-added after a delete, or redone under `analysis: update`) is as recent
+    as the second time it landed, which is what a reader sees on the site.
+
+    A build with no history to read (no repo, or a shallow clone that carries
+    only the tip) gets an empty map and a sentence saying so, rather than an
+    order quietly computed from one commit's worth of history.
+    """
+    git = ("git", "-C", str(REPO_ROOT))
+    try:
+        shallow = subprocess.run(
+            [*git, "rev-parse", "--is-shallow-repository"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if shallow.returncode != 0:
+            return {}, f"git is unreadable here ({_git_error(shallow)})"
+        if shallow.stdout.strip() == "true":
+            return {}, "the clone is shallow, so the merge order is not in it"
+        walk = subprocess.run(
+            [*git, "log", "--no-renames", "--name-status",
+             "--format=%x00%cI %s", "--", "analysis"],
+            capture_output=True, text=True, timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {}, f"git could not be run ({exc})"
+    if walk.returncode != 0:
+        return {}, f"git log failed ({_git_error(walk)})"
+
+    newest_first: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    day, redone = "", ""
+    for line in walk.stdout.splitlines():
+        if line.startswith("\0"):
+            day = line[1:11]
+            subject = _RELANDS.match(line[1:].partition(" ")[2])
+            redone = subject.group(1) if subject else ""
+            continue
+        status, _, path = line.partition("\t")
+        m = _LANDED.match(path.strip())
+        if not m or m.group(1) in seen:
+            continue
+        stem = m.group(1)
+        if status.startswith("A") or (status.startswith("M") and redone == stem):
+            seen.add(stem)
+            newest_first.append((stem, day))
+    total = len(newest_first)
+    return (
+        {stem: Landing(rank=total - i, date=day)
+         for i, (stem, day) in enumerate(newest_first)},
+        "" if total else "no rewrite in `analysis/` has been committed yet",
+    )
+
+
+def _git_error(proc: subprocess.CompletedProcess) -> str:
+    lines = proc.stderr.strip().splitlines()
+    return lines[-1] if lines else f"exit {proc.returncode}"
+
+
 @dataclass
 class Paper:
     stem: str                    # arXiv id — the file name
@@ -84,6 +174,7 @@ class Paper:
     body: str                    # the whole source below the front matter
     article: str = ""            # the body with the two surfaces carved out
     glance: object | None = None  # glance.Glance, or None when absent
+    landing: Landing | None = None   # where it sits in the merge order
 
     @property
     def title(self) -> str:
@@ -107,31 +198,49 @@ class Paper:
 
     @property
     def generated_at(self) -> str:
-        """`generated:` normalised to `YYYY-MM-DD HH:MM` — the corpus's order.
+        """`generated:` normalised to `YYYY-MM-DD HH:MM` — when it was written.
 
-        The time is what separates rewrites written on the same day, and a day
-        now routinely carries several. A rewrite that states only the date is
-        read as `00:00`, so it sorts to the head of its own day rather than
-        landing wherever the file name happens to put it.
+        The authoring stamp, and the order of last resort: it decides between
+        two rewrites the git walk cannot separate — landed by one commit, both
+        still uncommitted, or read by a build with no history at all. The clock
+        time is what lets it, since a day routinely carries several rewrites,
+        so a value that states only the date is read as `00:00`.
         """
         m = _GENERATED.match(self.front.get("generated", "").strip())
         return f"{m.group(1)} {m.group(2) or '00:00'}" if m else ""
 
     @property
     def date(self) -> str:
-        """The day, which is all any chip or row prints."""
-        return self.generated_at[:10]
+        """The day this version landed, which is all any chip or row prints.
+
+        A rewrite redone under `analysis: update` prints the day the redo
+        landed — that is the day the reader met what is on the page now. One
+        that has not landed at all, the file there and no commit carrying it,
+        prints the day it was written, because that is the only day it has.
+        """
+        return (self.landing.date if self.landing else "") or self.generated_at[:10]
 
     @property
-    def order_key(self) -> tuple[str, str]:
-        """Newest first under `reverse=True`, arXiv id descending on a tie.
+    def order_key(self) -> tuple[int, str, str]:
+        """Newest first under `reverse=True`, on landing rank before all else.
 
-        The tie-break is the point: sorting on the timestamp alone leaves
-        equal rewrites in discovery order — `sorted(glob(...))`, i.e. arXiv id
-        *ascending* — so the oldest id of the newest day takes the lead block
-        and a paper added after it never displaces it.
+        Rank is the merge order (`landings()`); `generated_at` separates
+        rewrites of equal rank, and the arXiv id descending settles the rest.
+        Both tie-breaks are load-bearing: without them equal rows fall back to
+        discovery order — `sorted(glob(...))`, i.e. arXiv id *ascending* — so
+        the oldest id takes the lead block and nothing displaces it.
         """
-        return (self.generated_at, self.stem)
+        return (self.landing.rank if self.landing else 0, self.generated_at, self.stem)
+
+    @property
+    def order_token(self) -> str:
+        """`order_key` as one string, for the list's own 최신순 to sort on.
+
+        Zero-padded so a plain string compare reproduces the integer rank. The
+        arXiv id is left off: the script already breaks the last tie with it.
+        """
+        rank, generated, _ = self.order_key
+        return f"{rank:06d} {generated}"
 
     @property
     def published(self) -> str:
@@ -387,6 +496,12 @@ def discover() -> tuple[list[Paper], list[str]]:
     if not ANALYSIS_DIR.is_dir():
         return papers, problems
 
+    # A rewrite the walk does not know — the file is there, no commit adds it —
+    # is one being previewed before it lands, so it ranks above everything that
+    # has: it is the next thing to arrive, and locally it is already here.
+    landed, no_history = landings()
+    pending = Landing(rank=len(landed) + 1, date="")
+
     for path in sorted(ANALYSIS_DIR.glob("*.md")):
         stem = path.stem
         if not ID_RE.match(stem):
@@ -410,19 +525,21 @@ def discover() -> tuple[list[Paper], list[str]]:
         for required in ("title", "summary", "tagline"):
             if not front.get(required):
                 problems.append(f"analysis/{path.name}: missing `{required}`")
-        # `generated` is the landing page's order and picks its lead block, so a
-        # value the parser cannot read is not a cosmetic slip — it drops the
-        # rewrite to the bottom of the corpus without saying so.
+        # `generated` dates the rewrite on every surface that has not landed
+        # yet, and separates two that land in one commit, so a value the parser
+        # cannot read is not a cosmetic slip — it prints an empty day and drops
+        # the rewrite below its equals without saying so.
         if not _GENERATED.match(front.get("generated", "").strip()):
             problems.append(
                 f"analysis/{path.name}: `generated` is "
                 f"{front.get('generated', '')!r} — write it as "
-                f"`YYYY-MM-DD HH:MM`, which is what orders the landing page"
+                f"`YYYY-MM-DD HH:MM`, the clock as you write the rewrite"
             )
         problems += _source_coverage(path.name, front, body)
 
         article, surfaces = split_surfaces(body)
-        paper = Paper(stem=stem, path=path, front=front, body=body, article=article)
+        paper = Paper(stem=stem, path=path, front=front, body=body,
+                      article=article, landing=landed.get(stem, pending))
         if "glance" not in surfaces:
             problems.append(
                 f"analysis/{path.name}: no `::: glance` section — a rewrite "
@@ -438,6 +555,12 @@ def discover() -> tuple[list[Paper], list[str]]:
                 f"keep it under {METRIC_MAX}, it prints inside a chip"
             )
         papers.append(paper)
+
+    if papers and no_history:
+        problems.append(
+            f"analysis/: {no_history} — the landing page orders by `generated:` "
+            f"instead of by the order the rewrites landed"
+        )
     return papers, problems
 
 
@@ -564,6 +687,6 @@ def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
             continue
         score = 2 * len(mine_t & set(other.tags)) + len(mine_p & set(other.pillars))
         if score:
-            scored.append((score, other.generated_at, other))
+            scored.append((score, other.order_key, other))
     scored.sort(key=lambda row: (row[0], row[1]), reverse=True)
     return [row[2] for row in scored[:limit]]
