@@ -348,11 +348,18 @@ and the lints:
 - [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for
       it (replace every `<PILLAR>` token in `.claude/prompts/scouting.txt`
       per `SETUP.md`).
-- [ ] **Extend the pillar-keyed tooling**: `PILLAR_NAMES` / `PILLAR_ORDER` /
-      `PILLAR_RE` in `site/builder/corpus.py` (an out-of-range `P#` lands
-      the paper in 미분류 on the site) and the §3-1 palette table in
-      `scouting/AUTHORING.md` (the palette's source of truth). The lints pick
-      the new pillar up on their own — both glob `context/P*.md`.
+- [ ] **Extend the pillar-keyed tooling** — four surfaces, one entry each,
+      because none of them can read the pillar set from another:
+      `PILLAR_NAMES` in `site/builder/corpus.py` (the build's source of truth —
+      display order and the `P#` pattern are derived from it, and an id outside
+      it lands the paper in 미분류 on the site); the §3-1 palette table in
+      `scouting/AUTHORING.md` (the palette's source of truth); `PILLARS` in
+      `site/search/function/search.ts` (a deployed function imports nothing
+      from the build — its prompt and both pillar guards read this object, and
+      an id missing here filters a search to nothing); and the `--p<n>` token
+      pair plus its `[data-p]` rules in `site/builder/assets/site.css` and
+      `index.css` (plain CSS cannot loop). The lints pick the new pillar up on
+      their own — both glob `context/P*.md`.
 - [ ] **Run `python3 linters/check-doc-links.py`** — the new file's path
       references (and every doc now referencing it) must resolve.
 

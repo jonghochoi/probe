@@ -36,6 +36,29 @@ const REWRITE_MS = 1_200;
 const TERMS_MAX = 8;
 const TERM_LEN = 40;
 
+/* The pillar set, as short glosses a model can match a question against. It is
+ * restated here rather than shared because a deployed function imports nothing
+ * from the build — keep it in step with `PILLAR_NAMES` in
+ * site/builder/corpus.py, which is the set's source of truth. Everything below
+ * that needs a pillar id reads this object: the prompt lists it, and the two
+ * guards accept exactly its keys, so a pillar is one entry here. */
+const PILLARS: Record<string, string> = {
+  P0: "datasets and benchmarks",
+  P1: "body/hand action experts",
+  P2: "multimodal observation fusion",
+  P3: "hand-level low-level control",
+  P4: "pretraining and data-efficient adaptation",
+  P5: "world models",
+};
+const PILLAR_IDS = Object.keys(PILLARS);
+
+/* Only ids this corpus actually has. A model may name anything and a caller may
+ * post anything; a pillar that is not in the set would filter the pool to
+ * nothing, which reads to a reader as a search that found nothing. */
+export function isPillar(p: unknown): boolean {
+  return typeof p === "string" && PILLAR_IDS.includes(p);
+}
+
 const EXPAND_PROMPT = `You turn a reader's question about robot-manipulation
 research papers into search terms. The corpus is Korean prose that keeps
 technical terms in English.
@@ -50,10 +73,8 @@ terms — up to ${TERMS_MAX} short search terms, most important first:
   · keep any exact token the reader typed — an arXiv id, a number with a unit,
     a model name — unchanged
   · no explanations, no sentences, no duplicates of the query itself
-pillars — any of P0..P5 the query clearly asks for, else []:
-  P0 datasets and benchmarks · P1 body/hand action experts · P2 multimodal
-  observation fusion · P3 hand-level low-level control · P4 pretraining and
-  data-efficient adaptation · P5 world models`;
+pillars — any of ${PILLAR_IDS.join(", ")} the query clearly asks for, else []:
+  ${PILLAR_IDS.map((p) => `${p} ${PILLARS[p]}`).join(" · ")}`;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -112,7 +133,7 @@ export function parseExpansion(raw: string): { terms: string[]; pillars: string[
     return {
       terms: Array.isArray(got.terms) ? got.terms.map(String) : [],
       pillars: (Array.isArray(got.pillars) ? got.pillars.map(String) : [])
-        .filter((p: string) => /^P[0-5]$/.test(p)),
+        .filter(isPillar),
     };
   } catch {
     return { terms: [], pillars: [] };
@@ -180,7 +201,7 @@ export default async function (req: Request): Promise<Response> {
 
   const limit = Math.min(Number(payload.limit) || 12, LIMIT_MAX);
   const pillars = Array.isArray(payload.pillars)
-    ? (payload.pillars as string[]).filter((p) => /^P[0-5]$/.test(p))
+    ? (payload.pillars as string[]).filter(isPillar)
     : [];
 
   const { createClient } = await import("npm:@insforge/sdk");
