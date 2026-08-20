@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="88" viewBox="0 0 880 88" role="img"
+     aria-label="PROBE marks the target. Reading it is still your week.">
+  <style>
+    .card   { fill: #FFFCFA; }
+    .edge   { fill: none; stroke: #E8CDBD; }
+    .head   { fill: #1F1611; }
+    .sub    { fill: #7A6A60; }
+    .dot    { fill: #E8CDBD; opacity: .85; }
+    .hit    { fill: #D97757; }
+    .ring   { fill: none; stroke: #D97757; stroke-width: 1.4; stroke-linecap: round; }
+    .hull   { fill: #D97757; }
+    .iris   { fill: #FFFAF7; }
+    .joy    { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .stalk  { stroke: #CC785C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #CC785C; }
+    .wave   { fill: none; stroke: #CC785C; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+    .shadow { fill: #CC785C; opacity: .45; }
+    .rig  { animation: bob 3.4s ease-in-out infinite; }
+    .w1   { animation: ping 2.6s ease-in-out infinite; }
+    .w2   { animation: ping 2.6s ease-in-out .34s infinite; }
+    .lock { opacity: 0; animation: lock 4.2s ease-in-out infinite; }
+    .l2   { animation-delay: .5s; }
+    .l3   { animation-delay: 1s; }
+    @keyframes bob  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes ping { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
+    @keyframes lock { 0%, 8%   { opacity: 0; transform: scale(1.7); }
+                      22%, 84% { opacity: 1; transform: scale(1); }
+                      96%, 100% { opacity: 0; transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) {
+      .rig, .wave, .lock { animation: none; }
+      .wave { opacity: .5; }
+      .lock { opacity: 1; }
+    }
+
+    .m { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .s { font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans KR', sans-serif; }
+  </style>
+
+  <rect class="card" width="880" height="88" rx="10"/>
+  <rect class="edge" x=".5" y=".5" width="879" height="87" rx="9.5"/>
+
+  <g transform="translate(30,20) scale(.5)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>
+    <g class="rig">
+      <path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/>
+      <path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/>
+      <path class="stalk" d="M48 26 V19"/>
+      <circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <circle class="iris" cx="36" cy="52" r="11"/><path class="joy" d="M30 54 a6.5 6.5 0 0 1 12 0"/>
+      <circle class="iris" cx="60" cy="52" r="11"/><path class="joy" d="M54 54 a6.5 6.5 0 0 1 12 0"/>
+    </g>
+  </g>
+
+  <text class="m head" x="94" y="45" font-size="20" font-weight="700">PROBE marks the target.</text>
+  <text class="s sub" x="95" y="66" font-size="13">Reading it is still your week.</text>
+
+    <circle class="dot" cx="566" cy="26" r="2.6"/>
+    <circle class="dot" cx="590" cy="26" r="2.6"/>
+    <circle class="dot" cx="614" cy="26" r="2.6"/>
+    <g class="lock l1" style="transform-origin:614px 26px"><circle class="hit" cx="614" cy="26" r="3.2"/><circle class="ring" cx="614" cy="26" r="7.5"/><path class="ring" d="M603 26 h4 M621 26 h4 M614 15 v4 M614 33 v4"/></g>
+    <circle class="dot" cx="638" cy="26" r="2.6"/>
+    <circle class="dot" cx="662" cy="26" r="2.6"/>
+    <circle class="dot" cx="686" cy="26" r="2.6"/>
+    <circle class="dot" cx="710" cy="26" r="2.6"/>
+    <circle class="dot" cx="734" cy="26" r="2.6"/>
+    <circle class="dot" cx="758" cy="26" r="2.6"/>
+    <circle class="dot" cx="782" cy="26" r="2.6"/>
+    <circle class="dot" cx="806" cy="26" r="2.6"/>
+    <circle class="dot" cx="830" cy="26" r="2.6"/>
+    <circle class="dot" cx="566" cy="44" r="2.6"/>
+    <circle class="dot" cx="590" cy="44" r="2.6"/>
+    <circle class="dot" cx="614" cy="44" r="2.6"/>
+    <circle class="dot" cx="638" cy="44" r="2.6"/>
+    <circle class="dot" cx="662" cy="44" r="2.6"/>
+    <circle class="dot" cx="686" cy="44" r="2.6"/>
+    <circle class="dot" cx="710" cy="44" r="2.6"/>
+    <circle class="dot" cx="734" cy="44" r="2.6"/>
+    <circle class="dot" cx="758" cy="44" r="2.6"/>
+    <circle class="dot" cx="782" cy="44" r="2.6"/>
+    <g class="lock l3" style="transform-origin:782px 44px"><circle class="hit" cx="782" cy="44" r="3.2"/><circle class="ring" cx="782" cy="44" r="7.5"/><path class="ring" d="M771 44 h4 M789 44 h4 M782 33 v4 M782 51 v4"/></g>
+    <circle class="dot" cx="806" cy="44" r="2.6"/>
+    <circle class="dot" cx="830" cy="44" r="2.6"/>
+    <circle class="dot" cx="566" cy="62" r="2.6"/>
+    <circle class="dot" cx="590" cy="62" r="2.6"/>
+    <circle class="dot" cx="614" cy="62" r="2.6"/>
+    <circle class="dot" cx="638" cy="62" r="2.6"/>
+    <circle class="dot" cx="662" cy="62" r="2.6"/>
+    <circle class="dot" cx="686" cy="62" r="2.6"/>
+    <circle class="dot" cx="710" cy="62" r="2.6"/>
+    <g class="lock l2" style="transform-origin:710px 62px"><circle class="hit" cx="710" cy="62" r="3.2"/><circle class="ring" cx="710" cy="62" r="7.5"/><path class="ring" d="M699 62 h4 M717 62 h4 M710 51 v4 M710 69 v4"/></g>
+    <circle class="dot" cx="734" cy="62" r="2.6"/>
+    <circle class="dot" cx="758" cy="62" r="2.6"/>
+    <circle class="dot" cx="782" cy="62" r="2.6"/>
+    <circle class="dot" cx="806" cy="62" r="2.6"/>
+    <circle class="dot" cx="830" cy="62" r="2.6"/>
+</svg>

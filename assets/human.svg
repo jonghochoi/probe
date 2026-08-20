@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="96" viewBox="12 0 72 96" role="img" aria-label="human">
+  <style>
+    .body   { fill: #D97757; }
+    .shadow { fill: #CC785C; opacity: .55; }
+    .rig    { animation: breathe 4.6s ease-in-out infinite; }
+    @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px); } }
+    @media (prefers-reduced-motion: reduce) { .rig { animation: none; } }
+  </style>
+
+  <ellipse class="shadow" cx="48" cy="90" rx="18" ry="4"/>
+  <g class="rig">
+    <circle class="body" cx="48" cy="33" r="14.5"/>
+    <path class="body" d="M21 76 a27 27 0 0 1 54 0 Z"/>
+  </g>
+</svg>
