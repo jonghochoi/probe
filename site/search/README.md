@@ -35,8 +35,8 @@ A rewrite yields about 43 chunks, so the index tracks the corpus closely:
 
 | Corpus | Chunks | Full re-index |
 |---|---|---|
-| 19 rewrites — what is published | 827 | ~120 K tokens |
-| 95 rewrites — with the legacy backlog ported | ~4,100 | ~600 K tokens, cents |
+| 22 rewrites — what is published | 959 | ~140 K tokens |
+| 106 rewrites — with the legacy backlog ported | ~4,600 | ~680 K tokens, cents |
 
 A normal run embeds only what changed, so the second column is the cost of
 rebuilding from nothing rather than the cost of a merge.
@@ -49,6 +49,7 @@ rebuilding from nothing rather than the cost of a merge.
 | `schema.sql` | The InsForge migration: `probe_chunks` (pgvector HNSW + a `simple` tsvector), `probe_query_cache`, and the three `SECURITY DEFINER` functions that are the only way in — `probe_search`, fusing the two arms with Reciprocal Rank Fusion, and `probe_cache_get` / `probe_cache_put`. A statement trigger on `probe_chunks` empties the cache, so an answer never outlives the index it was computed from |
 | `indexer.py` | Embeds and uploads. Stdlib only. Re-runs cost one embedding per changed chunk, because every chunk carries a `content_hash` |
 | `function/search.ts` | The endpoint: read the query into search terms, embed, call `probe_search`, return the list. The model writes terms and nothing else — it does not summarise and does not rank |
+| `verify.py` | Asks a connected project the seven questions nothing else can answer, in dependency order. Stdlib only, run by hand |
 
 ## Running it
 
@@ -87,6 +88,17 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
    secrets `INSFORGE_URL` and `INSFORGE_API_KEY`, and the repository *variable*
    `PROBE_SEARCH_API`. Until all three exist the step skips and the build emits
    no endpoint, which is the current state.
+5. **Verify** — `python3 site/search/verify.py .search/index.jsonl`, with
+   `INSFORGE_URL`, `INSFORGE_API_KEY` and `PROBE_SEARCH_API` set. Seven checks,
+   each assuming the one before it: the migration answers, the table holds this
+   build's chunks at their current versions, a Korean question comes back a list
+   inside the 2.5 s the page waits, the same question twice is cached, a write
+   to the index clears that cache, `플로우매칭` is read as `flow matching`, and
+   the anon key reads neither table directly. Four of them fail invisibly —
+   the fallback above is what a reader sees either way — so the page cannot
+   tell you which. Not in CI: a gate needing a key and egress fails for reasons
+   its pull request did not cause, and in the deploy job it would make
+   publishing the site depend on a service the site does not need.
 
 `--dry-run` prints the token estimate before anyone runs a full re-index in CI,
 which is the number that matters as the corpus grows toward the legacy backlog.
