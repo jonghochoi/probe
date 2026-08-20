@@ -221,6 +221,28 @@ def callout(icon: str, body_html: str, cls: str = "") -> str:
 
 
 
+def mark_fab() -> str:
+    """책갈피 for the section on screen, without going back to the contents.
+
+    The contents are the exact surface — a flag per section — but they sit at
+    the top of the article and a reader who stops reading is at the bottom of
+    it. This marks where they are, which is what a 책갈피 means, and it is the
+    same one-per-paper toggle: pressing it on a section already marked takes
+    the mark off.
+
+    Ships `hidden` and stays out of the page without a script. It belongs to
+    상세 — 요약 is one screen and has no sections to stand in — so `shelf.js`
+    shows it only while that surface is open.
+    """
+    return (
+        '<button class="mark-fab" data-mark-fab hidden aria-pressed="false" '
+        'aria-label="여기에 책갈피" title="여기에 책갈피">'
+        '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" '
+        'focusable="false"><path d="M3.6 1.7h8.8v12.6L8 11.1l-4.4 3.2z"/></svg>'
+        "</button>"
+    )
+
+
 def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) -> str:
     return f"""
 <button class="memo-fab" data-memo-fab data-has-memo="0" aria-label="메모 열기">

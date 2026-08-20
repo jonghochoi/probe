@@ -493,13 +493,21 @@ html.js .paper-acts {
    its rule that nothing appears under the cursor beside a heading, and the
    contents are sticky, so the mark is reachable from anywhere in the article.
    Invisible until the row is reached — except the one that IS the mark, which
-   is always lit, and on a touch screen, where there is no reaching. */
-.toc-row { position: relative; }
-.toc-row a { padding-right: 1.45rem; }
+   is always lit, and on a touch screen, where there is no reaching.
+
+   The flag has a column of its own rather than floating over the link's right
+   padding. Overlaid, the two controls share their edges: the link's box runs
+   on under the flag, so a tap a few pixels off the glyph is a tap on the link
+   and the page jumps to the section the reader was trying to bookmark. A grid
+   column cannot be shared — every point in it belongs to the button. */
+.toc-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 1.9rem;
+  align-items: stretch;
+}
 .toc-mark {
-  position: absolute; right: .15rem; top: .3rem;
-  font: inherit; line-height: 1; padding: .12rem .15rem;
-  background: none; border: none; cursor: pointer;
+  display: grid; place-items: center; min-height: 1.9rem;
+  font: inherit; line-height: 1; padding: 0;
+  background: none; border: none; cursor: pointer; touch-action: manipulation;
   color: var(--text-muted); opacity: 0;
   transition: opacity var(--dur-short) var(--ease-out),
               color var(--dur-short) var(--ease-out);
@@ -509,7 +517,36 @@ html.js .paper-acts {
 .toc-mark:hover { color: var(--orange); }
 .toc-mark[aria-pressed="true"] { opacity: 1; color: var(--orange); }
 .toc-mark[aria-pressed="true"] svg { fill: currentColor; }
-@media (hover: none) { .toc-mark { opacity: .45; } }
+/* A finger is not a cursor. There is nothing to reach with, so the flag is lit
+   from the start rather than faint, and its column widens to the 44px a thumb
+   is measured against — at 16px it is a target most taps miss, and every miss
+   lands on the link. */
+@media (hover: none) {
+  .toc-row { grid-template-columns: minmax(0, 1fr) 2.75rem; }
+  .toc-mark { opacity: 1; min-height: 2.75rem; }
+}
+
+/* ── 책갈피, where the reader is ──────────────────────────────────────── */
+/* Above the memo button, in the corner a thumb already goes to. The contents
+   answer "mark that section"; this answers "mark here", which is the question
+   a reader who stops reading actually has — and it is the only one of the two
+   that needs no scrolling back to the top of the article. Filled while the
+   section on screen is the marked one, so pressing it again takes it off. */
+.mark-fab {
+  position: fixed; right: 1.5rem; bottom: 4.6rem; z-index: var(--z-raised);
+  width: 44px; height: 44px; display: grid; place-items: center;
+  background: var(--surface); color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 50%;
+  box-shadow: var(--shadow-lg); cursor: pointer; touch-action: manipulation;
+  transition: color var(--dur-mid) var(--ease-out),
+              border-color var(--dur-mid) var(--ease-out),
+              transform var(--dur-mid) var(--ease-out);
+}
+.mark-fab[hidden] { display: none; }
+.mark-fab svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
+.mark-fab:hover { color: var(--orange); border-color: var(--amber-soft); transform: translateY(-1px); }
+.mark-fab[aria-pressed="true"] { color: var(--orange); border-color: var(--amber-soft); }
+.mark-fab[aria-pressed="true"] svg { fill: currentColor; }
 .toc-k { display: block; font-size: .81rem; font-weight: 600; }
 .toc-k::before {
   content: counter(tocsec); color: var(--orange); font-weight: 800;
@@ -1195,6 +1232,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   }
   .toc a { margin-left: 0; padding-left: .5rem; }
   .memo-fab { right: 1rem; bottom: 1rem; }
+  .mark-fab { right: 1rem; bottom: 4.1rem; }
 }
 @media (max-width: 640px) {
   body { font-size: 14.5px; }
@@ -1215,7 +1253,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 
 @media print {
-  nav, .memo, .memo-fab, .scrim, .toc,
+  nav, .memo, .memo-fab, .mark-fab, .scrim, .toc,
   .paper-acts { display: none !important; }
   .shell { grid-template-columns: 1fr; }
 }
