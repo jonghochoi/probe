@@ -2,6 +2,12 @@
    it. Tokens all come from site.css, so dark mode needs no work here beyond
    the two places that need a real surface color instead of a tint. */
 
+:root {
+  /* The rail's 즐겨찾기 mark, as a shape rather than a ★ — see the rail
+     block below for why the character could not be trusted to centre. */
+  --star-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%201.6l3.1%206.6%207%20.9-5.2%204.9%201.4%207.1L12%2017.6%205.7%2021.1l1.4-7.1L1.9%209.1l7-.9z'/%3E%3C/svg%3E");
+}
+
 /* ── Masthead ─────────────────────────────────────────────────────────── */
 /* A band, not a hero: full width, square, one rule under it, stacked between
    the nav and the filter bar. The list is what the page is for, so the title
@@ -323,6 +329,106 @@ html.js .rail {
 .rail-item[aria-pressed="true"] { background: var(--orange); }
 .rail-item[aria-pressed="true"] b,
 .rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
+/* 내 서재's three. The swatch slot carries a mark instead of a pillar colour —
+   a filled dot for New, a star for Starred, an open ring for Unread — because
+   none of them is a colour in the palette and all three are already drawn on
+   the rows they filter.
+
+   All three are drawn *inside* the 9px slot rather than replacing it: the slot
+   is what makes the labels start on one line, down the group and across to the
+   연구 축 swatches under it. All three are shapes rather than characters, and
+   the star is why. A ★ is a text node wider than its slot, and neither inline
+   flow nor grid centring will straddle a box over a track it overflows — both
+   put it at the start edge — so a glyph lands right of the axis the other two
+   share, by whatever that font's advance width happens to be. A masked SVG is
+   ours: it is the box this file gives it, centred by a translate that no
+   alignment fallback can clamp, and the accent shows through the mask so the
+   pressed state is one colour to change.
+
+   The star's box is 11px against the others' 9 because a five-pointed outline
+   encloses about half the ink of a disc at the same size; matched by box it
+   reads as the smaller mark. */
+.rail-item .sw.star,
+.rail-item .sw.unread,
+.rail-item .sw.fresh {
+  position: relative; background: none; border-radius: 0;
+}
+.rail-item .sw.star::before,
+.rail-item .sw.unread::before,
+.rail-item .sw.fresh::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px; height: 9px; box-sizing: border-box;
+}
+.rail-item .sw.unread::before { border: 1.5px solid var(--amber-soft); border-radius: 50%; }
+.rail-item .sw.fresh::before { background: var(--orange); border-radius: 50%; }
+.rail-item .sw.star::before {
+  width: 11px; height: 11px; background: var(--orange);
+  -webkit-mask: var(--star-mask) center / contain no-repeat;
+  mask: var(--star-mask) center / contain no-repeat;
+}
+.rail-item[aria-pressed="true"] .sw.star::before { background: var(--accent-ink); }
+.rail-item[aria-pressed="true"] .sw.unread::before { border-color: var(--accent-ink); }
+.rail-item[aria-pressed="true"] .sw.fresh::before { background: var(--accent-ink); }
+.rail-item[hidden] { display: none; }
+
+/* ── 책갈피: one line back to where the reader stopped ────────────────── */
+/* Above the lead block and quieter than it: the lead is the site's answer to
+   "what should I read", this is the reader's own unfinished business, and it
+   is only there at all when they left a mark. One line, whatever the count —
+   the marks are chips so that three of them cost the first screen one row
+   rather than three, and the strip is not there when there are none. */
+.resume {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .42rem .5rem .42rem .7rem; margin-bottom: .9rem;
+  border: 1px solid var(--amber-soft); border-radius: var(--radius);
+  background: var(--orange-soft);
+}
+.resume[hidden] { display: none; }
+.resume-k {
+  flex: none; margin-right: .15rem;
+  font-size: .64rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--orange);
+}
+/* The chips give up width before the row gives up its one line: each shrinks
+   to a floor that still fits an arXiv id, and past that — a phone — the rail
+   scrolls sideways rather than hiding a chip the count beside it has already
+   promised. */
+.resume-chips {
+  display: flex; align-items: center; gap: .4rem; min-width: 0;
+  overflow-x: auto; scrollbar-width: none;
+  /* The cut edge is what says the rail keeps going, so it fades rather than
+     stopping mid-word against the link beside it. With nothing to scroll the
+     fade lands on empty space and does nothing. */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
+}
+.resume-chips::-webkit-scrollbar { display: none; }
+/* The id is mono and tabular so the chips keep one width as marks come and
+   go; the section beside it is what a reader recognises, and it gives up its
+   tail first when the row runs out of room. */
+.resume-chip {
+  display: inline-flex; align-items: baseline; gap: .4rem; min-width: 0;
+  flex: 0 1 auto; min-width: 7.6rem; max-width: 15rem;
+  padding: .2rem .55rem; border-radius: var(--radius-pill);
+  background: var(--surface); border: 1px solid var(--border);
+  text-decoration: none; color: inherit; font-size: .76rem;
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+.resume-chip:hover { border-color: var(--orange); }
+.resume-chip b {
+  flex: none; font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: var(--orange); font-variant-numeric: tabular-nums;
+}
+.resume-chip span {
+  color: var(--text-muted); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.resume-all {
+  flex: none; margin-left: auto; padding: 0 .2rem 0 .45rem;
+  font-size: .74rem; font-weight: 600; color: var(--orange); text-decoration: none;
+}
+.resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* ── Lead: the newest rewrite, printed ────────────────────────────────── */
 .lead {
@@ -370,6 +476,34 @@ html.js .rail {
 }
 .lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange); }
 
+/* ── 즐겨찾기 ─────────────────────────────────────────────────────────── */
+/* Empty until it is the reader's: an unstarred star is drawn in the border
+   colour, so a list of forty papers reads as forty rows rather than forty
+   controls. Only the pressed one takes the accent. */
+.rowstar, .leadstar, .starbtn {
+  font: inherit; line-height: 1; padding: .1rem .15rem;
+  background: none; border: none; cursor: pointer; color: var(--border);
+  transition: color var(--dur-short) var(--ease-out),
+              transform var(--dur-short) var(--ease-out);
+}
+.rowstar { font-size: .92rem; }
+.leadstar, .starbtn { font-size: 1.02rem; }
+/* The 책갈피 row's control removes the mark rather than setting one, so it is
+   drawn in the accent it already has and turns red under the cursor. */
+.markbtn {
+  font: inherit; line-height: 1; padding: .1rem .15rem;
+  background: none; border: none; cursor: pointer; color: var(--orange);
+  transition: color var(--dur-short) var(--ease-out);
+}
+.markbtn svg { fill: currentColor; display: block; }
+.markbtn:hover { color: var(--red); }
+.rowstar:hover, .leadstar:hover, .starbtn:hover {
+  color: var(--amber-soft); transform: scale(1.12);
+}
+.rowstar[aria-pressed="true"],
+.leadstar[aria-pressed="true"],
+.starbtn[aria-pressed="true"] { color: var(--orange); }
+
 /* The one value the paper is remembered by (front matter `metric`). Reads as
    a reading, not a label: mono digits, the brand wash behind them. */
 .metric {
@@ -394,9 +528,31 @@ html.js .rail {
 }
 .listhead[hidden] { display: none; }
 .row {
+  /* the star anchors to this on a phone, where the row is a block */
+  position: relative;
   padding: .65rem .35rem; border-bottom: 1px solid var(--border-soft);
 }
 .row[hidden] { display: none; }
+/* The star is a control and nothing else, so with JavaScript off it leaves and
+   takes its column with it — the five-column list is unchanged there. */
+.rowstar, .lh-star { display: none; }
+html.js .listhead, html.js .row {
+  grid-template-columns: 1.2rem 4.2rem 5.6rem minmax(0, 1fr) 4.8rem 6.2rem;
+}
+html.js .rowstar, html.js .lh-star { display: block; }
+/* 읽음 is a tick in front of the date rather than a chip of its own: the row
+   has five columns already, and the state is a footnote to the paper, not a
+   fact about it. 새 글 takes the same slot — the two cannot both hold, since
+   opening a paper is what takes its badge off. */
+.row[data-read="done"] .row-when::before,
+.lead[data-read="done"] .lead-when::before {
+  content: "✓"; color: var(--green); font-weight: 700; margin-right: .28rem;
+}
+.row[data-fresh="1"] .row-when::before,
+.lead[data-fresh="1"] .lead-when::before {
+  content: "●"; color: var(--orange); font-size: .62em;
+  vertical-align: .15em; margin-right: .3rem;
+}
 .row:hover { background: var(--surface-2); }
 .row-when, .row-id {
   font-size: .74rem; color: var(--text-muted);
@@ -415,7 +571,7 @@ html.js .rail {
 }
 .row-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
 
-/* Pillar separator — only the `Pillar 별` sort shows these. */
+/* The 연구 축 separator — only the `연구 축별` sort shows these. */
 .rsep {
   display: flex; align-items: baseline; gap: .5rem;
   padding: 1.3rem .35rem .45rem; border-bottom: 1px solid var(--border);
@@ -499,8 +655,68 @@ html.js .rail {
 }
 .sem-facets { display: flex; gap: .2rem; flex: none; }
 
-/* ── Memo hub ─────────────────────────────────────────────────────────── */
+/* ── 내 서재 ──────────────────────────────────────────────────────────── */
+/* Three lists on one page, and the tab strip is what keeps them one page: the
+   reader's shelf is a single thing, cut three ways. */
 .hub { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+.hub-tabs {
+  display: flex; gap: .1rem; margin-bottom: 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+.hub-tabs button {
+  font: inherit; font-size: .84rem; font-weight: 700; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .35rem;
+  background: none; border: none; padding: .5rem .8rem;
+  color: var(--text-muted); border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.hub-tabs button:hover { color: var(--text); }
+.hub-tabs button[aria-selected="true"] {
+  color: var(--text); border-bottom-color: var(--orange);
+}
+.hub-tabs .tab-n {
+  font-size: .68rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: .05rem .35rem; border-radius: var(--radius-pill);
+  background: var(--surface-2); color: var(--text-muted);
+}
+.hub-tabs button[aria-selected="true"] .tab-n {
+  background: var(--orange-soft); color: var(--orange);
+}
+
+/* A kept paper, in the same shape the landing list uses — star first, the
+   paper itself, then what this browser knows about it. */
+.shelf-item {
+  position: relative;
+  display: grid; align-items: baseline; gap: .7rem;
+  grid-template-columns: 1.3rem minmax(0, 1fr) 4.6rem 5.4rem 4.6rem;
+  padding: .7rem .3rem; border-bottom: 1px solid var(--border-soft);
+}
+.shelf-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
+.shelf-title {
+  display: block; font-size: .88rem; font-weight: 700; line-height: 1.45;
+  letter-spacing: -.01em;
+}
+a.shelf-main:hover .shelf-title { color: var(--orange); }
+.shelf-tagline {
+  display: block; font-size: .78rem; line-height: 1.55; color: var(--text-muted);
+  margin-top: .1rem;
+}
+/* A star or a memo outlives the rewrite it points at. The row stays, without a
+   link, rather than disappearing and taking the reader's record with it. */
+.shelf-main.gone .shelf-title { color: var(--text-muted); }
+.shelf-note { display: block; font-size: .72rem; color: var(--red); margin-top: .15rem; }
+.shelf-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
+.shelf-state {
+  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.shelf-item[data-read="done"] .shelf-state { color: var(--green); font-weight: 600; }
+.shelf-when {
+  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
 .hub-actions {
   display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
   margin-bottom: 1.4rem;
@@ -583,4 +799,16 @@ html.js .rail {
   .row-main { margin: .15rem 0 .35rem; }
   .row-pillars { display: inline-flex; gap: .2rem; vertical-align: middle; }
   .row-size::before { content: "·"; margin: 0 .35rem; opacity: .5; }
+  /* The block row has no column to keep the star in, so it goes to the corner
+     the thumb reaches for and the text makes room for it. */
+  .row { padding-right: 1.7rem; }
+  html.js .rowstar { position: absolute; top: .7rem; right: .1rem; }
+  .shelf-item { display: block; padding-right: 1.7rem; }
+  .starbtn { position: absolute; top: .65rem; right: .1rem; }
+  .shelf-pillars { display: inline-flex; vertical-align: middle; margin-top: .3rem; }
+  .shelf-state::before, .shelf-when::before { content: "·"; margin: 0 .35rem; opacity: .5; }
+  /* A phone fits one chip and a bit of the next, which is what says the rail
+     swipes. Hiding the others would make `외 N개` a lie about what is there. */
+  .resume { padding-left: .55rem; gap: .3rem; }
+  .resume-chip { min-width: 9rem; }
 }

@@ -60,7 +60,7 @@ def _check_intact(before: str, after: str) -> list[str]:
 
 
 ASSET_FILES = ("site.css", "index.css", "theme.js", "brand.js", "paper.js",
-               "memo.js", "filter.js", "hub.js")
+               "memo.js", "shelf.js", "filter.js", "hub.js")
 # Shipped only when the build was given the endpoint it talks to. A tree with
 # no endpoint carries nothing about search: no script to load, and none of its
 # Korean strings dragged into the webfont subset for a file nobody fetches.

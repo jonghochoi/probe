@@ -323,7 +323,7 @@ def nav(up: str) -> str:
     <span class="nav-spacer"></span>
     <ul class="nav-links">
       <li><a href="{up}index.html">논문</a></li>
-      <li><a href="{up}memos/index.html">메모</a></li>
+      <li><a href="{up}shelf/index.html">내 서재</a></li>
     </ul>
     <button class="icon-btn" data-theme-toggle aria-label="다크 모드로">☾</button>
   </div>

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 
 from . import components as c
@@ -67,6 +68,28 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     touches = Counter(p for paper in ordered for p in (paper.pillars or [UNCLASSIFIED]))
     primaries = Counter(p.primary for p in ordered)
 
+    # The reader's own two filters sit above the corpus's, because they answer
+    # a question the corpus cannot: not "which papers are about X" but "which
+    # ones are mine" and "which ones are left". Their counts are the only
+    # numbers on this page the build does not know — `filter.js` fills them
+    # from the shelf, and the pair hides itself when nothing is scripted.
+    #
+    # The two labels are the rail's only English: the column is 10.5rem of
+    # control strip, and `Starred` names the ★ beside it in the width `아직 안
+    # 읽음` needs two lines for. The group's heading stays Korean, and so does
+    # every surface that speaks in sentences — 내 서재's tabs, the paper header.
+    rail_mine = (
+        '<p class="rail-h" data-mine-h>내 서재</p>'
+        '<button type="button" class="rail-item mine" data-facet-flag="fresh" '
+        'aria-pressed="false" hidden><span class="sw fresh" aria-hidden="true">'
+        '</span><b>New</b><span class="rn" data-flag-count="fresh">0</span></button>'
+        '<button type="button" class="rail-item mine" data-facet-flag="star" '
+        'aria-pressed="false"><span class="sw star" aria-hidden="true"></span>'
+        '<b>Starred</b><span class="rn" data-flag-count="star">0</span></button>'
+        '<button type="button" class="rail-item mine" data-facet-flag="unread" '
+        'aria-pressed="false"><span class="sw unread" aria-hidden="true"></span>'
+        '<b>Unread</b><span class="rn" data-flag-count="unread">0</span></button>'
+    )
     rail_pillars = "".join(
         f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
@@ -87,7 +110,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     seps = "".join(
         f'<div class="rsep" data-sep="{c.esc(k)}" hidden>'
         f'<span class="chip pillar" data-p="{c.esc(k)}">{c.esc(k)}</span>'
-        f"<h2>{c.esc(PILLAR_NAMES.get(k, '필러 미지정'))}</h2>"
+        f"<h2>{c.esc(PILLAR_NAMES.get(k, '축 미지정'))}</h2>"
         f'<span class="rsep-n" data-sep-count>{primaries[k]}</span></div>'
         for k in PILLAR_ORDER if primaries.get(k)
     )
@@ -122,7 +145,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     </label>
     <div class="sort" role="group" aria-label="정렬">
       <button type="button" data-sort="recent" aria-pressed="true">최신순</button>
-      <button type="button" data-sort="pillar" aria-pressed="false">Pillar 별</button>
+      <button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>
       <button type="button" data-sort="title" aria-pressed="false">제목순</button>
     </div>
     <span class="filter-spacer"></span>
@@ -134,20 +157,26 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
 
 <div class="deck">
   <aside class="rail" data-rail>
-    <p class="rail-h">Pillar</p>
+    {rail_mine}
+    <p class="rail-h">연구 축</p>
     {rail_pillars}
     <p class="rail-h">태그</p>
     {rail_tags}
   </aside>
   <main class="corpus" data-corpus>
     {_first_run() if not ordered else ""}
+    {_resume()}
     {_lead_block(ordered[0], renderer) if ordered else ""}
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
-      <span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>Pillar</span><span>분량</span>
+      <span class="lh-star"></span><span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>연구 축</span><span>분량</span>
     </div>
     <div class="sem" data-sem hidden></div>
     <p class="corpus-partial" data-partial hidden>
       모든 단어를 포함하는 논문이 없어, <b>일부만 일치</b>하는 논문을 관련도순으로 보여줍니다.
+    </p>
+    <p class="corpus-partial" data-fresh-note hidden>
+      이 브라우저에서 <b>아직 열지 않은</b> 새 글입니다. 논문을 열면 하나씩 빠집니다.
+      <button type="button" class="linkish" data-fresh-ack>모두 확인</button>
     </p>
     <div class="rows" data-rows>{seps}{rows}</div>
     <p class="corpus-empty" data-empty hidden>
@@ -163,9 +192,37 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
         depth=0,
         # `semantic.js` ships only when the build was handed an endpoint, so a
         # default build makes no request and needs no network to be correct.
-        scripts=["filter.js"] + (["semantic.js"] if search_api else []),
+        scripts=["shelf.js", "filter.js"] + (["semantic.js"] if search_api else []),
         extra_head='<link rel="stylesheet" href="assets/index.css">',
         body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
+    )
+
+
+def _resume() -> str:
+    """One line back to wherever the reader put a 책갈피.
+
+    Above the lead block, because it is the only thing on the page that is
+    about this reader rather than about the corpus, and because a reader who
+    left a mark came back for it. One line and no more: the lead block under
+    it is the site's own answer to "what should I read", and a stack of the
+    reader's unfinished business would push it off the first screen.
+
+    That is what makes the chips carry the arXiv id rather than the title —
+    three titles do not fit on a line, three ids always do, and the id is
+    fixed-width so the row does not jump about as marks come and go. The
+    section's name rides along as the part a reader actually recognises, and
+    the paper's title is on the chip's `title`, one hover away.
+
+    Everything printed was written into the mark itself, so the strip renders
+    with no corpus lookup and stays right for a paper that has left the site.
+    Shipped empty and hidden; `shelf.js` fills it or leaves it alone.
+    """
+    return (
+        '<div class="resume" data-resume="p/" hidden>'
+        '<span class="resume-k">책갈피</span>'
+        '<span class="resume-chips" data-resume-chips></span>'
+        '<a class="resume-all" data-resume-all href="shelf/index.html#marks">'
+        '내 서재 →</a></div>'
     )
 
 
@@ -198,6 +255,23 @@ def _facets(paper: Paper) -> str:
         f'data-title="{c.esc(paper.title.lower())}" '
         f'data-key="{c.esc(paper.search_key)}" '
         f'data-hay="{c.esc(paper.search_hay)}"'
+    )
+
+
+def _star(paper: Paper, cls: str = "rowstar") -> str:
+    """The star, wherever a paper is named.
+
+    Server-rendered empty and filled in by `shelf.js`: which papers are starred
+    is the reader's, not the corpus's, and the build has no way to know it. The
+    title rides along because the shelf keeps a copy of it — a starred paper
+    that later leaves the corpus still lists under a name in 내 서재 rather than
+    as a bare id. Nothing without JavaScript can toggle it, so the button
+    removes itself there (`index.css`) instead of sitting inert.
+    """
+    return (
+        f'<button type="button" class="{cls}" data-star="{c.esc(paper.stem)}" '
+        f'data-star-title="{c.esc(paper.title)}" aria-pressed="false" '
+        f'aria-label="즐겨찾기"><span data-star-glyph aria-hidden="true">☆</span></button>'
     )
 
 
@@ -249,10 +323,12 @@ def _lead_block(paper: Paper, renderer=None) -> str:
         c.chip(f"{emoji} {label}", "src-link", href=url)
         for emoji, label, url in paper.links
     )
-    return f"""<article class="lead" data-lead>
+    return f"""<article class="lead" data-lead data-read-of="{c.esc(paper.stem)}">
   <div class="lead-top">
     <span class="lead-flag">가장 최근</span>
     <span class="lead-when">{c.esc(paper.date)} · arXiv {c.esc(paper.stem)}</span>
+    <span class="filter-spacer"></span>
+    {_star(paper, "leadstar")}
   </div>
   <a class="lead-body" href="p/{c.esc(paper.stem)}/index.html">
     <h2 class="lead-title">{c.esc(paper.title)}</h2>
@@ -286,7 +362,8 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
         c.chip(p, "pillar", data={"p": p}) for p in paper.pillars[:2]
     )
     return f"""<article class="row" data-card{' data-lead-dup hidden' if lead else ''}
-  {_facets(paper)}>
+  data-read-of="{c.esc(paper.stem)}" {_facets(paper)}>
+  {_star(paper)}
   <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
   <span class="row-id">{c.esc(paper.stem)}</span>
   <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
@@ -298,43 +375,80 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
 </article>"""
 
 
-def memos_page() -> str:
-    """The memo hub — rendered empty and filled from localStorage.
+# The four lists 내 서재 holds, in the order a reader meets them: what they
+# picked out, what they got through, where they stopped, what they wrote down.
+SHELF_TABS = (
+    ("stars", "즐겨찾기"),
+    ("reads", "읽은 논문"),
+    ("marks", "책갈피"),
+    ("memos", "메모"),
+)
 
-    Nothing here can be server-rendered: the memos live in the reader's browser
-    and never reach the build. The page is the export/import surface for them.
+
+def shelf_page(papers: list[Paper]) -> str:
+    """내 서재 — everything this browser has kept about the corpus.
+
+    Rendered empty and filled from `localStorage`: stars, 읽음 marks and memos
+    never reach the build, so there is nothing here to server-render but the
+    frame. What the build *does* ship is `[data-corpus-index]` — id, title,
+    tagline, pillars for every rewrite — which is what turns a kept id back
+    into a row with a link. A kept id missing from it is a paper that has left
+    the corpus, and 내 서재 says so rather than dropping it.
+
+    The page is also the export surface, and the only one: a shelf that lives
+    in one browser profile reaches a second machine as a file or not at all.
     """
-    body = """<header class="mast slim">
+    ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
+    # `</` cannot appear inside a `<script>` body — the parser ends the element
+    # there, whatever the type says.
+    index = json.dumps(
+        [{"id": p.stem, "title": p.title, "tagline": p.tagline,
+          "pillars": p.pillars, "date": p.date} for p in ordered],
+        ensure_ascii=False, separators=(",", ":"),
+    ).replace("</", "<\\/")
+
+    tabs = "".join(
+        f'<button type="button" role="tab" id="sh-t-{key}" aria-controls="sh-{key}" '
+        f'aria-selected="{"true" if i == 0 else "false"}" data-shelf-tab="{key}">'
+        f'{c.esc(label)} <span class="tab-n" data-tab-count>0</span></button>'
+        for i, (key, label) in enumerate(SHELF_TABS)
+    )
+    panels = "".join(
+        f'<section id="sh-{key}" role="tabpanel" aria-labelledby="sh-t-{key}" '
+        f'data-shelf-panel="{key}"{"" if i == 0 else " hidden"}></section>'
+        for i, (key, label) in enumerate(SHELF_TABS)
+    )
+
+    body = f"""<header class="mast slim">
   <div class="mast-inner">
-    <h1>메모</h1>
+    <h1>내 서재</h1>
     <p class="mast-sub">
-      논문을 읽으며 남긴 메모입니다. <strong>이 브라우저에만</strong> 저장되어 있어
-      다른 기기에서는 보이지 않고, 사이트 데이터를 지우면 사라집니다.
-      남길 메모는 내보내거나 Discussions 로 발행하세요.
+      즐겨찾기, 읽은 논문, 책갈피, 그리고 메모. 넷 다 <strong>이 브라우저에만</strong>
+      저장되어 다른 기기·다른 브라우저에서는 보이지 않고, 사이트 데이터를 지우면
+      사라집니다. 옮기거나 남길 것은 내보내세요.
     </p>
   </div>
 </header>
 
-<main class="hub">
+<main class="hub" data-hub>
+  <div class="hub-tabs" role="tablist" aria-label="내 서재 보기">{tabs}</div>
   <div class="hub-actions">
-    <button type="button" class="primary" data-hub="export-json">JSON 내보내기</button>
-    <button type="button" data-hub="export-md">마크다운 내보내기</button>
+    <button type="button" class="primary" data-hub-action="export-json">JSON 내보내기</button>
+    <button type="button" data-hub-action="export-md">마크다운 내보내기</button>
     <label class="filebtn">가져오기<input type="file" accept="application/json" data-hub-import hidden></label>
     <span class="filter-spacer"></span>
     <span class="hub-status" data-hub-status aria-live="polite"></span>
   </div>
-  <div data-hub-list></div>
-  <p class="corpus-empty" data-hub-empty hidden>
-    아직 메모가 없습니다. 논문 페이지 오른쪽 아래의 📝 버튼으로 남길 수 있습니다.
-  </p>
-  <noscript><p class="corpus-empty">메모는 브라우저에 저장되므로 JavaScript 가 필요합니다.</p></noscript>
+  {panels}
+  <noscript><p class="corpus-empty">서재는 브라우저에 저장되므로 JavaScript 가 필요합니다.</p></noscript>
 </main>
+<script type="application/json" data-corpus-index>{index}</script>
 """
     return c.page(
-        title="메모 · PROBE",
+        title="내 서재 · PROBE",
         body=body,
         depth=1,
-        scripts=["memo.js", "hub.js"],
+        scripts=["memo.js", "shelf.js", "hub.js"],
         extra_head='<link rel="stylesheet" href="../assets/index.css">',
     )
 
@@ -407,8 +521,29 @@ def paper_page(paper: Paper, katex, decisions: dict,
         description=paper.preview,
         body=body,
         depth=2,
-        scripts=["paper.js", "memo.js"],
+        scripts=["paper.js", "memo.js", "shelf.js"],
     )
+
+
+def _acts(paper: Paper) -> str:
+    """즐겨찾기 and 읽음, for this paper, in this browser.
+
+    Both are server-rendered in their empty state and corrected by `shelf.js`
+    on load — the build cannot know either one. 읽음 is the reader's claim and
+    only ever theirs: neither opening a page nor scrolling to the end of it is
+    evidence that it was read, so nothing marks it on their behalf. The button
+    says which way it goes rather than naming a state beside itself — with two
+    states, 읽음 해제 already says the paper is read.
+    """
+    return f"""<div class="paper-acts" data-paper-acts
+     data-paper-id="{c.esc(paper.stem)}" data-paper-title="{c.esc(paper.title)}">
+  <button type="button" class="act-btn" data-star="{c.esc(paper.stem)}"
+          data-star-title="{c.esc(paper.title)}" aria-pressed="false">
+    <span data-star-glyph aria-hidden="true">☆</span><span data-star-text>즐겨찾기</span>
+  </button>
+  <button type="button" class="act-btn" data-read-toggle aria-pressed="false"
+          aria-live="polite">읽음으로 표시</button>
+</div>"""
 
 
 def _tabstrip() -> str:
@@ -510,11 +645,15 @@ def _toc(entries: list[dict]) -> str:
             )
             open_group = True
             continue
+        # Each entry is wrapped rather than bare: `shelf.js` hangs the 책갈피
+        # button off the row, and a button inside the anchor would be both
+        # invalid and un-clickable without swallowing the link.
         link = (
+            '<div class="toc-row">'
             f'<a href="#{c.esc(entry["id"])}">'
             f'<span class="toc-k">{c.esc(entry["label"])}</span>'
             + (f'<span class="toc-e">{c.esc(entry["en"])}</span>' if entry.get("en") else "")
-            + "</a>"
+            + "</a></div>"
         )
         if not open_group:
             groups.append('<div class="toc-grp">')
@@ -548,6 +687,7 @@ def _header(paper: Paper) -> str:
       {c.chip(f'등재 {paper.date}') if paper.date else ""}
       {_metric_chip(paper)}
       <span class="head-size">{c.esc(_size(paper))}</span>
+      {_acts(paper)}
     </div>
   </div>
 </header>"""

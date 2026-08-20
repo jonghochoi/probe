@@ -392,6 +392,28 @@ nav {
   font-variant-numeric: tabular-nums;
 }
 
+/* ── 서재: the header's two controls ──────────────────────────────────── */
+/* Both controls write to this browser's localStorage and nowhere else, so
+   without a script they are inert and remove themselves. They sit at the end
+   of the header's second chip row — after everything the paper *is*, because
+   they are what the reader has done with it. */
+.paper-acts { display: none; }
+html.js .paper-acts {
+  display: inline-flex; align-items: center; gap: .35rem; margin-left: auto;
+}
+.act-btn {
+  font: inherit; font-size: .74rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .22rem .6rem; border-radius: var(--radius-pill); cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.act-btn:hover { border-color: var(--amber-soft); color: var(--orange); }
+.act-btn[aria-pressed="true"] { color: var(--orange); border-color: var(--amber-soft); }
+
+
 /* ── Related, under the article ───────────────────────────────────────── */
 .related { margin-top: 3.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
 .related-h {
@@ -466,6 +488,28 @@ nav {
 }
 .toc-gl { font-size: .73rem; font-weight: 700; color: var(--text-muted); }
 .toc a { counter-increment: tocsec; border-radius: var(--radius-sm); }
+
+/* 책갈피 sits in the contents, not on the headings: the reading column keeps
+   its rule that nothing appears under the cursor beside a heading, and the
+   contents are sticky, so the mark is reachable from anywhere in the article.
+   Invisible until the row is reached — except the one that IS the mark, which
+   is always lit, and on a touch screen, where there is no reaching. */
+.toc-row { position: relative; }
+.toc-row a { padding-right: 1.45rem; }
+.toc-mark {
+  position: absolute; right: .15rem; top: .3rem;
+  font: inherit; line-height: 1; padding: .12rem .15rem;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); opacity: 0;
+  transition: opacity var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+.toc-mark svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.toc-row:hover .toc-mark, .toc-mark:focus-visible { opacity: 1; }
+.toc-mark:hover { color: var(--orange); }
+.toc-mark[aria-pressed="true"] { opacity: 1; color: var(--orange); }
+.toc-mark[aria-pressed="true"] svg { fill: currentColor; }
+@media (hover: none) { .toc-mark { opacity: .45; } }
 .toc-k { display: block; font-size: .81rem; font-weight: 600; }
 .toc-k::before {
   content: counter(tocsec); color: var(--orange); font-weight: 800;
@@ -1171,7 +1215,8 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 
 @media print {
-  nav, .memo, .memo-fab, .scrim, .toc { display: none !important; }
+  nav, .memo, .memo-fab, .scrim, .toc,
+  .paper-acts { display: none !important; }
   .shell { grid-template-columns: 1fr; }
 }
 
