@@ -3,9 +3,12 @@
    the two places that need a real surface color instead of a tint. */
 
 /* ── Masthead ─────────────────────────────────────────────────────────── */
-/* One line, not a hero. The list is what the page is for, so the title states
-   what this is and gets out of the way — which is also why the brand arrives
-   as a mark on that line and a wash behind it, and costs no height at all. */
+/* A band, not a hero: full width, square, one rule under it, stacked between
+   the nav and the filter bar. The list is what the page is for, so the title
+   states what this is in one line and gets out of the way — which is why the
+   brand arrives as a mark on that line and a wash behind it rather than as a
+   block of its own. The landing band carries the diagram beside that line
+   (`.mast.brief` below); the memo hub's carries nothing else. */
 .mast {
   position: relative; overflow: hidden;
   border-bottom: 1px solid var(--border);
@@ -36,16 +39,180 @@
   font-size: clamp(1.15rem, 2.6vw, 1.45rem); font-weight: 800;
   letter-spacing: -.025em; line-height: 1.3; white-space: nowrap;
 }
-.mast-rule { flex: 1; height: 1px; background: var(--border); min-width: 1rem; }
 .mast-count {
   font-size: .76rem; color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+/* 몇 편, 얼마나 새것 — asked and answered in the filter bar, where the count
+   is live. This one is the same pair for the reader who has no filter bar
+   because the page is unscripted, so it leaves as soon as the script arrives. */
+html.js .mast-count { display: none; }
 .mast-sub {
   font-size: .86rem; line-height: 1.7; color: var(--text-muted);
   max-width: 66ch; margin-top: .35rem;
 }
 .mast-sub strong { color: var(--text); font-weight: 700; }
+/* Korean breaks between any two syllables, so the tagline splits "논문" down
+   the middle the moment it stops fitting on one line. `keep-all` moves the
+   break to a space, and the hand-placed one at the comma gives each clause a
+   line of its own instead of leaving "씁니다." alone on the second. The break
+   is on only where the sentence does not fit: on a phone, and again in the
+   band where the diagram's column squeezes the text (both below). */
+.mast.brief .mast-sub { word-break: keep-all; overflow-wrap: anywhere; }
+.mast-br { display: none; }
+
+/* ── Masthead diagram ─────────────────────────────────────────────────── */
+/* The tagline, drawn: a scan lifts four pieces out of an original that stays
+   shut, the four wait in a rack over the mark, and they cross two at a time
+   into the 요약 and 상세 tabs they become. Geometry is `components.mast_art()`;
+   this block is the clock. Every move is a transform or an opacity, so the
+   loop stays on the compositor.
+
+   One cycle for the whole picture: `--ma` names it, and every beat below is a
+   percentage of it, which is what lets the four flights, the two tabs and the
+   parts they deliver stay in step when the duration moves. Each piece scales
+   about its own centre — a transform-origin at the viewBox corner drags the
+   position along with the scale, and a piece that grows on landing would slide
+   off the part it just became. */
+.mast.brief .mast-inner {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  gap: 1.6rem; align-items: center;
+  /* The diagram ends in a drawn edge rather than in a line of text, and an
+     edge needs less air under it before the filter bar's own rule. */
+  padding-bottom: .95rem;
+}
+.mast-text { min-width: 0; }
+.mast-art {
+  --ma: 12s;
+  width: 100%; height: auto; overflow: visible;
+}
+.mast-art .ma-sheet   { fill: var(--surface); stroke: var(--border); }
+.mast-art .ma-card    { fill: var(--surface-2); stroke: var(--border); }
+.mast-art .ma-head    { fill: var(--border); }
+.mast-art .ma-type    { fill: var(--border-soft); }
+/* The veil is what says 열지 않음 before the tag does: the type under it stays
+   a texture and never resolves into lines a reader could try to read. */
+.mast-art .ma-veil    { fill: var(--surface); opacity: .3; }
+.mast-art .ma-scan-0  { stop-color: var(--orange); stop-opacity: 0; }
+.mast-art .ma-scan-1  { stop-color: var(--orange); stop-opacity: .16; }
+.mast-art .ma-edge    { fill: var(--orange); opacity: .8; }
+.mast-art .ma-pill    { fill: var(--surface-2); stroke: var(--border); }
+.mast-art .ma-pill-t,
+.mast-art .ma-label   { fill: var(--text-muted); font-family: var(--mono); font-size: 8.5px; }
+.mast-art .ma-pill-t  { font-family: var(--ko); font-size: 9px; text-anchor: middle; }
+.mast-art .ma-tab     { font-family: var(--ko); font-size: 10px; font-weight: 700; fill: var(--text-muted); }
+.mast-art .ma-rule    { stroke: var(--border); }
+.mast-art .ma-tabbar  { fill: var(--orange); }
+.mast-art .ma-act     { fill: var(--border); }
+.mast-art .ma-a1 .ma-act-bar { fill: var(--act1); }
+.mast-art .ma-a2 .ma-act-bar { fill: var(--act2); }
+.mast-art .ma-a3 .ma-act-bar { fill: var(--act3); }
+.mast-art .ma-a4 .ma-act-bar { fill: var(--act4); }
+.mast-art .ma-sum,
+.mast-art .ma-body    { fill: var(--border-soft); }
+.mast-art .ma-thesis  { fill: var(--text); opacity: .72; }
+.mast-art .ma-term    { fill: var(--border); }
+.mast-art .ma-term-bg { fill: var(--wash-key); stroke: var(--border); }
+.mast-art .ma-term-edge { fill: var(--blue); }
+.mast-art .ma-fig-plot  { fill: none; stroke: var(--text-muted); stroke-width: 1.2; opacity: .65; }
+.mast-art .ma-rack    { fill: var(--border); }
+.mast-art .ma-dot     { fill: var(--orange); }
+/* The resting picture, and the one a reader who asked for less motion keeps:
+   the original read, the 요약 tab standing. Everything in flight starts from
+   nothing, so nothing is stranded mid-flight and the two tabs never stack. */
+.mast-art .ma-band,
+.mast-art .ma-rack,
+.mast-art .ma-dot,
+.mast-art .ma-detail { opacity: 0; }
+.mast-art .ma-dot,
+.mast-art .ma-act,
+.mast-art .ma-term,
+.mast-art .ma-fig { transform-box: fill-box; transform-origin: center; }
+.mast-art .ma-thesis { transform-box: fill-box; transform-origin: left center; }
+
+.mast-art .ma-band   { animation: ma-scan  var(--ma) cubic-bezier(.4, 0, .5, 1) infinite; }
+.mast-art .ma-rack   { animation: ma-rack  var(--ma) linear infinite; }
+.mast-art .ma-tab-1  { animation: ma-tab-a var(--ma) linear infinite; }
+.mast-art .ma-tab-2  { animation: ma-tab-b var(--ma) linear infinite; }
+.mast-art .ma-tabbar { animation: ma-bar   var(--ma) var(--ease-in-out) infinite; }
+.mast-art .ma-glance { animation: ma-glance var(--ma) linear infinite; }
+.mast-art .ma-detail { animation: ma-detail var(--ma) linear infinite; }
+.mast-art .ma-act    { animation: ma-act   var(--ma) var(--ease-out) infinite; }
+.mast-art .ma-a2 { animation-delay: .2s; }
+.mast-art .ma-a3 { animation-delay: .4s; }
+.mast-art .ma-a4 { animation-delay: .6s; }
+.mast-art .ma-sum    { animation: ma-sum    var(--ma) linear infinite; }
+.mast-art .ma-thesis { animation: ma-thesis var(--ma) var(--ease-out) infinite; }
+.mast-art .ma-body   { animation: ma-body   var(--ma) linear infinite; }
+.mast-art .ma-term   { animation: ma-term   var(--ma) var(--ease-out) infinite; }
+.mast-art .ma-fig    { animation: ma-fig    var(--ma) var(--ease-out) infinite; }
+.mast-art .ma-dot    { animation-duration: var(--ma); animation-iteration-count: infinite;
+                       animation-timing-function: cubic-bezier(.35, 0, .25, 1); }
+.mast-art .ma-d1 { animation-name: ma-piece-1; }
+.mast-art .ma-d2 { animation-name: ma-piece-2; }
+.mast-art .ma-d3 { animation-name: ma-piece-3; }
+.mast-art .ma-d4 { animation-name: ma-piece-4; }
+
+@keyframes ma-scan {
+  0%, 3%    { transform: translateY(0); opacity: 0; }
+  5%        { opacity: 1; }
+  30%       { transform: translateY(112px); opacity: 1; }
+  34%, 100% { transform: translateY(112px); opacity: 0; }
+}
+@keyframes ma-rack   { 0%, 17% { opacity: 0; } 22%, 62% { opacity: .55; } 67%, 100% { opacity: 0; } }
+@keyframes ma-tab-a  { 0%, 60% { fill: var(--text); } 65%, 94% { fill: var(--text-muted); }
+                       98%, 100% { fill: var(--text); } }
+@keyframes ma-tab-b  { 0%, 60% { fill: var(--text-muted); } 65%, 94% { fill: var(--text); }
+                       98%, 100% { fill: var(--text-muted); } }
+@keyframes ma-bar    { 0%, 60% { transform: translateX(0); } 65%, 94% { transform: translateX(38px); }
+                       98%, 100% { transform: translateX(0); } }
+@keyframes ma-glance { 0%, 33% { opacity: 0; } 37%, 58% { opacity: 1; } 62%, 100% { opacity: 0; } }
+@keyframes ma-detail { 0%, 64% { opacity: 0; } 68%, 94% { opacity: 1; } 97%, 100% { opacity: 0; } }
+@keyframes ma-act    { 0%, 41% { transform: translateY(4px) scale(.96); opacity: 0; }
+                       46%, 100% { transform: none; opacity: 1; } }
+@keyframes ma-sum    { 0%, 44% { opacity: 0; } 49%, 100% { opacity: 1; } }
+@keyframes ma-thesis { 0%, 66% { transform: scaleX(0); } 71%, 100% { transform: scaleX(1); } }
+@keyframes ma-body   { 0%, 68% { opacity: 0; } 73%, 100% { opacity: 1; } }
+@keyframes ma-term   { 0%, 71% { transform: scale(.94); opacity: 0; } 76%, 100% { transform: none; opacity: 1; } }
+@keyframes ma-fig    { 0%, 74% { transform: scale(.94); opacity: 0; } 79%, 100% { transform: none; opacity: 1; } }
+
+/* The four flights. A piece leaves the line the scan is crossing, waits in its
+   slot on the rack, and lands on the one part of the rewrite it becomes —
+   act cards, summary, term panel, figure, in that order. The two that stay
+   behind slide inward as the first pair leaves, so the rack keeps its centre. */
+@keyframes ma-piece-1 {
+  0%, 7.5%   { transform: scale(.35); opacity: 0; }
+  9%         { transform: none; opacity: 1; }
+  20%, 34%   { transform: translate(74px, -12px); opacity: 1; }
+  40%        { transform: translate(186px, 23px); opacity: 1; }
+  43%, 100%  { transform: translate(186px, 23px) scale(4); opacity: 0; }
+}
+@keyframes ma-piece-2 {
+  0%, 11.5%  { transform: scale(.35); opacity: 0; }
+  13%        { transform: none; opacity: 1; }
+  24%, 37%   { transform: translate(88px, -30px); opacity: 1; }
+  43%        { transform: translate(264px, 40px); opacity: 1; }
+  46%, 100%  { transform: translate(264px, 40px) scale(4); opacity: 0; }
+}
+@keyframes ma-piece-3 {
+  0%, 15.5%  { transform: scale(.35); opacity: 0; }
+  17%        { transform: none; opacity: 1; }
+  28%, 40%   { transform: translate(102px, -48px); opacity: 1; }
+  45%, 64%   { transform: translate(88px, -48px); opacity: 1; }
+  70%        { transform: translate(227px, 34px); opacity: 1; }
+  73%, 100%  { transform: translate(227px, 34px) scale(4); opacity: 0; }
+}
+@keyframes ma-piece-4 {
+  0%, 19.5%  { transform: scale(.35); opacity: 0; }
+  21%        { transform: none; opacity: 1; }
+  32%, 40%   { transform: translate(116px, -66px); opacity: 1; }
+  45%, 67%   { transform: translate(102px, -66px); opacity: 1; }
+  73%        { transform: translate(397px, 16px); opacity: 1; }
+  76%, 100%  { transform: translate(397px, 16px) scale(4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mast-art * { animation: none; }
+}
 
 /* ── Filter bar ───────────────────────────────────────────────────────── */
 /* With JS off the controls would be inert decoration, so they remove
@@ -67,6 +234,10 @@ html.js .filters { display: block; }
   font-size: .74rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
+/* The corpus's last date rides with the count, close enough to read as one
+   phrase. It states what the whole corpus is, so a filtered count — which is
+   about a subset — drops it (`filter.js`). */
+.filters .status.when { margin-left: -.28rem; }
 
 .search {
   display: flex; align-items: center; gap: .45rem;
@@ -388,11 +559,19 @@ html.js .rail {
   html.js .deck { grid-template-columns: minmax(0, 1fr); }
   html.js .rail { display: none; }
 }
+@media (max-width: 860px) {
+  .mast.brief .mast-inner { grid-template-columns: minmax(0, 1fr); }
+  .mast-art { display: none; }
+}
+/* The two widths the sentence stops fitting at, measured: 479px on a phone,
+   and 979px where the 460px diagram column leaves the text too little. */
+@media (max-width: 479px), (min-width: 861px) and (max-width: 979px) {
+  .mast-br { display: inline; }
+}
 @media (max-width: 680px) {
   .mast-inner { padding: 1.2rem .9rem 1rem; }
   .mast-line { flex-wrap: wrap; gap: .4rem; }
   .mast h1 { white-space: normal; }
-  .mast-rule { display: none; }
   .filters-inner { padding: .5rem .9rem; }
   .deck { padding: 1.1rem .9rem 4rem; }
   /* A five-column row cannot survive a phone, so it becomes a block: title

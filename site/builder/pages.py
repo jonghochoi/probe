@@ -38,6 +38,13 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
 
     Order is `Paper.order_key`, and the rows carry the same key on `data-date`
     so the script's 최신순 reproduces this list rather than a near-miss of it.
+
+    How large the corpus is and how fresh it is are stated once, in the filter
+    bar: the count there is the live one — it answers 몇 편 after a filter as
+    well as before — so a second, fixed count in the masthead would be the same
+    number twice on one screen, and only one of them would ever move. The
+    masthead carries the same pair for the reader whose page is unscripted and
+    who therefore has no filter bar; `index.css` hides it once a script runs.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     tag_counts = Counter(t for p in ordered for t in p.tags)
@@ -86,17 +93,20 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
         _row(p, renderer, lead=(i == 0)) for i, p in enumerate(ordered)
     )
 
-    body = f"""<header class="mast">
+    body = f"""<header class="mast brief">
   <div class="mast-inner">
-    <div class="mast-line">
-      <span class="mast-brand">{c.mark(30)}</span>
-      <h1>Dexterous Manipulation, 다시 쓴 판</h1>
-      <span class="mast-rule"></span>
-      <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
+    <div class="mast-text">
+      <div class="mast-line">
+        <span class="mast-brand">{c.mark(30)}</span>
+        <h1>Dexterous Manipulation, 다시 쓴 판</h1>
+        <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
+      </div>
+      <p class="mast-sub">
+        원문을 열지 않고도 메커니즘까지 이해되도록,<br class="mast-br">
+        논문을 한 편씩 새로 씁니다.
+      </p>
     </div>
-    <p class="mast-sub">
-      원문을 열지 않고도 메커니즘까지 이해되도록, 논문을 한 편씩 새로 씁니다.
-    </p>
+    {c.mast_art()}
   </div>
 </header>
 
@@ -115,6 +125,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     </div>
     <span class="filter-spacer"></span>
     <span class="status" data-result-count>{len(ordered)}편</span>
+    {f'<span class="status when" data-corpus-when>· 최근 {c.esc(ordered[0].date)}</span>' if ordered else ""}
     <button type="button" class="linkish" data-reset hidden>필터 초기화</button>
   </div>
 </div>

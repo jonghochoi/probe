@@ -29,6 +29,7 @@ const listhead = root.querySelector("[data-listhead]");
 const emptyMsg = root.querySelector("[data-empty]");
 const partialMsg = root.querySelector("[data-partial]");
 const countEl = bar.querySelector("[data-result-count]");
+const whenEl = bar.querySelector("[data-corpus-when]");
 const input = bar.querySelector("[data-q]");
 const sortBtns = [...bar.querySelectorAll("[data-sort]")];
 const resetBtns = [...document.querySelectorAll("[data-reset]")];
@@ -236,6 +237,8 @@ function apply() {
   if (emptyMsg) emptyMsg.hidden = visible > 0;
   if (listhead) listhead.hidden = visible - (leadOn ? 1 : 0) < 1;
   resetBtns.forEach((b) => { b.hidden = !dirty; });
+  // The date describes the corpus, not the subset a filter leaves behind.
+  if (whenEl) whenEl.hidden = dirty;
 }
 
 function refresh() { syncControls(); apply(); writeHash(); }
