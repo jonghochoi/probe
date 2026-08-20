@@ -9,9 +9,23 @@
  * the paper's identity and everything the rewrite names — so a term the
  * rewrite defines is findable even though the card only prints a summary.
  *
+ * Three of the filters are not the corpus's but the reader's — New, Starred
+ * and Unread — and they come off `window.ProbeShelf`, which reads this
+ * browser's own localStorage. They behave like any other facet here; the only
+ * difference is that their counts are computed rather than printed by the
+ * build, and that they disappear when the shelf layer is missing.
+ *
+ * This page is also the only one that knows the whole corpus, so it is where
+ * the 새 글 set is kept honest: it seeds the set on first sight (silently —
+ * arriving to be told all 32 papers are new is not news) and prunes ids that
+ * have left the site.
+ *
  * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
- * back-button history — Back should leave the page, not undo a keystroke.
+ * back-button history — Back should leave the page, not undo a keystroke. The
+ * two shelf filters ride there too (`&f=1`, `&u=1`) — a bookmark of "my
+ * starred P2 papers" is a view worth keeping — even though what they select is
+ * local to the browser that opens the link.
  */
 
 (function () {
@@ -36,8 +50,21 @@ const resetBtns = [...document.querySelectorAll("[data-reset]")];
 
 const SORTS = ["recent", "pillar", "title"];
 const PILLARS = seps.map((s) => s.dataset.sep);
+const shelf = window.ProbeShelf;
+const flagBtns = [...document.querySelectorAll("[data-facet-flag]")];
 
-const state = { q: "", pillars: new Set(), tags: new Set(), sort: "recent" };
+const state = {
+  q: "", pillars: new Set(), tags: new Set(), sort: "recent",
+  fresh: false, star: false, unread: false,
+};
+const freshNote = root.querySelector("[data-fresh-note]");
+
+// Without the shelf layer there is nothing to filter on, so the group leaves
+// rather than offering two buttons that would select every paper or none.
+if (!shelf) {
+  flagBtns.forEach((b) => b.remove());
+  document.querySelectorAll("[data-mine-h]").forEach((h) => h.remove());
+}
 
 /* ── State ↔ URL ──────────────────────────────────────────────────────── */
 function readHash() {
@@ -46,6 +73,9 @@ function readHash() {
   state.pillars = new Set((h.get("p") || "").split(",").filter(Boolean));
   state.tags = new Set((h.get("t") || "").split(",").filter(Boolean));
   state.sort = SORTS.includes(h.get("s")) ? h.get("s") : "recent";
+  state.fresh = !!shelf && h.get("n") === "1";
+  state.star = !!shelf && h.get("f") === "1";
+  state.unread = !!shelf && h.get("u") === "1";
 }
 
 function writeHash() {
@@ -54,6 +84,9 @@ function writeHash() {
   if (state.pillars.size) h.set("p", [...state.pillars].join(","));
   if (state.tags.size) h.set("t", [...state.tags].join(","));
   if (state.sort !== "recent") h.set("s", state.sort);
+  if (state.fresh) h.set("n", "1");
+  if (state.star) h.set("f", "1");
+  if (state.unread) h.set("u", "1");
   const hash = h.toString();
   history.replaceState(null, "", hash ? `#${hash}` : location.pathname + location.search);
 }
@@ -66,6 +99,8 @@ function syncControls() {
   document.querySelectorAll("[data-facet-tag]").forEach((b) => {
     b.setAttribute("aria-pressed", state.tags.has(b.dataset.facetTag) ? "true" : "false");
   });
+  flagBtns.forEach((b) => b.setAttribute(
+    "aria-pressed", state[b.dataset.facetFlag] ? "true" : "false"));
   // While a query ranks the list, none of the three is what the rows are in —
   // pressing 최신순 during a relevance sort would be the control lying about
   // the order. Clicking one still takes the list back.
@@ -116,6 +151,13 @@ function parse(q) {
 const KEY_HIT = 3, HAY_HIT = 1;
 
 function facetOk(card) {
+  // The reader's three come first: they are the cheapest tests and the ones
+  // most likely to cut the pool to a handful.
+  if (state.fresh && !shelf.Corpus.isNew(card.dataset.id)) return false;
+  if (state.star && !shelf.Stars.has(card.dataset.id)) return false;
+  // 아직 안 읽음 is "not finished", not "never opened" — a paper whose 요약 was
+  // read is still a paper the reader has not got through.
+  if (state.unread && shelf.Reads.isDone(card.dataset.id)) return false;
   if (state.pillars.size) {
     const own = card.dataset.pillars.split(" ");
     // A paper is kept if it touches ANY selected pillar — the pillars are
@@ -169,7 +211,8 @@ function ordered(shown, scored) {
 /* ── Apply ────────────────────────────────────────────────────────────── */
 function apply() {
   const terms = parse(state.q);
-  const dirty = !!(state.q || state.pillars.size || state.tags.size);
+  const dirty = !!(state.q || state.pillars.size || state.tags.size
+                   || state.fresh || state.star || state.unread);
   // The lead block stands in for the newest paper only while it *is* the top
   // of the list. Filter or re-sort and it stops being that, so it steps aside
   // and its row takes over — the paper is never in both places, and never in
@@ -198,6 +241,7 @@ function apply() {
     }
   }
 
+  if (freshNote) freshNote.hidden = !state.fresh;
   const scored = terms.length > 0 && state.sort === "recent";
   const keep = new Set(shown);
   cards.forEach((card) => {
@@ -242,7 +286,34 @@ function apply() {
   if (whenEl) whenEl.hidden = dirty;
 }
 
-function refresh() { syncControls(); apply(); writeHash(); }
+/* The two shelf counts, over the corpus this page is showing — a star on a
+ * paper that has since left the site is real but not selectable here, so
+ * counting the store rather than the rows would promise rows that do not
+ * exist. */
+function countFlags() {
+  if (!shelf) return;
+  let fresh = 0, star = 0, unread = 0;
+  cards.forEach((card) => {
+    if (shelf.Corpus.isNew(card.dataset.id)) fresh++;
+    if (shelf.Stars.has(card.dataset.id)) star++;
+    if (!shelf.Reads.isDone(card.dataset.id)) unread++;
+  });
+  const set = (key, n) => {
+    const el = document.querySelector(`[data-flag-count="${key}"]`);
+    if (el) el.textContent = n;
+  };
+  set("fresh", fresh);
+  set("star", star);
+  set("unread", unread);
+  // `New 0` is not a filter anyone would press, and on most visits that is
+  // what it says — so the row is there only while there is something new.
+  // It stays while the filter is on, or turning the last one off would take
+  // the control away mid-click.
+  const row = document.querySelector('[data-facet-flag="fresh"]');
+  if (row) row.hidden = fresh === 0 && !state.fresh;
+}
+
+function refresh() { syncControls(); countFlags(); shelf && shelf.paint(); apply(); writeHash(); }
 
 /* ── Wiring ───────────────────────────────────────────────────────────── */
 let debounce = null;
@@ -265,8 +336,16 @@ document.addEventListener("click", (e) => {
   const p = e.target.closest("[data-facet-pillar]");
   const t = e.target.closest("[data-facet-tag]");
   const s = e.target.closest("[data-sort]");
+  const flag = e.target.closest("[data-facet-flag]");
+  const ack = e.target.closest("[data-fresh-ack]");
   const jump = e.target.closest("[data-tag-jump]");
-  if (p) { toggleSet(state.pillars, p.dataset.facetPillar); refresh(); }
+  if (ack) {
+    shelf.Corpus.markAll(cards.map((card) => card.dataset.id));
+    state.fresh = false;
+    refresh();
+  }
+  else if (flag) { state[flag.dataset.facetFlag] = !state[flag.dataset.facetFlag]; refresh(); }
+  else if (p) { toggleSet(state.pillars, p.dataset.facetPillar); refresh(); }
   else if (t) { toggleSet(state.tags, t.dataset.facetTag); refresh(); }
   else if (s) { state.sort = s.dataset.sort; refresh(); }
   // A tag on the lead block is also a filter — that is how you find the
@@ -277,9 +356,15 @@ document.addEventListener("click", (e) => {
     bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
   } else if (e.target.closest("[data-reset]")) {
     state.q = ""; state.pillars.clear(); state.tags.clear();
+    state.fresh = false; state.star = false; state.unread = false;
     refresh();
   }
 });
+
+// A star toggled on a row is a filter input like any other: the counts move,
+// and a list that is currently showing 즐겨찾기 has to lose the row that just
+// stopped being one.
+document.addEventListener("probe:shelf-change", () => { countFlags(); apply(); });
 
 addEventListener("hashchange", () => { readHash(); syncControls(); apply(); });
 
@@ -291,6 +376,10 @@ addEventListener("keydown", (e) => {
     state.q = ""; refresh(); input.blur();
   }
 });
+
+// Seed or prune before the first paint, so a first visit never flashes a
+// badge it is about to withdraw.
+if (shelf) shelf.Corpus.sync(cards.map((card) => card.dataset.id));
 
 readHash();
 refresh();
