@@ -485,8 +485,20 @@ nothing while the same paper's Relevance and Methodology are the strongest of
 the week. Reproducibility governs how far a paper may be promoted, not whether
 the reader gets to see it.
 
+**The gate binds in both directions.** A candidate whose four gate dimensions
+are each ≥ 2 is surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section — there is no third
+outcome. Parking such a paper in `## 🔍` or `## 🚫` because its repository is
+still closed puts Reproducibility back inside the gate through the appendix
+tables, and the report then buries the week's strongest paper in a row whose
+재검토 조건 reads `코드 공개 시 승격`. A closed artifact caps the paper's
+priority at ★★ (§5-3); it never removes the paper from the report.
+
 The metadata field is `**Papers surfaced (4축 게이트 통과):**` (§6). When fewer
 than 3 papers clear the gate, say so and do not pad.
+
+The `## 📊` section carries the rationale for exactly those surfaced papers:
+one bold head per surfaced paper, and no head for a paper the report did not
+surface. Its five bullets sum to the total the head states.
 
 ### 5-2. Reproducibility is scored from quoted evidence, never inferred
 
@@ -541,12 +553,20 @@ artifact. Rank within a ceiling by Relevance, then by the /15 total.
 mechanism that makes "재검토 권고" actually happen:
 
 1. **One axis short** — exactly one of the four gate dimensions scores 1 and
-   the rest are ≥ 2.
+   the rest are ≥ 2. Two or more axes short is a 🚫 row; zero axes short is a
+   surfaced paper (§5-1), never a 🔍 row.
 2. **Carried forward** — a candidate listed in this section, or dropped for
-   Reproducibility, in this pillar's last ~2 weeks of reports. Every run
+   Reproducibility, in this pillar's last ~4 weeks of reports. Every run
    re-reads those entries and re-checks the code signal (§5-2). A candidate
    whose repository is now public is **promoted to a full paper section this
    run** and named in 🔄 as a promotion.
+
+**A carried row expires four weeks after it first appears.** On the run that
+passes that mark the row is either promoted or dropped from the table, and 🔄
+names the retirement in one clause. Without the limit the table only grows —
+every run re-lists every row, which keeps each row inside the carry-forward
+window forever, spends one metadata call per row per run, and turns a
+near-miss shortlist into a backlog of papers nobody is going to read.
 
 One table, most recent first, no per-paper `###` subsections:
 
@@ -576,7 +596,8 @@ The block between the H1 and the first `---` is exactly two lines:
   date three times; the H1 is the one a reader sees.
 - **No `Agent version:` line.** A constant across every report is not
   information — the report's provenance is its commit.
-- **`Papers surfaced` is an integer and nothing else.** Prose about *why* the
+- **`Papers surfaced` is an integer and nothing else**, and it equals the
+  number of `## 🥇 / 🥈 / 🥉 / 🌱` sections in the report. Prose about *why* the
   count is low belongs in 📊; the field is the count.
 - **`Papers scanned` is capped at 400 characters** and names, at most: the
   source passes run, an order-of-magnitude count per pass, and any failure

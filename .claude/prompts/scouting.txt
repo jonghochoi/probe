@@ -83,8 +83,19 @@ Three, read-only, with DIFFERENT jobs. Do not collapse them.
    pinned papers pass 1 expands from), Anti-topics (the filter) and the
    Curated External Lists (the pass-3 URLs). Never edit it.
 
-2. **`scouting/<PILLAR>/YYYY-MM-DD.md` — the recent reports**, last ~2 weeks
-   (~4 files), for DE-DUPLICATION and for the 🔄 run-over-run section.
+2. **`scouting/<PILLAR>/YYYY-MM-DD.md` — the recent reports.** Two different
+   depths, because the two jobs need different windows:
+     · **DE-DUPLICATION — the last ~8 weeks (~16 files), ids and titles only.**
+       Pass 1 reaches 8 weeks back and pass 3 reaches two calendar months, so
+       a de-dup window shorter than that lets a paper this pillar already
+       surfaced return as a "new" candidate. Scan the ids cheaply rather than
+       reading every file:
+         `grep -ho 'arxiv.org/abs/[0-9.]*' scouting/<PILLAR>/*.md | sort -u`
+       then bound it to the files inside the window.
+     · **The 🔄 run-over-run section — the last ~2 weeks (~4 files), read in
+       full.** That section compares this run against the recent ones, and
+       every claim it makes about re-appearance is quantified over the ~8-week
+       de-dup window above, never over the ~4 files it read in full.
 
 3. **`analysis/` + `analysis_legacy/` — top-level NAMES only**, any pillar,
    for de-duplication. Never read their contents.
@@ -140,7 +151,7 @@ THREE PASSES, ranked by signal — 1 above 3 above 2:
         14-day window, so nothing recent is dropped, while the 600+-entry
         lists collapse to a handful before any per-id lookup.
      d. drop ids already in this pillar's "Tracked Literature", in the
-        last ~2 weeks of reports, or in the already-analyzed set.
+        last ~8 weeks of reports, or in the already-analyzed set.
      e. for the few survivors only, fetch the publication date
         (`.../graph/v1/paper/arXiv:XXXX.XXXXX?fields=title,publicationDate,externalIds,abstract`,
         or the arXiv API) and keep only those within the last 14 days.
@@ -156,8 +167,9 @@ Then TWO STEPS over what the three passes returned. They rank nothing — they
 decide what carries over and what the Reproducibility score may claim:
 
 **CARRY-FORWARD RE-CHECK.** Read the `## 🔍 근접 후보` table and the
-Reproducibility-dropped rows of `## 🚫` in this pillar's last ~2 weeks of
-reports, and put each of those arXiv ids through the evidence step below.
+Reproducibility-dropped rows of `## 🚫` in this pillar's last ~4 weeks of
+reports — the 🔍 retention window (AUTHORING §5-4) — and put each of those
+arXiv ids through the evidence step below.
 This is the ONE place a paper may repeat across reports: a candidate whose
 repository has since gone public is promoted to a full paper section this run
 and the promotion is named in 🔄; one still waiting stays a 🔍 row. It costs a
@@ -215,6 +227,16 @@ Methodology, Sim2Real — not the total (AUTHORING §5-1). A paper carried by tw
 strong axes and a zero does not surface; say the run found fewer than three
 and stop. Padding a report to three is the one failure this gate exists to
 prevent.
+
+The gate runs in BOTH directions. A candidate whose four gate dimensions are
+each ≥ 2 IS surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section this run — there is no
+third outcome. Holding such a paper in `## 🔍` or `## 🚫` because its
+repository is not public yet re-introduces Reproducibility as a gate through
+the back door, and it is the failure this contract exists to stop: it hides
+the week's strongest paper in an appendix table whose 재검토 조건 reads
+"코드 공개 시 승격". A closed artifact caps the paper's priority at ★★
+(below); it never removes the paper from the report. `## 🔍` holds papers one
+gate axis short and nothing else (AUTHORING §5-4).
 
 Reproducibility is scored and shown but does NOT gate. A preprint posted this
 week has no repository yet, so gating on it measures the paper's age rather
@@ -274,18 +296,19 @@ PROCEDURE
 1. RESOLVE the run date and the already-analyzed set (INPUT above), once,
    before any network call.
 
-2. READ `context/<PILLAR>.md` in full, then the last ~2 weeks of
-   `scouting/<PILLAR>/`. The pillar definition and the Decision Log are what
-   ranking is done against; the recent reports are what a candidate is dropped
+2. READ `context/<PILLAR>.md` in full, then this pillar's recent reports at
+   the two depths of SOURCES §2 — the last ~8 weeks as an id list, the last
+   ~2 weeks in full. The pillar definition and the Decision Log are what
+   ranking is done against; the ~8-week id list is what a candidate is dropped
    against. Reading them after retrieval means ranking by keyword and
-   re-surfacing last week's papers.
+   re-surfacing a paper this pillar already ran.
 
 3. READ `scouting/AUTHORING.md` — the full format contract, §1 through §4 —
    and `scouting/templates/report.md`.
 
 4. RETRIEVE, three passes, in the order above. Every pass drops a candidate
    whose id is in the already-analyzed set, in this pillar's Tracked
-   Literature, or in the last ~2 weeks of reports — the same three filters,
+   Literature, or in the last ~8 weeks of reports — the same three filters,
    applied the same way in each pass. Anti-topics filter what survives. Then
    run the carry-forward re-check and the Reproducibility evidence step.
 
@@ -320,15 +343,23 @@ PROCEDURE
        you actually received? (a fabricated id is the one unrecoverable
        failure of this mode)
      - Is every surfaced paper absent from the already-analyzed set, from
-       Tracked Literature, and from the last ~2 weeks of reports — except a
+       Tracked Literature, and from the last ~8 weeks of reports — except a
        🔍 candidate the carry-forward step legitimately promoted?
      - Does every surfaced paper clear the four gate dimensions ≥ 2 — and if
        fewer than three do, does the report SAY so instead of padding?
+     - Does the reverse hold — is every candidate that cleared all four gate
+       dimensions surfaced, with none of them parked in 🔍 or 🚫 over a
+       missing repository? Does `Papers surfaced` equal the number of
+       🥇 / 🥈 / 🥉 / 🌱 sections, and does each 📊 head's five bullets sum to
+       the total it states?
+     - Is every 🔍 row exactly one gate axis short, and is every row older
+       than the 4-week retention window either promoted or retired?
+       (AUTHORING §5-4)
      - Does every Reproducibility bullet quote the evidence string it scored
        on, with no score resting on benchmark coverage? (AUTHORING §5-2)
      - Is each paper's code label the one its Reproducibility score implies,
        and does no ★★★ sit on a paper without a public artifact? (§5-3)
-     - Was every 🔍 row and Reproducibility-dropped 🚫 row from the last ~2
+     - Was every 🔍 row and Reproducibility-dropped 🚫 row from the last ~4
        weeks actually re-checked this run, not just copied forward?
      - Is each (a) line badges only — no Korean gloss, no body bullets — and
        are (b)–(d) free of `D#` / `deferred` / `v1` / config-key names?
