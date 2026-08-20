@@ -287,7 +287,7 @@ def drawing() -> str:
   <text class="path" x="308" y="76" font-size="13">MASTER.md</text>
   <text class="note" x="308" y="95">global anchor</text>
   <text class="path" x="488" y="76" font-size="13">P#.md</text>
-  <text class="note" x="488" y="95">per-pillar Decision Log</text>
+  <text class="note" x="488" y="95">per-pillar decision log</text>
   <g class="human">
     <path class="wire flow" d="M{AXIS} 108 V138"/>
     {arrow_d(AXIS, 146)}

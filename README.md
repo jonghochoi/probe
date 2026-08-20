@@ -4,7 +4,7 @@
 
 **Stop drowning in arXiv. Start changing what you train next week.**
 
-*Citation-graph expansion · Anti-topic filtering · Decision-grade Scouting Reports*
+*Citation-graph expansion · Anti-topic filtering · Decision-grade scouting reports*
 
 [![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
 [![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
@@ -34,7 +34,6 @@ touch dexterous manipulation. PROBE finds those and answers one question:
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-lost-dark.svg"><img src="assets/probe-lost.svg" width="22" align="absmiddle" alt=""></picture> Without PROBE | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt=""></picture> With PROBE |
 |---|---|
 | 50–100 papers/day → skim titles, remember none → "I'll check arXiv this weekend" → never happens | 3–5 papers/run → scored, tied to your open questions, landing in your repo on a fixed cadence, per pillar |
-| Survey mode: "this is interesting" | Decision mode: "change DR range on object mass to [0.5, 2.0] kg" |
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | "I'll read that paper properly later" → never does | `/analyze` → a Korean re-telling, published to the reading site |
 
