@@ -14,9 +14,7 @@ this one run:
 Both are written from the SAME reading of the original. The short surface is
 NOT written by shortening the long one — see AUTHORING G1, and step 6 below.
 
-`analysis_legacy/` is a legacy corpus in a different format, kept only until
-those papers are migrated. You do not touch it — you neither read it nor write
-to it. Everything here comes from the paper itself and from `context/`.
+Everything here comes from the paper itself and from `context/`.
 
 INPUT:
 The paper is the invocation argument: a bare arXiv id (`YYMM.NNNNN`), an
@@ -198,17 +196,16 @@ PROCEDURE
    give their own method in prose (unexpanded is fine), else omitted. Never
    invent one.
 
-   Stage `analysis/<id>.md` and nothing else. This track does not touch
-   `analysis_legacy/` at all.
+   Stage `analysis/<id>.md` and nothing else.
 
 
 ════════════════════════════════════════════════════════════════════════
 SCOPE
 ════════════════════════════════════════════════════════════════════════
 
-ON-DEMAND, ONE PAPER AT A TIME. There is no batch rollout and no backfill of
-the `analysis_legacy/` corpus. The site is exactly the set of rewrites
-that exist, so writing one is what puts that paper on the site at all.
+ON-DEMAND, ONE PAPER AT A TIME. There is no batch rollout. The site is exactly
+the set of rewrites that exist, so writing one is what puts that paper on the
+site at all.
 
 If asked to "do all of them", say no and explain the cost: each rewrite reads
 a 300 KB original and produces ~420 lines. The value is in the papers the

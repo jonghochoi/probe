@@ -2,8 +2,7 @@
 
 Everything the reading site is made of — the authoring rules, the static-site
 generator, and its build-time dependencies. The site publishes
-`analysis/<arxiv-id>.md` and nothing else; the legacy `analysis_legacy/` corpus
-is not read at all.
+`analysis/<arxiv-id>.md` and nothing else.
 
 One rewrite becomes **two tabs on one page** — 요약 (one screen, the tab a
 reader lands on) and 상세 (the body). Both come out of the same source file and

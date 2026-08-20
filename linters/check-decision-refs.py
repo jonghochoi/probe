@@ -25,8 +25,7 @@ Usage (repo root):
 
 No PATH -> scan the default set: `analysis/*.md` and `scouting/P*/*.md`
 (templates excluded — they carry `D<a>`-style placeholders and illustrative
-ids; the `analysis_legacy/` corpus is excluded too — it is a static folder, not
-a doc a `context/` edit should be able to break).
+ids).
 
 Exit codes: 0 = clean / 1 = bad citation(s) found / 2 = no Decision Log parsed.
 """

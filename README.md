@@ -62,7 +62,6 @@ decides.
 | `context/` | human | monthly at most | agent reads only |
 | `scouting/` | agent | scheduled, per pillar | append — one dated file per run |
 | `analysis/` | agent | on demand | overwrite — one snapshot per paper |
-| `analysis_legacy/` | — | frozen | legacy corpus, kept until re-written |
 
 Keeping static and dynamic apart is what stops the agent re-recommending last
 month's papers as the context bloats.

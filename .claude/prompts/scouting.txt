@@ -26,10 +26,10 @@ Two values are resolved once at run time, before any retrieval:
   · **the run date** — `TZ=Asia/Seoul date +%Y-%m-%d` (the schedule is
     Asia/Seoul). That exact value is the report filename AND the commit
     subject; do not re-derive it later in the run.
-  · **the already-analyzed set** — `ls analysis/ analysis_legacy/` (bare
-    arXiv ids: one `<id>.md` per rewrite, one `<id>/` folder per legacy
-    deep-dive, any pillar). Hold it for the whole run. It is a local
-    directory listing, not an API call, so it costs nothing and runs first.
+  · **the already-analyzed set** — `ls analysis/` (bare arXiv ids: one
+    `<id>.md` per rewrite, any pillar). Hold it for the whole run. It is a
+    local directory listing, not an API call, so it costs nothing and runs
+    first.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -97,8 +97,8 @@ Three, read-only, with DIFFERENT jobs. Do not collapse them.
        every claim it makes about re-appearance is quantified over the ~8-week
        de-dup window above, never over the ~4 files it read in full.
 
-3. **`analysis/` + `analysis_legacy/` — top-level NAMES only**, any pillar,
-   for de-duplication. Never read their contents.
+3. **`analysis/` — top-level NAMES only**, any pillar, for de-duplication.
+   Never read its contents.
 
 RETRIEVAL — use the Bash tool with `curl` against the public REST APIs below.
 Do NOT use built-in web search, and do NOT assume any MCP server: this routine
@@ -432,7 +432,7 @@ SCOPE
 
 ONE PILLAR, ONE DATE, ONE FILE PER RUN. A run does not write another
 pillar's folder, does not backfill a missed date, and does not touch
-`analysis/`, `analysis_legacy/` or `context/`.
+`analysis/` or `context/`.
 
 An honestly empty run is a valid, expected output: if every curl call failed
 or nothing cleared the gate, still write the partial or empty report, commit
