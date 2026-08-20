@@ -3,8 +3,8 @@
 A search result is a place to land, not a document to open: a rewrite is 60 KB
 and a whole-paper vector smears its sections together, so the unit here is the
 section a reader would have scrolled to. Each rewrite contributes its sections,
-its term panels and its figure captions, plus one chunk standing for the paper
-as a whole.
+its term panels and its figure captions, plus the 요약 surface and one chunk
+standing for the paper as a whole.
 
 Nothing here touches the network. `build-site.py --index` writes what this
 module produces; `site/search/indexer.py` is what embeds and uploads it.
@@ -13,6 +13,7 @@ module produces; `site/search/indexer.py` is what embeds and uploads it.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from dataclasses import asdict, dataclass, field
 
@@ -88,9 +89,72 @@ def _split_long(text: str) -> list[str]:
     return parts
 
 
+# The prose keys a panel carries, across every fence kind a section holds. A
+# panel is written to be read — a lineage entry names the work a paper builds
+# on, an equation panel reads the formula out in Korean, a quiz says why the
+# answer is the answer — and a section that drops its fences wholesale leaves
+# all of it unreachable. What stays out is addressing and machinery: `tex` and
+# `sym` are LaTeX, `url` / `link` / `id` are targets, `tone` and `n` drive
+# layout. A quiz gives up `why` and nothing else, because its options are
+# written to include wrong statements and a result must not hand one back as
+# the corpus speaking.
+_PROSE_KEYS = ("title", "body", "note", "label", "what", "why",
+               "read", "name", "state", "tag", "value", "link_label")
+_PROSE_STR = re.compile(
+    r'"(?:' + "|".join(_PROSE_KEYS) + r')"\s*:\s*"((?:[^"\\]|\\.)*)"')
+
+# Panels that become a chunk of their own, so the section holding one says it
+# once rather than putting the same sentences into a second vector.
+_OWN_CHUNK = frozenset({"probe-term", "probe-figure"})
+
+
+def _unescape(raw: str) -> str:
+    """A captured value as it was authored.
+
+    A fence payload is JSON, so its escapes are JSON's — and a rewrite's prose
+    carries inline math, which means backslashes arrive doubled. Left alone
+    they reach the embedding as `\\\\mathcal` and spend dimensions on nothing.
+    """
+    try:
+        return json.loads(f'"{raw}"')
+    except ValueError:
+        return raw.replace('\\"', '"')
+
+
+def _panel_prose(match: re.Match) -> str:
+    """What a fence leaves behind in the section body that held it."""
+    if match.group(1) in _OWN_CHUNK:
+        return ""
+    return " · ".join(_unescape(v) for v in _PROSE_STR.findall(match.group(2)))
+
+
+def _glance_text(model) -> str:
+    """The 요약 surface as sentences.
+
+    It is the most compressed statement a rewrite makes and the tab a reader
+    lands on, and it reaches this module nowhere else: the two surfaces are
+    carved apart before the article is read.
+    """
+    if model is None:
+        return ""
+    hub = model.hub
+    pairs = lambda rows, *keys: " · ".join(
+        " ".join(str(row.get(k, "")).strip() for k in keys).strip()
+        for row in rows or [])
+    blocks = [
+        " · ".join(filter(None, (hub.get("thesis"), hub.get("line"),
+                                 hub.get("caption")))),
+        pairs(hub.get("facts"), "k", "v"),
+        *model.narrative,
+        pairs(model.rail, "k", "v", "note"),
+        *(" · ".join(filter(None, (a.get("title"), a.get("claim"),
+                                   a.get("caption")))) for a in model.acts),
+    ]
+    return "\n\n".join(b for b in (str(x).strip() for x in blocks) if b)
+
+
 def _fence_values(payload: str, key: str) -> list[str]:
-    return [v.replace('\\"', '"')
-            for v in re.findall(_JSON_STR.format(key), payload)]
+    return [_unescape(v) for v in re.findall(_JSON_STR.format(key), payload)]
 
 
 def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
@@ -116,6 +180,10 @@ def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
         "\n\n".join(filter(None, [paper.tagline, paper.metric,
                                    plain(paper.summary_md), " ".join(paper.tags)])))
 
+    # The 요약 surface. No anchor: the page opens on this tab, so the paper's
+    # own address is already the place the passage is.
+    add("paper", paper.title, "요약", _glance_text(paper.glance))
+
     # The toc is in document order, so walking it carries the act a section
     # sits under down onto the section's own chunk: "3. 무엇이 증명되었나" is
     # most of what tells a reader whether a hit is a claim or its evidence.
@@ -132,10 +200,13 @@ def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
         idx += 1
         label = entry["label"] + (f" · {entry['en']}" if entry.get("en") else "")
         add("section", label, act or paper.title,
-            f"{label}\n\n{_ANY_FENCE.sub('', body)}", anchor=entry["id"])
+            f"{label}\n\n{_ANY_FENCE.sub('', _FENCE.sub(_panel_prose, body))}",
+            anchor=entry["id"])
         # Term panels and figure captions are their own chunks rather than part
         # of the section's: a term is the 한/영 bridge a reader searches by name,
-        # and a caption is a different sentence about a different thing.
+        # and a caption is a different sentence about a different thing. Every
+        # other panel stays inside the section, which is the argument it was
+        # written to support.
         for kind, payload in _FENCE.findall(body):
             if kind == "probe-term":
                 for term, gloss in zip(_fence_values(payload, "title"),
