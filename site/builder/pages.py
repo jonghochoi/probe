@@ -33,6 +33,44 @@ TAG_FACETS = 12
 PAGE_SIZES = (10, 20, 0)
 PAGE_DEFAULT = 10
 
+# How large `assets/corpus-index.js` may get before it stops being a file every
+# page can afford to carry. It is fetched once and cached across the whole site,
+# so the ceiling is generous — but it grows with the corpus and nothing else
+# here does, so the build says something rather than letting it drift.
+INDEX_BUDGET = 100 * 1024
+
+
+def corpus_index(papers: list[Paper]) -> str:
+    """`assets/corpus-index.js` — the corpus, as much of it as a row needs.
+
+    One file for the whole site rather than a blob inlined into every page: the
+    ⌘K palette opens from anywhere, so every page needs the index, and a shared
+    asset is fetched once and cached for all of them. A `<script>` rather than
+    JSON on the side, because `fetch` is blocked by CORS on `file://` and
+    opening a built page directly has to keep working.
+
+    Both surfaces that read it want the same fields. The palette searches the
+    id, the title, the tags and the 연구 축, and shows the tagline under each
+    title — which is also the only Korean any of those fields carry, since
+    titles and tags in this corpus are the paper's own English. 내 서재 turns a
+    kept id back into a titled, taglined row with the same records.
+
+    Pillar display names ride along so both can print 연구 축 as a name and
+    match a query against one, without either having to carry `PILLAR_NAMES`.
+    """
+    ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
+    payload = {
+        "pillars": PILLAR_NAMES,
+        "papers": [
+            {"id": p.stem, "title": p.title, "tagline": p.tagline,
+             "pillars": p.pillars, "tags": p.tags, "date": p.date}
+            for p in ordered
+        ],
+    }
+    body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    return f"window.ProbeIndex={body};\n"
+
+
 def _shelf_facets(cls: str) -> str:
     """New / Starred / Unread, in whichever of its two homes.
 
@@ -521,23 +559,14 @@ def shelf_page(papers: list[Paper]) -> str:
 
     Rendered empty and filled from `localStorage`: stars, 읽음 marks and memos
     never reach the build, so there is nothing here to server-render but the
-    frame. What the build *does* ship is `[data-corpus-index]` — id, title,
-    tagline, pillars for every rewrite — which is what turns a kept id back
-    into a row with a link. A kept id missing from it is a paper that has left
-    the corpus, and 내 서재 says so rather than dropping it.
+    frame. What turns a kept id back into a row with a link is `corpus_index()`,
+    the same file the ⌘K palette searches — every page carries it, so this one
+    needs no index of its own. A kept id missing from it is a paper that has
+    left the corpus, and 내 서재 says so rather than dropping it.
 
     The page is also the export surface, and the only one: a shelf that lives
     in one browser profile reaches a second machine as a file or not at all.
     """
-    ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
-    # `</` cannot appear inside a `<script>` body — the parser ends the element
-    # there, whatever the type says.
-    index = json.dumps(
-        [{"id": p.stem, "title": p.title, "tagline": p.tagline,
-          "pillars": p.pillars, "date": p.date} for p in ordered],
-        ensure_ascii=False, separators=(",", ":"),
-    ).replace("</", "<\\/")
-
     tabs = "".join(
         f'<button type="button" role="tab" id="sh-t-{key}" aria-controls="sh-{key}" '
         f'aria-selected="{"true" if i == 0 else "false"}" data-shelf-tab="{key}">'
@@ -573,7 +602,6 @@ def shelf_page(papers: list[Paper]) -> str:
   {panels}
   <noscript><p class="corpus-empty">서재는 브라우저에 저장되므로 JavaScript 가 필요합니다.</p></noscript>
 </main>
-<script type="application/json" data-corpus-index>{index}</script>
 """
     return c.page(
         title="내 서재 · PROBE",

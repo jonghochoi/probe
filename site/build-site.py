@@ -107,12 +107,25 @@ def build(args) -> int:
 
     # The font subset is cut from the *assembled* pages, so it must be computed
     # after the KaTeX splice — and from the asset sources too, since the JS
-    # writes Korean UI strings that appear in no page's markup.
+    # writes Korean UI strings that appear in no page's markup. The ⌘K palette
+    # prints titles and taglines that no page's markup carries either — a paper
+    # page names one paper and the index names them all — so the index counts
+    # as asset text for the same reason.
     extras = assets_out.OPTIONAL["search"] if args.search_api else ()
-    charset = set(assets_out.asset_text(extras))
+    index_js = pages.corpus_index(papers)
+    charset = set(assets_out.asset_text(extras)) | set(index_js)
     for html in final.values():
         charset |= set(_TEXT_ONLY.sub(" ", html))
     stats = assets_out.copy_all(out, charset, extras)
+    (out / "assets" / "corpus-index.js").write_text(index_js, encoding="utf-8")
+    size = len(index_js.encode("utf-8"))
+    if size > pages.INDEX_BUDGET:
+        problems.append(
+            f"assets/corpus-index.js: {size / 1024:.0f} KB for {len(papers)} "
+            f"rewrite(s), over the {pages.INDEX_BUDGET // 1024} KB budget — "
+            f"every page carries it, so drop a field from `pages.corpus_index` "
+            f"or raise the budget on purpose"
+        )
     # An asset-pipeline failure is a page failure: a mangled KaTeX stylesheet
     # publishes every formula in the body font and no reader reports it.
     problems.extend(stats["problems"])
@@ -123,6 +136,7 @@ def build(args) -> int:
         f"build-site: {len(rendered)} page(s) · {len(papers)} rewrite(s) · "
         f"{katex.rendered} formula(s) rendered · "
         f"{stats['glyphs']} glyph(s) → {kb:.0f} KB of webfont · "
+        f"{size / 1024:.0f} KB of corpus index · "
         f"{warn} katex warning(s) → {out}"
     )
     if not stats["pretendard"]:

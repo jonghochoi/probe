@@ -140,9 +140,18 @@
   --z-nav:    100;
   --z-scrim:  110;
   --z-panel:  120;
+  /* The palette opens from any page, over whatever that page already has
+     open — the memo panel included, which is the only thing at `--z-panel`. */
+  --z-cmdk:   130;
 
   /* ── Metrics ────────────────────────────────────────────────────────── */
   --nav-h:       56px;
+  /* The viewport, as much of it as is actually free. A phone's virtual keyboard
+     covers part of `100vh` and never shrinks it, so a panel measured against
+     `vh` runs its own footer under the keyboard the moment its input takes
+     focus. `dvh` is the number that moves; the declaration here is the fallback
+     for a browser without it. */
+  --vh-live:     100vh;
   /* No `--content-max`: the column falls out of the shell's own arithmetic —
      1180 less padding, rail and gutter, about 88ch of Korean. Capping the
      article on top of that leaves a wide empty gutter to its right AND wraps
@@ -150,6 +159,8 @@
      the components rather than as a comfortable measure. */
   --toc-w:       15.5rem;   /* wide enough that a section title wraps at most once */
 }
+
+@supports (height: 100dvh) { :root { --vh-live: 100dvh; } }
 
 :root[data-theme="dark"] {
   --bg:          oklch(18.1% 0.006 56);
@@ -1425,6 +1436,152 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    less room than the number it is labelling. */
 .g-act .sc-row { grid-template-columns: minmax(0, 1fr) 3.5rem auto; font-size: .72rem; }
 .g-act .sc-label { white-space: normal; line-height: 1.35; }
+
+/* ── ⌘K palette ───────────────────────────────────────────────────────── */
+/* The whole dialog is `palette.js`'s markup: an unscripted page has none of it,
+   so nothing here needs a `html.js` guard. The nav button that opens it is the
+   one piece the build prints, and it is the one piece that does. */
+.nav-cmdk {
+  display: none;
+  align-items: center; gap: .4rem;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); border-radius: var(--radius-sm);
+  height: 32px; padding: 0 .55rem; cursor: pointer;
+  font-family: inherit; font-size: .78rem;
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+html.js .nav-cmdk { display: inline-flex; }
+.nav-cmdk:hover { color: var(--orange); border-color: var(--amber-soft); }
+.nav-cmdk kbd {
+  font-family: var(--mono); font-size: .7rem; letter-spacing: .02em;
+  color: var(--text-muted);
+}
+/* Three parts, and the sheet decides which survive. Width takes the words: past
+   the point where the nav links crowd, the glyph says the same thing in the
+   room that is left. The pointer takes the key: a phone has no Ctrl to press,
+   so advertising one there names a way in that does not exist — the glyph is
+   the way in, and it is what stays. */
+.nav-cmdk-i { display: none; }
+@media (max-width: 620px) {
+  .nav-cmdk .lbl { display: none; }
+  .nav-cmdk-i { display: block; }
+}
+
+.cmdk { position: fixed; inset: 0; z-index: var(--z-cmdk); }
+.cmdk-scrim {
+  position: absolute; inset: 0;
+  background: var(--scrim); backdrop-filter: blur(2px);
+  animation: cmdk-in var(--dur-short) var(--ease-out);
+}
+.cmdk-box {
+  position: relative; z-index: 1;
+  width: min(38rem, calc(100vw - 1.6rem));
+  /* Held above centre: a dialog that grows downward from a fixed top edge does
+     not move under the reader as results arrive. */
+  margin: min(12vh, 6rem) auto 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; overflow: hidden;
+  max-height: min(32rem, calc(var(--vh-live) - min(12vh, 6rem) - 1.6rem));
+  animation: cmdk-rise var(--dur-mid) var(--ease-out);
+}
+@keyframes cmdk-in   { from { opacity: 0; } }
+@keyframes cmdk-rise { from { opacity: 0; translate: 0 -8px; } }
+
+.cmdk-head {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .7rem .85rem; border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.cmdk-icon { color: var(--text-muted); flex: none; }
+.cmdk-input {
+  flex: 1; min-width: 0; border: 0; background: none; outline: none;
+  font-family: inherit; font-size: .98rem; color: var(--text);
+}
+.cmdk-input::placeholder { color: var(--text-muted); }
+.cmdk-esc {
+  flex: none; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-muted); border-radius: var(--radius-xs);
+  font-family: var(--mono); font-size: .68rem; padding: .18rem .4rem;
+  cursor: pointer;
+}
+.cmdk-esc:hover { color: var(--orange); border-color: var(--amber-soft); }
+.cmdk-esc .x { display: none; }
+
+.cmdk-list { list-style: none; overflow-y: auto; overscroll-behavior: contain; padding: .35rem; }
+.cmdk-row {
+  display: grid; align-items: center; gap: .1rem .6rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: .45rem .55rem; border-radius: var(--radius-sm);
+  text-decoration: none; color: inherit; cursor: pointer;
+}
+/* Each of the three names its own column. Auto-placement would put whichever
+   parts a row happens to have into the first tracks instead — a paper with
+   neither a star nor a 읽음 mark would take the title's `1fr` for its marks and
+   leave the id nothing, which is a title that fits and an id off the edge. */
+.cmdk-marks { grid-column: 1; }
+.cmdk-main  { grid-column: 2; }
+.cmdk-meta  { grid-column: 3; }
+/* One highlight, and the keyboard owns it: the pointer sets `aria-selected` as
+   it moves rather than painting a second hover state, so there is never a row
+   that looks picked and a different row that Enter would open. */
+.cmdk-row[aria-selected="true"] { background: var(--surface-3); }
+.cmdk-marks { display: flex; align-items: center; gap: .25rem; }
+.cmdk-star { color: var(--orange); font-size: .8rem; line-height: 1; }
+.cmdk-read {
+  font-size: .62rem; font-weight: 700; color: var(--green);
+  border: 1px solid currentColor; border-radius: var(--radius-pill);
+  padding: 0 .3rem; line-height: 1.5;
+}
+.cmdk-main { min-width: 0; display: grid; gap: .1rem; }
+.cmdk-title {
+  font-size: .88rem; font-weight: 650; line-height: 1.35; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cmdk-line {
+  font-size: .76rem; color: var(--text-muted); line-height: 1.4;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cmdk-meta { display: flex; align-items: center; gap: .3rem; }
+.cmdk-id { font-family: var(--mono); font-size: .68rem; color: var(--text-muted); }
+.cmdk-none { padding: 1.1rem .8rem; font-size: .84rem; color: var(--text-muted); text-align: center; }
+
+.cmdk-foot {
+  flex: none; display: flex; align-items: center; gap: .6rem;
+  padding: .45rem .85rem; border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: .7rem; color: var(--text-muted);
+}
+.cmdk-keys { margin-left: auto; font-family: var(--mono); }
+/* The page behind must not scroll under an open dialog — a wheel over the
+   scrim would otherwise take the reader somewhere they cannot see. */
+html.cmdk-on, html.cmdk-on body { overflow: hidden; }
+
+/* A device driven by a thumb. Every key named on this surface is a key it does
+   not have, and 32 px is a comfortable target under a cursor and a small one
+   under a finger — so the names go and the hit areas grow, without the controls
+   growing with them: the button still sits level with the theme toggle beside
+   it, and the header still fits on one line. */
+@media (hover: none) and (pointer: coarse) {
+  .nav-cmdk kbd { display: none; }
+  .nav-cmdk-i { display: block; }
+  .nav-cmdk, .cmdk-esc { position: relative; }
+  .nav-cmdk::after, .cmdk-esc::after { content: ""; position: absolute; inset: -7px; }
+  .cmdk-esc .k { display: none; }
+  .cmdk-esc .x { display: inline; font-size: .82rem; line-height: 1; }
+  .cmdk-keys { display: none; }
+  /* Nothing here is reached by a key, so the row is sized to be reached by a
+     finger instead. */
+  .cmdk-row { padding: .6rem .55rem; }
+}
+@media (max-width: 560px) {
+  .cmdk-box { margin-top: 3.5rem; max-height: calc(var(--vh-live) - 5rem); }
+  /* Two columns, not three: the id and the chips together are wider than the
+     title gets to be, and the title is what the reader is reading. */
+  .cmdk-meta { display: none; }
+  .cmdk-keys { display: none; }
+}
 
 /* Everything above moves; this is where all of it stops. */
 @media (prefers-reduced-motion: reduce) {
