@@ -127,7 +127,7 @@ def build(args) -> int:
     # page names one paper and the index names them all — so the index counts
     # as asset text for the same reason.
     extras = assets_out.OPTIONAL["search"] if args.search_api else ()
-    index_js = pages.corpus_index(papers)
+    index_js = pages.corpus_index(papers, comps)
     charset = set(assets_out.asset_text(extras)) | set(index_js)
     for html in final.values():
         charset |= set(_TEXT_ONLY.sub(" ", html))
@@ -137,7 +137,8 @@ def build(args) -> int:
     if size > pages.INDEX_BUDGET:
         problems.append(
             f"assets/corpus-index.js: {size / 1024:.0f} KB for {len(papers)} "
-            f"rewrite(s), over the {pages.INDEX_BUDGET // 1024} KB budget — "
+            f"rewrite(s) and {len(comps)} comparison(s), over the "
+            f"{pages.INDEX_BUDGET // 1024} KB budget — "
             f"every page carries it, so drop a field from `pages.corpus_index` "
             f"or raise the budget on purpose"
         )

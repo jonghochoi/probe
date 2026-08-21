@@ -5,6 +5,10 @@
  * longer every time a rewrite lands. This is the shortcut past it — open, type,
  * Enter, and the reader is on the paper they meant.
  *
+ * Both kinds of document answer here. A comparison is otherwise reachable from
+ * 같이 읽기 and from the papers it names, and a reader who wants one is rarely
+ * standing on either.
+ *
  * The whole dialog is built here rather than server-rendered, which is the same
  * rule the other JS-only controls follow from the other side: a browser with no
  * script gets no markup at all, instead of a search box that cannot search. The
@@ -27,9 +31,11 @@
 
 const data = window.ProbeIndex;
 const match = window.ProbeMatch;
-if (!data || !match || !Array.isArray(data.papers) || !data.papers.length) return;
+if (!data || !match) return;
 
-const PAPERS = data.papers;
+const PAPERS = Array.isArray(data.papers) ? data.papers : [];
+const COMPARISONS = Array.isArray(data.comparisons) ? data.comparisons : [];
+if (!PAPERS.length && !COMPARISONS.length) return;
 const PILLAR_NAMES = data.pillars || {};
 
 /* Where the site's root is, seen from whatever depth this page sits at. Read
@@ -52,16 +58,45 @@ const ROOT = self ? self.src.replace(/assets\/palette\.js(\?.*)?$/, "") : "";
  */
 const NAME = 3, FILED = 2, LINE = 1;
 
-const ROWS = PAPERS.map((paper, i) => ({
-  paper: paper,
-  order: i,
-  name: [paper.id, paper.title].map(match.compact).filter(Boolean),
-  filed: [...(paper.tags || []), ...(paper.pillars || []),
-          ...(paper.pillars || []).map((p) => PILLAR_NAMES[p] || "")]
-         .map(match.compact).filter(Boolean),
-  line: [match.compact(paper.tagline)].filter(Boolean),
-  head: match.compact(paper.title),
-}));
+/* One row per document, of either kind. Three things differ between them —
+ * where the row links, what the reader can have kept about it, and what the
+ * right-hand column prints — so a row resolves all three when it is built and
+ * everything downstream stays kind-blind.
+ *
+ * A comparison's compared ids are `filed`, not `name`: the paper itself is
+ * what that id names, so typing one puts the paper above the comparisons that
+ * hold it, which is the order a reader typing an id is asking for. */
+function build(doc, kind) {
+  const paper = kind === "paper";
+  const key = paper ? doc.id : doc.slug;
+  const of = doc.of || [];
+  return {
+    kind: kind,
+    /* Shelf records are kept per arXiv id, so a comparison has none to look
+     * up — an empty key rather than a slug the store would never answer for. */
+    id: paper ? doc.id : "",
+    title: doc.title,
+    tagline: doc.tagline,
+    pillars: doc.pillars || [],
+    date: doc.date || "",
+    href: ROOT + (paper ? "p/" : "c/") + key + "/index.html",
+    tail: paper ? doc.id : of.join(" · "),
+    name: [key, doc.title].map(match.compact).filter(Boolean),
+    filed: [...(doc.tags || []), ...(doc.pillars || []),
+            ...(doc.pillars || []).map((p) => PILLAR_NAMES[p] || ""), ...of]
+           .map(match.compact).filter(Boolean),
+    line: [match.compact(doc.tagline)].filter(Boolean),
+    head: match.compact(doc.title),
+  };
+}
+
+/* Newest first across both kinds, so an empty box offers what actually landed
+ * last rather than every paper before every comparison. Both arrays arrive
+ * sorted, and the sort is stable, so a shared date keeps the build's order. */
+const ROWS = [...PAPERS.map((d) => build(d, "paper")),
+              ...COMPARISONS.map((d) => build(d, "comparison"))];
+ROWS.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+ROWS.forEach((row, i) => { row.order = i; });
 
 const LIMIT = 20;      // more than a reader scans; the list scrolls past it
 const RECENT = 8;      // what an empty box offers — the newest, which is why they came
@@ -113,7 +148,7 @@ root.className = "cmdk";
 root.hidden = true;
 root.innerHTML =
   '<div class="cmdk-scrim" data-cmdk-dismiss></div>' +
-  '<div class="cmdk-box" role="dialog" aria-modal="true" aria-label="논문 찾기">' +
+  '<div class="cmdk-box" role="dialog" aria-modal="true" aria-label="논문·비교 찾기">' +
     '<div class="cmdk-head">' +
       '<svg class="cmdk-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false">' +
         '<circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
@@ -142,7 +177,7 @@ let opener = null;
 
 function shelfMarks(id) {
   const shelf = window.ProbeShelf;
-  if (!shelf) return "";
+  if (!shelf || !id) return "";
   const star = shelf.Stars.has(id)
     ? '<span class="cmdk-star" title="즐겨찾기" aria-label="즐겨찾기">★</span>' : "";
   const read = shelf.Reads.isDone(id)
@@ -155,25 +190,29 @@ function draw(result) {
   active = 0;
   if (!shown.length) {
     list.innerHTML = '<li class="cmdk-none" role="presentation">' +
-      '찾는 논문이 없습니다. 제목의 한 단어나 arXiv id 로 다시 해보세요.</li>';
+      '찾는 글이 없습니다. 제목의 한 단어나 arXiv id 로 다시 해보세요.</li>';
   } else {
     list.innerHTML = shown.slice(0, LIMIT).map((row, i) => {
-      const p = row.paper;
-      const chips = (p.pillars || []).slice(0, 2).map((k) =>
+      const chips = row.pillars.slice(0, 2).map((k) =>
         '<span class="chip pillar" data-p="' + esc(k) + '">' + esc(k) + '</span>').join("");
+      /* Which kind a row is rides on the left, beside the shelf marks, because
+       * that is the column a narrow screen keeps — and where Enter lands is
+       * the one thing about a row a reader has to know before pressing it. */
+      const kind = row.kind === "comparison"
+        ? '<span class="cmdk-kind">비교</span>' : "";
       return '<li role="presentation"><a class="cmdk-row" role="option" ' +
         'id="cmdk-o-' + i + '" data-i="' + i + '" ' +
         'aria-selected="' + (i === 0 ? "true" : "false") + '" ' +
-        'href="' + esc(ROOT + "p/" + p.id + "/index.html") + '">' +
-        '<span class="cmdk-marks">' + shelfMarks(p.id) + '</span>' +
-        '<span class="cmdk-main"><span class="cmdk-title">' + esc(p.title) + '</span>' +
-        '<span class="cmdk-line">' + esc(p.tagline) + '</span></span>' +
+        'href="' + esc(row.href) + '">' +
+        '<span class="cmdk-marks">' + kind + shelfMarks(row.id) + '</span>' +
+        '<span class="cmdk-main"><span class="cmdk-title">' + esc(row.title) + '</span>' +
+        '<span class="cmdk-line">' + esc(row.tagline) + '</span></span>' +
         '<span class="cmdk-meta">' + chips +
-        '<span class="cmdk-id">' + esc(p.id) + '</span></span></a></li>';
+        '<span class="cmdk-id">' + esc(row.tail) + '</span></span></a></li>';
     }).join("");
   }
   note.textContent = result.all
-    ? "최근 재작성 " + shown.length + "편"
+    ? "최근 " + shown.length + "편"
     : result.partial
       ? "일부만 일치 · " + shown.length + "편"
       : shown.length + "편";

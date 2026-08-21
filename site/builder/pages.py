@@ -40,7 +40,7 @@ PAGE_DEFAULT = 10
 INDEX_BUDGET = 100 * 1024
 
 
-def corpus_index(papers: list[Paper]) -> str:
+def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     """`assets/corpus-index.js` — the corpus, as much of it as a row needs.
 
     One file for the whole site rather than a blob inlined into every page: the
@@ -57,14 +57,34 @@ def corpus_index(papers: list[Paper]) -> str:
 
     Pillar display names ride along so both can print 연구 축 as a name and
     match a query against one, without either having to carry `PILLAR_NAMES`.
+
+    **Two kinds, one payload.** `comparisons` sits beside `papers` because the
+    palette is the only way to reach a document from a page that is not a list,
+    and a comparison the palette cannot find is a comparison reachable only
+    from a paper it already names — which is the one place a reader who wants
+    it is least likely to be. The two arrays stay separate rather than merging
+    under a `kind` field: they are keyed differently (an arXiv id against a
+    slug), they land at different depths, and 내 서재 reads only the first —
+    shelf records are kept per arXiv id, so a comparison has nothing there to
+    look up.
+
+    A comparison carries the ids it compares, so typing an arXiv id finds both
+    the paper and the comparisons that hold it.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
+    ranked = sorted(comps or [], key=lambda x: x.order_key, reverse=True)
     payload = {
         "pillars": PILLAR_NAMES,
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
              "pillars": p.pillars, "tags": p.tags, "date": p.date}
             for p in ordered
+        ],
+        "comparisons": [
+            {"slug": x.slug, "title": x.title, "tagline": x.tagline,
+             "pillars": x.pillars, "tags": x.tags, "date": x.date,
+             "of": x.paper_ids}
+            for x in ranked
         ],
     }
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
