@@ -13,7 +13,7 @@ hands back a list of passages to open.
 search script, makes no request, and behaves exactly as it does today. A build
 given one still ships the lexical filter underneath, and the remote block
 removes itself on any failure — offline, `file://`, a 502, an answer slower than
-2.5 s.
+5 s.
 
 ## What is indexed
 
@@ -92,7 +92,7 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
    `INSFORGE_URL`, `INSFORGE_API_KEY` and `PROBE_SEARCH_API` set. Seven checks,
    each assuming the one before it: the migration answers, the table holds this
    build's chunks at their current versions, a Korean question comes back a list
-   inside the 2.5 s the page waits, the same question twice is cached, a write
+   inside the 5 s the page waits, the same question twice is cached, a write
    to the index clears that cache, `플로우매칭` is read as `flow matching`, and
    the anon key reads neither table directly. Four of them fail invisibly —
    the fallback above is what a reader sees either way — so the page cannot
@@ -146,7 +146,7 @@ what it understood can tell a good answer from a misread one.
 Set `PROBE_REWRITE_MODEL` in the function's environment to an OpenRouter model
 id to turn the step on — a small fast one, since it runs in front of every
 uncached query and its budget is what the embedding and the search leave of the
-page's 2.5 s. Unset, the step is skipped and the endpoint behaves exactly as it
+page's 5 s. Unset, the step is skipped and the endpoint behaves exactly as it
 does without it. So does any failure: a timeout, a non-200, or JSON the model
 fenced or wrapped in a sentence all fall back to the raw query. Expansion
 improves a search and is never what makes one possible.
