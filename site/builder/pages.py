@@ -336,8 +336,8 @@ def _lead_block(paper: Paper, renderer=None) -> str:
         for t in paper.tags[:3]
     )
     links = "".join(
-        c.chip(f"{emoji} {label}", "src-link", href=url)
-        for emoji, label, url in paper.links
+        c.chip(label, "src-link", href=url, mark=c.src_mark(kind))
+        for kind, label, url in paper.links
     )
     return f"""<article class="lead" data-lead data-read-of="{c.esc(paper.stem)}">
   <div class="lead-top">
@@ -551,6 +551,10 @@ def _acts(paper: Paper) -> str:
     evidence that it was read, so nothing marks it on their behalf. The button
     says which way it goes rather than naming a state beside itself — with two
     states, 읽음 해제 already says the paper is read.
+
+    They ride the breadcrumb line, at the top of the header: 즐겨찾기 is what a
+    reader reaches for *before* the read, and anywhere further down it lands
+    below the fold on a phone.
     """
     return f"""<div class="paper-acts" data-paper-acts
      data-paper-id="{c.esc(paper.stem)}" data-paper-title="{c.esc(paper.title)}">
@@ -682,29 +686,75 @@ def _toc(entries: list[dict]) -> str:
 
 
 def _header(paper: Paper) -> str:
-    chips = "".join(
-        c.chip(f"{emoji} {label}", "src-link", href=url)
-        for emoji, label, url in paper.links
-    )
+    """What the paper is, in the order a reader needs it.
+
+    The header carries three different kinds of thing — what the paper *is*
+    (tags), where it lives (resource links), and when it happened and how big
+    a sit it is (dates, length) — and each is drawn as its own kind, so a
+    reader scanning for the arXiv link is not reading a run of identical grey
+    capsules. Tags are quiet and take a `#`, the links are one bordered group
+    that says it leaves the site, the dates are plain text under everything,
+    and the paper's own number is the single filled pill. The two 서재 controls
+    ride the first line: a row that wraps puts whatever sits at its end below
+    the fold, and these two are reached for before the read.
+    """
+    facts = f"{_metric_chip(paper)}{_src_group(paper)}"
+    tags = c.tag_chips(paper.tags)
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
-    <div class="crumb">
-      <a href="../../index.html">논문</a> ›
-      <a href="../../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
-      {c.esc(paper.stem)}
+    <div class="crumb-row">
+      <div class="crumb">
+        <a href="../../index.html">논문</a> ›
+        <a href="../../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
+        {c.esc(paper.stem)}
+      </div>
+      {_acts(paper)}
     </div>
     <h1 class="paper-title">{c.esc(paper.title)}</h1>
     {f'<p class="paper-authors">{c.esc(paper.authors)}</p>' if paper.authors else ""}
-    <div class="chip-row">
-      {c.tag_chips(paper.tags)}
-    </div>
-    <div class="chip-row">
-      {chips}
-      {c.chip(f'발행 {paper.published}') if paper.published else ""}
-      {c.chip(f'등재 {paper.date}') if paper.date else ""}
-      {_metric_chip(paper)}
-      <span class="head-size">{c.esc(_size(paper))}</span>
-      {_acts(paper)}
-    </div>
+    {f'<div class="chip-row head-facts">{facts}</div>' if facts else ""}
+    {f'<div class="chip-row head-tags">{tags}</div>' if tags else ""}
+    {_metaline(paper)}
   </div>
 </header>"""
+
+
+def _src_group(paper: Paper) -> str:
+    """Every link out of the site, as one group.
+
+    A resource link is not a tag — it leaves the site — and the group says so
+    once, with a `↗` in its first cell, rather than every link repeating the
+    arrow. The group is also what holds when a paper declares all six kinds:
+    six loose pills in the middle of the header are a wall, one group that
+    wraps inside its own box is not. Empty when a rewrite declares no link,
+    which R10 allows and which is itself reproducibility information.
+    """
+    if not paper.links:
+        return ""
+    items = "".join(
+        f'<a href="{c.esc(url)}" target="_blank" rel="noopener">'
+        f"{c.src_mark(kind)}{c.esc(label)}</a>"
+        for kind, label, url in paper.links
+    )
+    return ('<span class="src-group" role="group" aria-label="외부 링크">'
+            '<span class="sg-out" aria-hidden="true">↗</span>'
+            f"{items}</span>")
+
+
+def _metaline(paper: Paper) -> str:
+    """When it happened and how long it is — the facts a reader checks, not
+    the ones they act on.
+
+    Plain monospace text rather than pills: a date is nothing to press, and a
+    pill that cannot be pressed spends a reader's attention to say so. The
+    separator rides on the item ahead of it so a line that wraps never opens
+    with a stranded `·`.
+    """
+    bits = []
+    if paper.published:
+        bits.append(f"발행 {paper.published}")
+    if paper.date:
+        bits.append(f"등재 {paper.date}")
+    bits.append(_size(paper))
+    items = "".join(f'<span class="mi">{c.esc(b)}</span>' for b in bits)
+    return f'<div class="metaline">{items}</div>'

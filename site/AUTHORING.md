@@ -459,8 +459,9 @@ is used. Never write the `co-*` class by hand.
 
 ### 2-10. R10 — Resource links
 
-The header's resource chips are built from `links:`. What you author is the
-`kind|url` pair; what the chip then looks like is the site's business.
+The header's resource links are built from `links:` — one group, marked `↗`,
+holding a cell per kind. What you author is the `kind|url` pair; what the
+group then looks like is the site's business.
 
 - **Six kinds, and only these**: `arxiv` `code` `weights` `data` `site` `demo`.
   An unknown kind is dropped rather than guessed at.
@@ -468,13 +469,14 @@ The header's resource chips are built from `links:`. What you author is the
   repository owner, never construct a model-hub path.
 - **Unconfirmed → leave the slot empty.** Do not write "없음". A short link row
   is itself reproducibility information.
-- The order you write them in does not matter — the chips sort themselves.
+- The order you write them in does not matter — the cells sort themselves.
 - No `P#` pillar chips in the header. No eyebrow tag above the title.
 
-The icon, the English label and the display order are presentation, fixed once
-in `LINK_KINDS` (`site/builder/corpus.py`) — that table is the single source
-for them, and this guide does not restate it. Adding or renaming a kind is a
-code change there plus the kind list above.
+The English label and the display order are presentation, fixed once in
+`LINK_KINDS` (`site/builder/corpus.py`), and the mark drawn beside the label
+is `SRC_MARKS` (`site/builder/components.py`) under the same kind key — those
+two are the single source for them, and this guide does not restate either.
+Adding or renaming a kind is a code change in both plus the kind list above.
 
 ### 2-11. R11 — Quizzes
 
