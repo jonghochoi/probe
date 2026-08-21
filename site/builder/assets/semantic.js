@@ -50,8 +50,7 @@ function esc(s) {
  * arXiv id of the paper it came from and nothing more, so without this the
  * block can name a passage but not the work it belongs to — and an id is not
  * a name. Reading the landing rows keeps the two in step for free: no title
- * on any of the 1,502 rows in the index, and nothing to re-embed when one
- * changes. */
+ * on any row in the index, and nothing to re-embed when one changes. */
 const TITLES = new Map(
   [...document.querySelectorAll("[data-star][data-star-title]")]
     .map((el) => [el.dataset.star, el.dataset.starTitle]));

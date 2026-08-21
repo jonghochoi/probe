@@ -31,14 +31,18 @@ LaTeX, `url` and `link` are targets, `tone` drives layout. A quiz gives up its
 `why` alone, since its options are written to include wrong statements and a
 result must not hand one back as the corpus speaking.
 
-A rewrite yields about 44 chunks, so the index tracks the corpus closely:
+A rewrite yields about 44 chunks and about 22 K tokens to embed. The corpus
+only grows, so the rate is what this states rather than a count of it — for
+the figures as they stand, `build-site.py --index` reports chunks and
+`indexer.py --dry-run` reports tokens:
 
 | Corpus | Chunks | Full re-index |
 |---|---|---|
-| 34 rewrites — what is published | 1,502 | ~220 K tokens |
-| 100 rewrites — where a full rebuild still costs cents | ~4,400 | ~660 K tokens |
+| 50 rewrites | ~2,200 | ~1.1 M tokens · ~2¢ |
+| 100 rewrites | ~4,400 | ~2.3 M tokens · ~5¢ |
+| 200 rewrites | ~8,800 | ~4.5 M tokens · ~9¢ |
 
-A normal run embeds only what changed, so the second column is the cost of
+A normal run embeds only what changed, so the last column is the cost of
 rebuilding from nothing rather than the cost of a merge.
 
 ## Layout
