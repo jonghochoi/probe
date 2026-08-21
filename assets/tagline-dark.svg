@@ -11,6 +11,8 @@
     .hull   { fill: #E8916F; }
     .iris   { fill: #FFF6F1; }
     .joy    { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .reti   { fill: none; stroke: #2A1A12; stroke-width: 2; stroke-linecap: round; }
+    .retd   { fill: #2A1A12; }
     .stalk  { stroke: #F0A183; stroke-width: 5; stroke-linecap: round; fill: none; }
     .beacon { fill: #F0A183; }
     .wave   { fill: none; stroke: #F0A183; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
@@ -21,13 +23,20 @@
     .lock { opacity: 0; animation: lock 4.2s ease-in-out infinite; }
     .l2   { animation-delay: .5s; }
     .l3   { animation-delay: 1s; }
+    .aim  { opacity: 0; animation: aim 4.2s ease-in-out infinite; }
+    .joy  { animation: rest 4.2s ease-in-out infinite; }
     @keyframes bob  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
     @keyframes ping { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
     @keyframes lock { 0%, 8%   { opacity: 0; transform: scale(1.7); }
                       22%, 84% { opacity: 1; transform: scale(1); }
                       96%, 100% { opacity: 0; transform: scale(1); } }
+    @keyframes aim  { 0%, 36% { opacity: 1; } 44%, 86% { opacity: 0; }
+                      92%, 100% { opacity: 1; } }
+    @keyframes rest { 0%, 36% { opacity: 0; } 44%, 86% { opacity: 1; }
+                      92%, 100% { opacity: 0; } }
     @media (prefers-reduced-motion: reduce) {
-      .rig, .wave, .lock { animation: none; }
+      .rig, .wave, .lock, .aim, .joy { animation: none; }
+      .aim { opacity: 0; }
       .wave { opacity: .5; }
       .lock { opacity: 1; }
     }
@@ -48,7 +57,9 @@
       <circle class="beacon" cx="48" cy="16" r="5"/>
       <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
       <circle class="iris" cx="36" cy="52" r="11"/><path class="joy" d="M30 54 a6.5 6.5 0 0 1 12 0"/>
+      <g class="aim"><circle class="reti" cx="36" cy="52" r="4.8"/><circle class="retd" cx="36" cy="52" r="1.8"/><path class="reti" d="M36 42.4 v2.8 M36 58.8 v2.8 M26.4 52 h2.8 M42.8 52 h2.8"/></g>
       <circle class="iris" cx="60" cy="52" r="11"/><path class="joy" d="M54 54 a6.5 6.5 0 0 1 12 0"/>
+      <g class="aim"><circle class="reti" cx="60" cy="52" r="4.8"/><circle class="retd" cx="60" cy="52" r="1.8"/><path class="reti" d="M60 42.4 v2.8 M60 58.8 v2.8 M50.4 52 h2.8 M66.8 52 h2.8"/></g>
     </g>
   </g>
 
