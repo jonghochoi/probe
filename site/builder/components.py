@@ -385,24 +385,22 @@ def cmdk_button() -> str:
     unscripted page, the same way every other JS-only control here removes
     itself rather than sitting inert.
 
-    It carries all three of its parts and lets the sheet decide which survive,
-    because what is in front of the reader is what settles it: a phone has no
-    Ctrl key, so there the key is what goes and the glyph is what stays, while
-    a wide desktop has room for the words and the shortcut both. The key prints
-    as `Ctrl K`, which is what it is on every platform but one; `palette.js`
-    swaps it to `⌘K` on a Mac, since which keyboard is in front of the reader
-    is the one thing about this button the build cannot know.
+    It is the glyph alone, on every viewport — a desktop and a phone read the
+    same button rather than one growing a label the other never had room for.
+    The shortcut lives in the `title`, a pointer's-length away rather than
+    printed beside the icon at all times. It reads `Ctrl K` here, which is
+    what it is on every platform but one; `palette.js` swaps it to `⌘K` on a
+    Mac, since which keyboard is in front of the reader is the one thing about
+    this button the build cannot know.
     """
     return ('<button type="button" class="nav-cmdk" data-cmdk-open '
-            'aria-label="논문 찾기">'
-            '<svg class="nav-cmdk-i" viewBox="0 0 16 16" width="15" height="15" '
+            'aria-label="논문 찾기" title="논문 찾기 (Ctrl K)">'
+            '<svg viewBox="0 0 16 16" width="15" height="15" '
             'aria-hidden="true" focusable="false">'
             '<circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" '
             'stroke-width="1.6"/>'
             '<path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.6" '
-            'stroke-linecap="round"/></svg>'
-            '<span class="lbl">논문 찾기</span>'
-            '<kbd data-cmdk-key>Ctrl K</kbd></button>')
+            'stroke-linecap="round"/></svg></button>')
 
 
 def nav(up: str) -> str:
@@ -416,7 +414,7 @@ def nav(up: str) -> str:
       <li><a href="{up}shelf/index.html">내 서재</a></li>
     </ul>
     {cmdk_button()}
-    <button class="icon-btn" data-theme-toggle aria-label="다크 모드로">☾</button>
+    <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">☾</button>
   </div>
 </nav>"""
 

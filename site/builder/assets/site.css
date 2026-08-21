@@ -1538,30 +1538,18 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    one piece the build prints, and it is the one piece that does. */
 .nav-cmdk {
   display: none;
-  align-items: center; gap: .4rem;
+  align-items: center; justify-content: center;
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text-muted); border-radius: var(--radius-sm);
-  height: 32px; padding: 0 .55rem; cursor: pointer;
-  font-family: inherit; font-size: .78rem;
+  width: 32px; height: 32px; cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
               border-color var(--dur-short) var(--ease-out);
 }
 html.js .nav-cmdk { display: inline-flex; }
 .nav-cmdk:hover { color: var(--orange); border-color: var(--amber-soft); }
-.nav-cmdk kbd {
-  font-family: var(--mono); font-size: .7rem; letter-spacing: .02em;
-  color: var(--text-muted);
-}
-/* Three parts, and the sheet decides which survive. Width takes the words: past
-   the point where the nav links crowd, the glyph says the same thing in the
-   room that is left. The pointer takes the key: a phone has no Ctrl to press,
-   so advertising one there names a way in that does not exist — the glyph is
-   the way in, and it is what stays. */
-.nav-cmdk-i { display: none; }
-@media (max-width: 620px) {
-  .nav-cmdk .lbl { display: none; }
-  .nav-cmdk-i { display: block; }
-}
+/* The glyph alone, at every width — a desktop and a phone read the same
+   button. The shortcut lives in its `title`, a pointer's length away on a
+   device that can hover, rather than printed beside the icon at all times. */
 
 .cmdk { position: fixed; inset: 0; z-index: var(--z-cmdk); }
 .cmdk-scrim {
@@ -1653,14 +1641,10 @@ html.js .nav-cmdk { display: inline-flex; }
    scrim would otherwise take the reader somewhere they cannot see. */
 html.cmdk-on, html.cmdk-on body { overflow: hidden; }
 
-/* A device driven by a thumb. Every key named on this surface is a key it does
-   not have, and 32 px is a comfortable target under a cursor and a small one
-   under a finger — so the names go and the hit areas grow, without the controls
-   growing with them: the button still sits level with the theme toggle beside
-   it, and the header still fits on one line. */
+/* A device driven by a thumb has no key to name and no pointer to hover a
+   tooltip with, so the dialog's own shortcuts go and the hit areas grow
+   instead — the nav button already carries no key on any viewport. */
 @media (hover: none) and (pointer: coarse) {
-  .nav-cmdk kbd { display: none; }
-  .nav-cmdk-i { display: block; }
   .nav-cmdk, .cmdk-esc { position: relative; }
   .nav-cmdk::after, .cmdk-esc::after { content: ""; position: absolute; inset: -7px; }
   .cmdk-esc .k { display: none; }
