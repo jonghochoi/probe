@@ -962,7 +962,7 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
     renderer.lead_html = _cmp_lead(comp, renderer)
     rendered = renderer.render(comp.body)
     if problems is not None:
-        problems.extend(f"compare/{comp.slug}.md: {p}" for p in renderer.problems)
+        problems.extend(f"comparison/{comp.slug}.md: {p}" for p in renderer.problems)
 
     body = f"""{_cmp_header(comp)}
 {_cmp_cards(papers)}
@@ -1049,7 +1049,7 @@ def _cmp_cards(papers: list[Paper]) -> str:
     )
 
 
-def compare_index_page(comps: list) -> str:
+def comparison_index_page(comps: list) -> str:
     """같이 읽기 — every comparison, newest first."""
     ordered = sorted(comps, key=lambda x: x.order_key, reverse=True)
     if ordered:

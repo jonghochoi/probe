@@ -1,7 +1,7 @@
 """Discover the comparisons the site publishes.
 
 A comparison reads two or three papers against each other and says where they
-diverge. It is a track of its own — `compare/<slug>.md`, written by `/compare`
+diverge. It is a track of its own — `comparison/<slug>.md`, written by `/compare`
 the way `analysis/<id>.md` is written by `/analyze` — and one constraint shapes
 everything about it:
 
@@ -28,7 +28,7 @@ from pathlib import Path
 
 from . import corpus, frontmatter
 
-COMPARE_DIR = corpus.REPO_ROOT / "compare"
+COMPARISON_DIR = corpus.REPO_ROOT / "comparison"
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 # `<id>v<n>` — the exact arXiv edition read, one per compared paper. The bare
@@ -99,7 +99,7 @@ class Comparison:
 
 
 def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
-    """Every `compare/<slug>.md`, plus the problems found reading them.
+    """Every `comparison/<slug>.md`, plus the problems found reading them.
 
     A problem that would publish a broken page skips the document; the rest are
     reported and the document still builds, so one soft slip does not take the
@@ -107,24 +107,24 @@ def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
     """
     comps: list[Comparison] = []
     problems: list[str] = []
-    if not COMPARE_DIR.is_dir():
+    if not COMPARISON_DIR.is_dir():
         return comps, problems
 
-    for path in sorted(COMPARE_DIR.glob("*.md")):
+    for path in sorted(COMPARISON_DIR.glob("*.md")):
         name = path.name
         if name == "AUTHORING.md":
             continue
         slug = path.stem
         if not SLUG_RE.match(slug):
             problems.append(
-                f"compare/{name}: name is not a slug — lowercase words joined "
+                f"comparison/{name}: name is not a slug — lowercase words joined "
                 f"by hyphens, drawn from the question the comparison asks"
             )
             continue
         try:
             front, body = frontmatter.parse(path.read_text(encoding="utf-8"))
         except ValueError as exc:
-            problems.append(f"compare/{name}: {exc}")
+            problems.append(f"comparison/{name}: {exc}")
             continue
 
         comp = Comparison(slug=slug, path=path, front=front, body=body)
@@ -132,7 +132,7 @@ def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
         ids = comp.paper_ids
         if not COMPARE_MIN <= len(ids) <= COMPARE_MAX:
             problems.append(
-                f"compare/{name}: `compares` names {len(ids)} papers — "
+                f"comparison/{name}: `compares` names {len(ids)} papers — "
                 f"{COMPARE_MIN}–{COMPARE_MAX}. Two is a contrast and three is a "
                 f"field; four is a survey and wants a different shape"
             )
@@ -143,23 +143,23 @@ def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
         missing = [pid for pid in ids if pid not in papers_by_id]
         if missing:
             problems.append(
-                f"compare/{name}: {', '.join(missing)} has no rewrite in "
+                f"comparison/{name}: {', '.join(missing)} has no rewrite in "
                 f"`analysis/` — not published. A comparison links out for every "
                 f"paper's own detail, so every compared paper needs a page to "
                 f"link to. Run `/analyze` on it first, or compare other papers"
             )
             continue
         if len(set(ids)) != len(ids):
-            problems.append(f"compare/{name}: `compares` names the same paper twice")
+            problems.append(f"comparison/{name}: `compares` names the same paper twice")
             continue
 
         problems += _check_sources(name, ids, comp.sources)
         for required in ("title", "tagline", "summary"):
             if not front.get(required):
-                problems.append(f"compare/{name}: missing `{required}`")
+                problems.append(f"comparison/{name}: missing `{required}`")
         if not corpus._GENERATED.match(front.get("generated", "").strip()):
             problems.append(
-                f"compare/{name}: `generated` is "
+                f"comparison/{name}: `generated` is "
                 f"{front.get('generated', '')!r} — write it as `YYYY-MM-DD HH:MM`"
             )
         comps.append(comp)
@@ -176,12 +176,12 @@ def _check_sources(name: str, ids: list[str], sources: list[str]) -> list[str]:
     """
     if not sources:
         return [
-            f"compare/{name}: missing `sources` — the arXiv edition read for "
+            f"comparison/{name}: missing `sources` — the arXiv edition read for "
             f"each paper, as `<id>v<n>`, in the order `compares` names them"
         ]
     if len(sources) != len(ids):
         return [
-            f"compare/{name}: `sources` has {len(sources)} entries for "
+            f"comparison/{name}: `sources` has {len(sources)} entries for "
             f"{len(ids)} papers — one edition per compared paper"
         ]
     problems = []
@@ -189,11 +189,11 @@ def _check_sources(name: str, ids: list[str], sources: list[str]) -> list[str]:
         m = SOURCE_RE.match(src)
         if not m:
             problems.append(
-                f"compare/{name}: `sources` entry {src!r} is not `<id>v<n>`"
+                f"comparison/{name}: `sources` entry {src!r} is not `<id>v<n>`"
             )
         elif m.group(1) != pid:
             problems.append(
-                f"compare/{name}: `sources` is out of step with `compares` — "
+                f"comparison/{name}: `sources` is out of step with `compares` — "
                 f"{src!r} sits where {pid} does"
             )
     return problems

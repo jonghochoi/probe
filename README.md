@@ -70,7 +70,7 @@ decides.
 | `context/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/human-dark.svg"><img src="assets/human.svg" width="22" align="absmiddle" alt=""></picture> human | monthly at most | agent reads only |
 | `scouting/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" width="22" align="absmiddle" alt=""></picture> agent | scheduled, per pillar | append — one dated file per run |
 | `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" width="22" align="absmiddle" alt=""></picture> agent | on demand | overwrite — one snapshot per paper |
-| `compare/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-compare-dark.svg"><img src="assets/probe-compare.svg" width="22" align="absmiddle" alt=""></picture> agent | on demand | overwrite — one file per comparison |
+| `comparison/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" width="22" align="absmiddle" alt=""></picture> agent | on demand | overwrite — one file per comparison |
 
 One folder the agent only reads, three it only adds to — that split is what
 stops it re-recommending last month's papers as `context/` grows.
@@ -97,7 +97,7 @@ Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 |---|---|---|
 | **Scouting** | [`SETUP.md`](SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
-| **Comparison** | by hand — the format and the pages are in place, the slash command is not | [`compare/AUTHORING.md`](compare/AUTHORING.md) |
+| **Comparison** | by hand — the format and the pages are in place, the slash command is not | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 
 - **One paper per `/analyze`**, named explicitly. No automatic `scouting/` →
   `analysis/` hand-off.

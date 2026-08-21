@@ -41,7 +41,7 @@ SURFACE_FENCES = ("probe-hub", "probe-rail", "probe-act")
 
 # The comparison track's own fence, and the ones it may not use. A comparison
 # compares; anything that zooms into a single paper belongs to that paper's own
-# page, which every compared paper is guaranteed to have (compare/AUTHORING.md).
+# page, which every compared paper is guaranteed to have (comparison/AUTHORING.md).
 # Both directions are reported rather than silently dropped — a fence that
 # renders to nothing is one the author never learns was wrong.
 COMPARE_FENCES = ("probe-matrix",)
