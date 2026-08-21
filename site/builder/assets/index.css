@@ -660,35 +660,46 @@ html.js .rowstar, html.js .lh-star { display: block; }
   padding: .05rem .32rem; border-radius: 3px;
   background: var(--surface-2); color: var(--text);
 }
-.sem-hit {
-  display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto;
-  gap: .6rem; align-items: start;
-  padding: .5rem .65rem; border-radius: 6px;
+/* One paper, and the passages inside it that matched. The heading is the row
+   the reader recognises the work by, so it carries the same title, id and
+   pillars the list below the block does. */
+.sem-group { margin-bottom: .5rem; }
+.sem-ghead {
+  display: flex; align-items: baseline; gap: .4rem; flex-wrap: wrap;
+  padding: .3rem .65rem; border-bottom: 1px solid var(--border);
+  text-decoration: none; color: inherit;
+}
+.sem-ghead:hover .sem-gt { color: var(--orange); }
+.sem-gt { font-size: .8rem; font-weight: 700; }
+.sem-gid {
+  font-family: var(--mono); font-size: .64rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sem-gn { font-size: .64rem; color: var(--text-muted); margin-left: auto; }
+/* Indented under its heading, so a long group reads as one work rather than
+   as the block starting over. */
+.sem-sub {
+  display: grid; grid-template-columns: 3.6rem minmax(0, 1fr);
+  gap: .55rem; align-items: start;
+  padding: .35rem .65rem .35rem 1.1rem; border-radius: 5px;
   text-decoration: none; color: inherit;
   border: 1px solid transparent; transition: background .14s, border-color .14s;
 }
-.sem-hit:hover { background: var(--surface); border-color: var(--border); }
+.sem-sub:hover { background: var(--surface); border-color: var(--border); }
 .sem-kind {
   font-size: .64rem; font-weight: 700; letter-spacing: .04em;
   padding: .1rem .3rem; border-radius: 3px; text-align: center;
   background: var(--surface-2); color: var(--text-muted);
 }
-/* The paper-level hit is the one that stands for the whole rewrite rather than
-   for a passage inside it, so it reads as the heading of the group it leads. */
 .sem-kind.k-paper { background: var(--orange-soft); color: var(--orange); }
 .sem-body { display: block; min-width: 0; }
-.sem-body b { font-size: .86rem; font-weight: 700; display: block; }
-.sem-hit:hover .sem-body b { color: var(--orange); }
-.sem-ctx {
-  display: block; font-size: .7rem; color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
+.sem-body b { font-size: .82rem; font-weight: 600; display: block; }
+.sem-sub:hover .sem-body b { color: var(--orange); }
 .sem-snip {
-  font-size: .78rem; line-height: 1.6; color: var(--text-muted); margin-top: .2rem;
+  font-size: .76rem; line-height: 1.6; color: var(--text-muted); margin-top: .15rem;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.sem-facets { display: flex; gap: .2rem; flex: none; }
 
 /* ── 내 서재 ──────────────────────────────────────────────────────────── */
 /* Three lists on one page, and the tab strip is what keeps them one page: the

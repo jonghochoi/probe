@@ -46,20 +46,58 @@ function esc(s) {
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+/* Every paper's title, off the list already on the page. A chunk carries the
+ * arXiv id of the paper it came from and nothing more, so without this the
+ * block can name a passage but not the work it belongs to — and an id is not
+ * a name. Reading the landing rows keeps the two in step for free: no title
+ * on any of the 1,502 rows in the index, and nothing to re-embed when one
+ * changes. */
+const TITLES = new Map(
+  [...document.querySelectorAll("[data-star][data-star-title]")]
+    .map((el) => [el.dataset.star, el.dataset.starTitle]));
+
+/* Papers, ordered by their best hit. One question is usually answered in
+ * several places at once — the same term glossed in five papers is five hits
+ * that read almost identically — and a flat list spends the whole block on
+ * that repetition while never saying how many works are behind it. */
+function byPaper(hits) {
+  const order = [];
+  const groups = new Map();
+  for (const hit of hits) {
+    const id = hit.paperId || "";
+    if (!groups.has(id)) { groups.set(id, []); order.push(id); }
+    const kept = groups.get(id);
+    // Two chunks of one passage are one place to go, not two.
+    if (!kept.some((h) => h.kind === hit.kind && h.title === hit.title
+                       && h.anchor === hit.anchor)) kept.push(hit);
+  }
+  return order.map((id) => ({ id, hits: groups.get(id) }));
+}
+
 /* A hit lands on the section it matched, not on the paper: the corpus is
  * written in 60 KB documents and "the paper is somewhere in here" is the answer
- * the reader already had. */
-function card(hit) {
-  const href = `${hit.path}${hit.anchor ? "#" + hit.anchor : ""}`;
-  const pillars = (hit.pillars || []).map(
+ * the reader already had. The heading above it is the one link that does go to
+ * the paper, for a reader who recognises the work and wants the whole of it. */
+function group(g) {
+  const first = g.hits[0];
+  const pillars = (first.pillars || []).slice(0, 3).map(
     (p) => `<span class="chip pillar" data-p="${esc(p)}">${esc(p)}</span>`).join("");
+  const passages = g.hits.map((hit) => {
+    const href = `${hit.path}${hit.anchor ? "#" + hit.anchor : ""}`;
+    return (
+      `<a class="sem-sub" href="${esc(href)}">` +
+      `<span class="sem-kind k-${esc(hit.kind)}">${esc(KINDS[hit.kind] || hit.kind)}</span>` +
+      `<span class="sem-body"><b>${esc(hit.title)}</b>` +
+      `<span class="sem-snip">${esc(hit.snippet)}</span></span></a>`
+    );
+  }).join("");
   return (
-    `<a class="sem-hit" href="${esc(href)}">` +
-    `<span class="sem-kind k-${esc(hit.kind)}">${esc(KINDS[hit.kind] || hit.kind)}</span>` +
-    `<span class="sem-body"><b>${esc(hit.title)}</b>` +
-    `<span class="sem-ctx">${esc(hit.context)}</span>` +
-    `<span class="sem-snip">${esc(hit.snippet)}</span></span>` +
-    `<span class="sem-facets">${pillars}</span></a>`
+    `<div class="sem-group">` +
+    `<a class="sem-ghead" href="${esc(first.path)}">` +
+    `<span class="sem-gt">${esc(TITLES.get(g.id) || g.id)}</span>` +
+    `<span class="sem-gid">${esc(g.id)}</span>${pillars}` +
+    `<span class="sem-gn">${g.hits.length} 대목</span></a>` +
+    passages + `</div>`
   );
 }
 
@@ -86,9 +124,12 @@ function pending(q) {
 function render(q, data) {
   const hits = data.hits || [];
   if (!hits.length) return hide();
+  const groups = byPaper(hits);
+  const kept = groups.reduce((n, g) => n + g.hits.length, 0);
   box.innerHTML =
-    `<p class="sem-head">의미 검색 <span>· “${esc(q)}” 에 가까운 대목 ${hits.length}</span></p>` +
-    readAs(data.expanded) + hits.map(card).join("");
+    `<p class="sem-head">의미 검색 <span>· “${esc(q)}” — 논문 ${groups.length}편에서 ` +
+    `${kept} 대목</span></p>` +
+    readAs(data.expanded) + groups.map(group).join("");
   box.hidden = false;
   shown = q;
 }
