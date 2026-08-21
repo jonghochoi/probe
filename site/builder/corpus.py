@@ -507,6 +507,8 @@ def discover() -> tuple[list[Paper], list[str]]:
     pending = Landing(rank=len(landed) + 1, date="")
 
     for path in sorted(ANALYSIS_DIR.glob("*.md")):
+        if path.name == "AUTHORING.md":
+            continue
         stem = path.stem
         if not ID_RE.match(stem):
             problems.append(f"analysis/{path.name}: name is not an arXiv id — skipped")

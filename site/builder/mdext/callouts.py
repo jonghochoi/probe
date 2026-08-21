@@ -3,7 +3,7 @@
     > [!NOTE] <선택 라벨>
     > <본문>
 
-`site/AUTHORING.md` §2-9 fixes five roles and five colors, and GitHub's own five
+`analysis/AUTHORING.md` §2-9 fixes five roles and five colors, and GitHub's own five
 alert types already carry exactly those colors — note/blue, tip/green,
 important/purple, warning/amber, caution/red. Reusing them means the same
 source renders as a recognisable callout on github.com as well, with no

@@ -116,7 +116,7 @@ class DocRenderer:
         self.katex = katex
         self.decisions = decisions or {}
         # Which contract this document answers to. `paper` is a rewrite under
-        # `site/AUTHORING.md`; `compare` is a comparison under
+        # `analysis/AUTHORING.md`; `compare` is a comparison under
         # `compare/AUTHORING.md`, which teaches nothing and so owes none of the
         # rules that exist to make one paper learnable.
         self.kind = kind

@@ -1,22 +1,23 @@
 # site/
 
-Everything the reading site is made of — the authoring rules, the static-site
-generator, and its build-time dependencies. The site publishes
-`analysis/<arxiv-id>.md` and `compare/<slug>.md`, and nothing else.
+Everything the reading site is made of — the static-site generator and its
+build-time dependencies. The site publishes `analysis/<arxiv-id>.md` and
+`compare/<slug>.md`, and nothing else.
 
 One rewrite becomes **two tabs on one page** — 요약 (one screen, the tab a
 reader lands on) and 상세 (the body). Both come out of the same source file and
-the same `/analyze` run; `AUTHORING.md` §4 and §5 are their contracts.
+the same `/analyze` run; `analysis/AUTHORING.md` §4 and §5 are their contracts.
 
 The corpus itself stays at the repo root (`analysis/`), next to the other
-agent-written track (`scouting/`). This folder is human-owned tooling and rules;
-the agent writes into `analysis/` and reads from here.
+agent-written track (`scouting/`), and so does its format contract
+(`analysis/AUTHORING.md`). This folder is human-owned tooling that implements
+that contract, not the rules themselves; the agent writes into `analysis/` and
+this folder only reads from there.
 
 ## Layout
 
 | Path | Role |
 |---|---|
-| `AUTHORING.md` | **The format contract for `analysis/<id>.md`** — front matter, body rules R1–R15, render traps, the 요약 rules G1–G7, what the build enforces. `.claude/prompts/analyze.txt` defers to it; edit this file first, then the code |
 | `build-site.py` | Build entry point. `--out` writes the tree, `--only <id>` builds one rewrite, `--check` lints and writes nothing, `--strict` fails on any warning, `--serve` previews under the deployed path, `--index <file>` writes the search index and builds no pages, `--search-api <url>` points the landing page at a search endpoint (omitted, the site makes no requests) |
 | `builder/corpus.py` | Rewrite discovery, the corpus's order (one `git log` over `analysis/`: a rewrite ranks by the commit that landed it — its add, or the `analysis: update` that redoes it — so 최근 is merge order and not the `generated:` stamp, and a redone rewrite lands again at the top. A build with no history to read says so and falls back to `generated:`), front-matter validation (including R6's `figures:` ↔ body agreement, R15's required `appendix:` and the tagline-echo check), pillar names, the R10 link vocabulary, and the two compacted haystacks the landing filter matches a query against — the paper's identity and everything the rewrite *names* (headings, term panels, figure captions), so a search reaches past the card's 240-character preview |
 | `builder/render.py` | Markdown → HTML, plus the rule checks that have no other home (R2, R4, R5, R11, R14) |

@@ -15,7 +15,7 @@ shapes made real.
 
 Rendering these is not optional decoration. Without it the fences fall through
 to the code highlighter and a term definition is published as a block of JSON,
-so `site/AUTHORING.md` and this module are one contract: the guide tells the
+so `analysis/AUTHORING.md` and this module are one contract: the guide tells the
 agent the build validates its fences, and this is where that is true.
 
 The only other fence language the corpus uses is `math`, so these names do not

@@ -64,7 +64,7 @@ must look like, and this prompt does not restate it:
 `scouting/templates/report.md` is the form every report follows — write into
 it exactly.
 
-`site/AUTHORING.md` governs `analysis/` and does NOT apply to this track. Do
+`analysis/AUTHORING.md` governs `analysis/` and does NOT apply to this track. Do
 not read it for report rules and do not carry its conventions over.
 
 This prompt owns the PROCEDURE below: what to read, how to retrieve, how to

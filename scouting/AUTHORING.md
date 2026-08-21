@@ -8,7 +8,7 @@
 > file before producing any output; change a rule here first, then the prompt.
 >
 > The reading site is a separate track with its own contract: `analysis/<id>.md`
-> is governed by `site/AUTHORING.md`, not by this guide. Nothing here applies to it.
+> is governed by `analysis/AUTHORING.md`, not by this guide. Nothing here applies to it.
 
 ---
 
@@ -285,7 +285,7 @@ verbatim in their original form versus which prose is Korean.
 The **scouting report** (`scouting/`) is **개조식**: a scanned decision
 document, not flowing prose. Its body content is written as terse outline
 bullets, not 합니다/됩니다 paragraphs. (The reading-site rewrites under
-`analysis/` keep an explanatory 합니다/됩니다 register — `site/AUTHORING.md` —
+`analysis/` keep an explanatory 합니다/됩니다 register — `analysis/AUTHORING.md` —
 since they are read, not scanned; only the scouting report is 개조식.)
 
 - **명사형 종결.** End body items on a noun or nominalized form
