@@ -88,6 +88,11 @@ def build(args) -> int:
     katex = KatexRenderer(cache) if args.katex == "server" else ClientRenderer()
     decisions = harvest_decisions()
 
+    # Before a page is rendered, because every asset URL a page prints carries
+    # a token hashed over what this build ships (`assets_out.version`).
+    index_js = pages.corpus_index(papers, comps)
+    assets_out.register("corpus-index.js", index_js)
+
     rendered: dict[Path, str] = {}
     render_problems: list[str] = []
     for paper in papers:
@@ -127,7 +132,6 @@ def build(args) -> int:
     # page names one paper and the index names them all — so the index counts
     # as asset text for the same reason.
     extras = assets_out.OPTIONAL["search"] if args.search_api else ()
-    index_js = pages.corpus_index(papers, comps)
     charset = set(assets_out.asset_text(extras)) | set(index_js)
     for html in final.values():
         charset |= set(_TEXT_ONLY.sub(" ", html))

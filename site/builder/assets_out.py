@@ -9,8 +9,10 @@ browser from the last decade.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import shutil
+from functools import lru_cache
 from pathlib import Path
 
 from . import fonts
@@ -83,6 +85,49 @@ def asset_text(extras: tuple[str, ...] = ()) -> str:
         (_ASSETS / name).read_text(encoding="utf-8")
         for name in _files(extras) if (_ASSETS / name).is_file()
     )
+
+
+# Files this build writes rather than copies — they carry no bytes on disk to
+# hash, so the build hands them over before it renders a page.
+_GENERATED: dict[str, str] = {}
+
+
+def register(name: str, text: str) -> None:
+    """Fold a generated asset into the version token.
+
+    `assets/corpus-index.js` is built from the corpus, so it changes on the
+    day a rewrite lands and on no other day — exactly when a reader's cached
+    copy stops matching the page that reads it.
+    """
+    _GENERATED[name] = text
+    version.cache_clear()
+
+
+@lru_cache(maxsize=1)
+def version() -> str:
+    """The `?v=` token every asset URL carries — a hash of what is shipped.
+
+    Pages serves `assets/site.css` under the same URL forever, so a reader
+    whose browser still holds yesterday's copy meets today's markup styled by
+    yesterday's rules: a new component lands *unstyled* rather than absent,
+    which looks broken in a way a missing feature never does. The token moves
+    with the bytes, so markup and the rules that style it are always fetched
+    as a pair.
+
+    Every shipped file is hashed, optional ones included, so the token does
+    not depend on which flags the build ran with — two builds of the same
+    tree agree, and a search build does not invalidate a reader's cache of
+    the files it shares with a plain one.
+    """
+    h = hashlib.sha256()
+    names = ASSET_FILES + tuple(n for group in OPTIONAL.values() for n in group)
+    for name in sorted(names):
+        src = _ASSETS / name
+        if src.is_file():
+            h.update(src.read_bytes())
+    for name, text in sorted(_GENERATED.items()):
+        h.update(text.encode("utf-8"))
+    return h.hexdigest()[:8]
 
 
 def copy_all(out: Path, charset: set[str] | None = None,
