@@ -96,7 +96,7 @@ Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 | Track | How to run | Output format |
 |---|---|---|
 | **Scouting** | [`SETUP.md`](SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
-| **Analysis** | `/analyze <arXiv id>` | [`site/AUTHORING.md`](site/AUTHORING.md) |
+| **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | by hand — the format and the pages are in place, the slash command is not | [`compare/AUTHORING.md`](compare/AUTHORING.md) |
 
 - **One paper per `/analyze`**, named explicitly. No automatic `scouting/` →

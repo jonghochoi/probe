@@ -35,7 +35,7 @@ No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
 (its Repository-map table), `README.md` and `SETUP.md`, where every path
 reference is meant to point at a real file, plus the `context/` files
 (MASTER + every pillar) the scheduled routine reads every run. The agent-output specs
-(`scouting/AUTHORING.md`, `site/AUTHORING.md`) and the prompts are out of the
+(`scouting/AUTHORING.md`, `analysis/AUTHORING.md`) and the prompts are out of the
 default set — they are full of *illustrative* example paths (example arXiv ids,
 `<id>` placeholders) by design — but can be scanned explicitly by passing them
 as PATH args.
@@ -74,7 +74,7 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 # Default scan set: the structural index docs whose path references are meant to
 # point at real files, plus the human-owned context files the scheduled routine
 # reads every run (their `scouting/AUTHORING.md`-style pointers must resolve).
-# The output specs (`scouting/AUTHORING.md`, `site/AUTHORING.md`) and the
+# The output specs (`scouting/AUTHORING.md`, `analysis/AUTHORING.md`) and the
 # prompts are intentionally excluded (they carry illustrative example paths)
 # but can be passed explicitly as PATH args.
 #

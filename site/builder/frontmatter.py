@@ -7,7 +7,7 @@ becoming `True` is a real YAML footgun. Flat keys only; genuine nesting is
 rejected rather than half-supported.
 
 The one structure that IS supported is the block scalar, because the contract
-in `site/AUTHORING.md` §1 requires it: `summary` is 2–3 sentences of Korean and
+in `analysis/AUTHORING.md` §1 requires it: `summary` is 2–3 sentences of Korean and
 folding it over several lines is the only way to keep the front matter
 readable.
 """

@@ -149,7 +149,7 @@ number in the arXiv original** before it goes in a cell.
 
 A comparison written only from rewrites inherits each rewrite's choices about
 what to foreground, so the axes end up being whatever three separate readings
-happened to emphasise. It is also the failure `site/AUTHORING.md` G1 names —
+happened to emphasise. It is also the failure `analysis/AUTHORING.md` G1 names —
 a digest of a digest — at three times the scale.
 
 `sources:` records which edition each fact was confirmed against.
