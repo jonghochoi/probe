@@ -17,11 +17,13 @@ on:
     branches: [main]
     paths:
       - 'analysis/**'
+      - 'compare/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   pull_request:
     paths:
       - 'analysis/**'
+      - 'compare/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:

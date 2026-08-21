@@ -39,6 +39,14 @@ FENCES = (
 # block.
 SURFACE_FENCES = ("probe-hub", "probe-rail", "probe-act")
 
+# The comparison track's own fence, and the ones it may not use. A comparison
+# compares; anything that zooms into a single paper belongs to that paper's own
+# page, which every compared paper is guaranteed to have (compare/AUTHORING.md).
+# Both directions are reported rather than silently dropped — a fence that
+# renders to nothing is one the author never learns was wrong.
+COMPARE_FENCES = ("probe-matrix",)
+COMPARE_BANNED = ("probe-figure", "probe-eq", "probe-quiz")
+
 
 class FenceError(ValueError):
     """Malformed fence payload — carries a message fit for a build warning."""
@@ -475,3 +483,98 @@ def parts(data: dict, inline_md) -> str:
 def error_block(message: str) -> str:
     """A visible failure. A dropped fence would leave a hole nobody notices."""
     return f'<div class="fence-error">⚠️ {_esc(message)}</div>'
+
+
+# ── ```probe-matrix ─────────────────────────────────────────────────────────
+
+MATRIX_MIN, MATRIX_MAX = 3, 7
+
+
+def matrix(data: dict, inline_md, heads: list[tuple[str, str, str]]) -> str:
+    """The comparison track's grid — one question per row, one paper per column.
+
+    Every other component here describes one paper. This one exists because a
+    comparison that lets an axis speak about two of its three papers has
+    stopped comparing: the schema requires a cell per paper per axis, so a
+    thought that only fits two of them has to be reworded until it fits all
+    three, or dropped. That reworking is where the comparison actually happens.
+
+    Cells are placed by `of` rather than by position, so the author writes them
+    in whatever order the axis reads best and the columns still line up.
+
+    `heads` is `(id, label, href)` per column, in column order — the fence has
+    no way to know which papers are being compared or where their rewrites
+    live, and both come from the document's front matter.
+    """
+    axes = data.get("axes")
+    if not isinstance(axes, list) or not MATRIX_MIN <= len(axes) <= MATRIX_MAX:
+        raise FenceError(
+            f"probe-matrix: `axes` must be a list of {MATRIX_MIN}–{MATRIX_MAX}, got "
+            f"{len(axes) if isinstance(axes, list) else type(axes).__name__} — "
+            f"fewer than {MATRIX_MIN} is a sentence, more than {MATRIX_MAX} is a spreadsheet"
+        )
+    ids = [head[0] for head in heads]
+
+    rows = ""
+    for axis in axes:
+        if not isinstance(axis, dict) or not str(axis.get("k", "")).strip():
+            raise FenceError(f"probe-matrix: each axis needs `k`, the question it asks (got {axis!r})")
+        key = str(axis["k"]).strip()
+        cells = axis.get("cells")
+        if not isinstance(cells, list):
+            raise FenceError(f"probe-matrix[{key}]: `cells` must be a list")
+
+        by_id: dict[str, dict] = {}
+        for cell in cells:
+            if not isinstance(cell, dict):
+                raise FenceError(f"probe-matrix[{key}]: each cell must be an object (got {cell!r})")
+            of = str(cell.get("of", "")).strip()
+            if of not in ids:
+                raise FenceError(
+                    f"probe-matrix[{key}]: `of` is {of!r}, which is not one of the "
+                    f"compared papers ({', '.join(ids)})"
+                )
+            if of in by_id:
+                raise FenceError(f"probe-matrix[{key}]: two cells claim {of} — one per paper")
+            if not str(cell.get("v", "")).strip():
+                raise FenceError(f"probe-matrix[{key}] · {of}: missing `v`")
+            by_id[of] = cell
+
+        missing = [pid for pid in ids if pid not in by_id]
+        if missing:
+            # The one rule this component exists for. An axis that answers for
+            # some of the papers is a remark about those papers, and it reads
+            # on the page as though the others had nothing to say.
+            raise FenceError(
+                f"probe-matrix[{key}]: no cell for {', '.join(missing)} — an axis "
+                f"answers for every compared paper or it is not an axis"
+            )
+
+        tds = ""
+        for pid in ids:
+            cell = by_id[pid]
+            note = str(cell.get("note", "")).strip()
+            tds += (
+                "<td>"
+                f'<span class="mx-v">{inline_md(str(cell["v"]))}</span>'
+                + (f'<span class="mx-note">{inline_md(note)}</span>' if note else "")
+                + "</td>"
+            )
+        rows += f'<tr><th scope="row" class="mx-k">{inline_md(key)}</th>{tds}</tr>'
+
+    cols = "".join(
+        f'<th scope="col"><a href="{_esc(href)}">{_esc(label)}</a>'
+        f'<span class="mx-id">{_esc(pid)}</span></th>'
+        for pid, label, href in heads
+    )
+    title = str(data.get("title", "")).strip()
+    head = f'<div class="box-head">{_esc(title)}</div>' if title else ""
+    # Three columns of Korean sentences overflow a phone, so the table scrolls
+    # inside its own wrapper rather than taking the page with it.
+    return (
+        f'<div class="matrix">{head}'
+        f'<div class="mx-wrap"><table class="mx">'
+        f'<thead><tr><td class="mx-corner"></td>{cols}</tr></thead>'
+        f"<tbody>{rows}</tbody>"
+        "</table></div></div>"
+    )

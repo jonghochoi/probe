@@ -41,7 +41,7 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, corpus, pages
+from builder import assets_out, comparisons, corpus, pages
 from builder.decisions import harvest_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
@@ -59,14 +59,24 @@ def build(args) -> int:
     if args.index:
         return write_index(Path(args.index), papers, problems)
 
+    papers_by_id = {p.stem: p for p in papers}
+    # A partial build cannot judge a comparison: `--only` drops papers a
+    # comparison names, and every one of those reads as a missing rewrite.
+    comps: list = []
+    if not args.only:
+        comps, comp_problems = comparisons.discover(papers_by_id)
+        problems += comp_problems
+
     if args.check:
         for line in problems:
             print(line)
         if problems:
             print(f"\nbuild-site --check: {len(problems)} problem(s) "
-                  f"across {len(papers)} rewrite(s)")
+                  f"across {len(papers)} rewrite(s) and "
+                  f"{len(comps)} comparison(s)")
             return 1
-        print(f"build-site --check: {len(papers)} rewrite(s) clean")
+        print(f"build-site --check: {len(papers)} rewrite(s), "
+              f"{len(comps)} comparison(s) clean")
         return 0
 
     out = Path(args.out)
@@ -84,7 +94,12 @@ def build(args) -> int:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
             paper, katex, decisions, render_problems,
             neighbours=corpus.related(paper, papers),
+            comparisons=comparisons.for_paper(paper.stem, comps),
         )
+    for comp in comps:
+        rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
+            comp, papers_by_id, katex, decisions, render_problems)
+    rendered[out / "c" / "index.html"] = pages.compare_index_page(comps)
     problems += render_problems
 
     # The landing page indexes whatever was built — with `--only`, a subset.
@@ -134,7 +149,7 @@ def build(args) -> int:
     kb = (stats["pretendard"] + stats["mono"]) / 1024
     print(
         f"build-site: {len(rendered)} page(s) · {len(papers)} rewrite(s) · "
-        f"{katex.rendered} formula(s) rendered · "
+        f"{len(comps)} comparison(s) · {katex.rendered} formula(s) rendered · "
         f"{stats['glyphs']} glyph(s) → {kb:.0f} KB of webfont · "
         f"{size / 1024:.0f} KB of corpus index · "
         f"{warn} katex warning(s) → {out}"

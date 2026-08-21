@@ -929,6 +929,33 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
 .notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 
+/* ── 같이 읽기 ─────────────────────────────────── */
+.cmp-list { display: grid; gap: .55rem; }
+.cmp-item {
+  display: flex; flex-direction: column; gap: .25rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .85rem 1rem;
+  text-decoration: none; color: inherit;
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+}
+.cmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.cmp-item-h { display: flex; gap: .8rem; align-items: baseline; }
+.cmp-item-t { flex: 1 1 auto; font-size: .95rem; font-weight: 700; line-height: 1.45; }
+.cmp-item:hover .cmp-item-t { color: var(--orange); }
+.cmp-item-when {
+  flex: 0 0 auto; font-size: .72rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.cmp-item-tag { font-size: .82rem; line-height: 1.6; color: var(--text-muted); }
+/* The ids rather than the titles: three titles do not fit on a line and three
+   ids always do — the same trade the 책갈피 strip makes. */
+.cmp-item-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .2rem; }
+.cmp-item-id {
+  font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
+  background: var(--surface-2); border-radius: var(--radius-xs);
+  padding: .1rem .35rem; font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 900px) {
   /* The rail is the first thing to go: it is a shortcut for the search box,
      which is still there. */

@@ -108,12 +108,17 @@ def _gather_default_docs() -> list[str]:
     patterns = [
         "analysis/*.md",
         "scouting/P*/*.md",
+        # A comparison's act 4 is our layer and cites the log like any rewrite.
+        "compare/*.md",
     ]
     docs: list[str] = []
     for pat in patterns:
         for path in sorted(glob.glob(os.path.join(_REPO_ROOT, pat), recursive=True)):
             rel = os.path.relpath(path, _REPO_ROOT)
             if f"{os.sep}templates{os.sep}" in rel or rel.startswith("templates"):
+                continue
+            # The track's format contract, not one of its documents.
+            if os.path.basename(rel) == "AUTHORING.md":
                 continue
             docs.append(rel)
     return docs

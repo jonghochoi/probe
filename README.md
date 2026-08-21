@@ -70,9 +70,16 @@ decides.
 | `context/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/human-dark.svg"><img src="assets/human.svg" width="22" align="absmiddle" alt="human"></picture> | monthly at most | agent reads only |
 | `scouting/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" width="22" align="absmiddle" alt="agent"></picture> | scheduled, per pillar | append — one dated file per run |
 | `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one snapshot per paper |
+| `compare/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one file per comparison |
 
-One folder the agent only reads, two it only adds to — that split is what
+One folder the agent only reads, three it only adds to — that split is what
 stops it re-recommending last month's papers as `context/` grows.
+
+**Comparisons read papers the corpus already has.** A comparison holds two or
+three rewrites under one question and stays on where they diverge; each paper's
+own detail lives on its own page, one link away. So only papers that already
+have a rewrite may be compared — that is what lets the comparison link out
+instead of explaining, and the build refuses to publish one that cannot.
 
 **Pillars.** The context split is what keeps one run narrow.
 
@@ -90,6 +97,7 @@ Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 |---|---|---|---|
 | **Scouting** | a cloud routine, one per pillar | [`SETUP.md`](SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` from any Claude Code session | none | [`site/AUTHORING.md`](site/AUTHORING.md) |
+| **Comparison** | written by hand for now — the format and the pages are in place, the slash command is not | none | [`compare/AUTHORING.md`](compare/AUTHORING.md) |
 
 - **One paper per `/analyze`**, named explicitly. No automatic `scouting/` →
   `analysis/` hand-off.

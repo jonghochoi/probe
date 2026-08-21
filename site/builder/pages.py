@@ -638,7 +638,8 @@ TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"))
 
 def paper_page(paper: Paper, katex, decisions: dict,
                problems: list[str] | None = None,
-               neighbours: list[Paper] | None = None) -> str:
+               neighbours: list[Paper] | None = None,
+               comparisons: list | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -669,6 +670,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
     <aside class="toc">{_toc(renderer.toc)}</aside>
     <main class="article">
       <section class="view">{rendered}</section>
+      {_in_comparisons(comparisons or [])}
       {_related(neighbours or [])}
     </main>
   </div>
@@ -759,6 +761,33 @@ def _related(neighbours: list[Paper]) -> str:
     return (
         '<section class="related">'
         '<h2 class="related-h">같은 갈래의 다른 글</h2>'
+        f'<div class="rel-list">{items}</div>'
+        "</section>"
+    )
+
+
+def _in_comparisons(comps: list) -> str:
+    """The comparisons this paper appears in, at the end of its own page.
+
+    The other half of the track's constraint. A comparison never explains this
+    paper, so the paper's page is where the detail stays — and this is the
+    doorway back out, for a reader who has just read it and wants to know what
+    it was argued against.
+    """
+    if not comps:
+        return ""
+    items = "".join(
+        f'<a class="rel-item" href="../../c/{c.esc(x.slug)}/index.html">\n'
+        f'  <span class="rel-p">{c.esc(x.date)}</span>\n'
+        f'  <span class="rel-title">{c.esc(x.title)}</span>\n'
+        f'  <span class="rel-tagline">{c.esc(x.tagline)}</span>\n'
+        f'  <span class="rel-size">{len(x.paper_ids)}편</span>\n'
+        f"</a>"
+        for x in comps
+    )
+    return (
+        '<section class="related">'
+        '<h2 class="related-h">이 논문이 들어간 비교</h2>'
         f'<div class="rel-list">{items}</div>'
         "</section>"
     )
@@ -901,3 +930,163 @@ def _metaline(paper: Paper) -> str:
     bits.append(_size(paper))
     items = "".join(f'<span class="mi">{c.esc(b)}</span>' for b in bits)
     return f'<div class="metaline">{items}</div>'
+
+
+# ── Comparisons ─────────────────────────────────────────────────────────────
+
+def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
+                    problems: list[str] | None = None) -> str:
+    """One comparison — the papers as cards, then the argument.
+
+    The card row is where the track's constraint pays off. Every compared paper
+    is guaranteed to have a rewrite, so the page can state what the three
+    papers *are* entirely from front matter already written — title, tagline,
+    headline metric, pillars, and a link to the full read. Nothing here is
+    authored twice.
+
+    That is what lets the contract forbid the prose from introducing anybody:
+    the introduction is already on the page, so the first sentence of act 1 can
+    go straight at the divergence, and a reader who wants one paper's detail
+    has a door to it rather than a paragraph about it.
+
+    None of the 서재 layer is here — 즐겨찾기, 읽음, 책갈피 and 메모 are all keyed
+    by arXiv id, and a comparison has a slug. Rather than ship controls that
+    cannot resolve, the page ships none: `paper.js` alone, for the term anchors
+    a shared vocabulary panel needs.
+    """
+    papers = [papers_by_id[pid] for pid in comp.paper_ids]
+    heads = [(p.stem, _alias(p), f"../../p/{p.stem}/index.html") for p in papers]
+
+    renderer = DocRenderer(katex, decisions=decisions, kind="compare",
+                           matrix_heads=heads)
+    renderer.lead_html = _cmp_lead(comp, renderer)
+    rendered = renderer.render(comp.body)
+    if problems is not None:
+        problems.extend(f"compare/{comp.slug}.md: {p}" for p in renderer.problems)
+
+    body = f"""{_cmp_header(comp)}
+{_cmp_cards(papers)}
+<div class="shell one">
+  <main class="article">
+    <section class="view">{rendered}</section>
+  </main>
+</div>
+"""
+    return c.page(
+        title=f"{comp.title} · PROBE",
+        description=comp.preview,
+        body=body,
+        depth=2,
+        scripts=["paper.js"],
+    )
+
+
+def _alias(paper: Paper) -> str:
+    """The paper's short name for a column head.
+
+    A `Name: What it does` title puts the codename before the colon, and that
+    is what fits above a table column. A title with no colon has no separable
+    name, so the id below the head carries the identification instead and the
+    head is clamped by CSS.
+    """
+    head = paper.title.split(":")[0].strip()
+    return head if (":" in paper.title and len(head.split()) <= 5) else paper.title
+
+
+def _cmp_header(comp) -> str:
+    pillars = c.pillar_chips(comp.pillars)
+    tags = c.tag_chips(comp.tags)
+    return f"""<header class="paper-head">
+  <div class="paper-head-inner">
+    <div class="crumb-row">
+      <div class="crumb">
+        <a href="../index.html">같이 읽기</a> › {c.esc(comp.slug)}
+      </div>
+    </div>
+    <h1 class="paper-title">{c.esc(comp.title)}</h1>
+    {f'<div class="chip-row head-facts">{pillars}</div>' if pillars else ""}
+    {f'<div class="chip-row head-tags">{tags}</div>' if tags else ""}
+    <div class="metaline"><span class="mi">{c.esc(comp.date)}</span><span class="mi">논문 {len(comp.paper_ids)}편</span></div>
+  </div>
+</header>"""
+
+
+def _cmp_lead(comp, renderer: DocRenderer) -> str:
+    out = ""
+    if comp.tagline:
+        out += f'<p class="thesis-sub">{renderer.inline(comp.tagline)}</p>\n'
+    if comp.summary_md:
+        out += (
+            '<div class="tldr"><span class="tldr-label">한 문단 요약</span>'
+            f"<p>{renderer.inline(comp.summary_md)}</p></div>\n"
+        )
+    return f"\n{out}" if out else ""
+
+
+def _cmp_cards(papers: list[Paper]) -> str:
+    """Who the compared papers are, drawn entirely from their own front matter.
+
+    In `compares:` order, which is the comparison author's order and the same
+    one every ```probe-matrix column runs in — so the third card and the third
+    column are the same paper wherever the reader is on the page.
+    """
+    cards = "".join(
+        f'<a class="cmp-card" href="../../p/{c.esc(p.stem)}/index.html">'
+        f'<span class="cmp-card-p">{"".join(c.esc(x) + " " for x in p.pillars[:2])}</span>'
+        f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
+        f'<span class="cmp-card-tag">{c.esc(p.tagline)}</span>'
+        f'<span class="cmp-card-foot">'
+        f'<span class="cmp-card-id">{c.esc(p.stem)}</span>'
+        + (f'<span class="cmp-card-m">{c.esc(p.metric)}</span>' if p.metric else "")
+        + "</span></a>"
+        for p in papers
+    )
+    return (
+        '<section class="cmp-cards">'
+        '<h2 class="cmp-cards-h">읽은 논문</h2>'
+        f'<div class="cmp-card-row">{cards}</div>'
+        "</section>"
+    )
+
+
+def compare_index_page(comps: list) -> str:
+    """같이 읽기 — every comparison, newest first."""
+    ordered = sorted(comps, key=lambda x: x.order_key, reverse=True)
+    if ordered:
+        rows = "".join(
+            f'<a class="cmp-item" href="{c.esc(x.slug)}/index.html">'
+            f'<span class="cmp-item-h">'
+            f'<span class="cmp-item-t">{c.esc(x.title)}</span>'
+            f'<span class="cmp-item-when">{c.esc(x.date)}</span></span>'
+            f'<span class="cmp-item-tag">{c.esc(x.tagline)}</span>'
+            f'<span class="cmp-item-ids">'
+            + "".join(
+                f'<span class="cmp-item-id">{c.esc(pid)}</span>' for pid in x.paper_ids
+            )
+            + "</span></a>"
+            for x in ordered
+        )
+        list_html = f'<div class="cmp-list">{rows}</div>'
+    else:
+        list_html = '<p class="corpus-empty">아직 비교한 글이 없습니다.</p>'
+
+    body = f"""<header class="mast slim">
+  <div class="mast-inner">
+    <h1>같이 읽기</h1>
+    <p class="mast-sub">
+      논문 두세 편을 한 질문 아래 놓고, <strong>어디서 갈리는지</strong>만 봅니다.
+      각 논문이 무엇을 하는지는 그 논문의 재작성본에 있고, 여기서는 링크로 갑니다.
+    </p>
+  </div>
+</header>
+
+<main class="hub">
+  {list_html}
+</main>
+"""
+    return c.page(
+        title="같이 읽기 · PROBE",
+        body=body,
+        depth=1,
+        extra_head='<link rel="stylesheet" href="../assets/index.css">',
+    )
