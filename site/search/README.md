@@ -15,6 +15,25 @@ given one still ships the lexical filter underneath, and the remote block
 removes itself on any failure — offline, `file://`, a 502, an answer slower than
 5 s.
 
+## When it asks
+
+The lexical filter narrows the list on every keystroke, because it costs a
+string compare over markup that is already on the page. This one costs a round
+trip, a model call and an embedding, and a half-typed word is not yet the
+question — so it asks when the reader submits, and says so first: two
+characters in, the block above the list offers the search and names `Enter`.
+An IME is composing, not submitting, so the Enter that commits a Korean
+syllable is not the Enter that asks.
+
+Submitting is a key and a button, and the button ships with the endpoint: a
+build given none emits no 검색 beside the box, because there would be nothing
+for it to do that the list is not doing already. It is disabled until the box
+holds a question, and off entirely in a browser with no script to run it.
+
+A `#q=` link is a question somebody already asked, so arriving at one asks it
+without waiting to be pressed. Everything else that empties the box — Escape,
+필터 초기화 — takes the block with it.
+
 ## What is indexed
 
 `analysis/<id>.md`, and nothing else — the same corpus the site publishes. A

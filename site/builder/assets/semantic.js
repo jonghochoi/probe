@@ -8,6 +8,11 @@
  *
  * The endpoint is emitted onto `<body data-search-api>` only when the build was
  * given one, so a default build never loads this file and never makes a request.
+ *
+ * It answers a question the reader submitted with Enter, not the one they are
+ * in the middle of typing. `filter.js` is the layer that keeps up with a
+ * keystroke; a round trip and a model call are not, and a half-typed word is
+ * not yet a question — so the block offers before it asks.
  */
 
 (function () {
@@ -17,9 +22,12 @@ const api = document.body.dataset.searchApi;
 const box = document.querySelector("[data-sem]");
 const input = document.querySelector("[data-q]");
 if (!api || !box || !input) return;
+// The build ships this beside the box wherever it shipped an endpoint. It
+// starts disabled and is the same submit Enter is, for a reader who is on a
+// touch keyboard or has never been told about the key.
+const go = document.querySelector("[data-ask]");
 
 const MIN = 2;
-const WAIT = 350;          // after typing stops — one request per question, not per keystroke
 /* What the remote block gets before the lexical list below it is the better
  * answer. The endpoint reads a query into search terms with one model and
  * embeds the result with another, in series, so an uncached question spends a
@@ -31,14 +39,26 @@ const TIMEOUT = 5000;
  * they are not the same offer: one is a definition, one is an argument. */
 const KINDS = { paper: "논문", section: "섹션", term: "용어", figure: "그림" };
 
-let timer = null;
 let inflight = null;
-let shown = "";
+/* The question the block currently answers, and `null` whenever it does not —
+ * offering, waiting, or gone. An empty box is a question like any other here,
+ * so "nothing on screen" cannot be spelled the same way as "". */
+let shown = null;
 
 function hide() {
   box.hidden = true;
   box.innerHTML = "";
-  shown = "";
+  shown = null;
+}
+
+/* The block belongs to one question at a time. Dropping the reference before
+ * aborting is what hands it over: the abort lands in the `catch` below, and a
+ * request that no longer owns the block must not clear what replaced it. */
+function cancel() {
+  if (!inflight) return;
+  const ctl = inflight;
+  inflight = null;
+  ctl.abort();
 }
 
 function esc(s) {
@@ -112,6 +132,17 @@ function readAs(terms) {
     (t) => `<span class="sem-term">${esc(t)}</span>`).join("")}</p>`;
 }
 
+/* Before the question is asked. The reader is typing and the list below is
+ * already narrowing, so this line is the whole of the remote layer's presence:
+ * it names what Enter would ask, and nothing has been spent yet. */
+function offer(q) {
+  box.innerHTML =
+    `<p class="sem-head sem-ask">의미 검색 <span>· <kbd class="sem-key">Enter</kbd> ` +
+    `를 누르면 “${esc(q)}” 에 가까운 대목을 찾습니다</span></p>`;
+  box.hidden = false;
+  shown = null;
+}
+
 /* The lexical list answers while the reader is still typing, so without this
  * the seconds the endpoint spends read as a page that has already finished.
  * It says only that the question is out — a failure takes the whole block
@@ -120,7 +151,7 @@ function pending(q) {
   box.innerHTML =
     `<p class="sem-head sem-wait">의미 검색 <span>· “${esc(q)}” 에 가까운 대목을 찾는 중</span></p>`;
   box.hidden = false;
-  shown = "";
+  shown = null;
 }
 
 function render(q, data) {
@@ -137,8 +168,9 @@ function render(q, data) {
 }
 
 function ask(q) {
-  if (inflight) inflight.abort();
+  cancel();
   const ctl = new AbortController();
+  ctl.q = q;                            // what the block is waiting on, while it waits
   inflight = ctl;
   pending(q);
   const bail = setTimeout(() => ctl.abort(), TIMEOUT);
@@ -150,8 +182,8 @@ function ask(q) {
   })
     .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
     .then((data) => {
-      // The reader kept typing while this was in the air; answering the
-      // question they have moved on from is worse than not answering.
+      // The block belongs to the question in the box; a late answer to any
+      // other one is worse than no answer at all.
       if (input.value.trim() === q) render(q, data);
     })
     // Superseded by a later question rather than failed: that request owns the
@@ -163,15 +195,38 @@ function ask(q) {
     });
 }
 
-function schedule() {
+/* One path in, from every route the query moves by. `submit` is the whole
+ * difference between the two of them: a submitted question is asked, a typed
+ * one is offered. */
+function follow(submit) {
   const q = input.value.trim();
-  if (timer) clearTimeout(timer);
+  // Nothing to ask until there is a question: the button says so rather than
+  // taking a press and doing nothing with it.
+  if (go) go.disabled = q.length < MIN;
+  // Already answered, or already out: pressing Enter twice is one question,
+  // and editing back to the question in the air keeps the answer coming.
+  if (q === shown || (inflight && inflight.q === q)) return;
+  cancel();
   if (q.length < MIN) return hide();
-  if (q === shown) return;
-  timer = setTimeout(() => ask(q), WAIT);
+  if (submit) ask(q); else offer(q);
 }
 
-input.addEventListener("input", schedule);
-addEventListener("hashchange", schedule);
-schedule();                                   // a shared `#q=` link asks on arrival
+/* Enter submits. Not while an IME is composing it: on a Korean keyboard the
+ * first Enter commits the syllable under the cursor, and taking that one would
+ * ask the half-written question this layer exists to stop asking. */
+input.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || e.isComposing || e.keyCode === 229) return;
+  e.preventDefault();
+  follow(true);
+});
+
+if (go) go.addEventListener("click", () => follow(true));
+input.addEventListener("input", () => follow(false));
+// The box is emptied by things that are not typing — Escape, 필터 초기화 — and
+// none of them fire `input`; `filter.js` says so here instead.
+document.addEventListener("probe:query", () => follow(false));
+// A `#q=` link carries a question somebody already asked, and arriving at one
+// is not typing it — both the shared link and the reader's own history ask.
+addEventListener("hashchange", () => follow(true));
+follow(true);
 })();

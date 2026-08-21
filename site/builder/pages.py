@@ -219,6 +219,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
       <input type="search" data-q autocomplete="off" spellcheck="false"
              placeholder="제목 · 본문 · 용어 · 태그 · 저자 · arXiv id 로 검색"
              aria-label="논문 검색">
+      {_search_go(search_api)}
     </label>
     <div class="sort" role="group" aria-label="정렬">
       <button type="button" data-sort="recent" aria-pressed="true">최신순</button>
@@ -276,6 +277,21 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
         extra_head='<link rel="stylesheet" href="assets/index.css">',
         body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
     )
+
+
+def _search_go(search_api: str) -> str:
+    """The button that submits the question, beside the box that holds it.
+
+    It ships with the endpoint and with nothing else: the list below filters as
+    the reader types, so where there is no remote index there is nothing for a
+    button to do. `index.css` keeps it off a browser with no script for the same
+    reason — the control that cannot run removes itself rather than sitting
+    there — and `semantic.js` disables it until there is a question to ask.
+    """
+    if not search_api:
+        return ""
+    return ('<button type="button" class="search-go" data-ask disabled '
+            'aria-label="의미 검색 (Enter)">검색</button>')
 
 
 def _resume() -> str:
