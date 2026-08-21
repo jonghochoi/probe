@@ -640,6 +640,17 @@ html.js .rowstar, html.js .lh-star { display: block; }
 
 /* The terms the query was read as. Quiet — it explains the results, it is not
    one of them — but always present when the endpoint expanded anything. */
+/* The waiting line, while the endpoint is still answering. It breathes rather
+   than spins: the block sits above a list that is already usable, so it should
+   read as work in progress, not as something demanding attention. */
+.sem-wait span { animation: sem-breathe 1.4s var(--ease-in-out) infinite; }
+@keyframes sem-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sem-wait span { animation: none; opacity: .7; }
+}
 .sem-read {
   display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
   font-size: .68rem; color: var(--text-muted); margin: -.15rem 0 .5rem;
