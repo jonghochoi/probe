@@ -54,7 +54,7 @@ ROWS_PER_CALL = 1000
 # What `semantic.js` waits before it drops the remote block. An answer slower
 # than this is one no reader ever sees, so it is a failure the operator wants
 # named even though every call in it succeeded.
-PAGE_BUDGET_MS = 2_500
+PAGE_BUDGET_MS = 5_000
 # What the page asks for, so the cache key exercised here is the key it writes.
 LIMIT = 8
 # The question the lexical filter cannot answer — the reason this folder exists.

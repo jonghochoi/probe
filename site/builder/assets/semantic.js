@@ -20,7 +20,13 @@ if (!api || !box || !input) return;
 
 const MIN = 2;
 const WAIT = 350;          // after typing stops — one request per question, not per keystroke
-const TIMEOUT = 2500;      // past this the lexical list is the better answer
+/* What the remote block gets before the lexical list below it is the better
+ * answer. The endpoint reads a query into search terms with one model and
+ * embeds the result with another, in series, so an uncached question spends a
+ * median of about 2 s inside the function before a reader's round trip is even
+ * counted. The block is additive — the lexical list is already on screen — so
+ * the cost of waiting is a late arrival, not a blank page. */
+const TIMEOUT = 5000;
 /* What kind of passage matched. A term panel and a section are both hits and
  * they are not the same offer: one is a definition, one is an argument. */
 const KINDS = { paper: "논문", section: "섹션", term: "용어", figure: "그림" };
