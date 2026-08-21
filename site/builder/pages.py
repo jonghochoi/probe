@@ -134,6 +134,32 @@ def _pager(total: int) -> str:
 </nav>"""
 
 
+# How many ids ride the masthead rail, and how many of them are lit. The lit
+# three are spread through the row rather than kept at its head, because the
+# marquee stops under `prefers-reduced-motion` and a reader who never sees the
+# row move must still see what was picked.
+RAIL_IDS, RAIL_LIT, RAIL_EVERY = 21, 3, 4
+
+
+def _rail_entries(ordered: list[Paper]) -> list[tuple[str, str]]:
+    """The rail's row: recent arXiv ids, the newest few carrying their link.
+
+    An id is lit exactly when it has an href, so this is the one place that
+    decides which papers the rail points at — the newest rewrites, which are
+    the ones a returning reader has not read yet.
+    """
+    lit = [p.stem for p in ordered[:RAIL_LIT]]
+    rest = [p.stem for p in ordered[RAIL_LIT:RAIL_IDS]]
+    entries: list[tuple[str, str]] = []
+    for i in range(len(lit) + len(rest)):
+        if i % RAIL_EVERY == 0 and lit:
+            stem = lit.pop(0)
+            entries.append((stem, f"p/{stem}/index.html"))
+        elif rest:
+            entries.append((rest.pop(0), ""))
+    return entries
+
+
 def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
@@ -234,16 +260,17 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     )
 
     body = f"""<header class="mast brief">
+  {c.index_rail(_rail_entries(ordered))}
   <div class="mast-inner">
     <div class="mast-text">
       <div class="mast-line">
         <span class="mast-brand">{c.mark(30)}</span>
-        <h1>Dexterous Manipulation, 다시 쓴 판</h1>
+        <h1>논문, 읽기 좋게 옮겨 둡니다</h1>
         <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
       </div>
       <p class="mast-sub">
-        원문을 열지 않고도 메커니즘까지 이해되도록,<br class="mast-br">
-        논문을 한 편씩 새로 씁니다.
+        원문을 열지 않아도 메커니즘까지 남도록<br class="mast-br">
+        한 편씩 다시 씁니다.
       </p>
     </div>
     {c.mast_art()}
