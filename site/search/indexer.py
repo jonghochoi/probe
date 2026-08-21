@@ -168,9 +168,11 @@ def main() -> int:
 
     if args.dry_run:
         # A rough figure, and rough is enough: it exists to make the cost of a
-        # full re-index visible before someone runs one in CI.
+        # full re-index visible before someone runs one in CI. Korean runs
+        # about 1.2 characters to the token, so the four-to-one ratio English
+        # gets would report a third of what this corpus actually costs.
         print(f"dry run — would embed {len(chunks)} chunk(s) with {MODEL} "
-              f"(~{chars // 4000}K tokens)")
+              f"(~{chars // 1200}K tokens)")
         return 0
 
     base = os.environ.get("INSFORGE_URL", "").rstrip("/")

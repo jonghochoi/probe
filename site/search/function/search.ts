@@ -210,18 +210,18 @@ export default async function (req: Request): Promise<Response> {
     anonKey: Deno.env.get("ANON_KEY"),
   }).database;
 
-  // Only the plain question is cached. A query narrowed by pillar is a
-  // different answer to the same words, and caching it under the words would
-  // hand the next reader someone else's filter.
-  const plain = pillars.length === 0;
-  const key = `${normalise(q)}|${limit}`;
-  if (plain) {
-    // Through `probe_cache_get`, not the table: this key is the project's anon
-    // key, and the cache is closed to it for the same reason the index is.
-    const { data } = await db.rpc("probe_cache_get", { q_norm: key });
-    if (data?.[0]?.result) {
-      return json({ ...data[0].result, cached: true, tookMs: Date.now() - started });
-    }
+  // The filter is part of the question. Narrowed to P1 the same words are a
+  // different answer, so the key carries the pillars the reader set — keying
+  // on the words alone would hand the next reader someone else's filter, and
+  // skipping the cache whenever a filter is set would pay the model for every
+  // repeat of a search that repeats as much as a plain one. Sorted and
+  // de-duplicated so one filter is one key however the page orders it.
+  const key = `${normalise(q)}|${limit}|${[...new Set(pillars)].sort().join(",")}`;
+  // Through `probe_cache_get`, not the table: this key is the project's anon
+  // key, and the cache is closed to it for the same reason the index is.
+  const { data } = await db.rpc("probe_cache_get", { q_norm: key });
+  if (data?.[0]?.result) {
+    return json({ ...data[0].result, cached: true, tookMs: Date.now() - started });
   }
 
   const expansion = await expand(q);
@@ -266,8 +266,6 @@ export default async function (req: Request): Promise<Response> {
   // reader who sees "느려터진 → inference latency" can tell a good answer from a
   // misread one, and a search that silently rewrites itself cannot be trusted.
   const result = { q, hits, expanded: expansion.terms, pillars: want };
-  if (plain) {
-    await db.rpc("probe_cache_put", { q_norm: key, result });
-  }
+  await db.rpc("probe_cache_put", { q_norm: key, result });
   return json({ ...result, cached: false, tookMs: Date.now() - started });
 }
