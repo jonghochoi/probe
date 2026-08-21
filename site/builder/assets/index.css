@@ -986,9 +986,6 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
   .mast h1 { white-space: normal; }
   .filters-inner { padding: .5rem .9rem; }
   .deck { padding: 1.1rem .9rem 4rem; }
-  /* The strip's range reads as a caption to the buttons, so on a phone it goes
-     under them rather than fighting 다음 for the last inch of the line. */
-  .pgstat { margin-left: 0; flex-basis: 100%; }
   /* A five-column row cannot survive a phone, so it becomes a block: title
      and one line under it, with the numbers folded onto one trailing row. */
   .listhead { display: none; }
