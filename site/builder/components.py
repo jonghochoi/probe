@@ -333,10 +333,16 @@ def page(
     # Classic scripts, not ES modules: `type="module"` is blocked by CORS on
     # `file://`, and opening a built page directly is the fastest way to check
     # a render. Shared state goes on `window.ProbeMemo` instead of exports.
-    # theme.js is unconditional — the nav button it drives is on every page.
+    #
+    # The four unconditional ones are the ones every page carries: theme.js
+    # drives the nav's own button, brand.js the mark beside it, and the ⌘K
+    # palette is reachable from anywhere — so its index, its matching rule and
+    # the script itself ride along too. `defer` runs them in this order, which
+    # is what lets `filter.js` further down the list read `match.js`.
     script_tags = "".join(
         f'<script src="{up}assets/{s}" defer></script>'
-        for s in ["theme.js", "brand.js", *(scripts or [])]
+        for s in ["theme.js", "brand.js", "corpus-index.js", "match.js",
+                  "palette.js", *(scripts or [])]
     )
     return f"""<!DOCTYPE html>
 <html lang="ko" data-theme="light">
@@ -370,6 +376,35 @@ document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 """
 
 
+def cmdk_button() -> str:
+    """The one part of the ⌘K palette the build prints.
+
+    The dialog itself is `palette.js`'s markup, so a browser with no script
+    never has it — but a reader needs something to press, and a shortcut nobody
+    is told about is a shortcut nobody uses. `site.css` keeps the button off an
+    unscripted page, the same way every other JS-only control here removes
+    itself rather than sitting inert.
+
+    It carries all three of its parts and lets the sheet decide which survive,
+    because what is in front of the reader is what settles it: a phone has no
+    Ctrl key, so there the key is what goes and the glyph is what stays, while
+    a wide desktop has room for the words and the shortcut both. The key prints
+    as `Ctrl K`, which is what it is on every platform but one; `palette.js`
+    swaps it to `⌘K` on a Mac, since which keyboard is in front of the reader
+    is the one thing about this button the build cannot know.
+    """
+    return ('<button type="button" class="nav-cmdk" data-cmdk-open '
+            'aria-label="논문 찾기">'
+            '<svg class="nav-cmdk-i" viewBox="0 0 16 16" width="15" height="15" '
+            'aria-hidden="true" focusable="false">'
+            '<circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" '
+            'stroke-width="1.6"/>'
+            '<path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.6" '
+            'stroke-linecap="round"/></svg>'
+            '<span class="lbl">논문 찾기</span>'
+            '<kbd data-cmdk-key>Ctrl K</kbd></button>')
+
+
 def nav(up: str) -> str:
     return f"""<nav>
   <div class="nav-inner">
@@ -379,6 +414,7 @@ def nav(up: str) -> str:
       <li><a href="{up}index.html">논문</a></li>
       <li><a href="{up}shelf/index.html">내 서재</a></li>
     </ul>
+    {cmdk_button()}
     <button class="icon-btn" data-theme-toggle aria-label="다크 모드로">☾</button>
   </div>
 </nav>"""

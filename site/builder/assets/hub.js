@@ -2,10 +2,10 @@
  *
  * Three lists off two stores: `window.ProbeShelf` (즐겨찾기, 읽기 상태) and
  * `window.ProbeMemo` (메모). Nothing here can be server-rendered, because none
- * of it ever reaches the build — what the build does hand this page is the
- * corpus index in `[data-corpus-index]`, which is how a bare id becomes a title,
- * a tagline and a link. A kept id the index does not carry is a paper that has
- * left the corpus: it still lists, without a link, rather than vanishing.
+ * of it ever reaches the build — what the build does hand this page is
+ * `window.ProbeIndex`, which is how a bare id becomes a title, a tagline and a
+ * link. A kept id the index does not carry is a paper that has left the
+ * corpus: it still lists, without a link, rather than vanishing.
  *
  * This page is also the export surface. A shelf that lives in one browser
  * profile moves to another only as a file, so the JSON here is the whole
@@ -37,14 +37,14 @@ const panels = {
 };
 const tabs = [...main.querySelectorAll("[data-shelf-tab]")];
 
-/* The corpus, as much of it as a list row needs. */
+/* The corpus, as much of it as a list row needs — `assets/corpus-index.js`,
+ * the same file the ⌘K palette searches. A missing index costs titles and
+ * taglines, not the page: every row still lists under its id. */
 const INDEX = (() => {
-  const el = document.querySelector("[data-corpus-index]");
   const map = new Map();
-  if (!el) return map;
-  try {
-    for (const paper of JSON.parse(el.textContent)) map.set(paper.id, paper);
-  } catch (e) { /* an unreadable index costs titles, not the page */ }
+  const data = window.ProbeIndex;
+  if (!data || !Array.isArray(data.papers)) return map;
+  for (const paper of data.papers) map.set(paper.id, paper);
   return map;
 })();
 

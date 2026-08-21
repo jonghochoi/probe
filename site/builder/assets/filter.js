@@ -7,7 +7,9 @@
  *
  * Matching runs over two compacted haystacks the build put on every row —
  * the paper's identity and everything the rewrite names — so a term the
- * rewrite defines is findable even though the card only prints a summary.
+ * rewrite defines is findable even though the card only prints a summary. How
+ * a query is read before it meets them is `match.js`, which the ⌘K palette
+ * reads the same query with.
  *
  * Three of the filters are not the corpus's but the reader's — New, Starred
  * and Unread — and they come off `window.ProbeShelf`, which reads this
@@ -197,37 +199,11 @@ function syncControls() {
 }
 
 /* ── Query normalisation ──────────────────────────────────────────────── */
-/* The build compacts both haystacks with one rule (`corpus.compact`): lowercase,
- * then drop everything that is not a letter, a digit, or the `·` that fences one
- * fragment off from the next. The query goes through the same mill — minus the
- * `·`, which is the haystack's barrier and never a reader's word — so "힘 제어"
- * finds text that spells it "힘제어" and the other way round. Korean spacing is
- * not stable enough to match on, and neither is ours.
+/* The compaction and the particle strip are `match.js` — the palette asks the
+ * same question of the same corpus, and one rule is what keeps the two
+ * surfaces from answering it differently.
  */
-const DROP = /[^0-9a-z가-힣ㄱ-ㅎㅏ-ㅣ]+/g;
-function compact(s) { return s.toLowerCase().normalize("NFC").replace(DROP, ""); }
-
-/* A query is typed as speech — "액션청킹은", "지연을", "그리퍼로" — while the text
- * spells the word bare. Strip one trailing particle and try both forms; longest
- * first, so "으로" never loses to "로". The guard keeps a short word whole: "은" is
- * a particle, "가치" is not.
- */
-const PARTICLES = [
-  "으로부터", "로부터", "에서는", "에게서", "이라는", "으로는", "까지", "부터",
-  "처럼", "보다", "에서", "에게", "한테", "이나", "으로", "라는", "라고", "이란",
-  "은", "는", "이", "가", "을", "를", "의", "에", "와", "과", "로", "도", "만", "랑",
-].sort((a, b) => b.length - a.length);
-
-function bare(term) {
-  for (const p of PARTICLES) {
-    if (term.length > p.length + 1 && term.endsWith(p)) return term.slice(0, -p.length);
-  }
-  return term;
-}
-
-function parse(q) {
-  return q.split(/\s+/).map(compact).filter(Boolean).map((t) => ({ t, b: bare(t) }));
-}
+const { parse, inFragment } = window.ProbeMatch;
 
 /* ── Matching ─────────────────────────────────────────────────────────── */
 /* Where a word lands is itself a signal: `data-key` is the paper's identity
@@ -261,10 +237,9 @@ function facetOk(card) {
 function score(card, terms) {
   const key = card.dataset.key || "", hay = card.dataset.hay || "";
   let total = 0, hit = 0;
-  for (const { t, b } of terms) {
-    const inKey = key.includes(t) || (b !== t && key.includes(b));
-    const inHay = inKey || hay.includes(t) || (b !== t && hay.includes(b));
-    if (inHay) { hit += 1; total += inKey ? KEY_HIT : HAY_HIT; }
+  for (const term of terms) {
+    const inKey = inFragment(key, term);
+    if (inKey || inFragment(hay, term)) { hit += 1; total += inKey ? KEY_HIT : HAY_HIT; }
   }
   return { total, hit };
 }
