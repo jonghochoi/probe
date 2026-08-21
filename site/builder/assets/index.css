@@ -631,12 +631,11 @@ html.js .rowstar, html.js .lh-star { display: block; }
 .corpus { scroll-margin-top: calc(var(--nav-h) + 3rem); }
 .pager { display: none; }
 /* The strip reads as the list's last line rather than a widget parked under
-   it: it carries the same hairline the rows part on, and the controls sit on
-   the page ground with no card of their own. */
+   it: the last row's own hairline is the only rule between them, and the
+   controls sit on the page ground with no card or hairline of their own. */
 html.js .pager {
   display: flex; flex-wrap: wrap; align-items: center; gap: .1rem;
-  padding: .85rem .35rem 0; margin-top: .3rem;
-  border-top: 1px solid var(--border-soft);
+  padding: .85rem .35rem 0;
 }
 /* Specific enough to outrank the rule above it: a bare `.pager[hidden]` loses
    to `html.js .pager`, and a strip the script hid — a filter that fits on one
