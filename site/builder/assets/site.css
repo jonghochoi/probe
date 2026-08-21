@@ -1626,8 +1626,23 @@ html.js .nav-cmdk { display: inline-flex; }
   font-size: .76rem; color: var(--text-muted); line-height: 1.4;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* Which track a row belongs to, in the column a narrow screen keeps. Amber
+   rather than the 읽음 green: it is not a mark the reader put there, it is what
+   the row is. */
+.cmdk-kind {
+  font-size: .62rem; font-weight: 700; color: var(--orange);
+  border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
+  padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
+}
 .cmdk-meta { display: flex; align-items: center; gap: .3rem; }
-.cmdk-id { font-family: var(--mono); font-size: .68rem; color: var(--text-muted); }
+/* A paper prints its own id and never reaches the cap; a comparison prints the
+   two or three it holds, and the cap is what stops that list from taking the
+   title's room — this column is `auto`, so anything it asks for the title
+   gives up. */
+.cmdk-id {
+  font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
+  max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .cmdk-none { padding: 1.1rem .8rem; font-size: .84rem; color: var(--text-muted); text-align: center; }
 
 .cmdk-foot {
