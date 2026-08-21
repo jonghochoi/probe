@@ -258,7 +258,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 }
 
 /* ── Nav ──────────────────────────────────────────────────────────────── */
-nav {
+.site-nav {
   position: sticky; top: 0; z-index: var(--z-nav);
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(10px);
