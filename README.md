@@ -68,8 +68,8 @@ decides.
 | Folder | Written by | Cadence | Write mode |
 |---|:---:|---|---|
 | `context/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/human-dark.svg"><img src="assets/human.svg" width="22" align="absmiddle" alt="human"></picture> | monthly at most | agent reads only |
-| `scouting/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt="agent"></picture> | scheduled, per pillar | append — one dated file per run |
-| `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-locked-dark.svg"><img src="assets/probe-locked.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one snapshot per paper |
+| `scouting/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" width="22" align="absmiddle" alt="agent"></picture> | scheduled, per pillar | append — one dated file per run |
+| `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one snapshot per paper |
 
 One folder the agent only reads, two it only adds to — that split is what
 stops it re-recommending last month's papers as `context/` grows.
