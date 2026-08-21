@@ -9,6 +9,11 @@ are the wrong tool for the question a reader actually arrives with: *"정책이
 folder answers that question instead, from a vector index of the rewrites, and
 hands back a list of passages to open.
 
+The two are named on the page for what they match: **의미** is this folder, and
+**글자** is the filter — which compares substrings rather than words, so
+`액션청` finds `액션청킹` and a name promising word boundaries would be a name
+that lies.
+
 **It is an enhancement, never a dependency.** A build given no endpoint emits no
 search script, makes no request, and behaves exactly as it does today. A build
 given one still ships the lexical filter underneath, and the remote block
@@ -33,6 +38,14 @@ holds a question, and off entirely in a browser with no script to run it.
 A `#q=` link is a question somebody already asked, so arriving at one asks it
 without waiting to be pressed. Everything else that empties the box — Escape,
 필터 초기화 — takes the block with it.
+
+An answer turns the result area into two tabs — `의미 검색` and `글자 검색`,
+each carrying its own count — and shows one of them. It lands on 의미, because
+that is the answer to the question just submitted; the list is one press away
+on the other tab, and so is anything that is about the list (a facet, a sort, a
+page) which switches to it. The strip stands only where there is a choice to
+make: no endpoint, no hits, a failed request, or a 글자 side that matched
+nothing all leave the page exactly as it was.
 
 ## What is indexed
 

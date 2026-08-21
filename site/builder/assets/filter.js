@@ -50,6 +50,8 @@ const lead = root.querySelector("[data-lead]");
 const listhead = root.querySelector("[data-listhead]");
 const emptyMsg = root.querySelector("[data-empty]");
 const partialMsg = root.querySelector("[data-partial]");
+const tabsEl = root.querySelector("[data-restabs]");
+const tabBtns = tabsEl ? [...tabsEl.querySelectorAll("[data-restab]")] : [];
 const countEl = bar.querySelector("[data-result-count]");
 const whenEl = bar.querySelector("[data-corpus-when]");
 const input = bar.querySelector("[data-q]");
@@ -100,6 +102,33 @@ const state = {
   size: SIZE_DEFAULT, page: 1,
 };
 const freshNote = root.querySelector("[data-fresh-note]");
+
+/* One question reaches the corpus two ways, and they are two answers rather
+ * than one long one: 의미 is what the remote index found by meaning, 글자 is
+ * what the matching below found letter for letter. So they are two tabs and
+ * one is on screen at a time — reading the better answer should not mean
+ * scrolling past the worse one. `semantic.js` says when there is an answer to
+ * tab to (`probe:answer`) and how big it is; a build with no endpoint never
+ * dispatches it, and then there is one answer and no strip.
+ *
+ * The list is the second tab, so `pane` is what decides whether this file
+ * paints it at all. */
+let answered = false;
+let pane = "sem";
+let semCount = { papers: 0, hits: 0 };
+
+// The block above the list is `semantic.js`'s to show and hide; it is told
+// which surface is on rather than reading the strip for itself.
+function tellPane() {
+  document.dispatchEvent(new CustomEvent("probe:pane", { detail: { pane: pane } }));
+}
+
+function setPane(next) {
+  if (pane === next) return;
+  pane = next;
+  tellPane();
+  apply();
+}
 
 // Without the shelf layer there is nothing to filter on, so the group leaves
 // rather than offering two buttons that would select every paper or none.
@@ -293,7 +322,9 @@ function apply() {
     }
   }
 
-  if (freshNote) freshNote.hidden = !state.fresh;
+  // On 의미 the list is not on screen at all: the other tab is.
+  const listOff = answered && pane === "sem";
+  if (freshNote) freshNote.hidden = listOff || !state.fresh;
   const scored = terms.length > 0 && state.sort === "recent";
   const rows = ordered(shown, scored);
 
@@ -306,7 +337,7 @@ function apply() {
   const pageCount = Math.max(1, Math.ceil(rows.length / size));
   state.page = Math.min(Math.max(state.page, 1), pageCount);
   const from = (state.page - 1) * size;
-  const onPage = new Set(rows.slice(from, from + size));
+  const onPage = new Set(listOff ? [] : rows.slice(from, from + size));
 
   // The lead block stands in for the newest paper only while it *is* the top
   // of the list. Filter, re-sort or step to page 2 and it stops being that, so
@@ -351,13 +382,37 @@ function apply() {
   const visible = shown.length;
   const count = visible === cards.length ? `${visible}편` : `${visible} / ${cards.length}편`;
   countEl.textContent = scored ? `${count} · 관련도순` : count;
-  paintPager(visible, pageCount, from, size);
-  if (partialMsg) partialMsg.hidden = !partial;
-  if (emptyMsg) emptyMsg.hidden = visible > 0;
+  paintTabs(visible);
+  paintPager(visible, listOff ? 1 : pageCount, from, size);
+  if (partialMsg) partialMsg.hidden = listOff || !partial;
+  // An answer is on screen, so "조건에 맞는 논문이 없습니다" is not what the page
+  // found — it is what the string match found, and saying it under a list of
+  // passages would read as the corpus having nothing.
+  if (emptyMsg) emptyMsg.hidden = answered || visible > 0;
   if (listhead) listhead.hidden = onPage.size - (leadOn ? 1 : 0) < 1;
   resetBtns.forEach((b) => { b.hidden = !dirty; });
   // The date describes the corpus, not the subset a filter leaves behind.
   if (whenEl) whenEl.hidden = dirty;
+}
+
+/* The strip, and the two counts on it. It stands only where there is a choice
+ * to make: no answer is one answer and no strip, and so is an answer the
+ * matching below found nothing to sit beside — a tab onto an empty list is a
+ * control that leads nowhere. The count is what makes the tab worth pressing,
+ * so each one carries its own: 의미 in papers and passages, 글자 in papers. */
+function paintTabs(visible) {
+  if (!tabsEl) return;
+  tabsEl.hidden = !answered || visible < 1;
+  if (tabsEl.hidden) return;
+  const n = {
+    sem: `${semCount.papers}편 · ${semCount.hits}대목`,
+    lex: `${visible}편`,
+  };
+  tabBtns.forEach((b) => {
+    b.setAttribute("aria-pressed", b.dataset.restab === pane ? "true" : "false");
+    const slot = b.querySelector("[data-restab-n]");
+    if (slot) slot.textContent = n[b.dataset.restab] || "";
+  });
 }
 
 /* ── The page strip ───────────────────────────────────────────────────── */
@@ -437,7 +492,16 @@ function countFlags() {
     .forEach((el) => { el.hidden = !show; });
 }
 
-function refresh() { syncControls(); countFlags(); shelf && shelf.paint(); apply(); writeHash(); }
+/* Every control that routes through here — a facet, a sort, a page, a page
+ * size — is about the list, so using one is a request for the tab the list is
+ * on. Typing does not: `apply()` is what a keystroke calls, and the strip
+ * stays where the answer left it. */
+function refresh() {
+  // `apply()` runs at the end of this function either way, so the switch only
+  // has to say so — going through `setPane()` would paint the page twice.
+  if (answered && pane !== "lex") { pane = "lex"; tellPane(); }
+  syncControls(); countFlags(); shelf && shelf.paint(); apply(); writeHash();
+}
 
 /* ── Wiring ───────────────────────────────────────────────────────────── */
 let debounce = null;
@@ -510,6 +574,22 @@ document.addEventListener("click", (e) => {
     state.page = 1;
     refresh();
   }
+});
+
+// The remote block found something, or stopped having something to show. Every
+// new answer lands on 의미: it answers a new question, and the reader who
+// switched away from the last one did not ask about this one.
+document.addEventListener("probe:answer", (e) => {
+  const d = e.detail || {};
+  answered = !!d.answered;
+  semCount = { papers: d.papers || 0, hits: d.hits || 0 };
+  pane = "sem";
+  tellPane();
+  apply();
+});
+
+tabBtns.forEach((b) => {
+  b.addEventListener("click", () => setPane(b.dataset.restab));
 });
 
 // A star toggled on a row is a filter input like any other: the counts move,
