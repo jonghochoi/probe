@@ -1,6 +1,6 @@
 # Comparison authoring
 
-The format contract for `compare/<slug>.md` — the comparison track. One file is
+The format contract for `comparison/<slug>.md` — the comparison track. One file is
 one comparison: two or three papers held under one question, with everything
 that is not the divergence left to the papers' own pages.
 
@@ -71,7 +71,7 @@ summary: >
 about one paper's original, and each compared paper's own rewrite already
 carries it. Adding one here later is easier than emptying one now.
 
-**File name.** `compare/<slug>.md`, lowercase words joined by hyphens, drawn
+**File name.** `comparison/<slug>.md`, lowercase words joined by hyphens, drawn
 from the question. Not the ids joined together: three run to forty characters,
 their order has no right answer, and what identifies a comparison is what it
 asks.

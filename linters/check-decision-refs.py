@@ -109,7 +109,7 @@ def _gather_default_docs() -> list[str]:
         "analysis/*.md",
         "scouting/P*/*.md",
         # A comparison's act 4 is our layer and cites the log like any rewrite.
-        "compare/*.md",
+        "comparison/*.md",
     ]
     docs: list[str] = []
     for pat in patterns:

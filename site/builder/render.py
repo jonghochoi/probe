@@ -117,7 +117,7 @@ class DocRenderer:
         self.decisions = decisions or {}
         # Which contract this document answers to. `paper` is a rewrite under
         # `analysis/AUTHORING.md`; `compare` is a comparison under
-        # `compare/AUTHORING.md`, which teaches nothing and so owes none of the
+        # `comparison/AUTHORING.md`, which teaches nothing and so owes none of the
         # rules that exist to make one paper learnable.
         self.kind = kind
         # `(id, label, href)` per column for ```probe-matrix, in column order.
@@ -321,7 +321,7 @@ class DocRenderer:
             if self.kind == "compare" and info in probefence.COMPARE_BANNED:
                 # Not a render failure — it would draw fine. It is a scope
                 # failure: this belongs to one paper, and that paper's own page
-                # already carries it (compare/AUTHORING.md).
+                # already carries it (comparison/AUTHORING.md).
                 message = (
                     f"```{info} is not for a comparison — it zooms into one "
                     f"paper, and that paper's own page already has it. Link to "
