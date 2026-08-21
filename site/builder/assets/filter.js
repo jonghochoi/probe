@@ -20,12 +20,20 @@
  * arriving to be told all 32 papers are new is not news) and prunes ids that
  * have left the site.
  *
+ * The list is also paged, which is the same toggling seen from a different
+ * angle: the rows outside the current page are `hidden` exactly like the rows
+ * a facet dropped. A page is counted in papers rather than rows, so the lead
+ * block — which is the first paper, printed rather than listed — is the first
+ * paper of the first page, and its own row stands down while it is.
+ *
  * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke. The
  * two shelf filters ride there too (`&f=1`, `&u=1`) — a bookmark of "my
  * starred P2 papers" is a view worth keeping — even though what they select is
- * local to the browser that opens the link.
+ * local to the browser that opens the link. So do the page and its size
+ * (`&pg=3`, `&sz=5`), which is what makes a link land on the list the sender
+ * was looking at.
  */
 
 (function () {
@@ -48,14 +56,48 @@ const input = bar.querySelector("[data-q]");
 const sortBtns = [...bar.querySelectorAll("[data-sort]")];
 const resetBtns = [...document.querySelectorAll("[data-reset]")];
 
+const pager = root.querySelector("[data-pager]");
+const sizeBtns = [...bar.querySelectorAll("[data-size]")];
+const pageBtns = pager ? [...pager.querySelectorAll("[data-page]")] : [];
+const stepBtns = pager ? [...pager.querySelectorAll("[data-page-rel]")] : [];
+const gapLo = pager && pager.querySelector('[data-gap="lo"]');
+const gapHi = pager && pager.querySelector('[data-gap="hi"]');
+const pageStat = pager && pager.querySelector("[data-page-stat]");
+
 const SORTS = ["recent", "pillar", "title"];
 const PILLARS = seps.map((s) => s.dataset.sep);
 const shelf = window.ProbeShelf;
 const flagBtns = [...document.querySelectorAll("[data-facet-flag]")];
 
+// Which page sizes exist, and which one is the default, are the build's to
+// decide (`pages.PAGE_SIZES`) — both are read back off the markup rather than
+// restated here, so the bar and the script can never offer different numbers.
+// `0` is 전체.
+const SIZES = sizeBtns.map((b) => +b.dataset.size);
+const SIZE_PRESSED = sizeBtns.find((b) => b.getAttribute("aria-pressed") === "true");
+const SIZE_DEFAULT = SIZE_PRESSED ? +SIZE_PRESSED.dataset.size : 0;
+
+/* How much of the list a page holds is the one thing here the reader sets and
+ * the corpus has no opinion about. It is a view setting rather than a mark on
+ * a paper, so it is not the shelf's to keep — it lives beside it under its own
+ * key, and a browser that refuses storage just gets the default every time. */
+const VIEW_KEY = "probe.view.v1";
+
+function storedSize() {
+  try {
+    const v = JSON.parse(localStorage.getItem(VIEW_KEY) || "{}");
+    return SIZES.includes(v.size) ? v.size : SIZE_DEFAULT;
+  } catch (e) { return SIZE_DEFAULT; }
+}
+
+function keepSize(n) {
+  try { localStorage.setItem(VIEW_KEY, JSON.stringify({ size: n })); } catch (e) { /* full or blocked */ }
+}
+
 const state = {
   q: "", pillars: new Set(), tags: new Set(), sort: "recent",
   fresh: false, star: false, unread: false,
+  size: SIZE_DEFAULT, page: 1,
 };
 const freshNote = root.querySelector("[data-fresh-note]");
 
@@ -76,6 +118,11 @@ function readHash() {
   state.fresh = !!shelf && h.get("n") === "1";
   state.star = !!shelf && h.get("f") === "1";
   state.unread = !!shelf && h.get("u") === "1";
+  // A link that names a size means it — otherwise this browser's last choice,
+  // and the build's default for a browser that has never made one.
+  const sz = parseInt(h.get("sz"), 10);
+  state.size = SIZES.includes(sz) ? sz : storedSize();
+  state.page = Math.max(1, parseInt(h.get("pg"), 10) || 1);
 }
 
 function writeHash() {
@@ -87,6 +134,8 @@ function writeHash() {
   if (state.fresh) h.set("n", "1");
   if (state.star) h.set("f", "1");
   if (state.unread) h.set("u", "1");
+  if (state.size !== SIZE_DEFAULT) h.set("sz", state.size);
+  if (state.page > 1) h.set("pg", state.page);
   const hash = h.toString();
   history.replaceState(null, "", hash ? `#${hash}` : location.pathname + location.search);
 }
@@ -101,6 +150,8 @@ function syncControls() {
   });
   flagBtns.forEach((b) => b.setAttribute(
     "aria-pressed", state[b.dataset.facetFlag] ? "true" : "false"));
+  sizeBtns.forEach((b) => b.setAttribute(
+    "aria-pressed", +b.dataset.size === state.size ? "true" : "false"));
   // While a query ranks the list, none of the three is what the rows are in —
   // pressing 최신순 during a relevance sort would be the control lying about
   // the order. Clicking one still takes the list back.
@@ -213,12 +264,6 @@ function apply() {
   const terms = parse(state.q);
   const dirty = !!(state.q || state.pillars.size || state.tags.size
                    || state.fresh || state.star || state.unread);
-  // The lead block stands in for the newest paper only while it *is* the top
-  // of the list. Filter or re-sort and it stops being that, so it steps aside
-  // and its row takes over — the paper is never in both places, and never in
-  // neither.
-  const leadOn = !!lead && !dirty && state.sort === "recent";
-  if (lead) lead.hidden = !leadOn;
 
   const pool = cards.filter(facetOk);
   let shown = pool, partial = false;
@@ -243,16 +288,37 @@ function apply() {
 
   if (freshNote) freshNote.hidden = !state.fresh;
   const scored = terms.length > 0 && state.sort === "recent";
-  const keep = new Set(shown);
+  const rows = ordered(shown, scored);
+
+  // ── One page of that ─────────────────────────────────────────────────
+  // 전체 is the whole list as one page, which is also what an empty result and
+  // a browser with no script get. The page is clamped rather than trusted: it
+  // arrives from a hash anyone can edit, and a filter can shrink the list under
+  // the reader's feet between one click and the next.
+  const size = state.size || rows.length || 1;
+  const pageCount = Math.max(1, Math.ceil(rows.length / size));
+  state.page = Math.min(Math.max(state.page, 1), pageCount);
+  const from = (state.page - 1) * size;
+  const onPage = new Set(rows.slice(from, from + size));
+
+  // The lead block stands in for the newest paper only while it *is* the top
+  // of the list. Filter, re-sort or step to page 2 and it stops being that, so
+  // it steps aside and its row takes over — the paper is never in both places,
+  // and never in neither.
+  const leadOn = !!lead && !dirty && state.sort === "recent" && state.page === 1;
+  if (lead) lead.hidden = !leadOn;
+
   cards.forEach((card) => {
-    card.hidden = !keep.has(card) || (leadOn && card.hasAttribute("data-lead-dup"));
+    card.hidden = !onPage.has(card) || (leadOn && card.hasAttribute("data-lead-dup"));
   });
 
-  const rows = ordered(shown, scored);
   if (state.sort === "pillar") {
     seps.forEach((sep) => {
       const mine = rows.filter((r) => r.dataset.primary === sep.dataset.sep);
-      sep.hidden = mine.length === 0;
+      // A separator belongs to the page its pillar has rows on; its count is
+      // the pillar's whole share of what the filter left standing, the same
+      // number the rail prints beside it, not the handful under it right now.
+      sep.hidden = !mine.some((r) => onPage.has(r));
       const n = sep.querySelector("[data-sep-count]");
       if (n) n.textContent = mine.length;
     });
@@ -278,12 +344,60 @@ function apply() {
   const visible = shown.length;
   const count = visible === cards.length ? `${visible}편` : `${visible} / ${cards.length}편`;
   countEl.textContent = scored ? `${count} · 관련도순` : count;
+  paintPager(visible, pageCount, from, size);
   if (partialMsg) partialMsg.hidden = !partial;
   if (emptyMsg) emptyMsg.hidden = visible > 0;
-  if (listhead) listhead.hidden = visible - (leadOn ? 1 : 0) < 1;
+  if (listhead) listhead.hidden = onPage.size - (leadOn ? 1 : 0) < 1;
   resetBtns.forEach((b) => { b.hidden = !dirty; });
   // The date describes the corpus, not the subset a filter leaves behind.
   if (whenEl) whenEl.hidden = dirty;
+}
+
+/* ── The page strip ───────────────────────────────────────────────────── */
+/* The build printed one button per page the list could ever need — the whole
+ * corpus at the smallest size — so this hides the ones this filter does not
+ * reach and windows the rest down to `1 … 6 7 8 … 20`. Nothing is relabelled:
+ * every button keeps the number it was printed with, and the two `…` are moved
+ * or hidden around them.
+ */
+function paintPager(total, pageCount, from, size) {
+  if (!pager) return;
+  // Nothing to step through — 전체, a filter down to one page, or an empty
+  // result. The strip leaves rather than standing there as a lone dead `1`.
+  pager.hidden = pageCount < 2;
+  if (pager.hidden) return;
+  const cur = state.page;
+  pageBtns.forEach((b) => {
+    const n = +b.dataset.page;
+    const inWindow = n === 1 || n === pageCount || Math.abs(n - cur) <= 1;
+    b.hidden = n > pageCount || !inWindow;
+    b.setAttribute("aria-current", n === cur ? "page" : "false");
+  });
+  if (gapLo) gapLo.hidden = cur - 1 <= 2;
+  if (gapHi) {
+    // Which button is last depends on the filter, so the trailing `…` is moved
+    // in front of it rather than parked before the highest page the corpus
+    // could ever reach — the same move the pillar separators make.
+    const last = pageBtns[pageCount - 1];
+    if (last) last.parentNode.insertBefore(gapHi, last);
+    gapHi.hidden = cur + 1 >= pageCount - 1;
+  }
+  stepBtns.forEach((b) => {
+    const next = cur + +b.dataset.pageRel;
+    b.disabled = next < 1 || next > pageCount;
+  });
+  if (pageStat) pageStat.textContent = `${from + 1}–${Math.min(from + size, total)} / ${total}편`;
+}
+
+const SMOOTH = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+
+function toPage(n) {
+  state.page = n;
+  refresh();
+  // The new page is drawn above where the reader is standing — they clicked a
+  // strip at the foot of the last one — so the list is brought back under the
+  // bar rather than leaving them at the bottom of a page they have not read.
+  root.scrollIntoView({ block: "start", behavior: SMOOTH });
 }
 
 /* The two shelf counts, over the corpus this page is showing — a star on a
@@ -322,6 +436,8 @@ function refresh() { syncControls(); countFlags(); shelf && shelf.paint(); apply
 let debounce = null;
 input.addEventListener("input", () => {
   state.q = input.value;
+  // Every keystroke asks a new question, and the answer starts at its top.
+  state.page = 1;
   if (debounce) clearTimeout(debounce);
   // Filtering is instant; the delay is only so the hash does not get
   // rewritten on every keystroke.
@@ -342,24 +458,49 @@ document.addEventListener("click", (e) => {
   const flag = e.target.closest("[data-facet-flag]");
   const ack = e.target.closest("[data-fresh-ack]");
   const jump = e.target.closest("[data-tag-jump]");
+  const sizeBtn = e.target.closest("[data-size]");
+  const pageBtn = e.target.closest("[data-page]");
+  const stepBtn = e.target.closest("[data-page-rel]");
+  // Every control that changes which papers are in the list sends the reader
+  // back to its first page: page 4 of one filter is not page 4 of the next,
+  // and landing on an emptied page would read as a broken list.
   if (ack) {
     shelf.Corpus.markAll(cards.map((card) => card.dataset.id));
     state.fresh = false;
+    state.page = 1;
     refresh();
   }
-  else if (flag) { state[flag.dataset.facetFlag] = !state[flag.dataset.facetFlag]; refresh(); }
-  else if (p) { toggleSet(state.pillars, p.dataset.facetPillar); refresh(); }
-  else if (t) { toggleSet(state.tags, t.dataset.facetTag); refresh(); }
-  else if (s) { state.sort = s.dataset.sort; refresh(); }
+  else if (flag) {
+    state[flag.dataset.facetFlag] = !state[flag.dataset.facetFlag];
+    state.page = 1;
+    refresh();
+  }
+  else if (p) { toggleSet(state.pillars, p.dataset.facetPillar); state.page = 1; refresh(); }
+  else if (t) { toggleSet(state.tags, t.dataset.facetTag); state.page = 1; refresh(); }
+  else if (s) { state.sort = s.dataset.sort; state.page = 1; refresh(); }
+  else if (pageBtn) { toPage(+pageBtn.dataset.page); }
+  else if (stepBtn) { toPage(state.page + +stepBtn.dataset.pageRel); }
+  // Changing the page size keeps the reader where they are rather than
+  // returning them to the top: the paper that was first on screen is still on
+  // the page they land on.
+  else if (sizeBtn) {
+    const first = state.size ? (state.page - 1) * state.size : 0;
+    state.size = +sizeBtn.dataset.size;
+    state.page = state.size ? Math.floor(first / state.size) + 1 : 1;
+    keepSize(state.size);
+    refresh();
+  }
   // A tag on the lead block is also a filter — that is how you find the
   // neighbours of the paper you are looking at.
   else if (jump) {
     toggleSet(state.tags, jump.dataset.tagJump);
+    state.page = 1;
     refresh();
     bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
   } else if (e.target.closest("[data-reset]")) {
     state.q = ""; state.pillars.clear(); state.tags.clear();
     state.fresh = false; state.star = false; state.unread = false;
+    state.page = 1;
     refresh();
   }
 });
@@ -376,7 +517,7 @@ addEventListener("keydown", (e) => {
   if (e.key === "/" && document.activeElement !== input && !e.metaKey && !e.ctrlKey) {
     e.preventDefault(); input.focus(); input.select();
   } else if (e.key === "Escape" && document.activeElement === input) {
-    state.q = ""; refresh(); input.blur();
+    state.q = ""; state.page = 1; refresh(); input.blur();
   }
 });
 

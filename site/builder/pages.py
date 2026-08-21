@@ -22,6 +22,17 @@ DISCUSSIONS_NEW = f"https://github.com/{REPO}/discussions/new?category=paper-not
 # than they save. Search covers everything the chips leave out.
 TAG_FACETS = 12
 
+# How many rewrites one page of the list holds, and which of them the bar
+# offers. `0` is 전체 — the whole list on one page, which is what a browser with
+# no script gets and what the reader can always come back to.
+#
+# The default is a page rather than the whole corpus: the list is the one part
+# of this page that grows without limit, and a reader arriving at it should
+# meet a screen of papers, not a year of them. Ten is a screen and a half with
+# the lead block above it.
+PAGE_SIZES = (5, 10, 20, 0)
+PAGE_DEFAULT = 10
+
 def _shelf_facets(cls: str) -> str:
     """New / Starred / Unread, in whichever of its two homes.
 
@@ -40,6 +51,51 @@ def _shelf_facets(cls: str) -> str:
     )
 
 
+def _page_sizes() -> str:
+    """5편 · 10편 · 20편 · 전체 — how much of the list one page holds.
+
+    A view control, so it sits with 정렬 and wears the same pill group. The
+    pressed state printed here is the default; `filter.js` moves it to whatever
+    the hash or this browser's last choice says, the same way the shelf facets
+    have their counts filled in.
+    """
+    return "".join(
+        f'<button type="button" data-size="{n}" '
+        f'aria-pressed="{"true" if n == PAGE_DEFAULT else "false"}">'
+        f'{f"{n}편" if n else "전체"}</button>'
+        for n in PAGE_SIZES
+    )
+
+
+def _pager(total: int) -> str:
+    """The page strip under the list — every page it could ever need, at once.
+
+    The number of pages depends on what the filter left standing, which is the
+    reader's business and not the build's. Rendering the most it can take
+    (`total` at the smallest page size) and letting the script hide the rest
+    keeps the rule this page is built on: the script toggles `hidden` on nodes
+    that already exist and never builds markup.
+
+    The two `…` gaps sit at fixed positions — after the first page and before
+    the last — so a long list windows down to `1 … 6 7 8 … 20` without any
+    button having to be relabelled.
+    """
+    pages = -(-total // PAGE_SIZES[0]) if total else 1
+    nums = []
+    for n in range(1, pages + 1):
+        if n == 2:
+            nums.append('<span class="pggap" data-gap="lo" aria-hidden="true" hidden>…</span>')
+        if n == pages and pages > 2:
+            nums.append('<span class="pggap" data-gap="hi" aria-hidden="true" hidden>…</span>')
+        nums.append(f'<button type="button" class="pgn" data-page="{n}" hidden>{n}</button>')
+    return f"""<nav class="pager" data-pager aria-label="쪽 이동" hidden>
+  <button type="button" class="pgstep" data-page-rel="-1">이전</button>
+  <span class="pgnums">{"".join(nums)}</span>
+  <button type="button" class="pgstep" data-page-rel="1">다음</button>
+  <span class="pgstat" data-page-stat></span>
+</nav>"""
+
+
 def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
@@ -51,9 +107,15 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
 
     Every row is server-rendered with its facets on `data-` attributes rather
     than hydrated from an inline JSON blob. That keeps the page fully readable
-    with JavaScript off (the filter bar and the rail hide themselves, the rows
-    stay, newest first), and the filter script only ever reorders and toggles
-    `hidden` on nodes that already exist.
+    with JavaScript off (the filter bar, the rail and the page strip hide
+    themselves, the rows stay, newest first, all of them), and the filter
+    script only ever reorders and toggles `hidden` on nodes that already exist.
+
+    The list is paged — `PAGE_DEFAULT` rewrites at a time, the bar offering
+    `PAGE_SIZES` — because it is the one part of this page that grows with the
+    corpus. A page is counted in papers, not in rows: on the first page the
+    lead block *is* the first of them and its own row stands down, so 10편 is
+    ten papers there as it is on every other page.
 
     Order is `Paper.order_key` — the order the rewrites landed on `main`, which
     is the order a reader watched them appear — and the rows carry that key on
@@ -163,6 +225,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
       <button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>
       <button type="button" data-sort="title" aria-pressed="false">제목순</button>
     </div>
+    <div class="sort psize" role="group" aria-label="한 쪽에 몇 편">{_page_sizes()}</div>
     <div class="barflags" role="group" aria-label="내 서재">{bar_mine}</div>
     <span class="filter-spacer"></span>
     <span class="status" data-result-count>{len(ordered)}편</span>
@@ -195,6 +258,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
       <button type="button" class="linkish" data-fresh-ack>모두 확인</button>
     </p>
     <div class="rows" data-rows>{seps}{rows}</div>
+    {_pager(len(ordered))}
     <p class="corpus-empty" data-empty hidden>
       조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
     </p>
