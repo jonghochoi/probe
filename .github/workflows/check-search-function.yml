@@ -1,0 +1,41 @@
+name: Check search function
+
+# Parse the search endpoint. `site/search/function/search.ts` runs on InsForge,
+# not in the site build, so nothing else in this repo reads it — the build never
+# imports it and none of the four lints scan it. Its only syntax gate is the
+# InsForge deploy validator, which runs when an operator uploads the file by
+# hand, so a parse error can sit on main across several merges and surface as a
+# refused deploy rather than a failed check. Meanwhile the deployed endpoint
+# keeps serving whatever it last accepted, which makes the repo and the reader
+# disagree without anything saying so.
+#
+# esbuild rather than a type-check: it parses TypeScript without resolving
+# imports, so the `npm:` specifier and the Deno globals cost nothing to check.
+# What reaches main this way is a parse error — a redeclared binding, an
+# unbalanced brace — and that is exactly what a parse catches.
+
+on:
+  pull_request:
+    paths:
+      - 'site/search/function/**'
+      - '.github/workflows/check-search-function.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-search-function-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse the search endpoint
+        run: |
+          npx --yes esbuild@0.28.2 site/search/function/search.ts \
+            --loader:.ts=ts --outfile=/dev/null
