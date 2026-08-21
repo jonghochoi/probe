@@ -72,6 +72,17 @@ function readAs(terms) {
     (t) => `<span class="sem-term">${esc(t)}</span>`).join("")}</p>`;
 }
 
+/* The lexical list answers while the reader is still typing, so without this
+ * the seconds the endpoint spends read as a page that has already finished.
+ * It says only that the question is out — a failure takes the whole block
+ * away with it, which is what the layer below is for. */
+function pending(q) {
+  box.innerHTML =
+    `<p class="sem-head sem-wait">의미 검색 <span>· “${esc(q)}” 에 가까운 대목을 찾는 중</span></p>`;
+  box.hidden = false;
+  shown = "";
+}
+
 function render(q, data) {
   const hits = data.hits || [];
   if (!hits.length) return hide();
@@ -86,6 +97,7 @@ function ask(q) {
   if (inflight) inflight.abort();
   const ctl = new AbortController();
   inflight = ctl;
+  pending(q);
   const bail = setTimeout(() => ctl.abort(), TIMEOUT);
   fetch(api, {
     method: "POST",
@@ -99,7 +111,9 @@ function ask(q) {
       // question they have moved on from is worse than not answering.
       if (input.value.trim() === q) render(q, data);
     })
-    .catch(hide)
+    // Superseded by a later question rather than failed: that request owns the
+    // block now, and aborting this one must not take its waiting line down.
+    .catch(() => { if (inflight === ctl) hide(); })
     .finally(() => {
       clearTimeout(bail);
       if (inflight === ctl) inflight = null;
