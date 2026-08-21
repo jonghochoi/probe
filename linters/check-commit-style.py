@@ -14,7 +14,8 @@ Accepted shapes:
   <type>: <description>                 style|deps
   scout: P<N> report YYYY-MM-DD         generated routine commits, formats per
   analysis: add|update <id> rewrite …  CLAUDE.md "generated routine commits"
-                                        (/analyze)
+  compare: add|update <slug>            (the scouting routine, /analyze,
+                                        /compare)
 
 Checked for the human shapes: allowed type; description starts lowercase; no
 trailing period; ≤72 chars total; no manual "(#NN)" suffix (GitHub appends the
@@ -39,6 +40,10 @@ _HUMAN = re.compile(rf"^({_TYPES})(\(([^)\s]+)\))?: (.+)$")
 _GENERATED = [
     re.compile(r"^scout: P\d report \d{4}-\d{2}-\d{2}$"),
     re.compile(r"^analysis: (add|update) \S+ rewrite.*"),
+    # The slug is the comparison's question, so it carries no alias and there
+    # is nothing to say after it — a subject that keeps going is describing
+    # the comparison, which the file already does.
+    re.compile(r"^compare: (add|update) [a-z0-9]+(-[a-z0-9]+)*$"),
 ]
 
 # Common non-imperative first words seen in the wild (past tense, gerund,

@@ -130,16 +130,31 @@ An unavailable fence is **reported and rendered as an error block**, never
 silently dropped — a fence that renders to nothing is one the author never
 learns was wrong.
 
+GFM alert callouts are not fences and the table does not govern them. They are
+available, and `> [!CAUTION]` in particular publishes as 우리와 충돌 — act 4's
+natural shape when the three answers cost our decisions different things.
+
 ### 2-5. Length
 
-A comparison that runs as long as a rewrite has stopped comparing. Rewrites sit
-around 12,000 printed characters; a comparison should land well under half
-that. The build warns past 7,000.
+A comparison that runs as long as a rewrite has stopped comparing. The rewrites
+it sits beside run 9,500–17,000 printed characters, median around 13,000; the
+build warns a comparison past 7,000.
 
-The ceiling is loose on purpose, and it warns rather than fails. When the
-warning fires, the fix is never to compress the prose — it is to find the
-paragraph that started explaining one paper and either link to its rewrite or
-drop the axis.
+**The count is prose only.** Every fenced block is stripped before measuring, so
+a `probe-matrix` costs nothing against the ceiling — a grid is scanned, not read
+top to bottom. That makes the ceiling generous by construction, and it also
+means it watches the wrong half: the part of the document that *is* the
+comparison is the part the count cannot see.
+
+Which matters, because a comparison does not start explaining one paper in a
+paragraph. It starts in a **cell note** — one clause of mechanism to make the
+cell land, then a second. Nothing counts that and nothing will; catching it is
+reading, which is what §4's last paragraph is for.
+
+When the ceiling does fire, the fix is never to compress the prose — it is to
+find the paragraph that started explaining one paper and either link to its
+rewrite or drop the axis. A note that has grown a second clause has the same
+two options and no third.
 
 ### 2-6. Where the facts come from
 
@@ -206,3 +221,8 @@ python3 linters/check-decision-refs.py
 What the code cannot see is the rule that decides whether a comparison was
 worth writing: whether the axes are the ones a reader would have asked about,
 and whether act 2 found a real shared commitment rather than a truism.
+
+Nor can it see the one failure that is easy to commit and invisible on the
+page — a cell note carrying a second clause of mechanism, which is one paper's
+detail wearing a comparison's clothes (§2-5). Read every note once more with
+only that question.
