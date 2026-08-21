@@ -608,6 +608,47 @@ html.js .rowstar, html.js .lh-star { display: block; }
   font-variant-numeric: tabular-nums;
 }
 
+/* ── The page strip ───────────────────────────────────────────────────── */
+/* Paging is a control like the rail and the bar, so it leaves when nothing is
+   scripted — and what it leaves behind is every paper in one list, which needs
+   no strip. The list is brought back under the sticky bar when a page changes,
+   which is what the scroll margin is for. */
+.corpus { scroll-margin-top: calc(var(--nav-h) + 3rem); }
+.pager { display: none; }
+html.js .pager {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem;
+  padding: 1.4rem .35rem 0;
+}
+.pager[hidden] { display: none; }
+.pgnums { display: flex; align-items: center; gap: .15rem; }
+.pgn, .pgstep {
+  font: inherit; font-size: .78rem; font-weight: 600; cursor: pointer;
+  padding: .3rem .6rem; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-muted); font-variant-numeric: tabular-nums;
+  transition: color var(--dur-short) var(--ease-out),
+              background var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.pgn { min-width: 2rem; text-align: center; }
+.pgn:hover, .pgstep:not(:disabled):hover {
+  border-color: var(--amber-soft); color: var(--orange);
+}
+.pgn[aria-current="page"] {
+  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
+}
+.pgn[hidden] { display: none; }
+/* 이전 and 다음 go dim rather than away: they hold the two ends of the strip,
+   and ends that move as you walk it are ends you have to re-aim at on every
+   click. */
+.pgstep:disabled { opacity: .4; cursor: default; }
+.pggap { color: var(--text-muted); padding: 0 .1rem; }
+.pggap[hidden] { display: none; }
+.pgstat {
+  margin-left: auto; font-size: .74rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .corpus-empty {
   text-align: center; color: var(--text-muted); font-size: .88rem;
   padding: 3.5rem 1rem;
@@ -850,6 +891,9 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
   .mast h1 { white-space: normal; }
   .filters-inner { padding: .5rem .9rem; }
   .deck { padding: 1.1rem .9rem 4rem; }
+  /* The strip's range reads as a caption to the buttons, so on a phone it goes
+     under them rather than fighting 다음 for the last inch of the line. */
+  .pgstat { margin-left: 0; flex-basis: 100%; }
   /* A five-column row cannot survive a phone, so it becomes a block: title
      and one line under it, with the numbers folded onto one trailing row. */
   .listhead { display: none; }
