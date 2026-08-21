@@ -154,30 +154,19 @@ def _pager(total: int) -> str:
 </nav>"""
 
 
-# How many ids ride the masthead rail, and how many of them are lit. The lit
-# three are spread through the row rather than kept at its head, because the
-# marquee stops under `prefers-reduced-motion` and a reader who never sees the
-# row move must still see what was picked.
-RAIL_IDS, RAIL_LIT, RAIL_EVERY = 21, 3, 4
+# How many ids ride the masthead rail. Every one of them is a link and every
+# one takes its turn under the spotlight, so this is only a length: enough to
+# read as a stream, short enough that a phone still gets a full turn out of it.
+RAIL_IDS = 21
 
 
 def _rail_entries(ordered: list[Paper]) -> list[tuple[str, str]]:
-    """The rail's row: recent arXiv ids, the newest few carrying their link.
+    """The rail's row — the most recent rewrites, newest first.
 
-    An id is lit exactly when it has an href, so this is the one place that
-    decides which papers the rail points at — the newest rewrites, which are
-    the ones a returning reader has not read yet.
+    Recent rather than random: the rail is the one place on the page that
+    names papers a returning reader has probably not opened yet.
     """
-    lit = [p.stem for p in ordered[:RAIL_LIT]]
-    rest = [p.stem for p in ordered[RAIL_LIT:RAIL_IDS]]
-    entries: list[tuple[str, str]] = []
-    for i in range(len(lit) + len(rest)):
-        if i % RAIL_EVERY == 0 and lit:
-            stem = lit.pop(0)
-            entries.append((stem, f"p/{stem}/index.html"))
-        elif rest:
-            entries.append((rest.pop(0), ""))
-    return entries
+    return [(p.stem, f"p/{p.stem}/index.html") for p in ordered[:RAIL_IDS]]
 
 
 def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
@@ -289,8 +278,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
         <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
       </div>
       <p class="mast-sub">
-        원문을 열지 않아도 메커니즘까지 남도록<br class="mast-br">
-        한 편씩 다시 씁니다.
+        원문을 열지 않아도 메커니즘까지 남도록 다시 씁니다.
       </p>
     </div>
     {c.mast_art()}
@@ -361,7 +349,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
         # `semantic.js` ships only when the build was handed an endpoint, so a
         # default build makes no request and needs no network to be correct.
         scripts=["shelf.js", "filter.js"] + (["semantic.js"] if search_api else []),
-        extra_head='<link rel="stylesheet" href="assets/index.css">',
+        extra_head=f'<link rel="stylesheet" href="{c.asset("assets/index.css")}">',
         body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
     )
 
@@ -656,7 +644,7 @@ def shelf_page(papers: list[Paper]) -> str:
         body=body,
         depth=1,
         scripts=["memo.js", "shelf.js", "hub.js"],
-        extra_head='<link rel="stylesheet" href="../assets/index.css">',
+        extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
     )
 
 
@@ -672,7 +660,7 @@ def not_found_page() -> str:
         body=body,
         depth=0,
         base=SITE_BASE,
-        extra_head=f'<link rel="stylesheet" href="{SITE_BASE}assets/index.css">',
+        extra_head=f'<link rel="stylesheet" href="{c.asset(SITE_BASE + "assets/index.css")}">',
     )
 
 
@@ -1136,5 +1124,5 @@ def comparison_index_page(comps: list) -> str:
         title="같이 읽기 · PROBE",
         body=body,
         depth=1,
-        extra_head='<link rel="stylesheet" href="../assets/index.css">',
+        extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
     )

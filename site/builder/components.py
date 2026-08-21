@@ -7,6 +7,9 @@ a fifth dependency. Every interpolation goes through `esc()`.
 from __future__ import annotations
 
 import html
+import math
+
+from . import assets_out
 
 # The mark at 16 px, inlined as a data URI so the zero-third-party rule holds
 # and no extra request is made for a tab icon. Two shapes and two tones: the
@@ -21,6 +24,17 @@ FAVICON = (
     "%3Ccircle cx='12.2' cy='18' r='2.5' fill='%232a1a12'/%3E"
     "%3Ccircle cx='19.8' cy='18' r='2.5' fill='%232a1a12'/%3E%3C/svg%3E"
 )
+
+
+def asset(url: str) -> str:
+    """An asset URL carrying the build's version token.
+
+    Every stylesheet and script goes through here, so nothing this build
+    prints can be served against a cached copy of a different build's rules
+    — see `assets_out.version()` for why that matters more than a missing
+    file would.
+    """
+    return f"{url}?v={assets_out.version()}"
 
 
 def esc(text: str) -> str:
@@ -68,38 +82,55 @@ def mark(size: int) -> str:
 
 
 
+def _rail_step(n: int) -> int:
+    """How far apart in the row two ids that light up in turn should sit.
+
+    Walking the spotlight straight down the row lights three neighbours at a
+    time, which reads as a block of selected text rather than as three papers
+    picked out of a stream. Stepping by a stride coprime with the row's length
+    visits every id exactly once per cycle while keeping the lit ones far
+    apart; the first stride that is coprime wins, and 1 is the honest fallback
+    for a row too short to spread.
+    """
+    return next((s for s in (8, 5, 3) if math.gcd(s, n) == 1), 1)
+
+
 def index_rail(entries: list[tuple[str, str]]) -> str:
-    """The landing masthead's index rail — the day's arXiv ids, three of them lit.
+    """The landing masthead's index rail — recent arXiv ids, a few lit at a time.
 
-    A row of ids drifting left under a slow scan band, with the three newest
-    rewrites at full ink and everything else dimmed. It says in one line what
-    the site is: a stream this size, that many kept. The picking is shown by
-    **taking light away from the rest** rather than by drawing a mark on the
-    three, which is what keeps a strip above the title from outranking it.
+    A row of ids drifting left under a slow scan band, dimmed, with a spotlight
+    of about three moving through it. It says in one strip what the site is: a
+    stream this size, read one at a time. Which ones are lit is shown by taking
+    light away from the rest rather than by marking the lit ones, which is what
+    keeps a strip above the title from outranking it.
 
-    Lit is a state, not an event: the three are lit for as long as the rail
-    exists rather than latching as the band sweeps over them. A highlight that
-    arrives and leaves is a blink, and it would also need a script to time it
-    against a moving row — this way the whole rail is markup and CSS, and a
-    reader with no script gets the same rail.
+    Every id takes a turn under the spotlight, so the strip keeps naming
+    different papers through the day rather than making three of them a
+    fixture at the top of the page. Every id is a link for the same reason:
+    whichever one lights up is the one a reader might reach for.
 
-    `entries` is `(arXiv id, href)`, newest first, and an href is what makes an
-    id one of the lit ones — the lit are exactly the ones worth a click. The
-    row is printed twice because the marquee translates by half its width; the
-    duplicate is what makes the wrap seamless.
+    Both the walk and the drift are CSS. Each id carries its own index in
+    `--i` — its turn in the cycle rather than its place in the row, see
+    `_rail_step` — and the row carries the count in `--n`, which is all
+    `index.css` needs to stagger one keyframe across it — so nothing here
+    waits on a script. The row is printed twice because the marquee translates by half
+    its width; the duplicate is what makes the wrap seamless, and the copies
+    share `--i` so both show the same id lit at the same moment.
 
     Decorative for a screen reader (`aria-hidden`): every paper it names is in
     the list below with its title, so a row of bare ids adds nothing but noise,
     and the links are `tabindex="-1"` so the keyboard walks the list instead of
     a row that is moving under it.
     """
+    n = len(entries)
+    step = _rail_step(n)
     run = "".join(
-        f'<a class="ri lit" href="{esc(href)}" tabindex="-1">{esc(rid)}</a>'
-        if href else f'<i class="ri">{esc(rid)}</i>'
-        for rid, href in entries
+        f'<a class="ri" style="--i:{k * step % n}" href="{esc(href)}" '
+        f'tabindex="-1">{esc(rid)}</a>'
+        for k, (rid, href) in enumerate(entries)
     )
     return ('<div class="mast-rail" aria-hidden="true">'
-            f'<div class="mast-run">{run}{run}</div>'
+            f'<div class="mast-run" style="--n:{len(entries)}">{run}{run}</div>'
             '<div class="mast-scan"></div></div>')
 
 
@@ -116,8 +147,8 @@ _ART_ROWS = ((44, 44), (44, 44), (44, 44), (44, 38),
 def mast_art() -> str:
     """The landing masthead's diagram — the tagline beside it, drawn.
 
-    The sentence it answers is "원문을 열지 않아도 메커니즘까지 남도록 한 편씩
-    다시 씁니다", and the drawing carries it in one loop: a scan
+    The sentence it answers is "원문을 열지 않아도 메커니즘까지 남도록 다시
+    씁니다", and the drawing carries it in one loop: a scan
     crosses an arXiv original that stays shut (it keeps its 열지 않음 tag the
     whole way) and lifts **four pieces** out of it; the four line up over the
     mark; then two of them cross to the 요약 tab and become its act cards and
@@ -376,7 +407,7 @@ def page(
     # the script itself ride along too. `defer` runs them in this order, which
     # is what lets `filter.js` further down the list read `match.js`.
     script_tags = "".join(
-        f'<script src="{up}assets/{s}" defer></script>'
+        f'<script src="{asset(f"{up}assets/{s}")}" defer></script>'
         for s in ["theme.js", "brand.js", "corpus-index.js", "match.js",
                   "palette.js", *(scripts or [])]
     )
@@ -388,9 +419,9 @@ def page(
 <title>{esc(title)}</title>
 {f'<meta name="description" content="{esc(description)}">' if description else ""}
 <link rel="icon" href="{FAVICON}">
-<link rel="stylesheet" href="{up}assets/fonts.css">
-<link rel="stylesheet" href="{up}assets/katex/katex.min.css">
-<link rel="stylesheet" href="{up}assets/site.css">
+<link rel="stylesheet" href="{asset(f"{up}assets/fonts.css")}">
+<link rel="stylesheet" href="{asset(f"{up}assets/katex/katex.min.css")}">
+<link rel="stylesheet" href="{asset(f"{up}assets/site.css")}">
 {extra_head}
 <script>
 /* Runs before first paint. Two jobs: set the theme (otherwise a dark-mode
