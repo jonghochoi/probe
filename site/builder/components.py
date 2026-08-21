@@ -67,6 +67,42 @@ def mark(size: int) -> str:
     )
 
 
+
+def index_rail(entries: list[tuple[str, str]]) -> str:
+    """The landing masthead's index rail — the day's arXiv ids, three of them lit.
+
+    A row of ids drifting left under a slow scan band, with the three newest
+    rewrites at full ink and everything else dimmed. It says in one line what
+    the site is: a stream this size, that many kept. The picking is shown by
+    **taking light away from the rest** rather than by drawing a mark on the
+    three, which is what keeps a strip above the title from outranking it.
+
+    Lit is a state, not an event: the three are lit for as long as the rail
+    exists rather than latching as the band sweeps over them. A highlight that
+    arrives and leaves is a blink, and it would also need a script to time it
+    against a moving row — this way the whole rail is markup and CSS, and a
+    reader with no script gets the same rail.
+
+    `entries` is `(arXiv id, href)`, newest first, and an href is what makes an
+    id one of the lit ones — the lit are exactly the ones worth a click. The
+    row is printed twice because the marquee translates by half its width; the
+    duplicate is what makes the wrap seamless.
+
+    Decorative for a screen reader (`aria-hidden`): every paper it names is in
+    the list below with its title, so a row of bare ids adds nothing but noise,
+    and the links are `tabindex="-1"` so the keyboard walks the list instead of
+    a row that is moving under it.
+    """
+    run = "".join(
+        f'<a class="ri lit" href="{esc(href)}" tabindex="-1">{esc(rid)}</a>'
+        if href else f'<i class="ri">{esc(rid)}</i>'
+        for rid, href in entries
+    )
+    return ('<div class="mast-rail" aria-hidden="true">'
+            f'<div class="mast-run">{run}{run}</div>'
+            '<div class="mast-scan"></div></div>')
+
+
 # The masthead diagram's geometry, in its own viewBox units. The four pieces
 # are the only numbers that have to agree with anything: each one departs a
 # line of the original and lands on the part of the rewrite it becomes, and
@@ -80,8 +116,8 @@ _ART_ROWS = ((44, 44), (44, 44), (44, 44), (44, 38),
 def mast_art() -> str:
     """The landing masthead's diagram — the tagline beside it, drawn.
 
-    The sentence it answers is "원문을 열지 않고도 메커니즘까지 이해되도록,
-    논문을 한 편씩 새로 씁니다", and the drawing carries it in one loop: a scan
+    The sentence it answers is "원문을 열지 않아도 메커니즘까지 남도록 한 편씩
+    다시 씁니다", and the drawing carries it in one loop: a scan
     crosses an arXiv original that stays shut (it keeps its 열지 않음 tag the
     whole way) and lifts **four pieces** out of it; the four line up over the
     mark; then two of them cross to the 요약 tab and become its act cards and

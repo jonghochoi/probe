@@ -60,12 +60,76 @@ html.js .mast-count { display: none; }
 .mast-sub strong { color: var(--text); font-weight: 700; }
 /* Korean breaks between any two syllables, so the tagline splits "논문" down
    the middle the moment it stops fitting on one line. `keep-all` moves the
-   break to a space, and the hand-placed one at the comma gives each clause a
-   line of its own instead of leaving "씁니다." alone on the second. The break
+   break to a space, and the hand-placed one before "한 편씩" gives each clause
+   a line of its own instead of leaving "씁니다." alone on the second. The break
    is on only where the sentence does not fit: on a phone, and again in the
    band where the diagram's column squeezes the text (both below). */
 .mast.brief .mast-sub { word-break: keep-all; overflow-wrap: anywhere; }
 .mast-br { display: none; }
+
+/* ── Masthead index rail ──────────────────────────────────────────────── */
+/* The day's arXiv ids drifting left under a slow scan band, with the newest
+   rewrites at full ink and the rest dimmed. What is picked is drawn by taking
+   light away from the rest rather than by putting a mark on the three: this
+   strip sits above the title, and anything up here louder than the title takes
+   the eye the title needs. Ink and weight move with the opacity, so the lit
+   ones still read as picked for someone who cannot separate two greys.
+
+   Lit is printed by the build (`components.index_rail`), so nothing here waits
+   on a script: both moves are keyframes, and a browser with none gets the same
+   row standing still. */
+.mast-rail {
+  position: relative; overflow: hidden; height: 26px;
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--border-soft);
+  /* Both ends fade, so an id enters and leaves rather than being cut off. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+/* The row is printed twice and travels exactly half its own width, so the wrap
+   lands on an identical frame and the loop has no seam. */
+.mast-run {
+  position: absolute; display: flex; gap: 1.5rem; white-space: nowrap;
+  font-family: var(--mono); font-size: .68rem;
+  animation: mast-run 54s linear infinite;
+}
+@keyframes mast-run { to { transform: translateX(-50%); } }
+/* A lit id is a link, and a link that is moving cannot be clicked. */
+.mast-rail:hover .mast-run { animation-play-state: paused; }
+.ri { font-style: normal; color: var(--text-muted); opacity: .34; }
+.ri.lit {
+  opacity: 1; color: var(--text); font-weight: 700; text-decoration: none;
+  transition: color var(--dur-short) var(--ease-out);
+}
+.ri.lit:hover { color: var(--orange); }
+/* The scan band is the only thing here that is not information: it says the
+   row is being read rather than merely scrolling. Held under a sixth of the
+   accent so it never competes with a lit id passing under it. */
+.mast-scan {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 46px; pointer-events: none;
+  background: linear-gradient(90deg, transparent,
+    color-mix(in oklab, var(--orange) 15%, transparent), transparent);
+  animation: mast-scan 9s var(--ease-in-out) infinite;
+}
+@keyframes mast-scan {
+  from { transform: translateX(-60px); }
+  to   { transform: translateX(100vw); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The row stops where it started, which is why the lit ones are spread
+     through it (`pages._rail_entries`) instead of bunched at its head — and
+     why the left fade goes: a still row's first id is one of the lit ones. */
+  .mast-run { animation: none; }
+  .mast-scan { display: none; }
+  .mast-rail {
+    -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent);
+    mask-image: linear-gradient(90deg, #000 86%, transparent);
+  }
+}
+@media (max-width: 680px) {
+  .mast-rail { height: 24px; }
+  .mast-run { gap: 1.1rem; font-size: .64rem; }
+}
 
 /* ── Masthead diagram ─────────────────────────────────────────────────── */
 /* The tagline, drawn: a scan lifts four pieces out of an original that stays
