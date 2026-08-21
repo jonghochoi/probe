@@ -219,9 +219,9 @@ export default async function (req: Request): Promise<Response> {
   const key = `${normalise(q)}|${limit}|${[...new Set(pillars)].sort().join(",")}`;
   // Through `probe_cache_get`, not the table: this key is the project's anon
   // key, and the cache is closed to it for the same reason the index is.
-  const { data } = await db.rpc("probe_cache_get", { q_norm: key });
-  if (data?.[0]?.result) {
-    return json({ ...data[0].result, cached: true, tookMs: Date.now() - started });
+  const { data: hit } = await db.rpc("probe_cache_get", { q_norm: key });
+  if (hit?.[0]?.result) {
+    return json({ ...hit[0].result, cached: true, tookMs: Date.now() - started });
   }
 
   const expansion = await expand(q);
