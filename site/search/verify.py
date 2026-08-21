@@ -309,7 +309,7 @@ def check_cache(rep: Report, url: str, base: str, admin: str) -> bool:
         rep("query cache", "fail",
             f"answered fresh again although {CACHE} holds {stored}",
             "probe_cache_get is not returning the row — its key is "
-            "`<normalised query>|<limit>`, and only an unfiltered query is cached")
+            "`<normalised query>|<limit>|<sorted pillars>`")
     return False
 
 
