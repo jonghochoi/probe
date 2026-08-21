@@ -141,7 +141,14 @@ function writeHash() {
 }
 
 function syncControls() {
-  if (input.value !== state.q) input.value = state.q;
+  if (input.value !== state.q) {
+    input.value = state.q;
+    // Setting `.value` fires no `input`, so Escape and 필터 초기화 change the
+    // query without anything hearing it. Whatever else reads the box off the
+    // page — `semantic.js` — is told here rather than made to watch each
+    // control that can empty it.
+    document.dispatchEvent(new CustomEvent("probe:query"));
+  }
   document.querySelectorAll("[data-facet-pillar]").forEach((b) => {
     b.setAttribute("aria-pressed", state.pillars.has(b.dataset.facetPillar) ? "true" : "false");
   });

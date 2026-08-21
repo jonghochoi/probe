@@ -259,6 +259,21 @@ html.js .filters { display: block; }
   background: none; border: none; outline: none; width: 100%;
 }
 .search input::placeholder { color: var(--text-muted); opacity: .8; }
+/* The submit, inside the box it submits, and only where both halves of it
+   exist: the build emits it with the endpoint, and it stays off a browser with
+   no script to run it — the list is already filtering without either. */
+.search-go { display: none; }
+html.js .search-go {
+  display: inline-flex; align-items: center; flex: none;
+  font: inherit; font-size: .72rem; font-weight: 700;
+  padding: .2rem .6rem; margin-right: -.45rem;
+  background: var(--surface-2); border: none; border-radius: var(--radius-pill);
+  color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  transition: background var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+html.js .search-go:hover:not(:disabled) { background: var(--orange); color: var(--accent-ink); }
+html.js .search-go:disabled { opacity: .5; cursor: default; }
 
 .sort { display: flex; gap: .1rem; background: var(--surface-2);
         border: 1px solid var(--border); border-radius: var(--radius-pill); padding: .12rem; }
@@ -677,6 +692,19 @@ html.js .pager {
 .sem-head span {
   font-weight: 500; letter-spacing: 0; text-transform: none;
   color: var(--text-muted);
+}
+
+/* The offer, before anything has been asked — quieter than the header that
+   reports an answer, since it is a line about what the box would do. */
+.sem-ask { color: var(--text-muted); }
+
+/* Enter, named in the line that offers the search rather than in the
+   placeholder: the box takes a query with or without the remote index, and a
+   build with no endpoint ships neither this line nor the script that draws it. */
+.sem-key {
+  font-family: var(--mono); font-size: .62rem; font-weight: 600;
+  padding: .02rem .3rem; border-radius: 3px;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
 }
 
 /* The terms the query was read as. Quiet — it explains the results, it is not
