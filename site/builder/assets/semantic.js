@@ -40,6 +40,19 @@ const TIMEOUT = 5000;
 const KINDS = { paper: "논문", section: "섹션", term: "용어", figure: "그림" };
 
 let inflight = null;
+/* Whether the block is answering, and how much of an answer it is. `filter.js`
+ * owns the strip that names the two surfaces and the list on the other one, so
+ * it needs both facts: that there is something to tab to, and the count to
+ * print on the tab. This only reports them. */
+let answered = false;
+function announce(on, papers, hits) {
+  if (!on && !answered) return;
+  answered = on;
+  document.dispatchEvent(new CustomEvent("probe:answer", {
+    detail: { answered: on, papers: papers || 0, hits: hits || 0 },
+  }));
+}
+
 /* The question the block currently answers, and `null` whenever it does not —
  * offering, waiting, or gone. An empty box is a question like any other here,
  * so "nothing on screen" cannot be spelled the same way as "". */
@@ -49,6 +62,7 @@ function hide() {
   box.hidden = true;
   box.innerHTML = "";
   shown = null;
+  announce(false);
 }
 
 /* The block belongs to one question at a time. Dropping the reference before
@@ -141,6 +155,7 @@ function offer(q) {
     `를 누르면 “${esc(q)}” 에 가까운 대목을 찾습니다</span></p>`;
   box.hidden = false;
   shown = null;
+  announce(false);
 }
 
 /* The lexical list answers while the reader is still typing, so without this
@@ -152,6 +167,7 @@ function pending(q) {
     `<p class="sem-head sem-wait">의미 검색 <span>· “${esc(q)}” 에 가까운 대목을 찾는 중</span></p>`;
   box.hidden = false;
   shown = null;
+  announce(false);
 }
 
 function render(q, data) {
@@ -159,12 +175,13 @@ function render(q, data) {
   if (!hits.length) return hide();
   const groups = byPaper(hits);
   const kept = groups.reduce((n, g) => n + g.hits.length, 0);
-  box.innerHTML =
-    `<p class="sem-head">의미 검색 <span>· “${esc(q)}” — 논문 ${groups.length}편에서 ` +
-    `${kept} 대목</span></p>` +
-    readAs(data.expanded) + groups.map(group).join("");
+  // No heading of its own: the strip above names this surface and counts it,
+  // and the box the reader typed in is still on screen with the question in
+  // it. A line repeating both would be the third time the page says it.
+  box.innerHTML = readAs(data.expanded) + groups.map(group).join("");
   box.hidden = false;
   shown = q;
+  announce(true, groups.length, kept);
 }
 
 function ask(q) {
@@ -225,6 +242,16 @@ input.addEventListener("input", () => follow(false));
 // The box is emptied by things that are not typing — Escape, 필터 초기화 — and
 // none of them fire `input`; `filter.js` says so here instead.
 document.addEventListener("probe:query", () => follow(false));
+/* Which surface the reader is looking at. The strip is `filter.js`'s — it is
+ * the one that knows what is on the other tab — so the block does not choose,
+ * it is told. An answer is left in place while it is off screen: the reader is
+ * one press from it, and asking the endpoint again for what is already here
+ * would be paying twice for one question. */
+document.addEventListener("probe:pane", (e) => {
+  if (shown === null) return;
+  box.hidden = e.detail.pane !== "sem";
+});
+
 // A `#q=` link carries a question somebody already asked, and arriving at one
 // is not typing it — both the shared link and the reader's own history ask.
 addEventListener("hashchange", () => follow(true));

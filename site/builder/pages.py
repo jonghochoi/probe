@@ -30,7 +30,7 @@ TAG_FACETS = 12
 # of this page that grows without limit, and a reader arriving at it should
 # meet a screen of papers, not a year of them. Ten is a screen and a half with
 # the lead block above it.
-PAGE_SIZES = (5, 10, 20, 0)
+PAGE_SIZES = (10, 20, 0)
 PAGE_DEFAULT = 10
 
 def _shelf_facets(cls: str) -> str:
@@ -52,7 +52,7 @@ def _shelf_facets(cls: str) -> str:
 
 
 def _page_sizes() -> str:
-    """5편 · 10편 · 20편 · 전체 — how much of the list one page holds.
+    """10편 · 20편 · 전체 — how much of the list one page holds.
 
     A view control, so it sits with 정렬 and wears the same pill group. The
     pressed state printed here is the default; `filter.js` moves it to whatever
@@ -247,10 +247,11 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     {_first_run() if not ordered else ""}
     {_resume()}
     {_lead_block(ordered[0], renderer) if ordered else ""}
+    {_search_tabs(search_api)}
+    <div class="sem" data-sem hidden></div>
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
       <span class="lh-star"></span><span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>연구 축</span><span>분량</span>
     </div>
-    <div class="sem" data-sem hidden></div>
     <p class="corpus-partial" data-partial hidden>
       모든 단어를 포함하는 논문이 없어, <b>일부만 일치</b>하는 논문을 관련도순으로 보여줍니다.
     </p>
@@ -292,6 +293,40 @@ def _search_go(search_api: str) -> str:
         return ""
     return ('<button type="button" class="search-go" data-ask disabled '
             'aria-label="의미 검색 (Enter)">검색</button>')
+
+
+def _search_tabs(search_api: str) -> str:
+    """The strip that splits a search into its two answers.
+
+    A question reaches the corpus two ways and they are not the same answer:
+    의미 is what the remote index found by meaning, 글자 is what the filter in
+    this browser matched letter for letter. The strip names both, carries each
+    one's count, and shows one at a time.
+
+    It ships with the endpoint, like the button that submits to it, and stays
+    hidden until there is something on both sides to choose between — a tab
+    over nothing is a tab nobody can use. `filter.js` fills in the counts and
+    owns which one is on; the build only prints the control.
+
+    It reads as the paper page's tab strip and is announced as what it is: two
+    buttons, one pressed. The 글자 answer is the listing below and everything
+    that describes it — a head, a note, the rows, the page strip — rather than
+    one element, and a `tab` with no panel to point at is a promise to a screen
+    reader that nothing keeps.
+    """
+    if not search_api:
+        return ""
+    return (
+        '<div class="restabs" data-restabs role="group" '
+        'aria-label="검색 결과" hidden>'
+        '<button type="button" class="restab" data-restab="sem" '
+        'aria-pressed="true">의미 검색<span class="restab-n" '
+        'data-restab-n="sem"></span></button>'
+        '<button type="button" class="restab" data-restab="lex" '
+        'aria-pressed="false">글자 검색<span class="restab-n" '
+        'data-restab-n="lex"></span></button>'
+        '</div>'
+    )
 
 
 def _resume() -> str:

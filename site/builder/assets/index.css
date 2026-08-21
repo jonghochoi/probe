@@ -634,7 +634,10 @@ html.js .pager {
   display: flex; flex-wrap: wrap; align-items: center; gap: .3rem;
   padding: 1.4rem .35rem 0;
 }
-.pager[hidden] { display: none; }
+/* Specific enough to outrank the rule above it: a bare `.pager[hidden]` loses
+   to `html.js .pager`, and a strip the script hid — a filter that fits on one
+   page, or a list folded behind a search answer — stays on screen. */
+html.js .pager[hidden] { display: none; }
 .pgnums { display: flex; align-items: center; gap: .15rem; }
 .pgn, .pgstep {
   font: inherit; font-size: .78rem; font-weight: 600; cursor: pointer;
@@ -677,6 +680,37 @@ html.js .pager {
   border-left: 2px solid var(--amber-soft); background: var(--surface-2);
 }
 .corpus-partial b { color: var(--text); font-weight: 600; }
+
+/* One question, two answers — 의미 found it by meaning, 글자 matched it letter
+   for letter — so the result area is a strip and one of them at a time. Same
+   control the paper page splits 요약 and 상세 with, and each surface keeps its
+   own colour: the accent for the remote answer, the cool one for the match in
+   this browser, so a glance at the strip says which is on. */
+.restabs {
+  display: flex; gap: 1.3rem; margin: 0 0 .7rem;
+  border-bottom: 1px solid var(--border);
+}
+.restabs[hidden] { display: none; }
+.restab {
+  font: inherit; font-size: .82rem; font-weight: 700;
+  display: inline-flex; align-items: baseline; gap: .38rem;
+  padding: .3rem .1rem .45rem; margin-bottom: -1px;
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-muted); cursor: pointer;
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.restab:hover { color: var(--text); }
+.restab-n {
+  font-family: var(--mono); font-size: .64rem; font-weight: 600;
+  opacity: .85; font-variant-numeric: tabular-nums;
+}
+.restab[data-restab="sem"][aria-pressed="true"] {
+  color: var(--orange); border-bottom-color: var(--orange);
+}
+.restab[data-restab="lex"][aria-pressed="true"] {
+  color: var(--blue); border-bottom-color: var(--blue);
+}
 
 /* ── Semantic results ─────────────────────────────────────────────────── */
 /* Above the list, not instead of it. The rows below are the corpus; this is a
