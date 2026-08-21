@@ -63,17 +63,19 @@ PILLAR_NAMES = {
 PILLAR_ORDER = [*PILLAR_NAMES, UNCLASSIFIED]
 PILLAR_RE = re.compile(r"\b(?:%s)\b" % "|".join(map(re.escape, PILLAR_NAMES)))
 
-# Link kind → (emoji, label, sort rank). THE single source for the chips'
-# icons, labels and display order — AUTHORING §2-10 deliberately does not
-# restate them, and states only the kind names, which is what an author types.
-# A rewrite declares `links:` as `kind|url` pairs in any order; this sorts them.
+# Link kind → (label, sort rank). THE single source for the resource links'
+# labels and display order — AUTHORING §2-10 deliberately does not restate
+# them, and states only the kind names, which is what an author types. The
+# mark drawn beside each label is `components.SRC_MARKS`, keyed by the same
+# kind. A rewrite declares `links:` as `kind|url` pairs in any order; this
+# sorts them.
 LINK_KINDS = {
-    "arxiv": ("📄", "arXiv", 0),
-    "code": ("💻", "GitHub", 1),
-    "weights": ("📦", "Weights", 2),
-    "data": ("📊", "Dataset", 3),
-    "site": ("🌐", "Website", 4),
-    "demo": ("🎬", "Demo", 5),
+    "arxiv": ("arXiv", 0),
+    "code": ("GitHub", 1),
+    "weights": ("Weights", 2),
+    "data": ("Dataset", 3),
+    "site": ("Website", 4),
+    "demo": ("Demo", 5),
 }
 
 
@@ -248,18 +250,20 @@ class Paper:
 
     @property
     def links(self) -> list[tuple[str, str, str]]:
-        """`[(emoji, label, url)]` in R10's order.
+        """`[(kind, label, url)]` in R10's order.
 
-        An unrecognised kind is dropped rather than guessed at — a resource
-        chip with the wrong label is worse than a missing one.
+        The kind rides along because it is what picks the mark drawn beside
+        the label. An unrecognised kind is dropped rather than guessed at — a
+        resource link with the wrong label is worse than a missing one.
         """
         ranked = []
         for item in frontmatter.as_list(self.front.get("links", "")):
             kind, _, url = item.partition("|")
-            spec = LINK_KINDS.get(kind.strip().lower())
+            key = kind.strip().lower()
+            spec = LINK_KINDS.get(key)
             if spec and url.strip():
-                ranked.append((spec[2], spec[0], spec[1], url.strip()))
-        return [(emoji, label, url) for _, emoji, label, url in sorted(ranked)]
+                ranked.append((spec[1], key, spec[0], url.strip()))
+        return [(kind, label, url) for _, kind, label, url in sorted(ranked)]
 
     @property
     def metric(self) -> str:

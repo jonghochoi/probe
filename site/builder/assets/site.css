@@ -343,6 +343,12 @@ nav {
   background: var(--surface);
 }
 .paper-head-inner { max-width: 1240px; margin: 0 auto; padding: 2rem 1.25rem 0; }
+/* The breadcrumb shares its line with 즐겨찾기 and 읽음, so it takes the space
+   they leave rather than the other way round — an id is recoverable from the
+   address bar, a control that has been pushed off the line is not. */
+.crumb-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .6rem; }
+.crumb-row .crumb { flex: 1 1 auto; min-width: 0; margin-bottom: 0; overflow: hidden;
+                    text-overflow: ellipsis; white-space: nowrap; }
 .crumb { font-size: .78rem; color: var(--text-muted); margin-bottom: .6rem; }
 .crumb a { color: var(--text-muted); text-decoration: none; }
 .crumb a:hover { color: var(--orange); }
@@ -373,6 +379,19 @@ nav {
 .chip.pillar[data-p="P4"] { background: var(--p4); }
 .chip.pillar[data-p="P5"] { background: var(--p5); }
 .chip.tag { font-weight: 500; }
+/* In the paper header a tag is the quietest thing on the page: nine arrive at
+   once, and with a border each they read as nine controls rather than one
+   description — while the resource links beside them are the things that
+   actually go somewhere. With no capsule around it, the `#` is what says
+   "tag". Scoped to the header: on the landing page the same chip is a filter
+   button, and there the border is telling the truth. */
+.head-tags { gap: .1rem .25rem; }
+.head-tags .chip.tag {
+  background: transparent; border-color: transparent;
+  color: var(--text-muted); padding: .2rem .3rem;
+}
+.head-tags .chip.tag::before { content: "#"; opacity: .45; }
+.head-tags .chip.tag:hover { background: var(--surface-2); color: var(--text); }
 .chip.link:hover { border-color: var(--amber-soft); color: var(--orange); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
@@ -387,16 +406,62 @@ nav {
   border: 1px solid var(--amber-soft); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.head-size {
-  font-size: .72rem; color: var(--text-muted); margin-left: .2rem;
-  font-variant-numeric: tabular-nums;
+/* ── Resource links ───────────────────────────────────────────────────── */
+/* One group, not one pill each. The `↗` cell says once that everything to its
+   right leaves the site, and the cell walls are drawn with a shadow rather
+   than a border so a group that wraps — six kinds on a phone — does not stand
+   a divider against the box's own left edge. Three or fewer stay a capsule;
+   past that the shape relaxes into a box, since a wrapped pill reads as a
+   broken one. */
+.src-group {
+  display: flex; flex-wrap: wrap; align-items: stretch; max-width: 100%;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); overflow: hidden;
+  font-size: .73rem; font-weight: 600;
+}
+.src-group:not(:has(a:nth-child(5))) { border-radius: var(--radius-pill); }
+.src-group .sg-out {
+  display: inline-flex; align-items: center; padding: .2rem .5rem;
+  background: var(--surface-2); color: var(--orange); font-size: .78rem;
+}
+.src-group a {
+  display: inline-flex; align-items: center; gap: .34rem; padding: .2rem .6rem;
+  color: var(--text-muted); text-decoration: none; white-space: nowrap;
+  box-shadow: -1px 0 0 var(--border);
+  transition: color var(--dur-short) var(--ease-out),
+              background var(--dur-short) var(--ease-out);
+}
+.src-group a:hover { color: var(--orange); background: var(--orange-soft); }
+/* The group clips its own overflow to keep the rounded ends, so the shared
+   focus ring — painted outside an element — is cut off on the cells at its
+   edges. Here alone the ring turns inward. */
+.src-group a:focus-visible { outline-offset: -2px; }
+
+/* The mark set — `components.SRC_MARKS`. Sized in `em` so it tracks whatever
+   text it sits beside, and painted with `currentColor` so it never needs a
+   dark-mode value of its own. */
+.src-mark {
+  width: 1em; height: 1em; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* Dates and length: read, not pressed. Monospace, and the separator rides on
+   the item ahead of it so a wrapped line never opens with a stray `·`. */
+.metaline {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .55rem;
+  font-family: var(--mono); font-size: .71rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; margin-bottom: .9rem;
+}
+.metaline .mi:not(:last-child)::after {
+  content: "·"; opacity: .4; margin-left: .55rem; display: inline-block;
 }
 
 /* ── 서재: the header's two controls ──────────────────────────────────── */
 /* Both controls write to this browser's localStorage and nowhere else, so
    without a script they are inert and remove themselves. They sit at the end
-   of the header's second chip row — after everything the paper *is*, because
-   they are what the reader has done with it. */
+   of the breadcrumb line, which is the first line of the header: 즐겨찾기 is
+   reached for before the read, not after it. */
 .paper-acts { display: none; }
 html.js .paper-acts {
   display: inline-flex; align-items: center; gap: .35rem; margin-left: auto;

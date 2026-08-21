@@ -190,9 +190,41 @@ def mast_art() -> str:
     )
 
 
-def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None) -> str:
+# One mark per `corpus.LINK_KINDS` kind, drawn on a 20-unit grid at a single
+# stroke weight so the six read as one set. Drawn here rather than picked from
+# the emoji block: an emoji set is six drawings by six hands — the weights,
+# the saturation and even the perspective disagree — and the reader's device,
+# not this build, decides what each one looks like. These take `currentColor`,
+# so a link's mark and its label change together on hover and the pair follows
+# the theme with everything else.
+SRC_MARKS = {
+    "arxiv": '<path d="M5 2.8h6.2L15 6.6V17a.6.6 0 0 1-.6.6H5a.6.6 0 0 1-.6-.6V3.4A.6.6 0'
+             ' 0 1 5 2.8Z"/><path d="M11 2.8v4h4M7.2 10.5h5.6M7.2 13.4h5.6"/>',
+    "code": '<path d="m7 6.5-4 3.6 4 3.6M13 6.5l4 3.6-4 3.6M11.4 4.6 8.6 15.6"/>',
+    "weights": '<path d="M10 2.9 17 6.4v7.2L10 17.1 3 13.6V6.4Z"/>'
+               '<path d="M3 6.4 10 10m0 0 7-3.6M10 10v7.1"/>',
+    "data": '<ellipse cx="10" cy="5.3" rx="6" ry="2.4"/><path d="M4 5.3v9.4c0 1.3 2.7 2.4 6'
+            ' 2.4s6-1.1 6-2.4V5.3M4 10c0 1.3 2.7 2.4 6 2.4s6-1.1 6-2.4"/>',
+    "site": '<circle cx="10" cy="10" r="7.1"/><ellipse cx="10" cy="10" rx="2.9" ry="7.1"/>'
+            '<path d="M3.2 7.6h13.6M3.2 12.4h13.6"/>',
+    "demo": '<rect x="2.9" y="4.2" width="14.2" height="11.6" rx="2.2"/>'
+            '<path d="m8.6 7.9 4.4 2.4-4.4 2.4Z"/>',
+}
+
+
+def src_mark(kind: str) -> str:
+    """The mark for one resource kind, or nothing for a kind without one."""
+    body = SRC_MARKS.get(kind)
+    if not body:
+        return ""
+    return (f'<svg class="src-mark" viewBox="0 0 20 20" aria-hidden="true">'
+            f"{body}</svg>")
+
+
+def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None,
+         mark: str = "") -> str:
     attrs = "".join(f' data-{k}="{esc(v)}"' for k, v in (data or {}).items())
-    inner = esc(label)
+    inner = f"{mark}{esc(label)}"
     classes = f"chip {cls}".strip()
     if href:
         return (
