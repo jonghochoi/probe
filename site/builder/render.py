@@ -71,6 +71,12 @@ def _render_details(self, tokens, idx, options, env) -> str:
 # marker; without one the renderer falls back to counting acts as they appear.
 _ACT_NUM = re.compile(r"^\s*(\d{1,2})[.)]?\s+(.*)$")
 
+# A comparison that runs as long as a rewrite has stopped comparing. Rewrites
+# sit around 12,000 printed characters; a comparison should land well under
+# half that. The ceiling is deliberately loose and warns rather than fails —
+# with one comparison written, the honest number is not yet known.
+COMPARE_CHARS_MAX = 7000
+
 
 def _split_act(text: str) -> tuple[str, str]:
     m = _ACT_NUM.match(text.strip())
@@ -105,9 +111,19 @@ class DocRenderer:
     """Renders one document kind, collecting its TOC as it goes."""
 
     def __init__(self, katex, *, decisions: dict | None = None,
-                 lead_html: str = ""):
+                 lead_html: str = "", kind: str = "paper",
+                 matrix_heads: list | None = None):
         self.katex = katex
         self.decisions = decisions or {}
+        # Which contract this document answers to. `paper` is a rewrite under
+        # `site/AUTHORING.md`; `compare` is a comparison under
+        # `compare/AUTHORING.md`, which teaches nothing and so owes none of the
+        # rules that exist to make one paper learnable.
+        self.kind = kind
+        # `(id, label, href)` per column for ```probe-matrix, in column order.
+        # The fence cannot know which papers are being compared; the document's
+        # front matter does.
+        self.matrix_heads = matrix_heads or []
         # Emitted immediately after the body H1 closes. The one-paragraph
         # summary is the first thing a reader wants and the front matter
         # already carries it, so the page prints it instead of reserving it
@@ -131,6 +147,8 @@ class DocRenderer:
         self._sections_without_quiz: list[str] = []
         self._current_section = ""
         self._term_panels: dict[str, str] = {}
+        self._matrices = 0
+        self._printed_chars = 0
         self.md = self._build()
 
     # ── parser construction ─────────────────────────────────────────────
@@ -290,7 +308,27 @@ class DocRenderer:
         # tokenizer rather than adding a second block rule for it.
         if info == "math":
             return self.katex.block(ghmath.normalize_tex(token.content))
+        if info in probefence.COMPARE_FENCES:
+            if self.kind != "compare":
+                message = (
+                    f"```{info} belongs to the comparison track — a rewrite "
+                    f"describes one paper, so it has no columns to fill"
+                )
+                self.problems.append(message)
+                return probefence.error_block(message)
+            return self._probe_fence(info, token.content)
         if info in probefence.FENCES:
+            if self.kind == "compare" and info in probefence.COMPARE_BANNED:
+                # Not a render failure — it would draw fine. It is a scope
+                # failure: this belongs to one paper, and that paper's own page
+                # already carries it (compare/AUTHORING.md).
+                message = (
+                    f"```{info} is not for a comparison — it zooms into one "
+                    f"paper, and that paper's own page already has it. Link to "
+                    f"the rewrite, or drop the axis"
+                )
+                self.problems.append(message)
+                return probefence.error_block(message)
             return self._probe_fence(info, token.content)
         if info in probefence.SURFACE_FENCES:
             message = (
@@ -393,6 +431,9 @@ class DocRenderer:
             if info == "probe-parts":
                 self._context_kinds.add("대조")
                 return probefence.parts(data, self._inline)
+            if info == "probe-matrix":
+                self._matrices += 1
+                return probefence.matrix(data, self._inline, self.matrix_heads)
         except probefence.FenceError as exc:
             # Reported AND rendered: a build warning the reader never sees is
             # how a broken quiz stays broken.
@@ -415,6 +456,9 @@ class DocRenderer:
             self.problems.append(f"term anchor `term:{tid}` has no ```probe-term definition")
         for tid in sorted(set(self._terms_defined) - self._terms_used):
             self.problems.append(f"term `{tid}` is defined but never anchored")
+        if self.kind == "compare":
+            self._check_compare()
+            return
         if self._sections_without_quiz:
             self.problems.append(
                 "sections without exactly one quiz: "
@@ -434,6 +478,27 @@ class DocRenderer:
                 "no planted-context component (R5): expected at least one of "
                 "```probe-lineage (계보) / ```probe-scale (숫자의 지형) / "
                 "```probe-split · ```probe-parts (대조)"
+            )
+
+    def _check_compare(self) -> None:
+        """What a comparison owes, in place of what a rewrite owes.
+
+        The quiz, the English keyword line and the planted-context component
+        all exist to make one paper learnable. A comparison teaches no paper —
+        each of its papers has a page that does — so it owes none of them. What
+        it owes instead is the grid: without one it is three summaries sharing
+        a file.
+        """
+        if not self._matrices:
+            self.problems.append(
+                "no ```probe-matrix — a comparison with no grid is three "
+                "summaries in one file. At least one belongs in act 3"
+            )
+        if self._printed_chars > COMPARE_CHARS_MAX:
+            self.problems.append(
+                f"{self._printed_chars} printed characters — a comparison over "
+                f"{COMPARE_CHARS_MAX} has started explaining the papers instead "
+                f"of comparing them. Link to a rewrite, or drop the axis"
             )
 
     # ── links ───────────────────────────────────────────────────────────
@@ -608,6 +673,8 @@ class DocRenderer:
         self._acts_seen = 0
         self._context_kinds = set()
         self._sections_without_keywords = []
+        self._matrices = 0
+        self._printed_chars = len(_printed(source))
         masked = ghmath.mask_source(source)
         self._prescan_terms(masked)
         out = self.md.render(masked)
@@ -622,6 +689,17 @@ class DocRenderer:
 # the broken forms on purpose, and `$` is ordinary shell syntax.
 _CODE_FENCE = re.compile(r"^```.*?^```", re.M | re.S)
 _CODE_SPAN = re.compile(r"`[^`\n]*`")
+_SPACE = re.compile(r"\s")
+
+
+def _printed(source: str) -> str:
+    """Body text with fenced blocks and whitespace stripped.
+
+    The measure `Paper.read_minutes` uses: a fence is looked at, opened or
+    answered rather than read top to bottom, so counting one would overstate
+    how long a document asks the reader to sit.
+    """
+    return _SPACE.sub("", _CODE_FENCE.sub("", source))
 
 _DREF_HTML = re.compile(r"(?<![A-Za-z0-9_&#])D(\d{1,2})(?![\d;])")
 _DESIGNATOR_TAIL = re.compile(

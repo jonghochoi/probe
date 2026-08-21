@@ -412,6 +412,7 @@ def nav(up: str) -> str:
     <span class="nav-spacer"></span>
     <ul class="nav-links">
       <li><a href="{up}index.html">논문</a></li>
+      <li><a href="{up}c/index.html">같이 읽기</a></li>
       <li><a href="{up}shelf/index.html">내 서재</a></li>
     </ul>
     {cmdk_button()}

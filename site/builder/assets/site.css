@@ -520,7 +520,102 @@ html.js .paper-acts {
   grid-column: 1; font-size: .78rem; line-height: 1.55; color: var(--text-muted);
 }
 
+/* ── Comparisons ──────────────────────────────────────────────────────── */
+/* Who the compared papers are, drawn from front matter the rewrites already
+   carry. It sits above the argument because the argument is forbidden from
+   introducing anybody — this row is the introduction. */
+.cmp-cards { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 0; }
+.cmp-cards-h {
+  font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: .7rem;
+}
+.cmp-card-row {
+  display: grid; gap: .6rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.cmp-card {
+  display: flex; flex-direction: column; gap: .3rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .8rem .9rem;
+  text-decoration: none; color: inherit;
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+}
+.cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.cmp-card-p {
+  font-size: .68rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em;
+}
+.cmp-card-t { font-size: .88rem; font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
+.cmp-card:hover .cmp-card-t { color: var(--orange); }
+.cmp-card-tag { font-size: .78rem; line-height: 1.55; color: var(--text-muted); }
+.cmp-card-foot {
+  display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: baseline;
+  margin-top: .15rem;
+}
+.cmp-card-id {
+  font-family: var(--mono); font-size: .7rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.cmp-card-m { font-size: .7rem; color: var(--orange); font-weight: 600; }
+
+/* ── ```probe-matrix ──────────────────────────────────────────────────── */
+/* One question per row, one paper per column. Three columns of Korean
+   sentences overflow a phone, so the table scrolls inside its own wrapper and
+   the page never does. */
+.matrix { margin: 1.6rem 0; }
+.mx-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.matrix .box-head + .mx-wrap { border-top-left-radius: 0; border-top-right-radius: 0; }
+/* Fixed layout, not auto: left to itself the browser sizes columns by content,
+   and the question column — short phrases, no wrapping pressure — takes half
+   the table while the answers it is asking about get a third of that each. */
+table.mx {
+  border-collapse: collapse; table-layout: fixed;
+  width: 100%; min-width: 42rem; background: var(--surface);
+}
+table.mx th, table.mx td {
+  border-bottom: 1px solid var(--border-soft); padding: .7rem .8rem;
+  text-align: left; vertical-align: top;
+}
+table.mx tbody tr:last-child th, table.mx tbody tr:last-child td { border-bottom: 0; }
+table.mx thead th {
+  border-bottom: 1px solid var(--border); background: var(--surface-2);
+  font-size: .8rem; font-weight: 700; line-height: 1.4;
+}
+/* A title with no codename before a colon arrives here in full, and a column
+   is about nine characters wide. Clamping keeps the head a head; the id under
+   it is the identifier that never truncates. */
+table.mx thead th a {
+  color: inherit; text-decoration: none;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+table.mx thead th a:hover { color: var(--orange); }
+/* The two widths that drive `table-layout: fixed` — the header row decides,
+   so they are declared on it and every body row follows. */
+.mx-corner {
+  width: 22%; border-bottom: 1px solid var(--border); background: var(--surface-2);
+}
+table.mx thead th[scope="col"] { width: 26%; }
+.mx-id {
+  display: block; margin-top: .15rem; font-family: var(--mono);
+  font-size: .66rem; font-weight: 400; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* The question column is the one a reader scans down, so it is the quiet one:
+   tinting it as well as the head would make the grid read as a border. */
+.mx-k {
+  font-size: .8rem; font-weight: 700;
+  color: var(--text-muted); line-height: 1.5;
+}
+.mx-v { display: block; font-size: .84rem; line-height: 1.65; }
+.mx-note {
+  display: block; margin-top: .3rem; font-size: .74rem; line-height: 1.55;
+  color: var(--text-muted);
+}
+
 /* ── Layout ───────────────────────────────────────────────────────────── */
+/* A comparison has no table of contents — it is short by contract — so its
+   shell is one column rather than the rewrite's rail-and-article pair. */
+.shell.one { grid-template-columns: minmax(0, 1fr); max-width: 900px; }
 .shell {
   max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 6rem;
   display: grid; grid-template-columns: var(--toc-w) minmax(0, 1fr); gap: 2.6rem;
