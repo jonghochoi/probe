@@ -630,30 +630,36 @@ html.js .rowstar, html.js .lh-star { display: block; }
    which is what the scroll margin is for. */
 .corpus { scroll-margin-top: calc(var(--nav-h) + 3rem); }
 .pager { display: none; }
+/* The strip reads as the list's last line rather than a widget parked under
+   it: it carries the same hairline the rows part on, and the controls sit on
+   the page ground with no card of their own. */
 html.js .pager {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem;
-  padding: 1.4rem .35rem 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: .1rem;
+  padding: .85rem .35rem 0; margin-top: .3rem;
+  border-top: 1px solid var(--border-soft);
 }
 /* Specific enough to outrank the rule above it: a bare `.pager[hidden]` loses
    to `html.js .pager`, and a strip the script hid — a filter that fits on one
    page, or a list folded behind a search answer — stays on screen. */
 html.js .pager[hidden] { display: none; }
-.pgnums { display: flex; align-items: center; gap: .15rem; }
+.pgnums { display: flex; align-items: center; gap: .1rem; }
 .pgn, .pgstep {
   font: inherit; font-size: .78rem; font-weight: 600; cursor: pointer;
-  padding: .3rem .6rem; border-radius: var(--radius-sm);
-  background: var(--surface); border: 1px solid var(--border);
+  padding: .34rem .55rem; border-radius: var(--radius-sm);
+  background: none; border: none;
   color: var(--text-muted); font-variant-numeric: tabular-nums;
   transition: color var(--dur-short) var(--ease-out),
-              background var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
+              box-shadow var(--dur-short) var(--ease-out);
 }
-.pgn { min-width: 2rem; text-align: center; }
-.pgn:hover, .pgstep:not(:disabled):hover {
-  border-color: var(--amber-soft); color: var(--orange);
-}
+.pgn { min-width: 1.9rem; text-align: center; }
+.pgn:hover, .pgstep:not(:disabled):hover { color: var(--orange); }
+/* The page you are on is marked by a rule under it, not a filled pill: the
+   strip has no card to fill, and the underline is the one mark that sits on
+   the ground the rest of the controls sit on. It is drawn inside the box so
+   nothing in the row shifts when it moves. */
 .pgn[aria-current="page"] {
-  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
+  color: var(--orange); border-radius: 0;
+  box-shadow: inset 0 -2px 0 var(--orange);
 }
 .pgn[hidden] { display: none; }
 /* 이전 and 다음 go dim rather than away: they hold the two ends of the strip,

@@ -406,7 +406,7 @@ def cmdk_button() -> str:
 
 
 def nav(up: str) -> str:
-    return f"""<nav>
+    return f"""<nav class="site-nav">
   <div class="nav-inner">
     <a class="nav-logo" href="{up}index.html">{mark(19)}PROBE</a>
     <span class="nav-spacer"></span>
