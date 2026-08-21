@@ -87,7 +87,10 @@ function group(g) {
       `<a class="sem-sub" href="${esc(href)}">` +
       `<span class="sem-kind k-${esc(hit.kind)}">${esc(KINDS[hit.kind] || hit.kind)}</span>` +
       `<span class="sem-body"><b>${esc(hit.title)}</b>` +
-      `<span class="sem-snip">${esc(hit.snippet)}</span></span></a>`
+      // A caption is its own chunk, so its excerpt trims to nothing: the line
+      // is left out rather than drawn empty under a title that says it all.
+      (hit.snippet ? `<span class="sem-snip">${esc(hit.snippet)}</span>` : "") +
+      `</span></a>`
     );
   }).join("");
   return (

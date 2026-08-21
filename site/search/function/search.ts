@@ -25,6 +25,7 @@ const MODEL = Deno.env.get("PROBE_EMBED_MODEL") ?? "openai/text-embedding-3-smal
 const DIMS = 1536;
 const Q_MAX = 200;          // a query, not a document — the embedding is per call
 const LIMIT_MAX = 24;
+const SNIPPET_MAX = 240;    // enough to recognise the passage, not to replace it
 
 /* The query-expansion model, as an OpenRouter id. No default: unset, the step
  * is skipped and the endpoint behaves exactly as it does without it. Pick a
@@ -122,6 +123,23 @@ export function searchText(q: string, terms: string[]): { embed: string; keyword
     embed: clean.length ? `${q}\n${clean.join(", ")}` : q,
     keyword: clean.length ? [q, ...clean].join(" or ") : q,
   };
+}
+
+/* The excerpt a card shows under the title it already prints. Four chunks in
+ * five open with their own title, because the title is part of what gets
+ * embedded and indexed — a term panel whose text does not contain the term is
+ * not retrievable by the term, so it is trimmed for display here rather than
+ * left out of the chunk. Trimming before the cut also spends the whole budget
+ * on prose the reader has not read yet.
+ *
+ * A figure caption is the whole of its chunk, so it trims to nothing and the
+ * card leaves the line out: the title above it has already said all there is.
+ */
+export function excerpt(body: string, title: string): string {
+  const rest = title && body.startsWith(title)
+    ? body.slice(title.length).replace(/^[\s·]+/, "")
+    : body;
+  return rest.slice(0, SNIPPET_MAX);
 }
 
 export function parseExpansion(raw: string): { terms: string[]; pillars: string[] } {
@@ -258,7 +276,7 @@ export default async function (req: Request): Promise<Response> {
     title: r.title, context: r.context, path: r.path, anchor: r.anchor,
     pillars: r.pillars, date: r.chunk_date,
     // Enough to recognise the passage, not enough to replace opening it.
-    snippet: String(r.body ?? "").slice(0, 240),
+    snippet: excerpt(String(r.body ?? ""), String(r.title ?? "")),
     similarity: r.similarity, score: r.score,
   }));
 
