@@ -110,10 +110,11 @@ Hard rules:
    a plain descriptive title whose method is never given a name of its own
    gets no alias, and one is never invented.)
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
-   `site`, `scouting`, `analysis`, `context`, `prompts`, `linters`,
-   `ci` (`.github/workflows/`), `config`. Omit the scope for repo-wide
-   changes — a docs pass across several tracks is `docs: …`, never
-   `docs(docs): …`.
+   `site`, `scouting`, `analysis`, `comparison`, `context`, `prompts`,
+   `linters`, `ci` (`.github/workflows/`), `config`. `comparison` covers the
+   track's contract and its documents; the build code that publishes them is
+   `site`. Omit the scope for repo-wide changes — a docs pass across several
+   tracks is `docs: …`, never `docs(docs): …`.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
    does, not why (the why goes in the body).
