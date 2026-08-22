@@ -169,7 +169,8 @@ def _rail_entries(ordered: list[Paper]) -> list[tuple[str, str]]:
     return [(p.stem, f"p/{p.stem}/index.html") for p in ordered[:RAIL_IDS]]
 
 
-def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
+def landing_page(papers: list[Paper], katex=None, search_api: str = "",
+                 comps: list | None = None) -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
     The page answers "what should I read" before "what is here". The most
@@ -190,6 +191,12 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     lead block *is* the first of them and its own row stands down, so 10편 is
     ten papers there as it is on every other page.
 
+    A paper that has been read against others carries a count beside its
+    title, in the lead block and in every row alike. It is the only signal on
+    this page that points at the other track, and it is here rather than only
+    on the paper because whether a paper has been argued against something is
+    part of deciding to open it.
+
     Order is `Paper.order_key` — the order the rewrites landed on `main`, which
     is the order a reader watched them appear — and the rows carry that key on
     `data-order`, so the script's 최신순 reproduces this list rather than a
@@ -203,6 +210,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
     who therefore has no filter bar; `index.css` hides it once a script runs.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
+    cmp_counts = Counter(pid for x in (comps or []) for pid in x.paper_ids)
     tag_counts = Counter(t for p in ordered for t in p.tags)
     facets = [t for t, _ in tag_counts.most_common(TAG_FACETS)]
 
@@ -265,7 +273,8 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
         for k in PILLAR_ORDER if primaries.get(k)
     )
     rows = "".join(
-        _row(p, renderer, lead=(i == 0)) for i, p in enumerate(ordered)
+        _row(p, renderer, lead=(i == 0), cmp_n=cmp_counts[p.stem])
+        for i, p in enumerate(ordered)
     )
 
     body = f"""<header class="mast brief">
@@ -320,7 +329,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "") -> str:
   <main class="corpus" data-corpus>
     {_first_run() if not ordered else ""}
     {_resume()}
-    {_lead_block(ordered[0], renderer) if ordered else ""}
+    {_lead_block(ordered[0], renderer, cmp_counts[ordered[0].stem]) if ordered else ""}
     {_search_tabs(search_api)}
     <div class="sem" data-sem hidden></div>
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
@@ -506,13 +515,28 @@ def _md(renderer, text: str) -> str:
     return renderer.inline(text) if renderer is not None else c.esc(text)
 
 
+def _cmp_count(n: int) -> str:
+    """How many comparisons hold this paper, wherever the paper is listed.
+
+    A count and not a link: the row already goes somewhere, and the paper's own
+    header carries the door. What this says is only that the door is there,
+    which is the thing a reader deciding what to open cannot otherwise know.
+    """
+    if not n:
+        return ""
+    return (
+        f'<span class="cmp-n" title="같이 읽은 글 {n}편" '
+        f'aria-label="같이 읽은 글 {n}편"><span aria-hidden="true">↔</span>{n}</span>'
+    )
+
+
 def _metric_chip(paper: Paper) -> str:
     return (
         f'<span class="metric">{c.esc(paper.metric)}</span>' if paper.metric else ""
     )
 
 
-def _lead_block(paper: Paper, renderer=None) -> str:
+def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
     """The newest rewrite, printed rather than summarised.
 
     A grid of equal cards makes every paper look equally likely to be the one
@@ -543,6 +567,7 @@ def _lead_block(paper: Paper, renderer=None) -> str:
   <div class="lead-foot">
     {"".join(c.chip(p, "pillar", data={"p": p}) for p in paper.pillars)}
     {_metric_chip(paper)}
+    {_cmp_count(cmp_n)}
     {tag_buttons}
     {links}
     <span class="filter-spacer"></span>
@@ -551,7 +576,8 @@ def _lead_block(paper: Paper, renderer=None) -> str:
 </article>"""
 
 
-def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
+def _row(paper: Paper, renderer=None, *, lead: bool = False,
+         cmp_n: int = 0) -> str:
     """One paper, one line.
 
     `data-lead-dup` marks the row the lead block is currently standing in for.
@@ -572,7 +598,7 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
   <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
   <span class="row-id">{c.esc(paper.stem)}</span>
   <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
-    <span class="row-title">{c.esc(paper.title)}{_metric_chip(paper)}</span>
+    <span class="row-title">{c.esc(paper.title)}{_metric_chip(paper)}{_cmp_count(cmp_n)}</span>
     <span class="row-tagline">{_md(renderer, paper.tagline)}</span>
   </a>
   <span class="row-pillars">{pillars}</span>
@@ -682,6 +708,13 @@ def paper_page(paper: Paper, katex, decisions: dict,
     different sits, so they are two panels of one page rather than two pages:
     the header, the resource links and the memo panel are the same paper's,
     and a reader switching surface has not left the paper.
+
+    The comparisons this paper appears in close both surfaces rather than one.
+    요약 is where a reader lands, so a door only at the foot of 상세 is a door
+    most readers never pass; and each copy ends the surface it belongs to,
+    where a reader who has just finished reading is standing. The two copies
+    are the same section under different ids, which is what lets the header
+    chip point at whichever one is on screen.
     """
     renderer = DocRenderer(katex, decisions=decisions)
     renderer.lead_html = _lead(paper, renderer)
@@ -696,17 +729,19 @@ def paper_page(paper: Paper, katex, decisions: dict,
             f"analysis/{paper.stem}.md: {p}" for p in renderer.problems
         )
 
-    body = f"""{_header(paper)}
+    comps = comparisons or []
+    body = f"""{_header(paper, comps)}
 {_tabstrip()}
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
   {glance_html or _missing("요약")}
+  {_in_comparisons(comps, "in-comparisons")}
 </div>
 <div class="panel" id="p-full" role="tabpanel" aria-labelledby="t-full" hidden>
   <div class="shell">
     <aside class="toc">{_toc(renderer.toc)}</aside>
     <main class="article">
       <section class="view">{rendered}</section>
-      {_in_comparisons(comparisons or [])}
+      {_in_comparisons(comps, "in-comparisons-full")}
       {_related(neighbours or [])}
     </main>
   </div>
@@ -802,13 +837,17 @@ def _related(neighbours: list[Paper]) -> str:
     )
 
 
-def _in_comparisons(comps: list) -> str:
-    """The comparisons this paper appears in, at the end of its own page.
+def _in_comparisons(comps: list, anchor: str) -> str:
+    """The comparisons this paper appears in, at the end of one of its surfaces.
 
     The other half of the track's constraint. A comparison never explains this
     paper, so the paper's page is where the detail stays — and this is the
     doorway back out, for a reader who has just read it and wants to know what
     it was argued against.
+
+    `anchor` is the id this copy answers to. Both surfaces carry the section,
+    so the id cannot be one value; the header chip resolves which of them it
+    points at from whichever surface is open.
     """
     if not comps:
         return ""
@@ -822,7 +861,7 @@ def _in_comparisons(comps: list) -> str:
         for x in comps
     )
     return (
-        '<section class="related">'
+        f'<section class="related in-cmp" id="{c.esc(anchor)}">'
         '<h2 class="related-h">이 논문이 들어간 비교</h2>'
         f'<div class="rel-list">{items}</div>'
         "</section>"
@@ -893,20 +932,26 @@ def _toc(entries: list[dict]) -> str:
     return '<div class="toc-title">목차</div>' + "".join(groups)
 
 
-def _header(paper: Paper) -> str:
+def _header(paper: Paper, comps: list | None = None) -> str:
     """What the paper is, in the order a reader needs it.
 
-    The header carries three different kinds of thing — what the paper *is*
-    (tags), where it lives (resource links), and when it happened and how big
-    a sit it is (dates, length) — and each is drawn as its own kind, so a
-    reader scanning for the arXiv link is not reading a run of identical grey
+    The header carries four different kinds of thing — what the paper *is*
+    (tags), where it lives (resource links), where else on this site it is
+    argued about (the 같이 읽기 chip), and when it happened and how big a sit it
+    is (dates, length) — and each is drawn as its own kind, so a reader
+    scanning for the arXiv link is not reading a run of identical grey
     capsules. Tags are quiet and take a `#`, the links are one bordered group
     that says it leaves the site, the dates are plain text under everything,
     and the paper's own number is the single filled pill. The two 서재 controls
     ride the first line: a row that wraps puts whatever sits at its end below
     the fold, and these two are reached for before the read.
+
+    The 같이 읽기 chip sits with the facts rather than at the foot of a surface
+    because it is read *before* the read: whether this paper has been held
+    against others is part of how to read it. It is the one item in that row
+    that stays on the site, so it takes the accent the resource group does not.
     """
-    facts = f"{_metric_chip(paper)}{_src_group(paper)}"
+    facts = f"{_metric_chip(paper)}{_src_group(paper)}{_cmp_chip(comps or [])}"
     tags = c.tag_chips(paper.tags)
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
@@ -925,6 +970,24 @@ def _header(paper: Paper) -> str:
     {_metaline(paper)}
   </div>
 </header>"""
+
+
+def _cmp_chip(comps: list) -> str:
+    """같이 읽기 N — the header's door to the other track.
+
+    An in-page anchor rather than a link to one of the comparisons: with more
+    than one there is no right one to pick, and the section it lands on names
+    every one of them. `paper.js` re-points it at whichever surface is open;
+    the printed href is the 요약 copy, which is the surface an unscripted page
+    is left on.
+    """
+    if not comps:
+        return ""
+    return (
+        f'<a class="chip cmp" href="#in-comparisons" data-cmp-jump>'
+        f'<span class="cmp-a" aria-hidden="true">↔</span>같이 읽기'
+        f'<span class="cmp-c">{len(comps)}</span></a>'
+    )
 
 
 def _src_group(paper: Paper) -> str:

@@ -66,12 +66,23 @@ const NAME = 3, FILED = 2, LINE = 1;
  * A comparison's compared ids are `filed`, not `name`: the paper itself is
  * what that id names, so typing one puts the paper above the comparisons that
  * hold it, which is the order a reader typing an id is asking for. */
+
+/* How many comparisons hold each paper. The same count the landing list prints
+ * beside a title, from the same payload — a paper row here would otherwise be
+ * the one surface that names a paper without saying it has been argued
+ * against something. */
+const HELD_BY = {};
+COMPARISONS.forEach((x) => {
+  (x.of || []).forEach((id) => { HELD_BY[id] = (HELD_BY[id] || 0) + 1; });
+});
+
 function build(doc, kind) {
   const paper = kind === "paper";
   const key = paper ? doc.id : doc.slug;
   const of = doc.of || [];
   return {
     kind: kind,
+    held: paper ? (HELD_BY[doc.id] || 0) : 0,
     /* Shelf records are kept per arXiv id, so a comparison has none to look
      * up — an empty key rather than a slug the store would never answer for. */
     id: paper ? doc.id : "",
@@ -199,7 +210,10 @@ function draw(result) {
        * that is the column a narrow screen keeps — and where Enter lands is
        * the one thing about a row a reader has to know before pressing it. */
       const kind = row.kind === "comparison"
-        ? '<span class="cmdk-kind">비교</span>' : "";
+        ? '<span class="cmdk-kind">비교</span>'
+        : (row.held ? '<span class="cmdk-held" title="같이 읽은 글 ' + row.held +
+            '편" aria-label="같이 읽은 글 ' + row.held + '편">' +
+            '<span aria-hidden="true">↔</span>' + row.held + '</span>' : "");
       return '<li role="presentation"><a class="cmdk-row" role="option" ' +
         'id="cmdk-o-' + i + '" data-i="' + i + '" ' +
         'aria-selected="' + (i === 0 ? "true" : "false") + '" ' +

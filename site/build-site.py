@@ -109,7 +109,7 @@ def build(args) -> int:
 
     # The landing page indexes whatever was built — with `--only`, a subset.
     rendered[out / "index.html"] = pages.landing_page(
-        papers, katex, search_api=args.search_api)
+        papers, katex, search_api=args.search_api, comps=comps)
     rendered[out / "shelf" / "index.html"] = pages.shelf_page(papers)
     rendered[out / "404.html"] = pages.not_found_page()
 

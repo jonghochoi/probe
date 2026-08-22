@@ -70,6 +70,10 @@
 
   /* ── The two surfaces: the tab strip ──────────────────────────────── */
   var tabs = [].slice.call(document.querySelectorAll(".tabs .tab"));
+  // 이 논문이 들어간 비교 closes both surfaces, so the header chip has two
+  // possible targets and only one of them is on screen. Pointing it at the
+  // hidden copy would switch surfaces on a reader who only asked to scroll.
+  var cmpJump = document.querySelector("[data-cmp-jump]");
 
   function showSurface(key, push) {
     tabs.forEach(function (tab) {
@@ -78,6 +82,10 @@
       var panel = document.getElementById(tab.getAttribute("aria-controls"));
       if (panel) panel.hidden = !on;
     });
+    if (cmpJump) {
+      cmpJump.setAttribute(
+        "href", key === "full" ? "#in-comparisons-full" : "#in-comparisons");
+    }
     // The surface belongs in the URL: a link to one surface of a paper is a
     // thing people send each other, and the back button should undo a switch.
     if (push && history.replaceState) {
@@ -99,8 +107,10 @@
       var deep = target && full && full.contains(target);
       showSurface(hash === "full" || deep ? "full" : "glance", false);
       // The browser scrolls to the target as it arrives, while the panel is
-      // still hidden, so nothing moves. Now that it is open, do it again.
-      if (deep) target.scrollIntoView();
+      // still hidden, so nothing moves. Now that it is open, do it again —
+      // for any target, since a link followed from 상세 into 요약 leaves the
+      // 요약 panel hidden at the moment the browser would have scrolled it.
+      if (target) target.scrollIntoView();
     }
 
     surfaceForHash();
