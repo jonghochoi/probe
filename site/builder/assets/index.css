@@ -638,6 +638,19 @@ html.js .rail {
   font-variant-numeric: tabular-nums;
 }
 
+/* How many comparisons hold this paper. Quiet, and outlined rather than
+   washed: the metric beside it is the paper's own number and keeps the accent,
+   while this is a pointer at the other track. Not a link — the row already
+   goes to the paper, and the paper's header is where the door is. */
+.cmp-n {
+  display: inline-flex; align-items: center; gap: .1rem;
+  font-family: var(--mono); font-size: .66rem; font-weight: 600;
+  padding: .04rem .34rem; border-radius: var(--radius-pill);
+  border: 1px solid var(--border); color: var(--text-muted);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.row-title .cmp-n, .row-title .metric + .cmp-n { margin-left: .34rem; vertical-align: 1px; }
+
 /* ── The list ─────────────────────────────────────────────────────────── */
 .listhead, .row {
   display: grid; align-items: baseline;

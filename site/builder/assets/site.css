@@ -404,6 +404,27 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 .head-tags .chip.tag::before { content: "#"; opacity: .45; }
 .head-tags .chip.tag:hover { background: var(--surface-2); color: var(--text); }
 .chip.link:hover { border-color: var(--amber-soft); color: var(--orange); }
+/* 같이 읽기 — the only thing in the facts row that goes somewhere on this site,
+   so it is the only one filled. The three kinds beside it each already have a
+   ground: the metric is the accent washed (a reading), the resource group is
+   grey and bordered (it leaves), the tags carry no capsule at all. A washed
+   accent here would be the metric a second time, and the two would read as one
+   pair of numbers rather than a number and a door. */
+.chip.cmp {
+  gap: .3rem; background: var(--orange); border-color: var(--orange);
+  color: var(--accent-ink); font-weight: 700;
+  transition: background var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.chip.cmp:hover {
+  background: color-mix(in srgb, var(--orange) 82%, var(--text));
+  border-color: color-mix(in srgb, var(--orange) 82%, var(--text));
+}
+.chip.cmp .cmp-a { font-size: .9em; opacity: .8; }
+.chip.cmp .cmp-c {
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  padding-left: .1rem; opacity: .85;
+}
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* The paper's headline number, from front matter `metric`. Also styled in
@@ -1633,6 +1654,17 @@ html.js .nav-cmdk { display: inline-flex; }
   font-size: .62rem; font-weight: 700; color: var(--orange);
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
+}
+/* A paper that has been read against others, in the same column a comparison
+   row's kind chip takes. Outlined and muted rather than amber: this is a fact
+   about the paper, not what the row is, and the two must not read alike in a
+   list where both appear. */
+.cmdk-held {
+  display: inline-flex; align-items: center; gap: .1rem;
+  font-size: .62rem; font-weight: 700; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: var(--radius-pill);
+  padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .cmdk-meta { display: flex; align-items: center; gap: .3rem; }
 /* A paper prints its own id and never reaches the cap; a comparison prints the
