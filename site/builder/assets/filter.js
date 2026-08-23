@@ -28,6 +28,12 @@
  * block — which is the first paper, printed rather than listed — is the first
  * paper of the first page, and its own row stands down while it is.
  *
+ * Only one 연구 축 is on at a time: an axis is where a paper is filed, so
+ * two of them at once is not a narrower question but a vaguer one, and the
+ * union it returns reads as no filter at all. Pressing the axis that is
+ * already on turns it off. Tags stay multi-select — those intersect, and each
+ * one typed does narrow the list.
+ *
  * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke. The
@@ -99,7 +105,7 @@ function keepSize(n) {
 }
 
 const state = {
-  q: "", pillars: new Set(), tags: new Set(), sort: "recent",
+  q: "", pillar: "", tags: new Set(), sort: "recent",
   fresh: false, star: false, unread: false,
   size: SIZE_DEFAULT, page: 1,
 };
@@ -143,7 +149,8 @@ if (!shelf) {
 function readHash() {
   const h = new URLSearchParams(location.hash.replace(/^#/, ""));
   state.q = h.get("q") || "";
-  state.pillars = new Set((h.get("p") || "").split(",").filter(Boolean));
+  // One axis, and a link that names several is read for the first of them.
+  state.pillar = (h.get("p") || "").split(",").filter(Boolean)[0] || "";
   state.tags = new Set((h.get("t") || "").split(",").filter(Boolean));
   state.sort = SORTS.includes(h.get("s")) ? h.get("s") : "recent";
   state.fresh = !!shelf && h.get("n") === "1";
@@ -159,7 +166,7 @@ function readHash() {
 function writeHash() {
   const h = new URLSearchParams();
   if (state.q) h.set("q", state.q);
-  if (state.pillars.size) h.set("p", [...state.pillars].join(","));
+  if (state.pillar) h.set("p", state.pillar);
   if (state.tags.size) h.set("t", [...state.tags].join(","));
   if (state.sort !== "recent") h.set("s", state.sort);
   if (state.fresh) h.set("n", "1");
@@ -181,7 +188,7 @@ function syncControls() {
     document.dispatchEvent(new CustomEvent("probe:query"));
   }
   document.querySelectorAll("[data-facet-pillar]").forEach((b) => {
-    b.setAttribute("aria-pressed", state.pillars.has(b.dataset.facetPillar) ? "true" : "false");
+    b.setAttribute("aria-pressed", b.dataset.facetPillar === state.pillar ? "true" : "false");
   });
   document.querySelectorAll("[data-facet-tag]").forEach((b) => {
     b.setAttribute("aria-pressed", state.tags.has(b.dataset.facetTag) ? "true" : "false");
@@ -221,12 +228,10 @@ function facetOk(card) {
   // 아직 안 읽음 is "not finished", not "never opened" — a paper whose 요약 was
   // read is still a paper the reader has not got through.
   if (state.unread && shelf.Reads.isDone(card.dataset.id)) return false;
-  if (state.pillars.size) {
-    const own = card.dataset.pillars.split(" ");
-    // A paper is kept if it touches ANY selected pillar — the pillars are
-    // facets of one paper, so intersecting them would return almost nothing.
-    if (!own.some((p) => state.pillars.has(p))) return false;
-  }
+  // `data-pillars` is `Paper.filed` — the two axes the row's own chips print
+  // and the rail counted — so the list a click opens is as long as the number
+  // that was clicked.
+  if (state.pillar && !card.dataset.pillars.split(" ").includes(state.pillar)) return false;
   if (state.tags.size) {
     const own = card.dataset.tags.split(" ");
     if (![...state.tags].every((t) => own.includes(t))) return false;
@@ -273,7 +278,7 @@ function ordered(shown, scored) {
 /* ── Apply ────────────────────────────────────────────────────────────── */
 function apply() {
   const terms = parse(state.q);
-  const dirty = !!(state.q || state.pillars.size || state.tags.size
+  const dirty = !!(state.q || state.pillar || state.tags.size
                    || state.fresh || state.star || state.unread);
 
   const pool = cards.filter(facetOk);
@@ -521,7 +526,14 @@ document.addEventListener("click", (e) => {
     state.page = 1;
     refresh();
   }
-  else if (p) { toggleSet(state.pillars, p.dataset.facetPillar); state.page = 1; refresh(); }
+  // The axis is a radio the reader can also switch off: pressing the one
+  // that is on clears it, pressing another moves to it.
+  else if (p) {
+    const k = p.dataset.facetPillar;
+    state.pillar = state.pillar === k ? "" : k;
+    state.page = 1;
+    refresh();
+  }
   else if (t) { toggleSet(state.tags, t.dataset.facetTag); state.page = 1; refresh(); }
   else if (s) { state.sort = s.dataset.sort; state.page = 1; refresh(); }
   else if (pageBtn) { toPage(+pageBtn.dataset.page); }
@@ -544,7 +556,7 @@ document.addEventListener("click", (e) => {
     refresh();
     bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
   } else if (e.target.closest("[data-reset]")) {
-    state.q = ""; state.pillars.clear(); state.tags.clear();
+    state.q = ""; state.pillar = ""; state.tags.clear();
     state.fresh = false; state.star = false; state.unread = false;
     state.page = 1;
     refresh();

@@ -7,7 +7,7 @@ from collections import Counter
 
 from . import components as c
 from . import corpus, glance as glance_mod
-from .corpus import PILLAR_NAMES, PILLAR_ORDER, UNCLASSIFIED, Paper
+from .corpus import PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer
 
 REPO = "jonghochoi/probe"
@@ -77,7 +77,7 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
         "pillars": PILLAR_NAMES,
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
-             "pillars": p.pillars, "tags": p.tags, "date": p.date}
+             "pillars": p.filed, "tags": p.tags, "date": p.date}
             for p in ordered
         ],
         "comparisons": [
@@ -206,12 +206,13 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     # not load.
     renderer = DocRenderer(katex) if katex is not None else None
 
-    # Counted over *every* declared pillar, not just the primary one: the filter
-    # keeps a paper that touches the pillar anywhere, so a count of primaries
-    # would promise fewer results than the click delivers. The pillar
-    # separators in the list still count primaries — a different question,
-    # asked in place.
-    touches = Counter(p for paper in ordered for p in (paper.pillars or [UNCLASSIFIED]))
+    # Counted over the axes a paper is *filed* under — `Paper.filed`, the two
+    # its card prints — because that is what the facet below selects on. Count
+    # one set and filter on another and the rail promises rows the click never
+    # delivers. The pillar separators in the list still count primaries: a
+    # paper sits under one heading, and that is a different question asked in
+    # place.
+    filed = Counter(p for paper in ordered for p in paper.filed)
     primaries = Counter(p.primary for p in ordered)
 
     # The reader's own three filters answer a question the corpus cannot: not
@@ -237,8 +238,8 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
         f'<span class="sw"></span><b>{c.esc(k)}</b>'
-        f'<span class="rn">{touches[k]}</span></button>'
-        for k in PILLAR_ORDER if touches.get(k)
+        f'<span class="rn">{filed[k]}</span></button>'
+        for k in PILLAR_ORDER if filed.get(k)
     )
     rail_tags = "".join(
         f'<button type="button" class="rail-item" data-facet-tag="{c.esc(t)}" '
@@ -446,7 +447,7 @@ def _facets(paper: Paper) -> str:
     """
     return (
         f'data-id="{c.esc(paper.stem)}" '
-        f'data-pillars="{c.esc(" ".join(paper.pillars) or UNCLASSIFIED)}" '
+        f'data-pillars="{c.esc(" ".join(paper.filed))}" '
         f'data-primary="{c.esc(paper.primary)}" '
         f'data-tags="{c.esc(" ".join(paper.tags))}" '
         f'data-order="{c.esc(paper.order_token)}" '
@@ -549,7 +550,7 @@ def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
     <p class="lead-sum">{_md(renderer, paper.summary_md)}</p>
   </a>
   <div class="lead-foot">
-    {"".join(c.chip(p, "pillar", data={"p": p}) for p in paper.pillars)}
+    {c.pillar_chips(paper.filed)}
     {_metric_chip(paper)}
     {_cmp_count(cmp_n)}
     {tag_buttons}
@@ -570,12 +571,10 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False,
     off the paper appears once (in the lead) instead of twice. The script
     reveals it the moment the lead block stops being the right thing to show.
     """
-    # Two chips, not every pillar: a third one wraps the column onto a second
-    # line and makes the row taller than its own title. `data-pillars` still
-    # carries all of them, so filtering is unaffected.
-    pillars = "".join(
-        c.chip(p, "pillar", data={"p": p}) for p in paper.pillars[:2]
-    )
+    # The axes the paper is filed under, which are also the ones the rail
+    # counts and filters on — the chips on a row are what a reader checks the
+    # rail's number against.
+    pillars = c.pillar_chips(paper.filed)
     return f"""<article class="row" data-card{' data-lead-dup hidden' if lead else ''}
   data-read-of="{c.esc(paper.stem)}" {_facets(paper)}>
   {_star(paper)}
@@ -826,7 +825,7 @@ def _related(neighbours: list[Paper]) -> str:
         return ""
     items = "".join(
         f'<a class="rel-item" href="../{c.esc(p.stem)}/index.html">\n'
-        f'  <span class="rel-p">{"".join(c.esc(x) + " " for x in p.pillars[:2])}</span>\n'
+        f'  <span class="rel-p">{"".join(c.esc(x) + " " for x in p.filed)}</span>\n'
         f'  <span class="rel-title">{c.esc(p.title)}</span>\n'
         f'  <span class="rel-tagline">{c.esc(p.tagline)}</span>\n'
         f'  <span class="rel-size">{c.esc(_size(p))}</span>\n'
@@ -1132,7 +1131,7 @@ def _cmp_cards(papers: list[Paper]) -> str:
     """
     cards = "".join(
         f'<a class="cmp-card" href="../../p/{c.esc(p.stem)}/index.html">'
-        f'<span class="cmp-card-p">{"".join(c.esc(x) + " " for x in p.pillars[:2])}</span>'
+        f'<span class="cmp-card-p">{"".join(c.esc(x) + " " for x in p.filed)}</span>'
         f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
         f'<span class="cmp-card-tag">{c.esc(p.tagline)}</span>'
         f'<span class="cmp-card-foot">'

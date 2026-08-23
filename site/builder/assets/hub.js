@@ -69,10 +69,11 @@ function itemHtml(id, { title, when, whenLabel, state = true, hash = "", sub = "
     ? `<a class="shelf-main" href="../p/${esc(id)}/index.html${esc(hash)}">${inner}</a>`
     : `<span class="shelf-main gone">${inner}` +
       `<span class="shelf-note">사이트에 없는 논문입니다</span></span>`;
-  // Two, as on the landing list: a third wraps the column and makes the row
-  // taller than its own title.
+  // The index carries the axes the paper is filed under and nothing else
+  // (`Paper.filed`), so this prints what it is handed — the same pair the
+  // landing row and the palette print.
   const pillars = meta && meta.pillars
-    ? meta.pillars.slice(0, 2)
+    ? meta.pillars
         .map((p) => `<span class="chip pillar" data-p="${esc(p)}">${esc(p)}</span>`).join("")
     : "";
   const control = lead || `<button type="button" class="starbtn" data-star="${esc(id)}"

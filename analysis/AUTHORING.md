@@ -53,7 +53,7 @@ analysis_of: <arxiv-id>          # MUST equal the file name
 title: "<the paper's own title, verbatim>"
 tagline: <one line: what this paper does>
 authors: <first authors et al. (affiliation)>
-pillars: P<a>, P<b>              # ours — the first decides the card's group
+pillars: P<a>, P<b>              # ours — most relevant first; the site files it under two
 tags: [<tag>, <tag>]
 links: [arxiv|<url>, code|<url>]
 published: YYYY-MM-DD            # the paper's date, from arXiv
@@ -77,7 +77,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `tagline` | required. **One line naming what the paper does**, printed under the body H1 and under the title on the landing page. The H1 is our thesis and often a metaphor, so on its own it does not tell a reader which paper they opened; the header prints the paper's own title. This is the sentence between them. **It never restates the paper's name** — `<코드명> — <무엇을 하는가>` printed under a title that already reads `<코드명>: <…>` spends the one line the tagline has on the word directly above it. Open with what the paper does, not with the codename; **the build reports the echo** |
 | `summary` | required. 2–3 sentences, read cold. Printed **on the page** as the `한 문단 요약` block between the thesis line and act 1, and flattened for the landing card. Authored as markdown — `**강조**` and `` $`math`$ `` render on the page and are stripped for the card, so bold the three or four phrases that carry the argument (§3-2 applies) |
 | `authors` | one line, as printed |
-| `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly. First entry decides the card's group; empty → 미분류, which beats a wrong pillar |
+| `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly, **most relevant first**. The site files the paper under the **first two** and nothing else: those are the chips its card prints, the axes the landing rail counts it in, and what a click on one of those counts returns. Naming a third is free and harmless — it just does not publish. First entry decides the card's group; empty → 미분류, which beats a wrong pillar |
 | `tags` | flow list, feeds the landing page's filter chips. Free vocabulary; the bar offers the most common facets and search covers the tail |
 | `links` | `kind\|url` pairs; kinds fixed at `arxiv` `code` `weights` `data` `site` `demo` (R10). Unknown kinds are dropped rather than guessed at |
 | `published` / `generated` | the paper's date / this rewrite's, as the clock reads when you write it. The landing page **orders the corpus by the commit that lands the file** — its add, or the `analysis: update <id> rewrite` that redoes it — so a redone rewrite lands again at the top and 최근 is the order a reader watched the rewrites appear, not the order they were written. `generated` dates a rewrite that has not landed yet and separates two that land in one commit, which is why it carries the clock time and not the day alone. A value the build cannot read is reported |
