@@ -204,7 +204,7 @@ function draw(result) {
       '찾는 글이 없습니다. 제목의 한 단어나 arXiv id 로 다시 해보세요.</li>';
   } else {
     list.innerHTML = shown.slice(0, LIMIT).map((row, i) => {
-      const chips = row.pillars.slice(0, 2).map((k) =>
+      const chips = row.pillars.map((k) =>
         '<span class="chip pillar" data-p="' + esc(k) + '">' + esc(k) + '</span>').join("");
       /* Which kind a row is rides on the left, beside the shelf marks, because
        * that is the column a narrow screen keeps — and where Enter lands is

@@ -63,6 +63,13 @@ PILLAR_NAMES = {
 PILLAR_ORDER = [*PILLAR_NAMES, UNCLASSIFIED]
 PILLAR_RE = re.compile(r"\b(?:%s)\b" % "|".join(map(re.escape, PILLAR_NAMES)))
 
+# How many of a rewrite's declared pillars the site files it under. Front
+# matter lists them most relevant first, and a paper that names four axes has
+# named the two it is about and two more it touches. Every surface that counts,
+# prints or filters on an axis reads exactly this many, so the number the rail
+# prints beside an axis is the number of papers clicking it returns.
+FILED_PILLARS = 2
+
 # Link kind → (label, sort rank). THE single source for the resource links'
 # labels and display order — AUTHORING §2-10 deliberately does not restate
 # them, and states only the kind names, which is what an author types. The
@@ -191,8 +198,19 @@ class Paper:
         return PILLAR_RE.findall(self.front.get("pillars", ""))
 
     @property
+    def filed(self) -> list[str]:
+        """The axes the site files this paper under — `FILED_PILLARS` of them.
+
+        `pillars` is everything the rewrite declared; this is the subset every
+        reader-facing surface agrees on. A facet built on the full list would
+        return papers under an axis their own card never prints, and its count
+        would promise more rows than the click delivers.
+        """
+        return self.pillars[:FILED_PILLARS] or [UNCLASSIFIED]
+
+    @property
     def primary(self) -> str:
-        return self.pillars[0] if self.pillars else UNCLASSIFIED
+        return self.filed[0]
 
     @property
     def tags(self) -> list[str]:
@@ -328,8 +346,8 @@ class Paper:
         """The identity fields, compacted — a hit here outranks one in the body."""
         return _haystack([
             self.stem, self.title, self.tagline, self.authors, self.metric,
-            *self.tags, *self.pillars,
-            *(PILLAR_NAMES[p] for p in self.pillars if p in PILLAR_NAMES),
+            *self.tags, *self.filed,
+            *(PILLAR_NAMES[p] for p in self.filed if p in PILLAR_NAMES),
         ])
 
     @property
@@ -460,8 +478,8 @@ def _fragments(paper: "Paper") -> list[str]:
     source = paper.body
     out = [
         paper.stem, paper.title, paper.tagline, paper.authors, paper.metric,
-        *paper.tags, *paper.pillars,
-        *(PILLAR_NAMES[p] for p in paper.pillars if p in PILLAR_NAMES),
+        *paper.tags, *paper.filed,
+        *(PILLAR_NAMES[p] for p in paper.filed if p in PILLAR_NAMES),
         _plain(paper.summary_md, limit=10_000),
     ]
     # Headings carry both languages — `### 한글 제목 | English · Subtitle` — and

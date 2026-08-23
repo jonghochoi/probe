@@ -113,7 +113,10 @@ function byPaper(hits) {
  * the paper, for a reader who recognises the work and wants the whole of it. */
 function group(g) {
   const first = g.hits[0];
-  const pillars = (first.pillars || []).slice(0, 3).map(
+  // Two, as everywhere else a paper is named: the index behind this endpoint
+  // stores every axis a rewrite declared, and the two it leads with are the
+  // ones it is filed under.
+  const pillars = (first.pillars || []).slice(0, 2).map(
     (p) => `<span class="chip pillar" data-p="${esc(p)}">${esc(p)}</span>`).join("");
   const passages = g.hits.map((hit) => {
     const href = `${hit.path}${hit.anchor ? "#" + hit.anchor : ""}`;
