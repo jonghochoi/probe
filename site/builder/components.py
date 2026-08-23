@@ -7,7 +7,6 @@ a fifth dependency. Every interpolation goes through `esc()`.
 from __future__ import annotations
 
 import html
-import math
 
 from . import assets_out
 
@@ -79,59 +78,6 @@ def mark(size: int) -> str:
         f"{eyes}"
         "</g></svg>"
     )
-
-
-
-def _rail_step(n: int) -> int:
-    """How far apart in the row two ids that light up in turn should sit.
-
-    Walking the spotlight straight down the row lights three neighbours at a
-    time, which reads as a block of selected text rather than as three papers
-    picked out of a stream. Stepping by a stride coprime with the row's length
-    visits every id exactly once per cycle while keeping the lit ones far
-    apart; the first stride that is coprime wins, and 1 is the honest fallback
-    for a row too short to spread.
-    """
-    return next((s for s in (8, 5, 3) if math.gcd(s, n) == 1), 1)
-
-
-def index_rail(entries: list[tuple[str, str]]) -> str:
-    """The landing masthead's index rail — recent arXiv ids, a few lit at a time.
-
-    A row of ids drifting left under a slow scan band, dimmed, with a spotlight
-    of about three moving through it. It says in one strip what the site is: a
-    stream this size, read one at a time. Which ones are lit is shown by taking
-    light away from the rest rather than by marking the lit ones, which is what
-    keeps a strip above the title from outranking it.
-
-    Every id takes a turn under the spotlight, so the strip keeps naming
-    different papers through the day rather than making three of them a
-    fixture at the top of the page. Every id is a link for the same reason:
-    whichever one lights up is the one a reader might reach for.
-
-    Both the walk and the drift are CSS. Each id carries its own index in
-    `--i` — its turn in the cycle rather than its place in the row, see
-    `_rail_step` — and the row carries the count in `--n`, which is all
-    `index.css` needs to stagger one keyframe across it — so nothing here
-    waits on a script. The row is printed twice because the marquee translates by half
-    its width; the duplicate is what makes the wrap seamless, and the copies
-    share `--i` so both show the same id lit at the same moment.
-
-    Decorative for a screen reader (`aria-hidden`): every paper it names is in
-    the list below with its title, so a row of bare ids adds nothing but noise,
-    and the links are `tabindex="-1"` so the keyboard walks the list instead of
-    a row that is moving under it.
-    """
-    n = len(entries)
-    step = _rail_step(n)
-    run = "".join(
-        f'<a class="ri" style="--i:{k * step % n}" href="{esc(href)}" '
-        f'tabindex="-1">{esc(rid)}</a>'
-        for k, (rid, href) in enumerate(entries)
-    )
-    return ('<div class="mast-rail" aria-hidden="true">'
-            f'<div class="mast-run" style="--n:{len(entries)}">{run}{run}</div>'
-            '<div class="mast-scan"></div></div>')
 
 
 # The masthead diagram's geometry, in its own viewBox units. The four pieces
