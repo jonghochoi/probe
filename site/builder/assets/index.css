@@ -6,6 +6,11 @@
   /* The rail's 즐겨찾기 mark, as a shape rather than a ★ — see the rail
      block below for why the character could not be trusted to centre. */
   --star-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%201.6l3.1%206.6%207%20.9-5.2%204.9%201.4%207.1L12%2017.6%205.7%2021.1l1.4-7.1L1.9%209.1l7-.9z'/%3E%3C/svg%3E");
+  /* One height for every control in the filter bar. They sit side by side on
+     one line and read as one row, so each taking whatever height its own
+     padding and font size add up to leaves the row visibly ragged — the box
+     that holds an input and a button ends up the tallest of them. */
+  --ctl-h: 2.1rem;
 }
 
 /* ── Masthead ─────────────────────────────────────────────────────────── */
@@ -252,8 +257,8 @@ html.js .filters { display: block; }
 .search {
   display: flex; align-items: center; gap: .45rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-pill); padding: .32rem .8rem;
-  flex: 1 1 260px; max-width: 420px;
+  border-radius: var(--radius-pill); padding: 0 .8rem;
+  height: var(--ctl-h); flex: 1 1 260px; max-width: 420px;
   transition: border-color var(--dur-short) var(--ease-out);
 }
 .search:focus-within { border-color: var(--amber-soft); }
@@ -280,7 +285,8 @@ html.js .search-go:hover:not(:disabled) { background: var(--orange); color: var(
 html.js .search-go:disabled { opacity: .5; cursor: default; }
 
 .sort { display: flex; gap: .1rem; background: var(--surface-2);
-        border: 1px solid var(--border); border-radius: var(--radius-pill); padding: .12rem; }
+        border: 1px solid var(--border); border-radius: var(--radius-pill);
+        padding: .12rem; height: var(--ctl-h); }
 .sort button {
   font: inherit; font-size: .74rem; font-weight: 600;
   padding: .22rem .65rem; border-radius: var(--radius-pill); cursor: pointer;
@@ -305,7 +311,8 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
 .barflag {
   font: inherit; font-size: .74rem; font-weight: 600;
   display: inline-flex; align-items: center; gap: .32rem;
-  padding: .22rem .6rem; border-radius: var(--radius-pill); cursor: pointer;
+  padding: 0 .6rem; height: var(--ctl-h);
+  border-radius: var(--radius-pill); cursor: pointer;
   background: var(--surface); border: 1px solid var(--border);
   color: var(--text-muted); white-space: nowrap;
   transition: background var(--dur-short) var(--ease-out),
