@@ -70,22 +70,18 @@
 
   /* ── The two surfaces: the tab strip ──────────────────────────────── */
   var tabs = [].slice.call(document.querySelectorAll(".tabs .tab"));
-  // 이 논문이 들어간 비교 closes both surfaces, so the header chip has two
-  // possible targets and only one of them is on screen. Pointing it at the
-  // hidden copy would switch surfaces on a reader who only asked to scroll.
-  var cmpJump = document.querySelector("[data-cmp-jump]");
+
+  function panelOf(tab) {
+    return document.getElementById(tab.getAttribute("aria-controls"));
+  }
 
   function showSurface(key, push) {
     tabs.forEach(function (tab) {
       var on = tab.dataset.tab === key;
       tab.setAttribute("aria-selected", on ? "true" : "false");
-      var panel = document.getElementById(tab.getAttribute("aria-controls"));
+      var panel = panelOf(tab);
       if (panel) panel.hidden = !on;
     });
-    if (cmpJump) {
-      cmpJump.setAttribute(
-        "href", key === "full" ? "#in-comparisons-full" : "#in-comparisons");
-    }
     // The surface belongs in the URL: a link to one surface of a paper is a
     // thing people send each other, and the back button should undo a switch.
     if (push && history.replaceState) {
@@ -98,18 +94,24 @@
       tab.addEventListener("click", function () { showSurface(tab.dataset.tab, true); });
     });
     // A link into the body — a section, a term, a figure — names an element
-    // that lives inside 상세. Landing on 요약 with it hidden makes the page look
-    // like it ignored the link, so the surface follows the target.
+    // that lives inside one particular tab. Landing on 요약 with that tab
+    // hidden makes the page look like it ignored the link, so the surface
+    // follows the target: whichever panel holds it wins, and a bare `#full` or
+    // `#cmp` names its tab directly.
     function surfaceForHash() {
       var hash = (location.hash || "").slice(1);
       var target = hash && document.getElementById(hash);
-      var full = document.getElementById("p-full");
-      var deep = target && full && full.contains(target);
-      showSurface(hash === "full" || deep ? "full" : "glance", false);
-      // The browser scrolls to the target as it arrives, while the panel is
-      // still hidden, so nothing moves. Now that it is open, do it again —
-      // for any target, since a link followed from 상세 into 요약 leaves the
-      // 요약 panel hidden at the moment the browser would have scrolled it.
+      var holder = "";
+      tabs.forEach(function (tab) {
+        var panel = panelOf(tab);
+        if (!holder && target && panel && panel.contains(target)) {
+          holder = tab.dataset.tab;
+        }
+      });
+      var named = tabs.some(function (t) { return t.dataset.tab === hash; });
+      showSurface(holder || (named ? hash : "glance"), false);
+      // The browser scrolls to the target as it arrives, while its panel is
+      // still hidden, so nothing moves. Now that it is open, do it again.
       if (target) target.scrollIntoView();
     }
 

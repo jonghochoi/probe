@@ -404,27 +404,6 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 .head-tags .chip.tag::before { content: "#"; opacity: .45; }
 .head-tags .chip.tag:hover { background: var(--surface-2); color: var(--text); }
 .chip.link:hover { border-color: var(--amber-soft); color: var(--orange); }
-/* 같이 읽기 — the only thing in the facts row that goes somewhere on this site,
-   so it is the only one filled. The three kinds beside it each already have a
-   ground: the metric is the accent washed (a reading), the resource group is
-   grey and bordered (it leaves), the tags carry no capsule at all. A washed
-   accent here would be the metric a second time, and the two would read as one
-   pair of numbers rather than a number and a door. */
-.chip.cmp {
-  gap: .3rem; background: var(--orange); border-color: var(--orange);
-  color: var(--accent-ink); font-weight: 700;
-  transition: background var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
-}
-.chip.cmp:hover {
-  background: color-mix(in srgb, var(--orange) 82%, var(--text));
-  border-color: color-mix(in srgb, var(--orange) 82%, var(--text));
-}
-.chip.cmp .cmp-a { font-size: .9em; opacity: .8; }
-.chip.cmp .cmp-c {
-  font-family: var(--mono); font-variant-numeric: tabular-nums;
-  padding-left: .1rem; opacity: .85;
-}
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* The paper's headline number, from front matter `metric`. Also styled in
@@ -1467,9 +1446,80 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
 }
 .tab .en { font-family: var(--mono); font-size: .68rem; opacity: .8; }
+/* A tab label never breaks across two lines: a two-line target reads as two
+   controls and halves the tap area of each. With three tabs the strip is what
+   gives instead — the English gloss leaves first, since the Korean label is
+   the one a reader presses by. */
+.tab { white-space: nowrap; }
+@media (max-width: 560px) {
+  .tabs { padding: 0 .9rem; }
+  .tab { padding: .6rem .6rem .65rem; }
+  .tab .en { display: none; }
+}
 .tab:hover { color: var(--text); }
 .tab[aria-selected="true"] { color: var(--orange); border-bottom-color: var(--orange); }
+/* 비교 carries its count in the tab, because the number is the whole reason to
+   look. Filled rather than outlined: it is the one thing in the strip that
+   says how much is behind a tab, and an outline at this size reads as a second
+   letter of the label. */
+.tab .cnt {
+  margin-left: -.12rem; font-family: var(--mono); font-size: .66rem;
+  font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.5;
+  background: var(--surface-3); color: var(--text-muted);
+  border-radius: var(--radius-pill); padding: 0 .34rem;
+}
+.tab[aria-selected="true"] .cnt { background: var(--orange); color: var(--accent-ink); }
 .panel.wide { max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.25rem 5rem; }
+
+/* ── 비교 — the comparisons holding this paper ─────────────────────────── */
+/* Narrower than the panel it sits in: 요약 fills the width because its act
+   cards are a grid, and a column of one-line questions read at 1240px is a
+   line the eye loses the start of on its way back. */
+.incmp { max-width: 900px; }
+.incmp-lead {
+  font-size: .88rem; line-height: 1.75; color: var(--text-muted);
+  padding-bottom: 1rem; margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.incmp-lead strong { color: var(--text); font-weight: 700; }
+.incmp-list { display: grid; gap: .7rem; }
+.incmp-item {
+  display: grid; gap: .3rem; padding: 1rem 1.1rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); text-decoration: none; color: inherit;
+  transition: border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+.incmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.incmp-when {
+  font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
+  letter-spacing: .04em;
+}
+.incmp-t {
+  font-size: 1rem; font-weight: 700; line-height: 1.45; letter-spacing: -.015em;
+  text-wrap: balance;
+}
+.incmp-item:hover .incmp-t { color: var(--orange); }
+.incmp-tag { font-size: .84rem; line-height: 1.6; color: var(--text-muted); }
+/* Which papers were on the table, in `compares:` order — the same order the
+   comparison's own columns run in, so the row is this paper's seat at it. */
+.incmp-seats {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem;
+  margin-top: .5rem; padding-top: .6rem; border-top: 1px dashed var(--border);
+}
+.seats-l {
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted); margin-right: .25rem;
+}
+.seat {
+  font-size: .72rem; font-weight: 600; color: var(--text-muted);
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-pill); padding: .1rem .5rem; white-space: nowrap;
+}
+.seat.self {
+  background: var(--orange); border-color: var(--orange);
+  color: var(--accent-ink); font-weight: 700;
+}
 
 /* ── 요약 ─────────────────────────────────────────────────────────────── */
 .g-hub {

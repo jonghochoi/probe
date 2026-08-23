@@ -674,18 +674,28 @@ def not_found_page() -> str:
     )
 
 
-# The two surfaces, in the order a reader meets them — the one-screen 요약
-# first, because a reader arrives at a paper page not yet knowing whether the
-# paper is worth the long read, and that is the question the short surface
-# answers. `en` is printed beside the Korean label because the tab strip is
-# also how a contributor finds the rule set: 요약 is §4 and 상세 is §1–§3.
-TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"))
+# The tabs, in the order a reader meets them — the one-screen 요약 first,
+# because a reader arrives at a paper page not yet knowing whether the paper is
+# worth the long read, and that is the question the short surface answers. `en`
+# is printed beside the Korean label because the tab strip is also how a
+# contributor finds the rule set: 요약 is `analysis/AUTHORING.md` §4, 상세 is
+# §1–§3, and 비교 is a different contract altogether.
+#
+# 비교 is not a third reading of this paper and its label does not pretend to
+# be one: BRIEF and FULL say how much of the paper a surface carries, COMPARED
+# says what happened to it. It is also the one tab that is not always there —
+# it appears only for a paper some comparison holds, and a tab that is empty
+# for most of the corpus is furniture.
+TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"),
+        ("cmp", "비교", "COMPARED"))
+CMP_TAB = "cmp"
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
                problems: list[str] | None = None,
                neighbours: list[Paper] | None = None,
-               comparisons: list | None = None) -> str:
+               comparisons: list | None = None,
+               papers_by_id: dict | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -693,12 +703,12 @@ def paper_page(paper: Paper, katex, decisions: dict,
     the header, the resource links and the memo panel are the same paper's,
     and a reader switching surface has not left the paper.
 
-    The comparisons this paper appears in close both surfaces rather than one.
-    요약 is where a reader lands, so a door only at the foot of 상세 is a door
-    most readers never pass; and each copy ends the surface it belongs to,
-    where a reader who has just finished reading is standing. The two copies
-    are the same section under different ids, which is what lets the header
-    chip point at whichever one is on screen.
+    The comparisons holding this paper are the third tab rather than a footer
+    under one of the other two. A footer is read by whoever reaches the foot of
+    the surface it sits under, which on a long 상세 is few and on 요약 is a
+    surface the section does not belong to — while the tab strip is on screen
+    from the first pixel and carries its own count, so the answer to "has this
+    been argued against anything" arrives before the read rather than after it.
     """
     renderer = DocRenderer(katex, decisions=decisions)
     renderer.lead_html = _lead(paper, renderer)
@@ -714,22 +724,21 @@ def paper_page(paper: Paper, katex, decisions: dict,
         )
 
     comps = comparisons or []
-    body = f"""{_header(paper, comps)}
-{_tabstrip()}
+    body = f"""{_header(paper)}
+{_tabstrip(len(comps))}
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
   {glance_html or _missing("요약")}
-  {_in_comparisons(comps, "in-comparisons")}
 </div>
 <div class="panel" id="p-full" role="tabpanel" aria-labelledby="t-full" hidden>
   <div class="shell">
     <aside class="toc">{_toc(renderer.toc)}</aside>
     <main class="article">
       <section class="view">{rendered}</section>
-      {_in_comparisons(comps, "in-comparisons-full")}
       {_related(neighbours or [])}
     </main>
   </div>
 </div>
+{_cmp_panel(paper, comps, papers_by_id or {})}
 {c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
@@ -767,18 +776,29 @@ def _acts(paper: Paper) -> str:
 </div>"""
 
 
-def _tabstrip() -> str:
-    """The two surfaces. Server-rendered and `hidden`-toggled, so the page is
-    readable with JavaScript off — the first panel stays open and the second is
-    reachable by its anchor."""
-    buttons = "".join(
-        f'<button type="button" class="tab" role="tab" id="t-{key}" '
-        f'aria-controls="p-{key}" aria-selected="{"true" if i == 0 else "false"}" '
-        f'data-tab="{key}">{c.esc(label)} <span class="en">{c.esc(en)}</span></button>'
-        for i, (key, label, en) in enumerate(TABS)
-    )
+def _tabstrip(cmp_n: int = 0) -> str:
+    """The tabs. Server-rendered and `hidden`-toggled, so the page is readable
+    with JavaScript off — the first panel stays open and the rest are reachable
+    by their anchors.
+
+    비교 is printed only when there is something behind it, and it carries the
+    count: the number is the whole reason to look, and a tab that made the
+    reader click to find out it says zero would have spent their click to tell
+    them nothing.
+    """
+    buttons = []
+    for i, (key, label, en) in enumerate(TABS):
+        if key == CMP_TAB and not cmp_n:
+            continue
+        count = (f'<span class="cnt">{cmp_n}</span>' if key == CMP_TAB else "")
+        buttons.append(
+            f'<button type="button" class="tab" role="tab" id="t-{key}" '
+            f'aria-controls="p-{key}" aria-selected="{"true" if i == 0 else "false"}" '
+            f'data-tab="{key}">{c.esc(label)} '
+            f'<span class="en">{c.esc(en)}</span>{count}</button>'
+        )
     return (f'<div class="tabs-wrap"><div class="tabs" role="tablist" '
-            f'aria-label="논문 보기 방식">{buttons}</div></div>')
+            f'aria-label="논문 보기 방식">{"".join(buttons)}</div></div>')
 
 
 def _missing(name: str) -> str:
@@ -821,34 +841,50 @@ def _related(neighbours: list[Paper]) -> str:
     )
 
 
-def _in_comparisons(comps: list, anchor: str) -> str:
-    """The comparisons this paper appears in, at the end of one of its surfaces.
+def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
+    """비교 — the comparisons that hold this paper, as their own surface.
 
     The other half of the track's constraint. A comparison never explains this
-    paper, so the paper's page is where the detail stays — and this is the
-    doorway back out, for a reader who has just read it and wants to know what
-    it was argued against.
+    paper, so the paper's page is where the detail stays — and this is the way
+    back out, for a reader who wants to know what it was argued against.
 
-    `anchor` is the id this copy answers to. Both surfaces carry the section,
-    so the id cannot be one value; the header chip resolves which of them it
-    points at from whichever surface is open.
+    Each card names the papers standing beside it, with this one marked. Which
+    papers a comparison put on the table is the first thing a reader wants and
+    the one thing a title cannot carry: two comparisons can ask a similar
+    question of entirely different papers. Marking this paper in the row is
+    what makes it a position rather than a list — the cards run in `compares:`
+    order, the same order the comparison's own columns run in.
     """
     if not comps:
         return ""
-    items = "".join(
-        f'<a class="rel-item" href="../../c/{c.esc(x.slug)}/index.html">\n'
-        f'  <span class="rel-p">{c.esc(x.date)}</span>\n'
-        f'  <span class="rel-title">{c.esc(x.title)}</span>\n'
-        f'  <span class="rel-tagline">{c.esc(x.tagline)}</span>\n'
-        f'  <span class="rel-size">{len(x.paper_ids)}편</span>\n'
-        f"</a>"
-        for x in comps
+    cards = "".join(_cmp_card(paper, x, papers_by_id) for x in comps)
+    return f"""<div class="panel wide" id="p-cmp" role="tabpanel"
+     aria-labelledby="t-cmp" hidden>
+  <section class="incmp">
+    <p class="incmp-lead">
+      이 논문이 다른 논문과 <strong>한 질문 아래 놓인 자리</strong>입니다.
+      비교문은 갈리는 자리만 쓰고, 각 논문이 무엇을 하는지는 그 논문의 페이지에
+      두고 링크로 갑니다.
+    </p>
+    <div class="incmp-list">{cards}</div>
+  </section>
+</div>"""
+
+
+def _cmp_card(paper: Paper, comp, papers_by_id: dict) -> str:
+    """One comparison, from this paper's side of it."""
+    seats = "".join(
+        f'<span class="seat{" self" if pid == paper.stem else ""}">'
+        f'{c.esc(_alias(papers_by_id[pid]) if pid in papers_by_id else pid)}</span>'
+        for pid in comp.paper_ids
     )
     return (
-        f'<section class="related in-cmp" id="{c.esc(anchor)}">'
-        '<h2 class="related-h">이 논문이 들어간 비교</h2>'
-        f'<div class="rel-list">{items}</div>'
-        "</section>"
+        f'<a class="incmp-item" href="../../c/{c.esc(comp.slug)}/index.html">'
+        f'<span class="incmp-when">{c.esc(comp.date)}</span>'
+        f'<span class="incmp-t">{c.esc(comp.title)}</span>'
+        f'<span class="incmp-tag">{c.esc(comp.tagline)}</span>'
+        f'<span class="incmp-seats"><span class="seats-l">같이 놓인 논문</span>'
+        f"{seats}</span></a>"
     )
 
 
@@ -916,26 +952,25 @@ def _toc(entries: list[dict]) -> str:
     return '<div class="toc-title">목차</div>' + "".join(groups)
 
 
-def _header(paper: Paper, comps: list | None = None) -> str:
+def _header(paper: Paper) -> str:
     """What the paper is, in the order a reader needs it.
 
-    The header carries four different kinds of thing — what the paper *is*
-    (tags), where it lives (resource links), where else on this site it is
-    argued about (the 같이 읽기 chip), and when it happened and how big a sit it
-    is (dates, length) — and each is drawn as its own kind, so a reader
-    scanning for the arXiv link is not reading a run of identical grey
+    The header carries three different kinds of thing — what the paper *is*
+    (tags), where it lives (resource links), and when it happened and how big
+    a sit it is (dates, length) — and each is drawn as its own kind, so a
+    reader scanning for the arXiv link is not reading a run of identical grey
     capsules. Tags are quiet and take a `#`, the links are one bordered group
     that says it leaves the site, the dates are plain text under everything,
     and the paper's own number is the single filled pill. The two 서재 controls
     ride the first line: a row that wraps puts whatever sits at its end below
     the fold, and these two are reached for before the read.
 
-    The 같이 읽기 chip sits with the facts rather than at the foot of a surface
-    because it is read *before* the read: whether this paper has been held
-    against others is part of how to read it. It is the one item in that row
-    that stays on the site, so it takes the accent the resource group does not.
+    Where else on this site the paper is argued about is the 비교 tab's job and
+    not a fourth kind here: the tab strip sits directly under this header and
+    carries the same count, so a chip would be the same offer twice, a
+    centimetre apart.
     """
-    facts = f"{_metric_chip(paper)}{_src_group(paper)}{_cmp_chip(comps or [])}"
+    facts = f"{_metric_chip(paper)}{_src_group(paper)}"
     tags = c.tag_chips(paper.tags)
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
@@ -954,24 +989,6 @@ def _header(paper: Paper, comps: list | None = None) -> str:
     {_metaline(paper)}
   </div>
 </header>"""
-
-
-def _cmp_chip(comps: list) -> str:
-    """같이 읽기 N — the header's door to the other track.
-
-    An in-page anchor rather than a link to one of the comparisons: with more
-    than one there is no right one to pick, and the section it lands on names
-    every one of them. `paper.js` re-points it at whichever surface is open;
-    the printed href is the 요약 copy, which is the surface an unscripted page
-    is left on.
-    """
-    if not comps:
-        return ""
-    return (
-        f'<a class="chip cmp" href="#in-comparisons" data-cmp-jump>'
-        f'<span class="cmp-a" aria-hidden="true">↔</span>같이 읽기'
-        f'<span class="cmp-c">{len(comps)}</span></a>'
-    )
 
 
 def _src_group(paper: Paper) -> str:

@@ -100,6 +100,7 @@ def build(args) -> int:
             paper, katex, decisions, render_problems,
             neighbours=corpus.related(paper, papers),
             comparisons=comparisons.for_paper(paper.stem, comps),
+            papers_by_id=papers_by_id,
         )
     for comp in comps:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
