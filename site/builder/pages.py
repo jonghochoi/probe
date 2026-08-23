@@ -92,14 +92,20 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
 
 
 def _shelf_facets(cls: str) -> str:
-    """New / Starred / Unread, in whichever of its two homes.
+    """New / Starred, in whichever of its two homes.
 
     Server-rendered with a zero count and no pressed state, because which
-    papers are starred, read or new is the reader's and the build cannot know
-    any of it. New ships `hidden` and stays hidden until there is something new
-    to point at — a zero that never moves is furniture.
+    papers are starred or new is the reader's and the build cannot know either.
+    New ships `hidden` and stays hidden until there is something new to point
+    at — a zero that never moves is furniture.
+
+    Both name something the reader put there. What is left to read is not a
+    mark anyone made: on a corpus a reader has barely started it counts almost
+    every paper, which selects the list they are already looking at. 읽음 is
+    still kept and still listed — in 내 서재, where the papers a reader is done
+    with are the point — it just has no facet here.
     """
-    flags = (("fresh", "New"), ("star", "Starred"), ("unread", "Unread"))
+    flags = (("fresh", "New"), ("star", "Starred"))
     return "".join(
         f'<button type="button" class="{c.esc(cls)}" data-facet-flag="{key}" '
         f'aria-pressed="false"{" hidden" if key == "fresh" else ""}>'
@@ -215,23 +221,22 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     filed = Counter(p for paper in ordered for p in paper.filed)
     primaries = Counter(p.primary for p in ordered)
 
-    # The reader's own three filters answer a question the corpus cannot: not
-    # "which papers are about X" but "which ones are mine", "which ones are
-    # left" and "which ones are new here". Their counts are the only numbers on
-    # this page the build does not know — `filter.js` fills them from the
-    # shelf, and the group hides itself when nothing is scripted.
+    # The reader's own two filters answer a question the corpus cannot: not
+    # "which papers are about X" but "which ones are mine" and "which ones are
+    # new here". Their counts are the only numbers on this page the build does
+    # not know — `filter.js` fills them from the shelf, and the group hides
+    # itself when nothing is scripted.
     #
     # They are the only English on either surface: a facet is a control, not a
-    # sentence, and `Starred` names the ★ beside it in the width `아직 안 읽음`
+    # sentence, and `Starred` names the ★ beside it in a width a Korean label
     # needs two lines for. Everything that speaks in sentences stays Korean —
     # the group heading, 내 서재's tabs, the paper header.
     #
-    # The same three are printed twice, once for the rail and once for the
-    # filter bar, because the rail leaves at 900px and these three would leave
-    # with it — and unlike the pillars and tags below them, nothing else on a
-    # phone can reach what they select. Exactly one copy is ever on screen
-    # (`index.css`); `filter.js` binds every copy it finds, so the pair never
-    # disagrees.
+    # The pair is printed twice, once for the rail and once for the filter bar,
+    # because the rail leaves at 900px and these two would leave with it — and
+    # unlike the pillars and tags below them, nothing else on a phone can reach
+    # what they select. Exactly one copy is ever on screen (`index.css`);
+    # `filter.js` binds every copy it finds, so the pair never disagrees.
     rail_mine = _shelf_facets("rail-item mine")
     bar_mine = _shelf_facets("barflag")
     rail_pillars = "".join(

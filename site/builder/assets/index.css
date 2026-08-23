@@ -379,38 +379,34 @@ html.js .rail {
 .rail-item[aria-pressed="true"] { background: var(--orange); }
 .rail-item[aria-pressed="true"] b,
 .rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
-/* 내 서재's three. The swatch slot carries a mark instead of a pillar colour —
-   a filled dot for New, a star for Starred, an open ring for Unread — because
-   none of them is a colour in the palette and all three are already drawn on
-   the rows they filter.
+/* 내 서재's pair. The swatch slot carries a mark instead of a pillar colour —
+   a filled dot for New, a star for Starred — because neither is a colour in
+   the palette and both are already drawn on the rows they filter.
 
-   All three are drawn *inside* the 9px slot rather than replacing it: the slot
-   is what makes the labels start on one line, down the group and across to the
-   연구 축 swatches under it. All three are shapes rather than characters, and
-   the star is why. A ★ is a text node wider than its slot, and neither inline
-   flow nor grid centring will straddle a box over a track it overflows — both
-   put it at the start edge — so a glyph lands right of the axis the other two
-   share, by whatever that font's advance width happens to be. A masked SVG is
-   ours: it is the box this file gives it, centred by a translate that no
-   alignment fallback can clamp, and the accent shows through the mask so the
-   pressed state is one colour to change.
+   Both are drawn *inside* the 9px slot rather than replacing it: the slot is
+   what makes the labels start on one line, down the group and across to the
+   연구 축 swatches under it. Both are shapes rather than characters, and the
+   star is why. A ★ is a text node wider than its slot, and neither inline flow
+   nor grid centring will straddle a box over a track it overflows — both put
+   it at the start edge — so a glyph lands right of the axis the dot keeps, by
+   whatever that font's advance width happens to be. A masked SVG is ours: it
+   is the box this file gives it, centred by a translate that no alignment
+   fallback can clamp, and the accent shows through the mask so the pressed
+   state is one colour to change.
 
-   The star's box is 11px against the others' 9 because a five-pointed outline
+   The star's box is 11px against the dot's 9 because a five-pointed outline
    encloses about half the ink of a disc at the same size; matched by box it
    reads as the smaller mark. */
 .sw.star,
-.sw.unread,
 .sw.fresh {
   position: relative; background: none; border-radius: 0;
 }
 .sw.star::before,
-.sw.unread::before,
 .sw.fresh::before {
   content: ""; position: absolute; left: 50%; top: 50%;
   transform: translate(-50%, -50%);
   width: 9px; height: 9px; box-sizing: border-box;
 }
-.sw.unread::before { border: 1.5px solid var(--amber-soft); border-radius: 50%; }
 .sw.fresh::before { background: var(--orange); border-radius: 50%; }
 .sw.star::before {
   width: 11px; height: 11px; background: var(--orange);
@@ -418,7 +414,6 @@ html.js .rail {
   mask: var(--star-mask) center / contain no-repeat;
 }
 [aria-pressed="true"] .sw.star::before { background: var(--accent-ink); }
-[aria-pressed="true"] .sw.unread::before { border-color: var(--accent-ink); }
 [aria-pressed="true"] .sw.fresh::before { background: var(--accent-ink); }
 .rail-item[hidden] { display: none; }
 

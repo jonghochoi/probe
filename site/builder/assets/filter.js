@@ -11,11 +11,11 @@
  * a query is read before it meets them is `match.js`, which the ⌘K palette
  * reads the same query with.
  *
- * Three of the filters are not the corpus's but the reader's — New, Starred
- * and Unread — and they come off `window.ProbeShelf`, which reads this
- * browser's own localStorage. They behave like any other facet here; the only
- * difference is that their counts are computed rather than printed by the
- * build, and that they disappear when the shelf layer is missing.
+ * Two of the filters are not the corpus's but the reader's — New and
+ * Starred — and they come off `window.ProbeShelf`, which reads this browser's
+ * own localStorage. They behave like any other facet here; the only difference
+ * is that their counts are computed rather than printed by the build, and that
+ * they disappear when the shelf layer is missing.
  *
  * This page is also the only one that knows the whole corpus, so it is where
  * the 새 글 set is kept honest: it seeds the set on first sight (silently —
@@ -37,7 +37,7 @@
  * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke. The
- * two shelf filters ride there too (`&f=1`, `&u=1`) — a bookmark of "my
+ * two shelf filters ride there too (`&n=1`, `&f=1`) — a bookmark of "my
  * starred P2 papers" is a view worth keeping — even though what they select is
  * local to the browser that opens the link. So do the page and its size
  * (`&pg=3`, `&sz=5`), which is what makes a link land on the list the sender
@@ -106,7 +106,7 @@ function keepSize(n) {
 
 const state = {
   q: "", pillar: "", tags: new Set(), sort: "recent",
-  fresh: false, star: false, unread: false,
+  fresh: false, star: false,
   size: SIZE_DEFAULT, page: 1,
 };
 const freshNote = root.querySelector("[data-fresh-note]");
@@ -155,7 +155,6 @@ function readHash() {
   state.sort = SORTS.includes(h.get("s")) ? h.get("s") : "recent";
   state.fresh = !!shelf && h.get("n") === "1";
   state.star = !!shelf && h.get("f") === "1";
-  state.unread = !!shelf && h.get("u") === "1";
   // A link that names a size means it — otherwise this browser's last choice,
   // and the build's default for a browser that has never made one.
   const sz = parseInt(h.get("sz"), 10);
@@ -171,7 +170,6 @@ function writeHash() {
   if (state.sort !== "recent") h.set("s", state.sort);
   if (state.fresh) h.set("n", "1");
   if (state.star) h.set("f", "1");
-  if (state.unread) h.set("u", "1");
   if (state.size !== SIZE_DEFAULT) h.set("sz", state.size);
   if (state.page > 1) h.set("pg", state.page);
   const hash = h.toString();
@@ -221,13 +219,10 @@ const { parse, inFragment } = window.ProbeMatch;
 const KEY_HIT = 3, HAY_HIT = 1;
 
 function facetOk(card) {
-  // The reader's three come first: they are the cheapest tests and the ones
+  // The reader's two come first: they are the cheapest tests and the ones
   // most likely to cut the pool to a handful.
   if (state.fresh && !shelf.Corpus.isNew(card.dataset.id)) return false;
   if (state.star && !shelf.Stars.has(card.dataset.id)) return false;
-  // 아직 안 읽음 is "not finished", not "never opened" — a paper whose 요약 was
-  // read is still a paper the reader has not got through.
-  if (state.unread && shelf.Reads.isDone(card.dataset.id)) return false;
   // `data-pillars` is `Paper.filed` — the two axes the row's own chips print
   // and the rail counted — so the list a click opens is as long as the number
   // that was clicked.
@@ -279,7 +274,7 @@ function ordered(shown, scored) {
 function apply() {
   const terms = parse(state.q);
   const dirty = !!(state.q || state.pillar || state.tags.size
-                   || state.fresh || state.star || state.unread);
+                   || state.fresh || state.star);
 
   const pool = cards.filter(facetOk);
   let shown = pool, partial = false;
@@ -448,21 +443,19 @@ function toPage(n) {
  * exist. */
 function countFlags() {
   if (!shelf) return;
-  let fresh = 0, star = 0, unread = 0;
+  let fresh = 0, star = 0;
   cards.forEach((card) => {
     if (shelf.Corpus.isNew(card.dataset.id)) fresh++;
     if (shelf.Stars.has(card.dataset.id)) star++;
-    if (!shelf.Reads.isDone(card.dataset.id)) unread++;
   });
-  // Every copy: the three facets are printed once for the rail and once for
-  // the filter bar, and only one of the two is on screen at any width.
+  // Every copy: the pair is printed once for the rail and once for the filter
+  // bar, and only one of the two is on screen at any width.
   const set = (key, n) => {
     document.querySelectorAll(`[data-flag-count="${key}"]`)
       .forEach((el) => { el.textContent = n; });
   };
   set("fresh", fresh);
   set("star", star);
-  set("unread", unread);
   // `New 0` is not a filter anyone would press, and on most visits that is
   // what it says — so the control is there only while there is something new.
   // It stays while the filter is on, or turning the last one off would take
@@ -557,7 +550,7 @@ document.addEventListener("click", (e) => {
     bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
   } else if (e.target.closest("[data-reset]")) {
     state.q = ""; state.pillar = ""; state.tags.clear();
-    state.fresh = false; state.star = false; state.unread = false;
+    state.fresh = false; state.star = false;
     state.page = 1;
     refresh();
   }
