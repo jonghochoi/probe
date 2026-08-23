@@ -154,21 +154,6 @@ def _pager(total: int) -> str:
 </nav>"""
 
 
-# How many ids ride the masthead rail. Every one of them is a link and every
-# one takes its turn under the spotlight, so this is only a length: enough to
-# read as a stream, short enough that a phone still gets a full turn out of it.
-RAIL_IDS = 21
-
-
-def _rail_entries(ordered: list[Paper]) -> list[tuple[str, str]]:
-    """The rail's row — the most recent rewrites, newest first.
-
-    Recent rather than random: the rail is the one place on the page that
-    names papers a returning reader has probably not opened yet.
-    """
-    return [(p.stem, f"p/{p.stem}/index.html") for p in ordered[:RAIL_IDS]]
-
-
 def landing_page(papers: list[Paper], katex=None, search_api: str = "",
                  comps: list | None = None) -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
@@ -278,7 +263,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     )
 
     body = f"""<header class="mast brief">
-  {c.index_rail(_rail_entries(ordered))}
   <div class="mast-inner">
     <div class="mast-text">
       <div class="mast-line">
