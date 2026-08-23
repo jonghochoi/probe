@@ -253,11 +253,27 @@ document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-hub-action]");
   if (!btn) return;
   const today = new Date().toISOString().slice(0, 10);
+  let name = "";
   if (btn.dataset.hubAction === "export-json") {
-    download(`probe-shelf-${today}.json`, snapshot());
+    name = `probe-shelf-${today}.json`;
+    download(name, snapshot());
   } else if (btn.dataset.hubAction === "export-md") {
-    download(`probe-shelf-${today}.md`, snapshotMd(), "text/markdown");
+    name = `probe-shelf-${today}.md`;
+    download(name, snapshotMd(), "text/markdown");
+  } else {
+    return;
   }
+  // Writing a file is over the moment it is written — the button holds no
+  // state and should not look as though it does. A pointer press leaves it
+  // focused, the browser's own download UI takes the page's focus and hands it
+  // back to whatever held it, and the ring returns on a button nobody is
+  // pressing. Only a pointer press is dropped: `detail` is 0 when the keyboard
+  // activated the button, and a reader moving by Tab would lose their place in
+  // the page rather than a ring they did not want.
+  if (e.detail) btn.blur();
+  // What a download did is otherwise invisible — the file lands somewhere this
+  // page cannot see. The line that reports an import reports this too.
+  if (status) status.textContent = `${name} 내보냄`;
 });
 
 const file = document.querySelector("[data-hub-import]");
