@@ -1440,6 +1440,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   .memo-fab { right: 1rem; bottom: 1rem; }
   .mark-fab { right: 1rem; bottom: 4.1rem; }
 }
+/* Three cards need more width than two, and a triple that reflows to 2 + 1
+   breaks the parallel the component exists to show — so it goes straight from
+   three tracks to one. */
+@media (max-width: 900px) {
+  .split:has(.sp-card:nth-child(3)) { grid-template-columns: 1fr; }
+}
 @media (max-width: 640px) {
   body { font-size: 14.5px; }
   .shell { padding: 1.25rem .9rem 5rem; }
@@ -1461,7 +1467,21 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   html.js .nav-links, html.js .nav-repo { display: none; }
   html.js .nav-menu { display: grid; }
   .nav-links a { padding: .3rem .35rem; }
+
+  /* The R5 components are all two- or three-track grids sized for a reading
+     column. A phone is one column wide, so at this width each of them stacks
+     rather than wrapping Korean text every second word — a 마이크로 컬럼 that
+     breaks a heading one syllable per line is not a comparison the reader can
+     hold side by side. */
+  .split, .split:has(.sp-card:nth-child(3)) { grid-template-columns: 1fr; }
+  .pt-row { grid-template-columns: 1fr; gap: .25rem; }
+  .sc-row { grid-template-columns: 1fr 3.6rem; row-gap: .2rem; }
+  .sc-label { grid-column: 1 / -1; }
+  .ln-item { grid-template-columns: 1fr; }
+  .ln-note { grid-column: 1; }
+  .sym-row { grid-template-columns: 1fr; gap: .1rem; }
 }
+
 /* Under 360px an unscripted row is down to its labels and its glyphs, and
    there is nothing left in it to drop that is not one of the three places this
    site goes or one of the things it can do — so the last of the width comes
@@ -1471,17 +1491,6 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   .nav-inner { padding: 0 .7rem; }
   html:not(.js) .nav-inner { gap: .3rem; }
   html:not(.js) .nav-links a { padding: .3rem .2rem; }
-  /* The R5 components are all two- or three-track grids. Below this width the
-     tracks are narrower than the Korean text they hold, so each one stacks
-     rather than wrapping every second word. */
-  .split { grid-template-columns: 1fr; }
-  .split:has(.sp-card:nth-child(3)) { grid-template-columns: 1fr; }
-  .pt-row { grid-template-columns: 1fr; gap: .25rem; }
-  .sc-row { grid-template-columns: 1fr 3.6rem; row-gap: .2rem; }
-  .sc-label { grid-column: 1 / -1; }
-  .ln-item { grid-template-columns: 1fr; }
-  .ln-note { grid-column: 1; }
-  .sym-row { grid-template-columns: 1fr; gap: .1rem; }
 }
 
 @media print {
