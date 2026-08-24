@@ -12,7 +12,7 @@ their `<style>` block.
 
 | File | Role |
 |---|---|
-| `wordmark.svg` | The brand lockup, which **is** the README's H1 |
+| `wordmark.svg` | The brand lockup, which **is** the README's H1 — the probe reading its one paper with a coffee steaming beside it |
 | `reading-site.svg` | The reading-site banner |
 | `probe-lost.svg`, `probe-locked.svg` | The two state icons heading the Why-PROBE comparison columns — out of it (dimmed hull, drooping beacon, crossed-out eyes) and on target (clay hull, a beacon under signal arcs, smiling eyes) |
 | `human.svg` | The author bust standing for the human in the *Written by* column of the Who-owns-what table |
@@ -44,20 +44,27 @@ and the pupils down on them), `probe-comparison.svg` weighs (two narrower pages
 riding up and down against each other like the pans of a scale, the raised one's
 lines lit and the eyes turned to it). The moving pages are what tell the
 weighing apart from the read at the size a table cell gives them, since the
-pupils and the lit lines do the same thing in both.
+pupils and the lit lines do the same thing in both. The lockup reads too — the
+same page, the same lit lines — and what separates it from `probe-analysis.svg`
+is the mug: the coffee belongs to the front door alone, where the invitation is
+to take the read at a coffee's pace, and it never follows the character into a
+table cell.
 
 **Marking is done by the gaze, never by a prop.** In `tagline.svg` the sentence
 sits beside a field of the day's papers where three take a crosshair in turn, so
 the picture performs the marking the words claim; the smile swaps to a pair of
 reticles while the three land and returns once they are all up. A handless probe
-holds nothing.
+holds nothing — a prop is placed, not gripped: the page rides under the eyes and
+the mug stands on the ground beside the hull, outside the bob that lifts the
+character off it.
 
 **Animation is inlined and stays in step with the site.** The lockup, the two
 state icons, the three track icons, the tagline banner and the flow diagram
 redraw `site/builder/components.py`'s `mark()` with their animation inlined,
 since a README image carries no external stylesheet. The lockup runs the full
 cycle — bob, signal, blink, wink and the mood swap between round pupils and
-smiling arcs — while every icon holds one mood: the state pair fixed, the track
+smiling arcs — over a page whose lines light in turn under scanning pupils and a
+mug whose steam rises on its own beat, while every icon holds one mood: the state pair fixed, the track
 trio moving through the one thing its own track does. Change `mark()` and these
 change with it.
 

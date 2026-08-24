@@ -2,7 +2,8 @@
 
 # <picture><source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg"><img src="assets/wordmark.svg" width="300" alt="PROBE · Research Scout"></picture>
 
-**Stop drowning in arXiv. Start from three to five papers a run, decision-grade.**
+**Stop drowning in arXiv.**<br>
+**PROBE marks the target. Sit back with a coffee and enjoy the read.**
 
 *Reports in Korean, published to a reading site.*
 
@@ -43,7 +44,7 @@ about each:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/tagline-dark.svg">
   <img src="assets/tagline.svg" width="880"
-       alt="PROBE marks the target. Reading it is still your week.">
+       alt="The day narrows to three. Scored, tied to your open decisions, already in your repo.">
 </picture>
 
 </div>
