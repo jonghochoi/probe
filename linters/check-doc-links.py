@@ -32,7 +32,8 @@ Usage (repo root):
     python3 linters/check-doc-links.py [PATH ...]
 
 No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
-(its Repository-map table), `README.md` and `SETUP.md`, where every path
+(its Repository-map table), `README.md` and `scouting/SETUP.md`, where every
+path
 reference is meant to point at a real file, plus every per-folder rule file
 (`<dir>/CLAUDE.md`) and the `context/` files (MASTER + every pillar) the
 scheduled routine reads every run. The agent-output specs
@@ -86,7 +87,7 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 _DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",
-    "SETUP.md",
+    "scouting/SETUP.md",
     "context/MASTER.md",
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"

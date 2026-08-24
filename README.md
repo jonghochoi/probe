@@ -92,7 +92,7 @@ Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 
 | Track | How to run | Output format |
 |---|---|---|
-| **Scouting** | [`SETUP.md`](SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
+| **Scouting** | [`scouting/SETUP.md`](scouting/SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 

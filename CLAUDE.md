@@ -39,13 +39,13 @@ belongs in that folder's own rule file or README, which the row points at.
 | Path | Owner | Role |
 |---|---|---|
 | `README.md` | human | Project front door — motivation, the pipeline, and which track to trigger for what |
-| `SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; `/analyze` and `/compare` need no routine setup |
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination |
 | `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics and Curated Lists (identical §1–§6 skeleton). A run reads one `P#.md` |
 | `context/_TEMPLATE.md` | human | The §1–§6 skeleton a new pillar is copied from |
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format and its pillar allocation, the "adding a new pillar" checklist |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence). `scouting/templates/report.md` is the skeleton they fill |
 | `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — emoji system, the Reference Legend and its pillar palette (§3-1), link rules, Korean authoring principles |
+| `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; `/analyze` and `/compare` need no routine setup |
 | `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat), from `/analyze`: a Korean re-telling written from the paper's **arXiv HTML original**, carrying its own front matter. One file publishes as **two tabs** — a one-screen 요약 (`::: glance`, where a reader lands) and the body — both written in the same run from the same reading |
 | `analysis/AUTHORING.md` | human | Format contract for `analysis/<id>.md` — front matter (§1), body rules R1–R15 (§2), what publishes as literal text including the KaTeX math forms (§3), the 요약 tab G1–G7 (§4), enforcement (§5) |
 | `comparison/` | agent | Comparisons — one `<slug>.md` per comparison, holding two or three papers under one question; the slug is the question, never the ids joined together. **Only papers with a rewrite in `analysis/` may be compared** |
@@ -57,7 +57,7 @@ belongs in that folder's own rule file or README, which the row points at.
 | `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/` and `comparison/` and nothing else. Folder map: `site/README.md` |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break, and the surfaces keyed to the pillar set |
 | `site/search/` | human | Semantic search over the rewrites — chunker, InsForge schema, indexer, the public endpoint and the operator's `verify.py`. `comparison/` is published but not chunked. Enhancement only: a build without `--search-api` emits no script. Folder map: `site/search/README.md` |
-| `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
+| `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
 | `linters/check-decision-refs.py` | human | Verifies every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` / `comparison/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
 | `linters/check-scouting-format.py` | human | Validates `scouting/P#/YYYY-MM-DD.md` against the `scouting/AUTHORING.md` contract — metadata block, emoji system and section order, the scoring contract (§5) and one-paper-per-row tables (§7-3). Binds reports dated on or after its `_CONTRACT_EFFECTIVE`. Scouting reports reach `main` without a PR, so the **blocking** gate is the routine's own pre-commit self-check (`.claude/prompts/scouting.txt` → SELF-CHECK) and CI is the backstop |
 | `linters/check-commit-style.py` | human | Validates commit subjects / PR titles against the "Commit message style" grammar below. Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
@@ -209,7 +209,8 @@ lockup. A narrative doc with no lockup of its own opens on a real `#` and may
 carry **one leading thematic emoji** right after it and a space (`# 🛸 …`) —
 exactly one, at the start, never at the end and never inside body text.
 
-**Reference / structural** — every `CLAUDE.md`, `SETUP.md`, the three
+**Reference / structural** — every `CLAUDE.md`, `scouting/SETUP.md`, the
+three
 `AUTHORING.md` contracts, `site/README.md` and `site/search/README.md`. Plain
 headers, **no emoji**. Numbered headers (`## N.`, `### N-M.`) are allowed and
 match the existing `scouting/AUTHORING.md`. A folder README's H1 is the folder
@@ -251,7 +252,8 @@ in?":
   `comparison/<slug>.md` and the `scouting/` reports — are Korean, and so are
   the templates those folders ship (`scouting/templates/`).
 - **English — contributor, style and operator docs.** Every `CLAUDE.md`,
-  `SETUP.md`, the three `AUTHORING.md` contracts and the folder READMEs. The
+  `scouting/SETUP.md`, the three `AUTHORING.md` contracts and the folder
+  READMEs. The
   audience is anyone reading PRs or history.
 - **English — the project front door.** `README.md`, the GitHub-rendered top
   page and the single onboarding surface for a newcomer.
@@ -296,8 +298,9 @@ list every time:
       above, and consistent per header level.
 - [ ] **Place it.** A rule binding one folder is that folder's `CLAUDE.md`; an
       output contract is that track's `AUTHORING.md`; a map of what is in a
-      folder is its `README.md`; repo-wide contributor, governance and operator
-      docs sit at the root next to this file. A doc that fits none of those
+      folder is its `README.md`; an operator guide for one track sits in that
+      track's folder; repo-wide contributor and governance docs sit at the
+      root next to this file. A doc that fits none of those
       belongs in one of them rewritten, not in a new file.
 - [ ] **Add a row to the Repository map above** — one line, pointing at the
       doc for anything longer.
@@ -307,6 +310,7 @@ list every time:
       at least one inbound link. Zero = orphan.
 - [ ] **Run `python3 linters/check-doc-links.py`** — the automated backstop for
       the dangling-path half of this list. It scans this file, every folder
-      `CLAUDE.md`, `README.md`, `SETUP.md` and the `context/` files; pass a
+      `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files;
+      pass a
       prompt or an `AUTHORING.md` as an explicit arg to scan it too (they are
       off the default set because they carry illustrative example paths).

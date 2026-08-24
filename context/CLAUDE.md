@@ -67,7 +67,7 @@ a half-added pillar silently drops out of the index and the lints:
       tie, tracked items, mirroring the existing §5.N blocks.
 - [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for it
       (replace every `<PILLAR>` token in `.claude/prompts/scouting.txt` per
-      `SETUP.md`).
+      `scouting/SETUP.md`).
 - [ ] **Extend the pillar-keyed tooling** — four surfaces, one entry each,
       because none of them can read the pillar set from another:
       `PILLAR_NAMES` in `site/builder/corpus.py` (the build's source of truth —
