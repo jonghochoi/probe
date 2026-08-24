@@ -259,10 +259,10 @@ html.js .filters { display: block; }
   font-size: .74rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-/* The corpus's last date rides with the count, close enough to read as one
-   phrase. It states what the whole corpus is, so a filtered count — which is
-   about a subset — drops it (`filter.js`). */
-.filters .status.when { margin-left: -.28rem; }
+/* The corpus's last date rides inside the count's own box rather than beside
+   it: they are one phrase, and two boxes on a wrapping bar are two things that
+   can land on different lines. It states what the whole corpus is, so a
+   filtered count — which is about a subset — drops it (`filter.js`). */
 
 .search {
   display: flex; align-items: center; gap: .45rem;
@@ -310,6 +310,13 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
   background: var(--surface); color: var(--orange);
   box-shadow: var(--shadow-sm);
 }
+
+/* ── The same two groups, folded ──────────────────────────────────────── */
+/* On a bar with room for them the wrapper is not a box at all: the group is
+   the flex item it always was, and the chip that would name it is off the
+   page. What it costs to fold them is in the 680px block. */
+.segwrap { display: contents; }
+.segchip { display: none; }
 
 /* ── 내 서재's three, in the filter bar ───────────────────────────────── */
 /* The rail leaves at 900px and these three would leave with it — and unlike
@@ -995,15 +1002,43 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
   .mast-art { display: none; }
 }
 @media (max-width: 680px) {
-  /* The bar is one column on a phone: search, then the two control groups on
-     a line of their own, then the count. `filter-spacer` collapses so the
-     status does not get pushed off the end. */
-  .filters-inner { row-gap: .45rem; }
+  /* The bar is two lines on a phone: the search box takes one on its own, and
+     everything that narrows the list — 정렬, 한 쪽에, Starred — lines up under
+     it with the count at the end of the same line. Six pill buttons do not fit
+     on that line, so the two groups fold into chips naming what is pressed
+     (below), which is what leaves room for the count to ride along instead of
+     taking a third line and leaving the space beside Starred empty. */
+  .filters-inner { gap: .4rem; row-gap: .45rem; }
+  .search { flex-basis: 100%; max-width: none; }
   .barflags { flex-wrap: wrap; }
-  /* 34편 and 최근 <date> are one phrase; letting the spacer grow on a narrow
-     bar splits them across two lines. It becomes the line break instead, so
-     the pair lands together under the controls. */
-  .filters-inner .filter-spacer { flex-basis: 100%; height: 0; }
+  .filters-inner .filter-spacer { flex: 1; flex-basis: auto; height: auto; }
+
+  /* The chip and the panel it opens. Both are a scripted browser's — with no
+     script the chip cannot open anything, so the groups stay as they are and
+     take the line they need. */
+  html.js .segwrap { display: inline-block; position: relative; }
+  html.js .segchip {
+    font: inherit; font-size: .74rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: 0 .5rem; height: var(--ctl-h);
+    border-radius: var(--radius-pill); cursor: pointer;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); white-space: nowrap;
+  }
+  html.js .segchip[aria-expanded="true"] { border-color: var(--amber-soft); }
+  .segcaret { font-size: .58rem; opacity: .55; }
+  /* The panel is the group itself, stood on end under the chip — same buttons,
+     same pressed state, same handler. */
+  html.js .segwrap > .sort {
+    display: none; position: absolute; z-index: var(--z-panel);
+    top: calc(100% + .3rem); left: 0; min-width: 100%;
+    flex-direction: column; height: auto; padding: .25rem;
+    background: var(--surface); border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+  }
+  html.js .segwrap[data-open] > .sort { display: flex; }
+  html.js .segwrap > .sort button { text-align: left; padding: .38rem .7rem; white-space: nowrap; }
+
   .mast-inner { padding: 1.2rem .9rem 1rem; }
   .mast-line { flex-wrap: wrap; gap: .4rem; }
   .mast h1 { white-space: normal; }
@@ -1030,4 +1065,13 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
      swipes. Hiding the others would make `외 N개` a lie about what is there. */
   .resume { padding-left: .55rem; gap: .3rem; }
   .resume-chip { min-width: 9rem; }
+}
+
+/* The controls' line ends with the count, which is where the reader is looking
+   for it — and the count is what fills the space beside a lone Starred. Under
+   ~380px that line is one word short of holding all of it, and the word that
+   goes is 최근: the date beside a corpus count is its most recent paper whether
+   or not the word is there to say so. */
+@media (max-width: 380px) {
+  .when-word { display: none; }
 }

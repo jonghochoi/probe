@@ -201,7 +201,62 @@ function syncControls() {
   const ranked = !!state.q.trim() && state.sort === "recent";
   sortBtns.forEach((b) => b.setAttribute(
     "aria-pressed", !ranked && b.dataset.sort === state.sort ? "true" : "false"));
+  segs.forEach(nameSeg);
 }
+
+/* ── 정렬 · 한 쪽에, folded into a chip ───────────────────────────────── */
+/* Below 680px each group sits in a panel under a chip (`index.css`), and the
+ * chip says which of the group's buttons is pressed. The name is read off the
+ * pressed button rather than kept beside it: this is the same group the bar
+ * shows at full width, and a label the script maintained separately would be a
+ * second answer to what the list is in.
+ *
+ * While a query ranks the list none of the three sorts is pressed, and the
+ * chip says so — 관련도순 is what the rows are actually in, and printing
+ * 최신순 there would be the control lying about the order.
+ */
+const segs = [...bar.querySelectorAll("[data-seg]")];
+
+function nameSeg(seg) {
+  const chip = seg.querySelector("[data-seg-toggle]");
+  const label = seg.querySelector("[data-seg-label]");
+  const on = seg.querySelector('[aria-pressed="true"]');
+  label.textContent = on ? on.textContent : "관련도순";
+  chip.setAttribute("aria-label", `${chip.dataset.segName}: ${label.textContent}`);
+}
+
+function openSeg(seg) {
+  segs.forEach((s) => {
+    const on = s === seg;
+    s.toggleAttribute("data-open", on);
+    s.querySelector("[data-seg-toggle]").setAttribute("aria-expanded", String(on));
+  });
+}
+
+segs.forEach((seg) => {
+  const chip = seg.querySelector("[data-seg-toggle]");
+  chip.addEventListener("click", () => {
+    const wasOpen = seg.hasAttribute("data-open");
+    openSeg(wasOpen ? null : seg);
+    if (!wasOpen) (seg.querySelector('[aria-pressed="true"]') || chip).focus();
+  });
+  // Choosing is closing: the panel exists to be spent on one press.
+  seg.querySelector(".sort").addEventListener("click", (e) => {
+    if (e.target.closest("button")) openSeg(null);
+  });
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-seg]")) openSeg(null);
+});
+
+addEventListener("keydown", (e) => {
+  const open = segs.find((s) => s.hasAttribute("data-open"));
+  if (e.key === "Escape" && open) {
+    openSeg(null);
+    open.querySelector("[data-seg-toggle]").focus();
+  }
+});
 
 /* ── Query normalisation ──────────────────────────────────────────────── */
 /* The compaction and the particle strip are `match.js` — the palette asks the
@@ -485,6 +540,12 @@ input.addEventListener("input", () => {
   if (debounce) clearTimeout(debounce);
   // Filtering is instant; the delay is only so the hash does not get
   // rewritten on every keystroke.
+  //
+  // The controls are re-read along with it because a query changes what they
+  // say: the first character puts the list in relevance order, which is none
+  // of the three sorts, and the group — and the chip a phone folds it into —
+  // has to stop claiming one.
+  syncControls();
   apply();
   debounce = setTimeout(writeHash, 250);
 });

@@ -364,15 +364,16 @@ def page(
     # `file://`, and opening a built page directly is the fastest way to check
     # a render. Shared state goes on `window.ProbeMemo` instead of exports.
     #
-    # The four unconditional ones are the ones every page carries: theme.js
-    # drives the nav's own button, brand.js the mark beside it, and the ⌘K
-    # palette is reachable from anywhere — so its index, its matching rule and
-    # the script itself ride along too. `defer` runs them in this order, which
-    # is what lets `filter.js` further down the list read `match.js`.
+    # The unconditional ones are the ones every page carries: theme.js drives
+    # the nav's own button, brand.js the mark beside it, nav.js the menu the
+    # nav folds its destinations into on a phone, and the ⌘K palette is
+    # reachable from anywhere — so its index, its matching rule and the script
+    # itself ride along too. `defer` runs them in this order, which is what
+    # lets `filter.js` further down the list read `match.js`.
     script_tags = "".join(
         f'<script src="{asset(f"{up}assets/{s}")}" defer></script>'
-        for s in ["theme.js", "brand.js", "corpus-index.js", "match.js",
-                  "palette.js", *(scripts or [])]
+        for s in ["theme.js", "brand.js", "nav.js", "corpus-index.js",
+                  "match.js", "palette.js", *(scripts or [])]
     )
     return f"""<!DOCTYPE html>
 <html lang="ko" data-theme="light">
@@ -479,19 +480,49 @@ def repo_link() -> str:
     )
 
 
+# Every place the site goes, in the order the nav offers them. The row and the
+# phone's sheet print the same list rather than each keeping their own, so a
+# destination cannot arrive in one and be missing from the other.
+DESTINATIONS = (("index.html", "논문"),
+                ("c/index.html", "같이 읽기"),
+                ("shelf/index.html", "내 서재"))
+
+
+def nav_sheet(up: str) -> str:
+    """The phone's menu — the row's destinations, one per line, plus the way out.
+
+    A phone is not wide enough for the mark, the site's name, three
+    destinations and three glyph controls on one line, and the name is the part
+    that says which site this is. So the destinations fold behind one button
+    and the name stays: the row keeps what a reader cannot reconstruct, and the
+    sheet takes what a label can name in full.
+
+    It is `hidden` until `nav.js` opens it, and the button that opens it is
+    printed only for a scripted browser — an unscripted phone keeps the row of
+    links it always had, and gives up the name instead (`site.css`).
+    """
+    links = "".join(
+        f'<a href="{up}{href}">{label}</a>' for href, label in DESTINATIONS)
+    return (f'<div class="nav-sheet" id="nav-sheet" hidden>{links}'
+            f'<a class="nav-sheet-out" href="{REPO_URL}" target="_blank" '
+            'rel="noopener noreferrer">GitHub 저장소 ↗</a></div>')
+
+
 def nav(up: str) -> str:
+    links = "".join(
+        f'<li><a href="{up}{href}">{label}</a></li>'
+        for href, label in DESTINATIONS)
     return f"""<nav class="site-nav">
   <div class="nav-inner">
     <a class="nav-logo" href="{up}index.html">{mark(19)}<span class="nav-word">PROBE</span></a>
     <span class="nav-spacer"></span>
-    <ul class="nav-links">
-      <li><a href="{up}index.html">논문</a></li>
-      <li><a href="{up}c/index.html">같이 읽기</a></li>
-      <li><a href="{up}shelf/index.html">내 서재</a></li>
-    </ul>
+    <ul class="nav-links">{links}</ul>
     {cmdk_button()}
     <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">☾</button>
     {repo_link()}
+    <button class="icon-btn nav-menu" data-nav-menu aria-expanded="false"
+            aria-controls="nav-sheet" aria-label="메뉴 열기" title="메뉴">☰</button>
   </div>
+  {nav_sheet(up)}
 </nav>"""
 

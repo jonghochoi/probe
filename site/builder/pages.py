@@ -130,6 +130,28 @@ def _page_sizes() -> str:
     )
 
 
+def _seg(name: str, cls: str, buttons: str) -> str:
+    """A pill group, and the chip a phone folds it into.
+
+    The group is the same three buttons at every width — `filter.js` binds
+    them, presses one and reads the pressed one back, and none of that knows
+    the chip exists. What changes below 680px is where the group sits: it
+    becomes a panel under a chip that names the choice currently pressed, so
+    the bar carries 정렬 and 한 쪽에 in the width of two words rather than six.
+
+    The chip's label is filled in by `filter.js` off the pressed button, for
+    the same reason the shelf facets get their counts there: printing it twice
+    is two places for it to disagree with what the list is actually in.
+    """
+    return (f'<div class="segwrap" data-seg>'
+            f'<button type="button" class="segchip" data-seg-toggle '
+            f'data-seg-name="{c.esc(name)}" aria-expanded="false" '
+            f'aria-haspopup="true"><span data-seg-label></span>'
+            f'<span class="segcaret" aria-hidden="true">▾</span></button>'
+            f'<div class="sort {cls}" role="group" aria-label="{c.esc(name)}">'
+            f'{buttons}</div></div>')
+
+
 def _pager(total: int) -> str:
     """The page strip under the list — every page it could ever need, at once.
 
@@ -292,16 +314,15 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
              aria-label="논문 검색">
       {_search_go(search_api)}
     </label>
-    <div class="sort" role="group" aria-label="정렬">
-      <button type="button" data-sort="recent" aria-pressed="true">최신순</button>
-      <button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>
-      <button type="button" data-sort="title" aria-pressed="false">제목순</button>
-    </div>
-    <div class="sort psize" role="group" aria-label="한 쪽에 몇 편">{_page_sizes()}</div>
+    {_seg("정렬", "", '<button type="button" data-sort="recent" aria-pressed="true">최신순</button>'
+                      '<button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>'
+                      '<button type="button" data-sort="title" aria-pressed="false">제목순</button>')}
+    {_seg("한 쪽에 몇 편", "psize", _page_sizes())}
     <div class="barflags" role="group" aria-label="내 서재">{bar_mine}</div>
     <span class="filter-spacer"></span>
-    <span class="status" data-result-count>{len(ordered)}편</span>
-    {f'<span class="status when" data-corpus-when>· 최근 {c.esc(ordered[0].date)}</span>' if ordered else ""}
+    <span class="status"><span data-result-count>{len(ordered)}편</span>{
+      f'<span data-corpus-when> · <span class="when-word">최근 </span>'
+      f'{c.esc(ordered[0].date)}</span>' if ordered else ""}</span>
     <button type="button" class="linkish" data-reset hidden>필터 초기화</button>
   </div>
 </div>
