@@ -74,7 +74,7 @@ jobs:
         # removes KaTeX and breaks the math render.
         run: |
           npm install --no-save --prefix site/builder \
-            katex@0.16.22 pretendard @fontsource/jetbrains-mono
+            katex@0.16.22 pretendard jetbrains-mono
 
       - name: Cache rendered formulas
         # Formulas are keyed by sha256(tex|display), so a warm cache turns the

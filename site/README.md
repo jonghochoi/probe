@@ -42,7 +42,7 @@ so the two parsers stay separate.
 ```bash
 pip install -r site/requirements.txt
 npm install --no-save --prefix site/builder \
-  katex@0.16.22 pretendard @fontsource/jetbrains-mono
+  katex@0.16.22 pretendard jetbrains-mono
 python3 site/build-site.py --serve        # http://127.0.0.1:8000/probe/
 ```
 
