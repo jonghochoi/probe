@@ -24,7 +24,7 @@
 
 ## Why PROBE
 
-**50–100 new papers** land on `cs.RO` + `cs.LG` every day. Maybe 3–5 a week
+**50–100 new papers** land on `cs.RO` + `cs.LG` every day. Maybe **3–5 a week**
 touch dexterous manipulation. PROBE finds those and answers three things
 about each:
 
@@ -91,13 +91,13 @@ session.
 
 | Track | How to run | Output format |
 |---|---|---|
-| **Scouting** | [`scouting/SETUP.md`](scouting/SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
+| **Scouting** | scheduled routine — [`scouting/SETUP.md`](scouting/SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 
 - **Start by hand.** Fill `context/`, run one report yourself, review it
   ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.
-- **One paper per `/analyze`**, named explicitly. No `scouting/` → `analysis/`
+- **One paper per `/analyze`, named explicitly.** No `scouting/` → `analysis/`
   hand-off.
 - **No arXiv HTML edition → skipped.** Never written from the abstract.
 - **`/compare` reads only what `analysis/` already holds.** Run `/analyze` on
