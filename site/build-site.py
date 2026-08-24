@@ -18,6 +18,7 @@ server-side math (`--katex=client` renders in the browser instead).
 from __future__ import annotations
 
 import argparse
+import html as htmllib
 import json
 import os
 import re
@@ -28,6 +29,14 @@ from pathlib import Path
 # Tag names and attribute values are never painted, so they must not drag
 # glyphs into the subset; `<script>`/`<style>` bodies likewise.
 _TEXT_ONLY = re.compile(r"<(script|style)[^>]*>.*?</\1>|<[^>]+>", re.S)
+
+# Every code fence (R8) and pseudocode transcription lands inside a `<pre>` —
+# `_code_box` wraps both the syntax-highlighted and the plain path in one.
+# This is the text JetBrains Mono actually has to render, which is why its
+# subset is cut from this narrower set instead of the whole-page `charset`
+# below (fonts.mono_coverage_gap reports on it too).
+_PRE_BLOCK = re.compile(r"<pre\b[^>]*>(.*?)</pre>", re.S)
+_TAG = re.compile(r"<[^>]+>")
 
 _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
@@ -134,9 +143,12 @@ def build(args) -> int:
     # as asset text for the same reason.
     extras = assets_out.OPTIONAL["search"] if args.search_api else ()
     charset = set(assets_out.asset_text(extras)) | set(index_js)
-    for html in final.values():
-        charset |= set(_TEXT_ONLY.sub(" ", html))
-    stats = assets_out.copy_all(out, charset, extras)
+    mono_charset: set[str] = set()
+    for page_html in final.values():
+        charset |= set(_TEXT_ONLY.sub(" ", page_html))
+        for body in _PRE_BLOCK.findall(page_html):
+            mono_charset |= set(htmllib.unescape(_TAG.sub("", body)))
+    stats = assets_out.copy_all(out, charset, extras, mono_charset=mono_charset)
     (out / "assets" / "corpus-index.js").write_text(index_js, encoding="utf-8")
     size = len(index_js.encode("utf-8"))
     if size > pages.INDEX_BUDGET:
@@ -164,7 +176,7 @@ def build(args) -> int:
         sys.stderr.write(
             "warning: no Pretendard subset written — install the build fonts with\n"
             "         npm install --no-save --prefix site/builder \\\n"
-            "           katex@0.16.22 pretendard @fontsource/jetbrains-mono\n"
+            "           katex@0.16.22 pretendard jetbrains-mono\n"
             "         (the site falls back to system fonts)\n"
         )
     for line in problems:

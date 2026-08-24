@@ -437,6 +437,20 @@ configs, diffs. The info string carries two things:
   Write it in Korean, as a noun phrase, and say what the block *demonstrates* —
   not what language it is in, which the chip already said.
 - Horizontal scrolling is confined to the block; body text never shifts.
+- **A code block renders in a webfont built from this corpus, not the whole of
+  Unicode.** `site/builder/fonts.py` embeds exactly the characters the
+  corpus's code fences use, and the build warns (`mono font gap`) on one it
+  cannot cover — that is the paper's own Greek letters, arrows and operators
+  transcribed straight out of a paper's Algorithm block (τ, Δ, →, x̂), which
+  the embedded set already spans. What it does not: a precomposed accented
+  Latin letter with no plain decomposition (ẑ, U+1E91) where the paper's own
+  x̂ / z̄ elsewhere in the same block already write it as the base letter plus
+  a combining accent — match that form instead of the single precomposed
+  glyph; and a symbol with an ordinary ASCII stand-in inside pseudocode (`||`
+  for norm bars, not `‖`; circled digits as `(1)`, `(2)`, not `①②`). A symbol
+  that is genuine paper notation, not a transcription convention, belongs in
+  inline math (`` $`\mathcal N`$ ``, §3-1) instead, which KaTeX renders with no
+  such gap.
 
 ### 2-9. R9 — Callouts: five roles, mechanically applied
 

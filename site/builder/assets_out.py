@@ -139,7 +139,8 @@ def version() -> str:
 
 
 def copy_all(out: Path, charset: set[str] | None = None,
-             extras: tuple[str, ...] = ()) -> dict:
+             extras: tuple[str, ...] = (),
+             mono_charset: set[str] | None = None) -> dict:
     dest = out / "assets"
     dest.mkdir(parents=True, exist_ok=True)
 
@@ -148,7 +149,7 @@ def copy_all(out: Path, charset: set[str] | None = None,
         if src.is_file():
             shutil.copy2(src, dest / name)
 
-    font_stats = fonts.emit(dest, charset or set())
+    font_stats = fonts.emit(dest, charset or set(), mono_charset)
 
     stats = {"fonts": 0, "katex": False, "problems": [], **font_stats}
     if _KATEX_DIST.is_dir():
@@ -156,7 +157,10 @@ def copy_all(out: Path, charset: set[str] | None = None,
         (kdir / "fonts").mkdir(parents=True, exist_ok=True)
         css = (_KATEX_DIST / "katex.min.css").read_text(encoding="utf-8")
         slim = _woff2_only(css)
-        stats["problems"] = _check_intact(css, slim)
+        # Appended, not assigned — `font_stats["problems"]` (the mono
+        # coverage-gap warning) already sits in `stats["problems"]` via the
+        # spread above, and a plain `=` here would silently drop it.
+        stats["problems"] += _check_intact(css, slim)
         (kdir / "katex.min.css").write_text(slim, encoding="utf-8")
         for font in sorted((_KATEX_DIST / "fonts").glob("*.woff2")):
             shutil.copy2(font, kdir / "fonts" / font.name)
