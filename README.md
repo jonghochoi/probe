@@ -10,10 +10,6 @@
 
 *Reports in Korean, published to a reading site.*
 
-[![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
-[![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
-[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
-
 <a href="https://jonghochoi.github.io/probe/">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/reading-site-dark.svg">
@@ -21,6 +17,10 @@
          alt="Read the analyses — jonghochoi.github.io/probe">
   </picture>
 </a>
+
+[![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
+[![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
+[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 
 </div>
 
