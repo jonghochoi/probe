@@ -10,19 +10,6 @@ import html
 
 from . import assets_out
 
-# The mark at 16 px, inlined as a data URI so the zero-third-party rule holds
-# and no extra request is made for a tab icon. Two shapes and two tones: the
-# hull and the pupil are all that survives at this size, and they are enough —
-# a tab full of favicons is scanned for silhouette, not for detail.
-FAVICON = (
-    "data:image/svg+xml,"
-    "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
-    "%3Crect width='32' height='32' rx='8' fill='%23D97757'/%3E"
-    "%3Ccircle cx='16' cy='5.6' r='2.1' fill='%23fff'/%3E"
-    "%3Crect x='5.5' y='9' width='21' height='18' rx='6.4' fill='%23fff'/%3E"
-    "%3Ccircle cx='12.2' cy='18' r='2.5' fill='%232a1a12'/%3E"
-    "%3Ccircle cx='19.8' cy='18' r='2.5' fill='%232a1a12'/%3E%3C/svg%3E"
-)
 
 
 def asset(url: str) -> str:
@@ -320,6 +307,31 @@ def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) 
 """.strip()
 
 
+def icon_links(up: str) -> str:
+    """Every icon the document declares, as real files rather than a data URI.
+
+    A data URI reaches exactly one consumer — a browser that parses the
+    markup — and the tab is not the only thing that asks for an icon. A feed
+    reader, a bookmark manager, a chat unfurl and iOS's home screen each go
+    looking for a file, and the deployed site sits under `/probe/`, so the
+    `/favicon.ico` those clients fall back to is not even this site's to
+    answer. Naming the files is what puts an icon in all of them.
+
+    The SVG is the one a browser prefers and the only one that follows the
+    reader's colour scheme; the 32 px PNG is what a client that will not take
+    an SVG icon gets instead, listed after it so the SVG wins wherever both
+    are understood. `theme-color` tints the browser chrome around the page on
+    the platforms that paint it, and is a pair because the page itself is.
+    """
+    return "\n".join([
+        f'<link rel="icon" type="image/svg+xml" href="{asset(f"{up}assets/favicon.svg")}">',
+        f'<link rel="icon" type="image/png" sizes="32x32" href="{asset(f"{up}assets/favicon-32.png")}">',
+        f'<link rel="apple-touch-icon" sizes="180x180" href="{asset(f"{up}assets/apple-touch-icon.png")}">',
+        '<meta name="theme-color" content="#faf7f5" media="(prefers-color-scheme: light)">',
+        '<meta name="theme-color" content="#14110f" media="(prefers-color-scheme: dark)">',
+    ])
+
+
 def page(
     *,
     title: str,
@@ -364,7 +376,7 @@ def page(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(title)}</title>
 {f'<meta name="description" content="{esc(description)}">' if description else ""}
-<link rel="icon" href="{FAVICON}">
+{icon_links(up)}
 <link rel="stylesheet" href="{asset(f"{up}assets/fonts.css")}">
 <link rel="stylesheet" href="{asset(f"{up}assets/katex/katex.min.css")}">
 <link rel="stylesheet" href="{asset(f"{up}assets/site.css")}">
