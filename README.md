@@ -18,6 +18,8 @@
   </picture>
 </a>
 
+<br>
+
 [![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
 
@@ -88,6 +90,10 @@ Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 ---
 
 ## Use it
+
+The two on-demand tracks are slash commands typed in a
+[Claude Code](https://claude.com/claude-code) session on this repo. Scouting
+is the same kind of prompt, on a schedule.
 
 | Track | How to run | Output format |
 |---|---|---|
