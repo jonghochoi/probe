@@ -13,7 +13,6 @@
 [![Claude](https://img.shields.io/badge/Claude-Agent-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
 [![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
 [![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 <a href="https://jonghochoi.github.io/probe/">
   <picture>
