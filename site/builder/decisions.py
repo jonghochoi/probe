@@ -1,7 +1,7 @@
 """Harvest the Decision Log so a bare `D<n>` in prose can carry its title.
 
 The Decision Log lives per pillar in `context/P<m>.md` §3, one entry shaped
-`#### [D<n>] <title> (P<m>)` (CLAUDE.md "Decision-Log entry format"). The site
+`#### [D<n>] <title> (P<m>)` (context/CLAUDE.md "Decision-Log entry format"). The site
 reads it to turn every `D<n>` citation in a rewrite into a tooltip naming the
 decision the opinion anchors to.
 

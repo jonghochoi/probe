@@ -121,7 +121,7 @@ PROCEDURE
 2. READ the paper end to end BEFORE anything of ours. Reading our material
    first anchors you to its framing and you will reproduce its omissions.
 
-3. READ `analysis/AUTHORING.md` — the full format contract, §1 through §4.
+3. READ `analysis/AUTHORING.md` — the full format contract, §1 through §5.
 
 4. READ `context/MASTER.md` and the `context/P#.md` for the pillars this
    paper plausibly touches. That is where act 4 and the `pillars:` front

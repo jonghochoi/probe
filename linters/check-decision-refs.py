@@ -2,7 +2,7 @@
 """Check that D# decision citations in agent outputs resolve to the Decision Log.
 
 The Decision Log is allocated per pillar (`context/P#.md` §3, entries shaped
-`#### [D<n>] <title> (P<m>)` — see CLAUDE.md "Decision-Log entry format"), and
+`#### [D<n>] <title> (P<m>)` — see context/CLAUDE.md "Decision-Log entry format"), and
 analysis / scouting outputs cite decisions constantly (`P1 / D4`,
 `[![D6]](…)`, "feeds P4 D22"). Nothing verified those citations: a typo'd
 `D14` in a P1 doc, or a decision renumbered in `context/`, went undetected.

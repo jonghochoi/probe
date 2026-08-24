@@ -6,7 +6,8 @@ build-time dependencies. The site publishes `analysis/<arxiv-id>.md` and
 
 One rewrite becomes **two tabs on one page** — 요약 (one screen, the tab a
 reader lands on) and 상세 (the body). Both come out of the same source file and
-the same `/analyze` run; `analysis/AUTHORING.md` §4 and §5 are their contracts.
+the same `/analyze` run; their contracts are `analysis/AUTHORING.md` §4 (요약)
+and §1–§3 (상세).
 
 The corpus itself stays at the repo root (`analysis/`), next to the other
 agent-written track (`scouting/`), and so does its format contract
