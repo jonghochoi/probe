@@ -59,9 +59,6 @@ about each:
        alt="PROBE pipeline — the day's arXiv narrowed to 3–5 papers, out to a scouting report and an analysis page, and back through the human into context/">
 </picture>
 
-[![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
-[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
-
 </div>
 
 The agent **never** edits a `context/` file. It proposes in a report, the human
@@ -98,12 +95,17 @@ session.
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 
-- **One paper per `/analyze`**, named explicitly. No automatic `scouting/` →
-  `analysis/` hand-off.
+- **Start by hand.** Fill `context/`, run one report yourself, review it
+  ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.
+- **One paper per `/analyze`**, named explicitly. No `scouting/` → `analysis/`
+  hand-off.
 - **No arXiv HTML edition → skipped.** Never written from the abstract.
-- **`/compare` only reads papers already rewritten.** Run `/analyze` on each
-  first. A comparison naming a paper the corpus lacks is not published.
-- **Starting from empty** — fill `context/`, generate one report by hand, review
-  it ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a
-  timer.
+- **`/compare` reads only what `analysis/` already holds.** Run `/analyze` on
+  each paper first.
 
+<div align="center">
+
+[![arXiv API](https://img.shields.io/badge/arXiv-API-B06749?logo=arxiv&logoColor=white&labelColor=1F1611)](https://info.arxiv.org/help/api/index.html)
+[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-B06749?labelColor=1F1611)](https://api.semanticscholar.org/)
+
+</div>
