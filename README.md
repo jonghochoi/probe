@@ -18,11 +18,6 @@
   </picture>
 </a>
 
-<br>
-
-[![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
-[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
-
 </div>
 
 ---
@@ -64,6 +59,9 @@ about each:
        alt="PROBE pipeline — the day's arXiv narrowed to 3–5 papers, out to a scouting report and an analysis page, and back through the human into context/">
 </picture>
 
+[![arXiv API](https://img.shields.io/badge/arXiv-API-B31B1B?logo=arxiv&logoColor=white)](https://info.arxiv.org/help/api/index.html)
+[![Semantic Scholar](https://img.shields.io/badge/Semantic%20Scholar-Graph%20API-1857B6)](https://api.semanticscholar.org/)
+
 </div>
 
 The agent **never** edits a `context/` file. It proposes in a report, the human
@@ -81,9 +79,9 @@ stops it re-recommending last month's papers as `context/` grows.
 
 **Pillars.** The context split is what keeps one run narrow.
 
-- `context/MASTER.md` — cross-cutting content only; every run reads it.
+- `context/MASTER.md` — cross-cutting content only. Every run reads it.
 - `context/P#.md` — one pillar's decision log, tracked literature and
-  anti-topics; a scouting run reads **exactly one**.
+  anti-topics. A scouting run reads **exactly one**.
 
 Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 
@@ -91,9 +89,8 @@ Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
 
 ## Use it
 
-The two on-demand tracks are slash commands typed in a
-[Claude Code](https://claude.com/claude-code) session on this repo. Scouting
-is the same kind of prompt, on a schedule.
+The slash commands run in a [Claude Code](https://claude.com/claude-code)
+session.
 
 | Track | How to run | Output format |
 |---|---|---|
@@ -105,7 +102,7 @@ is the same kind of prompt, on a schedule.
   `analysis/` hand-off.
 - **No arXiv HTML edition → skipped.** Never written from the abstract.
 - **`/compare` only reads papers already rewritten.** Run `/analyze` on each
-  first; a comparison naming a paper the corpus lacks is not published.
+  first. A comparison naming a paper the corpus lacks is not published.
 - **Starting from empty** — fill `context/`, generate one report by hand, review
   it ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a
   timer.
