@@ -10,6 +10,11 @@ import html
 
 from . import assets_out
 
+# Where the repository lives. The nav links it on every page, and `pages.py`
+# builds the blob and Discussions URLs off the same string — one name for the
+# one place the site's source, its context files and its threads all are.
+REPO = "jonghochoi/probe"
+REPO_URL = f"https://github.com/{REPO}"
 
 
 def asset(url: str) -> str:
@@ -428,10 +433,56 @@ def cmdk_button() -> str:
             'stroke-linecap="round"/></svg></button>')
 
 
+# GitHub's own mark, the one shape a reader recognises as "the source is over
+# there". One path at a 16 px viewBox, inlined like every other glyph here —
+# the site fetches nothing from a third party, least of all a logo.
+GITHUB_MARK = (
+    "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0"
+    "-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13"
+    "-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66"
+    ".07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15"
+    "-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0"
+    " 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82"
+    " 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01"
+    " 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+)
+
+
+def repo_link() -> str:
+    """The way out to the repository, on every page.
+
+    The site publishes one half of this project — the rewrites and the
+    comparisons — and the other half is the part that produced them: the
+    prompts, the human's `context/`, the format contracts, this generator. A
+    reader who wants to know how a paper came to be written this way has
+    nowhere on the site to go and ask.
+
+    It sits last in the nav, past the theme toggle, and is spaced and drawn
+    exactly like it: the three of them are one row of glyph-sized controls, and
+    a glyph set apart by its border or by its spacing reads as a control that
+    lost something rather than as one of a different kind. Last is what says it
+    is of a different kind, and it is also what lets it arrive without moving
+    anything that was already in reach.
+
+    The glyph alone, like the two controls beside it, with the destination in
+    the `title` and in `aria-label` — an icon-sized link is nothing to a screen
+    reader unless it is named. Nothing here needs a script, so unlike the ⌘K
+    button this one is on an unscripted page too.
+    """
+    return (
+        f'<a class="icon-btn nav-repo" href="{REPO_URL}" '
+        'target="_blank" rel="noopener noreferrer" '
+        'aria-label="GitHub 저장소 (새 탭)" title="GitHub 저장소">'
+        '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" '
+        f'focusable="false"><path fill="currentColor" d="{GITHUB_MARK}"/>'
+        '</svg></a>'
+    )
+
+
 def nav(up: str) -> str:
     return f"""<nav class="site-nav">
   <div class="nav-inner">
-    <a class="nav-logo" href="{up}index.html">{mark(19)}PROBE</a>
+    <a class="nav-logo" href="{up}index.html">{mark(19)}<span class="nav-word">PROBE</span></a>
     <span class="nav-spacer"></span>
     <ul class="nav-links">
       <li><a href="{up}index.html">논문</a></li>
@@ -440,6 +491,7 @@ def nav(up: str) -> str:
     </ul>
     {cmdk_button()}
     <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">☾</button>
+    {repo_link()}
   </div>
 </nav>"""
 
