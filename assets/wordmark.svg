@@ -8,13 +8,25 @@
     .beacon { fill: #CC785C; }
     .wave   { fill: none; stroke: #CC785C; stroke-width: 2.6;
               stroke-linecap: round; opacity: 0; }
+    .page   { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; }
+    .line   { fill: #B06749; opacity: .3; }
+    .mug    { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; stroke-linejoin: round; }
+    .handle { fill: none; stroke: #B06749; stroke-width: 2.4; stroke-linecap: round; }
+    .brew   { fill: #B06749; }
+    .steam  { fill: none; stroke: #CC785C; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
     .shadow { fill: #CC785C; opacity: .55; }
     .rig   { animation: bob 3.4s ease-in-out infinite; }
     .w1    { animation: ping 2.6s ease-in-out infinite; }
     .w2    { animation: ping 2.6s ease-in-out .34s infinite; }
     .lid   { animation: blink 5.4s ease-in-out infinite; }
-    .pupil { animation: mood-open 14s ease-in-out infinite; }
+    .pupil { animation: mood-open 14s ease-in-out infinite,
+                        read 3.6s ease-in-out infinite; }
     .joy   { animation: mood-joy 14s ease-in-out infinite; }
+    .l1    { animation: lit 4.8s ease-in-out infinite; }
+    .l2    { animation: lit 4.8s ease-in-out 1.6s infinite; }
+    .l3    { animation: lit 4.8s ease-in-out 3.2s infinite; }
+    .s1    { animation: steam 3.8s ease-in-out infinite; }
+    .s2    { animation: steam 3.8s ease-in-out 1.9s infinite; }
     .eL, .eL .lid { transform-origin: 36px 52px; }
     .eR, .eR .lid { transform-origin: 60px 52px; }
     @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
@@ -23,10 +35,19 @@
                        92% { transform: scaleY(.06); } 96% { transform: scaleY(1); } }
     @keyframes mood-open { 0%, 46%, 100% { opacity: 1; } 50%, 96% { opacity: 0; } }
     @keyframes mood-joy  { 0%, 46%, 100% { opacity: 0; } 50%, 96% { opacity: 1; } }
+    @keyframes read  { 0% { transform: translateX(-2.4px); }
+                       72% { transform: translateX(2.4px); }
+                       86%, 100% { transform: translateX(-2.4px); } }
+    @keyframes lit   { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
+    @keyframes steam { 0% { opacity: 0; transform: translateY(2px); }
+                       30%, 55% { opacity: .7; }
+                       100% { opacity: 0; transform: translateY(-6px); } }
     @media (prefers-reduced-motion: reduce) {
-      .rig, .lid, .pupil, .joy, .wave { animation: none; }
+      .rig, .lid, .pupil, .joy, .wave, .line, .steam { animation: none; }
       .joy { opacity: 0; }
       .wave { opacity: .5; }
+      .line { opacity: .55; }
+      .steam { opacity: .55; }
     }
   </style>
 
@@ -38,8 +59,22 @@
       <path class="stalk" d="M48 26 V19"/>
       <circle class="beacon" cx="48" cy="16" r="5"/>
       <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
-      <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="52" r="5"/><path class="joy" d="M30 54 a6.5 6.5 0 0 1 12 0"/></g></g>
-      <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="52" r="5"/><path class="joy" d="M54 54 a6.5 6.5 0 0 1 12 0"/></g></g>
+      <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="56.5" r="5"/><path class="joy" d="M30 54 a6.5 6.5 0 0 1 12 0"/></g></g>
+      <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="56.5" r="5"/><path class="joy" d="M54 54 a6.5 6.5 0 0 1 12 0"/></g></g>
+      <g transform="rotate(-5 48 75.5)">
+        <rect class="page" x="25" y="67" width="46" height="17" rx="3"/>
+        <rect class="line l1" x="31" y="70.6" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l2" x="31" y="74.4" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l3" x="31" y="78.2" width="22" height="2.2" rx="1.1"/>
+      </g>
+    </g>
+    <g class="cup">
+      <ellipse class="shadow" cx="91.5" cy="90" rx="9.4" ry="2.6"/>
+      <path class="steam s1" d="M87.6 63 c-3 -3.2 3 -5.2 0 -8.6"/>
+      <path class="steam s2" d="M95 62 c-3 -3.2 3 -5.2 0 -8.6"/>
+      <path class="handle" d="M99.6 72.6 a5 5 0 0 1 0 9.6"/>
+      <path class="mug" d="M83 68 h17 l-1.9 17.4 a3.2 3.2 0 0 1 -3.2 3.1 h-6.8 a3.2 3.2 0 0 1 -3.2 -3.1 Z"/>
+      <ellipse class="brew" cx="91.5" cy="68" rx="8.5" ry="2.5"/>
     </g>
   </g>
 
