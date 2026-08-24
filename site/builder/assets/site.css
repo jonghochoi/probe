@@ -1288,8 +1288,14 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    quiz — and wearing it makes each half of a two-up comparison read as its own
    callout interrupting the flow, which is the opposite of holding two things
    side by side. A card inside a multi-card grid is keyed by its heading. */
-.sp-cold .sp-head { color: var(--blue); }
-.sp-warm .sp-head { color: var(--orange); }
+/* One card at most wears a color, and it is the site's own accent — the same
+   orange that marks this paper's row in 숫자의 지형 and the reader's place in
+   계보, so one page says "여기가 이 논문의 자리" with one color everywhere. The
+   other cards stay plain: they are peers, and a second color on a peer says
+   there are two positions. Keeping it to one slot is also what lets a
+   contrast grow a card without the palette repeating itself. */
+.sp-us { border-color: var(--amber-soft); }
+.sp-us .sp-head { color: var(--orange); }
 
 /* One object decomposed into named regions. */
 /* Rows run edge to edge and divide themselves: the regions are one object cut

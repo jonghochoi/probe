@@ -373,15 +373,20 @@ def scale(data: dict, inline_md) -> str:
 
 # ── ```probe-split ──────────────────────────────────────────────────────────
 
-_SPLIT_TONES = {"cold", "warm", "plain"}
-
-
 def split(data: dict, inline_md) -> str:
     """R5's 대조 — two or three things the paper holds apart, held apart here.
 
     The paper's contrast is structural (this channel is slow, that one is
     fast); rendering it as consecutive paragraphs asks the reader to rebuild
     the parallel from prose. Cards put the parallel in the layout.
+
+    At most one card carries `us` — the position this paper takes in the
+    contrast — and it is the only card that gets a color, the same accent that
+    marks this paper's row in 숫자의 지형 and the reader's place in 계보. The
+    cards are peers until one of them is the paper's own, so a second color
+    would have to mean something, and there is nothing left for it to mean; a
+    palette handed out per card instead says only that the cards are numbered,
+    and runs out the moment a contrast grows.
     """
     cards = data.get("cards")
     if not isinstance(cards, list) or not 2 <= len(cards) <= 3:
@@ -390,19 +395,23 @@ def split(data: dict, inline_md) -> str:
             f"{len(cards) if isinstance(cards, list) else type(cards).__name__}"
         )
     out = ""
+    marked = ""
     for card in cards:
         if not isinstance(card, dict) or not card.get("title") or not card.get("body"):
             raise FenceError(f"probe-split: each card needs `title` and `body` (got {card!r})")
-        tone = str(card.get("tone", "plain")).strip() or "plain"
-        if tone not in _SPLIT_TONES:
+        us = bool(card.get("us"))
+        if us and marked:
             raise FenceError(
-                f"probe-split[{card['title']}]: `tone` must be one of "
-                f"{', '.join(sorted(_SPLIT_TONES))} — got {tone!r}"
+                f"probe-split[{card['title']}]: `us` is already on "
+                f"[{marked}] — one card is the position this paper takes and "
+                f"the rest are what it is held against, so only one carries it"
             )
+        if us:
+            marked = str(card["title"])
         tag = str(card.get("tag", "")).strip()
         note = str(card.get("note", "")).strip()
         out += (
-            f'<div class="sp-card sp-{_esc(tone)}">'
+            f'<div class="sp-card{" sp-us" if us else ""}">'
             f'<p class="sp-head">{inline_md(str(card["title"]))}'
             + (f'<span class="sp-tag">{_esc(tag)}</span>' if tag else "")
             + "</p>"
