@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="880" height="88" viewBox="0 0 880 88" role="img"
-     aria-label="The day narrows to three. Scored, tied to your open decisions, already in your repo.">
+     aria-label="The day narrows to a shortlist. Scored, tied to your open decisions, already in your repo.">
   <style>
     .card   { fill: #FFFCFA; }
     .edge   { fill: none; stroke: #E8CDBD; }
@@ -63,7 +63,7 @@
     </g>
   </g>
 
-  <text class="m head" x="94" y="45" font-size="20" font-weight="700">The day narrows to three.</text>
+  <text class="m head" x="94" y="45" font-size="20" font-weight="700">The day narrows to a shortlist.</text>
   <text class="s sub" x="95" y="66" font-size="13">Scored, tied to your open decisions, already in your repo.</text>
 
     <circle class="dot" cx="566" cy="26" r="2.6"/>

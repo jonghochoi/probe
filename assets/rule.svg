@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="10" viewBox="0 0 560 10" role="presentation" aria-hidden="true">
+  <style>
+    .accent { stop-color: #B06749; }
+  </style>
+
+  <defs>
+    <linearGradient id="rule" x1="0" x2="1">
+      <stop class="accent" offset="0" stop-opacity="0"/>
+      <stop class="accent" offset=".5"/>
+      <stop class="accent" offset="1" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect y="4" width="560" height="2" rx="1" fill="url(#rule)"/>
+</svg>

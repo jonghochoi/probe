@@ -1,9 +1,12 @@
 <div align="center">
 
-# <picture><source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg"><img src="assets/wordmark.svg" width="300" alt="PROBE · Research Scout"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg"><img src="assets/wordmark.svg" width="300" alt="PROBE · Research Scout"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/rule-dark.svg"><img src="assets/rule.svg" width="560" alt=""></picture>
 
 **Stop drowning in arXiv.**<br>
-**PROBE marks the target. Sit back with a coffee and enjoy the read.**
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/claim-dark.svg"><img src="assets/claim.svg" width="300" alt="PROBE marks the target."></picture><br>
+**Sit back with a coffee and enjoy the read.**
 
 *Reports in Korean, published to a reading site.*
 
@@ -44,7 +47,7 @@ about each:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/tagline-dark.svg">
   <img src="assets/tagline.svg" width="880"
-       alt="The day narrows to three. Scored, tied to your open decisions, already in your repo.">
+       alt="The day narrows to a shortlist. Scored, tied to your open decisions, already in your repo.">
 </picture>
 
 </div>
