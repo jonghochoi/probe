@@ -257,9 +257,9 @@ reader should see the stub.
 **3. 대조** — two or three things held apart, or one object decomposed.
 
     ```probe-split
-    {"cards": [{"title": "<A>", "tag": "<짧은 꼬리표>", "tone": "cold",
+    {"cards": [{"title": "<A>", "tag": "<짧은 꼬리표>",
                 "body": "<본문>", "note": "<한 줄 논평>"},
-               {"title": "<B>", "tag": "<짧은 꼬리표>", "tone": "warm",
+               {"title": "<B>", "tag": "<짧은 꼬리표>", "us": true,
                 "body": "<본문>", "note": "<한 줄 논평>"}]}
     ```
 
@@ -270,10 +270,28 @@ reader should see the stub.
                "body": "<이 구간이 무엇인가>"}]}
     ```
 
-`probe-split` for a contrast (2–3 cards; `tone`: `cold` / `warm` / `plain`);
-`probe-parts` for one thing cut into named regions. `probe-split` is also the
-right component for a corpus paper that prescribed something different for the
-same problem.
+`probe-split` for a contrast (2–3 cards); `probe-parts` for one thing cut into
+named regions. `probe-split` is also the right component for a corpus paper
+that prescribed something different for the same problem.
+
+**`us` marks 이 논문의 자리** — the card holding the position this paper takes
+in the contrast, and the only card that carries a color. It is the accent the
+rest of the family already uses for the same thing: `us` on a `probe-scale`
+row, `current` on a `probe-lineage` entry. The rules that follow from that:
+
+- **At most one card, and often none.** Two peers held apart (`매끄러움` vs
+  `반응`), two rejected alternatives, two halves of the paper's own
+  architecture, a wins-column against a loses-column — none of those has a
+  card that is the paper's position, and all of them render plain. **A second
+  `us` fails the build.** Reach for it when a card can be labelled `이 논문 —
+  …` or when its note says 이 논문이 서는 자리, not to brighten a block.
+- **The paper's position, not the reading you prefer.** A contrast between
+  what this paper measured and what our stack would need marks the paper's
+  card; where we stand goes in `note`, which is what `note` is for.
+- **Color is never card identity.** The cards are told apart by their titles
+  and their `tag`, in the order the rewrite argues them — so a contrast that
+  grows a card grows one more plain card, and never has to spend a color
+  twice.
 
 **`state` is the rewrite's own word**, not a value from a fixed list. Each
 paper cuts its object into the conditions *that* paper argues about — how
