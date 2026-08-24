@@ -52,7 +52,7 @@ belongs in that folder's own rule file or README, which the row points at.
 | `comparison/AUTHORING.md` | human | Format contract for `comparison/<slug>.md` — the one rule and its consequences (§1), front matter, the four-act spine, the fence allow-list and the length ceiling (§2), `probe-matrix` (§3), enforcement (§4) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token), `analyze.txt` and `compare.txt`. Each owns a **procedure** — which papers, where the facts come from, how to verify, how to commit — and delegates every format rule to its track's `AUTHORING.md`; a rule restated in a prompt is a second source of truth that drifts the next time the contract moves |
 | `.claude/commands/**` | human | Slash-command wrappers — `analyze.md` and `compare.md`, which only point their command at its prompt and at its track's `AUTHORING.md` |
-| `assets/` | human | The images the root `README.md` embeds — the brand lockup that **is** its H1, the state and track icons, the tagline banner and the generated flow diagram — each a light/dark SVG pair, plus `build-flow.py` |
+| `assets/` | human | The images the root `README.md` embeds — the brand lockup that opens it, the accent rule and claim line under it, the state and track icons, the tagline banner and the generated flow diagram — each a light/dark SVG pair, plus `build-flow.py` |
 | `assets/CLAUDE.md` | human | Rules for `assets/` — what each image is, the drawing and animation rules, the generated flow diagram |
 | `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/` and `comparison/` and nothing else. Folder map: `site/README.md` |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break, and the surfaces keyed to the pillar set |
@@ -199,11 +199,14 @@ The site build is the only one with dependencies:
 Probe docs fall into two families. The rule **codifies the existing
 convention** — it does not strip emoji.
 
-**Narrative / onboarding** — `README.md`. Its H1 is the **brand lockup**: the
-`<picture>` pair from `assets/` on one line inside the `#`, with the project
-name as the image's `alt` so the heading still reads as text everywhere the
-image does not. A narrative doc with no lockup of its own may instead carry
-**one leading thematic emoji** right after the `#` and a space (`# 🛸 …`) —
+**Narrative / onboarding** — `README.md`. It opens on the **brand lockup**: the
+`<picture>` pair from `assets/` standing where an H1 would, with the project
+name as the image's `alt` so the front door still names itself as text
+everywhere the image does not. The lockup is a plain centred image rather than
+a heading because GitHub rules its own line under an H1, and the front door
+draws that line itself — `assets/rule.svg`, in the accent, right below the
+lockup. A narrative doc with no lockup of its own opens on a real `#` and may
+carry **one leading thematic emoji** right after it and a space (`# 🛸 …`) —
 exactly one, at the start, never at the end and never inside body text.
 
 **Reference / structural** — every `CLAUDE.md`, `SETUP.md`, the three
@@ -214,7 +217,8 @@ name (e.g. `# analysis/`).
 
 Shared by both families:
 
-- One H1 per document.
+- One H1 per document — `README.md` excepted, which opens on the lockup and
+  starts its outline at H2.
 - **Internal consistency per level (hard rule).** Each header level is
   uniformly marked or uniformly plain — no mixing within one level in one doc.
   The canonical narrative pattern here is the mark at H1 only, plain at H2 and

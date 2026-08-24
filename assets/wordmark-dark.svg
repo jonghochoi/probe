@@ -3,25 +3,28 @@
     .hull   { fill: #E8916F; }
     .iris   { fill: #FFF6F1; }
     .pupil  { fill: #2A1A12; }
-    .joy    { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .lids   { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
     .stalk  { stroke: #F0A183; stroke-width: 5; stroke-linecap: round; fill: none; }
     .beacon { fill: #F0A183; }
-    .wave   { fill: none; stroke: #F0A183; stroke-width: 2.6;
-              stroke-linecap: round; opacity: 0; }
     .page   { fill: #FFF6F1; stroke: #C98A6D; stroke-width: 2; }
     .line   { fill: #C98A6D; opacity: .3; }
+    .bub    { fill: #FFF6F1; fill-opacity: .9; stroke: #C98A6D; stroke-width: 1.4; }
+    .z      { fill: #C98A6D; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+              font-weight: 700; }
     .mug    { fill: #FFF6F1; stroke: #C98A6D; stroke-width: 2; stroke-linejoin: round; }
     .handle { fill: none; stroke: #C98A6D; stroke-width: 2.4; stroke-linecap: round; }
     .brew   { fill: #C98A6D; }
     .steam  { fill: none; stroke: #F0A183; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
     .shadow { fill: #F0A183; opacity: .55; }
     .rig   { animation: bob 3.4s ease-in-out infinite; }
-    .w1    { animation: ping 2.6s ease-in-out infinite; }
-    .w2    { animation: ping 2.6s ease-in-out .34s infinite; }
-    .lid   { animation: blink 5.4s ease-in-out infinite; }
-    .pupil { animation: mood-open 14s ease-in-out infinite,
+    .lid   { animation: blink 14s ease-in-out infinite; }
+    .pupil { animation: mood-read 14s ease-in-out infinite,
                         read 3.6s ease-in-out infinite; }
-    .joy   { animation: mood-joy 14s ease-in-out infinite; }
+    .doze  { opacity: 0; animation: mood-doze 14s ease-in-out infinite; }
+    .snore { transform-origin: 48px 61px; animation: puff 2.8s ease-in-out infinite; }
+    .z1    { animation: rise 2.8s ease-in-out infinite; }
+    .z2    { animation: rise 2.8s ease-in-out .5s infinite; }
+    .z3    { animation: rise 2.8s ease-in-out 1s infinite; }
     .l1    { animation: lit 4.8s ease-in-out infinite; }
     .l2    { animation: lit 4.8s ease-in-out 1.6s infinite; }
     .l3    { animation: lit 4.8s ease-in-out 3.2s infinite; }
@@ -30,22 +33,25 @@
     .eL, .eL .lid { transform-origin: 36px 52px; }
     .eR, .eR .lid { transform-origin: 60px 52px; }
     @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-    @keyframes ping  { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
-    @keyframes blink { 0%, 88%, 100% { transform: scaleY(1); }
-                       92% { transform: scaleY(.06); } 96% { transform: scaleY(1); } }
-    @keyframes mood-open { 0%, 46%, 100% { opacity: 1; } 50%, 96% { opacity: 0; } }
-    @keyframes mood-joy  { 0%, 46%, 100% { opacity: 0; } 50%, 96% { opacity: 1; } }
+    @keyframes blink { 0%, 18%, 22%, 40%, 44%, 100% { transform: scaleY(1); }
+                       20%, 42% { transform: scaleY(.06); } }
+    @keyframes mood-read { 0%, 46%, 100% { opacity: 1; } 50%, 96% { opacity: 0; } }
+    @keyframes mood-doze { 0%, 46%, 100% { opacity: 0; } 50%, 96% { opacity: 1; } }
     @keyframes read  { 0% { transform: translateX(-2.4px); }
                        72% { transform: translateX(2.4px); }
                        86%, 100% { transform: translateX(-2.4px); } }
+    @keyframes puff  { 0%, 100% { transform: scale(.32); } 55% { transform: scale(1); } }
+    @keyframes rise  { 0%   { opacity: 0; transform: translate(0, 4px) scale(.7); }
+                       30%  { opacity: 1; }
+                       70%  { opacity: 1; }
+                       100% { opacity: 0; transform: translate(4px, -8px) scale(1.1); } }
     @keyframes lit   { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
     @keyframes steam { 0% { opacity: 0; transform: translateY(2px); }
                        30%, 55% { opacity: .7; }
                        100% { opacity: 0; transform: translateY(-6px); } }
     @media (prefers-reduced-motion: reduce) {
-      .rig, .lid, .pupil, .joy, .wave, .line, .steam { animation: none; }
-      .joy { opacity: 0; }
-      .wave { opacity: .5; }
+      .rig, .lid, .pupil, .doze, .snore, .z1, .z2, .z3, .line, .steam { animation: none; }
+      .doze { opacity: 0; }
       .line { opacity: .55; }
       .steam { opacity: .55; }
     }
@@ -54,18 +60,22 @@
   <g transform="translate(4 2) scale(.92)">
       <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>
     <g class="rig">
-      <path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/>
-      <path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/>
       <path class="stalk" d="M48 26 V19"/>
       <circle class="beacon" cx="48" cy="16" r="5"/>
       <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
-      <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="56.5" r="5"/><path class="joy" d="M30 54 a6.5 6.5 0 0 1 12 0"/></g></g>
-      <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="56.5" r="5"/><path class="joy" d="M54 54 a6.5 6.5 0 0 1 12 0"/></g></g>
+      <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="56.5" r="5"/><path class="lids doze" d="M29 51 a7.5 5 0 0 0 14 0"/></g></g>
+      <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="56.5" r="5"/><path class="lids doze" d="M53 51 a7.5 5 0 0 0 14 0"/></g></g>
       <g transform="rotate(-5 48 75.5)">
         <rect class="page" x="25" y="67" width="46" height="17" rx="3"/>
         <rect class="line l1" x="31" y="70.6" width="34" height="2.2" rx="1.1"/>
         <rect class="line l2" x="31" y="74.4" width="34" height="2.2" rx="1.1"/>
         <rect class="line l3" x="31" y="78.2" width="22" height="2.2" rx="1.1"/>
+      </g>
+      <g class="doze">
+        <g class="snore"><circle class="bub" cx="50" cy="67" r="7"/></g>
+        <g class="z1"><text class="z" x="80" y="41" font-size="9">z</text></g>
+        <g class="z2"><text class="z" x="87" y="32" font-size="11">z</text></g>
+        <g class="z3"><text class="z" x="94" y="22" font-size="13">z</text></g>
       </g>
     </g>
     <g class="cup">
