@@ -58,16 +58,26 @@
    is live. This one is the same pair for the reader who has no filter bar
    because the page is unscripted, so it leaves as soon as the script arrives. */
 html.js .mast-count { display: none; }
+/* Korean breaks between any two syllables, so a lead sentence splits "논문"
+   down the middle the moment it stops fitting on one line. `keep-all` moves
+   the break to a space; `pretty` spends the last two lines keeping a lone
+   word off a line of its own. */
 .mast-sub {
   font-size: .86rem; line-height: 1.7; color: var(--text-muted);
   max-width: 66ch; margin-top: .35rem;
+  word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty;
 }
 .mast-sub strong { color: var(--text); font-weight: 700; }
-/* Korean breaks between any two syllables, so a tagline splits "논문" down the
-   middle the moment it stops fitting on one line. `keep-all` moves the break
-   to a space, which is all this sentence needs — it is short enough to run as
-   one line on a phone, and where it does not fit it wraps between words. */
-.mast.brief .mast-sub { word-break: keep-all; overflow-wrap: anywhere; }
+/* The two list pages say where their lead breaks, because the break is part of
+   the sentence: a line per thought. That only holds where the widest of them
+   fits, so below the breakpoint the `<br>` leaves and the paragraph wraps on
+   its own; above it the authored breaks are the measure, and the 66ch cap that
+   serves the wrapping case would cut in front of them. */
+.mast.slim .mast-sub br { display: none; }
+@media (min-width: 720px) {
+  .mast.slim .mast-sub { max-width: none; }
+  .mast.slim .mast-sub br { display: inline; }
+}
 /* One line reads as one thought, and the sentence is a hair too wide for the
    narrowest phones — so there it gives up a little size rather than the line,
    down to a floor where a 320px screen takes the wrap instead of type nobody
