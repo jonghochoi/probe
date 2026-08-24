@@ -629,9 +629,9 @@ def shelf_page(papers: list[Paper]) -> str:
   <div class="mast-inner">
     <h1>내 서재</h1>
     <p class="mast-sub">
-      즐겨찾기, 읽은 논문, 책갈피, 그리고 메모. 넷 다 <strong>이 브라우저에만</strong>
-      저장되어 다른 기기·다른 브라우저에서는 보이지 않고, 사이트 데이터를 지우면
-      사라집니다. 옮기거나 남길 것은 내보내세요.
+      즐겨찾기 · 읽은 논문 · 책갈피 · 메모.<br>
+      넷 다 <strong>이 브라우저에만</strong> 남고, 사이트 데이터를 지우면 사라집니다.<br>
+      옮기거나 남길 것은 내보내세요.
     </p>
   </div>
 </header>
@@ -1174,8 +1174,8 @@ def comparison_index_page(comps: list) -> str:
   <div class="mast-inner">
     <h1>같이 읽기</h1>
     <p class="mast-sub">
-      논문 두세 편을 한 질문 아래 놓고, <strong>어디서 갈리는지</strong>만 봅니다.
-      각 논문이 무엇을 하는지는 그 논문의 재작성본에 있고, 여기서는 링크로 갑니다.
+      논문 두세 편을 한 질문 아래 놓고 <strong>갈리는 자리</strong>만 봅니다.<br>
+      각 논문이 무엇을 하는지는 그 논문의 재작성본에 있습니다.
     </p>
   </div>
 </header>
