@@ -10,12 +10,11 @@ from . import corpus, glance as glance_mod
 from .corpus import PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer
 
-REPO = "jonghochoi/probe"
 # Pages serves a project site under /<repo>/. Only 404.html uses this; every
 # other page is depth-relative and needs no knowledge of where it is hosted.
-SITE_BASE = f"/{REPO.split('/')[1]}/"
-BLOB = f"https://github.com/{REPO}/blob/main"
-DISCUSSIONS_NEW = f"https://github.com/{REPO}/discussions/new?category=paper-notes"
+SITE_BASE = f"/{c.REPO.split('/')[1]}/"
+BLOB = f"{c.REPO_URL}/blob/main"
+DISCUSSIONS_NEW = f"{c.REPO_URL}/discussions/new?category=paper-notes"
 
 # How many tag facets the filter bar offers. The corpus has ~90 distinct tags
 # and a long tail of one-offs; past this point the chips cost more scanning
