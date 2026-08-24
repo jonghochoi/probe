@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The PROBE mark as a tab icon: the same character the nav and the
+       masthead carry, at 1/2.365 of `components.mark()`'s own geometry, so a
+       reader who looks from the tab to the header sees one probe rather than
+       two drawings. Every coordinate here is that scale applied to the
+       corresponding number in `mark()` — moving one of them there moves this.
+
+       No tile behind it. A tile forces a ground colour to be chosen for a
+       strip whose colour the page does not know, and the orange hull already
+       carries the brand on light and dark alike; the silhouette — a rounded
+       hull under one beacon — is what a 16 px tab is scanned for, and a tile
+       squares it away. The waves, the shadow and the smile are dropped: at
+       16 px a 1 px arc is a smudge, and the pair of eyes is the whole face.
+
+       The colours are the orange, iris and pupil tokens of `site.css`
+       resolved to sRGB, orange in both of its themes. A favicon is fetched
+       outside the page, so it cannot read a custom property and carries its
+       own `prefers-color-scheme` rule instead.
+
+       Two hyphens in a row close an XML comment, so the token names are
+       spelled out in prose here rather than written as CSS properties. -->
+  <style>
+    .hull, .beacon { fill: #d97756; }
+    .stalk { fill: none; stroke: #d97756; stroke-width: 2.11; stroke-linecap: round; }
+    .iris  { fill: #fffaf7; }
+    .pupil { fill: #2a1a12; }
+    @media (prefers-color-scheme: dark) {
+      .hull, .beacon { fill: #e8916f; }
+      .stalk { stroke: #e8916f; }
+    }
+  </style>
+  <path class="stalk" d="M16 7.54 V4.58"/>
+  <circle class="beacon" cx="16" cy="3.31" r="2.11"/>
+  <rect class="hull" x="2.89" y="7.97" width="26.22" height="22.84" rx="8.03"/>
+  <circle class="iris" cx="10.93" cy="18.54" r="4.65"/>
+  <circle class="iris" cx="21.07" cy="18.54" r="4.65"/>
+  <circle class="pupil" cx="10.93" cy="18.54" r="2.11"/>
+  <circle class="pupil" cx="21.07" cy="18.54" r="2.11"/>
+</svg>

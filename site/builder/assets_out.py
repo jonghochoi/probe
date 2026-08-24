@@ -64,6 +64,13 @@ def _check_intact(before: str, after: str) -> list[str]:
 ASSET_FILES = ("site.css", "index.css", "theme.js", "brand.js", "paper.js",
                "memo.js", "shelf.js", "match.js", "palette.js", "filter.js",
                "hub.js")
+# The icons `components.head()` links. Shipped and hashed like everything else
+# but never scanned for characters: they carry no text the page renders, and
+# two of them are bytes that cannot be decoded as any. `favicon.svg` is the
+# tab icon; the PNGs are what a client that will not take an SVG icon falls
+# back to — 32 px for a tab, and the 180 px opaque tile iOS composites onto
+# the home screen.
+ICON_FILES = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png")
 # Shipped only when the build was given the endpoint it talks to. A tree with
 # no endpoint carries nothing about search: no script to load, and none of its
 # Korean strings dragged into the webfont subset for a file nobody fetches.
@@ -71,7 +78,7 @@ OPTIONAL = {"search": ("semantic.js",)}
 
 
 def _files(extras: tuple[str, ...] = ()) -> tuple[str, ...]:
-    return ASSET_FILES + extras
+    return ASSET_FILES + ICON_FILES + extras
 
 
 def asset_text(extras: tuple[str, ...] = ()) -> str:
@@ -83,7 +90,7 @@ def asset_text(extras: tuple[str, ...] = ()) -> str:
     """
     return "".join(
         (_ASSETS / name).read_text(encoding="utf-8")
-        for name in _files(extras) if (_ASSETS / name).is_file()
+        for name in ASSET_FILES + extras if (_ASSETS / name).is_file()
     )
 
 
@@ -120,7 +127,8 @@ def version() -> str:
     the files it shares with a plain one.
     """
     h = hashlib.sha256()
-    names = ASSET_FILES + tuple(n for group in OPTIONAL.values() for n in group)
+    names = (ASSET_FILES + ICON_FILES
+             + tuple(n for group in OPTIONAL.values() for n in group))
     for name in sorted(names):
         src = _ASSETS / name
         if src.is_file():
