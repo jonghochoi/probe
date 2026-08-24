@@ -13,6 +13,8 @@
       "Edit(site/**)",
       "Write(site/**)",
       "Edit(CLAUDE.md)",
+      "Edit(assets/CLAUDE.md)",
+      "Edit(context/CLAUDE.md)",
       "Edit(README.md)",
       "Edit(.gitignore)",
       "Bash(git status*)",

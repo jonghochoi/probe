@@ -796,10 +796,7 @@ not decoration** — a rail of restated adjectives is worse than no rail.
 
 ---
 
-
----
-
-## 6. Enforcement
+## 5. Enforcement
 
 Everything is checked by the build, which is the same pipeline that produces
 the page — so a rule is enforced against the artifact a reader actually gets.

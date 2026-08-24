@@ -3,7 +3,7 @@ name: Check doc links
 # Verify that local path references in the structural index docs resolve, on
 # every PR that touches those docs, the prompts, or the linter itself. This
 # automates the manual "run a final grep / zero inbound links = orphan" step of
-# the CLAUDE.md "When adding a new top-level doc" checklist, catching a dangling
+# the CLAUDE.md "When adding a new doc" checklist, catching a dangling
 # path reference (a moved/renamed file, an orphaned doc) before it lands on main.
 #
 # Lint-only, no auto-fix: repairing a broken path reference means deciding
@@ -17,6 +17,7 @@ on:
   pull_request:
     paths:
       - 'CLAUDE.md'
+      - '*/CLAUDE.md'
       - 'README.md'
       - 'SETUP.md'
       - 'context/**'

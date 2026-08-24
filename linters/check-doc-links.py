@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Check that local path references in the contributor/agent docs resolve.
 
-PROBE has no cross-link automation (CLAUDE.md → "When adding a new top-level
-doc"): every doc reference is hand-maintained, and a restructure can silently
-leave a dangling `context/MASTER.md`-style path or orphan a moved file. This
+PROBE has no cross-link automation (CLAUDE.md → "When adding a new doc"): every
+doc reference is hand-maintained, and a restructure can silently leave a
+dangling `context/MASTER.md`-style path or orphan a moved file. This
 lint turns the manual "run a final grep" step of that checklist into a CI gate:
 it scans a fixed doc set and verifies every LOCAL path reference points at a
 file or directory that actually exists.
@@ -33,8 +33,9 @@ Usage (repo root):
 
 No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
 (its Repository-map table), `README.md` and `SETUP.md`, where every path
-reference is meant to point at a real file, plus the `context/` files
-(MASTER + every pillar) the scheduled routine reads every run. The agent-output specs
+reference is meant to point at a real file, plus every per-folder rule file
+(`<dir>/CLAUDE.md`) and the `context/` files (MASTER + every pillar) the
+scheduled routine reads every run. The agent-output specs
 (`scouting/AUTHORING.md`, `analysis/AUTHORING.md`) and the prompts are out of the
 default set — they are full of *illustrative* example paths (example arXiv ids,
 `<id>` placeholders) by design — but can be scanned explicitly by passing them
@@ -78,9 +79,10 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 # prompts are intentionally excluded (they carry illustrative example paths)
 # but can be passed explicitly as PATH args.
 #
-# The pillar files are globbed, not listed, so adding a pillar needs no edit
-# here — `context/_TEMPLATE.md` is skipped because it is a skeleton of
-# placeholders, not a doc whose paths resolve.
+# The pillar files and the per-folder rule files are globbed, not listed, so
+# adding a pillar or a new `<dir>/CLAUDE.md` needs no edit here —
+# `context/_TEMPLATE.md` is skipped because it is a skeleton of placeholders,
+# not a doc whose paths resolve.
 _DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",
@@ -88,6 +90,7 @@ _DEFAULT_ROOT_DOCS = [
     "context/MASTER.md",
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"
+_FOLDER_RULE_GLOB = "*/CLAUDE.md"
 
 
 def _resolves(candidate: str, doc_dir: str) -> bool:
@@ -170,10 +173,11 @@ def check_file(path: str) -> list[tuple[int, str]]:
 
 def _gather_default_docs() -> list[str]:
     docs = [d for d in _DEFAULT_ROOT_DOCS if os.path.exists(os.path.join(_REPO_ROOT, d))]
-    docs += sorted(
-        os.path.relpath(p, _REPO_ROOT)
-        for p in glob.glob(os.path.join(_REPO_ROOT, _CONTEXT_PILLAR_GLOB))
-    )
+    for pattern in (_CONTEXT_PILLAR_GLOB, _FOLDER_RULE_GLOB):
+        docs += sorted(
+            os.path.relpath(p, _REPO_ROOT)
+            for p in glob.glob(os.path.join(_REPO_ROOT, pattern))
+        )
     return docs
 
 
