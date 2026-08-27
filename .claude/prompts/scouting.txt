@@ -80,16 +80,15 @@ Three, read-only, with DIFFERENT jobs. Do not collapse them.
 1. **`context/<PILLAR>.md` — the source of OUR VIEW, and of the queries.**
    `<PILLAR>`-only scope: read this file, NOT `context/MASTER.md`. It holds
    the Pillar definition, this pillar's Decision Log, Tracked Literature (the
-   pinned papers pass 1 expands from), Anti-topics (the filter) and the
-   Curated External Lists (the pass-3 URLs). Never edit it.
+   pinned papers pass 1 expands from) and Anti-topics (the filter). Never edit
+   it.
 
 2. **`scouting/<PILLAR>/YYYY-MM-DD.md` — the recent reports.** Two different
    depths, because the two jobs need different windows:
      · **DE-DUPLICATION — the last ~8 weeks (~16 files), ids and titles only.**
-       Pass 1 reaches 8 weeks back and pass 3 reaches two calendar months, so
-       a de-dup window shorter than that lets a paper this pillar already
-       surfaced return as a "new" candidate. Scan the ids cheaply rather than
-       reading every file:
+       Pass 1 reaches 8 weeks back, so a de-dup window shorter than that lets
+       a paper this pillar already surfaced return as a "new" candidate. Scan
+       the ids cheaply rather than reading every file:
          `grep -ho 'arxiv.org/abs/[0-9.]*' scouting/<PILLAR>/*.md | sort -u`
        then bound it to the files inside the window.
      · **The 🔄 run-over-run section — the last ~2 weeks (~4 files), read in
@@ -107,10 +106,6 @@ responses (Atom XML) and Semantic Scholar responses (JSON, via `jq`) directly.
 
 Endpoints:
 - arXiv:  `https://export.arxiv.org/api/query`
-- GitHub raw (curated lists): `https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md`
-  — a plain static GET, no auth, no MCP (consistent with the "no web
-  search" rule, it is still curl). Used only by the Curated-List Sweep
-  (pass 3); the exact URLs come from context/<PILLAR>.md.
 - Semantic Scholar Graph: `https://api.semanticscholar.org/graph/v1`
   Send the API key header when the env var is set:
   `-H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY"` (omit the header if the
@@ -120,7 +115,7 @@ Endpoints:
   backoff. Always pass `--fail --silent --show-error` and inspect
   the HTTP status.
 
-THREE PASSES, ranked by signal — 1 above 3 above 2:
+TWO PASSES, ranked by signal — 1 above 2:
 
 1. **Citation-Graph Expansion** — for each pinned paper in the "<PILLAR>
    Tracked Literature" section, use its arXiv id directly as the paper id:
@@ -135,35 +130,8 @@ THREE PASSES, ranked by signal — 1 above 3 above 2:
    Keep entries whose `<published>` is within the last 14 days, then filter
    against the "<PILLAR> Anti-topics" list. This is the noisiest source;
    weight it lowest.
-3. **Curated-List Sweep** — for every raw URL in the "Curated External Lists
-   to Monitor" section of context/<PILLAR>.md:
-     a. fetch the README:
-        `curl --fail -sS "https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md"`
-     b. extract arXiv ids, then dedupe — these lists link arXiv via
-        `/abs/`, `/pdf/`, shield badges, or `arXiv:` form, so match all
-        four shapes, not just `/abs/`:
-        `grep -oiE '(arxiv\.org/(abs|pdf)/|arxiv[:-])[0-9]{4}\.[0-9]{4,5}' \
-           | grep -oE '[0-9]{4}\.[0-9]{4,5}' | sort -u`
-     c. month-prefix pre-cut (NO API call — this is what keeps the sweep
-        cheap): keep only ids whose first four digits (YYMM) are the
-        current or previous month, e.g. a run on 2026-06-01 keeps
-        `2606.*` / `2605.*`. Current+previous month always covers any
-        14-day window, so nothing recent is dropped, while the 600+-entry
-        lists collapse to a handful before any per-id lookup.
-     d. drop ids already in this pillar's "Tracked Literature", in the
-        last ~8 weeks of reports, or in the already-analyzed set.
-     e. for the few survivors only, fetch the publication date
-        (`.../graph/v1/paper/arXiv:XXXX.XXXXX?fields=title,publicationDate,externalIds,abstract`,
-        or the arXiv API) and keep only those within the last 14 days.
-     f. filter against the "<PILLAR> Anti-topics" list, then rank by
-        relevance to the "Pillar <PILLAR>" definition + active Decisions.
-        These are human-curated, so weight them above the raw Keyword
-        Sweep — between sources 1 and 2.
-   Deferred (v2): catching a paper *newly added* to a list but with an
-   older arXiv date needs a stored README snapshot / commits diff — not
-   done here, as it would add per-run state. v1 is the recency feed above.
 
-Then TWO STEPS over what the three passes returned. They rank nothing — they
+Then TWO STEPS over what the two passes returned. They rank nothing — they
 decide what carries over and what the Reproducibility score may claim:
 
 **CARRY-FORWARD RE-CHECK.** Read the `## 🔍 근접 후보` table and the
@@ -306,7 +274,7 @@ PROCEDURE
 3. READ `scouting/AUTHORING.md` — the full format contract, §1 through §4 —
    and `scouting/templates/report.md`.
 
-4. RETRIEVE, three passes, in the order above. Every pass drops a candidate
+4. RETRIEVE, two passes, in the order above. Every pass drops a candidate
    whose id is in the already-analyzed set, in this pillar's Tracked
    Literature, or in the last ~8 weeks of reports — the same three filters,
    applied the same way in each pass. Anti-topics filter what survives. Then

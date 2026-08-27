@@ -14,7 +14,7 @@ This file and the pillar template are contributor material rather than research
 input, and are edited like any other doc.
 
 Ownership inside the folder is just as fixed. The Decision Log, Tracked
-Literature, Anti-topics and Curated Lists are **owned by the relevant `P#.md`**;
+Literature and Anti-topics are **owned by the relevant `P#.md`**;
 `MASTER.md` holds only what crosses pillars — Identity, Purpose, Long-term
 Context, Hardware, the P0–P5 overview, Venue, Cross-pollination. Edit the
 `P#.md` for pillar content and `MASTER.md` only for global content; the same
@@ -52,12 +52,12 @@ The allocation, which the lint reads back off these files:
 
 ## When adding a new pillar (P6+)
 
-The six pillars share an identical §1–§6 skeleton, and several surfaces key off
+The six pillars share an identical §1–§5 skeleton, and several surfaces key off
 the pillar set — none of them update automatically. Walk this list end to end;
 a half-added pillar silently drops out of the index and the lints:
 
 - [ ] **Copy `context/_TEMPLATE.md` to `context/P<N>.md`** and fill every
-      `<placeholder>`. Keep the §1–§6 spine and the `[STABLE]` / `[LIVING]` /
+      `<placeholder>`. Keep the §1–§5 spine and the `[STABLE]` / `[LIVING]` /
       `[AGENT-INPUT]` markers exactly — the pipeline pattern-matches on them.
 - [ ] **Allocate a fresh, contiguous Decision range** (`D33+` — never reuse or
       renumber an existing `D#`). Record it in three places: the new `P<N>.md`

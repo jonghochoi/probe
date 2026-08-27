@@ -40,8 +40,8 @@ belongs in that folder's own rule file or README, which the row points at.
 |---|---|---|
 | `README.md` | human | Project front door — motivation, the pipeline, and which track to trigger for what |
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P5), Venue, Cross-pollination |
-| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature, Anti-topics and Curated Lists (identical §1–§6 skeleton). A run reads one `P#.md` |
-| `context/_TEMPLATE.md` | human | The §1–§6 skeleton a new pillar is copied from |
+| `context/P{0..5}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature and Anti-topics (identical §1–§5 skeleton). A run reads one `P#.md` |
+| `context/_TEMPLATE.md` | human | The §1–§5 skeleton a new pillar is copied from |
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format and its pillar allocation, the "adding a new pillar" checklist |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence). `scouting/templates/report.md` is the skeleton they fill |
 | `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — emoji system, the Reference Legend and its pillar palette (§3-1), link rules, Korean authoring principles |
