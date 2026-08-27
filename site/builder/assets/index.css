@@ -307,7 +307,7 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
 }
 .sort button:hover { color: var(--text); }
 .sort button[aria-pressed="true"] {
-  background: var(--surface); color: var(--orange);
+  background: var(--surface); color: var(--orange-ink);
   box-shadow: var(--shadow-sm);
 }
 
@@ -345,7 +345,7 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
 
 .linkish {
   font: inherit; font-size: inherit; background: none; border: none;
-  color: var(--orange); cursor: pointer; padding: 0;
+  color: var(--orange-ink); cursor: pointer; padding: 0;
   text-decoration: underline; text-underline-offset: 2px;
 }
 
@@ -450,7 +450,7 @@ html.js .rail {
 .resume-k {
   flex: none; margin-right: .15rem;
   font-size: .64rem; font-weight: 800; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--orange);
+  text-transform: uppercase; color: var(--orange-ink);
 }
 /* The chips give up width before the row gives up its one line: each shrinks
    to a floor that still fits an arXiv id, and past that — a phone — the rail
@@ -480,7 +480,7 @@ html.js .rail {
 .resume-chip:hover { border-color: var(--orange); }
 .resume-chip b {
   flex: none; font-family: var(--mono); font-size: .72rem; font-weight: 600;
-  color: var(--orange); font-variant-numeric: tabular-nums;
+  color: var(--orange-ink); font-variant-numeric: tabular-nums;
 }
 .resume-chip span {
   color: var(--text-muted); overflow: hidden;
@@ -488,7 +488,7 @@ html.js .rail {
 }
 .resume-all {
   flex: none; margin-left: auto; padding: 0 .2rem 0 .45rem;
-  font-size: .74rem; font-weight: 600; color: var(--orange); text-decoration: none;
+  font-size: .74rem; font-weight: 600; color: var(--orange-ink); text-decoration: none;
 }
 .resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
@@ -514,7 +514,7 @@ html.js .rail {
   font-size: clamp(1.1rem, 2.4vw, 1.35rem); font-weight: 800;
   letter-spacing: -.025em; line-height: 1.35; text-wrap: balance;
 }
-.lead-body:hover .lead-title { color: var(--orange); }
+.lead-body:hover .lead-title { color: var(--orange-ink); }
 .lead-tagline {
   font-size: .85rem; color: var(--text); margin-top: .25rem; font-weight: 600;
 }
@@ -536,7 +536,7 @@ html.js .rail {
   transition: color var(--dur-short) var(--ease-out),
               border-color var(--dur-short) var(--ease-out);
 }
-.lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange); }
+.lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 
 /* ── 즐겨찾기 ─────────────────────────────────────────────────────────── */
 /* Empty until it is the reader's: an unstarred star is drawn in the border
@@ -554,7 +554,7 @@ html.js .rail {
    drawn in the accent it already has and turns red under the cursor. */
 .markbtn {
   font: inherit; line-height: 1; padding: .1rem .15rem;
-  background: none; border: none; cursor: pointer; color: var(--orange);
+  background: none; border: none; cursor: pointer; color: var(--orange-ink);
   transition: color var(--dur-short) var(--ease-out);
 }
 .markbtn svg { fill: currentColor; display: block; }
@@ -564,7 +564,7 @@ html.js .rail {
 }
 .rowstar[aria-pressed="true"],
 .leadstar[aria-pressed="true"],
-.starbtn[aria-pressed="true"] { color: var(--orange); }
+.starbtn[aria-pressed="true"] { color: var(--orange-ink); }
 
 /* The one value the paper is remembered by (front matter `metric`). Reads as
    a reading, not a label: mono digits, the brand wash behind them. */
@@ -572,7 +572,7 @@ html.js .rail {
   display: inline-flex; align-items: center;
   font-family: var(--mono); font-size: .7rem; font-weight: 600;
   padding: .08rem .42rem; border-radius: var(--radius-pill);
-  background: var(--orange-soft); color: var(--orange);
+  background: var(--orange-soft); color: var(--orange-ink);
   border: 1px solid var(--amber-soft); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -625,7 +625,7 @@ html.js .rowstar, html.js .lh-star { display: block; }
 }
 .row[data-fresh="1"] .row-when::before,
 .lead[data-fresh="1"] .lead-when::before {
-  content: "●"; color: var(--orange); font-size: .62em;
+  content: "●"; color: var(--orange-ink); font-size: .62em;
   vertical-align: .15em; margin-right: .3rem;
 }
 .row:hover { background: var(--surface-2); }
@@ -639,7 +639,7 @@ html.js .rowstar, html.js .lh-star { display: block; }
   line-height: 1.45; letter-spacing: -.01em;
 }
 .row-title .metric { margin-left: .4rem; vertical-align: 1px; }
-.row-main:hover .row-title { color: var(--orange); }
+.row-main:hover .row-title { color: var(--orange-ink); }
 .row-tagline {
   display: block; font-size: .79rem; line-height: 1.55; color: var(--text-muted);
   margin-top: .1rem;
@@ -687,13 +687,13 @@ html.js .pager[hidden] { display: none; }
               box-shadow var(--dur-short) var(--ease-out);
 }
 .pgn { min-width: 1.9rem; text-align: center; }
-.pgn:hover, .pgstep:not(:disabled):hover { color: var(--orange); }
+.pgn:hover, .pgstep:not(:disabled):hover { color: var(--orange-ink); }
 /* The page you are on is marked by a rule under it, not a filled pill: the
    strip has no card to fill, and the underline is the one mark that sits on
    the ground the rest of the controls sit on. It is drawn inside the box so
    nothing in the row shifts when it moves. */
 .pgn[aria-current="page"] {
-  color: var(--orange); border-radius: 0;
+  color: var(--orange-ink); border-radius: 0;
   box-shadow: inset 0 -2px 0 var(--orange);
 }
 .pgn[hidden] { display: none; }
@@ -747,7 +747,7 @@ html.js .pager[hidden] { display: none; }
   opacity: .85; font-variant-numeric: tabular-nums;
 }
 .restab[data-restab="sem"][aria-pressed="true"] {
-  color: var(--orange); border-bottom-color: var(--orange);
+  color: var(--orange-ink); border-bottom-color: var(--orange);
 }
 .restab[data-restab="lex"][aria-pressed="true"] {
   color: var(--blue); border-bottom-color: var(--blue);
@@ -762,7 +762,7 @@ html.js .pager[hidden] { display: none; }
 .sem[hidden] { display: none; }
 .sem-head {
   font-size: .7rem; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--orange); margin-bottom: .4rem;
+  text-transform: uppercase; color: var(--orange-ink); margin-bottom: .4rem;
 }
 .sem-head span {
   font-weight: 500; letter-spacing: 0; text-transform: none;
@@ -813,7 +813,7 @@ html.js .pager[hidden] { display: none; }
   padding: .3rem .65rem; border-bottom: 1px solid var(--border);
   text-decoration: none; color: inherit;
 }
-.sem-ghead:hover .sem-gt { color: var(--orange); }
+.sem-ghead:hover .sem-gt { color: var(--orange-ink); }
 .sem-gt { font-size: .8rem; font-weight: 700; }
 .sem-gid {
   font-family: var(--mono); font-size: .64rem; color: var(--text-muted);
@@ -835,10 +835,10 @@ html.js .pager[hidden] { display: none; }
   padding: .1rem .3rem; border-radius: 3px; text-align: center;
   background: var(--surface-2); color: var(--text-muted);
 }
-.sem-kind.k-paper { background: var(--orange-soft); color: var(--orange); }
+.sem-kind.k-paper { background: var(--orange-soft); color: var(--orange-ink); }
 .sem-body { display: block; min-width: 0; }
 .sem-body b { font-size: .82rem; font-weight: 600; display: block; }
-.sem-sub:hover .sem-body b { color: var(--orange); }
+.sem-sub:hover .sem-body b { color: var(--orange-ink); }
 .sem-snip {
   font-size: .76rem; line-height: 1.6; color: var(--text-muted); margin-top: .15rem;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -877,7 +877,7 @@ html.js .pager[hidden] { display: none; }
   background: var(--surface-2); color: var(--text-muted);
 }
 .hub-tabs button[aria-selected="true"] .tab-n {
-  background: var(--orange-soft); color: var(--orange);
+  background: var(--orange-soft); color: var(--orange-ink);
 }
 
 /* A kept paper, in the same shape the landing list uses — star first, the
@@ -893,7 +893,7 @@ html.js .pager[hidden] { display: none; }
   display: block; font-size: .88rem; font-weight: 700; line-height: 1.45;
   letter-spacing: -.01em;
 }
-a.shelf-main:hover .shelf-title { color: var(--orange); }
+a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
 .shelf-tagline {
   display: block; font-size: .78rem; line-height: 1.55; color: var(--text-muted);
   margin-top: .1rem;
@@ -925,7 +925,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
               border-color var(--dur-short) var(--ease-out);
 }
 .hub-actions button:hover, .filebtn:hover {
-  border-color: var(--amber-soft); color: var(--orange);
+  border-color: var(--amber-soft); color: var(--orange-ink);
 }
 .hub-actions .primary {
   background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
@@ -946,7 +946,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
 .memo-card-head a {
   font-size: .9rem; font-weight: 700; text-decoration: none; color: var(--text);
 }
-.memo-card-head a:hover { color: var(--orange); }
+.memo-card-head a:hover { color: var(--orange-ink); }
 .memo-card-head time {
   margin-left: auto; font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
@@ -961,7 +961,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
 }
 
 .notfound { text-align: center; padding: 6rem 1.25rem; }
-.notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange); }
+.notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange-ink); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 
 /* ── 같이 읽기 ─────────────────────────────────── */
@@ -976,7 +976,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange); }
 .cmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
 .cmp-item-h { display: flex; gap: .8rem; align-items: baseline; }
 .cmp-item-t { flex: 1 1 auto; font-size: .95rem; font-weight: 700; line-height: 1.45; }
-.cmp-item:hover .cmp-item-t { color: var(--orange); }
+.cmp-item:hover .cmp-item-t { color: var(--orange-ink); }
 .cmp-item-when {
   flex: 0 0 auto; font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
