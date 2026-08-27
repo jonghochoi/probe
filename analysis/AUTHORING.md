@@ -99,6 +99,27 @@ that exists in the Decision Log — never invent a position `context/` does not
 hold. Where our context has no view, relay without one. Subjective judgements
 take a hedge (`~인 것 같아요`); a flat assertion of an opinion reads as AI.
 
+**A `D#` is an anchor, never the subject.** The token is a join key — the lint,
+the Decision Log and the site all resolve on it — and a key is not a name the
+reader knows. So the sentence says the decision in Korean and the `D#` rides
+along in parentheses:
+
+    우리는 디코더를 body/hand 라는 해부학 축으로 나눕니다(D1).   ← 이렇게
+    우리 D1 은 body/hand 라는 해부학 축입니다.                  ← 이렇게 말고
+
+This binds everywhere the reader reads a sentence: prose, callout bodies, a
+section heading's Korean half, and the Korean inside a fence — a `probe-quiz`
+question and its options, a `probe-term` body, a `probe-fact` note. It does
+**not** reach the four places the token *is* the key rather than a reference —
+a table's Decision cell, a heading's keyword slot, a `co-ten` label, and the
+`P# / D#` form naming an allocation — because there the reader is looking at a
+label, not reading a clause.
+
+Anchor the decision once per paragraph or bullet, on its first mention; a
+second `(D1)` three lines down is noise. And naming the decision is what stops
+`D11 과 충돌한다` — a sentence that satisfies the anchor rule while telling the
+reader nothing.
+
 ---
 
 ## 2. Body Rules (R1–R15)
