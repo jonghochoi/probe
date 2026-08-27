@@ -9,38 +9,51 @@
    deepens without going grey. Dark mode is a single [data-theme] override
    block, which is what keeps that cheap.
 
-   Contrast: every pair that carries text clears WCAG 4.5:1 against the
-   grounds it can land on (`--surface-2` is the darkest of them, so it sets
-   the floor) — with one exception, taken deliberately: `--orange` as text
-   sits at 2.8–3.1:1, because the accent is held at its brand value rather
-   than darkened to meet the floor. No neutral is pure grey — a zero-chroma
-   neutral reads flat next to warm paper — and no ground is pure white. */
+   Contrast: every pair that carries text clears WCAG 4.5:1 against every
+   ground it can land on, `--surface-3` — the hover ground — included, since
+   that is the darkest of them and so sets the floor. The accent is two tokens
+   for this reason: `--orange` is the brand value, which fills, strokes and
+   marks — nothing is read off it but the wordmark, which is a landmark rather
+   than a line of text; `--orange-ink` is the accent wherever it does carry
+   something to read, deep enough to clear the floor. No neutral is pure
+   grey — a zero-chroma neutral reads flat next to warm paper — and no ground
+   is pure white.
+
+   Separation: the grounds are far enough apart that a card reads as a card on
+   a desktop panel, not only on a bright phone screen. `--border` carries that
+   edge and is measured too: it clears 1.35:1 against both the page and the
+   card, which is what keeps a hairline visible at desktop viewing distance. */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   /* ── Ground and ink ─────────────────────────────────────────────────── */
-  --bg:          oklch(97.8% 0.004 56);
+  --bg:          oklch(96.6% 0.005 57);
   --surface:     oklch(99.4% 0.003 60);   /* card ground — warm, not #fff */
-  --surface-2:   oklch(95.5% 0.008 62);   /* tinted panel */
-  --surface-3:   oklch(92.8% 0.012 58);   /* hover / pressed ground */
-  --border:      oklch(91.2% 0.018 54);
-  --border-soft: oklch(94.5% 0.013 56);
+  --surface-2:   oklch(93.6% 0.011 62);   /* tinted panel */
+  --surface-3:   oklch(90.5% 0.015 58);   /* hover / pressed ground */
+  --border:      oklch(86.0% 0.020 54);
+  --border-soft: oklch(90.8% 0.015 56);
   --text:        oklch(21.0% 0.018 50);
-  --text-muted:  oklch(53.6% 0.025 54);
+  --text-muted:  oklch(46.5% 0.025 54);
 
   /* ── Accent ─────────────────────────────────────────────────────────── */
-  /* One accent, one value. It sets every link and label, draws the rules and
-     marks, and fills the badges, numerals and primary buttons — which carry
-     `--accent-ink`, the dark ink, in both themes, because a bright fill is a
-     light surface either way. The pressed step of a filled button is mixed
-     from the accent rather than named separately: one accent means one value
-     to move when it moves. */
+  /* One accent, in two roles. `--orange` is the brand value: it draws the
+     rules and marks and fills the badges, numerals and primary buttons —
+     which carry `--accent-ink`, the dark ink, in both themes, because a
+     bright fill is a light surface either way. `--orange-ink` is the same
+     accent where it has to be *read* — every link, label and accented
+     numeral — because a fill only has to be seen and text has to clear 4.5:1
+     against paper. In dark the brand value already clears that floor, so the
+     ink is the accent and there is nothing to keep in step. The pressed step
+     of a filled button is mixed from the accent rather than named separately:
+     one accent means one value to move when it moves. */
   --orange:      oklch(67.2% 0.131 39);
+  --orange-ink:  oklch(51.4% 0.155 41);
   --accent-ink:  oklch(21.0% 0.018 50);
-  --orange-soft: oklch(96.1% 0.019 52);
+  --orange-soft: oklch(95.8% 0.021 52);
   --amber-soft:  oklch(77.3% 0.101 50);
-  --focus:       var(--orange);
+  --focus:       var(--orange-ink);
   /* The mark's eye. Both sit on the accent hull, which is bright in either
      theme, so they hold their one value across the pair. */
   --mark-iris:   oklch(98.8% 0.007 53);
@@ -51,11 +64,11 @@
      smallest thing that ever takes one, so it sets the floor. Redefined for
      dark below, which is what lets every use site write `var(--green)` and be
      right in both themes. */
-  --blue:        oklch(54.1% 0.183 258);
-  --green:       oklch(52.2% 0.128 156);
-  --amber:       oklch(54.1% 0.118 70);
-  --red:         oklch(55.7% 0.182 24);
-  --violet:      oklch(55.3% 0.183 291);   /* co-ctx only — 논문 밖 맥락 */
+  --blue:        oklch(49.5% 0.183 258);
+  --green:       oklch(47.0% 0.128 156);
+  --amber:       oklch(49.5% 0.118 70);
+  --red:         oklch(51.0% 0.182 24);
+  --violet:      oklch(50.5% 0.183 291);   /* co-ctx only — 논문 밖 맥락 */
   --wash-key:    oklch(98.1% 0.008 254);
   --wash-win:    oklch(98.1% 0.010 165);
   --wash-warn:   oklch(98.6% 0.011 85);
@@ -67,9 +80,9 @@
      the row reads as a sequence rather than four categories. Deliberately not
      the callout roles' colours: a reader who learned red = 우리와 충돌 on 상세
      should not meet a red card that means 문제. */
-  --act1:        oklch(57.0% 0.059 247);
-  --act2:        oklch(58.7% 0.080 180);
-  --act3:        oklch(67.2% 0.113 73);
+  --act1:        oklch(49.0% 0.059 247);
+  --act2:        oklch(48.0% 0.080 180);
+  --act3:        oklch(49.5% 0.113 73);
   --act4:        var(--orange);
 
   /* ── Syntax roles ───────────────────────────────────────────────────── */
@@ -87,10 +100,10 @@
   --syn-error:   var(--red);
 
   /* ── Grounds that are not the page ──────────────────────────────────── */
-  --code-bg:     oklch(95.5% 0.004 60);
-  --code-bar:    oklch(91.9% 0.004 60);
-  --code-rule:   oklch(88.8% 0.004 60);
-  --code-ink:    oklch(50.0% 0.025 54);   /* muted ink, measured on the bar */
+  --code-bg:     oklch(94.6% 0.005 60);
+  --code-bar:    oklch(90.4% 0.005 60);
+  --code-rule:   oklch(86.4% 0.005 60);
+  --code-ink:    oklch(46.5% 0.025 54);   /* muted ink, measured on the bar */
   --scrim:       oklch(21.0% 0.018 50 / .34);
   /* arXiv figures are white PNGs, so the pad matches the file's own ground
      rather than the page's — the one place pure white is the correct value. */
@@ -102,7 +115,7 @@
   --p4: oklch(90.1% 0.033 269); --p5: oklch(89.2% 0.045 301);
   --pna:  oklch(91.0% 0.009 56);
   --pink: oklch(21.0% 0.018 50);   /* pillar chip ink */
-  --dref: oklch(54.6% 0.131 58);   /* D# amber */
+  --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
   /* ── Type ───────────────────────────────────────────────────────────── */
   /* Latin glyphs come from Pretendard too — a separate Latin face next to
@@ -167,12 +180,13 @@
   --surface:     oklch(21.3% 0.009 59);
   --surface-2:   oklch(23.7% 0.014 58);
   --surface-3:   oklch(27.0% 0.015 58);
-  --border:      oklch(29.6% 0.016 59);
-  --border-soft: oklch(25.3% 0.013 62);
+  --border:      oklch(33.2% 0.017 59);
+  --border-soft: oklch(27.6% 0.014 62);
   --text:        oklch(92.3% 0.012 60);
   --text-muted:  oklch(67.4% 0.022 53);
 
   --orange:      oklch(73.9% 0.116 42);
+  --orange-ink:  var(--orange);
   --accent-ink:  oklch(18.1% 0.006 56);
   --orange-soft: oklch(25.0% 0.031 46);
 
@@ -238,7 +252,7 @@ body {
   overflow-x: clip;
 }
 
-a { color: var(--orange); }
+a { color: var(--orange-ink); }
 
 /* One focus ring for the whole site, on `:focus-visible` so it answers the
    keyboard and not the mouse. It appears instantly — a ring that fades in is
@@ -270,6 +284,10 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;
   width: 100%; display: flex; align-items: center; gap: 1rem;
 }
+/* The wordmark is the one accent text that keeps the brand value: it sits
+   against the mark's own hull, and the deeper ink beside that fill reads as
+   two oranges rather than as one lockup. It is a landmark, not something a
+   reader has to make out — every accent that carries meaning takes the ink. */
 .nav-logo {
   font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em;
   color: var(--orange); white-space: nowrap; text-decoration: none;
@@ -336,7 +354,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   padding: .3rem .6rem; border-radius: var(--radius-sm); white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
-.nav-links a:hover { color: var(--orange); background: var(--orange-soft); }
+.nav-links a:hover { color: var(--orange-ink); background: var(--orange-soft); }
 
 .icon-btn {
   border: 1px solid var(--border); background: var(--surface);
@@ -346,7 +364,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   transition: color var(--dur-short) var(--ease-out),
               border-color var(--dur-short) var(--ease-out);
 }
-.icon-btn:hover { color: var(--orange); border-color: var(--amber-soft); }
+.icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
 
 /* The one thing in the nav that leaves the site. It takes `.icon-btn` whole —
    the same box, the same hover, the same gap in front of it — because the
@@ -378,7 +396,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   border-bottom: 1px solid var(--border-soft);
 }
 .nav-sheet a:last-child { border-bottom: 0; }
-.nav-sheet a:hover { color: var(--orange); }
+.nav-sheet a:hover { color: var(--orange-ink); }
 /* The one line that leaves the site, set apart the way the glyph it replaces
    is: last, and quieter than the places this site goes. */
 .nav-sheet-out { color: var(--text-muted); font-size: .84rem; }
@@ -397,7 +415,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
                     text-overflow: ellipsis; white-space: nowrap; }
 .crumb { font-size: .78rem; color: var(--text-muted); margin-bottom: .6rem; }
 .crumb a { color: var(--text-muted); text-decoration: none; }
-.crumb a:hover { color: var(--orange); }
+.crumb a:hover { color: var(--orange-ink); }
 
 .paper-title {
   font-size: clamp(1.35rem, 3.2vw, 1.95rem);
@@ -438,7 +456,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 }
 .head-tags .chip.tag::before { content: "#"; opacity: .45; }
 .head-tags .chip.tag:hover { background: var(--surface-2); color: var(--text); }
-.chip.link:hover { border-color: var(--amber-soft); color: var(--orange); }
+.chip.link:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* The paper's headline number, from front matter `metric`. Also styled in
@@ -448,7 +466,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   display: inline-flex; align-items: center;
   font-family: var(--mono); font-size: .7rem; font-weight: 600;
   padding: .08rem .42rem; border-radius: var(--radius-pill);
-  background: var(--orange-soft); color: var(--orange);
+  background: var(--orange-soft); color: var(--orange-ink);
   border: 1px solid var(--amber-soft); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -468,7 +486,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 .src-group:not(:has(a:nth-child(5))) { border-radius: var(--radius-pill); }
 .src-group .sg-out {
   display: inline-flex; align-items: center; padding: .2rem .5rem;
-  background: var(--surface-2); color: var(--orange); font-size: .78rem;
+  background: var(--surface-2); color: var(--orange-ink); font-size: .78rem;
 }
 .src-group a {
   display: inline-flex; align-items: center; gap: .34rem; padding: .2rem .6rem;
@@ -477,7 +495,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   transition: color var(--dur-short) var(--ease-out),
               background var(--dur-short) var(--ease-out);
 }
-.src-group a:hover { color: var(--orange); background: var(--orange-soft); }
+.src-group a:hover { color: var(--orange-ink); background: var(--orange-soft); }
 /* The group clips its own overflow to keep the rounded ends, so the shared
    focus ring — painted outside an element — is cut off on the cells at its
    edges. Here alone the ring turns inward. */
@@ -521,8 +539,8 @@ html.js .paper-acts {
   transition: color var(--dur-short) var(--ease-out),
               border-color var(--dur-short) var(--ease-out);
 }
-.act-btn:hover { border-color: var(--amber-soft); color: var(--orange); }
-.act-btn[aria-pressed="true"] { color: var(--orange); border-color: var(--amber-soft); }
+.act-btn:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
+.act-btn[aria-pressed="true"] { color: var(--orange-ink); border-color: var(--amber-soft); }
 
 
 /* ── Related, under the article ───────────────────────────────────────── */
@@ -546,7 +564,7 @@ html.js .paper-acts {
   color: var(--text-muted); letter-spacing: .04em;
 }
 .rel-title { font-size: .88rem; font-weight: 700; letter-spacing: -.01em; line-height: 1.45; }
-.rel-item:hover .rel-title { color: var(--orange); }
+.rel-item:hover .rel-title { color: var(--orange-ink); }
 .rel-size {
   font-size: .72rem; color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums; grid-row: 2; grid-column: 2;
@@ -580,7 +598,7 @@ html.js .paper-acts {
   font-size: .68rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em;
 }
 .cmp-card-t { font-size: .88rem; font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
-.cmp-card:hover .cmp-card-t { color: var(--orange); }
+.cmp-card:hover .cmp-card-t { color: var(--orange-ink); }
 .cmp-card-tag { font-size: .78rem; line-height: 1.55; color: var(--text-muted); }
 .cmp-card-foot {
   display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: baseline;
@@ -590,7 +608,7 @@ html.js .paper-acts {
   font-family: var(--mono); font-size: .7rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.cmp-card-m { font-size: .7rem; color: var(--orange); font-weight: 600; }
+.cmp-card-m { font-size: .7rem; color: var(--orange-ink); font-weight: 600; }
 
 /* ── ```probe-matrix ──────────────────────────────────────────────────── */
 /* One question per row, one paper per column. Three columns of Korean
@@ -623,7 +641,7 @@ table.mx thead th a {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
   overflow: hidden;
 }
-table.mx thead th a:hover { color: var(--orange); }
+table.mx thead th a:hover { color: var(--orange-ink); }
 /* The two widths that drive `table-layout: fixed` — the header row decides,
    so they are declared on it and every body row follows. */
 .mx-corner {
@@ -675,7 +693,7 @@ table.mx thead th[scope="col"] { width: 26%; }
   transition: color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out);
 }
 .toc a:hover { color: var(--text); background: var(--orange-soft); }
-.toc a.active { color: var(--orange); border-left-color: var(--orange); font-weight: 600; }
+.toc a.active { color: var(--orange-ink); border-left-color: var(--orange-ink); font-weight: 600; }
 
 /* Grouped under the four acts, counted continuously across them: the number a
    reader sees beside a section is its position in the whole document, not its
@@ -720,8 +738,8 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .toc-mark svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .toc-row:hover .toc-mark, .toc-mark:focus-visible { opacity: 1; }
-.toc-mark:hover { color: var(--orange); }
-.toc-mark[aria-pressed="true"] { opacity: 1; color: var(--orange); }
+.toc-mark:hover { color: var(--orange-ink); }
+.toc-mark[aria-pressed="true"] { opacity: 1; color: var(--orange-ink); }
 .toc-mark[aria-pressed="true"] svg { fill: currentColor; }
 /* A finger is not a cursor. There is nothing to reach with, so the flag is lit
    from the start rather than faint, and its column widens to the 44px a thumb
@@ -750,12 +768,12 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .mark-fab[hidden] { display: none; }
 .mark-fab svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
-.mark-fab:hover { color: var(--orange); border-color: var(--amber-soft); transform: translateY(-1px); }
-.mark-fab[aria-pressed="true"] { color: var(--orange); border-color: var(--amber-soft); }
+.mark-fab:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: translateY(-1px); }
+.mark-fab[aria-pressed="true"] { color: var(--orange-ink); border-color: var(--amber-soft); }
 .mark-fab[aria-pressed="true"] svg { fill: currentColor; }
 .toc-k { display: block; font-size: .81rem; font-weight: 600; }
 .toc-k::before {
-  content: counter(tocsec); color: var(--orange); font-weight: 800;
+  content: counter(tocsec); color: var(--orange-ink); font-weight: 800;
   margin-right: .4rem; font-size: .72rem; font-variant-numeric: tabular-nums;
 }
 .toc-e {
@@ -771,7 +789,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 .lead { border-bottom: 2px solid var(--orange); padding-bottom: 1.4rem; margin-bottom: 1rem; }
 .eyebrow {
   font-size: .72rem; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--orange); margin-bottom: .7rem;
+  text-transform: uppercase; color: var(--orange-ink); margin-bottom: .7rem;
 }
 
 /* ── Prose ────────────────────────────────────────────────────────────── */
@@ -798,7 +816,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .pdiv .pt {
   font-size: .82rem; font-weight: 800; letter-spacing: .02em;
-  color: var(--orange);
+  color: var(--orange-ink);
 }
 
 /* A hairline over every section. Nine sections down a long page, the gap
@@ -825,7 +843,7 @@ table.mx thead th[scope="col"] { width: 26%; }
    above it rather than as the opening of the one below. */
 .article h3, .article h4.h-sub {
   font-size: 1.02rem; font-weight: 700; margin: 2rem 0 .5rem;
-  color: var(--orange);
+  color: var(--orange-ink);
 }
 
 /* Between our thesis and the paper's own title: what this paper does. */
@@ -848,7 +866,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .tldr-label {
   display: block; font-size: .66rem; font-weight: 800; letter-spacing: .11em;
-  text-transform: uppercase; color: var(--orange); margin-bottom: .45rem;
+  text-transform: uppercase; color: var(--orange-ink); margin-bottom: .45rem;
 }
 .tldr p { margin: 0; font-size: .96rem; line-height: 1.75; }
 /* Prose margins belong to PROSE, and the selectors say where prose is: the
@@ -877,7 +895,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 .article code {
   font-family: var(--mono);
   font-size: .855em;
-  background: var(--orange-soft); color: var(--orange);
+  background: var(--orange-soft); color: var(--orange-ink);
   padding: .1em .38em; border-radius: var(--radius-xs);
   word-break: break-word;
 }
@@ -963,7 +981,7 @@ figure.fig img {
 figure.fig figcaption {
   margin-top: .5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.55;
 }
-.fig-num { font-weight: 800; color: var(--orange); }
+.fig-num { font-weight: 800; color: var(--orange-ink); }
 .fig-src { font-style: italic; color: var(--text-muted); }
 
 /* ── Tables ───────────────────────────────────────────────────────────── */
@@ -1009,10 +1027,10 @@ abbr.dref {
   transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
 .tref:hover, .tref[aria-expanded="true"] {
-  color: var(--orange); border-bottom-color: var(--orange);
+  color: var(--orange-ink); border-bottom-color: var(--orange-ink);
   background: var(--orange-soft);
 }
-.tref .ti { font-size: .72em; vertical-align: .3em; margin-left: .1em; color: var(--orange); }
+.tref .ti { font-size: .72em; vertical-align: .3em; margin-left: .1em; color: var(--orange-ink); }
 
 /* The panel opens where the word is, inside the paragraph, so `.tbox` is an
    inline wrapper and only the card inside it becomes a block. */
@@ -1031,7 +1049,7 @@ abbr.dref {
    emphasis. */
 .tdef .th {
   display: block; font-weight: 800; font-size: .83rem;
-  color: var(--orange); margin-bottom: .15rem;
+  color: var(--orange-ink); margin-bottom: .15rem;
 }
 .tdef .tbody b, .tdef .tbody strong { display: inline; font-weight: 700; color: var(--text); }
 
@@ -1046,7 +1064,7 @@ abbr.dref {
    author asking rhetorically rather than as a section boundary to answer at. */
 .q-label {
   display: block; font-size: .66rem; font-weight: 800; letter-spacing: .11em;
-  text-transform: uppercase; color: var(--orange); margin-bottom: .45rem;
+  text-transform: uppercase; color: var(--orange-ink); margin-bottom: .45rem;
 }
 .quiz .qq { font-weight: 700; font-size: .9rem; margin-bottom: .6rem; }
 .qopts { display: flex; flex-direction: column; gap: .33rem; }
@@ -1090,7 +1108,7 @@ details.fold {
 details.fold[open] { border-color: var(--orange); }
 details.fold > summary {
   padding: .65rem .95rem; cursor: pointer; font-size: .85rem; font-weight: 700;
-  color: var(--orange); list-style: none; user-select: none;
+  color: var(--orange-ink); list-style: none; user-select: none;
 }
 details.fold > summary:hover { background: var(--orange-soft); }
 details.fold > summary::-webkit-details-marker { display: none; }
@@ -1226,7 +1244,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .ln-when {
   font-family: var(--mono); font-size: .74rem; font-weight: 800;
-  color: var(--orange); font-variant-numeric: tabular-nums; white-space: nowrap;
+  color: var(--orange-ink); font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .ln-text { display: block; font-size: .88rem; line-height: 1.62; }
 .ln-what { display: block; font-weight: 700; font-size: .87rem; margin-bottom: .12rem; }
@@ -1239,7 +1257,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   background: var(--orange-soft); border-radius: var(--radius-xs);
   padding: .35rem .4rem; margin: 0 -.4rem;
 }
-.ln-item.cur .ln-what { color: var(--orange); }
+.ln-item.cur .ln-what { color: var(--orange-ink); }
 
 /* 숫자의 지형 — one number against the others of its kind. */
 .sc-row {
@@ -1295,7 +1313,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    there are two positions. Keeping it to one slot is also what lets a
    contrast grow a card without the palette repeating itself. */
 .sp-us { border-color: var(--amber-soft); }
-.sp-us .sp-head { color: var(--orange); }
+.sp-us .sp-head { color: var(--orange-ink); }
 
 /* One object decomposed into named regions. */
 /* Rows run edge to edge and divide themselves: the regions are one object cut
@@ -1364,7 +1382,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
               border-color var(--dur-mid) var(--ease-out),
               transform var(--dur-mid) var(--ease-out);
 }
-.memo-fab:hover { border-color: var(--amber-soft); color: var(--orange); transform: translateY(-1px); }
+.memo-fab:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: translateY(-1px); }
 .memo-fab .count {
   display: none; min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: var(--radius-pill); background: var(--orange); color: var(--accent-ink);
@@ -1391,7 +1409,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-size: .74rem; color: var(--text-muted);
   padding: .5rem 1.15rem 0;
 }
-.memo-anchor a { color: var(--orange); text-decoration: none; }
+.memo-anchor a { color: var(--orange-ink); text-decoration: none; }
 .memo textarea {
   flex: 1; margin: .75rem 1.15rem; padding: .8rem;
   font: inherit; font-size: .88rem; line-height: 1.7;
@@ -1416,7 +1434,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
               background var(--dur-short) var(--ease-out),
               border-color var(--dur-short) var(--ease-out);
 }
-.memo-actions button:hover { border-color: var(--amber-soft); color: var(--orange); }
+.memo-actions button:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .memo-actions .primary {
   background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
 }
@@ -1533,7 +1551,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   .tab .en { display: none; }
 }
 .tab:hover { color: var(--text); }
-.tab[aria-selected="true"] { color: var(--orange); border-bottom-color: var(--orange); }
+.tab[aria-selected="true"] { color: var(--orange-ink); border-bottom-color: var(--orange-ink); }
 /* 비교 carries its count in the tab, because the number is the whole reason to
    look. Filled rather than outlined: it is the one thing in the strip that
    says how much is behind a tab, and an outline at this size reads as a second
@@ -1575,7 +1593,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-size: 1rem; font-weight: 700; line-height: 1.45; letter-spacing: -.015em;
   text-wrap: balance;
 }
-.incmp-item:hover .incmp-t { color: var(--orange); }
+.incmp-item:hover .incmp-t { color: var(--orange-ink); }
 .incmp-tag { font-size: .84rem; line-height: 1.6; color: var(--text-muted); }
 /* Which papers were on the table, in `compares:` order — the same order the
    comparison's own columns run in, so the row is this paper's seat at it. */
@@ -1611,7 +1629,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .gh-line { font-size: .88rem; color: var(--text-muted); }
 .gh-facts { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: .9rem; }
 .gh-k { font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); display: block; }
-.gh-v { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.02rem; font-weight: 700; color: var(--orange); }
+.gh-v { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.02rem; font-weight: 700; color: var(--orange-ink); }
 .gh-fig .fig { margin: 0; }
 
 /* The narrative and its rail are one card: the rail answers the questions the
@@ -1628,7 +1646,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .gn-l { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; color: var(--violet); font-weight: 500; }
 .g-narr-body p { margin: 0 0 .78rem; }
 .g-narr-body p:last-child { margin-bottom: 0; }
-.g-narr-body strong { color: var(--orange); }
+.g-narr-body strong { color: var(--orange-ink); }
 .g-rail { display: grid; gap: .95rem; align-content: start; border-left: 1px solid var(--border); padding-left: 1.3rem; }
 @media (max-width: 940px) {
   .g-narr { grid-template-columns: 1fr; }
@@ -1636,7 +1654,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .gr-k { font-family: var(--mono); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
 .gr-v { font-size: .84rem; line-height: 1.55; }
-.gr-v strong, .gr-v b { font-family: var(--mono); color: var(--orange); }
+.gr-v strong, .gr-v b { font-family: var(--mono); color: var(--orange-ink); }
 .gr-n { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
 
 /* Korean breaks between any two syllables by default, so a card title splits
@@ -1693,7 +1711,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
               border-color var(--dur-short) var(--ease-out);
 }
 html.js .nav-cmdk { display: inline-flex; }
-.nav-cmdk:hover { color: var(--orange); border-color: var(--amber-soft); }
+.nav-cmdk:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
 /* The glyph alone, at every width — a desktop and a phone read the same
    button. The shortcut lives in its `title`, a pointer's length away on a
    device that can hover, rather than printed beside the icon at all times. */
@@ -1736,7 +1754,7 @@ html.js .nav-cmdk { display: inline-flex; }
   font-family: var(--mono); font-size: .68rem; padding: .18rem .4rem;
   cursor: pointer;
 }
-.cmdk-esc:hover { color: var(--orange); border-color: var(--amber-soft); }
+.cmdk-esc:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
 .cmdk-esc .x { display: none; }
 
 .cmdk-list { list-style: none; overflow-y: auto; overscroll-behavior: contain; padding: .35rem; }
@@ -1758,7 +1776,7 @@ html.js .nav-cmdk { display: inline-flex; }
    that looks picked and a different row that Enter would open. */
 .cmdk-row[aria-selected="true"] { background: var(--surface-3); }
 .cmdk-marks { display: flex; align-items: center; gap: .25rem; }
-.cmdk-star { color: var(--orange); font-size: .8rem; line-height: 1; }
+.cmdk-star { color: var(--orange-ink); font-size: .8rem; line-height: 1; }
 .cmdk-read {
   font-size: .62rem; font-weight: 700; color: var(--green);
   border: 1px solid currentColor; border-radius: var(--radius-pill);
@@ -1777,7 +1795,7 @@ html.js .nav-cmdk { display: inline-flex; }
    rather than the 읽음 green: it is not a mark the reader put there, it is what
    the row is. */
 .cmdk-kind {
-  font-size: .62rem; font-weight: 700; color: var(--orange);
+  font-size: .62rem; font-weight: 700; color: var(--orange-ink);
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
 }
