@@ -81,7 +81,7 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
   on the shared branch. The prompt keeps a `git pull --rebase` retry as a
   backstop.
 - The form has no `context_files` field and needs none — the prompt names its
-  own inputs (`context/P1.md` §1–§6, the last 2 weeks of `scouting/`), the
+  own inputs (`context/P1.md` §1–§5, the last 2 weeks of `scouting/`), the
   `curl` procedure, the scoring contract and the guards.
 - A pillar-scoped run never reads `context/MASTER.md`, so the two tables it
   would need from there — Venue Priority and the monthly Cross-pollination

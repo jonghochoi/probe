@@ -1,8 +1,7 @@
 # Research Context — P<N>: <Pillar Name>
 
 > **P<N> working context — Pillar <N> (<Pillar Name>).**
-> Owns the P<N> Decision Log, Tracked Literature, Anti-topics, and Curated
-> Lists. P<N> owns **D<a>–D<b>**; cross-cutting
+> Owns the P<N> Decision Log, Tracked Literature and Anti-topics. P<N> owns **D<a>–D<b>**; cross-cutting
 > context (Identity, Pillars overview, Venue, Cross-pollination) lives in
 > `context/MASTER.md`.
 > **Agent usage**: *static* context. The retrieval agent reads (never writes)
@@ -80,20 +79,6 @@ Excluded from the digest unless an unusually strong tie to P<N> or a P<N> Decisi
 | Paper | arXiv | Relevance |
 |---|---|---|
 | <codename> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | <one clause> (D<a>) |
-
----
-
-## 6. P<N> Curated External Lists to Monitor [AGENT-INPUT]
-
-> Human-curated GitHub lists, read in the scout's Curated-List Sweep. Topic
-> whitelist only — this pillar's relevance score + §4 P<N> Anti-topics decide what
-> survives. Recency narrowing (do NOT ingest the whole lists): keep only arXiv
-> ids whose month-prefix `YYMM` is the current or previous month, then confirm
-> the last-14-day window via `publicationDate`.
-
-| List | raw README (HEAD = default branch) |
-|---|---|
-| <list name> | `https://raw.githubusercontent.com/<owner>/<repo>/HEAD/README.md` |
 
 ---
 

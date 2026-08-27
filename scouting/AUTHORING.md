@@ -611,7 +611,7 @@ failing at the end of the run is disclosed, verbatim.
 
 ```markdown
 **Papers scanned:** citation-graph 8핀 280편 + keyword sweep 110편(14일 44편)
-+ curated list 4종 13편 — keyword sweep 1개 쿼리 HTTP 429 최종 실패
+— keyword sweep 1개 쿼리 HTTP 429 최종 실패
 ```
 
 ---

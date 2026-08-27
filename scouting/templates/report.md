@@ -7,7 +7,7 @@
      the run (verbatim). No funnel arithmetic, no per-query log, no retry
      narration — a retry that succeeded is a non-event.
      `Papers surfaced:` — an INTEGER and nothing else; the "why" goes in 📊. -->
-**Papers scanned:** <citation-graph N편> + <keyword sweep M편(14일 K편)> + <curated list L편>
+**Papers scanned:** <citation-graph N편> + <keyword sweep M편(14일 K편)>
 **Papers surfaced (4축 게이트 통과):** <count>
 
 ---
@@ -50,7 +50,7 @@
      labelled 공개 예정 / 미공개 caps at ★★ however strong the rest is. -->
 
 **<Paper Title>**
-[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue tier, or arXiv preprint> · source: <citation-graph | keyword-sweep | curated-list> · <코드 공개 | 코드 공개 예정 | 코드 미공개>
+[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue tier, or arXiv preprint> · source: <citation-graph | keyword-sweep> · <코드 공개 | 코드 공개 예정 | 코드 미공개>
 
 ### (a) 관련 Pillar / Decision
 <!-- The decision TIE only — a single line of LINKED BADGES, nothing else

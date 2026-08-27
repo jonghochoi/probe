@@ -7,7 +7,7 @@
 
 > **Last updated**: 2026-06-04
 > **Maintainer**: \<your-name\>
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, Hardware, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics, Curated Lists) is **owned by `context/P0–P5.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, Hardware, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics) is **owned by `context/P0–P5.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -15,7 +15,7 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P0–P5.md` are the **owners** of their pillar's Decision Log, Tracked Literature, Anti-topics, and Curated Lists. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P0–P5.md` are the **owners** of their pillar's Decision Log, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
 - `[STABLE]`: changes rarely (identity, purpose, hardware)
