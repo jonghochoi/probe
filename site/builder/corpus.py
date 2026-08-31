@@ -56,9 +56,8 @@ PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",
     "P2": "Structured Multimodal Observation Fusion",
-    "P3": "Hand-level System0 Module",
+    "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",
-    "P5": "World Model",
 }
 PILLAR_ORDER = [*PILLAR_NAMES, UNCLASSIFIED]
 PILLAR_RE = re.compile(r"\b(?:%s)\b" % "|".join(map(re.escape, PILLAR_NAMES)))

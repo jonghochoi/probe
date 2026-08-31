@@ -47,9 +47,8 @@ const PILLARS: Record<string, string> = {
   P0: "datasets and benchmarks",
   P1: "body/hand action experts",
   P2: "multimodal observation fusion",
-  P3: "hand-level low-level control",
+  P3: "world models",
   P4: "pretraining and data-efficient adaptation",
-  P5: "world models",
 };
 const PILLAR_IDS = Object.keys(PILLARS);
 

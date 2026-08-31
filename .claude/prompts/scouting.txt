@@ -1,6 +1,6 @@
 > **DEPLOYMENT — pre-paste step**: before pasting this into a RemoteTrigger
 > routine, replace every `<PILLAR>` token below with the target pillar
-> identifier (`P0` … `P5`). One global find/replace; no other edits. The
+> identifier (`P0` … `P4`). One global find/replace; no other edits. The
 > Decision ID range for the chosen pillar is read by the agent from
 > `context/<PILLAR>.md` at run time, so this prompt does not hardcode it.
 
@@ -77,7 +77,7 @@ SOURCES
 
 Three, read-only, with DIFFERENT jobs. Do not collapse them.
 
-1. **`context/<PILLAR>.md` — the source of OUR VIEW, and of the queries.**
+1. **`context/<PILLAR>.md` — the source of THE AXIS VIEW, and of the queries.**
    `<PILLAR>`-only scope: read this file, NOT `context/MASTER.md`. It holds
    the Pillar definition, this pillar's Decision Log, Tracked Literature (the
    pinned papers pass 1 expands from) and Anti-topics (the filter). Never edit
@@ -330,7 +330,7 @@ PROCEDURE
      - Was every 🔍 row and Reproducibility-dropped 🚫 row from the last ~4
        weeks actually re-checked this run, not just copied forward?
      - Is each (a) line badges only — no Korean gloss, no body bullets — and
-       are (b)–(d) free of `D#` / `deferred` / `v1` / config-key names?
+       are (b)–(d) free of `D#` / `deferred` / config-key names?
        (AUTHORING §3-1)
      - Does the 🔑 legend list exactly the codes the body cites — no more —
        with meanings derived from `context/<PILLAR>.md` rather than invented?

@@ -94,7 +94,7 @@ Act 1 starts at the question that puts these papers on one table.
 ## 1 왜 이 셋인가
 ## 2 무엇이 같은가
 ## 3 어디서 갈리는가        ← ```probe-matrix lives here
-## 4 우리는 무엇을 하나       ← the D# layer
+## 4 연구축에 무엇이 걸리나   ← the D# layer
 ```
 
 `#` is the thesis: what emerges from reading them together, in one sentence.
@@ -131,8 +131,8 @@ silently dropped — a fence that renders to nothing is one the author never
 learns was wrong.
 
 GFM alert callouts are not fences and the table does not govern them. They are
-available, and `> [!CAUTION]` in particular publishes as 우리와 충돌 — act 4's
-natural shape when the three answers cost our decisions different things.
+available, and `> [!CAUTION]` in particular publishes as 연구축과 충돌 — act 4's
+natural shape when the three answers cost the decisions different things.
 
 ### 2-5. Length
 

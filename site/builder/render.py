@@ -701,7 +701,7 @@ def _printed(source: str) -> str:
     """
     return _SPACE.sub("", _CODE_FENCE.sub("", source))
 
-_DREF_HTML = re.compile(r"(?<![A-Za-z0-9_&#])D(\d{1,2})(?![\d;])")
+_DREF_HTML = re.compile(r"(?<![A-Za-z0-9_&#])(D\d[A-Z]{2})(?![A-Za-z0-9;])")
 _DESIGNATOR_TAIL = re.compile(
     r"(?:Fig\.?|Figure|Table|Tab\.?|Eq\.?|Equation|App\.?|Appendix|Sec\.?|Section|§)\s*$",
     re.IGNORECASE,
@@ -713,11 +713,11 @@ def _decorate_refs(text: str, decisions: dict) -> str:
     def sub(m: re.Match[str]) -> str:
         if _DESIGNATOR_TAIL.search(text[: m.start()]):
             return m.group(0)
-        n = int(m.group(1))
+        n = m.group(1)
         entry = decisions.get(n)
         if not entry:
             return m.group(0)
         pillar, title = entry
         tip = html.escape(f"P{pillar} · {title}", quote=True)
-        return f'<abbr class="dref" title="{tip}">D{n}</abbr>'
+        return f'<abbr class="dref" title="{tip}">{n}</abbr>'
     return _DREF_HTML.sub(sub, text)

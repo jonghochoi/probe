@@ -104,8 +104,8 @@ three times the scale, and nothing on the page says it happened.
 
 The rewrites tell you WHERE TO LOOK. The papers tell you WHAT IS TRUE.
 
-3. **`context/MASTER.md` + `context/P#.md` (read-only) — OUR VIEW**, which is
-   act 4 and nothing else. Never edit any `context/` file: propose in the
+3. **`context/MASTER.md` + `context/P#.md` (read-only) — THE AXIS VIEW**,
+   which is act 4 and nothing else. Never edit any `context/` file: propose in the
    document, never in the source.
 
 Never fabricate. If a number is not in the paper, it does not go in a cell. If
