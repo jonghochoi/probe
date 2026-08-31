@@ -1,62 +1,33 @@
-# Research Context — P<N>: <Pillar Name>
+# P<N> — <Pillar Name>
 
-> **P<N> working context — Pillar <N> (<Pillar Name>).**
-> Owns the P<N> Decision Log, Tracked Literature and Anti-topics. P<N> owns **D<a>–D<b>**; cross-cutting
-> context (Identity, Pillars overview, Venue, Cross-pollination) lives in
-> `context/MASTER.md`.
-> **Agent usage**: *static* context. The retrieval agent reads (never writes)
-> this file. Findings go to `scouting/P<N>/YYYY-MM-DD.md` (one per run).
-> **Formatting & authoring rules**: `scouting/AUTHORING.md` (single source of
-> truth — agent must read it before producing output).
-
----
-
-## 1. Identity [STABLE] [AGENT-INPUT]
-
-> <One paragraph: what question this pillar owns, why it exists, and the
-> hand-centric bet that narrows its target. Written by the human owner.>
-
-**Decomposition (P<N>-relevant)**
-- *Antagonist*: <what looks adjacent but is explicitly NOT this pillar>
-- *Protagonist (P<N> owns)*: <the positive scope, one dense line>
-- *Coupling*: <which other pillars it shares a backbone / corpus / representation with>
-
-> **Note**: P<N> owns the <half> half. <List the sibling pillars and their
-> one-word scopes> are out of scope here — see `context/MASTER.md`.
+> **Owns**: the P<N> Decision Log, Anti-topics and Tracked
+> Literature.
+> **Does not own**: the thesis, the pillar overview, hardware, venue and
+> cross-pollination — those are `context/MASTER.md`. A fact in both files is
+> one of them going stale.
+> **Agent usage**: *static* context, read-only. A scouting run reads this file
+> alone and writes `scouting/P<N>/YYYY-MM-DD.md`; `/analyze` and `/compare`
+> read it beside `context/MASTER.md`.
+> **Output format**: owned by the track — `scouting/AUTHORING.md`,
+> `analysis/AUTHORING.md`, `comparison/AUTHORING.md`. Never restated here.
 
 ---
 
-## 2. Pillar P<N> — <Pillar Name> [STABLE structure, LIVING content] [AGENT-INPUT]
+## 1. Scope [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Scope**: <the enumerable sub-axes this pillar tracks, **bold** on the axis names>.
+**Owns**: <the enumerable sub-axes this pillar tracks, **bold** on the axis
+names. One dense paragraph — what a paper must be about to land here.>
 
-**Identity tie**: <one line connecting the scope back to §1's bet>.
+**Thesis tie**: <one line back to the `context/MASTER.md` §1 claim — the
+sentence that makes a paper P<N>-relevant rather than merely adjacent.>
 
-**Tracked items**: <axis 1> (D<a>), <axis 2> (D<a+1>), … — one per Decision.
+**Tracked items**: <axis 1> (D<id>), <axis 2> (D<id>), … — one per Decision.
 
-**Anti-topics**: <one-line noise summary; the full filter is §4>.
+**Scouting lens**: <how wide recall runs around the north star — the comparison
+group that gets surfaced and scored rather than rejected.>
 
-**Literature anchor**: <the pinned papers by codename, one clause each>. See §5.
-
----
-
-## 3. Decision Log — P<N> / <Pillar Name> (D<a>–D<b>) [LIVING] [AGENT-INPUT]
-
-v1 choice per decision (first-attempt default; rationale and deferred candidates
-held outside the context file). P<N> covers **D<a>–D<b>**; <list the other
-pillars' ranges> are out of scope here — see `context/MASTER.md`.
-
-#### [D<a>] <Decision title> (P<N>)
-- **v1**: <the current first-attempt choice, **bold** on the chosen alternative;
-  tracked/deferred alternatives named inline>
-#### [D<a+1>] <Decision title> (P<N>)
-- **v1**: …
-
----
-
-## 4. P<N> Anti-topics (Noise Filter) [AGENT-INPUT]
-
-Excluded from the digest unless an unusually strong tie to P<N> or a P<N> Decision (D<a>–D<b>):
+**Anti-topics** (noise filter — excluded unless an unusually strong tie to
+P<N> or a P<N> Decision):
 
 - <exclusion 1>
 - <exclusion 2>
@@ -64,24 +35,46 @@ Excluded from the digest unless an unusually strong tie to P<N> or a P<N> Decisi
 
 ---
 
-## 5. P<N> Tracked Literature [LIVING] [AGENT-INPUT]
+## 2. Decision Log — P<N> [LIVING] [AGENT-INPUT]
 
-> Hard cap 8 pinned. Rebalance quarterly; replace, don't append.
-> **Format rule**: every entry carries `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no preprint; `[no public link]` if neither). Never fabricate arXiv IDs. Canonical: `scouting/AUTHORING.md` §3.
+One `####` heading and one bullet per decision — the current choice, **bold**
+on the chosen alternative, tracked and deferred alternatives named inline. Rationale lives outside this file. Entry format and
+the `D#` allocation across pillars: `context/CLAUDE.md`.
 
-### P<N> Pinned — <Pillar Name>
-| Paper | arXiv | Year | Role |
-|---|---|---|---|
-| <codename> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | YYYY | *Top*: <why it anchors the pillar> (D<a>) |
-| … | | | |
-
-**Methodology base (non-pinned)**
-| Paper | arXiv | Relevance |
-|---|---|---|
-| <codename> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | <one clause> (D<a>) |
+#### [D<id>] <Decision title> (P<N>)
+- <the current choice>
+#### [D<id>] <Decision title> (P<N>)
+- …
 
 ---
 
-*P<N> working context. For the other pillars, their decision ranges, and the
-cross-pillar anchor (Identity, Pillars overview, Venue, Cross-pollination),
-consult `context/MASTER.md` and the other `context/P#.md`.*
+## 3. Tracked Literature [LIVING] [AGENT-INPUT]
+
+Two tiers, and the split is the point: a paper this repo has already read has a
+rewrite in `analysis/` that carries its link, its numbers and its verdict, so
+the row here is a pointer. Only a paper with no rewrite yet needs its
+bibliography carried in the context file.
+
+### 3-1. Corpus — rewritten in `analysis/`
+
+The anchors this pillar argues from. One line each, and nothing the rewrite
+already says.
+
+| Alias | Rewrite | Anchors |
+|---|---|---|
+| <alias> | `analysis/<arxiv-id>.md` | <the one thing this pillar takes from it> (D<id>) |
+
+### 3-2. External pins — no rewrite yet
+
+> Hard cap 6. Rebalance quarterly; replace, don't append. A pin is a
+> **reference the decisions cite**, not a reading queue — it stays a pin for as
+> long as it anchors its decision. A pin that earns a rewrite moves to 3-1 and
+> frees its slot.
+> **Format rule**: every entry carries
+> `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no
+> preprint; `[no public link]` if neither). Never fabricate arXiv IDs.
+> Canonical: `scouting/AUTHORING.md` §3.
+
+| Paper | arXiv | Year | Role |
+|---|---|---|---|
+| <codename> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | YYYY | <why it anchors the pillar> (D<id>) |

@@ -13,6 +13,8 @@ venv/
 .site/
 .site-cache/
 site/builder/node_modules/
+# …and anywhere else a stray `npm install` puts them.
+node_modules/
 
 # Editors
 .vscode/

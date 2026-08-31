@@ -118,7 +118,7 @@ PROCEDURE
    There is no other precondition — the paper does not need to have been
    analyzed first, and you must not go looking for one.
 
-2. READ the paper end to end BEFORE anything of ours. Reading our material
+2. READ the paper end to end BEFORE any of the axis material. Reading it
    first anchors you to its framing and you will reproduce its omissions.
 
 3. READ `analysis/AUTHORING.md` — the full format contract, §1 through §5.

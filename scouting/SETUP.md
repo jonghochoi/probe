@@ -7,7 +7,7 @@ runs from any Claude Code session.
 | | Scheduled scouting routine |
 |---|---|
 | **Where** | The **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) or the `/schedule` CLI, never a repo config file |
-| **Durable asset** | The shared prompt `.claude/prompts/scouting.txt`. Register one routine per pillar (P0–P5) — P1 is the worked example below |
+| **Durable asset** | The shared prompt `.claude/prompts/scouting.txt`. Register one routine per pillar (P0–P4) — P1 is the worked example below |
 | **Retrieval** | `curl` to arXiv and Semantic Scholar, never MCP — a cloud session cannot reach a local MCP server |
 | **Output** | The prompt commits and runs `git push origin HEAD:main`. No PR — commit history *is* the research log |
 

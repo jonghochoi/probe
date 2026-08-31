@@ -89,8 +89,8 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `generator` | `analyze/v3` |
 
 **Source contract.** Facts come from the paper's arXiv HTML original (parsed
-by `site/builder/arxiv.py`); *our view* — `D#` impact, tensions, what we
-would check — comes from `context/`.
+by `site/builder/arxiv.py`); *the axis view* — `D#` impact, tensions, what
+the research axes would check — comes from `context/`.
 No HTML edition (~4% of papers) means **no rewrite is written**: an
 abstract-based fallback would be indistinguishable on the page from a real one.
 
@@ -104,8 +104,8 @@ the Decision Log and the site all resolve on it — and a key is not a name the
 reader knows. So the sentence says the decision in Korean and the `D#` rides
 along in parentheses:
 
-    우리는 디코더를 body/hand 라는 해부학 축으로 나눕니다(D1).   ← 이렇게
-    우리 D1 은 body/hand 라는 해부학 축입니다.                  ← 이렇게 말고
+    디코더는 body/hand 라는 해부학 축으로 나뉩니다(D3GS).   ← 이렇게
+    D3GS 은 body/hand 라는 해부학 축입니다.                  ← 이렇게 말고
 
 This binds everywhere the reader reads a sentence: prose, callout bodies, a
 section heading's Korean half, and the Korean inside a fence — a `probe-quiz`
@@ -116,8 +116,8 @@ a table's Decision cell, a heading's keyword slot, a `co-ten` label, and the
 label, not reading a clause.
 
 Anchor the decision once per paragraph or bullet, on its first mention; a
-second `(D1)` three lines down is noise. And naming the decision is what stops
-`D11 과 충돌한다` — a sentence that satisfies the anchor rule while telling the
+second `(D3GS)` three lines down is noise. And naming the decision is what stops
+`D3AG 과 충돌한다` — a sentence that satisfies the anchor rule while telling the
 reader nothing.
 
 ---
@@ -134,7 +134,7 @@ to fill in.
 1 무엇이 문제인가   — the problem, and where existing approaches stop
 2 무엇을 바꿨나     — the core insight + the design. The paper's method
 3 정말 되는가       — experiments, numbers, ablations
-4 우리는 무엇을 하나 — our layer: `D#` impact, and what we would check
+4 연구축에 무엇이 걸리나 — the axis layer: `D#` impact, and what it checks
 ```
 
 Section count varies per paper; the acts are always four. **Act 2 legitimately
@@ -172,7 +172,7 @@ Three levels, none of which render as their own tag.
   Written as the paragraph below the heading it becomes ordinary body text,
   never reaches the TOC, and reads as a stray sentence — **the build warns**.
 - **Section titles describe *this* paper.** Template titles are banned:
-  "왜 이 문제가 생기는가" or "우리에게 무슨 의미인가" fit any paper and
+  "왜 이 문제가 생기는가" or "무엇을 시사하는가" fit any paper and
   therefore say nothing. Skimming the titles alone must convey the argument.
   The shape to aim for is a claim, not a topic — across different papers:
   "픽셀은 3D를 모른다" · "990 ms 의 벽" · "FFN 하나를 공유했더니 전부 무너졌다".
@@ -490,7 +490,7 @@ is used. Never write the `co-*` class by hand.
 | `[!NOTE]` | `co-key` | 작동 원리 | explains why/how it works |
 | `[!TIP]` | `co-win` | 확인된 이득 | a measured result (numbers) |
 | `[!WARNING]` | `co-warn` | 한계·비용·조건 | a cost, failure mode, limit |
-| `[!CAUTION]` | `co-ten` | 우리와 충돌 | a `D#`/`P#` of ours shakes |
+| `[!CAUTION]` | `co-ten` | 연구축과 충돌 | a `D#`/`P#` shakes |
 | `[!IMPORTANT]` | `co-ctx` | 논문 밖 맥락 | lineage, background, corpus |
 
 - **`co-ten` is ACT-4 ONLY.** A problem the paper points out about itself is
@@ -747,7 +747,7 @@ arrive before the reason they matter.
 ### 4-3. G3 — `probe-hub`, the claim in one card
 
     ```probe-hub
-    {"thesis": "<한 문장 — 논문 제목이 아니라 우리의 테제>",
+    {"thesis": "<한 문장 — 논문 제목이 아니라 연구축이 읽어낸 테제>",
      "line": "<무엇을 어떻게 바꾸는가 — 한 줄>",
      "figure": "<figure id>", "caption": "<한 줄 캡션>",
      "facts": [{"k": "<지표 이름>", "v": "<값 · 단위>"},
@@ -864,7 +864,7 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |
 
 The short surface is checked in the same pass, against the same source file.
-Each row is a **hard failure**, not a warning — a brief that leaks our view is
+Each row is a **hard failure**, not a warning — a brief that leaks the axis view is
 not something a reader can be asked to discount:
 
 | Rule | Enforced by |

@@ -391,7 +391,6 @@ html.js .rail {
 .rail-item[data-p="P2"] .sw { background: var(--p2); }
 .rail-item[data-p="P3"] .sw { background: var(--p3); }
 .rail-item[data-p="P4"] .sw { background: var(--p4); }
-.rail-item[data-p="P5"] .sw { background: var(--p5); }
 .rail-item:hover { background: var(--surface-2); color: var(--text); }
 .rail-item[aria-pressed="true"] { background: var(--orange); }
 .rail-item[aria-pressed="true"] b,

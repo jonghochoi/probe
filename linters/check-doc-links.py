@@ -63,7 +63,7 @@ _KNOWN_EXTENSIONS = (
 # A backtick token carrying any of these is a glob/placeholder/URL/command, not
 # a concrete path we can resolve — skip it (precision guard). Includes the U+2026
 # ellipsis used as an elision placeholder (`…/2604.../x1.png`) and the U+2013
-# en dash used in range placeholders (`context/P0–P5.md`).
+# en dash used in range placeholders (`context/P0–P4.md`).
 _SKIP_CHARS = set("*<>{}#|=+$%@:` …–")
 
 # Date/id placeholder segments (`scouting/P0/YYYY-MM-DD.md`, `arXiv:XXXX.XXXXX`)

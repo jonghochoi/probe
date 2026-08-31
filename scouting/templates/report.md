@@ -27,7 +27,7 @@
   · Meaning source (do not invent), from context/P#.md:
       P# → §2 heading "Pillar P# — <name>"     → "<name> (pillar)"
       D# → §3 "#### [D#] <title>" + its current default
-           → "<title> — <concise gloss, ≤~12 words>". NO `v1:` label,
+           → "<title> — <concise gloss, ≤~12 words>". NO Korean,
              NO `;` semicolon chains (use commas); it is a decode gloss.
   · In the body, the FIRST occurrence of each code per ## section is a
     LINKED badge `[![CODE](…badge…)](#ref-CODE)`; later same-section
@@ -60,7 +60,7 @@
      goes in (b). The four sections read as ONE STORY: tie → contribution →
      what it means for us → what to check.
      PAPER-FOCUSED (do NOT plaster internal decision bookkeeping): in (b)–(d),
-     avoid `D<n>`/`deferred`/`v1`/config-key/`*.yaml` names — a reader should not
+     avoid `D<n>`/`deferred`/config-key/`*.yaml` names — a reader should not
      stop to ask "what is D<n>? what is deferred?". The decision link is the (a)
      badges; concrete context-edit proposals live in 💡 Context Suggestions. -->
 
@@ -70,7 +70,7 @@
 
 ### (c) 시사점
 <!-- 개조식 bullets: what this could mean for us, in PLAIN terms (e.g. "공개
-     기준점 확보", "도입 비용 낮음") — not "D<n> v1 …" / config-key plumbing. -->
+     기준점 확보", "도입 비용 낮음") — not "D<n> …" / config-key plumbing. -->
 
 ### (d) 먼저 확인할 점
 <!-- 개조식 bullets: the paper's own limits + the cheapest transfer caveat,
@@ -173,7 +173,7 @@
 <!-- Replace / add / remove a pinned paper within the pillar's 8-paper cap (`context/P#.md` §5). Include arXiv link and target Pillar. -->
 
 ### Decision Log
-<!-- Trigger an existing deferred candidate (cite D# + checkpoint), revise a v1 default's rationale, or propose a new decision. State which evidence this run moved it. -->
+<!-- Trigger an existing deferred candidate (cite D# + checkpoint), revise a default's rationale, or propose a new decision. State which evidence this run moved it. -->
 
 ### Anti-topics
 <!-- Candidate new exclusion rule surfaced by this run's filter set. -->

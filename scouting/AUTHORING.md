@@ -19,7 +19,7 @@ Each run produces **one Korean file**:
 
 | File | Language | Purpose |
 |------|----------|---------|
-| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P0–P5); `YYYY-MM-DD` is the run date. The agent reads sibling files in the same `P#/` folder for de-duplication. |
+| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P0–P4); `YYYY-MM-DD` is the run date. The agent reads sibling files in the same `P#/` folder for de-duplication. |
 
 The report is written directly in Korean (no separate English file).
 Paper titles, arXiv links, and `P#/D#` tags stay verbatim in their
@@ -125,8 +125,9 @@ after the top metadata block and immediately before the first
 There is no boilerplate intro blockquote — it would repeat in every file and
 carry no per-report information, so the report goes metadata → legend.
 
-**Format.** One compact table, rows ordered `P#` → `D#` (ascending),
-one row per distinct cited code. Each code renders as a **shields.io
+**Format.** One compact table, the pillar row first and the decision rows in
+order of first appearance in the body — a `D#` id is opaque and carries no
+sort order. One row per distinct cited code. Each code renders as a **shields.io
 badge**, color-coded by category:
 
 | Category | Color | Source |
@@ -134,9 +135,8 @@ badge**, color-coded by category:
 | `P0` | `f5d5d5` (pale red) | pillar palette — this table is the palette's source of truth |
 | `P1` | `f5e9d5` (pale orange) | pillar palette |
 | `P2` | `e2f5d5` (pale green) | pillar palette |
-| `P3` | `d5f5e7` (pale mint) | pillar palette |
+| `P3` | `e0d5f5` (pale purple) | pillar palette |
 | `P4` | `d5def5` (pale blue) | pillar palette |
-| `P5` | `e0d5f5` (pale purple) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared decision color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
@@ -151,7 +151,7 @@ color plus amber decisions appear.
 | Code | Meaning |
 |------|---------|
 | <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-e2f5d5.svg) | Structured Multimodal Observation Fusion (pillar) |
-| <a id="ref-D4"></a>![D4](https://img.shields.io/badge/D4-d97706.svg) | Body↔Hand information sharing — FiLM, cross-attn/hidden-state deferred |
+| <a id="ref-D9ZP"></a>![D9ZP](https://img.shields.io/badge/D9ZP-d97706.svg) | Body↔Hand information sharing — FiLM, cross-attn/hidden-state deferred |
 ```
 
 If the body cites no such code (rare), omit the section entirely.
@@ -159,24 +159,23 @@ If the body cites no such code (rare), omit the section entirely.
 **Meaning source** (deterministic — derive from `context/P#.md`,
 which the agent already reads; do not invent). The meaning is a **decode
 gloss**, so keep it clean: **English only** (the codes and their definitions
-are English; no Korean in this column), **no `v1:` label** (the reader does
-not need the version marker in a glossary), and **no `;` semicolon chains** —
+are English; no Korean in this column) and **no `;` semicolon chains** —
 use commas, ≤~12 words:
 
 | Code | Source in `context/P#.md` | Meaning string |
 |------|-----------------------------------|----------------|
-| `P#` | §2 heading `Pillar P# — <name>` | `<name>` + `(pillar)` |
-| `D#` | §4 `#### [D#] <title>` + its current default | `<title>` — concise gloss, ≤~12 words, commas not semicolons |
+| `P#` | the pillar file's H1, `P# — <name>` | `<name>` + `(pillar)` |
+| `D#` | the Decision Log's `#### [D#] <title>` + its current default | `<title>` — concise gloss, ≤~12 words, commas not semicolons |
 
 **Anchor convention.** Each legend row carries an explicit HTML anchor
 `<a id="ref-<CODE>"></a>` placed before the code badge (the legend badge
-itself is not a link). `<CODE>` is the verbatim code (`P1`, `D4` — case
+itself is not a link). `<CODE>` is the verbatim code (`P1`, `D9ZP` — case
 preserved; GitHub matches explicit `id=` attributes verbatim).
 
 **In-body links (first occurrence per section).** Within each top-level
 `##` section (each Paper N and the other sections), the **first** textual
 occurrence of each distinct code is written as a **linked badge**
-`[![D4](https://img.shields.io/badge/D4-d97706.svg)](#ref-D4)` (same
+`[![D9ZP](https://img.shields.io/badge/D9ZP-d97706.svg)](#ref-D9ZP)` (same
 palette as the legend). Later occurrences of that same code **in the same
 section** stay plain text.
 Each new `##` section links the first occurrence again, so any section is
@@ -185,7 +184,7 @@ not linked. The legend rows themselves are not self-linked.
 
 **No inline gloss next to a body badge.** The decision-tie line (each
 paper's (a) section) is badges only — `[![P2](…)](#ref-P2) /
-[![D11](…)](#ref-D11) [![D8](…)](#ref-D8)` — never a badge followed by a
+[![D3AG](…)](#ref-D3AG) [![D8EJ](…)](#ref-D8EJ)` — never a badge followed by a
 parenthetical Korean description. The badge alone names the tie; its
 meaning is in the legend and the paper-specific angle is in the (a)
 개조식 bullets below. Separate the pillar badge from the decision badges
@@ -195,8 +194,8 @@ with ` / `, and decision badges from each other with a **single space**.
 one story — (a) tie → (b) 핵심 기여 → (c) 시사점 → (d) 먼저 확인할 점 — and
 (a) is the badge line only (no body bullets; the substance starts in (b)).
 In (b)–(d), **do not plaster internal decision bookkeeping**: avoid `D#`
-codes, `deferred`, `v1`, config-key / `*.yaml` names in the prose. A reader
-should be able to follow the paper without stopping to ask "what is D11?
+codes, `deferred`, config-key / `*.yaml` names in the prose. A reader
+should be able to follow the paper without stopping to ask "what is D3AG?
 what is deferred?". The decision link is carried by the (a) badges; concrete
 context-edit proposals (which `D#` to move, which deferred candidate to
 trigger) belong in 💡 Context Suggestions, the section built for them.
@@ -218,7 +217,7 @@ verbatim in their original form versus which prose is Korean.
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
-| P#, D# tags | Keep verbatim (`P2`, `D11`, etc.). |
+| P#, D# tags | Keep verbatim (`P2`, `D3AG`, etc.). |
 | Reference Legend | Meaning column in **English** (mirrors the English code definitions — no Korean); codes + `<a id="ref-…">` anchors verbatim |
 | Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
 | arXiv links | Keep verbatim |
@@ -289,7 +288,7 @@ bullets, not 합니다/됩니다 paragraphs. (The reading-site rewrites under
 since they are read, not scanned; only the scouting report is 개조식.)
 
 - **명사형 종결.** End body items on a noun or nominalized form
-  (`~함 / ~음 / ~필요 / 명사`), not a full polite sentence. `D11 인코더 학습
+  (`~함 / ~음 / ~필요 / 명사`), not a full polite sentence. `D3AG 인코더 학습
   기준 데이터` / `검증 필요` — not `…데이터입니다` / `…검증해야 합니다`.
 - **Labelled bullets.** Each item is a bold label + a terse phrase
   (`- **판단 근거** — …`); nest sub-bullets for hierarchy. A section is a
@@ -632,7 +631,7 @@ already read and already decided about.
   date each was first made:
 
   ```markdown
-  - **미결 제안 2건** — WAM 아키텍처 전용 논문 Anti-topic(최초 2026-07-27), D24 리밸런싱(최초 2026-08-06)
+  - **미결 제안 2건** — WAM 아키텍처 전용 논문 Anti-topic(최초 2026-07-27), D4ML 리밸런싱(최초 2026-08-06)
   ```
 
 - Escalation is a count, not a re-argument. `3회 연속 관찰` is a fact worth one

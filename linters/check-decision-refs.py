@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Check that D# decision citations in agent outputs resolve to the Decision Log.
 
-The Decision Log is allocated per pillar (`context/P#.md` §3, entries shaped
+The Decision Log is allocated per pillar (a section of `context/P#.md`, entries shaped
 `#### [D<n>] <title> (P<m>)` — see context/CLAUDE.md "Decision-Log entry format"), and
-analysis / scouting outputs cite decisions constantly (`P1 / D4`,
-`[![D6]](…)`, "feeds P4 D22"). Nothing verified those citations: a typo'd
-`D14` in a P1 doc, or a decision renumbered in `context/`, went undetected.
+analysis / scouting outputs cite decisions constantly (`P1 / D9ZP`,
+`[![D6JW]](…)`, "feeds P4 D9QJ"). Nothing verified those citations: a mistyped
+id, or a decision moved between pillars, went undetected.
 This lint closes that gap with two checks:
 
   1. EXISTENCE — every `D<n>` token cited in a scanned doc must exist in some
-     pillar's Decision Log.
+     pillar's Decision Log, or be listed in `_RETIRED` below.
   2. ALLOCATION — every explicit `P<m> / D<n>` pairing must agree with the
-     owning pillar of `D<n>` (a `P1 / D14` tie is wrong when D14 belongs to
+     owning pillar of `D<id>` (a `P1 / D9KS` tie is wrong when D9KS belongs to
      P3).
 
-Precision over recall (mirroring check-doc-links.py): only 1-2 digit `D<n>`
-tokens on a word boundary count (a camera name like `D435` never matches), and
+Precision over recall (mirroring check-doc-links.py): only `D` + digit + two
+letters counts (a camera name like `D435` never matches, and neither does a
+model name like `DINO`), and
 matches immediately preceded by figure/table/appendix designators (`Fig. D2`,
 `Appendix D1`) are skipped — those are paper-internal labels, not Decision
 citations.
@@ -38,14 +39,30 @@ import sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-_HEADING = re.compile(r"^####\s*\[D(\d{1,2})\]", re.MULTILINE)
+# Decisions that were dropped from `context/` while documents citing them stay
+# published. A dated scouting report records what a run concluded, and a rewrite's
+# act 4 argues from the log as it stood; erasing the citation would rewrite the
+# conclusion rather than the reference. A retired id resolves here and is never
+# re-issued — the authoring prompts read `context/`, so they only ever cite live
+# decisions.
+_RETIRED = {
+    "D17": "contact sub-loop RL policy spec — the stack states no learning signal for the loop",
+    "D18": "that spec's sim2real",
+}
+
+# Numeric ids predate the current scheme. Only the retired two may still appear;
+# any other is a citation the migration missed.
+_OLD_FORM = re.compile(r"(?<![A-Za-z0-9_])(D\d{1,2})(?![A-Za-z0-9])")
+
+_HEADING = re.compile(r"^####\s*\[(D\d[A-Z]{2})\]", re.MULTILINE)
 _PILLAR_FILE = re.compile(r"^P(\d)\.md$")
 
 # A citation: D + 1-2 digits, not embedded in a longer alphanumeric token.
-_DREF = re.compile(r"(?<![A-Za-z0-9_])D(\d{1,2})(?![\d])")
-# An explicit pillar/decision tie: `P1 / D4`, `P4 D22` (badge pairs are covered
+_DREF = re.compile(r"(?<![A-Za-z0-9_])(D\d[A-Z]{2})(?![A-Za-z0-9])")
+# An explicit pillar/decision tie: `P1 / D9ZP`, `P4 D9QJ`, `P1 · D9ZP` — the middle
+# dot is the separator the Korean output actually uses (badge pairs are covered
 # by the existence check on their D token).
-_PAIR = re.compile(r"(?<![A-Za-z0-9_])P(\d)\s*(?:/\s*)?D(\d{1,2})(?![\d])")
+_PAIR = re.compile(r"(?<![A-Za-z0-9_])P(\d)\s*(?:[/·]\s*)?(D\d[A-Z]{2})(?![A-Za-z0-9])")
 # Paper-internal designators — `Fig. D2` is a figure label, not a Decision.
 _DESIGNATOR = re.compile(
     r"(?:Fig\.?|Figure|Table|Tab\.?|Eq\.?|Equation|App\.?|Appendix|Sec\.?|Section|§)\s*$",
@@ -53,9 +70,9 @@ _DESIGNATOR = re.compile(
 )
 
 
-def harvest_decision_log() -> dict[int, int]:
-    """Return {decision_number: owning_pillar} from context/P*.md §3 headings."""
-    owners: dict[int, int] = {}
+def harvest_decision_log() -> dict[str, int]:
+    """Return {decision_id: owning_pillar} from context/P*.md headings."""
+    owners: dict[str, int] = {}
     for path in sorted(glob.glob(os.path.join(_REPO_ROOT, "context", "P*.md"))):
         m = _PILLAR_FILE.match(os.path.basename(path))
         if not m:  # _TEMPLATE.md and friends
@@ -64,10 +81,10 @@ def harvest_decision_log() -> dict[int, int]:
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
         for h in _HEADING.finditer(text):
-            n = int(h.group(1))
+            n = h.group(1)
             if n in owners and owners[n] != pillar:
                 print(
-                    f"context: D{n} defined in both P{owners[n]} and P{pillar} "
+                    f"context: {n} defined in both P{owners[n]} and P{pillar} "
                     f"— duplicate allocation"
                 )
             owners[n] = pillar
@@ -78,7 +95,7 @@ def _is_designator_label(line: str, start: int) -> bool:
     return bool(_DESIGNATOR.search(line[:start]))
 
 
-def check_file(path: str, owners: dict[int, int]) -> list[tuple[int, str]]:
+def check_file(path: str, owners: dict[str, int]) -> list[tuple[int, str]]:
     findings: list[tuple[int, str]] = []
     try:
         with open(path, encoding="utf-8") as fh:
@@ -90,16 +107,24 @@ def check_file(path: str, owners: dict[int, int]) -> list[tuple[int, str]]:
         for m in _DREF.finditer(line):
             if _is_designator_label(line, m.start()):
                 continue
-            n = int(m.group(1))
+            n = m.group(1)
             if n not in owners:
-                findings.append((lineno, f"D{n} cited but not in any Decision Log"))
+                findings.append((lineno, f"{n} cited but not in any Decision Log"))
+        for m in _OLD_FORM.finditer(line):
+            if _is_designator_label(line, m.start()):
+                continue
+            n = m.group(1)
+            if n not in _RETIRED:
+                findings.append(
+                    (lineno, f"{n} is an old numeric id — ids are D + digit + two letters")
+                )
         for m in _PAIR.finditer(line):
             if _is_designator_label(line, m.start()):
                 continue
-            pillar, n = int(m.group(1)), int(m.group(2))
+            pillar, n = int(m.group(1)), m.group(2)
             if n in owners and owners[n] != pillar:
                 findings.append(
-                    (lineno, f"P{pillar} / D{n} tie — D{n} belongs to P{owners[n]}")
+                    (lineno, f"P{pillar} / {n} tie — {n} belongs to P{owners[n]}")
                 )
     return findings
 
@@ -143,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print(
         f"[check-decision-refs] clean — {len(docs)} doc(s) scanned against "
-        f"{len(owners)} decisions (D{min(owners)}–D{max(owners)})"
+        f"{len(owners)} live decision(s) and {len(_RETIRED)} retired"
     )
     return 0
 
