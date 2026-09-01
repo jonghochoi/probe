@@ -29,7 +29,7 @@ summary: >
 것인가.** 두 논문의 답이 여기서 갈리고, 아래 표는 그 답이 끌고 온 결과를 따라갑니다.
 
 한 상에 올려야 할 이유가 하나 더 있습니다. 근시일 손으로 22 자유도 Sharpa Hand 를,
-대안으로 xhand 를 잡아 두었는데(`context/MASTER.md` §4.1) 두 논문의 실기 플랫폼이 정확히 그
+대안으로 xhand 를 잡아 두었는데(`context/P2.md`) 두 논문의 실기 플랫폼이 정확히 그
 둘입니다 — TacForcing 은 RealMan RM75 두 대에 Sharpa Wave 손 둘, πR² 는 xArm6 하나에 12 자유도
 XHand 하나. 같은 수술을 이 후보 손 위에서 한 번씩 돌려 본 셈입니다.
 
