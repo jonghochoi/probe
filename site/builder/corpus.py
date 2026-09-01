@@ -47,7 +47,7 @@ def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
 # is printed inside a chip on a card, so it has to survive at one line.
 METRIC_MAX = 40
 
-# Pillar display names mirror context/MASTER.md §5 — the one place a pillar id
+# Pillar display names mirror context/MASTER.md §4 — the one place a pillar id
 # turns into a heading a reader sees. This dict is the pillar set for the whole
 # build: the display order is its declaration order and the id pattern is built
 # from its keys, so adding a pillar is one entry here. An id outside it lands

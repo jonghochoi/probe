@@ -75,7 +75,7 @@ a half-added pillar silently drops out of the index and the lints:
       `linters/check-decision-refs.py`. Never reuse, renumber or re-issue.
       Record them in the allocation table above, and give
       `context/MASTER.md`'s pillar table the new row's count.
-- [ ] **Add a row** to `context/MASTER.md` §5's pillar table — what the pillar
+- [ ] **Add a row** to `context/MASTER.md` §4's pillar table — what the pillar
       owns in one line, its decision range, and its file. The scope itself
       belongs in the pillar file and is not restated there.
 - [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for it

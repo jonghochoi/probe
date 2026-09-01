@@ -86,7 +86,7 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
 - A pillar-scoped run never reads `context/MASTER.md`, so the two tables it
   would need from there — Venue Priority and the monthly Cross-pollination
   Budget — are inlined in the prompt's SCORING section. Keep them in sync with
-  `context/MASTER.md` §6–§7 when either moves.
+  `context/MASTER.md` §5–§6 when either moves.
 
 ### 3-1. Re-paste after every prompt change
 

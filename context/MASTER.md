@@ -67,43 +67,15 @@ Build a holistic system for human-level dexterous manipulation. Full stack envis
 **Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). A contact-reaction sub-loop is a *further* low-level stabilization layer beneath the Hand expert, gated on only when contact retention demands sub-policy-loop reaction speed. Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
 
 ### 3.4 Long-term task families
-- **In-hand reorientation** (HORA-style): object rotation in palm — first demo, architectural validation
-- **Tool articulation** (e.g., tagging machine, trigger tools): hold tool + finger operation — identity flagship demo (phase 2)
-- **Diverse functional grasping**: appropriate nominal pose synthesis across objects — generalization phase (later)
-
-### 3.5 Demo task phasing
-- **Phase 1**: in-hand cube rotation (architectural validation of split + structured input + the contact-reaction gate, measurable falsifier)
-- **Phase 2**: tool articulation (identity flagship; body-hand coordination + finger asymmetry); 5-tool evaluation set matching CATFA precedent (arXiv:2509.23075)
-- **Phase 3**: cross-object generalization
+- **In-hand reorientation**: object rotation in the palm — the first demo, and the architectural validation
+- **Tool articulation** (e.g. tagging machine, trigger tools): hold the tool, operate it with the fingers — the flagship demo
+- **Diverse functional grasping**: nominal pose synthesis across objects — the generalization phase, later
 
 ---
 
-## 4. Target Hardware & Stack [STABLE]
-
-### 4.1 Hardware
-**Hand**
-- Near-term: **Sharpa Hand** (22-DOF, no wrist DOF) — fingertip tactile (Deform Map: vision-based, ~320×240 per fingertip @30Hz)
-- Alternate near-term: **xhand** (dexterous hand, no wrist DOF)
-- Mid-term (2H 2026+): **in-house custom hand** (spec TBD — DOF, tendon layout, sensor modality, control rate)
-
-**Arm**: not yet committed. Generic 6–7 DOF assumed in design (Body expert outputs both-wrist / tool-flange pose per D4QX).
-
-**Design constraint**: avoid Sharpa-specific lock-in. Tactile encoder uses *swappable sensor head + common token format* (P2).
-
-### 4.2 Simulation
-- Primary: **NVIDIA Isaac Sim + Isaac Lab** (PhysX rigid-body, Signorini-Coulomb contact)
-- Secondary (deferred to a later phase): **MuJoCo MJX** as alternative for differentiable contact
-- Visuotactile sim: Sharpa Deform Map sim-side rendering — protocol TBD before real-robot transition (Chen et al. 2024 / Akinola Isaac Gym tactile library as reference)
-
-Known gap: PhysX point contact vs. real fingertip viscoelastic deformation. Contact-Aware Neural Dynamics (arXiv:2601.12796) documents this gap.
-
-### 4.3 Training
-- **Primary policy**: VLA backbone (**Physical Intelligence π**, π0 / π0.5) + flow-matching Body/Hand action experts and the contact-reaction sub-loop beneath them, all trained by imitation with VLM-prior preservation (P4). This is the capability source.
-- Backbone weights from openpi (Apache 2.0).
-
 ---
 
-## 5. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
+## 4. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
 **Five pillars (P0–P4).** P1, P2 and P4 are the architectural core; P0 (data)
 is the upstream supporting pillar; P3 (world model) is a later-phase
@@ -127,7 +99,7 @@ Retired: **D17**, **D18**. A retired number is never re-issued;
 `linters/check-decision-refs.py` resolves it so already-published citations
 keep working.
 
-## 6. Venue Priority [AGENT-INPUT]
+## 5. Venue Priority [AGENT-INPUT]
 
 | Tier | Venues |
 |------|--------|
@@ -139,7 +111,7 @@ keep working.
 
 ---
 
-## 7. Cross-pollination Budget [AGENT-INPUT]
+## 6. Cross-pollination Budget [AGENT-INPUT]
 
 1 paper per month from an adjacent field that plausibly transfers. Rotating:
 - **Month A**: continual learning / catastrophic forgetting / PEFT (P4 adjacency)
