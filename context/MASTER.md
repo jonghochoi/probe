@@ -66,13 +66,6 @@ Build a holistic system for human-level dexterous manipulation. Full stack envis
 ### 3.3 Task philosophy
 **Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). A contact-reaction sub-loop is a *further* low-level stabilization layer beneath the Hand expert, gated on only when contact retention demands sub-policy-loop reaction speed. Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
 
-### 3.4 Long-term task families
-- **In-hand reorientation**: object rotation in the palm — the first demo, and the architectural validation
-- **Tool articulation** (e.g. tagging machine, trigger tools): hold the tool, operate it with the fingers — the flagship demo
-- **Diverse functional grasping**: nominal pose synthesis across objects — the generalization phase, later
-
----
-
 ---
 
 ## 4. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
