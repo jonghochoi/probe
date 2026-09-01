@@ -54,7 +54,7 @@ The allocation, which the lint reads back off these files:
 | Pillar | Decisions |
 |---|---|
 | P0. VLA Datasets & Benchmarks | D4ML, D1AL, D6SE, D8SD |
-| P1. Heterogeneous Body/Hand Action Expert | D3GS, D4QX, D1QT, D9ZP, D1MZ, D5SH, D6JW, D5DQ, D6ZD, D4NT, D5QT |
+| P1. Heterogeneous Body/Hand Action Expert | D3GS, D4QX, D1QT, D9ZP, D1MZ, D5SH, D6JW, D5DQ |
 | P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG, D9WZ |
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM, D7VC |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D5ZL, D3WV, D9QJ, D1WE |
