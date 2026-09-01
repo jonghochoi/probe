@@ -39,8 +39,9 @@ import sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Decisions that were dropped from `context/` while documents citing them stay
-# published. A dated scouting report records what a run concluded, and a rewrite's
+# Decisions dropped from `context/` while documents citing them stay published,
+# in either id form — retirement is about the decision, not about how it is
+# written. A dated scouting report records what a run concluded, and a rewrite's
 # act 4 argues from the log as it stood; erasing the citation would rewrite the
 # conclusion rather than the reference. A retired id resolves here and is never
 # re-issued — the authoring prompts read `context/`, so they only ever cite live
@@ -48,6 +49,9 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _RETIRED = {
     "D17": "contact sub-loop RL policy spec — the stack states no learning signal for the loop",
     "D18": "that spec's sim2real",
+    "D6ZD": "the sub-loop's gate — settled before D5DQ asked whether the loop earns a place",
+    "D4NT": "what that gated loop reads",
+    "D5QT": "what it emits",
 }
 
 # Numeric ids predate the current scheme. Only the retired two may still appear;
@@ -108,7 +112,7 @@ def check_file(path: str, owners: dict[str, int]) -> list[tuple[int, str]]:
             if _is_designator_label(line, m.start()):
                 continue
             n = m.group(1)
-            if n not in owners:
+            if n not in owners and n not in _RETIRED:
                 findings.append((lineno, f"{n} cited but not in any Decision Log"))
         for m in _OLD_FORM.finditer(line):
             if _is_designator_label(line, m.start()):

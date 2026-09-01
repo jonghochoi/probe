@@ -33,13 +33,28 @@ All formatting rules (emoji system, link format, Korean authoring principles) ar
 
 ## 1. Identity [STABLE] [AGENT-INPUT]
 
-> Most VLA-style policies attempt to converge on dexterity via a **monolithic action decoder + vision-dominant observation**, and most attempts to push the ceiling bolt a **correction/residual module onto a frozen VLA**. I argue both are dead ends for *dexterous **hand** manipulation*: a correction module is structurally bounded by the VLA's own local output distribution and must be re-trained whenever the VLA's motion pattern shifts, so it cannot exceed the VLA ceiling — it only tracks it. **I argue dexterity must be tackled at the VLA level itself**, via (1) an **anatomically heterogeneous Body/Hand action-expert decoder**, (2) **structured multimodal observation fusion** — multi-camera spatial-geometric grounding + per-finger proprio-tactile binding beyond flat concat, (3) a **gated contact-reaction sub-loop** beneath the Hand expert, running faster than the policy loop while a grasp must be held and handing finger control back when it must not, and (4) **data-efficient adaptation through the VLM pretraining recipe** (lineage × egocentric-centric corpus × staged recipe), with prior-preservation as one downstream lever. Task specification stays goal-centric (arm-hand integrated). Two supporting pillars feed this core — **P0** scouts the datasets and benchmarks the pretraining corpus draws on, and **P3** (a later-phase bet) folds an action-conditioned world model into the stack.
+> Dexterity is pursued two ways that do not reach it. A **monolithic action
+> decoder over vision-dominant observation** treats arm, torso and finger as
+> one homogeneous action space and takes sensing as a flat concat. A
+> **correction or residual module bolted onto a frozen VLA** is structurally
+> bounded by that VLA's own local output distribution and must be re-trained
+> whenever its motion pattern shifts, so it tracks the ceiling rather than
+> exceeding it. Dexterous **hand** manipulation is therefore tackled **at the
+> VLA level itself** — the decoder, the observation and the pretraining are
+> each designed rather than left to be learned incidentally. Task
+> specification stays goal-centric, arm and hand integrated.
 
 **Decomposition**
-- *Antagonist A*: VLA-output correction/residual modules — performance bounded by the VLA's local output distribution; re-train on every VLA motion-pattern shift; full-pipeline bottleneck
-- *Antagonist B*: monolithic decoder treating arm/torso/finger as one homogeneous action space + simple concat of heterogeneous modalities
-- *Protagonist*: VLA-level tackling of dexterous **hand** manipulation — heterogeneous Body/Hand experts + structured multimodal observation fusion + a gated contact-reaction sub-loop + pretraining composed for data-efficient adaptation
-- *Stays goal-centric*: task specification (arm-hand integrated)
+- *Antagonist A*: a monolithic decoder over one homogeneous action space
+- *Antagonist B*: sensing taken as a flat concat of heterogeneous streams
+- *Antagonist C*: a correction/residual module on a frozen VLA —
+  distribution-bounded, re-trained on every motion-pattern shift
+- *Protagonist*: the decoder, the observation and the pretraining, each
+  designed at the VLA level
+- *Stays goal-centric*: task specification, arm and hand integrated
+
+Each pillar carries its own tie back to this claim, and §4 says which pillar
+owns what. Neither is restated here.
 
 ---
 
@@ -88,9 +103,12 @@ scope restated here is a second copy to keep in step, so it is not restated.
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 5 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the choices upstream of deploy — lineage × corpus × recipe — and what they cost to protect afterwards | 5 | `context/P4.md` |
 
-Retired: **D17**, **D18**. A retired number is never re-issued;
+Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**. A retired number is
+never re-issued;
 `linters/check-decision-refs.py` resolves it so already-published citations
 keep working.
+
+---
 
 ## 5. Venue Priority [AGENT-INPUT]
 
