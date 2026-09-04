@@ -47,7 +47,7 @@ belongs in that folder's own rule file or README, which the row points at.
 | `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — emoji system, the Reference Legend and its pillar palette (§3-1), link rules, Korean authoring principles |
 | `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; `/analyze` and `/compare` need no routine setup |
 | `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat), from `/analyze`: a Korean re-telling written from the paper's **arXiv HTML original**, carrying its own front matter. One file publishes as **two tabs** — a one-screen 요약 (`::: glance`, where a reader lands) and the body — both written in the same run from the same reading |
-| `analysis/AUTHORING.md` | human | Format contract for `analysis/<id>.md` — front matter (§1), body rules R1–R15 (§2), what publishes as literal text including the KaTeX math forms (§3), the 요약 tab G1–G7 (§4), enforcement (§5) |
+| `analysis/AUTHORING.md` | human | Format contract for `analysis/<id>.md` — front matter (§1), body rules R1–R16 (§2), what publishes as literal text including the KaTeX math forms (§3), the 요약 tab G1–G7 (§4), enforcement (§5) |
 | `comparison/` | agent | Comparisons — one `<slug>.md` per comparison, holding two or three papers under one question; the slug is the question, never the ids joined together. **Only papers with a rewrite in `analysis/` may be compared** |
 | `comparison/AUTHORING.md` | human | Format contract for `comparison/<slug>.md` — the one rule and its consequences (§1), front matter, the four-act spine, the fence allow-list and the length ceiling (§2), `probe-matrix` (§3), enforcement (§4) |
 | `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token), `analyze.txt` and `compare.txt`. Each owns a **procedure** — which papers, where the facts come from, how to verify, how to commit — and delegates every format rule to its track's `AUTHORING.md`; a rule restated in a prompt is a second source of truth that drifts the next time the contract moves |
@@ -131,6 +131,7 @@ changes. One canonical format per prompt:
 scout: P{N} report YYYY-MM-DD
 compare: add <slug>                       # the slug is the question, so no alias
 analysis: add <arxiv-id> rewrite (<alias>)
+analysis: add <arxiv-id> facts (<alias>)
 ```
 
 `update` replaces `add` when redoing an existing rewrite or comparison. The
@@ -149,6 +150,11 @@ trailing `(<alias>)` is the paper's codename, resolved in priority order:
    quantized hand state policy" yields nothing.
 4. Otherwise omitted — a plain descriptive title whose method is never given a
    name of its own gets no alias, and one is never invented.
+
+`analysis: … facts` backfills the `probe-facts` block (`analysis/AUTHORING.md`
+R16) into a rewrite that has already landed, and takes `update` when the block
+is redone. It names one part of a file the reader has already met rather than a
+rewrite, so the landing page leaves that paper where it is.
 
 ### Body
 

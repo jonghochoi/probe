@@ -3,8 +3,8 @@
 A search result is a place to land, not a document to open: a rewrite is 60 KB
 and a whole-paper vector smears its sections together, so the unit here is the
 section a reader would have scrolled to. Each rewrite contributes its sections,
-its term panels and its figure captions, plus the 요약 surface and one chunk
-standing for the paper as a whole.
+its term panels and its figure captions, plus the 요약 surface, its 사실 카드 and
+one chunk standing for the paper as a whole.
 
 Nothing here touches the network. `build-site.py --index` writes what this
 module produces; `site/search/indexer.py` is what embeds and uploads it.
@@ -16,6 +16,8 @@ import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass, field
+
+from builder.mdext.probefence import FACT_AXES
 
 # A chunk longer than this is split at a paragraph boundary. The ceiling is
 # about recall, not about the model's context: one vector averages whatever it
@@ -157,6 +159,25 @@ def _fence_values(payload: str, key: str) -> list[str]:
     return [_unescape(v) for v in re.findall(_JSON_STR.format(key), payload)]
 
 
+def _facts_text(paper) -> str:
+    """The 사실 카드 as one line per axis.
+
+    It is the only part of a rewrite that states the paper's coordinates in a
+    fixed vocabulary, and it sits above act 1 — where `_sections` cannot reach
+    it, since that split starts at the first `###`. So it becomes its own chunk:
+    "촉각 쓰는 30 Hz 손 정책" is a query about these eight lines and about
+    nothing else in the file.
+    """
+    rows = []
+    card = paper.facts
+    for axis, (label, _vocabulary) in FACT_AXES.items():
+        cell = card.get(axis)
+        if not cell or not cell.get("v"):
+            continue
+        rows.append(f"{label}: {cell['v']} {cell.get('note', '')}".strip())
+    return "\n".join(rows)
+
+
 def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
     """One rewrite's chunks.
 
@@ -183,6 +204,10 @@ def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
     # The 요약 surface. No anchor: the page opens on this tab, so the paper's
     # own address is already the place the passage is.
     add("paper", paper.title, "요약", _glance_text(paper.glance))
+
+    # The 사실 카드 (R16). No anchor either: it opens the 상세 tab, which the
+    # paper's own address already lands on once the reader switches.
+    add("paper", paper.title, "사실", _facts_text(paper))
 
     # The toc is in document order, so walking it carries the act a section
     # sits under down onto the section's own chunk: "3. 무엇이 증명되었나" is

@@ -122,7 +122,7 @@ reader nothing.
 
 ---
 
-## 2. Body Rules (R1–R15)
+## 2. Body Rules (R1–R16)
 
 Free-form Korean markdown under a fixed four-act spine. There is no section
 schema beyond the acts — a rigid spine would turn a re-telling back into a form
@@ -631,6 +631,80 @@ Working rule:
 - Appendix detail is exactly what `::: details` (R3) is for. Collapsing it is
   fine; leaving it out is not.
 
+### 2-14. R16 — 사실 카드: the paper's coordinates, in fixed vocabulary
+
+Every rewrite carries one `probe-facts` block. Everything else on the page is
+written for the argument it sits in; this one is written for the corpus. The
+same eight things — 손 · 행동 · 감각 · 주기 · 백본 · 목표 · 데이터 · 검증 —
+are already stated somewhere in every rewrite, in that rewrite's own Korean and
+in whichever section needed them, so nothing above one paper can line them up.
+A closed vocabulary per axis is what turns the corpus into one table.
+
+    ```probe-facts
+    {"embodiment":   {"v": "<vocabulary>", "note": "<하드웨어 이름>", "src": "<§x.y>"},
+     "action_space": {"v": "<vocabulary>", "note": "<DoF, 청크 길이>", "src": "<§x.y>"},
+     "sensing":      {"v": "<vocabulary>", "note": "<센서 이름>", "src": "<§x.y>"},
+     "control_rate": {"v": "<수> Hz", "note": "<그 주기로 도는 것>", "src": "<§x.y>"},
+     "backbone":     {"v": "<vocabulary>", "note": "<계보 그대로>", "src": "<§x.y>"},
+     "objective":    {"v": "<vocabulary>", "note": "<헤드 · 손실>", "src": "<§x.y>"},
+     "data":         {"v": "<vocabulary>", "note": "<규모 + 출처 그대로>", "src": "<§x.y>"},
+     "evaluation":   {"v": "<vocabulary>", "note": "<과제 수, 하드웨어>", "src": "<§x.y>"}}
+    ```
+
+All eight axes are present, in this order, and no others — an axis this paper
+has nothing to say about is answered with a reserved value, never omitted.
+
+| Key | Label | `v` | `note` |
+|---|---|---|---|
+| `embodiment` | 신체·손 | `dexterous-hand` `gripper` `humanoid` `arm-only` `human-hand` `sim-only` | the hardware's own name |
+| `action_space` | 행동 공간 | `joint-position` `joint-torque` `ee-pose` `keypoints` `latent-token` `mixed` | DoF, chunk length |
+| `sensing` | 입력 모달리티 | `vision-only` `+proprio` `+tactile` `+force` `+tactile+force` | the sensors' own names |
+| `control_rate` | 제어 주기 | free text, `<수> Hz` — `30 Hz`, `1.5 Hz` | what runs at that rate |
+| `backbone` | 기반 VLM · 동결 | `none` `frozen` `lora` `partial` `full` | the lineage verbatim, e.g. `PaliGemma-2B × π0` |
+| `objective` | 학습 목표 | `flow-matching` `diffusion` `autoregressive` `regression` `rl` `other` | head / loss detail |
+| `data` | 학습 데이터 | `robot-teleop` `human-video` `sim` `mixed` | scale + source verbatim |
+| `evaluation` | 검증 | `real` `sim` `real+sim` | task count, hardware |
+
+**The vocabulary is closed and the `note` is not.** The value is what a surface
+above this page groups on, so it is one of the listed tokens and nothing else;
+everything that makes it this paper's answer — which hand, how many DoF, whose
+checkpoint, how many hours — goes in `note`, one line, and prints beside it.
+`note` is markdown: `` $`math`$ `` and backticks render.
+
+**Two values are not values.** Both are available on every axis:
+
+| Reserved `v` | Says |
+|---|---|
+| `해당 없음` | the axis does not apply — a benchmark paper has no control rate |
+| `미기재` | the paper never states it |
+
+They are not interchangeable. One is a property of the work, the other a gap in
+its reporting, and the difference is exactly what a corpus-wide read is looking
+for: "half the papers claiming multi-timescale control never print a Hz" is a
+finding, and it only exists if 미기재 was written where it was true.
+
+**`src` is required on every stated axis** — `§4.1`, `부록 §8`, `Table 1`. It is
+the same hook `probe-act` puts on `source` (§4-6): an axis is a claim about the
+paper, and a claim on this card is checkable without leaving it. A reserved
+value is the one exemption, having no passage to point at. **The build fails on
+an unknown key, a missing key, an empty `v`, a `v` outside its axis's
+vocabulary, a `control_rate` that is not `<수> Hz`, and a missing `src`.**
+
+**One per rewrite, and it opens the article** — immediately after the `#` thesis
+line, before `## 1`. There it is the first thing under the claim: what this
+paper is made of, before the argument for it. Anywhere else it reads as one more
+component in whichever section it landed in, which is the one thing it is not.
+It never appears on the 요약 surface (§4), which takes its own fences only.
+
+**A `probe-matrix` axis and a facts axis are different objects**
+(`comparison/AUTHORING.md` §3). A matrix axis is *the question a comparison
+asks* — 손에 없는 자리는 어떻게 되나 — and its cells are sentences written for
+that question. A facts axis is a *descriptor* from a fixed list, written once
+per paper and identical in shape across the corpus. So a matrix is never
+auto-filled from the cards: a grid of tokens compares nothing. Reading the cards
+while choosing the axes is another matter, and worth doing — where two papers'
+descriptors differ is a good place to look for a question.
+
 ---
 
 ## 3. What Publishes as Literal Text
@@ -863,8 +937,10 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | Rule | Enforced by |
 |---|---|
 | Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title (§1), `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
-| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
+| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), a second 사실 카드 (R16), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts (incl. its all-or-none `state` and the four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
+| The 사실 카드's payload — the eight axes and no others, each `v` inside its own vocabulary, the `<수> Hz` shape, and `src` on every value that is not reserved (R16) | `site/builder/mdext/probefence.py` |
+| The 사실 카드 present on every rewrite generated on or after `FACTS_EFFECTIVE`, and placed above act 1 (R16) | `site/builder/corpus.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |

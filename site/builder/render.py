@@ -164,6 +164,7 @@ class DocRenderer:
         self._current_section = ""
         self._term_panels: dict[str, str] = {}
         self._matrices = 0
+        self._facts = 0
         self._printed_chars = 0
         self.md = self._build()
 
@@ -448,6 +449,9 @@ class DocRenderer:
             if info == "probe-parts":
                 self._context_kinds.add("대조")
                 return probefence.parts(data, self._inline)
+            if info == "probe-facts":
+                self._facts += 1
+                return probefence.facts(data, self._inline)
             if info == "probe-matrix":
                 self._matrices += 1
                 return probefence.matrix(data, self._inline, self.matrix_heads)
@@ -476,6 +480,16 @@ class DocRenderer:
         if self.kind == "compare":
             self._check_compare()
             return
+        if self._facts > 1:
+            # Whether a rewrite carries the card at all, and where it sits, is
+            # `corpus.py`'s — it reads the source and knows the date the
+            # contract binds from. What only this pass can see is a second one:
+            # the card is the paper's row in a corpus-wide table, and a page
+            # printing two of them has two answers per axis.
+            self.problems.append(
+                f"{self._facts} ```probe-facts blocks (R16) — a rewrite carries "
+                f"exactly one, right under the thesis line"
+            )
         if self._sections_without_quiz:
             self.problems.append(
                 "sections without exactly one quiz: "

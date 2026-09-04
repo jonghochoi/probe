@@ -35,7 +35,7 @@ must look like, and this prompt does not restate it:
 
   §1  file + front-matter contract (every key, and which ones fail the build),
       plus the SOURCE and STANCE contracts the procedure below implements
-  §2  body rules R1–R15 — the four acts, the heading spine, density, term
+  §2  body rules R1–R16 — the four acts, the heading spine, density, term
       anchors, the five planted-context kinds and their ` ```probe-* ` fences,
       figures, math, code blocks (language AND caption on the fence line),
       callouts, resource links, quizzes

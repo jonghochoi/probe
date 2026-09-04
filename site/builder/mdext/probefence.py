@@ -26,10 +26,12 @@ from __future__ import annotations
 
 import html
 import json
+import re
 
 FENCES = (
     "probe-term", "probe-figure", "probe-quiz", "probe-eq", "probe-flow",
     "probe-lineage", "probe-scale", "probe-split", "probe-parts",
+    "probe-facts",
 )
 
 # The short surface has its own fences, validated by `glance.py` where the
@@ -45,7 +47,7 @@ SURFACE_FENCES = ("probe-hub", "probe-rail", "probe-act")
 # Both directions are reported rather than silently dropped — a fence that
 # renders to nothing is one the author never learns was wrong.
 COMPARE_FENCES = ("probe-matrix",)
-COMPARE_BANNED = ("probe-figure", "probe-eq", "probe-quiz")
+COMPARE_BANNED = ("probe-figure", "probe-eq", "probe-quiz", "probe-facts")
 
 
 class FenceError(ValueError):
@@ -492,6 +494,116 @@ def parts(data: dict, inline_md) -> str:
     # No `box-body` here: the rows run edge to edge and divide themselves, so
     # an inset wrapper would only add a margin the dividers have to stop short of.
     return f'<div class="parts">{head}{out}</div>'
+
+
+# ── ```probe-facts ──────────────────────────────────────────────────────────
+
+# Axis → (printed label, the values it accepts). The order is the card's order,
+# and the fixed vocabularies are the point: a rewrite states 손 · 행동 · 감각 ·
+# 주기 · 백본 · 목표 · 데이터 · 검증 in its own prose already, but in eight
+# different Korean phrasings per paper, so nothing above one paper can line them
+# up. A closed set per axis is what makes 40 rewrites one table. `control_rate`
+# is the one free-text axis — a rate is a number, and enumerating rates is
+# enumerating the corpus — so it is held to a shape instead.
+FACT_AXES = {
+    "embodiment": ("신체·손", ("dexterous-hand", "gripper", "humanoid",
+                               "arm-only", "human-hand", "sim-only")),
+    "action_space": ("행동 공간", ("joint-position", "joint-torque", "ee-pose",
+                                   "keypoints", "latent-token", "mixed")),
+    "sensing": ("입력 모달리티", ("vision-only", "+proprio", "+tactile",
+                                  "+force", "+tactile+force")),
+    "control_rate": ("제어 주기", None),
+    "backbone": ("기반 VLM · 동결", ("none", "frozen", "lora", "partial", "full")),
+    "objective": ("학습 목표", ("flow-matching", "diffusion", "autoregressive",
+                                "regression", "rl", "other")),
+    "data": ("학습 데이터", ("robot-teleop", "human-video", "sim", "mixed")),
+    "evaluation": ("검증", ("real", "sim", "real+sim")),
+}
+
+# The two answers that are not a value. `해당 없음` says the axis does not apply
+# to this paper (a benchmark has no control rate), `미기재` says the paper never
+# states it — and separating them is why both exist: one is a property of the
+# work, the other a gap in its reporting, and a card that spells them the same
+# way hides which corpus-wide silence is real.
+FACT_RESERVED = ("해당 없음", "미기재")
+
+# `30 Hz`, `1.5 Hz`. The unit is fixed so the axis reads as one number.
+FACT_RATE = re.compile(r"^\d+(\.\d+)? Hz$")
+
+
+def facts(data: dict, inline_md) -> str:
+    """The 사실 카드 — one paper's eight axes in fixed vocabulary (R16).
+
+    Every other component here is written for the argument it sits in. This one
+    is written for the corpus: "which of these run at 30 Hz on a dexterous hand"
+    is a question no set of prose answers can be collected into, so the eight
+    axes take a closed vocabulary and the detail moves to `note`, which carries
+    what the value alone cannot say — the DoF count, the hardware's own name —
+    and prints beside it.
+
+    `src` is the verification hook `probe-act` puts on `source`: an axis is a
+    claim about the paper, and a claim here is traceable in one glance. A
+    reserved value is exempt because there is no passage to point at — the
+    paper's silence is the finding.
+    """
+    unknown = [k for k in data if k not in FACT_AXES]
+    if unknown:
+        raise FenceError(
+            f"probe-facts: unknown axis {', '.join(sorted(unknown))} — the card is "
+            f"exactly the eight axes ({', '.join(FACT_AXES)})"
+        )
+    missing = [k for k in FACT_AXES if k not in data]
+    if missing:
+        raise FenceError(
+            f"probe-facts: missing axis {', '.join(missing)} — all eight are "
+            f"answered, with `미기재` where the paper does not say"
+        )
+
+    rows = ""
+    for key, (label, vocabulary) in FACT_AXES.items():
+        cell = data[key]
+        if not isinstance(cell, dict):
+            raise FenceError(f"probe-facts[{key}]: each cell is an object, got {cell!r}")
+        value = str(cell.get("v", "")).strip()
+        if not value:
+            raise FenceError(f"probe-facts[{key}]: missing `v`")
+        reserved = value in FACT_RESERVED
+        if not reserved and vocabulary and value not in vocabulary:
+            raise FenceError(
+                f"probe-facts[{key}]: `v` is {value!r} — this axis takes one of "
+                f"{', '.join(vocabulary)}, or {' / '.join(FACT_RESERVED)}"
+            )
+        if not reserved and vocabulary is None and not FACT_RATE.match(value):
+            raise FenceError(
+                f"probe-facts[{key}]: `v` is {value!r} — write it as `<수> Hz`, "
+                f"or {' / '.join(FACT_RESERVED)}"
+            )
+        src = str(cell.get("src", "")).strip()
+        if not src and not reserved:
+            raise FenceError(
+                f"probe-facts[{key}]: missing `src` — a stated axis names the passage "
+                f"it came from (§x.y / Table n). Only {' / '.join(FACT_RESERVED)} is "
+                f"exempt, having nothing to point at"
+            )
+        note = str(cell.get("note", "")).strip()
+        printed = (f'<span class="fx-na">{_esc(value)}</span>' if reserved
+                   else _esc(value))
+        rows += (
+            '<div class="fx-row">'
+            f'<dt class="fx-k">{_esc(label)}</dt>'
+            f'<dd class="fx-v">{printed}'
+            # The note is prose — a DoF count in math, a hardware name in
+            # backticks — so it goes through the inline rule rather than
+            # `escape()`, which would publish its own markup.
+            + (f'<span class="fx-note">{inline_md(note)}</span>' if note else "")
+            + (f'<span class="fx-src">{_esc(src)}</span>' if src else "")
+            + "</dd></div>"
+        )
+    # `box-head` over rows that run edge to edge and divide themselves — the
+    # `probe-parts` shape. An inset body would only add a margin the dividers
+    # have to stop short of.
+    return (f'<div class="factcard"><div class="box-head">사실 카드</div>'
+            f'<dl class="facts">{rows}</dl></div>')
 
 
 def error_block(message: str) -> str:

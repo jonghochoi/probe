@@ -125,6 +125,7 @@ that zoom into one paper are not** — that paper's own page has them.
 | `probe-figure` | **Unavailable** | one paper's figure is one paper's detail |
 | `probe-eq` | **Unavailable** | so is a derivation. Inline `` $`x`$ `` carries what an axis needs |
 | `probe-quiz` | **Unavailable** | it teaches one paper; it does not compare |
+| `probe-facts` | **Unavailable** | one paper's eight axes are that paper's own coordinates, and its page prints them |
 
 An unavailable fence is **reported and rendered as an error block**, never
 silently dropped — a fence that renders to nothing is one the author never

@@ -8,6 +8,7 @@ from collections import Counter
 from . import components as c
 from . import corpus, glance as glance_mod
 from .corpus import PILLAR_NAMES, PILLAR_ORDER, Paper
+from .mdext.probefence import FACT_AXES
 from .render import DocRenderer
 
 # Pages serves a project site under /<repo>/. Only 404.html uses this; every
@@ -69,6 +70,13 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
 
     A comparison carries the ids it compares, so typing an arXiv id finds both
     the paper and the comparisons that hold it.
+
+    A paper's 사실 카드 rides along as its bare axis values (R16) — the closed
+    vocabularies only, since a free-text rate is a number no filter groups on.
+    They are what lets a surface reading this index ask a question of the corpus
+    rather than of one page ("which of these are `+tactile`"), and they cost a
+    few bytes a paper because a value is a token, not a sentence. A rewrite with
+    no block leaves the key out rather than carrying an empty object.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     ranked = sorted(comps or [], key=lambda x: x.order_key, reverse=True)
@@ -76,7 +84,8 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
         "pillars": PILLAR_NAMES,
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
-             "pillars": p.filed, "tags": p.tags, "date": p.date}
+             "pillars": p.filed, "tags": p.tags, "date": p.date,
+             **({"facts": f} if (f := _index_facts(p)) else {})}
             for p in ordered
         ],
         "comparisons": [
@@ -88,6 +97,16 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     }
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     return f"window.ProbeIndex={body};\n"
+
+
+def _index_facts(paper: Paper) -> dict:
+    """`{axis: v}` for the axes with a closed vocabulary — the corpus index's
+    share of the 사실 카드."""
+    return {
+        axis: cell["v"]
+        for axis, cell in paper.facts.items()
+        if FACT_AXES.get(axis, (None, None))[1] and cell.get("v")
+    }
 
 
 def _shelf_facets(cls: str) -> str:

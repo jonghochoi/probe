@@ -14,6 +14,7 @@ Accepted shapes:
   <type>: <description>                 style|deps
   scout: P<N> report YYYY-MM-DD         generated routine commits, formats per
   analysis: add|update <id> rewrite …  CLAUDE.md "generated routine commits"
+  analysis: add|update <id> facts …     (a facts backfill of a landed rewrite)
   compare: add|update <slug>            (the scouting routine, /analyze,
                                         /compare)
 
@@ -39,7 +40,7 @@ _HUMAN = re.compile(rf"^({_TYPES})(\(([^)\s]+)\))?: (.+)$")
 
 _GENERATED = [
     re.compile(r"^scout: P\d report \d{4}-\d{2}-\d{2}$"),
-    re.compile(r"^analysis: (add|update) \S+ rewrite.*"),
+    re.compile(r"^analysis: (add|update) \S+ (rewrite|facts).*"),
     # The slug is the comparison's question, so it carries no alias and there
     # is nothing to say after it — a subject that keeps going is describing
     # the comparison, which the file already does.

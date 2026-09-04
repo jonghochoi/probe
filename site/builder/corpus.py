@@ -10,6 +10,7 @@ One rewrite per file, `analysis/<arxiv-id>.md` — flat, no per-paper folder.
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 from dataclasses import dataclass
@@ -99,9 +100,14 @@ LINK_KINDS = {
 # landing is not "any commit that touched the file" — a repo-wide docs or
 # refactor pass touches half the corpus in one commit and would shuffle the
 # whole list into that commit. Only two things land a rewrite: the commit that
-# adds the file, and a generated `analysis:` commit naming that paper's own id.
+# adds the file, and a generated `analysis:` commit that redoes that paper's own
+# rewrite. Which is why the subject pattern names the word `rewrite`: the
+# `analysis:` prefix also carries commits that touch one part of a file the
+# reader has already read — `analysis: add <id> facts` fills in the 사실 카드 of
+# a rewrite that landed months ago, and to a returning reader that is not a new
+# paper.
 _LANDED = re.compile(r"^analysis/(\d{4}\.\d{4,5})\.md$")
-_RELANDS = re.compile(r"^analysis:\s+(?:add|update)\s+(\d{4}\.\d{4,5})\b")
+_RELANDS = re.compile(r"^analysis:\s+(?:add|update)\s+(\d{4}\.\d{4,5})\s+rewrite\b")
 
 
 @dataclass(frozen=True)
@@ -341,6 +347,15 @@ class Paper:
         return _plain(self.front.get("summary", ""))
 
     @property
+    def facts(self) -> dict:
+        """The 사실 카드's eight axes, `{axis: {"v", "note", "src"}}` (R16).
+
+        Empty for a rewrite that carries no block, which the date gate below
+        allows for anything written before the contract binds.
+        """
+        return facts(self.body)
+
+    @property
     def search_key(self) -> str:
         """The identity fields, compacted — a hit here outranks one in the body."""
         return _haystack([
@@ -492,6 +507,13 @@ def _fragments(paper: "Paper") -> list[str]:
                 v.replace('\\"', '"')
                 for v in re.findall(_JSON_STR.format(key), payload)
             ]
+    # The 사실 카드's own words. Its keys are the axis names, not the prose keys
+    # every other fence shares, so it reaches the haystack by value instead:
+    # `dexterous-hand` and `flow-matching` are exactly the terms a reader types
+    # into the filter box, and the note beside each carries the hardware's own
+    # name.
+    for cell in facts(source).values():
+        out += [cell.get("v", ""), cell.get("note", "")]
     return out
 
 
@@ -571,6 +593,7 @@ def discover() -> tuple[list[Paper], list[str]]:
         else:
             paper.glance, found = glance_mod.parse(surfaces["glance"])
             problems += [f"analysis/{path.name}: {line}" for line in found]
+        problems += _facts_block(path.name, front, article)
         problems += _tagline_echo(path.name, paper.title, paper.tagline)
         if len(paper.metric) > METRIC_MAX:
             problems.append(
@@ -690,6 +713,71 @@ def figure_urls(body: str) -> dict[str, str]:
         if fid and url:
             out.setdefault(fid.group(1).strip(), url.group(1).strip())
     return out
+
+
+_FACTS_FENCE = re.compile(r"^```probe-facts[ \t]*\n(.*?)^```[ \t]*$", re.M | re.S)
+
+
+def facts(body: str) -> dict:
+    """`{axis: cell}` from the body's `probe-facts` fence (R16).
+
+    The payload's own validation is `mdext.probefence.facts`, which runs while
+    the page renders and reports what is wrong with it. This reads the block for
+    the surfaces that consult it away from the page — the landing haystack, the
+    corpus index, the search chunker — so a payload it cannot parse comes back
+    empty rather than raising here: the fence has already been reported by the
+    pass whose job that is.
+    """
+    match = _FACTS_FENCE.search(body)
+    if not match:
+        return {}
+    try:
+        data = json.loads(match.group(1))
+    except ValueError:
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {axis: cell for axis, cell in data.items() if isinstance(cell, dict)}
+
+
+# ── The 사실 카드's place in the file ────────────────────────────────────────
+# The block is a fixed-vocabulary description of the paper, and every surface
+# that reads across the corpus reads it — so it sits where nothing else can be
+# mistaken for it: exactly one per rewrite, between the thesis line and act 1.
+#
+# `FACTS_EFFECTIVE` binds rewrites generated on or after it. A rewrite written
+# before the contract existed is not wrong, it is older; the block arrives on
+# one by a facts backfill (`analysis: add <id> facts`), which is its own commit.
+FACTS_EFFECTIVE = "2026-09-04"
+
+_ACT_DIVIDER = re.compile(r"^## ", re.M)
+
+
+def _facts_block(name: str, front: dict, article: str) -> list[str]:
+    """The 사실 카드 is there, and it opens the article (R16).
+
+    That there is only one of it is the renderer's (`render.py`), which counts
+    the fences it draws; this pass reads the source, which is where a date and
+    an offset are.
+    """
+    blocks = list(_FACTS_FENCE.finditer(article))
+    if not blocks:
+        generated = _GENERATED.match(front.get("generated", "").strip())
+        if generated and generated.group(1) >= FACTS_EFFECTIVE:
+            return [
+                f"analysis/{name}: no ```probe-facts block (R16) — every rewrite "
+                f"generated on or after {FACTS_EFFECTIVE} carries the eight axes "
+                f"under its thesis line"
+            ]
+        return []
+    act = _ACT_DIVIDER.search(article)
+    if act and act.start() < blocks[0].start():
+        return [
+            f"analysis/{name}: ```probe-facts sits inside the body (R16) — it "
+            f"belongs between the thesis line and `## 1`, where a reader meets "
+            f"the paper's own coordinates before the argument for them"
+        ]
+    return []
 
 
 # ── Neighbours ──────────────────────────────────────────────────────────────

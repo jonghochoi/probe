@@ -1250,6 +1250,53 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .box-body { padding: .9rem 1.1rem; }
 
+/* ── 사실 카드 (R16) ───────────────────────────────────────────────────── */
+/* Eight axes in a fixed vocabulary, read before the argument starts. It wears
+   the same framed shape as the planted-context family — this is the paper's
+   own coordinates, not a claim of ours — and its rows run edge to edge and
+   divide themselves, the `probe-parts` arrangement. */
+.factcard {
+  margin: 1.4rem 0; border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.facts { margin: 0; }
+.fx-row {
+  display: grid; grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: .2rem 1rem; padding: .42rem .95rem; align-items: baseline;
+  border-top: 1px solid var(--border-soft);
+}
+.fx-row:first-child { border-top: 0; }
+.fx-k {
+  font-size: .76rem; font-weight: 700; color: var(--text-muted);
+  line-height: 1.5;
+}
+/* The value is the token the corpus sorts on, so it is set in mono and reads
+   as a value rather than as the start of a sentence. `dd` carries a browser
+   indent by default, which would step every value away from its own column. */
+.fx-v {
+  margin: 0; font-family: var(--mono); font-size: .8rem; font-weight: 700;
+  color: var(--text); line-height: 1.55;
+}
+/* Not a value: the paper does not say, or the axis does not apply. Set apart
+   so a column of real answers is not read as holding these. */
+.fx-na { font-family: var(--ko); font-weight: 600; color: var(--text-muted); }
+/* The detail the closed vocabulary cannot carry — the DoF count, the rig's own
+   name. Prose, so it leaves the mono column the value keeps. */
+.fx-note {
+  font-family: var(--ko); font-weight: 400; font-size: .82rem;
+  color: var(--text-muted); line-height: 1.55;
+}
+.fx-note::before { content: " — "; }
+/* Where the axis came from. Set like a figure origin, because that is what it
+   is: the passage a reader checks the row against. */
+.fx-src {
+  display: block; font-family: var(--ko); font-weight: 400;
+  font-size: .72rem; font-style: italic; color: var(--text-muted);
+}
+@media (max-width: 560px) {
+  .fx-row { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
+}
+
 /* 계보 — a dated rail. */
 .ln-list { list-style: none; margin: 0; display: grid; gap: .7rem; }
 .ln-item {
