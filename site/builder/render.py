@@ -41,6 +41,13 @@ EYEBROW = "읽기 쉬운 버전 · 원문에서 직접 발췌"
 # `Figure 3 — <한글 캡션>` → ("Figure 3", "<한글 캡션>")
 _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re.I)
 
+# An arXiv link in any of the three shapes the corpus writes — abstract, HTML
+# edition, PDF — reduced to the bare id, so a link to a paper that has its own
+# rewrite can be recognised however the author reached for it.
+_ARXIV_HREF = re.compile(
+    r"^https?://arxiv\.org/(?:abs|html|pdf)/(\d{4}\.\d{4,5})(?:v\d+)?(?:\.pdf)?/?$"
+)
+
 
 # `## 🔬 방법론` — a leading emoji is optional in a rewrite, but when
 # present it belongs to the heading's display, not to its slug.
@@ -112,9 +119,18 @@ class DocRenderer:
 
     def __init__(self, katex, *, decisions: dict | None = None,
                  lead_html: str = "", kind: str = "paper",
-                 matrix_heads: list | None = None):
+                 matrix_heads: list | None = None,
+                 siblings: dict[str, str] | None = None,
+                 self_id: str | None = None):
         self.katex = katex
         self.decisions = decisions or {}
+        # `{arXiv id: paper title}` for every paper the corpus has a rewrite
+        # of. A document cites its siblings by arXiv URL, so the build is the
+        # only place that knows one of those citations lands on a page of our
+        # own — and `self_id` is the document's own paper, which is a citation
+        # of itself rather than a sibling.
+        self.siblings = siblings or {}
+        self.self_id = self_id
         # Which contract this document answers to. `paper` is a rewrite under
         # `analysis/AUTHORING.md`; `compare` is a comparison under
         # `comparison/AUTHORING.md`, which teaches nothing and so owes none of the
@@ -421,7 +437,8 @@ class DocRenderer:
                 return probefence.flow(data, self._inline)
             if info == "probe-lineage":
                 self._context_kinds.add("계보")
-                return probefence.lineage(data, self._inline)
+                return probefence.lineage(data, self._inline,
+                                          self._sibling_for_url)
             if info == "probe-scale":
                 self._context_kinds.add("숫자의 지형")
                 return probefence.scale(data, self._inline)
@@ -520,6 +537,13 @@ class DocRenderer:
         if href.startswith(("http://", "https://")):
             token.attrSet("target", "_blank")
             token.attrSet("rel", "noopener")
+            sid = self._sibling_id(href)
+            if sid:
+                # The link itself still goes to arXiv — the marker is a second
+                # anchor appended by `_link_close`, so the reader chooses
+                # between the paper and our re-telling of it.
+                self._sib_stack = getattr(self, "_sib_stack", [])
+                self._sib_stack.append(sid)
         else:
             # Intra-corpus links must land on site pages, not raw markdown: a
             # sibling rewrite is `../<id>.md` in the corpus and `../<id>/` on
@@ -532,6 +556,9 @@ class DocRenderer:
         return f"<a {attrs}>"
 
     def _link_close(self, tokens, idx, options, env):
+        sibs = getattr(self, "_sib_stack", None)
+        if sibs:
+            return "</a>" + self._sibling_marker(sibs.pop())
         stack = getattr(self, "_term_stack", None)
         if stack:
             tid = stack.pop()
@@ -544,6 +571,47 @@ class DocRenderer:
                 + self._term_panels.get(tid, "")
             )
         return "</a>"
+
+    # ── sibling rewrites ────────────────────────────────────────────────
+    def _sibling_id(self, url: str) -> str:
+        """The corpus id an arXiv URL points at, or `""`.
+
+        A paper's own arXiv link is not a sibling: on its own page the marker
+        would send the reader to the page they are already reading.
+        """
+        m = _ARXIV_HREF.match(url.strip())
+        if not m:
+            return ""
+        aid = m.group(1)
+        return aid if aid in self.siblings and aid != self.self_id else ""
+
+    def _sibling_href(self, aid: str) -> str:
+        """The site path to a sibling's page, relative to this document.
+
+        A rewrite is published at `p/<id>/index.html` and a comparison at
+        `c/<slug>/index.html`, so the two kinds sit at the same depth and climb
+        differently — the same two shapes `pages.py` writes its own paper links
+        with.
+        """
+        if self.kind == "compare":
+            return f"../../p/{aid}/index.html"
+        return f"../{aid}/index.html"
+
+    def _sibling_marker(self, aid: str) -> str:
+        """The chip that follows a sibling citation.
+
+        A plain anchor, so a browser with no script still lands on the page.
+        The title carries the paper's own title: the chip has room for one word
+        and the reader needs to know which paper is on the other side of it.
+        """
+        title = html.escape(f"재작성본 · {self.siblings.get(aid, aid)}", quote=True)
+        return (f'<a class="sib" href="{html.escape(self._sibling_href(aid), quote=True)}" '
+                f'title="{title}">재작성본</a>')
+
+    def _sibling_for_url(self, url: str) -> str:
+        """`_sibling_marker` for a URL a fence emitted its own anchor for."""
+        aid = self._sibling_id(url)
+        return self._sibling_marker(aid) if aid else ""
 
     # ── D# / P# tooltips ────────────────────────────────────────────────
     def _text(self, tokens, idx, options, env):

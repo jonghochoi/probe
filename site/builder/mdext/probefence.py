@@ -272,13 +272,17 @@ def flow(data: dict, inline_md) -> str:
 
 # ── ```probe-lineage ────────────────────────────────────────────────────────
 
-def lineage(data: dict, inline_md) -> str:
+def lineage(data: dict, inline_md, sibling=None) -> str:
     """R5's 계보 — the papers this one stands on, in date order.
 
     A dated rail rather than a paragraph naming three prior works: the reader's
     question is *what moved between them*, and a list answers that in one
     downward scan. Exactly one entry may be `current` — the paper being read —
     which is what turns a bibliography into a position.
+
+    `sibling` is `url -> marker HTML`, given by the build for a rail entry that
+    points at a paper the corpus has its own rewrite of. It defaults to nothing
+    so a run can call this module with the fence alone.
     """
     items = data.get("items")
     if not isinstance(items, list) or not items:
@@ -303,6 +307,7 @@ def lineage(data: dict, inline_md) -> str:
         tail = (
             f' <a href="{_esc(link)}" target="_blank" rel="noopener">'
             f"{_esc(item.get('link_label') or link)}</a>"
+            + (sibling(link) if sibling else "")
             if link else ""
         )
         # Title and note share one cell so the `current` tint can wrap the

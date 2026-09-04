@@ -255,10 +255,11 @@ already covered a paper in that line, link it.
     ```
 
 At most one entry carries `current: true` — the paper being read. That is what
-turns a bibliography into a position. **Do not invent a lineage**: check
-the rest of `analysis/` for a site link and `context/P#.md` §Tracked
-Literature otherwise,
-and verify each link resolves before citing it.
+turns a bibliography into a position. **Do not invent a lineage**: draw it from
+`context/P#.md` §Tracked Literature and from the rest of `analysis/`, and
+verify each link resolves before citing it. `link` is the paper's own arXiv
+abstract in every case — when that id has a rewrite of its own, the build
+appends a marker beside the link that leads to it.
 
 **2. 숫자의 지형** — the paper's key number placed against the others of its
 kind (a human baseline, a hardware limit, another paper we read).
@@ -691,6 +692,11 @@ the phrase, not the phrase plus its parenthesis.
 broken link, just not a link. Every URL is explicit `[텍스트](…)` link syntax,
 which also keeps the prose readable: a raw URL mid-sentence is noise. Inside a
 code span a bare URL is fine and stays literal.
+
+An `arxiv.org/abs|html|pdf` link whose id has a rewrite in `analysis/` gains a
+재작성본 marker to that paper's page automatically, in prose and in a
+`probe-lineage` rail alike — so link the arXiv page and never write a
+`../<id>/` site path by hand.
 
 ### 3-4. Rules from the sibling track that do NOT apply here
 
