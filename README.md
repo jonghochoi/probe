@@ -99,6 +99,7 @@ session.
 |---|---|---|
 | **Scouting** | scheduled routine — [`scouting/SETUP.md`](scouting/SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
+| **Facts** | `/facts <arXiv id>` — the facts block into a rewrite that already landed | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) R16 |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 | **Stress test** | scheduled routine — [`decisions/SETUP.md`](decisions/SETUP.md) | [`decisions/AUTHORING.md`](decisions/AUTHORING.md) |
 
