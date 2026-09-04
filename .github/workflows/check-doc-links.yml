@@ -20,6 +20,7 @@ on:
       - '*/CLAUDE.md'
       - 'README.md'
       - 'scouting/SETUP.md'
+      - 'decisions/SETUP.md'
       - 'context/**'
       - 'linters/check-doc-links.py'
       - '.github/workflows/check-doc-links.yml'

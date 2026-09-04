@@ -1,0 +1,65 @@
+name: Check decisions format
+
+# Verify that stress-test memos follow the output contract in
+# decisions/AUTHORING.md — a memo covering the wrong set of OPEN decisions, a
+# verdict outside the three states, a falsifiability token that is missing
+# where the evidence is scouting lines only (or present where it is not) — and
+# that the generated decisions/MAP.md matches the corpus it indexes.
+#
+# The decisions track has no build step and no PR: the monthly routine pushes
+# the memo straight to `main`. A `pull_request` trigger alone would therefore
+# never see a memo at all, so this workflow fires on BOTH events:
+#
+#   push (main)     — the path memos actually take. Post-hoc, so it reports
+#                     rather than blocks; the blocking gate is the pre-commit
+#                     self-check the routine runs itself
+#                     (.claude/prompts/stress.txt → PROCEDURE step 5).
+#   pull_request    — a human editing memos, the linter, the map or the
+#                     contract.
+#
+# The map check fails when `decisions/MAP.md` is behind the corpus — rewrites
+# landed since the last monthly run. The fix is one command:
+# `python3 decisions/build-map.py`, committed alongside.
+#
+# Lint-only, no auto-fix: every violation is a judgement a human (or the agent)
+# has to remake — which decision the memo owes a section, which evidence the
+# verdict rests on.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'decisions/**'
+      - 'linters/check-decisions-format.py'
+      - '.github/workflows/check-decisions-format.yml'
+  pull_request:
+    paths:
+      - 'decisions/**'
+      - 'linters/check-decisions-format.py'
+      - '.github/workflows/check-decisions-format.yml'
+
+permissions:
+  contents: read
+
+# `head_ref` is empty on push events — fall back to the full ref so pushes
+# group per branch instead of colliding on one empty key.
+concurrency:
+  group: check-decisions-format-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      # Exit 2 is the linter's "nothing to scan" — no memo on disk yet, which is
+      # the track's own starting state and not a failure. A violation exits 1
+      # and fails the job.
+      - name: Check memos against the output contract
+        run: python3 linters/check-decisions-format.py || [ "$?" -eq 2 ]
+      - name: Check the decision map is current
+        run: python3 decisions/build-map.py --check

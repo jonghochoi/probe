@@ -8,6 +8,8 @@
       "Write(analysis/**)",
       "Edit(scouting/**)",
       "Write(scouting/**)",
+      "Edit(decisions/**)",
+      "Write(decisions/**)",
       "Edit(linters/**)",
       "Write(linters/**)",
       "Edit(site/**)",

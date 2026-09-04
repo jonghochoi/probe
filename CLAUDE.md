@@ -7,10 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 PROBE is a research-scouting agent for dexterous manipulation. A human owns
 the static research context in `context/`; agent tracks read it and write
 decision-grade Korean output — a scheduled per-pillar routine into `scouting/`,
-on-demand `/analyze` into `analysis/` and `/compare` into `comparison/`, the
-last two published by the reading site. `README.md` carries the motivation and
-the pipeline; this file is the contributor-facing reference for **commit
-hygiene and document style** so the repo stays consistent.
+on-demand `/analyze` into `analysis/` and `/compare` into `comparison/` (those
+two published by the reading site), and a monthly routine into `decisions/`
+that re-reads the month against the open decisions. `README.md` carries the
+motivation and the pipeline; this file is the contributor-facing reference for
+**commit hygiene and document style** so the repo stays consistent.
 
 ## Where the rules live
 
@@ -27,8 +28,9 @@ that folder's own `CLAUDE.md`, next to the code it governs:
 
 Output format is a third thing, one contract per track, owned by the track and
 never restated in a prompt: `scouting/AUTHORING.md`, `analysis/AUTHORING.md`,
-`comparison/AUTHORING.md`. A folder's `README.md` maps what is in it
-(`site/README.md`, `site/search/README.md`) and states no rules.
+`comparison/AUTHORING.md`, `decisions/AUTHORING.md`. A folder's `README.md`
+maps what is in it (`site/README.md`, `site/search/README.md`) and states no
+rules.
 
 ## Repository map
 
@@ -45,23 +47,28 @@ belongs in that folder's own rule file or README, which the row points at.
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format and its pillar allocation, the "adding a new pillar" checklist |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence). `scouting/templates/report.md` is the skeleton they fill |
 | `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — emoji system, the Reference Legend and its pillar palette (§3-1), link rules, Korean authoring principles |
-| `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; `/analyze` and `/compare` need no routine setup |
+| `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only — the second scheduled routine has its own guide (`decisions/SETUP.md`), and `/analyze` and `/compare` need no routine setup |
 | `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat), from `/analyze`: a Korean re-telling written from the paper's **arXiv HTML original**, carrying its own front matter. One file publishes as **two tabs** — a one-screen 요약 (`::: glance`, where a reader lands) and the body — both written in the same run from the same reading |
 | `analysis/AUTHORING.md` | human | Format contract for `analysis/<id>.md` — front matter (§1), body rules R1–R16 (§2), what publishes as literal text including the KaTeX math forms (§3), the 요약 tab G1–G7 (§4), enforcement (§5) |
 | `comparison/` | agent | Comparisons — one `<slug>.md` per comparison, holding two or three papers under one question; the slug is the question, never the ids joined together. **Only papers with a rewrite in `analysis/` may be compared** |
 | `comparison/AUTHORING.md` | human | Format contract for `comparison/<slug>.md` — the one rule and its consequences (§1), front matter, the four-act spine, the fence allow-list and the length ceiling (§2), `probe-matrix` (§3), enforcement (§4) |
-| `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token), `analyze.txt` and `compare.txt`. Each owns a **procedure** — which papers, where the facts come from, how to verify, how to commit — and delegates every format rule to its track's `AUTHORING.md`; a rule restated in a prompt is a second source of truth that drifts the next time the contract moves |
+| `decisions/` | agent | Stress-test memos (`YYYY-MM.md`, one per calendar month, on a monthly cadence) — every OPEN decision put back in front of the month's evidence, with a verdict and a proposed replacement bullet. Read in the repo and never published: the site builds `analysis/` and `comparison/`, and `deploy-site.yml` is path-filtered to them |
+| `decisions/AUTHORING.md` | human | Format contract for the `decisions/` track — file convention (§1), the memo spine, the OPEN-set rule and the four `###` (§2), the three-state 판정 line and the `(근거: 리포트 인용만)` token (§3), 제안 문안 (§4), enforcement (§5), `MAP.md` (§6) |
+| `decisions/SETUP.md` | human | Operator guide for the monthly stress-test routine — RemoteTrigger form, the `0 21 1 * *` schedule, why it needs no allowlist and no env var, first-run verification |
+| `decisions/build-map.py` | human | Bakes `decisions/MAP.md` — the committed decision → citing-section index over `analysis/` and `comparison/`, linking at the line. `--check` fails when the committed file is behind the corpus |
+| `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token), `stress.txt` (the monthly stress test, pasted whole — no token to substitute), `analyze.txt` and `compare.txt`. Each owns a **procedure** — which papers, where the facts come from, how to verify, how to commit — and delegates every format rule to its track's `AUTHORING.md`; a rule restated in a prompt is a second source of truth that drifts the next time the contract moves |
 | `.claude/commands/**` | human | Slash-command wrappers — `analyze.md` and `compare.md`, which only point their command at its prompt and at its track's `AUTHORING.md` |
 | `assets/` | human | The images the root `README.md` embeds — the brand lockup that opens it, the accent rule and claim line under it, the state and track icons, the tagline banner and the generated flow diagram — each a light/dark SVG pair, plus `build-flow.py` |
 | `assets/CLAUDE.md` | human | Rules for `assets/` — what each image is, the drawing and animation rules, the generated flow diagram |
 | `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/` and `comparison/` and nothing else. Folder map: `site/README.md` |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break, and the surfaces keyed to the pillar set |
 | `site/search/` | human | Semantic search over the rewrites — chunker, InsForge schema, indexer, the public endpoint and the operator's `verify.py`. `comparison/` is published but not chunked. Enhancement only: a build without `--search-api` emits no script. Folder map: `site/search/README.md` |
-| `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
-| `linters/check-decision-refs.py` | human | Verifies every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` / `comparison/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
+| `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, the two operator guides `scouting/SETUP.md` and `decisions/SETUP.md`, and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
+| `linters/check-decision-refs.py` | human | Verifies every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` / `comparison/*.md` / `decisions/*.md` (the generated `decisions/MAP.md` included) exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
 | `linters/check-scouting-format.py` | human | Validates `scouting/P#/YYYY-MM-DD.md` against the `scouting/AUTHORING.md` contract — metadata block, emoji system and section order, the scoring contract (§5) and one-paper-per-row tables (§7-3). Binds reports dated on or after its `_CONTRACT_EFFECTIVE`. Scouting reports reach `main` without a PR, so the **blocking** gate is the routine's own pre-commit self-check (`.claude/prompts/scouting.txt` → SELF-CHECK) and CI is the backstop |
+| `linters/check-decisions-format.py` | human | Validates `decisions/YYYY-MM.md` against the `decisions/AUTHORING.md` contract — the spine and its metadata line, the `##` set against the OPEN decisions in `context/P*.md`, the four `###` in order, the 판정 line and its falsifiability token, and that every line-anchored link resolves. Binds memos covering the first month on or after its `_CONTRACT_EFFECTIVE`. Memos reach `main` without a PR, so the **blocking** gate is the routine's own pre-commit lint (`.claude/prompts/stress.txt` → PROCEDURE step 5) and CI is the backstop |
 | `linters/check-commit-style.py` | human | Validates commit subjects / PR titles against the "Commit message style" grammar below. Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `.github/workflows/` | human | Six gates. The four lints above run PR-time (`check-commit-style` reads the **PR title**, since squash-merge makes it the landing subject); `check-scouting-format` also fires on `push` to `main`, the path scouting reports actually take. `check-search-function` parses `site/search/function/search.ts`, which no build reads. `deploy-site.yml` builds the site on every PR touching `analysis/` or `site/` and deploys to Pages only from `main`, where it also refreshes the semantic index when the InsForge secrets exist |
+| `.github/workflows/` | human | Seven gates. The five lints above run PR-time (`check-commit-style` reads the **PR title**, since squash-merge makes it the landing subject); `check-scouting-format` also fires on `push` to `main`, the path scouting reports actually take. `check-decisions-format` fires on both events for the same reason and also runs `decisions/build-map.py --check`. `check-search-function` parses `site/search/function/search.ts`, which no build reads. `deploy-site.yml` builds the site on every PR touching `analysis/` or `site/` and deploys to Pages only from `main`, where it also refreshes the semantic index when the InsForge secrets exist |
 
 ## Commit message style
 
@@ -89,11 +96,13 @@ Hard rules:
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types.
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
-   `site`, `scouting`, `analysis`, `comparison`, `context`, `prompts`,
-   `linters`, `ci` (`.github/workflows/`), `config`. `comparison` covers the
-   track's contract and its documents; the build code that publishes them is
-   `site`. Omit the scope for repo-wide changes — a docs pass across several
-   tracks is `docs: …`, never `docs(docs): …`.
+   `site`, `scouting`, `analysis`, `comparison`, `decisions`, `context`,
+   `prompts`, `linters`, `ci` (`.github/workflows/`), `config`. `comparison`
+   covers the track's contract and its documents; the build code that
+   publishes them is `site`. `decisions` covers the stress-test track — its
+   contract, its memos and `build-map.py`. Omit the scope for repo-wide
+   changes — a docs pass across several tracks is `docs: …`, never
+   `docs(docs): …`.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
    does, not why (the why goes in the body).
@@ -123,16 +132,20 @@ update prompts                                  # no type, vague verb "update"
 
 ### Generated routine commits
 
-The bare `scout:` / `analysis:` / `compare:` prefixes belong to the generating
-prompts, not to human commits — do not imitate them when authoring code or doc
-changes. One canonical format per prompt:
+The bare `scout:` / `analysis:` / `compare:` / `stress:` prefixes belong to the
+generating prompts, not to human commits — do not imitate them when authoring
+code or doc changes. One canonical format per prompt:
 
 ```
 scout: P{N} report YYYY-MM-DD
 compare: add <slug>                       # the slug is the question, so no alias
 analysis: add <arxiv-id> rewrite (<alias>)
 analysis: add <arxiv-id> facts (<alias>)
+stress: YYYY-MM memo
 ```
+
+`stress:` names the month the memo covers, never the day the run happened —
+one memo per month, and the map it regenerates rides in the same commit.
 
 `update` replaces `add` when redoing an existing rewrite or comparison. The
 trailing `(<alias>)` is the paper's codename, resolved in priority order:
@@ -191,7 +204,8 @@ pushing, so a red gate is not the first you hear of it.
 | Change touches | Command |
 |---|---|
 | any doc in the index set | `python3 linters/check-doc-links.py` |
-| `analysis/`, `scouting/`, `comparison/`, `context/` | `python3 linters/check-decision-refs.py` |
+| `analysis/`, `scouting/`, `comparison/`, `decisions/`, `context/` | `python3 linters/check-decision-refs.py` |
+| `decisions/` | `python3 linters/check-decisions-format.py` and `python3 decisions/build-map.py --check` |
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
 | `analysis/`, `comparison/` or `site/` | `python3 site/build-site.py --check --strict` (a comparison's fence and length rules are checked while the page renders, so add `--out /tmp/probe-check`) |
 | `assets/build-flow.py` | `python3 assets/build-flow.py --check` |
@@ -215,9 +229,9 @@ lockup. A narrative doc with no lockup of its own opens on a real `#` and may
 carry **one leading thematic emoji** right after it and a space (`# 🛸 …`) —
 exactly one, at the start, never at the end and never inside body text.
 
-**Reference / structural** — every `CLAUDE.md`, `scouting/SETUP.md`, the
-three
-`AUTHORING.md` contracts, `site/README.md` and `site/search/README.md`. Plain
+**Reference / structural** — every `CLAUDE.md`, the two operator guides
+`scouting/SETUP.md` and `decisions/SETUP.md`, the four `AUTHORING.md`
+contracts, `site/README.md` and `site/search/README.md`. Plain
 headers, **no emoji**. Numbered headers (`## N.`, `### N-M.`) are allowed and
 match the existing `scouting/AUTHORING.md`. A folder README's H1 is the folder
 name (e.g. `# analysis/`).
@@ -255,12 +269,13 @@ This is the single source of truth for "which language should a new doc be
 in?":
 
 - **Default — Korean (한글).** All agent outputs — `analysis/<id>.md`,
-  `comparison/<slug>.md` and the `scouting/` reports — are Korean, and so are
-  the templates those folders ship (`scouting/templates/`).
-- **English — contributor, style and operator docs.** Every `CLAUDE.md`,
-  `scouting/SETUP.md`, the three `AUTHORING.md` contracts and the folder
-  READMEs. The
-  audience is anyone reading PRs or history.
+  `comparison/<slug>.md`, the `scouting/` reports and the `decisions/` memos —
+  are Korean, and so are the templates those folders ship
+  (`scouting/templates/`).
+- **English — contributor, style and operator docs.** Every `CLAUDE.md`, the
+  two operator guides `scouting/SETUP.md` and `decisions/SETUP.md`, the four
+  `AUTHORING.md` contracts and the folder READMEs. The audience is anyone
+  reading PRs or history.
 - **English — the project front door.** `README.md`, the GitHub-rendered top
   page and the single onboarding surface for a newcomer.
 
@@ -316,7 +331,7 @@ list every time:
       at least one inbound link. Zero = orphan.
 - [ ] **Run `python3 linters/check-doc-links.py`** — the automated backstop for
       the dangling-path half of this list. It scans this file, every folder
-      `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files;
-      pass a
+      `CLAUDE.md`, `README.md`, `scouting/SETUP.md`, `decisions/SETUP.md` and
+      the `context/` files; pass a
       prompt or an `AUTHORING.md` as an explicit arg to scan it too (they are
       off the default set because they carry illustrative example paths).

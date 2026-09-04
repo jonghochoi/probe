@@ -71,8 +71,14 @@ decides.
 | `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one snapshot per paper |
 | `comparison/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one file per comparison |
 
-One folder the agent only reads, three it only adds to — that split is what
+One folder the agent only reads, the rest it only adds to — that split is what
 stops it re-recommending last month's papers as `context/` grows.
+
+Once a month a fourth track writes `decisions/`: a memo that puts every
+decision still marked open back in front of that month's reports and rewrites,
+gives it a verdict, and ends with the exact bullet you would paste into
+`context/` — a proposal, never an edit. It stays in the repo; the reading site
+publishes `analysis/` and `comparison/` only.
 
 **Pillars.** The context split is what keeps one run narrow.
 
@@ -94,6 +100,7 @@ session.
 | **Scouting** | scheduled routine — [`scouting/SETUP.md`](scouting/SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
+| **Stress test** | scheduled routine — [`decisions/SETUP.md`](decisions/SETUP.md) | [`decisions/AUTHORING.md`](decisions/AUTHORING.md) |
 
 - **Start by hand.** Fill `context/`, run one report yourself, review it
   ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.

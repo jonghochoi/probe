@@ -15,6 +15,7 @@ on:
       - 'analysis/*.md'
       - 'scouting/**/*.md'
       - 'comparison/*.md'
+      - 'decisions/*.md'
       - 'context/**'
       - 'linters/check-decision-refs.py'
       - '.github/workflows/check-decision-refs.yml'

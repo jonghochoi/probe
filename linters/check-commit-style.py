@@ -16,7 +16,7 @@ Accepted shapes:
   analysis: add|update <id> rewrite …  CLAUDE.md "generated routine commits"
   analysis: add|update <id> facts …     (a facts backfill of a landed rewrite)
   compare: add|update <slug>            (the scouting routine, /analyze,
-                                        /compare)
+  stress: YYYY-MM memo                  /compare, the monthly stress test)
 
 Checked for the human shapes: allowed type; description starts lowercase; no
 trailing period; ≤72 chars total; no manual "(#NN)" suffix (GitHub appends the
@@ -45,6 +45,9 @@ _GENERATED = [
     # is nothing to say after it — a subject that keeps going is describing
     # the comparison, which the file already does.
     re.compile(r"^compare: (add|update) [a-z0-9]+(-[a-z0-9]+)*$"),
+    # One memo per month, named by the month it covers — the memo is the only
+    # thing the run produces, so the subject carries nothing else.
+    re.compile(r"^stress: \d{4}-\d{2} memo$"),
 ]
 
 # Common non-imperative first words seen in the wild (past tense, gerund,

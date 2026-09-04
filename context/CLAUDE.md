@@ -24,8 +24,10 @@ fact in both is one of them going stale.
 
 Every entry in a `P#.md` Decision Log section has exactly this shape (used 30×
 across the five pillars; the scouting and analyze prompts,
-`linters/check-decision-refs.py` and `site/builder/decisions.py` all
-pattern-match on it, so it is load-bearing, not cosmetic):
+`linters/check-decision-refs.py`, `site/builder/decisions.py`,
+`decisions/build-map.py` and `linters/check-decisions-format.py` all
+pattern-match on it, so it is load-bearing, not cosmetic — and the last two
+read the ` — **OPEN**` suffix as well as the entry line):
 
 ```
 #### [D<id>] <Decision title> (P<m>)

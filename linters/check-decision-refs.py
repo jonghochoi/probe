@@ -24,9 +24,12 @@ citations.
 Usage (repo root):
     python3 linters/check-decision-refs.py [PATH ...]
 
-No PATH -> scan the default set: `analysis/*.md` and `scouting/P*/*.md`
-(templates excluded — they carry `D<a>`-style placeholders and illustrative
-ids).
+No PATH -> scan the default set: `analysis/*.md`, `scouting/P*/*.md`,
+`comparison/*.md` and `decisions/*.md` (templates excluded — they carry
+`D<a>`-style placeholders and illustrative ids; a track's `AUTHORING.md` and
+`SETUP.md` are its contract and its operator guide, not its documents). The
+generated `decisions/MAP.md` IS scanned: it names every live id, so a decision
+that leaves `context/` is caught there on the next build.
 
 Exit codes: 0 = clean / 1 = bad citation(s) found / 2 = no Decision Log parsed.
 """
@@ -139,6 +142,8 @@ def _gather_default_docs() -> list[str]:
         "scouting/P*/*.md",
         # A comparison's act 4 is our layer and cites the log like any rewrite.
         "comparison/*.md",
+        # The stress-test memos and the generated map, which name ids directly.
+        "decisions/*.md",
     ]
     docs: list[str] = []
     for pat in patterns:
@@ -146,8 +151,8 @@ def _gather_default_docs() -> list[str]:
             rel = os.path.relpath(path, _REPO_ROOT)
             if f"{os.sep}templates{os.sep}" in rel or rel.startswith("templates"):
                 continue
-            # The track's format contract, not one of its documents.
-            if os.path.basename(rel) == "AUTHORING.md":
+            # The track's format contract and its operator guide, not its documents.
+            if os.path.basename(rel) in ("AUTHORING.md", "SETUP.md"):
                 continue
             docs.append(rel)
     return docs
