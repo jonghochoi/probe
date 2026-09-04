@@ -77,9 +77,12 @@ Four, all local, all read-only, with DIFFERENT jobs. Do not collapse them.
 
 3. **`analysis/` and `comparison/` — what landed in the window.**
 
-     git log --since=${FIRST} --until=${LAST} --format='%cs %s' -- analysis comparison
+     git log --since=${FIRST} --until=${LAST} --name-status --format='%cs %s' -- analysis comparison
 
-   Keep the `analysis:` and `compare:` subjects; they name the files. Read act 4
+   `Rewrites landed` is the count of distinct `analysis/` and `comparison/`
+   files that appear in that log and still exist, whatever subject carried
+   them (`decisions/AUTHORING.md` §2). The `analysis:` and `compare:` subjects
+   are where to start reading, since they name a file each. Read act 4
    (`## 4 연구축에 무엇이 걸리나`) of each — the layer where a rewrite argues with
    the Decision Log. This is the only source that can produce evidence strong
    enough to drop the falsifiability token (§3).
