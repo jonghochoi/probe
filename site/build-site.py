@@ -104,12 +104,17 @@ def build(args) -> int:
 
     rendered: dict[Path, str] = {}
     render_problems: list[str] = []
+    # One pass over every rewrite's source, before any page is rendered: the
+    # backlinks on a paper's page are written by papers that come later in the
+    # loop as often as earlier ones.
+    cited = corpus.citations(papers)
     for paper in papers:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
             paper, katex, decisions, render_problems,
             neighbours=corpus.related(paper, papers),
             comparisons=comparisons.for_paper(paper.stem, comps),
             papers_by_id=papers_by_id,
+            citers=cited.get(paper.stem, []),
         )
     for comp in comps:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(

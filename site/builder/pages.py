@@ -719,7 +719,8 @@ def paper_page(paper: Paper, katex, decisions: dict,
                problems: list[str] | None = None,
                neighbours: list[Paper] | None = None,
                comparisons: list | None = None,
-               papers_by_id: dict | None = None) -> str:
+               papers_by_id: dict | None = None,
+               citers: list[Paper] | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -734,7 +735,12 @@ def paper_page(paper: Paper, katex, decisions: dict,
     from the first pixel and carries its own count, so the answer to "has this
     been argued against anything" arrives before the read rather than after it.
     """
-    renderer = DocRenderer(katex, decisions=decisions)
+    by_id = papers_by_id or {}
+    renderer = DocRenderer(
+        katex, decisions=decisions,
+        siblings={pid: p.title for pid, p in by_id.items()},
+        self_id=paper.stem,
+    )
     renderer.lead_html = _lead(paper, renderer)
     rendered = renderer.render(paper.article or paper.body)
 
@@ -759,10 +765,11 @@ def paper_page(paper: Paper, katex, decisions: dict,
     <main class="article">
       <section class="view">{rendered}</section>
       {_related(neighbours or [])}
+      {_citers(citers or [])}
     </main>
   </div>
 </div>
-{_cmp_panel(paper, comps, papers_by_id or {})}
+{_cmp_panel(paper, comps, by_id)}
 {c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
@@ -860,6 +867,34 @@ def _related(neighbours: list[Paper]) -> str:
     return (
         '<section class="related">'
         '<h2 class="related-h">같은 갈래의 다른 글</h2>'
+        f'<div class="rel-list">{items}</div>'
+        "</section>"
+    )
+
+
+def _citers(citers: list[Paper]) -> str:
+    """The rewrites that cite this paper, under the ones nearest to it.
+
+    `_related` answers "what else is like this"; this answers "who leaned on
+    it", which is the stronger signal of the two — a paper another rewrite
+    argues from is already load-bearing in the corpus. The two lists overlap by
+    design: a neighbour that also cites this paper belongs in both, because it
+    is on the page for two different reasons.
+    """
+    if not citers:
+        return ""
+    items = "".join(
+        f'<a class="rel-item" href="../{c.esc(p.stem)}/index.html">\n'
+        f'  <span class="rel-p">{"".join(c.esc(x) + " " for x in p.filed)}</span>\n'
+        f'  <span class="rel-title">{c.esc(p.title)}</span>\n'
+        f'  <span class="rel-tagline">{c.esc(p.tagline)}</span>\n'
+        f'  <span class="rel-size">{c.esc(_size(p))}</span>\n'
+        f"</a>"
+        for p in citers
+    )
+    return (
+        '<section class="related">'
+        '<h2 class="related-h">이 논문을 언급한 다른 글</h2>'
         f'<div class="rel-list">{items}</div>'
         "</section>"
     )
@@ -1082,7 +1117,9 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
     heads = [(p.stem, _alias(p), f"../../p/{p.stem}/index.html") for p in papers]
 
     renderer = DocRenderer(katex, decisions=decisions, kind="compare",
-                           matrix_heads=heads)
+                           matrix_heads=heads,
+                           siblings={pid: p.title
+                                     for pid, p in papers_by_id.items()})
     renderer.lead_html = _cmp_lead(comp, renderer)
     rendered = renderer.render(comp.body)
     if problems is not None:

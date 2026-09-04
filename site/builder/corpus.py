@@ -713,3 +713,29 @@ def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
             scored.append((score, other.order_key, other))
     scored.sort(key=lambda row: (row[0], row[1]), reverse=True)
     return [row[2] for row in scored[:limit]]
+
+
+# Any of the three arXiv shapes a rewrite writes, anywhere in the source — prose
+# links, ```probe-lineage rails, the front matter's own fields.
+_ARXIV_IN_BODY = re.compile(r"arxiv\.org/(?:abs|html|pdf)/(\d{4}\.\d{4,5})")
+
+
+def citations(papers: list[Paper]) -> dict[str, list[Paper]]:
+    """`{cited id: [rewrites citing it]}`, newest first.
+
+    The inbound half of a sibling citation. A rewrite names the papers it
+    stands on and the site marks those links, but the paper being stood on has
+    no way of knowing — so the corpus is read once here and each paper's page
+    can print who reached for it. Self-citation is dropped: a rewrite linking
+    its own arXiv page is citing the paper, not another rewrite.
+    """
+    out: dict[str, list[Paper]] = {}
+    for paper in papers:
+        for aid in sorted(set(_ARXIV_IN_BODY.findall(paper.body))):
+            if aid != paper.stem:
+                out.setdefault(aid, []).append(paper)
+    known = {p.stem for p in papers}
+    return {
+        aid: sorted(citers, key=lambda p: p.order_key, reverse=True)
+        for aid, citers in out.items() if aid in known
+    }

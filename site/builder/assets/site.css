@@ -1016,6 +1016,21 @@ abbr.dref {
   border-bottom: 1px dotted var(--dref);
 }
 
+/* ── Sibling rewrites ─────────────────────────────────────────────────── */
+/* The chip that follows a citation of a paper this corpus has rewritten. Both
+   accent tokens are redefined per theme, so the chip keeps its contrast in
+   either one; it is a plain anchor, so a browser with no script still lands on
+   the sibling's page. */
+.sib {
+  margin-left: .25em; padding: .04em .38em;
+  font-family: var(--mono); font-size: .74em; vertical-align: .08em;
+  white-space: nowrap; text-decoration: none;
+  color: var(--orange-ink); background: var(--orange-soft);
+  border: 1px solid var(--orange); border-radius: var(--radius-pill);
+  transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
+}
+.sib:hover, .sib:focus-visible { color: var(--bg); background: var(--orange-ink); }
+
 /* ── Readable layer: inline term anchors (R4) ─────────────────────────── */
 /* Dotted, at full accent strength. A 1px dash in the pale `--amber-soft` was
    the same weight as an underline artefact — under 15px Korean it read as
