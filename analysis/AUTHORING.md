@@ -951,7 +951,7 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), a second 사실 카드 (R16), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts (incl. its all-or-none `state` and the four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | The 사실 카드's payload — the eight axes and no others, each `v` inside its own vocabulary, the `<수> Hz` shape, and `src` on every value that is not reserved (R16) | `site/builder/mdext/probefence.py` |
-| The 사실 카드 present on every rewrite generated on or after `FACTS_EFFECTIVE`, and placed above act 1 (R16) | `site/builder/corpus.py` |
+| The 사실 카드 present on every rewrite, and placed above act 1 (R16) | `site/builder/corpus.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | The vendored KaTeX stylesheet surviving the woff2 rewrite — without it every formula publishes in the body sans-serif with no KaTeX face loaded | `site/builder/assets_out.py` |

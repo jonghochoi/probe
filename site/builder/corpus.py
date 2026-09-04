@@ -593,7 +593,7 @@ def discover() -> tuple[list[Paper], list[str]]:
         else:
             paper.glance, found = glance_mod.parse(surfaces["glance"])
             problems += [f"analysis/{path.name}: {line}" for line in found]
-        problems += _facts_block(path.name, front, article)
+        problems += _facts_block(path.name, article)
         problems += _tagline_echo(path.name, paper.title, paper.tagline)
         if len(paper.metric) > METRIC_MAX:
             problems.append(
@@ -744,32 +744,25 @@ def facts(body: str) -> dict:
 # The block is a fixed-vocabulary description of the paper, and every surface
 # that reads across the corpus reads it — so it sits where nothing else can be
 # mistaken for it: exactly one per rewrite, between the thesis line and act 1.
-#
-# `FACTS_EFFECTIVE` binds rewrites generated on or after it. A rewrite written
-# before the contract existed is not wrong, it is older; the block arrives on
-# one by a facts backfill (`analysis: add <id> facts`), which is its own commit.
-FACTS_EFFECTIVE = "2026-09-04"
+# A rewrite without one is incomplete, whatever its date: the block arrives on
+# an existing rewrite by a facts backfill (`analysis: add <id> facts`).
 
 _ACT_DIVIDER = re.compile(r"^## ", re.M)
 
 
-def _facts_block(name: str, front: dict, article: str) -> list[str]:
+def _facts_block(name: str, article: str) -> list[str]:
     """The 사실 카드 is there, and it opens the article (R16).
 
     That there is only one of it is the renderer's (`render.py`), which counts
-    the fences it draws; this pass reads the source, which is where a date and
-    an offset are.
+    the fences it draws; this pass reads the source, which is where an offset
+    is.
     """
     blocks = list(_FACTS_FENCE.finditer(article))
     if not blocks:
-        generated = _GENERATED.match(front.get("generated", "").strip())
-        if generated and generated.group(1) >= FACTS_EFFECTIVE:
-            return [
-                f"analysis/{name}: no ```probe-facts block (R16) — every rewrite "
-                f"generated on or after {FACTS_EFFECTIVE} carries the eight axes "
-                f"under its thesis line"
-            ]
-        return []
+        return [
+            f"analysis/{name}: no ```probe-facts block (R16) — every rewrite "
+            f"carries the eight axes under its thesis line"
+        ]
     act = _ACT_DIVIDER.search(article)
     if act and act.start() < blocks[0].start():
         return [
