@@ -683,6 +683,17 @@ its reporting, and the difference is exactly what a corpus-wide read is looking
 for: "half the papers claiming multi-timescale control never print a Hz" is a
 finding, and it only exists if 미기재 was written where it was true.
 
+**Two rulings the axes need.** `backbone` is the VLM lineage and nothing else:
+a paper with no vision-language model is `none` even when it freezes a
+pretrained vision encoder — the encoder goes in `note`. A paper that trains
+several systems (a benchmark with four baselines, a method reported on two
+backbones) answers each axis from its headline configuration — the one its
+abstract and main table lead with — and names the split in `note`; the
+vocabulary has no mixed value on purpose, because a card that hedges groups
+nowhere. Demonstrations gathered by teleoperation inside a simulator are `sim`:
+the axis is what the frames are made of, and the note carries how they were
+driven.
+
 **`src` is required on every stated axis** — `§4.1`, `부록 §8`, `Table 1`. It is
 the same hook `probe-act` puts on `source` (§4-6): an axis is a claim about the
 paper, and a claim on this card is checkable without leaving it. A reserved
