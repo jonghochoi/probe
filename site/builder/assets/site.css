@@ -284,13 +284,16 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;
   width: 100%; display: flex; align-items: center; gap: 1rem;
 }
-/* The wordmark is the one accent text that keeps the brand value: it sits
-   against the mark's own hull, and the deeper ink beside that fill reads as
-   two oranges rather than as one lockup. It is a landmark, not something a
-   reader has to make out — every accent that carries meaning takes the ink. */
+/* The accent is the corpus's, not the chrome's: it marks what a reader is
+   deciding about — the axis a paper sits under, the number it is remembered
+   by, the filter they have switched on — and a page that also spends it on
+   its own furniture spends it in eight places at once, where none of the
+   eight can be the one that means something. So the mark keeps the orange,
+   which is the whole of the brand a reader has to recognise, and the wordmark
+   beside it takes the ink every other piece of chrome is set in. */
 .nav-logo {
   font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em;
-  color: var(--orange); white-space: nowrap; text-decoration: none;
+  color: var(--text); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
 }
 

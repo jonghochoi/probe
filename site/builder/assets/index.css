@@ -40,15 +40,35 @@
   -webkit-mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
   mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
 }
+/* A title this size needs the room a title this size implies — the band is
+   the first screen's only pause, and the list starts right under it. */
 .mast-inner {
   position: relative;
-  max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 1.2rem;
+  max-width: 1240px; margin: 0 auto; padding: 2.4rem 1.25rem 2rem;
 }
-.mast.slim .mast-inner { padding: 1.7rem 1.25rem 1.4rem; }
-.mast-line { display: flex; align-items: baseline; gap: .8rem; }
+.mast.slim .mast-inner { padding: 2.6rem 1.25rem 2.2rem; }
+.mast-line { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; }
+/* The one line on the page that is allowed to be large. Hierarchy here is
+   made of type, not of colour: a title a reader's eye lands on before
+   anything else is what lets the accent go back to marking the corpus — the
+   axis a paper sits under, the number it is remembered by — instead of
+   standing in for a size the title never had. Korean breaks between any two
+   syllables, so `keep-all` moves the break to a space and the line wraps
+   rather than being held on one row by `nowrap` and overflowing a phone. */
 .mast h1 {
-  font-size: clamp(1.15rem, 2.6vw, 1.45rem); font-weight: 800;
-  letter-spacing: -.025em; line-height: 1.3; white-space: nowrap;
+  font-size: clamp(1.55rem, 3.6vw, 2.35rem); font-weight: 800;
+  letter-spacing: -.035em; line-height: 1.22;
+  word-break: keep-all; text-wrap: balance;
+}
+/* The label above the title — what this surface is, in the register a control
+   speaks in rather than a sentence. It is the corpus's own subject, the one
+   fact the title never states, and it is set the way the site sets every
+   other label: small, tracked, muted, and out of the way of the line under
+   it. */
+.mast-eyebrow {
+  font-size: .64rem; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: .5rem;
 }
 .mast-count {
   font-size: .76rem; color: var(--text-muted); white-space: nowrap;
@@ -63,8 +83,8 @@ html.js .mast-count { display: none; }
    the break to a space; `pretty` spends the last two lines keeping a lone
    word off a line of its own. */
 .mast-sub {
-  font-size: .86rem; line-height: 1.7; color: var(--text-muted);
-  max-width: 66ch; margin-top: .35rem;
+  font-size: .9rem; line-height: 1.7; color: var(--text-muted);
+  max-width: 66ch; margin-top: .55rem;
   word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty;
 }
 .mast-sub strong { color: var(--text); font-weight: 700; }
@@ -83,7 +103,7 @@ html.js .mast-count { display: none; }
    down to a floor where a 320px screen takes the wrap instead of type nobody
    can read. */
 @media (max-width: 560px) {
-  .mast.brief .mast-sub { font-size: clamp(.74rem, 3.55vw, .86rem); }
+  .mast.brief .mast-sub { font-size: clamp(.74rem, 3.55vw, .9rem); }
 }
 
 /* ── Masthead diagram ─────────────────────────────────────────────────── */
@@ -306,8 +326,12 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
               box-shadow var(--dur-short) var(--ease-out);
 }
 .sort button:hover { color: var(--text); }
+/* Which sort or which page size is on is a fact about the view, not about
+   the corpus — the lifted pill already says which one it is, so it says it in
+   ink. The accent stays on the controls that select papers: the rail's axes
+   and tags, and the reader's own two flags. */
 .sort button[aria-pressed="true"] {
-  background: var(--surface); color: var(--orange-ink);
+  background: var(--surface); color: var(--text);
   box-shadow: var(--shadow-sm);
 }
 
