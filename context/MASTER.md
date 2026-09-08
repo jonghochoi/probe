@@ -98,7 +98,7 @@ scope restated here is a second copy to keep in step, so it is not restated.
 | Pillar | Owns | Decisions | File |
 |---|---|---|---|
 | P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them; data is upstream of method | 4 | `context/P0.md` |
-| P1 — Heterogeneous Body/Hand Action Expert | how the action decoder is split into more than one expert, on the anatomical seam and the temporal one | 11 | `context/P1.md` |
+| P1 — Heterogeneous Body/Hand Action Expert | how the action decoder is split into more than one expert, on the anatomical seam and the temporal one | 8 | `context/P1.md` |
 | P2 — Structured Multimodal Observation Fusion | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder | 5 | `context/P2.md` |
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 5 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the choices upstream of deploy — lineage × corpus × recipe — and what they cost to protect afterwards | 5 | `context/P4.md` |
