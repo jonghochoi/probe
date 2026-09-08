@@ -16,11 +16,6 @@ SITE_BASE = f"/{c.REPO.split('/')[1]}/"
 BLOB = f"{c.REPO_URL}/blob/main"
 DISCUSSIONS_NEW = f"{c.REPO_URL}/discussions/new?category=paper-notes"
 
-# How many tag facets the filter bar offers. The corpus has ~90 distinct tags
-# and a long tail of one-offs; past this point the chips cost more scanning
-# than they save. Search covers everything the chips leave out.
-TAG_FACETS = 12
-
 # How many rewrites one page of the list holds, and which of them the bar
 # offers. `0` is 전체 — the whole list on one page, which is what a browser with
 # no script gets and what the reader can always come back to.
@@ -228,8 +223,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     cmp_counts = Counter(pid for x in (comps or []) for pid in x.paper_ids)
-    tag_counts = Counter(t for p in ordered for t in p.tags)
-    facets = [t for t, _ in tag_counts.most_common(TAG_FACETS)]
 
     # Taglines and the lead summary are authored markdown — emphasis is what
     # makes a summary scannable, and a summary that opens with math is common
@@ -260,8 +253,8 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     #
     # The pair is printed twice, once for the rail and once for the filter bar,
     # because the rail leaves at 900px and these two would leave with it — and
-    # unlike the pillars and tags below them, nothing else on a phone can reach
-    # what they select. Exactly one copy is ever on screen (`index.css`);
+    # unlike the 연구 축 below them, nothing else on a phone can reach what
+    # they select. Exactly one copy is ever on screen (`index.css`);
     # `filter.js` binds every copy it finds, so the pair never disagrees.
     rail_mine = _shelf_facets("rail-item mine")
     bar_mine = _shelf_facets("barflag")
@@ -272,12 +265,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         f'<span class="rl">{c.esc(PILLAR_LABELS.get(k, "축 미지정"))}</span>'
         f'<span class="rn">{filed[k]}</span></button>'
         for k in PILLAR_ORDER if filed.get(k)
-    )
-    rail_tags = "".join(
-        f'<button type="button" class="rail-item" data-facet-tag="{c.esc(t)}" '
-        f'aria-pressed="false"><b>{c.esc(t)}</b>'
-        f'<span class="rn">{tag_counts[t]}</span></button>'
-        for t in facets
     )
 
     # One separator per pillar, parked in the list and shown only by the
@@ -299,7 +286,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
   <div class="mast-inner">
     <div class="mast-text">
       <div class="mast-line">
-        <span class="mast-brand">{c.mark(30)}</span>
         <h1>논문, 읽기 좋게 옮겨 둡니다</h1>
         <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
       </div>
@@ -339,8 +325,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     {rail_mine}
     <p class="rail-h">연구 축</p>
     {rail_pillars}
-    <p class="rail-h">태그</p>
-    {rail_tags}
   </aside>
   <main class="corpus" data-corpus>
     {_first_run() if not ordered else ""}

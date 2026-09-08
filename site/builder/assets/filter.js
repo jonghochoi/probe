@@ -188,9 +188,6 @@ function syncControls() {
   document.querySelectorAll("[data-facet-pillar]").forEach((b) => {
     b.setAttribute("aria-pressed", b.dataset.facetPillar === state.pillar ? "true" : "false");
   });
-  document.querySelectorAll("[data-facet-tag]").forEach((b) => {
-    b.setAttribute("aria-pressed", state.tags.has(b.dataset.facetTag) ? "true" : "false");
-  });
   flagBtns.forEach((b) => b.setAttribute(
     "aria-pressed", state[b.dataset.facetFlag] ? "true" : "false"));
   sizeBtns.forEach((b) => b.setAttribute(
@@ -558,7 +555,6 @@ function toggleSet(set, value) {
 // list — they set the same state and differ only in where they sit.
 document.addEventListener("click", (e) => {
   const p = e.target.closest("[data-facet-pillar]");
-  const t = e.target.closest("[data-facet-tag]");
   const s = e.target.closest("[data-sort]");
   const flag = e.target.closest("[data-facet-flag]");
   const ack = e.target.closest("[data-fresh-ack]");
@@ -588,7 +584,6 @@ document.addEventListener("click", (e) => {
     state.page = 1;
     refresh();
   }
-  else if (t) { toggleSet(state.tags, t.dataset.facetTag); state.page = 1; refresh(); }
   else if (s) { state.sort = s.dataset.sort; state.page = 1; refresh(); }
   else if (pageBtn) { toPage(+pageBtn.dataset.page); }
   else if (stepBtn) { toPage(state.page + +stepBtn.dataset.pageRel); }
