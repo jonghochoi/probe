@@ -111,8 +111,8 @@
 
   /* ── Pillar palette — scouting/AUTHORING.md §3-1 ────────────────────── */
   --p0: oklch(90.0% 0.036 18);  --p1: oklch(93.8% 0.030 81);
-  --p2: oklch(94.8% 0.047 133); --p3: oklch(89.2% 0.045 301);
-  --p4: oklch(90.1% 0.033 269);
+  --p2: oklch(94.8% 0.047 133); --p3: oklch(90.1% 0.033 269);
+  --p4: oklch(89.2% 0.045 301);
   --pna:  oklch(91.0% 0.009 56);
   --pink: oklch(21.0% 0.018 50);   /* pillar chip ink */
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
@@ -213,8 +213,8 @@
   --fig-pad:     oklch(94.9% 0.008 62);   /* pad the white PNG, don't invert it */
 
   --p0: oklch(39.1% 0.047 19);  --p1: oklch(42.2% 0.042 72);
-  --p2: oklch(42.2% 0.058 136); --p3: oklch(36.9% 0.067 304);
-  --p4: oklch(37.1% 0.056 268);
+  --p2: oklch(42.2% 0.058 136); --p3: oklch(37.1% 0.056 268);
+  --p4: oklch(36.9% 0.067 304);
   --pna:  oklch(32.7% 0.013 58);
   --pink: oklch(93.6% 0.012 60);
   --dref: oklch(76.5% 0.139 73);
