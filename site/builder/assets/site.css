@@ -356,15 +356,32 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 }
 .nav-links a:hover { color: var(--orange-ink); background: var(--orange-soft); }
 
+/* ── The icon set ─────────────────────────────────────────────────────── */
+/* Every control's glyph is one of `components.icon()`'s paths: no fill, 1.6px
+   strokes, and `currentColor`, so a control's own colour rule is the only
+   thing that says what shade its icon is — hover, pressed and dark mode all
+   come along for free. Sizes are on the element, since one path serves the
+   nav's button and a list row alike. */
+.ico { display: block; flex: none; }
+/* The one path that carries a state: 즐겨찾기 is the same star hollow or
+   filled, so nothing has to swap markup to answer a click. */
+[aria-pressed="true"] .ico-star { fill: currentColor; }
+
 .icon-btn {
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text-muted); border-radius: var(--radius-sm);
   width: 32px; height: 32px; flex: none; display: grid; place-items: center;
-  cursor: pointer; font-size: .95rem;
+  cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
               border-color var(--dur-short) var(--ease-out);
 }
 .icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
+/* The theme button carries both of its icons and shows the one that names
+   where the click goes. Which that is answers to `data-theme` alone, so the
+   button is drawn correctly by the boot script's attribute, before any of the
+   deferred scripts arrive. */
+html[data-theme="dark"] .ico-moon,
+html:not([data-theme="dark"]) .ico-sun { display: none; }
 
 /* The one thing in the nav that leaves the site. It takes `.icon-btn` whole —
    the same box, the same hover, the same gap in front of it — because the
@@ -380,7 +397,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
    destinations, and off an unscripted page at every width — it opens markup
    only a script can reach. `components.nav_sheet()` prints the panel; the
    rules that hand the destinations over to it are in the 640px block below. */
-.nav-menu { display: none; font-size: 1.05rem; line-height: 1; }
+.nav-menu { display: none; }
 .nav-sheet {
   position: absolute; top: 100%; left: 0; right: 0;
   display: flex; flex-direction: column;
@@ -1790,7 +1807,10 @@ html.js .nav-cmdk { display: inline-flex; }
    that looks picked and a different row that Enter would open. */
 .cmdk-row[aria-selected="true"] { background: var(--surface-3); }
 .cmdk-marks { display: flex; align-items: center; gap: .25rem; }
-.cmdk-star { color: var(--orange-ink); font-size: .8rem; line-height: 1; }
+/* A result row's 즐겨찾기 mark is a statement, not a control — nothing here
+   toggles it — so the star arrives already filled. */
+.cmdk-star { color: var(--orange-ink); display: inline-flex; }
+.cmdk-star .ico { width: 12px; height: 12px; fill: currentColor; }
 .cmdk-read {
   font-size: .62rem; font-weight: 700; color: var(--green);
   border: 1px solid currentColor; border-radius: var(--radius-pill);
@@ -1853,7 +1873,7 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
   .nav-cmdk, .cmdk-esc { position: relative; }
   .nav-cmdk::after, .cmdk-esc::after { content: ""; position: absolute; inset: -7px; }
   .cmdk-esc .k { display: none; }
-  .cmdk-esc .x { display: inline; font-size: .82rem; line-height: 1; }
+  .cmdk-esc .x { display: inline-flex; }
   .cmdk-keys { display: none; }
   /* Nothing here is reached by a key, so the row is sized to be reached by a
      finger instead. */

@@ -1,7 +1,9 @@
 /* Theme toggle. Every page has the nav button, so this is loaded everywhere.
    The initial `data-theme` is already set by the inline boot script in the
    document head — this only handles the click, the shortcut, and keeps the
-   icon and its tooltip in sync. */
+   tooltip in sync. Which of the button's two icons is on screen is
+   `site.css`'s answer to `data-theme`, so the swap needs no script and a
+   theme set before this file arrives is already drawn correctly. */
 
 (function () {
   "use strict";
@@ -17,7 +19,6 @@
 
   function apply(mode) {
     root.setAttribute("data-theme", mode);
-    toggle.textContent = mode === "dark" ? "☀" : "☾";
     var label = (mode === "dark" ? "라이트 모드로" : "다크 모드로") + " (" + key + ")";
     toggle.setAttribute("aria-label", label);
     toggle.title = label;
