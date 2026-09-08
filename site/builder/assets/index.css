@@ -354,7 +354,7 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
    and the list takes the full width. */
 .deck { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
 html.js .deck {
-  display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: 2rem;
+  display: grid; grid-template-columns: 13.5rem minmax(0, 1fr); gap: 2rem;
   align-items: start;
 }
 .rail { display: none; }
@@ -386,6 +386,17 @@ html.js .rail {
 .rail-item .sw {
   width: 9px; height: 9px; border-radius: var(--radius-xs); flex: none; background: var(--pna);
 }
+/* The axis name, riding after the id. The id is what the rows, the chips and
+   the ⌘K palette are marked with, so it stays the item's name and keeps its
+   width; the label is what shrinks when a name outgrows the column. It is the
+   only label here that is not also a filter token — `filter.js` reads
+   `data-facet-pillar`, never this text. */
+.rail-item .rl {
+  font-size: .7rem; min-width: 0; margin-left: -.1rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rail-item .rl::before { content: "· "; opacity: .5; }
+.rail-item.pillar b { flex: none; }
 .rail-item[data-p="P0"] .sw { background: var(--p0); }
 .rail-item[data-p="P1"] .sw { background: var(--p1); }
 .rail-item[data-p="P2"] .sw { background: var(--p2); }
@@ -395,6 +406,7 @@ html.js .rail {
 .rail-item[aria-pressed="true"] { background: var(--orange); }
 .rail-item[aria-pressed="true"] b,
 .rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
+.rail-item[aria-pressed="true"] .rl { color: var(--accent-ink); opacity: .85; }
 /* 내 서재's pair. The swatch slot carries a mark instead of a pillar colour —
    a filled dot for New, a star for Starred — because neither is a colour in
    the palette and both are already drawn on the rows they filter.

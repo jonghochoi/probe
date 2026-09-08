@@ -85,7 +85,9 @@ a half-added pillar silently drops out of the index and the lints:
       because none of them can read the pillar set from another:
       `PILLAR_NAMES` in `site/builder/corpus.py` (the build's source of truth —
       display order and the `P#` pattern derive from it, and an id outside it
-      lands the paper in `UNCLASSIFIED`); the §3-1 palette table in
+      lands the paper in `UNCLASSIFIED`) together with the Korean
+      `PILLAR_LABELS` the rail prints beside each id, which the build requires
+      to name the same set; the §3-1 palette table in
       `scouting/AUTHORING.md` (the palette's source of truth); `PILLARS` in
       `site/search/function/search.ts` (a deployed function imports nothing
       from the build — its prompt and both pillar guards read this object, and
