@@ -16,7 +16,7 @@ input, and are edited like any other doc.
 Ownership inside the folder is just as fixed. The Decision Log, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;
 `MASTER.md` holds only what crosses pillars — Identity, Purpose, Long-term
-Context, Hardware, the P0–P4 overview, Venue, Cross-pollination. Edit the
+Context, the P0–P4 overview, Venue, Cross-pollination. Edit the
 `P#.md` for pillar content and `MASTER.md` only for global content; the same
 fact in both is one of them going stale.
 
