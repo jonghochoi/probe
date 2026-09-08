@@ -239,12 +239,23 @@ const Corpus = {
 };
 
 /* ── Painting whatever is on the page ─────────────────────────────────── */
+/* The star every list this browser builds at runtime draws — 내 서재's rows and
+   the ⌘K palette's results, neither of which the build ever prints. It is the
+   same shape `components.icon("star")` prints, kept here because those two
+   surfaces have no server-rendered markup to copy it from. */
+const STAR =
+  '<svg class="ico ico-star" viewBox="0 0 16 16" width="15" height="15" ' +
+  'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
+  'stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+  '<path d="m8 1.9 1.85 3.75 4.15.6-3 2.93.71 4.13L8 11.4l-3.71 1.91.71-4.13' +
+  '-3-2.93 4.15-.6Z"/></svg>';
+
 function paint(root = document) {
   root.querySelectorAll("[data-star]").forEach((el) => {
     const on = Stars.has(el.dataset.star);
+    // On and off are one path filled or not (`index.css`), so nothing here
+    // rewrites markup to answer a click.
     el.setAttribute("aria-pressed", on ? "true" : "false");
-    const glyph = el.querySelector("[data-star-glyph]");
-    if (glyph) glyph.textContent = on ? "★" : "☆";
     const label = el.querySelector("[data-star-text]");
     if (label) label.textContent = on ? "즐겨찾기 됨" : "즐겨찾기";
   });
@@ -441,5 +452,5 @@ paint();
 
 // No bundler, so the shared surface goes on `window` — the same door
 // `window.ProbeMemo` uses.
-window.ProbeShelf = { Stars, Reads, Marks, Corpus, paint };
+window.ProbeShelf = { Stars, Reads, Marks, Corpus, paint, STAR };
 })();

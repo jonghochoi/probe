@@ -171,7 +171,11 @@ root.innerHTML =
         'aria-controls="cmdk-list" aria-autocomplete="list" autocomplete="off" ' +
         'spellcheck="false" placeholder="제목 · 태그 · 연구 축 · arXiv id">' +
       '<button type="button" class="cmdk-esc" data-cmdk-dismiss aria-label="닫기">' +
-        '<span class="k">esc</span><span class="x">✕</span></button>' +
+        '<span class="k">esc</span><span class="x">' +
+        '<svg class="ico ico-close" viewBox="0 0 16 16" width="13" height="13" ' +
+          'fill="none" stroke="currentColor" stroke-width="1.6" ' +
+          'stroke-linecap="round" aria-hidden="true" focusable="false">' +
+          '<path d="M3.8 3.8 12.2 12.2M12.2 3.8 3.8 12.2"/></svg></span></button>' +
     '</div>' +
     '<ul class="cmdk-list" id="cmdk-list" role="listbox" aria-label="검색 결과"></ul>' +
     '<p class="cmdk-foot"><span data-cmdk-note></span>' +
@@ -192,7 +196,8 @@ function shelfMarks(id) {
   const shelf = window.ProbeShelf;
   if (!shelf || !id) return "";
   const star = shelf.Stars.has(id)
-    ? '<span class="cmdk-star" title="즐겨찾기" aria-label="즐겨찾기">★</span>' : "";
+    ? '<span class="cmdk-star" title="즐겨찾기" aria-label="즐겨찾기">' +
+      shelf.STAR + "</span>" : "";
   const read = shelf.Reads.isDone(id)
     ? '<span class="cmdk-read" aria-label="읽음">읽음</span>' : "";
   return star + read;

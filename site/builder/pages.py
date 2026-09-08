@@ -300,7 +300,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
 <div class="filters" data-filters>
   <div class="filters-inner">
     <label class="search">
-      <span aria-hidden="true">🔍</span>
+      {c.icon("search", 14)}
       <input type="search" data-q autocomplete="off" spellcheck="false"
              placeholder="제목 · 본문 · 용어 · 태그 · 저자 · arXiv id 로 검색"
              aria-label="논문 검색">
@@ -475,8 +475,9 @@ def _facets(paper: Paper) -> str:
 def _star(paper: Paper, cls: str = "rowstar") -> str:
     """The star, wherever a paper is named.
 
-    Server-rendered empty and filled in by `shelf.js`: which papers are starred
-    is the reader's, not the corpus's, and the build has no way to know it. The
+    Server-rendered hollow; `shelf.js` presses it and `index.css` fills the one
+    path from `currentColor`. Which papers are starred is the reader's, not the
+    corpus's, and the build has no way to know it. The
     title rides along because the shelf keeps a copy of it — a starred paper
     that later leaves the corpus still lists under a name in 내 서재 rather than
     as a bare id. Nothing without JavaScript can toggle it, so the button
@@ -485,7 +486,7 @@ def _star(paper: Paper, cls: str = "rowstar") -> str:
     return (
         f'<button type="button" class="{cls}" data-star="{c.esc(paper.stem)}" '
         f'data-star-title="{c.esc(paper.title)}" aria-pressed="false" '
-        f'aria-label="즐겨찾기"><span data-star-glyph aria-hidden="true">☆</span></button>'
+        f'aria-label="즐겨찾기">{c.icon("star", 15)}</button>'
     )
 
 
@@ -790,7 +791,7 @@ def _acts(paper: Paper) -> str:
      data-paper-id="{c.esc(paper.stem)}" data-paper-title="{c.esc(paper.title)}">
   <button type="button" class="act-btn" data-star="{c.esc(paper.stem)}"
           data-star-title="{c.esc(paper.title)}" aria-pressed="false">
-    <span data-star-glyph aria-hidden="true">☆</span><span data-star-text>즐겨찾기</span>
+    {c.icon("star", 13)}<span data-star-text>즐겨찾기</span>
   </button>
   <button type="button" class="act-btn" data-read-toggle aria-pressed="false"
           aria-live="polite">읽음으로 표시</button>

@@ -3,9 +3,10 @@
    the two places that need a real surface color instead of a tint. */
 
 :root {
-  /* The rail's 즐겨찾기 mark, as a shape rather than a ★ — see the rail
-     block below for why the character could not be trusted to centre. */
-  --star-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%201.6l3.1%206.6%207%20.9-5.2%204.9%201.4%207.1L12%2017.6%205.7%2021.1l1.4-7.1L1.9%209.1l7-.9z'/%3E%3C/svg%3E");
+  /* The rail's 즐겨찾기 mark. It is the same star `components.icon("star")`
+     draws, as a mask rather than an element, because the rail paints it from
+     the swatch a facet already has rather than from an icon of its own. */
+  --star-mask: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'><path%20d='m8%201.9%201.85%203.75%204.15.6-3%202.93.71%204.13L8%2011.4l-3.71%201.91.71-4.13-3-2.93%204.15-.6Z'/></svg>");
   /* One height for every control in the filter bar. They sit side by side on
      one line and read as one row, so each taking whatever height its own
      padding and font size add up to leaves the row visibly ragged — the box
@@ -271,7 +272,7 @@ html.js .filters { display: block; }
   transition: border-color var(--dur-short) var(--ease-out);
 }
 .search:focus-within { border-color: var(--amber-soft); }
-.search span { opacity: .5; font-size: .82rem; }
+.search .ico { color: var(--text-muted); }
 .search input {
   font: inherit; font-size: .86rem; color: var(--text);
   background: none; border: none; outline: none; width: 100%;
@@ -553,13 +554,11 @@ html.js .rail {
    colour, so a list of forty papers reads as forty rows rather than forty
    controls. Only the pressed one takes the accent. */
 .rowstar, .leadstar, .starbtn {
-  font: inherit; line-height: 1; padding: .1rem .15rem;
+  line-height: 0; padding: .1rem .15rem;
   background: none; border: none; cursor: pointer; color: var(--border);
   transition: color var(--dur-short) var(--ease-out),
               transform var(--dur-short) var(--ease-out);
 }
-.rowstar { font-size: .92rem; }
-.leadstar, .starbtn { font-size: 1.02rem; }
 /* The 책갈피 row's control removes the mark rather than setting one, so it is
    drawn in the accent it already has and turns red under the cursor. */
 .markbtn {

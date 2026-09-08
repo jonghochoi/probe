@@ -32,6 +32,44 @@ def esc(text: str) -> str:
     return html.escape(str(text), quote=True)
 
 
+# ── The icon set ────────────────────────────────────────────────────────────
+# One pen for every glyph a control is drawn with: a 16px viewBox, no fill,
+# 1.6px strokes in `currentColor`, round caps and joins. Size and colour come
+# from the control's own CSS rule, so one path serves the nav's 32px button and
+# a list row's 14px star without a second copy of the shape.
+#
+# A text glyph cannot hold this line — `☾` and `☰` are drawn by whichever font
+# the reader happens to have, at a weight and an optical size the page has no
+# say in, and `🔍` arrives in colour. So every control here is a vector, and
+# the characters that stay are the ones that are punctuation rather than
+# controls: `↗` after a link's label, the `✓` and `●` that mark a row's state
+# inside a line of text.
+_ICON_PATHS = {
+    "search": '<circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/>',
+    "moon": '<path d="M13.6 9.9A5.8 5.8 0 0 1 6.1 2.4 6 6 0 1 0 13.6 9.9Z"/>',
+    "sun": ('<circle cx="8" cy="8" r="3"/>'
+            '<path d="M8 1.2v1.5M8 13.3v1.5M2.6 2.6l1.1 1.1M12.3 12.3l1.1 1.1'
+            'M1.2 8h1.5M13.3 8h1.5M2.6 13.4l1.1-1.1M12.3 3.7l1.1-1.1"/>'),
+    "menu": '<path d="M2.3 4.6h11.4M2.3 8h11.4M2.3 11.4h11.4"/>',
+    "close": '<path d="M3.8 3.8 12.2 12.2M12.2 3.8 3.8 12.2"/>',
+    # The one shape that carries a state rather than a name: `index.css` fills
+    # it from `currentColor` on the pressed button, so on and off are the same
+    # path and nothing has to swap markup to answer a click.
+    "star": ('<path d="m8 1.9 1.85 3.75 4.15.6-3 2.93.71 4.13L8 11.4l-3.71 '
+             '1.91.71-4.13-3-2.93 4.15-.6Z"/>'),
+}
+
+
+def icon(name: str, size: int = 16) -> str:
+    """One glyph from the set above, sized by the caller."""
+    return (
+        f'<svg class="ico ico-{name}" viewBox="0 0 16 16" '
+        f'width="{size}" height="{size}" fill="none" stroke="currentColor" '
+        'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" '
+        f'aria-hidden="true" focusable="false">{_ICON_PATHS[name]}</svg>'
+    )
+
+
 def mark(size: int) -> str:
     """The animated PROBE mark — a probe that looks back at the reader.
 
@@ -426,12 +464,7 @@ def cmdk_button() -> str:
     """
     return ('<button type="button" class="nav-cmdk" data-cmdk-open '
             'aria-label="논문 찾기" title="논문 찾기 (Ctrl K)">'
-            '<svg viewBox="0 0 16 16" width="15" height="15" '
-            'aria-hidden="true" focusable="false">'
-            '<circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" '
-            'stroke-width="1.6"/>'
-            '<path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.6" '
-            'stroke-linecap="round"/></svg></button>')
+            f'{icon("search", 15)}</button>')
 
 
 # GitHub's own mark, the one shape a reader recognises as "the source is over
@@ -518,10 +551,10 @@ def nav(up: str) -> str:
     <span class="nav-spacer"></span>
     <ul class="nav-links">{links}</ul>
     {cmdk_button()}
-    <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">☾</button>
+    <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">{icon("moon", 15)}{icon("sun", 15)}</button>
     {repo_link()}
     <button class="icon-btn nav-menu" data-nav-menu aria-expanded="false"
-            aria-controls="nav-sheet" aria-label="메뉴 열기" title="메뉴">☰</button>
+            aria-controls="nav-sheet" aria-label="메뉴 열기" title="메뉴">{icon("menu", 15)}</button>
   </div>
   {nav_sheet(up)}
 </nav>"""

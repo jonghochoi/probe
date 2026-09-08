@@ -22,7 +22,7 @@ const main = document.querySelector("[data-hub]");
 if (!memoApi || !shelf || !main) return;
 
 const { MemoStore, download } = memoApi;
-const { Stars, Reads, Marks } = shelf;
+const { Stars, Reads, Marks, STAR } = shelf;
 
 const FLAG =
   '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" ' +
@@ -78,7 +78,7 @@ function itemHtml(id, { title, when, whenLabel, state = true, hash = "", sub = "
     : "";
   const control = lead || `<button type="button" class="starbtn" data-star="${esc(id)}"
           data-star-title="${esc(name)}" aria-pressed="false"
-          aria-label="즐겨찾기"><span data-star-glyph>☆</span></button>`;
+          aria-label="즐겨찾기">${STAR}</button>`;
   return `<article class="shelf-item" data-read-of="${esc(id)}">
   ${control}
   ${link}
@@ -96,7 +96,7 @@ function renderStars() {
     ? ids.map((id) => itemHtml(id, {
         title: map[id].title, when: map[id].at, whenLabel: "즐겨찾기에 담은 날",
       })).join("")
-    : empty("아직 즐겨찾기가 없습니다. 논문 목록의 ☆ 나 논문 페이지의 즐겨찾기 버튼으로 담습니다.");
+    : empty("아직 즐겨찾기가 없습니다. 논문 목록의 별이나 논문 페이지의 즐겨찾기 버튼으로 담습니다.");
   return ids.length;
 }
 
