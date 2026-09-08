@@ -5,7 +5,7 @@
  * in `localStorage` — this browser profile, on this device, for this origin —
  * so Chrome and Safari on one machine are two different shelves, a private
  * window is a third that empties itself, and clearing site data empties all of
- * them. The 내 서재 page's export is the only way one shelf reaches another
+ * them. The 서재 page's export is the only way one shelf reaches another
  * machine.
  *
  * 읽음 is the reader's claim, never the site's guess. Scroll depth is not
@@ -239,7 +239,7 @@ const Corpus = {
 };
 
 /* ── Painting whatever is on the page ─────────────────────────────────── */
-/* The star every list this browser builds at runtime draws — 내 서재's rows and
+/* The star every list this browser builds at runtime draws — 서재's rows and
    the ⌘K palette's results, neither of which the build ever prints. It is the
    same shape `components.icon("star")` prints, kept here because those two
    surfaces have no server-rendered markup to copy it from. */
@@ -307,11 +307,11 @@ function paintResume(root = document) {
       box.append(chip);
     });
   }
-  // The link is the door to 내 서재 either way; when marks are being left off
+  // The link is the door to 서재 either way; when marks are being left off
   // the strip it says how many, so the count is never silently dropped.
   if (all) {
     const rest = ids.length - RESUME_CHIPS;
-    all.textContent = rest > 0 ? `외 ${rest}개 →` : "내 서재 →";
+    all.textContent = rest > 0 ? `외 ${rest}개 →` : "서재 →";
   }
 }
 
