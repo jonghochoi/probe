@@ -519,7 +519,7 @@ html.js .rail {
 }
 .lead-sum {
   font-size: .85rem; line-height: 1.72; color: var(--text-muted);
-  margin-top: .5rem; max-width: 74ch;
+  margin-top: .5rem;
 }
 .lead-foot {
   display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
