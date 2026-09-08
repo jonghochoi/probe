@@ -57,10 +57,12 @@ the rest of the build.
 the site makes no request. `site/search/verify.py` needs a key and egress, so it
 is run by hand and never in CI.
 
-**The pillar set is hard-coded in three places here** — `PILLAR_NAMES` in
-`builder/corpus.py`, `PILLARS` in `search/function/search.ts`, and the `--p<n>`
-tokens with their `[data-p]` rules in `builder/assets/site.css` and
-`index.css`. Adding a pillar walks the checklist in `context/CLAUDE.md`.
+**The pillar set is hard-coded in three places here** — `PILLAR_NAMES` with
+the Korean `PILLAR_LABELS` beside it in `builder/corpus.py` (the build refuses
+to start when the two name different pillars), `PILLARS` in
+`search/function/search.ts`, and the `--p<n>` tokens with their `[data-p]`
+rules in `builder/assets/site.css` and `index.css`. Adding a pillar walks the
+checklist in `context/CLAUDE.md`.
 
 ## Before pushing
 

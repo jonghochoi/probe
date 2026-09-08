@@ -37,6 +37,7 @@ const PAPERS = Array.isArray(data.papers) ? data.papers : [];
 const COMPARISONS = Array.isArray(data.comparisons) ? data.comparisons : [];
 if (!PAPERS.length && !COMPARISONS.length) return;
 const PILLAR_NAMES = data.pillars || {};
+const PILLAR_LABELS = data.pillarLabels || {};
 
 /* Where the site's root is, seen from whatever depth this page sits at. Read
  * off this script's own resolved `src` rather than printed into every page: it
@@ -94,7 +95,8 @@ function build(doc, kind) {
     tail: paper ? doc.id : of.join(" · "),
     name: [key, doc.title].map(match.compact).filter(Boolean),
     filed: [...(doc.tags || []), ...(doc.pillars || []),
-            ...(doc.pillars || []).map((p) => PILLAR_NAMES[p] || ""), ...of]
+            ...(doc.pillars || []).map((p) => PILLAR_NAMES[p] || ""),
+            ...(doc.pillars || []).map((p) => PILLAR_LABELS[p] || ""), ...of]
            .map(match.compact).filter(Boolean),
     line: [match.compact(doc.tagline)].filter(Boolean),
     head: match.compact(doc.title),

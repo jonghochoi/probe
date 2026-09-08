@@ -59,6 +59,21 @@ PILLAR_NAMES = {
     "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",
 }
+# The Korean label the rail prints beside each id — short enough to sit on one
+# line in a 13.5rem column, and the axis as a reader would name it rather than
+# as the pillar file titles it. Its keys are PILLAR_NAMES's; the build refuses
+# to start on a mismatch, so a pillar cannot be added to one and forgotten in
+# the other.
+PILLAR_LABELS = {
+    "P0": "데이터셋 · 벤치마크",
+    "P1": "행동 전문가 분해",
+    "P2": "멀티모달 관측 융합",
+    "P3": "월드 모델",
+    "P4": "사전학습 · 적응",
+}
+if PILLAR_LABELS.keys() != PILLAR_NAMES.keys():
+    raise RuntimeError("PILLAR_LABELS and PILLAR_NAMES name different pillars")
+
 PILLAR_ORDER = [*PILLAR_NAMES, UNCLASSIFIED]
 PILLAR_RE = re.compile(r"\b(?:%s)\b" % "|".join(map(re.escape, PILLAR_NAMES)))
 
@@ -347,6 +362,7 @@ class Paper:
             self.stem, self.title, self.tagline, self.authors, self.metric,
             *self.tags, *self.filed,
             *(PILLAR_NAMES[p] for p in self.filed if p in PILLAR_NAMES),
+            *(PILLAR_LABELS[p] for p in self.filed if p in PILLAR_LABELS),
         ])
 
     @property
@@ -479,6 +495,7 @@ def _fragments(paper: "Paper") -> list[str]:
         paper.stem, paper.title, paper.tagline, paper.authors, paper.metric,
         *paper.tags, *paper.filed,
         *(PILLAR_NAMES[p] for p in paper.filed if p in PILLAR_NAMES),
+        *(PILLAR_LABELS[p] for p in paper.filed if p in PILLAR_LABELS),
         _plain(paper.summary_md, limit=10_000),
     ]
     # Headings carry both languages — `### 한글 제목 | English · Subtitle` — and

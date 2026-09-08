@@ -7,7 +7,7 @@ from collections import Counter
 
 from . import components as c
 from . import corpus, glance as glance_mod
-from .corpus import PILLAR_NAMES, PILLAR_ORDER, Paper
+from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer
 
 # Pages serves a project site under /<repo>/. Only 404.html uses this; every
@@ -56,6 +56,8 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
 
     Pillar display names ride along so both can print 연구 축 as a name and
     match a query against one, without either having to carry `PILLAR_NAMES`.
+    The Korean labels ride with them because the landing rail prints those, and
+    a name a reader can read off the page is a name they may type in here.
 
     **Two kinds, one payload.** `comparisons` sits beside `papers` because the
     palette is the only way to reach a document from a page that is not a list,
@@ -74,6 +76,7 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     ranked = sorted(comps or [], key=lambda x: x.order_key, reverse=True)
     payload = {
         "pillars": PILLAR_NAMES,
+        "pillarLabels": PILLAR_LABELS,
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
              "pillars": p.filed, "tags": p.tags, "date": p.date}
@@ -264,6 +267,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
         f'<span class="sw"></span><b>{c.esc(k)}</b>'
+        f'<span class="rl">{c.esc(PILLAR_LABELS.get(k, "축 미지정"))}</span>'
         f'<span class="rn">{filed[k]}</span></button>'
         for k in PILLAR_ORDER if filed.get(k)
     )
