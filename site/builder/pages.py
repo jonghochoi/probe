@@ -54,10 +54,12 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     titles and tags in this corpus are the paper's own English. 내 서재 turns a
     kept id back into a titled, taglined row with the same records.
 
-    Pillar display names ride along so both can print 연구 축 as a name and
-    match a query against one, without either having to carry `PILLAR_NAMES`.
-    The Korean labels ride with them because the landing rail prints those, and
-    a name a reader can read off the page is a name they may type in here.
+    Both pillar vocabularies ride along so either surface can match a query
+    against an axis without carrying the dicts: the Korean label because a
+    reader reads it off the rail and may type it here, and the English name
+    because the papers themselves are English and a reader may type that
+    instead. Neither is printed — a row marks its axes with the id, which is
+    what the chips beside it are keyed to.
 
     **Two kinds, one payload.** `comparisons` sits beside `papers` because the
     palette is the only way to reach a document from a page that is not a list,
@@ -284,7 +286,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     seps = "".join(
         f'<div class="rsep" data-sep="{c.esc(k)}" hidden>'
         f'<span class="chip pillar" data-p="{c.esc(k)}">{c.esc(k)}</span>'
-        f"<h2>{c.esc(PILLAR_NAMES.get(k, '축 미지정'))}</h2>"
+        f"<h2>{c.esc(PILLAR_LABELS.get(k, '축 미지정'))}</h2>"
         f'<span class="rsep-n" data-sep-count>{primaries[k]}</span></div>'
         for k in PILLAR_ORDER if primaries.get(k)
     )
