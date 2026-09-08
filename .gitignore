@@ -16,6 +16,10 @@ site/builder/node_modules/
 # …and anywhere else a stray `npm install` puts them.
 node_modules/
 
+# Agent worktrees. A subagent run with worktree isolation gets the repo checked
+# out here so it can build and commit without touching this working tree.
+.claude/worktrees/
+
 # Editors
 .vscode/
 .idea/
