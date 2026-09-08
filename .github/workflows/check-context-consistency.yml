@@ -1,0 +1,53 @@
+name: Check context consistency
+
+# Verify that `context/` still has the shape its own documents promise.
+# `context/_TEMPLATE.md` defines the pillar section spine and `context/MASTER.md`
+# declares which sections it owns, so every check here is an existing contract
+# read back rather than a new rule:
+#
+#   SPINE      every `context/P#.md` carries the `## N.` sections the template
+#              defines. A pillar missing its Tracked Literature is not cosmetic —
+#              the scouting routine's first pass expands the citation graph out
+#              of it, so that pillar runs on an empty input and its reports still
+#              read as normal.
+#   COUNT      MASTER §4's per-pillar decision count against the pillar file.
+#   SECTION    every section a document says MASTER owns against MASTER's real
+#              headings — a pointer to a section that does not exist sends a
+#              reader nowhere.
+#   PILLARSET  pillar-count prose and `P0–P4` range tokens against the pillar set.
+#
+# Paths mirror the linter's own default scan set (`_DEFAULT_ROOT_DOCS`,
+# `_CONTEXT_PILLAR_GLOB`, `_FOLDER_RULE_GLOB`); a doc it reads that this list
+# misses is a gate that stays silent on the edit that broke it.
+#
+# Lint-only, no auto-fix: when a count and a log disagree the linter cannot know
+# which one is wrong, and `context/` is the human's to correct.
+
+on:
+  pull_request:
+    paths:
+      - 'context/**'
+      - 'CLAUDE.md'
+      - '*/CLAUDE.md'
+      - 'README.md'
+      - 'scouting/SETUP.md'
+      - 'linters/check-context-consistency.py'
+      - '.github/workflows/check-context-consistency.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-context-consistency-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check context keeps the shape its documents promise
+        run: python3 linters/check-context-consistency.py

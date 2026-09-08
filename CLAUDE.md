@@ -59,10 +59,10 @@ belongs in that folder's own rule file or README, which the row points at.
 | `site/search/` | human | Semantic search over the rewrites — chunker, InsForge schema, indexer, the public endpoint and the operator's `verify.py`. `comparison/` is published but not chunked. Enhancement only: a build without `--search-api` emits no script. Folder map: `site/search/README.md` |
 | `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
 | `linters/check-decision-refs.py` | human | Verifies every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` / `comparison/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
-| `linters/check-context-consistency.py` | human | Verifies `context/` keeps the shape its own documents promise — the section spine `context/_TEMPLATE.md` defines in every pillar file (SPINE), the decision counts `context/MASTER.md` §4 states against the pillar files (COUNT), every section a document claims MASTER owns against MASTER's real headings (SECTION), and pillar-count prose and `P0–P4` range tokens against the pillar set (PILLARSET). It runs locally and joins CI once `context/` is clean — the findings it reports are the human's to resolve, and `context/` is read-only to the agent |
+| `linters/check-context-consistency.py` | human | Verifies `context/` keeps the shape its own documents promise — the section spine `context/_TEMPLATE.md` defines in every pillar file (SPINE), the decision counts `context/MASTER.md` §4 states against the pillar files (COUNT), every section a document claims MASTER owns against MASTER's real headings (SECTION), and pillar-count prose and `P0–P4` range tokens against the pillar set (PILLARSET). Every check reads back a promise `context/_TEMPLATE.md` or `context/MASTER.md` already makes, so a finding is a drift rather than a new demand — and it is the human's to resolve, since `context/` is read-only to the agent |
 | `linters/check-scouting-format.py` | human | Validates `scouting/P#/YYYY-MM-DD.md` against the `scouting/AUTHORING.md` contract — metadata block, emoji system and section order, the scoring contract (§5) and one-paper-per-row tables (§7-3). Binds reports dated on or after its `_CONTRACT_EFFECTIVE`. Scouting reports reach `main` without a PR, so the **blocking** gate is the routine's own pre-commit self-check (`.claude/prompts/scouting.txt` → SELF-CHECK) and CI is the backstop |
 | `linters/check-commit-style.py` | human | Validates commit subjects / PR titles against the "Commit message style" grammar below. Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `.github/workflows/` | human | Six gates. Every lint above except `check-context-consistency` runs PR-time (`check-commit-style` reads the **PR title**, since squash-merge makes it the landing subject); `check-scouting-format` also fires on `push` to `main`, the path scouting reports actually take. `check-search-function` parses `site/search/function/search.ts`, which no build reads. `deploy-site.yml` builds the site on every PR touching `analysis/` or `site/` and deploys to Pages only from `main`, where it also refreshes the semantic index when the InsForge secrets exist |
+| `.github/workflows/` | human | Seven gates. Every lint above runs PR-time (`check-commit-style` reads the **PR title**, since squash-merge makes it the landing subject); `check-scouting-format` also fires on `push` to `main`, the path scouting reports actually take. `check-search-function` parses `site/search/function/search.ts`, which no build reads. `deploy-site.yml` builds the site on every PR touching `analysis/` or `site/` and deploys to Pages only from `main`, where it also refreshes the semantic index when the InsForge secrets exist |
 
 ## Commit message style
 
@@ -180,9 +180,8 @@ one logical area or needs context to be reviewable. When present:
 
 ## Local checks
 
-CI runs each of these on the PR — `check-context-consistency.py` is the one
-that runs locally only. Run the ones your change touches before pushing, so a
-red gate is not the first you hear of it.
+CI runs each of these on the PR. Run the ones your change touches before
+pushing, so a red gate is not the first you hear of it.
 
 | Change touches | Command |
 |---|---|
