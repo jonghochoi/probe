@@ -246,10 +246,11 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     # not know — `filter.js` fills them from the shelf, and the group hides
     # itself when nothing is scripted.
     #
-    # They are the only English on either surface: a facet is a control, not a
-    # sentence, and `Starred` names the ★ beside it in a width a Korean label
-    # needs two lines for. Everything that speaks in sentences stays Korean —
-    # the group heading, 내 서재's tabs, the paper header.
+    # They are English for the reason the masthead's eyebrow is: a label is a
+    # control, not a sentence, and `Starred` names the star beside it in a
+    # width a Korean label needs two lines for. Everything that speaks in
+    # sentences stays Korean — the group heading, 내 서재's tabs, the paper
+    # header, and the masthead's own title and lead.
     #
     # The pair is printed twice, once for the rail and once for the filter bar,
     # because the rail leaves at 900px and these two would leave with it — and
@@ -285,6 +286,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     body = f"""<header class="mast brief">
   <div class="mast-inner">
     <div class="mast-text">
+      <p class="mast-eyebrow">Dexterous manipulation</p>
       <div class="mast-line">
         <h1>논문, 읽기 좋게 옮겨 둡니다</h1>
         <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
