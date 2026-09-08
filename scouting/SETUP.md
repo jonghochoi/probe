@@ -94,8 +94,8 @@ The form stores a **copy** of the prompt body, not a reference to the file. A
 merged change to `.claude/prompts/scouting.txt` reaches nothing until every
 routine is edited and the body re-pasted, `<PILLAR>` substitution redone.
 
-- Six pillars means six routines to update, every time.
-- Re-paste all six in one pass. A half-updated fleet has pillars scoring on
+- Five pillars means five routines to update, every time.
+- Re-paste all five in one pass. A half-updated fleet has pillars scoring on
   different contracts — exactly the drift the scoring contract
   (`scouting/AUTHORING.md` §5) exists to prevent.
 - After the last one, **Run now** on a single pillar and walk §4 before
