@@ -52,9 +52,14 @@ Two or three bare arXiv ids (`YYMM.NNNNN`), arXiv URLs or versioned ids —
 normalize to bare ids. Their order is the order every column and every card
 will run in, so keep the order given.
 
-  EMPTY OR UNPARSEABLE → stop and ask. Do not pick the papers yourself.
-  Which papers are worth holding together is the human's judgement, and it is
-  the one judgement this mode cannot make for them.
+  UNPARSEABLE → stop and say which token you could not read. Do not guess at
+  an id.
+
+  EMPTY → the human has not chosen yet, which is the moment to hand them
+  something to choose from. Name the candidates (below), then stop. Which
+  papers are worth holding together stays their judgement — it is the one
+  judgement this mode cannot make for them, and a list to choose from is not
+  a choice.
 
   FOUR OR MORE → stop and say so. Two is a contrast, three is a field, four is
   a survey and wants a shape this track does not have.
@@ -68,6 +73,47 @@ will run in, so keep the order given.
 
 Optional flag — `--refresh`: `comparison/<slug>.md` already exists and you are
 redoing it. Same procedure; overwrite in place; commit with `update`.
+
+
+────────────────────────────────────────────────────────────────────────
+NAMING THE CANDIDATES — what an empty invocation answers with
+────────────────────────────────────────────────────────────────────────
+
+The corpus outgrows its comparisons. A rewrite lands on its own merits and
+nothing looks back at what it now stands beside, so papers answering one
+question end up on pages that never meet.
+
+THE UNIT IS A QUESTION, NOT A PAIR. Two rewrites sharing five tags are a
+candidate; what makes them a comparison is a question they answer differently.
+A pair you cannot phrase one for is not a finding — drop it and hand back a
+shorter list.
+
+  1. RANK with the rule the site already uses for neighbours
+     (`site/builder/corpus.py::related`): two points per shared tag, one per
+     shared pillar — tags double, because two papers tagged `flow-matching` are
+     about the same machinery while two sharing P1 may only both be policies.
+     A second ranking rule is a second answer to one question; do not write
+     one.
+
+     Read `tags:` and `pillars:` from front matter for this and nothing else.
+     Forty bodies is not a survey this affords, and the score does not need
+     them.
+
+  2. DROP every pair a `comparison/<slug>.md` already holds in `compares:`.
+
+  3. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the five or six that survive
+     — the layer where a rewrite argues with the Decision Log, and the only
+     prose read here. The question comes from a disagreement you can point at:
+     one rewrite calling a choice necessary where another routes around it, two
+     citing one `D#` to opposite ends. Tag overlap only said where to look.
+
+  4. PRINT at most three, strongest first — the ids and aliases, the tags they
+     share, the question in one line, the slug it suggests, and which `D#` the
+     answer would move. Fewer is fine. None is fine, and is the honest answer
+     when the surviving pairs share vocabulary and nothing else.
+
+  5. STOP. Naming candidates is not choosing one. Write nothing, and do not
+     carry on into the procedure below on papers the human has not named.
 
 
 ════════════════════════════════════════════════════════════════════════

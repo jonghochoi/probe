@@ -102,6 +102,9 @@ session.
 - **No arXiv HTML edition → skipped.** Never written from the abstract.
 - **`/compare` reads only what `analysis/` already holds.** Run `/analyze` on
   each paper first.
+- **`/compare` with no ids names candidates.** It ranks the pairs no
+  comparison holds yet and gives the question that would divide them, then
+  stops — choosing one stays yours.
 
 <div align="center">
 

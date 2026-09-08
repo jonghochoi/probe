@@ -198,6 +198,33 @@ PROCEDURE
 
    Stage `analysis/<id>.md` and nothing else.
 
+10. NAME THE COMPARISON CANDIDATES — a short block at the end of the run,
+    printed for the human and written nowhere.
+
+    A comparison earns its place when two or three rewrites answer one question
+    differently, and the corpus only changes at the moment a rewrite lands —
+    the moment that just happened. So the candidates are named here, while the
+    paper is still read, rather than looked for later against a corpus that has
+    not moved since.
+
+    Read the other rewrites' FRONT MATTER only — `tags:` and `pillars:` — never
+    their bodies. Score a pair the way the site already scores neighbours
+    (`corpus.related()`): two points per shared tag, one per shared pillar,
+    tags weighted double because two papers tagged `flow-matching` are about
+    the same machinery while two sharing P1 may only both be policies. Drop any
+    pair a `comparison/<slug>.md` already holds in its `compares:`.
+
+    Print at most three, strongest first, each as: the ids and aliases, the
+    tags they share, and the question that would divide them. The question is
+    what makes a comparison — a tag overlap is a candidate, not a question, and
+    naming one you cannot phrase is worse than naming none. When nothing
+    scores, say so: an honest none is the usual answer for a paper that opens a
+    corner of the corpus nothing else occupies.
+
+    This is a proposal. Do not run `/compare`, do not write a file, do not edit
+    anything. The human decides whether any of it is worth writing, and
+    `comparison/AUTHORING.md` §1 binds what a comparison may hold.
+
 
 ════════════════════════════════════════════════════════════════════════
 SCOPE
