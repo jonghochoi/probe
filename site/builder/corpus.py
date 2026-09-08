@@ -47,11 +47,13 @@ def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
 # is printed inside a chip on a card, so it has to survive at one line.
 METRIC_MAX = 40
 
-# Pillar display names mirror context/MASTER.md §4 — the one place a pillar id
-# turns into a heading a reader sees. This dict is the pillar set for the whole
-# build: the display order is its declaration order and the id pattern is built
-# from its keys, so adding a pillar is one entry here. An id outside it lands
-# the paper in 미분류.
+# Pillar names mirror context/MASTER.md §4. This dict is the pillar set for the
+# whole build: the display order is its declaration order and the id pattern is
+# built from its keys, so adding a pillar is one entry here. An id outside it
+# lands the paper in 미분류. The names themselves are what the search box and
+# ⌘K match a query against — every surface a reader *reads* prints
+# `PILLAR_LABELS` — so a query in the paper's own English still finds its
+# axis.
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Body/Hand Action Expert",
@@ -59,15 +61,15 @@ PILLAR_NAMES = {
     "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",
 }
-# The Korean label the rail prints beside each id — short enough to sit on one
-# line in a 13.5rem column, and the axis as a reader would name it rather than
-# as the pillar file titles it. Its keys are PILLAR_NAMES's; the build refuses
-# to start on a mismatch, so a pillar cannot be added to one and forgotten in
-# the other.
+# What every reader-facing surface prints for an axis — the rail facet and the
+# `연구 축별` separator. Short enough to sit on one line in a 13.5rem column,
+# and the axis as a reader would name it rather than as the pillar file titles
+# it. Its keys are PILLAR_NAMES's; the build refuses to start on a mismatch, so
+# a pillar cannot be added to one and forgotten in the other.
 PILLAR_LABELS = {
     "P0": "데이터셋 · 벤치마크",
     "P1": "행동 전문가 분해",
-    "P2": "멀티모달 관측 융합",
+    "P2": "관측 설계",
     "P3": "월드 모델",
     "P4": "사전학습 · 적응",
 }
