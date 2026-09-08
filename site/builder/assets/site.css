@@ -50,6 +50,13 @@
      one accent means one value to move when it moves. */
   --orange:      oklch(67.2% 0.131 39);
   --orange-ink:  oklch(51.4% 0.155 41);
+  /* The wordmark's two stops. They are named rather than borrowed from the
+     pair above because the pair collapses in dark — there `--orange-ink` *is*
+     `--orange`, and a gradient between them is a flat fill. Both stops stay on
+     the accent's hue so the lockup reads as one colour deepening across five
+     letters rather than as two colours meeting. */
+  --wm-a:        oklch(49.0% 0.152 36);
+  --wm-b:        oklch(70.5% 0.128 44);
   --accent-ink:  oklch(21.0% 0.018 50);
   --orange-soft: oklch(95.8% 0.021 52);
   --amber-soft:  oklch(77.3% 0.101 50);
@@ -187,6 +194,8 @@
 
   --orange:      oklch(73.9% 0.116 42);
   --orange-ink:  var(--orange);
+  --wm-a:        oklch(60.5% 0.135 34);
+  --wm-b:        oklch(80.0% 0.104 50);
   --accent-ink:  oklch(18.1% 0.006 56);
   --orange-soft: oklch(25.0% 0.031 46);
 
@@ -284,17 +293,32 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;
   width: 100%; display: flex; align-items: center; gap: 1rem;
 }
-/* The accent is the corpus's, not the chrome's: it marks what a reader is
-   deciding about — the axis a paper sits under, the number it is remembered
-   by, the filter they have switched on — and a page that also spends it on
-   its own furniture spends it in eight places at once, where none of the
-   eight can be the one that means something. So the mark keeps the orange,
-   which is the whole of the brand a reader has to recognise, and the wordmark
-   beside it takes the ink every other piece of chrome is set in. */
+/* The wordmark is the one accent text that keeps the brand value: it sits
+   against the mark's own hull, and the two read as one lockup rather than as
+   a drawing with a caption. It is a landmark, not something a reader has to
+   make out. Every other accent on the page carries a meaning — the axis a
+   paper sits under, the filter that is on — and takes `--orange-ink`; this
+   one is the brand itself, so it takes the brand value.
+   
+   It takes it as a gradient across the five letters, deep to bright, which is
+   the mark's own hull lit from one side. `color` is set first and the clip is
+   layered over it, so a browser that cannot paint text from a background —
+   or a reader in forced-colours, where the background is dropped — still gets
+   a solid accent rather than transparent letters. */
 .nav-logo {
   font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em;
-  color: var(--text); white-space: nowrap; text-decoration: none;
+  color: var(--orange); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .nav-word {
+    background: linear-gradient(96deg, var(--wm-a) 0%, var(--wm-b) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+}
+@media (forced-colors: active) {
+  .nav-word { background: none; color: currentColor; }
 }
 
 /* ── The mark ─────────────────────────────────────────────────────────── */

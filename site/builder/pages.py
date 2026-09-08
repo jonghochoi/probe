@@ -46,7 +46,7 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     Both surfaces that read it want the same fields. The palette searches the
     id, the title, the tags and the 연구 축, and shows the tagline under each
     title — which is also the only Korean any of those fields carry, since
-    titles and tags in this corpus are the paper's own English. 내 서재 turns a
+    titles and tags in this corpus are the paper's own English. 서재 turns a
     kept id back into a titled, taglined row with the same records.
 
     Both pillar vocabularies ride along so either surface can match a query
@@ -62,7 +62,7 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     from a paper it already names — which is the one place a reader who wants
     it is least likely to be. The two arrays stay separate rather than merging
     under a `kind` field: they are keyed differently (an arXiv id against a
-    slug), they land at different depths, and 내 서재 reads only the first —
+    slug), they land at different depths, and 서재 reads only the first —
     shelf records are kept per arXiv id, so a comparison has nothing there to
     look up.
 
@@ -101,7 +101,7 @@ def _shelf_facets(cls: str) -> str:
     Both name something the reader put there. What is left to read is not a
     mark anyone made: on a corpus a reader has barely started it counts almost
     every paper, which selects the list they are already looking at. 읽음 is
-    still kept and still listed — in 내 서재, where the papers a reader is done
+    still kept and still listed — in 서재, where the papers a reader is done
     with are the point — it just has no facet here.
     """
     flags = (("fresh", "New"), ("star", "Starred"))
@@ -249,7 +249,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     # They are English for the reason the masthead's eyebrow is: a label is a
     # control, not a sentence, and `Starred` names the star beside it in a
     # width a Korean label needs two lines for. Everything that speaks in
-    # sentences stays Korean — the group heading, 내 서재's tabs, the paper
+    # sentences stays Korean — the group heading, 서재's tabs, the paper
     # header, and the masthead's own title and lead.
     #
     # The pair is printed twice, once for the rail and once for the filter bar,
@@ -291,9 +291,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         <h1>논문, 읽기 좋게 옮겨 둡니다</h1>
         <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
       </div>
-      <p class="mast-sub">
-        원문을 열지 않아도 메커니즘까지 남도록 다시 씁니다.
-      </p>
     </div>
     {c.mast_art()}
   </div>
@@ -312,7 +309,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
                       '<button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>'
                       '<button type="button" data-sort="title" aria-pressed="false">제목순</button>')}
     {_seg("한 쪽에 몇 편", "psize", _page_sizes())}
-    <div class="barflags" role="group" aria-label="내 서재">{bar_mine}</div>
+    <div class="barflags" role="group" aria-label="서재">{bar_mine}</div>
     <span class="filter-spacer"></span>
     <span class="status"><span data-result-count>{len(ordered)}편</span>{
       f'<span data-corpus-when> · <span class="when-word">최근 </span>'
@@ -323,7 +320,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
 
 <div class="deck">
   <aside class="rail" data-rail>
-    <p class="rail-h" data-mine-h>내 서재</p>
+    <p class="rail-h" data-mine-h>서재</p>
     {rail_mine}
     <p class="rail-h">연구 축</p>
     {rail_pillars}
@@ -438,7 +435,7 @@ def _resume() -> str:
         '<span class="resume-k">책갈피</span>'
         '<span class="resume-chips" data-resume-chips></span>'
         '<a class="resume-all" data-resume-all href="shelf/index.html#marks">'
-        '내 서재 →</a></div>'
+        '서재 →</a></div>'
     )
 
 
@@ -481,7 +478,7 @@ def _star(paper: Paper, cls: str = "rowstar") -> str:
     path from `currentColor`. Which papers are starred is the reader's, not the
     corpus's, and the build has no way to know it. The
     title rides along because the shelf keeps a copy of it — a starred paper
-    that later leaves the corpus still lists under a name in 내 서재 rather than
+    that later leaves the corpus still lists under a name in 서재 rather than
     as a bare id. Nothing without JavaScript can toggle it, so the button
     removes itself there (`index.css`) instead of sitting inert.
     """
@@ -607,7 +604,7 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False,
 </article>"""
 
 
-# The four lists 내 서재 holds, in the order a reader meets them: what they
+# The four lists 서재 holds, in the order a reader meets them: what they
 # picked out, what they got through, where they stopped, what they wrote down.
 SHELF_TABS = (
     ("stars", "즐겨찾기"),
@@ -618,14 +615,14 @@ SHELF_TABS = (
 
 
 def shelf_page(papers: list[Paper]) -> str:
-    """내 서재 — everything this browser has kept about the corpus.
+    """서재 — everything this browser has kept about the corpus.
 
     Rendered empty and filled from `localStorage`: stars, 읽음 marks and memos
     never reach the build, so there is nothing here to server-render but the
     frame. What turns a kept id back into a row with a link is `corpus_index()`,
     the same file the ⌘K palette searches — every page carries it, so this one
     needs no index of its own. A kept id missing from it is a paper that has
-    left the corpus, and 내 서재 says so rather than dropping it.
+    left the corpus, and 서재 says so rather than dropping it.
 
     The page is also the export surface, and the only one: a shelf that lives
     in one browser profile reaches a second machine as a file or not at all.
@@ -644,7 +641,7 @@ def shelf_page(papers: list[Paper]) -> str:
 
     body = f"""<header class="mast slim">
   <div class="mast-inner">
-    <h1>내 서재</h1>
+    <h1>서재</h1>
     <p class="mast-sub">
       즐겨찾기 · 읽은 논문 · 책갈피 · 메모.<br>
       넷 다 <strong>이 브라우저에만</strong> 남고, 사이트 데이터를 지우면 사라집니다.<br>
@@ -654,7 +651,7 @@ def shelf_page(papers: list[Paper]) -> str:
 </header>
 
 <main class="hub" data-hub>
-  <div class="hub-tabs" role="tablist" aria-label="내 서재 보기">{tabs}</div>
+  <div class="hub-tabs" role="tablist" aria-label="서재 보기">{tabs}</div>
   <div class="hub-actions">
     <button type="button" class="primary" data-hub-action="export-json">JSON 내보내기</button>
     <button type="button" data-hub-action="export-md">마크다운 내보내기</button>
@@ -667,7 +664,7 @@ def shelf_page(papers: list[Paper]) -> str:
 </main>
 """
     return c.page(
-        title="내 서재 · PROBE",
+        title="서재 · PROBE",
         body=body,
         depth=1,
         scripts=["memo.js", "shelf.js", "hub.js"],
@@ -1154,7 +1151,7 @@ def _cmp_header(comp) -> str:
   <div class="paper-head-inner">
     <div class="crumb-row">
       <div class="crumb">
-        <a href="../index.html">같이 읽기</a> › {c.esc(comp.slug)}
+        <a href="../index.html">비교</a> › {c.esc(comp.slug)}
       </div>
     </div>
     <h1 class="paper-title">{c.esc(comp.title)}</h1>
@@ -1204,7 +1201,7 @@ def _cmp_cards(papers: list[Paper]) -> str:
 
 
 def comparison_index_page(comps: list) -> str:
-    """같이 읽기 — every comparison, newest first."""
+    """비교 — every comparison, newest first."""
     ordered = sorted(comps, key=lambda x: x.order_key, reverse=True)
     if ordered:
         rows = "".join(
@@ -1226,7 +1223,7 @@ def comparison_index_page(comps: list) -> str:
 
     body = f"""<header class="mast slim">
   <div class="mast-inner">
-    <h1>같이 읽기</h1>
+    <h1>비교</h1>
     <p class="mast-sub">
       논문 두세 편을 한 질문 아래 놓고 <strong>갈리는 자리</strong>만 봅니다.<br>
       각 논문이 무엇을 하는지는 그 논문의 재작성본에 있습니다.
@@ -1239,7 +1236,7 @@ def comparison_index_page(comps: list) -> str:
 </main>
 """
     return c.page(
-        title="같이 읽기 · PROBE",
+        title="비교 · PROBE",
         body=body,
         depth=1,
         extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',

@@ -78,10 +78,11 @@
    is live. This one is the same pair for the reader who has no filter bar
    because the page is unscripted, so it leaves as soon as the script arrives. */
 html.js .mast-count { display: none; }
-/* Korean breaks between any two syllables, so a lead sentence splits "논문"
-   down the middle the moment it stops fitting on one line. `keep-all` moves
-   the break to a space; `pretty` spends the last two lines keeping a lone
-   word off a line of its own. */
+/* The lead the two list pages carry under their title. Korean breaks between
+   any two syllables, so a sentence splits "논문" down the middle the moment it
+   stops fitting on one line: `keep-all` moves the break to a space, and
+   `pretty` spends the last two lines keeping a lone word off a line of its
+   own. */
 .mast-sub {
   font-size: .9rem; line-height: 1.7; color: var(--text-muted);
   max-width: 66ch; margin-top: .55rem;
@@ -98,14 +99,6 @@ html.js .mast-count { display: none; }
   .mast.slim .mast-sub { max-width: none; }
   .mast.slim .mast-sub br { display: inline; }
 }
-/* One line reads as one thought, and the sentence is a hair too wide for the
-   narrowest phones — so there it gives up a little size rather than the line,
-   down to a floor where a 320px screen takes the wrap instead of type nobody
-   can read. */
-@media (max-width: 560px) {
-  .mast.brief .mast-sub { font-size: clamp(.74rem, 3.55vw, .9rem); }
-}
-
 /* ── Masthead diagram ─────────────────────────────────────────────────── */
 /* The tagline, drawn: a scan lifts four pieces out of an original that stays
    shut, the four wait in a rack over the mark, and they cross two at a time
@@ -342,7 +335,7 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
 .segwrap { display: contents; }
 .segchip { display: none; }
 
-/* ── 내 서재's three, in the filter bar ───────────────────────────────── */
+/* ── 서재's three, in the filter bar ───────────────────────────────── */
 /* The rail leaves at 900px and these three would leave with it — and unlike
    the pillars and the tags, nothing else on a phone can reach what they
    select: a star is not a word the search box can match. So the bar carries
@@ -431,7 +424,7 @@ html.js .rail {
 .rail-item[aria-pressed="true"] b,
 .rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
 .rail-item[aria-pressed="true"] .rl { color: var(--accent-ink); opacity: .85; }
-/* 내 서재's pair. The swatch slot carries a mark instead of a pillar colour —
+/* 서재's pair. The swatch slot carries a mark instead of a pillar colour —
    a filled dot for New, a star for Starred — because neither is a colour in
    the palette and both are already drawn on the rows they filter.
 
@@ -878,7 +871,7 @@ html.js .pager[hidden] { display: none; }
   overflow: hidden;
 }
 
-/* ── 내 서재 ──────────────────────────────────────────────────────────── */
+/* ── 서재 ──────────────────────────────────────────────────────────── */
 /* Three lists on one page, and the tab strip is what keeps them one page: the
    reader's shelf is a single thing, cut three ways. */
 .hub { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
@@ -997,7 +990,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
 .notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange-ink); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 
-/* ── 같이 읽기 ─────────────────────────────────── */
+/* ── 비교 ─────────────────────────────────── */
 .cmp-list { display: grid; gap: .55rem; }
 .cmp-item {
   display: flex; flex-direction: column; gap: .25rem;

@@ -6,7 +6,7 @@
  * Enter, and the reader is on the paper they meant.
  *
  * Both kinds of document answer here. A comparison is otherwise reachable from
- * 같이 읽기 and from the papers it names, and a reader who wants one is rarely
+ * 비교 and from the papers it names, and a reader who wants one is rarely
  * standing on either.
  *
  * The whole dialog is built here rather than server-rendered, which is the same

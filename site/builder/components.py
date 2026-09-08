@@ -121,10 +121,10 @@ _ART_ROWS = ((44, 44), (44, 44), (44, 44), (44, 38),
 
 
 def mast_art() -> str:
-    """The landing masthead's diagram — the tagline beside it, drawn.
+    """The landing masthead's diagram — what this site does to a paper, drawn.
 
-    The sentence it answers is "원문을 열지 않아도 메커니즘까지 남도록 다시
-    씁니다", and the drawing carries it in one loop: a scan
+    The claim it makes is that the original does not have to be opened for its
+    mechanism to survive, and the drawing carries it in one loop: a scan
     crosses an arXiv original that stays shut (it keeps its 열지 않음 tag the
     whole way) and lifts **four pieces** out of it; the four line up over the
     mark; then two of them cross to the 요약 tab and become its act cards and
@@ -142,8 +142,10 @@ def mast_art() -> str:
     drawing as the one in the nav — same tokens, same blink, same pupils under
     `brand.js`. Geometry only: every beat is a keyframe in `index.css`.
 
-    The tagline states all of this in text immediately to the left, so the
-    figure is decorative and stays out of the accessibility tree.
+    Nothing on the page states any of this in words, and the figure does not
+    either: it sets the band rather than carrying a claim, so it stays out of
+    the accessibility tree. Naming it there would hand a reader on a screen
+    reader a sentence no sighted reader is given.
     """
     rows = "".join(
         f'<rect x="18" y="{y}" width="{w1}" height="3" rx="1.5"/>'
@@ -517,8 +519,8 @@ def repo_link() -> str:
 # phone's sheet print the same list rather than each keeping their own, so a
 # destination cannot arrive in one and be missing from the other.
 DESTINATIONS = (("index.html", "논문"),
-                ("c/index.html", "같이 읽기"),
-                ("shelf/index.html", "내 서재"))
+                ("c/index.html", "비교"),
+                ("shelf/index.html", "서재"))
 
 
 def nav_sheet(up: str) -> str:

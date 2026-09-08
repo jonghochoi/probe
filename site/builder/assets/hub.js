@@ -1,4 +1,4 @@
-/* 내 서재 — the one page that shows everything this browser has kept.
+/* 서재 — the one page that shows everything this browser has kept.
  *
  * Three lists off two stores: `window.ProbeShelf` (즐겨찾기, 읽기 상태) and
  * `window.ProbeMemo` (메모). Nothing here can be server-rendered, because none
