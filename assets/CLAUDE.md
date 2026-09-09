@@ -20,7 +20,7 @@ their `<style>` block.
 | `human.svg` | The author bust standing for the human in the *Written by* column of the Who-owns-what table |
 | `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg` | The four track icons filling the agent's cells in that same column |
 | `tagline.svg` (880×88) | The tagline banner closing Why PROBE |
-| `flow.svg` (880×336) | The How-it-works flow diagram — the day's arXiv narrowing through the filter into the mark, out to the two output chips, and back through the human to `context/` |
+| `flow.svg` (880×348) | The How-it-works flow diagram — `context/` dropping into the run, the day's arXiv narrowing through the filter into the mark, and out to the scouting card and the on-demand card |
 | `build-flow.py` | Generates both flow files from one set of coordinates |
 
 ## Drawing rules
@@ -38,8 +38,8 @@ keeps the emphasis single. A second coloured line would leave the trio with no
 middle. `claim.svg` repeats its sentence in `aria-label` and in the `alt` the
 README embeds it with, so the line still reads where the image does not.
 
-**Rectangles are files and only files.** The human rides the return wire as a
-bare label, never a card.
+**Rectangles are files and only files.** Nothing else earns a box — a stage is
+drawn as a funnel, an act as a wire.
 
 **A mark cell is the mark alone.** In the Who-owns-what table the word a cell
 stands for rides in the image's `alt`, so the column still reads where the
@@ -74,8 +74,8 @@ makes this one legible beside `probe-analysis.svg` in a column.
 than an exception: reading and weighing are things one character does alone,
 and presenting is not. The listener is `human.svg` scaled — the same head
 radius over the same semicircle torso — rather than a new shape, so the room
-this track speaks to is the same human the flow diagram hands `context/` back
-to. It breathes on that file's own cycle, and only the character bobs: a
+this track speaks to is the same human `human.svg` stands for in the
+Who-owns-what table. It breathes on that file's own cycle, and only the character bobs: a
 screen that moved with the presenter would read as held rather than stood in
 front of, which is the one thing this icon is not saying. The moving pages are what tell the
 weighing apart from the read at the size a table cell gives them, since the
@@ -119,10 +119,37 @@ writes both files from one set of coordinates and `--check` fails when they
 drift from it, because moving any of its twenty-odd elements drags the wires,
 arrowheads and keyframes pointing at it. Edit the script, never the SVG.
 
-Its picking cycle runs 9 s: a scan band marks six papers as it crosses their
-column, three are culled inside the filter (each greys and fades out, still a
-circle), three land in the kept column. The durations are literal rather than
-`var()` — a `:root` custom property resolves only while the SVG is its own
-document, and an unresolved duration drops the animation.
+Its right column is two shapes, one per cadence — the scheduled card and the
+on-demand card — and both are built by one `card()`: a header naming the
+cadence, then the paths that share it. A fourth track is a fourth path; a
+fifth cadence is what would earn a third card. Nothing is ruled between the
+paths, because a divider inside an output card groups or ranks, and the only
+thing these share is the cadence already named above them. The `context/`
+card is the one that keeps a divider, and there it separates two documents a
+run reads for different reasons.
+
+That card is also the palest thing in the drawing. It is the one card the
+agent may not write, and reading as a quieter ground than the outputs is how
+the picture says so before any label does — which is also why the two output
+cards clear it by more than the gap between their own edges. They overlap it
+horizontally, so a thin gap would read as one stack of three boxes rather
+than an input and two outputs.
+
+The drawing ends at those two cards. It runs arXiv to files and stops: what a
+reader does with a report is a decision rather than a file, and a wire drawn
+back into `context/` would end the agent's own arrow at the one folder the
+agent may not write.
+
+A path on a card is set in two registers, because it is two things. The folder
+is the track a reader is scanning for, and the rest is a filename pattern; set
+alike they read as one wall of bold, so the track takes the size and the ink
+and the pattern drops to the weight of a note. That pattern is always a `<…>`
+placeholder rather than a specimen filename, since the face is a system stack
+and a wide substitution needs somewhere to go before it leaves the card through
+its right edge.
+
+A card gets no subtitle, because a note under one card and not the others reads
+as that output mattering more, when the only difference is the cadence its
+header already states.
 
 Before pushing a change here: `python3 assets/build-flow.py --check`.
