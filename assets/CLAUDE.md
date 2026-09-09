@@ -41,6 +41,14 @@ README embeds it with, so the line still reads where the image does not.
 **Rectangles are files and only files.** Nothing else earns a box — a stage is
 drawn as a funnel, an act as a wire.
 
+**Every card sits on the same ground.** The banner and the flow diagram's cards
+share one fill (`#FFFCFA` light, `#211C19` dark) inside one border (`#E8CDBD`,
+`#3D3129`). A card tinted toward the accent to draw the eye reads as a different
+kind of object rather than a louder one, and the front door already spends its
+emphasis on `claim.svg`. The accent stays on the label, the arrow and the wires,
+where a second colour is a second meaning; the paler `WASH` is the funnel's, not
+a card's.
+
 **A mark cell is the mark alone.** In the Who-owns-what table the word a cell
 stands for rides in the image's `alt`, so the column still reads where the
 images do not.
