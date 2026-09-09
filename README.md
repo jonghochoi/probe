@@ -56,7 +56,7 @@ about each:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/flow-dark.svg">
   <img src="assets/flow.svg" width="880"
-       alt="PROBE pipeline — the day's arXiv narrowed to 3–5 papers, out to a scouting report and an analysis page, and back through the human into context/">
+       alt="PROBE pipeline — context/ dropping into the run, the day's arXiv narrowed to 3–5 papers, and out to a scheduled scouting report and the on-demand pages you name">
 </picture>
 
 </div>
@@ -99,26 +99,17 @@ session.
 
 - **Start by hand.** Fill `context/`, run one report yourself, review it
   ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.
-- **One paper per `/analyze`, named explicitly.** No `scouting/` → `analysis/`
-  hand-off.
+- **You name the papers.** One id for `/analyze` and `/present`, two or three
+  for `/compare`. Nothing hands off on its own — a scouting report never
+  feeds `analysis/` for you.
 - **No arXiv HTML edition → skipped.** Never written from the abstract.
-- **`/compare` reads only what `analysis/` already holds.** Run `/analyze` on
-  each paper first.
-- **`/compare` with no ids names candidates.** It ranks the pairs no
-  comparison holds yet and gives the question that would divide them, then
-  stops — choosing one stays yours.
-- **`/present` needs the rewrite too, and argues one thing.** It reads
-  `analysis/` for what matters and the arXiv original for every number, then
-  lays the paper out as 起承轉結 with a speaker essay under each slide. The
-  slide count is what falls out, never a target.
-- **The presentation is a tab, and the tab is a screen.** One slide at a time
-  with ← → beside it and a deck of act-coloured ticks under it, so the turn is
-  arrived at rather than scrolled past; 발표자 노트 opens the speaker essay
-  under the frame. 발표 시작 puts that same slide on a fullscreen stage — a
-  clicker's keys move it, 목록 lays every slide out, a laser points without
-  advancing — and there the notes are a second window carrying the essay, the
-  next slide and a clock. Every talk the site holds is listed under **발표** in
-  the nav.
+- **The rewrite gates the other two.** `/compare` and `/present` read what
+  `/analyze` wrote, so run it on each paper first. `/compare` with no ids
+  ranks the pairs no comparison holds yet and names the question that would
+  divide each, then stops — choosing one stays yours.
+- **A presentation is a tab that presents.** One slide at a time in the page,
+  and the same slide on a fullscreen stage — arrow keys or a clicker move it,
+  with the speaker notes, the next slide and a clock in a second window.
 
 <div align="center">
 

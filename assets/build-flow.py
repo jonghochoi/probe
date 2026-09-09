@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Bake `flow.svg` and `flow-dark.svg` — the diagram the README's "Who owns
-what" section embeds.
+"""Bake `flow.svg` and `flow-dark.svg` — the diagram the README's "How it
+works" section embeds.
 
 The other images in this folder are hand-authored: they are small enough that
 editing the file is editing the drawing. This one is not — it carries twenty-odd
@@ -16,15 +16,23 @@ markup.
 What the drawing has to keep saying, whatever is moved:
 
   - Rectangles are files and only files. `context/` is one card of two
-    compartments, the two outputs are chips, and the human is a bare label on
-    the return wire — never a fourth box.
-  - The card's divider, the drop wire and the mark share one vertical axis
-    (x=468), so the read is "both documents feed one run".
-  - Both output chips join the same return rail: the human judges against
-    `scouting/` and `analysis/` together, not one of them.
-  - The two wires the human owns — the `context/` drop and the return rail —
-    run at the same washed opacity, so the wires at full strength are exactly
-    the ones the agent writes.
+    compartments, each output is one card of a header and the paths under
+    it, and nothing that is not a file gets a box: a stage is a funnel, an
+    act is a wire.
+  - The `context/` card's divider, the drop wire and the mark share one
+    vertical axis (x=468), so the read is "both documents feed one run".
+  - The `context/` card is the palest thing in the drawing. It is the one
+    card the agent may not write, and reading as a quieter ground than the
+    outputs is how the picture says so before any label does.
+  - The two output cards clear the `context/` card by more than the gap
+    between their own edges. They overlap it horizontally, so a thin gap
+    reads as one stack of three boxes rather than an input and two outputs.
+  - The drawing ends at the two outputs. It runs arXiv to files and stops,
+    because what a reader does with a report is a decision rather than a
+    file, and a wire drawn back into `context/` would put the one folder the
+    agent may not write at the end of the agent's own arrow.
+  - The `context/` drop is the one wire the human owns, and it runs washed,
+    so the wires at full strength are exactly the ones the agent writes.
   - The mark is `site/builder/components.py`'s `mark()` redrawn with its
     animation inlined, since a README image carries no external stylesheet.
     Keep the two drawings in step.
@@ -49,13 +57,13 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parent
 
 LIGHT = dict(
-    CARD="#FFFCFA", GROUND="#FDEFE7", BORDER="#E8CDBD", BORDER_SOFT="#F2DFD3",
+    CARD="#FFFCFA", GROUND="#FEF6F0", BORDER="#E8CDBD", BORDER_SOFT="#F2DFD3",
     WASH="#FBF3EE", ACCENT="#D97757", ACCENT_DEEP="#B06749",
     INK="#1F1611", MUTED="#7A6A60",
     HULL="#D97757", STALK="#CC785C", IRIS="#FFFAF7", PUPIL="#2A1A12",
 )
 DARK = dict(
-    CARD="#211C19", GROUND="#2A2320", BORDER="#3D3129", BORDER_SOFT="#332B26",
+    CARD="#211C19", GROUND="#251F1C", BORDER="#3D3129", BORDER_SOFT="#332B26",
     WASH="#262019", ACCENT="#E8916F", ACCENT_DEEP="#C98A6D",
     INK="#F2EAE4", MUTED="#A08D80",
     HULL="#E8916F", STALK="#F0A183", IRIS="#FFF6F1", PUPIL="#2A1A12",
@@ -67,9 +75,8 @@ DARK = dict(
 MONO = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace"
 SANS = "system-ui, -apple-system, 'Segoe UI', 'Noto Sans KR', sans-serif"
 
-W, H = 880, 336
+W, H = 880, 348
 AXIS = 468          # card divider, drop wire and mark centre
-RAIL = 856          # the return rail, clear of the output chips
 
 CYCLE = "9s"        # one full pick, slow enough to watch out of the corner of an eye
 BAND = ".11"        # the scan band, faint enough not to compete with the wires
@@ -161,7 +168,8 @@ CSS = f"""
     .m    {{ font-family: {{MONO}}; }}
     .lab  {{ font-family: {{MONO}}; font-size: 10px; letter-spacing: 2.2px; fill: {{ACCENT_DEEP}}; }}
     .tick {{ font-family: {{MONO}}; font-size: 9.5px; letter-spacing: 1.4px; fill: {{ACCENT_DEEP}}; }}
-    .path {{ font-family: {{MONO}}; font-size: 13.5px; font-weight: 700; fill: {{INK}}; }}
+    .path {{ font-family: {{MONO}}; font-size: 15.5px; font-weight: 700; fill: {{INK}}; }}
+    .rest {{ font-weight: 400; font-size: 11.5px; fill: {{MUTED}}; }}
     .note {{ font-family: {{SANS}}; font-size: 11px; fill: {{MUTED}}; }}
     .wire {{ fill: none; stroke: {{ACCENT}}; stroke-width: 1.6; stroke-linecap: round;
             stroke-linejoin: round; }}
@@ -224,10 +232,6 @@ def arrow_r(x: float, y: float) -> str:
     return f'<path class="head" d="M{x} {y} l-8 -4.6 v9.2 z"/>'
 
 
-def arrow_l(x: float, y: float) -> str:
-    return f'<path class="head" d="M{x} {y} l8 -4.6 v9.2 z"/>'
-
-
 def arrow_d(x: float, y: float) -> str:
     return f'<path class="head" d="M{x} {y} l-4.6 -8 h9.2 z"/>'
 
@@ -237,15 +241,38 @@ def at(x: float, y: float, inner: str) -> str:
     return f'<g transform="translate({x:.0f} {y:.0f})">{inner}</g>'
 
 
-def chip(x: float, y: float, tick: str, path: str, note: str) -> str:
-    """One output file: cadence, path, and what a reader gets from it."""
+def card(x: float, y: float, header: str, paths: list[str]) -> str:
+    """One agent-written output: a header naming its cadence, then its files.
+
+    A card holds paths and the header that binds them, and nothing else. A
+    subtitle under one card and not the others reads as that output being the
+    important one, when the only difference is cadence and the header already
+    carries it. Nothing is ruled between the paths either: a divider inside an
+    output card groups or ranks, and these share exactly the cadence named
+    above them.
+
+    A path is set in two registers, because it is two things: the folder is
+    the track, and the rest is a filename pattern. Set alike they read as one
+    wall of bold — every card the same weight, nothing leading the eye — so
+    the track carries the size and the ink, and the pattern drops to the
+    weight of a note. What a reader is looking for is which four tracks exist.
+
+    Every path is written with a `<…>` placeholder rather than a specimen
+    filename. The face is a system stack, so a wide substitution has to have
+    somewhere to go; a literal date is the longest string here and the first
+    to leave the card through its right edge.
+    """
+    h = 64 + 22 * (len(paths) - 1)
     return (
-        f'<rect x="{x}" y="{y}" width="240" height="76" rx="10" '
+        f'<rect x="{x}" y="{y}" width="240" height="{h}" rx="10" '
         'fill="{CARD}" stroke="{BORDER}"/>'
-        f'<rect x="{x + 1}" y="{y + 16}" width="3" height="44" rx="1.5" fill="{{ACCENT}}"/>'
-        f'<text class="tick" x="{x + 20}" y="{y + 26}">{tick}</text>'
-        f'<text class="path" x="{x + 20}" y="{y + 48}">{path}</text>'
-        f'<text class="note" x="{x + 20}" y="{y + 66}">{note}</text>'
+        f'<rect x="{x + 1}" y="{y + 16}" width="3" height="{h - 32}" rx="1.5" '
+        'fill="{ACCENT}"/>'
+        f'<text class="tick" x="{x + 20}" y="{y + 26}">{header}</text>'
+        + "".join(
+            f'<text class="path" x="{x + 20}" y="{y + 50 + 22 * j}">{track}/'
+            f'<tspan class="rest">{rest}</tspan></text>'
+            for j, (track, _, rest) in enumerate(p.partition("/") for p in paths))
     )
 
 
@@ -305,24 +332,15 @@ def drawing() -> str:
 
   {mark(422, 158, .96)}
 
-  <path class="wire flow" d="M516 206 C548 206, 552 152, 578 152"/>
-  {arrow_r(586, 152)}
-  <path class="wire flow" d="M516 206 C548 206, 552 250, 578 250"/>
-  {arrow_r(586, 250)}
+  <path class="wire flow" d="M516 206 C548 206, 552 166, 578 166"/>
+  {arrow_r(586, 166)}
+  <path class="wire flow" d="M516 206 C548 206, 552 272, 578 272"/>
+  {arrow_r(586, 272)}
 
-  {chip(592, 114, "SCHEDULED · PER PILLAR", "scouting/P#/YYYY-MM-DD.md",
-        "3–5 papers · scored · decision-grade")}
-  {chip(592, 212, "ON DEMAND · /analyze", "analysis/&lt;id&gt;.md",
-        "one paper · a published page")}
-
-  <text class="m" x="848" y="40" text-anchor="end" font-size="11" font-weight="700"
-        letter-spacing="1.6" fill="{{INK}}">HUMAN</text>
-  <text class="m" x="848" y="57" text-anchor="end" font-size="9.5"
-        letter-spacing=".2" fill="{{MUTED}}">judge · discard · refresh</text>
-  <g class="human">
-    <path class="wire flow" d="M832 152 H{RAIL} M832 250 H{RAIL} V75 q0 -8 -8 -8 H664"/>
-    {arrow_l(656, 67)}
-  </g>
+  {card(592, 134, "SCHEDULED · PER PILLAR", ["scouting/P#/&lt;date&gt;.md"])}
+  {card(592, 218, "ON DEMAND · YOU NAME IT", ["analysis/&lt;id&gt;.md",
+                                              "comparison/&lt;slug&gt;.md",
+                                              "presentation/&lt;id&gt;.md"])}
 """
 
 
@@ -330,7 +348,8 @@ def render(palette: dict[str, str]) -> str:
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
         f'viewBox="0 0 {W} {H}" role="img" '
-        'aria-label="PROBE pipeline — arXiv in, scouting and analysis out">\n'
+        'aria-label="PROBE pipeline — arXiv in, a scouting report and the '
+        'on-demand pages out">\n'
         f"  <style>{CSS}  </style>\n"
         f"{drawing()}\n</svg>\n"
     )
