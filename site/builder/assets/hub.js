@@ -159,6 +159,13 @@ function render() {
     const n = tab.querySelector("[data-tab-count]");
     if (n) n.textContent = counts[tab.dataset.shelfTab] || 0;
   });
+  // The build prints both exports closed, because an empty shelf has nothing
+  // to write out and a file that downloads with nothing in it reports a
+  // success that did not happen. Any one list holding something opens both:
+  // the JSON is the whole envelope, and the Markdown prints every list it
+  // finds, so neither is tied to the tab that happens to be showing.
+  const kept = counts.stars + counts.reads + counts.marks + counts.memos;
+  for (const btn of main.querySelectorAll("[data-hub-action]")) btn.disabled = !kept;
   // The stores wrote the ids; the glyphs and the 읽음 marks are the shelf
   // layer's to fill, on this page as on every other.
   shelf.paint(main);

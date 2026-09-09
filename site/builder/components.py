@@ -387,12 +387,17 @@ def page(
     extra_head: str = "",
     base: str = "",
     body_attrs: str = "",
+    here: str = "",
 ) -> str:
     """Full document shell.
 
     Hrefs are relative and computed from page depth, so `--serve` on
     localhost, a `file://` open, and the deployed `/probe/` subpath all behave
     identically — and a future custom domain needs no rebuild.
+
+    `here` is the `DESTINATIONS` key this page sits under, which the nav marks
+    as the reader's place. Every page passes one but `404.html`, which stands
+    under no destination.
 
     `base` overrides that with an absolute prefix. Exactly one page needs it:
     Pages serves `404.html` at whatever depth the bad URL had, so a relative
@@ -439,7 +444,7 @@ document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 </script>
 </head>
 <body{" " + body_attrs if body_attrs else ""}>
-{nav(up)}
+{nav(up, here)}
 {body}
 {script_tags}
 </body>
@@ -518,12 +523,28 @@ def repo_link() -> str:
 # Every place the site goes, in the order the nav offers them. The row and the
 # phone's sheet print the same list rather than each keeping their own, so a
 # destination cannot arrive in one and be missing from the other.
-DESTINATIONS = (("index.html", "논문"),
-                ("c/index.html", "비교"),
-                ("shelf/index.html", "서재"))
+#
+# The key in front is what a page names itself with. A paper and a comparison
+# each sit *under* a destination rather than being one, so `p/<id>/` marks 논문
+# and `c/<slug>/` marks 비교 — the mark answers "which part of the site is
+# this", which is what a reader glancing at a nav is asking.
+DESTINATIONS = (("papers", "index.html", "논문"),
+                ("compare", "c/index.html", "비교"),
+                ("shelf", "shelf/index.html", "서재"))
 
 
-def nav_sheet(up: str) -> str:
+def _current(key: str, here: str) -> str:
+    """`aria-current` on the destination the reader is standing in.
+
+    One attribute carries the whole mark: `site.css` draws the rule under it
+    from `[aria-current="page"]`, and a screen reader is told which of the
+    three it is without a second, visual-only class to keep in step. `here`
+    may be empty — 404 stands under no destination and marks none.
+    """
+    return ' aria-current="page"' if key and key == here else ""
+
+
+def nav_sheet(up: str, here: str = "") -> str:
     """The phone's menu — the row's destinations, one per line, plus the way out.
 
     A phone is not wide enough for the mark, the site's name, three
@@ -537,27 +558,42 @@ def nav_sheet(up: str) -> str:
     links it always had, and gives up the name instead (`site.css`).
     """
     links = "".join(
-        f'<a href="{up}{href}">{label}</a>' for href, label in DESTINATIONS)
+        f'<a href="{up}{href}"{_current(key, here)}>{label}</a>'
+        for key, href, label in DESTINATIONS)
     return (f'<div class="nav-sheet" id="nav-sheet" hidden>{links}'
             f'<a class="nav-sheet-out" href="{REPO_URL}" target="_blank" '
             'rel="noopener noreferrer">GitHub 저장소 ↗</a></div>')
 
 
-def nav(up: str) -> str:
+def nav(up: str, here: str = "") -> str:
+    """The row every page opens on — where the site goes, and what it can do.
+
+    Two clusters, and they are different kinds: three places to go, then three
+    things to do to the page in front of the reader. A hairline stands between
+    them (`site.css`), because the seam between an unboxed label and a bordered
+    32px button reads as a control that lost its border unless something says
+    the boundary is meant.
+
+    `here` is the destination this page sits under, and marking it is the
+    other half of the same job: a row of three names that never says which one
+    the reader is standing in is a row with a hole in it, and the hole is what
+    makes the labels beside the controls look unfinished.
+    """
     links = "".join(
-        f'<li><a href="{up}{href}">{label}</a></li>'
-        for href, label in DESTINATIONS)
+        f'<li><a href="{up}{href}"{_current(key, here)}>{label}</a></li>'
+        for key, href, label in DESTINATIONS)
     return f"""<nav class="site-nav">
   <div class="nav-inner">
     <a class="nav-logo" href="{up}index.html">{mark(19)}<span class="nav-word">PROBE</span></a>
     <span class="nav-spacer"></span>
     <ul class="nav-links">{links}</ul>
+    <span class="nav-rule"></span>
     {cmdk_button()}
     <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">{icon("moon", 15)}{icon("sun", 15)}</button>
     {repo_link()}
     <button class="icon-btn nav-menu" data-nav-menu aria-expanded="false"
             aria-controls="nav-sheet" aria-label="메뉴 열기" title="메뉴">{icon("menu", 15)}</button>
   </div>
-  {nav_sheet(up)}
+  {nav_sheet(up, here)}
 </nav>"""
 
