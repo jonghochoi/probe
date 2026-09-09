@@ -18,12 +18,14 @@ on:
     paths:
       - 'analysis/**'
       - 'comparison/**'
+      - 'presentation/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   pull_request:
     paths:
       - 'analysis/**'
       - 'comparison/**'
+      - 'presentation/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:

@@ -6,7 +6,7 @@ import json
 from collections import Counter
 
 from . import components as c
-from . import corpus, glance as glance_mod
+from . import corpus, presentations, glance as glance_mod
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer
 
@@ -318,7 +318,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
   </div>
 </div>
 
-<div class="deck">
+<div class="presentation">
   <aside class="rail" data-rail>
     <p class="rail-h" data-mine-h>서재</p>
     {rail_mine}
@@ -355,7 +355,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
         depth=0,
-        # `semantic.js` ships only when the build was handed an endpoint, so a
+        # `semantic.js` ships only when the build is handed an endpoint, so a
         # default build makes no request and needs no network to be correct.
         scripts=["shelf.js", "filter.js"] + (["semantic.js"] if search_api else []),
         extra_head=f'<link rel="stylesheet" href="{c.asset("assets/index.css")}">',
@@ -701,14 +701,19 @@ def not_found_page() -> str:
 # contributor finds the rule set: 요약 is `analysis/AUTHORING.md` §4, 상세 is
 # §1–§3, and 비교 is a different contract altogether.
 #
-# 비교 is not a third reading of this paper and its label does not pretend to
-# be one: BRIEF and FULL say how much of the paper a surface carries, COMPARED
-# says what happened to it. It is also the one tab that is not always there —
-# it appears only for a paper some comparison holds, and a tab that is empty
-# for most of the corpus is furniture.
+# 비교 and 발표 are not further readings of this paper and their labels do not
+# pretend to be: BRIEF and FULL say how much of the paper a surface carries,
+# COMPARED says what happened to it, and TALK says what it is turned into.
+# They are also the two tabs that are not always there — 비교 appears only for a
+# paper some comparison holds and 발표 only for one some presentation retells, and a tab
+# that is empty for most of the corpus is furniture.
+#
+# 발표 sits last because it is the surface a reader reaches after deciding the
+# paper is worth carrying into a room, which is the decision the first two make.
 TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"),
-        ("cmp", "비교", "COMPARED"))
+        ("cmp", "비교", "COMPARED"), ("presentation", "발표", "TALK"))
 CMP_TAB = "cmp"
+PRESENTATION_TAB = "presentation"
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
@@ -716,7 +721,8 @@ def paper_page(paper: Paper, katex, decisions: dict,
                neighbours: list[Paper] | None = None,
                comparisons: list | None = None,
                papers_by_id: dict | None = None,
-               citers: list[Paper] | None = None) -> str:
+               citers: list[Paper] | None = None,
+               presentation=None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -751,7 +757,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
     comps = comparisons or []
     body = f"""{_header(paper)}
-{_tabstrip(len(comps))}
+{_tabstrip(len(comps), presentation is not None)}
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
   {glance_html or _missing("요약")}
 </div>
@@ -766,6 +772,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
   </div>
 </div>
 {_cmp_panel(paper, comps, by_id)}
+{_presentation_panel(presentation)}
 {c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
@@ -775,7 +782,13 @@ def paper_page(paper: Paper, katex, decisions: dict,
         description=paper.preview,
         body=body,
         depth=2,
-        scripts=["paper.js", "memo.js", "shelf.js"],
+        scripts=(["paper.js", "memo.js", "shelf.js"]
+                 + (["presentation.js"] if presentation else [])),
+        # The presentation's stylesheet rides only the pages that carry one: a slide is
+        # a frame with its own type scale, and no other surface uses a rule of it.
+        extra_head=(
+            f'<link rel="stylesheet" href="{c.asset("../../assets/presentation.css")}">'
+            if presentation else ""),
     )
 
 
@@ -804,19 +817,22 @@ def _acts(paper: Paper) -> str:
 </div>"""
 
 
-def _tabstrip(cmp_n: int = 0) -> str:
+def _tabstrip(cmp_n: int = 0, has_presentation: bool = False) -> str:
     """The tabs. Server-rendered and `hidden`-toggled, so the page is readable
     with JavaScript off — the first panel stays open and the rest are reachable
     by their anchors.
 
-    비교 is printed only when there is something behind it, and it carries the
-    count: the number is the whole reason to look, and a tab that made the
-    reader click to find out it says zero would have spent their click to tell
-    them nothing.
+    비교 and 발표 are printed only when there is something behind them, and 비교
+    carries its count: the number is the whole reason to look, and a tab that
+    made the reader click to find out it says zero would have spent their click
+    to tell them nothing. 발표 carries none — a paper has one presentation or none, and
+    the tab's own presence already says which.
     """
     buttons = []
     for i, (key, label, en) in enumerate(TABS):
         if key == CMP_TAB and not cmp_n:
+            continue
+        if key == PRESENTATION_TAB and not has_presentation:
             continue
         count = (f'<span class="cnt">{cmp_n}</span>' if key == CMP_TAB else "")
         buttons.append(
@@ -924,6 +940,52 @@ def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
     </p>
     <div class="incmp-list">{cards}</div>
   </section>
+</div>"""
+
+
+def _presentation_panel(presentation) -> str:
+    """발표 — the paper retold as a talk, slides and speaker essay together.
+
+    The two are stacked rather than put side by side or behind a toggle: the
+    slide is what a room looks at and the essay is what the presenter says over
+    it, and they are never on screen at the same moment. Reading them in that
+    order on one scroll is how the talk is rehearsed.
+
+    The lead states what the presentation was cut for — how long, for whom, and the one
+    sentence it exists to land. A presentation read without those is a slide dump, and
+    a reader who disagrees with the spine should be able to see that in the
+    first line rather than on slide seven.
+
+    The control bar is printed here and left `hidden`: `presentation.js` unhides it,
+    so a browser with no script never meets a 발표 시작 button that cannot
+    present. It sits outside `.prs-presentation` because presenting takes that element
+    over as the stage, and the control that started it must not be on it — but
+    inside `.prs-stage`, which is what goes fullscreen, so the presenter reaches
+    목록 and 레이저 without leaving the talk to do it.
+    """
+    if presentation is None:
+        return ""
+    return f"""<div class="panel wide" id="p-presentation" role="tabpanel"
+     aria-labelledby="t-presentation" hidden>
+  <div class="prs-stage" data-pres-stage>
+  <div class="prs-bar" data-pres-bar hidden>
+    <button type="button" class="prs-btn" data-pres-start>발표 시작</button>
+    <button type="button" class="prs-btn" data-pres-notes>발표자 노트</button>
+    <button type="button" class="prs-btn" data-stage data-pres-list
+            aria-pressed="false">목록</button>
+    <button type="button" class="prs-btn" data-stage data-pres-laser
+            aria-pressed="false">레이저</button>
+    <span class="prs-zoom" data-stage data-pres-zoom>100%</span>
+    <span class="prs-hint">→ ← 넘김 · O 목록 · L 레이저 · + − 0 확대 · Esc 나가기</span>
+  </div>
+  <div class="prs-presentation" data-pres-of="{c.esc(presentation.paper_id)}">
+    <div class="prs-lead">
+      <p class="prs-spine">{presentations.inline(presentation.spine.replace(" / ", " "))}</p>
+      <p><b>{c.esc(presentation.minutes)}분</b> · {c.esc(presentation.audience)}</p>
+    </div>
+    {presentations.render(presentation)}
+  </div>
+  </div>
 </div>"""
 
 

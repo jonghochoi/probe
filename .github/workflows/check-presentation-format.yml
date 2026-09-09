@@ -1,0 +1,40 @@
+name: Check presentation format
+
+# Verify that presentations follow the output contract in presentation/AUTHORING.md — a panel
+# column whose items carry no second register, a slide with no evidence ribbon,
+# a drawn figure that never says which of the paper's own figures it stands in
+# for, a slide nobody wrote a speaker essay for.
+#
+# It is the half of the contract the site build cannot reach. The build
+# validates what it needs in order to draw a slide; every rule here is one a
+# presentation can break while rendering perfectly, which is exactly how a slide dump
+# gets published. `deploy-site.yml` runs the build itself.
+#
+# Lint-only, no auto-fix: every violation is a judgement the agent (or a human)
+# has to remake — which number a claim rests on, which of two slides making one
+# point survives.
+
+on:
+  pull_request:
+    paths:
+      - 'presentation/**/*.md'
+      - 'linters/check-presentation-format.py'
+      - '.github/workflows/check-presentation-format.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-presentation-format-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check presentations against the output contract
+        run: python3 linters/check-presentation-format.py

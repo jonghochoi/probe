@@ -18,7 +18,7 @@ their `<style>` block.
 | `reading-site.svg` | The reading-site banner |
 | `probe-lost.svg`, `probe-locked.svg` | The two state icons heading the Why-PROBE comparison columns — out of it (dimmed hull, drooping beacon, crossed-out eyes) and on target (clay hull, a beacon under signal arcs, smiling eyes) |
 | `human.svg` | The author bust standing for the human in the *Written by* column of the Who-owns-what table |
-| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg` | The three track icons filling the agent's cells in that same column |
+| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg` | The four track icons filling the agent's cells in that same column |
 | `tagline.svg` (880×88) | The tagline banner closing Why PROBE |
 | `flow.svg` (880×336) | The How-it-works flow diagram — the day's arXiv narrowing through the filter into the mark, out to the two output chips, and back through the human to `context/` |
 | `build-flow.py` | Generates both flow files from one set of coordinates |
@@ -53,7 +53,31 @@ band crossing the hull, the pupils tracking it), `probe-analysis.svg` reads (no
 arcs, one wide page held under the eyes, its lines lighting one after another
 and the pupils down on them), `probe-comparison.svg` weighs (two narrower pages
 riding up and down against each other like the pans of a scale, the raised one's
-lines lit and the eyes turned to it). The moving pages are what tell the
+lines lit and the eyes turned to it), and `probe-presentation.svg` presents (a screen
+standing behind, up and to the right so the character is beside it rather than
+under it, its bands lighting one after another as a talk advances, and one
+listener in front on the left — cut by the bottom edge, the way a front row
+is).
+
+Two things about that icon are worth stating, because both are departures.
+
+**Its outline is what does the work.** At the 22 px a table cell gives these,
+the only thing that survives is the **shape below the face** — one page for the
+read, two with a gap for the weighing, none for the sweep. A tilt, an inner
+rule or a pupil direction is gone at that size, so a fourth track needs a
+fourth outline: here the screen breaks the silhouette upward on the right and
+the listener breaks it downward on the left, and neither is a variation on the
+block the other three share. Nothing hangs under the chin at all, which is what
+makes this one legible beside `probe-analysis.svg` in a column.
+
+**It is the one icon with a second character**, and that is the point rather
+than an exception: reading and weighing are things one character does alone,
+and presenting is not. The listener is `human.svg` scaled — the same head
+radius over the same semicircle torso — rather than a new shape, so the room
+this track speaks to is the same human the flow diagram hands `context/` back
+to. It breathes on that file's own cycle, and only the character bobs: a
+screen that moved with the presenter would read as held rather than stood in
+front of, which is the one thing this icon is not saying. The moving pages are what tell the
 weighing apart from the read at the size a table cell gives them, since the
 pupils and the lit lines do the same thing in both. The lockup reads too — the
 same page, the same lit lines — and what separates it from `probe-analysis.svg`
