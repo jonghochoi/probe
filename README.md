@@ -111,9 +111,14 @@ session.
   `analysis/` for what matters and the arXiv original for every number, then
   lays the paper out as 起承轉結 with a speaker essay under each slide. The
   slide count is what falls out, never a target.
-- **The presentation is a tab, and the tab presents.** 발표 시작 puts one slide on a
-  fullscreen stage — arrow keys, space or a clicker move it — and 발표자 노트
-  opens a second window with the essay, the next slide and a clock.
+- **The presentation is a tab, and the tab is a screen.** One slide at a time
+  with ← → beside it and a deck of act-coloured ticks under it, so the turn is
+  arrived at rather than scrolled past; 발표자 노트 opens the speaker essay
+  under the frame. 발표 시작 puts that same slide on a fullscreen stage — a
+  clicker's keys move it, 목록 lays every slide out, a laser points without
+  advancing — and there the notes are a second window carrying the essay, the
+  next slide and a clock. Every talk the site holds is listed under **발표** in
+  the nav.
 
 <div align="center">
 

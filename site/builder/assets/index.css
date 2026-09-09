@@ -1025,6 +1025,52 @@ html:not(.js) .hub-actions { display: none; }
   padding: .1rem .35rem; font-variant-numeric: tabular-nums;
 }
 
+/* ── 발표 ─────────────────────────────────── */
+
+/* A talk is the one surface someone goes looking for with a room already
+   booked, so a row answers the two questions that decide whether to open it —
+   what it lands, and what it costs — before the paper's own title. */
+.talk-list { display: grid; gap: .55rem; }
+.talk-item {
+  display: grid; gap: .3rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .85rem 1rem;
+  text-decoration: none; color: inherit;
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+}
+.talk-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.talk-h { display: flex; gap: .8rem; align-items: baseline; }
+.talk-t { flex: 1 1 auto; font-size: .95rem; font-weight: 700; line-height: 1.45; }
+.talk-item:hover .talk-t { color: var(--orange-ink); }
+.talk-id {
+  flex: 0 0 auto; font-family: var(--mono); font-size: .68rem;
+  color: var(--text-muted); font-variant-numeric: tabular-nums;
+}
+.talk-spine {
+  font-size: .82rem; line-height: 1.65; color: var(--text-muted);
+  word-break: keep-all;
+}
+.talk-spine b { color: var(--text); font-weight: 700; }
+.talk-spine .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
+/* The talk's own shape — one block per run of a beat, weighted by the slides
+   it holds, in the four colours the site already keeps for four acts. Nothing
+   in it is authored: it is the slide headers, counted. */
+.talk-rail { display: flex; gap: 3px; margin: .2rem 0 .1rem; }
+.talk-rail i { flex: var(--n); height: 4px; border-radius: 2px; background: currentColor; opacity: .5; }
+.talk-item:hover .talk-rail i { opacity: .85; }
+.talk-r1 { color: var(--act1); } .talk-r2 { color: var(--act2); }
+.talk-r3 { color: var(--act3); } .talk-r4 { color: var(--act4); }
+/* The cost in mono and the room in prose, because they are two kinds of fact:
+   14분 · 9장 is read as a number and the audience is read as a sentence. */
+.talk-foot {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .55rem;
+}
+.talk-cost {
+  font-family: var(--mono); font-size: .7rem; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.talk-for { font-size: .76rem; color: var(--text-muted); word-break: keep-all; }
+
 @media (max-width: 900px) {
   /* The rail is the first thing to go: it is a shortcut for the search box,
      which is still there. */

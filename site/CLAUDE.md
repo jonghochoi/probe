@@ -33,7 +33,8 @@ own page, and the comparison links out.
 holds the same line for the same reason: a slide compresses, and the rewrite is
 where the detail it dropped stays reachable. The presentation is a tab on that paper's
 own page rather than a page of its own, so the link back is the page it is
-already on.
+already on — and `t/` is an index of those tabs rather than a second home for
+them: every row it prints links into the paper page it belongs to.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`

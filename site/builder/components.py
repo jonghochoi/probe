@@ -57,6 +57,22 @@ _ICON_PATHS = {
     # path and nothing has to swap markup to answer a click.
     "star": ('<path d="m8 1.9 1.85 3.75 4.15.6-3 2.93.71 4.13L8 11.4l-3.71 '
              '1.91.71-4.13-3-2.93 4.15-.6Z"/>'),
+    # The four presentation controls. A slide deck's controls are the one place on
+    # the site where a label costs more than it carries: the bar sits over a
+    # slide the room is looking at, and 목록 · 레이저 · 나가기 spelled out is
+    # three words of chrome competing with the sentence on screen. So they are
+    # glyphs at the same weight as the rest of the set, and the word survives
+    # in `aria-label` and `title`, where a reader who needs it can still get it.
+    "grid": ('<rect x="2.2" y="2.2" width="5.1" height="5.1" rx="1.2"/>'
+             '<rect x="8.7" y="2.2" width="5.1" height="5.1" rx="1.2"/>'
+             '<rect x="2.2" y="8.7" width="5.1" height="5.1" rx="1.2"/>'
+             '<rect x="8.7" y="8.7" width="5.1" height="5.1" rx="1.2"/>'),
+    # A pointer is an aim rather than a beam: the dot is what the room follows,
+    # and the ticks say it is being held on something.
+    "laser": ('<circle cx="8" cy="8" r="4.5"/><circle cx="8" cy="8" r="1.25"/>'
+              '<path d="M8 1.1v1.7M8 13.2v1.7M1.1 8h1.7M13.2 8h1.7"/>'),
+    "prev": '<path d="M9.9 3.3 5.1 8l4.8 4.7"/>',
+    "next": '<path d="M6.1 3.3 10.9 8l-4.8 4.7"/>',
 }
 
 
@@ -528,8 +544,14 @@ def repo_link() -> str:
 # each sit *under* a destination rather than being one, so `p/<id>/` marks 논문
 # and `c/<slug>/` marks 비교 — the mark answers "which part of the site is
 # this", which is what a reader glancing at a nav is asking.
+#
+# 발표 is the one destination that is an index and nothing else: a presentation is a
+# tab on its paper's page, so the row it lists links back into 논문, and a paper
+# page opened at that tab still marks 논문 — which is the part of the site it
+# is standing in.
 DESTINATIONS = (("papers", "index.html", "논문"),
                 ("compare", "c/index.html", "비교"),
+                ("talk", "t/index.html", "발표"),
                 ("shelf", "shelf/index.html", "서재"))
 
 

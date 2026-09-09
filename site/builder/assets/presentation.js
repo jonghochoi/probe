@@ -1,20 +1,33 @@
 /* 발표 mode — the presentation, one slide at a time, on a screen.
  *
- * The 발표 tab reads as a scroll: every slide with its speaker essay under it,
- * which is what rehearsing and sharing want. Presenting wants the opposite —
- * one slide filling the screen, nothing else on it, and the essay somewhere
- * only the presenter can see. Same markup, two readings, and this file is the
- * switch between them.
+ * One markup, three readings, and this file is the switch between them.
  *
- * Three pieces:
+ *   Unscripted, the tab is the whole talk as a scroll — every slide with its
+ *   essay under it. That is what a browser with no script keeps, and it is
+ *   still the document a reader can print or send.
  *
- *   The stage. `data-presenting` on the presentation hides every slide but one and
- *   drops the essays; `presentation.css` does the rest. Nothing is cloned or rebuilt,
- *   so a slide on the stage is the same element the page already validated.
+ *   `data-browsing` is what a reader gets: one frame held still, ← and → beside
+ *   it, a deck of act-coloured ticks under it, and the speaker essay on
+ *   request. A talk argues in a sequence, and a sequence read by scrolling is
+ *   a document — the reader passes the turn instead of arriving at it.
+ *
+ *   `data-presenting` is the room's: that same frame filling the screen with
+ *   nothing else on it, and the essay in a window only the presenter sees.
+ *
+ * The two flags are never both set. Nothing is cloned or rebuilt in either, so
+ * the slide on the stage is the same element the page already validated.
+ *
+ * Four more pieces:
  *
  *   The keys. → ← Space PageDown PageUp Home End Esc, plus a click on the
  *   right or left half. A presenter's hand is on a clicker that sends PageUp
  *   and PageDown, so those are not an afterthought.
+ *
+ *   The notes toggle. One control, 발표자 노트, meaning "I want the essay" —
+ *   answered by whichever surface the presenter is standing on: under the
+ *   frame in the tab, and in the presenter's window once the talk is on a
+ *   stage. So a talk started with notes on opens the window with it, and the
+ *   stage needs no button of its own for a decision already made.
  *
  *   Three tools for the three things that go wrong in front of a room. 목록 (O)
  *   answers the question that names a slide four beats back. 레이저 (L) points
@@ -30,9 +43,10 @@
  *   the index travels over a `BroadcastChannel` both directions — a presenter
  *   who advances from the notes window moves the stage.
  *
- * Without this file the tab is still the whole presentation, read by scrolling. The
- * control bar the build prints stays `hidden` and no key does anything, which
- * is the site's rule: a control removes itself rather than sitting inert.
+ * Without this file the tab is still the whole presentation, read by scrolling.
+ * The control bar stays `hidden`, the arrows and the deck are drawn only under
+ * `data-browsing` and no key does anything, which is the site's rule: a control
+ * removes itself rather than sitting inert.
  */
 
 (function () {
@@ -46,12 +60,30 @@
   var slides = [].slice.call(presentation.querySelectorAll(".prs-slide"));
   if (!slides.length) return;
 
+  // The paper this talk retells, and the name every message between the stage
+  // and the notes window carries. `data-pres-of` is the attribute the build
+  // prints, so `presOf` is the only spelling that reads it.
+  var of = presentation.dataset.presOf || "";
+  var panel = presentation.closest(".panel");
+  var deck = stage.querySelector("[data-pres-deck]");
   var startBtn = bar.querySelector("[data-pres-start]");
   var notesBtn = bar.querySelector("[data-pres-notes]");
   var listBtn = bar.querySelector("[data-pres-list]");
   var laserBtn = bar.querySelector("[data-pres-laser]");
+  var exitBtn = bar.querySelector("[data-pres-exit]");
   var zoomOut = bar.querySelector("[data-pres-zoom]");
+  var steps = [].slice.call(presentation.querySelectorAll("[data-pres-step]"));
+  var ticks = deck ? [].slice.call(deck.querySelectorAll("[data-pres-go]")) : [];
+  var atEl = deck ? deck.querySelector("[data-pres-at]") : null;
+  // The essay belonging to each slide, by name rather than by position: §6
+  // asks every slide for one, and a presentation that is short an essay is a
+  // presentation missing an essay — not one whose every later slide reads the
+  // wrong one.
+  var essays = slides.map(function (s) {
+    return presentation.querySelector('.prs-script[data-for="' + s.id + '"]');
+  });
   var at = 0;
+  var notesOn = false;
   var notes = null;
   var chan = null;
   var startedAt = 0;
@@ -61,6 +93,7 @@
   var ZMAX = 4;
 
   bar.hidden = false;
+  stage.setAttribute("data-browsing", "");
 
   try {
     chan = new BroadcastChannel("probe-presentation");
@@ -68,7 +101,7 @@
       var d = e.data || {};
       // A notes window that outlived its stage would otherwise drive a presentation it
       // is not showing, so every message names the presentation it belongs to.
-      if (d.presentation !== presentation.dataset.presentationOf) return;
+      if (d.presentation !== of) return;
       if (d.type === "go") show(d.at);
       if (d.type === "who") send();
     };
@@ -79,7 +112,7 @@
   function send() {
     if (!chan) return;
     chan.postMessage({
-      presentation: presentation.dataset.presentationOf, type: "at", at: at,
+      presentation: of, type: "at", at: at,
       total: slides.length, startedAt: startedAt,
     });
   }
@@ -98,20 +131,39 @@
       s.style.removeProperty("--prs-x");
       s.style.removeProperty("--prs-y");
     });
+    essays.forEach(function (e, n) {
+      if (e) e.classList.toggle("prs-on", n === at);
+    });
+    ticks.forEach(function (t, n) {
+      t.setAttribute("aria-current", n === at ? "true" : "false");
+    });
+    if (atEl) atEl.textContent = at + 1;
+    // The arrows go quiet at the ends rather than away: a control that leaves
+    // takes the frame's width with it, and the slide resizes under the reader.
+    steps.forEach(function (b) {
+      b.disabled = +b.dataset.presStep < 0 ? at === 0 : at === slides.length - 1;
+    });
     zoomOut.textContent = "100%";
-    if (!presenting() || listing()) {
-      slides[at].scrollIntoView({ block: listing() ? "nearest" : "center" });
-    }
+    // Nothing scrolls in either single-slide reading — the frame is what holds
+    // still. The overview is the one surface with a list to keep up with.
+    if (listing()) slides[at].scrollIntoView({ block: "nearest" });
     send();
   }
 
   function start() {
+    // The two readings are exclusive: the stage takes the presentation element
+    // over, and a browse template left standing under it would be a layout
+    // nothing on screen was laid out by.
+    stage.removeAttribute("data-browsing");
     stage.setAttribute("data-presenting", "");
     // The root carries the flag too, so the page behind stops scrolling and
     // takes its scrollbar gutter with it — the stage is then the whole width.
     document.documentElement.setAttribute("data-presenting", "");
     startedAt = Date.now();
     show(at);
+    // The decision was made in the tab; the stage only answers it on the
+    // surface a presenter can see from there.
+    if (notesOn) openNotes();
     if (stage.requestFullscreen) {
       // A browser that refuses fullscreen (a permission policy, an older
       // engine) still gets the stage — it just keeps the browser chrome.
@@ -124,6 +176,7 @@
     setLaser(false);
     setZoom(1);
     stage.removeAttribute("data-presenting");
+    stage.setAttribute("data-browsing", "");
     document.documentElement.removeAttribute("data-presenting");
     if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(function () {});
@@ -137,8 +190,19 @@
     if (!document.fullscreenElement && presenting()) stop();
   });
 
-  startBtn.addEventListener("click", function () {
-    presenting() ? stop() : start();
+  startBtn.addEventListener("click", start);
+  exitBtn.addEventListener("click", stop);
+
+  /* ── moving ────────────────────────────────────────────────────────── */
+
+  steps.forEach(function (b) {
+    b.addEventListener("click", function () {
+      show(at + (+b.dataset.presStep || 0));
+    });
+  });
+
+  ticks.forEach(function (t, n) {
+    t.addEventListener("click", function () { show(n); });
   });
 
   /* ── 목록 ──────────────────────────────────────────────────────────── */
@@ -254,6 +318,26 @@
 
   /* ── keys and clicks ───────────────────────────────────────────────── */
 
+  function typing(el) {
+    return !!el && (el.isContentEditable ||
+      /^(input|textarea|select)$/i.test(el.tagName || ""));
+  }
+
+  // In the tab the keys are two, and both are ones nothing else on the page is
+  // listening for: Space and PageDown scroll a document, and the 발표 tab is
+  // one panel of a paper page that still is one. The stage is the surface
+  // where a clicker's keys belong, because there the talk *is* the page.
+  document.addEventListener("keydown", function (e) {
+    if (presenting() || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!stage.hasAttribute("data-browsing")) return;
+    if (panel && panel.hidden) return;
+    if (typing(e.target)) return;
+    if (e.key === "ArrowRight") show(at + 1);
+    else if (e.key === "ArrowLeft") show(at - 1);
+    else return;
+    e.preventDefault();
+  });
+
   document.addEventListener("keydown", function (e) {
     if (!presenting()) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -270,6 +354,10 @@
       setList(!listing());
     } else if (k === "l" || k === "L") {
       setLaser(!lasing());
+    } else if (k === "n" || k === "N") {
+      // The notes control lives in the tab, so this is how a presenter who
+      // changed their mind after starting reaches the window.
+      setNotes(!notesOn);
     } else if (k === "+" || k === "=") {
       setZoom(z.k * 1.25);
     } else if (k === "-" || k === "_") {
@@ -296,21 +384,33 @@
     show(at + (e.clientX < window.innerWidth / 2 ? -1 : 1));
   });
 
-  notesBtn.addEventListener("click", function () {
-    openNotes();
-  });
+  /* ── the notes ────────────────────────────────────────────────────── */
 
-  /* ── the notes window ─────────────────────────────────────────────── */
+  /* One request — "I want the essay" — answered by whichever surface the
+     presenter is standing on. In the tab it is the essay under the frame, the
+     one belonging to the slide on screen; on the stage the frame is the whole
+     screen and there is nowhere to put it, so it is the second window. The
+     button is therefore a state rather than an action, and starting a talk
+     with it on opens the window with the talk. */
+  function setNotes(on) {
+    notesOn = on;
+    stage.toggleAttribute("data-notes", on);
+    notesBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (on && presenting()) openNotes();
+    if (!on && notes && !notes.closed) notes.close();
+  }
+
+  notesBtn.addEventListener("click", function () { setNotes(!notesOn); });
 
   function openNotes() {
     if (notes && !notes.closed) { notes.focus(); return; }
     notes = window.open("", "probe-presentation-notes",
                         "width=620,height=780,menubar=no,toolbar=no");
-    if (!notes) {                      // popup blocked — say so where it was asked
-      notesBtn.textContent = "팝업이 막혀 있습니다";
-      return;
-    }
-    notes.document.write(NOTES_HTML.replace("__PRESENTATION__", presentation.dataset.presentationOf));
+    // A blocked popup is the browser's own message to give, and it gives one.
+    // Nothing here can improve on it: the control that would carry a second
+    // one is off the stage the presenter is standing on.
+    if (!notes) return;
+    notes.document.write(NOTES_HTML.replace("__PRESENTATION__", of));
     notes.document.close();
   }
 
@@ -362,20 +462,21 @@
     'var c=null;try{c=new BroadcastChannel("probe-presentation")}catch(e){}',
     'function slides(){try{return [].slice.call(',
     '  opener.document.querySelectorAll(".prs-presentation .prs-slide"))}catch(e){return []}}',
-    'function scripts(){try{return [].slice.call(',
-    '  opener.document.querySelectorAll(".prs-presentation .prs-script"))}catch(e){return []}}',
+    'function essay(s){try{return opener.document.querySelector(',
+    '  ".prs-presentation .prs-script[data-for=" + JSON.stringify(s.id) + "]")}',
+    ' catch(e){return null}}',
     'function txt(el){if(!el)return "";var c=el.cloneNode(true);',
     ' [].forEach.call(c.querySelectorAll("br"),function(b){',
     '   b.parentNode.replaceChild(document.createTextNode(" "),b)});',
     ' return c.textContent.trim()}',
     'function paint(){',
-    ' var ss=slides(),sc=scripts(),s=ss[at];if(!s)return;',
+    ' var ss=slides(),s=ss[at];if(!s)return;',
     ' var h=s.querySelector("h3")||s.querySelector(".prs-say");',
     ' document.getElementById("n").textContent=(at+1)+" / "+ss.length+"  ·  "+',
     '   (s.dataset.act||"")+" · "+txt(s.querySelector(".prs-act"));',
     ' document.getElementById("title").textContent=txt(h);',
     ' var body=document.getElementById("script");body.innerHTML="";',
-    ' var e=sc[at];',
+    ' var e=essay(s);',
     ' if(e){[].forEach.call(e.querySelectorAll("p"),function(p){',
     '   body.appendChild(document.importNode(p,true))})}',
     ' else{body.innerHTML="<p style=\\"color:#7d6c62\\">이 슬라이드에는 발표 에세이가 없습니다.</p>"}',
