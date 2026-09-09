@@ -85,19 +85,6 @@
    is live. This one is the same pair for the reader who has no filter bar
    because the page is unscripted, so it leaves as soon as the script arrives. */
 html.js .mast-count { display: none; }
-/* The sentence 비교 and 서재 hand their drawing. It is printed only where the
-   drawing cannot go — the band drops the art below 860px — so the two surfaces
-   never say the same thing twice, and a screen too narrow for the picture
-   still gets what the picture was for. Korean breaks between any two
-   syllables, so a sentence splits "논문" down the middle the moment it stops
-   fitting on one line: `keep-all` moves the break to a space, and `pretty`
-   spends the last two lines keeping a lone word off a line of its own. */
-.mast-sub {
-  display: none;
-  font-size: .9rem; line-height: 1.7; color: var(--text-muted);
-  max-width: 66ch; margin-top: .55rem;
-  word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty;
-}
 /* ── The landing's masthead diagram ───────────────────────────────────── */
 /* What this page holds, drawn: a scan crosses originals that stay shut and
    lifts four pieces out of them, the four wait in a rack over the mark, and
@@ -1228,8 +1215,6 @@ html:not(.js) .hub-actions { display: none; }
 @media (max-width: 860px) {
   .mast .mast-inner { grid-template-columns: minmax(0, 1fr); }
   .mast-art { display: none; }
-  /* What the drawing was saying, said in words instead. */
-  .mast-sub { display: block; }
 }
 @media (max-width: 680px) {
   /* The bar is two lines on a phone: the search box takes one on its own, and
