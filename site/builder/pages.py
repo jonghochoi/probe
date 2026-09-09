@@ -948,26 +948,36 @@ def _presentation_panel(presentation) -> str:
 
     The speaker essay goes with the slide it belongs to rather than under it:
     the slide is what the room looks at and the essay is what the presenter
-    says over it, and the two are never on screen at the same moment. 발표자
-    노트 is what asks for it — inline under the frame while the tab is being
-    read, and the second window once the talk is on a stage, because those are
-    the same request answered by whichever surface the presenter is standing
-    on.
+    says over it, and the two are never on screen at the same moment. 노트 is
+    what asks for it — inline under the frame while the tab is being read, and
+    the second window once the talk is on a stage, because those are the same
+    request answered by whichever surface the presenter is standing on.
 
-    The bar is printed here and left `hidden`: `presentation.js` unhides it, so
-    a browser with no script never meets a 발표 시작 button that cannot present
-    — and what it keeps is every slide with its essay under it, which is the
-    talk read as a document. It sits outside `.prs-presentation` because
-    presenting takes that element over as the stage, and the control that
-    started it must not be on it — but inside `.prs-stage`, which is what goes
-    fullscreen, so the presenter reaches 목록 and 레이저 without leaving the
-    talk to do it.
+    The frame stands off the page rather than sitting on it, and every control
+    it has stands on one band above it — the arrows at the left end, 노트 and
+    전체 화면 at the right, moving on one side and acting on the other. Beside
+    the frame the arrows would take a sixth of a phone's width and a column of
+    a laptop's from the one element here that cannot spare either; on the band
+    they take a strip that was half empty. They are glyphs there for the same
+    reason the stage's three are: a word beside a slide is a word competing
+    with the sentence on it.
 
-    The arrows and the deck go the other way, inside: they are grid items of
-    the presentation, which is what puts them level with the frame — the arrows
-    beside it whatever the notes toggle has opened underneath, and the deck
-    ruled to the frame's own width rather than to the panel's. The stage drops
-    them with everything else that is not a slide.
+    `.prs-tools` is a grid item of the presentation at the slide's own area, so
+    the band is ruled to the frame and not to the panel — and the stage, which
+    takes the presentation over and drops everything that is not a slide, drops
+    it without being told. It carries no `hidden`: the band is drawn under
+    `data-browsing`, which only `presentation.js` sets, so a browser with no
+    script never meets a 전체 화면 button that cannot present. What it keeps is
+    every slide with its essay under it, which is the talk read as a document.
+
+    The bar is the stage's alone — 목록, 레이저, the zoom readout and the way
+    out, none of which mean anything off the stage. It sits outside
+    `.prs-presentation`, because presenting takes that element over, but inside
+    `.prs-stage`, which is what goes fullscreen, so the presenter reaches those
+    controls without leaving the talk to do it.
+
+    The deck is a grid item too, which is what rules it to the frame's own
+    width rather than to the panel's.
     """
     if presentation is None:
         return ""
@@ -975,27 +985,33 @@ def _presentation_panel(presentation) -> str:
     return f"""<div class="panel wide" id="p-presentation" role="tabpanel"
      aria-labelledby="t-presentation" hidden>
   <div class="prs-stage" data-pres-stage>
-  <div class="prs-bar" data-pres-bar hidden>
-    <button type="button" class="prs-btn" data-off-stage data-pres-start>발표 시작</button>
-    <button type="button" class="prs-btn" data-off-stage data-pres-notes
-            aria-pressed="false">발표자 노트</button>
-    <button type="button" class="prs-ico" data-stage data-pres-list
+  <div class="prs-bar" data-pres-bar>
+    <button type="button" class="prs-ico" data-pres-list
             aria-pressed="false" aria-label="슬라이드 목록"
             title="슬라이드 목록 (O)">{c.icon("grid", 15)}</button>
-    <button type="button" class="prs-ico" data-stage data-pres-laser
+    <button type="button" class="prs-ico" data-pres-laser
             aria-pressed="false" aria-label="레이저 포인터"
             title="레이저 포인터 (L)">{c.icon("laser", 15)}</button>
-    <span class="prs-zoom" data-stage data-pres-zoom>100%</span>
-    <span class="prs-sep" data-stage aria-hidden="true"></span>
-    <button type="button" class="prs-ico" data-stage data-pres-exit
+    <span class="prs-zoom" data-pres-zoom>100%</span>
+    <span class="prs-sep" aria-hidden="true"></span>
+    <button type="button" class="prs-ico" data-pres-exit
             aria-label="발표 끝내기" title="발표 끝내기 (Esc)">{c.icon("close", 15)}</button>
   </div>
   <div class="prs-presentation" data-pres-of="{c.esc(presentation.paper_id)}">
-    <button type="button" class="prs-arrow prs-prev" data-pres-step="-1"
-            aria-label="이전 슬라이드">{c.icon("prev", 20)}</button>
+    <div class="prs-tools">
+      <span class="prs-move">
+        <button type="button" class="prs-arrow" data-pres-step="-1"
+                aria-label="이전 슬라이드">{c.icon("prev", 16)}</button>
+        <button type="button" class="prs-arrow" data-pres-step="1"
+                aria-label="다음 슬라이드">{c.icon("next", 16)}</button>
+      </span>
+      <button type="button" class="prs-ico" data-pres-notes
+              aria-pressed="false" aria-label="노트"
+              title="노트">{c.icon("note", 15)}</button>
+      <button type="button" class="prs-ico" data-pres-start
+              aria-label="전체 화면" title="전체 화면">{c.icon("expand", 15)}</button>
+    </div>
     {presentations.render(presentation)}
-    <button type="button" class="prs-arrow prs-next" data-pres-step="1"
-            aria-label="다음 슬라이드">{c.icon("next", 20)}</button>
     {presentations.deck(presentation)}
   </div>
   </div>
