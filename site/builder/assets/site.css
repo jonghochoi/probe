@@ -1696,6 +1696,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .fork-trunk {
   flex: 0 0 auto; width: 17rem; text-align: right;
+  display: flex; align-items: center; justify-content: flex-end; gap: .5rem;
   font-size: .74rem; line-height: 1.35; color: var(--text-muted);
   /* Korean breaks between characters by default, which strands a syllable of
      the last word alone on a line; `balance` then evens the two lines a
@@ -1704,10 +1705,20 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
      which is the reading neither property can produce on its own. */
   word-break: keep-all; text-wrap: balance;
 }
-/* The label is for the stacked layout only. Beside the bracket, the trunk is
-   already the line every branch leaves — a word saying so sits against the
-   bracket and reads as attached to it rather than as a heading over the text. */
-.fork-l { display: none; }
+/* The one word that names what the trunk is. It takes the accent rather than a
+   step of the neutral ramp because it is a marker, not content: on the ink
+   scale it would either read as the sentence's first word (at `--text-muted`,
+   the trunk's own colour) or outrank the stances it introduces (at `--text`).
+   Off that scale, it reads as a label and the eye skips it once learned.
+   It does not collide with `.is-self`, the other accented thing here: that
+   marks a branch and moves from card to card, while this sits in the trunk on
+   every card as the same fixed word.
+   No `--mono` and no `text-transform`: neither reaches Hangul, and a
+   declaration that does nothing is one a reader has to disprove. */
+.fork-l {
+  flex: 0 0 auto; font-size: .66rem; font-weight: 700; letter-spacing: .08em;
+  color: var(--orange-ink); white-space: nowrap;
+}
 /* `currentColor` on the path, so the bracket is one declaration here rather
    than a stroke repeated in every generated <svg>. */
 .fork-br { flex: 0 0 auto; color: var(--amber-soft); display: block; }
@@ -1724,22 +1735,20 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-family: var(--mono); font-size: .64rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+/* The stance is what the fork exists to show, so it takes the body ink and
+   separates from the alias beside it by weight rather than colour. Left muted,
+   it reads at the same level as the arXiv id next to it — reference weight for
+   the payload — and `--text-muted` ends up carrying four roles on one card. */
 .fork-s {
-  font-size: .78rem; color: var(--text-muted);
+  font-size: .78rem; color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 @media (max-width: 720px) {
   /* The bracket is the one part that cannot fold: it is drawn to a row height
      the stacked layout no longer has. A left rule says the same thing. */
   .fork { flex-direction: column; align-items: stretch; gap: .4rem; }
-  .fork-trunk { width: auto; text-align: left; }
+  .fork-trunk { width: auto; text-align: left; justify-content: flex-start; }
   .fork-br { display: none; }
-  /* Stacked, the trunk is a line of text above other lines of text, so the
-     label is what still separates it from them. */
-  .fork-l {
-    display: block; font-family: var(--mono); font-size: .58rem; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase; margin-bottom: .1rem;
-  }
   .fork-branches {
     grid-template-columns: max-content minmax(0, 1fr); grid-auto-rows: auto;
     row-gap: .15rem; padding-left: .6rem;
