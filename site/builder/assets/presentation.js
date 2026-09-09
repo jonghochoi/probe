@@ -237,10 +237,17 @@
       dot = document.createElement("div");
       dot.className = "prs-dot";
       dot.style.left = "-100px";
-      laser.addEventListener("mousemove", function (e) {
+      // Pointer events rather than mouse ones, because a touch screen sends a
+      // compatibility `mousemove` once the finger has already left: a dot that
+      // only ever arrives on contact points where the presenter has stopped
+      // pointing. `pointerdown` is listened for alongside the move because a
+      // press that never travels is still a presenter saying "there".
+      var track = function (e) {
         dot.style.left = e.clientX + "px";
         dot.style.top = e.clientY + "px";
-      });
+      };
+      laser.addEventListener("pointerdown", track);
+      laser.addEventListener("pointermove", track);
       laser.addEventListener("click", function (e) {
         e.stopPropagation(); e.preventDefault();
       });

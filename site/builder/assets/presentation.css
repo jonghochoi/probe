@@ -597,6 +597,7 @@
 /* The readout is a control-sized cell rather than a run of text, so it sits on
    the buttons' own centre line instead of on a baseline they do not share. */
 .prs-zoom {
+  display: inline-flex;
   min-width: 3.1em; height: 30px; align-items: center; justify-content: center;
   font-family: var(--mono); font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
@@ -824,7 +825,13 @@
 
 /* The overlay is what makes the pointer usable: it takes the click, so
    pointing at a number does not advance past the slide the number is on. */
-.prs-laser { position: fixed; inset: 0; z-index: 61; cursor: none; }
+/* `touch-action: none` is what makes the overlay a pointer surface on a touch
+   screen and not a thing to scroll: without it the browser claims the drag as
+   a gesture and cancels the pointer, so the dot lands where the finger went
+   down and then stops following it. */
+.prs-laser {
+  position: fixed; inset: 0; z-index: 61; cursor: none; touch-action: none;
+}
 .prs-dot {
   position: fixed; width: 22px; height: 22px; margin: -11px 0 0 -11px;
   border-radius: 50%; pointer-events: none; z-index: 63;
