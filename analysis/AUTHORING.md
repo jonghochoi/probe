@@ -51,6 +51,7 @@ other source, so a missing field is a hole on the landing page.
 ---
 analysis_of: <arxiv-id>          # MUST equal the file name
 title: "<the paper's own title, verbatim>"
+alias: <the paper's own name for its method>   # optional — omit rather than invent
 tagline: <one line: what this paper does>
 authors: <first authors et al. (affiliation)>
 pillars: P<a>, P<b>              # ours — most relevant first; the site files it under two
@@ -74,6 +75,7 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 |---|---|
 | `analysis_of` | must equal the file name — **mismatch fails the build**. This catches the copy-paste that lands a rewrite under the wrong id |
 | `title` | required. The paper's title, as the card and the page header print it |
+| `alias` | **optional.** The paper's own codename — what a surface that has no room for a title calls it, so a reader sees `T-Rex` where an id says nothing. `comparison/` names every compared paper by it (`comparison/AUTHORING.md` §2-1), and it is the `(<alias>)` a rewrite's commit subject carries. Resolved in this order: **(1)** the prefix before the first colon in the paper's own title (`T-Rex`, `Being-H0.7`); **(2)** failing a colon, an acronym the paper defines for itself as `ACRONYM (Full Expansion)` in the title, abstract or intro, whose expansion initials spell the acronym (`Human Universal Grasping` → `HUG`); **(3)** failing both, the name the authors give their own method in the paper's own prose — introduced as "we propose X" / "we call it X" / "our X" and used as the method's designator from there on, **even when the paper never expands it** (`DQ-RISE`). Rung 3 qualifies only if it reads as a proper name — capitals, digits or a hyphenated compound, not a descriptive noun phrase — so "our quantized hand state policy" yields nothing. **(4)** Otherwise **omit the key**: a plain descriptive title whose method is never given a name of its own gets no alias, and one is never invented. Under 24 characters |
 | `tagline` | required. **One line naming what the paper does**, printed under the body H1 and under the title on the landing page. The H1 is our thesis and often a metaphor, so on its own it does not tell a reader which paper they opened; the header prints the paper's own title. This is the sentence between them. **It never restates the paper's name** — `<코드명> — <무엇을 하는가>` printed under a title that already reads `<코드명>: <…>` spends the one line the tagline has on the word directly above it. Open with what the paper does, not with the codename; **the build reports the echo** |
 | `summary` | required. 2–3 sentences, read cold. Printed **on the page** as the `한 문단 요약` block between the thesis line and act 1, and flattened for the landing card. Authored as markdown — `**강조**` and `` $`math`$ `` render on the page and are stripped for the card, so bold the three or four phrases that carry the argument (§3-2 applies) |
 | `authors` | one line, as printed |
@@ -862,7 +864,7 @@ the page — so a rule is enforced against the artifact a reader actually gets.
 
 | Rule | Enforced by |
 |---|---|
-| Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title (§1), `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
+| Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title and `alias:` within its width (§1), `appendix:` present (R15), `figures:` ↔ the body's `probe-figure` fences (R6) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split, parts (incl. its all-or-none `state` and the four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
