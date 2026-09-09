@@ -3,6 +3,8 @@ compares: [2603.10158, 2606.10683, 2608.14028]
 sources: [2603.10158v1, 2606.10683v2, 2608.14028v1]
 title: "손이 여러 개일 때 관절 벡터를 무엇으로 바꿔 끼우나"
 tagline: 잠재 벡터로 묶거나, 토큰으로 접거나, 표를 그려 꽂거나 — 세 방식이 갈리는 자리와, 셋 다 손대지 않는 자리
+stances: [잠재 벡터로 묶는다, 토큰으로 접는다, 표를 그려 꽂는다]
+common: 셋 다 손가락 대응은 사람이 정한다
 pillars: P1, P4
 tags: [action-space, cross-embodiment, dexterous-hand, retargeting]
 generated: 2026-08-21 15:10

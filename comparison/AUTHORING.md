@@ -46,6 +46,8 @@ compares: [2603.10158, 2606.10683, 2608.14028]
 sources: [2603.10158v2, 2606.10683v1, 2608.14028v1]
 title: "손이 여러 개일 때 행동 공간을 하나로 만드는 세 가지 방법"
 tagline: 배우게 할 것인가, 토큰으로 자를 것인가, 손으로 배정할 것인가
+stances: [잠재 벡터로 묶는다, 토큰으로 접는다, 표를 그려 꽂는다]
+common: 셋 다 손대지 않는 자리가 있다
 pillars: P1, P4
 tags: [action-space, cross-embodiment, retargeting]
 generated: 2026-08-21 14:30
@@ -60,11 +62,30 @@ summary: >
 | `sources` | The arXiv edition actually read, `<id>v<n>`, **one per entry of `compares`, in the same order**. Which version was read is the one fact a comparison cannot recover later, and pairing it positionally means neither list can drift without the other noticing |
 | `title` | The comparison's **question**, not a list of the papers' names. The cards below the header already name them |
 | `tagline` | One line: what reading these together tells you |
+| `stances` | **One per entry of `compares`, in the same order** — what that paper does about the question, in 20 characters or fewer (`끝까지 푼다`, `토큰으로 접는다`). The divergence in its shortest form. Positional like `sources`, so neither list can drift without the other noticing. A stance that needs a clause of mechanism to land is not a stance — that clause belongs in a `probe-matrix` cell |
+| `common` | One line, 30 characters or fewer: **the commitment all of them share** (`셋 다 이미지 평면에서 끝낸다`). Required, for the reason act 2 is load-bearing (§2-3) — papers that share nothing cannot diverge, and a comparison that cannot state the shared commitment in one line has not found it yet |
 | `pillars` | Ours, comma-separated. Which pillars this question sits in |
 | `tags` | Free vocabulary, same as `analysis/` |
 | `generated` | `YYYY-MM-DD HH:MM` — the clock as you write |
 | `generator` | Literal `compare/v1` |
 | `summary` | 2–3 sentences read cold. Markdown and `` $`math`$ `` render |
+
+**Two registers, one thought.** `tagline` is prose and prints on the
+comparison's own page, under the H1. `stances` and `common` are the same claim
+as structure: the index card draws them as a fork — a branch per paper for what
+it does, the trunk for what they all accept. A branch carries that paper's
+`alias:` (`analysis/AUTHORING.md` §1) **and its arXiv id**: the alias is what a
+reader recognises, and the id is what they search, cite and type — a card that
+drops it makes the reader open the comparison to recover a number the list
+already had. A paper that resolves to no alias shows the id alone, which is why
+the alias is optional there and the id is not. The card prints the fork
+**instead of** the tagline, because the two carry one thought and printing both
+is the same sentence twice on one card.
+
+Writing `common` is the check, not the caption. Three stances that leave no
+trunk are three papers that are merely different (§2-3), and the moment you
+cannot fill this key in one line is the moment to ask whether these are the
+right two or three papers.
 
 `analysis/` keys that are deliberately **absent**: `figures` · `appendix` ·
 `terms` · `metric` · `published` · `authors` · `links`. Each declares something
@@ -203,7 +224,7 @@ Each row is a hard failure under `--strict`, which is how pull requests build.
 
 | Rule | Enforced by |
 |---|---|
-| A compared paper with no rewrite (§1) — **not published**; `compares` count and duplicates; `sources` present, parallel and in step; `title` / `tagline` / `summary`; `generated` format; the file name is a slug | `site/builder/comparisons.py` |
+| A compared paper with no rewrite (§1) — **not published**; `compares` count and duplicates; `sources` present, parallel and in step; `stances` present, parallel and within its width; `common` present and within its; `title` / `tagline` / `summary`; `generated` format; the file name is a slug | `site/builder/comparisons.py` |
 | `probe-matrix` payload — axis count, `k`, a cell per paper, `of` known and unique, `v` present (§3) | `site/builder/mdext/probefence.py` |
 | At least one `probe-matrix`; the length ceiling; an unavailable fence in a comparison; `probe-matrix` in a rewrite (§2-4, §2-5) | `site/builder/render.py` |
 | Term anchor ↔ definition pairing, unclosed `**`, math published as literal text | `site/builder/render.py`, shared with `analysis/` |

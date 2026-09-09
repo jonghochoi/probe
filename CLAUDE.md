@@ -135,21 +135,9 @@ analysis: add <arxiv-id> rewrite (<alias>)
 ```
 
 `update` replaces `add` when redoing an existing rewrite or comparison. The
-trailing `(<alias>)` is the paper's codename, resolved in priority order:
-
-1. The prefix before the first colon in the paper's own title (`LaST-HD`,
-   `Being-H0.7`, `T-Rex`).
-2. Failing a colon, an acronym the paper explicitly defines for itself as
-   `ACRONYM (Full Expansion)` in the title / abstract / intro, whose expansion
-   initials spell the acronym (`Human Universal Grasping` → `HUG`).
-3. Failing both, the name the authors give their own method in the paper's own
-   prose — introduced as "we propose X" / "we call it X" / "our X" and used as
-   the method's designator from there on — **even when the paper never expands
-   it** (`DQ-RISE`). It qualifies only if it reads as a proper name: capitals,
-   digits or a hyphenated compound, not a descriptive noun phrase, so "our
-   quantized hand state policy" yields nothing.
-4. Otherwise omitted — a plain descriptive title whose method is never given a
-   name of its own gets no alias, and one is never invented.
+trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
+resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that resolves to no
+alias there carries none here either, and the subject ends at `rewrite`.
 
 ### Body
 

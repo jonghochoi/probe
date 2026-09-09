@@ -36,6 +36,10 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SOURCE_RE = re.compile(r"^(\d{4}\.\d{4,5})v(\d+)$")
 
 COMPARE_MIN, COMPARE_MAX = 2, 3
+# A stance is a branch label and `common` the trunk it leaves — both are read at
+# a glance in a list, not down a page, so the ceilings are the width that keeps
+# them on one line rather than a stylistic preference.
+STANCE_MAX, COMMON_MAX = 20, 30
 
 
 @dataclass
@@ -60,6 +64,16 @@ class Comparison:
     @property
     def sources(self) -> list[str]:
         return frontmatter.as_list(self.front.get("sources", ""))
+
+    @property
+    def stances(self) -> list[str]:
+        """What each compared paper does about the question, in `compares` order."""
+        return frontmatter.as_list(self.front.get("stances", ""))
+
+    @property
+    def common(self) -> str:
+        """The commitment all of them share — the trunk the stances leave."""
+        return self.front.get("common", "").strip()
 
     @property
     def pillars(self) -> list[str]:
@@ -154,6 +168,7 @@ def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
             continue
 
         problems += _check_sources(name, ids, comp.sources)
+        problems += _check_fork(name, ids, comp.stances, comp.common)
         for required in ("title", "tagline", "summary"):
             if not front.get(required):
                 problems.append(f"comparison/{name}: missing `{required}`")
@@ -196,6 +211,54 @@ def _check_sources(name: str, ids: list[str], sources: list[str]) -> list[str]:
                 f"comparison/{name}: `sources` is out of step with `compares` — "
                 f"{src!r} sits where {pid} does"
             )
+    return problems
+
+
+def _check_fork(name: str, ids: list[str], stances: list[str], common: str) -> list[str]:
+    """`stances` is one line per compared paper; `common` is the one they share.
+
+    The index card draws these as a fork, so a comparison missing either one
+    renders as a card that names a question and then says nothing about it.
+    Both are reported rather than skipped: the comparison's own page is whole
+    without them, and it is the list that goes quiet.
+
+    `stances` pairs positionally with `compares`, like `sources` — the third
+    branch and the third `probe-matrix` column are the same paper, and a count
+    that drifts is the one way that can silently stop being true.
+    """
+    problems = []
+    if not stances:
+        problems.append(
+            f"comparison/{name}: missing `stances` — what each paper does about "
+            f"the question, one per entry of `compares`, in the same order"
+        )
+    elif len(stances) != len(ids):
+        problems.append(
+            f"comparison/{name}: `stances` has {len(stances)} entries for "
+            f"{len(ids)} papers — one per compared paper, in `compares` order"
+        )
+    else:
+        for pid, stance in zip(ids, stances):
+            if len(stance) > STANCE_MAX:
+                problems.append(
+                    f"comparison/{name}: the stance for {pid} is {len(stance)} "
+                    f"chars — keep it to {STANCE_MAX}. One that needs a clause of "
+                    f"mechanism to land is not a stance; that clause is a "
+                    f"`probe-matrix` cell"
+                )
+    if not common:
+        # Act 2 is the act most often skipped, and this is the key that catches
+        # the skip: three stances that leave no trunk are three papers that are
+        # merely different rather than diverging.
+        problems.append(
+            f"comparison/{name}: missing `common` — the commitment all "
+            f"{len(ids)} share, in one line"
+        )
+    elif len(common) > COMMON_MAX:
+        problems.append(
+            f"comparison/{name}: `common` is {len(common)} chars — keep it to "
+            f"{COMMON_MAX}. It prints as the trunk of a fork, on one line"
+        )
     return problems
 
 

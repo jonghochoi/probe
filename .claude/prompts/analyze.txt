@@ -190,11 +190,9 @@ PROCEDURE
 
 9. COMMIT — one paper per commit:
        analysis: add <arxiv-id> rewrite (<alias>)
-   `update` instead of `add` when redoing an existing one. `<alias>` resolves
-   exactly as in CLAUDE.md's commit rules: the codename before the first colon
-   in the title, else a self-defined acronym, else the proper name the authors
-   give their own method in prose (unexpanded is fine), else omitted. Never
-   invent one.
+   `update` instead of `add` when redoing an existing one. `<alias>` is the
+   `alias:` you wrote in front matter — copy it, do not re-derive it. A paper
+   that resolved to no alias carries none: the subject ends at `rewrite`.
 
    Stage `analysis/<id>.md` and nothing else.
 

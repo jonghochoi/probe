@@ -46,6 +46,7 @@ def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
 # A `metric:` longer than this stops being a value and becomes a sentence — it
 # is printed inside a chip on a card, so it has to survive at one line.
 METRIC_MAX = 40
+ALIAS_MAX = 24
 
 # Pillar names mirror context/MASTER.md §4. This dict is the pillar set for the
 # whole build: the display order is its declaration order and the id pattern is
@@ -298,6 +299,18 @@ class Paper:
             if spec and url.strip():
                 ranked.append((spec[1], key, spec[0], url.strip()))
         return [(kind, label, url) for _, kind, label, url in sorted(ranked)]
+
+    @property
+    def alias(self) -> str:
+        """The paper's own codename, for a surface with no room for a title.
+
+        A comparison's fork names each branch by this, beside the arXiv id.
+        Optional, and empty is a real answer rather than a gap: a paper whose
+        method the authors never name gets no alias and is shown by its id
+        alone, which is what `analysis/AUTHORING.md` §1 rung 4 refuses to let
+        anyone invent their way out of.
+        """
+        return self.front.get("alias", "").strip()
 
     @property
     def metric(self) -> str:
@@ -595,6 +608,13 @@ def discover() -> tuple[list[Paper], list[str]]:
             problems.append(
                 f"analysis/{path.name}: `metric` is {len(paper.metric)} chars — "
                 f"keep it under {METRIC_MAX}, it prints inside a chip"
+            )
+        if len(paper.alias) >= ALIAS_MAX:
+            problems.append(
+                f"analysis/{path.name}: `alias` is {len(paper.alias)} chars — "
+                f"keep it under {ALIAS_MAX}. A name that long is the title, and "
+                f"the surfaces that print an alias print it where a title does "
+                f"not fit"
             )
         papers.append(paper)
 

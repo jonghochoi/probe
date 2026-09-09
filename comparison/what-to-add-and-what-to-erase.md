@@ -3,6 +3,8 @@ compares: [2412.10345, 2605.22183, 2608.13422]
 sources: [2412.10345v3, 2605.22183v3, 2608.13422v1]
 title: "관찰 한 장을 고쳐 쓴다면 무엇을 더하고 무엇을 지울 것인가"
 tagline: 과거를 그리거나, 미래를 찍거나, 지금 볼 곳만 남기거나 — 셋 다 이미지 평면에서 끝낸다
+stances: [과거를 그린다, 미래를 찍는다, 지금 볼 곳만 남긴다]
+common: 셋 다 3D 재료를 쥐고 답은 2D 에 적는다
 pillars: P2, P4
 tags: [observation-design, visual-prompting, roi-crop, spatial-grounding, frozen-backbone, annotation-free]
 generated: 2026-08-27 13:02

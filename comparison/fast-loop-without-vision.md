@@ -3,6 +3,8 @@ compares: [2606.17055, 2607.07287, 2608.01824]
 sources: [2606.17055v2, 2607.07287v2, 2608.01824v2]
 title: "촉각 루프가 눈을 감은 채 행동 청크에 무엇을 할 수 있나"
 tagline: 끝까지 풀거나, 더하거나, 다시 만들거나 — 셋 다 같은 대가를 치르고 서로 다른 권한을 산다
+stances: [끝까지 푼다, 더한다, 다시 만든다]
+common: 셋 다 빠른 루프에서 시각을 끊는다
 pillars: P1, P2
 tags: [tactile, contact-rich, dexterous-hand, vla-arch, asynchronous, flow-matching]
 generated: 2026-08-21 16:59

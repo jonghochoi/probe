@@ -3,6 +3,8 @@ compares: [2608.25798, 2607.26055]
 sources: [2608.25798v1, 2607.26055v1]
 title: "행동 청크가 실행되는 동안 다시 읽어야 하는 신호는 무엇인가"
 tagline: 촉각을 다시 읽고 볼 자격을 제한하거나, 힘을 매 tick 다시 읽고 시각을 낡게 두거나
+stances: [손끝 촉각을 다시 읽는다, 고유수용을 매 tick 읽는다]
+common: 둘 다 시각의 낡음을 고치지 않고 배분한다
 pillars: P1, P2
 tags: [flow-matching, streaming, tactile, force, vla-arch, latency, contact-rich]
 generated: 2026-08-28 09:34
