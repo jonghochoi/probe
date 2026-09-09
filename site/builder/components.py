@@ -66,12 +66,20 @@ _ICON_PATHS = {
     # it from `currentColor` on the pressed button, so on and off are the same
     # path and nothing has to swap markup to answer a click.
     "star": f'<path d="{_STAR_D}"/>',
-    # The four presentation controls. A slide deck's controls are the one place on
-    # the site where a label costs more than it carries: the bar sits over a
-    # slide the room is looking at, and 목록 · 레이저 · 나가기 spelled out is
-    # three words of chrome competing with the sentence on screen. So they are
-    # glyphs at the same weight as the rest of the set, and the word survives
-    # in `aria-label` and `title`, where a reader who needs it can still get it.
+    # The presentation controls. A slide deck's controls are the one place on
+    # the site where a label costs more than it carries: every one of them sits
+    # on the frame a room is looking at, and 전체 화면 · 노트 · 목록 · 레이저 ·
+    # 나가기 spelled out is five words of chrome competing with the sentence on
+    # screen. So they are glyphs at the same weight as the rest of the set, and
+    # the word survives in `aria-label` and `title`, where a reader who needs it
+    # can still get it.
+    # Four corners pulling apart, which is the shape of the thing the button
+    # does: the frame stops being a card on a page and becomes the screen.
+    "expand": '<path d="M6 2.3H2.3V6M10 2.3h3.7V6M13.7 10v3.7H10M2.3 10v3.7H6"/>',
+    # A card with what is said over the slide written on it. Two rules rather
+    # than three: at 15px a third line closes the gaps and the card reads solid.
+    "note": ('<rect x="2.3" y="3.1" width="11.4" height="9.8" rx="1.7"/>'
+             '<path d="M5.2 6.7h5.6M5.2 9.4h3.3"/>'),
     "grid": ('<rect x="2.2" y="2.2" width="5.1" height="5.1" rx="1.2"/>'
              '<rect x="8.7" y="2.2" width="5.1" height="5.1" rx="1.2"/>'
              '<rect x="2.2" y="8.7" width="5.1" height="5.1" rx="1.2"/>'

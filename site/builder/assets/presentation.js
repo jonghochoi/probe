@@ -23,11 +23,11 @@
  *   right or left half. A presenter's hand is on a clicker that sends PageUp
  *   and PageDown, so those are not an afterthought.
  *
- *   The notes toggle. One control, 발표자 노트, meaning "I want the essay" —
- *   answered by whichever surface the presenter is standing on: under the
- *   frame in the tab, and in the presenter's window once the talk is on a
- *   stage. So a talk started with notes on opens the window with it, and the
- *   stage needs no button of its own for a decision already made.
+ *   The notes toggle. One control, 노트, meaning "I want the essay" — answered
+ *   by whichever surface the presenter is standing on: under the frame in the
+ *   tab, and in the presenter's window once the talk is on a stage. So a talk
+ *   started with notes on opens the window with it, and the stage needs no
+ *   button of its own for a decision already made.
  *
  *   Three tools for the three things that go wrong in front of a room. 목록 (O)
  *   answers the question that names a slide four beats back. 레이저 (L) points
@@ -44,9 +44,10 @@
  *   who advances from the notes window moves the stage.
  *
  * Without this file the tab is still the whole presentation, read by scrolling.
- * The control bar stays `hidden`, the arrows and the deck are drawn only under
- * `data-browsing` and no key does anything, which is the site's rule: a control
- * removes itself rather than sitting inert.
+ * The frame's control band, the stage's bar, the arrows and the deck are
+ * all drawn under `data-browsing` or `data-presenting` — flags only this file
+ * sets — and no key does anything, which is the site's rule: a control removes
+ * itself rather than sitting inert.
  */
 
 (function () {
@@ -66,8 +67,10 @@
   var of = presentation.dataset.presOf || "";
   var panel = presentation.closest(".panel");
   var deck = stage.querySelector("[data-pres-deck]");
-  var startBtn = bar.querySelector("[data-pres-start]");
-  var notesBtn = bar.querySelector("[data-pres-notes]");
+  // 전체 화면 and 노트 are on the frame's own control band and the other
+  // three on the stage's bar, so the scope that finds all five is the stage.
+  var startBtn = stage.querySelector("[data-pres-start]");
+  var notesBtn = stage.querySelector("[data-pres-notes]");
   var listBtn = bar.querySelector("[data-pres-list]");
   var laserBtn = bar.querySelector("[data-pres-laser]");
   var exitBtn = bar.querySelector("[data-pres-exit]");
@@ -92,7 +95,6 @@
   var z = { k: 1, x: 0, y: 0 };
   var ZMAX = 4;
 
-  bar.hidden = false;
   stage.setAttribute("data-browsing", "");
 
   try {

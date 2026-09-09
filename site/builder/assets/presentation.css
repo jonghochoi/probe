@@ -494,11 +494,20 @@
 
 .prs-slide .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
 
-/* A slide is a fixed-ratio frame, so below the phone breakpoint the two-column
-   compositions have nowhere to go but taller type in narrower columns. They
-   stack instead, and the ratio is released so the frame follows its content. */
-@media (max-width: 620px) {
-  .prs-slide { aspect-ratio: auto; min-height: 62vh; }
+/* A composition stacks when the *frame* is narrow, which is not the same
+   question as whether the viewport is: the tab draws the frame on a canvas
+   wider than the phone it is rendered on, and a rule keyed to the viewport
+   would stack a two-column slide that has room for both columns. So these are
+   container queries against the frame's own laid-out width — the width the
+   columns actually have to fit in.
+
+   The threshold is the frame's *content* box, which is what a container query
+   measures and what the columns actually get — some 90px less than the frame's
+   own width at this size, since the slide's side padding scales with it.
+
+   `.prs-slide` itself is the container, so the one rule that sets its shape
+   cannot live here; it is under the media query below. */
+@container (max-width: 430px) {
   .prs-versus .prs-body, .prs-ledger .prs-body, .prs-split .prs-body,
   .prs-statement .prs-body:has(.prs-diag) { grid-template-columns: 1fr; }
   .prs-facts { grid-auto-flow: row; }
@@ -524,31 +533,64 @@
 
 }
 
-/* ── the control bar ───────────────────────────────────────────────── */
+/* The two readings of a phone-width slide, and they want opposite shapes.
 
-/* Printed by the build and unhidden by `presentation.js`, so a browser with no script
-   never sees a button that cannot present. */
+   Read as a document — no script, every slide in a scroll — the frame follows
+   its content: releasing the ratio is what keeps a slide legible when it is
+   the thing being read.
+
+   Read as a deck, it has to look like one. A ratio is the one thing a slide
+   cannot negotiate, so the frame keeps 16 / 9 and is drawn on a canvas wide
+   enough for the type floors to stop binding, then scaled down to the width
+   it actually has.
+
+   The band just above the breakpoint is the same repair for a milder case of
+   the same break. Up to about 680px the frame holds its ratio while the floors
+   have already stopped shrinking with it, so the densest two slides run past
+   the bottom of a box whose `overflow: hidden` then takes the evidence ribbon
+   off the screen without saying so. A tenth off the canvas is enough for every
+   slide to fit, and it changes nothing else — the compositions keep their
+   columns. `zoom` rather than a transform, for the reason the overview
+   takes it: it scales the rendered box after layout, so the frame is the slide
+   at its own size made small, and markup is the build's to write, never a
+   stylesheet's. What that buys is a frame whose composition is the one the
+   room will see; what it costs is type below the size this file's floors exist
+   to guarantee — which is the trade a phone-width deck has no way around, and
+   why 전체 화면 sits on the frame's own band. */
+@media (max-width: 680px) {
+  .prs-stage[data-browsing] .prs-slide.prs-on { zoom: .9; }
+}
+@media (max-width: 620px) {
+  .prs-slide { aspect-ratio: auto; min-height: 62vh; }
+  .prs-stage[data-browsing] .prs-slide.prs-on {
+    aspect-ratio: 16 / 9; min-height: 0; zoom: .42;
+  }
+}
+
+/* ── the controls ──────────────────────────────────────────────────── */
+
+/* Seven controls, one shape. Square and unlabelled, because every one of them
+   sits beside or on a frame someone is reading: a pill spelling out 목록 is a
+   word competing with the sentence on screen, and the word is still in the
+   button's `aria-label` and `title`. Where they stand differs — two on the
+   frame's band, two beside it, three on the stage's bar — and nothing else
+   does, so one rule draws the lot and a reader meets one kind of control.
+
+   Nothing at rest. A ground under each of them is a pale patch the size of a
+   button laid on the page, and four of those at the ends of a band read as a
+   tint someone forgot to finish rather than as controls. The band's own rule
+   is what says a control is there; the ground arrives under the pointer, where
+   it answers a question the reader has just asked. */
 .prs-stage { display: grid; gap: 14px; }
-.prs-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.prs-btn {
-  padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-pill);
-  background: var(--surface); color: var(--text); font: inherit; font-size: .8rem;
-  font-weight: 600; cursor: pointer;
+.prs-ico, .prs-arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0; cursor: pointer; background: transparent; color: var(--text-muted);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  transition: background var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
 }
-.prs-btn:hover { background: var(--surface-3); }
-.prs-btn[aria-pressed="true"] {
-  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
-}
-/* The stage's own controls. Square and unlabelled, because they sit over a
-   slide a room is reading: a pill spelling out 목록 is a word competing with
-   the sentence on screen, and the word is still in the button's `title`. */
-.prs-ico {
-  width: 30px; height: 30px; display: inline-flex; align-items: center;
-  justify-content: center; padding: 0; cursor: pointer;
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--surface); color: var(--text-muted);
-}
-.prs-ico:hover { background: var(--surface-3); color: var(--text); }
+.prs-ico { width: 30px; height: 30px; }
+.prs-ico:hover, .prs-arrow:hover { background: var(--surface-3); color: var(--text); }
 .prs-ico[aria-pressed="true"] {
   background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
 }
@@ -562,14 +604,10 @@
 /* Two kinds of control on one bar — three tools, then the way out — and the
    seam between them is what says the last one is not a fourth tool. */
 .prs-sep { width: 1px; height: 18px; margin: 0 1px; background: var(--border); }
-/* Each control belongs to one of the two readings. 목록, 레이저, the zoom
-   readout and the way out are the stage's — off the stage there is nothing to
-   list, point at, magnify or leave. 발표 시작 and 발표자 노트 are the tab's,
-   and printing them again on the stage would be a button offering to start a
-   talk that is already running. */
-.prs-bar [data-stage] { display: none; }
-.prs-stage[data-presenting] .prs-bar [data-stage] { display: inline-flex; }
-.prs-stage[data-presenting] .prs-bar [data-off-stage] { display: none; }
+/* The bar carries only what the stage means: 목록, 레이저, the zoom readout
+   and the way out. Off the stage there is nothing to list, point at, magnify
+   or leave, so the bar is not drawn at all rather than drawn empty. */
+.prs-bar { display: none; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* ── the screen ────────────────────────────────────────────────────── */
 
@@ -586,16 +624,57 @@
    still held three columns under it would be a layout nothing on screen was
    laid out by.
 
-   The arrows are grid items of the presentation rather than chrome placed over
-   it, so they sit level with the *frame* — an essay opened under it grows the
-   row below them and moves nothing. */
+   One column, because everything under the band is the frame's own width: the
+   slide, the essay the notes toggle opens, and the deck that reads the talk's
+   position. Nothing flanks the frame, so nothing takes width off it.
+
+   The band above it is a property rather than a number because two rules have
+   to agree on it: the padding that opens it, and the controls that stand in
+   it. */
 .prs-stage[data-browsing] .prs-presentation {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "prev screen next" ".    note   ." ".    deck   .";
-  gap: 0 clamp(4px, 1.4vw, 14px); align-items: center;
+  --prs-band: 38px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "screen" "note" "deck";
+  gap: 0; padding: var(--prs-band) 0 0;
 }
 .prs-stage[data-browsing] .prs-slide { display: none; }
 .prs-stage[data-browsing] .prs-slide.prs-on { display: grid; grid-area: screen; }
+
+/* ── the chassis ───────────────────────────────────────────────────── */
+
+/* What says "deck" is the frame standing off the page, not a surround drawn
+   around it. The slide already carries a border, a rule in the accent and a
+   shadow — it is a drawn object before this file adds anything — so a filled
+   mat behind it is a frame around a frame, and the second one is the one that
+   looks cheap. The lift does the work instead: `--shadow-lg`, which is the
+   token the site already keeps for a thing held off its ground, and which
+   answers the theme so the light page and the dark one both get it. */
+.prs-stage[data-browsing] .prs-slide.prs-on { box-shadow: var(--shadow-lg); }
+
+/* The frame's own two controls, standing in the band above the slide and ruled
+   to its right edge — the same edge the frame's own footer ends on, so the
+   band reads as the frame's chrome rather than as a row the page put there.
+
+   The band is ruled rather than tinted. A strip needs an edge to be a strip,
+   and a line is the one that costs no height and no second colour — it spans
+   the frame it belongs to, and the controls hang off it down to the slide's
+   own top. A wash the width of the frame would be the mat again, and four
+   button-sized washes floating at its ends are what a reader reads as an
+   unfinished tint. */
+.prs-tools {
+  display: none; grid-area: screen; place-self: start stretch;
+  position: relative; z-index: 2;
+  margin-top: calc(-1 * var(--prs-band)); height: var(--prs-band);
+  align-items: center; justify-content: flex-end; gap: 2px;
+  border-top: 1px solid var(--border);
+}
+.prs-stage[data-browsing] .prs-tools { display: flex; }
+/* The moving half, held at the far end by an auto margin rather than by
+   `space-between`: the band has three items and only one seam. */
+.prs-move { display: flex; align-items: center; gap: 2px; margin-right: auto; }
+
+/* ── the essay ─────────────────────────────────────────────────────── */
+
 /* The essay arrives on the reader's word, and only the one belonging to the
    frame on screen: the slide is what a room looks at and the essay is what is
    said over it, so the two are never read at once. */
@@ -604,23 +683,15 @@
   display: block; grid-area: note; margin-top: 16px;
 }
 
-.prs-arrow {
-  grid-area: prev; align-self: center; display: none;
-  width: 34px; height: 34px; padding: 0; cursor: pointer;
-  align-items: center; justify-content: center;
-  border: 1px solid var(--border); border-radius: 50%;
-  background: var(--surface); color: var(--text-muted);
-  transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
-}
-.prs-next { grid-area: next; }
+/* The arrow is one of the band's buttons and takes everything from the rule
+   that draws them; its size is all that is its own, and even that only because
+   a chevron reads at a smaller glyph than a filled mark does. */
+.prs-arrow { display: none; width: 30px; height: 30px; }
 .prs-stage[data-browsing] .prs-arrow { display: inline-flex; }
-.prs-arrow:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
 /* At the ends the arrow stays in place rather than disappearing: a control
-   that leaves takes the frame's width with it and the slide resizes under the
-   reader. */
+   that leaves shifts the two beside it and the band moves under the reader. */
 .prs-arrow[disabled] { opacity: .22; cursor: default; }
-.prs-arrow[disabled]:hover { color: var(--text-muted); border-color: var(--border); }
+.prs-arrow[disabled]:hover { background: transparent; color: var(--text-muted); }
 
 /* ── the deck ──────────────────────────────────────────────────────── */
 
@@ -649,19 +720,17 @@
 .prs-where b { color: var(--text); font-weight: 700; }
 .prs-where i { font-style: normal; margin: 0 .25em; opacity: .55; }
 
-/* Two 34px arrows and their gaps take a sixth of a phone's width away from the
-   frame, which is the one element on this surface that cannot spare it. They
-   drop to their own row under the slide — the same two buttons in the same
-   order, moved by the template rather than printed twice. The row gap stays 0
-   so the essay keeps its join with the frame; the arrows carry their own
-   clearance instead. */
+/* Every control on this surface is measured against the frame, and at phone
+   width the frame is a sixth of the height it has on a laptop. A band and a
+   button that keep their laptop size stop being chrome on a slide and start
+   being a slide's worth of chrome. Nothing else moves: the band is the same
+   band and the deck the same deck, drawn smaller and closed up. */
 @media (max-width: 620px) {
-  .prs-stage[data-browsing] .prs-presentation {
-    grid-template-areas: "screen screen screen" "note   note   note"
-                         "prev   .      next"   "deck   deck   deck";
-    gap: 0;
-  }
-  .prs-stage[data-browsing] .prs-arrow { margin-top: 12px; }
+  .prs-stage[data-browsing] .prs-presentation { --prs-band: 30px; }
+  .prs-tools .prs-ico, .prs-tools .prs-arrow { width: 26px; height: 26px; }
+  .prs-tools .prs-ico .ico { width: 13px; height: 13px; }
+  .prs-tools .prs-arrow .ico { width: 14px; height: 14px; }
+  .prs-stage[data-browsing] .prs-deck { margin-top: 9px; }
 }
 
 /* ── the stage ─────────────────────────────────────────────────────── */
@@ -710,6 +779,7 @@
 /* The bar becomes chrome: present, but not competing with the slide until the
    pointer goes for it. */
 .prs-stage[data-presenting] .prs-bar {
+  display: flex;
   position: fixed; top: 14px; right: 14px; z-index: 62; margin: 0;
   padding: 5px; gap: 4px; border: 1px solid var(--border);
   border-radius: var(--radius); background: var(--surface-2);
