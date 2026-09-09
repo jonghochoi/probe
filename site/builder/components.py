@@ -263,11 +263,9 @@ def mast_art() -> str:
 
 
 # ── The two list mastheads that are not the landing ─────────────────────────
-# Each one carries the sentence its page used to print as prose under the
-# title. The drawing is the sentence, so the string is written once here: the
-# art labels itself with it, and `mast()` prints the same text as the paragraph
-# a screen too narrow for the drawing falls back to. Two copies of a sentence
-# are two sentences the moment one of them is edited.
+# What each drawing argues, in words. A drawing that carries a claim rather
+# than setting the band is named in the accessibility tree instead of hidden
+# from it, and this is the name: the art writes it into its own `aria-label`.
 CMP_LEAD = (
     "논문 두세 편을 한 질문 아래 놓고 갈리는 자리만 봅니다. "
     "각 논문이 무엇을 하는지는 그 논문의 재작성본에 있습니다."
@@ -469,8 +467,7 @@ def shelf_art() -> str:
     )
 
 
-def mast(*, eyebrow: str, title: str, art: str, sub: str = "",
-         count: str = "") -> str:
+def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
     """The band every list page opens on.
 
     One frame for the three destinations the nav names, because they are one
@@ -479,15 +476,13 @@ def mast(*, eyebrow: str, title: str, art: str, sub: str = "",
     each art is its own page's claim, and the landing's — an original becoming
     two tabs — argues nothing on a page about comparisons.
 
-    `count` is the pair the landing prints beside its title for a reader
-    whose filter bar has not arrived, and it is the only number any band
-    carries — because it is the only one the build has. What this browser has
-    kept is not a fact this generator holds. `sub` is the sentence the drawing
-    carries, printed as prose only where the drawing is too wide to stand: one
-    of the two is on the page at any width, never both. A page whose art is
-    decoration passes neither.
+    Three things and no fourth: what this surface is, what it does, and the
+    drawing that argues it. `count` is the exception the landing earns — the
+    pair it prints beside its title for a reader whose filter bar has not
+    arrived — and it is the only number any band carries, because it is the
+    only one the build has. What this browser has kept is not a fact this
+    generator holds.
     """
-    sub_html = f'\n      <p class="mast-sub">{esc(sub)}</p>' if sub else ""
     count_html = f'<p class="mast-count">{esc(count)}</p>' if count else ""
     return f"""<header class="mast">
   <div class="mast-inner">
@@ -495,7 +490,7 @@ def mast(*, eyebrow: str, title: str, art: str, sub: str = "",
       <p class="mast-eyebrow">{esc(eyebrow)}</p>
       <div class="mast-line">
         <h1>{esc(title)}</h1>{count_html}
-      </div>{sub_html}
+      </div>
     </div>
     {art}
   </div>

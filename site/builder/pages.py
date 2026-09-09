@@ -644,7 +644,6 @@ def shelf_page(papers: list[Paper]) -> str:
         eyebrow="Kept in this browser",
         title="서재, 이 브라우저에만 남습니다",
         art=c.shelf_art(),
-        sub=c.SHELF_LEAD,
     )
 
     body = f"""{head}
@@ -1384,7 +1383,6 @@ def talk_index_page(presentation_map: dict) -> str:
         eyebrow="Slides and script",
         title="발표, 할 말을 순서대로 적어 둡니다",
         art=c.talk_art(),
-        sub=c.TALK_LEAD,
     )
 
     body = f"""{head}
@@ -1458,7 +1456,6 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
         eyebrow="Side by side",
         title="비교, 갈리는 자리만 봅니다",
         art=c.cmp_art(),
-        sub=c.CMP_LEAD,
     )
 
     body = f"""{head}
