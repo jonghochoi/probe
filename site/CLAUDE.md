@@ -7,15 +7,16 @@ Repo-wide rules are in the root `CLAUDE.md`.
 
 ## The build implements contracts it does not own
 
-`analysis/AUTHORING.md` and `comparison/AUTHORING.md` are the rules; this folder
-enforces them. A new rule is written into the contract first and checked here
-second — a rule that exists only in `builder/` is a rule no author can read.
-The same holds in reverse: what the build refuses, the contract must say.
+`analysis/AUTHORING.md`, `comparison/AUTHORING.md` and `presentation/AUTHORING.md` are
+the rules; this folder enforces them. A new rule is written into the contract
+first and checked here second — a rule that exists only in `builder/` is a rule
+no author can read. The same holds in reverse: what the build refuses, the
+contract must say.
 
 ## Invariants
 
-**Only `analysis/` and `comparison/` publish.** Nothing else in the repo
-reaches the site — `scouting/` and `context/` are not published surfaces.
+**Only `analysis/`, `comparison/` and `presentation/` publish.** Nothing else in the
+repo reaches the site — `scouting/` and `context/` are not published surfaces.
 
 **Generated HTML is never committed.** `deploy-site.yml` builds it fresh; a
 local build goes to `--out` and stays there.
@@ -27,6 +28,12 @@ the paper alone.
 **A comparison naming a paper with no rewrite is not published.**
 `builder/comparisons.py` holds that line: every paper's own detail stays on its
 own page, and the comparison links out.
+
+**A presentation of a paper with no rewrite is not published.** `builder/presentations.py`
+holds the same line for the same reason: a slide compresses, and the rewrite is
+where the detail it dropped stays reachable. The presentation is a tab on that paper's
+own page rather than a page of its own, so the link back is the page it is
+already on.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`

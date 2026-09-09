@@ -70,8 +70,9 @@ decides.
 | `scouting/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" width="22" align="absmiddle" alt="agent"></picture> | scheduled, per pillar | append — one dated file per run |
 | `analysis/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one snapshot per paper |
 | `comparison/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one file per comparison |
+| `presentation/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-presentation-dark.svg"><img src="assets/probe-presentation.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one talk per paper |
 
-One folder the agent only reads, three it only adds to — that split is what
+One folder the agent only reads, four it only adds to — that split is what
 stops it re-recommending last month's papers as `context/` grows.
 
 **Pillars.** The context split is what keeps one run narrow.
@@ -94,6 +95,7 @@ session.
 | **Scouting** | scheduled routine — [`scouting/SETUP.md`](scouting/SETUP.md) | [`scouting/AUTHORING.md`](scouting/AUTHORING.md) |
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
+| **Presentation** | `/present <arXiv id>` | [`presentation/AUTHORING.md`](presentation/AUTHORING.md) |
 
 - **Start by hand.** Fill `context/`, run one report yourself, review it
   ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.
@@ -105,6 +107,13 @@ session.
 - **`/compare` with no ids names candidates.** It ranks the pairs no
   comparison holds yet and gives the question that would divide them, then
   stops — choosing one stays yours.
+- **`/present` needs the rewrite too, and argues one thing.** It reads
+  `analysis/` for what matters and the arXiv original for every number, then
+  lays the paper out as 起承轉結 with a speaker essay under each slide. The
+  slide count is what falls out, never a target.
+- **The presentation is a tab, and the tab presents.** 발표 시작 puts one slide on a
+  fullscreen stage — arrow keys, space or a clicker move it — and 발표자 노트
+  opens a second window with the essay, the next slide and a clock.
 
 <div align="center">
 

@@ -50,7 +50,7 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, comparisons, corpus, pages
+from builder import assets_out, comparisons, corpus, presentations, pages
 from builder.decisions import harvest_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
@@ -75,17 +75,23 @@ def build(args) -> int:
     if not args.only:
         comps, comp_problems = comparisons.discover(papers_by_id)
         problems += comp_problems
+    # A presentation belongs to one paper, so unlike a comparison it survives `--only` —
+    # the paper it retells is the paper being built. The presentations of papers the
+    # subset dropped are skipped rather than reported: they are not missing
+    # rewrites, they are simply not in this build.
+    presentation_map, presentation_problems = presentations.discover(papers_by_id, partial=bool(args.only))
+    problems += presentation_problems
 
     if args.check:
         for line in problems:
             print(line)
         if problems:
             print(f"\nbuild-site --check: {len(problems)} problem(s) "
-                  f"across {len(papers)} rewrite(s) and "
-                  f"{len(comps)} comparison(s)")
+                  f"across {len(papers)} rewrite(s), "
+                  f"{len(comps)} comparison(s) and {len(presentation_map)} presentation(s)")
             return 1
         print(f"build-site --check: {len(papers)} rewrite(s), "
-              f"{len(comps)} comparison(s) clean")
+              f"{len(comps)} comparison(s), {len(presentation_map)} presentation(s) clean")
         return 0
 
     out = Path(args.out)
@@ -115,6 +121,7 @@ def build(args) -> int:
             comparisons=comparisons.for_paper(paper.stem, comps),
             papers_by_id=papers_by_id,
             citers=cited.get(paper.stem, []),
+            presentation=presentation_map.get(paper.stem),
         )
     for comp in comps:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
@@ -172,7 +179,8 @@ def build(args) -> int:
     kb = (stats["pretendard"] + stats["mono"]) / 1024
     print(
         f"build-site: {len(rendered)} page(s) · {len(papers)} rewrite(s) · "
-        f"{len(comps)} comparison(s) · {katex.rendered} formula(s) rendered · "
+        f"{len(comps)} comparison(s) · {len(presentation_map)} presentation(s) · "
+        f"{katex.rendered} formula(s) rendered · "
         f"{stats['glyphs']} glyph(s) → {kb:.0f} KB of webfont · "
         f"{size / 1024:.0f} KB of corpus index · "
         f"{warn} katex warning(s) → {out}"

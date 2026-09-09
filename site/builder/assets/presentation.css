@@ -1,0 +1,647 @@
+/* presentation.css — the 발표 tab.
+ *
+ * Every rule here is scoped under `.prs-` because a slide is a frame with its
+ * own type scale, and letting the article's rules reach into it would put body
+ * measure on a surface read from across a room.
+ *
+ * The layout rules that matter are three, and they are the ones
+ * `presentation/AUTHORING.md` §3 states:
+ *
+ *   1. the container stretches, then distributes its items — a card that hugs
+ *      its content leaves the slack outside it, where nothing can use it;
+ *   2. that distribution is capped — three short items spread over a full
+ *      card manufacture cavities rather than filling them, so the gap has a
+ *      maximum and whatever is left splits evenly above and below;
+ *   3. every slide closes on the evidence ribbon, and the panel types are not
+ *      exempt.
+ */
+
+.prs-presentation { display: grid; gap: 26px; }
+
+.prs-lead {
+  margin: 0 0 4px; padding: 14px 16px; border: 1px solid var(--border-soft);
+  border-radius: var(--radius); background: var(--surface-2);
+  display: grid; gap: 6px;
+}
+.prs-lead p { margin: 0; font-size: .86rem; line-height: 1.65; color: var(--text-muted); }
+.prs-lead b { color: var(--text); font-weight: 700; }
+.prs-lead .prs-spine { font-size: .95rem; color: var(--text); font-weight: 600; }
+
+/* ── the frame ─────────────────────────────────────────────────────── */
+
+.prs-slide {
+  /* Every ceiling in this file is `calc(… * var(--prs-cap))`. In the tab the
+     frame is a card on a page and those ceilings hold; on the stage it is the
+     screen, and one lever lifts the whole scale at once instead of forty rules
+     disagreeing about how much bigger a slide gets. */
+  --prs-cap: 1;
+  width: 100%; aspect-ratio: 16 / 9; position: relative; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: clamp(18px, 3vw, calc(30px * var(--prs-cap))) clamp(22px, 4.2vw, calc(42px * var(--prs-cap))) 16px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
+  container-type: inline-size;
+}
+.prs-slide::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 3px;
+  background: var(--orange);
+}
+/* The beat, in the word the room can use. Korean takes far less tracking than
+   a Latin small-caps label does — past about .05em the syllables read as
+   separate words — so the label earns its weight from size and colour. */
+.prs-act {
+  display: block; margin-bottom: 7px;
+  font-size: clamp(9px, 1.05cqw, calc(12px * var(--prs-cap)));
+  font-weight: 700; letter-spacing: .05em;
+  color: var(--orange-ink);
+}
+.prs-slide h3 {
+  margin: 0; font-size: clamp(14px, 2.5cqw, calc(27px * var(--prs-cap))); font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.25; color: var(--text);
+  word-break: keep-all;
+}
+.prs-slide footer {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding-top: 10px; font-family: var(--mono);
+  font-size: clamp(7.5px, .9cqw, calc(10px * var(--prs-cap))); color: var(--text-muted);
+}
+
+.prs-body { display: grid; gap: clamp(10px, 1.8cqw, calc(20px * var(--prs-cap))); padding: 18px 0 6px; min-height: 0; }
+.prs-claim {
+  margin: 0; font-size: clamp(11px, 1.55cqw, calc(18px * var(--prs-cap))); line-height: 1.5;
+  font-weight: 500; color: var(--text-muted); word-break: keep-all;
+}
+.prs-claim b { color: var(--orange-ink); font-weight: 800; }
+
+/* ── cover ─────────────────────────────────────────────────────────── */
+
+/* On the cover the spine is the headline and the slide's own header is the
+   hook above it — everywhere else that order is reversed, and it is reversed
+   here because a title slide's job is to put the one sentence the talk lands
+   in front of the room before the talk starts.
+   Centred rather than pushed to the edges: §3-2, the slack halved above and
+   below instead of pooled in the middle. */
+.prs-cover .prs-body { align-content: center; gap: clamp(16px, 3.4cqw, 40px); padding-bottom: 14px; }
+.prs-cover h3 {
+  font-size: clamp(10px, 1.35cqw, calc(15px * var(--prs-cap)));
+  font-weight: 700; letter-spacing: 0; color: var(--orange-ink);
+}
+.prs-spineline {
+  margin: 0; font-size: clamp(15px, 2.9cqw, calc(32px * var(--prs-cap)));
+  font-weight: 800; letter-spacing: -.03em; line-height: 1.26;
+  color: var(--text); word-break: keep-all;
+}
+.prs-colophon { display: grid; align-content: end; }
+
+/* The act rail — the presentation's own shape, on its title slide. Cells are weighted
+   by how many slides each run of an act holds, so the block a beat gets is the
+   time it gets, and the four colours are the ones `site.css` already keeps for
+   four acts rather than a palette invented here. */
+.prs-rail { display: flex; gap: clamp(5px, .9cqw, 10px); align-items: end; }
+.prs-rblock { flex: var(--n); display: grid; gap: clamp(5px, .9cqw, 9px); min-width: 0; }
+.prs-rcells { display: flex; gap: clamp(2px, .35cqw, 4px); }
+.prs-rcells i {
+  flex: 1; height: clamp(8px, 1.7cqw, calc(17px * var(--prs-cap)));
+  border-radius: 2px; background: currentColor; opacity: .42;
+}
+.prs-rlab {
+  display: flex; align-items: baseline; gap: .5em; font-family: var(--mono);
+  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap)));
+  font-weight: 700; letter-spacing: .06em; color: currentColor;
+}
+.prs-rlab em { font-style: normal; font-weight: 500; opacity: .62; letter-spacing: 0; }
+.prs-r1 { color: var(--act1); } .prs-r2 { color: var(--act2); }
+.prs-r3 { color: var(--act3); } .prs-r4 { color: var(--act4); }
+/* The turn is what the presentation exists for, so its cells stand taller. Height
+   rather than a darker fill: the four act colours are already carrying which
+   block is which, and a solid slab among washed ones reads as a different
+   kind of thing rather than as the same thing emphasised. */
+.prs-r3 .prs-rcells i { height: clamp(13px, 2.7cqw, calc(27px * var(--prs-cap))); }
+.prs-rail { margin-top: clamp(18px, 3.6cqw, 44px); }
+.prs-railfoot {
+  margin: clamp(7px, 1.3cqw, 13px) 0 0; font-family: var(--mono);
+  font-size: clamp(7px, .9cqw, calc(10px * var(--prs-cap)));
+  color: var(--text-muted); letter-spacing: .04em;
+}
+.prs-meta {
+  margin: 0; font-family: var(--mono); font-size: clamp(8px, 1cqw, calc(10.5px * var(--prs-cap)));
+  letter-spacing: .04em; color: var(--text-muted);
+}
+.prs-paper {
+  margin: 6px 0 16px; font-size: clamp(12px, 1.6cqw, calc(18px * var(--prs-cap)));
+  font-weight: 600; color: var(--text); word-break: keep-all;
+}
+.prs-points { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.prs-points li {
+  position: relative; padding-left: 13px; word-break: keep-all;
+  font-size: clamp(10px, 1.3cqw, calc(14.5px * var(--prs-cap))); line-height: 1.6; color: var(--text-muted);
+}
+.prs-points li::before {
+  content: ""; position: absolute; left: 0; top: .62em;
+  width: 5px; height: 1.5px; background: var(--orange);
+}
+.prs-points li b { color: var(--text); font-weight: 700; }
+
+/* ── cover, with the paper's own figure ────────────────────────────── */
+
+/* The text keeps a column and the image takes the frame's edge. Half the
+   frame given to something that is not type is most of why a title slide
+   reads as one, and it is the only place in a presentation where an image is not
+   evidence — so it bleeds past the padding every other slide respects. */
+.prs-hero .prs-body,
+.prs-hero header,
+.prs-hero footer { padding-right: 46cqw; }
+.prs-hero .prs-body { grid-template-columns: minmax(0, 1fr); align-content: center; padding-bottom: 0; }
+.prs-hero .prs-left {
+  display: grid; align-content: center; min-height: 0;
+  gap: clamp(16px, 3.4cqw, calc(40px * var(--prs-cap)));
+}
+.prs-hero .prs-art {
+  /* Inset by the accent rule's own height so the rule still runs the full
+     width of the frame and the image starts under it. */
+  position: absolute; inset: 3px 0 0 auto; width: 43cqw; overflow: hidden;
+  background: var(--surface-2);
+}
+.prs-hero .prs-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* The caption is white on someone else's photograph, and the paper does not
+   promise a dark corner to put it in. */
+.prs-hero .prs-art::after {
+  content: ""; position: absolute; inset: auto 0 0; height: 42%;
+  background: linear-gradient(to top, rgba(0, 0, 0, .62), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+.prs-hero .prs-artcap {
+  position: absolute; right: clamp(8px, 1.4cqw, calc(14px * var(--prs-cap)));
+  bottom: clamp(7px, 1.2cqw, calc(12px * var(--prs-cap)));
+  margin: 0; max-width: 82%; text-align: right; font-style: italic;
+  font-size: clamp(7px, .88cqw, calc(10px * var(--prs-cap))); line-height: 1.5;
+  color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, .8); word-break: keep-all;
+}
+/* The provenance rides with the caption because the cover has no evidence
+   ribbon to carry it, and a photograph with no figure number is a photograph
+   the room cannot look up. */
+.prs-hero .prs-artcap span {
+  display: block; margin-top: 3px;
+  font-family: var(--mono); font-style: normal; font-weight: 700; opacity: .82;
+}
+
+/* ── statement ─────────────────────────────────────────────────────── */
+
+.prs-statement .prs-body { align-content: center; }
+.prs-statement .prs-body:has(.prs-diag) {
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  align-items: center; gap: clamp(14px, 2.6cqw, calc(30px * var(--prs-cap)));
+}
+.prs-say {
+  margin: 0 0 14px; font-size: clamp(16px, 3.1cqw, calc(34px * var(--prs-cap))); font-weight: 800;
+  letter-spacing: -.03em; line-height: 1.22; color: var(--text); word-break: keep-all;
+}
+.prs-sub {
+  margin: 0; font-size: clamp(10px, 1.4cqw, calc(16px * var(--prs-cap))); line-height: 1.6;
+  color: var(--text-muted); word-break: keep-all;
+}
+.prs-sub b { color: var(--text); font-weight: 700; }
+
+/* ── figure ────────────────────────────────────────────────────────── */
+
+.prs-evidence .prs-body { grid-template-rows: minmax(0, 1fr) auto; gap: 14px; }
+.prs-split .prs-body {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center;
+}
+.prs-fig { margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; min-height: 0; }
+.prs-fig img {
+  width: 100%; height: 100%; object-fit: contain; object-position: center;
+  background: var(--fig-pad); border-radius: var(--radius-sm);
+}
+.prs-fig figcaption {
+  font-size: clamp(7.5px, .92cqw, calc(10.5px * var(--prs-cap))); line-height: 1.5; color: var(--text-muted);
+  word-break: keep-all;
+}
+.prs-fig figcaption b { color: var(--orange-ink); font-weight: 700; }
+
+/* ── panel: versus and ledger ──────────────────────────────────────── */
+
+.prs-versus .prs-body, .prs-ledger .prs-body {
+  grid-template-columns: 1fr 1fr; align-items: stretch;
+}
+.prs-panel {
+  min-width: 0; background: var(--surface-2);
+  border: 1px solid var(--border-soft); border-radius: 9px;
+  padding: clamp(13px, 2cqw, calc(20px * var(--prs-cap))) clamp(14px, 2.2cqw, calc(22px * var(--prs-cap))) 18px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px;
+}
+.prs-panel h4 {
+  margin: 0; font-family: var(--mono); font-size: clamp(8px, 1.05cqw, calc(11px * var(--prs-cap)));
+  font-weight: 700; letter-spacing: .1em; color: var(--text-muted);
+}
+.prs-panel ul {
+  margin: 0; padding: 0; list-style: none; display: grid;
+  /* Rule 2: the slack goes into the gaps up to a ceiling, and the remainder
+     splits above and below. Slack pushed to one end is a hole; halved at both
+     ends it is margin. */
+  align-content: center; gap: clamp(10px, 2.4cqh, calc(26px * var(--prs-cap)));
+}
+.prs-panel li {
+  position: relative; padding-left: 13px; word-break: keep-all;
+  font-size: clamp(9.5px, 1.25cqw, calc(14px * var(--prs-cap))); line-height: 1.6; color: var(--text-muted);
+}
+.prs-panel li::before { content: ""; position: absolute; left: 0; top: .6em; width: 5px; height: 1.5px; }
+.prs-panel li b { color: var(--text); font-weight: 700; }
+.prs-panel li span {
+  display: block; margin-top: 4px; font-family: var(--mono);
+  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); line-height: 1.55;
+  color: var(--text-muted); opacity: .85; word-break: keep-all;
+}
+.prs-foot {
+  margin: 0; padding-top: 12px; border-top: 1px solid var(--border-soft);
+  font-size: clamp(8.5px, 1.1cqw, calc(12.5px * var(--prs-cap))); line-height: 1.5;
+  color: var(--text-muted); word-break: keep-all;
+}
+.prs-foot b { color: var(--text); font-weight: 700; }
+
+.prs-wall h4 { color: var(--red); }
+.prs-wall li::before { background: var(--red); opacity: .55; }
+.prs-buy { background: var(--orange-soft); border-color: var(--border-soft); }
+.prs-buy h4 { color: var(--green); }
+.prs-buy li::before { background: var(--green); opacity: .6; }
+.prs-buy .prs-foot { border-top-color: var(--border); }
+.prs-sell h4 { color: var(--orange-ink); }
+.prs-sell li::before { background: var(--orange); opacity: .6; }
+
+/* ── the evidence ribbon ───────────────────────────────────────────── */
+
+.prs-facts {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  border-top: 1px solid var(--border-soft); margin-top: 6px;
+}
+.prs-fact {
+  display: grid; gap: 3px; align-content: center;
+  padding: 11px clamp(8px, 1.6cqw, calc(16px * var(--prs-cap))) 12px; border-left: 1px solid var(--border-soft);
+}
+.prs-fact:first-child { border-left: 0; padding-left: 0; }
+.prs-fact b {
+  font-family: var(--mono); font-size: clamp(10px, 1.5cqw, calc(16px * var(--prs-cap)));
+  font-weight: 600; color: var(--orange-ink);
+}
+.prs-fact span {
+  font-size: clamp(7.5px, .95cqw, calc(11px * var(--prs-cap))); line-height: 1.45;
+  color: var(--text-muted); word-break: keep-all;
+}
+
+/* ── diagram ───────────────────────────────────────────────────────── */
+
+.prs-diag { display: grid; gap: 14px; }
+.prs-drow {
+  display: grid; grid-template-columns: clamp(34px, 5cqw, calc(52px * var(--prs-cap))) minmax(0, 1fr);
+  gap: 12px; align-items: center;
+}
+.prs-dlab {
+  font-family: var(--mono); font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap)));
+  font-weight: 600; color: var(--text-muted); text-align: right;
+}
+.prs-dlab.hot { color: var(--orange-ink); }
+.prs-chain, .prs-split { display: flex; align-items: center; gap: 7px; }
+.prs-box {
+  position: relative; flex: 1; min-width: 0; background: var(--surface-2);
+  border: 1px solid var(--border-soft); border-radius: 7px; padding: 8px 10px;
+}
+.prs-box b {
+  display: block; font-size: clamp(8px, 1.05cqw, calc(11.5px * var(--prs-cap))); font-weight: 600;
+  color: var(--text); line-height: 1.3; word-break: keep-all;
+}
+.prs-box span {
+  display: block; margin-top: 3px; font-family: var(--mono);
+  font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted);
+  line-height: 1.45; word-break: keep-all;
+}
+.prs-box.hot { background: var(--orange-soft); border-color: var(--amber-soft); }
+.prs-box.hot b { color: var(--orange-ink); }
+.prs-box.looped { padding-top: 28px; }
+.prs-arw { font-style: normal; flex: none; color: var(--border); font-size: 12px; }
+.prs-lanes { display: grid; gap: 7px; flex: 1.35; min-width: 0; }
+.prs-lanes .prs-box { flex: none; }
+.prs-merge, .prs-join { width: 26px; flex: none; align-self: stretch; display: grid; }
+.prs-merge svg, .prs-join svg { width: 100%; height: 100%; overflow: visible; }
+.prs-merge path, .prs-join path {
+  fill: none; stroke: var(--border); stroke-width: 1.3; vector-effect: non-scaling-stroke;
+}
+.prs-loop {
+  position: absolute; left: 0; right: 0; top: 2px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+}
+.prs-loop svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.prs-loop path {
+  fill: none; stroke: var(--orange-ink); stroke-width: 1.1;
+  vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round;
+}
+.prs-loop path.hd { stroke-width: 1.3; }
+.prs-loop i {
+  position: relative; font-style: normal; font-family: var(--mono);
+  font-size: clamp(6px, .8cqw, calc(8.5px * var(--prs-cap))); color: var(--orange-ink);
+  background: var(--surface-2); padding: 0 5px; white-space: nowrap;
+  max-width: calc(100% - 26px); overflow: hidden; text-overflow: ellipsis;
+}
+.prs-box.hot .prs-loop i { background: var(--orange-soft); }
+.prs-why {
+  margin: 2px 0 0; padding-left: clamp(46px, 6.4cqw, calc(64px * var(--prs-cap)));
+  font-size: clamp(7px, .9cqw, calc(10px * var(--prs-cap))); line-height: 1.5;
+  color: var(--text-muted); word-break: keep-all;
+}
+
+/* ── budget ────────────────────────────────────────────────────────── */
+
+.prs-budget .prs-body, .prs-lineage .prs-body { grid-template-rows: minmax(0, 1fr) auto; gap: 16px; }
+/* Rule 2 again: the bar and its scale are one block, the legend is the other,
+   and the slack between them grows to a ceiling and then splits. */
+.prs-bud {
+  display: grid; align-content: center;
+  gap: clamp(16px, 5.4cqh, calc(60px * var(--prs-cap)));
+}
+.prs-bgroup { display: grid; gap: clamp(9px, 1.6cqw, calc(18px * var(--prs-cap))); }
+.prs-brow {
+  display: grid; gap: 12px; align-items: center;
+  grid-template-columns: clamp(74px, 11cqw, calc(132px * var(--prs-cap)))
+                         minmax(0, 1fr) auto;
+}
+.prs-blab {
+  font-size: clamp(8px, 1.05cqw, calc(12px * var(--prs-cap)));
+  color: var(--text-muted); word-break: keep-all;
+}
+.prs-brow b {
+  font-family: var(--mono); font-weight: 600; color: var(--text);
+  font-size: clamp(8.5px, 1.1cqw, calc(12.5px * var(--prs-cap)));
+}
+.prs-bmeter { position: relative; }
+.prs-bbar {
+  display: flex; height: clamp(26px, 4.4cqw, calc(50px * var(--prs-cap)));
+  border-radius: var(--radius-sm); overflow: hidden;
+}
+/* The second bar is what one turn of the loop affords, on the first bar's
+   scale. It carries the accent because it is the constraint the slide is
+   about, and the segments above it are what has to fit inside it. */
+.prs-btick { width: var(--w); background: var(--orange); }
+.prs-bfoot {
+  margin: 2px 0 0; font-family: var(--mono); text-align: right;
+  font-size: clamp(8.5px, 1.1cqw, calc(12.5px * var(--prs-cap)));
+  color: var(--orange-ink); letter-spacing: .02em;
+}
+.prs-seg {
+  width: var(--w); display: grid; place-items: center; font-family: var(--mono);
+  font-size: clamp(8px, 1cqw, calc(11px * var(--prs-cap))); color: var(--text);
+}
+/* The control period, drawn where it can be counted. The ticks sit over the
+   fills rather than under them, so a segment reads as the number of ticks it
+   covers instead of as a length. */
+.prs-bticks { position: absolute; inset: 0; pointer-events: none; }
+.prs-bticks i {
+  position: absolute; left: var(--x); top: 0; bottom: 0; width: 1px;
+  background: var(--surface); opacity: .72;
+}
+.prs-g0 { background: var(--amber-soft); }
+.prs-g1 { background: oklch(84% 0.048 92); }
+.prs-g2 { background: oklch(86% 0.040 150); }
+.prs-g3 { background: oklch(85% 0.045 250); }
+.prs-keys {
+  margin: 0; padding: 0; list-style: none; display: grid;
+  align-content: center; gap: clamp(10px, 3cqh, calc(32px * var(--prs-cap)));
+}
+.prs-keys li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline; gap: 9px; word-break: keep-all;
+  font-size: clamp(9px, 1.15cqw, calc(13px * var(--prs-cap))); color: var(--text);
+}
+.prs-keys li b { font-family: var(--mono); color: var(--text); font-weight: 600; }
+.prs-keys .prs-ktext span {
+  display: block; margin-top: 4px;
+  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); line-height: 1.55;
+  color: var(--text-muted); word-break: keep-all;
+}
+.prs-sw {
+  width: 10px; height: 10px; border-radius: 3px; flex: none;
+  transform: translateY(1px);
+}
+
+/* ── timing ────────────────────────────────────────────────────────── */
+
+.prs-timing .prs-body { align-content: stretch; }
+.prs-tim { display: grid; align-content: space-evenly; gap: 10px; }
+.prs-row { display: grid; grid-template-columns: clamp(80px, 13cqw, calc(150px * var(--prs-cap))) minmax(0, 1fr); gap: 12px; align-items: center; }
+.prs-rname {
+  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); color: var(--text-muted);
+  text-align: right; word-break: keep-all;
+}
+.prs-lane { position: relative; height: clamp(20px, 2.8cqw, calc(32px * var(--prs-cap))); }
+.prs-lane > i {
+  position: absolute; left: var(--x); top: -4px; bottom: -4px; width: 1px;
+  background: var(--border-soft);
+}
+.prs-blk {
+  position: absolute; left: var(--x); width: var(--w); top: 0; bottom: 0;
+  display: grid; place-items: center; border-radius: 4px; overflow: hidden;
+  font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap)));
+}
+.prs-blk.prs-wait { background: var(--surface-2); border: 1px solid var(--border-soft); color: var(--text-muted); }
+.prs-blk.prs-run { background: var(--orange-soft); border: 1px solid var(--amber-soft); color: var(--orange-ink); }
+.prs-mk { position: absolute; left: var(--x); top: -13px; bottom: -3px; border-left: 1.5px solid var(--text); }
+.prs-mk b {
+  position: absolute; left: 5px; top: -2px; white-space: nowrap;
+  font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap)));
+  font-style: italic; font-weight: 600; color: var(--text);
+}
+.prs-mk.us { border-left-color: var(--orange-ink); }
+.prs-mk.us b { color: var(--orange-ink); }
+.prs-axis { position: relative; height: 12px; }
+.prs-axis span {
+  position: absolute; left: var(--x); transform: translateX(-50%);
+  font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted);
+}
+.prs-tnote {
+  margin: 2px 0 0; text-align: center; font-size: clamp(7px, .9cqw, calc(10px * var(--prs-cap)));
+  color: var(--text-muted);
+}
+
+/* ── lineage ───────────────────────────────────────────────────────── */
+
+.prs-lin { display: flex; align-items: center; gap: 10px; align-content: center; }
+.prs-priors { display: grid; gap: 12px; flex: 1; min-width: 0; }
+.prs-node {
+  background: var(--surface-2); border: 1px solid var(--border-soft);
+  border-radius: 8px; padding: 10px 13px; flex: 1; min-width: 0;
+}
+.prs-node.hot { background: var(--orange-soft); border-color: var(--amber-soft); }
+.prs-when { display: block; font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted); }
+.prs-node b { display: block; margin: 2px 0 3px; font-size: clamp(9px, 1.15cqw, calc(13px * var(--prs-cap))); font-weight: 700; color: var(--text); }
+.prs-node.hot b { color: var(--orange-ink); }
+.prs-nnote { display: block; font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); line-height: 1.5; color: var(--text-muted); word-break: keep-all; }
+
+/* ── the speaker essay ─────────────────────────────────────────────── */
+
+.prs-script {
+  margin-top: -14px; padding: 16px clamp(16px, 3vw, calc(26px * var(--prs-cap))) 18px;
+  border: 1px solid var(--border-soft); border-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius); background: var(--surface-2);
+}
+.prs-script h4 {
+  margin: 0 0 9px; font-family: var(--mono); font-size: .62rem; font-weight: 700;
+  letter-spacing: .16em; color: var(--orange-ink);
+}
+.prs-script p { margin: 0 0 9px; font-size: .84rem; line-height: 1.78; color: var(--text-muted); word-break: keep-all; }
+.prs-script p:last-child { margin: 0; }
+.prs-script b { color: var(--text); font-weight: 700; }
+.prs-script .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
+
+.prs-slide .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
+
+/* A slide is a fixed-ratio frame, so below the phone breakpoint the two-column
+   compositions have nowhere to go but taller type in narrower columns. They
+   stack instead, and the ratio is released so the frame follows its content. */
+@media (max-width: 620px) {
+  .prs-slide { aspect-ratio: auto; min-height: 62vh; }
+  .prs-versus .prs-body, .prs-ledger .prs-body, .prs-split .prs-body,
+  .prs-statement .prs-body:has(.prs-diag) { grid-template-columns: 1fr; }
+  .prs-facts { grid-auto-flow: row; }
+  .prs-fact { border-left: 0; border-top: 1px solid var(--border-soft); padding-left: 0; }
+  .prs-fact:first-child { border-top: 0; }
+  /* A routing diagram is a left-to-right reading and stacking it would lose
+     that, so it keeps its row and scrolls inside itself instead. The page body
+     never scrolls sideways. */
+  .prs-chain, .prs-split { overflow-x: auto; padding-bottom: 4px; }
+  .prs-chain > .prs-box, .prs-split > .prs-box, .prs-lanes { min-width: 116px; }
+  .prs-lin { overflow-x: auto; }
+  .prs-priors, .prs-lin > .prs-node { min-width: 150px; }
+  .prs-row { grid-template-columns: 72px minmax(0, 1fr); }
+  /* A timing mark's label sits past its lane's right edge, which the frame
+     would clip. The ruler keeps its width and scrolls, with room on the right
+     for the last label. */
+  .prs-timing .prs-body { overflow-x: auto; }
+  .prs-tim { min-width: 430px; padding-right: 64px; }
+  /* A one-slide run gets a block the width of one cell, and at this size the
+     act's Korean gloss does not fit in it — it wraps into its neighbour and
+     the rail stops being readable. The glyph alone still names the beat. */
+  .prs-rlab em { display: none; }
+}
+
+/* ── the control bar ───────────────────────────────────────────────── */
+
+/* Printed by the build and unhidden by `presentation.js`, so a browser with no script
+   never sees a button that cannot present. */
+.prs-stage { display: grid; gap: 16px; }
+.prs-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.prs-btn {
+  padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-pill);
+  background: var(--surface); color: var(--text); font: inherit; font-size: .8rem;
+  font-weight: 600; cursor: pointer;
+}
+.prs-btn:hover { background: var(--surface-3); }
+.prs-btn[aria-pressed="true"] {
+  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
+}
+.prs-hint { font-family: var(--mono); font-size: .68rem; color: var(--text-muted); }
+.prs-zoom {
+  min-width: 3.4em; text-align: center; font-family: var(--mono);
+  font-size: .72rem; color: var(--text-muted);
+}
+/* 목록, 레이저 and the zoom readout are stage controls: off the stage there is
+   nothing to list, point at or magnify, so they are not there to be pressed. */
+.prs-bar [data-stage] { display: none; }
+.prs-stage[data-presenting] .prs-bar [data-stage] { display: inline-flex; }
+.prs-stage[data-presenting] .prs-hint { display: none; }
+
+/* ── the stage ─────────────────────────────────────────────────────── */
+
+/* Presenting is the same markup read the other way: one slide, nothing else,
+   and the essay moved to a window only the presenter is looking at. Nothing is
+   cloned — the slide on the stage is the element the build already drew, so it
+   cannot disagree with the one the page validated.
+
+   The flag sits on the wrapper rather than on `.prs-presentation` because the stage has
+   controls of its own, and a control the presenter has to leave fullscreen to
+   reach is a control they will not use. Fullscreening the wrapper keeps the
+   bar on the same surface as the slide. */
+.prs-stage[data-presenting] {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center; overflow: hidden; background: var(--bg);
+}
+.prs-stage[data-presenting] .prs-presentation {
+  gap: 0; width: 100%; height: 100%; display: grid; place-items: center;
+}
+.prs-stage[data-presenting] .prs-presentation > *:not(.prs-slide) { display: none; }
+.prs-stage[data-presenting] .prs-slide { display: none; }
+.prs-stage[data-presenting] .prs-slide.prs-on {
+  --prs-cap: 2.4;
+  /* `100%` of the stage, not `100vw`: the viewport unit counts the scrollbar
+     gutter the fixed stage does not have, and the slide would hang 15 px off
+     the right edge into a strip the frame cannot paint. */
+  display: grid; width: min(100%, 177.78vh); height: auto;
+  border: 0; border-radius: 0; box-shadow: none;
+  /* Origin at the corner so a pan is the translation it looks like rather than
+     one the scale has already moved. */
+  transform: translate(var(--prs-x, 0px), var(--prs-y, 0px)) scale(var(--prs-z, 1));
+  transform-origin: 0 0;
+}
+/* And the gutter goes with the scroll it belonged to. `overflow: hidden` alone
+   does not take it: the root reserves it with `scrollbar-gutter: stable`, and a
+   reserved gutter shrinks the initial containing block, so even a `inset: 0`
+   fixed stage stops 15 px short of the screen. The flag is set on the root by
+   `presentation.js` rather than matched with `:has()`, because whether that selector
+   reaches out of a fixed subtree, and whether the resulting overflow propagates
+   from root to body, is exactly the sort of thing that differs between engines
+   — and a strip the stage cannot paint is visible from the back of the room. */
+:root[data-presenting] { overflow: hidden; scrollbar-gutter: auto; }
+
+/* The bar becomes chrome: present, but not competing with the slide until the
+   pointer goes for it. */
+.prs-stage[data-presenting] .prs-bar {
+  position: fixed; top: 14px; right: 14px; z-index: 62; margin: 0;
+  padding: 6px; gap: 6px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface-2);
+  box-shadow: var(--shadow); opacity: .3; transition: opacity .15s;
+}
+.prs-stage[data-presenting] .prs-bar:hover,
+.prs-stage[data-presenting] .prs-bar:focus-within { opacity: 1; }
+.prs-stage[data-presenting] .prs-btn { padding: 6px 11px; font-size: .74rem; }
+
+/* ── 목록 ──────────────────────────────────────────────────────────── */
+
+/* Every slide at once, so the question from the back of the room that names a
+   slide four beats ago is one click rather than eight presses.
+
+   The slides are already in the document, so the overview is those same
+   elements at a smaller width. `container-type: inline-size` on the frame is
+   what makes that enough: the type scales itself, and nothing is cloned,
+   transformed or rebuilt into a thumbnail that could fall out of step. */
+.prs-stage[data-overview] .prs-presentation {
+  place-items: start stretch; align-content: start; overflow: auto;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 14px; padding: clamp(58px, 8vh, 82px) 18px 24px;
+}
+/* `zoom` rather than a container query, because the type inside a slide has
+   floors — `clamp(14px, 2.5cqw, …)` stops shrinking long before a thumbnail is
+   thumbnail-sized, and the frame that stops shrinking with it overflows. Zoom
+   scales the whole rendered box after layout, so a card is the slide at its
+   own size, made small. A transform would need a wrapper element, and markup
+   is the build's to write, never a script's. */
+.prs-stage[data-overview] .prs-slide,
+.prs-stage[data-overview] .prs-slide.prs-on {
+  --prs-cap: 1;
+  display: grid; width: 100%; height: auto; zoom: .3; transform: none;
+  cursor: pointer; box-shadow: none;
+  border: 1px solid var(--border); border-radius: calc(var(--radius-sm) / .3);
+}
+.prs-stage[data-overview] .prs-slide.prs-on {
+  outline: 6px solid var(--orange); outline-offset: 4px;
+}
+
+/* ── 레이저 ────────────────────────────────────────────────────────── */
+
+/* The overlay is what makes the pointer usable: it takes the click, so
+   pointing at a number does not advance past the slide the number is on. */
+.prs-laser { position: fixed; inset: 0; z-index: 61; cursor: none; }
+.prs-dot {
+  position: fixed; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+  border-radius: 50%; pointer-events: none; z-index: 63;
+  background: radial-gradient(circle at 50% 50%,
+              rgba(255, 70, 50, .98) 0%, rgba(255, 40, 30, .6) 38%,
+              rgba(255, 0, 0, 0) 72%);
+  box-shadow: 0 0 16px 6px rgba(255, 45, 32, .55);
+}

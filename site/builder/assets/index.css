@@ -366,11 +366,11 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
   text-decoration: underline; text-underline-offset: 2px;
 }
 
-/* ── Deck: facet rail + list ──────────────────────────────────────────── */
+/* ── Presentation: facet rail + list ──────────────────────────────────────────── */
 /* The rail is nothing but filter controls, so with JS off it removes itself
    and the list takes the full width. */
-.deck { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
-html.js .deck {
+.presentation { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
+html.js .presentation {
   display: grid; grid-template-columns: 13.5rem minmax(0, 1fr); gap: 2rem;
   align-items: start;
 }
@@ -1028,7 +1028,7 @@ html:not(.js) .hub-actions { display: none; }
 @media (max-width: 900px) {
   /* The rail is the first thing to go: it is a shortcut for the search box,
      which is still there. */
-  html.js .deck { grid-template-columns: minmax(0, 1fr); }
+  html.js .presentation { grid-template-columns: minmax(0, 1fr); }
   html.js .rail { display: none; }
 }
 @media (max-width: 860px) {
@@ -1077,7 +1077,7 @@ html:not(.js) .hub-actions { display: none; }
   .mast-line { flex-wrap: wrap; gap: .4rem; }
   .mast h1 { white-space: normal; }
   .filters-inner { padding: .5rem .9rem; }
-  .deck { padding: 1.1rem .9rem 4rem; }
+  .presentation { padding: 1.1rem .9rem 4rem; }
   /* A five-column row cannot survive a phone, so it becomes a block: title
      and one line under it, with the numbers folded onto one trailing row. */
   .listhead { display: none; }
