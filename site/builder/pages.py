@@ -928,19 +928,17 @@ def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
 
 
 def _cmp_card(paper: Paper, comp, papers_by_id: dict) -> str:
-    """One comparison, from this paper's side of it."""
-    seats = "".join(
-        f'<span class="seat{" self" if pid == paper.stem else ""}">'
-        f'{c.esc(_alias(papers_by_id[pid]) if pid in papers_by_id else pid)}</span>'
-        for pid in comp.paper_ids
-    )
+    """One comparison, from this paper's side of it.
+
+    The same fork the list draws, with this paper's branch marked — which is
+    what makes the card a position rather than a list: not only that these
+    papers were on one table, but which answer was this one's.
+    """
     return (
         f'<a class="incmp-item" href="../../c/{c.esc(comp.slug)}/index.html">'
         f'<span class="incmp-when">{c.esc(comp.date)}</span>'
         f'<span class="incmp-t">{c.esc(comp.title)}</span>'
-        f'<span class="incmp-tag">{c.esc(comp.tagline)}</span>'
-        f'<span class="incmp-seats"><span class="seats-l">같이 놓인 논문</span>'
-        f"{seats}</span></a>"
+        f"{_fork(comp, papers_by_id, mark=paper.stem)}</a>"
     )
 
 
@@ -1141,15 +1139,83 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
 
 
 def _alias(paper: Paper) -> str:
-    """The paper's short name for a column head.
+    """The paper's short name, wherever a title does not fit.
 
-    A `Name: What it does` title puts the codename before the colon, and that
-    is what fits above a table column. A title with no colon has no separable
-    name, so the id below the head carries the identification instead and the
-    head is clamped by CSS.
+    `alias:` is the rewrite's own answer, resolved against the paper's original
+    by the ladder in `analysis/AUTHORING.md` §1 — which reaches names no title
+    carries (`XL-VLA` under *Cross-Hand Latent Representation…*). A paper the
+    ladder leaves without one falls back to the title's colon prefix, and then
+    to the title itself: the id printed beside it is what identifies the paper
+    either way, so the fallback only has to be readable, not authoritative.
     """
+    if paper.alias:
+        return paper.alias
     head = paper.title.split(":")[0].strip()
     return head if (":" in paper.title and len(head.split()) <= 5) else paper.title
+
+
+# ── The fork ────────────────────────────────────────────────────────────────
+# A comparison's list card draws `stances:` and `common:` (comparison/
+# AUTHORING.md §2-1) rather than its tagline: a branch per paper for what it
+# does, the trunk for what they all accept. The branch carries the alias AND
+# the arXiv id — the alias is what a reader recognises, the id is what they
+# search and cite — and every branch is drawn the same. Nothing here is keyed
+# to a pillar: a comparison usually sits inside one axis, so a per-paper colour
+# separates cards that are already apart and says nothing inside the one card
+# where the reader is actually choosing between three answers.
+
+FORK_ROW = 22          # px per branch, matched by `grid-auto-rows` in site.css
+
+
+def _fork_bracket(n: int) -> str:
+    """The bracket an `n`-way fork leaves: a trunk, a spine, a tick per branch."""
+    h = FORK_ROW * n
+    ticks = [FORK_ROW // 2 + FORK_ROW * i for i in range(n)]
+    d = " ".join(
+        [f"M0 {h // 2} H13", f"M13 {ticks[0]} V{ticks[-1]}"]
+        + [f"M13 {y} H25" for y in ticks]
+    )
+    return (
+        f'<svg class="fork-br" width="26" height="{h}" viewBox="0 0 26 {h}" '
+        f'aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" '
+        f'stroke-linecap="round"><path d="{d}"/></svg>'
+    )
+
+
+def _fork(comp, papers_by_id: dict, mark: str = "") -> str:
+    """One comparison as a fork, or its ids when the front matter cannot draw one.
+
+    `stances:` is required and checked, but a comparison missing it is reported
+    rather than skipped — so the render has to stand up without it, and falls
+    back to the id row the card would otherwise carry.
+    """
+    stances = comp.stances
+    if len(stances) != len(comp.paper_ids):
+        return (
+            '<span class="cmp-item-ids">'
+            + "".join(
+                f'<span class="cmp-item-id">{c.esc(pid)}</span>'
+                for pid in comp.paper_ids
+            )
+            + "</span>"
+        )
+    branches = "".join(
+        f'<span class="fork-n{" is-self" if pid == mark else ""}">'
+        f'{c.esc(_alias(papers_by_id[pid]) if pid in papers_by_id else pid)}</span>'
+        f'<span class="fork-id">{c.esc(pid)}</span>'
+        f'<span class="fork-s">{c.esc(stance)}</span>'
+        for pid, stance in zip(comp.paper_ids, stances)
+    )
+    trunk = (
+        f'<span class="fork-trunk"><span class="fork-l">공통</span>'
+        f"{c.esc(comp.common)}</span>"
+        if comp.common
+        else '<span class="fork-trunk"></span>'
+    )
+    return (
+        f'<span class="fork">{trunk}{_fork_bracket(len(stances))}'
+        f'<span class="fork-branches">{branches}</span></span>'
+    )
 
 
 def _cmp_header(comp) -> str:
@@ -1208,8 +1274,13 @@ def _cmp_cards(papers: list[Paper]) -> str:
     )
 
 
-def comparison_index_page(comps: list) -> str:
-    """비교 — every comparison, newest first."""
+def comparison_index_page(comps: list, papers_by_id: dict) -> str:
+    """비교 — every comparison, newest first.
+
+    A row carries the question, then the fork: what each paper does about it and
+    what they all accept. The tagline is not printed here — it is the same
+    thought as prose, and it prints under the H1 on the comparison's own page.
+    """
     ordered = sorted(comps, key=lambda x: x.order_key, reverse=True)
     if ordered:
         rows = "".join(
@@ -1217,12 +1288,7 @@ def comparison_index_page(comps: list) -> str:
             f'<span class="cmp-item-h">'
             f'<span class="cmp-item-t">{c.esc(x.title)}</span>'
             f'<span class="cmp-item-when">{c.esc(x.date)}</span></span>'
-            f'<span class="cmp-item-tag">{c.esc(x.tagline)}</span>'
-            f'<span class="cmp-item-ids">'
-            + "".join(
-                f'<span class="cmp-item-id">{c.esc(pid)}</span>' for pid in x.paper_ids
-            )
-            + "</span></a>"
+            f"{_fork(x, papers_by_id)}</a>"
             for x in ordered
         )
         list_html = f'<div class="cmp-list">{rows}</div>'
