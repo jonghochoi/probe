@@ -318,7 +318,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
   </div>
 </div>
 
-<div class="presentation">
+<div class="deck">
   <aside class="rail" data-rail>
     <p class="rail-h" data-mine-h>서재</p>
     {rail_mine}
