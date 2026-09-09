@@ -19,8 +19,10 @@
    the nav and the filter bar. The list is what the page is for, so the title
    states what this is in one line and gets out of the way — which is why the
    brand arrives as a mark on that line and a wash behind it rather than as a
-   block of its own. The landing band carries the diagram beside that line
-   (`.mast.brief` below); the memo hub's carries nothing else. */
+   block of its own. Every band carries a diagram beside that line, and each
+   one is that page's own claim rather than a shared ornament — which is also
+   why the padding under it is measured to a drawn edge rather than to a last
+   line of text. */
 .mast {
   position: relative; overflow: hidden;
   border-bottom: 1px solid var(--border);
@@ -41,12 +43,17 @@
   mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
 }
 /* A title this size needs the room a title this size implies — the band is
-   the first screen's only pause, and the list starts right under it. */
+   the first screen's only pause, and the list starts right under it. One box
+   for all three bands, whatever width the list under each one reads at: the
+   nav names three destinations at one level, and a band that changed shape
+   between them would say they are not. */
 .mast-inner {
   position: relative;
-  max-width: 1240px; margin: 0 auto; padding: 2.4rem 1.25rem 2rem;
+  max-width: 1240px; margin: 0 auto; padding: 2.4rem 1.25rem .95rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  gap: 1.6rem; align-items: center;
 }
-.mast.slim .mast-inner { padding: 2.6rem 1.25rem 2.2rem; }
+.mast-text { min-width: 0; }
 .mast-line { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; }
 /* The one line on the page that is allowed to be large. Hierarchy here is
    made of type, not of colour: a title a reader's eye lands on before
@@ -78,54 +85,41 @@
    is live. This one is the same pair for the reader who has no filter bar
    because the page is unscripted, so it leaves as soon as the script arrives. */
 html.js .mast-count { display: none; }
-/* The lead the two list pages carry under their title. Korean breaks between
-   any two syllables, so a sentence splits "논문" down the middle the moment it
-   stops fitting on one line: `keep-all` moves the break to a space, and
-   `pretty` spends the last two lines keeping a lone word off a line of its
-   own. */
+/* The sentence 비교 and 서재 hand their drawing. It is printed only where the
+   drawing cannot go — the band drops the art below 860px — so the two surfaces
+   never say the same thing twice, and a screen too narrow for the picture
+   still gets what the picture was for. Korean breaks between any two
+   syllables, so a sentence splits "논문" down the middle the moment it stops
+   fitting on one line: `keep-all` moves the break to a space, and `pretty`
+   spends the last two lines keeping a lone word off a line of its own. */
 .mast-sub {
+  display: none;
   font-size: .9rem; line-height: 1.7; color: var(--text-muted);
   max-width: 66ch; margin-top: .55rem;
   word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty;
 }
-.mast-sub strong { color: var(--text); font-weight: 700; }
-/* The two list pages say where their lead breaks, because the break is part of
-   the sentence: a line per thought. That only holds where the widest of them
-   fits, so below the breakpoint the `<br>` leaves and the paragraph wraps on
-   its own; above it the authored breaks are the measure, and the 66ch cap that
-   serves the wrapping case would cut in front of them. */
-.mast.slim .mast-sub br { display: none; }
-@media (min-width: 720px) {
-  .mast.slim .mast-sub { max-width: none; }
-  .mast.slim .mast-sub br { display: inline; }
-}
-/* ── Masthead diagram ─────────────────────────────────────────────────── */
-/* The tagline, drawn: a scan lifts four pieces out of an original that stays
-   shut, the four wait in a rack over the mark, and they cross two at a time
-   into the 요약 and 상세 tabs they become. Geometry is `components.mast_art()`;
-   this block is the clock. Every move is a transform or an opacity, so the
-   loop stays on the compositor.
+/* ── The landing's masthead diagram ───────────────────────────────────── */
+/* What this page holds, drawn: a scan crosses originals that stay shut and
+   lifts four pieces out of them, the four wait in a rack over the mark, and
+   then they land one at a time, top to bottom, as the list this page is — the
+   newest rewrite printed in full and every other one as a line.
+
+   Geometry is `components.mast_art()`; this block is the clock. Every move is
+   a transform or an opacity, so the loop stays on the compositor.
 
    One cycle for the whole picture: `--ma` names it, and every beat below is a
-   percentage of it, which is what lets the four flights, the two tabs and the
-   parts they deliver stay in step when the duration moves. Each piece scales
-   about its own centre — a transform-origin at the viewBox corner drags the
-   position along with the scale, and a piece that grows on landing would slide
-   off the part it just became. */
-.mast.brief .mast-inner {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
-  gap: 1.6rem; align-items: center;
-  /* The diagram ends in a drawn edge rather than in a line of text, and an
-     edge needs less air under it before the filter bar's own rule. */
-  padding-bottom: .95rem;
-}
-.mast-text { min-width: 0; }
-.mast-art {
-  --ma: 12s;
-  width: 100%; height: auto; overflow: visible;
-}
+   percentage of it, which is what keeps the four flights and the four things
+   they deliver in step when the duration moves. Each piece scales about its
+   own centre — a transform-origin at the viewBox corner drags the position
+   along with the scale, and a piece that grows on landing would slide off the
+   line it just became. */
+.mast-art { width: 100%; height: auto; overflow: visible; }
+.home-art { --ma: 12s; }
 .mast-art .ma-sheet   { fill: var(--surface); stroke: var(--border); }
-.mast-art .ma-card    { fill: var(--surface-2); stroke: var(--border); }
+/* The two behind the top sheet are the rest of the corpus. They are faded
+   rather than drawn in full because the stack is a quantity, not three
+   papers a reader is invited to count. */
+.mast-art .ma-stack   { opacity: .55; }
 .mast-art .ma-head    { fill: var(--border); }
 .mast-art .ma-type    { fill: var(--border-soft); }
 /* The veil is what says 열지 않음 before the tag does: the type under it stays
@@ -136,56 +130,41 @@ html.js .mast-count { display: none; }
 .mast-art .ma-edge    { fill: var(--orange); opacity: .8; }
 .mast-art .ma-pill    { fill: var(--surface-2); stroke: var(--border); }
 .mast-art .ma-pill-t,
-.mast-art .ma-label   { fill: var(--text-muted); font-family: var(--mono); font-size: 8.5px; }
-.mast-art .ma-pill-t  { font-family: var(--ko); font-size: 9px; text-anchor: middle; }
-.mast-art .ma-tab     { font-family: var(--ko); font-size: 10px; font-weight: 700; fill: var(--text-muted); }
-.mast-art .ma-rule    { stroke: var(--border); }
-.mast-art .ma-tabbar  { fill: var(--orange); }
-.mast-art .ma-act     { fill: var(--border); }
-.mast-art .ma-a1 .ma-act-bar { fill: var(--act1); }
-.mast-art .ma-a2 .ma-act-bar { fill: var(--act2); }
-.mast-art .ma-a3 .ma-act-bar { fill: var(--act3); }
-.mast-art .ma-a4 .ma-act-bar { fill: var(--act4); }
-.mast-art .ma-sum,
-.mast-art .ma-body    { fill: var(--border-soft); }
-.mast-art .ma-thesis  { fill: var(--text); opacity: .72; }
-.mast-art .ma-term    { fill: var(--border); }
-.mast-art .ma-term-bg { fill: var(--wash-key); stroke: var(--border); }
-.mast-art .ma-term-edge { fill: var(--blue); }
-.mast-art .ma-fig-plot  { fill: none; stroke: var(--text-muted); stroke-width: 1.2; opacity: .65; }
+.mast-art .ma-label   { fill: var(--text-muted); font-family: var(--ko); font-size: 9px; }
+.mast-art .ma-pill-t  { text-anchor: middle; }
+/* 가장 최근, which is the one thing the lead block says that a row does not. */
+.mast-art .ma-flag    { fill: var(--orange); }
+.mast-art .ma-lead-t  { fill: var(--text); opacity: .72; }
+.mast-art .ma-lead-s,
+.mast-art .ma-title   { fill: var(--border); }
+.mast-art .ma-id      { fill: var(--border-soft); }
+/* Hollow, because that is how a row arrives: the star is the reader's to
+   press and the build never knows it pressed. */
+.mast-art .ma-star    { fill: none; stroke: var(--border); stroke-width: 1.4;
+                        stroke-linejoin: round; }
+.mast-art .ma-sep     { fill: none; stroke: var(--border-soft); }
 .mast-art .ma-rack    { fill: var(--border); }
 .mast-art .ma-dot     { fill: var(--orange); }
 /* The resting picture, and the one a reader who asked for less motion keeps:
-   the original read, the 요약 tab standing. Everything in flight starts from
-   nothing, so nothing is stranded mid-flight and the two tabs never stack. */
+   the originals unread, the list standing. Only what is in flight starts from
+   nothing, so no piece is stranded over a line it never reached. */
 .mast-art .ma-band,
 .mast-art .ma-rack,
-.mast-art .ma-dot,
-.mast-art .ma-detail { opacity: 0; }
-.mast-art .ma-dot,
-.mast-art .ma-act,
-.mast-art .ma-term,
-.mast-art .ma-fig { transform-box: fill-box; transform-origin: center; }
-.mast-art .ma-thesis { transform-box: fill-box; transform-origin: left center; }
+.mast-art .ma-dot  { opacity: 0; }
+.mast-art .ma-dot  { transform-box: fill-box; transform-origin: center; }
+.mast-art .ma-lead,
+.mast-art .ma-row  { transform-box: fill-box; transform-origin: left center; }
 
-.mast-art .ma-band   { animation: ma-scan  var(--ma) cubic-bezier(.4, 0, .5, 1) infinite; }
-.mast-art .ma-rack   { animation: ma-rack  var(--ma) linear infinite; }
-.mast-art .ma-tab-1  { animation: ma-tab-a var(--ma) linear infinite; }
-.mast-art .ma-tab-2  { animation: ma-tab-b var(--ma) linear infinite; }
-.mast-art .ma-tabbar { animation: ma-bar   var(--ma) var(--ease-in-out) infinite; }
-.mast-art .ma-glance { animation: ma-glance var(--ma) linear infinite; }
-.mast-art .ma-detail { animation: ma-detail var(--ma) linear infinite; }
-.mast-art .ma-act    { animation: ma-act   var(--ma) var(--ease-out) infinite; }
-.mast-art .ma-a2 { animation-delay: .2s; }
-.mast-art .ma-a3 { animation-delay: .4s; }
-.mast-art .ma-a4 { animation-delay: .6s; }
-.mast-art .ma-sum    { animation: ma-sum    var(--ma) linear infinite; }
-.mast-art .ma-thesis { animation: ma-thesis var(--ma) var(--ease-out) infinite; }
-.mast-art .ma-body   { animation: ma-body   var(--ma) linear infinite; }
-.mast-art .ma-term   { animation: ma-term   var(--ma) var(--ease-out) infinite; }
-.mast-art .ma-fig    { animation: ma-fig    var(--ma) var(--ease-out) infinite; }
-.mast-art .ma-dot    { animation-duration: var(--ma); animation-iteration-count: infinite;
-                       animation-timing-function: cubic-bezier(.35, 0, .25, 1); }
+.mast-art .ma-band { animation: ma-scan var(--ma) cubic-bezier(.4, 0, .5, 1) infinite; }
+.mast-art .ma-rack { animation: ma-rack var(--ma) linear infinite; }
+.mast-art .ma-lead { animation: ma-lead var(--ma) var(--ease-out) infinite; }
+.mast-art .ma-row  { animation: ma-row  var(--ma) var(--ease-out) infinite; }
+/* A list is read top to bottom, so it arrives that way — each row waits for
+   the piece that becomes it. */
+.mast-art .ma-r2 { animation-delay: .95s; }
+.mast-art .ma-r3 { animation-delay: 1.9s; }
+.mast-art .ma-dot { animation-duration: var(--ma); animation-iteration-count: infinite;
+                    animation-timing-function: cubic-bezier(.35, 0, .25, 1); }
 .mast-art .ma-d1 { animation-name: ma-piece-1; }
 .mast-art .ma-d2 { animation-name: ma-piece-2; }
 .mast-art .ma-d3 { animation-name: ma-piece-3; }
@@ -194,60 +173,234 @@ html.js .mast-count { display: none; }
 @keyframes ma-scan {
   0%, 3%    { transform: translateY(0); opacity: 0; }
   5%        { opacity: 1; }
-  30%       { transform: translateY(112px); opacity: 1; }
-  34%, 100% { transform: translateY(112px); opacity: 0; }
+  30%       { transform: translateY(106px); opacity: 1; }
+  34%, 100% { transform: translateY(106px); opacity: 0; }
 }
-@keyframes ma-rack   { 0%, 17% { opacity: 0; } 22%, 62% { opacity: .55; } 67%, 100% { opacity: 0; } }
-@keyframes ma-tab-a  { 0%, 60% { fill: var(--text); } 65%, 94% { fill: var(--text-muted); }
-                       98%, 100% { fill: var(--text); } }
-@keyframes ma-tab-b  { 0%, 60% { fill: var(--text-muted); } 65%, 94% { fill: var(--text); }
-                       98%, 100% { fill: var(--text-muted); } }
-@keyframes ma-bar    { 0%, 60% { transform: translateX(0); } 65%, 94% { transform: translateX(38px); }
-                       98%, 100% { transform: translateX(0); } }
-@keyframes ma-glance { 0%, 33% { opacity: 0; } 37%, 58% { opacity: 1; } 62%, 100% { opacity: 0; } }
-@keyframes ma-detail { 0%, 64% { opacity: 0; } 68%, 94% { opacity: 1; } 97%, 100% { opacity: 0; } }
-@keyframes ma-act    { 0%, 41% { transform: translateY(4px) scale(.96); opacity: 0; }
-                       46%, 100% { transform: none; opacity: 1; } }
-@keyframes ma-sum    { 0%, 44% { opacity: 0; } 49%, 100% { opacity: 1; } }
-@keyframes ma-thesis { 0%, 66% { transform: scaleX(0); } 71%, 100% { transform: scaleX(1); } }
-@keyframes ma-body   { 0%, 68% { opacity: 0; } 73%, 100% { opacity: 1; } }
-@keyframes ma-term   { 0%, 71% { transform: scale(.94); opacity: 0; } 76%, 100% { transform: none; opacity: 1; } }
-@keyframes ma-fig    { 0%, 74% { transform: scale(.94); opacity: 0; } 79%, 100% { transform: none; opacity: 1; } }
+@keyframes ma-rack { 0%, 17% { opacity: 0; } 22%, 66% { opacity: .55; } 72%, 100% { opacity: 0; } }
+@keyframes ma-lead { 0%, 42% { opacity: 0; transform: translateY(5px); }
+                     50%, 100% { opacity: 1; transform: none; } }
+@keyframes ma-row  { 0%, 50% { opacity: 0; transform: translateX(-8px); }
+                     58%, 100% { opacity: 1; transform: none; } }
 
-/* The four flights. A piece leaves the line the scan is crossing, waits in its
-   slot on the rack, and lands on the one part of the rewrite it becomes —
-   act cards, summary, term panel, figure, in that order. The two that stay
-   behind slide inward as the first pair leaves, so the rack keeps its centre. */
+/* The four flights. A piece leaves a line of the original the scan is
+   crossing, waits in its slot on the rack, and lands on the one part of the
+   list it becomes — the lead block first, then a row each. */
 @keyframes ma-piece-1 {
   0%, 7.5%   { transform: scale(.35); opacity: 0; }
   9%         { transform: none; opacity: 1; }
-  20%, 34%   { transform: translate(74px, -12px); opacity: 1; }
-  40%        { transform: translate(186px, 23px); opacity: 1; }
-  43%, 100%  { transform: translate(186px, 23px) scale(4); opacity: 0; }
+  20%, 38%   { transform: translate(88px, -6px); opacity: 1; }
+  45%        { transform: translate(263px, -5px); opacity: 1; }
+  48%, 100%  { transform: translate(263px, -5px) scale(4); opacity: 0; }
 }
 @keyframes ma-piece-2 {
   0%, 11.5%  { transform: scale(.35); opacity: 0; }
   13%        { transform: none; opacity: 1; }
-  24%, 37%   { transform: translate(88px, -30px); opacity: 1; }
-  43%        { transform: translate(264px, 40px); opacity: 1; }
-  46%, 100%  { transform: translate(264px, 40px) scale(4); opacity: 0; }
+  24%, 46%   { transform: translate(102px, -24px); opacity: 1; }
+  53%        { transform: translate(292px, 20px); opacity: 1; }
+  56%, 100%  { transform: translate(292px, 20px) scale(4); opacity: 0; }
 }
 @keyframes ma-piece-3 {
   0%, 15.5%  { transform: scale(.35); opacity: 0; }
   17%        { transform: none; opacity: 1; }
-  28%, 40%   { transform: translate(102px, -48px); opacity: 1; }
-  45%, 64%   { transform: translate(88px, -48px); opacity: 1; }
-  70%        { transform: translate(227px, 34px); opacity: 1; }
-  73%, 100%  { transform: translate(227px, 34px) scale(4); opacity: 0; }
+  28%, 54%   { transform: translate(116px, -42px); opacity: 1; }
+  61%        { transform: translate(313px, 24px); opacity: 1; }
+  64%, 100%  { transform: translate(313px, 24px) scale(4); opacity: 0; }
 }
 @keyframes ma-piece-4 {
   0%, 19.5%  { transform: scale(.35); opacity: 0; }
   21%        { transform: none; opacity: 1; }
-  32%, 40%   { transform: translate(116px, -66px); opacity: 1; }
-  45%, 67%   { transform: translate(102px, -66px); opacity: 1; }
-  73%        { transform: translate(397px, 16px); opacity: 1; }
-  76%, 100%  { transform: translate(397px, 16px) scale(4); opacity: 0; }
+  32%, 62%   { transform: translate(130px, -60px); opacity: 1; }
+  69%        { transform: translate(278px, 28px); opacity: 1; }
+  72%, 100%  { transform: translate(278px, 28px) scale(4); opacity: 0; }
 }
+/* ── Comparison masthead diagram ──────────────────────────────────────── */
+/* The fork at band size: a question over everything, the trunk on the left,
+   one branch per paper, and an arrow off the edge where that paper's own page
+   carries on. Geometry is `components.cmp_art()`; this block is the clock.
+   `--ca` names one cycle and every beat below is a percentage of it, so the
+   branches, the stances and the trunk stay in step when the duration moves.
+
+   Nothing is hidden on the element itself. Every piece starts from a keyframe
+   at `0%` and rests where the drawing wants it, so the picture a reader gets
+   with the animation off — no script needed, `prefers-reduced-motion` set, or
+   the frame simply not painted yet — is the finished fork rather than an empty
+   box. `.ca-all` is what lets the cycle restart: the whole drawing fades out
+   before any single piece snaps back to its opening state. */
+.cmp-art { --ca: 11s; }
+.cmp-art .ca-sheet   { fill: var(--surface); stroke: var(--border); }
+.cmp-art .ca-q       { fill: var(--text); opacity: .62; }
+.cmp-art .ca-label   { fill: var(--text-muted); font-family: var(--ko); font-size: 9px; }
+.cmp-art .ca-trunk-l { fill: var(--orange-ink); font-weight: 700; }
+.cmp-art .ca-trunk   { fill: var(--border); }
+/* One colour for the bracket, taken from the one `.fork-br` draws on every
+   comparison card, so the band and the list under it are the same fork. */
+.cmp-art .ca-stub,
+.cmp-art .ca-spine,
+.cmp-art .ca-tick    { fill: none; stroke: var(--amber-soft); stroke-width: 1.4;
+                       stroke-linecap: round; }
+.cmp-art .ca-pill    { fill: var(--surface-2); stroke: var(--border); }
+/* The trunk is lighter than the branches on purpose: 공통 is the ground the
+   comparison stands on, and the stance is the thing it was written to show. */
+.cmp-art .ca-stance  { fill: var(--text-muted); }
+.cmp-art .ca-out     { fill: none; stroke: var(--orange); stroke-width: 1.6;
+                       stroke-linecap: round; stroke-linejoin: round; opacity: .8; }
+/* The cut is a dashed rule rather than a drawn one because it is not a
+   thing in the picture — it is where the picture changes its mind. */
+.cmp-art .ca-cut     { fill: none; stroke: var(--amber-soft); stroke-width: 1.2;
+                       stroke-dasharray: 3 4; }
+
+/* A bar that fills grows from its own left edge and a spine opens about its
+   middle; an origin at the viewBox corner would drag the piece across the
+   drawing as it scaled. */
+.cmp-art .ca-q,
+.cmp-art .ca-trunk,
+.cmp-art .ca-stance,
+.cmp-art .ca-tick  { transform-box: fill-box; transform-origin: left center; }
+.cmp-art .ca-spine { transform-box: fill-box; transform-origin: center; }
+.cmp-art .ca-pill,
+.cmp-art .ca-out   { transform-box: fill-box; transform-origin: center; }
+
+.cmp-art .ca-all    { animation: art-cycle var(--ca) linear infinite; }
+.cmp-art .ca-sheet  { animation: ca-sheet  var(--ca) var(--ease-out) infinite; }
+.cmp-art .ca-q      { animation: ca-q      var(--ca) var(--ease-out) infinite; }
+.cmp-art .ca-pill   { animation: ca-pill   var(--ca) cubic-bezier(.35, 0, .25, 1) infinite; }
+.cmp-art .ca-stub   { animation: ca-stub   var(--ca) linear infinite; }
+.cmp-art .ca-spine  { animation: ca-spine  var(--ca) var(--ease-out) infinite; }
+.cmp-art .ca-tick   { animation: ca-tick   var(--ca) var(--ease-out) infinite; }
+.cmp-art .ca-stance { animation: ca-stance var(--ca) var(--ease-out) infinite; }
+.cmp-art .ca-trunk  { animation: ca-trunk  var(--ca) var(--ease-out) infinite; }
+.cmp-art .ca-out    { animation: ca-out    var(--ca) var(--ease-in-out) infinite; }
+.cmp-art .ca-cut    { animation: ca-cut    var(--ca) var(--ease-out) infinite; }
+/* The three branches arrive in the order they are listed, not at once: a fork
+   read top to bottom is a fork whose rows are separate answers. */
+.cmp-art .ca-t2, .cmp-art .ca-b2 * { animation-delay: .35s; }
+.cmp-art .ca-t3, .cmp-art .ca-b3 * { animation-delay: .7s; }
+
+@keyframes ca-sheet  { 0%, 2% { opacity: 0; } 8%, 100% { opacity: 1; } }
+@keyframes ca-q      { 0%, 6% { transform: scaleX(0); } 16%, 100% { transform: scaleX(1); } }
+@keyframes ca-pill   { 0%, 18% { transform: translateX(-36px); opacity: 0; }
+                       28%, 100% { transform: none; opacity: 1; } }
+@keyframes ca-stub   { 0%, 30% { opacity: 0; } 36%, 100% { opacity: 1; } }
+@keyframes ca-spine  { 0%, 34% { transform: scaleY(0); } 44%, 100% { transform: scaleY(1); } }
+@keyframes ca-tick   { 0%, 42% { transform: scaleX(0); } 52%, 100% { transform: scaleX(1); } }
+@keyframes ca-stance { 0%, 50% { transform: scaleX(0); } 60%, 100% { transform: scaleX(1); } }
+@keyframes ca-trunk  { 0%, 58% { transform: scaleX(0); } 68%, 100% { transform: scaleX(1); } }
+@keyframes ca-cut    { 0%, 46% { opacity: 0; } 58%, 100% { opacity: 1; } }
+/* The last beat, and the one that means the most: the branch does not end
+   here, it continues on that paper's own page. It has to finish before the
+   drawing settles, or the only thing it is ever seen doing is dissolving. */
+@keyframes ca-out    { 0%, 64% { transform: translateX(-5px); opacity: 0; }
+                       72%     { transform: translateX(3px); opacity: .8; }
+                       78%, 100% { transform: none; opacity: .8; } }
+
+/* ── 발표's masthead diagram ───────────────────────────────────────────── */
+/* `TALK_LEAD`, drawn: the one sentence over everything, a slide per act under
+   it in `--act1..4`, and under each slide what is said in front of it. The two
+   rows are the argument — a slide is what the room sees and the essay is what
+   the speaker says, and a deck with only the first row is a slide dump.
+   Geometry is `components.talk_art()`; `--pa` is the cycle, and the resting
+   picture is the finished talk.
+
+   `talk-` rather than `prs-`: that prefix is `presentation.css`'s scope, where
+   `.prs-art` is a cover slide's photograph. This rides `index.css` and is a
+   band, so it takes the name the destination already goes by. */
+.talk-art { --pa: 11s; }
+.talk-art .pa-label { fill: var(--text-muted); font-family: var(--ko); font-size: 9px; }
+.talk-art .pa-spine { fill: var(--text); opacity: .62; }
+.talk-art .pa-slide { fill: var(--surface); stroke: var(--border); }
+.talk-art .pa-body rect { fill: var(--border); }
+/* Fainter than the slide it sits under, because it is not on the screen —
+   the room hears it and never reads it. */
+.talk-art .pa-say rect { fill: var(--border-soft); }
+.talk-art .pa-act   { font-family: var(--ko); font-size: 10px; font-weight: 700; }
+.talk-art .pa-a1 .pa-bar, .talk-art .pa-a1 .pa-act { fill: var(--act1); }
+.talk-art .pa-a2 .pa-bar, .talk-art .pa-a2 .pa-act { fill: var(--act2); }
+.talk-art .pa-a3 .pa-bar, .talk-art .pa-a3 .pa-act { fill: var(--act3); }
+.talk-art .pa-a4 .pa-bar, .talk-art .pa-a4 .pa-act { fill: var(--act4); }
+
+.talk-art .pa-spine { transform-box: fill-box; transform-origin: left center; }
+.talk-art .pa-s,
+.talk-art .pa-body,
+.talk-art .pa-say { transform-box: fill-box; transform-origin: center; }
+
+.talk-art .pa-all   { animation: art-cycle var(--pa) linear infinite; }
+.talk-art .pa-spine { animation: pa-spine  var(--pa) var(--ease-out) infinite; }
+.talk-art .pa-s     { animation: pa-slide  var(--pa) cubic-bezier(.35, 0, .25, 1) infinite; }
+.talk-art .pa-body  { animation: pa-body   var(--pa) var(--ease-out) infinite; }
+.talk-art .pa-say   { animation: pa-say    var(--pa) var(--ease-out) infinite; }
+/* 起承轉結 is an order, so the four arrive in it. */
+.talk-art .pa-a2 * { animation-delay: .3s; }
+.talk-art .pa-a3 * { animation-delay: .6s; }
+.talk-art .pa-a4 * { animation-delay: .9s; }
+
+@keyframes pa-spine { 0%, 3% { transform: scaleX(0); } 14%, 100% { transform: scaleX(1); } }
+@keyframes pa-slide { 0%, 16% { transform: translateY(10px) scale(.96); opacity: 0; }
+                      28%, 100% { transform: none; opacity: 1; } }
+@keyframes pa-body  { 0%, 34% { opacity: 0; } 44%, 100% { opacity: 1; } }
+@keyframes pa-say   { 0%, 52% { transform: translateY(-4px); opacity: 0; }
+                      62%, 100% { transform: none; opacity: 1; } }
+
+/* ── Shelf masthead diagram ───────────────────────────────────────────── */
+/* Four marks fall into one browser window and stay in it. The frame is the
+   argument — it lights once to say it is a boundary, and the only thing that
+   crosses it is the export arrow — which is why the page has two export
+   buttons and no account. Geometry is `components.shelf_art()`; `--sa` is the
+   cycle, and the resting picture is again the finished one.
+
+   Not a number anywhere: what this browser holds is the reader's, and the
+   build has none of it to draw. */
+.shelf-art { --sa: 11s; }
+.shelf-art .sa-win   { fill: var(--surface); stroke: var(--border); }
+.shelf-art .sa-rule  { fill: none; stroke: var(--border); }
+.shelf-art .sa-dot   { fill: var(--border); }
+.shelf-art .sa-label { fill: var(--text-muted); font-family: var(--ko); font-size: 9px; }
+.shelf-art .sa-out-l { text-anchor: middle; }
+.shelf-art .sa-title { fill: var(--border); }
+/* A mark in the window is a mark that has been set, so the four take the
+   colours the page gives a set mark: 즐겨찾기, 책갈피 and 메모 the accent
+   (`.rowstar[aria-pressed="true"]`, `.mark-fab[aria-pressed="true"]`), 읽음
+   the green `.shelf-item[data-read="done"]` reads in. `--act1..4` is
+   deliberately not borrowed — those four mean the rewrite's four acts
+   everywhere else, and one palette answering two questions answers neither. */
+.shelf-art .sa-star,
+.shelf-art .sa-flag  { fill: var(--orange-ink); }
+.shelf-art .sa-check { fill: none; stroke: var(--green); stroke-width: 1.8;
+                       stroke-linecap: round; stroke-linejoin: round; }
+.shelf-art .sa-memo  { fill: none; stroke: var(--orange-ink); stroke-width: 1.3;
+                       stroke-linecap: round; }
+.shelf-art .sa-edge  { fill: none; stroke: var(--orange); opacity: 0; }
+.shelf-art .sa-arrow { fill: none; stroke: var(--orange); stroke-width: 1.6;
+                       stroke-linecap: round; stroke-linejoin: round; opacity: .8; }
+.shelf-art .sa-card  { fill: var(--surface-2); stroke: var(--border); }
+.shelf-art .sa-line  { fill: var(--border); }
+
+.shelf-art .sa-row,
+.shelf-art .sa-arrow,
+.shelf-art .sa-file { transform-box: fill-box; transform-origin: center; }
+
+.shelf-art .sa-all   { animation: art-cycle var(--sa) linear infinite; }
+.shelf-art .sa-row   { animation: sa-row   var(--sa) cubic-bezier(.35, 0, .25, 1) infinite; }
+.shelf-art .sa-r2 { animation-delay: .3s; }
+.shelf-art .sa-r3 { animation-delay: .6s; }
+.shelf-art .sa-r4 { animation-delay: .9s; }
+.shelf-art .sa-edge  { animation: sa-edge  var(--sa) var(--ease-in-out) infinite; }
+.shelf-art .sa-arrow { animation: sa-arrow var(--sa) var(--ease-in-out) infinite; }
+.shelf-art .sa-file  { animation: sa-file  var(--sa) var(--ease-out) infinite; }
+
+@keyframes sa-row   { 0%, 8% { transform: translateY(-16px); opacity: 0; }
+                      20%, 100% { transform: none; opacity: 1; } }
+@keyframes sa-edge  { 0%, 40% { opacity: 0; } 48% { opacity: .5; } 58%, 100% { opacity: 0; } }
+@keyframes sa-arrow { 0%, 60% { transform: translateX(-10px); opacity: 0; }
+                      70%, 100% { transform: none; opacity: .8; } }
+@keyframes sa-file  { 0%, 68% { transform: scale(.94); opacity: 0; }
+                      78%, 100% { transform: none; opacity: 1; } }
+
+/* One cycle for the two drawings that build rather than circulate: hold the
+   finished picture for most of it, dissolve, and let every piece reset while
+   nothing is on screen. */
+@keyframes art-cycle { 0%, 4% { opacity: 0; } 10%, 93% { opacity: 1; }
+                       99%, 100% { opacity: 0; } }
+
 @media (prefers-reduced-motion: reduce) {
   .mast-art * { animation: none; }
 }
@@ -1060,16 +1213,11 @@ html:not(.js) .hub-actions { display: none; }
 .talk-item:hover .talk-rail i { opacity: .85; }
 .talk-r1 { color: var(--act1); } .talk-r2 { color: var(--act2); }
 .talk-r3 { color: var(--act3); } .talk-r4 { color: var(--act4); }
-/* The cost in mono and the room in prose, because they are two kinds of fact:
-   14분 · 9장 is read as a number and the audience is read as a sentence. */
-.talk-foot {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .55rem;
-}
+/* In mono, because 14분 · 9장 is read as a number rather than as a sentence. */
 .talk-cost {
   font-family: var(--mono); font-size: .7rem; color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.talk-for { font-size: .76rem; color: var(--text-muted); word-break: keep-all; }
 
 @media (max-width: 900px) {
   /* The rail is the first thing to go: it is a shortcut for the search box,
@@ -1078,8 +1226,10 @@ html:not(.js) .hub-actions { display: none; }
   html.js .rail { display: none; }
 }
 @media (max-width: 860px) {
-  .mast.brief .mast-inner { grid-template-columns: minmax(0, 1fr); }
+  .mast .mast-inner { grid-template-columns: minmax(0, 1fr); }
   .mast-art { display: none; }
+  /* What the drawing was saying, said in words instead. */
+  .mast-sub { display: block; }
 }
 @media (max-width: 680px) {
   /* The bar is two lines on a phone: the search box takes one on its own, and

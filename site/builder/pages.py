@@ -283,18 +283,14 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         for i, p in enumerate(ordered)
     )
 
-    body = f"""<header class="mast brief">
-  <div class="mast-inner">
-    <div class="mast-text">
-      <p class="mast-eyebrow">Dexterous manipulation</p>
-      <div class="mast-line">
-        <h1>논문, 읽기 좋게 옮겨 둡니다</h1>
-        <p class="mast-count">{len(ordered)}편{f" · 최근 {c.esc(ordered[0].date)}" if ordered else ""}</p>
-      </div>
-    </div>
-    {c.mast_art()}
-  </div>
-</header>
+    head = c.mast(
+        eyebrow="Dexterous manipulation",
+        title="논문, 읽기 좋게 옮겨 둡니다",
+        art=c.mast_art(),
+        count=f"{len(ordered)}편" + (f" · 최근 {ordered[0].date}" if ordered else ""),
+    )
+
+    body = f"""{head}
 
 <div class="filters" data-filters>
   <div class="filters-inner">
@@ -644,16 +640,14 @@ def shelf_page(papers: list[Paper]) -> str:
         for i, (key, label) in enumerate(SHELF_TABS)
     )
 
-    body = f"""<header class="mast slim">
-  <div class="mast-inner">
-    <h1>서재</h1>
-    <p class="mast-sub">
-      즐겨찾기 · 읽은 논문 · 책갈피 · 메모.<br>
-      넷 다 <strong>이 브라우저에만</strong> 남고, 사이트 데이터를 지우면 사라집니다.<br>
-      옮기거나 남길 것은 내보내세요.
-    </p>
-  </div>
-</header>
+    head = c.mast(
+        eyebrow="Kept in this browser",
+        title="서재, 이 브라우저에만 남습니다",
+        art=c.shelf_art(),
+        sub=c.SHELF_LEAD,
+    )
+
+    body = f"""{head}
 
 <main class="hub" data-hub>
   <div class="hub-tabs" role="tablist" aria-label="서재 보기">{tabs}</div>
@@ -1366,11 +1360,11 @@ def talk_index_page(presentation_map: dict) -> str:
     Thursday" is a question the paper list cannot answer, since a paper that
     has a talk looks exactly like one that does not until the page is open.
 
-    Each row says what the talk was cut for — the sentence it lands, then how
-    long and for whom. All three are the presentation's own front matter, so
-    nothing here is invented, and they are what a reader needs to know the talk
-    is not theirs before opening it. `venue` stays off: it dates the paper
-    rather than the talk, and the paper is one click away wearing it already.
+    Each row says the sentence the talk lands and how long it takes — both the
+    presentation's own front matter, so nothing here is invented. Nothing else
+    from that front matter earns the space: `venue` dates the paper rather than
+    the talk, and `audience` is a sentence about a room this reader is not
+    standing in, printed at the width of a line they are scanning.
 
     Under them the act rail, drawn the way the cover slide draws it: one block
     per run of a beat, weighted by the slides it holds. It is the talk's shape,
@@ -1386,15 +1380,14 @@ def talk_index_page(presentation_map: dict) -> str:
     else:
         list_html = '<p class="corpus-empty">아직 발표 자료로 만든 논문이 없습니다.</p>'
 
-    body = f"""<header class="mast slim">
-  <div class="mast-inner">
-    <h1>발표</h1>
-    <p class="mast-sub">
-      논문 한 편을 <strong>방에서 말할 순서</strong>로 다시 짠 자료입니다.<br>
-      슬라이드마다 무엇을 말할지가 붙어 있고, 재작성본이 있는 논문만 여기에 섭니다.
-    </p>
-  </div>
-</header>
+    head = c.mast(
+        eyebrow="Slides and script",
+        title="발표, 할 말을 순서대로 적어 둡니다",
+        art=c.talk_art(),
+        sub=c.TALK_LEAD,
+    )
+
+    body = f"""{head}
 
 <main class="hub">
   {list_html}
@@ -1436,8 +1429,7 @@ def _talk_row(presentation) -> str:
         f'<span class="talk-id">{c.esc(presentation.paper_id)}</span></span>'
         f'<span class="talk-spine">{spine}</span>'
         f'<span class="talk-rail" aria-hidden="true">{rail}</span>'
-        f'<span class="talk-foot"><span class="talk-cost">{c.esc(cost)}</span>'
-        f'<span class="talk-for">{c.esc(presentation.audience)}</span></span></a>'
+        f'<span class="talk-cost">{c.esc(cost)}</span></a>'
     )
 
 
@@ -1462,15 +1454,14 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
     else:
         list_html = '<p class="corpus-empty">아직 비교한 글이 없습니다.</p>'
 
-    body = f"""<header class="mast slim">
-  <div class="mast-inner">
-    <h1>비교</h1>
-    <p class="mast-sub">
-      논문 두세 편을 한 질문 아래 놓고 <strong>갈리는 자리</strong>만 봅니다.<br>
-      각 논문이 무엇을 하는지는 그 논문의 재작성본에 있습니다.
-    </p>
-  </div>
-</header>
+    head = c.mast(
+        eyebrow="Side by side",
+        title="비교, 갈리는 자리만 봅니다",
+        art=c.cmp_art(),
+        sub=c.CMP_LEAD,
+    )
+
+    body = f"""{head}
 
 <main class="hub">
   {list_html}

@@ -104,10 +104,6 @@ class Presentation:
         return self.front.get("spine", "")
 
     @property
-    def audience(self) -> str:
-        return self.front.get("audience", "")
-
-    @property
     def minutes(self) -> str:
         return self.front.get("minutes", "")
 

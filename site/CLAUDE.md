@@ -36,12 +36,24 @@ own page rather than a page of its own, so the link back is the page it is
 already on — and `t/` is an index of those tabs rather than a second home for
 them: every row it prints links into the paper page it belongs to.
 
+**Every band draws what its own page holds.** `components.mast()` is one frame
+for the destinations the nav names, and the drawing beside each title is that
+page's own: 논문 the list, 비교 the fork a comparison opens, 발표 the four acts
+a talk is cut into with what is said under each, 서재 the window a browser
+keeps. A band that draws some *other* page's surface goes stale every time that
+page changes — a drawing of the paper page's tab strip asserts a shape that
+page stops having the moment a track is added, on a band whose own page has no
+tabs at all. A new track that earns a destination draws what its own list
+holds, and the ones already here stay true.
+
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
 under `assets/shelf.js`, and the landing page size — a view setting rather than
 a mark on a paper — under `probe.view.v1`. Both marks are set by the reader and
 never inferred: neither opening a page nor scrolling to its end is evidence it
-was read.
+was read. This binds the drawings too — `components.shelf_art()` draws the four
+kinds without drawing how full any of them is, because a picture that implies a
+count leaks the same fact as markup that prints one.
 
 **A browser with no script loses only the extras.** Every control removes
 itself rather than sitting inert, and the landing list falls back to one page.
