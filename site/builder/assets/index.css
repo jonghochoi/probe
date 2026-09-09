@@ -1016,7 +1016,6 @@ html:not(.js) .hub-actions { display: none; }
   flex: 0 0 auto; font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.cmp-item-tag { font-size: .82rem; line-height: 1.6; color: var(--text-muted); }
 /* The ids rather than the titles: three titles do not fit on a line and three
    ids always do — the same trade the 책갈피 strip makes. */
 .cmp-item-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .2rem; }

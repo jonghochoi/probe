@@ -1679,25 +1679,76 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   text-wrap: balance;
 }
 .incmp-item:hover .incmp-t { color: var(--orange-ink); }
-.incmp-tag { font-size: .84rem; line-height: 1.6; color: var(--text-muted); }
-/* Which papers were on the table, in `compares:` order — the same order the
-   comparison's own columns run in, so the row is this paper's seat at it. */
-.incmp-seats {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem;
-  margin-top: .5rem; padding-top: .6rem; border-top: 1px dashed var(--border);
+/* ── The fork ──────────────────────────────────────────────────────────────
+   A comparison wherever it is listed — the 비교 index and the paper page's
+   비교 panel both draw this, so the two surfaces name one thing one way.
+   `stances:` are the branches, `common:` the trunk, in `compares:` order,
+   which is the order the comparison's own matrix columns run in.
+
+   Every branch is drawn identically. Colouring one per pillar separates cards
+   that already sit apart and says nothing inside the card, where the reader is
+   choosing between two or three answers to one question — so the only mark
+   that varies is `.is-self`, which answers a different question: which of
+   these is the paper I am on. */
+.fork {
+  display: flex; align-items: center; gap: .55rem;
+  margin-top: .45rem; padding-top: .55rem; border-top: 1px dashed var(--border);
 }
-.seats-l {
-  font-family: var(--mono); font-size: .62rem; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--text-muted); margin-right: .25rem;
+.fork-trunk {
+  flex: 0 0 auto; width: 17rem; text-align: right;
+  font-size: .74rem; line-height: 1.35; color: var(--text-muted);
+  /* Korean breaks between characters by default, which strands a syllable of
+     the last word alone on a line; `balance` then evens the two lines a
+     `common:` at the contract's ceiling still needs, rather than leaving one
+     word under a full line. The width is what most of them fit on one line in,
+     which is the reading neither property can produce on its own. */
+  word-break: keep-all; text-wrap: balance;
 }
-.seat {
-  font-size: .72rem; font-weight: 600; color: var(--text-muted);
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-pill); padding: .1rem .5rem; white-space: nowrap;
+/* The label is for the stacked layout only. Beside the bracket, the trunk is
+   already the line every branch leaves — a word saying so sits against the
+   bracket and reads as attached to it rather than as a heading over the text. */
+.fork-l { display: none; }
+/* `currentColor` on the path, so the bracket is one declaration here rather
+   than a stroke repeated in every generated <svg>. */
+.fork-br { flex: 0 0 auto; color: var(--amber-soft); display: block; }
+/* One grid for every branch, not a row each: the alias column is as wide as
+   the widest name, so the ids and the stances line up down the card. */
+.fork-branches {
+  flex: 1 1 auto; min-width: 0;
+  display: grid; grid-template-columns: max-content max-content minmax(0, 1fr);
+  grid-auto-rows: 22px; align-items: center; column-gap: .55rem;
 }
-.seat.self {
-  background: var(--orange); border-color: var(--orange);
-  color: var(--accent-ink); font-weight: 700;
+.fork-n { font-size: .78rem; font-weight: 700; color: var(--text); }
+.fork-n.is-self { color: var(--orange-ink); }
+.fork-id {
+  font-family: var(--mono); font-size: .64rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fork-s {
+  font-size: .78rem; color: var(--text-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+@media (max-width: 720px) {
+  /* The bracket is the one part that cannot fold: it is drawn to a row height
+     the stacked layout no longer has. A left rule says the same thing. */
+  .fork { flex-direction: column; align-items: stretch; gap: .4rem; }
+  .fork-trunk { width: auto; text-align: left; }
+  .fork-br { display: none; }
+  /* Stacked, the trunk is a line of text above other lines of text, so the
+     label is what still separates it from them. */
+  .fork-l {
+    display: block; font-family: var(--mono); font-size: .58rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: .1rem;
+  }
+  .fork-branches {
+    grid-template-columns: max-content minmax(0, 1fr); grid-auto-rows: auto;
+    row-gap: .15rem; padding-left: .6rem;
+    border-left: 2px solid var(--amber-soft);
+  }
+  /* Room is the scarce thing here, not lines: a stance wraps rather than being
+     clipped, and the id steps aside for it. */
+  .fork-s { white-space: normal; overflow: visible; }
+  .fork-id { display: none; }
 }
 
 /* ── 요약 ─────────────────────────────────────────────────────────────── */
