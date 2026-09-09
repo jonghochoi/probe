@@ -351,6 +351,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
 """
     return c.page(
         title="PROBE",
+        here="papers",
         description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
         depth=0,
@@ -626,6 +627,10 @@ def shelf_page(papers: list[Paper]) -> str:
 
     The page is also the export surface, and the only one: a shelf that lives
     in one browser profile reaches a second machine as a file or not at all.
+    The two export buttons are printed `disabled` for the same reason the
+    lists are printed empty — an empty shelf has nothing to write out, and a
+    file that downloads with nothing in it reports a success that did not
+    happen. `hub.js` opens them the moment a count is non-zero.
     """
     tabs = "".join(
         f'<button type="button" role="tab" id="sh-t-{key}" aria-controls="sh-{key}" '
@@ -653,8 +658,8 @@ def shelf_page(papers: list[Paper]) -> str:
 <main class="hub" data-hub>
   <div class="hub-tabs" role="tablist" aria-label="서재 보기">{tabs}</div>
   <div class="hub-actions">
-    <button type="button" class="primary" data-hub-action="export-json">JSON 내보내기</button>
-    <button type="button" data-hub-action="export-md">마크다운 내보내기</button>
+    <button type="button" data-hub-action="export-json" disabled>JSON 내보내기</button>
+    <button type="button" data-hub-action="export-md" disabled>마크다운 내보내기</button>
     <label class="filebtn">가져오기<input type="file" accept="application/json" data-hub-import hidden></label>
     <span class="filter-spacer"></span>
     <span class="hub-status" data-hub-status aria-live="polite"></span>
@@ -665,6 +670,7 @@ def shelf_page(papers: list[Paper]) -> str:
 """
     return c.page(
         title="서재 · PROBE",
+        here="shelf",
         body=body,
         depth=1,
         scripts=["memo.js", "shelf.js", "hub.js"],
@@ -765,6 +771,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
 """
     return c.page(
         title=f"{paper.title} · PROBE",
+        here="papers",
         description=paper.preview,
         body=body,
         depth=2,
@@ -1125,6 +1132,7 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
 """
     return c.page(
         title=f"{comp.title} · PROBE",
+        here="compare",
         description=comp.preview,
         body=body,
         depth=2,
@@ -1237,6 +1245,7 @@ def comparison_index_page(comps: list) -> str:
 """
     return c.page(
         title="비교 · PROBE",
+        here="compare",
         body=body,
         depth=1,
         extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',

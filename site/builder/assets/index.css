@@ -953,13 +953,22 @@ a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
 .hub-actions button:hover, .filebtn:hover {
   border-color: var(--amber-soft); color: var(--orange-ink);
 }
-.hub-actions .primary {
-  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
+/* The three read alike, and none of them takes the accent. On this page the
+   accent already answers one question — the tab strip's rule and its count
+   chip say which list is open — and a filled button under that strip is read
+   as a fourth thing that is on rather than as the action to take first. What
+   the reader came here to do is read the shelf; writing it out is what they
+   do afterwards, and once. */
+.hub-actions button[disabled] {
+  opacity: .48; cursor: not-allowed;
 }
-.hub-actions .primary:hover {
-  background: color-mix(in oklab, var(--orange) 88%, var(--text));
-  border-color: color-mix(in oklab, var(--orange) 88%, var(--text));
+.hub-actions button[disabled]:hover {
+  border-color: var(--border); color: var(--text-muted);
 }
+/* Nothing in this row works without a script — both exports are built in the
+   browser and the import is read there — so the row leaves rather than sitting
+   inert. The page's `noscript` line is what an unscripted reader gets instead. */
+html:not(.js) .hub-actions { display: none; }
 .hub-status { font-size: .74rem; color: var(--text-muted); }
 
 .memo-card {

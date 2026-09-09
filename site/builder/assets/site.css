@@ -375,13 +375,35 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 
 .nav-spacer { flex: 1; }
 .nav-links { display: flex; gap: .15rem; list-style: none; }
+/* The destinations stand at the controls' own height, so the row is one line
+   of 32px boxes with three labels sitting in it rather than two rows of
+   different things that happen to be vertically centred together. */
 .nav-links a {
   text-decoration: none; color: var(--text-muted);
   font-size: .82rem; font-weight: 500;
-  padding: .3rem .6rem; border-radius: var(--radius-sm); white-space: nowrap;
+  display: flex; align-items: center; height: 32px;
+  padding: 0 .6rem; border-radius: var(--radius-sm); white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
 .nav-links a:hover { color: var(--orange-ink); background: var(--orange-soft); }
+/* Where the reader is, marked the way the pagination strip marks it: a rule
+   under the label, not a filled pill. The nav has no card to fill, and the
+   underline is the one mark that sits on the ground the rest of the row sits
+   on. It is drawn inside the box, so nothing in the row shifts when the mark
+   moves from one destination to the next, and the hover ground is dropped
+   under it — a label that is already the answer does not also offer itself. */
+.nav-links a[aria-current="page"] {
+  color: var(--orange-ink); font-weight: 600;
+  border-radius: 0; box-shadow: inset 0 -2px 0 var(--orange);
+}
+.nav-links a[aria-current="page"]:hover { background: none; }
+
+/* One hairline between the two clusters. They are different kinds — three
+   places to go, then three things to do to the page in front of you — and
+   without a boundary the seam between an unboxed label and a bordered 32px
+   button reads as a control that lost its border rather than as the end of
+   one kind and the start of another. It goes wherever the destinations go. */
+.nav-rule { width: 1px; height: 18px; background: var(--border); flex: none; }
 
 /* ── The icon set ─────────────────────────────────────────────────────── */
 /* Every control's glyph is one of `components.icon()`'s paths: no fill, 1.6px
@@ -441,6 +463,10 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 }
 .nav-sheet a:last-child { border-bottom: 0; }
 .nav-sheet a:hover { color: var(--orange-ink); }
+/* The sheet answers the same question the row does, so it carries the same
+   mark — in a stack, where a rule under a line is the divider between two of
+   them, the accent moves to the label itself. */
+.nav-sheet a[aria-current="page"] { color: var(--orange-ink); font-weight: 700; }
 /* The one line that leaves the site, set apart the way the glyph it replaces
    is: last, and quieter than the places this site goes. */
 .nav-sheet-out { color: var(--text-muted); font-size: .84rem; }
@@ -1546,9 +1572,9 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
      the row it can lose and still be navigable. */
   .nav-inner { gap: .5rem; padding: 0 .9rem; }
   html:not(.js) .nav-word { display: none; }
-  html.js .nav-links, html.js .nav-repo { display: none; }
+  html.js .nav-links, html.js .nav-rule, html.js .nav-repo { display: none; }
   html.js .nav-menu { display: grid; }
-  .nav-links a { padding: .3rem .35rem; }
+  .nav-links a { padding: 0 .35rem; }
 
   /* The R5 components are all two- or three-track grids sized for a reading
      column. A phone is one column wide, so at this width each of them stacks
@@ -1572,7 +1598,8 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 @media (max-width: 360px) {
   .nav-inner { padding: 0 .7rem; }
   html:not(.js) .nav-inner { gap: .3rem; }
-  html:not(.js) .nav-links a { padding: .3rem .2rem; }
+  html:not(.js) .nav-links a { padding: 0 .2rem; }
+  html:not(.js) .nav-rule { display: none; }
 }
 
 @media print {
