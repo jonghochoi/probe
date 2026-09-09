@@ -18,15 +18,6 @@
 
 .prs-presentation { display: grid; gap: 26px; }
 
-.prs-lead {
-  margin: 0 0 4px; padding: 14px 16px; border: 1px solid var(--border-soft);
-  border-radius: var(--radius); background: var(--surface-2);
-  display: grid; gap: 6px;
-}
-.prs-lead p { margin: 0; font-size: .86rem; line-height: 1.65; color: var(--text-muted); }
-.prs-lead b { color: var(--text); font-weight: 700; }
-.prs-lead .prs-spine { font-size: .95rem; color: var(--text); font-weight: 600; }
-
 /* ── the frame ─────────────────────────────────────────────────────── */
 
 .prs-slide {
@@ -476,18 +467,29 @@
 
 /* ── the speaker essay ─────────────────────────────────────────────── */
 
+/* A script, not a panel. The essay is the one thing on this surface a person
+   reads *out loud*, so it is set as prose on the page's own ground — a rule
+   down its left edge to say where it starts, a measure it can be read at, and
+   the line-height of something spoken rather than skimmed. A tinted card with
+   muted small type says the opposite of all three: it reads as chrome hung off
+   the slide, and it is the only text here that is not chrome.
+   The bold is the presenter's own emphasis mark — where to lean — so it takes
+   the accent rather than another weight of the body colour. */
 .prs-script {
-  margin-top: -14px; padding: 16px clamp(16px, 3vw, calc(26px * var(--prs-cap))) 18px;
-  border: 1px solid var(--border-soft); border-top: 0;
-  border-radius: 0 0 var(--radius) var(--radius); background: var(--surface-2);
+  margin-top: -10px; padding: 2px 0 2px clamp(14px, 1.8vw, 20px);
+  border: 0; border-left: 2px solid var(--orange); border-radius: 0;
+  background: none;
 }
 .prs-script h4 {
-  margin: 0 0 9px; font-family: var(--mono); font-size: .62rem; font-weight: 700;
-  letter-spacing: .16em; color: var(--orange-ink);
+  margin: 0 0 11px; font-family: var(--mono); font-size: .6rem; font-weight: 700;
+  letter-spacing: .05em; color: var(--orange-ink);
 }
-.prs-script p { margin: 0 0 9px; font-size: .84rem; line-height: 1.78; color: var(--text-muted); word-break: keep-all; }
+.prs-script p {
+  margin: 0 0 .85em; max-width: 66ch; font-size: .93rem; line-height: 1.95;
+  color: var(--text); word-break: keep-all;
+}
 .prs-script p:last-child { margin: 0; }
-.prs-script b { color: var(--text); font-weight: 700; }
+.prs-script b { color: var(--orange-ink); font-weight: 700; }
 .prs-script .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
 
 .prs-slide .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
@@ -519,13 +521,14 @@
      act's Korean gloss does not fit in it — it wraps into its neighbour and
      the rail stops being readable. The glyph alone still names the beat. */
   .prs-rlab em { display: none; }
+
 }
 
 /* ── the control bar ───────────────────────────────────────────────── */
 
 /* Printed by the build and unhidden by `presentation.js`, so a browser with no script
    never sees a button that cannot present. */
-.prs-stage { display: grid; gap: 16px; }
+.prs-stage { display: grid; gap: 14px; }
 .prs-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .prs-btn {
   padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-pill);
@@ -536,16 +539,130 @@
 .prs-btn[aria-pressed="true"] {
   background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
 }
-.prs-hint { font-family: var(--mono); font-size: .68rem; color: var(--text-muted); }
-.prs-zoom {
-  min-width: 3.4em; text-align: center; font-family: var(--mono);
-  font-size: .72rem; color: var(--text-muted);
+/* The stage's own controls. Square and unlabelled, because they sit over a
+   slide a room is reading: a pill spelling out 목록 is a word competing with
+   the sentence on screen, and the word is still in the button's `title`. */
+.prs-ico {
+  width: 30px; height: 30px; display: inline-flex; align-items: center;
+  justify-content: center; padding: 0; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text-muted);
 }
-/* 목록, 레이저 and the zoom readout are stage controls: off the stage there is
-   nothing to list, point at or magnify, so they are not there to be pressed. */
+.prs-ico:hover { background: var(--surface-3); color: var(--text); }
+.prs-ico[aria-pressed="true"] {
+  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
+}
+/* The readout is a control-sized cell rather than a run of text, so it sits on
+   the buttons' own centre line instead of on a baseline they do not share. */
+.prs-zoom {
+  min-width: 3.1em; height: 30px; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: .72rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* Two kinds of control on one bar — three tools, then the way out — and the
+   seam between them is what says the last one is not a fourth tool. */
+.prs-sep { width: 1px; height: 18px; margin: 0 1px; background: var(--border); }
+/* Each control belongs to one of the two readings. 목록, 레이저, the zoom
+   readout and the way out are the stage's — off the stage there is nothing to
+   list, point at, magnify or leave. 발표 시작 and 발표자 노트 are the tab's,
+   and printing them again on the stage would be a button offering to start a
+   talk that is already running. */
 .prs-bar [data-stage] { display: none; }
 .prs-stage[data-presenting] .prs-bar [data-stage] { display: inline-flex; }
-.prs-stage[data-presenting] .prs-hint { display: none; }
+.prs-stage[data-presenting] .prs-bar [data-off-stage] { display: none; }
+
+/* ── the screen ────────────────────────────────────────────────────── */
+
+/* The tab's reading: one frame, held still, with ← and → beside it.
+
+   A talk is a sequence, and a sequence laid out as a scroll is a document —
+   the reader meets the turn by scrolling past six frames rather than by
+   arriving at it, which is the one thing the 起承轉結 spine is for. So the
+   frame does not move and the talk does, which is also what a room sees, and
+   nobody has to start a presentation to get that reading.
+
+   `data-browsing` and `data-presenting` are the two readings and never both:
+   the stage takes the presentation element over entirely, and a template that
+   still held three columns under it would be a layout nothing on screen was
+   laid out by.
+
+   The arrows are grid items of the presentation rather than chrome placed over
+   it, so they sit level with the *frame* — an essay opened under it grows the
+   row below them and moves nothing. */
+.prs-stage[data-browsing] .prs-presentation {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "prev screen next" ".    note   ." ".    deck   .";
+  gap: 0 clamp(4px, 1.4vw, 14px); align-items: center;
+}
+.prs-stage[data-browsing] .prs-slide { display: none; }
+.prs-stage[data-browsing] .prs-slide.prs-on { display: grid; grid-area: screen; }
+/* The essay arrives on the reader's word, and only the one belonging to the
+   frame on screen: the slide is what a room looks at and the essay is what is
+   said over it, so the two are never read at once. */
+.prs-stage[data-browsing] .prs-script { display: none; }
+.prs-stage[data-browsing][data-notes] .prs-script.prs-on {
+  display: block; grid-area: note; margin-top: 16px;
+}
+
+.prs-arrow {
+  grid-area: prev; align-self: center; display: none;
+  width: 34px; height: 34px; padding: 0; cursor: pointer;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 50%;
+  background: var(--surface); color: var(--text-muted);
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+.prs-next { grid-area: next; }
+.prs-stage[data-browsing] .prs-arrow { display: inline-flex; }
+.prs-arrow:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
+/* At the ends the arrow stays in place rather than disappearing: a control
+   that leaves takes the frame's width with it and the slide resizes under the
+   reader. */
+.prs-arrow[disabled] { opacity: .22; cursor: default; }
+.prs-arrow[disabled]:hover { color: var(--text-muted); border-color: var(--border); }
+
+/* ── the deck ──────────────────────────────────────────────────────── */
+
+/* One tick per slide, in its act's colour — the act rail read a second way,
+   with the reader's position in it. A tick is a button because the question a
+   reader asks halfway through a talk is "what was the turn again", and eight
+   presses of → is not an answer to it. */
+.prs-deck { display: none; grid-area: deck; align-items: center; gap: 14px; margin-top: 14px; }
+.prs-stage[data-browsing] .prs-deck { display: flex; }
+.prs-ticks {
+  flex: 1 1 auto; min-width: 0; height: 12px;
+  display: flex; align-items: center; gap: 3px;
+}
+.prs-tick {
+  flex: 1 1 0; min-width: 0; height: 5px; padding: 0; border: 0;
+  border-radius: 2px; background: currentColor; opacity: .34; cursor: pointer;
+  transition: height var(--dur-short) var(--ease-out),
+              opacity var(--dur-short) var(--ease-out);
+}
+.prs-tick:hover { opacity: .72; }
+.prs-tick[aria-current="true"] { height: 12px; opacity: 1; }
+.prs-where {
+  flex: 0 0 auto; margin: 0; font-family: var(--mono); font-size: .72rem;
+  color: var(--text-muted); font-variant-numeric: tabular-nums;
+}
+.prs-where b { color: var(--text); font-weight: 700; }
+.prs-where i { font-style: normal; margin: 0 .25em; opacity: .55; }
+
+/* Two 34px arrows and their gaps take a sixth of a phone's width away from the
+   frame, which is the one element on this surface that cannot spare it. They
+   drop to their own row under the slide — the same two buttons in the same
+   order, moved by the template rather than printed twice. The row gap stays 0
+   so the essay keeps its join with the frame; the arrows carry their own
+   clearance instead. */
+@media (max-width: 620px) {
+  .prs-stage[data-browsing] .prs-presentation {
+    grid-template-areas: "screen screen screen" "note   note   note"
+                         "prev   .      next"   "deck   deck   deck";
+    gap: 0;
+  }
+  .prs-stage[data-browsing] .prs-arrow { margin-top: 12px; }
+}
 
 /* ── the stage ─────────────────────────────────────────────────────── */
 
@@ -564,6 +681,7 @@
 }
 .prs-stage[data-presenting] .prs-presentation {
   gap: 0; width: 100%; height: 100%; display: grid; place-items: center;
+  grid-template-columns: none; grid-template-areas: none;
 }
 .prs-stage[data-presenting] .prs-presentation > *:not(.prs-slide) { display: none; }
 .prs-stage[data-presenting] .prs-slide { display: none; }
@@ -593,13 +711,12 @@
    pointer goes for it. */
 .prs-stage[data-presenting] .prs-bar {
   position: fixed; top: 14px; right: 14px; z-index: 62; margin: 0;
-  padding: 6px; gap: 6px; border: 1px solid var(--border);
+  padding: 5px; gap: 4px; border: 1px solid var(--border);
   border-radius: var(--radius); background: var(--surface-2);
   box-shadow: var(--shadow); opacity: .3; transition: opacity .15s;
 }
 .prs-stage[data-presenting] .prs-bar:hover,
 .prs-stage[data-presenting] .prs-bar:focus-within { opacity: 1; }
-.prs-stage[data-presenting] .prs-btn { padding: 6px 11px; font-size: .74rem; }
 
 /* ── 목록 ──────────────────────────────────────────────────────────── */
 
@@ -613,6 +730,7 @@
 .prs-stage[data-overview] .prs-presentation {
   place-items: start stretch; align-content: start; overflow: auto;
   grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  grid-template-areas: none;
   gap: 14px; padding: clamp(58px, 8vh, 82px) 18px 24px;
 }
 /* `zoom` rather than a container query, because the type inside a slide has

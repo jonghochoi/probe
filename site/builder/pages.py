@@ -944,46 +944,66 @@ def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
 
 
 def _presentation_panel(presentation) -> str:
-    """발표 — the paper retold as a talk, slides and speaker essay together.
+    """발표 — the paper retold as a talk, one slide at a time.
 
-    The two are stacked rather than put side by side or behind a toggle: the
-    slide is what a room looks at and the essay is what the presenter says over
-    it, and they are never on screen at the same moment. Reading them in that
-    order on one scroll is how the talk is rehearsed.
+    The tab is a screen, not a scroll. Every slide is in the document and only
+    the one being read is on: a talk is a sequence, and a reader who has to
+    scroll past twelve frames to reach the turn is reading the deck as a
+    document rather than watching it argue. So the frame holds still, ← and →
+    move it, and the deck under it says where in the talk this is — the same
+    reading a room gets, without anyone having to start the talk to see it.
 
-    The lead states what the presentation was cut for — how long, for whom, and the one
-    sentence it exists to land. A presentation read without those is a slide dump, and
-    a reader who disagrees with the spine should be able to see that in the
-    first line rather than on slide seven.
+    The speaker essay goes with the slide it belongs to rather than under it:
+    the slide is what the room looks at and the essay is what the presenter
+    says over it, and the two are never on screen at the same moment. 발표자
+    노트 is what asks for it — inline under the frame while the tab is being
+    read, and the second window once the talk is on a stage, because those are
+    the same request answered by whichever surface the presenter is standing
+    on.
 
-    The control bar is printed here and left `hidden`: `presentation.js` unhides it,
-    so a browser with no script never meets a 발표 시작 button that cannot
-    present. It sits outside `.prs-presentation` because presenting takes that element
-    over as the stage, and the control that started it must not be on it — but
-    inside `.prs-stage`, which is what goes fullscreen, so the presenter reaches
-    목록 and 레이저 without leaving the talk to do it.
+    The bar is printed here and left `hidden`: `presentation.js` unhides it, so
+    a browser with no script never meets a 발표 시작 button that cannot present
+    — and what it keeps is every slide with its essay under it, which is the
+    talk read as a document. It sits outside `.prs-presentation` because
+    presenting takes that element over as the stage, and the control that
+    started it must not be on it — but inside `.prs-stage`, which is what goes
+    fullscreen, so the presenter reaches 목록 and 레이저 without leaving the
+    talk to do it.
+
+    The arrows and the deck go the other way, inside: they are grid items of
+    the presentation, which is what puts them level with the frame — the arrows
+    beside it whatever the notes toggle has opened underneath, and the deck
+    ruled to the frame's own width rather than to the panel's. The stage drops
+    them with everything else that is not a slide.
     """
     if presentation is None:
         return ""
+    n = len(presentation.slides)
     return f"""<div class="panel wide" id="p-presentation" role="tabpanel"
      aria-labelledby="t-presentation" hidden>
   <div class="prs-stage" data-pres-stage>
   <div class="prs-bar" data-pres-bar hidden>
-    <button type="button" class="prs-btn" data-pres-start>발표 시작</button>
-    <button type="button" class="prs-btn" data-pres-notes>발표자 노트</button>
-    <button type="button" class="prs-btn" data-stage data-pres-list
-            aria-pressed="false">목록</button>
-    <button type="button" class="prs-btn" data-stage data-pres-laser
-            aria-pressed="false">레이저</button>
+    <button type="button" class="prs-btn" data-off-stage data-pres-start>발표 시작</button>
+    <button type="button" class="prs-btn" data-off-stage data-pres-notes
+            aria-pressed="false">발표자 노트</button>
+    <button type="button" class="prs-ico" data-stage data-pres-list
+            aria-pressed="false" aria-label="슬라이드 목록"
+            title="슬라이드 목록 (O)">{c.icon("grid", 15)}</button>
+    <button type="button" class="prs-ico" data-stage data-pres-laser
+            aria-pressed="false" aria-label="레이저 포인터"
+            title="레이저 포인터 (L)">{c.icon("laser", 15)}</button>
     <span class="prs-zoom" data-stage data-pres-zoom>100%</span>
-    <span class="prs-hint">→ ← 넘김 · O 목록 · L 레이저 · + − 0 확대 · Esc 나가기</span>
+    <span class="prs-sep" data-stage aria-hidden="true"></span>
+    <button type="button" class="prs-ico" data-stage data-pres-exit
+            aria-label="발표 끝내기" title="발표 끝내기 (Esc)">{c.icon("close", 15)}</button>
   </div>
   <div class="prs-presentation" data-pres-of="{c.esc(presentation.paper_id)}">
-    <div class="prs-lead">
-      <p class="prs-spine">{presentations.inline(presentation.spine.replace(" / ", " "))}</p>
-      <p><b>{c.esc(presentation.minutes)}분</b> · {c.esc(presentation.audience)}</p>
-    </div>
+    <button type="button" class="prs-arrow prs-prev" data-pres-step="-1"
+            aria-label="이전 슬라이드">{c.icon("prev", 20)}</button>
     {presentations.render(presentation)}
+    <button type="button" class="prs-arrow prs-next" data-pres-step="1"
+            aria-label="다음 슬라이드">{c.icon("next", 20)}</button>
+    {presentations.deck(presentation)}
   </div>
   </div>
 </div>"""
@@ -1333,6 +1353,91 @@ def _cmp_cards(papers: list[Paper]) -> str:
         '<h2 class="cmp-cards-h">읽은 논문</h2>'
         f'<div class="cmp-card-row">{cards}</div>'
         "</section>"
+    )
+
+
+def talk_index_page(presentation_map: dict) -> str:
+    """발표 — every presentation, and nothing about a paper that is not one.
+
+    The one destination in the nav that is an index and nothing else: a
+    presentation is a tab on its paper's page, so every row here links back
+    into 논문. It exists because a talk is the surface someone goes looking for
+    with a room already booked — "what do we have that can be presented on
+    Thursday" is a question the paper list cannot answer, since a paper that
+    has a talk looks exactly like one that does not until the page is open.
+
+    Each row says what the talk was cut for — the sentence it lands, then how
+    long and for whom. All three are the presentation's own front matter, so
+    nothing here is invented, and they are what a reader needs to know the talk
+    is not theirs before opening it. `venue` stays off: it dates the paper
+    rather than the talk, and the paper is one click away wearing it already.
+
+    Under them the act rail, drawn the way the cover slide draws it: one block
+    per run of a beat, weighted by the slides it holds. It is the talk's shape,
+    and on this surface it is also the only thing that distinguishes two
+    fourteen-minute talks from each other before either is opened.
+    """
+    ordered = sorted(presentation_map.values(),
+                     key=lambda t: (t.front.get("generated", ""), t.paper_id),
+                     reverse=True)
+    if ordered:
+        rows = "".join(_talk_row(t) for t in ordered)
+        list_html = f'<div class="talk-list">{rows}</div>'
+    else:
+        list_html = '<p class="corpus-empty">아직 발표 자료로 만든 논문이 없습니다.</p>'
+
+    body = f"""<header class="mast slim">
+  <div class="mast-inner">
+    <h1>발표</h1>
+    <p class="mast-sub">
+      논문 한 편을 <strong>방에서 말할 순서</strong>로 다시 짠 자료입니다.<br>
+      슬라이드마다 무엇을 말할지가 붙어 있고, 재작성본이 있는 논문만 여기에 섭니다.
+    </p>
+  </div>
+</header>
+
+<main class="hub">
+  {list_html}
+</main>
+"""
+    return c.page(
+        title="발표 · PROBE",
+        here="talk",
+        body=body,
+        depth=1,
+        extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
+    )
+
+
+def _talk_row(presentation) -> str:
+    """One talk, from outside it — the spine, its shape, what it was cut for.
+
+    The spine drops its ` / ` marker here (§1-0): the break is authored for the
+    width of a cover slide, and a row is not that width.
+    """
+    spine = presentations.inline(presentation.spine.replace(" / ", " "))
+    runs: list[list] = []
+    for sl in presentation.slides:
+        if runs and runs[-1][0] == sl.act:
+            runs[-1][1] += 1
+        else:
+            runs.append([sl.act, 1])
+    rail = "".join(
+        f'<i class="talk-r{presentations.ACT_ORDER[act]}" style="--n:{n}"'
+        f' title="{c.esc(presentations.ACTS[act])} · {n}장"></i>'
+        for act, n in runs)
+    cost = " · ".join(x for x in (
+        f"{presentation.minutes}분" if presentation.minutes else "",
+        f"{len(presentation.slides)}장") if x)
+    return (
+        f'<a class="talk-item" href="../p/{c.esc(presentation.paper_id)}'
+        f'/index.html#{PRESENTATION_TAB}">'
+        f'<span class="talk-h"><span class="talk-t">{c.esc(presentation.title)}</span>'
+        f'<span class="talk-id">{c.esc(presentation.paper_id)}</span></span>'
+        f'<span class="talk-spine">{spine}</span>'
+        f'<span class="talk-rail" aria-hidden="true">{rail}</span>'
+        f'<span class="talk-foot"><span class="talk-cost">{c.esc(cost)}</span>'
+        f'<span class="talk-for">{c.esc(presentation.audience)}</span></span></a>'
     )
 
 

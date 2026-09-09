@@ -48,8 +48,8 @@ hook and the spine underneath is what the room reads while the talk starts. So
 the cover carries no `probe-facts` and needs none: the sentence is the slide.
 
 A long spine takes its break the same way a title does (§5) — ` / `, at the
-seam where the claim turns. The tab's one-line lead drops the marker; only the
-cover honours it, because only the cover has the width to.
+seam where the claim turns. The 발표 index drops the marker, since a row is not
+that width; only the cover honours it, because only the cover has the width to.
 
 **The cover gives half its frame to the paper's own figure** — a
 `probe-figure` fence with the same three keys every other figure takes. It is

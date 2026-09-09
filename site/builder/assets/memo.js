@@ -114,8 +114,25 @@ if (root) {
     showAnchor();
   }
   refreshFab();
+  followSurface();
 
   function setStatus(text) { if (status) status.textContent = text; }
+
+  /* 발표 is the one surface with a control of its own at the corner this
+     button sits in — the arrow that turns the slide, at the right edge of a
+     frame that takes the panel's whole width. A fixed button parked over it is
+     a control the reader cannot press, and a memo is about the paper rather
+     than about the talk, so it steps aside and waits on the other tabs. The
+     tab strip swaps `hidden` on the panel; watching the attribute keeps this
+     independent of who does the swapping. */
+  function followSurface() {
+    const talk = document.getElementById("p-presentation");
+    if (!fab || !talk) return;
+    const follow = () => { fab.hidden = !talk.hidden; };
+    new MutationObserver(follow).observe(
+      talk, { attributes: true, attributeFilter: ["hidden"] });
+    follow();
+  }
 
   function refreshFab() {
     if (!fab) return;

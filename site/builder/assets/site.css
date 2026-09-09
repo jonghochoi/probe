@@ -1466,6 +1466,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
               border-color var(--dur-mid) var(--ease-out),
               transform var(--dur-mid) var(--ease-out);
 }
+/* The declared `display` above wins over the UA's `[hidden]` rule, so the
+   attribute needs saying again — `memo.js` takes the button off the 발표 tab,
+   where the frame's own arrow stands in this corner. */
+.memo-fab[hidden] { display: none; }
 .memo-fab:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: translateY(-1px); }
 .memo-fab .count {
   display: none; min-width: 18px; height: 18px; padding: 0 5px;

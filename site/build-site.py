@@ -127,6 +127,7 @@ def build(args) -> int:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
             comp, papers_by_id, katex, decisions, render_problems)
     rendered[out / "c" / "index.html"] = pages.comparison_index_page(comps, papers_by_id)
+    rendered[out / "t" / "index.html"] = pages.talk_index_page(presentation_map)
     problems += render_problems
 
     # The landing page indexes whatever was built — with `--only`, a subset.

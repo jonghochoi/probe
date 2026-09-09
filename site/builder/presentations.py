@@ -343,6 +343,30 @@ def render(presentation: Presentation) -> str:
                      for i, s in enumerate(presentation.slides))
 
 
+def deck(presentation: Presentation) -> str:
+    """The deck under the frame — where in the talk this slide is.
+
+    One tick per slide, in its act's colour, so the strip is the act rail read
+    a second way: the shape of the talk and the reader's position in it are the
+    same drawing. A tick is a button because the question a reader asks of a
+    talk they are halfway through is "what was the turn again", and eight
+    presses of → is not an answer to it.
+
+    Drawn only under `data-browsing`, which `presentation.js` sets. Without a
+    script every slide is on screen already and there is no position to mark,
+    so the strip would be a control pointing at nothing.
+    """
+    ticks = "".join(
+        f'<button type="button" class="prs-tick prs-r{ACT_ORDER[sl.act]}" '
+        f'data-pres-go="{i}" aria-label="{i + 1}장 · {c.esc(ACTS[sl.act])}" '
+        f'title="{i + 1}. {c.esc(sl.title.replace(" / ", " "))}"></button>'
+        for i, sl in enumerate(presentation.slides))
+    return (f'<div class="prs-deck" data-pres-deck>'
+            f'<div class="prs-ticks">{ticks}</div>'
+            f'<p class="prs-where"><b data-pres-at>1</b>'
+            f'<i>/</i>{len(presentation.slides)}</p></div>')
+
+
 def _slide(i: int, s: Slide, total: int, presentation: Presentation) -> str:
     inner = _compose(s, presentation)
     facts = _facts(s.data["facts"]) if s.data.get("facts") else ""
@@ -363,7 +387,7 @@ def _slide(i: int, s: Slide, total: int, presentation: Presentation) -> str:
   {facts}
   <footer><span>{c.esc(presentation.title)}</span><span>{i + 1} / {total}</span></footer>
 </article>
-{_script(s.script)}"""
+{_script(s.script, f"s{i + 1}")}"""
 
 
 def _rail(presentation) -> str:
@@ -654,16 +678,23 @@ def _lineage(l: dict) -> str:
             f'<span class="prs-nnote">{inline(me["gave"])}</span></div></div>')
 
 
-def _script(text: str) -> str:
+def _script(text: str, of: str) -> str:
     """The speaker essay, under the slide it belongs to.
 
     Under rather than beside: the slide is what the room looks at and the essay
     is what the presenter reads, and the two are never on screen together. It
     carries no fact the slide does not show — a number worth saying is in the
     ribbon or in an item's second register, and the essay points at it.
+
+    `data-for` names the slide, so the surfaces that show one essay at a time —
+    the notes toggle and the presenter's window — ask for the essay *of this
+    slide* rather than for the nth essay. §6 asks every slide for one, but a
+    presentation that is short an essay is a presentation missing an essay, not
+    one whose every later slide reads the wrong one.
     """
     if not text.strip():
         return ""
     paras = "".join(f"<p>{inline(p.replace(chr(10), ' '))}</p>"
                     for p in text.strip().split("\n\n") if p.strip())
-    return (f'<div class="prs-script"><h4>말할 것</h4>{paras}</div>')
+    return (f'<div class="prs-script" data-for="{c.esc(of)}">'
+            f'<h4>말할 것</h4>{paras}</div>')
