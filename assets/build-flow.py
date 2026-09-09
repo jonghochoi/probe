@@ -21,9 +21,12 @@ What the drawing has to keep saying, whatever is moved:
     act is a wire.
   - The `context/` card's divider, the drop wire and the mark share one
     vertical axis (x=468), so the read is "both documents feed one run".
-  - The `context/` card is the palest thing in the drawing. It is the one
-    card the agent may not write, and reading as a quieter ground than the
-    outputs is how the picture says so before any label does.
+  - The `context/` card takes the same ground and the same border as the
+    outputs, and is marked instead by a hairline ruled just inside that
+    border. It is the one card the agent may not write, and a document held
+    in a matte frame is how the picture says so before any label does. The
+    hairline is a frame on the card, not a second box: it never encloses a
+    file of its own, so the rule above still holds.
   - The two output cards clear the `context/` card by more than the gap
     between their own edges. They overlap it horizontally, so a thin gap
     reads as one stack of three boxes rather than an input and two outputs.
@@ -31,8 +34,10 @@ What the drawing has to keep saying, whatever is moved:
     because what a reader does with a report is a decision rather than a
     file, and a wire drawn back into `context/` would put the one folder the
     agent may not write at the end of the agent's own arrow.
-  - The `context/` drop is the one wire the human owns, and it runs washed,
-    so the wires at full strength are exactly the ones the agent writes.
+  - Every wire is one drawing: the same accent, the same march, and the same
+    gap off whatever it leaves. A wire says a hand-off happened, never whose
+    hand — that is the cards' to say. Drawn weaker than its neighbours, a
+    wire reads as a weaker hand-off rather than a different owner.
   - The mark is `site/builder/components.py`'s `mark()` redrawn with its
     animation inlined, since a README image carries no external stylesheet.
     Keep the two drawings in step.
@@ -57,13 +62,13 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parent
 
 LIGHT = dict(
-    CARD="#FFFCFA", GROUND="#FEF6F0", BORDER="#E8CDBD", BORDER_SOFT="#F2DFD3",
+    CARD="#FFFCFA", BORDER="#E8CDBD", BORDER_SOFT="#F2DFD3",
     WASH="#FBF3EE", ACCENT="#D97757", ACCENT_DEEP="#B06749",
     INK="#1F1611", MUTED="#7A6A60",
     HULL="#D97757", STALK="#CC785C", IRIS="#FFFAF7", PUPIL="#2A1A12",
 )
 DARK = dict(
-    CARD="#211C19", GROUND="#251F1C", BORDER="#3D3129", BORDER_SOFT="#332B26",
+    CARD="#211C19", BORDER="#3D3129", BORDER_SOFT="#332B26",
     WASH="#262019", ACCENT="#E8916F", ACCENT_DEEP="#C98A6D",
     INK="#F2EAE4", MUTED="#A08D80",
     HULL="#E8916F", STALK="#F0A183", IRIS="#FFF6F1", PUPIL="#2A1A12",
@@ -175,7 +180,6 @@ CSS = f"""
             stroke-linejoin: round; }}
     .flow {{ stroke-dasharray: 7 7; animation: march 1.1s linear infinite; }}
     .head  {{ fill: {{ACCENT}}; }}
-    .human {{ opacity: .55; }}
 
     .d    {{ fill: {{BORDER}}; opacity: .85; }}
     .mk   {{ fill: {{BORDER}}; opacity: .9; }}
@@ -251,11 +255,14 @@ def card(x: float, y: float, header: str, paths: list[str]) -> str:
     output card groups or ranks, and these share exactly the cadence named
     above them.
 
-    A path is set in two registers, because it is two things: the folder is
-    the track, and the rest is a filename pattern. Set alike they read as one
-    wall of bold — every card the same weight, nothing leading the eye — so
-    the track carries the size and the ink, and the pattern drops to the
-    weight of a note. What a reader is looking for is which four tracks exist.
+    A path is set in two registers, because it is two things: everything up
+    to the last `/` is where the file lives, and the rest is a filename
+    pattern. Set alike they read as one wall of bold — every card the same
+    weight, nothing leading the eye — so the directory carries the size and
+    the ink, and the pattern drops to the weight of a note. What a reader is
+    looking for is which four tracks exist and where each one writes, and a
+    track that nests one level deeper says so in the same register as the
+    track itself.
 
     Every path is written with a `<…>` placeholder rather than a specimen
     filename. The face is a system stack, so a wide substitution has to have
@@ -266,13 +273,11 @@ def card(x: float, y: float, header: str, paths: list[str]) -> str:
     return (
         f'<rect x="{x}" y="{y}" width="240" height="{h}" rx="10" '
         'fill="{CARD}" stroke="{BORDER}"/>'
-        f'<rect x="{x + 1}" y="{y + 16}" width="3" height="{h - 32}" rx="1.5" '
-        'fill="{ACCENT}"/>'
         f'<text class="tick" x="{x + 20}" y="{y + 26}">{header}</text>'
         + "".join(
             f'<text class="path" x="{x + 20}" y="{y + 50 + 22 * j}">{track}/'
             f'<tspan class="rest">{rest}</tspan></text>'
-            for j, (track, _, rest) in enumerate(p.partition("/") for p in paths))
+            for j, (track, _, rest) in enumerate(p.rpartition("/") for p in paths))
     )
 
 
@@ -308,17 +313,16 @@ def drawing() -> str:
   <rect width="{W}" height="{H}" rx="14" fill="{{CARD}}"/>
   <rect x=".75" y=".75" width="{W - 1.5}" height="{H - 1.5}" rx="13.25" fill="none" stroke="{{BORDER}}"/>
 
-  <rect x="288" y="26" width="360" height="82" rx="10" fill="{{GROUND}}" stroke="{{BORDER_SOFT}}"/>
+  <rect x="288" y="26" width="360" height="82" rx="10" fill="{{CARD}}" stroke="{{BORDER}}"/>
+  <rect x="293.5" y="31.5" width="349" height="71" rx="6" fill="none" stroke="{{BORDER_SOFT}}"/>
   <text class="tick" x="308" y="50">CONTEXT · HUMAN-OWNED · READ-ONLY</text>
   <path d="M{AXIS} 60 V96" stroke="{{BORDER}}" stroke-width="1"/>
   <text class="path" x="308" y="76" font-size="13">MASTER.md</text>
   <text class="note" x="308" y="95">global anchor</text>
   <text class="path" x="488" y="76" font-size="13">P#.md</text>
   <text class="note" x="488" y="95">per-pillar decision log</text>
-  <g class="human">
-    <path class="wire flow" d="M{AXIS} 108 V138"/>
-    {arrow_d(AXIS, 146)}
-  </g>
+  <path class="wire flow" d="M{AXIS} 122 V138"/>
+  {arrow_d(AXIS, 146)}
 
   <text class="lab" x="44" y="112">ARXIV cs.RO + cs.LG</text>
   {field()}

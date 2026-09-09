@@ -107,9 +107,6 @@ session.
   `/analyze` wrote, so run it on each paper first. `/compare` with no ids
   ranks the pairs no comparison holds yet and names the question that would
   divide each, then stops — choosing one stays yours.
-- **A presentation is a tab that presents.** One slide at a time in the page,
-  and the same slide on a fullscreen stage — arrow keys or a clicker move it,
-  with the speaker notes, the next slide and a clock in a second window.
 
 <div align="center">
 
