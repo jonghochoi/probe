@@ -33,9 +33,12 @@
  *   answers the question that names a slide four beats back. 레이저 (L) points
  *   at a number, on the one kind of slide type cannot point at — the paper's
  *   own figure. Zoom (+ − 0, Ctrl-wheel, drag to pan) makes that figure legible
- *   from the back row. The last is a repair for a frame `presentation/AUTHORING.md` §3
- *   is meant to fill at authoring time, so reaching for it often is the
- *   signal that a slide, not the room, is what needs fixing.
+ *   from the back row, on a surface with an input for it — a screen with no
+ *   hover has neither the keys nor the wheel, and is offered the two tools a
+ *   finger can work. The last is a repair for a frame
+ *   `presentation/AUTHORING.md` §3 is meant to fill at authoring time, so
+ *   reaching for it often is the signal that a slide, not the room, is what
+ *   needs fixing.
  *
  *   The notes window. A second window carrying the current slide's essay, the
  *   next slide's title and a clock. It reads its content out of this document
@@ -282,10 +285,19 @@
     zoomOut.textContent = Math.round(z.k * 100) + "%";
   }
 
+  // Zoom asks for an input the stage cannot assume — a wheel with a modifier,
+  // or the + − 0 keys — and a screen with no hover has neither. There the
+  // scale is pinned at 1 and the readout is not drawn, so the tool is absent
+  // rather than reachable by a route with nothing to report what it did. Read
+  // at the call rather than at load, because a tablet that gains a trackpad
+  // gains the tool with it.
+  var coarse = window.matchMedia ? window.matchMedia("(hover: none)") : null;
+  function zoomable() { return !coarse || !coarse.matches; }
+
   function setZoom(k, cx, cy) {
     var s = slides[at];
     if (!s) return;
-    k = Math.max(1, Math.min(ZMAX, k));
+    k = zoomable() ? Math.max(1, Math.min(ZMAX, k)) : 1;
     var r = s.getBoundingClientRect();
     // The layout box is the visual rect with the current translation taken back
     // out; the point under the cursor is then in the slide's own coordinates,

@@ -789,6 +789,30 @@
 .prs-stage[data-presenting] .prs-bar:hover,
 .prs-stage[data-presenting] .prs-bar:focus-within { opacity: 1; }
 
+/* ── the stage on a touch screen ───────────────────────────────────── */
+
+/* No hover is not a smaller screen, it is a different input, and two of the
+   stage's rules are written for an input that is not there.
+
+   The bar's own rest state is one of them. Chrome that fades until the pointer
+   goes for it is chrome a finger cannot ask for: there is nothing to go for it
+   with, so the bar would sit at a third of itself for the whole talk and the
+   way out of a fullscreen presentation would be the faintest thing on the
+   screen. It stands at full strength instead — the slide loses a corner, which
+   is the smaller cost.
+
+   Zoom is the other. It is reached by a wheel with a modifier or by + − 0, and
+   a touch screen offers neither, so the readout would report a number nothing
+   on this surface can change. The site's rule is that a control removes itself
+   rather than sitting inert, and `presentation.js` holds the scale at 1 to
+   match, so the tool is gone rather than hidden. What that costs is the repair
+   for a figure too small to read from the back of the room — and a phone is
+   not the back of a room. */
+@media (hover: none) {
+  .prs-stage[data-presenting] .prs-bar { opacity: 1; }
+  .prs-zoom { display: none; }
+}
+
 /* ── 목록 ──────────────────────────────────────────────────────────── */
 
 /* Every slide at once, so the question from the back of the room that names a
