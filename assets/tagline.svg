@@ -2,7 +2,7 @@
      aria-label="The day narrows to a shortlist. Scored, tied to your open decisions, already in your repo.">
   <style>
     .card   { fill: #FFFCFA; }
-    .edge   { fill: none; stroke: #E8CDBD; }
+    .edge   { fill: none; stroke: #D97757; }
     .head   { fill: #1F1611; }
     .sub    { fill: #7A6A60; }
     .dot    { fill: #E8CDBD; opacity: .85; }

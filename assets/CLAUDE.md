@@ -41,15 +41,18 @@ README embeds it with, so the line still reads where the image does not.
 **Rectangles are files and only files.** Nothing else earns a box — a stage is
 drawn as a funnel, an act as a wire.
 
-**Every card sits on the same ground, and only a link raises its edge.** The
-banner and the flow diagram's cards share one fill (`#FFFCFA` light, `#211C19`
-dark). A card tinted toward the accent reads as a different kind of object
-rather than a louder one, so the ground never carries the emphasis — the edge
-does, and only once. `reading-site.svg` is the one card a reader can click, and
-it takes the accent border (`#D97757`, `#E8916F`) its own arrow already carries,
-so the outline and the affordance are one ink. Every card inside `flow.svg`
-keeps the neutral `#E8CDBD` / `#3D3129`, where a border is a card's boundary and
-says nothing else; the paler `WASH` is the funnel's, not a card's.
+**Every card sits on the same ground, and the accent draws the edge a reader
+meets first.** The three cards the README embeds — `reading-site.svg`,
+`tagline.svg` and `flow.svg` — share one fill (`#FFFCFA` light, `#211C19` dark)
+and one outline, the accent (`#D97757`, `#E8916F`) that the reading-site card's
+own arrow already carries. A card tinted toward the accent reads as a different
+kind of object rather than a louder one, so the ground never carries the
+emphasis — the edge does. What the edge marks is depth rather than affordance: a
+card standing on the README's own page takes the accent, and a card drawn inside
+one of those images does not, so three outlines read as one set of panels rather
+than three unrelated boxes. Every card inside `flow.svg` keeps the neutral
+`#E8CDBD` / `#3D3129`, where a border is a card's boundary and says nothing
+else; the paler `WASH` is the funnel's, not a card's.
 
 **A mark cell is the mark alone.** In the Who-owns-what table the word a cell
 stands for rides in the image's `alt`, so the column still reads where the

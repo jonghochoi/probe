@@ -311,7 +311,7 @@ def overlay() -> str:
 def drawing() -> str:
     return f"""
   <rect width="{W}" height="{H}" rx="14" fill="{{CARD}}"/>
-  <rect x=".75" y=".75" width="{W - 1.5}" height="{H - 1.5}" rx="13.25" fill="none" stroke="{{BORDER}}"/>
+  <rect x=".75" y=".75" width="{W - 1.5}" height="{H - 1.5}" rx="13.25" fill="none" stroke="{{ACCENT}}"/>
 
   <rect x="288" y="26" width="360" height="82" rx="10" fill="{{CARD}}" stroke="{{BORDER}}"/>
   <rect x="293.5" y="31.5" width="349" height="71" rx="6" fill="none" stroke="{{BORDER_SOFT}}"/>
