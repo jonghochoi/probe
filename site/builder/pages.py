@@ -91,7 +91,7 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
 
 
 def _shelf_facets(cls: str) -> str:
-    """New / Starred, in whichever of its two homes.
+    """New / Starred, the two facets the rail carries beside the axes.
 
     Server-rendered with a zero count and no pressed state, because which
     papers are starred or new is the reader's and the build cannot know either.
@@ -258,7 +258,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     # they select. Exactly one copy is ever on screen (`index.css`);
     # `filter.js` binds every copy it finds, so the pair never disagrees.
     rail_mine = _shelf_facets("rail-item mine")
-    bar_mine = _shelf_facets("barflag")
     rail_pillars = "".join(
         f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
@@ -301,21 +300,21 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
              aria-label="논문 검색">
       {_search_go(search_api)}
     </label>
+    <button type="button" class="barreset" data-reset="facet" hidden>필터 초기화</button>
+    <span class="filter-spacer"></span>
     {_seg("정렬", "", '<button type="button" data-sort="recent" aria-pressed="true">최신순</button>'
                       '<button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>'
                       '<button type="button" data-sort="title" aria-pressed="false">제목순</button>')}
     {_seg("한 쪽에 몇 편", "psize", _page_sizes())}
-    <div class="barflags" role="group" aria-label="서재">{bar_mine}</div>
-    <span class="filter-spacer"></span>
-    <span class="status"><span data-result-count>{len(ordered)}편</span>{
-      f'<span data-corpus-when> · <span class="when-word">최근 </span>'
-      f'{c.esc(ordered[0].date)}</span>' if ordered else ""}</span>
-    <button type="button" class="linkish" data-reset hidden>필터 초기화</button>
   </div>
 </div>
 
 <div class="deck">
   <aside class="rail" data-rail>
+    <p class="rail-stat"><span data-result-count>{len(ordered)}편</span>{
+      f'<span data-corpus-when> · <span class="when-word">최근 </span>'
+      f'{c.esc(ordered[0].date)}</span>' if ordered else ""}<button type="button"
+      class="rail-reset" data-reset hidden>초기화</button></p>
     <p class="rail-h" data-mine-h>서재</p>
     {rail_mine}
     <p class="rail-h">연구 축</p>
