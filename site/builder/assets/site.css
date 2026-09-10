@@ -1866,12 +1866,12 @@ html.js .nav-cmdk { display: inline-flex; }
    device that can hover, rather than printed beside the icon at all times. */
 
 .cmdk { position: fixed; inset: 0; z-index: var(--z-cmdk); }
-.cmprs-scrim {
+.cmdk-scrim {
   position: absolute; inset: 0;
   background: var(--scrim); backdrop-filter: blur(2px);
-  animation: cmprs-in var(--dur-short) var(--ease-out);
+  animation: cmdk-in var(--dur-short) var(--ease-out);
 }
-.cmprs-box {
+.cmdk-box {
   position: relative; z-index: 1;
   width: min(38rem, calc(100vw - 1.6rem));
   /* Held above centre: a dialog that grows downward from a fixed top edge does
@@ -1881,33 +1881,33 @@ html.js .nav-cmdk { display: inline-flex; }
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
   display: flex; flex-direction: column; overflow: hidden;
   max-height: min(32rem, calc(var(--vh-live) - min(12vh, 6rem) - 1.6rem));
-  animation: cmprs-rise var(--dur-mid) var(--ease-out);
+  animation: cmdk-rise var(--dur-mid) var(--ease-out);
 }
-@keyframes cmprs-in   { from { opacity: 0; } }
-@keyframes cmprs-rise { from { opacity: 0; translate: 0 -8px; } }
+@keyframes cmdk-in   { from { opacity: 0; } }
+@keyframes cmdk-rise { from { opacity: 0; translate: 0 -8px; } }
 
-.cmprs-head {
+.cmdk-head {
   display: flex; align-items: center; gap: .6rem;
   padding: .7rem .85rem; border-bottom: 1px solid var(--border);
   flex: none;
 }
-.cmprs-icon { color: var(--text-muted); flex: none; }
-.cmprs-input {
+.cmdk-icon { color: var(--text-muted); flex: none; }
+.cmdk-input {
   flex: 1; min-width: 0; border: 0; background: none; outline: none;
   font-family: inherit; font-size: .98rem; color: var(--text);
 }
-.cmprs-input::placeholder { color: var(--text-muted); }
-.cmprs-esc {
+.cmdk-input::placeholder { color: var(--text-muted); }
+.cmdk-esc {
   flex: none; border: 1px solid var(--border); background: var(--surface-2);
   color: var(--text-muted); border-radius: var(--radius-xs);
   font-family: var(--mono); font-size: .68rem; padding: .18rem .4rem;
   cursor: pointer;
 }
-.cmprs-esc:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
-.cmprs-esc .x { display: none; }
+.cmdk-esc:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
+.cmdk-esc .x { display: none; }
 
-.cmprs-list { list-style: none; overflow-y: auto; overscroll-behavior: contain; padding: .35rem; }
-.cmprs-row {
+.cmdk-list { list-style: none; overflow-y: auto; overscroll-behavior: contain; padding: .35rem; }
+.cmdk-row {
   display: grid; align-items: center; gap: .1rem .6rem;
   grid-template-columns: auto minmax(0, 1fr) auto;
   padding: .45rem .55rem; border-radius: var(--radius-sm);
@@ -1917,36 +1917,36 @@ html.js .nav-cmdk { display: inline-flex; }
    parts a row happens to have into the first tracks instead — a paper with
    neither a star nor a 읽음 mark would take the title's `1fr` for its marks and
    leave the id nothing, which is a title that fits and an id off the edge. */
-.cmprs-marks { grid-column: 1; }
-.cmprs-main  { grid-column: 2; }
-.cmprs-meta  { grid-column: 3; }
+.cmdk-marks { grid-column: 1; }
+.cmdk-main  { grid-column: 2; }
+.cmdk-meta  { grid-column: 3; }
 /* One highlight, and the keyboard owns it: the pointer sets `aria-selected` as
    it moves rather than painting a second hover state, so there is never a row
    that looks picked and a different row that Enter would open. */
-.cmprs-row[aria-selected="true"] { background: var(--surface-3); }
-.cmprs-marks { display: flex; align-items: center; gap: .25rem; }
+.cmdk-row[aria-selected="true"] { background: var(--surface-3); }
+.cmdk-marks { display: flex; align-items: center; gap: .25rem; }
 /* A result row's 즐겨찾기 mark is a statement, not a control — nothing here
    toggles it — so the star arrives already filled. */
-.cmprs-star { color: var(--orange-ink); display: inline-flex; }
-.cmprs-star .ico { width: 12px; height: 12px; fill: currentColor; }
-.cmprs-read {
+.cmdk-star { color: var(--orange-ink); display: inline-flex; }
+.cmdk-star .ico { width: 12px; height: 12px; fill: currentColor; }
+.cmdk-read {
   font-size: .62rem; font-weight: 700; color: var(--green);
   border: 1px solid currentColor; border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5;
 }
-.cmprs-main { min-width: 0; display: grid; gap: .1rem; }
-.cmprs-title {
+.cmdk-main { min-width: 0; display: grid; gap: .1rem; }
+.cmdk-title {
   font-size: .88rem; font-weight: 650; line-height: 1.35; color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.cmprs-line {
+.cmdk-line {
   font-size: .76rem; color: var(--text-muted); line-height: 1.4;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* Which track a row belongs to, in the column a narrow screen keeps. Amber
    rather than the 읽음 green: it is not a mark the reader put there, it is what
    the row is. */
-.cmprs-kind {
+.cmdk-kind {
   font-size: .62rem; font-weight: 700; color: var(--orange-ink);
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
@@ -1955,54 +1955,54 @@ html.js .nav-cmdk { display: inline-flex; }
    row's kind chip takes. Outlined and muted rather than amber: this is a fact
    about the paper, not what the row is, and the two must not read alike in a
    list where both appear. */
-.cmprs-held {
+.cmdk-held {
   display: inline-flex; align-items: center; gap: .1rem;
   font-size: .62rem; font-weight: 700; color: var(--text-muted);
   border: 1px solid var(--border); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.cmprs-meta { display: flex; align-items: center; gap: .3rem; }
+.cmdk-meta { display: flex; align-items: center; gap: .3rem; }
 /* A paper prints its own id and never reaches the cap; a comparison prints the
    two or three it holds, and the cap is what stops that list from taking the
    title's room — this column is `auto`, so anything it asks for the title
    gives up. */
-.cmprs-id {
+.cmdk-id {
   font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
   max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.cmprs-none { padding: 1.1rem .8rem; font-size: .84rem; color: var(--text-muted); text-align: center; }
+.cmdk-none { padding: 1.1rem .8rem; font-size: .84rem; color: var(--text-muted); text-align: center; }
 
-.cmprs-foot {
+.cmdk-foot {
   flex: none; display: flex; align-items: center; gap: .6rem;
   padding: .45rem .85rem; border-top: 1px solid var(--border);
   background: var(--surface-2);
   font-size: .7rem; color: var(--text-muted);
 }
-.cmprs-keys { margin-left: auto; font-family: var(--mono); }
+.cmdk-keys { margin-left: auto; font-family: var(--mono); }
 /* The page behind must not scroll under an open dialog — a wheel over the
    scrim would otherwise take the reader somewhere they cannot see. */
-html.cmprs-on, html.cmprs-on body { overflow: hidden; }
+html.cmdk-on, html.cmdk-on body { overflow: hidden; }
 
 /* A device driven by a thumb has no key to name and no pointer to hover a
    tooltip with, so the dialog's own shortcuts go and the hit areas grow
    instead — the nav button already carries no key on any viewport. */
 @media (hover: none) and (pointer: coarse) {
-  .nav-cmdk, .cmprs-esc { position: relative; }
-  .nav-cmdk::after, .cmprs-esc::after { content: ""; position: absolute; inset: -7px; }
-  .cmprs-esc .k { display: none; }
-  .cmprs-esc .x { display: inline-flex; }
-  .cmprs-keys { display: none; }
+  .nav-cmdk, .cmdk-esc { position: relative; }
+  .nav-cmdk::after, .cmdk-esc::after { content: ""; position: absolute; inset: -7px; }
+  .cmdk-esc .k { display: none; }
+  .cmdk-esc .x { display: inline-flex; }
+  .cmdk-keys { display: none; }
   /* Nothing here is reached by a key, so the row is sized to be reached by a
      finger instead. */
-  .cmprs-row { padding: .6rem .55rem; }
+  .cmdk-row { padding: .6rem .55rem; }
 }
 @media (max-width: 560px) {
-  .cmprs-box { margin-top: 3.5rem; max-height: calc(var(--vh-live) - 5rem); }
+  .cmdk-box { margin-top: 3.5rem; max-height: calc(var(--vh-live) - 5rem); }
   /* Two columns, not three: the id and the chips together are wider than the
      title gets to be, and the title is what the reader is reading. */
-  .cmprs-meta { display: none; }
-  .cmprs-keys { display: none; }
+  .cmdk-meta { display: none; }
+  .cmdk-keys { display: none; }
 }
 
 /* Everything above moves; this is where all of it stops. */
