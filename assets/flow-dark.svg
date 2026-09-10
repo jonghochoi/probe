@@ -151,7 +151,7 @@
   </style>
 
   <rect width="880" height="348" rx="14" fill="#211C19"/>
-  <rect x=".75" y=".75" width="878.5" height="346.5" rx="13.25" fill="none" stroke="#3D3129"/>
+  <rect x=".75" y=".75" width="878.5" height="346.5" rx="13.25" fill="none" stroke="#E8916F"/>
 
   <rect x="288" y="26" width="360" height="82" rx="10" fill="#211C19" stroke="#3D3129"/>
   <rect x="293.5" y="31.5" width="349" height="71" rx="6" fill="none" stroke="#332B26"/>
