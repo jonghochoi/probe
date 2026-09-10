@@ -408,19 +408,17 @@ html.js .filters { display: block; }
   display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
 }
 .filter-spacer { flex: 1; }
-.filters .status {
-  font-size: .74rem; color: var(--text-muted);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-/* The corpus's last date rides inside the count's own box rather than beside
-   it: they are one phrase, and two boxes on a wrapping bar are two things that
-   can land on different lines. It states what the whole corpus is, so a
-   filtered count — which is about a subset — drops it (`filter.js`). */
 
+/* The box sits on the same ground as the two pill groups beside it. An input
+   is a well and a segmented group is a panel, but on one bar they are three
+   controls of one bar first — and `--surface` is above `--bg` in light while
+   `--surface-2` is below it, so grounding them differently makes the search
+   box the raised one in light and the sunken one in dark. One token is what
+   keeps the row reading the same in both themes. */
 .search {
   display: flex; align-items: center; gap: .45rem;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-pill); padding: 0 .8rem;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0 .8rem;
   height: var(--ctl-h); flex: 1 1 260px; max-width: 420px;
   transition: border-color var(--dur-short) var(--ease-out);
 }
@@ -430,29 +428,62 @@ html.js .filters { display: block; }
   font: inherit; font-size: .86rem; color: var(--text);
   background: none; border: none; outline: none; width: 100%;
 }
-.search input::placeholder { color: var(--text-muted); opacity: .8; }
+/* `--text-muted` at full strength: it is measured to clear 4.5:1 on every
+   ground it can land on, and thinning it with opacity spends exactly that
+   margin on the one line of text a reader needs before they know what to type. */
+.search input::placeholder { color: var(--text-muted); }
 /* The submit, inside the box it submits, and only where both halves of it
    exist: the build emits it with the endpoint, and it stays off a browser with
-   no script to run it — the list is already filtering without either. */
+   no script to run it — the list is already filtering without either.
+
+   It carries the accent at rest, because it is the one control on this bar
+   that leaves the browser: the list below is already filtering letter for
+   letter as the reader types, and this is what spends a round trip to ask the
+   remote index the same question by meaning. Hover deepens that accent from
+   outline to fill rather than introducing it — a button whose rank arrives
+   with the cursor is a button with no rank. Outline rather than fill at rest
+   for the same reason `--orange-soft` is not used here: a full fill is what
+   `.rail-item[aria-pressed="true"]` says 선택됨 with, and that is not what an
+   idle submit means.
+
+   Corners: `--radius-sm` is what this sheet draws a control with, the nav's
+   own buttons included, and every control on this bar takes it. The two
+   radii either side of it are already spoken for — `--radius` is the card and
+   the panel (`.lead`, the chip's own dropdown), `--radius-pill` is the label
+   (`.chip`, a tag or an axis badge) — so a control borrowing one of those
+   reads as the wrong kind of thing rather than as a softer version of the
+   right one. */
 .search-go { display: none; }
+/* It is the box's right cap rather than a second box inside the first: it
+   stretches to the full height, eats the padding and the border on that side,
+   and takes the box's own radius there, so the field and its submit are one
+   shape divided rather than two shapes nested. A rule divides them, which is
+   the only edge the cap draws — an outline of its own would put a second
+   perimeter inside a perimeter. */
 html.js .search-go {
-  display: inline-flex; align-items: center; flex: none;
+  display: inline-flex; align-items: center; flex: none; align-self: stretch;
   font: inherit; font-size: .72rem; font-weight: 700;
-  padding: .2rem .6rem; margin-right: -.45rem;
-  background: var(--surface-2); border: none; border-radius: var(--radius-pill);
-  color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  padding: 0 .85rem; margin: -1px calc(-.8rem - 1px) -1px 0;
+  background: none; border: none; border-left: 1px solid var(--border);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--orange-ink); cursor: pointer; white-space: nowrap;
   transition: background var(--dur-short) var(--ease-out),
               color var(--dur-short) var(--ease-out);
 }
-html.js .search-go:hover:not(:disabled) { background: var(--orange); color: var(--accent-ink); }
-html.js .search-go:disabled { opacity: .5; cursor: default; }
+html.js .search-go:hover:not(:disabled) {
+  background: var(--orange); color: var(--accent-ink);
+}
+/* Nothing to ask yet. The cap keeps its place and drops to the bar's own quiet
+   ink, so the accent arriving is the signal that the question is long enough
+   to send. */
+html.js .search-go:disabled { color: var(--text-muted); cursor: default; }
 
 .sort { display: flex; gap: .1rem; background: var(--surface-2);
-        border: 1px solid var(--border); border-radius: var(--radius-pill);
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
         padding: .12rem; height: var(--ctl-h); }
 .sort button {
   font: inherit; font-size: .74rem; font-weight: 600;
-  padding: .22rem .65rem; border-radius: var(--radius-pill); cursor: pointer;
+  padding: .22rem .65rem; border-radius: var(--radius-xs); cursor: pointer;
   background: none; border: none; color: var(--text-muted);
   transition: color var(--dur-short) var(--ease-out),
               background var(--dur-short) var(--ease-out),
@@ -468,37 +499,89 @@ html.js .search-go:disabled { opacity: .5; cursor: default; }
   box-shadow: var(--shadow-sm);
 }
 
-/* ── The same two groups, folded ──────────────────────────────────────── */
-/* On a bar with room for them the wrapper is not a box at all: the group is
-   the flex item it always was, and the chip that would name it is off the
-   page. What it costs to fold them is in the 680px block. */
+/* ── The two groups, folded ───────────────────────────────────────────── */
+/* Each group is one chip carrying the choice that is on, and the group itself
+   is the panel it opens. Folded at every width rather than only where the bar
+   runs out of room: three sort buttons and three page sizes are six controls
+   standing open to say two words, and a bar that states the view in two words
+   leaves the eye on the list the view is of.
+
+   What it costs is that the alternatives are no longer on screen — a reader
+   sees 최신순 and has to open the chip to learn 연구 축별 exists. The chip
+   naming its group (`filter.js` writes `정렬: 최신순` into its `aria-label`)
+   is what keeps that one press away rather than a guess.
+
+   With no script the chip cannot open anything, so the groups stay open and
+   take the line they need. */
 .segwrap { display: contents; }
 .segchip { display: none; }
-
-/* ── 서재's three, in the filter bar ───────────────────────────────── */
-/* The rail leaves at 900px and these three would leave with it — and unlike
-   the pillars and the tags, nothing else on a phone can reach what they
-   select: a star is not a word the search box can match. So the bar carries
-   its own copy, and exactly one of the two is on screen at any width. */
-.barflags { display: none; gap: .25rem; }
-@media (max-width: 900px) { html.js .barflags { display: flex; } }
-.barflag {
+html.js .segwrap { display: inline-block; position: relative; }
+html.js .segchip {
   font: inherit; font-size: .74rem; font-weight: 600;
-  display: inline-flex; align-items: center; gap: .32rem;
-  padding: 0 .6rem; height: var(--ctl-h);
-  border-radius: var(--radius-pill); cursor: pointer;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text-muted); white-space: nowrap;
-  transition: background var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: 0 .7rem; height: var(--ctl-h);
+  border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text); white-space: nowrap;
+  transition: border-color var(--dur-short) var(--ease-out);
 }
-.barflag .sw { width: 9px; height: 9px; flex: none; }
-.barflag b { font-weight: 600; color: var(--text); }
-.barflag .rn { font-size: .68rem; opacity: .6; font-variant-numeric: tabular-nums; }
-.barflag[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); }
-.barflag[aria-pressed="true"] b,
-.barflag[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
-.barflag[hidden] { display: none; }
+html.js .segchip:hover { border-color: var(--amber-soft); }
+html.js .segchip[aria-expanded="true"] { border-color: var(--amber-soft); }
+.segcaret { font-size: .58rem; opacity: .55; }
+/* The panel is the group itself, stood on end under the chip — same buttons,
+   same pressed state, same handler. It takes `--surface` because a panel over
+   the page is the raised ground, where the bar it opens from is the tinted
+   one. */
+html.js .segwrap > .sort {
+  display: none; position: absolute; z-index: var(--z-panel);
+  top: calc(100% + .3rem); left: 0; min-width: 100%;
+  flex-direction: column; height: auto; padding: .25rem;
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+html.js .segwrap[data-open] > .sort { display: flex; }
+html.js .segwrap > .sort button {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.2rem;
+  text-align: left; padding: .38rem .7rem; white-space: nowrap;
+}
+html.js .segwrap > .sort button:hover { background: var(--surface-3); }
+/* In the panel the choice that is on is marked by ink and a tick, and by
+   nothing else. The lift the group uses is a ground one step off the ground
+   under it, and inside a panel already on `--surface` there is no such step
+   left to take: `--surface-2` reads 1.06:1 against it in dark. A tick is a
+   shape rather than a ratio, so it survives a palette whose grounds sit
+   within six points of each other. */
+html.js .segwrap > .sort button[aria-pressed="true"] {
+  background: none; box-shadow: none; color: var(--text);
+}
+html.js .segwrap > .sort button[aria-pressed="true"]::after {
+  content: "✓"; font-size: .8em; line-height: 1;
+}
+
+/* The reset rides the rail's count, where the number it puts back is. This is
+   the copy for the width that has no rail, and the one control on that width
+   that sets nothing: below 900px the bar offers no facet at all, so the only
+   filter a phone can be in is one a link brought it to (`filter.js` reads
+   `#p=`, `#t=` and the shelf pair off the hash, which is what makes a filtered
+   view shareable). It is marked `data-reset="facet"`, so a typed query does
+   not raise it — the search box's own ✕ already clears that — and it is on
+   screen exactly when a filter is on that nothing else on this width can
+   undo. Without it a shared link is a room with no door. */
+.barreset {
+  font: inherit; font-size: .74rem; font-weight: 600; display: none;
+  align-items: center; padding: 0 .7rem; height: var(--ctl-h);
+  border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-muted); white-space: nowrap;
+  transition: border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+.barreset:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
+@media (max-width: 900px) { html.js .barreset { display: inline-flex; } }
+/* Outweighs the media rule above, which is what `hidden` has to do here: it
+   is the attribute `filter.js` toggles, so a selector that cannot beat the
+   one putting the button on screen leaves it there with nothing to reset. */
+html.js .barreset[hidden] { display: none; }
 
 .linkish {
   font: inherit; font-size: inherit; background: none; border: none;
@@ -518,6 +601,29 @@ html.js .deck {
 html.js .rail {
   display: block; position: sticky; top: calc(var(--nav-h) + 3rem);
 }
+/* What the list currently holds, at the head of the column it is filtered
+   from. The corpus's last date rides inside the count's own box rather than
+   beside it: they are one phrase. It states what the whole corpus is, so a
+   filtered count — which is about a subset — drops it (`filter.js`).
+
+   The rail is the whole of its mobile rule: it leaves at 900px and takes this
+   with it, which is where a running count is least worth the line it costs.
+   Spacing is the following heading's, so the two never disagree. */
+.rail-stat {
+  font-size: .72rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; padding-left: .3rem; margin: 0;
+}
+/* Beside the number rather than on the bar, because what it undoes is that
+   number: a reset is the way back from `35 / 42편` to `42편`, and a control
+   standing where its own effect is readable needs no label explaining it. */
+.rail-reset {
+  font: inherit; font-size: .66rem; font-weight: 600; margin-left: .4rem;
+  padding: .06rem .36rem; border-radius: var(--radius-xs); cursor: pointer;
+  background: none; border: 1px solid var(--border); color: var(--text-muted);
+  transition: border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+.rail-reset:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .rail-h {
   font-size: .68rem; font-weight: 700; letter-spacing: .12em;
   text-transform: uppercase; color: var(--text-muted);
@@ -705,6 +811,10 @@ html.js .rail {
               border-color var(--dur-short) var(--ease-out);
 }
 .lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
+/* A tag is the lead card's own filter control, and it is the one that hides
+   itself in the act of being used — the card it lives on leaves as soon as
+   anything is filtering. It goes where the rest of the facets go. */
+@media (max-width: 900px) { .lead-foot .chip.tag { display: none; } }
 
 /* ── 즐겨찾기 ─────────────────────────────────────────────────────────── */
 /* Empty until it is the reader's: an unstarred star is drawn in the border
@@ -1217,42 +1327,26 @@ html:not(.js) .hub-actions { display: none; }
   .mast-art { display: none; }
 }
 @media (max-width: 680px) {
-  /* The bar is two lines on a phone: the search box takes one on its own, and
-     everything that narrows the list — 정렬, 한 쪽에, Starred — lines up under
-     it with the count at the end of the same line. Six pill buttons do not fit
-     on that line, so the two groups fold into chips naming what is pressed
-     (below), which is what leaves room for the count to ride along instead of
-     taking a third line and leaving the space beside Starred empty. */
-  .filters-inner { gap: .4rem; row-gap: .45rem; }
-  .search { flex-basis: 100%; max-width: none; }
-  .barflags { flex-wrap: wrap; }
-  .filters-inner .filter-spacer { flex: 1; flex-basis: auto; height: auto; }
+  /* The bar is one line on a phone. Three controls are all that is left at
+     this width — the facets are the rail's and the rail is gone — so what
+     remains is the field a phone searches with and the two chips that say how
+     its answer is laid out, and three is few enough to keep on the line the
+     list starts under. The field gives up the width: it is the only one of
+     the three that can be read at any size, since a chip that loses its label
+     stops naming the choice it carries.
 
-  /* The chip and the panel it opens. Both are a scripted browser's — with no
-     script the chip cannot open anything, so the groups stay as they are and
-     take the line they need. */
-  html.js .segwrap { display: inline-block; position: relative; }
-  html.js .segchip {
-    font: inherit; font-size: .74rem; font-weight: 600;
-    display: inline-flex; align-items: center; gap: .3rem;
-    padding: 0 .5rem; height: var(--ctl-h);
-    border-radius: var(--radius-pill); cursor: pointer;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); white-space: nowrap;
-  }
-  html.js .segchip[aria-expanded="true"] { border-color: var(--amber-soft); }
-  .segcaret { font-size: .58rem; opacity: .55; }
-  /* The panel is the group itself, stood on end under the chip — same buttons,
-     same pressed state, same handler. */
-  html.js .segwrap > .sort {
-    display: none; position: absolute; z-index: var(--z-panel);
-    top: calc(100% + .3rem); left: 0; min-width: 100%;
-    flex-direction: column; height: auto; padding: .25rem;
-    background: var(--surface); border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-  }
-  html.js .segwrap[data-open] > .sort { display: flex; }
-  html.js .segwrap > .sort button { text-align: left; padding: .38rem .7rem; white-space: nowrap; }
+     `min-width: 0` on both the box and its input is what lets it: a flex item
+     will not shrink past its content's own minimum, and an input's is its
+     default size. The spacer goes, so the room it would hold is the field's,
+     and the row still wraps if a link brings a reset onto it. */
+  .filters-inner { gap: .4rem; row-gap: .45rem; }
+  .search { flex: 1 1 120px; min-width: 0; max-width: none; }
+  .search input { min-width: 0; }
+  .filters-inner .filter-spacer { display: none; }
+
+  /* The chip tightens where the bar is narrowest; the fold itself is not a
+     width rule and lives in the base. */
+  html.js .segchip { padding: 0 .5rem; }
 
   .mast-inner { padding: 1.2rem .9rem 1rem; }
   .mast-line { flex-wrap: wrap; gap: .4rem; }

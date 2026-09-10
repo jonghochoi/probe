@@ -60,8 +60,11 @@ const emptyMsg = root.querySelector("[data-empty]");
 const partialMsg = root.querySelector("[data-partial]");
 const tabsEl = root.querySelector("[data-restabs]");
 const tabBtns = tabsEl ? [...tabsEl.querySelectorAll("[data-restab]")] : [];
-const countEl = bar.querySelector("[data-result-count]");
-const whenEl = bar.querySelector("[data-corpus-when]");
+// The two readouts live in the rail, not the bar: what the filter leaves
+// behind is a fact about the list, and the rail is the column the list is
+// filtered from. Scoped to the document for that reason.
+const countEl = document.querySelector("[data-result-count]");
+const whenEl = document.querySelector("[data-corpus-when]");
 const input = bar.querySelector("[data-q]");
 const sortBtns = [...bar.querySelectorAll("[data-sort]")];
 const resetBtns = [...document.querySelectorAll("[data-reset]")];
@@ -327,6 +330,12 @@ function apply() {
   const terms = parse(state.q);
   const dirty = !!(state.q || state.pillar || state.tags.size
                    || state.fresh || state.star);
+  // Everything narrowing the list except the query, which clears itself: the
+  // search box carries its own ✕. A reset marked `facet` answers to this
+  // instead, so the one on the phone bar — where a facet can only arrive by
+  // link — is on screen exactly when there is something ✕ cannot reach.
+  const facetDirty = !!(state.pillar || state.tags.size
+                        || state.fresh || state.star);
 
   const pool = cards.filter(facetOk);
   let shown = pool, partial = false;
@@ -417,7 +426,9 @@ function apply() {
   // passages would read as the corpus having nothing.
   if (emptyMsg) emptyMsg.hidden = answered || visible > 0;
   if (listhead) listhead.hidden = onPage.size - (leadOn ? 1 : 0) < 1;
-  resetBtns.forEach((b) => { b.hidden = !dirty; });
+  resetBtns.forEach((b) => {
+    b.hidden = b.dataset.reset === "facet" ? !facetDirty : !dirty;
+  });
   // The date describes the corpus, not the subset a filter leaves behind.
   if (whenEl) whenEl.hidden = dirty;
 }
