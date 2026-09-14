@@ -37,16 +37,6 @@ about each:
 | Re-discovering already-published solutions | Citation graph surfaces the prior art before you waste the week |
 | "I'll read that paper properly later" → never does | The one you do pick comes back as a Korean page you can finish in a sitting |
 
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/tagline-dark.svg">
-  <img src="assets/tagline.svg" width="880"
-       alt="The day narrows to a shortlist. Scored, tied to your open decisions, already in your repo.">
-</picture>
-
-</div>
-
 ---
 
 ## How it works
