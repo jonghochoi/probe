@@ -27,6 +27,16 @@ DISCUSSIONS_NEW = f"{c.REPO_URL}/discussions/new?category=paper-notes"
 PAGE_SIZES = (10, 20, 0)
 PAGE_DEFAULT = 10
 
+# The two shapes the same rows take. 카드 is the default: this page is as often
+# someone's first sight of the corpus as it is a returning reader's way back
+# into it, and a grid says what has been built where a line says what is in it.
+#
+# The default is printed into the markup rather than reached for by the script,
+# so a browser with no script gets the view the site opens on instead of a
+# fallback of its own.
+VIEWS = (("grid", "카드"), ("list", "목록"))
+VIEW_DEFAULT = "grid"
+
 # How large `assets/corpus-index.js` may get before it stops being a file every
 # page can afford to carry. It is fetched once and cached across the whole site,
 # so the ceiling is generous — but it grows with the corpus and nothing else
@@ -127,6 +137,25 @@ def _page_sizes() -> str:
         f'aria-pressed="{"true" if n == PAGE_DEFAULT else "false"}">'
         f'{f"{n}편" if n else "전체"}</button>'
         for n in PAGE_SIZES
+    )
+
+
+def _views() -> str:
+    """카드 · 목록 — which shape the rows are in.
+
+    A view setting like the page size, so it sits with 정렬 and wears the same
+    pill group. What it switches between is not two lists but one: the rows are
+    the same nodes either way and `index.css` re-lays them out off `data-view`,
+    which is what keeps a card and a line from ever disagreeing about a paper.
+
+    The pressed state printed here is the default; `filter.js` moves it to
+    whatever the hash or this browser's last choice says.
+    """
+    return "".join(
+        f'<button type="button" data-view-set="{key}" '
+        f'aria-pressed="{"true" if key == VIEW_DEFAULT else "false"}">'
+        f"{label}</button>"
+        for key, label in VIEWS
     )
 
 
@@ -306,6 +335,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
                       '<button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>'
                       '<button type="button" data-sort="title" aria-pressed="false">제목순</button>')}
     {_seg("한 쪽에 몇 편", "psize", _page_sizes())}
+    {_seg("보기", "vsel", _views())}
   </div>
 </div>
 
@@ -320,7 +350,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     <p class="rail-h">연구 축</p>
     {rail_pillars}
   </aside>
-  <main class="corpus" data-corpus>
+  <main class="corpus" data-corpus data-view="{VIEW_DEFAULT}">
     {_first_run() if not ordered else ""}
     {_resume()}
     {_lead_block(ordered[0], renderer, cmp_counts[ordered[0].stem]) if ordered else ""}
@@ -586,17 +616,40 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False,
     # counts and filters on — the chips on a row are what a reader checks the
     # rail's number against.
     pillars = c.pillar_chips(paper.filed)
+    # What a card has room for and a line does not. All of it is already in the
+    # front matter, and one set of nodes serves both views — 목록 hides these in
+    # `index.css` rather than the build printing a second kind of row, which is
+    # the same reason the sorts reorder nodes instead of rebuilding them.
+    #
+    # The codename leads because it is what a paper is actually talked about
+    # by: a reader recognises TacPAC where they would have to read 2609.05266.
+    # It is the paper's own, so a paper that resolves to none simply has none
+    # (`analysis/AUTHORING.md` §1) and the card opens on its title instead.
+    alias = f'<span class="row-alias">{c.esc(paper.alias)}</span>' if paper.alias else ""
+    figs = (f'<span class="row-figs"> · 그림 {paper.figure_count}</span>'
+            if paper.figure_count else "")
+    tags = "".join(
+        f'<button type="button" class="chip tag" data-tag-jump="{c.esc(t)}">{c.esc(t)}</button>'
+        for t in paper.tags[:3]
+    )
+    links = "".join(
+        c.chip(label, "src-link", href=url, mark=c.src_mark(kind))
+        for kind, label, url in paper.links
+    )
     return f"""<article class="row" data-card{' data-lead-dup hidden' if lead else ''}
   data-read-of="{c.esc(paper.stem)}" {_facets(paper)}>
   {_star(paper)}
   <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
   <span class="row-id">{c.esc(paper.stem)}</span>
   <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
-    <span class="row-title">{c.esc(paper.title)}{_metric_chip(paper)}{_cmp_count(cmp_n)}</span>
+    {alias}
+    <span class="row-title">{c.esc(paper.title)}</span><span
+      class="row-num">{_metric_chip(paper)}{_cmp_count(cmp_n)}</span>
     <span class="row-tagline">{_md(renderer, paper.tagline)}</span>
   </a>
   <span class="row-pillars">{pillars}</span>
-  <span class="row-size">{c.esc(_size(paper, short=True))}</span>
+  <span class="row-size">{c.esc(_size(paper, short=True))}{figs}</span>
+  <div class="row-extra">{tags}{links}</div>
 </article>"""
 
 

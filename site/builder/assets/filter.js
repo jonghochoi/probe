@@ -39,9 +39,13 @@
  * back-button history — Back should leave the page, not undo a keystroke. The
  * two shelf filters ride there too (`&n=1`, `&f=1`) — a bookmark of "my
  * starred P2 papers" is a view worth keeping — even though what they select is
- * local to the browser that opens the link. So do the page and its size
- * (`&pg=3`, `&sz=5`), which is what makes a link land on the list the sender
- * was looking at.
+ * local to the browser that opens the link. So do the page, its size and the
+ * shape the rows are in (`&pg=3`, `&sz=5`, `&v=list`), which is what makes a
+ * link land on the list the sender was looking at.
+ *
+ * 카드 and 목록 are one list twice, not two lists: the rows are the nodes the
+ * build printed either way, and switching writes `data-view` on the container
+ * for `index.css` to lay them out from. Nothing here renders a card.
  */
 
 (function () {
@@ -90,27 +94,50 @@ const SIZES = sizeBtns.map((b) => +b.dataset.size);
 const SIZE_PRESSED = sizeBtns.find((b) => b.getAttribute("aria-pressed") === "true");
 const SIZE_DEFAULT = SIZE_PRESSED ? +SIZE_PRESSED.dataset.size : 0;
 
-/* How much of the list a page holds is the one thing here the reader sets and
- * the corpus has no opinion about. It is a view setting rather than a mark on
- * a paper, so it is not the shelf's to keep — it lives beside it under its own
- * key, and a browser that refuses storage just gets the default every time. */
+// Which shapes the rows come in, and which one the build opens on, read back
+// off the markup for the same reason the sizes are — the bar and the script
+// cannot offer different ones if only one of them decides.
+const viewBtns = [...bar.querySelectorAll("[data-view-set]")];
+const VIEWS = viewBtns.map((b) => b.dataset.viewSet);
+const VIEW_PRESSED = viewBtns.find((b) => b.getAttribute("aria-pressed") === "true");
+const VIEW_DEFAULT = VIEW_PRESSED ? VIEW_PRESSED.dataset.viewSet
+  : (root.dataset.view || VIEWS[0] || "list");
+
+/* How much of the list a page holds, and what shape the rows are in, are the
+ * two things here the reader sets and the corpus has no opinion about. They
+ * are view settings rather than marks on a paper, so they are not the shelf's
+ * to keep — they live beside it under one key of their own, and a browser that
+ * refuses storage just gets the defaults every time. */
 const VIEW_KEY = "probe.view.v1";
 
-function storedSize() {
-  try {
-    const v = JSON.parse(localStorage.getItem(VIEW_KEY) || "{}");
-    return SIZES.includes(v.size) ? v.size : SIZE_DEFAULT;
-  } catch (e) { return SIZE_DEFAULT; }
+function stored() {
+  try { return JSON.parse(localStorage.getItem(VIEW_KEY) || "{}"); }
+  catch (e) { return {}; }
 }
 
-function keepSize(n) {
-  try { localStorage.setItem(VIEW_KEY, JSON.stringify({ size: n })); } catch (e) { /* full or blocked */ }
+function storedSize() {
+  const v = stored();
+  return SIZES.includes(v.size) ? v.size : SIZE_DEFAULT;
+}
+
+function storedView() {
+  const v = stored();
+  return VIEWS.includes(v.view) ? v.view : VIEW_DEFAULT;
+}
+
+// Both settings at once: they share the one key, so writing either from its
+// own value alone would take the other one out with it.
+function keepView() {
+  try {
+    localStorage.setItem(VIEW_KEY, JSON.stringify(
+      { size: state.size, view: state.view }));
+  } catch (e) { /* full or blocked */ }
 }
 
 const state = {
   q: "", pillar: "", tags: new Set(), sort: "recent",
   fresh: false, star: false,
-  size: SIZE_DEFAULT, page: 1,
+  size: SIZE_DEFAULT, page: 1, view: VIEW_DEFAULT,
 };
 const freshNote = root.querySelector("[data-fresh-note]");
 
@@ -163,6 +190,10 @@ function readHash() {
   const sz = parseInt(h.get("sz"), 10);
   state.size = SIZES.includes(sz) ? sz : storedSize();
   state.page = Math.max(1, parseInt(h.get("pg"), 10) || 1);
+  // Same rule for the shape: a link that names one means it, otherwise this
+  // browser's last choice, otherwise what the build opened on.
+  const v = h.get("v");
+  state.view = VIEWS.includes(v) ? v : storedView();
 }
 
 function writeHash() {
@@ -175,6 +206,7 @@ function writeHash() {
   if (state.star) h.set("f", "1");
   if (state.size !== SIZE_DEFAULT) h.set("sz", state.size);
   if (state.page > 1) h.set("pg", state.page);
+  if (state.view !== VIEW_DEFAULT) h.set("v", state.view);
   const hash = h.toString();
   history.replaceState(null, "", hash ? `#${hash}` : location.pathname + location.search);
 }
@@ -195,6 +227,12 @@ function syncControls() {
     "aria-pressed", state[b.dataset.facetFlag] ? "true" : "false"));
   sizeBtns.forEach((b) => b.setAttribute(
     "aria-pressed", +b.dataset.size === state.size ? "true" : "false"));
+  // The shape is the list's own attribute rather than a class on each row:
+  // one write re-lays out every card, and the rows stay what the build made
+  // them — which is what lets the two views share a single set of nodes.
+  viewBtns.forEach((b) => b.setAttribute(
+    "aria-pressed", b.dataset.viewSet === state.view ? "true" : "false"));
+  root.dataset.view = state.view;
   // While a query ranks the list, none of the three is what the rows are in —
   // pressing 최신순 during a relevance sort would be the control lying about
   // the order. Clicking one still takes the list back.
@@ -489,7 +527,28 @@ function paintPager(total, pageCount, from, size) {
   if (pageStat) pageStat.textContent = `${from + 1}–${Math.min(from + size, total)} / ${total}편`;
 }
 
-const SMOOTH = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SMOOTH = REDUCED ? "auto" : "smooth";
+
+/* A settle is worth one beat when the list changes shape, and worth none when
+ * it changes contents. `apply()` re-appends every visible row on each call, so
+ * an animation parked on the rows would run again on every filtered keystroke;
+ * the class is put on for the two moments a settle says something — arriving,
+ * and switching between 카드 and 목록 — and taken off before anything else can
+ * borrow it.
+ *
+ * Under `prefers-reduced-motion` it is never added, and the rows are already
+ * at rest: the keyframes only say where a card comes *from* (`index.css`), so
+ * a card that never animates is the finished one rather than an empty box. */
+let settleTimer = null;
+function settle() {
+  if (REDUCED) return;
+  root.classList.remove("settling");
+  void root.offsetWidth;  // a fresh run rather than the tail of the last one
+  root.classList.add("settling");
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => root.classList.remove("settling"), 900);
+}
 
 function toPage(n) {
   state.page = n;
@@ -571,6 +630,7 @@ document.addEventListener("click", (e) => {
   const ack = e.target.closest("[data-fresh-ack]");
   const jump = e.target.closest("[data-tag-jump]");
   const sizeBtn = e.target.closest("[data-size]");
+  const viewBtn = e.target.closest("[data-view-set]");
   const pageBtn = e.target.closest("[data-page]");
   const stepBtn = e.target.closest("[data-page-rel]");
   // Every control that changes which papers are in the list sends the reader
@@ -605,8 +665,20 @@ document.addEventListener("click", (e) => {
     const first = state.size ? (state.page - 1) * state.size : 0;
     state.size = +sizeBtn.dataset.size;
     state.page = state.size ? Math.floor(first / state.size) + 1 : 1;
-    keepSize(state.size);
+    keepView();
     refresh();
+  }
+  // The shape changes and the list does not: same papers, same order, same
+  // page. So this is the one control here that does not send the reader back
+  // to the first page — there is nothing about the change for a page number
+  // to have gone stale against.
+  else if (viewBtn) {
+    if (state.view !== viewBtn.dataset.viewSet) {
+      state.view = viewBtn.dataset.viewSet;
+      keepView();
+      refresh();
+      settle();
+    }
   }
   // A tag on the lead block is also a filter — that is how you find the
   // neighbours of the paper you are looking at.
@@ -661,4 +733,5 @@ if (shelf) shelf.Corpus.sync(cards.map((card) => card.dataset.id));
 
 readHash();
 refresh();
+settle();
 })();

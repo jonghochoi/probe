@@ -48,10 +48,10 @@ holds, and the ones already here stay true.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
-under `assets/shelf.js`, and the landing page size — a view setting rather than
-a mark on a paper — under `probe.view.v1`. Both marks are set by the reader and
-never inferred: neither opening a page nor scrolling to its end is evidence it
-was read. This binds the drawings too — `components.shelf_art()` draws the four
+under `assets/shelf.js`, and the landing page size with the shape its rows are
+in — view settings rather than marks on a paper — under `probe.view.v1`. Both
+marks are set by the reader and never inferred: neither opening a page nor
+scrolling to its end is evidence it was read. This binds the drawings too — `components.shelf_art()` draws the four
 kinds without drawing how full any of them is, because a picture that implies a
 count leaks the same fact as markup that prints one.
 

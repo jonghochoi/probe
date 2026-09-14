@@ -864,7 +864,7 @@ html.js .rail {
   border: 1px solid var(--border); color: var(--text-muted);
   white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.row-title .cmp-n, .row-title .metric + .cmp-n { margin-left: .34rem; vertical-align: 1px; }
+.row-num .cmp-n, .row-num .metric + .cmp-n { margin-left: .34rem; vertical-align: 1px; }
 
 /* ── The list ─────────────────────────────────────────────────────────── */
 .listhead, .row {
@@ -910,11 +910,17 @@ html.js .rowstar, html.js .lh-star { display: block; }
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .row-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
-.row-title {
-  display: block; font-size: .89rem; font-weight: 700;
+/* The paper's own numbers ride beside the title rather than inside it: a card
+   clamps the title to keep its neighbours' titles on the same line, and a
+   result chip caught inside that clamp is the first thing a long title pushes
+   out of sight — which is the one thing on the row a reader is deciding on.
+   Kept inline here, the line reads exactly as one run of text. */
+.row-title { display: inline; font-size: .89rem; font-weight: 700;
   line-height: 1.45; letter-spacing: -.01em;
 }
-.row-title .metric { margin-left: .4rem; vertical-align: 1px; }
+.row-num { display: inline; }
+.row-num:empty { display: none; }
+.row-num .metric { margin-left: .4rem; vertical-align: 1px; }
 .row-main:hover .row-title { color: var(--orange-ink); }
 .row-tagline {
   display: block; font-size: .79rem; line-height: 1.55; color: var(--text-muted);
@@ -933,6 +939,134 @@ html.js .rowstar, html.js .lh-star { display: block; }
 .rsep-n {
   margin-left: auto; font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── 카드 ─────────────────────────────────────────────────────────────── */
+/* The same rows, laid out as a grid. Nothing here is a second kind of row:
+   the build prints one article per paper carrying everything either view
+   needs, and the three parts a line has no room for sit in the markup with
+   `display: none` until the grid asks for them. That is what keeps a card and
+   a line from ever disagreeing about a paper — there is only one of each.
+
+   `data-view` is on the list rather than a class on each row, so switching is
+   one attribute write and the rows stay exactly what the build made them. The
+   build prints the opening view into that attribute, which is also what a
+   browser with no script gets. */
+.row-alias, .row-figs, .row-extra { display: none; }
+
+.corpus[data-view="grid"] .listhead { display: none; }
+.corpus[data-view="grid"] .rows {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: .8rem; align-items: start;
+}
+/* A separator is a heading over the cards that follow it, so it takes the
+   whole row of the grid rather than a cell in it. */
+.corpus[data-view="grid"] .rsep { grid-column: 1 / -1; }
+.corpus[data-view="grid"] .row {
+  display: grid; gap: .3rem .5rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "when    id      star"
+    "main    main    main"
+    "extra   extra   extra"
+    "pillars pillars size";
+  align-content: start;
+  padding: .8rem .85rem .7rem;
+  border: 1px solid var(--border-soft); border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out),
+              transform var(--dur-short) var(--ease-out);
+}
+/* Both of these outweigh what they have to beat rather than merely following
+   it: `html.js .row` carries the list's six columns at one weight above a bare
+   `[data-view] .row`, and `.row[hidden]` ties with it — so a card would get
+   the list's column template, and a paged-out card would come back. The
+   `.corpus` the attribute actually sits on is what buys the weight.
+   Every view has to restate the one thing `filter.js` relies on. */
+.corpus[data-view="grid"] .row[hidden] { display: none; }
+.corpus[data-view="grid"] .row-when { grid-area: when; }
+.corpus[data-view="grid"] .row-id { grid-area: id; }
+.corpus[data-view="grid"] .rowstar { grid-area: star; }
+.corpus[data-view="grid"] .row-main { grid-area: main; }
+.corpus[data-view="grid"] .row-pillars { grid-area: pillars; align-self: end; }
+.corpus[data-view="grid"] .row-size { grid-area: size; align-self: end; text-align: right; }
+.corpus[data-view="grid"] .row-extra { grid-area: extra; }
+.corpus[data-view="grid"] .row-alias { display: block; }
+.corpus[data-view="grid"] .row-figs { display: inline; }
+.corpus[data-view="grid"] .row-extra {
+  display: flex; flex-wrap: wrap; gap: .25rem;
+  margin: .2rem 0 .45rem;
+}
+/* The codename, above the title it is short for. A reader recognises TacPAC
+   where they would have to read 2609.05266 — and it is the accent's one job
+   on a card, so the title below it stays the page's ink. */
+.corpus[data-view="grid"] .row-alias {
+  font-family: var(--mono); font-size: .68rem; font-weight: 700;
+  letter-spacing: .04em; color: var(--orange-ink); margin-bottom: .12rem;
+}
+/* The card's own column, so each part gets a line: codename, title, the
+   paper's numbers, then the one-liner. The order is the markup's — nothing
+   here reorders anything, it only stops the run of inline text a line wants. */
+.corpus[data-view="grid"] .row-main {
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.corpus[data-view="grid"] .row-num {
+  display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .3rem;
+}
+.corpus[data-view="grid"] .row-num:empty { display: none; }
+.corpus[data-view="grid"] .row-num .metric { margin-left: 0; }
+/* Cards in a row are read across, so their titles have to start on the same
+   line: the two clamps buy that at the cost of a long title's tail, which the
+   paper's own page carries in full one click away. */
+.corpus[data-view="grid"] .row-title {
+  font-size: .85rem;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.corpus[data-view="grid"] .row-tagline {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  overflow: hidden; margin-top: .25rem;
+}
+/* The grey a line takes on hover is the line telling you which one you are
+   on. A card has its own edges and needs no such help, so it keeps its ground
+   and answers with the raise below instead. */
+.corpus[data-view="grid"] .row:hover { background: var(--surface); }
+@media (hover: hover) {
+  .corpus[data-view="grid"] .row:hover {
+    border-color: var(--border); box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+}
+
+/* ── The settle ───────────────────────────────────────────────────────── */
+/* One beat when the list changes shape, none when it changes contents —
+   `filter.js` puts `settling` on for arriving and for switching between the
+   two views, and takes it off again before a keystroke can borrow it.
+
+   The keyframe says only where a card comes *from*. Its rest state is the
+   element's own, so the picture with the animation off — reduced motion set,
+   the class never added, or the frame simply not painted yet — is the
+   finished grid rather than an empty one. */
+@keyframes card-in { from { opacity: 0; transform: translateY(.6rem); } }
+.settling .rows > .row,
+.settling > .lead { animation: card-in var(--dur-long) var(--ease-out) both; }
+/* The stagger reaches about a screen and stops: past that the reader has not
+   arrived yet, and a delay long enough to be seen there is a delay they would
+   have to wait out on the way back up. */
+.settling .rows > .row:nth-of-type(1) { animation-delay: 20ms; }
+.settling .rows > .row:nth-of-type(2) { animation-delay: 50ms; }
+.settling .rows > .row:nth-of-type(3) { animation-delay: 80ms; }
+.settling .rows > .row:nth-of-type(4) { animation-delay: 110ms; }
+.settling .rows > .row:nth-of-type(5) { animation-delay: 140ms; }
+.settling .rows > .row:nth-of-type(6) { animation-delay: 170ms; }
+.settling .rows > .row:nth-of-type(7) { animation-delay: 200ms; }
+.settling .rows > .row:nth-of-type(8) { animation-delay: 230ms; }
+.settling .rows > .row:nth-of-type(9) { animation-delay: 260ms; }
+.settling .rows > .row:nth-of-type(n + 10) { animation-delay: 290ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .settling .rows > .row, .settling > .lead { animation: none; }
 }
 
 /* ── The page strip ───────────────────────────────────────────────────── */
