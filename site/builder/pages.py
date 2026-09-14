@@ -159,6 +159,48 @@ def _views() -> str:
     )
 
 
+def _briefing(total: int, when: str, filed: Counter,
+              cmp_n: int, talk_n: int) -> str:
+    """What the corpus is, above the list of what is in it.
+
+    Every number on this line is a door. The axes press the same facet the rail
+    does — `filter.js` binds every `[data-facet-pillar]` it finds, so the two
+    copies cannot drift — and the other two tracks link to their own indexes.
+
+    It carries the running count because that number is about the page rather
+    than the column it would otherwise sit in: the rail leaves at 900px, which
+    left a phone with no count at all. What a filter left standing is the first
+    thing the line says, and the reset that undoes it stands beside it.
+
+    Nothing here can be pressed without a script, so the band leaves with the
+    other controls rather than sitting inert (`index.css`).
+    """
+    axes = "".join(
+        f'<button type="button" class="brief-p" data-p="{c.esc(k)}" '
+        f'data-facet-pillar="{c.esc(k)}" aria-pressed="false" '
+        f'title="{c.esc(PILLAR_LABELS.get(k, "축 미지정"))}">'
+        f'<b>{c.esc(k)}</b><span class="brief-n">{filed[k]}</span></button>'
+        for k in PILLAR_ORDER if filed.get(k)
+    )
+    # A track with nothing in it is not a door, so it is not drawn as one.
+    tracks = "".join(
+        f'<a class="brief-x" href="{href}">{label}<b>{n}</b></a>'
+        for label, href, n in (("비교", "c/index.html", cmp_n),
+                               ("발표", "t/index.html", talk_n)) if n
+    )
+    when_html = (
+        f'<span data-corpus-when> · <span class="when-word">최근 </span>'
+        f"{c.esc(when)}</span>" if when else ""
+    )
+    return f"""<div class="brief" data-brief>
+  <p class="brief-stat"><span data-result-count>{total}편</span>{when_html}<button
+     type="button" class="brief-reset" data-reset hidden>초기화</button></p>
+  <div class="brief-axes" role="group" aria-label="연구 축">{axes}</div>
+  <span class="filter-spacer"></span>
+  <div class="brief-tracks">{tracks}</div>
+</div>"""
+
+
 def _seg(name: str, cls: str, buttons: str) -> str:
     """A pill group, and the chip a phone folds it into.
 
@@ -211,7 +253,7 @@ def _pager(total: int) -> str:
 
 
 def landing_page(papers: list[Paper], katex=None, search_api: str = "",
-                 comps: list | None = None) -> str:
+                 comps: list | None = None, talks: int = 0) -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
     The page answers "what should I read" before "what is here". The most
@@ -320,6 +362,9 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
 
     body = f"""{head}
 
+{_briefing(len(ordered), ordered[0].date if ordered else "", filed,
+           len(comps or []), talks)}
+
 <div class="filters" data-filters>
   <div class="filters-inner">
     <label class="search">
@@ -341,10 +386,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
 
 <div class="deck">
   <aside class="rail" data-rail>
-    <p class="rail-stat"><span data-result-count>{len(ordered)}편</span>{
-      f'<span data-corpus-when> · <span class="when-word">최근 </span>'
-      f'{c.esc(ordered[0].date)}</span>' if ordered else ""}<button type="button"
-      class="rail-reset" data-reset hidden>초기화</button></p>
     <p class="rail-h" data-mine-h>서재</p>
     {rail_mine}
     <p class="rail-h">연구 축</p>
