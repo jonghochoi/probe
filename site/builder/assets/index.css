@@ -767,20 +767,35 @@ html.js .rail {
 .resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* ── Lead: the newest rewrite, printed ────────────────────────────────── */
+/* The newest paper is marked by its frame — two accent brackets on opposite
+   corners, drawn over the hairline — and reads as three ruled bands: when,
+   what, and where it is filed. */
 .lead {
+  position: relative;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 1.1rem 1.2rem .85rem; margin-bottom: 1.6rem;
+  transition: box-shadow var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
 }
+.lead:hover { box-shadow: var(--shadow-lg); transform: var(--lift); }
+.lead::before, .lead::after {
+  content: ""; position: absolute; width: 12px; height: 12px; pointer-events: none;
+  border-color: var(--orange); border-style: solid;
+}
+.lead::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.lead::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
 .lead[hidden] { display: none; }
-.lead-top { display: flex; align-items: center; gap: .5rem; margin-bottom: .55rem; }
+.lead-top {
+  display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border-soft);
+}
 .lead-flag {
   font-size: .64rem; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--accent-ink); background: var(--orange);
   padding: .1rem .4rem; border-radius: var(--radius-xs);
 }
 .lead-when {
-  font-size: .72rem; color: var(--text-muted);
+  font-family: var(--num); font-size: .72rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 .lead-body { display: block; text-decoration: none; color: inherit; }
@@ -790,18 +805,37 @@ html.js .rail {
 }
 .lead-body:hover .lead-title { color: var(--orange-ink); }
 .lead-tagline {
-  font-size: .85rem; color: var(--text); margin-top: .25rem; font-weight: 600;
+  font-size: .85rem; color: var(--text-muted); margin-top: .25rem; font-weight: 500;
+}
+/* The figure a reader would quote stands on its own line at display size,
+   keyed on its left, between the thesis it backs and the summary that
+   explains it. */
+.lead-ro {
+  display: flex; align-items: stretch; margin: .85rem 0 .2rem;
+  border: 1px solid color-mix(in oklab, var(--orange) 45%, var(--border));
+  background: color-mix(in oklab, var(--orange) 7%, var(--surface));
+  border-radius: var(--radius-sm); max-width: 100%; width: fit-content;
+}
+.lead-ro-k {
+  display: flex; align-items: center; padding: 0 .7rem;
+  font-size: .68rem; font-weight: 700; color: var(--bg); background: var(--orange);
+  white-space: nowrap;
+}
+.lead-ro-v {
+  font-family: var(--num); font-size: clamp(1rem, 2.1vw, 1.32rem); font-weight: 600;
+  color: var(--orange-ink); padding: .38rem .85rem; line-height: 1.35;
+  font-variant-numeric: tabular-nums;
 }
 .lead-sum {
   font-size: .85rem; line-height: 1.72; color: var(--text-muted);
-  margin-top: .5rem;
+  margin-top: .75rem;
 }
 .lead-foot {
   display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
-  margin-top: .75rem;
+  margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border-soft);
 }
 .lead-size, .row-size {
-  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-family: var(--num); font-size: .72rem; color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .lead-foot .chip.tag {
@@ -842,20 +876,9 @@ html.js .rail {
 .leadstar[aria-pressed="true"],
 .starbtn[aria-pressed="true"] { color: var(--orange-ink); }
 
-/* The one value the paper is remembered by (front matter `metric`). Reads as
-   a reading, not a label: mono digits, the brand wash behind them. */
-.metric {
-  display: inline-flex; align-items: center;
-  font-family: var(--mono); font-size: .7rem; font-weight: 600;
-  padding: .08rem .42rem; border-radius: var(--radius-pill);
-  background: var(--orange-soft); color: var(--orange-ink);
-  border: 1px solid var(--amber-soft); white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
 /* How many comparisons hold this paper. Quiet, and outlined rather than
-   washed: the metric beside it is the paper's own number and keeps the accent,
-   while this is a pointer at the other track. Not a link — the row already
+   washed: the paper's own number keeps the accent on its 결과 line, while this
+   is a pointer at the other track. Not a link — the row already
    goes to the paper, and the paper's header is where the door is. */
 .cmp-n {
   display: inline-flex; align-items: center; gap: .1rem;
@@ -864,7 +887,7 @@ html.js .rail {
   border: 1px solid var(--border); color: var(--text-muted);
   white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.row-title .cmp-n, .row-title .metric + .cmp-n { margin-left: .34rem; vertical-align: 1px; }
+.row-title .cmp-n { margin-left: .34rem; vertical-align: 1px; }
 
 /* ── The list ─────────────────────────────────────────────────────────── */
 .listhead, .row {
@@ -872,10 +895,12 @@ html.js .rail {
   grid-template-columns: 4.2rem 5.6rem minmax(0, 1fr) 4.8rem 6.2rem;
   gap: .9rem;
 }
-.listhead {
-  font-size: .66rem; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--text-muted);
-  padding: 0 .35rem .45rem; border-bottom: 1px solid var(--border);
+/* The column head is a band of its own, in the label voice at normal
+   tracking — its words are Korean. 비교 and 발표 print the same band. */
+.listhead, .ix-head {
+  font-family: var(--num); font-size: .68rem; font-weight: 600; color: var(--text-muted);
+  background: var(--surface-2); padding: .5rem .35rem;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
 }
 .listhead[hidden] { display: none; }
 .row {
@@ -904,17 +929,20 @@ html.js .rowstar, html.js .lh-star { display: block; }
   content: "●"; color: var(--orange-ink); font-size: .62em;
   vertical-align: .15em; margin-right: .3rem;
 }
-.row:hover { background: var(--surface-2); }
+/* A row under the pointer takes the accent as a tick on its leading edge. */
+.row { transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out); }
+.row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
+/* Dates and ids in the figure face, so the columns line up digit for digit. */
 .row-when, .row-id {
-  font-size: .74rem; color: var(--text-muted);
+  font-family: var(--num); font-size: .74rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
+.row-id { color: var(--text); opacity: .8; }
 .row-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
 .row-title {
   display: block; font-size: .89rem; font-weight: 700;
   line-height: 1.45; letter-spacing: -.01em;
 }
-.row-title .metric { margin-left: .4rem; vertical-align: 1px; }
 .row-main:hover .row-title { color: var(--orange-ink); }
 .row-tagline {
   display: block; font-size: .79rem; line-height: 1.55; color: var(--text-muted);
@@ -1101,7 +1129,7 @@ html.js .pager[hidden] { display: none; }
 .sem-sub {
   display: grid; grid-template-columns: 3.6rem minmax(0, 1fr);
   gap: .55rem; align-items: start;
-  padding: .35rem .65rem .35rem 1.1rem; border-radius: 5px;
+  padding: .35rem .65rem .35rem 1.1rem; border-radius: var(--radius-sm);
   text-decoration: none; color: inherit;
   border: 1px solid transparent; transition: background .14s, border-color .14s;
 }
@@ -1250,22 +1278,15 @@ html:not(.js) .hub-actions { display: none; }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 
 /* ── 비교 ─────────────────────────────────── */
-.cmp-list { display: grid; gap: .55rem; }
+.cmp-list { display: grid; }
 .cmp-item {
-  display: flex; flex-direction: column; gap: .25rem;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: .85rem 1rem;
+  padding-top: .85rem; padding-bottom: .85rem; border-bottom: 1px solid var(--border-soft);
   text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+  transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
 }
-.cmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
-.cmp-item-h { display: flex; gap: .8rem; align-items: baseline; }
-.cmp-item-t { flex: 1 1 auto; font-size: .95rem; font-weight: 700; line-height: 1.45; }
+.cmp-item:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
+.cmp-item-t { font-size: .95rem; font-weight: 700; line-height: 1.45; }
 .cmp-item:hover .cmp-item-t { color: var(--orange-ink); }
-.cmp-item-when {
-  flex: 0 0 auto; font-size: .72rem; color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
 /* The ids rather than the titles: three titles do not fit on a line and three
    ids always do — the same trade the 책갈피 strip makes. */
 .cmp-item-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .2rem; }
@@ -1280,22 +1301,15 @@ html:not(.js) .hub-actions { display: none; }
 /* A talk is the one surface someone goes looking for with a room already
    booked, so a row answers the two questions that decide whether to open it —
    what it lands, and what it costs — before the paper's own title. */
-.talk-list { display: grid; gap: .55rem; }
+.talk-list { display: grid; }
 .talk-item {
-  display: grid; gap: .3rem;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: .85rem 1rem;
+  padding-top: .85rem; padding-bottom: .85rem; border-bottom: 1px solid var(--border-soft);
   text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+  transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
 }
-.talk-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
-.talk-h { display: flex; gap: .8rem; align-items: baseline; }
-.talk-t { flex: 1 1 auto; font-size: .95rem; font-weight: 700; line-height: 1.45; }
+.talk-item:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
+.talk-t { font-size: .95rem; font-weight: 700; line-height: 1.45; }
 .talk-item:hover .talk-t { color: var(--orange-ink); }
-.talk-id {
-  flex: 0 0 auto; font-family: var(--mono); font-size: .68rem;
-  color: var(--text-muted); font-variant-numeric: tabular-nums;
-}
 .talk-spine {
   font-size: .82rem; line-height: 1.65; color: var(--text-muted);
   word-break: keep-all;
@@ -1383,4 +1397,79 @@ html:not(.js) .hub-actions { display: none; }
    or not the word is there to say so. */
 @media (max-width: 380px) {
   .when-word { display: none; }
+}
+
+/* ── A row's result ───────────────────────────────────────────────────── */
+/* A row's result gets a fixed slot under the tagline, so a reader can run an
+   eye down the list and compare figures: the key in the label voice, the
+   figure in body ink on a quiet well, the accent a 2px tick at its edge. */
+.row-ro {
+  display: inline-flex; align-items: baseline; gap: .5rem; max-width: 100%;
+  margin-top: .35rem; padding: .08rem .5rem .1rem .45rem;
+  border-left: 2px solid var(--orange); background: var(--surface-2);
+}
+.row-ro-k { font-size: .64rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+.row-ro-v {
+  font-family: var(--num); font-size: .74rem; font-weight: 600; color: var(--text);
+  font-variant-numeric: tabular-nums; min-width: 0;
+}
+.row:hover .row-ro { background: var(--surface-3); }
+
+/* ── 비교 and 발표: the landing's table, cut two more ways ────────────── */
+/* The same head, the same ruled rows, the same columns where the facts are the
+   same kind — when, an id, the thing itself, its axes, its size — so the three
+   indexes read as one table. */
+.hub-wide { max-width: 1240px; padding-top: 1.5rem; }
+.ix-head, .ix-row {
+  display: grid; align-items: baseline; gap: .9rem; padding-left: .6rem; padding-right: .6rem;
+}
+.ix-cmp  { grid-template-columns: 4.2rem minmax(0, 1fr) 8rem 3.4rem; }
+.ix-talk { grid-template-columns: 4.2rem 5.6rem minmax(0, 1fr) 6.8rem 6.2rem; }
+.ix-when, .ix-size, .talk-id, .talk-cost {
+  font-family: var(--num); font-size: .74rem; color: var(--text-muted);
+  white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.talk-id { color: var(--text); opacity: .8; }
+.ix-main { display: grid; gap: .3rem; min-width: 0; }
+.ix-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
+.cmp-item .fork { margin-top: .2rem; padding-top: .45rem; border-top: 1px solid var(--border-soft); gap: .7rem; }
+.cmp-item .fork-trunk {
+  width: 15rem; flex-direction: column; align-items: flex-start;
+  justify-content: center; text-align: left; gap: .15rem;
+}
+.cmp-item .fork-branches { grid-template-columns: max-content max-content max-content; }
+.cmp-item .fork-s { max-width: 32rem; }
+.talk-rail { max-width: 36rem; margin-top: .25rem; }
+.talk-rail i { height: 3px; border-radius: 0; opacity: .85; }
+
+/* The table's last line: what the rail's colours mean, and that it ends —
+   a short list otherwise stops on a row rule with the page running on. */
+.ix-foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: .6rem 1.5rem; padding: .7rem .6rem; border-bottom: 1px solid var(--border);
+  font-family: var(--num); font-size: .7rem; color: var(--text-muted);
+}
+.ix-end::before { content: "■ "; color: var(--orange); }
+.act-key { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem 1rem; }
+.ak-h { font-weight: 700; color: var(--text); }
+.ak { display: inline-flex; align-items: center; gap: .4rem; color: var(--text); }
+.ak i { width: 1.4rem; height: 3px; background: currentColor; }
+.ak .talk-r1 { color: var(--act1); } .ak .talk-r2 { color: var(--act2); }
+.ak .talk-r3 { color: var(--act3); } .ak .talk-r4 { color: var(--act4); }
+
+@media (max-width: 720px) {
+  .lead-ro { width: auto; }
+  .lead-ro-k { padding: 0 .5rem; }
+  .lead-ro-v { padding: .35rem .6rem; }
+  .hub-wide { padding: 1rem .9rem 4rem; }
+  /* The head goes and each row folds to a block, as the landing's does: the
+     when and id on a line, the thing under them, the axes and size trailing. */
+  .ix-head { display: none; }
+  .cmp-item.ix-row, .talk-item.ix-row { display: block; padding: .8rem .2rem; }
+  .ix-talk .ix-when::after { content: " ·"; margin-right: .3rem; }
+  .ix-row .ix-main { margin: .2rem 0 .4rem; }
+  .ix-pillars { display: inline-flex; vertical-align: middle; }
+  .ix-row .ix-size::before, .ix-row .talk-cost::before { content: "·"; margin: 0 .35rem; opacity: .5; }
+  .cmp-item .fork-trunk { width: auto; }
+  .cmp-item .fork-branches { grid-template-columns: max-content minmax(0, 1fr); }
 }

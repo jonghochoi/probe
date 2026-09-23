@@ -127,7 +127,7 @@ def build(args) -> int:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
             comp, papers_by_id, katex, decisions, render_problems)
     rendered[out / "c" / "index.html"] = pages.comparison_index_page(comps, papers_by_id)
-    rendered[out / "t" / "index.html"] = pages.talk_index_page(presentation_map)
+    rendered[out / "t" / "index.html"] = pages.talk_index_page(presentation_map, papers_by_id)
     problems += render_problems
 
     # The landing page indexes whatever was built — with `--only`, a subset.
@@ -156,7 +156,10 @@ def build(args) -> int:
     # as asset text for the same reason.
     extras = assets_out.OPTIONAL["search"] if args.search_api else ()
     charset = set(assets_out.asset_text(extras)) | set(index_js)
-    mono_charset: set[str] = set()
+    # Metadata — dates, ids, counts, labels — is set in the mono face as well
+    # as code, so the subset always carries printable ASCII and the few
+    # separators a readout uses, whether or not any `<pre>` happens to.
+    mono_charset: set[str] = {chr(c) for c in range(0x20, 0x7F)} | set("·→←↗×±–—%▸■●")
     for page_html in final.values():
         charset |= set(_TEXT_ONLY.sub(" ", page_html))
         for body in _PRE_BLOCK.findall(page_html):

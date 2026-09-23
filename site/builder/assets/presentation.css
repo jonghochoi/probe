@@ -217,7 +217,7 @@
 }
 .prs-panel {
   min-width: 0; background: var(--surface-2);
-  border: 1px solid var(--border-soft); border-radius: 9px;
+  border: 1px solid var(--border-soft); border-radius: var(--radius);
   padding: clamp(13px, 2cqw, calc(20px * var(--prs-cap))) clamp(14px, 2.2cqw, calc(22px * var(--prs-cap))) 18px;
   display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px;
 }
@@ -294,7 +294,7 @@
 .prs-chain, .prs-split { display: flex; align-items: center; gap: 7px; }
 .prs-box {
   position: relative; flex: 1; min-width: 0; background: var(--surface-2);
-  border: 1px solid var(--border-soft); border-radius: 7px; padding: 8px 10px;
+  border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 8px 10px;
 }
 .prs-box b {
   display: block; font-size: clamp(8px, 1.05cqw, calc(11.5px * var(--prs-cap))); font-weight: 600;
@@ -428,7 +428,7 @@
 }
 .prs-blk {
   position: absolute; left: var(--x); width: var(--w); top: 0; bottom: 0;
-  display: grid; place-items: center; border-radius: 4px; overflow: hidden;
+  display: grid; place-items: center; border-radius: var(--radius-sm); overflow: hidden;
   font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap)));
 }
 .prs-blk.prs-wait { background: var(--surface-2); border: 1px solid var(--border-soft); color: var(--text-muted); }
@@ -457,7 +457,7 @@
 .prs-priors { display: grid; gap: 12px; flex: 1; min-width: 0; }
 .prs-node {
   background: var(--surface-2); border: 1px solid var(--border-soft);
-  border-radius: 8px; padding: 10px 13px; flex: 1; min-width: 0;
+  border-radius: var(--radius); padding: 10px 13px; flex: 1; min-width: 0;
 }
 .prs-node.hot { background: var(--orange-soft); border-color: var(--amber-soft); }
 .prs-when { display: block; font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted); }
