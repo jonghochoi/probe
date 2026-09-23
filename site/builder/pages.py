@@ -532,6 +532,37 @@ def _metric_chip(paper: Paper) -> str:
     )
 
 
+def _row_readout(paper: Paper) -> str:
+    """A row's headline number, on a line of its own under the tagline.
+
+    Riding at the end of the title, the figure lands wherever the title
+    happens to wrap — inline on one row, alone on the next line on another —
+    and the column loses its rhythm. A fixed slot is what lets a reader run an
+    eye down the list and compare results, which is why the number is there.
+    """
+    if not paper.metric:
+        return ""
+    return (
+        '<span class="row-ro"><span class="row-ro-k">결과</span>'
+        f'<span class="row-ro-v">{c.esc(paper.metric)}</span></span>'
+    )
+
+
+def _lead_readout(paper: Paper) -> str:
+    """The lead's headline number, at display size and keyed on its left.
+
+    A row gives the figure a slot under its tagline (`_row_readout`); on the
+    lead it is the number a reader would quote, so it stands on its own line
+    between the thesis it backs and the summary that explains it.
+    """
+    if not paper.metric:
+        return ""
+    return (
+        '<span class="lead-ro"><span class="lead-ro-k">결과</span>'
+        f'<span class="lead-ro-v">{c.esc(paper.metric)}</span></span>'
+    )
+
+
 def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
     """The newest rewrite, printed rather than summarised.
 
@@ -558,11 +589,11 @@ def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
   <a class="lead-body" href="p/{c.esc(paper.stem)}/index.html">
     <h2 class="lead-title">{c.esc(paper.title)}</h2>
     <p class="lead-tagline">{_md(renderer, paper.tagline)}</p>
+    {_lead_readout(paper)}
     <p class="lead-sum">{_md(renderer, paper.summary_md)}</p>
   </a>
   <div class="lead-foot">
     {c.pillar_chips(paper.filed)}
-    {_metric_chip(paper)}
     {_cmp_count(cmp_n)}
     {tag_buttons}
     {links}
@@ -592,8 +623,9 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False,
   <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
   <span class="row-id">{c.esc(paper.stem)}</span>
   <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
-    <span class="row-title">{c.esc(paper.title)}{_metric_chip(paper)}{_cmp_count(cmp_n)}</span>
+    <span class="row-title">{c.esc(paper.title)}{_cmp_count(cmp_n)}</span>
     <span class="row-tagline">{_md(renderer, paper.tagline)}</span>
+    {_row_readout(paper)}
   </a>
   <span class="row-pillars">{pillars}</span>
   <span class="row-size">{c.esc(_size(paper, short=True))}</span>
@@ -1347,7 +1379,7 @@ def _cmp_cards(papers: list[Paper]) -> str:
     """
     cards = "".join(
         f'<a class="cmp-card" href="../../p/{c.esc(p.stem)}/index.html">'
-        f'<span class="cmp-card-p">{"".join(c.esc(x) + " " for x in p.filed)}</span>'
+        f'<span class="cmp-card-p">{c.pillar_chips(p.filed)}</span>'
         f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
         f'<span class="cmp-card-tag">{c.esc(p.tagline)}</span>'
         f'<span class="cmp-card-foot">'
@@ -1364,7 +1396,7 @@ def _cmp_cards(papers: list[Paper]) -> str:
     )
 
 
-def talk_index_page(presentation_map: dict) -> str:
+def talk_index_page(presentation_map: dict, papers_by_id: dict | None = None) -> str:
     """발표 — every presentation, and nothing about a paper that is not one.
 
     The one destination in the nav that is an index and nothing else: a
@@ -1384,13 +1416,23 @@ def talk_index_page(presentation_map: dict) -> str:
     per run of a beat, weighted by the slides it holds. It is the talk's shape,
     and on this surface it is also the only thing that distinguishes two
     fourteen-minute talks from each other before either is opened.
+
+    The row stands on the landing list's columns — when, id, the talk, its
+    axes, its cost — with the paper's own pillar chips, so 논문, 비교 and 발표
+    read as one table cut three ways rather than as three sites.
     """
     ordered = sorted(presentation_map.values(),
                      key=lambda t: (t.front.get("generated", ""), t.paper_id),
                      reverse=True)
+    papers_by_id = papers_by_id or {}
     if ordered:
-        rows = "".join(_talk_row(t) for t in ordered)
-        list_html = f'<div class="talk-list">{rows}</div>'
+        rows = "".join(_talk_row(t, papers_by_id.get(t.paper_id)) for t in ordered)
+        list_html = (
+            '<div class="ix-head ix-talk" aria-hidden="true"><span>작성</span>'
+            '<span>arXiv</span><span>발표 · 한 문장</span><span>연구 축</span>'
+            f'<span>분량</span></div><div class="talk-list">{rows}</div>'
+            + _ix_foot(f"발표 {len(ordered)}개", _act_key())
+        )
     else:
         list_html = '<p class="corpus-empty">아직 발표 자료로 만든 논문이 없습니다.</p>'
 
@@ -1402,7 +1444,7 @@ def talk_index_page(presentation_map: dict) -> str:
 
     body = f"""{head}
 
-<main class="hub">
+<main class="hub hub-wide">
   {list_html}
 </main>
 """
@@ -1415,7 +1457,32 @@ def talk_index_page(presentation_map: dict) -> str:
     )
 
 
-def _talk_row(presentation) -> str:
+def _act_key() -> str:
+    """The key to the rail every talk row draws: which colour is which act.
+
+    The rail is a talk's shape in four colours and nothing else, so the colours
+    are named once, under the table, in the order the acts run.
+    """
+    keys = "".join(
+        f'<span class="ak"><i class="talk-r{presentations.ACT_ORDER[a]}"></i>'
+        f"{c.esc(a)} {c.esc(name)}</span>"
+        for a, name in presentations.ACTS.items()
+    )
+    return f'<span class="act-key"><span class="ak-h">막</span>{keys}</span>'
+
+
+def _ix_foot(count: str, key: str = "") -> str:
+    """The table's last line: what the rail's colours mean, and that it ends.
+
+    A short list otherwise stops on a row rule with the page running on under
+    it, and a reader cannot tell a list that is complete from one that has not
+    finished arriving. The count says the former.
+    """
+    return (f'<div class="ix-foot">{key}'
+            f'<span class="ix-end">목록 끝 · {c.esc(count)}</span></div>')
+
+
+def _talk_row(presentation, paper: Paper | None = None) -> str:
     """One talk, from outside it — the spine, its shape, what it was cut for.
 
     The spine drops its ` / ` marker here (§1-0): the break is authored for the
@@ -1435,13 +1502,17 @@ def _talk_row(presentation) -> str:
     cost = " · ".join(x for x in (
         f"{presentation.minutes}분" if presentation.minutes else "",
         f"{len(presentation.slides)}장") if x)
+    when = str(presentation.front.get("generated", ""))[:10]
+    pillars = c.pillar_chips(paper.filed) if paper else ""
     return (
-        f'<a class="talk-item" href="../p/{c.esc(presentation.paper_id)}'
+        f'<a class="talk-item ix-row ix-talk" href="../p/{c.esc(presentation.paper_id)}'
         f'/index.html#{PRESENTATION_TAB}">'
-        f'<span class="talk-h"><span class="talk-t">{c.esc(presentation.title)}</span>'
-        f'<span class="talk-id">{c.esc(presentation.paper_id)}</span></span>'
+        f'<span class="ix-when">{c.esc(when[5:] or when)}</span>'
+        f'<span class="talk-id">{c.esc(presentation.paper_id)}</span>'
+        f'<span class="ix-main"><span class="talk-t">{c.esc(presentation.title)}</span>'
         f'<span class="talk-spine">{spine}</span>'
-        f'<span class="talk-rail" aria-hidden="true">{rail}</span>'
+        f'<span class="talk-rail" aria-hidden="true">{rail}</span></span>'
+        f'<span class="ix-pillars">{pillars}</span>'
         f'<span class="talk-cost">{c.esc(cost)}</span></a>'
     )
 
@@ -1452,18 +1523,27 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
     A row carries the question, then the fork: what each paper does about it and
     what they all accept. The tagline is not printed here — it is the same
     thought as prose, and it prints under the H1 on the comparison's own page.
+    Around it the landing list's columns: when, the comparison's axes, and how
+    many papers it holds.
     """
     ordered = sorted(comps, key=lambda x: x.order_key, reverse=True)
     if ordered:
         rows = "".join(
-            f'<a class="cmp-item" href="{c.esc(x.slug)}/index.html">'
-            f'<span class="cmp-item-h">'
+            f'<a class="cmp-item ix-row ix-cmp" href="{c.esc(x.slug)}/index.html">'
+            f'<span class="ix-when">{c.esc(x.date[5:] or x.date)}</span>'
+            f'<span class="ix-main">'
             f'<span class="cmp-item-t">{c.esc(x.title)}</span>'
-            f'<span class="cmp-item-when">{c.esc(x.date)}</span></span>'
-            f"{_fork(x, papers_by_id)}</a>"
+            f"{_fork(x, papers_by_id)}</span>"
+            f'<span class="ix-pillars">{c.pillar_chips(x.pillars)}</span>'
+            f'<span class="ix-size">{len(x.paper_ids)}편</span></a>'
             for x in ordered
         )
-        list_html = f'<div class="cmp-list">{rows}</div>'
+        list_html = (
+            '<div class="ix-head ix-cmp" aria-hidden="true"><span>작성</span>'
+            '<span>질문 · 공통 → 갈래</span><span>연구 축</span><span>논문</span></div>'
+            f'<div class="cmp-list">{rows}</div>'
+            + _ix_foot(f"비교 {len(ordered)}건")
+        )
     else:
         list_html = '<p class="corpus-empty">아직 비교한 글이 없습니다.</p>'
 
@@ -1475,7 +1555,7 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
 
     body = f"""{head}
 
-<main class="hub">
+<main class="hub hub-wide">
   {list_html}
 </main>
 """

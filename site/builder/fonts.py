@@ -49,10 +49,20 @@ _JBM_FACES = {400: "Regular", 700: "Bold"}
 RUNTIME_CHARS = "저장됨입력중삭제발행가져옴실패공간이가득찼습니다개편"
 
 
-def _face(family: str, url: str, weight: str, fmt: str = "woff2") -> str:
+# The readout face: the same JetBrains Mono files, bound to printable ASCII
+# minus the space. A metadata run like `슬립 76 % 를 23.1 ms 안에` then sets its
+# digits, units and Latin in mono while its Hangul *and its spaces* fall
+# through to Pretendard — a mono space between two proportional syllables is
+# what makes a Korean readout look letter-spaced.
+NUM_RANGE = "U+0021-007E, U+00B1, U+00D7, U+2190-2193"
+
+
+def _face(family: str, url: str, weight: str, fmt: str = "woff2",
+          unicode_range: str = "") -> str:
+    rng = f"unicode-range:{unicode_range};" if unicode_range else ""
     return (
         f"@font-face{{font-family:'{family}';"
-        f"src:url({url}) format('{fmt}');"
+        f"src:url({url}) format('{fmt}');{rng}"
         f"font-weight:{weight};font-style:normal;font-display:swap}}"
     )
 
@@ -183,6 +193,8 @@ def emit(dest: Path, charset: set[str], mono_charset: set[str] | None = None) ->
         (fonts / name).write_bytes(data)
         stats["mono"] += len(data)
         faces.append(_face("JetBrains Mono", f"fonts/{name}", str(weight)))
+        faces.append(_face("Probe Num", f"fonts/{name}", str(weight),
+                           unicode_range=NUM_RANGE))
 
     gap = mono_coverage_gap(mono_charset)
     if gap:

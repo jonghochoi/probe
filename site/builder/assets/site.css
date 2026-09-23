@@ -120,6 +120,11 @@
   --p0: oklch(90.0% 0.036 18);  --p1: oklch(93.8% 0.030 81);
   --p2: oklch(94.8% 0.047 133); --p3: oklch(90.1% 0.033 269);
   --p4: oklch(89.2% 0.045 301);
+  /* Each pillar's ink: its tint's hue at text strength, for the chip's frame
+     and label. */
+  --p0-ink: oklch(50% 0.13 18);  --p1-ink: oklch(52% 0.10 81);
+  --p2-ink: oklch(50% 0.12 140); --p3-ink: oklch(50% 0.12 262);
+  --p4-ink: oklch(50% 0.13 304);
   --pna:  oklch(91.0% 0.009 56);
   --pink: oklch(21.0% 0.018 50);   /* pillar chip ink */
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
@@ -130,15 +135,25 @@
   --ko: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
         'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  /* The figure face: JetBrains Mono for digits, units and Latin only, with
+     Hangul and spaces falling through to Pretendard (`fonts.NUM_RANGE`), so a
+     readout's numbers line up without its Korean looking letter-spaced. */
+  --num: 'Probe Num', var(--ko);
 
   /* ── Shape ──────────────────────────────────────────────────────────── */
-  --radius-xs:   3px;
-  --radius-sm:   6px;
-  --radius:      10px;
-  --radius-pill: 999px;
-  --shadow:      0 2px 12px oklch(21% 0.018 50 / .08);
-  --shadow-sm:   0 1px 3px oklch(21% 0.018 50 / .12);
-  --shadow-lg:   0 8px 34px oklch(21% 0.018 50 / .16);
+  /* Panels meet at corners and a chip is a window rather than a pill: every
+     radius is all but square, and `--radius-pill` keeps its name so a rule
+     that asks for one gets the square version (a dot that is round by nature,
+     `50%`, stays round). A surface sits on the page by its hairline rather
+     than on a shadow; `--shadow-lg` is for what really is above the page — an
+     overlay, a slide, a card lifted under the pointer. */
+  --radius-xs:   1px;
+  --radius-sm:   2px;
+  --radius:      3px;
+  --radius-pill: 2px;
+  --shadow:      0 0 0 transparent;
+  --shadow-sm:   0 1px 0 oklch(21% 0.018 50 / .06);
+  --shadow-lg:   0 14px 40px oklch(21% 0.018 50 / .18), 0 0 0 1px oklch(21% 0.018 50 / .04);
 
   /* ── Motion ─────────────────────────────────────────────────────────── */
   /* One easing for entrances, one for state changes, and four durations.
@@ -152,6 +167,9 @@
   --dur-short:   150ms;
   --dur-mid:     200ms;
   --dur-long:    280ms;
+  /* A card that is a link rises this far under the pointer, so the thing
+     that will open is the thing that moved. */
+  --lift:        translateY(-2px);
 
   /* ── Layers ─────────────────────────────────────────────────────────── */
   /* The nav out-paints in-page sticky elements, so a docked filter bar or a
@@ -224,13 +242,16 @@
   --p0: oklch(39.1% 0.047 19);  --p1: oklch(42.2% 0.042 72);
   --p2: oklch(42.2% 0.058 136); --p3: oklch(37.1% 0.056 268);
   --p4: oklch(36.9% 0.067 304);
+  --p0-ink: oklch(78% 0.10 18);  --p1-ink: oklch(82% 0.09 81);
+  --p2-ink: oklch(80% 0.11 140); --p3-ink: oklch(78% 0.09 262);
+  --p4-ink: oklch(78% 0.10 304);
   --pna:  oklch(32.7% 0.013 58);
   --pink: oklch(93.6% 0.012 60);
   --dref: oklch(76.5% 0.139 73);
 
-  --shadow:    0 2px 12px oklch(0% 0 0 / .4);
-  --shadow-sm: 0 1px 3px oklch(0% 0 0 / .5);
-  --shadow-lg: 0 8px 34px oklch(0% 0 0 / .55);
+  --shadow:    0 0 0 transparent;
+  --shadow-sm: 0 1px 0 oklch(0% 0 0 / .4);
+  --shadow-lg: 0 16px 44px oklch(0% 0 0 / .6), 0 0 0 1px oklch(30% 0.017 59 / .6);
 }
 
 html {
@@ -422,9 +443,10 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   width: 32px; height: 32px; flex: none; display: grid; place-items: center;
   cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
+              border-color var(--dur-short) var(--ease-out),
+              transform var(--dur-short) var(--ease-out);
 }
-.icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
+.icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: var(--lift); }
 /* The theme button carries both of its icons and shows the one that names
    where the click goes. Which that is answers to `data-theme` alone, so the
    button is drawn correctly by the boot script's attribute, before any of the
@@ -505,12 +527,19 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
   background: var(--surface-2); border: 1px solid var(--border);
   color: var(--text-muted); text-decoration: none; white-space: nowrap;
 }
-.chip.pillar { color: var(--pink); border-color: transparent; }
-.chip.pillar[data-p="P0"] { background: var(--p0); }
-.chip.pillar[data-p="P1"] { background: var(--p1); }
-.chip.pillar[data-p="P2"] { background: var(--p2); }
-.chip.pillar[data-p="P3"] { background: var(--p3); }
-.chip.pillar[data-p="P4"] { background: var(--p4); }
+/* An axis is a labelled window: the frame and label in the pillar's ink over
+   its tint, so five axes stay apart by hue at the chip's size in either
+   theme. */
+.chip.pillar {
+  --pi: var(--text-muted);
+  font-family: var(--num); font-weight: 700;
+  color: var(--pi); border: 1px solid color-mix(in oklab, var(--pi) 55%, transparent);
+}
+.chip.pillar[data-p="P0"] { --pi: var(--p0-ink); background: color-mix(in oklab, var(--p0) 50%, var(--surface)); }
+.chip.pillar[data-p="P1"] { --pi: var(--p1-ink); background: color-mix(in oklab, var(--p1) 50%, var(--surface)); }
+.chip.pillar[data-p="P2"] { --pi: var(--p2-ink); background: color-mix(in oklab, var(--p2) 50%, var(--surface)); }
+.chip.pillar[data-p="P3"] { --pi: var(--p3-ink); background: color-mix(in oklab, var(--p3) 50%, var(--surface)); }
+.chip.pillar[data-p="P4"] { --pi: var(--p4-ink); background: color-mix(in oklab, var(--p4) 50%, var(--surface)); }
 .chip.tag { font-weight: 500; }
 /* In the paper header a tag is the quietest thing on the page: nine arrive at
    once, and with a border each they read as nine controls rather than one
@@ -606,9 +635,10 @@ html.js .paper-acts {
   background: var(--surface-2); border: 1px solid var(--border);
   color: var(--text-muted);
   transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
+              border-color var(--dur-short) var(--ease-out),
+              transform var(--dur-short) var(--ease-out);
 }
-.act-btn:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
+.act-btn:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: var(--lift); }
 .act-btn[aria-pressed="true"] { color: var(--orange-ink); border-color: var(--amber-soft); }
 
 
@@ -625,9 +655,10 @@ html.js .paper-acts {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: .7rem .9rem;
   text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-mid) var(--ease-out),
+              transform var(--dur-mid) var(--ease-out);
 }
-.rel-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.rel-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .rel-p {
   grid-column: 1 / -1; font-size: .68rem; font-weight: 700;
   color: var(--text-muted); letter-spacing: .04em;
@@ -660,9 +691,10 @@ html.js .paper-acts {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: .8rem .9rem;
   text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-mid) var(--ease-out),
+              transform var(--dur-mid) var(--ease-out);
 }
-.cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .cmp-card-p {
   font-size: .68rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em;
 }
@@ -1671,9 +1703,9 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); text-decoration: none; color: inherit;
   transition: border-color var(--dur-short) var(--ease-out),
-              box-shadow var(--dur-short) var(--ease-out);
+              box-shadow var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
 }
-.incmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow); }
+.incmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .incmp-when {
   font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
   letter-spacing: .04em;
@@ -1768,7 +1800,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .g-hub {
   background: var(--surface); border: 1px solid var(--border);
   border-top: 3px solid var(--orange); border-radius: var(--radius);
-  box-shadow: var(--shadow-lg); padding: 1.15rem 1.35rem; margin-bottom: 1.2rem;
+  padding: 1.15rem 1.35rem; margin-bottom: 1.2rem;
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 1.4rem; align-items: center;
 }
@@ -1822,9 +1854,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 @media (max-width: 620px) { .g-acts { grid-template-columns: 1fr; } }
 .g-act {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: .95rem; display: grid; gap: .6rem;
+  padding: .95rem; display: grid; gap: .6rem;
   align-content: start; position: relative;
+  transition: border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
 }
+.g-act:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 /* One colour per act, in the order the acts run. The body numbers its acts
    but does not colour them, so this row is the only place the four carry a
    colour and it is free to say something: the ramp runs cool to warm and
@@ -2007,6 +2042,7 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
 
 /* Everything above moves; this is where all of it stops. */
 @media (prefers-reduced-motion: reduce) {
+  :root { --lift: none; }
   html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 1ms !important;
