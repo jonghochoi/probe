@@ -51,3 +51,21 @@ def harvest_decisions() -> dict[str, tuple[int, str]]:
                 )
             out[n] = (pillar, title)
     return out
+
+
+_RETIRED_LINE = re.compile(r"^Retired:(.*)$", re.MULTILINE)
+_CODE = re.compile(r"\bD\d[A-Z]{2}\b")
+
+
+def retired_decisions() -> set[str]:
+    """The retired codes `context/MASTER.md` lists on its `Retired:` line.
+
+    A retired code is never re-issued and still appears in rewrites written
+    before it retired, so a reader of `corpus.json` meets it with no entry in
+    any pillar's Decision Log. Only the current `D<digit><two letters>` form is
+    returned; the numeric forms predate the scheme and no rewrite's regex
+    matches them.
+    """
+    text = (REPO_ROOT / "context" / "MASTER.md").read_text(encoding="utf-8")
+    m = _RETIRED_LINE.search(text)
+    return set(_CODE.findall(m.group(1))) if m else set()

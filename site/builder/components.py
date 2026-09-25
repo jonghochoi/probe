@@ -15,6 +15,7 @@ from . import assets_out
 # one place the site's source, its context files and its threads all are.
 REPO = "jonghochoi/probe"
 REPO_URL = f"https://github.com/{REPO}"
+RAW_URL = f"https://raw.githubusercontent.com/{REPO}/main"
 
 
 def asset(url: str) -> str:
