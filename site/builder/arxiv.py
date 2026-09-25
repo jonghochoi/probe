@@ -414,15 +414,41 @@ def load(paper_id: str) -> Paper:
     return parse(html, paper_id)
 
 
-if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id>`
+def grep(paper: Paper, pattern: str) -> list[tuple[str, str]]:
+    """`(where, line)` for every line of the original matching `pattern`.
+
+    How a number read off a rewrite is checked against the paper: the abstract,
+    every section and every table, searched line by line, each hit carrying the
+    §-anchor or table number a citation names.
+    """
+    rx = re.compile(pattern, re.I)
+    blocks = [("abstract", paper.abstract)]
+    blocks += [(s.anchor, s.text) for s in paper.sections]
+    blocks += [(f"Table {t.number}", f"{t.caption}\n{t.markdown}") for t in paper.tables]
+    return [(where, line.strip()) for where, text in blocks
+            for line in text.splitlines() if rx.search(line)]
+
+
+if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id> [--grep REGEX]`
     import sys
 
+    args = sys.argv[1:]
+    pattern = ""
+    if "--grep" in args:
+        i = args.index("--grep")
+        pattern = args[i + 1] if i + 1 < len(args) else ""
+        args = args[:i] + args[i + 2:]
     try:
-        paper = load(sys.argv[1])
+        paper = load(args[0])
     except Unavailable as exc:
         # A traceback here would read as a bug in this script; it is a fact
         # about the paper, and the caller must stop rather than fall back.
         sys.exit(f"unavailable: {exc}")
+    if pattern:
+        print(paper.version)
+        for where, line in grep(paper, pattern):
+            print(f"  {where:12} {line}")
+        sys.exit(0)
     linkable = [f for f in paper.figures if f.linkable]
     appendix = paper.appendix
     print(f"{paper.version}  {paper.title}")
