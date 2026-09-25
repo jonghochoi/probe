@@ -196,7 +196,29 @@ def build(args) -> int:
         )
     if agent_json:
         (out / "corpus.json").write_text(agent_json + "\n", encoding="utf-8")
-        (out / "llms.txt").write_text(catalog.llms_txt(cat), encoding="utf-8")
+        (out / "llms.txt").write_text(catalog.llms_txt(cat, args.search_api),
+                                      encoding="utf-8")
+    # Every built rewrite, cut at its H3s beside its page for an agent that
+    # has only the site. The anchors come from the renderer the page is built
+    # with, which is what lets a search hit name its section's file.
+    for paper in papers:
+        renderer = DocRenderer(ClientRenderer())
+        renderer.render(paper.article or paper.body)
+        secs = catalog.section_files(paper, renderer.toc)
+        if not secs:
+            problems.append(f"analysis/{paper.stem}: its H3s and the page's "
+                            f"contents disagree, so no section files were written")
+            continue
+        base = out / "p" / paper.stem
+        (base / "s").mkdir(parents=True, exist_ok=True)
+        for sec in secs:
+            (base / "s" / f"{sec['anchor']}.md").write_text(sec["text"], encoding="utf-8")
+        listing = [{k: v for k, v in sec.items() if k != "text"}
+                   | {"path": f"s/{sec['anchor']}.md",
+                      "bytes": len(sec["text"].encode("utf-8"))}
+                   for sec in secs]
+        (base / "sections.json").write_text(
+            json.dumps(listing, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     # An asset-pipeline failure is a page failure: a mangled KaTeX stylesheet
     # publishes every formula in the body font and no reader reports it.
     problems.extend(stats["problems"])

@@ -86,8 +86,12 @@ PROCEDURE
      is shared vocabulary, `cites` / `mentions` are the rewrite's own
      reaching, `compared_with` and `nearby_comparison` are questions already
      argued, `same_decision` is a shared open question.
-   - A TOPIC: `catalog --match` with two to four terms, Korean and English
-     both (`"지연|latency|asynchronous"`) — it searches title, alias, tagline,
+   - A TOPIC: `search "<the topic as written>"` first — the site's semantic
+     index, which finds a paraphrase that shares no word with the rewrite, and
+     prints what it read the question as. It needs the network; when it says
+     it cannot reach the endpoint, go on without it. Then `catalog --match`
+     with two to four terms, Korean and English both
+     (`"지연|latency|asynchronous"`) — it searches title, alias, tagline,
      `keywords` and `summary`, and names the fields each row hit. `tags`
      lists the tag vocabulary, and `catalog --tag` / `--pillar` /
      `--decision` narrow it. `catalog --json` prints the full records when a

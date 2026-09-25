@@ -118,6 +118,49 @@ def section(doc, act: int | None = None, match: str = "") -> str:
     return "\n".join(parts)
 
 
+def section_files(paper: Paper, toc: list[dict]) -> list[dict]:
+    """One record per H3 of the body, carrying the text under it.
+
+    What a full build writes as `p/<id>/s/<anchor>.md` beside the page, with
+    the list of them as `p/<id>/sections.json` — so an agent that has only the
+    site reads the one section an argument rests on instead of the whole
+    rewrite. The page itself is untouched: these are the same body cut at its
+    own headings, linked from no reader surface.
+
+    `toc` is the page renderer's (`DocRenderer.toc`), so a section file is
+    named by the anchor the page carries and a semantic-search hit, which
+    returns that anchor, names its file directly. The H3s here and the toc's
+    are the same headings in the same order; a body where they disagree yields
+    nothing rather than files under the wrong names.
+    """
+    md = _text(paper)
+    heads = _headings(md)
+    anchors = [e for e in toc if e.get("kind") == "sec"]
+    h3 = [i for i, (_, level, _t) in enumerate(heads) if level == 3]
+    if len(h3) != len(anchors):
+        return []
+    out, act = [], 0
+    k = 0
+    for i, (start, level, text) in enumerate(heads):
+        if level == 2:
+            m = _ACT.match(text)
+            act = int(m.group(1)) if m else act
+            continue
+        if level != 3:
+            continue
+        end = next((s for s, lv, _ in heads[i + 1:] if lv <= 3), len(md))
+        entry = anchors[k]
+        k += 1
+        out.append({
+            "act": act,
+            "heading": entry["label"],
+            "keywords": [t.strip() for t in (entry.get("en") or "").split("·") if t.strip()],
+            "anchor": entry["id"],
+            "text": md[start:end].rstrip() + "\n",
+        })
+    return out
+
+
 def decision_refs(paper: Paper) -> list[str]:
     return sorted(set(_DREF.findall(paper.body)))
 
@@ -201,6 +244,7 @@ def records(papers: list[Paper], comps: list, decisions: dict,
             "date": p.date,
             "page": f"{SITE}p/{p.stem}/",
             "source": f"{RAW}/analysis/{p.stem}.md",
+            "sections": f"{SITE}p/{p.stem}/sections.json",
             "presentation": p.stem in presented,
             "compared_in": [x.slug for x in comps if p.stem in x.paper_ids],
             "cites": sorted(cites.get(p.stem, [])),
@@ -250,12 +294,13 @@ def records(papers: list[Paper], comps: list, decisions: dict,
     }
 
 
-def llms_txt(cat: dict) -> str:
+def llms_txt(cat: dict, search_api: str = "") -> str:
     """`llms.txt` — the one URL an agent is handed, saying where the rest is.
 
     Descriptive only: what the corpus is, where each kind of file lives and one
     line per document. How to *use* it for a task is a procedure, and
-    procedures live in `.claude/prompts/`.
+    procedures live in `.claude/prompts/`. `search_api` is the build's
+    semantic-search endpoint; given one, its contract is listed too.
     """
     site, src = cat["site"], cat["source"]
     lines = [
@@ -275,7 +320,7 @@ def llms_txt(cat: dict) -> str:
         "## Data",
         "",
         f"- [corpus.json]({site}corpus.json): every paper and comparison as one "
-        "record — front matter, English keywords, pillars, tags, and the four "
+        "record — front matter, English keywords, pillars, tags, and the five "
         "relations kept apart: `neighbours` (scored by shared tags and pillars), "
         "`cites` / `cited_by` (arXiv links), "
         "`mentions` / `mentioned_by` (named by alias without a link), "
@@ -283,11 +328,32 @@ def llms_txt(cat: dict) -> str:
         f"- Raw Markdown of any paper: `{RAW}/analysis/<arxiv-id>.md`; of a "
         f"comparison: `{RAW}/comparison/<slug>.md`. A record's `source` is that "
         "URL. Far lighter than the HTML page.",
+        f"- One section at a time: `{site}p/<arxiv-id>/sections.json` lists a "
+        "rewrite's H3 sections — act, Korean heading, English keywords, anchor — "
+        "and each is `" + site + "p/<arxiv-id>/s/<anchor>.md`, a few KB instead "
+        "of the whole rewrite. A record's `sections` is that list's URL.",
         f"- Research context the `## 4` parts argue against — pillars, the "
         f"Decision Log, anti-topics: {src}/tree/main/context",
         f"- In a checkout, `python3 site/query.py --help` answers the same "
         "questions from the repo, standard library only.",
         "",
+    ]
+    if search_api:
+        lines += [
+            "## Search",
+            "",
+            f"Semantic search over the rewrites' sections, terms and figure captions "
+            f"(comparisons are not indexed), Korean or English: `POST {search_api}` "
+            "with JSON `{\"q\": \"...\", \"limit\": 12, \"pillars\": [\"P1\"]}` "
+            "(`limit` at most 24, `pillars` optional). It answers `{\"hits\": [...], "
+            "\"expanded\": [...]}`; a hit carries `paperId`, `kind`, `title`, "
+            "`anchor` and a 240-character `snippet` — passages to open, not the "
+            "text itself. `p/<paperId>/s/<anchor>.md` is the section a hit points "
+            "into. 30 requests a minute; `python3 site/query.py search` asks it "
+            "from a checkout.",
+            "",
+        ]
+    lines += [
         "## Pillars",
         "",
     ]

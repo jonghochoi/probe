@@ -9,6 +9,7 @@ one JSON object per line, the same keys on every line of one command.
     python3 site/query.py catalog [--pillar P2] [--tag flow-matching] [--decision D9NB]
                                   [--match "지연|latency"]
     python3 site/query.py tags
+    python3 site/query.py search "정책이 느린 걸 해결한 논문" [--pillar P1] [--limit 12]
     python3 site/query.py show <id|alias|comparison slug>
     python3 site/query.py related <id|alias>
     python3 site/query.py outline <id|alias|slug>
@@ -22,9 +23,12 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
 import signal
 import sys
+import urllib.error
+import urllib.request
 from itertools import combinations
 from pathlib import Path
 
@@ -153,6 +157,62 @@ def cmd_catalog(cat: dict, a) -> None:
 
 def cmd_tags(cat: dict, a) -> None:
     emit([[t, n] for t, n in cat["tags"].items()], a.json, ["tag", "papers"])
+
+
+_ENDPOINT = re.compile(r"`POST (https://[^`\s]+)`")
+
+
+def endpoint(explicit: str) -> str:
+    """The semantic-search endpoint: `--api`, `PROBE_SEARCH_API`, or `llms.txt`.
+
+    The URL is a repository variable, not a file in the checkout, so a checkout
+    that was not handed it reads it where the site publishes it.
+    """
+    url = explicit or os.environ.get("PROBE_SEARCH_API", "")
+    if url:
+        return url
+    try:
+        with urllib.request.urlopen(catalog.SITE + "llms.txt", timeout=10) as res:
+            m = _ENDPOINT.search(res.read().decode("utf-8"))
+    except (urllib.error.URLError, OSError):
+        m = None
+    return m.group(1) if m else ""
+
+
+def cmd_search(cat: dict, a) -> None:
+    """Semantic search, from the endpoint the site's own search box asks.
+
+    The one subcommand that needs the network: the index lives in the
+    deployed project, not in the checkout. Each hit names the section file
+    (`p/<id>/s/<anchor>.md`) its anchor points into; from a checkout, `section
+    <id> --match "<title>"` prints the same passage. When the endpoint cannot
+    be reached, `catalog --match` is the lexical search that needs nothing.
+    """
+    url = endpoint(a.api)
+    if not url:
+        sys.exit("query: no search endpoint — pass --api or set PROBE_SEARCH_API "
+                 "(the site's llms.txt lists it); `catalog --match` searches offline")
+    body = {"q": a.q, "limit": a.limit}
+    if a.pillar:
+        body["pillars"] = [a.pillar.upper()]
+    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"),
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as res:
+            got = json.load(res)
+    except (urllib.error.URLError, OSError, ValueError) as exc:
+        sys.exit(f"query: search failed ({exc}) — `catalog --match` searches offline")
+    by_id = {r["id"]: r for r in cat["papers"]}
+    rows = []
+    for h in got.get("hits", []):
+        pid, anchor = h.get("paperId", ""), h.get("anchor") or ""
+        rows.append([pid, name(by_id[pid]) if pid in by_id else "", h.get("kind", ""),
+                     h.get("title", ""),
+                     f"{catalog.SITE}p/{pid}/s/{anchor}.md" if anchor else "",
+                     h.get("snippet", "")])
+    if not a.json and got.get("expanded"):
+        print("# read as: " + ", ".join(got["expanded"]))
+    emit(rows, a.json, ["id", "name", "kind", "title", "section_file", "snippet"])
 
 
 def cmd_show(cat: dict, a) -> None:
@@ -333,6 +393,11 @@ def main() -> int:
     p.add_argument("--decision")
     p.add_argument("--match", help="regex over title, alias, tagline, keywords, summary")
     command("tags", "every tag with how many papers carry it")
+    p = command("search", "semantic search through the site's endpoint (network)")
+    p.add_argument("q")
+    p.add_argument("--pillar")
+    p.add_argument("--limit", type=int, default=12)
+    p.add_argument("--api", default="", help="the endpoint; default PROBE_SEARCH_API or llms.txt")
     p = command("show", "one paper's or comparison's full record")
     p.add_argument("paper")
     p = command("related", "every relation a paper has, by kind")
@@ -359,7 +424,7 @@ def main() -> int:
     if a.cmd in ("outline", "section", "pairs"):
         {"outline": cmd_outline, "section": cmd_section, "pairs": cmd_pairs}[a.cmd](cat, a, by_id)
     else:
-        {"catalog": cmd_catalog, "tags": cmd_tags, "show": cmd_show,
+        {"catalog": cmd_catalog, "tags": cmd_tags, "search": cmd_search, "show": cmd_show,
          "related": cmd_related, "decision": cmd_decision}[a.cmd](cat, a)
     return 0
 

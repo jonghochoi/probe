@@ -85,10 +85,18 @@ print in a `D#` tooltip — the code, its pillar and its title. Relations stay
 one kind per field; only `neighbours` is a score, and it is `corpus.score`, the
 rule the page's own neighbour row ranks by.
 
+**Section files are the page's own headings, never a second parser.** A full
+build writes each rewrite's H3s as `p/<id>/s/<anchor>.md` with
+`p/<id>/sections.json` beside the page, cut by `catalog.section_files` and
+named by the anchors `DocRenderer` gives the page — the anchors a search hit
+returns. No reader surface links them; the page stays one page.
+
 **`query.py` runs with the standard library.** An agent in a checkout has not
 run `pip install`, so `query.py` and every `builder/` module it imports —
 `catalog`, `corpus`, `comparisons`, `presentations`, `decisions` and theirs —
-keep a third-party import out of module scope.
+keep a third-party import out of module scope. `query.py search` is the one
+subcommand that touches the network, and it points at `catalog --match` when
+the endpoint cannot be reached.
 
 **The pillar set is hard-coded in three places here** — `PILLAR_NAMES` with
 the Korean `PILLAR_LABELS` beside it in `builder/corpus.py` (the build refuses
