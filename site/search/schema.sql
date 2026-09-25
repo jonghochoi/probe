@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS probe_chunks (
   path          TEXT NOT NULL,           -- p/<id>/ — the page the hit lands on
   anchor        TEXT NOT NULL DEFAULT '',
   pillars       TEXT[] NOT NULL DEFAULT '{}',
-  tags          TEXT[] NOT NULL DEFAULT '{}',
   chunk_date    DATE,
   body          TEXT NOT NULL,
   content_hash  TEXT NOT NULL,           -- what decides a re-embed

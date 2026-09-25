@@ -31,10 +31,9 @@
  * Only one 연구 축 is on at a time: an axis is where a paper is filed, so
  * two of them at once is not a narrower question but a vaguer one, and the
  * union it returns reads as no filter at all. Pressing the axis that is
- * already on turns it off. Tags stay multi-select — those intersect, and each
- * one typed does narrow the list.
+ * already on turns it off.
  *
- * Filter state lives in the URL hash (`#q=<query>&p=P<n>&t=<tag>&s=title`) so a
+ * Filter state lives in the URL hash (`#q=<query>&p=P<n>&s=title`) so a
  * view can be bookmarked and shared, and `replaceState` keeps it out of the
  * back-button history — Back should leave the page, not undo a keystroke. The
  * two shelf filters ride there too (`&n=1`, `&f=1`) — a bookmark of "my
@@ -108,7 +107,7 @@ function keepSize(n) {
 }
 
 const state = {
-  q: "", pillar: "", tags: new Set(), sort: "recent",
+  q: "", pillar: "", sort: "recent",
   fresh: false, star: false,
   size: SIZE_DEFAULT, page: 1,
 };
@@ -151,10 +150,14 @@ if (!shelf) {
 /* ── State ↔ URL ──────────────────────────────────────────────────────── */
 function readHash() {
   const h = new URLSearchParams(location.hash.replace(/^#/, ""));
-  state.q = h.get("q") || "";
+  // `t=` in a link names words to narrow by. The list has one text filter, so
+  // they join the query — `#t=tactile,flow-matching` lands as the search
+  // `tactile flow-matching` — and the first repaint writes the hash back
+  // without them.
+  const words = (h.get("t") || "").split(",").filter(Boolean);
+  state.q = [h.get("q") || "", ...words].filter(Boolean).join(" ");
   // One axis, and a link that names several is read for the first of them.
   state.pillar = (h.get("p") || "").split(",").filter(Boolean)[0] || "";
-  state.tags = new Set((h.get("t") || "").split(",").filter(Boolean));
   state.sort = SORTS.includes(h.get("s")) ? h.get("s") : "recent";
   state.fresh = !!shelf && h.get("n") === "1";
   state.star = !!shelf && h.get("f") === "1";
@@ -169,7 +172,6 @@ function writeHash() {
   const h = new URLSearchParams();
   if (state.q) h.set("q", state.q);
   if (state.pillar) h.set("p", state.pillar);
-  if (state.tags.size) h.set("t", [...state.tags].join(","));
   if (state.sort !== "recent") h.set("s", state.sort);
   if (state.fresh) h.set("n", "1");
   if (state.star) h.set("f", "1");
@@ -267,7 +269,7 @@ const { parse, inFragment } = window.ProbeMatch;
 
 /* ── Matching ─────────────────────────────────────────────────────────── */
 /* Where a word lands is itself a signal: `data-key` is the paper's identity
- * (title, tagline, tags, authors, metric, id) and `data-hay` is everything the
+ * (title, tagline, authors, metric, id, axes) and `data-hay` is everything the
  * rewrite names — headings, term panels, figure captions. A title hit and a
  * footnote hit are not the same claim, so they do not score the same.
  */
@@ -282,10 +284,6 @@ function facetOk(card) {
   // and the rail counted — so the list a click opens is as long as the number
   // that was clicked.
   if (state.pillar && !card.dataset.pillars.split(" ").includes(state.pillar)) return false;
-  if (state.tags.size) {
-    const own = card.dataset.tags.split(" ");
-    if (![...state.tags].every((t) => own.includes(t))) return false;
-  }
   return true;
 }
 
@@ -328,14 +326,12 @@ function ordered(shown, scored) {
 /* ── Apply ────────────────────────────────────────────────────────────── */
 function apply() {
   const terms = parse(state.q);
-  const dirty = !!(state.q || state.pillar || state.tags.size
-                   || state.fresh || state.star);
+  const dirty = !!(state.q || state.pillar || state.fresh || state.star);
   // Everything narrowing the list except the query, which clears itself: the
   // search box carries its own ✕. A reset marked `facet` answers to this
   // instead, so the one on the phone bar — where a facet can only arrive by
   // link — is on screen exactly when there is something ✕ cannot reach.
-  const facetDirty = !!(state.pillar || state.tags.size
-                        || state.fresh || state.star);
+  const facetDirty = !!(state.pillar || state.fresh || state.star);
 
   const pool = cards.filter(facetOk);
   let shown = pool, partial = false;
@@ -558,10 +554,6 @@ input.addEventListener("input", () => {
   debounce = setTimeout(writeHash, 250);
 });
 
-function toggleSet(set, value) {
-  if (set.has(value)) set.delete(value); else set.add(value);
-}
-
 // One handler for the sort group in the bar and the facet rail beside the
 // list — they set the same state and differ only in where they sit.
 document.addEventListener("click", (e) => {
@@ -569,7 +561,6 @@ document.addEventListener("click", (e) => {
   const s = e.target.closest("[data-sort]");
   const flag = e.target.closest("[data-facet-flag]");
   const ack = e.target.closest("[data-fresh-ack]");
-  const jump = e.target.closest("[data-tag-jump]");
   const sizeBtn = e.target.closest("[data-size]");
   const pageBtn = e.target.closest("[data-page]");
   const stepBtn = e.target.closest("[data-page-rel]");
@@ -608,15 +599,8 @@ document.addEventListener("click", (e) => {
     keepSize(state.size);
     refresh();
   }
-  // A tag on the lead block is also a filter — that is how you find the
-  // neighbours of the paper you are looking at.
-  else if (jump) {
-    toggleSet(state.tags, jump.dataset.tagJump);
-    state.page = 1;
-    refresh();
-    bar.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  } else if (e.target.closest("[data-reset]")) {
-    state.q = ""; state.pillar = ""; state.tags.clear();
+  else if (e.target.closest("[data-reset]")) {
+    state.q = ""; state.pillar = "";
     state.fresh = false; state.star = false;
     state.page = 1;
     refresh();
@@ -644,7 +628,11 @@ tabBtns.forEach((b) => {
 // stopped being one.
 document.addEventListener("probe:shelf-change", () => { countFlags(); apply(); });
 
-addEventListener("hashchange", () => { readHash(); syncControls(); apply(); });
+addEventListener("hashchange", () => {
+  readHash(); syncControls(); apply();
+  // A `t=` that `readHash` folded into the query leaves the address with it.
+  if (new URLSearchParams(location.hash.replace(/^#/, "")).has("t")) writeHash();
+});
 
 // `/` focuses search, the shortcut every list page has; Escape clears it.
 addEventListener("keydown", (e) => {

@@ -15,11 +15,13 @@ points at the raw Markdown of it (`source`) rather than carrying it. That keeps
 the whole corpus inside one context window, which is the point: an agent reads
 every record, shortlists, and only then opens two or three sources.
 
-**Every kind of link keeps its own field.** A shared tag, a citation, a
-sibling named by alias, a comparison that already set two papers side by side
-and a Decision-Log entry both rewrites argue about are five different claims. Folded into one number
-they would stop being checkable, so only `neighbours` is a score — the same
-`corpus.score` the page's own neighbour row ranks by — and the rest are lists.
+**Every kind of link keeps its own field.** A citation, a sibling named by
+alias, a comparison that already set two papers side by side and the
+Decision-Log entries both rewrites argue about are different claims. Folded
+into one number they would stop being checkable, so only `neighbours` is a
+score — the same `corpus.score` the page's own neighbour row ranks by, built
+from the shared codes and pillars the records also list — and the rest are
+lists.
 
 Standard library only, like everything it imports: `site/query.py` runs in a
 checkout with no `pip install`.
@@ -46,7 +48,7 @@ BUDGET = 256 * 1024
 # an agent reads the scores and a reader reads only the row.
 NEIGHBOURS = 6
 
-_DREF = re.compile(r"(?<![A-Za-z0-9_])D\d[A-Z]{2}(?![A-Za-z0-9])")
+_DREF = corpus.DREF
 _HEAD = re.compile(r"^(#{2,4})[ \t]+(.+?)[ \t]*$", re.M)
 _FENCE = re.compile(r"^```.*?^```[ \t]*$", re.S | re.M)
 _ACT = re.compile(r"^(\d)\b")
@@ -161,10 +163,6 @@ def section_files(paper: Paper, toc: list[dict]) -> list[dict]:
     return out
 
 
-def decision_refs(paper: Paper) -> list[str]:
-    return sorted(set(_DREF.findall(paper.body)))
-
-
 def _alias_pattern(alias: str) -> re.Pattern | None:
     """A word-bounded, case-sensitive match for an alias, or None when too thin.
 
@@ -212,7 +210,8 @@ def records(papers: list[Paper], comps: list, decisions: dict,
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     comps = sorted(comps, key=lambda x: x.order_key, reverse=True)
-    refs = {p.stem: decision_refs(p) for p in ordered}
+    refs = {p.stem: p.decisions for p in ordered}
+    weights = corpus.decision_weights(ordered, retired)
     named = mentions(ordered, cited)
     by_mention: dict[str, list[str]] = {}
     for src, targets in named.items():
@@ -226,7 +225,7 @@ def records(papers: list[Paper], comps: list, decisions: dict,
     rows = []
     for p in ordered:
         near = sorted(
-            ((corpus.score(p, o), o.order_key, o) for o in ordered if o is not p),
+            ((corpus.score(p, o, weights), o.order_key, o) for o in ordered if o is not p),
             key=lambda t: (t[0], t[1]), reverse=True,
         )
         rows.append({
@@ -236,7 +235,6 @@ def records(papers: list[Paper], comps: list, decisions: dict,
             "tagline": p.tagline,
             "authors": p.authors,
             "pillars": p.pillars,
-            "tags": p.tags,
             "metric": p.metric,
             "summary": corpus._plain(p.summary_md, limit=10_000),
             "keywords": keywords(p),
@@ -257,10 +255,7 @@ def records(papers: list[Paper], comps: list, decisions: dict,
         })
 
     used = sorted({d for r in refs.values() for d in r if d in decisions or d in retired})
-    tag_counts: dict[str, int] = {}
-    for p in ordered:
-        for t in p.tags:
-            tag_counts[t] = tag_counts.get(t, 0) + 1
+    df = {d: sum(d in r for r in refs.values()) for d in used}
 
     return {
         "schema": 1,
@@ -271,8 +266,8 @@ def records(papers: list[Paper], comps: list, decisions: dict,
         "decisions": {d: ({"pillar": f"P{decisions[d][0]}", "title": decisions[d][1]}
                           if d in decisions and d not in retired else
                           {"pillar": None, "title": "", "retired": True})
+                         | {"rewrites": df[d]}
                       for d in used},
-        "tags": dict(sorted(tag_counts.items(), key=lambda kv: (-kv[1], kv[0]))),
         "papers": rows,
         "comparisons": [
             {
@@ -283,7 +278,6 @@ def records(papers: list[Paper], comps: list, decisions: dict,
                 "stances": x.stances,
                 "common": x.common,
                 "pillars": x.pillars,
-                "tags": x.tags,
                 "summary": corpus._plain(x.summary_md, limit=10_000),
                 "date": x.date,
                 "page": f"{SITE}c/{x.slug}/",
@@ -308,7 +302,7 @@ def llms_txt(cat: dict, search_api: str = "") -> str:
         "",
         "> Korean re-tellings of dexterous-manipulation papers, each written from "
         "the paper's arXiv HTML original, plus comparisons that set two or three "
-        "of them against one question. Titles, tags and section glosses are "
+        "of them against one question. Titles and section glosses are "
         "English; taglines, summaries and bodies are Korean.",
         "",
         "Every rewrite follows one four-part spine: `## 1 무엇이 문제인가` "
@@ -320,8 +314,9 @@ def llms_txt(cat: dict, search_api: str = "") -> str:
         "## Data",
         "",
         f"- [corpus.json]({site}corpus.json): every paper and comparison as one "
-        "record — front matter, English keywords, pillars, tags, and the five "
-        "relations kept apart: `neighbours` (scored by shared tags and pillars), "
+        "record — front matter, English keywords, pillars, and the five "
+        "relations kept apart: `neighbours` (scored by the Decision-Log codes both "
+        "cite, rarer codes weighing more, plus shared pillars), "
         "`cites` / `cited_by` (arXiv links), "
         "`mentions` / `mentioned_by` (named by alias without a link), "
         "`compared_in` and `decisions`. No bodies.",

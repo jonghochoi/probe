@@ -49,7 +49,6 @@ tagline: 배우게 할 것인가, 토큰으로 자를 것인가, 손으로 배�
 stances: [잠재 벡터로 묶는다, 토큰으로 접는다, 표를 그려 꽂는다]
 common: 셋 다 손대지 않는 자리가 있다
 pillars: P1, P4
-tags: [action-space, cross-embodiment, retargeting]
 generated: 2026-08-21 14:30
 generator: compare/v1
 summary: >
@@ -65,7 +64,6 @@ summary: >
 | `stances` | **One per entry of `compares`, in the same order** — what that paper does about the question, in 20 characters or fewer (`끝까지 푼다`, `토큰으로 접는다`). The divergence in its shortest form. Positional like `sources`, so neither list can drift without the other noticing. A stance that needs a clause of mechanism to land is not a stance — that clause belongs in a `probe-matrix` cell |
 | `common` | One line, 30 characters or fewer: **the commitment all of them share** (`셋 다 이미지 평면에서 끝낸다`). Required, for the reason act 2 is load-bearing (§2-3) — papers that share nothing cannot diverge, and a comparison that cannot state the shared commitment in one line has not found it yet |
 | `pillars` | Ours, comma-separated. Which pillars this question sits in |
-| `tags` | Free vocabulary, same as `analysis/` |
 | `generated` | `YYYY-MM-DD HH:MM` — the clock as you write |
 | `generator` | Literal `compare/v1` |
 | `summary` | 2–3 sentences read cold. Markdown and `` $`math`$ `` render |

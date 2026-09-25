@@ -450,7 +450,7 @@ html.js .filters { display: block; }
    own buttons included, and every control on this bar takes it. The two
    radii either side of it are already spoken for — `--radius` is the card and
    the panel (`.lead`, the chip's own dropdown), `--radius-pill` is the label
-   (`.chip`, a tag or an axis badge) — so a control borrowing one of those
+   (`.chip`, an axis badge) — so a control borrowing one of those
    reads as the wrong kind of thing rather than as a softer version of the
    right one. */
 .search-go { display: none; }
@@ -493,7 +493,7 @@ html.js .search-go:disabled { color: var(--text-muted); cursor: default; }
 /* Which sort or which page size is on is a fact about the view, not about
    the corpus — the lifted pill already says which one it is, so it says it in
    ink. The accent stays on the controls that select papers: the rail's axes
-   and tags, and the reader's own two flags. */
+   and the reader's own two flags. */
 .sort button[aria-pressed="true"] {
   background: var(--surface); color: var(--text);
   box-shadow: var(--shadow-sm);
@@ -838,17 +838,6 @@ html.js .rail {
   font-family: var(--num); font-size: .72rem; color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.lead-foot .chip.tag {
-  font-size: .68rem; padding: .1rem .4rem; cursor: pointer;
-  font-family: inherit;
-  transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
-}
-.lead-foot .chip.tag:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
-/* A tag is the lead card's own filter control, and it is the one that hides
-   itself in the act of being used — the card it lives on leaves as soon as
-   anything is filtering. It goes where the rest of the facets go. */
-@media (max-width: 900px) { .lead-foot .chip.tag { display: none; } }
 
 /* ── 즐겨찾기 ─────────────────────────────────────────────────────────── */
 /* Empty until it is the reader's: an unstarred star is drawn in the border

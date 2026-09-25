@@ -6,7 +6,6 @@ tagline: 가중치에 심으면 배포는 한 장이고, 가지에 붙이면 매
 stances: [인코더 가중치에 심는다, 이력 가지에만 붙인다, 입력 픽셀에 그린다]
 common: 셋 다 동역학을 행동이 아니라 점 추적에서 꺼낸다
 pillars: P2, P4
-tags: [dynamics-aware, observation-design, vla-arch, encoder, history, frozen-backbone]
 generated: 2026-09-09 13:50
 generator: compare/v1
 summary: >

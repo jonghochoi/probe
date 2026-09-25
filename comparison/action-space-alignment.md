@@ -6,7 +6,6 @@ tagline: 잠재 벡터로 묶거나, 토큰으로 접거나, 표를 그려 꽂�
 stances: [잠재 벡터로 묶는다, 토큰으로 접는다, 표를 그려 꽂는다]
 common: 셋 다 손가락 대응은 사람이 정한다
 pillars: P1, P4
-tags: [action-space, cross-embodiment, dexterous-hand, retargeting]
 generated: 2026-08-21 15:10
 generator: compare/v1
 summary: >

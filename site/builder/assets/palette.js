@@ -49,10 +49,10 @@ const ROOT = self ? self.src.replace(/assets\/palette\.js(\?.*)?$/, "") : "";
 /* ── The index, compacted once ────────────────────────────────────────── */
 /* Fragments rather than one joined string: `match.compact` strips every
  * character that could have fenced them off, so a list is what keeps a query
- * from matching across the end of the title and the start of a tag.
+ * from matching across the end of the title and the start of an axis.
  *
  * Where a word lands is a signal, as it is on the landing. The id and the title
- * are what the paper *is*; tags and 연구 축 are what it is filed under; the
+ * are what the paper *is*; its 연구 축 are what it is filed under; the
  * tagline is what it does, in the reader's own language — and in this corpus it
  * is the only Korean any of these fields carry, so it is the field a Korean
  * query lands in rather than a nicety.
@@ -94,7 +94,7 @@ function build(doc, kind) {
     href: ROOT + (paper ? "p/" : "c/") + key + "/index.html",
     tail: paper ? doc.id : of.join(" · "),
     name: [key, doc.title].map(match.compact).filter(Boolean),
-    filed: [...(doc.tags || []), ...(doc.pillars || []),
+    filed: [...(doc.pillars || []),
             ...(doc.pillars || []).map((p) => PILLAR_NAMES[p] || ""),
             ...(doc.pillars || []).map((p) => PILLAR_LABELS[p] || ""), ...of]
            .map(match.compact).filter(Boolean),

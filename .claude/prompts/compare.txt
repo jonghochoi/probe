@@ -83,23 +83,23 @@ The corpus outgrows its comparisons. A rewrite lands on its own merits and
 nothing looks back at what it now stands beside, so papers answering one
 question end up on pages that never meet.
 
-THE UNIT IS A QUESTION, NOT A PAIR. Two rewrites sharing five tags are a
-candidate; what makes them a comparison is a question they answer differently.
+THE UNIT IS A QUESTION, NOT A PAIR. Two rewrites citing five of the same
+Decision-Log codes are a candidate; what makes them a comparison is a question they answer differently.
 A pair you cannot phrase one for is not a finding — drop it and hand back a
 shorter list.
 
   1. RANK with the rule the site already uses for neighbours
-     (`site/builder/corpus.py::related`): two points per shared tag, one per
-     shared pillar — tags double, because two papers tagged `flow-matching` are
-     about the same machinery while two sharing P1 may only both be policies.
-     A second ranking rule is a second answer to one question; do not write
-     one.
+     (`site/builder/corpus.py::score`): the Decision-Log codes both rewrites
+     cite, each weighed by how few rewrites cite it, plus one per shared
+     pillar — a rare code is a narrow shared question, while two papers sharing
+     P1 may only both be policies. A second ranking rule is a second answer to
+     one question; do not write one.
 
   2. DROP every pair a `comparison/<slug>.md` already holds in `compares:`.
 
-     Both steps are one command, which reads `tags:` and `pillars:` from front
-     matter and no bodies — forty bodies is not a survey this affords, and the
-     score does not need them:
+     Both steps are one command, which reads the codes and `pillars:` and no
+     prose — forty bodies is not a survey this affords, and the score does not
+     need them:
 
          python3 site/query.py pairs --limit 12
 
@@ -107,9 +107,9 @@ shorter list.
      — the layer where a rewrite argues with the Decision Log, and the only
      prose read here. The question comes from a disagreement you can point at:
      one rewrite calling a choice necessary where another routes around it, two
-     citing one `D#` to opposite ends. Tag overlap only said where to look.
+     citing one `D#` to opposite ends. The score only said where to look.
 
-  4. PRINT at most three, strongest first — the ids and aliases, the tags they
+  4. PRINT at most three, strongest first — the ids and aliases, the codes they
      share, the question in one line, the slug it suggests, and which `D#` the
      answer would move. Fewer is fine. None is fine, and is the honest answer
      when the surviving pairs share vocabulary and nothing else.
@@ -284,5 +284,5 @@ run (INPUT) and the human decides whether that paper is worth a rewrite of its
 own — which is a bigger decision than this comparison, and not one to make as
 a side effect of wanting a third column.
 
-If asked to compare "everything in a tag", say no. The value is in the
+If asked to compare "everything in a pillar", say no. The value is in the
 question, and a question is what a human brings.

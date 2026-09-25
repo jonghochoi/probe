@@ -6,16 +6,15 @@ Reads the same records the build publishes as `corpus.json`
 Tab-separated rows under a `# column` header line by default; `--json` prints
 one JSON object per line, the same keys on every line of one command.
 
-    python3 site/query.py catalog [--pillar P2] [--tag flow-matching] [--decision D9NB]
+    python3 site/query.py catalog [--pillar P2] [--decision D9NB]
                                   [--match "지연|latency"]
-    python3 site/query.py tags
     python3 site/query.py search "정책이 느린 걸 해결한 논문" [--pillar P1] [--limit 12]
     python3 site/query.py show <id|alias|comparison slug>
     python3 site/query.py related <id|alias>
     python3 site/query.py outline <id|alias|slug>
     python3 site/query.py section <id|alias|slug> (--act 1-4 | --match "Flow Matching")
     python3 site/query.py decision <D#>
-    python3 site/query.py pairs [--with <id|alias>] [--by score|decisions|contrast] [--limit 20]
+    python3 site/query.py pairs [--with <id|alias>] [--by score|contrast] [--limit 20]
 """
 
 from __future__ import annotations
@@ -42,13 +41,21 @@ ACTS = range(1, 5)
 
 def load() -> tuple[dict, dict]:
     """The records, and every source document by id or comparison slug."""
+    global WEIGHTS
     papers, _ = corpus.discover()
     by_id = {p.stem: p for p in papers}
     comps, _ = comparisons.discover(by_id)
     presented, _ = presentations.discover(by_id)
+    retired = retired_decisions()
+    WEIGHTS = corpus.decision_weights(papers, retired)
     cat = catalog.records(papers, comps, harvest_decisions(),
-                          corpus.citations(papers), set(presented), retired_decisions())
+                          corpus.citations(papers), set(presented), retired)
     return cat, {**by_id, **{x.slug: x for x in comps}}
+
+
+# `corpus.decision_weights` over the loaded corpus — the weights `corpus.score`
+# ranks with, so every order printed here is the site's own.
+WEIGHTS: dict[str, float] = {}
 
 
 def resolve(cat: dict, key: str) -> dict:
@@ -75,25 +82,9 @@ def name(r: dict) -> str:
     return r["alias"] or r["title"]
 
 
-def rarity(cat: dict) -> dict[str, float]:
-    """`{code: weight}` — how much sharing a Decision-Log code says.
-
-    A handful of codes are cited by most rewrites, and two papers both citing
-    one of them share little more than a corpus. Inverse document frequency
-    weighs a code by how few rewrites argue about it. Retired codes carry no
-    weight: they name no open question left to share.
-    """
-    n = len(cat["papers"])
-    df: dict[str, int] = {}
-    for r in cat["papers"]:
-        for d in r["decisions"]:
-            df[d] = df.get(d, 0) + 1
-    return {d: math.log(n / k) for d, k in df.items()}
-
-
-def by_weight(codes, w: dict) -> list[str]:
+def by_weight(codes) -> list[str]:
     """Rarest first, ties by code — the same order on every run."""
-    return sorted(codes, key=lambda d: (-w[d], d))
+    return sorted(codes, key=lambda d: (-WEIGHTS.get(d, 0.0), d))
 
 
 def emit(rows: list[list], as_json: bool, header: list[str]) -> None:
@@ -117,14 +108,9 @@ def cmd_catalog(cat: dict, a) -> None:
     topic search needs before it opens anything.
     """
     pillar = a.pillar.upper() if a.pillar else ""
-    tag = a.tag.casefold() if a.tag else ""
     code = a.decision.upper() if a.decision else ""
     if pillar and pillar not in cat["pillars"]:
         sys.exit(f"query: no pillar {pillar} — {', '.join(cat['pillars'])}")
-    if tag and tag not in cat["tags"]:
-        close = [t for t in cat["tags"] if tag in t or t in tag][:8]
-        sys.exit(f"query: no tag {tag!r}" + (f" — close: {', '.join(close)}" if close
-                                             else " — `tags` lists them"))
     if code and code not in cat["decisions"]:
         sys.exit(f"query: no rewrite cites {code}")
     try:
@@ -141,7 +127,6 @@ def cmd_catalog(cat: dict, a) -> None:
     rows = []
     for r in cat["papers"]:
         if ((not pillar or pillar in r["pillars"])
-                and (not tag or tag in r["tags"])
                 and (not code or code in r["decisions"] + r["retired_decisions"])):
             fields = hits(r)
             if not rx or fields:
@@ -153,10 +138,6 @@ def cmd_catalog(cat: dict, a) -> None:
     emit([[r["id"], name(r), r["pillars"]] + ([fields] if rx else []) + [r["tagline"]]
           for r, fields in rows],
          False, ["id", "name", "pillars"] + (["matched"] if rx else []) + ["tagline"])
-
-
-def cmd_tags(cat: dict, a) -> None:
-    emit([[t, n] for t, n in cat["tags"].items()], a.json, ["tag", "papers"])
 
 
 _ENDPOINT = re.compile(r"`POST (https://[^`\s]+)`")
@@ -220,14 +201,27 @@ def cmd_show(cat: dict, a) -> None:
                      indent=None if a.json else 1))
 
 
-def cmd_related(cat: dict, a) -> None:
-    """Every relation the paper has, one kind per block and never merged."""
+def cmd_related(cat: dict, a, docs: dict) -> None:
+    """Every relation the paper has, one kind per block and never merged.
+
+    `neighbour` rows are `corpus.score` over the whole corpus — the order the
+    page's own neighbour row takes its first three from — each with the codes
+    and pillars behind its score, rarest code first.
+    """
     me = resolve(cat, a.paper)
     by_id = {r["id"]: r for r in cat["papers"]}
-    rows = [["neighbour", n["id"], name(by_id[n["id"]]),
-             f"score {n['score']}: "
-             + " ".join(t for t in me["tags"] if t in by_id[n["id"]]["tags"])]
-            for n in me["neighbours"]]
+    near = sorted(
+        ((corpus.score(docs[me["id"]], docs[r["id"]], WEIGHTS), r) for r in cat["papers"]
+         if r is not me),
+        key=lambda t: (-t[0], t[1]["id"]),
+    )
+    rows = []
+    for s, r in near[:max(a.limit, 0)]:
+        if not s:
+            break
+        codes = by_weight(set(me["decisions"]) & set(r["decisions"]))
+        axes = [p for p in me["pillars"] if p in r["pillars"]]
+        rows.append(["neighbour", r["id"], name(r), f"score {s}: {' '.join(codes + axes)}"])
     for kind in ("cites", "cited_by", "mentions", "mentioned_by"):
         rows += [[kind, i, name(by_id[i]), ""] for i in me[kind]]
     for x in cat["comparisons"]:
@@ -239,7 +233,7 @@ def cmd_related(cat: dict, a) -> None:
                              f"{x['slug']}: {stance}"])
     # A comparison this paper is not in, holding a paper it is linked to: the
     # question may already be argued one step away.
-    linked = {n["id"] for n in me["neighbours"]}.union(
+    linked = {r["id"] for _, r in near[:max(a.limit, 0)]}.union(
         me["cites"], me["cited_by"], me["mentions"], me["mentioned_by"])
     for x in cat["comparisons"]:
         if me["id"] in x["compares"]:
@@ -248,16 +242,6 @@ def cmd_related(cat: dict, a) -> None:
             if pid in linked:
                 rows.append(["nearby_comparison", pid, name(by_id[pid]),
                              f"{x['slug']}: {stance}"])
-    w = rarity(cat)
-    mine = set(me["decisions"])
-    shared = []
-    for r in cat["papers"]:
-        common = by_weight(mine & set(r["decisions"]), w)
-        if r is not me and common:
-            shared.append((round(sum(w[d] for d in common), 1), r["id"], r, common))
-    shared.sort(key=lambda t: (-t[0], t[1]))
-    rows += [["same_decision", r["id"], name(r), f"weight {s}: {' '.join(common)}"]
-             for s, _, r, common in shared[:a.limit]]
     emit(rows, a.json, ["relation", "id", "name", "detail"])
 
 
@@ -298,28 +282,25 @@ def cmd_decision(cat: dict, a) -> None:
     emit([row[3:] for row in rows], False, [])
 
 
-def cmd_pairs(cat: dict, a, by_id: dict) -> None:
+def cmd_pairs(cat: dict, a, docs: dict) -> None:
     """Pairs no comparison has set side by side yet — raw material for an idea.
 
-    Three orders, each a different question, and every column prints under all
-    of them:
+    Two orders, each a different question, and every column prints under both:
 
     - `score` (the default) is `corpus.score`, the rule the site's neighbour
       row and `/compare`'s candidate list already rank by — a second rule for
       that question would be a second answer to it.
-    - `decisions` asks which pairs argue about the same Decision-Log entries,
-      each shared code weighed by `rarity`.
     - `contrast` asks which pairs meet on a *narrow* open question from
-      *different* machinery. Only a narrow code counts — one at most
+      *different* directions. Only a narrow code counts — one at most
       `narrow_df` rewrites cite, since a code half the corpus argues about is
-      no meeting point — and its weight is discounted by how alike the two
-      papers' tags already are (`1 - Jaccard`). A pair sharing no narrow code
-      is not a contrast and is left out of this order.
+      no meeting point — and its weight is discounted by how much the two
+      papers' pillars already overlap (`1 - Jaccard`): two papers filed under
+      the same axes reach the question the same way. A pair sharing no narrow
+      code is not a contrast and is left out of this order.
     """
-    w = rarity(cat)
     n = len(cat["papers"])
-    df = {d: round(n / math.exp(v)) for d, v in w.items()}
     narrow_df = max(3, n // 8)
+    df = {d: v["rewrites"] for d, v in cat["decisions"].items()}
     done = {frozenset(p) for x in cat["comparisons"]
             for p in combinations(x["compares"], 2)}
     papers = cat["papers"]
@@ -332,45 +313,40 @@ def cmd_pairs(cat: dict, a, by_id: dict) -> None:
     for x, y in pool:
         if frozenset((x["id"], y["id"])) in done:
             continue
-        shared = by_weight(set(x["decisions"]) & set(y["decisions"]), w)
+        shared = by_weight(set(x["decisions"]) & set(y["decisions"]))
         narrow = [d for d in shared if df[d] <= narrow_df]
-        tx, ty = set(x["tags"]), set(y["tags"])
-        jaccard = len(tx & ty) / len(tx | ty) if tx | ty else 0.0
+        px, py = set(x["pillars"]), set(y["pillars"])
+        jaccard = len(px & py) / len(px | py) if px | py else 0.0
         if a.by == "contrast" and not narrow:
             continue
         link = ("cites" if y["id"] in x["cites"] or x["id"] in y["cites"] else
                 "mentions" if y["id"] in x["mentions"] or x["id"] in y["mentions"] else "")
         rows.append({
-            "score": corpus.score(by_id[x["id"]], by_id[y["id"]]),
-            "decision_weight": round(sum(w[d] for d in shared), 1),
-            "contrast": round(sum(w[d] for d in narrow) * (1 - jaccard), 2),
+            "score": corpus.score(docs[x["id"]], docs[y["id"]], WEIGHTS),
+            "contrast": round(sum(WEIGHTS[d] for d in narrow) * (1 - jaccard), 2),
             "row": [x["id"], name(x), y["id"], name(y)],
             "tail": [[f"{d}({df[d]})" for d in narrow], shared, link,
-                     [t for t in x["tags"] if t in ty]],
+                     [p for p in x["pillars"] if p in py]],
         })
-    first, second = {"score": ("score", "decision_weight"),
-                     "decisions": ("decision_weight", "score"),
-                     "contrast": ("contrast", "decision_weight")}[a.by]
+    first, second = ("score", "contrast") if a.by == "score" else ("contrast", "score")
     rows.sort(key=lambda r: (-r[first], -r[second], r["row"][0], r["row"][2]))
     if not rows and a.by == "contrast":
         sys.exit(f"query: no uncovered pair shares a Decision-Log code cited by "
-                 f"{narrow_df} rewrites or fewer — `--by decisions` ranks the broad ones")
+                 f"{narrow_df} rewrites or fewer — `--by score` ranks the rest")
     emit(
-        [r["row"] + [r["score"], r["decision_weight"], r["contrast"]] + r["tail"]
-         for r in rows[:max(a.limit, 0)]],
-        a.json, ["a", "a_name", "b", "b_name", "score", "decision_weight", "contrast",
-                 "narrow_decisions", "shared_decisions", "link", "shared_tags"],
+        [r["row"] + [r["score"], r["contrast"]] + r["tail"] for r in rows[:max(a.limit, 0)]],
+        a.json, ["a", "a_name", "b", "b_name", "score", "contrast",
+                 "narrow_decisions", "shared_decisions", "link", "shared_pillars"],
     )
 
 
 PAIRS_COLUMNS = """columns:
-  score             corpus.score — 2 per shared tag + 1 per shared pillar
-  decision_weight   sum of log(n/df) over the live Decision-Log codes both cite
-  contrast          narrow codes' weight x (1 - tag Jaccard); 0 when none is narrow
+  score             corpus.score — log(n/df) per shared live Decision-Log code + 1 per shared pillar
+  contrast          narrow codes' weight x (1 - pillar Jaccard); 0 when none is narrow
   narrow_decisions  shared codes cited by at most max(3, n/8) rewrites, (df) beside each
   shared_decisions  every live code both cite, rarest first
   link              cites | mentions, when one rewrite already reaches the other
-  shared_tags       tags both carry
+  shared_pillars    pillars both are filed under
 pairs a comparison already holds are never listed."""
 
 
@@ -389,10 +365,8 @@ def main() -> int:
 
     p = command("catalog", "one row per paper, optionally filtered")
     p.add_argument("--pillar")
-    p.add_argument("--tag")
     p.add_argument("--decision")
     p.add_argument("--match", help="regex over title, alias, tagline, keywords, summary")
-    command("tags", "every tag with how many papers carry it")
     p = command("search", "semantic search through the site's endpoint (network)")
     p.add_argument("q")
     p.add_argument("--pillar")
@@ -402,7 +376,7 @@ def main() -> int:
     p.add_argument("paper")
     p = command("related", "every relation a paper has, by kind")
     p.add_argument("paper")
-    p.add_argument("--limit", type=int, default=8, help="rows of same_decision")
+    p.add_argument("--limit", type=int, default=8, help="rows of neighbour")
     p = command("outline", "a rewrite's or comparison's headings")
     p.add_argument("paper")
     p = command("section", "parts of a rewrite's or comparison's body")
@@ -416,16 +390,17 @@ def main() -> int:
                        parents=[common], epilog=PAIRS_COLUMNS,
                        formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--with", dest="with_", metavar="PAPER")
-    p.add_argument("--by", choices=("score", "decisions", "contrast"), default="score")
+    p.add_argument("--by", choices=("score", "contrast"), default="score")
     p.add_argument("--limit", type=int, default=20)
     a = ap.parse_args()
 
     cat, by_id = load()
-    if a.cmd in ("outline", "section", "pairs"):
-        {"outline": cmd_outline, "section": cmd_section, "pairs": cmd_pairs}[a.cmd](cat, a, by_id)
+    if a.cmd in ("outline", "section", "pairs", "related"):
+        {"outline": cmd_outline, "section": cmd_section, "pairs": cmd_pairs,
+         "related": cmd_related}[a.cmd](cat, a, by_id)
     else:
-        {"catalog": cmd_catalog, "tags": cmd_tags, "search": cmd_search, "show": cmd_show,
-         "related": cmd_related, "decision": cmd_decision}[a.cmd](cat, a)
+        {"catalog": cmd_catalog, "search": cmd_search, "show": cmd_show,
+         "decision": cmd_decision}[a.cmd](cat, a)
     return 0
 
 

@@ -6,7 +6,6 @@ tagline: 차원을 정하는 것은 손의 자유도가 아니라, 그 좌표 �
 stances: [걸어다닐 좌표를 만든다, 건너갈 좌표를 만든다]
 common: 둘 다 과제를 보기 전에 좌표를 정하고 얼린다
 pillars: P1, P2, P4
-tags: [latent-action-space, action-space, dexterous-hand, vae, cross-embodiment, residual-rl]
 generated: 2026-09-17 14:01
 generator: compare/v1
 summary: >

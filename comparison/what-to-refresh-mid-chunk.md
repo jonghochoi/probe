@@ -6,7 +6,6 @@ tagline: 촉각을 다시 읽고 볼 자격을 제한하거나, 힘을 매 tick 
 stances: [손끝 촉각을 다시 읽는다, 고유수용을 매 tick 읽는다]
 common: 둘 다 시각의 낡음을 고치지 않고 배분한다
 pillars: P1, P2
-tags: [flow-matching, streaming, tactile, force, vla-arch, latency, contact-rich]
 generated: 2026-08-28 09:34
 generator: compare/v1
 summary: >

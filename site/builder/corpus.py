@@ -1,7 +1,7 @@
 """Discover the analysis rewrites the site publishes.
 
 A rewrite is written from the paper's own arXiv HTML, so everything the site
-needs — title, authors, pillars, tags, links, the card preview — is declared in
+needs — title, authors, pillars, links, the card preview — is declared in
 the rewrite's own front matter. There is no second source to reconcile
 against.
 
@@ -10,6 +10,7 @@ One rewrite per file, `analysis/<arxiv-id>.md` — flat, no per-paper folder.
 
 from __future__ import annotations
 
+import math
 import re
 import subprocess
 from dataclasses import dataclass
@@ -230,8 +231,9 @@ class Paper:
         return self.filed[0]
 
     @property
-    def tags(self) -> list[str]:
-        return frontmatter.as_list(self.front.get("tags", ""))
+    def decisions(self) -> list[str]:
+        """The Decision-Log codes the rewrite cites anywhere in its source."""
+        return sorted(set(DREF.findall(self.body)))
 
     @property
     def generated_at(self) -> str:
@@ -375,7 +377,7 @@ class Paper:
         """The identity fields, compacted — a hit here outranks one in the body."""
         return _haystack([
             self.stem, self.title, self.tagline, self.authors, self.metric,
-            *self.tags, *self.filed,
+            *self.filed,
             *(PILLAR_NAMES[p] for p in self.filed if p in PILLAR_NAMES),
             *(PILLAR_LABELS[p] for p in self.filed if p in PILLAR_LABELS),
         ])
@@ -472,7 +474,7 @@ def _plain(md: str, limit: int = 240) -> str:
 # recall, and it is what the semantic index is for.
 #
 # Two fields per paper, because where a word appears is itself a signal:
-# `search_key` is the identity (title, tagline, tags, authors, metric, id), and
+# `search_key` is the identity (title, tagline, authors, metric, id, axes), and
 # `search_hay` is everything. A hit in the first outranks a hit in the second.
 #
 # Both are emitted **compacted** — lowercased with whitespace and punctuation
@@ -508,7 +510,7 @@ def _fragments(paper: "Paper") -> list[str]:
     source = paper.body
     out = [
         paper.stem, paper.title, paper.tagline, paper.authors, paper.metric,
-        *paper.tags, *paper.filed,
+        *paper.filed,
         *(PILLAR_NAMES[p] for p in paper.filed if p in PILLAR_NAMES),
         *(PILLAR_LABELS[p] for p in paper.filed if p in PILLAR_LABELS),
         _plain(paper.summary_md, limit=10_000),
@@ -733,31 +735,60 @@ def figure_urls(body: str) -> dict[str, str]:
 
 # ── Neighbours ──────────────────────────────────────────────────────────────
 
-def score(a: Paper, b: Paper) -> int:
-    """How near two rewrites sit — twice the shared tags plus the shared pillars.
+# A Decision-Log citation — `D`, one digit, two capitals, standing alone — the
+# same token `check-decision-refs.py` and the page's tooltips read.
+DREF = re.compile(r"(?<![A-Za-z0-9_])D\d[A-Z]{2}(?![A-Za-z0-9])")
+
+
+def decision_weights(papers: list[Paper], retired=frozenset()) -> dict[str, float]:
+    """`{code: log(n / df)}` over the live Decision-Log codes the corpus cites.
+
+    What two rewrites share is only as specific as the rarest thing they
+    share: a code most of the corpus argues about says two papers belong to
+    this corpus, one three rewrites argue about says they bear on the same
+    open question. Retired codes weigh nothing — they name no question left.
+    """
+    df: dict[str, int] = {}
+    for p in papers:
+        for d in p.decisions:
+            if d not in retired:
+                df[d] = df.get(d, 0) + 1
+    n = len(papers)
+    return {d: math.log(n / k) for d, k in df.items()}
+
+
+def score(a: Paper, b: Paper, weights: dict[str, float]) -> float:
+    """How near two rewrites sit — the shared Decision-Log codes, each weighed
+    by `decision_weights`, plus one per shared pillar.
+
+    The Decision Log is the one vocabulary here a human keeps: every code is a
+    choice the team wrote down, so two rewrites citing it argue about the same
+    thing in the same words. A pillar is coarser — two papers sharing P1 may
+    only both be policies — so it counts once and a rare code counts more.
 
     The one ranking rule for "which papers are near this one": the page's
-    neighbour row, `corpus.json` and `site/query.py` all read it from here, so
-    a reader and an agent asking the same question get the same order.
+    neighbour row, `corpus.json`, `site/query.py` and `/compare`'s candidate
+    list all read it from here, so a reader and an agent asking the same
+    question get the same order.
     """
-    return (2 * len(set(a.tags) & set(b.tags))
-            + len(set(a.pillars) & set(b.pillars)))
+    shared = set(a.decisions) & set(b.decisions)
+    return round(sum(weights.get(d, 0.0) for d in shared)
+                 + len(set(a.pillars) & set(b.pillars)), 1)
 
 
-def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
-    """The nearest few rewrites, by shared tags first and pillars second.
+def related(paper: Paper, corpus: list[Paper], weights: dict[str, float],
+            limit: int = 3) -> list[Paper]:
+    """The nearest few rewrites by `score`.
 
-    Tags weigh double because they are the specific claim — two papers tagged
-    `flow-matching` are about the same machinery, while two papers sharing P1
-    may only both be policies. Papers with nothing in common are dropped rather
-    than padded out to `limit`: an unrelated suggestion costs more trust than an
-    empty row costs space.
+    Papers with nothing in common are dropped rather than padded out to
+    `limit`: an unrelated suggestion costs more trust than an empty row costs
+    space.
     """
     scored = []
     for other in corpus:
         if other.stem == paper.stem:
             continue
-        points = score(paper, other)
+        points = score(paper, other, weights)
         if points:
             scored.append((points, other.order_key, other))
     scored.sort(key=lambda row: (row[0], row[1]), reverse=True)

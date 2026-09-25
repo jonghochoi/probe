@@ -38,7 +38,6 @@ class Chunk:
     path: str                    # the page it lands on
     anchor: str                  # in-page anchor, empty when there is none
     pillars: list[str] = field(default_factory=list)
-    tags: list[str] = field(default_factory=list)
     date: str = ""
     text: str = ""
 
@@ -165,7 +164,7 @@ def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
     a second slug parser drifting away from the first.
     """
     out: list[Chunk] = []
-    meta = dict(pillars=paper.pillars, tags=paper.tags, date=paper.date,
+    meta = dict(pillars=paper.pillars, date=paper.date,
                 path=f"p/{paper.stem}/")
 
     def add(kind: str, title: str, context: str, text: str, anchor: str = "") -> None:
@@ -178,7 +177,7 @@ def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
     # section does, and what a result card falls back to when no section wins.
     add("paper", paper.title, "재작성본",
         "\n\n".join(filter(None, [paper.tagline, paper.metric,
-                                   plain(paper.summary_md), " ".join(paper.tags)])))
+                                   plain(paper.summary_md)])))
 
     # The 요약 surface. No anchor: the page opens on this tab, so the paper's
     # own address is already the place the passage is.
