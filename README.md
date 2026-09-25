@@ -98,6 +98,13 @@ session.
   ranks the pairs no comparison holds yet and names the question that would
   divide each, then stops — choosing one stays yours.
 
+**Hand it to an agent.** The site publishes
+[`llms.txt`](https://jonghochoi.github.io/probe/llms.txt) — one line per paper
+and comparison — and `corpus.json`, every record with its relations. In a
+checkout, `python3 site/query.py --help` answers the same questions with no
+install: related papers, a rewrite's sections, and the pairs no comparison
+covers yet.
+
 <div align="center">
 
 [![arXiv API](https://img.shields.io/badge/arXiv-API-B06749?logo=arxiv&logoColor=white&labelColor=1F1611)](https://info.arxiv.org/help/api/index.html)

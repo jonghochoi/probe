@@ -182,7 +182,7 @@ def _pager(total: int) -> str:
 
 
 def landing_page(papers: list[Paper], katex=None, search_api: str = "",
-                 comps: list | None = None) -> str:
+                 comps: list | None = None, partial: bool = False) -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
     The page answers "what should I read" before "what is here". The most
@@ -353,7 +353,11 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         # `semantic.js` ships only when the build is handed an endpoint, so a
         # default build makes no request and needs no network to be correct.
         scripts=["shelf.js", "filter.js"] + (["semantic.js"] if search_api else []),
-        extra_head=f'<link rel="stylesheet" href="{c.asset("assets/index.css")}">',
+        # `llms.txt` is where an agent handed this URL finds the corpus as
+        # data; a partial build writes none, so it links none.
+        extra_head=(f'<link rel="stylesheet" href="{c.asset("assets/index.css")}">'
+                    + ("" if partial else
+                       '\n<link rel="alternate" type="text/plain" title="llms.txt" href="llms.txt">')),
         body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
     )
 
@@ -810,9 +814,11 @@ def paper_page(paper: Paper, katex, decisions: dict,
                  + (["presentation.js"] if presentation else [])),
         # The presentation's stylesheet rides only the pages that carry one: a slide is
         # a frame with its own type scale, and no other surface uses a rule of it.
+        # The source an agent should read instead of this page's markup.
         extra_head=(
-            f'<link rel="stylesheet" href="{c.asset("../../assets/presentation.css")}">'
-            if presentation else ""),
+            f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/analysis/{paper.stem}.md">'
+            + (f'\n<link rel="stylesheet" href="{c.asset("../../assets/presentation.css")}">'
+               if presentation else "")),
     )
 
 
@@ -1257,6 +1263,7 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
         body=body,
         depth=2,
         scripts=["paper.js"],
+        extra_head=f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/comparison/{comp.slug}.md">',
     )
 
 

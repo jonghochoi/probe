@@ -50,8 +50,8 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, comparisons, corpus, presentations, pages
-from builder.decisions import harvest_decisions
+from builder import assets_out, catalog, comparisons, corpus, presentations, pages
+from builder.decisions import harvest_decisions, retired_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
 
@@ -82,6 +82,26 @@ def build(args) -> int:
     presentation_map, presentation_problems = presentations.discover(papers_by_id, partial=bool(args.only))
     problems += presentation_problems
 
+    # The agent's entry points: `corpus.json` and `llms.txt`. A full build
+    # only — under `--only` the catalog would describe a corpus of one and its
+    # relations would point at pages this build did not write. It needs no
+    # rendering, so `--check` measures it too.
+    decisions = harvest_decisions()
+    cited = corpus.citations(papers)
+    agent_json = ""
+    if not args.only:
+        cat = catalog.records(papers, comps, decisions, cited, set(presentation_map),
+                              retired_decisions())
+        agent_json = json.dumps(cat, ensure_ascii=False, separators=(",", ":"))
+        agent_size = len(agent_json.encode("utf-8"))
+        if agent_size > catalog.BUDGET:
+            problems.append(
+                f"corpus.json: {agent_size / 1024:.0f} KB, over the "
+                f"{catalog.BUDGET // 1024} KB budget — it exists to fit one "
+                f"context window, so move `summary` or `keywords` out of "
+                f"`catalog.records` rather than raising the budget"
+            )
+
     if args.check:
         for line in problems:
             print(line)
@@ -101,7 +121,6 @@ def build(args) -> int:
 
     cache = corpus.REPO_ROOT / ".site-cache" if args.katex == "server" else None
     katex = KatexRenderer(cache) if args.katex == "server" else ClientRenderer()
-    decisions = harvest_decisions()
 
     # Before a page is rendered, because every asset URL a page prints carries
     # a token hashed over what this build ships (`assets_out.version`).
@@ -110,10 +129,9 @@ def build(args) -> int:
 
     rendered: dict[Path, str] = {}
     render_problems: list[str] = []
-    # One pass over every rewrite's source, before any page is rendered: the
-    # backlinks on a paper's page are written by papers that come later in the
-    # loop as often as earlier ones.
-    cited = corpus.citations(papers)
+    # `cited` is one pass over every rewrite's source, made above before any
+    # page is rendered: the backlinks on a paper's page are written by papers
+    # that come later in the loop as often as earlier ones.
     for paper in papers:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
             paper, katex, decisions, render_problems,
@@ -132,7 +150,8 @@ def build(args) -> int:
 
     # The landing page indexes whatever was built — with `--only`, a subset.
     rendered[out / "index.html"] = pages.landing_page(
-        papers, katex, search_api=args.search_api, comps=comps)
+        papers, katex, search_api=args.search_api, comps=comps,
+        partial=bool(args.only))
     rendered[out / "shelf" / "index.html"] = pages.shelf_page(papers)
     rendered[out / "404.html"] = pages.not_found_page()
 
@@ -175,6 +194,9 @@ def build(args) -> int:
             f"every page carries it, so drop a field from `pages.corpus_index` "
             f"or raise the budget on purpose"
         )
+    if agent_json:
+        (out / "corpus.json").write_text(agent_json + "\n", encoding="utf-8")
+        (out / "llms.txt").write_text(catalog.llms_txt(cat), encoding="utf-8")
     # An asset-pipeline failure is a page failure: a mangled KaTeX stylesheet
     # publishes every formula in the body font and no reader reports it.
     problems.extend(stats["problems"])

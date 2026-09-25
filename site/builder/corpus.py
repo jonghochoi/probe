@@ -733,6 +733,17 @@ def figure_urls(body: str) -> dict[str, str]:
 
 # ── Neighbours ──────────────────────────────────────────────────────────────
 
+def score(a: Paper, b: Paper) -> int:
+    """How near two rewrites sit — twice the shared tags plus the shared pillars.
+
+    The one ranking rule for "which papers are near this one": the page's
+    neighbour row, `corpus.json` and `site/query.py` all read it from here, so
+    a reader and an agent asking the same question get the same order.
+    """
+    return (2 * len(set(a.tags) & set(b.tags))
+            + len(set(a.pillars) & set(b.pillars)))
+
+
 def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
     """The nearest few rewrites, by shared tags first and pillars second.
 
@@ -742,14 +753,13 @@ def related(paper: Paper, corpus: list[Paper], limit: int = 3) -> list[Paper]:
     than padded out to `limit`: an unrelated suggestion costs more trust than an
     empty row costs space.
     """
-    mine_t, mine_p = set(paper.tags), set(paper.pillars)
     scored = []
     for other in corpus:
         if other.stem == paper.stem:
             continue
-        score = 2 * len(mine_t & set(other.tags)) + len(mine_p & set(other.pillars))
-        if score:
-            scored.append((score, other.order_key, other))
+        points = score(paper, other)
+        if points:
+            scored.append((points, other.order_key, other))
     scored.sort(key=lambda row: (row[0], row[1]), reverse=True)
     return [row[2] for row in scored[:limit]]
 

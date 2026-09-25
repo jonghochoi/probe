@@ -66,6 +66,14 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Query the corpus with the standard library alone
+        # Before the install, on purpose: an agent in a checkout runs
+        # `site/query.py` without `pip install`, and `-I -S` hides whatever
+        # site-packages the runner already carries.
+        run: |
+          python3 -I -S site/query.py catalog > /dev/null
+          python3 -I -S site/query.py pairs --by contrast --limit 3 > /dev/null
+
       - name: Install build dependencies
         run: pip install -r site/requirements.txt
 

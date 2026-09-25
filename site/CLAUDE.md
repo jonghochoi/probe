@@ -77,6 +77,19 @@ the rest of the build.
 the site makes no request. `site/search/verify.py` needs a key and egress, so it
 is run by hand and never in CI.
 
+**`corpus.json` carries front matter and relations, never bodies.** It exists
+to fit one context window beside an agent's question, so a record points at the
+raw Markdown (`source`) rather than holding it, and the build refuses the file
+past `catalog.BUDGET`. From `context/` it carries only what the pages already
+print in a `D#` tooltip — the code, its pillar and its title. Relations stay
+one kind per field; only `neighbours` is a score, and it is `corpus.score`, the
+rule the page's own neighbour row ranks by.
+
+**`query.py` runs with the standard library.** An agent in a checkout has not
+run `pip install`, so `query.py` and every `builder/` module it imports —
+`catalog`, `corpus`, `comparisons`, `presentations`, `decisions` and theirs —
+keep a third-party import out of module scope.
+
 **The pillar set is hard-coded in three places here** — `PILLAR_NAMES` with
 the Korean `PILLAR_LABELS` beside it in `builder/corpus.py` (the build refuses
 to start when the two name different pillars), `PILLARS` in

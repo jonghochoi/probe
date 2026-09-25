@@ -95,11 +95,13 @@ shorter list.
      A second ranking rule is a second answer to one question; do not write
      one.
 
-     Read `tags:` and `pillars:` from front matter for this and nothing else.
-     Forty bodies is not a survey this affords, and the score does not need
-     them.
-
   2. DROP every pair a `comparison/<slug>.md` already holds in `compares:`.
+
+     Both steps are one command, which reads `tags:` and `pillars:` from front
+     matter and no bodies — forty bodies is not a survey this affords, and the
+     score does not need them:
+
+         python3 site/query.py pairs --limit 12
 
   3. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the five or six that survive
      — the layer where a rewrite argues with the Decision Log, and the only
