@@ -86,7 +86,7 @@ session.
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 | **Presentation** | `/present <arXiv id>` | [`presentation/AUTHORING.md`](presentation/AUTHORING.md) |
-| **Ideate** | `/ideate [<arXiv id \| alias \| topic>]` | chat only — no file |
+| **Ideation** | `/ideate [<arXiv id \| alias \| topic>]` | chat only — no file |
 
 - **Start by hand.** Fill `context/`, run one report yourself, review it
   ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.
@@ -98,15 +98,6 @@ session.
   `/analyze` wrote, so run it on each paper first. `/compare` with no ids
   ranks the pairs no comparison holds yet and names the question that would
   divide each, then stops — choosing one stays yours.
-
-**Hand it to an agent.** The site publishes
-[`llms.txt`](https://jonghochoi.github.io/probe/llms.txt) — one line per paper
-and comparison — and `corpus.json`, every record with its relations. In a
-checkout, `python3 site/query.py --help` answers the same questions with no
-install: related papers, a rewrite's sections, and the pairs no comparison
-covers yet — and `search` asks the site's semantic index. Each rewrite is also
-published a section at a time, so an agent reads a few KB instead of 70. `/ideate` is the procedure on top of it — from a paper, a topic
-or nothing, to grounded combinations no single paper makes.
 
 <div align="center">
 
