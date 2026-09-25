@@ -104,7 +104,8 @@ session.
 and comparison — and `corpus.json`, every record with its relations. In a
 checkout, `python3 site/query.py --help` answers the same questions with no
 install: related papers, a rewrite's sections, and the pairs no comparison
-covers yet. `/ideate` is the procedure on top of it — from a paper, a topic
+covers yet — and `search` asks the site's semantic index. Each rewrite is also
+published a section at a time, so an agent reads a few KB instead of 70. `/ideate` is the procedure on top of it — from a paper, a topic
 or nothing, to grounded combinations no single paper makes.
 
 <div align="center">

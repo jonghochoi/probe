@@ -122,8 +122,9 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
 3. **Index** — the two commands above, once by hand.
 4. **Wire CI** — `deploy-site.yml` already carries the step. Add the repository
    secrets `INSFORGE_URL` and `INSFORGE_API_KEY`, and the repository *variable*
-   `PROBE_SEARCH_API`. Until all three exist the step skips and the build emits
-   no endpoint, which is the current state.
+   `PROBE_SEARCH_API`. Without them the step skips and the build emits no
+   endpoint; with them, every push to `main` embeds only the chunks that
+   changed and the build's `llms.txt` lists the endpoint for agents.
 5. **Verify** — `python3 site/search/verify.py .search/index.jsonl`, with
    `INSFORGE_URL`, `INSFORGE_API_KEY` and `PROBE_SEARCH_API` set. Seven checks,
    each assuming the one before it: the migration answers, the table holds this
