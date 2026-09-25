@@ -81,22 +81,27 @@ def keywords(paper: Paper) -> list[str]:
     return list(seen)
 
 
-def outline(paper: Paper) -> list[tuple[int, str]]:
-    """`(level, heading)` for the body — the 요약 tab is not part of it."""
-    return [(level, text) for _, level, text in _headings(paper.article or paper.body)]
+def _text(doc) -> str:
+    """The body a rewrite argues in (its 요약 tab carved out), or a comparison's."""
+    return getattr(doc, "article", "") or doc.body
 
 
-def section(paper: Paper, act: int | None = None, match: str = "") -> str:
+def outline(doc) -> list[tuple[int, str]]:
+    """`(level, heading)` for a rewrite's or a comparison's body."""
+    return [(level, text) for _, level, text in _headings(_text(doc))]
+
+
+def section(doc, act: int | None = None, match: str = "") -> str:
     """Parts of the body, each cut at its own headings.
 
     `act` is the numbered H2 (`## 3 정말 되는가`) — the four-part spine every
-    rewrite shares. `match` is a substring of any H2–H4, compared case-folded,
+    rewrite and every comparison shares. `match` is a substring of any H2–H4, compared case-folded,
     which is how an English gloss from `keywords` finds the section that argues
     it; every heading it hits is returned, in body order, not only the first.
     A part runs from its heading to the next heading of the same or a higher
     level. Empty when nothing matches.
     """
-    md = paper.article or paper.body
+    md = _text(doc)
     heads = _headings(md)
     parts: list[str] = []
     covered = 0
@@ -138,12 +143,15 @@ def mentions(papers: list[Paper], cited: dict) -> dict[str, list[str]]:
     a citation is not repeated here.
     """
     linked = {(q.stem, target) for target, qs in cited.items() for q in qs}
-    patterns = [(p.stem, pat) for p in papers if p.alias
+    patterns = [(p.stem, p.alias, pat) for p in papers if p.alias
                 for pat in [_alias_pattern(p.alias)] if pat]
     out: dict[str, list[str]] = {}
     for p in papers:
-        for stem, pat in patterns:
-            if stem != p.stem and (p.stem, stem) not in linked and pat.search(p.body):
+        for stem, alias, pat in patterns:
+            # The substring test first: it rules out nearly every pair for a
+            # fraction of what the bounded regex costs on a 70 KB body.
+            if (stem != p.stem and (p.stem, stem) not in linked
+                    and alias in p.body and pat.search(p.body)):
                 out.setdefault(p.stem, []).append(stem)
     return {k: sorted(v) for k, v in out.items()}
 

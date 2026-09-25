@@ -86,6 +86,7 @@ session.
 | **Analysis** | `/analyze <arXiv id>` | [`analysis/AUTHORING.md`](analysis/AUTHORING.md) |
 | **Comparison** | `/compare <arXiv id> <arXiv id> [<arXiv id>]` | [`comparison/AUTHORING.md`](comparison/AUTHORING.md) |
 | **Presentation** | `/present <arXiv id>` | [`presentation/AUTHORING.md`](presentation/AUTHORING.md) |
+| **Ideate** | `/ideate [<arXiv id \| alias \| topic>]` | chat only — no file |
 
 - **Start by hand.** Fill `context/`, run one report yourself, review it
   ruthlessly, *then* schedule it. Bad prompt + automation = garbage on a timer.
@@ -103,7 +104,8 @@ session.
 and comparison — and `corpus.json`, every record with its relations. In a
 checkout, `python3 site/query.py --help` answers the same questions with no
 install: related papers, a rewrite's sections, and the pairs no comparison
-covers yet.
+covers yet. `/ideate` is the procedure on top of it — from a paper, a topic
+or nothing, to grounded combinations no single paper makes.
 
 <div align="center">
 
