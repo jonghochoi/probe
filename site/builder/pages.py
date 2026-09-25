@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 
 from . import components as c
@@ -529,12 +530,6 @@ def _cmp_count(n: int) -> str:
     )
 
 
-def _metric_chip(paper: Paper) -> str:
-    return (
-        f'<span class="metric">{c.esc(paper.metric)}</span>' if paper.metric else ""
-    )
-
-
 def _row_readout(paper: Paper) -> str:
     """A row's headline number, on a line of its own under the tagline.
 
@@ -822,22 +817,21 @@ def _acts(paper: Paper) -> str:
     Both are server-rendered in their empty state and corrected by `shelf.js`
     on load — the build cannot know either one. 읽음 is the reader's claim and
     only ever theirs: neither opening a page nor scrolling to the end of it is
-    evidence that it was read, so nothing marks it on their behalf. The button
-    says which way it goes rather than naming a state beside itself — with two
-    states, 읽음 해제 already says the paper is read.
+    evidence that it was read, so nothing marks it on their behalf.
 
-    They ride the breadcrumb line, at the top of the header: 즐겨찾기 is what a
-    reader reaches for *before* the read, and anywhere further down it lands
-    below the fold on a phone.
+    They are glyphs, one joined pair at the right end of the action bar: the
+    bar is one line on a phone only while nothing in it is a word it can do
+    without, and a star and a check are the two marks this site already draws
+    for these two states. What each does and which way it goes is the
+    button's accessible name, which `shelf.js` keeps in step with the state.
     """
     return f"""<div class="paper-acts" data-paper-acts
      data-paper-id="{c.esc(paper.stem)}" data-paper-title="{c.esc(paper.title)}">
   <button type="button" class="act-btn" data-star="{c.esc(paper.stem)}"
-          data-star-title="{c.esc(paper.title)}" aria-pressed="false">
-    {c.icon("star", 13)}<span data-star-text>즐겨찾기</span>
-  </button>
+          data-star-title="{c.esc(paper.title)}" aria-pressed="false"
+          aria-label="즐겨찾기" title="즐겨찾기">{c.icon("star", 16)}</button>
   <button type="button" class="act-btn" data-read-toggle aria-pressed="false"
-          aria-live="polite">읽음으로 표시</button>
+          aria-label="읽음으로 표시" title="읽음으로 표시">{c.icon("check", 16)}</button>
 </div>"""
 
 
@@ -1129,24 +1123,23 @@ def _toc(entries: list[dict]) -> str:
 
 
 def _header(paper: Paper) -> str:
-    """What the paper is, in the order a reader needs it.
+    """What the paper is, and the one line of things to do with it.
 
-    The header carries two different kinds of thing under the title — where
-    the paper lives (resource links) and when it happened and how big a sit it
-    is (dates, length) — and each is drawn as its own kind, so a reader
-    scanning for the arXiv link is not reading a run of identical grey
-    capsules. The links are one bordered group that says it leaves the site,
-    the dates are plain text under everything, and the paper's own number is
-    the single filled pill. The two 서재 controls
-    ride the first line: a row that wraps puts whatever sits at its end below
-    the fold, and these two are reached for before the read.
+    Under the title there are exactly two kinds of thing — who wrote it, and a
+    bar of what a reader can press — and the bar is ruled off from the rest so
+    it reads as controls rather than as more facts. Everything in the bar is
+    one line at a phone's width whatever the paper declares, which is why the
+    header carries no headline number and no length: the number is the first
+    thing the 요약 tab directly below prints, with its context, and a chip of
+    variable length here was what decided where the links wrapped.
 
-    Where else on this site the paper is argued about is the 비교 tab's job and
-    not a fourth kind here: the tab strip sits directly under this header and
-    carries the same count, so a chip would be the same offer twice, a
-    centimetre apart.
+    The only date is the rewrite's own, on the breadcrumb line. When the paper
+    itself appeared is already in its arXiv id; when this corpus read it is
+    not recoverable from anything else on the page.
+
+    Where else on this site the paper is argued about is the 비교 tab's job:
+    the tab strip sits directly under this header and carries the count.
     """
-    facts = f"{_metric_chip(paper)}{_src_group(paper)}"
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
     <div class="crumb-row">
@@ -1155,55 +1148,50 @@ def _header(paper: Paper) -> str:
         <a href="../../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
         {c.esc(paper.stem)}
       </div>
-      {_acts(paper)}
+      {f'<span class="crumb-date">재작성 {c.esc(paper.date)}</span>' if paper.date else ""}
     </div>
     <h1 class="paper-title">{c.esc(paper.title)}</h1>
-    {f'<p class="paper-authors">{c.esc(paper.authors)}</p>' if paper.authors else ""}
-    {f'<div class="chip-row head-facts">{facts}</div>' if facts else ""}
-    {_metaline(paper)}
+    {_authors(paper)}
+    <div class="actbar">
+      {_src_group(paper)}
+      {_acts(paper)}
+    </div>
   </div>
 </header>"""
 
 
-def _src_group(paper: Paper) -> str:
-    """Every link out of the site, as one group.
+def _authors(paper: Paper) -> str:
+    """The byline, names on one line and affiliations under them.
 
-    A resource link leaves the site, and the group says so
-    once, with a `↗` in its first cell, rather than every link repeating the
-    arrow. The group is also what holds when a paper declares all six kinds:
-    six loose pills in the middle of the header are a wall, one group that
-    wraps inside its own box is not. Empty when a rewrite declares no link,
-    which R10 allows and which is itself reproducibility information.
+    `authors:` is written `names (affiliations)`; split, each half wraps on its
+    own rather than an affiliation list starting mid-line after the names. A
+    byline that is not in that shape prints as it stands.
+    """
+    if not paper.authors:
+        return ""
+    m = re.match(r"^(.*?)\s*\((.+)\)\s*$", paper.authors)
+    if not m:
+        return f'<p class="paper-authors">{c.esc(paper.authors)}</p>'
+    return (f'<p class="paper-authors"><span class="au-n">{c.esc(m.group(1))}</span>'
+            f'<span class="au-a">{c.esc(m.group(2))}</span></p>')
+
+
+def _src_group(paper: Paper) -> str:
+    """Every link out of the site, as one joined group.
+
+    One bordered box divided into cells, so the bar reads as two things — where
+    the paper lives, and the pair of 서재 controls — rather than as a row of
+    loose buttons. Empty when a rewrite declares no link, which R10 allows and
+    which is itself reproducibility information.
     """
     if not paper.links:
         return ""
     items = "".join(
         f'<a href="{c.esc(url)}" target="_blank" rel="noopener">'
-        f"{c.src_mark(kind)}{c.esc(label)}</a>"
+        f"{c.src_mark(kind)}<span>{c.esc(label)}</span></a>"
         for kind, label, url in paper.links
     )
-    return ('<span class="src-group" role="group" aria-label="외부 링크">'
-            '<span class="sg-out" aria-hidden="true">↗</span>'
-            f"{items}</span>")
-
-
-def _metaline(paper: Paper) -> str:
-    """When it happened and how long it is — the facts a reader checks, not
-    the ones they act on.
-
-    Plain monospace text rather than pills: a date is nothing to press, and a
-    pill that cannot be pressed spends a reader's attention to say so. The
-    separator rides on the item ahead of it so a line that wraps never opens
-    with a stranded `·`.
-    """
-    bits = []
-    if paper.published:
-        bits.append(f"발행 {paper.published}")
-    if paper.date:
-        bits.append(f"등재 {paper.date}")
-    bits.append(_size(paper))
-    items = "".join(f'<span class="mi">{c.esc(b)}</span>' for b in bits)
-    return f'<div class="metaline">{items}</div>'
+    return f'<div class="src-group" role="group" aria-label="외부 링크">{items}</div>'
 
 
 # ── Comparisons ─────────────────────────────────────────────────────────────
