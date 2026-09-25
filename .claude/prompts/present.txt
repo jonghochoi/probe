@@ -225,6 +225,6 @@ SCOPE
 ON-DEMAND, ONE PRESENTATION AT A TIME, over papers the corpus already holds.
 
 A presentation is written for a room, and which paper a room should hear is a
-human call. If asked to present "everything in a tag", say no: the value is in
+human call. If asked to present "everything in a pillar", say no: the value is in
 deciding this paper is worth fourteen minutes of other people's time, and that
 decision does not scale.

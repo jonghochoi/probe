@@ -80,10 +80,6 @@ class Comparison:
         return corpus.PILLAR_RE.findall(self.front.get("pillars", ""))
 
     @property
-    def tags(self) -> list[str]:
-        return frontmatter.as_list(self.front.get("tags", ""))
-
-    @property
     def summary_md(self) -> str:
         return self.front.get("summary", "")
 

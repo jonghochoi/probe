@@ -6,7 +6,6 @@ tagline: 굽는 쪽은 어디가 정밀한지를 알아내고, 받는 쪽은 배
 stances: [데이터에 굽는다, 입력으로 받는다]
 common: 둘 다 제어기는 건드리지 않는다
 pillars: P1, P0
-tags: [execution-speed, speed-control, action-chunking, trajectory-augmentation, imitation-learning]
 generated: 2026-09-17 23:24
 generator: compare/v1
 summary: >

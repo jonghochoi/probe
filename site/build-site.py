@@ -87,11 +87,13 @@ def build(args) -> int:
     # relations would point at pages this build did not write. It needs no
     # rendering, so `--check` measures it too.
     decisions = harvest_decisions()
+    retired = retired_decisions()
+    weights = corpus.decision_weights(papers, retired)
     cited = corpus.citations(papers)
     agent_json = ""
     if not args.only:
         cat = catalog.records(papers, comps, decisions, cited, set(presentation_map),
-                              retired_decisions())
+                              retired)
         agent_json = json.dumps(cat, ensure_ascii=False, separators=(",", ":"))
         agent_size = len(agent_json.encode("utf-8"))
         if agent_size > catalog.BUDGET:
@@ -135,7 +137,7 @@ def build(args) -> int:
     for paper in papers:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
             paper, katex, decisions, render_problems,
-            neighbours=corpus.related(paper, papers),
+            neighbours=corpus.related(paper, papers, weights),
             comparisons=comparisons.for_paper(paper.stem, comps),
             papers_by_id=papers_by_id,
             citers=cited.get(paper.stem, []),

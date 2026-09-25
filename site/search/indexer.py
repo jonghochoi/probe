@@ -124,7 +124,7 @@ def row_of(chunk: dict, vector: list[float]) -> dict:
         "paper_id": chunk["paper_id"], "title": chunk["title"],
         "context": chunk["context"], "path": chunk["path"],
         "anchor": chunk["anchor"], "pillars": chunk["pillars"],
-        "tags": chunk["tags"], "chunk_date": chunk["date"] or None,
+        "chunk_date": chunk["date"] or None,
         "body": chunk["text"], "content_hash": chunk["content_hash"],
         "embedding": vector,
     }

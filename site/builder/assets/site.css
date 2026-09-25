@@ -540,20 +540,6 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 .chip.pillar[data-p="P2"] { --pi: var(--p2-ink); background: color-mix(in oklab, var(--p2) 50%, var(--surface)); }
 .chip.pillar[data-p="P3"] { --pi: var(--p3-ink); background: color-mix(in oklab, var(--p3) 50%, var(--surface)); }
 .chip.pillar[data-p="P4"] { --pi: var(--p4-ink); background: color-mix(in oklab, var(--p4) 50%, var(--surface)); }
-.chip.tag { font-weight: 500; }
-/* In the paper header a tag is the quietest thing on the page: nine arrive at
-   once, and with a border each they read as nine controls rather than one
-   description — while the resource links beside them are the things that
-   actually go somewhere. With no capsule around it, the `#` is what says
-   "tag". Scoped to the header: on the landing page the same chip is a filter
-   button, and there the border is telling the truth. */
-.head-tags { gap: .1rem .25rem; }
-.head-tags .chip.tag {
-  background: transparent; border-color: transparent;
-  color: var(--text-muted); padding: .2rem .3rem;
-}
-.head-tags .chip.tag::before { content: "#"; opacity: .45; }
-.head-tags .chip.tag:hover { background: var(--surface-2); color: var(--text); }
 .chip.link:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 

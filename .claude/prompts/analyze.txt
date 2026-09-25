@@ -205,16 +205,18 @@ PROCEDURE
     paper is still read, rather than looked for later against a corpus that has
     not moved since.
 
-    Read the other rewrites' FRONT MATTER only — `tags:` and `pillars:` — never
-    their bodies. Score a pair the way the site already scores neighbours
-    (`corpus.related()`): two points per shared tag, one per shared pillar,
-    tags weighted double because two papers tagged `flow-matching` are about
-    the same machinery while two sharing P1 may only both be policies. Drop any
-    pair a `comparison/<slug>.md` already holds in its `compares:`.
+    Score with the rule the site already ranks neighbours by, never the
+    bodies of the other rewrites:
+
+        python3 site/query.py pairs --with <this id> --limit 6
+
+    It scores a pair by the Decision-Log codes both cite, a rarer code weighing
+    more, plus one per shared pillar (`corpus.score`), and drops any pair a
+    `comparison/<slug>.md` already holds in its `compares:`.
 
     Print at most three, strongest first, each as: the ids and aliases, the
-    tags they share, and the question that would divide them. The question is
-    what makes a comparison — a tag overlap is a candidate, not a question, and
+    codes they share, and the question that would divide them. The question is
+    what makes a comparison — a shared code is a candidate, not a question, and
     naming one you cannot phrase is worse than naming none. When nothing
     scores, say so: an honest none is the usual answer for a paper that opens a
     corner of the corpus nothing else occupies.

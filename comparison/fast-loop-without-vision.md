@@ -6,7 +6,6 @@ tagline: 끝까지 풀거나, 더하거나, 다시 만들거나 — 셋 다 같�
 stances: [끝까지 푼다, 더한다, 다시 만든다]
 common: 셋 다 빠른 루프에서 시각을 끊는다
 pillars: P1, P2
-tags: [tactile, contact-rich, dexterous-hand, vla-arch, asynchronous, flow-matching]
 generated: 2026-08-21 16:59
 generator: compare/v1
 summary: >

@@ -44,9 +44,9 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     opening a built page directly has to keep working.
 
     Both surfaces that read it want the same fields. The palette searches the
-    id, the title, the tags and the 연구 축, and shows the tagline under each
-    title — which is also the only Korean any of those fields carry, since
-    titles and tags in this corpus are the paper's own English. 서재 turns a
+    id, the title and the 연구 축, and shows the tagline under each title —
+    which is also the only Korean any of those fields carry, since titles in
+    this corpus are the paper's own English. 서재 turns a
     kept id back into a titled, taglined row with the same records.
 
     Both pillar vocabularies ride along so either surface can match a query
@@ -76,12 +76,12 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
         "pillarLabels": PILLAR_LABELS,
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
-             "pillars": p.filed, "tags": p.tags, "date": p.date}
+             "pillars": p.filed, "date": p.date}
             for p in ordered
         ],
         "comparisons": [
             {"slug": x.slug, "title": x.title, "tagline": x.tagline,
-             "pillars": x.pillars, "tags": x.tags, "date": x.date,
+             "pillars": x.pillars, "date": x.date,
              "of": x.paper_ids}
             for x in ranked
         ],
@@ -463,7 +463,6 @@ def _facets(paper: Paper) -> str:
         f'data-id="{c.esc(paper.stem)}" '
         f'data-pillars="{c.esc(" ".join(paper.filed))}" '
         f'data-primary="{c.esc(paper.primary)}" '
-        f'data-tags="{c.esc(" ".join(paper.tags))}" '
         f'data-order="{c.esc(paper.order_token)}" '
         f'data-title="{c.esc(paper.title.lower())}" '
         f'data-key="{c.esc(paper.search_key)}" '
@@ -575,10 +574,6 @@ def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
     reader has not seen, so it gets the space — and with it the thesis line, which is
     ours and appears nowhere else on this page.
     """
-    tag_buttons = "".join(
-        f'<button type="button" class="chip tag" data-tag-jump="{c.esc(t)}">{c.esc(t)}</button>'
-        for t in paper.tags[:3]
-    )
     links = "".join(
         c.chip(label, "src-link", href=url, mark=c.src_mark(kind))
         for kind, label, url in paper.links
@@ -599,7 +594,6 @@ def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
   <div class="lead-foot">
     {c.pillar_chips(paper.filed)}
     {_cmp_count(cmp_n)}
-    {tag_buttons}
     {links}
     <span class="filter-spacer"></span>
     <span class="lead-size">{c.esc(_size(paper))}</span>
@@ -893,8 +887,8 @@ def _related(neighbours: list[Paper]) -> str:
 
     Placed after the article rather than in the sidebar: it is a next step, not
     a navigation aid, and it should not compete with the table of contents
-    while there is still text above it. Empty when nothing shares a tag or a
-    pillar — see `corpus.related`.
+    while there is still text above it. Empty when nothing shares a Decision-Log
+    code or a pillar — see `corpus.related`.
     """
     if not neighbours:
         return ""
@@ -1137,13 +1131,13 @@ def _toc(entries: list[dict]) -> str:
 def _header(paper: Paper) -> str:
     """What the paper is, in the order a reader needs it.
 
-    The header carries three different kinds of thing — what the paper *is*
-    (tags), where it lives (resource links), and when it happened and how big
-    a sit it is (dates, length) — and each is drawn as its own kind, so a
-    reader scanning for the arXiv link is not reading a run of identical grey
-    capsules. Tags are quiet and take a `#`, the links are one bordered group
-    that says it leaves the site, the dates are plain text under everything,
-    and the paper's own number is the single filled pill. The two 서재 controls
+    The header carries two different kinds of thing under the title — where
+    the paper lives (resource links) and when it happened and how big a sit it
+    is (dates, length) — and each is drawn as its own kind, so a reader
+    scanning for the arXiv link is not reading a run of identical grey
+    capsules. The links are one bordered group that says it leaves the site,
+    the dates are plain text under everything, and the paper's own number is
+    the single filled pill. The two 서재 controls
     ride the first line: a row that wraps puts whatever sits at its end below
     the fold, and these two are reached for before the read.
 
@@ -1153,7 +1147,6 @@ def _header(paper: Paper) -> str:
     centimetre apart.
     """
     facts = f"{_metric_chip(paper)}{_src_group(paper)}"
-    tags = c.tag_chips(paper.tags)
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
     <div class="crumb-row">
@@ -1167,7 +1160,6 @@ def _header(paper: Paper) -> str:
     <h1 class="paper-title">{c.esc(paper.title)}</h1>
     {f'<p class="paper-authors">{c.esc(paper.authors)}</p>' if paper.authors else ""}
     {f'<div class="chip-row head-facts">{facts}</div>' if facts else ""}
-    {f'<div class="chip-row head-tags">{tags}</div>' if tags else ""}
     {_metaline(paper)}
   </div>
 </header>"""
@@ -1176,7 +1168,7 @@ def _header(paper: Paper) -> str:
 def _src_group(paper: Paper) -> str:
     """Every link out of the site, as one group.
 
-    A resource link is not a tag — it leaves the site — and the group says so
+    A resource link leaves the site, and the group says so
     once, with a `↗` in its first cell, rather than every link repeating the
     arrow. The group is also what holds when a paper declares all six kinds:
     six loose pills in the middle of the header are a wall, one group that
@@ -1349,7 +1341,6 @@ def _fork(comp, papers_by_id: dict, mark: str = "") -> str:
 
 def _cmp_header(comp) -> str:
     pillars = c.pillar_chips(comp.pillars)
-    tags = c.tag_chips(comp.tags)
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
     <div class="crumb-row">
@@ -1359,7 +1350,6 @@ def _cmp_header(comp) -> str:
     </div>
     <h1 class="paper-title">{c.esc(comp.title)}</h1>
     {f'<div class="chip-row head-facts">{pillars}</div>' if pillars else ""}
-    {f'<div class="chip-row head-tags">{tags}</div>' if tags else ""}
     <div class="metaline"><span class="mi">{c.esc(comp.date)}</span><span class="mi">논문 {len(comp.paper_ids)}편</span></div>
   </div>
 </header>"""

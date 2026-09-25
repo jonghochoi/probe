@@ -92,9 +92,8 @@ PROCEDURE
      it cannot reach the endpoint, go on without it. Then `catalog --match`
      with two to four terms, Korean and English both
      (`"지연|latency|asynchronous"`) — it searches title, alias, tagline,
-     `keywords` and `summary`, and names the fields each row hit. `tags`
-     lists the tag vocabulary, and `catalog --tag` / `--pillar` /
-     `--decision` narrow it. `catalog --json` prints the full records when a
+     `keywords` and `summary`, and names the fields each row hit.
+     `catalog --pillar` / `--decision` narrow it. `catalog --json` prints the full records when a
      row's tagline is not enough to judge it. Keep at most eight, and say for
      each which field matched.
    - Any comparison that holds two of your papers already asked a question

@@ -554,12 +554,6 @@ def pillar_chips(pillars: list[str]) -> str:
     return "".join(chip(p, "pillar", data={"p": p}) for p in pillars)
 
 
-def tag_chips(tags: list[str]) -> str:
-    return "".join(chip(t, "tag") for t in tags)
-
-
-
-
 def callout(icon: str, body_html: str, cls: str = "") -> str:
     classes = f"callout {cls}".strip()
     return (

@@ -6,7 +6,6 @@ tagline: 손목 힘을 에피소드째 여덟 토큰에, 직전 1 초의 움직�
 stances: [손목 힘을 에피소드 통째로, 직전 1 초의 움직임만, 본 것 전부를 가중치에]
 common: 셋 다 기억의 크기를 이력 길이에서 떼어 낸다
 pillars: P2, P1
-tags: [memory, history, long-context, vla-arch, flow-matching, non-markovian]
 generated: 2026-09-09 13:40
 generator: compare/v1
 summary: >
