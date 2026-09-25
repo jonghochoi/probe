@@ -339,7 +339,10 @@ if (acts) {
     if (toggle) {
       const done = Reads.isDone(id);
       toggle.setAttribute("aria-pressed", done ? "true" : "false");
-      toggle.textContent = done ? "읽음 해제" : "읽음으로 표시";
+      // A glyph button: which way it goes is its name, not its text.
+      const name = done ? "읽음 해제" : "읽음으로 표시";
+      toggle.setAttribute("aria-label", name);
+      toggle.title = name;
     }
   }
 

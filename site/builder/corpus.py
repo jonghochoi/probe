@@ -99,7 +99,7 @@ LINK_KINDS = {
     "code": ("GitHub", 1),
     "weights": ("Weights", 2),
     "data": ("Dataset", 3),
-    "site": ("Website", 4),
+    "site": ("Page", 4),
     "demo": ("Demo", 5),
 }
 

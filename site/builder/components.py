@@ -67,6 +67,8 @@ _ICON_PATHS = {
     # it from `currentColor` on the pressed button, so on and off are the same
     # path and nothing has to swap markup to answer a click.
     "star": f'<path d="{_STAR_D}"/>',
+    # 읽음 — the claim the reader makes, drawn as the mark people make for it.
+    "check": '<path d="M3 8.4 6.4 11.6 13 4.6"/>',
     # The presentation controls. A slide deck's controls are the one place on
     # the site where a label costs more than it carries: every one of them sits
     # on the frame a room is looking at, and 전체 화면 · 노트 · 목록 · 레이저 ·
@@ -507,7 +509,8 @@ def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
 
 
 # One mark per `corpus.LINK_KINDS` kind, drawn on a 20-unit grid at a single
-# stroke weight so the six read as one set. Drawn here rather than picked from
+# stroke weight so the six read as one set — GitHub's mark aside, which is a
+# brand silhouette and keeps its own fill. Drawn here rather than picked from
 # the emoji block: an emoji set is six drawings by six hands — the weights,
 # the saturation and even the perspective disagree — and the reader's device,
 # not this build, decides what each one looks like. These take `currentColor`,
@@ -516,13 +519,27 @@ def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
 SRC_MARKS = {
     "arxiv": '<path d="M5 2.8h6.2L15 6.6V17a.6.6 0 0 1-.6.6H5a.6.6 0 0 1-.6-.6V3.4A.6.6 0'
              ' 0 1 5 2.8Z"/><path d="M11 2.8v4h4M7.2 10.5h5.6M7.2 13.4h5.6"/>',
-    "code": '<path d="m7 6.5-4 3.6 4 3.6M13 6.5l4 3.6-4 3.6M11.4 4.6 8.6 15.6"/>',
+    # GitHub's own mark (Octicons `mark-github`, MIT), drawn on its 16-unit
+    # grid and scaled onto this one. The one filled shape in the set: the
+    # silhouette is what a reader recognises, and outlined it stops being the
+    # mark. It stands for `code` because every code link the corpus declares
+    # is a GitHub repository.
+    "code": ('<path fill="currentColor" stroke="none" transform="translate(1.2 1.2) scale(1.1)" '
+             'd="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 '
+             '0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 '
+             '0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27'
+             '-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 '
+             '1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66'
+             '-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 '
+             '0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/>'),
     "weights": '<path d="M10 2.9 17 6.4v7.2L10 17.1 3 13.6V6.4Z"/>'
                '<path d="M3 6.4 10 10m0 0 7-3.6M10 10v7.1"/>',
     "data": '<ellipse cx="10" cy="5.3" rx="6" ry="2.4"/><path d="M4 5.3v9.4c0 1.3 2.7 2.4 6'
             ' 2.4s6-1.1 6-2.4V5.3M4 10c0 1.3 2.7 2.4 6 2.4s6-1.1 6-2.4"/>',
-    "site": '<circle cx="10" cy="10" r="7.1"/><ellipse cx="10" cy="10" rx="2.9" ry="7.1"/>'
-            '<path d="M3.2 7.6h13.6M3.2 12.4h13.6"/>',
+    # The project's own page — its home, drawn to fill the grid the way the
+    # document and the mark beside it do.
+    "site": '<path d="M2.2 9.4 10 2.6l7.8 6.8"/><path d="M4.4 7.6v9.6h11.2V7.6"/>'
+            '<path d="M8.2 17.2v-4.8h3.6v4.8"/>',
     "demo": '<rect x="2.9" y="4.2" width="14.2" height="11.6" rx="2.2"/>'
             '<path d="m8.6 7.9 4.4 2.4-4.4 2.4Z"/>',
 }

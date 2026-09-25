@@ -499,12 +499,15 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
   background: var(--surface);
 }
 .paper-head-inner { max-width: 1240px; margin: 0 auto; padding: 2rem 1.25rem 0; }
-/* The breadcrumb shares its line with 즐겨찾기 and 읽음, so it takes the space
-   they leave rather than the other way round — an id is recoverable from the
-   address bar, a control that has been pushed off the line is not. */
+/* The breadcrumb shares its line with the rewrite's date, so it takes the
+   space the date leaves — an id is recoverable from the address bar. */
 .crumb-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .6rem; }
 .crumb-row .crumb { flex: 1 1 auto; min-width: 0; margin-bottom: 0; overflow: hidden;
                     text-overflow: ellipsis; white-space: nowrap; }
+.crumb-date {
+  flex: none; font-family: var(--mono); font-size: .7rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
 .crumb { font-size: .78rem; color: var(--text-muted); margin-bottom: .6rem; }
 .crumb a { color: var(--text-muted); text-decoration: none; }
 .crumb a:hover { color: var(--orange-ink); }
@@ -515,9 +518,12 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
   margin-bottom: .55rem;
 }
 .paper-authors {
-  font-size: .84rem; color: var(--text-muted); margin-bottom: .9rem;
+  font-size: .84rem; color: var(--text-muted); margin-bottom: .95rem;
   max-width: 90ch;
 }
+/* Names, then affiliations on their own line and a step quieter. */
+.paper-authors .au-n, .paper-authors .au-a { display: block; }
+.paper-authors .au-a { font-size: .78rem; opacity: .85; margin-top: .1rem; }
 .chip-row { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; margin-bottom: .9rem; }
 
 .chip {
@@ -543,47 +549,40 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 .chip.link:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
-/* The paper's headline number, from front matter `metric`. Also styled in
-   index.css for the landing list — same component, two stylesheets, because
-   the paper page deliberately does not load the landing one. */
-.metric {
-  display: inline-flex; align-items: center;
-  font-family: var(--mono); font-size: .7rem; font-weight: 600;
-  padding: .08rem .42rem; border-radius: var(--radius-pill);
-  background: var(--orange-soft); color: var(--orange-ink);
-  border: 1px solid var(--amber-soft); white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+/* ── The action bar ───────────────────────────────────────────────────── */
+/* The last line of the header, ruled off from the byline so it reads as
+   things to press rather than more facts. Two joined groups — the links out on
+   the left, the 서재 pair on the right — each one bordered box divided into
+   cells, square like every other window on the site. The bar is one line at a
+   phone's width; if a paper ever declares more links than fit, the link group
+   scrolls inside itself rather than wrapping the bar. */
+.actbar {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  border-top: 1px solid var(--border); padding: .75rem 0 .85rem;
 }
-/* ── Resource links ───────────────────────────────────────────────────── */
-/* One group, not one pill each. The `↗` cell says once that everything to its
-   right leaves the site, and the cell walls are drawn with a shadow rather
-   than a border so a group that wraps — six kinds on a phone — does not stand
-   a divider against the box's own left edge. Three or fewer stay a capsule;
-   past that the shape relaxes into a box, since a wrapped pill reads as a
-   broken one. */
-.src-group {
-  display: flex; flex-wrap: wrap; align-items: stretch; max-width: 100%;
-  border: 1px solid var(--border); border-radius: var(--radius);
+html:not(.js) .actbar:not(:has(a)) { display: none; }
+.src-group, .paper-acts {
+  display: flex; border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--surface); overflow: hidden;
-  font-size: .73rem; font-weight: 600;
 }
-.src-group:not(:has(a:nth-child(5))) { border-radius: var(--radius-pill); }
-.src-group .sg-out {
-  display: inline-flex; align-items: center; padding: .2rem .5rem;
-  background: var(--surface-2); color: var(--orange-ink); font-size: .78rem;
-}
-.src-group a {
-  display: inline-flex; align-items: center; gap: .34rem; padding: .2rem .6rem;
-  color: var(--text-muted); text-decoration: none; white-space: nowrap;
-  box-shadow: -1px 0 0 var(--border);
+.src-group { min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.src-group::-webkit-scrollbar { display: none; }
+.src-group a, .act-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .36rem;
+  height: 2.35rem; padding: 0 .7rem; white-space: nowrap;
+  font: inherit; font-size: .8rem; font-weight: 600; color: var(--text);
+  text-decoration: none; background: none; border: 0; cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
               background var(--dur-short) var(--ease-out);
 }
-.src-group a:hover { color: var(--orange-ink); background: var(--orange-soft); }
-/* The group clips its own overflow to keep the rounded ends, so the shared
-   focus ring — painted outside an element — is cut off on the cells at its
-   edges. Here alone the ring turns inward. */
-.src-group a:focus-visible { outline-offset: -2px; }
+.src-group a + a, .act-btn + .act-btn { box-shadow: -1px 0 0 var(--border); }
+.src-group .src-mark { color: var(--text-muted); font-size: 1.1em; }
+.src-group a:hover, .act-btn:hover { color: var(--orange-ink); background: var(--orange-soft); }
+.src-group a:hover .src-mark { color: inherit; }
+/* The group clips its own overflow to keep its corners, so the shared focus
+   ring — painted outside an element — is cut off on its cells. Here alone the
+   ring turns inward. */
+.src-group a:focus-visible, .act-btn:focus-visible { outline-offset: -2px; }
 
 /* The mark set — `components.SRC_MARKS`. Sized in `em` so it tracks whatever
    text it sits beside, and painted with `currentColor` so it never needs a
@@ -607,25 +606,12 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 
 /* ── 서재: the header's two controls ──────────────────────────────────── */
 /* Both controls write to this browser's localStorage and nowhere else, so
-   without a script they are inert and remove themselves. They sit at the end
-   of the breadcrumb line, which is the first line of the header: 즐겨찾기 is
-   reached for before the read, not after it. */
+   without a script they are inert and the pair removes itself. */
 .paper-acts { display: none; }
-html.js .paper-acts {
-  display: inline-flex; align-items: center; gap: .35rem; margin-left: auto;
-}
-.act-btn {
-  font: inherit; font-size: .74rem; font-weight: 600;
-  display: inline-flex; align-items: center; gap: .3rem;
-  padding: .22rem .6rem; border-radius: var(--radius-pill); cursor: pointer;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-muted);
-  transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out),
-              transform var(--dur-short) var(--ease-out);
-}
-.act-btn:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: var(--lift); }
-.act-btn[aria-pressed="true"] { color: var(--orange-ink); border-color: var(--amber-soft); }
+html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
+.act-btn { width: 2.5rem; padding: 0; color: var(--text-muted); }
+.act-btn .ico { width: 16px; height: 16px; }
+.act-btn[aria-pressed="true"] { color: var(--orange-ink); }
 
 
 /* ── Related, under the article ───────────────────────────────────────── */
