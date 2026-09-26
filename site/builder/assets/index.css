@@ -1,6 +1,7 @@
-/* Landing + memo hub. Loaded only by those two pages; every paper page skips
-   it. Tokens all come from site.css, so dark mode needs no work here beyond
-   the two places that need a real surface color instead of a tint. */
+/* The list pages — the landing, 서재, the 비교 and 발표 indexes — and the
+   404 page. Every paper and comparison page skips it. Tokens all come from
+   site.css, so dark mode needs no work here beyond the two places that need a
+   real surface color instead of a tint. */
 
 :root {
   /* The rail's 즐겨찾기 mark. It is the same star `components.icon("star")`
@@ -44,8 +45,8 @@
 }
 /* A title this size needs the room a title this size implies — the band is
    the first screen's only pause, and the list starts right under it. One box
-   for all three bands, whatever width the list under each one reads at: the
-   nav names three destinations at one level, and a band that changed shape
+   for all four bands, whatever width the list under each one reads at: the
+   nav names four destinations at one level, and a band that changed shape
    between them would say they are not. */
 .mast-inner {
   position: relative;

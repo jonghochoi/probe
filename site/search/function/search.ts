@@ -1,6 +1,6 @@
 /* The reading site's search endpoint — one InsForge edge function.
  *
- * POST { q, pillars?, limit? } → { hits: [...], expanded, cached, tookMs }
+ * POST { q, pillars?, limit? } → { q, hits: [...], expanded, pillars, cached, tookMs }
  *
  * It reads the query, embeds it, calls `probe_search` (schema.sql) and returns
  * what came back. It does not summarise, rank with a model, or answer in prose:
@@ -274,7 +274,6 @@ export default async function (req: Request): Promise<Response> {
     uid: r.uid, kind: r.kind, paperId: r.paper_id,
     title: r.title, context: r.context, path: r.path, anchor: r.anchor,
     pillars: r.pillars, date: r.chunk_date,
-    // Enough to recognise the passage, not enough to replace opening it.
     snippet: excerpt(String(r.body ?? ""), String(r.title ?? "")),
     similarity: r.similarity, score: r.score,
   }));

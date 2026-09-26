@@ -45,7 +45,7 @@ pairing, §4-8 bold-before-particle) are out of scope — review catches those.
 
 SCOPE. Each rule binds reports dated on or after the day the rule takes
 effect: `_CONTRACT_EFFECTIVE` for the metadata, emoji, label and table rules,
-`_GATE_EFFECTIVE` for the gate arithmetic added with them. Earlier reports are
+`_GATE_EFFECTIVE` for the gate arithmetic. Earlier reports are
 the record of runs that happened under the contract of their day; they are
 evidence, not drafts, so the lint skips them rather than inviting a rewrite of
 history.
@@ -71,8 +71,8 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Reports dated before this are out of scope (see SCOPE in the docstring).
 _CONTRACT_EFFECTIVE = "2026-08-18"
 
-# The gate-arithmetic checks bind from here — the first scheduled run under the
-# revision that added them.
+# The gate-arithmetic checks bind from here — the first scheduled run their
+# rules apply to.
 _GATE_EFFECTIVE = "2026-08-24"
 
 _SCANNED_MAX_CHARS = 400
@@ -100,7 +100,7 @@ _GATE_DIMENSIONS = ("Relevance", "Novelty", "Methodology", "Sim2Real")
 _PAPER_SECTIONS = ("🥇", "🥈", "🥉", "🌱")
 
 # Any pictographic character, so an `###` header is flagged for carrying an
-# emoji the canonical `##` set does not even contain (AUTHORING §2-2).
+# emoji the canonical `##` set does not even contain (AUTHORING §2-3).
 _EMOJI = re.compile(
     "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U00002B00-\U00002BFF\U0001F000-\U0001F2FF️]"
 )
@@ -202,7 +202,7 @@ def _check_sections(lines: list[str], findings: list[tuple[int, str]]) -> None:
 
         if line.startswith("###"):
             if _EMOJI.search(line):
-                findings.append((lineno, "emoji belongs on `##` headers only, not `###` (AUTHORING §2-2)"))
+                findings.append((lineno, "emoji belongs on `##` headers only, not `###` (AUTHORING §2-3)"))
             continue
 
         if not line.startswith("## "):

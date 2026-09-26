@@ -11,8 +11,9 @@ from . import corpus, presentations, glance as glance_mod
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer
 
-# Pages serves a project site under /<repo>/. Only 404.html uses this; every
-# other page is depth-relative and needs no knowledge of where it is hosted.
+# Pages serves a project site under /<repo>/. 404.html and `build-site.py
+# serve` use this; every other page is depth-relative and needs no knowledge
+# of where it is hosted.
 SITE_BASE = f"/{c.REPO.split('/')[1]}/"
 BLOB = f"{c.REPO_URL}/blob/main"
 DISCUSSIONS_NEW = f"{c.REPO_URL}/discussions/new?category=paper-notes"
@@ -58,14 +59,10 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     what the chips beside it are keyed to.
 
     **Two kinds, one payload.** `comparisons` sits beside `papers` because the
-    palette is the only way to reach a document from a page that is not a list,
-    and a comparison the palette cannot find is a comparison reachable only
-    from a paper it already names — which is the one place a reader who wants
-    it is least likely to be. The two arrays stay separate rather than merging
-    under a `kind` field: they are keyed differently (an arXiv id against a
-    slug), they land at different depths, and 서재 reads only the first —
-    shelf records are kept per arXiv id, so a comparison has nothing there to
-    look up.
+    palette is the only way to reach a comparison from a page that does not
+    name it. The arrays stay separate rather than merging under a `kind`
+    field: they are keyed differently (an arXiv id against a slug), they land
+    at different depths, and 서재 reads only the first.
 
     A comparison carries the ids it compares, so typing an arXiv id finds both
     the paper and the comparisons that hold it.
@@ -215,12 +212,9 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     `data-order`, so the script's 최신순 reproduces this list rather than a
     near-miss of it.
 
-    How large the corpus is and how fresh it is are stated once, in the filter
-    bar: the count there is the live one — it answers 몇 편 after a filter as
-    well as before — so a second, fixed count in the masthead would be the same
-    number twice on one screen, and only one of them would ever move. The
-    masthead carries the same pair for the reader whose page is unscripted and
-    who therefore has no filter bar; `index.css` hides it once a script runs.
+    The corpus's size and freshness are stated in the filter bar, whose count
+    is the live one; the masthead carries the same pair only for an unscripted
+    page, and `index.css` hides it once a script runs.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     cmp_counts = Counter(pid for x in (comps or []) for pid in x.paper_ids)
@@ -716,7 +710,8 @@ def not_found_page() -> str:
 # worth the long read, and that is the question the short surface answers. `en`
 # is printed beside the Korean label because the tab strip is also how a
 # contributor finds the rule set: 요약 is `analysis/AUTHORING.md` §4, 상세 is
-# §1–§3, and 비교 is a different contract altogether.
+# §1–§3, 비교 is `comparison/AUTHORING.md` and 발표 is
+# `presentation/AUTHORING.md`.
 #
 # 비교 and 발표 are not further readings of this paper and their labels do not
 # pretend to be: BRIEF and FULL say how much of the paper a surface carries,
@@ -964,49 +959,28 @@ def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
 def _presentation_panel(presentation) -> str:
     """발표 — the paper retold as a talk, one slide at a time.
 
-    The tab is a screen, not a scroll. Every slide is in the document and only
-    the one being read is on: a talk is a sequence, and a reader who has to
-    scroll past twelve frames to reach the turn is reading the deck as a
-    document rather than watching it argue. So the frame holds still, ← and →
-    move it, and the deck under it says where in the talk this is — the same
-    reading a room gets, without anyone having to start the talk to see it.
+    The tab is a screen, not a scroll: every slide is in the document and only
+    the one being read is on, ← and → move it, and the deck under the frame
+    says where in the talk this is. A talk is a sequence, and scrolling past
+    twelve frames to reach the turn reads it as a document instead.
 
-    The speaker essay goes with the slide it belongs to rather than under it:
-    the slide is what the room looks at and the essay is what the presenter
-    says over it, and the two are never on screen at the same moment. 노트 is
-    what asks for it — inline under the frame while the tab is being read, and
-    the second window once the talk is on a stage, because those are the same
-    request answered by whichever surface the presenter is standing on.
+    The speaker essay sits under the slide it belongs to, and while the tab is
+    browsed it stays hidden until 노트 asks for it — inline under the frame
+    while the tab is being read, and the second window once the talk is on a
+    stage, because those are the same request answered by whichever surface
+    the presenter is standing on.
 
-    The frame stands off the page rather than sitting on it, and every control
-    it has stands on one band above it — the arrows at the left end, 노트 and
-    전체 화면 at the right, moving on one side and acting on the other. Beside
-    the frame the arrows would take a sixth of a phone's width and a column of
-    a laptop's from the one element here that cannot spare either; on the band
-    they take a strip that was half empty. They are glyphs there for the same
-    reason the stage's three are: a word beside a slide is a word competing
-    with the sentence on it.
-
-    `.prs-tools` is a grid item of the presentation at the slide's own area, so
-    the band is ruled to the frame and not to the panel — and the stage, which
-    takes the presentation over and drops everything that is not a slide, drops
-    it without being told. It carries no `hidden`: the band is drawn under
+    Every control stands on one band above the frame (`.prs-tools`) rather
+    than beside it, where it would take width from the one element that cannot
+    spare any. The band carries no `hidden`: it is drawn under
     `data-browsing`, which only `presentation.js` sets, so a browser with no
-    script never meets a 전체 화면 button that cannot present. What it keeps is
-    every slide with its essay under it, which is the talk read as a document.
-
-    The bar is the stage's alone — 목록, 레이저, the zoom readout and the way
-    out, none of which mean anything off the stage. It sits outside
-    `.prs-presentation`, because presenting takes that element over, but inside
-    `.prs-stage`, which is what goes fullscreen, so the presenter reaches those
-    controls without leaving the talk to do it.
-
-    The deck is a grid item too, which is what rules it to the frame's own
-    width rather than to the panel's.
+    script never meets a 전체 화면 button that cannot present — it gets every
+    slide with its essay under it. The stage bar (목록, 레이저, zoom, exit)
+    sits outside `.prs-presentation`, which presenting takes over, but inside
+    `.prs-stage`, which is what goes fullscreen.
     """
     if presentation is None:
         return ""
-    n = len(presentation.slides)
     return f"""<div class="panel wide" id="p-presentation" role="tabpanel"
      aria-labelledby="t-presentation" hidden>
   <div class="prs-stage" data-pres-stage>

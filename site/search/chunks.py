@@ -184,7 +184,7 @@ def from_rewrite(paper, toc: list[dict]) -> list[Chunk]:
     add("paper", paper.title, "요약", _glance_text(paper.glance))
 
     # The toc is in document order, so walking it carries the act a section
-    # sits under down onto the section's own chunk: "3. 무엇이 증명되었나" is
+    # sits under down onto the section's own chunk: "정말 되는가" is
     # most of what tells a reader whether a hit is a claim or its evidence.
     bodies = _sections(paper.article or paper.body)
     act = ""

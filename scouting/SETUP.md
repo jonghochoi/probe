@@ -1,7 +1,7 @@
-# Agent Setup Guide
+# Scouting Routine Setup
 
 Deploying the scheduled scouting routine — a cloud session that commits its
-own reports straight to `main`. On-demand `/analyze` needs none of this and
+own reports straight to `main`. The on-demand commands need none of this and
 runs from any Claude Code session.
 
 | | Scheduled scouting routine |
@@ -69,7 +69,7 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
 
 | Form field | Value |
 |---|---|
-| Name | `probe-weekly-scout` |
+| Name | `probe-scout-P1` |
 | Prompt (Instructions) | The full body of `.claude/prompts/scouting.txt`, every `<PILLAR>` replaced by `P1`. Model → **Sonnet** |
 | Repositories | This repo |
 | Environment | The one from §2 |
@@ -81,8 +81,10 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
   on the shared branch. The prompt keeps a `git pull --rebase` retry as a
   backstop.
 - The form has no `context_files` field and needs none — the prompt names its
-  own inputs (`context/P1.md` §1–§5, the last 2 weeks of `scouting/`), the
-  `curl` procedure, the scoring contract and the guards.
+  own inputs (the pillar file in full, recent `scouting/P1/` reports,
+  `analysis/` names — see its SOURCES), the
+  `curl` procedure, the venue and budget tables it scores with, and the
+  guards; the rubric itself is `scouting/AUTHORING.md` §5.
 - A pillar-scoped run never reads `context/MASTER.md`, so the two tables it
   would need from there — Venue Priority and the monthly Cross-pollination
   Budget — are inlined in the prompt's SCORING section. Keep them in sync with
@@ -117,8 +119,9 @@ gates fired, and that the environment is sound:
       error. One there means the Custom allowlist is missing.
 - [ ] The Anti-topics filter fired. An empty "did not pass filter" section is
       suspicious.
-- [ ] Decision implications are concrete — a specific config key,
-      hyperparameter or metric, not "tune DR wider".
+- [ ] Implications are concrete — (c) names a specific cost, number or
+      transfer caveat in plain terms, and 💡 `### Decision Log` names the
+      decision and the evidence that moved it, not "tune DR wider".
 
 If anything fails, fix `.claude/prompts/scouting.txt` (or `context/P1.md`),
 **re-paste the corrected body into every routine** (§3-1) and re-run — do not

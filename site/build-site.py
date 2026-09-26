@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Build the PROBE reading site.
 
-Renders every `analysis/<id>.md` into a static page tree under `--out`.
+Renders every `analysis/<id>.md`, `comparison/<slug>.md` and
+`presentation/<id>.md` into a static page tree under `--out`, and beside the
+pages what an agent reads instead — `corpus.json`, `llms.txt`, and per-paper
+`sections.json` with one Markdown file per section.
 Build-time dependencies only — the published site ships no runtime Python, no
 CDN request, and (with the default `--katex=server`) no math JavaScript.
 
@@ -9,6 +12,8 @@ CDN request, and (with the default `--katex=server`) no math JavaScript.
     python3 site/build-site.py --only 2607.06559     # one rewrite
     python3 site/build-site.py --serve               # build + preview
     python3 site/build-site.py --check               # lint, write nothing
+    python3 site/build-site.py --check --strict      # lint, fail on any warning
+    python3 site/build-site.py --index chunks.jsonl  # search index, no pages
 
 Requires `pip install -r site/requirements.txt`, plus Node with
 `npm install --no-save --prefix site/builder katex@0.16.22` for

@@ -17,7 +17,7 @@ Two kinds of reference are checked:
 
 Precision over recall (deliberate, mirroring the repo's other gates): tokens
 carrying placeholder or glob syntax are SKIPPED, not flagged, so the documented
-patterns `context/P{1..4}.md`, `scouting/<PILLAR>/YYYY-MM-DD.md`,
+patterns `context/P{0..4}.md`, `scouting/<PILLAR>/YYYY-MM-DD.md`,
 `.claude/prompts/**`, `…/x1.png`, `arxiv.org/abs/...`, `cat:cs.RO`, shell
 snippets, etc. do not produce false positives. Fenced code blocks (``` ... ```)
 are skipped entirely. A token with no known file extension (a bare directory
@@ -31,16 +31,10 @@ habit of citing root-relative paths in prose).
 Usage (repo root):
     python3 linters/check-doc-links.py [PATH ...]
 
-No PATH -> scan the default doc set: the structural index docs `CLAUDE.md`
-(its Repository-map table), `README.md` and `scouting/SETUP.md`, where every
-path
-reference is meant to point at a real file, plus every per-folder rule file
-(`<dir>/CLAUDE.md`) and the `context/` files (MASTER + every pillar) the
-scheduled routine reads every run. The agent-output specs
-(`scouting/AUTHORING.md`, `analysis/AUTHORING.md`) and the prompts are out of the
-default set — they are full of *illustrative* example paths (example arXiv ids,
-`<id>` placeholders) by design — but can be scanned explicitly by passing them
-as PATH args.
+No PATH -> scan the default doc set (`_DEFAULT_ROOT_DOCS` and the globs
+beside it). The four `AUTHORING.md` contracts and the prompts are out of it —
+they carry illustrative example paths by design — but can be scanned by
+passing them as PATH args.
 
 Exit codes: 0 = clean / 1 = unresolved references found / 2 = nothing to scan.
 """
@@ -73,17 +67,13 @@ _PLACEHOLDER_SEGMENTS = re.compile(r"YYYY|XXXX")
 _MD_LINK = re.compile(r"\[(?:[^\]]*)\]\(([^)]+)\)")
 _BACKTICK = re.compile(r"`([^`]+)`")
 
-# Default scan set: the structural index docs whose path references are meant to
-# point at real files, plus the human-owned context files the scheduled routine
-# reads every run (their `scouting/AUTHORING.md`-style pointers must resolve).
-# The output specs (`scouting/AUTHORING.md`, `analysis/AUTHORING.md`) and the
-# prompts are intentionally excluded (they carry illustrative example paths)
-# but can be passed explicitly as PATH args.
-#
-# The pillar files and the per-folder rule files are globbed, not listed, so
-# adding a pillar or a new `<dir>/CLAUDE.md` needs no edit here —
-# `context/_TEMPLATE.md` is skipped because it is a skeleton of placeholders,
-# not a doc whose paths resolve.
+# Default scan set: the structural index docs whose path references are meant
+# to point at real files — `CLAUDE.md`, `README.md`, `scouting/SETUP.md` —
+# every per-folder `<dir>/CLAUDE.md`, and the `context/` files the scheduled
+# routine reads every run. The pillar files and the per-folder rule files are
+# globbed, not listed, so adding a pillar or a new `<dir>/CLAUDE.md` needs no
+# edit here; `context/_TEMPLATE.md` is skipped because it is a skeleton of
+# placeholders, not a doc whose paths resolve.
 _DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",

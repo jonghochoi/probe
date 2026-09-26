@@ -62,16 +62,17 @@ decides.
 | `comparison/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one file per comparison |
 | `presentation/` | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-presentation-dark.svg"><img src="assets/probe-presentation.svg" width="22" align="absmiddle" alt="agent"></picture> | on demand | overwrite — one talk per paper |
 
-One folder the agent only reads, four it only adds to — that split is what
+One folder the agent only reads, four it writes — that split is what
 stops it re-recommending last month's papers as `context/` grows.
 
 **Pillars.** The context split is what keeps one run narrow.
 
-- `context/MASTER.md` — cross-cutting content only. Every run reads it.
+- `context/MASTER.md` — cross-cutting content only. The on-demand commands
+  read it; a scouting run does not.
 - `context/P#.md` — one pillar's decision log, tracked literature and
   anti-topics. A scouting run reads **exactly one**.
 
-Pillar names are in [`context/MASTER.md`](context/MASTER.md) §5.
+Pillar names are in [`context/MASTER.md`](context/MASTER.md) §4.
 
 ---
 

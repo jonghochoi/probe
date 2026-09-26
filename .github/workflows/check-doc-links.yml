@@ -1,10 +1,9 @@
 name: Check doc links
 
 # Verify that local path references in the structural index docs resolve, on
-# every PR that touches those docs, the prompts, or the linter itself. This
-# automates the manual "run a final grep / zero inbound links = orphan" step of
-# the CLAUDE.md "When adding a new doc" checklist, catching a dangling
-# path reference (a moved/renamed file, an orphaned doc) before it lands on main.
+# every PR that touches those docs or the linter itself — the dangling-path
+# half of the CLAUDE.md "When adding a new doc" checklist. What it scans and
+# skips is `linters/check-doc-links.py`'s docstring.
 #
 # Lint-only, no auto-fix: repairing a broken path reference means deciding
 # where the file went, which only a human knows.

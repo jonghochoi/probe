@@ -1,7 +1,7 @@
 """Copy the static assets into the output tree.
 
 KaTeX is vendored rather than pulled from a CDN: the published site must have
-zero third-party requests (the one exception, giscus, is click-to-load). The
+zero third-party requests. The
 woff/ttf duplicates are dropped and the CSS rewritten to woff2-only, which
 takes the font payload from 1.2 MB to ~296 KB with no visual difference on any
 browser from the last decade.
@@ -25,13 +25,11 @@ _KATEX_DIST = _HERE / "node_modules" / "katex" / "dist"
 #
 # The terminator is `[;}]`, and that bracket is the whole rule. `src:` is the
 # LAST declaration in each of KaTeX's minified @font-face blocks, so it ends at
-# the closing brace with no semicolon: a `[^;]+;` pattern ran straight through
-# `}@font-face{…` and stopped at the next block's first semicolon, swallowing
-# the boundary. Every substitution ate one block, 20 @font-face rules collapsed
-# into 1, and `.katex{font:1.21em KaTeX_Main…}` — the first rule after them —
-# went with it. The site published every formula in the body sans-serif with no
-# KaTeX face loaded at all, which looks close enough to right that it survived
-# review; `_check_intact` below is why it cannot happen again silently.
+# the closing brace with no semicolon. A `[^;]+;` pattern runs straight through
+# `}@font-face{…` to the next block's first semicolon: every substitution eats
+# one block, and `.katex{font:1.21em KaTeX_Main…}` — the first rule after them —
+# goes with it, so every formula publishes in the body font. That looks close
+# enough to right to survive review, which is why `_check_intact` checks it.
 _SRC_BLOCK = re.compile(r"src:([^;}]+)([;}])")
 _WOFF2 = re.compile(r"url\(([^)]*\.woff2)\)\s*format\(([\"'])woff2\2\)")
 
@@ -64,7 +62,7 @@ def _check_intact(before: str, after: str) -> list[str]:
 ASSET_FILES = ("site.css", "index.css", "presentation.css", "theme.js", "brand.js",
                "nav.js", "paper.js", "presentation.js", "memo.js", "shelf.js",
                "match.js", "palette.js", "filter.js", "hub.js")
-# The icons `components.head()` links. Shipped and hashed like everything else
+# The icons `components.icon_links()` links. Shipped and hashed like everything else
 # but never scanned for characters: they carry no text the page renders, and
 # two of them are bytes that cannot be decoded as any. `favicon.svg` is the
 # tab icon; the PNGs are what a client that will not take an SVG icon falls

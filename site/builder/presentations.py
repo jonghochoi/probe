@@ -1,26 +1,9 @@
 """Discover the presentations the site publishes, and draw their slides.
 
-A presentation is one paper retold as a talk — `presentation/<arxiv-id>.md`, written by `/present`
-the way `analysis/<id>.md` is written by `/analyze`. It is a track of its own
-because a talk is not a shorter rewrite: it argues in a sequence, it carries a
-speaker essay under every slide, and its unit is a frame rather than a section.
-
-Two constraints shape everything here, and both come from
-`presentation/AUTHORING.md`:
-
-    **only a paper that already has a rewrite may have a presentation**, and
-    **every slide declares its act and its type.**
-
-The first is the same discipline `comparison/` runs on: a slide compresses, and
-what it compresses away has to be one link off. Without the rewrite there is
-nowhere to send the listener who wants the detail, so the presentation would have to
-carry it and stop being a presentation.
-
-The second is what keeps a presentation from becoming a table of contents. The act
-(起承轉結) is the beat the slide serves; the type is its shape, and the shape
-decides the composition — one grid stretched over every slide is what leaves
-holes. Both live in the source rather than in the author's head, which is what
-makes them checkable.
+A presentation is one paper retold as a talk — `presentation/<arxiv-id>.md`,
+written by `/present`. Only a paper with a rewrite in `analysis/` may have one,
+and every slide declares its act (起承轉結) and its type; the type decides the
+composition. The contract is `presentation/AUTHORING.md`.
 
 Discovery and drawing sit in one module for the same reason `glance.py` does:
 the surface is small, its rules are its layout, and splitting them would put a
@@ -43,9 +26,8 @@ ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 SOURCE_RE = re.compile(r"^(\d{4}\.\d{4,5})v(\d+)$")
 HEAD_RE = re.compile(r"^\[(\S+) · (\w+)\]\s*(.+)$")
 
-# The four beats, with the word each one is doing on a slide. A presentation whose
-# slides all sit in one act is a table of contents, which is what the paper
-# already is — so the labels are printed, not just validated.
+# The four beats, with the word each one is doing on a slide. The labels are
+# printed, not just validated: the beat is what the room reads the slide as.
 ACTS = {"起": "상황", "承": "막다른 길", "轉": "전환", "結": "결과"}
 ACT_ORDER = {a: i + 1 for i, a in enumerate(ACTS)}
 
@@ -253,7 +235,7 @@ def parse_slides(body: str) -> tuple[list[Slide], list[str]]:
         if need and need not in data:
             problems.append(f"{where}: a {kind} slide needs ```probe-{need}")
             continue
-        problems += _check_registers(where, data)
+        problems += _check_frame(where, data)
 
         bullets = [l[2:].strip() for l in rest.split("\n") if l.startswith("- ")]
         claim = " ".join(l.strip() for l in rest.split("\n")
@@ -271,18 +253,13 @@ def _cut(fence: str, rest: str) -> tuple[str | None, str]:
     return m.group(1), rest.replace(m.group(0), "")
 
 
-def _check_registers(where: str, data: dict) -> list[str]:
-    """The two-register rule (`presentation/AUTHORING.md` §2), where it is structural.
+def _check_frame(where: str, data: dict) -> list[str]:
+    """The fences a slide carries, where their shape is checkable at build time.
 
-    A claim with nothing under it is a bullet; a claim with the number or the
-    source that makes it checkable is evidence. The build can only see the
-    *shape* — whether the second register exists — so that is what it checks,
-    and a genuinely absent one is left alone: the paper does not always supply
-    it, and an invented `n` is worse than a bare line.
-
-    What it will not accept is a created figure with no `why`. That one is not
-    a matter of what the paper supplied: a drawn figure has to say which of the
-    paper's own figures covers the ground and what this one strips out.
+    A `probe-figure` needs `url`, `caption` and `source`, a `probe-diagram`
+    needs its `why` (`presentation/AUTHORING.md` §4), and `probe-facts` is a
+    list of at most `FACTS_MAX` cells. The two-register floor on panel items is
+    `linters/check-presentation-format.py`'s, not the build's.
     """
     problems = []
     fig = data.get("figure")
@@ -675,12 +652,14 @@ def _lineage(l: dict) -> str:
 
 
 def _script(text: str, of: str) -> str:
-    """The speaker essay, under the slide it belongs to.
+    """The speaker essay, right after the slide it belongs to.
 
-    Under rather than beside: the slide is what the room looks at and the essay
-    is what the presenter reads, and the two are never on screen together. It
-    carries no fact the slide does not show — a number worth saying is in the
-    ribbon or in an item's second register, and the essay points at it.
+    Without a script every essay sits under its slide, which is the talk read
+    as a document. While the tab is browsed it stays hidden until 노트 asks for
+    it — inline under the frame, or in the presenter's second window once the
+    talk is on a stage. It carries no fact the slide does not show — a number
+    worth saying is in the ribbon or in an item's second register, and the
+    essay points at it.
 
     `data-for` names the slide, so the surfaces that show one essay at a time —
     the notes toggle and the presenter's window — ask for the essay *of this

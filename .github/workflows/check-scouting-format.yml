@@ -10,9 +10,9 @@ name: Check scouting format
 # never see a scouting report at all, so this workflow fires on BOTH events:
 #
 #   push (main)     — the path scouting reports actually take. Post-hoc, so it
-#                     reports rather than blocks; the blocking gate is the
-#                     pre-commit self-check the routine runs itself
-#                     (.claude/prompts/scouting.txt → SELF-CHECK).
+#                     reports rather than blocks; the blocking gate is this
+#                     same linter, run by the routine before it commits
+#                     (.claude/prompts/scouting.txt → step 7, LINT).
 #   pull_request    — a human editing reports, the linter, or the contract.
 #
 # Lint-only, no auto-fix: every violation is a judgement the agent (or a human)

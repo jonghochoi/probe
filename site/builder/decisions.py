@@ -62,9 +62,9 @@ def retired_decisions() -> set[str]:
 
     A retired code is never re-issued and still appears in rewrites written
     before it retired, so a reader of `corpus.json` meets it with no entry in
-    any pillar's Decision Log. Only the current `D<digit><two letters>` form is
-    returned; the numeric forms predate the scheme and no rewrite's regex
-    matches them.
+    any pillar's Decision Log. Only the `D<digit><two capitals>` form is
+    returned: it is the only form the site's citation regex matches, so a
+    numeric id on the line has nothing here to resolve.
     """
     text = (REPO_ROOT / "context" / "MASTER.md").read_text(encoding="utf-8")
     m = _RETIRED_LINE.search(text)

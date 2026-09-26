@@ -48,12 +48,29 @@ holds, and the ones already here stay true.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
-under `assets/shelf.js`, and the landing page size — a view setting rather than
+under `assets/shelf.js` and `assets/memo.js`, and the landing page size — a view setting rather than
 a mark on a paper — under `probe.view.v1`. Both marks are set by the reader and
 never inferred: neither opening a page nor scrolling to its end is evidence it
 was read. This binds the drawings too — `components.shelf_art()` draws the four
 kinds without drawing how full any of them is, because a picture that implies a
 count leaks the same fact as markup that prints one.
+
+**The article frame is the stylesheet's.** What `analysis/AUTHORING.md` R12
+and R13 forbid an author to write, `builder/assets/site.css` keeps:
+
+- A 3px left accent band means "aside" — the 요약 block, the five callouts, a
+  term panel, a quiz — and every such card squares off on that edge
+  (`border-radius: 0 var(--radius) var(--radius) 0`), since a rounded band
+  reads as a different component. A card inside a multi-card grid
+  (`probe-split`) is keyed by its heading color, never a band.
+- Every component owns its internal spacing; body paragraph and list margins
+  apply only to the article flow, a callout body and a `::: details` body.
+- A `###` section keeps its `id` (contents, scroll-spy and memo anchor resolve
+  against it) but prints no `#` anchor glyph — `builder/render.py` never emits
+  one, so the stylesheet has none to hide.
+- Never `display:block` on an inline tag: `.X b{display:block}` catches body
+  emphasis and breaks the line at every `<b>`. Titles get their own class, or
+  a `>` child combinator.
 
 **A browser with no script loses only the extras.** Every control removes
 itself rather than sitting inert, and the landing list falls back to one page.
@@ -63,7 +80,7 @@ filter box and the ⌘K palette ask their question with; two surfaces answering
 the same query differently is a bug, not two behaviours.
 
 **`components.mark()` has copies in `assets/`.** The README's lockup, state
-icons, track icons, tagline and flow diagram redraw it with their animation
+icons, track icons and flow diagram redraw it with their animation
 inlined (`assets/CLAUDE.md`). Change the mark here and bring those into step.
 
 **Two modules serve the prompt, not the build.** `builder/arxiv.py` extracts an
@@ -98,21 +115,24 @@ keep a third-party import out of module scope. `query.py search` is the one
 subcommand that touches the network, and it points at `catalog --match` when
 the endpoint cannot be reached.
 
-**The pillar set is hard-coded in three places here** — `PILLAR_NAMES` with
-the Korean `PILLAR_LABELS` beside it in `builder/corpus.py` (the build refuses
-to start when the two name different pillars), `PILLARS` in
-`search/function/search.ts`, and the `--p<n>` tokens with their `[data-p]`
-rules in `builder/assets/site.css` and `index.css`. Adding a pillar walks the
-checklist in `context/CLAUDE.md`.
+**The pillar set is hard-coded, not read.** `PILLAR_NAMES` and `PILLAR_LABELS`
+in `builder/corpus.py` (the build refuses to start when the two disagree),
+`PILLARS` in `search/function/search.ts` and the `--p<n>` tokens in the CSS each
+carry it. Adding a pillar walks the checklist in `context/CLAUDE.md`.
 
 ## Before pushing
 
 ```bash
-python3 site/build-site.py --check --strict --out /tmp/probe-check
+python3 site/build-site.py --check --strict
+python3 site/build-site.py --strict --out /tmp/probe-check
 ```
 
-A comparison's fence and length rules are checked while the page renders, so
-`--out` is what makes them run. Touching `search/function/`, also:
+`--check` stops after discovery and writes nothing: it reports front matter,
+the 요약 fences, a comparison's sources and fork, every presentation check and
+the `corpus.json` budget. The rewrite body rules in `render.py`, a comparison's
+fence and length rules, KaTeX warnings, the corpus-index budget and the asset
+pipeline run only while pages render, so the second command — the full build —
+is the one that sees them. Touching `search/function/`, also:
 
 ```bash
 npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null

@@ -34,8 +34,8 @@ ACTS = 4
 
 _FENCE = re.compile(r"^```(probe-[a-z]+)[ \t]*\n(.*?)^```[ \t]*$", re.M | re.S)
 _SPACE = re.compile(r"\s")
-# `D2DV` but not the `D` in `3D`: a word boundary already excludes a digit
-# before it, and a `#` after guards the HTML entities the renderer emits.
+# `D2DV` but not the `D` in `3D`: no letter, digit or `_` may stand on either
+# side, so a decision id inside a longer token is not one.
 _DREF = re.compile(r"(?<![A-Za-z0-9_])D\d[A-Z]{2}(?![A-Za-z0-9])")
 _CONTEXT = re.compile(r"\bcontext/[A-Za-z0-9_]+\.md")
 _LISTY = re.compile(r"^\s*(?:[-*+•]\s|\d+[.)]\s|#{1,6}\s|>\s)")

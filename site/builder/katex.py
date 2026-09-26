@@ -1,10 +1,10 @@
 """Server-side KaTeX rendering, batched and content-cached.
 
-The corpus carries ~7.5k inline math occurrences across ~4k distinct formulas.
-Two consequences drive this design:
+The corpus carries thousands of inline math occurrences across thousands of
+distinct formulas. Two consequences drive this design:
 
   1. **Never spawn a process per formula.** At ~40 ms of spawn overhead that is
-     five minutes of pure fork, which is a CI non-starter. Rendering is
+     minutes of pure fork, which is a CI non-starter. Rendering is
      deferred: the Markdown renderers emit `<!--K:hash-->` placeholders,
      `flush()` renders every cache-missing formula in ONE `node` call, and
      `splice()` substitutes the results into the finished HTML.

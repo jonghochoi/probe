@@ -4,8 +4,7 @@
 // stdout: {"html": {"<hash>": "<span class=\"katex\">…"}, "warnings": [...]}
 //
 // `throwOnError: false` renders a broken macro red-and-visible instead of
-// aborting the build — docs/style.md §5-4 wants render failures to stay
-// visible. Every failure is still reported on `warnings` so `--strict` can
+// aborting the build, so a render failure stays visible. Every failure is still reported on `warnings` so `--strict` can
 // fail the build on a *new* one.
 
 import { readFileSync } from "node:fs";

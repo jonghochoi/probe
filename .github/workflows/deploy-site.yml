@@ -1,6 +1,7 @@
 name: Deploy site
 
-# Build the reading site from analysis/ and publish it to GitHub Pages.
+# Build the reading site from analysis/, comparison/ and presentation/ and
+# publish it to GitHub Pages.
 #
 # The generated HTML is NOT committed — a page-per-rewrite bot commit on every
 # merge would bury the history this repo is read through. The artifact is built

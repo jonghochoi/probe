@@ -4,16 +4,17 @@
  * own type scale, and letting the article's rules reach into it would put body
  * measure on a surface read from across a room.
  *
- * The layout rules that matter are three, and they are the ones
- * `presentation/AUTHORING.md` §3 states:
+ * A slide reads thin when its content stops short of the frame, and larger
+ * type is never the fix — the layout fills the frame instead. The rules that
+ * matter are three:
  *
  *   1. the container stretches, then distributes its items — a card that hugs
  *      its content leaves the slack outside it, where nothing can use it;
  *   2. that distribution is capped — three short items spread over a full
  *      card manufacture cavities rather than filling them, so the gap has a
  *      maximum and whatever is left splits evenly above and below;
- *   3. every slide closes on the evidence ribbon, and the panel types are not
- *      exempt.
+ *   3. every slide closes on the evidence ribbon (`presentation/AUTHORING.md`
+ *      §3-2), and the panel types are not exempt.
  */
 
 .prs-presentation { display: grid; gap: 26px; }
@@ -70,8 +71,8 @@
    hook above it — everywhere else that order is reversed, and it is reversed
    here because a title slide's job is to put the one sentence the talk lands
    in front of the room before the talk starts.
-   Centred rather than pushed to the edges: §3-2, the slack halved above and
-   below instead of pooled in the middle. */
+   Centred rather than pushed to the edges: the slack is halved above and
+   below instead of pooled in one place. */
 .prs-cover .prs-body { align-content: center; gap: clamp(16px, 3.4cqw, 40px); padding-bottom: 14px; }
 .prs-cover h3 {
   font-size: clamp(10px, 1.35cqw, calc(15px * var(--prs-cap)));

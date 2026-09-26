@@ -6,26 +6,28 @@ the act and type header, the fence a type is drawn from. This lint is the other
 half: the authoring rules, the ones a presentation can break while still rendering
 perfectly. A slide dump publishes cleanly; it just is not a talk.
 
-The six it checks, each naming the section it comes from:
+The seven it checks, each naming the section it comes from:
 
-  SPINE     (§1)  two acts at least, and the turn among them. A presentation whose
-                  slides all sit in one act is a table of contents, which is
-                  what the paper already is.
-  REGISTER  (§2)  panel items carry a second layer — the number or source that
-                  makes the claim checkable. Not demanded item by item: the
-                  paper does not always supply one, and an invented `n` is
-                  worse than a bare line. What is demanded is that most of them
-                  do, because a presentation where none does was written before the
-                  rule.
-  CLOSE     (§3)  every panel column closes on `foot`, and every slide but the
-                  cover closes on the evidence ribbon.
-  DRAWN     (§4)  a created figure states `why` — which of the paper's own
-                  figures covers this ground, and what this one leaves out.
-  SPEAK     (§6)  every slide carries its speaker essay. A slide with none is
-                  a slide nobody worked out how to present.
-  SOURCE    (§0)  no `context/` material. A `D#` is a claim about our own
-                  decisions, which is the one thing on a slide a listener
-                  cannot check against the paper.
+  SPINE     (§1-1)  two acts at least, and the turn among them. A
+                    presentation whose slides all sit in one act is a table
+                    of contents, which is what the paper already is.
+  REGISTER  (§2)    panel items carry a second layer — the number or source
+                    that makes the claim checkable. Not demanded item by
+                    item: the paper does not always supply one, and an
+                    invented `n` is worse than a bare line. What is demanded
+                    is that most of them do, because a presentation where
+                    none does is a list of bullets.
+  MATH      (§2)    no KaTeX. A slide is read from across a room, so its
+                    symbols are literal text.
+  CLOSE     (§3)    every panel column closes on `foot`, and every slide but
+                    the cover closes on the evidence ribbon.
+  DRAWN     (§4-2)  a created figure states `why` — which of the paper's own
+                    figures covers this ground, and what this one leaves out.
+  SPEAK     (§6)    every slide carries its speaker essay. A slide with none
+                    is a slide nobody worked out how to present.
+  SOURCE    (§1-3)  no `context/` material. A `D#` is a claim about our own
+                    decisions, which is the one thing on a slide a listener
+                    cannot check against the paper.
 
 It re-parses the source rather than importing `site/builder/presentations.py`, for the
 same reason `check-decision-refs.py` re-parses the Decision Log: this has to run
@@ -93,7 +95,7 @@ def check_file(path: str) -> list[tuple[int, str]]:
     found: list[tuple[int, str]] = []
     slides = _slides(text)
     if not slides:
-        return [(1, "SPINE (§1): no slides — a presentation is `## [<act> · <type>] <title>` "
+        return [(1, "SPINE (§1-1): no slides — a presentation is `## [<act> · <type>] <title>` "
                     "and the fences under it")]
 
     acts = {s[1] for s in slides}
@@ -102,10 +104,10 @@ def check_file(path: str) -> list[tuple[int, str]]:
     for line, act, kind, title, chunk in slides:
         where = f"slide '{title}'"
         if act not in _ACTS:
-            found.append((line, f"SPINE (§1): {where} declares act {act!r} — "
+            found.append((line, f"SPINE (§1-1): {where} declares act {act!r} — "
                                 f"one of {' '.join(_ACTS)}"))
         if kind not in _TYPES:
-            found.append((line, f"SPINE (§1): {where} declares type {kind!r} — "
+            found.append((line, f"SPINE (§1-1): {where} declares type {kind!r} — "
                                 f"one of {' '.join(_TYPES)}"))
         fences = _fences(chunk)
 
@@ -114,18 +116,18 @@ def check_file(path: str) -> list[tuple[int, str]]:
 
         hits = sorted(set(_DREF.findall(whole)))
         if hits:
-            found.append((line, f"SOURCE (§0): {where} cites {', '.join(hits)} — "
+            found.append((line, f"SOURCE (§1-3): {where} cites {', '.join(hits)} — "
                                 f"`context/` is not a source for this track. That "
                                 f"argument belongs to the rewrite's act 4, which "
                                 f"is one link away"))
 
         if _MATH.search(whole):
-            found.append((line, f"§2: {where} carries KaTeX math — a slide is read "
+            found.append((line, f"MATH (§2): {where} carries KaTeX math — a slide is read "
                                 f"from across a room, so its symbols are written "
                                 f"as literal text (d₀, W₀, tanh(α))"))
 
         if "facts" not in fences and kind != "cover":
-            found.append((line, f"CLOSE (§3-4): {where} has no ```probe-facts — "
+            found.append((line, f"CLOSE (§3-2): {where} has no ```probe-facts — "
                                 f"every slide closes on the evidence ribbon, and "
                                 f"the panel types are not exempt"))
         if "script" not in fences:
@@ -156,7 +158,7 @@ def check_file(path: str) -> list[tuple[int, str]]:
                 if not isinstance(col, dict):
                     continue
                 if not str(col.get("foot", "")).strip():
-                    found.append((line, f"CLOSE (§3-3): {where}, column {key!r} has "
+                    found.append((line, f"CLOSE (§3-1): {where}, column {key!r} has "
                                         f"no `foot` — the column closes on its own "
                                         f"one-line conclusion, which is what holds "
                                         f"the bottom edge"))

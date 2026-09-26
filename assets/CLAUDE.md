@@ -17,9 +17,8 @@ their `<style>` block.
 | `claim.svg` | The middle of the front door's three lines, set in the accent |
 | `reading-site.svg` | The reading-site banner |
 | `probe-lost.svg`, `probe-locked.svg` | The two state icons heading the Why-PROBE comparison columns — out of it (dimmed hull, drooping beacon, crossed-out eyes) and on target (clay hull, a beacon under signal arcs, smiling eyes) |
-| `human.svg` | The author bust standing for the human in the *Written by* column of the Who-owns-what table |
+| `human.svg` | The author bust standing for the human in the *Written by* column of the folder table under How it works |
 | `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg` | The four track icons filling the agent's cells in that same column |
-| `tagline.svg` (880×88) | The tagline banner closing Why PROBE |
 | `flow.svg` (880×348) | The How-it-works flow diagram — `context/` dropping into the run, the day's arXiv narrowing through the filter into the mark, and out to the scouting card and the on-demand card |
 | `build-flow.py` | Generates both flow files from one set of coordinates |
 
@@ -42,19 +41,19 @@ README embeds it with, so the line still reads where the image does not.
 drawn as a funnel, an act as a wire.
 
 **Every card sits on the same ground, and the accent draws the edge a reader
-meets first.** The three cards the README embeds — `reading-site.svg`,
-`tagline.svg` and `flow.svg` — share one fill (`#FFFCFA` light, `#211C19` dark)
+meets first.** The two cards the README embeds — `reading-site.svg`
+and `flow.svg` — share one fill (`#FFFCFA` light, `#211C19` dark)
 and one outline, the accent (`#D97757`, `#E8916F`) that the reading-site card's
 own arrow already carries. A card tinted toward the accent reads as a different
 kind of object rather than a louder one, so the ground never carries the
 emphasis — the edge does. What the edge marks is depth rather than affordance: a
 card standing on the README's own page takes the accent, and a card drawn inside
-one of those images does not, so three outlines read as one set of panels rather
-than three unrelated boxes. Every card inside `flow.svg` keeps the neutral
+one of those images does not, so the outlines read as one set of panels rather
+than unrelated boxes. Every card inside `flow.svg` keeps the neutral
 `#E8CDBD` / `#3D3129`, where a border is a card's boundary and says nothing
 else; the paler `WASH` is the funnel's, not a card's.
 
-**A mark cell is the mark alone.** In the Who-owns-what table the word a cell
+**A mark cell is the mark alone.** In the folder table under How it works the word a cell
 stands for rides in the image's `alt`, so the column still reads where the
 images do not.
 
@@ -70,9 +69,18 @@ lines lit and the eyes turned to it), and `probe-presentation.svg` presents (a s
 standing behind, up and to the right so the character is beside it rather than
 under it, its bands lighting one after another as a talk advances, and one
 listener in front on the left — cut by the bottom edge, the way a front row
-is).
+is). The moving pages are what tell the weighing apart from the read, since the
+pupils and the lit lines do the same thing in both.
 
-Two things about that icon are worth stating, because both are departures.
+**The lockup reads too, and the mug is what sets it apart.** It holds the same
+page with the same lit lines as `probe-analysis.svg`; what separates the two is
+the mug and the doze the lockup ends in. The coffee belongs to the front door
+alone, where the invitation is to take the read at a coffee's pace. A track icon
+shows its track working; only the front door is allowed to lose the fight with
+the paper, so neither the mug nor the doze follows the character into a table
+cell.
+
+`probe-presentation.svg` departs from the other three track icons in two ways.
 
 **Its outline is what does the work.** At the 22 px a table cell gives these,
 the only thing that survives is the **shape below the face** — one page for the
@@ -87,29 +95,17 @@ makes this one legible beside `probe-analysis.svg` in a column.
 than an exception: reading and weighing are things one character does alone,
 and presenting is not. The listener is `human.svg` scaled — the same head
 radius over the same semicircle torso — rather than a new shape, so the room
-this track speaks to is the same human `human.svg` stands for in the
-Who-owns-what table. It breathes on that file's own cycle, and only the character bobs: a
-screen that moved with the presenter would read as held rather than stood in
-front of, which is the one thing this icon is not saying. The moving pages are what tell the
-weighing apart from the read at the size a table cell gives them, since the
-pupils and the lit lines do the same thing in both. The lockup reads too — the
-same page, the same lit lines — and what separates it from `probe-analysis.svg`
-is the mug and what the front door does with it: the coffee belongs there alone,
-where the invitation is to take the read at a coffee's pace, and so does the
-doze it ends in — closed lids, the snore bubble and the `z`s. A track icon shows
-its track working; only the front door is allowed to lose the fight with the
-paper. Neither the mug nor the doze follows the character into a table cell.
+this track speaks to is the same human `human.svg` stands for in the folder
+table under How it works. It breathes on that file's own cycle, and only the
+character bobs: a screen that moved with the presenter would read as held
+rather than stood in front of, which is the one thing this icon is not saying.
 
-**Marking is done by the gaze, never by a prop.** In `tagline.svg` the sentence
-sits beside a field of the day's papers where three take a crosshair in turn, so
-the picture performs the marking the words claim; the smile swaps to a pair of
-reticles while the three land and returns once they are all up. A handless probe
-holds nothing — a prop is placed, not gripped: the page rides under the eyes and
-the mug stands on the ground beside the hull, outside the bob that lifts the
-character off it.
+**A prop is placed, never gripped.** A handless probe holds nothing: the page
+rides under the eyes and the mug stands on the ground beside the hull, outside
+the bob that lifts the character off it.
 
 **Animation is inlined and stays in step with the site.** The lockup, the two
-state icons, the three track icons, the tagline banner and the flow diagram
+state icons, the four track icons and the flow diagram
 redraw `site/builder/components.py`'s `mark()` with their animation inlined,
 since a README image carries no external stylesheet. The lockup runs the full
 cycle — bob, and a mood swap between reading and dozing off: pupils down and
@@ -118,10 +114,10 @@ bubble at the nose and three `z`s drifting off the hull. The blink lives in the
 same 14 s cycle, keyed to the reading half, so nothing squashes an eye that is
 already shut, and the mug steams outside it — the coffee goes cold at the same
 rate whether the reader is awake or not. Signal arcs belong to the images that
-hail (`probe-scouting.svg`, `probe-locked.svg`, the banner) and not to the front
+hail (`probe-scouting.svg`, `probe-locked.svg`) and not to the front
 door, which shows one thing: the read. A beacon hailing over a sleeping reader
 reads as an alarm going off. Every icon holds one mood instead: the state pair
-fixed, the track trio moving through the one thing its own track does. Change
+fixed, the four track icons each moving through the one thing its own track does. Change
 `mark()` and these change with it, second mood apart: the site smiles, the
 lockup dozes.
 
@@ -134,24 +130,39 @@ arrowheads and keyframes pointing at it. Edit the script, never the SVG.
 
 Its right column is two shapes, one per cadence — the scheduled card and the
 on-demand card — and both are built by one `card()`: a header naming the
-cadence, then the paths that share it. A fourth track is a fourth path; a
-fifth cadence is what would earn a third card. Nothing is ruled between the
+cadence, then the paths that share it. A new track is one more path; a
+third cadence is what would earn a third card. Nothing is ruled between the
 paths, because a divider inside an output card groups or ranks, and the only
 thing these share is the cadence already named above them. The `context/`
 card is the one that keeps a divider, and there it separates two documents a
-run reads for different reasons.
+run reads for different reasons. That divider, the drop wire and the mark
+share one vertical axis, so the read is "both documents feed one run".
 
-That card is also the palest thing in the drawing. It is the one card the
-agent may not write, and reading as a quieter ground than the outputs is how
-the picture says so before any label does — which is also why the two output
-cards clear it by more than the gap between their own edges. They overlap it
-horizontally, so a thin gap would read as one stack of three boxes rather
-than an input and two outputs.
+The `context/` card takes the same ground and the same border as the outputs,
+and is marked instead by a hairline ruled just inside that border. It is the
+one card the agent may not write, and a document held in a matte frame is how
+the picture says so before any label does. The hairline is a frame on the
+card, not a second box: it never encloses a file of its own, so rectangles
+stay files. The two output cards clear the `context/` card by more than the
+gap between their own edges. They overlap it horizontally, so a thin gap would
+read as one stack of three boxes rather than an input and two outputs.
 
 The drawing ends at those two cards. It runs arXiv to files and stops: what a
 reader does with a report is a decision rather than a file, and a wire drawn
 back into `context/` would end the agent's own arrow at the one folder the
 agent may not write.
+
+Every wire is one drawing: the same accent, the same march, and the same gap
+off whatever it leaves. A wire says a hand-off happened, never whose hand —
+that is the cards' to say. Drawn weaker than its neighbours, a wire reads as a
+weaker hand-off rather than a different owner.
+
+The picking cycle earns every state it shows, in this order: a uniform field,
+a scan band that marks six as it passes their column, six dispatched toward
+the filter, three culled inside it — each stays a circle, turns from the
+accent to the muted ink and fades out as it drifts to a halt — three landed in
+the kept column. Nothing is marked before the scan reaches it and nothing sits
+at its destination before it travels.
 
 A path on a card is set in two registers, because it is two things. The folder
 is the track a reader is scanning for, and the rest is a filename pattern; set

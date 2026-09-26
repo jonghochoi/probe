@@ -39,34 +39,34 @@ belongs in that folder's own rule file or README, which the row points at.
 | Path | Owner | Role |
 |---|---|---|
 | `README.md` | human | Project front door — motivation, the pipeline, and which track to trigger for what |
-| `context/MASTER.md` | human | Global anchor — cross-cutting content only: Identity, Purpose, Long-term Context, Hardware, Pillars overview (P0–P4), Venue, Cross-pollination |
+| `context/MASTER.md` | human | Global anchor — cross-cutting content only (what it owns: `context/CLAUDE.md`) |
 | `context/P{0..4}.md` | human | Per-pillar **owners** of the Decision Log, Tracked Literature and Anti-topics, on the `_TEMPLATE.md` skeleton. A run reads one `P#.md` |
 | `context/_TEMPLATE.md` | human | The skeleton a new pillar is copied from — the source of truth for the pillar section spine |
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format and its pillar allocation, the "adding a new pillar" checklist |
 | `scouting/` | agent | Scouting Reports (`P#/YYYY-MM-DD.md`, per pillar, on a scheduled cadence). `scouting/templates/report.md` is the skeleton they fill |
-| `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — emoji system, the Reference Legend and its pillar palette (§3-1), link rules, Korean authoring principles |
-| `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. Scouting only; `/analyze` and `/compare` need no routine setup |
-| `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat), from `/analyze`: a Korean re-telling written from the paper's **arXiv HTML original**, carrying its own front matter. One file publishes as **two tabs** — a one-screen 요약 (`::: glance`, where a reader lands) and the body — both written in the same run from the same reading |
+| `scouting/AUTHORING.md` | human | Format contract for the `scouting/` track — the section table (§2-1), the Reference Legend and its pillar palette (§3-1), Korean authoring principles (§4), the scoring rubric (§5), enforcement (§8) |
+| `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine — RemoteTrigger form, network allowlist, `SEMANTIC_SCHOLAR_API_KEY`, first-run verification. The on-demand commands need no setup |
+| `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper (flat), from `/analyze`: a Korean re-telling written from the paper's **arXiv HTML original**. One file publishes as two tabs — the one-screen 요약 (`::: glance`) and the body |
 | `analysis/AUTHORING.md` | human | Format contract for `analysis/<id>.md` — front matter (§1), body rules R1–R15 (§2), what publishes as literal text including the KaTeX math forms (§3), the 요약 tab G1–G7 (§4), enforcement (§5) |
 | `comparison/` | agent | Comparisons — one `<slug>.md` per comparison, holding two or three papers under one question; the slug is the question, never the ids joined together. **Only papers with a rewrite in `analysis/` may be compared** |
 | `comparison/AUTHORING.md` | human | Format contract for `comparison/<slug>.md` — the one rule and its consequences (§1), front matter, the four-act spine, the fence allow-list and the length ceiling (§2), `probe-matrix` (§3), enforcement (§4) |
-| `presentation/` | agent | Presentations — one `<arxiv-id>.md` per paper, from `/present`: that paper as a talk, every slide carrying its act (起承轉結), its type and a speaker essay. **Only a paper with a rewrite in `analysis/` may have a presentation**, for the same reason a comparison needs one — a slide compresses, and the rewrite is where the detail it drops stays reachable |
-| `presentation/AUTHORING.md` | human | Format contract for `presentation/<arxiv-id>.md` — the spine (§1), the two-register rule (§2), filling the frame (§3), created figures and when not to draw one (§4), the authored line break (§5), the speaker essay (§6), enforcement (§7) |
-| `.claude/prompts/**` | human | Externalized, durable agent prompts (the repo's real asset) — `scouting.txt` (the scheduled routine, one instance per pillar via the `<PILLAR>` token), `analyze.txt`, `compare.txt` and `present.txt`, plus `ideate.txt`, which writes nothing and answers in the chat through `site/query.py`. Each owns a **procedure** — which papers, where the facts come from, how to verify, how to commit — and delegates every format rule to its track's `AUTHORING.md`; a rule restated in a prompt is a second source of truth that drifts the next time the contract moves |
-| `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, `compare.md`, `present.md` and `ideate.md`, which only point their command at its prompt and, for a track that writes a file, at its `AUTHORING.md` |
-| `assets/` | human | The images the root `README.md` embeds — the brand lockup that opens it, the accent rule and claim line under it, the state and track icons, the tagline banner and the generated flow diagram — each a light/dark SVG pair, plus `build-flow.py` |
+| `presentation/` | agent | Presentations — one `<arxiv-id>.md` per paper, from `/present`: that paper as a talk, every slide carrying its act (起承轉結), its type and a speaker essay. **Only a paper with a rewrite in `analysis/` may have a presentation** |
+| `presentation/AUTHORING.md` | human | Format contract for `presentation/<arxiv-id>.md` — the spine and the fence schemas (§1), the two-register rule (§2), filling the frame (§3), created figures and when not to draw one (§4), the authored line break (§5), the speaker essay (§6), enforcement (§7) |
+| `.claude/prompts/**` | human | Durable agent prompts (the repo's real asset) — `scouting.txt` (one routine instance per pillar via `<PILLAR>`), `analyze.txt`, `compare.txt`, `present.txt`, and `ideate.txt`, which writes nothing. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` — a rule restated in a prompt is a second source of truth |
+| `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, `compare.md`, `present.md`, `ideate.md` — each points its command at its prompt and, for a track that writes a file, at its `AUTHORING.md` |
+| `assets/` | human | The images the root `README.md` embeds — each a light/dark SVG pair — plus `build-flow.py`, which generates the flow diagram |
 | `assets/CLAUDE.md` | human | Rules for `assets/` — what each image is, the drawing and animation rules, the generated flow diagram |
-| `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/`, `comparison/` and `presentation/` and nothing else — as pages, and for agents as `llms.txt`, `corpus.json` and per-section Markdown. Folder map: `site/README.md` |
-| `site/query.py` | human | The agent's query CLI over a checkout, standard library only — the same records a full build publishes as `corpus.json` beside `llms.txt`: related papers by each relation kind, a rewrite's outline and sections, Decision-Log lookups, paper pairs no comparison covers yet, and `search` through the deployed semantic endpoint |
+| `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/`, `comparison/` and `presentation/` as pages and, for agents, as `llms.txt`, `corpus.json` and per-section Markdown. Folder map: `site/README.md` |
+| `site/query.py` | human | The agent's query CLI over a checkout, standard library only — the `corpus.json` records, relations, outlines and sections, Decision-Log lookups, uncompared pairs, and `search` through the deployed endpoint |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break, and the surfaces keyed to the pillar set |
-| `site/search/` | human | Semantic search over the rewrites — chunker, InsForge schema, indexer, the public endpoint and the operator's `verify.py`. `comparison/` is published but not chunked. Enhancement only: a build without `--search-api` emits no script. Folder map: `site/search/README.md` |
+| `site/search/` | human | Semantic search over the rewrites — chunker, InsForge schema, indexer, the public endpoint and the operator's `verify.py`. Folder map: `site/search/README.md` |
 | `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
 | `linters/check-decision-refs.py` | human | Verifies every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` / `comparison/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
-| `linters/check-presentation-format.py` | human | Validates `presentation/<arxiv-id>.md` against the `presentation/AUTHORING.md` contract — the act spine and its turn (§1), the second-register floor on panel items (§2), the closing line and the evidence ribbon (§3), `why` on a drawn figure (§4), a speaker essay per slide (§6). It is the half of the contract the build cannot reach: every rule here is one a presentation can break while rendering perfectly |
-| `linters/check-context-consistency.py` | human | Verifies `context/` keeps the shape its own documents promise — the section spine `context/_TEMPLATE.md` defines in every pillar file (SPINE), the decision counts `context/MASTER.md` §4 states against the pillar files (COUNT), every section a document claims MASTER owns against MASTER's real headings (SECTION), and pillar-count prose and `P0–P4` range tokens against the pillar set (PILLARSET). Every check reads back a promise `context/_TEMPLATE.md` or `context/MASTER.md` already makes, so a finding is a drift rather than a new demand — and it is the human's to resolve, since `context/` is read-only to the agent |
-| `linters/check-scouting-format.py` | human | Validates `scouting/P#/YYYY-MM-DD.md` against the `scouting/AUTHORING.md` contract — metadata block, emoji system and section order, the scoring contract (§5) and one-paper-per-row tables (§7-3). Binds reports dated on or after its `_CONTRACT_EFFECTIVE`. Scouting reports reach `main` without a PR, so the **blocking** gate is the routine's own pre-commit self-check (`.claude/prompts/scouting.txt` → SELF-CHECK) and CI is the backstop |
+| `linters/check-presentation-format.py` | human | Validates `presentation/<arxiv-id>.md` against the `presentation/AUTHORING.md` rules the build cannot reach — the ones a presentation can break while rendering perfectly |
+| `linters/check-context-consistency.py` | human | Verifies `context/` keeps the shape `context/_TEMPLATE.md` and `context/MASTER.md` promise — SPINE, COUNT, SECTION, PILLARSET. A finding is a drift, and the human's to resolve |
+| `linters/check-scouting-format.py` | human | Validates `scouting/P#/YYYY-MM-DD.md` against `scouting/AUTHORING.md`, for reports dated on or after its `_CONTRACT_EFFECTIVE`. Reports reach `main` without a PR, so the blocking gate is the routine's own LINT step and CI is the backstop |
 | `linters/check-commit-style.py` | human | Validates commit subjects / PR titles against the "Commit message style" grammar below. Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `.github/workflows/` | human | Eight gates. Every lint above runs PR-time (`check-commit-style` reads the **PR title**, since squash-merge makes it the landing subject); `check-scouting-format` also fires on `push` to `main`, the path scouting reports actually take. `check-search-function` parses `site/search/function/search.ts`, which no build reads. `deploy-site.yml` runs `site/query.py` with no site-packages, builds the site on every PR touching `analysis/`, `comparison/`, `presentation/` or `site/` and deploys to Pages only from `main`, where it also refreshes the semantic index when the InsForge secrets exist |
+| `.github/workflows/` | human | Eight workflows — every lint above on PRs (`check-commit-style` reads the **PR title**, the squash-merge subject), `check-scouting-format` also on `push` to `main`, `check-search-function` over `search.ts`, and `deploy-site.yml`: PR build, Pages deploy and semantic re-index from `main` |
 
 ## Commit message style
 
@@ -94,9 +94,9 @@ Hard rules:
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types.
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
-   `site`, `scouting`, `analysis`, `comparison`, `context`, `prompts`,
-   `linters`, `ci` (`.github/workflows/`), `config`. `comparison` and `presentation`
-   cover each track's contract and its documents; the build code that
+   `site`, `scouting`, `analysis`, `comparison`, `presentation`, `context`,
+   `prompts`, `assets`, `linters`, `ci` (`.github/workflows/`), `config`. A
+   track's scope covers its contract and its documents; the build code that
    publishes them is `site`. Omit the scope for repo-wide changes — a docs pass across several
    tracks is `docs: …`, never `docs(docs): …`.
 4. **Description** — lowercase first letter (after the colon), no trailing
@@ -139,7 +139,7 @@ analysis: add <arxiv-id> rewrite (<alias>)
 present: add <arxiv-id> talk (<alias>)
 ```
 
-`update` replaces `add` when redoing an existing rewrite or comparison. The
+`update` replaces `add` when redoing an existing rewrite, comparison or talk. The
 trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
 resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that resolves to no
 alias there carries none here either, and the subject ends at `rewrite`.
@@ -173,16 +173,17 @@ one logical area or needs context to be reviewable. When present:
 
 ## Local checks
 
-CI runs each of these on the PR. Run the ones your change touches before
+CI runs each of these on the PR except `build-flow.py --check`. Run the ones your change touches before
 pushing, so a red gate is not the first you hear of it.
 
 | Change touches | Command |
 |---|---|
 | any doc in the index set | `python3 linters/check-doc-links.py` |
 | `analysis/`, `scouting/`, `comparison/`, `context/` | `python3 linters/check-decision-refs.py` |
-| `context/` | `python3 linters/check-context-consistency.py` |
+| `context/` or any `CLAUDE.md`, `README.md`, `scouting/SETUP.md` | `python3 linters/check-context-consistency.py` |
+| `scouting/` | `python3 linters/check-scouting-format.py` |
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `analysis/`, `comparison/`, `presentation/` or `site/` | `python3 site/build-site.py --check --strict` (a comparison's fence and length rules and every slide's composition are checked while the page renders, so add `--out /tmp/probe-check`) |
+| `analysis/`, `comparison/`, `presentation/` or `site/` | `python3 site/build-site.py --check --strict` for what discovery reads — front matter, the 요약 fences, a comparison's sources and fork, every presentation check — then `python3 site/build-site.py --strict --out /tmp/probe-check`, the full render, for the rewrite body rules, a comparison's fence and length rules and KaTeX (`--check` stops before any page renders) |
 | `presentation/` | `python3 linters/check-presentation-format.py` |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` hides site-packages, so it proves the standard library suffices) |
 | `assets/build-flow.py` | `python3 assets/build-flow.py --check` |
