@@ -56,7 +56,7 @@ kinds without drawing how full any of them is, because a picture that implies a
 count leaks the same fact as markup that prints one.
 
 **The article frame is the stylesheet's.** What `analysis/AUTHORING.md` R12
-and R13 forbid an author to write, `builder/assets/site.css` keeps:
+forbids an author to write, `builder/assets/site.css` keeps:
 
 - A 3px left accent band means "aside" — the 요약 block, the five callouts, a
   term panel, a quiz — and every such card squares off on that edge

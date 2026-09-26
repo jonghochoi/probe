@@ -631,6 +631,24 @@ class DocRenderer:
                 f"move the closing marker off the parenthesis"
             )
 
+    def _check_raw_html(self, out: str) -> None:
+        """A tag written into the source, published as its own text (R13).
+
+        The parser runs with `html=False`, so `<br>` in a table cell or a
+        `<b>` in prose is escaped and prints as the literal characters. Code and
+        KaTeX's TeX annotation are exempt — both quote markup on purpose — and
+        only the layout tags an author reaches for count, since `<SEG>` or
+        `<object>` in prose is a token or a placeholder the text names.
+        """
+        prose = re.sub(r"<(code|pre|annotation)\b[^>]*>.*?</\1>", "", out, flags=re.S)
+        found = _RAW_TAG.search(prose)
+        if found:
+            tag = html.unescape(found.group(0))
+            self.problems.append(
+                f"raw HTML published as literal text: {tag[:40]!r} — the source takes "
+                "no HTML; break a table cell with ` / `, emphasise with `**` (R13)"
+            )
+
     def _check_leaked_math(self, source: str, out: str) -> None:
         """Math notation that reached the page as literal text.
 
@@ -717,6 +735,7 @@ class DocRenderer:
         """
         self._check_stray_emphasis(out)
         self._check_leaked_math(source, out)
+        self._check_raw_html(out)
 
     def render(self, source: str) -> str:
         self.toc = []
@@ -733,8 +752,16 @@ class DocRenderer:
         self._check()
         self._check_stray_emphasis(self.lead_html + out)
         self._check_leaked_math(source, self.lead_html + out)
+        self._check_raw_html(self.lead_html + out)
         return out
 
+
+# The layout tags an author reaches for, as the escaped text `html=False` leaves
+# of them (R13).
+_RAW_TAG = re.compile(
+    r"&lt;/?(?:br|b|i|u|em|strong|span|div|p|sub|sup|font|small|mark|hr|img|a"
+    r"|details|summary|center)(?:\s[^&]*)?/?&gt;"
+)
 
 # Code is exempt from the leaked-math scan: a document *about* the trap quotes
 # the broken forms on purpose, and `$` is ordinary shell syntax.

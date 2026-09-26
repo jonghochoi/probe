@@ -528,10 +528,13 @@ without exactly one correct option.
   divider's bar and each component's title band. Write the content; the page
   frames it. A `###` keeps an `id` but prints no `#` link, so refer to another
   section in plain words where that reads better than a `#id` link.
-- **R13. Never force layout from the source.** Emphasis is `**…**` and nothing
-  more; a line break or a block is the stylesheet's to draw. A layout need is
-  a class in `site/builder/assets/`, which keeps the inline-tag invariant in
-  `site/CLAUDE.md`.
+- **R13. No raw HTML.** The parser runs with `html=False`, so a tag in the
+  source — `<br>` in a table cell, `<b>` in prose — prints as its own
+  characters. Emphasis is `**…**`; a table cell that needs two parts takes
+  ` / ` or a parenthesis (`Pull Tissue (Grasp / Place)`); anything larger is a
+  component. A token or placeholder the paper itself spells in angle brackets
+  (`<SEG>`, `<object>`) is text and stays. The build reports the layout tags
+  (§5).
 - **R14. A `**` run cannot close between a closing paren and a Korean
   particle** — see §3-2.
 
@@ -569,7 +572,7 @@ restoration floor is not reachable without it. Typically it holds:
 The failures below are not parse errors. The source is valid Markdown and the
 sentence still reads correctly in the file — the page just prints the notation
 instead of rendering it. The build reports each one; this section says what to
-write so it does not have to.
+write so it does not have to. Raw HTML fails the same way (R13).
 
 ### 3-1. Math: three accepted forms, and nothing else
 
@@ -805,7 +808,7 @@ means "a strict build fails".
 |---|---|
 | Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title, `alias:` and `metric:` within their widths (§1), `appendix:` present (R15), the `::: glance` container present (§4) | `site/builder/corpus.py` |
 | `figures:` ↔ every `probe-figure`, `probe-hub` and `probe-act` figure id across both surfaces, and every 요약 figure id declared by a body `probe-figure` (R6, G6) | `site/builder/corpus.py` |
-| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
+| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), raw HTML published as text (R13), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split (at most one `us`), parts (all-or-none `state`, four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
