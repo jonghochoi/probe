@@ -1,0 +1,258 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="458" viewBox="0 0 880 458" role="img" aria-label="PROBE's tracks as tiles — scouting, analysis, comparison, presentation, ideation — the human-owned context, and the three questions every paper is asked">
+  <style>
+    .hull   { fill: #D97757; }
+    .iris   { fill: #FFFAF7; }
+    .pupil  { fill: #2A1A12; }
+    .lids   { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .stalk  { stroke: #CC785C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #CC785C; }
+    .page   { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; }
+    .line   { fill: #B06749; opacity: .3; }
+    .wave   { fill: none; stroke: #CC785C; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+    .shadow { fill: #CC785C; opacity: .45; }
+    .dim    { fill: #C4B6AE; }
+    .dimst  { stroke: #B3A49B; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .dimbe  { fill: #B3A49B; }
+    .cross  { fill: none; stroke: #6B5A50; stroke-width: 3.2; stroke-linecap: round; }
+    .mug    { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; stroke-linejoin: round; }
+    .handle { fill: none; stroke: #B06749; stroke-width: 2.4; stroke-linecap: round; }
+    .brew   { fill: #B06749; }
+    .steam  { fill: none; stroke: #CC785C; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
+    .z      { fill: #B06749; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; font-weight: 700; }
+    .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .lid    { transform-box: fill-box; transform-origin: 50% 50%;
+              animation: blink 7s ease-in-out infinite; }
+    .readp  { animation: read 3.6s ease-in-out infinite; }
+    .sweepp { animation: sweep 3.2s ease-in-out infinite; }
+    .w1     { animation: ping 2.6s ease-in-out infinite; }
+    .w2     { animation: ping 2.6s ease-in-out .34s infinite; }
+    .l1     { animation: lit 4.8s ease-in-out infinite; }
+    .l2     { animation: lit 4.8s ease-in-out 1.6s infinite; }
+    .l3     { animation: lit 4.8s ease-in-out 3.2s infinite; }
+    .s1     { animation: steam 3.8s ease-in-out infinite; }
+    .s2     { animation: steam 3.8s ease-in-out 1.9s infinite; }
+    .z1     { animation: rise 2.8s ease-in-out infinite; }
+    .z2     { animation: rise 2.8s ease-in-out .5s infinite; }
+    .z3     { animation: rise 2.8s ease-in-out 1s infinite; }
+    .drift  { transform-box: fill-box; transform-origin: 50% 100%;
+              animation: drift 4.6s ease-in-out infinite; }
+    @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
+    @keyframes read  { 0% { transform: translateX(-2.4px); } 72% { transform: translateX(2.4px); }
+                       86%, 100% { transform: translateX(-2.4px); } }
+    @keyframes sweep { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
+    @keyframes ping  { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
+    @keyframes lit   { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
+    @keyframes steam { 0% { opacity: 0; transform: translateY(2px); } 30%, 55% { opacity: .7; }
+                       100% { opacity: 0; transform: translateY(-6px); } }
+    @keyframes rise  { 0% { opacity: 0; transform: translate(0, 4px); } 30%, 70% { opacity: 1; }
+                       100% { opacity: 0; transform: translate(4px, -8px); } }
+    @keyframes drift { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+    .tile  { fill: #FFFCFA; stroke: #E8CDBD; stroke-width: 1.2; }
+    .hot   { fill: #D97757; }
+    .eb    { fill: #B06749; font: 10.5px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 2px; }
+    .ti    { fill: #1F1611; font: 700 19px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; letter-spacing: -.3px; }
+    .tis   { fill: #1F1611; font: 700 16px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .sb    { fill: #7A6A60; font: 13px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .path  { fill: #1F1611; font: 700 12px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .note  { fill: #7A6A60; font: 12px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .ebh   { fill: #FFFAF7; opacity: .8; font: 10.5px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 2px; }
+    .q     { fill: #FFFAF7; font: 700 15.5px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .dot   { fill: #E8CDBD; }
+    .keep  { fill: #E8CDBD; animation: keep 6s ease-in-out infinite; }
+    .k2    { animation-delay: .9s; }
+    .k3    { animation-delay: 1.8s; }
+    .scanb { fill: #D97757; opacity: .08; animation: scanx 6s ease-in-out infinite; }
+    .lock  { fill: none; stroke: #B06749; stroke-width: 2.4; stroke-linecap: round; }
+    .lockb { fill: #B06749; }
+    .doc   { fill: #FFFAF7; stroke: #E8CDBD; stroke-width: 1.5; }
+    .frame { fill: none; stroke: #E8CDBD; stroke-width: 1; }
+    .dl    { fill: #7A6A60; opacity: .3; }
+    .qm    { transform-box: fill-box; transform-origin: 50% 50%; animation: qpop 4.5s ease-in-out infinite; }
+    .q2    { animation-delay: .5s; }
+    .q3    { animation-delay: 1s; }
+    @keyframes keep  { 0%, 25% { fill: #E8CDBD; } 35%, 85% { fill: #D97757; } 100% { fill: #E8CDBD; } }
+    @keyframes scanx { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(210px); } }
+    @keyframes qpop  { 0%, 10% { opacity: .35; } 20%, 80% { opacity: 1; } 100% { opacity: .35; } }
+
+    .name { fill: #1F1611; font: 700 15px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .cmd  { fill: #B06749; font: 12px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .when { fill: #7A6A60; font: 10px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 1.4px; }
+    .pg   { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; }
+    .up   { animation: pan 3s ease-in-out infinite; }
+    .dn   { animation: pan 3s ease-in-out 1.5s infinite; }
+    .scr  { fill: #FFFCFA; stroke: #E8CDBD; stroke-width: 2; }
+    .band { fill: #D97757; opacity: .25; }
+    .bd1  { animation: lit 3.6s ease-in-out infinite; }
+    .bd2  { animation: lit 3.6s ease-in-out 1.2s infinite; }
+    .bd3  { animation: lit 3.6s ease-in-out 2.4s infinite; }
+    .bub  { fill: #FFFAF7; stroke: #B06749; stroke-width: 1.6; }
+    .bdot { fill: #B06749; opacity: .2; }
+    .t1   { animation: think 2.4s ease-in-out infinite; }
+    .t2   { animation: think 2.4s ease-in-out .3s infinite; }
+    .t3   { animation: think 2.4s ease-in-out .6s infinite; }
+    .sep  { stroke: #F2DFD3; stroke-width: 1.5; }
+    @keyframes pan   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes think { 0%, 100% { opacity: .2; } 40% { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+<rect class="tile" x="0.6" y="0.6" width="430.8" height="298.8" rx="14"/>
+  <text class="eb" x="26" y="38">SCOUTING · SCHEDULED</text>
+  <text class="ti" x="26" y="66">The day's arXiv, narrowed to 3–5</text>
+  <text class="sb" x="26" y="88">one pillar per run, scored against your open decisions</text>
+  <circle class="dot" cx="178" cy="130" r="5"/>
+  <circle class="dot" cx="178" cy="156" r="5"/>
+  <circle class="dot" cx="178" cy="182" r="5"/>
+  <circle class="dot" cx="178" cy="208" r="5"/>
+  <circle class="dot" cx="178" cy="234" r="5"/>
+  <circle class="dot" cx="204" cy="130" r="5"/>
+  <circle class="keep" cx="204" cy="156" r="5"/>
+  <circle class="dot" cx="204" cy="182" r="5"/>
+  <circle class="dot" cx="204" cy="208" r="5"/>
+  <circle class="dot" cx="204" cy="234" r="5"/>
+  <circle class="dot" cx="230" cy="130" r="5"/>
+  <circle class="dot" cx="230" cy="156" r="5"/>
+  <circle class="dot" cx="230" cy="182" r="5"/>
+  <circle class="dot" cx="230" cy="208" r="5"/>
+  <circle class="dot" cx="230" cy="234" r="5"/>
+  <circle class="dot" cx="256" cy="130" r="5"/>
+  <circle class="dot" cx="256" cy="156" r="5"/>
+  <circle class="dot" cx="256" cy="182" r="5"/>
+  <circle class="dot" cx="256" cy="208" r="5"/>
+  <circle class="dot" cx="256" cy="234" r="5"/>
+  <circle class="keep k3" cx="282" cy="130" r="5"/>
+  <circle class="dot" cx="282" cy="156" r="5"/>
+  <circle class="dot" cx="282" cy="182" r="5"/>
+  <circle class="dot" cx="282" cy="208" r="5"/>
+  <circle class="dot" cx="282" cy="234" r="5"/>
+  <circle class="dot" cx="308" cy="130" r="5"/>
+  <circle class="dot" cx="308" cy="156" r="5"/>
+  <circle class="dot" cx="308" cy="182" r="5"/>
+  <circle class="dot" cx="308" cy="208" r="5"/>
+  <circle class="dot" cx="308" cy="234" r="5"/>
+  <circle class="dot" cx="334" cy="130" r="5"/>
+  <circle class="dot" cx="334" cy="156" r="5"/>
+  <circle class="dot" cx="334" cy="182" r="5"/>
+  <circle class="keep k2" cx="334" cy="208" r="5"/>
+  <circle class="dot" cx="334" cy="234" r="5"/>
+  <circle class="dot" cx="360" cy="130" r="5"/>
+  <circle class="dot" cx="360" cy="156" r="5"/>
+  <circle class="dot" cx="360" cy="182" r="5"/>
+  <circle class="dot" cx="360" cy="208" r="5"/>
+  <circle class="dot" cx="360" cy="234" r="5"/>
+  <circle class="dot" cx="386" cy="130" r="5"/>
+  <circle class="dot" cx="386" cy="156" r="5"/>
+  <circle class="dot" cx="386" cy="182" r="5"/>
+  <circle class="dot" cx="386" cy="208" r="5"/>
+  <circle class="dot" cx="386" cy="234" r="5"/>
+  <rect class="scanb" x="164" y="114" width="28" height="136" rx="10"/>
+  <g transform="translate(22 116) scale(1.28)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      <path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/>
+      <path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/>
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><g class="sweepp"><circle class="pupil" cx="36" cy="52" r="5"/></g></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><g class="sweepp"><circle class="pupil" cx="60" cy="52" r="5"/></g></g>
+      
+      
+    </g>
+  </g>
+  <text class="path" x="26" y="280">scouting/P#/&lt;date&gt;.md</text>
+  <rect class="tile" x="448.6" y="0.6" width="430.8" height="140.8" rx="14"/>
+  <g transform="translate(466 22) scale(1.0)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="36" cy="56.5" r="5"/></g></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="60" cy="56.5" r="5"/></g></g>
+      <g transform="rotate(-5 48 75.5)">
+        <rect class="page" x="25" y="67" width="46" height="17" rx="3"/>
+        <rect class="line l1" x="31" y="70.6" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l2" x="31" y="74.4" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l3" x="31" y="78.2" width="22" height="2.2" rx="1.1"/>
+      </g>
+      
+    </g>
+  </g>
+  <text class="eb" x="588" y="42">ANALYSIS · /analyze</text>
+  <text class="ti" x="588" y="70">One paper, in Korean</text>
+  <text class="sb" x="588" y="92">from the arXiv HTML original — a 요약</text>
+  <text class="sb" x="588" y="110">tab and the full re-telling</text>
+  <rect class="tile" x="448.6" y="158.6" width="206.8" height="140.8" rx="14"/>
+  <text class="eb" x="468.0" y="190">COMPARISON</text>
+  <text class="tis" x="468.0" y="214">Where they part</text>
+  <text class="sb" x="468.0" y="238">2–3 rewrites,</text>
+  <text class="sb" x="468.0" y="256">one question</text>
+  <g transform="translate(572.0 222) scale(0.74)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="36" cy="55" r="5"/></g></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="60" cy="55" r="5"/></g></g>
+      
+      
+    </g>
+  </g><g transform="translate(572.0 222) scale(0.74)">
+      <g class="up"><rect class="pg" x="20" y="66" width="26" height="18" rx="3"/><rect class="line" x="25" y="71" width="16" height="2.2"/><rect class="line" x="25" y="76" width="12" height="2.2"/></g>
+      <g class="dn"><rect class="pg" x="50" y="66" width="26" height="18" rx="3"/><rect class="line" x="55" y="71" width="16" height="2.2"/><rect class="line" x="55" y="76" width="12" height="2.2"/></g></g>
+  <rect class="tile" x="672.6" y="158.6" width="206.8" height="140.8" rx="14"/>
+  <text class="eb" x="692.0" y="190">PRESENTATION</text>
+  <text class="tis" x="692.0" y="214">Slide by slide</text>
+  <text class="sb" x="692.0" y="238">a speaker essay</text>
+  <text class="sb" x="692.0" y="256">for each one</text>
+  <g transform="translate(796.0 222) scale(0.74)">
+      <rect class="scr" x="56" y="-4" width="46" height="36" rx="3"/>
+      <rect class="band bd1" x="62" y="3" width="34" height="5" rx="1.5"/>
+      <rect class="band bd2" x="62" y="12" width="34" height="5" rx="1.5"/>
+      <rect class="band bd3" x="62" y="21" width="22" height="5" rx="1.5"/></g><g transform="translate(788.0 222) scale(0.74)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="33" cy="56" r="5"/></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="57" cy="56" r="5"/></g>
+      
+      
+    </g>
+  </g>
+  <rect class="tile" x="0.6" y="316.6" width="430.8" height="140.8" rx="14"/>
+  <g transform="translate(18 346) scale(0.9)">
+    <ellipse class="shadow" cx="48" cy="90" rx="18" ry="4"/>
+    <g class="rig"><circle class="hull" cx="48" cy="33" r="14.5"/>
+    <path class="hull" d="M21 76 a27 27 0 0 1 54 0 Z"/></g></g>
+  <rect class="doc" x="116" y="346" width="54" height="68" rx="5"/><rect class="frame" x="120" y="350" width="46" height="60" rx="3"/>
+  <rect class="dl" x="126" y="360" width="32" height="3" rx="1.5"/>
+  <rect class="dl" x="126" y="370" width="32" height="3" rx="1.5"/>
+  <rect class="dl" x="126" y="380" width="24" height="3" rx="1.5"/>
+  <path class="lock" d="M152 408 v-6 a7 7 0 0 1 14 0 v6"/><rect class="lockb" x="147" y="407" width="24" height="18" rx="4"/>
+  <text class="eb" x="196" y="358">CONTEXT · YOURS</text>
+  <text class="tis" x="196" y="384">It reads. It never writes.</text>
+  <text class="sb" x="196" y="406">MASTER.md + one P#.md per</text>
+  <text class="sb" x="196" y="424">pillar — it proposes, you decide</text>
+  <rect class="tile" x="448.6" y="316.6" width="206.8" height="140.8" rx="14"/>
+  <text class="eb" x="468" y="348">IDEATION · /ideate</text>
+  <text class="tis" x="468" y="372">Untried ideas</text>
+  <text class="sb" x="468" y="396">in chat,</text>
+  <text class="sb" x="468" y="414">no file written</text>
+  <g transform="translate(548.0 382) scale(0.7)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="38.5" cy="48" r="5"/></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="62.5" cy="48" r="5"/></g>
+      
+      
+    </g>
+  </g><g transform="translate(548.0 382) scale(0.7)">
+      <circle class="bub" cx="80" cy="26" r="2.6"/><circle class="bub" cx="87" cy="16" r="4"/>
+      <ellipse class="bub" cx="104" cy="2" rx="16" ry="11"/>
+      <circle class="bdot t1" cx="96" cy="2" r="2.6"/><circle class="bdot t2" cx="104" cy="2" r="2.6"/><circle class="bdot t3" cx="112" cy="2" r="2.6"/></g>
+  <rect class="hot" x="672.6" y="316.6" width="206.8" height="140.8" rx="14"/>
+  <text class="ebh" x="692.0" y="348">EVERY PAPER, ASKED</text>
+  <g class="qm q1"><text class="q" x="692.0" y="380">Is it actually new?</text></g>
+  <g class="qm q2"><text class="q" x="692.0" y="406">Real hardware?</text></g>
+  <g class="qm q3"><text class="q" x="692.0" y="432">Can I get the code?</text></g>
+</svg>
