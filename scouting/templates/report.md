@@ -21,7 +21,8 @@
 
 ## 🥇 논문 1 — 우선순위 ★★★
 
-<!-- Medal = rank, stars = priority after the ceiling — AUTHORING §2-1, §5-3. -->
+<!-- Medal = rank, stars = priority after the ceiling — AUTHORING §2-1, §5-3.
+     The top three only, each medal once; the rest go to 📋 (§5-1). -->
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue tier, or arXiv preprint> · source: <citation-graph | keyword-sweep> · <코드 공개 | 코드 공개 예정 | 코드 미공개>
@@ -77,9 +78,20 @@
 
 ---
 
+## 📋 기준 통과 · 추가 후보
+
+<!-- AUTHORING §5-1. Every further gate-clearing paper below 🥉, in rank order.
+     Omit the section when three or fewer papers clear the gate. -->
+
+| Paper | Link | R·N·M·S2R | Repro | 합계 | 코드 | 한 줄 근거 |
+|---|---|---|---|---|---|---|
+| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | 3·2·2·2 | 1 | 10/15 | 코드 공개 예정 | <한 줄> |
+
+---
+
 ## 📊 점수 요약
 
-<!-- No table — AUTHORING §5-1. One head per surfaced paper, five bullets;
+<!-- No table — AUTHORING §5-1. One head per paper section (not 📋 rows), five bullets;
      Reproducibility quotes its evidence (§5-2). -->
 
 **<alias> (<total>/15)**
@@ -97,7 +109,7 @@
 
 | Paper | Link | R·N·M·S2R | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | 3·2·2·1 | 공개 예정 | <what must change to promote it> |
+| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | 3·2·2·1 | 공개 예정 | <what would lift the short axis> |
 
 ---
 

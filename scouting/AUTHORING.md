@@ -39,10 +39,11 @@ context suggestions — stays up top; the 🚫 appendix sits last.
 | Emoji | `##` header (verbatim) | Holds | Rules |
 |-------|------------------------|-------|-------|
 | 🔑 | `## 🔑 참조 약어 풀이` | Reference Legend — the `P#` / `D#` codes this report cites | §3-1 |
-| 🥇 🥈 🥉 | `## 🥇 논문 N — 우선순위 ★★★` | One surfaced paper each. The medal is its rank in the report (🥇 first); the stars are its priority after the ceiling, so a capped top paper reads `## 🥇 논문 1 — 우선순위 ★★` | §3, §5-1, §5-3 |
+| 🥇 🥈 🥉 | `## 🥇 논문 N — 우선순위 ★★★` | The top three surfaced papers, one medal each and each medal at most once. The medal is the paper's rank (§5-3); the stars are its priority after the ceiling, so a capped top paper reads `## 🥇 논문 1 — 우선순위 ★★` | §3, §5-1, §5-3 |
 | 🌱 | `## 🌱 논문 N — 인접 분야 픽` | The cross-pollination pick — an adjacent-field paper, scored on the same rubric and carrying the same label | §5 |
-| 📊 | `## 📊 점수 요약` | Scoring Summary — the rubric rationale for each surfaced paper | §5-1, §5-2 |
-| 🔍 | `## 🔍 근접 후보` | Near-Miss Candidates — papers one gate axis short, and carried-forward candidates | §5-4 |
+| 📋 | `## 📋 기준 통과 · 추가 후보` | Every further surfaced paper, ranked below 🥉 — one table row each | §5-1 |
+| 📊 | `## 📊 점수 요약` | Scoring Summary — the rubric rationale for each paper with a section of its own | §5-1, §5-2 |
+| 🔍 | `## 🔍 근접 후보` | Near-Miss Candidates — this run's papers one gate axis short | §5-4 |
 | 💡 | `## 💡 컨텍스트 제안` | Context Suggestions — proposed edits to `context/P#.md` | §7-1 |
 | 🔄 | `## 🔄 직전 리포트 대비 종합` | Run-over-Run Synthesis — this run against the recent reports | §7-2 |
 | 🚫 | `## 🚫 필터 통과 실패 후보 논문` | Candidate Papers That Did Not Pass Filter — each with its reason | §4-5, §7-3 |
@@ -101,7 +102,7 @@ Every paper entry must include a direct link. Precedence:
 
 Links must appear:
 - In the paper header (immediately below the bold title)
-- In the Near-Miss Candidates table (`Link` column)
+- In the further-surfaced (📋) and Near-Miss Candidates (🔍) tables (`Link` column)
 - In the Candidate Papers table (`Link` column)
 - Inline in Context Suggestions when an arXiv ID is mentioned
 
@@ -461,15 +462,29 @@ tables, and the report then buries the week's strongest paper in a row whose
 재검토 조건 reads `코드 공개 시 승격`. A closed artifact caps the paper's
 priority at ★★ (§5-3); it never removes the paper from the report.
 
-The metadata field is `**Papers surfaced (4축 게이트 통과):**` (§6). When fewer
-than 3 papers clear the gate, say so and do not pad — a paper carried by two
-strong axes and a zero does not surface.
+**The gate decides whether a paper surfaces; its rank decides the shape.**
+The top three by rank (§5-3) take the full `## 🥇 / 🥈 / 🥉` sections, one
+medal each. Every further paper that clears the gate is still surfaced — as one
+row of `## 📋 기준 통과 · 추가 후보`, in rank order — so a strong week stays a
+report a reader can scan rather than a stack of full sections. The 🌱 pick
+keeps its own section (§5) and is not one of the three.
 
-The `## 📊` section carries the rationale for exactly those surfaced papers and
-**no table**: one bold head per surfaced paper carrying its total
-(`**HapTile (13/15)**`), then one 개조식 bullet per dimension
-(`- Relevance 3 — <근거>`), summing to that total. No head for a paper the
-report did not surface.
+```markdown
+| Paper | Link | R·N·M·S2R | Repro | 합계 | 코드 | 한 줄 근거 |
+|---|---|---|---|---|---|---|
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 3·2·2·2 | 1 | 10/15 | 코드 공개 예정 | <한 줄> |
+```
+
+Omit 📋 when three or fewer papers clear the gate. The metadata field
+`**Papers surfaced (4축 게이트 통과):**` (§6) counts the paper sections and the
+📋 rows together. When fewer than 3 papers clear the gate, say so and do not
+pad — a paper carried by two strong axes and a zero does not surface.
+
+The `## 📊` section carries the rationale for exactly the papers with a
+section of their own and **no table**: one bold head per paper carrying its
+total (`**HapTile (13/15)**`), then one 개조식 bullet per dimension
+(`- Relevance 3 — <근거>`), summing to that total. A 📋 row carries its own
+scores and gets no head, and neither does a paper the report did not surface.
 
 ### 5-2. Reproducibility is scored from quoted evidence, never inferred
 
@@ -517,41 +532,33 @@ plain text (emoji stay on `##` headers — §2):
 A paper the team cannot run yet is still worth reading, but it does not
 outrank one they can — so `★★★` is reserved for a paper with an obtainable
 artifact. Rank within a ceiling by Relevance, then by the /15 total, then by
-venue tier — the Venue Priority table `context/MASTER.md` §5 owns (the prompt
+venue tier — this order assigns the medals and orders the 📋 rows (§5-1).
+Venue tier comes from the Venue Priority table `context/MASTER.md` §5 owns (the prompt
 carries a copy), read from the arXiv comment field and recorded on the paper header line. Venue
 breaks ties only; it never gates and never overrides the rubric.
 
 ### 5-4. Near-miss candidates
 
-`## 🔍 근접 후보` is the standing home for two kinds of paper, and it is the
-mechanism that makes "재검토 권고" actually happen:
+`## 🔍 근접 후보` holds this run's candidates that are **exactly one gate axis
+short** — one of the four gate dimensions scores 1 and the rest are ≥ 2. Two
+or more axes short is a 🚫 row; zero axes short is a surfaced paper (§5-1),
+never a 🔍 row.
 
-1. **One axis short** — exactly one of the four gate dimensions scores 1 and
-   the rest are ≥ 2. Two or more axes short is a 🚫 row; zero axes short is a
-   surfaced paper (§5-1), never a 🔍 row.
-2. **Carried forward** — a candidate listed in this section, or dropped for
-   Reproducibility, in this pillar's last ~4 weeks of reports. Every run
-   re-reads those entries and re-checks the code signal (§5-2). A candidate
-   whose repository is now public is **promoted to a full paper section this
-   run** and named in 🔄 as a promotion.
+The table is this run's alone. A row is not carried into the next report and
+is not re-checked there; like every id a report names, the paper is then held
+out of later runs by the routine's de-duplication window. `재검토 조건` names,
+for the reader, what would lift the short axis.
 
-**A carried row expires four weeks after it first appears.** On the run that
-passes that mark the row is either promoted or dropped from the table, and 🔄
-names the retirement in one clause. Without the limit the table only grows —
-every run re-lists every row, which keeps each row inside the carry-forward
-window forever, spends one metadata call per row per run, and turns a
-near-miss shortlist into a backlog of papers nobody is going to read.
-
-One table, most recent first, no per-paper `###` subsections:
+One table, no per-paper `###` subsections:
 
 ```markdown
 | Paper | Link | R·N·M·S2R | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·2·1 | 공개 예정 | 실로봇 결과 공개 시 재평가 |
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·2·1 | 공개 예정 | 실로봇 결과가 나오면 Sim2Real 충족 |
 ```
 
 Omit the section when it has no rows. A paper appears in 🔍 or in 🚫, never
-both — 🚫 is for candidates that are out, 🔍 for candidates that are waiting.
+both — 🚫 is for candidates that are out, 🔍 for the ones a single axis kept out.
 
 ---
 
@@ -571,7 +578,7 @@ The block between the H1 and the first `---` is exactly two lines:
 - **No `Agent version:` line.** A constant across every report is not
   information — the report's provenance is its commit.
 - **`Papers surfaced` is an integer and nothing else**, and it equals the
-  number of `## 🥇 / 🥈 / 🥉 / 🌱` sections in the report. Prose about *why* the
+  number of `## 🥇 / 🥈 / 🥉 / 🌱` sections plus the `## 📋` rows (§5-1). Prose about *why* the
   count is low belongs in 📊; the field is the count.
 - **`Papers scanned` is capped at 400 characters** and names, at most: the
   source passes run, an order-of-magnitude count per pass, and any failure
@@ -582,7 +589,8 @@ The block between the H1 and the first `---` is exactly two lines:
 What the line does **not** carry: per-query breakdowns, stage-by-stage funnel
 arithmetic (`661건 → 507편 → 226편 → 190편 → 19편`), per-pin request counts,
 or retry narration. A retry that succeeded is a non-event; only a call still
-failing at the end of the run is disclosed, verbatim.
+failing at the end of the run is disclosed, verbatim, as `… 최종 실패`. The
+line names no retry or backoff at all unless that clause is there.
 
 ```markdown
 **Papers scanned:** citation-graph 8핀 280편 + keyword sweep 110편(14일 44편)
@@ -621,7 +629,7 @@ a paragraph the reader has already read and already decided about.
 
 `## 🔄 직전 리포트 대비 종합` covers, one bullet each and only when the run has
 something to say: papers already covered (verdict first), contradictions with
-recent findings, Decision-Log triggers, 🔍 promotions this run, Anti-topic
+recent findings, Decision-Log triggers, Anti-topic
 filter health as a count, already-analyzed dedup count.
 
 - **Never restate the retrieval funnel.** Anti-topic filter health is a count
@@ -640,7 +648,7 @@ same row.
 
 - In **prose** (💡, 🔄, 📊 heads), an alias carries its id on first use in the
   section: `Faster-WAM(2608.04404)`.
-- In the 🚫 and 🔍 tables the `Paper` column stays alias-only — the `Link`
+- In the 📋, 🔍 and 🚫 tables the `Paper` column stays alias-only — the `Link`
   column is the disambiguator (§4-5).
 - One table row is **one paper**. A cell like `Faster-WAM 외 2편 (ω-0, WAM-Diff2)`
   against a single link hides two papers behind a third one's id; give each its
@@ -654,12 +662,13 @@ A report goes straight to `main` with no PR, so the routine runs
 `linters/check-scouting-format.py` on its own report before committing
 (`.claude/prompts/scouting.txt`, LINT step) and CI re-runs it on every push to
 `main` as the backstop. The lint binds reports dated on or after its
-`_CONTRACT_EFFECTIVE`; the gate arithmetic binds from `_GATE_EFFECTIVE`.
+`_CONTRACT_EFFECTIVE`; the gate arithmetic binds from `_GATE_EFFECTIVE`, and
+the medal, 📋 and retry rules from `_SHAPE_EFFECTIVE`.
 
 | Rule | Checked by |
 |---|---|
-| H1 form and its date against the filename; the two-line metadata block, the 400-character cap, `Papers surfaced` a bare integer equal to the paper-section count (§6) | lint |
-| Every `##` opens with a §2-1 emoji, sections in §2-1 order, no emoji on `###` (§2) | lint |
-| Five 📊 bullets per head summing to its total; each surfaced paper clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header; `★★★` only on `코드 공개` (§5) | lint |
-| One paper per 🚫 / 🔍 row (§7-3) | lint |
-| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); Reproducibility quoting its evidence (§5-2); 🔍 carry-forward and expiry (§5-4); 💡 rollup and 🔄 discipline (§7-1, §7-2) | the routine's SELF-CHECK and the reader — nothing parses them |
+| H1 form and its date against the filename; the two-line metadata block, the 400-character cap, no retry narration without `최종 실패`, `Papers surfaced` a bare integer equal to the paper sections plus the 📋 rows (§6) | lint |
+| Every `##` opens with a §2-1 emoji, sections in §2-1 order, each medal at most once, 📋 only under all three medals, no emoji on `###` (§2, §5-1) | lint |
+| Five 📊 bullets per head summing to its total; each surfaced paper and 📋 row clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header; `★★★` only on `코드 공개` (§5) | lint |
+| One paper per 🚫 / 🔍 / 📋 row (§7-3) | lint |
+| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); Reproducibility quoting its evidence (§5-2); 💡 rollup and 🔄 discipline (§7-1, §7-2) | the routine's SELF-CHECK and the reader — nothing parses them |
