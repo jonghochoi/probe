@@ -6,10 +6,8 @@
  * button is the durable path — it moves the memo into the repository, where it
  * syncs across devices and can be read back.
  *
- * Note on giscus: its comment box is a cross-origin iframe and cannot be
- * filled programmatically. Publishing therefore goes through a prefilled
- * `discussions/new` URL, which actually works — giscus stays a read-only
- * enhancement, loaded only on demand.
+ * Publishing goes through a prefilled `discussions/new` URL: the page never
+ * posts on the reader's behalf, it opens GitHub with the memo already filled.
  */
 
 (function () {

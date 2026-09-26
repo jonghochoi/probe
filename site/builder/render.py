@@ -6,10 +6,10 @@ tables, code — is here.
 
 Parser configuration, and why:
 
-    html=False        The corpus has one intentional raw-HTML use and 170+
-                      `<!-- provenance -->` comments that must not be
-                      published. `ghmath.mask_source` strips the comments; the
-                      one anchor is re-emitted by us.
+    html=False        Raw HTML in the source is escaped, never published.
+                      `<!-- provenance -->` comments are stripped before that
+                      by `ghmath.mask_source`, so they do not surface as
+                      escaped text either.
     linkify=False     A bare URL is not a link here (AUTHORING §3-3): the
                       corpus writes explicit `[text](url)` links, and leaving
                       autolink off keeps a stray URL visibly unlinked rather
@@ -49,20 +49,6 @@ _ARXIV_HREF = re.compile(
 )
 
 
-# `## 🔬 방법론` — a leading emoji is optional in a rewrite, but when
-# present it belongs to the heading's display, not to its slug.
-_LEADING_EMOJI = re.compile(
-    r"^([\U0001F300-\U0001FAFF☀-➿⬀-⯿〰〽]"
-    r"[\U0001F3FB-\U0001F3FF️‍]*)\s*(.*)$"
-)
-
-
-def split_emoji(header_text: str) -> tuple[str, str]:
-    """`🔬 방법론` → (`🔬`, `방법론`); plain text → (`""`, text)."""
-    m = _LEADING_EMOJI.match(header_text.strip())
-    return (m.group(1), m.group(2).strip()) if m else ("", header_text.strip())
-
-
 def _render_details(self, tokens, idx, options, env) -> str:
     token = tokens[idx]
     if token.nesting != 1:
@@ -78,10 +64,9 @@ def _render_details(self, tokens, idx, options, env) -> str:
 # marker; without one the renderer falls back to counting acts as they appear.
 _ACT_NUM = re.compile(r"^\s*(\d{1,2})[.)]?\s+(.*)$")
 
-# A comparison that runs as long as a rewrite has stopped comparing. Rewrites
-# sit around 12,000 printed characters; a comparison should land well under
-# half that. The ceiling is deliberately loose and warns rather than fails —
-# with one comparison written, the honest number is not yet known.
+# A comparison that runs as long as a rewrite has stopped comparing. The
+# ceiling warns rather than fails; what it counts and why is
+# `comparison/AUTHORING.md` §2-5.
 COMPARE_CHARS_MAX = 7000
 
 
@@ -181,10 +166,9 @@ class DocRenderer:
         # which a JSON fence could not.
         container_plugin(md, "details", render=_render_details)
         ghmath.install(md, self.katex.inline, self.katex.block)
-        # The label goes through the inline renderer, not `escape()`. A callout
-        # titled `` $`d`$ 가 변해도 견디는 이유 `` published its own math source
-        # as visible backticks and dollars — the one place on the page where
-        # markdown reached the reader unrendered.
+        # The label goes through the inline renderer, not `escape()`: a callout
+        # title carries markdown and math like any other line, and escaping it
+        # publishes the source as visible backticks and dollars.
         callouts.install(md, self._inline, self.problems.append)
 
         rules = md.renderer.rules
@@ -216,7 +200,7 @@ class DocRenderer:
         level = int(token.tag[1])
         inline = tokens[idx + 1] if idx + 1 < len(tokens) else None
         raw = inline.content if inline else ""
-        emoji, label = split_emoji(raw)
+        label = raw.strip()
 
         self._heading_seq += 1
         # A rewrite's section is an H3 (H2 is one of the four acts). Each one
@@ -227,7 +211,7 @@ class DocRenderer:
             # the name is used in a warning — "제목 | Keywords (0 quiz)" reads
             # like the pipe is part of the problem.
             self._current_section = (
-                _split_keyword_line(label or raw)[0] if level == 3 else ""
+                _split_keyword_line(label)[0] if level == 3 else ""
             )
 
         # Every branch below emits its own markup, so the inline token must not
@@ -248,7 +232,7 @@ class DocRenderer:
                     '<h1 class="thesis">')
 
         if level == 2:
-            number, act = _split_act(label or raw)
+            number, act = _split_act(label)
             self._acts_seen += 1
             self.toc.append({"kind": "act", "n": number or str(self._acts_seen),
                              "label": act})
@@ -261,7 +245,7 @@ class DocRenderer:
                 "</div>\n"
             )
 
-        ko, en = _split_keyword_line(label or raw)
+        ko, en = _split_keyword_line(label)
         anchor = _slugify(ko, self._heading_seq)
         existing = {e.get("id") for e in self.toc}
         if anchor in existing:
@@ -270,8 +254,7 @@ class DocRenderer:
         if level == 3:
             if not en:
                 self._sections_without_keywords.append(ko)
-            self.toc.append({"kind": "sec", "id": anchor, "label": ko, "en": en,
-                             "emoji": emoji})
+            self.toc.append({"kind": "sec", "id": anchor, "label": ko, "en": en})
             take_inline()
             # The heading keeps its `id` — the contents, the scroll-spy and the
             # memo anchor all resolve against it — but prints no `#` link. A

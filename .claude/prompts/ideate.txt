@@ -83,9 +83,9 @@ PROCEDURE
    it there — never "related" without a kind.
 
    - A PAPER: `related <paper>`. The kinds are distinct claims: `neighbour`
-     is shared vocabulary, `cites` / `mentions` are the rewrite's own
-     reaching, `compared_with` and `nearby_comparison` are questions already
-     argued, `same_decision` is a shared open question.
+     is shared vocabulary (its row lists the `D#` codes behind it), `cites` /
+     `mentions` are the rewrite's own reaching, and `compared_with` and
+     `nearby_comparison` are questions already argued.
    - A TOPIC: `search "<the topic as written>"` first — the site's semantic
      index, which finds a paraphrase that shares no word with the rewrite, and
      prints what it read the question as. It needs the network; when it says
@@ -107,12 +107,12 @@ PROCEDURE
      python3 site/query.py pairs --with <paper> --by contrast
      python3 site/query.py pairs --by contrast           # EMPTY input
 
-   `contrast` puts first a pair that meets on a narrow Decision-Log entry
-   from different machinery — the pair where each paper holds what the other
-   lacks; `pairs --help` says what every column measures. A paper that cites
-   only broad codes has no contrast pairs, and the command says so: rank with
-   `--by decisions` then. `--by score` is the opposite question (the most
-   alike), useful only to rule a pair out as redundant.
+   `--by contrast` is the order this mode reads, because an idea lives where
+   each paper holds what the other lacks; `pairs --help` says what it and
+   every column measure. When no pair qualifies the command says so — fall
+   back to `--by score`, the order `/compare` names candidates from, and
+   treat its top rows as the most alike: a pair too alike to lend each other
+   anything is ruled out, not proposed.
 
    Read the list down to about the twelfth row, not further, and take three
    or four candidates; for a TOPIC, take them from among the papers step 2

@@ -1,6 +1,6 @@
 /* Paper page: the tab strip, term anchors, quizzes, TOC scroll-spy.
    No framework, no bundler. Without this file the page is still fully
-   readable — the first tab is open and the other is reachable by its anchor,
+   readable — the first tab is open and every other tab is reachable by its anchor,
    term definitions render expanded and quizzes show their options.
    (The theme toggle lives in theme.js — every page has the nav button.) */
 

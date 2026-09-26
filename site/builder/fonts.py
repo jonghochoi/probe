@@ -1,19 +1,18 @@
 """Build-time font subsetting.
 
-Pretendard ships 6.5 MB of variable TTF covering all of Hangul; this corpus
-uses 1,324 distinct characters. Subsetting to exactly those takes the payload
-to ~270 KB, which is the difference between a font that arrives before the
-reader scrolls and one that does not.
+Pretendard ships megabytes of variable TTF covering all of Hangul; this corpus
+uses on the order of a thousand distinct characters. Subsetting to exactly
+those takes the payload to a few hundred KB, which is the difference between
+a font that arrives before the reader scrolls and one that does not.
 
 The subset covers the whole corpus and is shared by every page, rather than
-being cut per page and inlined: a per-page subset is smaller in isolation
-(~55 KB/weight against ~108 KB for the union) but it ships in each of the 95
-pages and is re-fetched on every navigation, where the shared file is fetched
-once and cached.
+being cut per page and inlined: a per-page subset is smaller in isolation,
+but it ships in every page and is re-fetched on every navigation, where the
+shared file is fetched once and cached.
 
 It is the variable font, not static cuts. The site uses six weights
-(400/500/600/700/750/800); as static files that is ~540 KB, against ~272 KB
-for one variable subset — and `font-weight: 750` renders at 750 rather than
+(400/500/600/700/750/800); as static files that is about twice the bytes of
+one variable subset — and `font-weight: 750` renders at 750 rather than
 snapping to the nearest cut.
 
 JetBrains Mono gets the same treatment, cut to the narrower `mono_charset` —

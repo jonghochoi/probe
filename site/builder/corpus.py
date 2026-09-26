@@ -199,7 +199,7 @@ class Paper:
     path: Path
     front: dict
     body: str                    # the whole source below the front matter
-    article: str = ""            # the body with the two surfaces carved out
+    article: str = ""            # the body with `::: glance` carved out
     glance: object | None = None  # glance.Glance, or None when absent
     landing: Landing | None = None   # where it sits in the merge order
 
@@ -500,7 +500,7 @@ def compact(text: str) -> str:
     """Lowercase, strip whitespace and punctuation, keep `·` as the barrier.
 
     The one normalisation both sides of the match run through: the build calls
-    it on the haystack, `filter.js` calls its twin on the query.
+    it on the haystack, `match.js` calls its twin on the query.
     """
     return _PUNCT.sub("", text.lower())
 
@@ -609,7 +609,7 @@ def discover() -> tuple[list[Paper], list[str]]:
         if len(paper.metric) > METRIC_MAX:
             problems.append(
                 f"analysis/{path.name}: `metric` is {len(paper.metric)} chars — "
-                f"keep it under {METRIC_MAX}, it prints inside a chip"
+                f"keep it under {METRIC_MAX}, it prints on one 결과 line"
             )
         if len(paper.alias) >= ALIAS_MAX:
             problems.append(
@@ -795,8 +795,8 @@ def related(paper: Paper, corpus: list[Paper], weights: dict[str, float],
     return [row[2] for row in scored[:limit]]
 
 
-# Any of the three arXiv shapes a rewrite writes, anywhere in the source — prose
-# links, ```probe-lineage rails, the front matter's own fields.
+# Any of the three arXiv shapes a rewrite writes, anywhere in the body — prose
+# links and ```probe-lineage rails alike.
 _ARXIV_IN_BODY = re.compile(r"arxiv\.org/(?:abs|html|pdf)/(\d{4}\.\d{4,5})")
 
 

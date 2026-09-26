@@ -2,8 +2,7 @@
 """Check a commit subject / PR title against the CLAUDE.md commit style.
 
 CLAUDE.md ("Commit message style") pins an exact subject grammar and calls the
-imperative-verb rule "the one that drifts most easily" — yet nothing enforced
-any of it. This lint validates one or more subjects against the mechanical
+imperative-verb rule "the one that drifts most easily". This lint validates one or more subjects against the mechanical
 half of the rules (grammar shape, type set, casing, length, punctuation) plus
 a blocklist of the common non-imperative offenders. It cannot prove a verb is
 imperative; it catches the drift patterns the doc itself names.

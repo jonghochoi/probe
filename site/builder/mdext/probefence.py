@@ -18,8 +18,9 @@ to the code highlighter and a term definition is published as a block of JSON,
 so `analysis/AUTHORING.md` and this module are one contract: the guide tells the
 agent the build validates its fences, and this is where that is true.
 
-The only other fence language the corpus uses is `math`, so these names do not
-collide with anything an author might mean literally.
+Every other fence language the corpus uses is `math` or a code language
+(`analysis/AUTHORING.md` R8), so the `probe-` names do not collide with
+anything an author might mean literally.
 """
 
 from __future__ import annotations
@@ -72,10 +73,9 @@ def term(data: dict, inline_md) -> tuple[str, str]:
     """Return `(term_id, html)` for a definition panel.
 
     The panel is emitted **at the anchor**, not after the paragraph holding it
-    (R4). Hoisting it to the end of the block put the definition one or two
-    sentences below the word that needed it, so the reader had to find their
-    way back into the sentence they left; opening it in place splits the
-    paragraph exactly where they stopped reading.
+    (R4). Emitted after the paragraph, the definition would land one or two
+    sentences below the word that needed it; opening it in place splits the
+    paragraph exactly where the reader stopped.
 
     That placement is why this is a `<span>` wrapper and not a `<div>`: the
     anchor sits inside a `<p>`, and a block-level child there is invalid markup

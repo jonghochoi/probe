@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import re
 import signal
@@ -210,10 +209,12 @@ def cmd_related(cat: dict, a, docs: dict) -> None:
     """
     me = resolve(cat, a.paper)
     by_id = {r["id"]: r for r in cat["papers"]}
+    # Ties break newest first on `order_key`, as `corpus.related` and the
+    # catalog's `neighbours` do, so the first three rows are the page's own.
     near = sorted(
         ((corpus.score(docs[me["id"]], docs[r["id"]], WEIGHTS), r) for r in cat["papers"]
          if r is not me),
-        key=lambda t: (-t[0], t[1]["id"]),
+        key=lambda t: (t[0], docs[t[1]["id"]].order_key), reverse=True,
     )
     rows = []
     for s, r in near[:max(a.limit, 0)]:

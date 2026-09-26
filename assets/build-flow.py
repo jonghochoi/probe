@@ -13,41 +13,9 @@ markup.
     python3 assets/build-flow.py            # write both files
     python3 assets/build-flow.py --check    # fail if either is out of date
 
-What the drawing has to keep saying, whatever is moved:
-
-  - Rectangles are files and only files. `context/` is one card of two
-    compartments, each output is one card of a header and the paths under
-    it, and nothing that is not a file gets a box: a stage is a funnel, an
-    act is a wire.
-  - The `context/` card's divider, the drop wire and the mark share one
-    vertical axis (x=468), so the read is "both documents feed one run".
-  - The `context/` card takes the same ground and the same border as the
-    outputs, and is marked instead by a hairline ruled just inside that
-    border. It is the one card the agent may not write, and a document held
-    in a matte frame is how the picture says so before any label does. The
-    hairline is a frame on the card, not a second box: it never encloses a
-    file of its own, so the rule above still holds.
-  - The two output cards clear the `context/` card by more than the gap
-    between their own edges. They overlap it horizontally, so a thin gap
-    reads as one stack of three boxes rather than an input and two outputs.
-  - The drawing ends at the two outputs. It runs arXiv to files and stops,
-    because what a reader does with a report is a decision rather than a
-    file, and a wire drawn back into `context/` would put the one folder the
-    agent may not write at the end of the agent's own arrow.
-  - Every wire is one drawing: the same accent, the same march, and the same
-    gap off whatever it leaves. A wire says a hand-off happened, never whose
-    hand — that is the cards' to say. Drawn weaker than its neighbours, a
-    wire reads as a weaker hand-off rather than a different owner.
-  - The mark is `site/builder/components.py`'s `mark()` redrawn with its
-    animation inlined, since a README image carries no external stylesheet.
-    Keep the two drawings in step.
-
-The picking cycle earns every state it shows, in this order: a uniform field,
-a scan band that marks six as it passes their column, six dispatched toward the
-filter, three culled inside it — each stays a circle, turns from the accent to
-the muted ink and fades out as it drifts to a halt — three landed in the kept
-column. Nothing is marked before the scan reaches it and nothing sits at its
-destination before it travels.
+What the drawing has to keep saying — the card and wire rules, the picking
+cycle, the mark kept in step with `site/builder/components.py`'s `mark()` —
+is `assets/CLAUDE.md` ("The flow diagram" and the rules above it).
 
 Durations are literal, never `var()`: a custom property declared on `:root`
 resolves only while the SVG is its own document, and an unresolved duration

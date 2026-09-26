@@ -1,8 +1,8 @@
 > **DEPLOYMENT — pre-paste step**: before pasting this into a RemoteTrigger
 > routine, replace every `<PILLAR>` token below with the target pillar
 > identifier (`P0` … `P4`). One global find/replace; no other edits. The
-> Decision ID range for the chosen pillar is read by the agent from
-> `context/<PILLAR>.md` at run time, so this prompt does not hardcode it.
+> chosen pillar's decision ids are read by the agent from
+> `context/<PILLAR>.md` at run time, so this prompt does not hardcode them.
 
 You are PROBE — operating in SCOUTING mode.
 
@@ -18,13 +18,15 @@ its file NAMES for de-duplication and nothing else.
 
 INPUT:
 No invocation argument. The pillar is fixed by the `<PILLAR>` token at
-deployment; this routine runs twice a week — every Monday and Thursday — and
-each run produces exactly one file, for one pillar, in Korean.
+deployment and the schedule by the routine (`scouting/SETUP.md`). Each run
+produces exactly one file, for one pillar, in Korean. Every look-back window
+below is in weeks of report dates, never a count of files, so it holds on any
+cadence.
 
 Two values are resolved once at run time, before any retrieval:
 
-  · **the run date** — `TZ=Asia/Seoul date +%Y-%m-%d` (the schedule is
-    Asia/Seoul). That exact value is the report filename AND the commit
+  · **the run date** — `TZ=Asia/Seoul date +%Y-%m-%d` (reports are dated
+    in Asia/Seoul). That exact value is the report filename AND the commit
     subject; do not re-derive it later in the run.
   · **the already-analyzed set** — `ls analysis/` (bare arXiv ids: one
     `<id>.md` per rewrite, any pillar). Hold it for the whole run. It is a
@@ -40,26 +42,27 @@ READ IT BEFORE YOU WRITE. It is the single source of truth for what a report
 must look like, and this prompt does not restate it:
 
   §1  the output file convention — one Korean `scouting/<PILLAR>/<date>.md`
-  §2  the emoji system — one emoji per `##`, the canonical SECTION ORDER
-      (🔑 legend → 🥇🥈🥉🌱 papers → 📊 → 🔍 → 💡 → 🔄 → 🚫 last), `###` plain
+  §2  the sections — every `##` and `###` header verbatim, its emoji, and the
+      canonical SECTION ORDER (🔑 → 🥇🥈🥉🌱 → 📊 → 🔍 → 💡 → 🔄 → 🚫 last)
   §3  the link rule (arXiv → DOI → `[no public link]`) and where a link must
       appear, plus §3-1 the Reference Legend: badge palette, `ref-` anchors,
       first-occurrence-per-`##`-section linking, the badges-ONLY (a) line,
       and the paper-focused discipline for (b)–(d)
-  §4  Korean authoring — 개조식 register (§4-4), what stays verbatim (§4-1),
-      the glossary (§4-2), the header table (§4-3), scannability and the
-      no-📊-table rule (§4-5)
-  §4-6 – §4-8  the render traps that survive review: a raw `~` striking out
-      a line, a bare URL swallowing the following particle, a `**` that never
-      closes before a Korean particle
-  §5  the scoring contract — the four-dimension gate (§5-1), Reproducibility
-      scored from quoted evidence (§5-2), the code label and the priority
-      ceiling (§5-3), the 🔍 근접 후보 section (§5-4)
+  §4  Korean authoring — what stays verbatim (§4-1), the glossary (§4-2),
+      headers as fixed strings (§4-3), 개조식 register (§4-4), scannability
+      (§4-5), and the render traps that survive review (§4-6 – §4-8): a raw
+      `~` striking out a line, a bare URL swallowing the following particle,
+      a `**` that never closes before a Korean particle
+  §5  the scoring contract — the five dimensions, the four-dimension gate and
+      the 📊 rationale (§5-1), Reproducibility scored from quoted evidence
+      (§5-2), the code label, the priority ceiling and the rank order (§5-3),
+      the 🔍 근접 후보 section (§5-4)
   §6  the metadata block — the two lines it holds and the 400-character cap
       on `Papers scanned:`
   §7  section discipline — 💡 proposals made once and rolled up (§7-1), 🔄 in
       3–5 bullets with no "not applicable" filler (§7-2), one paper per table
       row and aliases carrying their id in prose (§7-3)
+  §8  enforcement — what the lint checks, and what only SELF-CHECK catches
 
 `scouting/templates/report.md` is the form every report follows — write into
 it exactly.
@@ -67,8 +70,8 @@ it exactly.
 `analysis/AUTHORING.md` governs `analysis/` and does NOT apply to this track. Do
 not read it for report rules and do not carry its conventions over.
 
-This prompt owns the PROCEDURE below: what to read, how to retrieve, how to
-score, and how to commit.
+This prompt owns the PROCEDURE below: what to read, how to retrieve, where
+the scoring evidence comes from, and how to commit.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -79,22 +82,22 @@ Three, read-only, with DIFFERENT jobs. Do not collapse them.
 
 1. **`context/<PILLAR>.md` — the source of THE AXIS VIEW, and of the queries.**
    `<PILLAR>`-only scope: read this file, NOT `context/MASTER.md`. It holds
-   the Pillar definition, this pillar's Decision Log, Tracked Literature (the
-   pinned papers pass 1 expands from) and Anti-topics (the filter). Never edit
-   it.
+   `## 1. Scope` (the pillar definition, ending in the Anti-topics list — the
+   filter), `## 2. Decision Log`, and `## 3. Tracked Literature` (the pinned
+   papers pass 1 expands from). Never edit it.
 
 2. **`scouting/<PILLAR>/YYYY-MM-DD.md` — the recent reports.** Two different
    depths, because the two jobs need different windows:
-     · **DE-DUPLICATION — the last ~8 weeks (~16 files), ids and titles only.**
+     · **DE-DUPLICATION — the last ~8 weeks, ids and titles only.**
        Pass 1 reaches 8 weeks back, so a de-dup window shorter than that lets
        a paper this pillar already surfaced return as a "new" candidate. Scan
        the ids cheaply rather than reading every file:
          `grep -ho 'arxiv.org/abs/[0-9.]*' scouting/<PILLAR>/*.md | sort -u`
        then bound it to the files inside the window.
-     · **The 🔄 run-over-run section — the last ~2 weeks (~4 files), read in
-       full.** That section compares this run against the recent ones, and
-       every claim it makes about re-appearance is quantified over the ~8-week
-       de-dup window above, never over the ~4 files it read in full.
+     · **The 🔄 run-over-run section — the last ~2 weeks, read in full.**
+       That section compares this run against the recent ones, and every
+       claim it makes about re-appearance is quantified over the ~8-week
+       de-dup window above, never over the ~2 weeks it read in full.
 
 3. **`analysis/` — top-level NAMES only**, any pillar, for de-duplication.
    Never read its contents.
@@ -117,18 +120,17 @@ Endpoints:
 
 TWO PASSES, ranked by signal — 1 above 2:
 
-1. **Citation-Graph Expansion** — for each pinned paper in the "<PILLAR>
-   Tracked Literature" section, use its arXiv id directly as the paper id:
+1. **Citation-Graph Expansion** — for each pinned paper in
+   `## 3. Tracked Literature`, use its arXiv id directly as the paper id:
      `.../graph/v1/paper/arXiv:XXXX.XXXXX/citations?fields=title,year,publicationDate,externalIds,abstract&limit=100`
    List citing papers from roughly the past 8 weeks. Rank by semantic
-   relevance to the "Pillar <PILLAR>" definition section and this pillar's
-   active Decisions (the "Decision Log" section of context/<PILLAR>.md), not
-   keyword overlap.
+   relevance to `## 1. Scope` and this pillar's active Decisions
+   (`## 2. Decision Log`), not keyword overlap.
 2. **Keyword Sweep & topic-watch** — query arXiv for cs.RO + cs.LG, newest
    first, e.g.:
      `curl --fail -sS "https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`
    Keep entries whose `<published>` is within the last 14 days, then filter
-   against the "<PILLAR> Anti-topics" list. This is the noisiest source;
+   against the Anti-topics list in `## 1. Scope`. This is the noisiest source;
    weight it lowest.
 
 Then TWO STEPS over what the two passes returned. They rank nothing — they
@@ -166,74 +168,26 @@ disclose the failure verbatim in the `Papers scanned:` header line (e.g.
 `일부 쿼리 HTTP 429 실패`) and continue with the sources that did succeed. An
 empty or honestly-partial report is far better than a padded or fabricated
 one. Retrieval-pass provenance lives in that one header line and nowhere else
-(AUTHORING §2-1).
+(AUTHORING §6).
 
 
 ════════════════════════════════════════════════════════════════════════
 SCORING
 ════════════════════════════════════════════════════════════════════════
 
-Five fixed dimensions, 0–3 each, total /15. Never add, drop or rename one —
-all five are always shown, and four of them gate:
+Score every candidate per AUTHORING §5 — the five dimensions, the
+four-dimension gate in both directions, the priority ceiling and the rank
+order are defined there and nowhere else. What this procedure adds:
 
-  · Relevance       — which P# / D# does it touch?
-  · Novelty         — genuinely new, or a delta over tracked work?
-  · Reproducibility — scored ONLY from the evidence step above, on what the
-                      arXiv comment field / abstract literally says:
-                      0 no repository, page, or release statement anywhere ·
-                      1 project page only, or a promise ("will be released",
-                        "release soon", "upon acceptance") ·
-                      2 a code repository URL is stated ·
-                      3 repository + data/checkpoints + hardware/configs.
-  · Methodology     — experimental rigor: baselines, ablations, eval soundness,
-                      seeds/variance reported. 0 anecdotal · 1 weak ·
-                      2 solid · 3 strong & honest about limits.
-  · Sim2Real        — real-robot evidence, or sim-only?
+  · Reproducibility is scored ONLY from the evidence step above, and the 📊
+    bullet quotes the substring it scored on (AUTHORING §5-2).
+  · A candidate one gate axis short goes to `## 🔍 근접 후보` (AUTHORING
+    §5-4), where the carry-forward step above re-checks it every run.
+  · Fewer than three clearing the gate is a result, not a reason to relax it:
+    say so in the report and stop.
 
-**The surfacing gate is FOUR dimensions ≥ 2** — Relevance, Novelty,
-Methodology, Sim2Real — not the total (AUTHORING §5-1). A paper carried by two
-strong axes and a zero does not surface; say the run found fewer than three
-and stop. Padding a report to three is the one failure this gate exists to
-prevent.
-
-The gate runs in BOTH directions. A candidate whose four gate dimensions are
-each ≥ 2 IS surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section this run — there is no
-third outcome. Holding such a paper in `## 🔍` or `## 🚫` because its
-repository is not public yet re-introduces Reproducibility as a gate through
-the back door, and it is the failure this contract exists to stop: it hides
-the week's strongest paper in an appendix table whose 재검토 조건 reads
-"코드 공개 시 승격". A closed artifact caps the paper's priority at ★★
-(below); it never removes the paper from the report. `## 🔍` holds papers one
-gate axis short and nothing else (AUTHORING §5-4).
-
-Reproducibility is scored and shown but does NOT gate. A preprint posted this
-week has no repository yet, so gating on it measures the paper's age rather
-than its quality, and it stalls whole runs on the one axis time fixes by
-itself. It sets the PRIORITY CEILING instead (AUTHORING §5-3):
-
-  Repro 2–3 -> label `코드 공개`      -> may reach ★★★
-  Repro 1   -> label `코드 공개 예정` -> caps at ★★
-  Repro 0   -> label `코드 미공개`    -> caps at ★★
-
-Rank within a ceiling by Relevance, then the /15 total, then Venue tier.
-Methodology stays the decision-grade axis it always was — a high-novelty paper
-without it is a lead, not a result.
-
-Reproducibility is the axis that goes wrong most often. Two hard rules:
-  · Evaluation on a public benchmark (LIBERO, CALVIN, SIMPLER, DexYCB …) is
-    NOT reproducibility evidence — it says the paper is comparable, not that
-    the artifact is obtainable. Never score >= 2 on benchmark coverage.
-  · A rationale scoring >= 2 while its own text says "코드 공개 미확인"
-    contradicts itself. If the signal is absent, the score is 0 and the bullet
-    says it is absent — the evidence step already looked.
-Every 📊 Reproducibility bullet quotes the substring it scored on.
-
-A paper missing exactly ONE of the four gate dimensions (scores 1, rest >= 2)
-is not dropped — it becomes a `## 🔍 근접 후보` row, re-checked every run by
-the carry-forward step above.
-
-VENUE PRIORITY — the arXiv comment field states acceptance when it exists.
-Record it on the paper header line and use it as the final rank tiebreak:
+VENUE PRIORITY — the tier AUTHORING §5-3 breaks ties on. The arXiv comment
+field states acceptance when it exists; record it on the paper header line:
 
   Tier 1  CoRL, RSS
   Tier 2  ICRA, IROS
@@ -241,8 +195,7 @@ Record it on the paper header line and use it as the final rank tiebreak:
   Tier 4  arXiv raw (cs.RO, cs.LG) — noisiest, lowest default weight
   —       NeurIPS/ICML robotics workshops — read only if pinned author
 
-A paper with no acceptance statement is `arXiv preprint` (Tier 4). Venue never
-gates and never overrides the rubric; it breaks ties only.
+A paper with no acceptance statement is `arXiv preprint` (Tier 4).
 
 CROSS-POLLINATION BUDGET — ONE adjacent-field paper per MONTH (the 🌱
 section). Before adding one, check this pillar's recent reports: if any report
@@ -254,8 +207,6 @@ target field rotates monthly:
   Month C  spatial-geometric / multimodal fusion representation (P2 adjacency)
   Month D  tactile sensing in prosthetics / neuroscience
 
-A 🌱 pick is scored on the same rubric and carries the same labels.
-
 
 ════════════════════════════════════════════════════════════════════════
 PROCEDURE
@@ -266,12 +217,12 @@ PROCEDURE
 
 2. READ `context/<PILLAR>.md` in full, then this pillar's recent reports at
    the two depths of SOURCES §2 — the last ~8 weeks as an id list, the last
-   ~2 weeks in full. The pillar definition and the Decision Log are what
+   ~2 weeks in full. The Scope and the Decision Log are what
    ranking is done against; the ~8-week id list is what a candidate is dropped
    against. Reading them after retrieval means ranking by keyword and
    re-surfacing a paper this pillar already ran.
 
-3. READ `scouting/AUTHORING.md` — the full format contract, §1 through §4 —
+3. READ `scouting/AUTHORING.md` — the full format contract, §1 through §8 —
    and `scouting/templates/report.md`.
 
 4. RETRIEVE, two passes, in the order above. Every pass drops a candidate
@@ -280,8 +231,8 @@ PROCEDURE
    applied the same way in each pass. Anti-topics filter what survives. Then
    run the carry-forward re-check and the Reproducibility evidence step.
 
-5. SCORE every surviving candidate on the five dimensions, then keep the top
-   3–5 that clear the four-dimension gate.
+5. SCORE every surviving candidate per AUTHORING §5, then keep the top 3–5
+   that clear the four-dimension gate.
 
 6. WRITE `scouting/<PILLAR>/<run date>.md` directly in Korean, into the
    template's form. A paper one axis short goes in the 🔍 table, one that is
@@ -326,7 +277,8 @@ PROCEDURE
      - Does every Reproducibility bullet quote the evidence string it scored
        on, with no score resting on benchmark coverage? (AUTHORING §5-2)
      - Is each paper's code label the one its Reproducibility score implies,
-       and does no ★★★ sit on a paper without a public artifact? (§5-3)
+       and does no ★★★ sit on a paper without a public artifact? (AUTHORING
+       §5-3)
      - Was every 🔍 row and Reproducibility-dropped 🚫 row from the last ~4
        weeks actually re-checked this run, not just copied forward?
      - Is each (a) line badges only — no Korean gloss, no body bullets — and
@@ -356,8 +308,8 @@ GIT
 The scheduled run must persist its output by pushing the single report file
 directly to `main`. No PR is created — neither by you nor by the harness.
 
-  git add scouting/<PILLAR>/${TODAY}.md
-  git commit -m "scout: <PILLAR> report ${TODAY}"
+  git add scouting/<PILLAR>/<run date>.md
+  git commit -m "scout: <PILLAR> report <run date>"
   git push origin HEAD:main
   git push --force-with-lease origin HEAD
 

@@ -12,8 +12,8 @@ the rewrite's `figures:` front-matter records (`S1.F1`), and every formula
 keeps its TeX in `<math alttext>`. That last one matters most — the math
 survives the trip as `$…$` instead of being lost to entity soup.
 
-Stdlib only, like every other script in this repo. `html.parser` rather than a
-regex sweep: the caption of a figure routinely contains nested `<math>`,
+Stdlib only, so the prompts can run it without `pip install`. `html.parser`
+rather than a regex sweep: the caption of a figure routinely contains nested `<math>`,
 `<span>` and another `<figure>`, and matching that with regex is how you
 silently truncate a caption at the first `>`.
 

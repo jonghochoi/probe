@@ -4,8 +4,9 @@ The format contract for `comparison/<slug>.md` — the comparison track. One fil
 one comparison: two or three papers held under one question, with everything
 that is not the divergence left to the papers' own pages.
 
-`.claude/prompts/compare.txt` defers to this file. Edit this first, then the
-code.
+`.claude/prompts/compare.txt` defers to this file for what a comparison must
+look like, and owns the procedure — which papers, how the rewrites and the
+originals are read, how to verify and commit. Edit this first, then the code.
 
 ## 1. The one rule
 
@@ -62,7 +63,7 @@ summary: >
 | `title` | The comparison's **question**, not a list of the papers' names. The cards below the header already name them |
 | `tagline` | One line: what reading these together tells you |
 | `stances` | **One per entry of `compares`, in the same order** — what that paper does about the question, in 20 characters or fewer (`끝까지 푼다`, `토큰으로 접는다`). The divergence in its shortest form. Positional like `sources`, so neither list can drift without the other noticing. A stance that needs a clause of mechanism to land is not a stance — that clause belongs in a `probe-matrix` cell |
-| `common` | One line, 30 characters or fewer: **the commitment all of them share** (`셋 다 이미지 평면에서 끝낸다`). Required, for the reason act 2 is load-bearing (§2-3) — papers that share nothing cannot diverge, and a comparison that cannot state the shared commitment in one line has not found it yet |
+| `common` | One line, 30 characters or fewer: **the commitment all of them share** (`셋 다 이미지 평면에서 끝낸다`) — act 2 in its shortest form (§2-3). Required |
 | `pillars` | Ours, comma-separated. Which pillars this question sits in |
 | `generated` | `YYYY-MM-DD HH:MM` — the clock as you write |
 | `generator` | Literal `compare/v1` |
@@ -80,10 +81,9 @@ the alias is optional there and the id is not. The card prints the fork
 **instead of** the tagline, because the two carry one thought and printing both
 is the same sentence twice on one card.
 
-Writing `common` is the check, not the caption. Three stances that leave no
-trunk are three papers that are merely different (§2-3), and the moment you
-cannot fill this key in one line is the moment to ask whether these are the
-right two or three papers.
+Writing `common` is the check, not the caption. The moment you cannot fill it
+in one line is the moment to ask whether these are the right two or three
+papers (§2-3).
 
 `analysis/` keys that are deliberately **absent**: `figures` · `appendix` ·
 `terms` · `metric` · `published` · `authors` · `links`. Each declares something
@@ -98,7 +98,7 @@ asks.
 ### 2-2. The prose never introduces a paper
 
 The page prints a card per compared paper above the argument — title, tagline,
-headline metric, pillars, and a link to the rewrite — built entirely from front
+arXiv id, headline metric, pillars, and a link to the rewrite — built entirely from front
 matter that is already written. That is the introduction. It is on the screen
 before the first sentence.
 
@@ -120,13 +120,18 @@ Act 1 starts at the question that puts these papers on one table.
 Not a title, and not a summary of any one paper.
 
 Act 2 is load-bearing and is the act most often skipped. Papers that share
-nothing cannot diverge — they are merely different. Naming the shared
-commitment is what makes act 3 a fork rather than a list.
+nothing cannot diverge — they are merely different, and act 3 degenerates into
+a list of unrelated methods. Naming the shared commitment is what makes act 3
+a fork rather than a list. The test: act 2 says something **no single one of
+these papers says about itself**. A shared commitment is visible only from
+outside, so act 2 that could have been copied off one paper's abstract has not
+found it yet.
 
 `###` subsections are free. **Not required, unlike a rewrite**: the quiz per
 section (R11), the `| English Keyword` heading line (R2), and the
 planted-context component (R5). All three exist to make one paper learnable,
-and a comparison teaches no paper.
+and a comparison teaches no paper — do not carry them over from
+`analysis/AUTHORING.md`.
 
 ### 2-4. Which fences are available
 
@@ -156,8 +161,8 @@ natural shape when the three answers cost the decisions different things.
 ### 2-5. Length
 
 A comparison that runs as long as a rewrite has stopped comparing. The rewrites
-it sits beside run 9,500–17,000 printed characters, median around 13,000; the
-build warns a comparison past 7,000.
+it sits beside run about 8,500–20,000 printed characters, median around
+13,000; the build warns a comparison past 7,000.
 
 **The count is prose only.** Every fenced block is stripped before measuring, so
 a `probe-matrix` costs nothing against the ceiling — a grid is scanned, not read
@@ -170,23 +175,31 @@ paragraph. It starts in a **cell note** — one clause of mechanism to make the
 cell land, then a second. Nothing counts that and nothing will; catching it is
 reading, which is what §4's last paragraph is for.
 
-When the ceiling does fire, the fix is never to compress the prose — it is to
-find the paragraph that started explaining one paper and either link to its
-rewrite or drop the axis. A note that has grown a second clause has the same
-two options and no third.
+When the ceiling does fire, the fix is never to compress the prose — a short
+explanation of one paper is still an explanation of one paper. Find the
+paragraph that started explaining one paper and either link to its rewrite or
+drop the axis. A note that has grown a second clause has the same two options
+and no third.
 
 ### 2-6. Where the facts come from
 
-Read the three rewrites first, to find where the papers diverge — they are the
-map, and they are why the track requires them. Then **confirm every fact and
-number in the arXiv original** before it goes in a cell.
+**Every number, mechanism and stated limitation in a cell is confirmed in the
+arXiv original**, never inherited from a rewrite, and `sources:` records which
+edition it was confirmed against. A number the paper does not give is not in a
+cell; a paper that is ambiguous on an axis gets a cell saying so — that is a
+finding, and one only a comparison produces.
 
-A comparison written only from rewrites inherits each rewrite's choices about
-what to foreground, so the axes end up being whatever three separate readings
-happened to emphasise. It is also the failure `analysis/AUTHORING.md` G1 names —
-a digest of a digest — at three times the scale.
+How the rewrites and the originals are read to get there, and why both, is the
+procedure's (`.claude/prompts/compare.txt`, SOURCES).
 
-`sources:` records which edition each fact was confirmed against.
+### 2-7. What publishes as literal text
+
+The renderer is the one `analysis/` uses, so the traps
+`analysis/AUTHORING.md` §3 names bind here as written: the three accepted math
+forms and nothing else (§3-1 — inline is `` $`x`$ ``), emphasis that never
+closes (§3-2), and a bare URL that is not a link (§3-3). Read that section
+before writing a cell or a note — a matrix cell is inline Markdown and falls
+into the same traps as prose.
 
 ## 3. `probe-matrix`
 
@@ -212,20 +225,24 @@ collapse into three summaries sharing a file.
 - `v` is required; `note` is one optional line under it.
 - Cells are placed by `of`, not by position, so they may be written in whatever
   order the axis reads best.
+- A cell is an answer. A paper with nothing on an axis gets a cell saying
+  **what it does instead** — never `해당 없음` or another placeholder; if no
+  such sentence exists, the axis is the wrong one.
 
 Columns run in `compares:` order and their heads link to the rewrites, so the
 third column and the third card are always the same paper.
 
 ## 4. What the build checks
 
-Each row is a hard failure under `--strict`, which is how pull requests build.
+Each row is a hard failure: the build rows under `--strict`, which is how
+pull requests build, and the last row as its own CI gate.
 
 | Rule | Enforced by |
 |---|---|
 | A compared paper with no rewrite (§1) — **not published**; `compares` count and duplicates; `sources` present, parallel and in step; `stances` present, parallel and within its width; `common` present and within its; `title` / `tagline` / `summary`; `generated` format; the file name is a slug | `site/builder/comparisons.py` |
 | `probe-matrix` payload — axis count, `k`, a cell per paper, `of` known and unique, `v` present (§3) | `site/builder/mdext/probefence.py` |
 | At least one `probe-matrix`; the length ceiling; an unavailable fence in a comparison; `probe-matrix` in a rewrite (§2-4, §2-5) | `site/builder/render.py` |
-| Term anchor ↔ definition pairing, unclosed `**`, math published as literal text | `site/builder/render.py`, shared with `analysis/` |
+| Term anchor ↔ definition pairing, unclosed `**`, math published as literal text (R4, §2-7) | `site/builder/render.py`, shared with `analysis/` |
 | Every `D#` cited exists in the Decision Log | `linters/check-decision-refs.py` |
 
 Verify before reporting a comparison done. `--check` reads front matter and
@@ -239,9 +256,6 @@ python3 linters/check-decision-refs.py
 
 What the code cannot see is the rule that decides whether a comparison was
 worth writing: whether the axes are the ones a reader would have asked about,
-and whether act 2 found a real shared commitment rather than a truism.
-
-Nor can it see the one failure that is easy to commit and invisible on the
-page — a cell note carrying a second clause of mechanism, which is one paper's
-detail wearing a comparison's clothes (§2-5). Read every note once more with
-only that question.
+and whether act 2 found a real shared commitment rather than a truism (§2-3).
+Nor can it see a cell note that has grown a second clause of mechanism (§2-5).
+Read every note once more with only that question.

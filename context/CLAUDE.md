@@ -1,7 +1,7 @@
 # context/CLAUDE.md
 
 Rules for the human-owned research context. `context/MASTER.md` is the global
-anchor; `context/P{0..5}.md` are the pillars a run actually reads. Repo-wide
+anchor; `context/P{0..4}.md` are the pillars a run actually reads. Repo-wide
 rules — commits, contributor-doc style, the local checks — are in the root
 `CLAUDE.md`.
 
@@ -22,10 +22,10 @@ fact in both is one of them going stale.
 
 ## Decision-Log entry format
 
-Every entry in a `P#.md` Decision Log section has exactly this shape (used 30×
-across the five pillars; the scouting and analyze prompts,
-`linters/check-decision-refs.py` and `site/builder/decisions.py` all
-pattern-match on it, so it is load-bearing, not cosmetic):
+Every entry in a `P#.md` Decision Log section has exactly this shape. The
+scouting and analyze prompts, `linters/check-decision-refs.py` and
+`site/builder/decisions.py` all pattern-match on it, so it is load-bearing,
+not cosmetic:
 
 ```
 #### [D<id>] <Decision title> (P<m>)
@@ -59,7 +59,7 @@ The allocation, which the lint reads back off these files:
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM, D7VC |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D5ZL, D3WV, D9QJ, D1WE |
 
-## When adding a new pillar (P6+)
+## When adding a new pillar (P5+)
 
 The pillars share one skeleton — owned by `context/_TEMPLATE.md` — and
 several surfaces key off
@@ -71,12 +71,12 @@ a half-added pillar silently drops out of the index and the lints:
       `[LIVING]` / `[AGENT-INPUT]` markers exactly — the pipeline
       pattern-matches on them.
 - [ ] **Draw ids for its decisions** — `D` + digit + two letters, checked
-      against every id already in the repo and against the retired list in
-      `linters/check-decision-refs.py`. Never reuse, renumber or re-issue.
-      Record them in the allocation table above, and give
-      `context/MASTER.md`'s pillar table the new row's count.
+      against every id already in the repo and against the `Retired:` line in
+      `context/MASTER.md` (the build and `linters/check-decision-refs.py`
+      both read it). Never reuse, renumber or re-issue.
+      Record them in the allocation table above.
 - [ ] **Add a row** to `context/MASTER.md` §4's pillar table — what the pillar
-      owns in one line, its decision range, and its file. The scope itself
+      owns in one line, its decision count, and its file. The scope itself
       belongs in the pillar file and is not restated there.
 - [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for it
       (replace every `<PILLAR>` token in `.claude/prompts/scouting.txt` per
@@ -93,7 +93,7 @@ a half-added pillar silently drops out of the index and the lints:
       from the build — its prompt and both pillar guards read this object, and
       an id missing here filters a search to nothing); and the `--p<n>` token
       pair plus its `[data-p]` rules in `site/builder/assets/site.css` and
-      `index.css` (plain CSS cannot loop). The lints need no edit — both glob
-      `context/P*.md`.
+      `index.css` (plain CSS cannot loop). The lints need no edit — they glob
+      the pillar files.
 - [ ] **Run `python3 linters/check-doc-links.py`** — the new file's path
       references, and every doc now referencing it, must resolve.

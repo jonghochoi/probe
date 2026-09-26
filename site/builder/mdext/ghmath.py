@@ -34,9 +34,9 @@ import re
 # no other code path touches a math token's content, so it cannot leak to HTML.
 PIPE_SENTINEL = "\ue000"
 
-# `<!-- … -->` provenance/retrieval logs. Present in most analyses, invisible on
-# github.com but plainly readable in view-source, so they are stripped from the
-# source rather than merely hidden with CSS.
+# `<!-- … -->` provenance/retrieval notes. Invisible on github.com but plainly
+# readable in view-source, so they are stripped from the source rather than
+# merely hidden with CSS.
 _HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 
 # An inline math span, used only by Hook A's table-row scan. The real tokenizing

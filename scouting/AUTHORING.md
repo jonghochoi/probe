@@ -1,11 +1,10 @@
 # Scouting Report Authoring Guide
-> **Version:** v1.36 (2026-08-18) · **Scope:** every `scouting/P#/YYYY-MM-DD.md`
-> — the dated reports the scheduled routine writes, plus the templates in
-> `scouting/templates/`.
+> **Scope:** every `scouting/P#/YYYY-MM-DD.md` — the dated reports the
+> scheduled routine writes — plus the skeleton in `scouting/templates/`.
 > This document is the single source of truth for that format.
-> `.claude/prompts/scouting.txt` owns the *procedure* (retrieval, scoring,
-> commit) and defers to this file for the output contract. Agent reads this
-> file before producing any output; change a rule here first, then the prompt.
+> `.claude/prompts/scouting.txt` owns the *procedure* (retrieval, evidence,
+> commit) and defers to this file for the output contract, the rubric
+> included. Change a rule here first, then the prompt.
 >
 > The reading site is a separate track with its own contract: `analysis/<id>.md`
 > is governed by `analysis/AUTHORING.md`, not by this guide. Nothing here applies to it.
@@ -14,77 +13,79 @@
 
 ## 1. Output File Convention
 
-The scouting routine runs **on a scheduled cadence**, once per pillar per run.
-Each run produces **one Korean file**:
+Each run of the routine writes **one Korean file** for one pillar. The
+cadence is the routine's schedule, set in `scouting/SETUP.md`.
 
 | File | Language | Purpose |
 |------|----------|---------|
-| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P0–P4); `YYYY-MM-DD` is the run date. The agent reads sibling files in the same `P#/` folder for de-duplication. |
+| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P0–P4); `YYYY-MM-DD` is the run date. |
 
-The report is written directly in Korean (no separate English file).
-Paper titles, arXiv links, and `P#/D#` tags stay verbatim in their
-original form (see §4-1), so de-duplication across previous reports
-works on those verbatim tokens regardless of prose language.
+There is no separate English file. Paper titles, arXiv links, and `P#/D#`
+tags stay verbatim (§4-1), so de-duplication across previous reports works on
+those tokens regardless of prose language.
 
 ---
 
-## 2. Emoji System
+## 2. Emoji System and Section Headers
 
-Emoji are used **only on section headers (`##`)** — exactly one, at the start of
-the header text after `## ` and a space. **`###` and deeper headers are plain
-text (no emoji)**, and emoji never appear in body text, bullet points, table
-cells, or code blocks.
+Every `##` header opens with one emoji from §2-1; §2-3 holds the rules.
 
-### 2-1. Scouting report `##` emojis
+### 2-1. Scouting report `##` sections
 
-The table also fixes the canonical **section order** (top to bottom). The
-🚫 dropped-candidates table is a reference appendix and sits LAST, after
-🔄; the decision content (papers, scores, context suggestions) stays up top.
+The table fixes the emoji, the exact Korean header text and the canonical
+**section order** (top to bottom). The decision content — papers, scores,
+context suggestions — stays up top; the 🚫 appendix sits last.
 
-| Emoji | Section |
-|-------|---------|
-| 🔑 | Reference Legend (참조 약어 풀이) |
-| 🥇 | Paper N — PRIORITY ★★★ |
-| 🥈 | Paper N — PRIORITY ★★ |
-| 🥉 | Paper N — PRIORITY ★ |
-| 🌱 | Paper N — CROSS-POLLINATION (인접 분야 픽) |
-| 📊 | Scoring Summary (점수 요약) |
-| 🔍 | Near-Miss Candidates (근접 후보) |
-| 💡 | Context Suggestions (컨텍스트 제안) |
-| 🔄 | Run-over-Run Synthesis (직전 리포트 대비 종합) |
-| 🚫 | Candidate Papers That Did Not Pass Filter (필터 통과 실패 후보 논문) |
+| Emoji | `##` header (verbatim) | Holds | Rules |
+|-------|------------------------|-------|-------|
+| 🔑 | `## 🔑 참조 약어 풀이` | Reference Legend — the `P#` / `D#` codes this report cites | §3-1 |
+| 🥇 🥈 🥉 | `## 🥇 논문 N — 우선순위 ★★★` | One surfaced paper each. The medal is its rank in the report (🥇 first); the stars are its priority after the ceiling, so a capped top paper reads `## 🥇 논문 1 — 우선순위 ★★` | §3, §5-1, §5-3 |
+| 🌱 | `## 🌱 논문 N — 인접 분야 픽` | The cross-pollination pick — an adjacent-field paper, scored on the same rubric and carrying the same label | §5 |
+| 📊 | `## 📊 점수 요약` | Scoring Summary — the rubric rationale for each surfaced paper | §5-1, §5-2 |
+| 🔍 | `## 🔍 근접 후보` | Near-Miss Candidates — papers one gate axis short, and carried-forward candidates | §5-4 |
+| 💡 | `## 💡 컨텍스트 제안` | Context Suggestions — proposed edits to `context/P#.md` | §7-1 |
+| 🔄 | `## 🔄 직전 리포트 대비 종합` | Run-over-Run Synthesis — this run against the recent reports | §7-2 |
+| 🚫 | `## 🚫 필터 통과 실패 후보 논문` | Candidate Papers That Did Not Pass Filter — each with its reason | §4-5, §7-3 |
 
-Retrieval-pass provenance — including verbatim disclosure of any tool
-failure that is still failing at the end of the run (e.g.
-`일부 쿼리 HTTP 429 실패`) — is summarized in the `Papers scanned:` header
-line, not a dedicated section. A retry that eventually succeeded is not a
-failure and is not reported at all (§6).
+### 2-2. Subsection (`###`) headers
 
-### 2-2. Subsection (`###`) headers are plain
+Every paper section (🥇 🥈 🥉 🌱) carries the same four subsections, read as one
+story — tie → contribution → what it means for us → what to check:
 
-The per-paper `###` subsections — (a) P# / D# touched, (b) what is genuinely
-new, (c) decision implication, (d) failure mode to probe first — and the
-Context-Suggestions `###` subsections carry **no emoji**.
+| `###` header (verbatim) | Holds |
+|-------------------------|-------|
+| `### (a) 관련 Pillar / Decision` | The badge line only (§3-1) |
+| `### (b) 핵심 기여` | What the paper is and does, and what is genuinely new against the field |
+| `### (c) 시사점` | What it could mean for us, in plain terms (`공개 기준점 확보`, `도입 비용 낮음`) |
+| `### (d) 먼저 확인할 점` | The paper's own limits and the cheapest transfer caveat |
+
+💡 carries three:
+
+| `###` header (verbatim) | Holds |
+|-------------------------|-------|
+| `### Tracked literature` | Replace, add or remove a pin within the pillar's cap (`context/P#.md` §3-2), with its arXiv link |
+| `### Decision Log` | Trigger a deferred alternative, revise a default, or propose a new decision — naming the evidence this run moved |
+| `### Anti-topics` | A candidate exclusion rule this run's filter surfaced |
 
 ### 2-3. Rules
 
 - One emoji per `##` header, at the start, after `## ` and a space.
-- No emoji on `#`, on `###` or deeper, on table headers, in table cells, or in
-  body text.
-- Do not use an emoji not listed in this guide (§2-1).
+- No emoji on `#`, on `###` or deeper, on table headers, in table cells, in
+  code blocks, or in body text.
+- Do not use an emoji not listed in §2-1.
 - Emojis are not translated — use the symbols exactly as listed.
 
 #### Correct example
 ```markdown
-## 🥇 Paper 1 — PRIORITY ★★★
-### (a) P# / D# touched
-### (b) What is genuinely new
+## 🥇 논문 1 — 우선순위 ★★★
+### (a) 관련 Pillar / Decision
+### (b) 핵심 기여
 ```
 
 #### Incorrect example
 ```markdown
-## Paper 1 — PRIORITY ★★★ 🥇             ← emoji at end, wrong
-### 🎯 (a) P# / D# touched               ← emoji on H3, wrong (## only)
+## 논문 1 — 우선순위 ★★★ 🥇               ← emoji at end, wrong
+### 🎯 (a) 관련 Pillar / Decision         ← emoji on H3, wrong (## only)
 The policy achieved ✨ great results.     ← emoji in body text, wrong
 ```
 
@@ -104,7 +105,7 @@ Links must appear:
 - In the Candidate Papers table (`Link` column)
 - Inline in Context Suggestions when an arXiv ID is mentioned
 
-The 📊 section carries no table and therefore no `Link` column (§4-5) — a
+The 📊 section carries no table and therefore no `Link` column (§5-1) — a
 paper scored there already has its link in its own header.
 
 Do not fabricate arXiv IDs. Verify that the URL resolves before including it.
@@ -119,11 +120,9 @@ decode the report without opening `context/P#.md`.
 **Only codes actually cited in this report.** Never list a code the body
 does not use; never list competitor codenames, Identity, or the falsifier.
 
-**Placement.** A single `## 🔑 Reference Legend` section, immediately
-after the top metadata block and immediately before the first
-`## 🥇 Paper` section. It is the first content section of the report.
-There is no boilerplate intro blockquote — it would repeat in every file and
-carry no per-report information, so the report goes metadata → legend.
+**Placement.** A single `## 🔑 참조 약어 풀이` section, immediately after the
+top metadata block and before the first paper section — the report goes
+metadata → legend, with no boilerplate intro between them.
 
 **Format.** One compact table, the pillar row first and the decision rows in
 order of first appearance in the body — a `D#` id is opaque and carries no
@@ -146,7 +145,7 @@ across reports. A scouting report is single-pillar, so in practice one pillar
 color plus amber decisions appear.
 
 ```markdown
-## 🔑 Reference Legend
+## 🔑 참조 약어 풀이
 
 | Code | Meaning |
 |------|---------|
@@ -186,19 +185,18 @@ not linked. The legend rows themselves are not self-linked.
 paper's (a) section) is badges only — `[![P2](…)](#ref-P2) /
 [![D3AG](…)](#ref-D3AG) [![D8EJ](…)](#ref-D8EJ)` — never a badge followed by a
 parenthetical Korean description. The badge alone names the tie; its
-meaning is in the legend and the paper-specific angle is in the (a)
+meaning is in the legend and the paper-specific angle is in the (b)–(d)
 개조식 bullets below. Separate the pillar badge from the decision badges
 with ` / `, and decision badges from each other with a **single space**.
 
-**Paper sections stay paper-focused.** The four per-paper sections read as
-one story — (a) tie → (b) 핵심 기여 → (c) 시사점 → (d) 먼저 확인할 점 — and
-(a) is the badge line only (no body bullets; the substance starts in (b)).
-In (b)–(d), **do not plaster internal decision bookkeeping**: avoid `D#`
-codes, `deferred`, config-key / `*.yaml` names in the prose. A reader
-should be able to follow the paper without stopping to ask "what is D3AG?
-what is deferred?". The decision link is carried by the (a) badges; concrete
-context-edit proposals (which `D#` to move, which deferred candidate to
-trigger) belong in 💡 Context Suggestions, the section built for them.
+**Paper sections stay paper-focused.** (a) is the badge line only — no body
+bullets; the substance starts in (b) (§2-2). In (b)–(d), **do not plaster
+internal decision bookkeeping**: avoid `D#` codes, `deferred`, config-key /
+`*.yaml` names in the prose. A reader should be able to follow the paper
+without stopping to ask "what is D3AG? what is deferred?". The decision link
+is carried by the (a) badges; concrete context-edit proposals (which `D#` to
+move, which deferred candidate to trigger) belong in 💡, the section built
+for them.
 
 ---
 
@@ -221,7 +219,7 @@ verbatim in their original form versus which prose is Korean.
 | Reference Legend | Meaning column in **English** (mirrors the English code definitions — no Korean); codes + `<a id="ref-…">` anchors verbatim |
 | Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
 | arXiv links | Keep verbatim |
-| Section headers | Korean header text (see §4-3); `##` keeps its emoji, `###` plain |
+| Section headers | Verbatim from §2-1 and §2-2 (§4-3) |
 
 ### 4-2. Technical term glossary (standard translations)
 
@@ -258,26 +256,12 @@ verbatim in their original form versus which prose is Korean.
 | Action expert | 액션 전문가 |
 | Flow matching | 플로우 매칭 |
 
-### 4-3. Header translation reference
+### 4-3. Section headers are fixed strings
 
-`##` headers carry the §2 emoji; `###` subsections are plain.
-
-| English header (`##`) | Korean header (`##`) |
-|----------------|--------------|
-| 🔑 Reference Legend | 🔑 참조 약어 풀이 |
-| 🥇 Paper N — PRIORITY ★★★ | 🥇 논문 N — 우선순위 ★★★ |
-| 🥈 Paper N — PRIORITY ★★ | 🥈 논문 N — 우선순위 ★★ |
-| 🥉 Paper N — PRIORITY ★ | 🥉 논문 N — 우선순위 ★ |
-| 🌱 Paper N — CROSS-POLLINATION | 🌱 논문 N — 인접 분야 픽 |
-| 📊 Scoring Summary | 📊 점수 요약 |
-| 💡 Context Suggestions | 💡 컨텍스트 제안 |
-| 🔄 Run-over-Run Synthesis | 🔄 직전 리포트 대비 종합 |
-| 🚫 Candidate Papers That Did Not Pass Filter | 🚫 필터 통과 실패 후보 논문 |
-| (a) P# / D# touched | (a) 관련 Pillar / Decision |
-| (b) Key contribution | (b) 핵심 기여 |
-| (c) Takeaway for us | (c) 시사점 |
-| (d) What to check first | (d) 먼저 확인할 점 |
-| (sub-sections) | (하위 섹션) |
+Every `##` and `###` header is copied verbatim from §2-1 and §2-2. It is not
+translated back to English, reworded, or extended — no `(월 1회)` on 🌱, no
+paper name in a `###`. The English names the tables give are for this guide's
+prose only.
 
 ### 4-4. Register — 개조식 (outline form, 명사형 종결)
 
@@ -307,26 +291,20 @@ since they are read, not scanned; only the scouting report is 개조식.)
 
 Two surface conventions (markdown, not register):
 
-- Use bold (`**text**`) for the bullet label and for emphasis.
-- When a bold span ends just before a Korean particle, do **not** close the
-  `**` right after a closing paren / punctuation glued to the particle —
-  `**용어(gloss)**을` renders the `**` literally (GFM right-flanking rule: a
-  `**` preceded by punctuation must be followed by whitespace or punctuation
-  to close). Close the bold on the Korean term and leave the gloss + particle
-  plain: `**용어**(gloss)을`.
+- Use bold (`**text**`) for the bullet label and for emphasis — and never
+  close it between a paren and a particle (§4-8).
 - Code blocks and inline code (`` `text` ``) are kept verbatim.
 
-**Meaning is never altered for style.** Restructuring prose into 개조식 must
-not add, drop, or reorder any fact, number, date, quotation, citation
-polarity, causal direction, or `P#`/`D#` / arXiv / formula token — the same
-fidelity bar that governs every edit.
+**Meaning is never altered for style.** Restructuring prose into 개조식, a
+table or bullets (§4-5) must not add, drop, or reorder any fact, number, date,
+quotation, citation polarity, causal direction, or `P#`/`D#` / arXiv / formula
+token.
 
 ### 4-5. Scannability — repetitive structure goes in a table
 
 A decision-grade report is *scanned* by a reader hunting for the one row
 that matters, not read prose-first end to end. §4-4 governs the register
 inside a bullet; this rule governs the *layout above the sentence*.
-It applies to every `scouting/` output.
 
 - **Repetitive records become a table, never a run-on sentence.** Wherever
   the report enumerates the same shape N times — dropped paper → reason
@@ -339,13 +317,6 @@ It applies to every `scouting/` output.
   newline ends the row, and a leading `*`/`-` renders as text, not a bullet.
   To stack several items in one cell, join them with `<br>` and a literal
   bullet glyph: `• a<br>• b<br>• c`.
-- **No 📊 summary score table.** The 📊 section is the per-paper rationale
-  only (one bold head carrying the total — `**HapTile (13/15)**` — then a
-  bullet per dimension). A separate scores table duplicates it, so it is
-  dropped.
-- **The rubric is five fixed dimensions and the gate is four of them** — §5
-  is authoritative. Never add, drop, or rename a dimension in a report, and
-  always show all five bullets per paper.
 - **Conclusion before enumeration.** When a long list resolves to one
   verdict ("10편 전원 재등장·제외"), state the verdict first, then the list —
   the reader must not parse every item to reach the point.
@@ -354,18 +325,8 @@ It applies to every `scouting/` output.
   cell, do not belong inline in Korean sentences. Put them in a dedicated
   cell; never repeat an id a sibling cell already shows (e.g. the 🚫
   `Paper` column drops the id its `Link` column already carries).
-- **`Papers scanned:` is a one-line summary**, not a full query log — §6
-  caps it and names what belongs in it. A retrieval funnel restated anywhere
-  else in the report (typically in 🔄) is a duplicate and is dropped.
 - **No enumeration markers in body.** 개조식 uses bullets (§4-4); do not fall
   back to `①②` / `1. 2.` / `첫째·둘째` running inside a sentence.
-- **P#/D# codes render as color-coded badges** (§3-1) — pillar palette for
-  `P#`, one shared amber for every `D#` — so the decision ties in each
-  paper's (a) line read as scannable chips rather than plain inline text.
-
-These are fidelity-neutral: restructuring prose into a table or bullets must
-not add, drop, or reorder any fact, number, date, citation, or `P#`/`D#` /
-arXiv token — the §4-4 fidelity bar still binds.
 
 ### 4-6. No raw `~` in prose — it is a strikethrough delimiter on GitHub
 
@@ -466,14 +427,22 @@ is the only defense — nothing errors and review is what has to notice.
 
 ## 5. Scoring Contract
 
-The rubric is **five dimensions, 0–3 each, total /15** — Relevance · Novelty ·
-Reproducibility · Methodology · Sim2Real. The per-dimension definitions live in
-`.claude/prompts/scouting.txt`; this section owns what the report must *show*
-and what the gate quantifies over.
+The rubric is **five fixed dimensions, 0–3 each, total /15**. A report never
+adds, drops, or renames one, and always shows all five for every paper it
+scores. This section owns the dimensions, the gate, the ceiling and the rank
+order; the prompt owns how the evidence is fetched.
+
+| Dimension | What it scores |
+|---|---|
+| Relevance | Which `P#` / `D#` the paper touches, and how directly |
+| Novelty | Genuinely new, or a delta over tracked work |
+| Reproducibility | Whether the artifact is obtainable — scored only from quoted evidence (§5-2) |
+| Methodology | Experimental rigor — baselines, ablations, eval soundness, seeds / variance. 0 anecdotal · 1 weak · 2 solid · 3 strong and honest about limits. A high-novelty paper without it is a lead, not a result |
+| Sim2Real | Real-robot evidence, or sim-only |
 
 ### 5-1. The surfacing gate is four dimensions
 
-A paper is surfaced as a `## 🥇 / 🥈 / 🥉` section when **Relevance, Novelty,
+A paper is surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section when **Relevance, Novelty,
 Methodology and Sim2Real are each ≥ 2**. Reproducibility is scored, shown, and
 used for ranking (§5-3), but it is **not** part of the gate.
 
@@ -493,11 +462,14 @@ tables, and the report then buries the week's strongest paper in a row whose
 priority at ★★ (§5-3); it never removes the paper from the report.
 
 The metadata field is `**Papers surfaced (4축 게이트 통과):**` (§6). When fewer
-than 3 papers clear the gate, say so and do not pad.
+than 3 papers clear the gate, say so and do not pad — a paper carried by two
+strong axes and a zero does not surface.
 
-The `## 📊` section carries the rationale for exactly those surfaced papers:
-one bold head per surfaced paper, and no head for a paper the report did not
-surface. Its five bullets sum to the total the head states.
+The `## 📊` section carries the rationale for exactly those surfaced papers and
+**no table**: one bold head per surfaced paper carrying its total
+(`**HapTile (13/15)**`), then one 개조식 bullet per dimension
+(`- Relevance 3 — <근거>`), summing to that total. No head for a paper the
+report did not surface.
 
 ### 5-2. Reproducibility is scored from quoted evidence, never inferred
 
@@ -544,9 +516,12 @@ plain text (emoji stay on `##` headers — §2):
 
 A paper the team cannot run yet is still worth reading, but it does not
 outrank one they can — so `★★★` is reserved for a paper with an obtainable
-artifact. Rank within a ceiling by Relevance, then by the /15 total.
+artifact. Rank within a ceiling by Relevance, then by the /15 total, then by
+venue tier — the Venue Priority table `context/MASTER.md` §5 owns (the prompt
+carries a copy), read from the arXiv comment field and recorded on the paper header line. Venue
+breaks ties only; it never gates and never overrides the rubric.
 
-### 5-4. 🔍 Near-Miss Candidates
+### 5-4. Near-miss candidates
 
 `## 🔍 근접 후보` is the standing home for two kinds of paper, and it is the
 mechanism that makes "재검토 권고" actually happen:
@@ -572,7 +547,7 @@ One table, most recent first, no per-paper `###` subsections:
 ```markdown
 | Paper | Link | R·N·M·S2R | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·2·2 | 공개 예정 | 저장소 공개 시 승격 |
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·2·1 | 공개 예정 | 실로봇 결과 공개 시 재평가 |
 ```
 
 Omit the section when it has no rows. A paper appears in 🔍 or in 🚫, never
@@ -601,7 +576,8 @@ The block between the H1 and the first `---` is exactly two lines:
 - **`Papers scanned` is capped at 400 characters** and names, at most: the
   source passes run, an order-of-magnitude count per pass, and any failure
   still unresolved when the run ended. It is a provenance line, not an audit
-  trail — a reader checks that the sweep ran, then moves on.
+  trail — a reader checks that the sweep ran, then moves on. It is also the
+  report's only provenance: no section restates the retrieval (§7-2).
 
 What the line does **not** carry: per-query breakdowns, stage-by-stage funnel
 arithmetic (`661건 → 507편 → 226편 → 190편 → 19편`), per-pin request counts,
@@ -620,11 +596,11 @@ failing at the end of the run is disclosed, verbatim.
 §4-4 governs the register inside a bullet and §4-5 the layout above it. This
 section governs what each `##` section is allowed to repeat.
 
-### 7-1. 💡 Context Suggestions — a proposal is made once
+### 7-1. Context Suggestions — a proposal is made once
 
-A suggestion the human has not yet acted on is **still open**, not new. Re-stating
-it every run buries the run's actual finding under a paragraph the reader has
-already read and already decided about.
+In `## 💡 컨텍스트 제안`, a suggestion the human has not yet acted on is **still
+open**, not new. Re-stating it every run buries the run's actual finding under
+a paragraph the reader has already read and already decided about.
 
 - A proposal already made in this pillar's last ~2 weeks of reports is **not
   restated**. It is rolled up into one line naming the open proposals and the
@@ -637,16 +613,16 @@ already read and already decided about.
 - Escalation is a count, not a re-argument. `3회 연속 관찰` is a fact worth one
   clause; the rationale stays where it was first written.
 - A proposal disappears from the rollup when the human lands it in
-  `context/P#.md` — that file is the accept/decline record, and the agent
-  never edits it (§1).
+  `context/P#.md` — that file is the accept/decline record, and it is
+  read-only to the agent (`context/CLAUDE.md`).
 - A subsection with nothing new says so in one bullet (`제안 없음 — …`) and stops.
 
-### 7-2. 🔄 Run-over-Run Synthesis — 3–5 bullets
+### 7-2. Run-over-Run Synthesis — 3–5 bullets
 
-Cover, one bullet each and only when the run has something to say: papers
-already covered (verdict first), contradictions with recent findings,
-Decision-Log triggers, 🔍 promotions this run, Anti-topic filter health as a
-count, already-analyzed dedup count.
+`## 🔄 직전 리포트 대비 종합` covers, one bullet each and only when the run has
+something to say: papers already covered (verdict first), contradictions with
+recent findings, Decision-Log triggers, 🔍 promotions this run, Anti-topic
+filter health as a count, already-analyzed dedup count.
 
 - **Never restate the retrieval funnel.** Anti-topic filter health is a count
   and a reason (`5편 제외 — WAM 아키텍처 4편, Sim2Real 미달 1편`), not the
@@ -669,3 +645,21 @@ same row.
 - One table row is **one paper**. A cell like `Faster-WAM 외 2편 (ω-0, WAM-Diff2)`
   against a single link hides two papers behind a third one's id; give each its
   own row.
+
+---
+
+## 8. Enforcement
+
+A report goes straight to `main` with no PR, so the routine runs
+`linters/check-scouting-format.py` on its own report before committing
+(`.claude/prompts/scouting.txt`, LINT step) and CI re-runs it on every push to
+`main` as the backstop. The lint binds reports dated on or after its
+`_CONTRACT_EFFECTIVE`; the gate arithmetic binds from `_GATE_EFFECTIVE`.
+
+| Rule | Checked by |
+|---|---|
+| H1 form and its date against the filename; the two-line metadata block, the 400-character cap, `Papers surfaced` a bare integer equal to the paper-section count (§6) | lint |
+| Every `##` opens with a §2-1 emoji, sections in §2-1 order, no emoji on `###` (§2) | lint |
+| Five 📊 bullets per head summing to its total; each surfaced paper clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header; `★★★` only on `코드 공개` (§5) | lint |
+| One paper per 🚫 / 🔍 row (§7-3) | lint |
+| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); Reproducibility quoting its evidence (§5-2); 🔍 carry-forward and expiry (§5-4); 💡 rollup and 🔄 discipline (§7-1, §7-2) | the routine's SELF-CHECK and the reader — nothing parses them |

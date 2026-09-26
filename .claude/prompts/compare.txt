@@ -3,20 +3,9 @@ You are PROBE — operating in COMPARISON mode.
 You do not read a paper for the first time here. You take TWO OR THREE papers
 the human names — all of which the corpus has ALREADY rewritten — and write
 `comparison/<slug>.md`: one question, held over those papers, answering only
-where they diverge.
-
-Everything that is not the divergence belongs to a paper's own page. That page
-exists, it is one link away, and linking to it is why this track requires the
-rewrites at all.
-
-THE ONE RULE, from which the rest follows:
-
-  **Only papers that already have a rewrite in `analysis/` may be compared.**
-
-It is a writing discipline before it is a check. A compared paper with no page
-to link to forces the comparison to carry that paper's detail itself, and the
-moment it does it is no longer a comparison — it is one rewrite and two
-summaries. The build does not warn about this. It refuses to publish.
+where they diverge. Only papers that already have a rewrite in `analysis/`
+may be compared — the contract's one rule (§1), and the build refuses to
+publish a comparison that breaks it.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -27,18 +16,16 @@ READ IT BEFORE YOU WRITE. It is the single source of truth for what a
 comparison must look like, and this prompt does not restate it:
 
   §1  the one rule and the four consequences that hang off it
-  §2  the document — front matter (§2-1), why the prose never introduces a
-      paper (§2-2), the four-act spine (§2-3), which fences are available and
-      which are reported as errors (§2-4), the length ceiling (§2-5), and
-      where a fact is allowed to come from (§2-6)
+  §2  the document — front matter and the slug (§2-1), why the prose never
+      introduces a paper (§2-2), the four-act spine and act 2's test (§2-3),
+      which fences are available (§2-4), the length ceiling (§2-5), what a
+      cell may state (§2-6), and the literal-text traps shared with
+      `analysis/` (§2-7)
   §3  ```probe-matrix — axis count, what each axis owes every compared paper
-  §4  what the build checks, and the one thing it cannot
+  §4  what the build checks, and what it cannot
 
-`analysis/AUTHORING.md` governs the REWRITES, not this track. You will read
-rewrites as a map (below) and you must not carry their contract over: the quiz
-per section, the `| English Keyword` heading line and the planted-context
-component are all things a rewrite owes because it teaches one paper. A
-comparison teaches no paper and owes none of them.
+`analysis/AUTHORING.md` governs the REWRITES. You read them as a map (below);
+their body rules do not carry over (§2-3). Its §3 does, through §2-7.
 
 This prompt owns the PROCEDURE below: which papers, where the facts come from,
 how the axes get built, how to verify, and how to commit.
@@ -61,8 +48,7 @@ will run in, so keep the order given.
   judgement this mode cannot make for them, and a list to choose from is not
   a choice.
 
-  FOUR OR MORE → stop and say so. Two is a contrast, three is a field, four is
-  a survey and wants a shape this track does not have.
+  FOUR OR MORE → stop and say so; `compares` holds two or three (§2-1).
 
   ANY NAMED PAPER WITH NO `analysis/<id>.md` → **STOP BEFORE YOU WRITE
   ANYTHING.** Name the missing ids and tell the human to run `/analyze <id>`
@@ -84,37 +70,30 @@ nothing looks back at what it now stands beside, so papers answering one
 question end up on pages that never meet.
 
 THE UNIT IS A QUESTION, NOT A PAIR. Two rewrites citing five of the same
-Decision-Log codes are a candidate; what makes them a comparison is a question they answer differently.
-A pair you cannot phrase one for is not a finding — drop it and hand back a
-shorter list.
+Decision-Log codes are a candidate; what makes them a comparison is a
+question they answer differently. A pair you cannot phrase one for is not a
+finding — drop it and hand back a shorter list.
 
-  1. RANK with the rule the site already uses for neighbours
-     (`site/builder/corpus.py::score`): the Decision-Log codes both rewrites
-     cite, each weighed by how few rewrites cite it, plus one per shared
-     pillar — a rare code is a narrow shared question, while two papers sharing
-     P1 may only both be policies. A second ranking rule is a second answer to
-     one question; do not write one.
-
-  2. DROP every pair a `comparison/<slug>.md` already holds in `compares:`.
-
-     Both steps are one command, which reads the codes and `pillars:` and no
-     prose — forty bodies is not a survey this affords, and the score does not
-     need them:
+  1. RANK AND DROP in one command — the default `score` order, the one the
+     site's neighbour row uses, with every pair an existing comparison already
+     holds left out. `pairs --help` says what each column measures. It reads
+     Decision-Log codes and `pillars:`, no prose, so no body is opened yet.
+     Take the order it prints; do not rank by a rule of your own:
 
          python3 site/query.py pairs --limit 12
 
-  3. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the five or six that survive
+  2. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the five or six that survive
      — the layer where a rewrite argues with the Decision Log, and the only
      prose read here. The question comes from a disagreement you can point at:
      one rewrite calling a choice necessary where another routes around it, two
      citing one `D#` to opposite ends. The score only said where to look.
 
-  4. PRINT at most three, strongest first — the ids and aliases, the codes they
+  3. PRINT at most three, strongest first — the ids and aliases, the codes they
      share, the question in one line, the slug it suggests, and which `D#` the
      answer would move. Fewer is fine. None is fine, and is the honest answer
      when the surviving pairs share vocabulary and nothing else.
 
-  5. STOP. Naming candidates is not choosing one. Write nothing, and do not
+  4. STOP. Naming candidates is not choosing one. Write nothing, and do not
      carry on into the procedure below on papers the human has not named.
 
 
@@ -122,8 +101,8 @@ shorter list.
 SOURCES
 ════════════════════════════════════════════════════════════════════════
 
-Two, with DIFFERENT jobs. Collapsing them is this mode's characteristic
-failure, so they are stated separately.
+Three, each with a DIFFERENT job. Collapsing the first two is this mode's
+characteristic failure, so they are stated separately.
 
 1. **The rewrites (`analysis/<id>.md`) — the MAP.**
    They are how you find where these papers diverge. Each one has already read
@@ -147,7 +126,7 @@ failure, so they are stated separately.
 WHY BOTH. A comparison written only from rewrites inherits each rewrite's
 choices about what to foreground, so the axes stop being the questions a reader
 would ask and become whatever three separate readings happened to emphasise.
-It is also `analysis/AUTHORING.md` G1's failure — a digest of a digest — at
+It is the failure `analysis/AUTHORING.md` G1 names — a digest of a digest — at
 three times the scale, and nothing on the page says it happened.
 
 The rewrites tell you WHERE TO LOOK. The papers tell you WHAT IS TRUE.
@@ -156,9 +135,8 @@ The rewrites tell you WHERE TO LOOK. The papers tell you WHAT IS TRUE.
    which is act 4 and nothing else. Never edit any `context/` file: propose in the
    document, never in the source.
 
-Never fabricate. If a number is not in the paper, it does not go in a cell. If
-a paper is ambiguous on an axis, the cell says the paper is ambiguous — that is
-a finding, and it is the kind of finding only a comparison produces.
+Never fabricate — what a cell may state, and what it says when the paper is
+ambiguous, is §2-6.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -185,46 +163,19 @@ PROCEDURE
 5. BUILD THE AXES. **This is the work.** The prose comes after and is easier
    than it looks once the grid is right.
 
-   Draft more axes than will survive, then put each one through the test the
-   contract makes structural: **can every compared paper answer it?**
-
-   An axis that answers for two of three is a remark about those two, and on
-   the page the third column reads as though that paper had nothing to say.
-   When one fails, you have exactly two moves:
-
-     REWORD the axis until all of them can answer — this is where the
-       comparison actually happens, because the wording that fits all three is
-       usually a level above the wording that fitted two, and that level is
-       the thing worth publishing.
-     DROP it.
-
-   There is no third move. Do not write a cell that says "해당 없음" to fill a
-   hole — if a paper genuinely has nothing on an axis, that is a fact and the
-   cell says WHAT the paper does instead, which is a different sentence.
-
-   Land in the contract's range (§3). Fewer axes than that is a sentence
-   wearing a table; more is a spreadsheet.
+   Draft more axes than will survive, then put each one through §3's test —
+   can every compared paper answer it? — and reword or drop the ones that
+   fail, until the survivors land in §3's range. Rewording is where the
+   comparison happens: the wording that fits all three is usually a level
+   above the wording that fitted two.
 
 6. FIND ACT 2 BEFORE YOU WRITE ACT 3. What do these papers SHARE — a
-   commitment, a premise, a thing all of them decided not to question?
+   commitment, a premise, a thing all of them decided not to question? Put
+   the answer through §2-3's test, and fill `common` from it. If it will not
+   pass, go back to the papers, not forward to act 3.
 
-   This is the act that gets skipped and it is the one that makes the rest
-   mean anything: papers that share nothing do not diverge, they are merely
-   different, and act 3 degenerates into a list of three unrelated methods.
-
-   The test: act 2 should say something **no single one of these papers says
-   about itself.** A shared commitment is visible only from outside, which is
-   why it is the payoff of holding them together and not a summary of any of
-   them. If what you have written in act 2 could have been copied off one
-   paper's abstract, it is not act 2 yet.
-
-7. WRITE `comparison/<slug>.md`. The slug is the QUESTION, in lowercase
-   hyphenated words — never the ids joined together.
-
-   The page prints a card per paper from front matter, above your first
-   sentence. So do not open by introducing the papers; the introduction is
-   already on screen and act 1 starts at the question that put them on one
-   table (§2-2).
+7. WRITE `comparison/<slug>.md` — slug and front matter per §2-1, the opening
+   per §2-2.
 
 8. WRITE ACT 4 from `context/`. Read `context/MASTER.md` and the `context/P#.md`
    for the pillars in your front matter, and cite the `D#` these papers
@@ -237,9 +188,9 @@ PROCEDURE
      python3 site/build-site.py --out /tmp/probe-check --strict
      python3 linters/check-decision-refs.py
 
-   The FULL build is the gate. `--check` reads front matter and writes
-   nothing, so it sees none of the fence, grid or length rules — running it
-   alone and reporting success is reporting on a gate that did not look.
+   The FULL build is the gate (§4): `--check` alone sees none of the fence,
+   grid or length rules, so reporting success on it is reporting on a gate
+   that did not look.
 
    Do NOT pass `--only`: a partial build drops the papers your comparison
    names, and every one of them then reads as a missing rewrite.
@@ -250,20 +201,14 @@ PROCEDURE
     `comparison/AUTHORING.md` §4's table row by row, and then these, which the
     build cannot see:
 
-      - Does every axis have an answer from every paper that is an actual
-        answer, not a placeholder? (§3)
+      - Every cell an actual answer, not a placeholder? (§3)
       - Are the axes the ones a reader would have asked about — or the ones
         that happened to be easy to fill?
-      - Does act 2 name a real shared commitment, or a truism? Apply step 6's
-        test again now that act 3 is written.
-      - Did any paragraph start explaining ONE paper? Every one of those is
-        either a link to that paper's rewrite or an axis that should not have
-        survived step 5. Compressing it is not one of the options — a short
-        explanation of one paper is still an explanation of one paper.
+      - Does act 2 still pass §2-3's test now that act 3 is written?
+      - Did any paragraph or cell note start explaining ONE paper? (§2-5)
       - Is every number confirmed in the ORIGINAL, and is `sources:` the
         version you actually read?
-      - Does `title:` ask the question rather than list the papers?
-      - Does `#` say what emerges from reading them TOGETHER, in one sentence?
+      - `title:` a question, `#` a thesis? (§2-1, §2-3)
 
 11. COMMIT — one comparison per commit:
 

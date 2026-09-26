@@ -19,7 +19,7 @@
  *
  * This page is also the only one that knows the whole corpus, so it is where
  * the 새 글 set is kept honest: it seeds the set on first sight (silently —
- * arriving to be told all 32 papers are new is not news) and prunes ids that
+ * arriving to be told every paper is new is not news) and prunes ids that
  * have left the site.
  *
  * The list is also paged, which is the same toggling seen from a different

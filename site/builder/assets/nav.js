@@ -1,6 +1,6 @@
 /* The phone's nav menu.
  *
- * One button, one panel under the nav, and the three destinations the row
+ * One button, one panel under the nav, and the four destinations the row
  * hands over below 640px so the site's name can stay on the line. The panel
  * is markup the build printed — the script only opens and closes it, so a
  * browser that never runs this file still has every link, in the row.

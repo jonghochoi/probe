@@ -1,9 +1,8 @@
 name: Check presentation format
 
-# Verify that presentations follow the output contract in presentation/AUTHORING.md — a panel
-# column whose items carry no second register, a slide with no evidence ribbon,
-# a drawn figure that never says which of the paper's own figures it stands in
-# for, a slide nobody wrote a speaker essay for.
+# Verify that presentations follow the output contract in
+# presentation/AUTHORING.md. What it checks is listed in
+# `linters/check-presentation-format.py`.
 #
 # It is the half of the contract the site build cannot reach. The build
 # validates what it needs in order to draw a slide; every rule here is one a

@@ -146,9 +146,9 @@ def mark(size: int) -> str:
     )
 
 
-# One box for all three masthead diagrams. The art column is the same width on
+# One box for all four masthead diagrams. The art column is the same width on
 # every band, so a second aspect ratio is a second band height — and "one frame
-# for the three destinations" stops being true the moment one of them is taller.
+# for the four destinations" stops being true the moment one of them is taller.
 # The foot stops just under the drawing: the band's own padding is the margin,
 # and a taller box would push the page down with empty space.
 _ART_BOX = "0 0 560 164"
@@ -184,7 +184,7 @@ def mast_art() -> str:
     comparison opens, the shelf a browser keeps — each belongs to the band of
     the page that holds it, and a band drawing a different page's surface goes
     stale every time that page gains one. That is why the tabs are not here:
-    there are four of them now and there will be more.
+    their set belongs to the paper page.
 
     No pillar chip either. A chip only reads as an axis in that axis's colour,
     and painting one here would put the pillar set in a fourth place
@@ -481,7 +481,7 @@ def shelf_art() -> str:
 def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
     """The band every list page opens on.
 
-    One frame for the three destinations the nav names, because they are one
+    One frame for the four destinations the nav names, because they are one
     level of the site and a band that changed shape between them would say
     otherwise. What differs is the drawing beside the title, and it has to:
     each art is its own page's claim, and the landing's — an original becoming
@@ -569,15 +569,6 @@ def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None,
 
 def pillar_chips(pillars: list[str]) -> str:
     return "".join(chip(p, "pillar", data={"p": p}) for p in pillars)
-
-
-def callout(icon: str, body_html: str, cls: str = "") -> str:
-    classes = f"callout {cls}".strip()
-    return (
-        f'<div class="{classes}"><span class="ci">{icon}</span>'
-        f"<div>{body_html}</div></div>"
-    )
-
 
 
 def mark_fab() -> str:
@@ -835,7 +826,7 @@ def _current(key: str, here: str) -> str:
 def nav_sheet(up: str, here: str = "") -> str:
     """The phone's menu — the row's destinations, one per line, plus the way out.
 
-    A phone is not wide enough for the mark, the site's name, three
+    A phone is not wide enough for the mark, the site's name, four
     destinations and three glyph controls on one line, and the name is the part
     that says which site this is. So the destinations fold behind one button
     and the name stays: the row keeps what a reader cannot reconstruct, and the
@@ -856,14 +847,14 @@ def nav_sheet(up: str, here: str = "") -> str:
 def nav(up: str, here: str = "") -> str:
     """The row every page opens on — where the site goes, and what it can do.
 
-    Two clusters, and they are different kinds: three places to go, then three
+    Two clusters, and they are different kinds: four places to go, then three
     things to do to the page in front of the reader. A hairline stands between
     them (`site.css`), because the seam between an unboxed label and a bordered
     32px button reads as a control that lost its border unless something says
     the boundary is meant.
 
     `here` is the destination this page sits under, and marking it is the
-    other half of the same job: a row of three names that never says which one
+    other half of the same job: a row of four names that never says which one
     the reader is standing in is a row with a hole in it, and the hole is what
     makes the labels beside the controls look unfinished.
     """

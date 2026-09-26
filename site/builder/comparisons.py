@@ -1,23 +1,11 @@
 """Discover the comparisons the site publishes.
 
 A comparison reads two or three papers against each other and says where they
-diverge. It is a track of its own — `comparison/<slug>.md`, written by `/compare`
-the way `analysis/<id>.md` is written by `/analyze` — and one constraint shapes
-everything about it:
-
-    **only papers that already have a rewrite may be compared.**
-
-That is a discipline before it is a check. A paper's own detail belongs to its
-own page, where a reader who wants more can go; the comparison stays on the
-divergence and links out for everything else. A compared paper with no rewrite
-would have nowhere to link, so the comparison would have to carry that paper's
-detail itself — and the track's premise would be gone. So a comparison naming a
-paper the corpus does not have is **not published**, rather than published with
-a dead reference.
-
-The slug is the comparison's question, not its member list: three ids run to
-forty characters, their order has no right answer, and what identifies a
-comparison is what it asks.
+diverge — `comparison/<slug>.md`, written by `/compare`. Only papers that
+already have a rewrite may be compared, so a comparison naming a paper the
+corpus does not have is **not published** rather than published with a dead
+reference. The slug is the comparison's question, not its member list. The
+contract is `comparison/AUTHORING.md`.
 """
 
 from __future__ import annotations
@@ -147,9 +135,8 @@ def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
                 f"field; four is a survey and wants a different shape"
             )
             continue
-        # The track's constraint, and the reason it is a skip rather than a
-        # warning: without the rewrite there is nowhere to send a reader who
-        # wants this paper's detail, so the comparison would have to carry it.
+        # The track's one rule (`comparison/AUTHORING.md` §1) — a skip, not a
+        # warning.
         missing = [pid for pid in ids if pid not in papers_by_id]
         if missing:
             problems.append(

@@ -15,37 +15,19 @@ The two are named on the page for what they match: **의미** is this folder, an
 that lies.
 
 **It is an enhancement, never a dependency.** A build given no endpoint emits no
-search script, makes no request, and behaves exactly as it does today. A build
+search script, makes no request, and behaves exactly like a build without search. A build
 given one still ships the lexical filter underneath, and the remote block
 removes itself on any failure — offline, `file://`, a 502, an answer slower than
 5 s.
 
 ## When it asks
 
-The lexical filter narrows the list on every keystroke, because it costs a
-string compare over markup that is already on the page. This one costs a round
-trip, a model call and an embedding, and a half-typed word is not yet the
-question — so it asks when the reader submits, and says so first: two
-characters in, the block above the list offers the search and names `Enter`.
-An IME is composing, not submitting, so the Enter that commits a Korean
-syllable is not the Enter that asks.
-
-Submitting is a key and a button, and the button ships with the endpoint: a
-build given none emits no 검색 beside the box, because there would be nothing
-for it to do that the list is not doing already. It is disabled until the box
-holds a question, and off entirely in a browser with no script to run it.
-
-A `#q=` link is a question somebody already asked, so arriving at one asks it
-without waiting to be pressed. Everything else that empties the box — Escape,
-필터 초기화 — takes the block with it.
-
-An answer turns the result area into two tabs — `의미 검색` and `글자 검색`,
-each carrying its own count — and shows one of them. It lands on 의미, because
-that is the answer to the question just submitted; the list is one press away
-on the other tab, and so is anything that is about the list (a facet, a sort, a
-page) which switches to it. The strip stands only where there is a choice to
-make: no endpoint, no hits, a failed request, or a 글자 side that matched
-nothing all leave the page exactly as it was.
+The lexical filter narrows the list on every keystroke; this costs a round
+trip, a model call and an embedding, so it asks only when the reader submits —
+`Enter` or the 검색 button, which ships only with an endpoint — and a `#q=`
+link asks on arrival. An answer splits the result area into `의미 검색` and
+`글자 검색` tabs, landing on 의미. The page-side behaviour is
+`builder/assets/semantic.js`, whose comments carry the reasons.
 
 ## What is indexed
 
@@ -117,12 +99,12 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
 2. **Deploy the function** as `search`, with `OPENROUTER_API_KEY`,
    `INSFORGE_BASE_URL` and `ANON_KEY` in its environment, plus
    `PROBE_REWRITE_MODEL` if the query-reading step below is wanted. The
-   OpenRouter key is the one InsForge provisions — the repo stores no provider
-   credential.
+   OpenRouter key is the one InsForge provisions.
 3. **Index** — the two commands above, once by hand.
 4. **Wire CI** — `deploy-site.yml` already carries the step. Add the repository
    secrets `INSFORGE_URL` and `INSFORGE_API_KEY`, and the repository *variable*
-   `PROBE_SEARCH_API`. Without them the step skips and the build emits no
+   `PROBE_SEARCH_API`. `OPENROUTER_API_KEY` is an optional secret — unset, the
+   indexer fetches the key from InsForge (`indexer.py`). Without them the step skips and the build emits no
    endpoint; with them, every push to `main` embeds only the chunks that
    changed and the build's `llms.txt` lists the endpoint for agents.
 5. **Verify** — `python3 site/search/verify.py .search/index.jsonl`, with
@@ -153,42 +135,19 @@ which is the number that matters as the corpus grows.
   not a secret, so the design does not pretend to have one. The ceiling is the
   query cache, a length cap, a per-isolate rate limit, and the project's own
   gateway quota — in that order of effectiveness.
-- **No model writes prose.** M1 returns passages, ranked. A wrong list costs a
+- **No model writes prose.** The endpoint returns passages, ranked. A wrong list costs a
   reader one click; a wrong sentence costs the corpus its credibility.
 
 ## Reading the query
 
 A reader types `플로우매칭`; the body says `flow matching`. The two share no
-character, so no normalisation reaches across, and the embedding of a
-transliteration lands nowhere near the term it transliterates. Naming the
-standard term is what a small model is genuinely good at, so one runs in front
-of the embedding and returns search terms — never an answer, never SQL.
-
-```
-"지연을 줄이는 정책"
-   → terms   ["inference latency", "action chunking", "지연"]
-   → embed   the query and the terms as one string, averaged into one vector
-   → keyword "지연을 줄이는 정책 or inference latency or action chunking or 지연"
-```
-
-The two arms take the expansion differently on purpose. `websearch_to_tsquery`
-ANDs the words inside a group, so appending terms there would demand every one
-of them and return nothing; joining with its `or` keeps the reader's own words
-AND'd among themselves and each expansion as an alternative.
-
-The terms come back to the page and print above the results as `읽은 뜻`. A
-search that silently rewrites itself cannot be trusted, and a reader who sees
-what it understood can tell a good answer from a misread one.
+character, so a small model runs in front of the embedding and returns search
+terms — never an answer, never SQL. The terms are embedded with the query and
+OR'd into the keyword arm, and print above the results as `읽은 뜻` so a reader
+can see what the search understood.
 
 Set `PROBE_REWRITE_MODEL` in the function's environment to an OpenRouter model
 id to turn the step on — a small fast one, since it runs in front of every
-uncached query and its budget is what the embedding and the search leave of the
-page's 5 s. Unset, the step is skipped and the endpoint behaves exactly as it
-does without it. So does any failure: a timeout, a non-200, or JSON the model
-fenced or wrapped in a sentence all fall back to the raw query. Expansion
-improves a search and is never what makes one possible.
-
-A model reads reader-supplied text here, so what it can do with it is worth
-stating: its output is used as strings to search with, capped at eight terms of
-40 characters, stripped of quotes, and passed to a parameterised RPC. The worst
-a crafted query buys is its own bad results.
+uncached query. Unset, or on any failure, the raw query is searched as is. The
+limits that keep reader-supplied text harmless (eight terms of 40 characters,
+quotes stripped, a parameterised RPC) are in `function/search.ts`.

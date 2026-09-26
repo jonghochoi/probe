@@ -964,7 +964,8 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .article strong { font-weight: 700; }
 
-/* Inline code vs math: code is an identifier, math is notation (§5-6). */
+/* Inline code vs math: code is an identifier, math is notation
+   (`analysis/AUTHORING.md` §3-1). */
 .article code {
   font-family: var(--mono);
   font-size: .855em;
@@ -1566,8 +1567,8 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   body { font-size: 14.5px; }
   .shell { padding: 1.25rem .9rem 5rem; }
   .paper-head-inner { padding: 1.5rem .9rem 0; }
-  /* The nav is a row of six things and a phone is not wide enough for all of
-     them at full size. What goes is the three destinations: they fold into the
+  /* The nav is a row of seven things and a phone is not wide enough for all
+     of them at full size. What goes is the four destinations: they fold into the
      sheet the ☰ opens, where each one gets a full line, and the name stays on
      the row — the mark beside it is a picture of the site, not its name, and
      nothing else on a phone screen says which site this is. The way out to the
