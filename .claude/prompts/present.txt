@@ -29,15 +29,24 @@ READ IT BEFORE YOU WRITE. It is the single source of truth for what a
 presentation must look like, and this prompt does not restate it:
 
   §1  the document — front matter, the act and the type, the fence schemas,
-      and why `context/` is not a source
+      one assertion and one piece of visual evidence per slide, the
+      storyboard that comes before the fences, and why `context/` is not a
+      source
   §2  the two-register rule: every element carries its claim and the thing that
       makes the claim checkable
-  §3  filling the frame — the column's closing line, the evidence ribbon
-  §4  created figures — derivable rather than interpretive, the required `why`,
-      when `probe-diagram` is the wrong drawing
+  §3  filling the frame — the word budget and what it counts, the column's
+      closing line, when a ribbon earns its place, builds, the room's floor
+      and where a figure's caption goes
+  §4  created figures — derivable rather than interpretive, labelling what
+      the drawing chose, the required `why`, when `probe-diagram` is the wrong
+      drawing, plotting the results and listing what was left out, the
+      per-position strip, time on one named clock, and the two lineage
+      figures every talk carries — the contrast and the inheritance
   §5  the authored line break
   §6  the speaker essay
   §7  what is checked, and by which gate
+  §8  motion — the authors' clip and the stepped figure, when a slide may move
+      at all, and the still every moving slide is first
 
 `analysis/AUTHORING.md` governs the REWRITES, not this track. You will read the
 rewrite as a map (below) and you must not carry its contract over: the quiz per
@@ -82,10 +91,20 @@ TWO SOURCES, AND THEY DO DIFFERENT JOBS.
   you where to look.
 
   The **arXiv original** is the SOURCE OF FACTS. Every number that lands on a
-  slide or in a `probe-facts` cell is confirmed there, in the edition you name
-  in `arxiv_html:`. Extract it with:
+  slide — in a chart, a timing, a ribbon cell, a panel's `n` — is confirmed
+  there, in the edition you name in `arxiv_html:`. Extract it with:
 
-      cd site && python3 -m builder.arxiv <id>
+      cd site && python3 -m builder.arxiv <id>                   # the index
+      cd site && python3 -m builder.arxiv <id> --tables          # every table
+      cd site && python3 -m builder.arxiv <id> --section §4.1.2  # one section
+
+  The index prints the section tree (body and appendix apart), every figure
+  with the URL it hotlinks from and its caption, and every table's caption.
+  `--tables` prints each table in full as Markdown; `--section` takes an
+  anchor as the index prints it (`§4.1.2`, `A11`) and prints that section's
+  text with its subsections. Read the tables and the sections your results
+  come from in full — a number is confirmed where it is printed, not where the
+  index summarises it.
 
   A number taken from the rewrite and not re-confirmed is a number that has
   been through two compressions. Two is where they start to drift.
@@ -94,7 +113,16 @@ The one thing you may take from the rewrite verbatim is a figure's URL and id
 (the rewrite already resolved which figures exist and hotlink). The caption you
 write yourself, for a listener rather than a reader.
 
-`context/` is NOT a source here — `presentation/AUTHORING.md` §1-3.
+The rewrite shows a reader only some of the paper's figures. The talk draws on
+all of them, so take the inventory from the original, not from the rewrite:
+the index's figure list is it, read from the page's own `<img>` tags whatever
+the files are called. Check that each URL you intend to show answers 200
+before it goes on a slide — a hotlinked figure that 404s is a blank frame in
+front of the room:
+
+    curl -s -o /dev/null -w '%{http_code}\n' <figure url>
+
+`context/` is NOT a source here — `presentation/AUTHORING.md` §1-5.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -109,11 +137,21 @@ PROCEDURE
 2. WRITE THE SPINE FIRST, IN ONE SENTENCE, INTO `spine:`.
 
    Before any slide exists. Not "what this paper does" — what this talk will
-   have landed if it works. §1-0 holds the test it has to pass.
+   have landed if it works. §1-0 holds the test it has to pass. A spine names
+   the turn, and it has one of two shapes, for the two kinds of paper:
+
+     a mechanism paper   지연을 견디는 문제가 아니라, 호출 경로에서 빼내는 문제다
+     a finding paper     손목 카메라는 성공률보다, 실패에서 되돌아오는 속도를
+                         더 올린다
+
+   Then find the paper's sentence the spine rests on and read the two side by
+   side (§1-3). The second shape says `성공률보다 … 더`, not `성공률이
+   아니라`, for a paper that says the camera ALSO raised success — dropping an
+   `also` is how a spine outruns its paper.
 
 3. LAY OUT THE ACTS BEFORE THE SLIDES. On paper, in this order:
 
-     起 — what the situation is, and why it is a problem worth 14 minutes
+     起 — what the situation is, and why it is a problem worth the room's time
      承 — the obvious answer, and the wall it hits. Let the room predict it
      轉 — the turn. What this paper did instead, and what it buys
      結 — whether it worked, what it costs, and what is still open
@@ -122,15 +160,55 @@ PROCEDURE
    Everything else is compressible, and the first thing to compress is `結`
    when it starts listing results rather than judging them.
 
-4. WRITE THE SLIDES. One point per slide, and the point is the header.
+   One of the `轉` slides is the `statement`, and a talk has exactly one
+   (§1-1) — decide in this step which sentence it is, and what permits it.
 
-   The header is a claim, not a topic. 관절은 눈보다 천 배 빠르다, not 배경 및
-   동기. A topic header makes the audience wait for the point; a claim header
-   IS the point and the slide becomes its evidence.
+4. STORYBOARD BEFORE ANY FENCE (§1-4). Write the talk as a table first — act,
+   assertion, the visual that proves it, and the paper's sentence the
+   assertion rests on — and nothing else:
 
-   Choose the type from the shape of what the slide is doing, and write its
-   fence to the §1-2 schema. If two types would both work, the presentation
-   is probably making the same point twice — see step 6.
+     | act | assertion (the header) | visual | 원문 근거 (quoted, with §) |
+     |-----|------------------------|--------|---------------------------|
+     | <one of 起 承 轉 結> | <a claim, with its verb> | <Figure N, or Table N → its chart kind> | "<the paper's sentence>" §<n> |
+
+   A filled row, for example:
+
+     | 結  | 지연이 커질수록 기준선은 떨어지고, 이 방법은 그대로다 | Figure 3 → line | "…" §4.1.2 |
+
+   Two rows are always there: a `contrast` in 承 and an `inheritance` in 結
+   (§4-9), built in step 7. When the paper gives one of them nothing to draw,
+   the row says why — and that reason goes into the front matter's
+   `lineage_drop`.
+
+   Most papers need no probe-timing, no probe-heat and no clip; a talk of the
+   paper's figures plus two or three charts of its tables is the common case.
+   Reach for a drawn mechanism only when the paper's point is that shape.
+
+   Fill the visual column from the figure inventory above. The paper's own
+   figure comes first where it carries the point at slide scale — and where
+   the point is one panel of a multi-panel figure, that panel alone, cropped
+   (§1-3). After it: the result numbers, plotted (§4-6); a mechanism the paper
+   states as an equation over positions, as a strip (§4-7); a mechanism it
+   states as pseudocode or as times, on one clock (§4-8); a routing change
+   (§4-3). Every result figure and every results table in the paper should
+   have been considered for a row — if one was left out, you should be able
+   to say why.
+
+   Each header is an assertion, and no stronger than its 원문 근거 cell
+   (§1-3): set its quantifiers (모두, 만, 아니라, 무너진다) beside the quoted
+   sentence, and where the paper hedges, carry the hedge or narrow the header
+   to the rows that hold.
+
+   Read the assertion column alone, top to bottom. It must argue the `spine`
+   without the slides; that sequence is what the room will retain. Only the
+   one text slide the contract allows (§1-3) may have an empty visual cell.
+
+   Then write each slide from its row, its type chosen from the visual and
+   its fence written to the §1-2 schema. Spend the words under the budget
+   (§3-1): the header and one line of takeaway. A paper figure's `caption`
+   is not printed on the slide (§3-5): write it as what the presenter walks
+   the room through, since it closes the essay, and keep `source` to one
+   line. Anything longer goes into the script.
 
 5. GIVE EVERY ELEMENT ITS SECOND REGISTER (§2), THEN CLOSE EVERY COLUMN AND
    SLIDE (§3). This is the step that gets skipped, because a presentation
@@ -149,46 +227,297 @@ PROCEDURE
    Cut the weaker one and fold its substance into the survivor's script. A
    presentation that got shorter this way is tighter, not thinner.
 
+   Then check every `probe-facts` ribbon against its own slide (§3-3): a cell
+   that repeats a number the figure or chart already shows goes. Most slides
+   end with no ribbon at all.
+
 7. DRAW ONLY WHAT IS DERIVABLE (§4). Before adding a `probe-diagram`, sketch
    `before` and `after` and run §4-3's test on them. If it fails, use the
    paper's own figure, or nothing.
 
+   Then PLOT THE RESULTS (§4-6). Go through the original and list every table
+   and every sentence that prints a result number — success rates, latency or
+   horizon sweeps, ablations. `--tables` prints the tables; the body text
+   often carries the numbers a bar chart only draws, and `--section` prints
+   it. For each result the talk leans on, decide which comparison the room has
+   to see — a sweep over an ordered x is a `line` (with `x.values` when the x
+   is a number, so the spacing is the real one), methods across tasks is
+   `dots`, one quantity against another — size against success, cost against
+   quality — is a `scatter` — and write the slide's header as the claim the
+   chart proves. Choose `us` and `vs` by §4-6, checking the strongest
+   baseline against the paper's numbers at the point the note reads — and
+   the baseline cell of a `probe-facts` comparison the same way. Write every
+   value as the paper prints it (`0.20`, not `0.2`), since the chart prints it
+   at that precision, and a point the paper did not measure as `null`.
+
+   As you choose rows, write down the ones you leave out, with their values,
+   in the chart's `omitted` (`[]` when none). This is not bookkeeping: the
+   header is a claim about the whole table, and the rows you dropped are the
+   ones most likely to contradict it. Step 11 reads the header against them.
+
+   When a figure's numbers exist only in the image, do not estimate them off
+   the plot. Show the paper's figure instead — and then do not also redraw
+   another panel of that same figure family beside it (§1-3).
+
+   A mechanism the paper states as an equation over positions — a noise
+   schedule, a mask — is a `probe-heat` (§4-7). Compute every cell from the
+   equation at one setting, and name that setting in `source`. A setting you
+   chose because it draws well (a dozen cells where the paper runs more) is
+   `illustrative`, with the paper's own values beside it (§4-1) — the room
+   reads every number on a figure as the paper's unless told.
+
+   A mechanism the paper states as pseudocode or as timings — workers running
+   side by side, a call split into stages — is a `probe-timing` (§4-8). State
+   every block's `at` and `ms` from numbers the paper prints, and name the
+   setup they were measured on in `clock` (`<§> · <hardware> · <rate>`) — on
+   a `probe-budget` too. Papers routinely state latency on one machine and
+   deploy on another: list the clocks the paper uses before drawing, and keep
+   every drawing of time in one act on one of them. A result chart whose
+   values are delays or ticks names its own `clock`.
+
+   The clock is one case of a wider rule (§2): every `n`, ribbon label and
+   row note is from the setup of the claim it sits under — model, benchmark,
+   level, hardware. List the paper's setups before writing any (the
+   simulation and the robot; each difficulty level; each GPU), and where a slide's
+   argument joins two, say so on the slide or in the script at the join.
+
+   THEN PLACE THE PAPER — THE TWO LINEAGE FIGURES (§4-9). Build both from
+   the original only, never from the rewrite's own 계보 rail, which may draw
+   on the corpus rather than on what the paper cites:
+
+     a. Read what the paper says about the work it builds on — the related
+        work, the introduction, the method sentences that name the prior a
+        step generalizes or adopts, and the limitations — and its
+        bibliography:
+
+            cd site && python3 -m builder.arxiv <id> --section §2
+            cd site && python3 -m builder.arxiv <id> --section <§ of each method step>
+            cd site && python3 -m builder.arxiv <id> --bib
+
+        List every prior the paper names, each with the sentence that says
+        what it did, lacked or gave, and its section.
+
+     b. Draft the contrast's columns from the paper's own contrasts — the
+        properties those sentences set the paper apart on, in its words, or
+        its own comparison table's columns when it has one — and name the
+        one column only this paper fills; that is `key`. Fill each cell
+        from a sentence and quote it in `n`; a cell the paper does not speak
+        to is `–`, whatever you know of the prior. Keep the rows whose cells
+        differ: two priors with the same glyphs are one row, and the other
+        goes into `omitted`.
+
+     c. Draft the inheritance from the sentences that say the paper took
+        something — adopts, builds on, generalizes, fine-tunes: each is a
+        line, its `gave` the thing taken, its `where` the section. `adds` is
+        the mechanism the paper brings, not the gap: set it beside the
+        contrast's key column and rewrite any item that says the same thing.
+        `open` is the paper's own limitation or future work. Concurrent work
+        stays in the contrast.
+
+     d. One work per row or line. A citation that groups several stands as
+        the first the paper names — or as the one its sentence describes by
+        name — and the rest go into `omitted` with their dates.
+
+     e. Date each prior from `--bib`: the first-version month of the arXiv
+        id the entry gives, carried in `id`, or the venue year when it gives
+        none. Confirm each month on the abs page, which prints the first
+        version's date:
+
+            curl -s https://arxiv.org/abs/<cited-id> | grep -oE 'Submitted on [0-9]+ [A-Z][a-z]+ [0-9]{4}'
+
+     f. Check which priors have a rewrite, and give those their `id` so the
+        slide links to them:
+
+            ls analysis/<cited-id>.md
+
+   THEN ASK WHETHER ANY SLIDE HAS TO MOVE (§8). Usually none does, and at most
+   three may. A slide moves only on a yes to one of these:
+
+     - Is its claim about WHEN — a reaction, a contact, a recovery, the moment
+       a force turns? Then look for the authors' own clip of that scene, to
+       ride over the paper's figure of it.
+     - Does the paper draw one buffer or schedule as panels (a) (b) (c) of a
+       step? Then the slide's `probe-heat` steps through them (`steps`,
+       `states`), with the panels' own names as the labels.
+     - Is the point of a `line` how the gap moves across the sweep? Then the
+       chart steps through its columns (`steps`).
+
+   Every state of a stepped figure is the paper's numbers or the paper's
+   equation at the stated setting, like any other cell — never a value you
+   interpolated between two the paper reports.
+
+   FINDING THE AUTHORS' CLIP. Most papers have none you may use; do not look
+   past what the paper itself points at.
+
+     a. Find the page the paper links — a project page or supplementary
+        material, named in the arXiv original or on its abstract page:
+
+            grep -n -i 'project page\|github.io\|supplementary' <the extract>
+            curl -s https://arxiv.org/abs/<id> | grep -oE 'https?://[^" <]+' | sort -u
+
+        A code repository with no video in it, a third-party upload, a news
+        piece or a lab's social post is not a clip source: the room is owed
+        the authors' own publication.
+
+     b. List the files the page serves — every `<video>` and `<source>` it
+        names, `.mp4` or `.webm`, relative paths resolved against the page.
+        When your sandbox cannot reach the host, a `*.github.io` page is
+        published from its repository, and
+        `raw.githubusercontent.com/<owner>/<owner>.github.io/<branch>/…`
+        serves the same files for checking; the fence still cites the page's
+        own URL, which is what the paper links.
+
+     c. Test that each clip loads and watch it before choosing it: fetch it,
+        `ffprobe` its codec, size and duration, and extract a frame or two
+        (`ffmpeg -ss <t> -i <clip> -frames:v 1 <png>`). It shows the scene of
+        the figure it rides over, it is seconds rather than minutes, and you
+        know what its rendering hides — two plots on different axis scales, a
+        speed-up burned into the frame, a cut. Those go into `caption`.
+
+     d. Only a YouTube or Vimeo embed? It does not go on a slide (§8-1-2);
+        name it in that slide's essay for after the talk. No page at all is
+        the common case, and the answer is the paper's figure alone.
+
 8. WRITE THE SPEAKER ESSAYS LAST (§6), once the slide is settled — an essay
    written before the slide carries facts the slide ends up not showing.
+   Script facts, `질문 나오면` included, are confirmed in the original exactly
+   as slide numbers are. Mark each build's press and each stepped state where
+   it falls (§6, §8-2-3); on a slide with a clip, say when to pause it (K)
+   and what the still says if it does not play.
 
 9. VERIFY:
 
-     python3 site/build-site.py --out /tmp/probe-check --strict
+     python3 site/build-site.py --only <arxiv-id> --out /tmp/probe-check --strict
      python3 linters/check-presentation-format.py
+     python3 linters/check-presentation-format.py --words
+     python3 linters/check-presentation-format.py --omitted
 
-   `--check` runs the build rows of §7 too — they are read while the
-   presentation is discovered — but it stops before any page renders, so it
-   never draws a slide. The FULL build is the one that composes every slide
-   into its page.
+   A build with `--out` is the gate for rendering: it composes every slide
+   into its page. `--check` runs the build rows of §7 too — they are read
+   while the presentation is discovered — but it stops before any page
+   renders, so it never draws a slide. `--only <arxiv-id>` builds the paper
+   the talk belongs to, and the 발표 tab with it; its landing page is a subset
+   that is never published, so a clone without the history the landing page
+   orders by (a shallow checkout) is a note there rather than a warning.
 
    `--strict` must exit 0, and so must the linter. Do not report success on a
    gate you did not run.
 
-10. SELF-CHECK — **before committing, not before writing.** Walk
+10. RENDER AND LOOK — the gates read the source; the room reads the frame.
+    Serve the build and screenshot every slide of the 발표 tab:
+
+      python3 -m http.server 8765 -d /tmp/probe-check &
+      # open http://localhost:8765/p/<id>/#presentation at 1600×1000, wait
+      # for every `.prs-slide img` to finish loading, then screenshot
+      # `[data-pres-stage]`, press → and repeat for each `.prs-slide`
+
+    Use Playwright when it is installed; otherwise open the page in a browser
+    and page through it. Figures are hotlinked from arXiv, so wait until every
+    `.prs-slide img` reports `complete` with a non-zero `naturalWidth` before
+    the first screenshot, and re-shoot a frame whose figure came out blank
+    before reading a network hiccup as a dead URL. Then READ EVERY SCREENSHOT,
+    as a demanding designer and as the lab meeting at the back of the room
+    would:
+
+      - Is there a hole — a band of empty frame, a card with a cavity, a figure
+        letterboxed in white because it is on the wrong type (§1-2)?
+      - Can the figure's own axis labels be read at this size? If not, it
+        belongs on a `split` slide at full height, or it is not this slide's
+        evidence.
+      - Does any label clip, wrap mid-phrase, or sit on a line, a bar or
+        another label? A drawn figure is where this happens, and no gate
+        sees it (§7).
+      - Does every figure load? A blank frame is a dead URL.
+      - Does a paper figure show text or panels that are not the evidence —
+        the paper's own caption set into the image, a sliver of panel (b) at
+        the edge? Crop it (`crop`, §1-3) — on the cover too; `focus` only
+        pans.
+      - Does the eye land on the assertion first and the evidence second, or
+        on a paragraph?
+
+    Fix what you find and render again. At least one pass in the dark theme
+    (`prefers-color-scheme: dark`) — a created figure whose colours only work
+    on white is a figure half the room cannot read.
+
+    A slide that moves is shot in every state: step the figure with ↓ and
+    shoot each one, on the stage (전체 화면) as well as in the tab, and check
+    that → still reaches every slide — after a stepped slide's states — and
+    ← walks back one slide per press. Play the clip, press K and S, and shoot
+    it playing; then block the clip's host (a Playwright `route` that aborts
+    it) and shoot the slide again: the paper's figure must stand there with
+    its own provenance line. A browser without the clip's codec is the same
+    case — a Chromium without H.264 never gets frames and must show the
+    figure. To see the clip play in such a browser, route its host to a VP9
+    transcode (`ffmpeg -i <clip> -c:v libvpx-vp9 -b:v 0 -crf 32 <clip>.webm`).
+
+11. SELF-CHECK — **before committing, not before writing.** Walk
     `presentation/AUTHORING.md` §7's table, and then these, which no gate can see:
 
       - Does the presentation land the `spine:`, or does it retell the paper in
         the paper's own order?
-      - Is every header a claim rather than a topic?
+      - Is every header an assertion rather than a topic?
+      - For the spine and every header, set its quantifiers (모두, 만,
+        아니라, 무너진다) beside the 원문 근거 sentence from step 4. If the
+        paper hedges (also, not only … but also, partly, for example, up to),
+        does the header carry the hedge or narrow to the rows that hold?
+        Do the same for every script sentence that says `X 가 아니라 Y`.
+      - For every `n`, ribbon cell and drawing row note: is it from the setup
+        its claim names — model, benchmark, level, hardware (§2)? Where a
+        slide or a spoken bridge joins two setups, is the join said?
       - Read only the headers, in order. Do they argue? That sequence is what a
         listener will actually retain.
+      - Which of the paper's figures are not in the talk, and why not?
+      - Is every result the talk leans on PLOTTED rather than listed in a
+        ribbon or a ledger line (§4-6)? Is there a results table shown as
+        prose?
+      - Is every plotted value printed in the original's text or tables —
+        none read off a plot image — and is no figure family shown both as the
+        paper's image and as a redrawing?
+      - Does every headline still hold against the omitted rows? Run
+        `--omitted`, which prints each chart's left-out rows under its
+        header, and read them against it. A header that says "only X" or
+        "every Y" is the one to check first. When a left-out row contradicts
+        it, narrow the header to what the plotted rows support, or plot the
+        row.
+      - Is every parameter a drawing chose for itself — a horizon, a tick cut
+        to count an age — labelled `illustrative`, with the paper's own value
+        beside it?
+      - Do the times in every `probe-timing` and `probe-budget` come from the
+        setup its `clock` names, and does each act draw time on one clock?
+      - Is there exactly one `statement`, in `轉`?
+      - Does every row, column head, cell, edge phrase and addition of the
+        contrast and the inheritance rest on a sentence of the paper or a
+        title in its bibliography, with a cell the paper is silent on left
+        `–`? Is every prior one work, with the rest of its citation in
+        `omitted`, and dated from the id `--bib` printed?
+      - Read the contrast's key column beside the inheritance's `adds` and
+        the two headlines side by side: does the first show the gap and the
+        second the mechanism, or do they say one thing twice?
+      - If the talk carries `lineage_drop`, does the paper really give that
+        figure nothing to draw, and does the line say why?
       - Did step 6 actually cut something? If the answer is no on a
         presentation over ten slides, look again — the pair is there.
-      - Is every number on a slide confirmed in the ORIGINAL, and is
-        `arxiv_html:` the edition you read?
+      - Is every number on a slide, every mark in a chart and every number in
+        a script — the walk-through and `질문 나오면` alike — confirmed in the
+        ORIGINAL, and is `arxiv_html:` the edition you read? Save the
+        extract (`python3 -m builder.arxiv <id> --tables` plus the sections
+        you used) and run
+            python3 linters/check-presentation-format.py --numbers <extract>
+        It prints every numeral not found verbatim in the extract, under its
+        slide. Each one is either arithmetic on printed numbers (a gap, a
+        ratio) — say which — or a slip to fix.
       - Does any line break fall where the container ended rather than where
         the claim turned? (§5)
-      - Does any script carry a fact the slide does not show? Move it or cut
-        it.
+      - Does any walk-through carry a fact the slide does not show? Move it
+        or cut it. Does every fact in a `질문 나오면` name its table or §?
+      - For every slide that moves: would the talk lose anything if it were
+        its still? If not, make it the still. Does the still — the figure
+        under the clip, the first state of the stepped figure — make the
+        claim on its own? Does its essay say when to step or pause?
       - Is there a `D#` or any `context/` material anywhere in the
-        presentation? Remove it (§1-3).
+        presentation? Remove it (§1-5).
 
-11. COMMIT — one presentation per commit:
+12. COMMIT — one presentation per commit:
 
         present: add <arxiv-id> talk (<alias>)
 
@@ -206,5 +535,5 @@ ON-DEMAND, ONE PRESENTATION AT A TIME, over papers the corpus already holds.
 
 A presentation is written for a room, and which paper a room should hear is a
 human call. If asked to present "everything in a pillar", say no: the value is in
-deciding this paper is worth fourteen minutes of other people's time, and that
-decision does not scale.
+deciding this paper is worth a slot of other people's time, and that decision
+does not scale.
