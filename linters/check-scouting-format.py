@@ -13,14 +13,17 @@ Checks, grouped by the contract section they enforce:
 
   AUTHORING §6  metadata block — exactly `Papers scanned:` + `Papers surfaced
             (4축 게이트 통과):` after the H1, no `Run date:` / `Agent version:`
-            line, scanned line within the 400-character cap, surfaced value a
-            bare integer, H1 date agreeing with the filename.
+            line, scanned line within the 400-character cap and naming a
+            retry only beside a `최종 실패`, surfaced value a bare integer, H1
+            date agreeing with the filename.
   AUTHORING §2  emoji system — every `##` header opens with an emoji from the
-            canonical set, `###` headers carry none, and the `##` sections run
-            in canonical order.
+            canonical set, `###` headers carry none, the `##` sections run in
+            canonical order, each medal appears at most once, and 📋 stands
+            only under all three medals.
   AUTHORING §5  scoring contract — every 📊 paper head lists all five dimensions
             and its bullets sum to the total it states; the four gate
-            dimensions of a surfaced paper are each >= 2, and a 🔍 row is
+            dimensions of a surfaced paper and of a 📋 row are each >= 2, and
+            a 🔍 row is
             exactly one gate axis short, so neither table can hold a paper
             that cleared the gate; a Reproducibility bullet scoring >= 2 may
             not also plead that the signal is unconfirmed (the
@@ -28,8 +31,8 @@ Checks, grouped by the contract section they enforce:
             line carries one of the three code labels; a `★★★` section
             requires `코드 공개`.
   AUTHORING §6  `Papers surfaced` agrees with the number of 🥇 / 🥈 / 🥉 / 🌱
-            sections.
-  AUTHORING §7  section discipline — 🚫 / 🔍 rows are one paper each (no
+            sections plus the 📋 rows.
+  AUTHORING §7  section discipline — 🚫 / 🔍 / 📋 rows are one paper each (no
             `X 외 2편` bundling behind a single link).
 
 The gate checks are the ones with teeth. Reproducibility is scored but does
@@ -45,7 +48,8 @@ pairing, §4-8 bold-before-particle) are out of scope — review catches those.
 
 SCOPE. Each rule binds reports dated on or after the day the rule takes
 effect: `_CONTRACT_EFFECTIVE` for the metadata, emoji, label and table rules,
-`_GATE_EFFECTIVE` for the gate arithmetic. Earlier reports are
+`_GATE_EFFECTIVE` for the gate arithmetic, `_SHAPE_EFFECTIVE` for the medal,
+📋 and retry rules. Earlier reports are
 the record of runs that happened under the contract of their day; they are
 evidence, not drafts, so the lint skips them rather than inviting a rewrite of
 history.
@@ -75,7 +79,15 @@ _CONTRACT_EFFECTIVE = "2026-08-18"
 # rules apply to.
 _GATE_EFFECTIVE = "2026-08-24"
 
+# The medal, 📋 and retry rules bind from here.
+_SHAPE_EFFECTIVE = "2026-09-27"
+
 _SCANNED_MAX_CHARS = 400
+
+# A retry is named on `Papers scanned` only beside the failure it ended in
+# (AUTHORING §6); one that succeeded is a non-event.
+_RETRY = re.compile(r"재시도|백오프|retry|backoff", re.IGNORECASE)
+_FINAL_FAILURE = "최종 실패"
 
 _H1 = re.compile(r"^# Probe 스카우트 리포트 — (\d{4}-\d{2}-\d{2}) · Pillar (P\d)\s*$")
 _SCANNED = re.compile(r"^\*\*Papers scanned:\*\*\s*(.*)$")
@@ -84,12 +96,13 @@ _BANNED_META = re.compile(r"^\*\*(Run date|Agent version):\*\*")
 _FILENAME_DATE = re.compile(r"(\d{4}-\d{2}-\d{2})\.md$")
 
 # Canonical `##` section order (AUTHORING §2-1). Sections must run non-decreasing
-# in rank, which allows several paper sections while pinning 📊 → 🔍 → 💡 →
-# 🔄 → 🚫 and keeps the 🚫 appendix last.
+# in rank, pinning 📋 → 📊 → 🔍 → 💡 → 🔄 → 🚫 and keeping the 🚫 appendix last.
 _SECTION_RANK = {
-    "🔑": 0, "🥇": 1, "🥈": 2, "🥉": 3, "🌱": 4,
-    "📊": 5, "🔍": 6, "💡": 7, "🔄": 8, "🚫": 9,
+    "🔑": 0, "🥇": 1, "🥈": 2, "🥉": 3, "🌱": 4, "📋": 5,
+    "📊": 6, "🔍": 7, "💡": 8, "🔄": 9, "🚫": 10,
 }
+
+_MEDALS = ("🥇", "🥈", "🥉")
 
 _RUBRIC_DIMENSIONS = ("Relevance", "Novelty", "Reproducibility", "Methodology", "Sim2Real")
 
@@ -122,7 +135,7 @@ _PAPER_LINK_LINE = re.compile(r"^\[(?:arXiv:[^\]]+|DOI)\]\(https?://[^)]+\)\s*·
 # Table-cell paper bundling (AUTHORING §7-3): `Faster-WAM 외 2편 (…)`.
 _BUNDLED = re.compile(r"외\s*\d+\s*편")
 
-# The `R·N·M·S2R` cell of a 🔍 row (AUTHORING §5-4): `2·2·1·3`.
+# The `R·N·M·S2R` cell of a 🔍 or 📋 row (AUTHORING §5-1, §5-4): `2·2·1·3`.
 _NEAR_MISS_SCORES = re.compile(r"(\d)·(\d)·(\d)·(\d)")
 
 
@@ -139,7 +152,8 @@ def _emoji_of(header_text: str) -> str | None:
     return first if first in _SECTION_RANK else None
 
 
-def _check_metadata(lines: list[str], date_from_name: str, findings: list[tuple[int, str]]) -> None:
+def _check_metadata(lines: list[str], date_from_name: str, findings: list[tuple[int, str]],
+                    shape_rules: bool) -> None:
     if not lines or not _H1.match(lines[0].rstrip("\n")):
         findings.append((1, "H1 must read `# Probe 스카우트 리포트 — YYYY-MM-DD · Pillar P#` (AUTHORING §6)"))
     else:
@@ -174,6 +188,12 @@ def _check_metadata(lines: list[str], date_from_name: str, findings: list[tuple[
                 lineno,
                 f"`Papers scanned:` is {len(value)} chars, over the {_SCANNED_MAX_CHARS}-char cap — "
                 "drop the funnel arithmetic and the retry narration (AUTHORING §6)",
+            ))
+        if shape_rules and _RETRY.search(value) and _FINAL_FAILURE not in value:
+            findings.append((
+                lineno,
+                "`Papers scanned:` narrates a retry that succeeded — only a call that ends in "
+                f"`{_FINAL_FAILURE}` is disclosed (AUTHORING §6)",
             ))
 
     if not surfaced:
@@ -337,8 +357,62 @@ def _check_near_miss(sections, findings: list[tuple[int, str]]) -> None:
                 ))
 
 
+def _table_rows(body: list[str], start: int):
+    """(lineno, cells) for each data row of the tables in a section body."""
+    for offset, line in enumerate(body, start=start + 1):
+        stripped = line.strip()
+        if not stripped.startswith("|") or stripped.startswith("|--"):
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if cells and cells[0] == "Paper":  # the header row
+            continue
+        yield offset, cells
+
+
+def _check_shape(sections, findings: list[tuple[int, str]]) -> None:
+    """The top three take the medals once each; the rest are 📋 rows that clear
+    the gate (AUTHORING §5-1)."""
+    seen: dict[str, int] = {}
+    for emoji, _header, start, _body in sections:
+        if emoji in _MEDALS:
+            if emoji in seen:
+                findings.append((
+                    start,
+                    f"{emoji} is used again (first at line {seen[emoji]}) — each medal marks one "
+                    "rank, and papers below 🥉 are 📋 rows (AUTHORING §5-1)",
+                ))
+            else:
+                seen[emoji] = start
+    for emoji, _header, start, body in sections:
+        if emoji != "📋":
+            continue
+        if len(seen) < len(_MEDALS):
+            findings.append((
+                start,
+                "📋 holds papers ranked below 🥉, so it needs all three medal sections "
+                "above it (AUTHORING §5-1)",
+            ))
+        for offset, cells in _table_rows(body, start):
+            paper = cells[0]
+            score_cell = next((c for c in cells if _NEAR_MISS_SCORES.fullmatch(c)), None)
+            if score_cell is None:
+                findings.append((
+                    offset,
+                    f"📋 row `{paper}` carries no `R·N·M·S2R` score cell (AUTHORING §5-1)",
+                ))
+                continue
+            scores = [int(v) for v in _NEAR_MISS_SCORES.fullmatch(score_cell).groups()]
+            short = [d for d, v in zip(_GATE_DIMENSIONS, scores) if v < 2]
+            if short:
+                findings.append((
+                    offset,
+                    f"📋 row `{paper}` scores {score_cell}, short on {', '.join(short)} — a 📋 "
+                    "row is a surfaced paper and clears the gate (AUTHORING §5-1, §5-4)",
+                ))
+
+
 def _check_surfaced_count(lines: list[str], sections, findings: list[tuple[int, str]]) -> None:
-    """`Papers surfaced` equals the number of paper sections (AUTHORING §6)."""
+    """`Papers surfaced` equals the paper sections plus the 📋 rows (AUTHORING §6)."""
     stated: tuple[int, str] | None = None
     for lineno, raw in enumerate(lines, start=1):
         m = _SURFACED.match(raw.rstrip("\n"))
@@ -348,12 +422,16 @@ def _check_surfaced_count(lines: list[str], sections, findings: list[tuple[int, 
     if stated is None or not re.fullmatch(r"\d+", stated[1]):
         return  # absent or non-integer — already reported by _check_metadata
     lineno, value = stated
-    actual = sum(1 for emoji, _h, _s, _b in sections if emoji in _PAPER_SECTIONS)
-    if int(value) != actual:
+    n_sections = sum(1 for emoji, _h, _s, _b in sections if emoji in _PAPER_SECTIONS)
+    n_rows = sum(
+        1 for emoji, _h, start, body in sections if emoji == "📋"
+        for _ in _table_rows(body, start)
+    )
+    if int(value) != n_sections + n_rows:
         findings.append((
             lineno,
-            f"`Papers surfaced` is {value} but the report carries {actual} "
-            "🥇 / 🥈 / 🥉 / 🌱 section(s) (AUTHORING §6)",
+            f"`Papers surfaced` is {value} but the report carries {n_sections} "
+            f"🥇 / 🥈 / 🥉 / 🌱 section(s) and {n_rows} 📋 row(s) (AUTHORING §6)",
         ))
 
 
@@ -383,7 +461,7 @@ def _check_paper_headers(sections, findings: list[tuple[int, str]]) -> None:
 
 def _check_tables(sections, findings: list[tuple[int, str]]) -> None:
     for emoji, _header, start, body in sections:
-        if emoji not in ("🚫", "🔍"):
+        if emoji not in ("🚫", "🔍", "📋"):
             continue
         for offset, line in enumerate(body, start=start + 1):
             stripped = line.strip()
@@ -412,7 +490,8 @@ def check_file(path: str) -> list[tuple[int, str]]:
 
     findings: list[tuple[int, str]] = []
     gate_rules = date_from_name >= _GATE_EFFECTIVE
-    _check_metadata(lines, date_from_name, findings)
+    shape_rules = date_from_name >= _SHAPE_EFFECTIVE
+    _check_metadata(lines, date_from_name, findings, shape_rules)
     _check_sections(lines, findings)
     sections = _split_sections(lines)
     _check_scoring(sections, findings, gate_rules)
@@ -421,6 +500,8 @@ def check_file(path: str) -> list[tuple[int, str]]:
     if gate_rules:
         _check_near_miss(sections, findings)
         _check_surfaced_count(lines, sections, findings)
+    if shape_rules:
+        _check_shape(sections, findings)
     return sorted(findings)
 
 
