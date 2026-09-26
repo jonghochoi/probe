@@ -93,7 +93,7 @@ def term(data: dict, inline_md) -> tuple[str, str]:
     return tid, (
         f'<span class="tbox" data-term="{_esc(tid)}" hidden>'
         f'<span class="tdef">'
-        # A dedicated title class, never a bare `b` — R13: `display:block` on an
+        # A dedicated title class, never a bare `b` (site/CLAUDE.md): `display:block` on an
         # inline tag also catches every `<b>` in the body and breaks the line at
         # each emphasis.
         f'<span class="th">{_esc(title) or _esc(tid)}</span>'
