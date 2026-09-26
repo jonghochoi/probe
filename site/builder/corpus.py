@@ -13,6 +13,7 @@ from __future__ import annotations
 import math
 import re
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -544,8 +545,16 @@ def _haystack(fragments: list[str]) -> str:
 
 # ── Discovery ───────────────────────────────────────────────────────────────
 
-def discover() -> tuple[list[Paper], list[str]]:
-    """Every `analysis/<id>.md`, plus the problems found reading them."""
+def discover(partial: bool = False) -> tuple[list[Paper], list[str]]:
+    """Every `analysis/<id>.md`, plus the problems found reading them.
+
+    `partial` says the build is a subset (`--only`). Its landing page lists
+    only that subset and is never the one deployed, so a merge order it cannot
+    read is not a defect in what it builds: the missing history is printed as
+    a note rather than reported as a problem, and `--strict` judges the pages
+    the subset does build. A full build — the one `deploy-site.yml` publishes
+    — still reports it, because there it would publish a wrong 최근.
+    """
     papers: list[Paper] = []
     problems: list[str] = []
     if not ANALYSIS_DIR.is_dir():
@@ -621,10 +630,13 @@ def discover() -> tuple[list[Paper], list[str]]:
         papers.append(paper)
 
     if papers and no_history:
-        problems.append(
-            f"analysis/: {no_history} — the landing page orders by `generated:` "
-            f"instead of by the order the rewrites landed"
-        )
+        line = (f"analysis/: {no_history} — the landing page orders by `generated:` "
+                f"instead of by the order the rewrites landed")
+        if partial:
+            print(f"note: {line} (a partial build's landing page is never published)",
+                  file=sys.stderr)
+        else:
+            problems.append(line)
     return papers, problems
 
 

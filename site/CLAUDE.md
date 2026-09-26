@@ -75,6 +75,14 @@ forbids an author to write, `builder/assets/site.css` keeps:
 **A browser with no script loses only the extras.** Every control removes
 itself rather than sitting inert, and the landing list falls back to one page.
 
+**A moving slide is a still first.** `builder/charts.py` draws every state a
+stepped figure can be in and `builder/presentations.py` draws the authors' clip
+over the paper's own figure; `assets/presentation.js` only chooses what is on
+screen and computes no number the room reads. A clip that cannot play, a
+printout and a browser with no script all get the figure or the first state —
+never an empty frame — and nothing of a clip is fetched until the talk is a
+slide away from it.
+
 **One query is read by one rule.** `assets/match.js` is what both the landing
 filter box and the ⌘K palette ask their question with; two surfaces answering
 the same query differently is a bug, not two behaviours.
@@ -85,7 +93,9 @@ inlined (`assets/CLAUDE.md`). Change the mark here and bring those into step.
 
 **Two modules serve the prompt, not the build.** `builder/arxiv.py` extracts an
 arXiv original — body and appendix, figures, tables — and raises `Unavailable`
-when a paper has no HTML edition, which is `/analyze`'s stop condition;
+when a paper has no HTML edition, which is `/analyze`'s stop condition; run as
+a module it prints the index, `--grep`, `--tables` and `--section <anchor>`,
+which are what `/analyze` and `/present` confirm their numbers in, and `--bib`;
 `builder/mdext/probefence.py` owns the ` ```probe-* ` fences and their
 validation. Both are called by hand from a run, so keep them importable without
 the rest of the build.

@@ -26,10 +26,11 @@ surface sits in the docstring or header comment of the file that draws it.
 | `builder/glance.py` | The 요약 tab and its checks (G1–G7) |
 | `builder/comparisons.py` | Comparison discovery and validation (`comparison/AUTHORING.md`) |
 | `builder/presentations.py` | Presentation discovery, validation and slide drawing — the 발표 tab (`presentation/AUTHORING.md`) |
+| `builder/charts.py` | The 발표 tab's drawn figures — `probe-chart`, `probe-heat`, `probe-timing`, `probe-contrast`, `probe-inheritance` — as inline SVG laid out to the box the slide leaves them, stepped states included (`presentation/AUTHORING.md` §4-6 to §4-9, §8-2) |
 | `builder/pages.py`, `components.py` | Page assembly — the landing list, 같이 읽기 (`c/`), 발표 (`t/`), 내 서재, the paper page and its tabs, and the mastheads each list page opens on |
 | `builder/decisions.py` | The `context/P*.md` Decision-Log parser behind the `D<n>` tooltips |
 | `builder/catalog.py` | The corpus as data for an agent — `corpus.json`, `llms.txt` and the per-section Markdown under `p/<id>/s/` |
-| `builder/arxiv.py` | LaTeXML extraction of an arXiv original, for the prompts: `python3 -m builder.arxiv <id>` from this folder prints the section tree and figures; `--grep <regex>` prints the matching lines with their § |
+| `builder/arxiv.py` | LaTeXML extraction of an arXiv original, for the prompts: `python3 -m builder.arxiv <id>` from this folder prints the section tree, figures and table captions; `--grep <regex>` the matching lines with their §, `--tables` every table as Markdown, `--section <anchor>` one section's text, `--bib` the bibliography with each arXiv id's first-version month |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |
 | `builder/fonts.py` | Webfont subsetting, `Probe Num` included |
 | `builder/assets_out.py`, `builder/assets/` | The site's CSS, JS and icons, copied into the output tree. Each script opens on a comment stating what it owns |

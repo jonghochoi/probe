@@ -25,9 +25,11 @@ to stop rather than fall back to a summary-based rewrite.
 from __future__ import annotations
 
 import re
+import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from html import unescape
 from html.parser import HTMLParser
 
 BASE = "https://arxiv.org/html"
@@ -429,26 +431,112 @@ def grep(paper: Paper, pattern: str) -> list[tuple[str, str]]:
             for line in text.splitlines() if rx.search(line)]
 
 
-if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id> [--grep REGEX]`
-    import sys
+# A bibliography entry and an arXiv id inside it. An id encodes the month its
+# first version was posted (`2406.04806` is June 2024), which is how a talk's
+# lineage figures date a prior (`presentation/AUTHORING.md` §4-9). An entry is
+# one `<li>` with no list nested in it, so it is cut out by its id rather than
+# walked by the parser — the entry is read as flat text either way.
+_BIB_ITEM = re.compile(r'<li[^>]*\bid="bib\.bib\d+"[^>]*>(.*?)</li>', re.S)
+_BIB_ID = re.compile(r"(?<![\d.])(\d{2})(0[1-9]|1[0-2])\.\d{4,5}(?:v\d+)?(?![\d])")
 
-    args = sys.argv[1:]
-    pattern = ""
-    if "--grep" in args:
-        i = args.index("--grep")
-        pattern = args[i + 1] if i + 1 < len(args) else ""
-        args = args[:i] + args[i + 2:]
+
+def bibliography(html: str) -> list[str]:
+    """Every bibliography entry as one line of text, with the first-version
+    month of the arXiv id it gives, when it gives one — the venue year is all
+    an entry without one can be dated by."""
+    out = []
+    for body in _BIB_ITEM.findall(html):
+        text = re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", body))).strip()
+        text = re.sub(r"\s+([,.;:)])", r"\1", text)
+        m = _BIB_ID.search(text)
+        out.append(text + (f"  → arXiv {m.group(0)} · 20{m.group(1)}.{m.group(2)}"
+                           if m else "  → no arXiv id · venue year"))
+    return out
+
+
+def find_sections(paper: Paper, anchor: str) -> list[Section]:
+    """The section `anchor` names and every section under it, in order.
+
+    `anchor` is any of the forms a caption or a rewrite cites: the LaTeXML id
+    (`S3.SS2`, `A2`), the printed number (`3.2`), or the anchor this module
+    prints (`§3.2`). A numbered section's subsections come with it, so asking
+    for `§4` returns the whole of section 4.
+    """
+    key = anchor.strip().lstrip("§#")
+    hit = next((s for s in paper.sections if s.id == key or s.number == key), None)
+    if hit is None:
+        return []
+    prefix = hit.id + "."
+    return [s for s in paper.sections if s.id == hit.id or s.id.startswith(prefix)]
+
+
+def _main(argv: list[str]) -> int:
+    """`python3 -m builder.arxiv <arxiv-id> [--grep REGEX] [--tables] [--section <anchor> ...] [--bib]`
+
+    Bare, it prints the index: the section tree (body and appendix apart),
+    then every figure with the URL it hotlinks from — read from the page's own
+    `<img>`, whatever the file is called — so the inventory a talk or a
+    rewrite takes its figures from is one command rather than a grep for a
+    filename pattern. `--grep` prints every line of the original matching a
+    pattern, with its §. `--tables` prints every table in full, caption first,
+    as Markdown; `--section` prints a section's text, subsections included.
+    Every number a talk puts on a slide is confirmed in one of these two.
+    `--bib` prints the bibliography, one entry a line, each with the arXiv id
+    it gives and that id's first-version month — the date a lineage figure
+    puts on a prior.
+    """
+    import argparse
+
+    ap = argparse.ArgumentParser(prog="python3 -m builder.arxiv",
+                                 description=_main.__doc__.split("\n")[0])
+    ap.add_argument("paper_id")
+    ap.add_argument("--grep", metavar="REGEX",
+                    help="print every line of the original matching REGEX, with its §")
+    ap.add_argument("--tables", action="store_true",
+                    help="print every table, caption and body, as Markdown")
+    ap.add_argument("--section", action="append", default=[], metavar="ANCHOR",
+                    help="print one section's text (id, number or §anchor); repeatable")
+    ap.add_argument("--bib", action="store_true",
+                    help="print the bibliography, with each arXiv id's first-version month")
+    args = ap.parse_args(argv)
+    if args.bib:
+        try:
+            html, _ = fetch(args.paper_id)
+        except Unavailable as exc:
+            print(f"unavailable: {exc}", file=sys.stderr)
+            return 1
+        print("\n".join(bibliography(html)))
+        return 0
     try:
-        paper = load(args[0])
+        paper = load(args.paper_id)
     except Unavailable as exc:
         # A traceback here would read as a bug in this script; it is a fact
         # about the paper, and the caller must stop rather than fall back.
-        sys.exit(f"unavailable: {exc}")
-    if pattern:
+        print(f"unavailable: {exc}", file=sys.stderr)
+        return 1
+
+    if args.grep:
         print(paper.version)
-        for where, line in grep(paper, pattern):
+        for where, line in grep(paper, args.grep):
             print(f"  {where:12} {line}")
-        sys.exit(0)
+        return 0
+    if args.tables or args.section:
+        for anchor in args.section:
+            found = find_sections(paper, anchor)
+            if not found:
+                print(f"no section {anchor!r} — the index lists the anchors",
+                      file=sys.stderr)
+                return 1
+            for sec in found:
+                print(f"{'#' * min(sec.level + 1, 6)} {sec.anchor} {sec.title}\n")
+                print(sec.text + "\n")
+        if args.tables:
+            for t in paper.tables:
+                print(f"── Table {t.number} ({t.id}) ──")
+                print(t.caption.lstrip(": ") + "\n")
+                print((t.markdown or "(no cells — the table is an image)") + "\n")
+        return 0
+
     linkable = [f for f in paper.figures if f.linkable]
     appendix = paper.appendix
     print(f"{paper.version}  {paper.title}")
@@ -464,8 +552,19 @@ if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id> [--grep REGEX
             print(f"  {'  ' * (s.level - 1)}{s.anchor:11} {s.title[:54]:56} "
                   f"{len(s.text):6} chars")
         print()
+    print("  ── 그림 ──")
     for f in paper.figures:
         # An unlinkable figure is a decision to make, not a line to skim past:
         # R6 wants the paper's own figure wherever one exists.
         print(f"  {f.id:12} Fig {f.number:4} "
               f"{f.url or '— inline SVG, no file to hotlink (R6: redraw or skip)'}")
+        print(f"  {'':12} {' ' * 8} {f.caption.lstrip(': ')[:110]}")
+    if paper.tables:
+        print("\n  ── 표 ── (본문은 --tables)")
+        for t in paper.tables:
+            print(f"  {t.id:12} Tab {t.number:4} {t.caption.lstrip(': ')[:100]}")
+    return 0
+
+
+if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id> [--grep …] [--tables] [--section …] [--bib]`
+    sys.exit(_main(sys.argv[1:]))

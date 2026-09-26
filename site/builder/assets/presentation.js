@@ -17,7 +17,7 @@
  * The two flags are never both set. Nothing is cloned or rebuilt in either, so
  * the slide on the stage is the same element the page already validated.
  *
- * Four more pieces:
+ * The pieces:
  *
  *   The keys. → ← Space PageDown PageUp Home End Esc, plus a click on the
  *   right or left half. A presenter's hand is on a clicker that sends PageUp
@@ -39,6 +39,37 @@
  *   `presentation/AUTHORING.md` §3 is meant to fill at authoring time, so
  *   reaching for it often is the signal that a slide, not the room, is what
  *   needs fixing.
+ *
+ *   The builds. An item a slide marks `data-build="k"` waits for the
+ *   presenter's kth press on the stage, and → reveals it before it turns the
+ *   page. Only the stage holds anything back: a reader browsing the tab chose
+ *   to look and gets the whole slide, and stepping back onto a slide shows it
+ *   whole, because a presenter going back is looking for something already
+ *   said.
+ *
+ *   The steps. A figure the build drew in several states (`[data-steps]`) —
+ *   a schedule carried through a step, a sweep walked one value at a time —
+ *   is moved from one state to the next by the same press that reveals a
+ *   build: on the stage → takes the slide's builds, then its states, then
+ *   the next slide, so a clicker drives the whole talk. ↓ and ↑ move the
+ *   figure without leaving the slide, on the stage and, while the reader is
+ *   working the figure, in the tab — where ← and → stay the slides' alone.
+ *   Every state is in the markup; this file only chooses which one is on
+ *   screen, and a slide arrives in its first state, or its last when the
+ *   presenter steps back onto it.
+ *
+ *   The clips. The authors' video of the scene a slide's figure shows,
+ *   drawn over that figure (`[data-reel]`). It is fetched when the talk is a
+ *   slide away, plays muted from its first frame whenever its slide arrives,
+ *   and pauses when the slide leaves; K pauses it and S halves its speed. It
+ *   replaces the figure only once every clip has frames — a clip that errors,
+ *   a codec the browser lacks, a host the room's network blocks all leave the
+ *   figure standing, which is the slide it would have been anyway.
+ *
+ *   The figures. A paper figure is hotlinked, so one the network dropped
+ *   is marked on its card, which then says so instead of showing alt text
+ *   in a box, and is asked for again when the stage starts and as its slide
+ *   comes up.
  *
  *   The notes window. A second window carrying the current slide's essay, the
  *   next slide's title and a clock. It reads its content out of this document
@@ -79,6 +110,12 @@
   var exitBtn = bar.querySelector("[data-pres-exit]");
   var zoomOut = bar.querySelector("[data-pres-zoom]");
   var steps = [].slice.call(presentation.querySelectorAll("[data-pres-step]"));
+  // The stepped figure and the clip on each slide; `presentation/AUTHORING.md`
+  // §1-3 gives a slide one visual, so there is at most one of either.
+  var figs = slides.map(function (s) { return s.querySelector("[data-steps]"); });
+  var reels = slides.map(function (s) { return s.querySelector("[data-reel]"); });
+  var still = !!(window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   var ticks = deck ? [].slice.call(deck.querySelectorAll("[data-pres-go]")) : [];
   var atEl = deck ? deck.querySelector("[data-pres-at]") : null;
   // The essay belonging to each slide, by name rather than by position: §6
@@ -89,6 +126,7 @@
     return presentation.querySelector('.prs-script[data-for="' + s.id + '"]');
   });
   var at = 0;
+  var built = 0;                       // builds revealed on the slide at `at`
   var notesOn = false;
   var notes = null;
   var chan = null;
@@ -107,8 +145,13 @@
       // A notes window that outlived its stage would otherwise drive a presentation it
       // is not showing, so every message names the presentation it belongs to.
       if (d.presentation !== of) return;
-      if (d.type === "go") show(d.at);
+      if (d.type === "go") {
+        if (d.at === at + 1) next(); else show(d.at);
+        send();
+      }
       if (d.type === "who") send();
+      // The keys a moving slide takes, pressed in the notes window.
+      if (d.type === "key" && !listing()) act(d.key);
     };
   } catch (err) {
     chan = null;                       // notes still open; they just cannot sync
@@ -125,8 +168,298 @@
   function presenting() { return stage.hasAttribute("data-presenting"); }
   function listing() { return stage.hasAttribute("data-overview"); }
 
-  function show(i) {
-    at = Math.max(0, Math.min(slides.length - 1, i));
+  function builds(s) {
+    return [].slice.call(s.querySelectorAll("[data-build]"));
+  }
+
+  function depth(s) {
+    return builds(s).reduce(function (m, el) {
+      return Math.max(m, +el.dataset.build || 0);
+    }, 0);
+  }
+
+  // Only the stage holds a build back; every other reading shows it all.
+  function paintBuilds() {
+    slides.forEach(function (s, n) {
+      builds(s).forEach(function (el) {
+        el.classList.toggle("prs-held",
+          presenting() && !listing() && n === at && +el.dataset.build > built);
+      });
+    });
+  }
+
+  /* ── steps ────────────────────────────────────────────────────────── */
+
+  function count(f) { return +f.getAttribute("data-steps") || 1; }
+  function stateOf(f) { return +f.getAttribute("data-at") || 0; }
+
+  // Every element that differs between states names the states it is shown
+  // in (`data-in`), set back in (`data-lo`), or its value in each
+  // (`data-vars`). A snap is a move with no transition — the loop closing.
+  function setStep(f, i, animate) {
+    if (!animate) f.classList.add("prs-snap");
+    f.setAttribute("data-at", i);
+    [].forEach.call(f.querySelectorAll("[data-in]"), function (el) {
+      el.classList.toggle("prs-out",
+        el.getAttribute("data-in").split(" ").indexOf(String(i)) < 0);
+    });
+    [].forEach.call(f.querySelectorAll("[data-lo]"), function (el) {
+      el.classList.toggle("prs-lo",
+        el.getAttribute("data-lo").split(" ").indexOf(String(i)) >= 0);
+    });
+    [].forEach.call(f.querySelectorAll("[data-vars]"), function (el) {
+      el.getAttribute("data-vars").split("|").forEach(function (part) {
+        var k = part.indexOf(":");
+        el.style.setProperty(part.slice(0, k), part.slice(k + 1).split(";")[i]);
+      });
+    });
+    [].forEach.call(f.querySelectorAll("[data-step-to]"), function (b) {
+      var on = +b.getAttribute("data-step-to") === i;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      // A reader stepping from the buttons with ↑ ↓ keeps focus on the state
+      // on screen, so the focus ring never marks a state that is not.
+      if (on && f.contains(document.activeElement) &&
+          document.activeElement.hasAttribute("data-step-to")) {
+        b.focus({ preventScroll: true });
+      }
+    });
+    if (!animate) {
+      void f.getBoundingClientRect();  // commit the snap before transitions return
+      f.classList.remove("prs-snap");
+    }
+  }
+
+  // One state along. A figure whose last state is its first again
+  // (`data-cycle`) goes round: past the end it snaps back to the start, which
+  // looks the same, and moves on from there.
+  function stepBy(f, dir) {
+    var n = count(f), to = stateOf(f) + dir;
+    if (f.hasAttribute("data-cycle") && to > n - 1) { setStep(f, 0, false); to = 1; }
+    to = Math.max(0, Math.min(n - 1, to));
+    if (to !== stateOf(f)) setStep(f, to, true);
+  }
+
+  figs.forEach(function (f) {
+    if (!f) return;
+    [].forEach.call(f.querySelectorAll("[data-step-to]"), function (b) {
+      b.addEventListener("click", function () {
+        setStep(f, +b.getAttribute("data-step-to"), true);
+      });
+    });
+  });
+
+  // → on the stage: the next build if the slide has one waiting, then the
+  // next state of its figure, else the next slide, arriving with its builds
+  // held and its figure in its first state.
+  function beat() {
+    if (built < depth(slides[at])) {
+      built += 1;
+      paintBuilds();
+      return true;
+    }
+    var f = figs[at];
+    if (f && stateOf(f) < count(f) - 1) {
+      setStep(f, stateOf(f) + 1, true);
+      return true;
+    }
+    return false;
+  }
+
+  function next() {
+    if (presenting() && !listing() && beat()) return;
+    show(at + 1, true);
+  }
+
+  // The keys a moving slide takes — the ones the deck leaves free. From the
+  // stage, the tab and the notes window alike.
+  function act(k) {
+    var f = figs[at], r = reels[at];
+    if (f && (k === "ArrowDown" || k === "ArrowUp")) {
+      // ↓ is → that never leaves the slide: on the stage a held build
+      // arrives before the figure moves.
+      if (k === "ArrowDown" && presenting() && built < depth(slides[at])) {
+        built += 1;
+        paintBuilds();
+      } else {
+        stepBy(f, k === "ArrowDown" ? 1 : -1);
+      }
+      return true;
+    }
+    if (r && r.hasAttribute("data-live") && (k === "k" || k === "K")) {
+      setPaused(r, !r.hasAttribute("data-paused"));
+      return true;
+    }
+    if (r && r.hasAttribute("data-live") && (k === "s" || k === "S")) {
+      setSlow(r, !r.hasAttribute("data-slow"));
+      return true;
+    }
+    return false;
+  }
+
+  /* ── clips ────────────────────────────────────────────────────────── */
+
+  function vids(r) { return [].slice.call(r.querySelectorAll("video")); }
+
+  function arm(r) {
+    if (r.hasAttribute("data-armed")) return;
+    r.setAttribute("data-armed", "");
+    var vs = vids(r), ready = 0;
+    vs.forEach(function (v) {
+      v.addEventListener("error", function () { dead(r); });
+      v.addEventListener("loadeddata", function () {
+        if (++ready === vs.length && !r.hasAttribute("data-dead")) {
+          r.setAttribute("data-live", "");
+          fit(r);
+          reel();
+        }
+      }, { once: true });
+      v.preload = "auto";
+      v.src = v.getAttribute("data-src");
+    });
+    // The first clip is the clock. A shorter one waits on its last frame and
+    // a longer one is cut, so the two sides of a pair show the same instant.
+    vs[0].addEventListener("ended", function () {
+      vs.forEach(function (v) { v.currentTime = 0; });
+      if (!r.hasAttribute("data-paused")) play(r);
+    });
+  }
+
+  // Each card at the largest size the figure's cell holds at the clip's own
+  // proportions, the pair side by side with one gap between them.
+  function fit(r) {
+    var vs = vids(r);
+    if (!r.hasAttribute("data-live") || !vs[0].videoWidth || !r.offsetHeight) return;
+    var box = r.querySelector(".prs-clips");
+    var clip = r.querySelector(".prs-clip");
+    var lab = r.querySelector(".prs-cliplab");
+    var cs = getComputedStyle(box), gs = getComputedStyle(clip);
+    var gap = parseFloat(cs.columnGap) || 0;
+    var pad = parseFloat(getComputedStyle(vs[0]).paddingLeft) || 0;
+    var top = lab ? lab.offsetHeight + (parseFloat(gs.rowGap) || 0) : 0;
+    var ar = vs[0].videoWidth / vs[0].videoHeight;
+    var h = r.offsetHeight - top;
+    var w = (h - 2 * pad) * ar + 2 * pad;
+    var room = (r.offsetWidth - gap * (vs.length - 1)) / vs.length;
+    if (w > room) { w = room; h = (w - 2 * pad) / ar + 2 * pad; }
+    vs.forEach(function (v) {
+      v.style.setProperty("--w", w + "px");
+      v.style.setProperty("--h", h + "px");
+    });
+  }
+
+  function dead(r) {
+    // One side of a comparison is not a comparison: the figure stays.
+    r.setAttribute("data-dead", "");
+    r.removeAttribute("data-live");
+    vids(r).forEach(function (v) { v.pause(); v.removeAttribute("src"); v.load(); });
+  }
+
+  function play(r) {
+    vids(r).forEach(function (v) {
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    });
+  }
+
+  function pause(r) { vids(r).forEach(function (v) { v.pause(); }); }
+
+  function setPaused(r, on) {
+    r.toggleAttribute("data-paused", on);
+    if (on) pause(r); else play(r);
+  }
+
+  function setSlow(r, on) {
+    r.toggleAttribute("data-slow", on);
+    var b = r.querySelector("[data-reel-rate]");
+    if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
+    vids(r).forEach(function (v) {
+      v.playbackRate = on ? 0.5 : 1;
+      v.defaultPlaybackRate = on ? 0.5 : 1;
+    });
+  }
+
+  reels.forEach(function (r) {
+    if (!r) return;
+    r.querySelector("[data-reel-toggle]").addEventListener("click", function () {
+      setPaused(r, !r.hasAttribute("data-paused"));
+    });
+    r.querySelector("[data-reel-rate]").addEventListener("click", function () {
+      setSlow(r, !r.hasAttribute("data-slow"));
+    });
+  });
+
+  // Whichever slide is on screen decides what plays; the clip a slide ahead
+  // is fetched, so it has frames when the talk gets there. `arrived` starts
+  // the slide's clip from its first frame, because that is the order the
+  // essay under it was written in.
+  function reel(arrived) {
+    var shown = !(panel && panel.hidden) && !listing();
+    reels.forEach(function (r, n) {
+      if (!r) return;
+      if (n === at || n === at + 1) arm(r);
+      if (n !== at || !shown) { pause(r); return; }
+      if (arrived) {
+        vids(r).forEach(function (v) { if (v.readyState) v.currentTime = 0; });
+        r.toggleAttribute("data-paused", still);
+      }
+      if (r.hasAttribute("data-live") && !r.hasAttribute("data-paused")) play(r);
+    });
+  }
+
+  if (reels.some(Boolean)) {
+    if (window.ResizeObserver) {
+      var sized = new ResizeObserver(function (es) {
+        es.forEach(function (e) { fit(e.target); });
+      });
+      reels.forEach(function (r) { if (r) sized.observe(r); });
+    }
+    // 목록 and the tab strip change what is visible without changing the slide.
+    new MutationObserver(function () { reel(false); }).observe(stage, {
+      attributes: true, attributeFilter: ["data-overview"],
+    });
+    if (panel) new MutationObserver(function () { reel(false); }).observe(panel, {
+      attributes: true, attributeFilter: ["hidden"],
+    });
+  }
+
+  /* ── figures ──────────────────────────────────────────────────────── */
+
+  // Every paper figure is hotlinked from the paper's host and loaded with the
+  // page, so a talk opened ahead of time has them all before the room does.
+  // One that failed is marked on its card (`data-missing`, drawn as a card
+  // saying so) and asked for again when the stage starts and when its slide
+  // or the one before it comes up — a network that dropped one request is
+  // usually back by the time the talk reaches it.
+  var imgs = slides.map(function (s) {
+    return [].slice.call(s.querySelectorAll(".prs-fig > img, .prs-art > img"));
+  });
+  function card(img) { return img.parentNode; }
+  imgs.forEach(function (list) {
+    list.forEach(function (img) {
+      img.addEventListener("load", function () { card(img).removeAttribute("data-missing"); });
+      img.addEventListener("error", function () { card(img).setAttribute("data-missing", ""); });
+      if (img.complete && !img.naturalWidth) card(img).setAttribute("data-missing", "");
+    });
+  });
+  function heal(list) {
+    (list || []).forEach(function (img) {
+      if (!img.complete || img.naturalWidth) return;
+      var src = img.getAttribute("src");
+      img.removeAttribute("src");
+      img.setAttribute("src", src);
+    });
+  }
+
+  function show(i, fresh) {
+    var to = Math.max(0, Math.min(slides.length - 1, i));
+    var moved = to !== at;
+    built = fresh && moved ? 0 : depth(slides[to]);
+    at = to;
+    // A slide arrives in its figure's first state — or, when the presenter
+    // steps back onto it, its last, for the reason a build arrives whole.
+    if (moved && figs[at]) {
+      setStep(figs[at], presenting() && !fresh ? count(figs[at]) - 1 : 0, false);
+    }
     // A new slide is read whole first, and the slide being left goes back to
     // 100% with it — otherwise stepping back lands on someone else's zoom.
     z = { k: 1, x: 0, y: 0 };
@@ -149,9 +482,13 @@
       b.disabled = +b.dataset.presStep < 0 ? at === 0 : at === slides.length - 1;
     });
     zoomOut.textContent = "100%";
+    paintBuilds();
     // Nothing scrolls in either single-slide reading — the frame is what holds
     // still. The overview is the one surface with a list to keep up with.
     if (listing()) slides[at].scrollIntoView({ block: "nearest" });
+    reel(moved);
+    heal(imgs[at]);
+    heal(imgs[at + 1]);
     send();
   }
 
@@ -165,7 +502,11 @@
     // takes its scrollbar gutter with it — the stage is then the whole width.
     document.documentElement.setAttribute("data-presenting", "");
     startedAt = Date.now();
-    show(at);
+    imgs.forEach(heal);
+    show(at, true);
+    built = 0;
+    if (figs[at]) setStep(figs[at], 0, false);
+    paintBuilds();
     // The decision was made in the tab; the stage only answers it on the
     // surface a presenter can see from there.
     if (notesOn) openNotes();
@@ -183,6 +524,7 @@
     stage.removeAttribute("data-presenting");
     stage.setAttribute("data-browsing", "");
     document.documentElement.removeAttribute("data-presenting");
+    paintBuilds();
     if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(function () {});
     }
@@ -355,7 +697,11 @@
     if (typing(e.target)) return;
     if (e.key === "ArrowRight") show(at + 1);
     else if (e.key === "ArrowLeft") show(at - 1);
-    else return;
+    // ↑ and ↓ still scroll the page a reader is on, so the figure takes them
+    // only while the reader is working it — focus inside the slide.
+    else if (/^Arrow(Up|Down)$/.test(e.key) &&
+             !slides[at].contains(document.activeElement)) return;
+    else if (!act(e.key)) return;
     e.preventDefault();
   });
 
@@ -364,9 +710,11 @@
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var k = e.key;
     if (k === "ArrowRight" || k === "PageDown" || k === " " || k === "Spacebar") {
-      listing() ? setList(false) : show(at + 1);
+      listing() ? setList(false) : next();
     } else if (k === "ArrowLeft" || k === "PageUp" || k === "Backspace") {
       show(at - 1);
+    } else if (!listing() && act(k)) {
+      // a moving slide's own key — ↑ ↓ K S
     } else if (k === "Home") {
       show(0);
     } else if (k === "End") {
@@ -402,7 +750,18 @@
   presentation.addEventListener("click", function (e) {
     if (!presenting() || listing()) return;
     if (swallow) { swallow = false; return; }
-    show(at + (e.clientX < window.innerWidth / 2 ? -1 : 1));
+    // The frame's own controls sit inside the presentation, so the click that
+    // starts the talk bubbles here once the stage is up — and would turn the
+    // first page before the room has seen it.
+    if (e.target.closest && e.target.closest("button")) return;
+    // A link on a slide — a prior's rewrite on a lineage figure — opens
+    // beside the talk, and the page stays where it is.
+    if (e.target.closest && e.target.closest("a")) return;
+    // A click on a playing clip is the clip's: it pauses rather than turning
+    // the page under the room.
+    var r = e.target.closest && e.target.closest("[data-reel][data-live]");
+    if (r) { setPaused(r, !r.hasAttribute("data-paused")); return; }
+    if (e.clientX < window.innerWidth / 2) show(at - 1); else next();
   });
 
   /* ── the notes ────────────────────────────────────────────────────── */
@@ -516,7 +875,9 @@
     'document.getElementById("nxt").onclick=function(){go(Math.min(slides().length-1,at+1))};',
     'document.addEventListener("keydown",function(e){',
     ' if(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" ")go(Math.min(slides().length-1,at+1));',
-    ' else if(e.key==="ArrowLeft"||e.key==="PageUp")go(Math.max(0,at-1));else return;',
+    ' else if(e.key==="ArrowLeft"||e.key==="PageUp")go(Math.max(0,at-1));',
+    ' else if(/^(ArrowUp|ArrowDown|k|K|s|S)$/.test(e.key)){if(c)c.postMessage(',
+    '   {presentation:PRESENTATION,type:"key",key:e.key})}else return;',
     ' e.preventDefault()});',
     'setInterval(tick,1000);paint();',
     '})();<\/script></body></html>',

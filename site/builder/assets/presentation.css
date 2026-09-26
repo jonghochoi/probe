@@ -4,17 +4,29 @@
  * own type scale, and letting the article's rules reach into it would put body
  * measure on a surface read from across a room.
  *
- * A slide reads thin when its content stops short of the frame, and larger
- * type is never the fix — the layout fills the frame instead. The rules that
+ * The scale is the frame's. Every size inside a slide is a share of the
+ * slide's own width (`cqw`), so the tab, the stage and the 목록 thumbnail are
+ * one composition at three sizes rather than three compositions — a keynote
+ * does not reflow when the projector is bigger. The `max()` floors are only
+ * for a phone, where the frame is small enough that a share of it stops being
+ * legible.
+ *
+ * The hierarchy is the talk's: the claim in the header dominates every
+ * frame, the evidence under it is drawn or quoted as large as the frame
+ * allows, and prose is what is left — a line, not a paragraph.
+ *
+ * A slide reads thin when its content stops short of the frame, and more
+ * text is never the fix — the layout fills the frame instead. The rules that
  * matter are three:
  *
  *   1. the container stretches, then distributes its items — a card that hugs
  *      its content leaves the slack outside it, where nothing can use it;
  *   2. that distribution is capped — three short items spread over a full
- *      card manufacture cavities rather than filling them, so the gap has a
+ *      column manufacture cavities rather than filling them, so the gap has a
  *      maximum and whatever is left splits evenly above and below;
- *   3. every slide closes on the evidence ribbon (`presentation/AUTHORING.md`
- *      §3-2), and the panel types are not exempt.
+ *   3. a slide's numbers sit where its figure leaves room — beside a square
+ *      paper figure, under everything else — and only when the figure does
+ *      not already show them (`presentation/AUTHORING.md` §3-3).
  */
 
 .prs-presentation { display: grid; gap: 26px; }
@@ -22,115 +34,174 @@
 /* ── the frame ─────────────────────────────────────────────────────── */
 
 .prs-slide {
-  /* Every ceiling in this file is `calc(… * var(--prs-cap))`. In the tab the
-     frame is a card on a page and those ceilings hold; on the stage it is the
-     screen, and one lever lifts the whole scale at once instead of forty rules
-     disagreeing about how much bigger a slide gets. */
-  --prs-cap: 1;
+  /* The beat's colour, which the eyebrow, the accents and the deck all read.
+     The four are the ones `site.css` keeps for four acts. */
+  --act: var(--act4);
+  /* The same colour where it is type rather than a fill. The last act's is
+     the brand orange, which is a fill's strength; its ink is the one a
+     number can be read in. */
+  --act-ink: var(--act);
+  /* The margins, as shares of the frame's width, and the frame's width as
+     its children measure it — which is what a figure needs to bleed exactly
+     to the edge, since `cqw` inside the frame is a share of its content box. */
+  --px: .052;
+  --py: .039;
+  --sw: calc(100cqw / (1 - 2 * var(--px)));
+  /* The smallest type a room reads from the back — the floor every line of
+     content on a slide is set at or above. Chrome (the eyebrow, the page
+     number) may go under it; a figure's provenance, a ribbon label and a
+     panel item's second register may not. */
+  --room: max(11px, 1.5cqw);
   width: 100%; aspect-ratio: 16 / 9; position: relative; overflow: hidden;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: clamp(18px, 3vw, calc(30px * var(--prs-cap))) clamp(22px, 4.2vw, calc(42px * var(--prs-cap))) 16px;
+  padding: calc(var(--py) * 100%) calc(var(--px) * 100%) calc(var(--py) * 90%);
   display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
   container-type: inline-size;
-}
-.prs-slide::before {
-  content: ""; position: absolute; inset: 0 0 auto; height: 3px;
-  background: var(--orange);
-}
-/* The beat, in the word the room can use. Korean takes far less tracking than
-   a Latin small-caps label does — past about .05em the syllables read as
-   separate words — so the label earns its weight from size and colour. */
-.prs-act {
-  display: block; margin-bottom: 7px;
-  font-size: clamp(9px, 1.05cqw, calc(12px * var(--prs-cap)));
-  font-weight: 700; letter-spacing: .05em;
-  color: var(--orange-ink);
-}
-.prs-slide h3 {
-  margin: 0; font-size: clamp(14px, 2.5cqw, calc(27px * var(--prs-cap))); font-weight: 800;
-  letter-spacing: -.02em; line-height: 1.25; color: var(--text);
   word-break: keep-all;
 }
-.prs-slide footer {
-  display: flex; justify-content: space-between; gap: 12px;
-  padding-top: 10px; font-family: var(--mono);
-  font-size: clamp(7.5px, .9cqw, calc(10px * var(--prs-cap))); color: var(--text-muted);
+.prs-slide[data-act="起"] { --act: var(--act1); }
+.prs-slide[data-act="承"] { --act: var(--act2); }
+.prs-slide[data-act="轉"] { --act: var(--act3); }
+.prs-slide[data-act="結"] { --act: var(--act4); --act-ink: var(--orange-ink); }
+
+/* Where in the four beats this slide stands. Four short bars, the current one
+   long and solid, the ones behind it at half strength, the ones ahead only
+   outlined — so the room sees the talk move through its acts, and the word
+   beside the bar is the beat in the language the room uses. */
+.prs-eyebrow {
+  display: flex; align-items: center; gap: max(6px, 1cqw);
+  margin-bottom: max(6px, 1.3cqw);
+}
+.prs-acts { display: flex; gap: max(2px, .3cqw); }
+.prs-acts i {
+  width: max(8px, 1.4cqw); height: max(3px, .36cqw); border-radius: 1px;
+  color: var(--border); background: transparent; box-shadow: inset 0 0 0 1px currentColor;
+}
+.prs-acts i.past { background: currentColor; opacity: .38; box-shadow: none; }
+.prs-acts i.on { width: max(18px, 3.4cqw); background: currentColor; box-shadow: none; }
+.prs-acts i.past.prs-r1, .prs-acts i.on.prs-r1 { color: var(--act1); }
+.prs-acts i.past.prs-r2, .prs-acts i.on.prs-r2 { color: var(--act2); }
+.prs-acts i.past.prs-r3, .prs-acts i.on.prs-r3 { color: var(--act3); }
+.prs-acts i.past.prs-r4, .prs-acts i.on.prs-r4 { color: var(--act4); }
+/* Korean takes far less tracking than a Latin small-caps label does — past
+   about .05em the syllables read as separate words — so the label earns its
+   weight from size and colour. */
+.prs-act {
+  font-size: max(9px, 1.08cqw); font-weight: 700; letter-spacing: .04em;
+  color: var(--act-ink);
 }
 
-.prs-body { display: grid; gap: clamp(10px, 1.8cqw, calc(20px * var(--prs-cap))); padding: 18px 0 6px; min-height: 0; }
-.prs-claim {
-  margin: 0; font-size: clamp(11px, 1.55cqw, calc(18px * var(--prs-cap))); line-height: 1.5;
-  font-weight: 500; color: var(--text-muted); word-break: keep-all;
+/* The claim. It is the largest thing on every frame but the cover and the
+   turn, and nothing competes with it: the eyebrow is small, the body is
+   drawn, and the prose under a figure is a line. Every headline is sized to
+   its widest authored line (`--len`, from the build), so the column never
+   gets to decide where one breaks. */
+.prs-slide h3 {
+  margin: 0; font-size: max(16px, min(3.7cqw, calc(98cqw / var(--len, 1))));
+  font-weight: 800; letter-spacing: -.035em; line-height: 1.16; color: var(--text);
 }
-.prs-claim b { color: var(--orange-ink); font-weight: 800; }
+.prs-slide footer {
+  position: absolute; right: calc(var(--px) * var(--sw)); bottom: calc(var(--py) * .8 * var(--sw));
+  font-family: var(--mono); font-size: max(8px, .9cqw); font-weight: 600;
+  color: var(--text-muted); opacity: .7; letter-spacing: .06em;
+}
+
+.prs-body {
+  display: grid; gap: max(10px, 2cqw);
+  padding: max(10px, 2.4cqw) 0 0; min-height: 0;
+}
+.prs-claim {
+  margin: 0; font-size: max(11px, 1.75cqw); line-height: 1.5;
+  font-weight: 500; color: var(--text-muted);
+}
+.prs-claim b { color: var(--text); font-weight: 800; }
+
+/* ── the numbers ───────────────────────────────────────────────────── */
+
+/* The evidence ribbon, set as numbers. No box, no rule between cells: a ruled
+   row of three is a table, and a table is read rather than seen. The numeral
+   carries the size and the unit sits small beside it, the way `50 N` is set
+   when the 50 is what has to land. */
+.prs-facts {
+  display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+  gap: max(12px, 3cqw); margin-top: max(10px, 2.2cqw);
+  padding-top: max(8px, 1.6cqw); border-top: 1px solid var(--border-soft);
+  padding-right: 5cqw;
+}
+.prs-fact { display: grid; gap: max(2px, .5cqw); align-content: start; min-width: 0; }
+.prs-v {
+  margin: 0; font-family: var(--num); font-size: max(15px, 3.1cqw);
+  line-height: 1; letter-spacing: -.02em; color: var(--act-ink); white-space: nowrap;
+}
+.prs-v b { font-weight: 700; }
+.prs-v small {
+  font-family: var(--ko); font-size: .48em; font-weight: 600;
+  letter-spacing: 0; color: var(--text-muted);
+}
+.prs-v .prs-vtext { font-family: var(--ko); font-size: .62em; font-weight: 800; letter-spacing: -.02em; }
+.prs-fact > span {
+  font-size: var(--room); line-height: 1.4; color: var(--text-muted);
+}
 
 /* ── cover ─────────────────────────────────────────────────────────── */
 
 /* On the cover the spine is the headline and the slide's own header is the
-   hook above it — everywhere else that order is reversed, and it is reversed
-   here because a title slide's job is to put the one sentence the talk lands
-   in front of the room before the talk starts.
-   Centred rather than pushed to the edges: the slack is halved above and
-   below instead of pooled in one place. */
-.prs-cover .prs-body { align-content: center; gap: clamp(16px, 3.4cqw, 40px); padding-bottom: 14px; }
+   hook above it — everywhere else that order is reversed, because a title
+   slide's job is to put the one sentence the talk lands in front of the room
+   before the talk starts. Centred rather than pushed to the edges: the slack
+   is halved above and below instead of pooled in one place. */
+.prs-cover .prs-body { align-content: center; gap: max(14px, 3.4cqw); }
 .prs-cover h3 {
-  font-size: clamp(10px, 1.35cqw, calc(15px * var(--prs-cap)));
-  font-weight: 700; letter-spacing: 0; color: var(--orange-ink);
+  font-size: max(11px, 1.55cqw); font-weight: 700; letter-spacing: -.01em;
+  color: var(--act-ink); margin-top: max(4px, .6cqw);
 }
 .prs-spineline {
-  margin: 0; font-size: clamp(15px, 2.9cqw, calc(32px * var(--prs-cap)));
-  font-weight: 800; letter-spacing: -.03em; line-height: 1.26;
-  color: var(--text); word-break: keep-all;
+  margin: 0; font-size: max(18px, min(4.4cqw, calc(var(--col, 98cqw) / var(--len, 1))));
+  font-weight: 800; letter-spacing: -.045em; line-height: 1.14; color: var(--text);
 }
 .prs-colophon { display: grid; align-content: end; }
 
-/* The act rail — the presentation's own shape, on its title slide. Cells are weighted
-   by how many slides each run of an act holds, so the block a beat gets is the
-   time it gets, and the four colours are the ones `site.css` already keeps for
-   four acts rather than a palette invented here. */
-.prs-rail { display: flex; gap: clamp(5px, .9cqw, 10px); align-items: end; }
-.prs-rblock { flex: var(--n); display: grid; gap: clamp(5px, .9cqw, 9px); min-width: 0; }
-.prs-rcells { display: flex; gap: clamp(2px, .35cqw, 4px); }
+/* The act rail — the presentation's own shape, on its title slide. Cells are
+   weighted by how many slides each run of an act holds, so the block a beat
+   gets is the time it gets. */
+.prs-rail { display: flex; gap: max(5px, .9cqw); align-items: end; margin-top: max(16px, 3.6cqw); }
+.prs-rblock { flex: var(--n); display: grid; gap: max(5px, .9cqw); min-width: 0; }
+.prs-rcells { display: flex; gap: max(2px, .35cqw); }
 .prs-rcells i {
-  flex: 1; height: clamp(8px, 1.7cqw, calc(17px * var(--prs-cap)));
+  flex: 1; height: max(8px, 1.7cqw);
   border-radius: 2px; background: currentColor; opacity: .42;
 }
 .prs-rlab {
   display: flex; align-items: baseline; gap: .5em; font-family: var(--mono);
-  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap)));
-  font-weight: 700; letter-spacing: .06em; color: currentColor;
+  font-size: max(7.5px, .95cqw); font-weight: 700; letter-spacing: .06em;
+  color: currentColor;
 }
 .prs-rlab em { font-style: normal; font-weight: 500; opacity: .62; letter-spacing: 0; }
 .prs-r1 { color: var(--act1); } .prs-r2 { color: var(--act2); }
 .prs-r3 { color: var(--act3); } .prs-r4 { color: var(--act4); }
-/* The turn is what the presentation exists for, so its cells stand taller. Height
-   rather than a darker fill: the four act colours are already carrying which
-   block is which, and a solid slab among washed ones reads as a different
-   kind of thing rather than as the same thing emphasised. */
-.prs-r3 .prs-rcells i { height: clamp(13px, 2.7cqw, calc(27px * var(--prs-cap))); }
-.prs-rail { margin-top: clamp(18px, 3.6cqw, 44px); }
+/* The turn is what the presentation exists for, so its cells stand taller. */
+.prs-r3 .prs-rcells i { height: max(13px, 2.7cqw); }
 .prs-railfoot {
-  margin: clamp(7px, 1.3cqw, 13px) 0 0; font-family: var(--mono);
-  font-size: clamp(7px, .9cqw, calc(10px * var(--prs-cap)));
-  color: var(--text-muted); letter-spacing: .04em;
+  margin: max(7px, 1.3cqw) 0 0; font-family: var(--mono);
+  font-size: max(7px, .9cqw); color: var(--text-muted); letter-spacing: .04em;
 }
 .prs-meta {
-  margin: 0; font-family: var(--mono); font-size: clamp(8px, 1cqw, calc(10.5px * var(--prs-cap)));
+  margin: 0; font-family: var(--mono); font-size: max(8px, 1cqw);
   letter-spacing: .04em; color: var(--text-muted);
 }
 .prs-paper {
-  margin: 6px 0 16px; font-size: clamp(12px, 1.6cqw, calc(18px * var(--prs-cap)));
-  font-weight: 600; color: var(--text); word-break: keep-all;
+  margin: max(4px, .6cqw) 0 max(10px, 1.8cqw); font-size: max(12px, 1.85cqw);
+  font-weight: 700; letter-spacing: -.02em; color: var(--text);
 }
-.prs-points { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.prs-points { margin: 0; padding: 0; list-style: none; display: grid; gap: max(4px, .7cqw); }
 .prs-points li {
-  position: relative; padding-left: 13px; word-break: keep-all;
-  font-size: clamp(10px, 1.3cqw, calc(14.5px * var(--prs-cap))); line-height: 1.6; color: var(--text-muted);
+  position: relative; padding-left: max(12px, 1.6cqw);
+  font-size: max(10px, 1.4cqw); line-height: 1.5; color: var(--text-muted);
 }
 .prs-points li::before {
-  content: ""; position: absolute; left: 0; top: .62em;
-  width: 5px; height: 1.5px; background: var(--orange);
+  content: ""; position: absolute; left: 0; top: .72em;
+  width: max(6px, .8cqw); height: 2px; background: var(--act);
 }
 .prs-points li b { color: var(--text); font-weight: 700; }
 
@@ -138,342 +209,704 @@
 
 /* The text keeps a column and the image takes the frame's edge. Half the
    frame given to something that is not type is most of why a title slide
-   reads as one, and it is the only place in a presentation where an image is not
-   evidence — so it bleeds past the padding every other slide respects. */
+   reads as one, and it is the only place in a presentation where an image is
+   not evidence — so it bleeds past the padding every other slide respects. */
 .prs-hero .prs-body,
-.prs-hero header,
-.prs-hero footer { padding-right: 46cqw; }
-.prs-hero .prs-body { grid-template-columns: minmax(0, 1fr); align-content: center; padding-bottom: 0; }
+.prs-hero header { padding-right: 41cqw; }
+.prs-hero .prs-body { --col: 58cqw; }
+.prs-hero .prs-body { grid-template-columns: minmax(0, 1fr); align-content: center; }
 .prs-hero .prs-left {
-  display: grid; align-content: center; min-height: 0;
-  gap: clamp(16px, 3.4cqw, calc(40px * var(--prs-cap)));
+  display: grid; align-content: center; min-height: 0; gap: max(16px, 4cqw);
 }
 .prs-hero .prs-art {
-  /* Inset by the accent rule's own height so the rule still runs the full
-     width of the frame and the image starts under it. */
-  position: absolute; inset: 3px 0 0 auto; width: 43cqw; overflow: hidden;
+  position: absolute; inset: 0 0 0 auto; width: 38%; overflow: hidden;
   background: var(--surface-2);
 }
-.prs-hero .prs-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.prs-hero .prs-art img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%; display: block;
+}
 /* The caption is white on someone else's photograph, and the paper does not
    promise a dark corner to put it in. */
 .prs-hero .prs-art::after {
-  content: ""; position: absolute; inset: auto 0 0; height: 42%;
-  background: linear-gradient(to top, rgba(0, 0, 0, .62), rgba(0, 0, 0, 0));
+  content: ""; position: absolute; inset: auto 0 0; height: 28%;
+  background: linear-gradient(to top, rgba(0, 0, 0, .66), rgba(0, 0, 0, 0));
   pointer-events: none;
 }
+/* The provenance rides on the image because the cover has no other line to
+   carry it, and a photograph with no figure number is a photograph the room
+   cannot look up. */
 .prs-hero .prs-artcap {
-  position: absolute; right: clamp(8px, 1.4cqw, calc(14px * var(--prs-cap)));
-  bottom: clamp(7px, 1.2cqw, calc(12px * var(--prs-cap)));
-  margin: 0; max-width: 82%; text-align: right; font-style: italic;
-  font-size: clamp(7px, .88cqw, calc(10px * var(--prs-cap))); line-height: 1.5;
-  color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, .8); word-break: keep-all;
-}
-/* The provenance rides with the caption because the cover has no evidence
-   ribbon to carry it, and a photograph with no figure number is a photograph
-   the room cannot look up. */
-.prs-hero .prs-artcap span {
-  display: block; margin-top: 3px;
-  font-family: var(--mono); font-style: normal; font-weight: 700; opacity: .82;
+  position: absolute; left: max(10px, 2.2cqw); right: max(10px, 2.2cqw);
+  bottom: max(9px, 2cqw); z-index: 1;
+  margin: 0; font-family: var(--mono); font-size: var(--room); font-weight: 700;
+  line-height: 1.4; color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, .8);
 }
 
-/* ── statement ─────────────────────────────────────────────────────── */
+/* ── statement: the turn ───────────────────────────────────────────── */
 
+/* The turn is the one frame on its own ground: the page tinted a tenth of the
+   way toward the turn's act colour, with a thick band of that colour down its
+   left edge. Everything before it was set on the page's plain ground and
+   everything after will be, so the room sees it has arrived at the sentence
+   the talk exists for — without the frame flipping to the other ink, which
+   reads as a different deck rather than a louder beat of this one. Text,
+   drawings and the paper's cards keep the theme's own tokens, so nothing on
+   the turn is authored for it. */
+.prs-statement {
+  background: color-mix(in oklch, var(--act3) 10%, var(--surface));
+  box-shadow: inset max(6px, 1.1cqw) 0 0 var(--act3);
+}
+.prs-stage[data-browsing] .prs-slide.prs-statement.prs-on,
+.prs-stage[data-presenting] .prs-slide.prs-statement.prs-on {
+  box-shadow: inset max(6px, 1.1cqw) 0 0 var(--act3), var(--shadow-lg);
+}
+.prs-statement .prs-sub b { color: var(--act3); }
 .prs-statement .prs-body { align-content: center; }
 .prs-statement .prs-body:has(.prs-diag) {
-  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
-  align-items: center; gap: clamp(14px, 2.6cqw, calc(30px * var(--prs-cap)));
+  --col: 44cqw;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  align-items: center; gap: max(14px, 4cqw);
+}
+/* With a drawing, the sentence stands over it at the frame's width and the
+   line under the sentence sits beside it rather than under it, so the drawing
+   keeps the height it needs. */
+.prs-statement .prs-body:has(> .prs-dfig),
+.prs-statement .prs-body:has(> .prs-sfig) {
+  --col: 58cqw;
+  grid-template-rows: auto minmax(0, 1fr); align-content: stretch;
+  gap: max(10px, 2cqw); padding-top: max(6px, 1cqw);
+}
+.prs-statement .prs-said:has(+ .prs-dfig),
+.prs-statement .prs-said:has(+ .prs-sfig) {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: max(12px, 4cqw); align-items: end;
+}
+.prs-statement .prs-said:has(+ :is(.prs-dfig, .prs-sfig)) .prs-say { margin: 0; }
+.prs-statement .prs-said:has(+ :is(.prs-dfig, .prs-sfig)) .prs-sub { padding-bottom: .3em; }
+/* The paper's own figure on the turn: its card, at the height the sentence
+   leaves, with its provenance under it. */
+.prs-sfig {
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: max(4px, .8cqw);
+  min-height: 0;
 }
 .prs-say {
-  margin: 0 0 14px; font-size: clamp(16px, 3.1cqw, calc(34px * var(--prs-cap))); font-weight: 800;
-  letter-spacing: -.03em; line-height: 1.22; color: var(--text); word-break: keep-all;
+  margin: 0 0 max(10px, 2cqw);
+  font-size: max(20px, min(5.4cqw, calc(var(--col, 98cqw) / var(--len, 1)))); font-weight: 800;
+  letter-spacing: -.045em; line-height: 1.12; color: var(--text);
 }
 .prs-sub {
-  margin: 0; font-size: clamp(10px, 1.4cqw, calc(16px * var(--prs-cap))); line-height: 1.6;
-  color: var(--text-muted); word-break: keep-all;
+  margin: 0; font-size: max(10px, 1.5cqw); line-height: 1.6; color: var(--text-muted);
 }
 .prs-sub b { color: var(--text); font-weight: 700; }
+.prs-statement .prs-v small { color: var(--text-muted); }
 
-/* ── figure ────────────────────────────────────────────────────────── */
+/* ── figure: a paper's own ─────────────────────────────────────────── */
 
-.prs-evidence .prs-body { grid-template-rows: minmax(0, 1fr) auto; gap: 14px; }
+/* The figure is the slide, so it takes the frame the composition leaves it
+   and shrinks to its own shape inside that — never stretched, never cropped.
+   It sits on a card of the paper's own white: a paper's figures are drawn on
+   white, and set straight onto a dark frame the white is a slab with no edge.
+   On the card it reads as a page laid on the slide in either theme.
+
+   `evidence` is the wide figure — a strip of photographs, a plot wider than
+   about 2 : 1 — at the frame's width with one line under it. `split` is the
+   squarer one at the frame's height, with everything else in one column
+   beside it: what to look at, the numbers it shows, where it is from. */
+.prs-evidence .prs-body { grid-template-rows: minmax(0, 1fr) auto; }
 .prs-split .prs-body {
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center;
+  grid-template-columns: minmax(0, 1fr) 30cqw; gap: max(14px, 3.4cqw);
 }
-.prs-fig { margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; min-height: 0; }
+.prs-fig {
+  margin: 0; min-width: 0; min-height: 0; height: 100%;
+  display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center;
+}
 .prs-fig img {
-  width: 100%; height: 100%; object-fit: contain; object-position: center;
+  display: block; max-width: 100%; max-height: 100%; width: auto; height: auto;
+  box-sizing: border-box; padding: max(6px, 1.2cqw);
   background: var(--fig-pad); border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px var(--border-soft), var(--shadow);
 }
-.prs-fig figcaption {
-  font-size: clamp(7.5px, .92cqw, calc(10.5px * var(--prs-cap))); line-height: 1.5; color: var(--text-muted);
-  word-break: keep-all;
+.prs-split .prs-fig { place-items: center start; }
+:root[data-theme="dark"] .prs-fig img { filter: brightness(.93); }
+/* A figure is hotlinked from the paper's host, so the room's network decides
+   whether it arrives. Until it does — or when it does not — the frame shows
+   neither the browser's broken-image glyph nor the alt text in a box of the
+   wrong size: the alt text is transparent, and a figure `presentation.js`
+   found missing is drawn as a card of the cell's size saying so, while the
+   provenance under it still names the figure to open. */
+.prs-slide img { color: transparent; }
+.prs-fig[data-missing], .prs-art[data-missing] {
+  background: var(--fig-pad); border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px var(--border-soft);
 }
-.prs-fig figcaption b { color: var(--orange-ink); font-weight: 700; }
+.prs-fig[data-missing] > img, .prs-art[data-missing] > img { visibility: hidden; }
+.prs-fig[data-missing]::after {
+  content: "그림을 불러오지 못했습니다 — 아래 출처의 원문 그림"; grid-area: 1 / 1;
+  place-self: center; font-size: var(--room); font-weight: 700; color: #6b645d;
+}
+.prs-under {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: max(12px, 3cqw);
+  align-items: end;
+}
+.prs-under .prs-claim { font-size: max(11px, 1.9cqw); color: var(--text); font-weight: 600; line-height: 1.4; }
+.prs-under .prs-claim b { color: var(--act-ink); }
+/* The page number stands in the frame's bottom-right corner, so the
+   provenance stops short of it. */
+.prs-under .prs-src { padding: 0 5cqw 0 0; text-align: right; max-width: 40cqw; }
+.prs-aside {
+  display: flex; flex-direction: column; justify-content: center;
+  gap: max(12px, 3cqw); min-height: 0;
+}
+.prs-aside .prs-points { gap: max(8px, 2cqw); }
+.prs-aside .prs-points li { font-size: max(11px, 1.85cqw); line-height: 1.4; color: var(--text); }
+.prs-aside .prs-points li b { color: var(--act-ink); }
+.prs-aside .prs-claim { font-size: max(11px, 1.8cqw); color: var(--text); line-height: 1.45; font-weight: 600; }
+.prs-aside .prs-claim b { color: var(--act-ink); }
+/* Beside a figure the numbers stack: one column, each number on its own line
+   with its label under it, so the eye drops down the column the way it drops
+   down the figure's axis. */
+.prs-aside .prs-facts {
+  grid-template-columns: minmax(0, 1fr); gap: max(10px, 2cqw);
+  margin: 0; padding: 0; border: 0;
+}
+.prs-aside .prs-fact { padding-left: max(8px, 1.2cqw); border-left: 2px solid var(--act); }
+.prs-aside .prs-v { font-size: max(14px, 2.9cqw); }
+.prs-aside .prs-fact > span { font-size: max(8px, 1.2cqw); }
+/* A figure's provenance: its number, its section and the setup it was
+   measured in — one line, at the room's floor, in the face the site sets
+   references in. What the figure shows is the speaker's to say, so the
+   caption closes the essay instead of standing here as fine print. */
+.prs-src {
+  margin: 0; font-family: var(--mono); font-size: var(--room); font-weight: 700;
+  line-height: 1.4; color: var(--text-muted);
+}
 
 /* ── panel: versus and ledger ──────────────────────────────────────── */
 
+/* Two columns read against each other, on the frame's own ground, with one
+   rule between them. A tinted card per column is a form with two fields; the
+   head is the column's verdict and is set large enough to be one. */
+/* Both columns sit on one grid of rows — the head, one row per item, a
+   flexible row that takes the slack, and the foot — so an item and its
+   counterpart across the rule start on the same line, the first item starts
+   right under the head, and the slack pools above the feet rather than in a
+   band between head and items. */
 .prs-versus .prs-body, .prs-ledger .prs-body {
-  grid-template-columns: 1fr 1fr; align-items: stretch;
+  grid-template-columns: 1fr 1fr; gap: 0 0;
+  grid-template-rows: auto repeat(var(--items, 3), auto) minmax(0, 1fr) auto;
+  row-gap: max(10px, 2.4cqw);
 }
 .prs-panel {
-  min-width: 0; background: var(--surface-2);
-  border: 1px solid var(--border-soft); border-radius: var(--radius);
-  padding: clamp(13px, 2cqw, calc(20px * var(--prs-cap))) clamp(14px, 2.2cqw, calc(22px * var(--prs-cap))) 18px;
-  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px;
+  min-width: 0; display: grid; grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+  padding: 0 max(12px, 3cqw) 0 0;
+  counter-reset: prs-item;
 }
+.prs-panel + .prs-panel { padding: 0 0 0 max(12px, 3cqw); border-left: 1px solid var(--border-soft); }
 .prs-panel h4 {
-  margin: 0; font-family: var(--mono); font-size: clamp(8px, 1.05cqw, calc(11px * var(--prs-cap)));
-  font-weight: 700; letter-spacing: .1em; color: var(--text-muted);
+  margin: 0 0 max(2px, .6cqw); font-size: max(13px, 2.3cqw); font-weight: 800; letter-spacing: -.03em;
+  line-height: 1.1; color: var(--text);
 }
 .prs-panel ul {
   margin: 0; padding: 0; list-style: none; display: grid;
-  /* Rule 2: the slack goes into the gaps up to a ceiling, and the remainder
-     splits above and below. Slack pushed to one end is a hole; halved at both
-     ends it is margin. */
-  align-content: center; gap: clamp(10px, 2.4cqh, calc(26px * var(--prs-cap)));
+  grid-row: 2 / span var(--items, 3); grid-template-rows: subgrid;
 }
 .prs-panel li {
-  position: relative; padding-left: 13px; word-break: keep-all;
-  font-size: clamp(9.5px, 1.25cqw, calc(14px * var(--prs-cap))); line-height: 1.6; color: var(--text-muted);
+  position: relative; padding-left: max(18px, 3.2cqw);
+  font-size: max(11px, 2.6cqw); line-height: 1.3; color: var(--text-muted);
 }
-.prs-panel li::before { content: ""; position: absolute; left: 0; top: .6em; width: 5px; height: 1.5px; }
+.prs-panel li::before {
+  counter-increment: prs-item; content: counter(prs-item, decimal-leading-zero);
+  position: absolute; left: 0; top: .12em; font-family: var(--mono);
+  font-size: .72em; font-weight: 700; color: var(--pnl, var(--act-ink));
+}
 .prs-panel li b { color: var(--text); font-weight: 700; }
 .prs-panel li span {
-  display: block; margin-top: 4px; font-family: var(--mono);
-  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); line-height: 1.55;
-  color: var(--text-muted); opacity: .85; word-break: keep-all;
+  display: block; margin-top: max(2px, .45cqw); font-family: var(--mono);
+  font-size: max(11px, 1.6cqw); line-height: 1.4; color: var(--text-muted);
 }
+/* The column's conclusion, on the bottom edge it holds — set as a claim of
+   its own, because it is the line the room keeps. */
 .prs-foot {
-  margin: 0; padding-top: 12px; border-top: 1px solid var(--border-soft);
-  font-size: clamp(8.5px, 1.1cqw, calc(12.5px * var(--prs-cap))); line-height: 1.5;
-  color: var(--text-muted); word-break: keep-all;
+  grid-row: -2 / -1; align-self: end;
+  margin: 0; padding-top: max(8px, 1.3cqw); border-top: 2px solid var(--pnl, var(--act));
+  font-size: max(10px, 1.9cqw); line-height: 1.4; font-weight: 600; color: var(--text);
 }
-.prs-foot b { color: var(--text); font-weight: 700; }
+.prs-foot b { color: var(--pnl, var(--act-ink)); font-weight: 800; }
 
-.prs-wall h4 { color: var(--red); }
-.prs-wall li::before { background: var(--red); opacity: .55; }
-.prs-buy { background: var(--orange-soft); border-color: var(--border-soft); }
-.prs-buy h4 { color: var(--green); }
-.prs-buy li::before { background: var(--green); opacity: .6; }
-.prs-buy .prs-foot { border-top-color: var(--border); }
-.prs-sell h4 { color: var(--orange-ink); }
-.prs-sell li::before { background: var(--orange); opacity: .6; }
-
-/* ── the evidence ribbon ───────────────────────────────────────────── */
-
-.prs-facts {
-  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
-  border-top: 1px solid var(--border-soft); margin-top: 6px;
-}
-.prs-fact {
-  display: grid; gap: 3px; align-content: center;
-  padding: 11px clamp(8px, 1.6cqw, calc(16px * var(--prs-cap))) 12px; border-left: 1px solid var(--border-soft);
-}
-.prs-fact:first-child { border-left: 0; padding-left: 0; }
-.prs-fact b {
-  font-family: var(--mono); font-size: clamp(10px, 1.5cqw, calc(16px * var(--prs-cap)));
-  font-weight: 600; color: var(--orange-ink);
-}
-.prs-fact span {
-  font-size: clamp(7.5px, .95cqw, calc(11px * var(--prs-cap))); line-height: 1.45;
-  color: var(--text-muted); word-break: keep-all;
-}
+.prs-wall { --pnl: var(--red); }
+.prs-buy { --pnl: var(--green); }
+.prs-sell { --pnl: var(--orange-ink); }
+.prs-panel h4 { color: var(--pnl, var(--text)); }
 
 /* ── diagram ───────────────────────────────────────────────────────── */
 
-.prs-diag { display: grid; gap: 14px; }
+.prs-diag { display: grid; gap: max(10px, 2cqw); }
 .prs-drow {
-  display: grid; grid-template-columns: clamp(34px, 5cqw, calc(52px * var(--prs-cap))) minmax(0, 1fr);
-  gap: 12px; align-items: center;
+  display: grid; grid-template-columns: max(30px, 4.4cqw) minmax(0, 1fr);
+  gap: max(6px, 1.2cqw); align-items: center;
 }
 .prs-dlab {
-  font-family: var(--mono); font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap)));
-  font-weight: 600; color: var(--text-muted); text-align: right;
+  font-family: var(--mono); font-size: max(7.5px, 1cqw); font-weight: 700;
+  color: var(--text-muted); text-align: right;
 }
-.prs-dlab.hot { color: var(--orange-ink); }
-.prs-chain, .prs-split { display: flex; align-items: center; gap: 7px; }
+.prs-dlab.hot { color: var(--act-ink); }
+.prs-chain, .prs-fork { display: flex; align-items: center; gap: max(4px, .7cqw); }
 .prs-box {
   position: relative; flex: 1; min-width: 0; background: var(--surface-2);
-  border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 8px 10px;
+  border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+  padding: max(6px, 1cqw) max(7px, 1.1cqw);
 }
 .prs-box b {
-  display: block; font-size: clamp(8px, 1.05cqw, calc(11.5px * var(--prs-cap))); font-weight: 600;
-  color: var(--text); line-height: 1.3; word-break: keep-all;
+  display: block; font-size: max(8px, 1.2cqw); font-weight: 700;
+  color: var(--text); line-height: 1.3;
 }
 .prs-box span {
-  display: block; margin-top: 3px; font-family: var(--mono);
-  font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted);
-  line-height: 1.45; word-break: keep-all;
+  display: block; margin-top: max(2px, .35cqw); font-family: var(--mono);
+  font-size: max(6.5px, .9cqw); color: var(--text-muted); line-height: 1.45;
 }
-.prs-box.hot { background: var(--orange-soft); border-color: var(--amber-soft); }
-.prs-box.hot b { color: var(--orange-ink); }
-.prs-box.looped { padding-top: 28px; }
-.prs-arw { font-style: normal; flex: none; color: var(--border); font-size: 12px; }
-.prs-lanes { display: grid; gap: 7px; flex: 1.35; min-width: 0; }
+.prs-box.hot {
+  background: color-mix(in oklch, var(--act) 16%, transparent);
+  border-color: var(--act);
+}
+.prs-box.hot b { color: var(--act-ink); }
+.prs-box.looped { padding-top: max(20px, 2.8cqw); }
+.prs-arw { font-style: normal; flex: none; color: var(--text-muted); font-size: max(10px, 1.2cqw); }
+.prs-lanes { display: grid; gap: max(4px, .7cqw); flex: 1.35; min-width: 0; }
 .prs-lanes .prs-box { flex: none; }
-.prs-merge, .prs-join { width: 26px; flex: none; align-self: stretch; display: grid; }
-.prs-merge svg, .prs-join svg { width: 100%; height: 100%; overflow: visible; }
-.prs-merge path, .prs-join path {
-  fill: none; stroke: var(--border); stroke-width: 1.3; vector-effect: non-scaling-stroke;
+.prs-merge { width: max(16px, 2.6cqw); flex: none; align-self: stretch; display: grid; }
+.prs-merge svg { width: 100%; height: 100%; overflow: visible; }
+.prs-merge path {
+  fill: none; stroke: var(--text-muted); stroke-width: 1.4; vector-effect: non-scaling-stroke;
 }
 .prs-loop {
-  position: absolute; left: 0; right: 0; top: 2px; height: 26px;
+  position: absolute; left: 0; right: 0; top: 2px; height: max(18px, 2.6cqw);
   display: flex; align-items: center; justify-content: center;
 }
 .prs-loop svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .prs-loop path {
-  fill: none; stroke: var(--orange-ink); stroke-width: 1.1;
+  fill: none; stroke: var(--act); stroke-width: 1.1;
   vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round;
 }
 .prs-loop path.hd { stroke-width: 1.3; }
 .prs-loop i {
   position: relative; font-style: normal; font-family: var(--mono);
-  font-size: clamp(6px, .8cqw, calc(8.5px * var(--prs-cap))); color: var(--orange-ink);
+  font-size: max(6px, .8cqw); color: var(--act);
   background: var(--surface-2); padding: 0 5px; white-space: nowrap;
   max-width: calc(100% - 26px); overflow: hidden; text-overflow: ellipsis;
 }
-.prs-box.hot .prs-loop i { background: var(--orange-soft); }
-.prs-why {
-  margin: 2px 0 0; padding-left: clamp(46px, 6.4cqw, calc(64px * var(--prs-cap)));
-  font-size: clamp(7px, .9cqw, calc(10px * var(--prs-cap))); line-height: 1.5;
-  color: var(--text-muted); word-break: keep-all;
-}
-
 /* ── budget ────────────────────────────────────────────────────────── */
 
-.prs-budget .prs-body, .prs-lineage .prs-body { grid-template-rows: minmax(0, 1fr) auto; gap: 16px; }
-/* Rule 2 again: the bar and its scale are one block, the legend is the other,
-   and the slack between them grows to a ceiling and then splits. */
-.prs-bud {
-  display: grid; align-content: center;
-  gap: clamp(16px, 5.4cqh, calc(60px * var(--prs-cap)));
+/* One call as one bar, and the control loop under it in the cells it really
+   is. The bar is the frame's width and tall enough to carry its own labels,
+   because a legend beside a bar is a second place to look. */
+.prs-budget .prs-body { grid-template-rows: minmax(0, 1fr) auto; }
+.prs-bud { display: grid; align-content: center; gap: max(6px, 1.1cqw); }
+.prs-bcap, .prs-bfoot {
+  margin: 0; display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; font-size: max(9px, 1.45cqw); color: var(--text-muted);
 }
-.prs-bgroup { display: grid; gap: clamp(9px, 1.6cqw, calc(18px * var(--prs-cap))); }
-.prs-brow {
-  display: grid; gap: 12px; align-items: center;
-  grid-template-columns: clamp(74px, 11cqw, calc(132px * var(--prs-cap)))
-                         minmax(0, 1fr) auto;
+.prs-bcap b, .prs-bfoot b {
+  font-family: var(--num); font-size: max(16px, 3.8cqw); line-height: 1;
+  font-weight: 700; color: var(--text); letter-spacing: -.02em;
 }
-.prs-blab {
-  font-size: clamp(8px, 1.05cqw, calc(12px * var(--prs-cap)));
-  color: var(--text-muted); word-break: keep-all;
+.prs-bcap small, .prs-bfoot small {
+  font-family: var(--ko); font-size: .5em; font-weight: 600; color: var(--text-muted);
 }
-.prs-brow b {
-  font-family: var(--mono); font-weight: 600; color: var(--text);
-  font-size: clamp(8.5px, 1.1cqw, calc(12.5px * var(--prs-cap)));
-}
-.prs-bmeter { position: relative; }
+.prs-bfoot b { color: var(--act-ink); }
 .prs-bbar {
-  display: flex; height: clamp(26px, 4.4cqw, calc(50px * var(--prs-cap)));
-  border-radius: var(--radius-sm); overflow: hidden;
-}
-/* The second bar is what one turn of the loop affords, on the first bar's
-   scale. It carries the accent because it is the constraint the slide is
-   about, and the segments above it are what has to fit inside it. */
-.prs-btick { width: var(--w); background: var(--orange); }
-.prs-bfoot {
-  margin: 2px 0 0; font-family: var(--mono); text-align: right;
-  font-size: clamp(8.5px, 1.1cqw, calc(12.5px * var(--prs-cap)));
-  color: var(--orange-ink); letter-spacing: .02em;
+  display: flex; height: max(40px, 10.5cqw); gap: 2px;
 }
 .prs-seg {
-  width: var(--w); display: grid; place-items: center; font-family: var(--mono);
-  font-size: clamp(8px, 1cqw, calc(11px * var(--prs-cap))); color: var(--text);
+  width: var(--w); display: grid; align-content: center; gap: max(2px, .4cqw);
+  padding: 0 max(8px, 1.6cqw); border-radius: var(--radius-sm); min-width: 0;
 }
-/* The control period, drawn where it can be counted. The ticks sit over the
-   fills rather than under them, so a segment reads as the number of ticks it
-   covers instead of as a length. */
-.prs-bticks { position: absolute; inset: 0; pointer-events: none; }
-.prs-bticks i {
-  position: absolute; left: var(--x); top: 0; bottom: 0; width: 1px;
-  background: var(--surface); opacity: .72;
+.prs-seg b {
+  font-family: var(--num); font-size: max(13px, 3cqw); line-height: 1;
+  font-weight: 700; color: oklch(22% 0.02 50);
 }
-.prs-g0 { background: var(--amber-soft); }
-.prs-g1 { background: oklch(84% 0.048 92); }
-.prs-g2 { background: oklch(86% 0.040 150); }
-.prs-g3 { background: oklch(85% 0.045 250); }
-.prs-keys {
-  margin: 0; padding: 0; list-style: none; display: grid;
-  align-content: center; gap: clamp(10px, 3cqh, calc(32px * var(--prs-cap)));
+.prs-seg b small { font-family: var(--ko); font-size: .55em; font-weight: 600; }
+.prs-seg span {
+  font-size: max(8.5px, 1.45cqw); font-weight: 600; color: oklch(28% 0.02 50);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.prs-keys li {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: baseline; gap: 9px; word-break: keep-all;
-  font-size: clamp(9px, 1.15cqw, calc(13px * var(--prs-cap))); color: var(--text);
+.prs-g0 { background: oklch(80% 0.09 45); }
+.prs-g1 { background: oklch(84% 0.06 90); }
+.prs-g2 { background: oklch(85% 0.05 150); }
+.prs-g3 { background: oklch(84% 0.05 250); }
+/* On a dark ground the same four hues, a step down, so a bar is a fill
+   rather than a light source. */
+:root[data-theme="dark"] .prs-g0 { background: oklch(72% 0.09 45); }
+:root[data-theme="dark"] .prs-g1 { background: oklch(76% 0.06 90); }
+:root[data-theme="dark"] .prs-g2 { background: oklch(76% 0.05 150); }
+:root[data-theme="dark"] .prs-g3 { background: oklch(75% 0.05 250); }
+.prs-bnotes { display: flex; gap: 2px; }
+.prs-bnotes p {
+  width: var(--w); margin: 0; padding: 0 max(8px, 1.6cqw);
+  font-size: max(8px, 1.3cqw); line-height: 1.45; color: var(--text-muted);
 }
-.prs-keys li b { font-family: var(--mono); color: var(--text); font-weight: 600; }
-.prs-keys .prs-ktext span {
-  display: block; margin-top: 4px;
-  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); line-height: 1.55;
-  color: var(--text-muted); word-break: keep-all;
+/* The control loop, cell by cell, on the bar's own scale. The one cell a turn
+   of the loop affords is in the accent; the rest are what the call spends
+   past it. */
+.prs-bcells { display: flex; gap: 2px; margin-top: max(10px, 2cqw); }
+.prs-bcells i {
+  width: var(--w); height: max(22px, 4.6cqw); display: grid; place-items: center;
+  border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
 }
-.prs-sw {
-  width: 10px; height: 10px; border-radius: 3px; flex: none;
-  transform: translateY(1px);
+.prs-bcells i.on { background: var(--act); border: 1.5px solid var(--act); }
+.prs-bcells em {
+  font-style: normal; font-family: var(--mono); font-weight: 700;
+  font-size: max(8px, 1.4cqw); color: var(--text-muted);
 }
-
-/* ── timing ────────────────────────────────────────────────────────── */
-
-.prs-timing .prs-body { align-content: stretch; }
-.prs-tim { display: grid; align-content: space-evenly; gap: 10px; }
-.prs-row { display: grid; grid-template-columns: clamp(80px, 13cqw, calc(150px * var(--prs-cap))) minmax(0, 1fr); gap: 12px; align-items: center; }
-.prs-rname {
-  font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); color: var(--text-muted);
-  text-align: right; word-break: keep-all;
-}
-.prs-lane { position: relative; height: clamp(20px, 2.8cqw, calc(32px * var(--prs-cap))); }
-.prs-lane > i {
-  position: absolute; left: var(--x); top: -4px; bottom: -4px; width: 1px;
-  background: var(--border-soft);
-}
-.prs-blk {
-  position: absolute; left: var(--x); width: var(--w); top: 0; bottom: 0;
-  display: grid; place-items: center; border-radius: var(--radius-sm); overflow: hidden;
-  font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap)));
-}
-.prs-blk.prs-wait { background: var(--surface-2); border: 1px solid var(--border-soft); color: var(--text-muted); }
-.prs-blk.prs-run { background: var(--orange-soft); border: 1px solid var(--amber-soft); color: var(--orange-ink); }
-.prs-mk { position: absolute; left: var(--x); top: -13px; bottom: -3px; border-left: 1.5px solid var(--text); }
-.prs-mk b {
-  position: absolute; left: 5px; top: -2px; white-space: nowrap;
-  font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap)));
-  font-style: italic; font-weight: 600; color: var(--text);
-}
-.prs-mk.us { border-left-color: var(--orange-ink); }
-.prs-mk.us b { color: var(--orange-ink); }
-.prs-axis { position: relative; height: 12px; }
-.prs-axis span {
-  position: absolute; left: var(--x); transform: translateX(-50%);
-  font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted);
-}
-.prs-tnote {
-  margin: 2px 0 0; text-align: center; font-size: clamp(7px, .9cqw, calc(10px * var(--prs-cap)));
-  color: var(--text-muted);
+.prs-bcells i.on em { color: var(--surface); }
+.prs-bfoot span { display: inline-flex; align-items: center; gap: .5em; }
+.prs-bfoot span i {
+  width: .9em; height: .9em; border-radius: 2px; background: var(--act); display: inline-block;
 }
 
-/* ── lineage ───────────────────────────────────────────────────────── */
+/* ── drawn figures: timing, chart, heat, contrast, inheritance ─────── */
 
-.prs-lin { display: flex; align-items: center; gap: 10px; align-content: center; }
-.prs-priors { display: grid; gap: 12px; flex: 1; min-width: 0; }
-.prs-node {
-  background: var(--surface-2); border: 1px solid var(--border-soft);
-  border-radius: var(--radius); padding: 10px 13px; flex: 1; min-width: 0;
+/* The paper's numbers, drawn by `builder/charts.py` as inline SVG. The SVG is
+   laid out in a 1000-wide viewBox and scaled to the body, so its type grows
+   with the frame on the stage the way the slide's own type does, and every
+   colour below is a site token read through `--pc-*` — the light theme, the
+   dark theme and the turn are one drawing.
+
+   One series is the point, so it alone takes the accent; the strongest
+   baseline takes the darker grey and every other one the lighter, told apart
+   by shape and by the direct label beside it. Text never wears a series
+   colour: labels and values are in text tokens, and the coloured mark beside
+   them is what carries identity. Zero specificity, so the turn's own frame
+   can point them at its ink. */
+:where(.prs-slide) {
+  --pc-us: var(--orange);
+  --pc-ink: var(--orange-ink);
+  --pc-ref: var(--text-muted);
+  --pc-ctx: color-mix(in oklch, var(--text-muted) 48%, var(--surface));
+  --pc-hi: var(--orange-ink);
+  --pc-lo: var(--surface-2);
+  --pc-soft: color-mix(in oklch, var(--orange) 14%, var(--surface));
+  --pc-cool: var(--act1);
 }
-.prs-node.hot { background: var(--orange-soft); border-color: var(--amber-soft); }
-.prs-when { display: block; font-family: var(--mono); font-size: clamp(6.5px, .85cqw, calc(9.5px * var(--prs-cap))); color: var(--text-muted); }
-.prs-node b { display: block; margin: 2px 0 3px; font-size: clamp(9px, 1.15cqw, calc(13px * var(--prs-cap))); font-weight: 700; color: var(--text); }
-.prs-node.hot b { color: var(--orange-ink); }
-.prs-nnote { display: block; font-size: clamp(7.5px, .95cqw, calc(10.5px * var(--prs-cap))); line-height: 1.5; color: var(--text-muted); word-break: keep-all; }
+/* The low end of the ramp is a ground a cell can still be seen on: on the
+   light page the tinted panel, on the dark one the rule colour, because the
+   dark theme's panel is a shade off its surface and an empty cell there
+   vanishes. */
+:where(:root[data-theme="dark"] .prs-slide) { --pc-lo: var(--border); }
+/* The lighter baseline grey is a mix toward the surface, and on the dark
+   surface that mix lands under 3 : 1 — a baseline mark a projector loses. It
+   is lifted there, still a step under the reference grey. */
+:where(:root[data-theme="dark"] .prs-slide) {
+  --pc-ctx: color-mix(in oklch, var(--text-muted) 78%, var(--surface));
+}
+.prs-timing .prs-body, .prs-chart .prs-body, .prs-heat .prs-body,
+.prs-contrast .prs-body, .prs-inheritance .prs-body {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.prs-dfig {
+  margin: 0; min-height: 0; min-width: 0;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: max(4px, .8cqw);
+}
+.prs-dfig > svg { width: 100%; height: 100%; display: block; overflow: visible; }
+/* A stepped strip's row is clipped to its own track, so a slot sliding in or
+   out vanishes at the strip's edge rather than over the row's label. Only the
+   outer drawing is sized and let overflow above: a rule reaching this one too
+   would size it to the whole figure and let it spill. */
+.prs-dfig .pc-track-clip { overflow: hidden; }
+.prs-dfig figcaption {
+  font-family: var(--mono); font-size: var(--room); font-weight: 700;
+  line-height: 1.4; color: var(--text-muted);
+}
+/* A parameter the drawing chose for itself is labelled where the eye meets
+   the provenance, so the room never reads it as the paper's setting. It is a
+   label, not a warning: a tinted pill in the text's colours, since an
+   accent-outlined box on a figure reads as an error the room should worry
+   about. */
+.prs-dfig .pc-ill, .prs-dfig .pc-clock, .prs-src .pc-clock {
+  display: inline-block; margin-right: .8em; padding: .05em .6em;
+  font-family: var(--ko); font-weight: 700; color: var(--text);
+  background: color-mix(in oklch, var(--text-muted) 14%, var(--surface));
+  border-radius: 999px;
+}
+/* The clock a chart's values were measured on — the setup, not a caveat. */
+.prs-dfig .pc-clock, .prs-src .pc-clock { background: none; box-shadow: inset 0 0 0 1px var(--border); }
+.prs-dfig text { font-family: var(--ko); fill: var(--text); }
+.prs-dfig .pc-tick { font-family: var(--num); font-size: 16px; fill: var(--text-muted); }
+.prs-dfig .pc-axis { font-size: 15px; fill: var(--text-muted); }
+.prs-dfig .pc-xt { font-size: 20px; font-weight: 700; }
+.prs-dfig .pc-xs { font-size: 15px; fill: var(--text-muted); }
+.prs-dfig .pc-row { font-size: 20px; font-weight: 700; }
+.prs-dfig .pc-row-us { fill: var(--pc-ink); }
+.prs-dfig .pc-key { font-size: 17px; fill: var(--text-muted); }
+.prs-dfig .pc-key-us { fill: var(--text); font-weight: 700; }
+.pc-grid { stroke: var(--border-soft); stroke-width: 1; }
+.pc-grid.pc-base { stroke: var(--border); }
+.pc-track { stroke: var(--border-soft); stroke-width: 1; }
+
+/* Marks: thin lines, a surface ring on every marker so overlaps stay two. */
+.pc-ln { fill: none; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+polyline.pc-us.pc-ln, line.pc-us.pc-ln { stroke-width: 4; }
+.pc-us { stroke: var(--pc-us); fill: var(--pc-us); }
+.pc-ref { stroke: var(--pc-ref); fill: var(--pc-ref); }
+.pc-ctx { stroke: var(--pc-ctx); fill: var(--pc-ctx); }
+/* A chart of a finding has no method in the accent; the series its note is
+   about takes the text's own ink, heaviest on the chart. */
+.pc-subj { stroke: var(--text); fill: var(--text); }
+polyline.pc-subj.pc-ln { stroke-width: 3.4; }
+circle.pc-us, circle.pc-ref, circle.pc-ctx, circle.pc-subj,
+rect.pc-us, rect.pc-ref, rect.pc-ctx, rect.pc-subj,
+path.pc-us, path.pc-ref, path.pc-ctx, path.pc-subj { stroke: var(--surface); stroke-width: 2.5; }
+polyline.pc-us, polyline.pc-ref, polyline.pc-ctx, polyline.pc-subj { fill: none; }
+.pc-gap { stroke: color-mix(in oklch, var(--pc-us) 42%, var(--surface)); stroke-width: 7; stroke-linecap: round; }
+/* A gap that would run through another series' mark is lifted over the row. */
+.pc-gap-over { fill: none; stroke: color-mix(in oklch, var(--pc-us) 60%, var(--surface)); stroke-width: 2.5; stroke-linejoin: round; }
+/* A reference level — the full model, a budget — and a trade-off curve. */
+.pc-guide { stroke: var(--text-muted); stroke-width: 1.3; stroke-dasharray: 5 5; }
+polyline.pc-front { stroke-width: 2; stroke-dasharray: 2 5; }
+polyline.pc-us.pc-front { stroke-width: 2.6; }
+.prs-dfig .pc-plab { font-size: 16px; fill: var(--text-muted); }
+.prs-dfig .pc-plab-us { fill: var(--text); font-weight: 700; }
+.pc-lead { fill: none; stroke: var(--border); stroke-width: 1; }
+
+/* Direct labels, and the one annotation that carries the takeaway. */
+.prs-dfig .pc-end { font-size: 17px; fill: var(--text-muted); }
+.prs-dfig .pc-end-us { fill: var(--text); font-weight: 700; }
+.prs-dfig .pc-endv { font-family: var(--num); font-weight: 700; font-size: 20px; fill: var(--text); }
+.prs-dfig .pc-end-us .pc-endv { fill: var(--pc-ink); font-size: 23px; }
+.prs-dfig .pc-dim { font-family: var(--num); font-weight: 500; fill: var(--text-muted); font-size: 16px; }
+.pc-brace { fill: none; stroke: var(--pc-ink); stroke-width: 1.8; stroke-linejoin: round; }
+.prs-dfig .pc-note { font-size: 24px; font-weight: 800; fill: var(--pc-ink); letter-spacing: -.01em; }
+.prs-dfig .pc-note.pc-big { font-size: 30px; }
+.prs-dfig .pc-note.pc-mid { font-size: 19px; }
+.prs-dfig .pc-nsub { font-size: 15px; fill: var(--text-muted); }
+/* A label that sits over the plot keeps a halo of the surface, so a line
+   passing under it breaks rather than striking the words through. */
+.pc-note, .pc-nsub, .pc-end, .pc-mkt, .pc-plab, .pc-glab {
+  paint-order: stroke; stroke: var(--surface); stroke-width: 6px; stroke-linejoin: round;
+}
+
+/* The strip: one sequential ramp from the surface to the accent's ink. */
+.pc-cell { stroke: none; }
+/* A shared level is not a value on the ramp — it is one level the whole run
+   moves along together — so it is drawn off the ramp, with the ramp beside
+   its label. */
+.pc-shared { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+.prs-dfig .pc-sharedt { font-size: 17px; font-weight: 700; }
+.pc-mark { fill: none; stroke: var(--text); stroke-width: 2.5; }
+.pc-span { fill: none; stroke: var(--text-muted); stroke-width: 1.3; }
+.pc-span-us { stroke: var(--text); stroke-width: 2; }
+.prs-dfig .pc-spant { font-size: 16px; fill: var(--text-muted); }
+.prs-dfig .pc-spant-us { fill: var(--text); font-weight: 700; }
+.prs-dfig .pc-step { font-size: 17px; font-weight: 700; fill: var(--pc-ink); }
+.pc-stepar { fill: none; stroke: var(--pc-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Rows on one clock. The washed column is the tick the slide is about. */
+.pc-band { fill: var(--pc-soft); }
+.prs-dfig .pc-bandt { font-size: 16px; font-weight: 700; fill: var(--pc-ink); }
+.pc-wait { fill: var(--pc-lo); stroke: var(--border); stroke-width: 1; }
+.pc-slow { fill: color-mix(in oklch, var(--pc-cool) 16%, var(--surface)); stroke: var(--pc-cool); stroke-width: 1.4; }
+.pc-run { fill: var(--pc-us); }
+.prs-dfig .pc-blk { font-family: var(--num); font-size: 16px; font-weight: 600; fill: var(--text-muted); }
+.prs-dfig .pc-blk-slow { fill: var(--text); font-family: var(--ko); font-weight: 700; }
+.prs-dfig .pc-blk-run { fill: var(--surface); font-weight: 700; }
+.prs-dfig .pc-blk-sm { font-size: 13px; }
+.pc-mkl { stroke: var(--text); stroke-width: 2; }
+.pc-mkl-us { stroke: var(--pc-ink); stroke-width: 3; }
+.prs-dfig .pc-mkt { font-family: var(--num); font-size: 18px; fill: var(--text); }
+.prs-dfig .pc-mkt-us { fill: var(--pc-ink); font-weight: 800; font-size: 21px; }
+.pc-dot { fill: var(--pc-us); stroke: var(--surface); stroke-width: 2.5; }
+.pc-feed { fill: none; stroke: var(--pc-cool); stroke-width: 2; stroke-linecap: round; }
+.pc-feed-us { fill: none; stroke: var(--pc-us); stroke-width: 1.8; stroke-linecap: round; }
+.pc-head { stroke-linejoin: round; }
+
+/* ── builds ────────────────────────────────────────────────────────── */
+
+/* An item with `data-build` waits for the presenter's press. `presentation.js`
+   sets `prs-held` only on the stage, so the tab, the overview and a browser
+   with no script all show the whole slide. Opacity rather than display, so a
+   held mark keeps its place and the chart does not re-lay itself out under the
+   room as the marks arrive. */
+.prs-held { opacity: 0 !important; }
+[data-build] { transition: opacity .28s var(--ease-out); }
+
+/* ── motion: stepped figures and the authors' clip ─────────────────── */
+
+/* A stepped figure is drawn in every state it can be in, and the markup
+   stands in the first (`presentation/AUTHORING.md` §8). `prs-out` is an
+   element the state on screen does not show, `prs-lo` one it sets back; a
+   slot of a stepped strip takes its shade from `--f` and the row slides by
+   `--dx`, so a state change is a transition rather than a redraw. `prs-snap`
+   is the loop closing — a move the room should not see. */
+.prs-out { opacity: 0; }
+.prs-lo { opacity: .28; }
+.prs-dfig [data-in], .prs-dfig [data-lo] { transition: opacity .4s var(--ease-out); }
+.pc-slot { fill: var(--f); transition: fill .5s var(--ease-out); }
+.pc-slide { transform: translateX(var(--dx)); transition: transform .6s var(--ease-out); }
+.prs-snap, .prs-snap * { transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .pc-slot, .pc-slide, .prs-dfig [data-in], .prs-dfig [data-lo] { transition: none; }
+}
+.pc-read { fill: var(--surface); stroke: var(--pc-ref); stroke-width: 1.5; }
+.pc-read.pc-read-us { stroke: var(--pc-us); stroke-width: 2; }
+.prs-dfig .pc-readv { font-family: var(--num); font-size: 19px; font-weight: 700; fill: var(--text); }
+.prs-dfig .pc-readv.pc-read-us { fill: var(--pc-ink); }
+
+/* The contrast. A glyph is the claim and its `<title>` the paper's
+   sentence under it; ● is filled, ◐ half, ○ a ring and – a short rule for a
+   cell the paper says nothing about, which is drawn fainter than a ring so an
+   absence of a claim never reads as a claim of absence. Priors are in the
+   reference grey and this paper in the accent. The column only it fills is
+   the contribution: a band of the accent's tint, ruled in the accent. */
+.pc-ct-key { fill: color-mix(in oklch, var(--pc-us) 13%, transparent); stroke: var(--pc-us); stroke-width: 2.5; }
+.pc-ct-us { fill: color-mix(in oklch, var(--pc-us) 7%, transparent); }
+.pc-ct-full.pc-ref { fill: var(--pc-ref); stroke: var(--surface); stroke-width: 2.5; }
+.pc-ct-full.pc-us { fill: var(--pc-us); stroke: var(--surface); stroke-width: 2.5; }
+.pc-ct-ring { fill: var(--surface); stroke: var(--pc-ref); stroke-width: 2.8; }
+.pc-ct-half.pc-us .pc-ct-ring, .pc-ct-half.pc-us .pc-ct-fill { stroke: var(--pc-us); }
+.pc-ct-half .pc-ct-fill { fill: var(--pc-ref); stroke: var(--pc-ref); stroke-width: 2.8; }
+.pc-ct-half.pc-us .pc-ct-fill { fill: var(--pc-us); }
+.pc-ct-none { stroke: var(--pc-ctx); }
+.pc-ct-dash { stroke: var(--pc-ctx); stroke-width: 3; stroke-linecap: round; }
+.pc-ct-rail { stroke: var(--border); stroke-width: 2; }
+.pc-ct-tick { fill: var(--pc-ref); stroke: var(--surface); stroke-width: 2; }
+.pc-ct-tick.pc-us { fill: var(--pc-us); }
+.prs-dfig .pc-ct-head { font-size: 19px; font-weight: 700; fill: var(--text-muted); }
+.prs-dfig .pc-ct-head-key { fill: var(--pc-ink); font-weight: 800; }
+.prs-dfig .pc-ct-when { font-family: var(--num); font-size: 17px; fill: var(--text-muted); }
+.prs-dfig .pc-ct-when-us { fill: var(--pc-ink); font-weight: 700; }
+.prs-dfig .pc-ct-sub { font-size: 16px; fill: var(--text-muted); }
+.prs-dfig .pc-ct-name { font-size: 24px; font-weight: 700; fill: var(--text); }
+.prs-dfig .pc-ct-name-us { fill: var(--pc-ink); font-weight: 800; }
+.pc-ct-pill { fill: none; stroke: var(--pc-cool); stroke-width: 1.6; }
+.prs-dfig .pc-ct-pillt { font-size: 14px; font-weight: 700; fill: var(--pc-cool); }
+.pc-ct-link { cursor: pointer; }
+.pc-ct-link:hover .pc-ct-name, .pc-ct-link:focus-visible .pc-ct-name { text-decoration: underline; }
+.pc-ct-link:hover .pc-ct-pill { fill: color-mix(in oklch, var(--pc-cool) 12%, var(--surface)); }
+
+/* The inheritance. The priors recede — their names in the text ink, their
+   dates in the muted one — and what each edge carries is the loudest text on
+   the drawing after the paper's own name, because it is the claim: this is
+   what came from there. The paper is the one node in the accent. The question
+   the paper leaves is dashed, because it did not flow in. */
+.prs-dfig .pc-ih-when { font-family: var(--num); font-size: 16px; font-weight: 600; fill: var(--text-muted); }
+.prs-dfig .pc-ih-name { font-size: 23px; font-weight: 800; letter-spacing: -.01em; }
+.prs-dfig .pc-ih-cor { font-size: 15px; font-weight: 700; fill: var(--pc-cool); }
+.pc-ih-link { cursor: pointer; }
+.prs-dfig .pc-ih-link:hover .pc-ih-name,
+.prs-dfig .pc-ih-link:focus-visible .pc-ih-name { text-decoration: underline; }
+.pc-ih-dot { fill: var(--surface); stroke: var(--pc-ref); stroke-width: 2.5; }
+.pc-ih-edge { fill: none; stroke: var(--pc-ref); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.pc-ih-dash { stroke: var(--pc-ctx); stroke-dasharray: 7 7; }
+.pc-ih-dash.pc-head { stroke-dasharray: none; }
+.prs-dfig .pc-ih-gave { font-size: 21px; font-weight: 700; }
+.prs-dfig .pc-ih-gave-sm { font-size: 18px; }
+.prs-dfig .pc-ih-where { font-family: var(--num); font-size: 15px; fill: var(--text-muted); }
+.pc-ih-box { fill: var(--pc-soft); stroke: color-mix(in oklch, var(--pc-us) 55%, var(--surface)); stroke-width: 1.5; }
+.pc-ih-band { fill: var(--pc-us); }
+.prs-dfig .pc-ih-mename { font-size: 40px; font-weight: 800; letter-spacing: -.02em; fill: var(--text); }
+.prs-dfig .pc-ih-cap { font-size: 15px; font-weight: 700; fill: var(--text-muted); }
+.prs-dfig .pc-ih-add { font-size: 21px; font-weight: 700; }
+.prs-dfig .pc-ih-plus { fill: var(--pc-ink); font-weight: 800; }
+.prs-dfig .pc-ih-open { font-size: 19px; font-weight: 700; fill: var(--text-muted); }
+
+/* The row naming the states, over the drawing: in the tab its buttons are
+   how a reader steps, and on the stage it is the room's caption for the
+   state on screen. Only a reading `presentation.js` set draws it — without
+   the script the figure stands in its first state and there is nothing to
+   step. */
+.prs-dfig.prs-stepped { grid-template-rows: auto minmax(0, 1fr) auto; }
+.prs-stepper { display: none; }
+[data-browsing] .prs-stepper, [data-presenting] .prs-stepper {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 max(6px, 1.2cqw);
+}
+.prs-stepper button {
+  font: inherit; font-family: var(--ko); font-size: var(--room); font-weight: 700;
+  line-height: 1.35; color: var(--text-muted); background: none; cursor: pointer;
+  border: 0; border-bottom: 2px solid var(--border-soft); padding: .1em .15em .2em;
+  transition: color .2s var(--ease-out), border-color .2s var(--ease-out);
+}
+.prs-stepper button + button::before {
+  content: "→"; margin-right: max(6px, 1.2cqw); color: var(--border);
+}
+.prs-stepper button[aria-pressed="true"] { color: var(--pc-ink); border-bottom-color: var(--pc-us); }
+.prs-stepper button:hover { color: var(--text); }
+/* The keyboard's ring, softened: the site's accent box around a state label
+   reads as a field that failed validation and pulls the eye off the figure. */
+.prs-stepper button:focus-visible {
+  outline: 2px solid var(--border); outline-offset: 3px; border-radius: 3px;
+}
+.prs-stepkeys {
+  margin-left: auto; font-family: var(--mono); font-size: var(--room); color: var(--text-muted);
+}
+[data-presenting] .prs-stepkeys { display: none; }
+
+/* The authors' clip, over the paper's figure of the same scene. The figure
+   keeps its place in the grid cell — hidden, not removed, so nothing moves
+   when the clip arrives — and the clips take the same cell only once every
+   one of them has frames. A pair sits side by side, each on the same card a
+   paper figure gets and named over it, the paper's method first. */
+.prs-reel { position: relative; }
+.prs-reel > .prs-still, .prs-reel > .prs-clips { grid-area: 1 / 1; }
+.prs-clips {
+  display: none; width: 100%; height: 100%; min-height: 0; min-width: 0;
+  justify-content: center; align-items: center; gap: max(10px, 2cqw);
+}
+.prs-reel[data-live] > .prs-still { visibility: hidden; }
+.prs-reel[data-live] > .prs-clips { display: flex; }
+/* A clip's card hugs the clip, the way a figure's card hugs the figure. A
+   video's box cannot be sized from its own shape inside a flexible cell the
+   way an image's can, so `presentation.js` sets it (`--w`, `--h`) from the
+   cell and the clip's proportions whenever either changes. */
+.prs-clip {
+  min-width: 0; display: flex; flex-direction: column; align-items: center;
+  gap: max(4px, .6cqw);
+}
+.prs-cliplab {
+  font-size: var(--room); font-weight: 800; line-height: 1.3; color: var(--text);
+}
+.prs-clip:first-child .prs-cliplab { color: var(--act-ink); }
+.prs-clip video {
+  display: block; width: var(--w, 40cqw); height: var(--h, auto); max-width: 100%;
+  box-sizing: border-box; padding: max(4px, .8cqw);
+  background: var(--fig-pad); border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px var(--border-soft), var(--shadow);
+}
+:root[data-theme="dark"] .prs-clip video { filter: brightness(.93); }
+.prs-rctl {
+  display: none; position: absolute; right: 0; bottom: 0; gap: 6px;
+}
+.prs-reel[data-live] .prs-rctl { display: flex; }
+.prs-rbtn {
+  display: grid; place-items: center; min-width: max(26px, 3.2cqw); height: max(26px, 3.2cqw);
+  padding: 0 .5em; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text-muted); cursor: pointer;
+  font-family: var(--num); font-size: max(11px, 1.3cqw); font-weight: 700;
+}
+.prs-rbtn:hover { color: var(--text); }
+/* On the stage the presenter has K and S; the buttons stay for a mouse but
+   step back from the room's view until one is over them. */
+[data-presenting] .prs-rctl { opacity: .6; transition: opacity .15s; }
+[data-presenting] .prs-rctl:hover { opacity: 1; }
+.prs-rbtn .ico-play, .prs-reel[data-paused] .prs-rbtn .ico-pause { display: none; }
+.prs-reel[data-paused] .prs-rbtn .ico-play { display: block; }
+.prs-rate[aria-pressed="true"] { color: var(--act-ink); border-color: var(--act); }
+/* The provenance under the slide names what is on screen. */
+.prs-cap-reel { display: none; }
+.prs-slide:has([data-reel][data-live]) .prs-cap-still { display: none; }
+.prs-slide:has([data-reel][data-live]) .prs-cap-reel { display: inline; }
+.prs-src a { white-space: nowrap; color: inherit; text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: .2em; }
+@media print {
+  .prs-reel > .prs-still { visibility: visible !important; }
+  .prs-clips, .prs-rctl, .prs-stepper, .prs-cap-reel { display: none !important; }
+  .prs-cap-still { display: inline !important; }
+}
 
 /* ── the speaker essay ─────────────────────────────────────────────── */
 
 /* A script, not a panel. The essay is the one thing on this surface a person
    reads *out loud*, so it is set as prose on the page's own ground — a rule
    down its left edge to say where it starts, a measure it can be read at, and
-   the line-height of something spoken rather than skimmed. A tinted card with
-   muted small type says the opposite of all three: it reads as chrome hung off
-   the slide, and it is the only text here that is not chrome.
+   the line-height of something spoken rather than skimmed.
    The bold is the presenter's own emphasis mark — where to lean — so it takes
    the accent rather than another weight of the body colour. */
 .prs-script {
@@ -492,6 +925,13 @@
 .prs-script p:last-child { margin: 0; }
 .prs-script b { color: var(--orange-ink); font-weight: 700; }
 .prs-script .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
+/* A drawn figure's `why` closes the essay: the presenter's answer to "is that
+   in the paper?", kept off the slide and a glance away when it is asked. */
+.prs-script p.prs-drawwhy {
+  font-size: .82rem; line-height: 1.75; color: var(--text-muted);
+  padding-top: .7em; border-top: 1px dashed var(--border);
+}
+.prs-script p.prs-drawwhy b { color: var(--text-muted); }
 
 .prs-slide .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
 
@@ -502,36 +942,29 @@
    container queries against the frame's own laid-out width — the width the
    columns actually have to fit in.
 
-   The threshold is the frame's *content* box, which is what a container query
-   measures and what the columns actually get — some 90px less than the frame's
-   own width at this size, since the slide's side padding scales with it.
-
    `.prs-slide` itself is the container, so the one rule that sets its shape
    cannot live here; it is under the media query below. */
 @container (max-width: 430px) {
   .prs-versus .prs-body, .prs-ledger .prs-body, .prs-split .prs-body,
+  .prs-evidence .prs-body,
   .prs-statement .prs-body:has(.prs-diag) { grid-template-columns: 1fr; }
-  .prs-facts { grid-auto-flow: row; }
-  .prs-fact { border-left: 0; border-top: 1px solid var(--border-soft); padding-left: 0; }
-  .prs-fact:first-child { border-top: 0; }
+  .prs-statement .prs-said:has(+ .prs-dfig) { grid-template-columns: 1fr; }
+  .prs-versus .prs-body, .prs-ledger .prs-body { grid-template-rows: none; }
+  .prs-panel { grid-row: auto; grid-template-rows: auto; gap: max(8px, 1.6cqw); }
+  .prs-panel ul { grid-row: auto; grid-template-rows: none; gap: max(8px, 1.6cqw); }
+  .prs-panel + .prs-panel { border-left: 0; padding: max(10px, 2cqw) 0 0; border-top: 1px solid var(--border-soft); }
+  .prs-facts { grid-template-columns: minmax(0, 1fr); }
   /* A routing diagram is a left-to-right reading and stacking it would lose
      that, so it keeps its row and scrolls inside itself instead. The page body
      never scrolls sideways. */
-  .prs-chain, .prs-split { overflow-x: auto; padding-bottom: 4px; }
-  .prs-chain > .prs-box, .prs-split > .prs-box, .prs-lanes { min-width: 116px; }
-  .prs-lin { overflow-x: auto; }
-  .prs-priors, .prs-lin > .prs-node { min-width: 150px; }
-  .prs-row { grid-template-columns: 72px minmax(0, 1fr); }
-  /* A timing mark's label sits past its lane's right edge, which the frame
-     would clip. The ruler keeps its width and scrolls, with room on the right
-     for the last label. */
-  .prs-timing .prs-body { overflow-x: auto; }
-  .prs-tim { min-width: 430px; padding-right: 64px; }
+  .prs-chain, .prs-fork { overflow-x: auto; padding-bottom: 4px; }
+  .prs-chain > .prs-box, .prs-fork > .prs-box, .prs-lanes { min-width: 116px; }
+  .prs-hero .prs-body, .prs-hero header { padding-right: 0; }
+  .prs-hero .prs-art { position: relative; width: auto; height: 180px; margin: 12px calc(-1 * var(--px) * var(--sw)) 0; }
   /* A one-slide run gets a block the width of one cell, and at this size the
      act's Korean gloss does not fit in it — it wraps into its neighbour and
      the rail stops being readable. The glyph alone still names the beat. */
   .prs-rlab em { display: none; }
-
 }
 
 /* The two readings of a phone-width slide, and they want opposite shapes.
@@ -543,21 +976,19 @@
    Read as a deck, it has to look like one. A ratio is the one thing a slide
    cannot negotiate, so the frame keeps 16 / 9 and is drawn on a canvas wide
    enough for the type floors to stop binding, then scaled down to the width
-   it actually has.
-
-   The band just above the breakpoint is the same repair for a milder case of
-   the same break. Up to about 680px the frame holds its ratio while the floors
-   have already stopped shrinking with it, so the densest two slides run past
-   the bottom of a box whose `overflow: hidden` then takes the evidence ribbon
-   off the screen without saying so. A tenth off the canvas is enough for every
-   slide to fit, and it changes nothing else — the compositions keep their
-   columns. `zoom` rather than a transform, for the reason the overview
+   it actually has. `zoom` rather than a transform, for the reason the overview
    takes it: it scales the rendered box after layout, so the frame is the slide
    at its own size made small, and markup is the build's to write, never a
-   stylesheet's. What that buys is a frame whose composition is the one the
-   room will see; what it costs is type below the size this file's floors exist
+   stylesheet's. What it costs is type below the size this file's floors exist
    to guarantee — which is the trade a phone-width deck has no way around, and
-   why 전체 화면 sits on the frame's own band. */
+   why 전체 화면 sits on the frame's own band.
+
+   The band just above the breakpoint is the same repair for a milder case of
+   the same break: there the frame holds its ratio while the floors have
+   already stopped shrinking with it, and the densest slide runs past a bottom
+   whose `overflow: hidden` takes the figure's source off the screen without
+   saying so. A tenth off the canvas is enough, and the compositions keep
+   their columns. */
 @media (max-width: 680px) {
   .prs-stage[data-browsing] .prs-slide.prs-on { zoom: .9; }
 }
@@ -757,7 +1188,6 @@
 .prs-stage[data-presenting] .prs-presentation > *:not(.prs-slide) { display: none; }
 .prs-stage[data-presenting] .prs-slide { display: none; }
 .prs-stage[data-presenting] .prs-slide.prs-on {
-  --prs-cap: 2.4;
   /* `100%` of the stage, not `100vw`: the viewport unit counts the scrollbar
      gutter the fixed stage does not have, and the slide would hang 15 px off
      the right edge into a strip the frame cannot paint. */
@@ -830,14 +1260,13 @@
   gap: 14px; padding: clamp(58px, 8vh, 82px) 18px 24px;
 }
 /* `zoom` rather than a container query, because the type inside a slide has
-   floors — `clamp(14px, 2.5cqw, …)` stops shrinking long before a thumbnail is
+   floors — `max(16px, 3.7cqw)` stops shrinking long before a thumbnail is
    thumbnail-sized, and the frame that stops shrinking with it overflows. Zoom
    scales the whole rendered box after layout, so a card is the slide at its
    own size, made small. A transform would need a wrapper element, and markup
    is the build's to write, never a script's. */
 .prs-stage[data-overview] .prs-slide,
 .prs-stage[data-overview] .prs-slide.prs-on {
-  --prs-cap: 1;
   display: grid; width: 100%; height: auto; zoom: .3; transform: none;
   cursor: pointer; box-shadow: none;
   border: 1px solid var(--border); border-radius: calc(var(--radius-sm) / .3);
