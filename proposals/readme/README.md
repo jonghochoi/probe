@@ -1,6 +1,6 @@
 # README redesign proposals
 
-Six complete front-door drafts for the root `README.md`. Each folder holds a
+Seven complete front-door drafts for the root `README.md`. Each folder holds a
 `README.md` that GitHub renders in place — open it on this branch to see the
 animations run — plus the light/dark SVG pairs it adds. Every draft keeps the
 brand: the clay probe, its moods, the mono `PROBE` wordmark and the accent
@@ -15,6 +15,7 @@ picture, and what gets said once instead of three times.
 | **D** | [Storyboard](D-storyboard/README.md) | One run as four panels with a progress rail; the folder and command tables merged into one | `story` |
 | **E** | [Fold](E-fold/README.md) | Minimal first screen — lockup, one line, five tracks in a strip, the site — and every detail folded into `<details>` | `tracks` |
 | **F** | [Bento](F-bento/README.md) | Every track, the `context/` boundary and the three questions as tiles on one board; GitHub alerts for the rules | `bento` |
+| **G** | [Stage + Fold](G-stage-fold/README.md) | A's hero and actions over E's track strip, each track with a one-line note; everything else folded into `<details>` | `hero`, `btn-read`, `btn-setup`, `tracks` |
 
 ## At a glance
 
@@ -23,6 +24,8 @@ picture, and what gets said once instead of three times.
 | <img src="shots/A-light.jpg" width="280"> | <img src="shots/B-light.jpg" width="280"> | <img src="shots/C-light.jpg" width="280"> |
 | **D · Storyboard** | **E · Fold** | **F · Bento** |
 | <img src="shots/D-light.jpg" width="280"> | <img src="shots/E-light.jpg" width="280"> | <img src="shots/F-light.jpg" width="280"> |
+| **G · Stage + Fold** | | |
+| <img src="shots/G-light.jpg" width="280"> | | |
 
 Dark-mode captures sit beside them in `shots/` (`*-dark.jpg`). The captures
 are a frozen frame; the drafts themselves animate.
@@ -47,7 +50,7 @@ The images are generated, one source for both themes, like
 
 ```sh
 cd proposals/readme
-python3 build_a.py   # … build_f.py — each writes its folder's SVG pairs
+python3 build_a.py   # … build_g.py — each writes its folder's SVG pairs
 ```
 
 `common.py` holds the palette (the same tokens as `build-flow.py`) and the

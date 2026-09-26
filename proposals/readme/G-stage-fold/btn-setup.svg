@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="48" viewBox="0 0 250 48" role="img" aria-label="Schedule the scouting routine">
+  <style>
+    .hull   { fill: #D97757; }
+    .iris   { fill: #FFFAF7; }
+    .pupil  { fill: #2A1A12; }
+    .lids   { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .stalk  { stroke: #CC785C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #CC785C; }
+    .page   { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; }
+    .line   { fill: #B06749; opacity: .3; }
+    .wave   { fill: none; stroke: #CC785C; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+    .shadow { fill: #CC785C; opacity: .45; }
+    .dim    { fill: #C4B6AE; }
+    .dimst  { stroke: #B3A49B; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .dimbe  { fill: #B3A49B; }
+    .cross  { fill: none; stroke: #6B5A50; stroke-width: 3.2; stroke-linecap: round; }
+    .mug    { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; stroke-linejoin: round; }
+    .handle { fill: none; stroke: #B06749; stroke-width: 2.4; stroke-linecap: round; }
+    .brew   { fill: #B06749; }
+    .steam  { fill: none; stroke: #CC785C; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
+    .z      { fill: #B06749; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; font-weight: 700; }
+    .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .lid    { transform-box: fill-box; transform-origin: 50% 50%;
+              animation: blink 7s ease-in-out infinite; }
+    .readp  { animation: read 3.6s ease-in-out infinite; }
+    .sweepp { animation: sweep 3.2s ease-in-out infinite; }
+    .w1     { animation: ping 2.6s ease-in-out infinite; }
+    .w2     { animation: ping 2.6s ease-in-out .34s infinite; }
+    .l1     { animation: lit 4.8s ease-in-out infinite; }
+    .l2     { animation: lit 4.8s ease-in-out 1.6s infinite; }
+    .l3     { animation: lit 4.8s ease-in-out 3.2s infinite; }
+    .s1     { animation: steam 3.8s ease-in-out infinite; }
+    .s2     { animation: steam 3.8s ease-in-out 1.9s infinite; }
+    .z1     { animation: rise 2.8s ease-in-out infinite; }
+    .z2     { animation: rise 2.8s ease-in-out .5s infinite; }
+    .z3     { animation: rise 2.8s ease-in-out 1s infinite; }
+    .drift  { transform-box: fill-box; transform-origin: 50% 100%;
+              animation: drift 4.6s ease-in-out infinite; }
+    @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
+    @keyframes read  { 0% { transform: translateX(-2.4px); } 72% { transform: translateX(2.4px); }
+                       86%, 100% { transform: translateX(-2.4px); } }
+    @keyframes sweep { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
+    @keyframes ping  { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
+    @keyframes lit   { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
+    @keyframes steam { 0% { opacity: 0; transform: translateY(2px); } 30%, 55% { opacity: .7; }
+                       100% { opacity: 0; transform: translateY(-6px); } }
+    @keyframes rise  { 0% { opacity: 0; transform: translate(0, 4px); } 30%, 70% { opacity: 1; }
+                       100% { opacity: 0; transform: translate(4px, -8px); } }
+    @keyframes drift { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+    .fill  { fill: #D97757; }
+    .ring  { fill: #FFFCFA; stroke: #D97757; stroke-width: 1.5; }
+    .on    { fill: #FFFAF7; font: 600 15px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .off   { fill: #B06749; font: 600 15px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .arr   { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .nudge { animation: nudge 1.8s ease-in-out infinite; }
+    @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+
+  <rect class="ring" x="1" y="1" width="248" height="46" rx="23"/>
+  <text class="off" x="28" y="29">Schedule scouting</text>
+  <path class="arr" stroke="#D97757" d="M206 24h18m-6-6 6 6-6 6"/>
+</svg>

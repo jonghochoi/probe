@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="340" viewBox="0 0 880 340" role="img" aria-label="PROBE — Stop drowning in arXiv. PROBE marks the target.">
+  <style>
+    .hull   { fill: #D97757; }
+    .iris   { fill: #FFFAF7; }
+    .pupil  { fill: #2A1A12; }
+    .lids   { fill: none; stroke: #2A1A12; stroke-width: 3.4; stroke-linecap: round; }
+    .stalk  { stroke: #CC785C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #CC785C; }
+    .page   { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; }
+    .line   { fill: #B06749; opacity: .3; }
+    .wave   { fill: none; stroke: #CC785C; stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+    .shadow { fill: #CC785C; opacity: .45; }
+    .dim    { fill: #C4B6AE; }
+    .dimst  { stroke: #B3A49B; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .dimbe  { fill: #B3A49B; }
+    .cross  { fill: none; stroke: #6B5A50; stroke-width: 3.2; stroke-linecap: round; }
+    .mug    { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; stroke-linejoin: round; }
+    .handle { fill: none; stroke: #B06749; stroke-width: 2.4; stroke-linecap: round; }
+    .brew   { fill: #B06749; }
+    .steam  { fill: none; stroke: #CC785C; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
+    .z      { fill: #B06749; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; font-weight: 700; }
+    .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .lid    { transform-box: fill-box; transform-origin: 50% 50%;
+              animation: blink 7s ease-in-out infinite; }
+    .readp  { animation: read 3.6s ease-in-out infinite; }
+    .sweepp { animation: sweep 3.2s ease-in-out infinite; }
+    .w1     { animation: ping 2.6s ease-in-out infinite; }
+    .w2     { animation: ping 2.6s ease-in-out .34s infinite; }
+    .l1     { animation: lit 4.8s ease-in-out infinite; }
+    .l2     { animation: lit 4.8s ease-in-out 1.6s infinite; }
+    .l3     { animation: lit 4.8s ease-in-out 3.2s infinite; }
+    .s1     { animation: steam 3.8s ease-in-out infinite; }
+    .s2     { animation: steam 3.8s ease-in-out 1.9s infinite; }
+    .z1     { animation: rise 2.8s ease-in-out infinite; }
+    .z2     { animation: rise 2.8s ease-in-out .5s infinite; }
+    .z3     { animation: rise 2.8s ease-in-out 1s infinite; }
+    .drift  { transform-box: fill-box; transform-origin: 50% 100%;
+              animation: drift 4.6s ease-in-out infinite; }
+    @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
+    @keyframes read  { 0% { transform: translateX(-2.4px); } 72% { transform: translateX(2.4px); }
+                       86%, 100% { transform: translateX(-2.4px); } }
+    @keyframes sweep { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
+    @keyframes ping  { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
+    @keyframes lit   { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
+    @keyframes steam { 0% { opacity: 0; transform: translateY(2px); } 30%, 55% { opacity: .7; }
+                       100% { opacity: 0; transform: translateY(-6px); } }
+    @keyframes rise  { 0% { opacity: 0; transform: translate(0, 4px); } 30%, 70% { opacity: 1; }
+                       100% { opacity: 0; transform: translate(4px, -8px); } }
+    @keyframes drift { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+    .ground { fill: #FFFCFA; }
+    .edge   { fill: none; stroke: #D97757; }
+    .eyebrow{ fill: #B06749; font: 11px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 2.6px; }
+    .head   { fill: #1F1611; font: 700 42px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; letter-spacing: -1px; }
+    .claim  { fill: #D97757; font: 700 24px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; letter-spacing: -.3px; }
+    .sub    { fill: #7A6A60; font: 15px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .tag    { fill: #7A6A60; font: 10px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 1.6px; }
+    .miss   { fill: #EFE4DC; }
+    .missl  { fill: #7A6A60; opacity: .28; }
+    .hit    { fill: #FFFAF7; stroke: #D97757; stroke-width: 1.5; }
+    .hitl   { fill: #B06749; }
+    .dot    { fill: #D97757; }
+    .fade0  { stop-color: #FFFCFA; stop-opacity: 1; }
+    .fade1  { stop-color: #FFFCFA; stop-opacity: 0; }
+    .wire   { fill: none; stroke: #D97757; stroke-width: 1.6; stroke-dasharray: 4 5;
+              animation: march 1.2s linear infinite; }
+    .feed   { animation: scroll 18s linear infinite; }
+    .scan   { fill: #D97757; opacity: .10; animation: scan 4.5s ease-in-out infinite; }
+    @keyframes scroll { from { transform: translateY(0); } to { transform: translateY(-272px); } }
+    @keyframes march  { to { stroke-dashoffset: -18; } }
+    @keyframes scan   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(200px); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+
+  <defs>
+    <clipPath id="win"><rect x="680" y="46" width="180" height="254"/></clipPath>
+    <linearGradient id="ft" x1="0" y1="0" x2="0" y2="1"><stop class="fade0" offset="0"/><stop class="fade1" offset="1"/></linearGradient>
+    <linearGradient id="fb" x1="0" y1="1" x2="0" y2="0"><stop class="fade0" offset="0"/><stop class="fade1" offset="1"/></linearGradient>
+  </defs>
+  <rect class="ground" width="880" height="340" rx="12"/>
+  <rect class="edge" x=".5" y=".5" width="879" height="339" rx="11.5"/>
+
+  <text class="eyebrow" x="48" y="66">PROBE · RESEARCH SCOUT</text>
+  <text class="head" x="46" y="124">Stop drowning</text>
+  <text class="head" x="46" y="174">in arXiv.</text>
+  <text class="claim" x="47" y="222">PROBE marks the target.</text>
+  <text class="sub" x="48" y="264">Dexterous-manipulation papers, scouted on a schedule —</text>
+  <text class="sub" x="48" y="286">and retold in Korean when you name one.</text>
+
+  <text class="tag" x="690" y="34">ARXIV · cs.RO + cs.LG</text>
+  <g clip-path="url(#win)">
+    <g class="feed">
+      <rect x="690" y="50" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="57" width="96" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="64" width="84" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="84" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="91" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="98" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="118" width="150" height="24" rx="5" class="hit"/>
+      <circle cx="703" cy="130" r="4" class="dot"/>
+      <rect x="714" y="125" width="96" height="3.4" rx="1.7" class="hitl"/>
+      <rect x="714" y="132" width="62" height="3.4" rx="1.7" class="hitl" opacity=".5"/>
+      <rect x="690" y="152" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="159" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="166" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="186" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="193" width="96" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="200" width="84" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="220" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="227" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="234" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="254" width="150" height="24" rx="5" class="hit"/>
+      <circle cx="703" cy="266" r="4" class="dot"/>
+      <rect x="714" y="261" width="96" height="3.4" rx="1.7" class="hitl"/>
+      <rect x="714" y="268" width="62" height="3.4" rx="1.7" class="hitl" opacity=".5"/>
+      <rect x="690" y="288" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="295" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="302" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="322" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="329" width="96" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="336" width="84" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="356" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="363" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="370" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="390" width="150" height="24" rx="5" class="hit"/>
+      <circle cx="703" cy="402" r="4" class="dot"/>
+      <rect x="714" y="397" width="96" height="3.4" rx="1.7" class="hitl"/>
+      <rect x="714" y="404" width="62" height="3.4" rx="1.7" class="hitl" opacity=".5"/>
+      <rect x="690" y="424" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="431" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="438" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="458" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="465" width="96" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="472" width="84" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="492" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="499" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="506" width="70" height="3.4" rx="1.7" class="missl"/>
+      <rect x="690" y="526" width="150" height="24" rx="5" class="hit"/>
+      <circle cx="703" cy="538" r="4" class="dot"/>
+      <rect x="714" y="533" width="96" height="3.4" rx="1.7" class="hitl"/>
+      <rect x="714" y="540" width="62" height="3.4" rx="1.7" class="hitl" opacity=".5"/>
+      <rect x="690" y="560" width="150" height="24" rx="5" class="miss"/>
+      <rect x="702" y="567" width="110" height="3.4" rx="1.7" class="missl"/>
+      <rect x="702" y="574" width="70" height="3.4" rx="1.7" class="missl"/>
+    </g>
+    <rect class="scan" x="684" y="46" width="162" height="40" rx="6"/>
+    <rect x="680" y="46" width="180" height="46" fill="url(#ft)"/>
+    <rect x="680" y="254" width="180" height="46" fill="url(#fb)"/>
+  </g>
+  <text class="tag" x="850" y="322" text-anchor="end">50–100 A DAY → 3–5 A WEEK</text>
+
+  <path class="wire" d="M682 173 C 660 173, 650 232, 628 236"/>
+  <g transform="translate(470 118) scale(1.62)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="36" cy="56.5" r="5"/></g></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="60" cy="56.5" r="5"/></g></g>
+      <g transform="rotate(-5 48 75.5)">
+        <rect class="page" x="25" y="67" width="46" height="17" rx="3"/>
+        <rect class="line l1" x="31" y="70.6" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l2" x="31" y="74.4" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l3" x="31" y="78.2" width="22" height="2.2" rx="1.1"/>
+      </g>
+      
+    </g><g><ellipse class="shadow" cx="91.5" cy="90" rx="9.4" ry="2.6"/>
+      <path class="steam s1" d="M87.6 63 c-3 -3.2 3 -5.2 0 -8.6"/>
+      <path class="steam s2" d="M95 62 c-3 -3.2 3 -5.2 0 -8.6"/>
+      <path class="handle" d="M99.6 72.6 a5 5 0 0 1 0 9.6"/>
+      <path class="mug" d="M83 68 h17 l-1.9 17.4 a3.2 3.2 0 0 1 -3.2 3.1 h-6.8 a3.2 3.2 0 0 1 -3.2 -3.1 Z"/>
+      <ellipse class="brew" cx="91.5" cy="68" rx="8.5" ry="2.5"/></g>
+  </g>
+
+</svg>
