@@ -17,6 +17,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import charts
 from . import components as c
 from . import corpus, frontmatter
 
@@ -42,21 +43,49 @@ TYPE_FENCE = {
     "ledger": "ledger",
     "budget": "budget",
     "timing": "timing",
-    "lineage": "lineage",
+    "contrast": "contrast",
+    "inheritance": "inheritance",
+    "chart": "chart",
+    "heat": "heat",
 }
 
-# The fences a slide may carry beside the one its type is drawn from.
-EXTRA_FENCES = ("diagram", "facts", "script")
+# The fences a slide may carry beside the one its type is drawn from. `video`
+# rides only beside the paper's own figure, because that figure is what the
+# slide is whenever the clip cannot play (`presentation/AUTHORING.md` §8-1).
+EXTRA_FENCES = ("diagram", "video", "facts", "script")
+VIDEO_TYPES = ("evidence", "split")
+
+# A clip is a file the authors' page serves, played by the browser — never a
+# player embedded from a video platform, which takes the keyboard the deck
+# runs on and has no figure to fall back to.
+CLIP_RE = re.compile(r"^https://[^\s/]+/\S+\.(?:mp4|webm)(?:\?\S*)?$", re.I)
+EMBED_RE = re.compile(r"(?:youtube\.com|youtu\.be|vimeo\.com|/embed/|<iframe)", re.I)
+PAGE_RE = re.compile(r"^https://\S+$")
+# A pair is the one comparison worth a second clip; a third is a grid the room
+# watches instead of listening.
+CLIPS_MAX = 2
 FENCES = tuple(f for f in TYPE_FENCE.values() if f) + EXTRA_FENCES
 
 REQUIRED_FRONT = ("presentation_of", "title", "venue", "audience", "minutes", "spine",
                   "arxiv_html", "generated")
 
-# `probe-facts` is the evidence ribbon every slide closes on. Three cells is
-# the shape; two is what a slide with only two numbers gets. More than three
-# stops being a ribbon and starts being a table the audience reads instead of
-# listening.
+# `probe-facts` is the evidence ribbon — the numbers a slide leans on that its
+# visual does not already put on screen. Three cells is the most; two is what a
+# slide with only two numbers gets. More than three stops being a ribbon and
+# starts being a table the audience reads instead of listening.
 FACTS_MAX = 3
+
+# The widest a headline's authored line may run, in the ems `_fit` measures.
+# A headline is sized to fit its widest line, so a line past this is set
+# below about four-fifths of the headline size — the point where a claim
+# stops reading as the largest thing on the frame. The fix is a ` / ` at its
+# seam (§5), which is the author's to place.
+HEADLINE_EM_MAX = 33
+
+# A figure's `crop` and the cover's `focus`, in the forms CSS takes them.
+_PCT = r"(?:0|\d{1,2}(?:\.\d+)?%)"
+_CROP = re.compile(rf"{_PCT}(?:\s+{_PCT}){{0,3}}")
+_FOCUS = re.compile(r"\d{1,3}(?:\.\d+)?%\s+\d{1,3}(?:\.\d+)?%")
 
 
 @dataclass
@@ -235,7 +264,23 @@ def parse_slides(body: str) -> tuple[list[Slide], list[str]]:
         if need and need not in data:
             problems.append(f"{where}: a {kind} slide needs ```probe-{need}")
             continue
+        # A figure that does not fit its own shape cannot be drawn — a series
+        # shorter than its axis has no mark for the last tick — so the slide
+        # is skipped rather than drawn wrong.
+        broken = [p for fence in ("chart", "heat", "timing") + charts.LINEAGE
+                  if fence in data
+                  for p in charts.problems(where, fence, data[fence])]
+        if broken:
+            problems += broken
+            continue
         problems += _check_frame(where, data)
+        problems += _check_video(where, kind, data)
+        if _widest(title) > HEADLINE_EM_MAX:
+            problems.append(
+                f"{where}: a header line runs {_widest(title):.0f} em — past "
+                f"{HEADLINE_EM_MAX} it is set too small to lead the frame. Break "
+                f"it with ` / ` where the claim turns"
+            )
 
         bullets = [l[2:].strip() for l in rest.split("\n") if l.startswith("- ")]
         claim = " ".join(l.strip() for l in rest.split("\n")
@@ -256,9 +301,10 @@ def _cut(fence: str, rest: str) -> tuple[str | None, str]:
 def _check_frame(where: str, data: dict) -> list[str]:
     """The fences a slide carries, where their shape is checkable at build time.
 
-    A `probe-figure` needs `url`, `caption` and `source`, a `probe-diagram`
-    needs its `why` (`presentation/AUTHORING.md` §4), and `probe-facts` is a
-    list of at most `FACTS_MAX` cells. The two-register floor on panel items is
+    A `probe-figure` needs `url`, `caption` and `source` and takes `crop` and
+    `focus` in the form CSS does, a `probe-diagram` or `probe-timing` needs its
+    `why` (`presentation/AUTHORING.md` §4-2), and `probe-facts` is a list of at
+    most `FACTS_MAX` cells. The two-register floor on panel items is
     `linters/check-presentation-format.py`'s, not the build's.
     """
     problems = []
@@ -273,13 +319,26 @@ def _check_frame(where: str, data: dict) -> list[str]:
                 + "` — a figure the room cannot look up is a picture, and on "
                   "the cover there is no evidence ribbon to put the provenance in"
             )
-    dia = data.get("diagram")
-    if dia and not str(dia.get("why", "")).strip():
-        problems.append(
-            f"{where}: ```probe-diagram has no `why` — a drawn figure states "
-            f"which of the paper's own figures covers this ground and what "
-            f"this one leaves out"
-        )
+    if isinstance(fig, dict):
+        if fig.get("crop") and not _CROP.fullmatch(str(fig["crop"]).strip()):
+            problems.append(
+                f"{where}: ```probe-figure `crop` is {fig['crop']!r} — one to four "
+                f"percentages, top right bottom left, as CSS `inset()` takes them "
+                f"(`0 0 0 62%` keeps the right 38 %)"
+            )
+        if fig.get("focus") and not _FOCUS.fullmatch(str(fig["focus"]).strip()):
+            problems.append(
+                f"{where}: ```probe-figure `focus` is {fig['focus']!r} — two "
+                f"percentages, across then down (`30% 50%`)"
+            )
+    for fence in ("diagram", "timing"):
+        dia = data.get(fence)
+        if isinstance(dia, dict) and not str(dia.get("why", "")).strip():
+            problems.append(
+                f"{where}: ```probe-{fence} has no `why` — a drawn figure states "
+                f"which of the paper's own figures covers this ground and what "
+                f"this one leaves out"
+            )
     facts = data.get("facts")
     if facts is not None and not isinstance(facts, list):
         problems.append(f"{where}: ```probe-facts is not a list of cells")
@@ -290,6 +349,58 @@ def _check_frame(where: str, data: dict) -> list[str]:
             f"of listening"
         )
     return problems
+
+
+def _check_video(where: str, kind: str, data: dict) -> list[str]:
+    """The authors' clip (`presentation/AUTHORING.md` §8-1), where it is structural.
+
+    A clip that breaks a rule is dropped and the slide publishes on its
+    figure — which is what the slide is anyway whenever the clip cannot play —
+    so a bad fence costs the motion, never the slide.
+    """
+    vid = data.get("video")
+    if vid is None:
+        return []
+    bad = []
+    if kind not in VIDEO_TYPES or not isinstance(data.get("figure"), dict):
+        bad.append(
+            f"{where}: ```probe-video rides on an {' or '.join(VIDEO_TYPES)} slide "
+            f"beside the paper's own ```probe-figure — that figure is the slide "
+            f"whenever the clip cannot play, is printed, or runs with no script")
+    if not isinstance(vid, dict):
+        data.pop("video", None)
+        return bad + [f"{where}: ```probe-video is not an object"]
+    clips = vid.get("clips")
+    if not isinstance(clips, list) or not clips:
+        bad.append(f"{where}: ```probe-video has no `clips`")
+        clips = []
+    if len(clips) > CLIPS_MAX:
+        bad.append(f"{where}: ```probe-video has {len(clips)} clips — at most "
+                   f"{CLIPS_MAX}. A pair is a comparison; past that it is a grid "
+                   f"the room watches instead of listening")
+    for clip in clips:
+        src = str(clip.get("src", "")) if isinstance(clip, dict) else ""
+        if EMBED_RE.search(src):
+            bad.append(f"{where}: clip {src!r} is an embedded player — it takes the "
+                       f"keyboard the deck runs on and cannot fall back to the "
+                       f"figure. Name it in the essay for after the talk")
+        elif not CLIP_RE.match(src):
+            bad.append(f"{where}: clip {src!r} is not an https `.mp4` or `.webm` — "
+                       f"a clip is a file the authors' page serves")
+        if len(clips) > 1 and not (isinstance(clip, dict)
+                                   and str(clip.get("label", "")).strip()):
+            bad.append(f"{where}: a clip in a pair has no `label` — the room has to "
+                       f"know which side is which")
+    gone = [k for k in ("page", "caption", "source") if not str(vid.get(k, "")).strip()]
+    if gone:
+        bad.append(f"{where}: ```probe-video has no `" + "`, `".join(gone)
+                   + "` — a clip is published by the paper's authors somewhere, "
+                     "and the room is owed where")
+    elif not PAGE_RE.match(str(vid["page"])):
+        bad.append(f"{where}: ```probe-video `page` is not an https URL")
+    if bad:
+        data.pop("video", None)
+    return bad
 
 
 # ── drawing ───────────────────────────────────────────────────────────
@@ -308,6 +419,30 @@ def inline(text: str, breaks: bool = False) -> str:
     out = _BOLD.sub(r"<b>\1</b>", c.esc(text))
     out = _CODE.sub(r'<i class="m">\1</i>', out)
     return out.replace(" / ", "<br>") if breaks else out
+
+
+def _widest(text: str) -> float:
+    """The widest authored line of `text`, in ems — see `_fit`."""
+    def width(line: str) -> float:
+        line = _BOLD.sub(r"\1", line)
+        return sum(0.28 if ch == " " else
+                   0.88 if ord(ch) >= 0x1100 else
+                   0.62 if ch.isupper() else 0.54 for ch in line)
+    return max(width(line) for line in text.split(" / "))
+
+
+def _fit(text: str) -> str:
+    """The widest authored line of a headline, in ems, as `--len`.
+
+    A headline is set as large as its column allows, and what the column has
+    to hold is the longest line the author wrote — never a line the column
+    made by wrapping (`presentation/AUTHORING.md` §5-1). So the stylesheet
+    sizes it as `min(ceiling, column / --len)`, which lets a short claim take
+    the full size and keeps a long one on the lines it was broken into.
+    Hangul is taken at just under an em, Latin and digits at a little over
+    half — generous, so an estimate that errs leaves a margin, not a wrap.
+    """
+    return f' style="--len:{_widest(text):.1f}"'
 
 
 def render(presentation: Presentation) -> str:
@@ -342,25 +477,108 @@ def deck(presentation: Presentation) -> str:
 
 def _slide(i: int, s: Slide, total: int, presentation: Presentation) -> str:
     inner = _compose(s, presentation)
-    facts = _facts(s.data["facts"]) if s.data.get("facts") else ""
+    # The ribbon rides beside a `split` figure and under everything else.
+    # Beside, because a square figure at full height leaves a column and a
+    # row of numbers under it takes the height the figure needs; under,
+    # because every other composition is as wide as the frame.
+    beside = s.kind == "split"
+    facts = (_facts(s.data["facts"]) if s.data.get("facts") and not beside
+             else "")
     head = ("" if s.kind == "statement"
-            else f"<h3>{inline(s.title, True)}</h3>")
+            else f"<h3{_fit(s.title)}>{inline(s.title, True)}</h3>")
     # A cover that carries a figure splits the frame, which is a different
     # composition rather than a decorated one — the class is what the CSS needs
     # to give the text a column and the image the edge.
     mod = " prs-hero" if s.kind == "cover" and s.data.get("figure") else ""
-    # The eyebrow says the beat in the word the room can use. The glyph is the
-    # author's spine and the presenter's position marker, so it rides on the
-    # element as data and the notes window shows it — printing both on the
-    # slide is one line saying the same thing twice.
+    # The chrome is the page number and nothing else: the paper's title is on
+    # the cover and on the page the tab sits in, and a slide that repeats it
+    # in every corner spends the room's attention on a line it already read.
+    foot = ("" if s.kind == "cover"
+            else f'<footer><span>{i + 1:02d}</span></footer>')
     return f"""<article class="prs-slide prs-{c.esc(s.kind)}{mod}" id="s{i + 1}"
          data-act="{c.esc(s.act)}">
-  <header><span class="prs-act">{c.esc(ACTS[s.act])}</span>{head}</header>
-  <div class="prs-body">{inner}</div>
+  <header>{_eyebrow(s.act)}{head}</header>
+  <div class="prs-body"{_rows(s)}>{inner}</div>
   {facts}
-  <footer><span>{c.esc(presentation.title)}</span><span>{i + 1} / {total}</span></footer>
+  {foot}
 </article>
-{_script(s.script, f"s{i + 1}")}"""
+{_script(s.script, f"s{i + 1}", _notes(s.data))}"""
+
+
+def _rows(s: Slide) -> str:
+    """The row tracks two panel columns share.
+
+    A ledger's two columns are read across as much as down — the first thing
+    each side buys or sells, then the second — so an item sits on the same
+    row as its counterpart even when the one beside it runs to two lines. The
+    stylesheet lays both columns on one grid of these rows (`subgrid`); the
+    count is the longer column's.
+    """
+    fence = {"ledger": "ledger", "versus": "versus"}.get(s.kind)
+    if not fence or not isinstance(s.data.get(fence), dict):
+        return ""
+    cols = [v for v in s.data[fence].values() if isinstance(v, dict)]
+    n = max((len(col.get("lines", [])) for col in cols), default=0)
+    return f' style="--items:{max(n, 1)}"'
+
+
+# The frame, in the units the stylesheet sets it in: a share of the content
+# box's width (`cqw`). These are the heights each part of a slide takes, so the
+# drawing handed the rest can be laid out at the shape it will be shown at.
+_FRAME_H = 54.5          # 16 : 9 less the padding, in cqw of the content width
+_EYEBROW = 3.1
+_BODY_PAD = 2.4
+_GAP = 2.0
+_SRC = 3.1               # the provenance line under a drawing, with its gap
+_FACTS = 9.8
+_STEPPER = 3.6           # the row naming a stepped figure's states
+
+
+def _ratio(s: Slide) -> float:
+    """The shape of the box a drawing on this slide gets — width over height.
+
+    Estimated from what the slide stacks above and below the drawing: the
+    headline at the size its widest authored line is set at, the takeaway
+    line, the provenance under the figure, a ribbon. The estimate errs short
+    — a box taken to be a little shorter than it is leaves the drawing a thin
+    margin above and below, where one taken to be taller would leave it
+    standing in the middle of the frame with empty flanks.
+    """
+    lines = len(s.title.split(" / "))
+    if s.kind == "statement":
+        say = min(5.4, 58 / max(_widest(s.title), 1))
+        used = _EYEBROW + 1.0 + lines * say * 1.12 + _GAP
+    else:
+        size = min(3.7, 98 / max(_widest(s.title), 1))
+        used = _EYEBROW + lines * size * 1.16 + _BODY_PAD
+        if s.claim:
+            claim_lines = max(1, int(_widest(s.claim) * 1.75 // 96) + 1)
+            used += _GAP + claim_lines * 1.75 * 1.5
+        if s.data.get("facts"):
+            used += _FACTS
+    if any(isinstance(s.data.get(f), dict) and s.data[f].get("steps")
+           for f in ("chart", "heat")):
+        used += _STEPPER
+    used += _SRC + 1.5
+    return 100 / max(_FRAME_H - used, 12)
+
+
+def _eyebrow(act: str) -> str:
+    """Where in the four beats this slide stands, and the beat's word.
+
+    Four short bars in the act colours, the current one drawn solid and long,
+    the ones behind it at half strength and the ones ahead as outlines — the
+    act rail of the cover carried onto every slide, so the room feels the talk
+    turn rather than being told it did. The word is the beat in the language
+    the room uses; the glyph stays on the element as `data-act`, because
+    printing both is one line saying the same thing twice.
+    """
+    here = ACT_ORDER[act]
+    bars = "".join(
+        f'<i class="prs-r{n}{" on" if n == here else " past" if n < here else ""}"></i>'
+        for n in range(1, len(ACTS) + 1))
+    return (f'<div class="prs-eyebrow"><span class="prs-acts" aria-hidden="true">'
+            f'{bars}</span><span class="prs-act">{c.esc(ACTS[act])}</span></div>')
 
 
 def _rail(presentation) -> str:
@@ -413,26 +631,57 @@ def _compose(s: Slide, presentation: Presentation) -> str:
         # is looking at while the talk starts. A listener who disagrees with
         # the spine should be able to say so from the first slide.
         lis = "".join(f"<li>{inline(b)}</li>" for b in s.bullets)
-        said = (f'<p class="prs-spineline">{inline(presentation.spine, True)}</p>'
+        said = (f'<p class="prs-spineline"{_fit(presentation.spine)}>{inline(presentation.spine, True)}</p>'
                 f'<div class="prs-colophon">'
                 f'<p class="prs-meta">{c.esc(presentation.venue)}</p>'
                 f'<p class="prs-paper">{c.esc(presentation.title)}</p>'
                 f'<ul class="prs-points">{lis}</ul></div>')
-        # With a figure the frame splits and the image takes the half the rail
-        # otherwise fills; without one the rail is what fills it.
+        # With a figure the frame splits and the image takes the share of it
+        # the rail otherwise fills; without one the rail is what fills it.
         if s.data.get("figure"):
             return f'<div class="prs-left">{said}</div>' + _cover_art(s.data["figure"])
         return said + _rail(presentation)
     if s.kind == "statement":
-        said = (f'<div class="prs-said"><p class="prs-say">{inline(s.title, True)}</p>'
+        # The turn, on its tinted ground. With a visual the sentence stands over
+        # it at the width of the frame; the visual is what the sentence is
+        # permitted by — a drawing of the mechanism, a chart of the numbers
+        # that force it, or the paper's own figure — so it takes the rest of
+        # the frame under it.
+        said = (f'<div class="prs-said"><p class="prs-say"{_fit(s.title)}>{inline(s.title, True)}</p>'
                 f'<p class="prs-sub">{inline(s.claim, True)}</p></div>')
+        r = _ratio(s)
+        if d.get("timing"):
+            return said + charts.timing(d["timing"], r)
+        if d.get("chart"):
+            return said + charts.chart(d["chart"], r)
+        if d.get("heat"):
+            return said + charts.heat(d["heat"], r)
+        if d.get("figure"):
+            f = d["figure"]
+            return said + (f'<div class="prs-sfig">{_figure(f)}'
+                           f'<p class="prs-src">{c.esc(f.get("source", ""))}</p></div>')
         return said + (_diagram(d["diagram"]) if d.get("diagram") else "")
     if s.kind == "evidence":
-        return _figure(d["figure"]) + (
-            f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else "")
+        # A figure wider than about 2 : 1 — a strip of photographs, a wide
+        # plot — takes the frame's width, and what to see in it is one line
+        # under it with its provenance beside. The caption is not printed: it
+        # is the figure's alt text and closes the speaker essay (`_notes`).
+        f = d["figure"]
+        said = f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else ""
+        return (_figure(f, d.get("video")) + f'<div class="prs-under">{said}'
+                f'{_src(f, d.get("video"))}</div>')
     if s.kind == "split":
+        # A squarer figure at full height, and everything else in one column
+        # beside it: what to see in it, the numbers it shows, where it is from.
+        # Stretched across the frame the same figure is a small plot with
+        # white either side.
         lis = "".join(f"<li>{inline(b)}</li>" for b in s.bullets)
-        return _figure(d["figure"]) + f'<ul class="prs-points">{lis}</ul>'
+        said = (f'<ul class="prs-points">{lis}</ul>' if lis else
+                f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else "")
+        f = d["figure"]
+        facts = _facts(d["facts"]) if d.get("facts") else ""
+        return (_figure(f, d.get("video")) + f'<div class="prs-aside">{said}{facts}'
+                f'{_src(f, d.get("video"))}</div>')
     if s.kind == "versus":
         v = d["versus"]
         return _panel(v["left"], "prs-wall") + _panel(v["right"], "prs-wall")
@@ -443,11 +692,25 @@ def _compose(s: Slide, presentation: Presentation) -> str:
         return _budget(d["budget"]) + (
             f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else "")
     if s.kind == "timing":
-        return _timing(d["timing"])
-    if s.kind == "lineage":
-        return _lineage(d["lineage"]) + (
+        return charts.timing(d["timing"], _ratio(s)) + (
+            f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else "")
+    if s.kind in ("chart", "heat"):
+        fig = (charts.chart(d["chart"], _ratio(s)) if s.kind == "chart"
+               else charts.heat(d["heat"], _ratio(s)))
+        return fig + (f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else "")
+    if s.kind in charts.LINEAGE:
+        draw = charts.contrast if s.kind == "contrast" else charts.inheritance
+        return draw(d[s.kind], _ratio(s), _corpus_ids()) + (
             f'<p class="prs-claim">{inline(s.claim)}</p>' if s.claim else "")
     return ""
+
+
+def _corpus_ids() -> frozenset:
+    """Every paper with a rewrite in `analysis/` — the whole corpus, not the
+    subset a `--only` build draws, because a prior on a lineage figure links
+    to the page the published site has for that paper."""
+    return frozenset(p.stem for p in (corpus.REPO_ROOT / "analysis").glob("*.md")
+                     if ID_RE.match(p.stem))
 
 
 def _panel(p: dict, cls: str) -> str:
@@ -471,39 +734,142 @@ def _panel(p: dict, cls: str) -> str:
             f"<ul>{lines}</ul>{foot}</div>")
 
 
+_NUMERAL = re.compile(r"[−+-]?\d[\d.,]*")
+
+
+def _figure_value(v: str) -> str:
+    """A ribbon value set as a number rather than as a phrase.
+
+    The numerals are what the room reads from the back, so they carry the
+    size; the unit and the qualifier around them (`약`, `ms`, `차원`) are
+    set small beside them, the way a slide sets `50 N` when it wants the 50
+    to land. A value with no numeral in it — a robot's name — is a phrase and
+    stays one size.
+    """
+    toks = v.split(" ")
+    if not any(_NUMERAL.fullmatch(t) for t in toks):
+        return f'<span class="prs-vtext">{c.esc(v)}</span>'
+    return " ".join(
+        f'<b>{c.esc(t)}</b>' if _NUMERAL.fullmatch(t) else f'<small>{c.esc(t)}</small>'
+        for t in toks)
+
+
 def _facts(rows: list) -> str:
-    """The evidence ribbon every slide closes on.
+    """The evidence ribbon — the numbers a slide leans on, set as numbers.
 
     Not decoration for a slide that came out short: each cell is a number the
     slide leans on. A cell the paper does not supply is dropped rather than
-    filled, and a ribbon of two is a ribbon of two.
+    filled, and a ribbon of two is a ribbon of two. No rules between cells and
+    no box around them: a ruled row of three is a table, and a table is read
+    rather than seen.
     """
     cells = "".join(
-        f'<div class="prs-fact"><b>{inline(r["값"])}</b>'
+        f'<div class="prs-fact"><p class="prs-v">{_figure_value(r["값"])}</p>'
         f'<span>{inline(r["라벨"])}</span></div>' for r in rows)
-    return f'<div class="prs-facts">{cells}</div>'
+    return f'<div class="prs-facts" style="--n:{len(rows)}">{cells}</div>'
+
+
+def _src(f: dict, video: dict | None = None) -> str:
+    """The provenance line under a paper figure — and, when the authors' clip
+    is playing over it, the clip's, since the room is owed the source of what
+    is on screen rather than of what would have been. The stylesheet shows
+    whichever one the figure is showing."""
+    still = c.esc(f.get("source", ""))
+    if not video:
+        return f'<p class="prs-src">{still}</p>'
+    host = re.sub(r"^https://", "", video["page"]).split("/")[0]
+    return (f'<p class="prs-src"><span class="prs-cap-still">{still}</span>'
+            f'<span class="prs-cap-reel">{c.esc(video["source"])} · '
+            f'<a href="{c.esc(video["page"])}" rel="noopener" target="_blank">'
+            f'{c.esc(host)}</a></span></p>')
+
+
+def _figure(f: dict, video: dict | None = None) -> str:
+    """A paper's own figure, on a card of its own.
+
+    The card is the paper's page: its figures are drawn on white, and a
+    figure set straight onto a dark frame is a white slab with no edge. On the
+    card the white is the card's ground, so in either theme the figure reads as
+    a page laid on the slide rather than a hole cut in it.
+
+    `crop` shows one region of the figure alone — the panel a multi-panel
+    figure makes its point in — as `object-view-box`, which changes the
+    image's own proportions to the region's, so the card is sized to the
+    panel rather than to the whole page. A browser without it shows the whole
+    figure, which is the figure the `source` names.
+    """
+    crop = (f' style="object-view-box: inset({c.esc(_inset(f["crop"]))})"'
+            if f.get("crop") else "")
+    img = (f'<img src="{c.esc(f.get("url", ""))}" '
+           f'alt="{c.esc(f.get("caption", ""))}"{crop}')
+    if video:
+        return _reel(img, video)
+    return f'<figure class="prs-fig">{img}></figure>'
+
+
+def _reel(img: str, v: dict) -> str:
+    """The paper's figure, with the authors' own clip of the same scene over it.
+
+    The figure is not a poster thrown away once the clip loads: it is the
+    slide. The clip is drawn over it only once `presentation.js` has frames
+    for every clip, so one that cannot load — a codec the browser lacks, a host
+    the room's network blocks, a page that moved — leaves the slide exactly as
+    it would be without one, and so does a printout or a browser with no
+    script. `data-src` rather than `src`: nothing is fetched until the talk is
+    a slide away. No `loop`: a pair restarts together from the first clip's
+    end, so its two sides never drift apart one loop at a time.
+    """
+    clips = "".join(
+        f'<div class="prs-clip">'
+        + (f'<span class="prs-cliplab">{inline(cl["label"])}</span>' if cl.get("label") else "")
+        + f'<video muted playsinline preload="none" data-src="{c.esc(cl["src"])}" '
+          f'aria-label="{c.esc(cl.get("label") or v["source"])}"></video></div>'
+        for cl in v["clips"])
+    return (f'<figure class="prs-fig prs-reel" data-reel>'
+            f'{img} class="prs-still">'
+            f'<div class="prs-clips" style="--n:{len(v["clips"])}">{clips}</div>'
+            f'<div class="prs-rctl">'
+            f'<button type="button" class="prs-rbtn" data-reel-toggle '
+            f'aria-label="재생 / 일시정지" title="재생 / 일시정지 (K)">'
+            f'{c.icon("pause", 14)}{c.icon("play", 14)}</button>'
+            f'<button type="button" class="prs-rbtn prs-rate" data-reel-rate '
+            f'aria-pressed="false" aria-label="느리게" title="½ 배속 (S)">½×</button>'
+            f'</div></figure>')
+
+
+def _inset(crop: str) -> str:
+    """`crop` as the `inset()` it becomes — top, right, bottom, left, in
+    percent of the image, the same shorthand CSS takes."""
+    return " ".join(crop.split())
 
 
 def _cover_art(f: dict) -> str:
     """The cover's figure, bled to the edge of the frame.
 
-    Everywhere else a figure sits inside the frame with its caption under it,
-    because the slide is arguing with it. Here it is not evidence — it is what
-    the room looks at while the talk starts, and the half of the frame it takes
-    is most of why a title slide reads as one. The caption goes over the image
-    for the same reason: the composition has no row left to give it.
+    Everywhere else a figure sits on its own card, sized to its shape, with
+    the line that argues with it beside or under it. Here it is not evidence — it is what the room looks at while the talk
+    starts, and the share of the frame it takes is most of why a title slide
+    reads as one. The provenance goes over the image for the same reason: the
+    composition has no column left to give it. The crop to a tall column is
+    centred on `focus` — the point of the image that has to survive it, as an
+    `object-position` — because only the author knows where the apparatus is.
+    `focus` only pans: a figure whose photograph shares its image with other
+    panels or with the paper's own caption text takes `crop` first, as on any
+    figure, and the column is then filled from the cropped region alone.
+
+    No image on a slide is loaded lazily. Every slide but one is hidden, and a
+    hidden image deferred until its slide is shown arrives while the room is
+    already looking at the empty frame.
     """
-    return (f'<div class="prs-art"><img src="{c.esc(f.get("url", ""))}" alt="" '
-            f'loading="lazy">'
-            f'<p class="prs-artcap">{c.esc(f.get("caption", ""))}'
-            f'<span>{c.esc(f.get("source", ""))}</span></p></div>')
-
-
-def _figure(f: dict) -> str:
-    return (f'<figure class="prs-fig">'
-            f'<img src="{c.esc(f.get("url", ""))}" alt="" loading="lazy">'
-            f'<figcaption><b>{c.esc(f.get("source", ""))}</b> '
-            f'{c.esc(f.get("caption", ""))}</figcaption></figure>')
+    rules = []
+    if f.get("crop"):
+        rules.append(f"object-view-box: inset({_inset(f['crop'])})")
+    if f.get("focus"):
+        rules.append(f"object-position: {f['focus']}")
+    style = f' style="{c.esc("; ".join(rules))}"' if rules else ""
+    return (f'<div class="prs-art"><img src="{c.esc(f.get("url", ""))}" '
+            f'alt="{c.esc(f.get("caption", ""))}"{style}>'
+            f'<p class="prs-artcap">{c.esc(f.get("source", ""))}</p></div>')
 
 
 def _diagram(d: dict) -> str:
@@ -512,7 +878,13 @@ def _diagram(d: dict) -> str:
     The shape of a paper that moved where a signal goes. It is drawn rather
     than quoted because the paper's own concept figure carries the whole model
     and this is one scene out of it; `why` says which figure that is and what
-    this one leaves out, and the build refuses the fence without it.
+    this one leaves out, and the build refuses the fence without it. The
+    `why` closes the speaker essay rather than sitting under the drawing — see
+    `_whys`.
+
+    The fork is `prs-fork` rather than anything spelled like a slide type:
+    every slide carries `prs-<type>`, and a diagram class that shares a type's
+    name restyles the whole frame of that type.
     """
     def box(b: dict) -> str:
         note = f'<span>{inline(b["note"])}</span>' if b.get("note") else ""
@@ -531,7 +903,7 @@ def _diagram(d: dict) -> str:
 
     before = '<i class="prs-arw">→</i>'.join(box(b) for b in d["before"]["chain"])
     a = d["after"]
-    after = (f'<div class="prs-split"><div class="prs-lanes">'
+    after = (f'<div class="prs-fork"><div class="prs-lanes">'
              f'{box(a["slow"])}{box(a["fast"])}</div>'
              f'<div class="prs-merge"><svg viewBox="0 0 40 100" '
              f'preserveAspectRatio="none" aria-hidden="true" focusable="false">'
@@ -543,123 +915,96 @@ def _diagram(d: dict) -> str:
             f'{inline(d["before"]["label"])}</span>'
             f'<div class="prs-chain">{before}</div></div>'
             f'<div class="prs-drow"><span class="prs-dlab hot">'
-            f'{inline(a["label"])}</span>{after}</div>'
-            f'<p class="prs-why">{inline(d["why"])}</p></div>')
+            f'{inline(a["label"])}</span>{after}</div></div>')
 
 
 def _budget(b: dict) -> str:
     """Where one call goes, against the time there is to spend it.
 
     A duration means nothing on its own: 140 ms is a number until it is put
-    beside the 20 ms tick it has to fit inside. So the budget is two bars on one
-    scale — what the call costs, and what one turn of the control loop affords —
-    and the control period is drawn across the first as well, so the count is
-    something the room reads off the bar rather than something the bar claims.
+    beside the 20 ms tick it has to fit inside. So the call is one bar, and
+    under it the control loop is drawn on the same scale as the cells it
+    actually is — numbered, with the one cell the loop affords in the accent —
+    so the count is something the room reads off the drawing rather than
+    something the drawing claims. Each segment carries its own name, and what
+    it is sits directly under it, so there is no legend to cross-reference.
     """
     total = sum(p["ms"] for p in b["항목"])
     per = b["제어주기"]
     segs = "".join(
         f'<div class="prs-seg prs-g{i}" style="--w:{p["ms"] / total * 100:.2f}%">'
-        f'<span>{p["ms"]:g}</span></div>' for i, p in enumerate(b["항목"]))
-    # Interior ticks only: the two ends are the bar's own edges, and a hairline
-    # drawn over a border reads as a thicker border.
-    ticks = "".join(
-        f'<i style="--x:{x / total * 100:.2f}%"></i>'
-        for x in range(int(per["ms"]), int(total), int(per["ms"])))
-    keys = "".join(
-        f'<li><i class="prs-sw prs-g{i}"></i>'
-        f'<span class="prs-ktext">{inline(p["label"])}'
-        + (f'<span>{inline(p["note"])}</span>' if p.get("note") else "")
-        + f'</span><b>{p["ms"]:g} ms</b></li>'
+        f'<b>{p["ms"]:g}<small> ms</small></b><span>{inline(p["label"])}</span></div>'
         for i, p in enumerate(b["항목"]))
+    notes = "".join(
+        f'<p style="--w:{p["ms"] / total * 100:.2f}%">{inline(p.get("note", ""))}</p>'
+        for p in b["항목"])
+    # One cell per control period the call spans; a remainder is a cell cut
+    # short, so the row ends where the bar ends rather than on a round number.
+    cells, x, n = "", 0.0, 0
+    while x < total - 1e-9:
+        w = min(per["ms"], total - x)
+        n += 1
+        on = ' class="on"' if n == 1 else ""
+        cells += (f'<i{on} '
+                  f'style="--w:{w / total * 100:.2f}%"><em>{n}</em></i>')
+        x += w
+    count = total / per["ms"]
+    # The clock is provenance, so it opens the provenance line the way it
+    # does under a chart, rather than riding in the cells' legend a second
+    # time beside the source that names the same section.
+    clock = (f'<span class="pc-clock">{c.esc(b["clock"])}</span>'
+             if b.get("clock") else "")
+    count_s = f"{count:g}" if count == int(count) else f"{count:.1f}"
     return (
-        f'<div class="prs-bud"><div class="prs-bgroup">'
-        f'<div class="prs-brow"><span class="prs-blab">{c.esc(b.get("이름", ""))}</span>'
-        f'<div class="prs-bmeter"><div class="prs-bbar">{segs}</div>'
-        f'<div class="prs-bticks" aria-hidden="true">{ticks}</div></div>'
-        f'<b>{total:g} ms</b></div>'
-        f'<div class="prs-brow"><span class="prs-blab">{c.esc(per["label"])}</span>'
-        f'<div class="prs-bmeter"><div class="prs-bbar prs-btick" '
-        f'style="--w:{per["ms"] / total * 100:.2f}%"></div></div>'
-        f'<b>{per["ms"]:g} ms</b></div>'
-        f'<p class="prs-bfoot">{total:g} ms = {c.esc(per["label"])} '
-        f'{total / per["ms"]:.1f} 칸</p></div>'
-        f'<ul class="prs-keys">{keys}</ul></div>')
+        f'<div class="prs-bud">'
+        f'<p class="prs-bcap"><span>{c.esc(b.get("이름", ""))}</span>'
+        f'<b>{total:g}<small> ms</small></b></p>'
+        f'<div class="prs-bbar">{segs}</div>'
+        f'<div class="prs-bnotes">{notes}</div>'
+        f'<div class="prs-bcells">{cells}</div>'
+        f'<p class="prs-bfoot"><span><i></i>{c.esc(per["label"])} 한 칸 · '
+        f'{per["ms"]:g} ms</span><b>{count_s}<small> 칸</small></b></p>'
+        + (f'<p class="prs-src">{clock}{c.esc(b.get("출처", ""))}</p>'
+           if b.get("출처") or clock else "")
+        + '</div>')
 
 
-def _timing(t: dict) -> str:
-    """Several rows on one time ruler, with the control period as its ticks."""
-    span = t["span_ms"]
-    per = t["제어주기"]["ms"]
-    ticks = "".join(
-        f'<i style="--x:{x / span * 100:.2f}%"></i>'
-        for x in range(0, int(span) + 1, int(per)))
-    rows = ""
-    for row in t["줄"]:
-        blocks = "".join(
-            f'<div class="prs-blk prs-{b.get("kind", "wait")}" '
-            f'style="--x:{b["at"] / span * 100:.2f}%;'
-            f'--w:{b["ms"] / span * 100:.2f}%">'
-            f'<span>{inline(b["label"])}</span></div>' for b in row["blocks"])
-        mark = ""
-        if row.get("mark"):
-            mk = row["mark"]
-            mark = (f'<div class="prs-mk{" us" if mk.get("us") else ""}" '
-                    f'style="--x:{mk["at"] / span * 100:.2f}%">'
-                    f'<b>{inline(mk["label"])}</b></div>')
-        rows += (f'<div class="prs-row"><span class="prs-rname">'
-                 f'{inline(row["name"])}</span>'
-                 f'<div class="prs-lane">{ticks}{blocks}{mark}</div></div>')
-    axis = "".join(f'<span style="--x:{x / span * 100:.2f}%">{x:g}</span>'
-                   for x in (0, span / 2, span))
-    return (f'<div class="prs-tim">{rows}'
-            f'<div class="prs-row"><span class="prs-rname"></span>'
-            f'<div class="prs-axis">{axis}</div></div>'
-            f'<p class="prs-tnote">세로선 한 칸이 '
-            f'{c.esc(t["제어주기"]["label"])} — {per:g} ms</p></div>')
+def _notes(data: dict) -> list[tuple[str, str]]:
+    """What closes the speaker essay: the paper figure's caption, the authors'
+    clip's caption and where it is published, and the `why` of every figure
+    the slide draws for itself.
 
-
-def _lineage(l: dict) -> str:
-    """What this paper is downstream of.
-
-    Every value here — the date, the name, what each prior gave — is one the
-    rewrite already carries, so nothing is invented in the drawing. What the
-    drawing adds is the convergence: a list states publication order, and the
-    point of the slide is that these lines meet here.
-
-    The merge is cut for however many priors there are rather than for two, so
-    a lineage of three does not have one line arriving from nowhere.
+    The caption says what the figure shows, panel by panel; the slide already
+    carries the one line of what to see in it, so the caption is the
+    presenter's to walk the room through rather than a paragraph under the
+    figure set too small to read. The `why` is the answer to "is that in the
+    paper?" — which of the paper's figures covers this ground and what the
+    drawing strips out — and that answer is the presenter's to give when
+    asked.
     """
-    items = l["items"]
-    n = len(items)
-    priors = "".join(
-        f'<div class="prs-node"><span class="prs-when">{c.esc(a["when"])}</span>'
-        f'<b>{inline(a["what"])}</b>'
-        f'<span class="prs-nnote">{inline(a["gave"])}</span></div>'
-        for a in items)
-    paths = "".join(
-        f'<path d="M0 {(i + .5) / n * 100:.1f} '
-        f'C22 {(i + .5) / n * 100:.1f}, 22 50, 40 50"/>' for i in range(n))
-    me = l["me"]
-    return (f'<div class="prs-lin"><div class="prs-priors">{priors}</div>'
-            f'<div class="prs-join"><svg viewBox="0 0 40 100" '
-            f'preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-            f'{paths}</svg></div>'
-            f'<div class="prs-node hot">'
-            f'<span class="prs-when">{c.esc(me["when"])}</span>'
-            f'<b>{inline(me["what"])}</b>'
-            f'<span class="prs-nnote">{inline(me["gave"])}</span></div></div>')
+    out = []
+    fig = data.get("figure")
+    if isinstance(fig, dict) and str(fig.get("caption", "")).strip():
+        out.append(("그림", str(fig["caption"])))
+    vid = data.get("video")
+    if isinstance(vid, dict):
+        out.append(("영상", f'{vid["caption"]} — {vid["source"]}, {vid["page"]}'))
+    out += [("그린 그림", str(data[f]["why"]))
+            for f in ("diagram", "timing", "chart", "heat") + charts.LINEAGE
+            if isinstance(data.get(f), dict) and str(data[f].get("why", "")).strip()]
+    return out
 
 
-def _script(text: str, of: str) -> str:
+def _script(text: str, of: str, notes: list[tuple[str, str]] | None = None) -> str:
     """The speaker essay, right after the slide it belongs to.
 
     Without a script every essay sits under its slide, which is the talk read
     as a document. While the tab is browsed it stays hidden until 노트 asks for
     it — inline under the frame, or in the presenter's second window once the
     talk is on a stage. It carries no fact the slide does not show — a number
-    worth saying is in the ribbon or in an item's second register, and the
-    essay points at it.
+    worth saying is on the slide, in a figure, an item's second register or
+    the ribbon, and the essay points at it. It closes on the paper figure's
+    caption and the `why` of every figure the slide drew for itself (`_notes`).
 
     `data-for` names the slide, so the surfaces that show one essay at a time —
     the notes toggle and the presenter's window — ask for the essay *of this
@@ -671,5 +1016,7 @@ def _script(text: str, of: str) -> str:
         return ""
     paras = "".join(f"<p>{inline(p.replace(chr(10), ' '))}</p>"
                     for p in text.strip().split("\n\n") if p.strip())
+    paras += "".join(f'<p class="prs-drawwhy"><b>{c.esc(k)}</b> — {inline(w)}</p>'
+                     for k, w in notes or [])
     return (f'<div class="prs-script" data-for="{c.esc(of)}">'
             f'<h4>말할 것</h4>{paras}</div>')

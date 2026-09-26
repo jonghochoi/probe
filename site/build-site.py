@@ -62,7 +62,7 @@ from builder.render import DocRenderer
 
 
 def build(args) -> int:
-    papers, problems = corpus.discover()
+    papers, problems = corpus.discover(partial=bool(args.only))
 
     if args.only:
         papers = [p for p in papers if p.stem in args.only]

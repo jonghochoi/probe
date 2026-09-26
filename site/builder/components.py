@@ -93,6 +93,10 @@ _ICON_PATHS = {
               '<path d="M8 1.1v1.7M8 13.2v1.7M1.1 8h1.7M13.2 8h1.7"/>'),
     "prev": '<path d="M9.9 3.3 5.1 8l4.8 4.7"/>',
     "next": '<path d="M6.1 3.3 10.9 8l-4.8 4.7"/>',
+    # A slide's clip. The button carries both and the stylesheet shows the one
+    # the clip's own state calls for.
+    "play": '<path d="M5 3.2v9.6L12.6 8Z"/>',
+    "pause": '<path d="M5.6 3.4v9.2M10.4 3.4v9.2"/>',
 }
 
 
