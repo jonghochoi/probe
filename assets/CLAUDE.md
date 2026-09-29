@@ -14,7 +14,7 @@ their colours.
 |---|---|
 | `hero.svg` (880×330) | The front door, and the link to the reading site. The headline, the claim and the button on the left; on the right, one 25 s cycle in two scenes — the flood, then the reader |
 | `own.svg` (880×204) | The picture under How it works — who writes what: you and `context/`, the probe that reads it, and the four folders it writes |
-| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons in the first column of the How-it-works table |
+| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons, each before its track's name in the How-it-works table |
 | `build-art.py` | Generates `hero`, `own` and `probe-ideation`. The four other track icons are hand-authored |
 
 ## Drawing rules
@@ -57,6 +57,12 @@ bands light as a talk advances, one listener in front on the left, cut by the
 bottom edge), and `probe-ideation.svg` thinks (pupils up at a thought whose
 dots light in turn). A new track needs a new outline, not a variation on one
 of these.
+
+**An icon shares its track's cell, never a column of its own.** A table
+column that holds only an image has no minimum width — GitHub caps every image
+at `max-width: 100%` — so when the page is narrower than the table, the
+browser squeezes that column first and the icons shrink to nothing. Beside the
+track's name, the name holds the cell open.
 
 **Animation is inlined and stays in step with the site.** A README image
 carries no external stylesheet, so every motion lives in the file's own
