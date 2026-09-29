@@ -22,7 +22,7 @@ that folder's own `CLAUDE.md`, next to the code it governs:
 |---|---|
 | `CLAUDE.md` (this file) | the whole repo — commits, contributor docs, the checks |
 | `context/CLAUDE.md` | `context/` — who may edit it, the Decision-Log entry format, adding a pillar |
-| `assets/CLAUDE.md` | `assets/` — the README images, the character and its moods, `build-flow.py` |
+| `assets/CLAUDE.md` | `assets/` — the README images, the character and its moods, `build-art.py` |
 | `site/CLAUDE.md` | `site/` — the generator's invariants and the surfaces keyed to the pillar set |
 
 Output format is a third thing, one contract per track, owned by the track and
@@ -54,8 +54,8 @@ belongs in that folder's own rule file or README, which the row points at.
 | `presentation/AUTHORING.md` | human | Format contract for `presentation/<arxiv-id>.md` — the spine, the fence schemas and the storyboard (§1), the two-register rule (§2), the word budget and the room's floor (§3), created figures, plotted results and the two lineage figures (§4), the authored line break (§5), the speaker essay (§6), enforcement (§7), motion — the authors' clip and the stepped figure (§8) |
 | `.claude/prompts/**` | human | Durable agent prompts (the repo's real asset) — `scouting.txt` (one routine instance per pillar via `<PILLAR>`), `analyze.txt`, `compare.txt`, `present.txt`, and `ideate.txt`, which writes nothing. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` — a rule restated in a prompt is a second source of truth |
 | `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, `compare.md`, `present.md`, `ideate.md` — each points its command at its prompt and, for a track that writes a file, at its `AUTHORING.md` |
-| `assets/` | human | The images the root `README.md` embeds — each a light/dark SVG pair — plus `build-flow.py`, which generates the flow diagram |
-| `assets/CLAUDE.md` | human | Rules for `assets/` — what each image is, the drawing and animation rules, the generated flow diagram |
+| `assets/` | human | The images the root `README.md` embeds — each a light/dark SVG pair — plus `build-art.py`, which generates the hero, the who-writes-what picture and the ideation icon |
+| `assets/CLAUDE.md` | human | Rules for `assets/` — what each image is, the drawing and animation rules, the hero's cycle and the who-writes-what picture |
 | `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/`, `comparison/` and `presentation/` as pages and, for agents, as `llms.txt`, `corpus.json` and per-section Markdown. Folder map: `site/README.md` |
 | `site/query.py` | human | The agent's query CLI over a checkout, standard library only — the `corpus.json` records, relations, outlines and sections, Decision-Log lookups, uncompared pairs, and `search` through the deployed endpoint |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break, and the surfaces keyed to the pillar set |
@@ -173,7 +173,7 @@ one logical area or needs context to be reviewable. When present:
 
 ## Local checks
 
-CI runs each of these on the PR except `build-flow.py --check`. Run the ones your change touches before
+CI runs each of these on the PR except `build-art.py --check`. Run the ones your change touches before
 pushing, so a red gate is not the first you hear of it.
 
 | Change touches | Command |
@@ -186,7 +186,7 @@ pushing, so a red gate is not the first you hear of it.
 | `analysis/`, `comparison/`, `presentation/` or `site/` | `python3 site/build-site.py --check --strict` for what discovery reads — front matter, the 요약 fences, a comparison's sources and fork, every presentation check — then `python3 site/build-site.py --strict --out /tmp/probe-check`, the full render, for the rewrite body rules, a comparison's fence and length rules and KaTeX (`--check` stops before any page renders) |
 | `presentation/` | `python3 linters/check-presentation-format.py` |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` hides site-packages, so it proves the standard library suffices) |
-| `assets/build-flow.py` | `python3 assets/build-flow.py --check` |
+| `assets/build-art.py` | `python3 assets/build-art.py --check` |
 | `site/search/function/` | `npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null` |
 
 The site build is the only one with dependencies:
@@ -197,15 +197,16 @@ The site build is the only one with dependencies:
 Probe docs fall into two families. The rule **codifies the existing
 convention** — it does not strip emoji.
 
-**Narrative / onboarding** — `README.md`. It opens on the **brand lockup**: the
-`<picture>` pair from `assets/` standing where an H1 would, with the project
-name as the image's `alt` so the front door still names itself as text
-everywhere the image does not. The lockup is a plain centred image rather than
-a heading because GitHub rules its own line under an H1, and the front door
-draws that line itself — `assets/rule.svg`, in the accent, right below the
-lockup. A narrative doc with no lockup of its own opens on a real `#` and may
-carry **one leading thematic emoji** right after it and a space (`# 🛸 …`) —
-exactly one, at the start, never at the end and never inside body text.
+**Narrative / onboarding** — `README.md`. It opens on the **hero**: the
+`<picture>` pair `assets/hero.svg` standing where an H1 would, linked to the
+reading site, with the project name and its lines in the image's `alt` so the
+front door still names itself as text everywhere the image does not. Below it
+the page is folded — each section a `<details>` whose `<summary>` is a bold
+name, an em dash and one line — so the first screen is the hero and the list
+of what it holds. A narrative doc with no hero of its own opens on a real `#`
+and may carry **one leading thematic emoji** right after it and a space
+(`# 🛸 …`) — exactly one, at the start, never at the end and never inside body
+text.
 
 **Reference / structural** — every `CLAUDE.md`, `scouting/SETUP.md`, the four
 `AUTHORING.md` contracts, `site/README.md` and `site/search/README.md`. Plain
@@ -215,8 +216,8 @@ name (e.g. `# analysis/`).
 
 Shared by both families:
 
-- One H1 per document — `README.md` excepted, which opens on the lockup and
-  starts its outline at H2.
+- One H1 per document — `README.md` excepted, which opens on the hero and
+  carries its outline in `<details>` summaries rather than headings.
 - **Internal consistency per level (hard rule).** Each header level is
   uniformly marked or uniformly plain — no mixing within one level in one doc.
   The canonical narrative pattern here is the mark at H1 only, plain at H2 and

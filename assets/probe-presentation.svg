@@ -12,8 +12,8 @@
 
     /* The character bobs; the screen behind does not, because a screen that
        moved with the presenter would read as held rather than stood in front
-       of. The listener breathes on `human.svg`'s own cycle — it is that
-       glyph. */
+       of. The listener breathes on the person's own cycle in `own.svg` — it
+       is that glyph. */
     .rig    { animation: bob 4.2s ease-in-out infinite; }
     .who    { animation: breathe 4.6s ease-in-out infinite; }
     /* The talk advances one band at a time, and the pupils go with it: out to

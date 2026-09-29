@@ -87,9 +87,9 @@ slide away from it.
 filter box and the ⌘K palette ask their question with; two surfaces answering
 the same query differently is a bug, not two behaviours.
 
-**`components.mark()` has copies in `assets/`.** The README's lockup, state
-icons, track icons and flow diagram redraw it with their animation
-inlined (`assets/CLAUDE.md`). Change the mark here and bring those into step.
+**`components.mark()` has copies in `assets/`.** The README's hero, track
+icons and who-writes-what picture redraw it with their animation inlined
+(`assets/CLAUDE.md`). Change the mark here and bring those into step.
 
 **Two modules serve the prompt, not the build.** `builder/arxiv.py` extracts an
 arXiv original — body and appendix, figures, tables — and raises `Unavailable`

@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="204" viewBox="0 0 880 204" role="img" aria-label="Who writes what: you write context/, and PROBE reads it and writes scouting/, analysis/, comparison/ and presentation/. Changes to context/ come to you as proposals.">
+  <style>
+    .hull   { fill: #D97757; }
+    .iris   { fill: #FFFAF7; }
+    .pupil  { fill: #2A1A12; }
+    .stalk  { stroke: #CC785C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .beacon { fill: #CC785C; }
+    .page   { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; }
+    .line   { fill: #B06749; opacity: .3; }
+    .shadow { fill: #CC785C; opacity: .45; }
+    .dim    { fill: #C4B6AE; }
+    .dimst  { stroke: #B3A49B; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .dimbe  { fill: #B3A49B; }
+    .cross  { fill: none; stroke: #6B5A50; stroke-width: 3.2; stroke-linecap: round; }
+    .mug    { fill: #FFFAF7; stroke: #B06749; stroke-width: 2; stroke-linejoin: round; }
+    .handle { fill: none; stroke: #B06749; stroke-width: 2.4; stroke-linecap: round; }
+    .brew   { fill: #B06749; }
+    .steam  { fill: none; stroke: #CC785C; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
+    .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .lid    { transform-box: fill-box; transform-origin: 50% 50%;
+              animation: blink 7s ease-in-out infinite; }
+    .readp  { animation: read 3.6s ease-in-out infinite; }
+    .l1     { animation: lit 4.8s ease-in-out infinite; }
+    .l2     { animation: lit 4.8s ease-in-out 1.6s infinite; }
+    .l3     { animation: lit 4.8s ease-in-out 3.2s infinite; }
+    .s1     { animation: steam 3.8s ease-in-out infinite; }
+    .s2     { animation: steam 3.8s ease-in-out 1.9s infinite; }
+    .breathe { animation: breathe 4.6s ease-in-out infinite; }
+    .drift  { transform-box: fill-box; transform-origin: 50% 100%;
+              animation: drift 4.6s ease-in-out infinite; }
+    @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
+    @keyframes read  { 0% { transform: translateX(-2.4px); } 72% { transform: translateX(2.4px); }
+                       86%, 100% { transform: translateX(-2.4px); } }
+    @keyframes lit   { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
+    @keyframes steam { 0% { opacity: 0; transform: translateY(2px); } 30%, 55% { opacity: .7; }
+                       100% { opacity: 0; transform: translateY(-6px); } }
+    @keyframes drift { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px); } }
+
+    .mine  { fill: #FFFCFA; stroke: #D97757; stroke-width: 1.2; }
+    .matte { fill: none; stroke: #F2DFD3; stroke-width: 1; }
+    .row   { fill: #FFFCFA; stroke: #E8CDBD; stroke-width: 1.2; }
+    .eb    { fill: #B06749; font: 9.5px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 1.8px; }
+    .p     { fill: #1F1611; font: 700 13px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .ps    { fill: #7A6A60; font: 11px ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; }
+    .note  { fill: #7A6A60; font: 12.5px system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    .wire  { fill: none; stroke: #D97757; stroke-width: 1.6; stroke-dasharray: 4 5;
+             animation: march 1.2s linear infinite; }
+    .head  { fill: #D97757; }
+    @keyframes march { to { stroke-dashoffset: -18; } }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+<g transform="translate(39.4 0)"><text class="eb" x="116" y="42">YOU WRITE</text>
+  <g transform="translate(20 70.0) scale(0.8)">
+    <ellipse class="shadow" cx="48" cy="90" rx="18" ry="4"/>
+    <g class="breathe"><circle class="hull" cx="48" cy="33" r="14.5"/>
+    <path class="hull" d="M21 76 a27 27 0 0 1 54 0 Z"/></g></g>
+  <rect class="mine" x="116" y="52" width="196" height="112" rx="10"/>
+  <rect class="matte" x="121" y="57" width="186" height="102" rx="7"/>
+  <text class="p" x="136" y="96.0">context/</text>
+  <text class="ps" x="136" y="118.0">MASTER.md</text>
+  <text class="ps" x="136" y="136.0">P#.md, one per pillar</text>
+  <path class="wire" d="M332 108.0 H401.3"/><path class="head" d="M409.3 108.0 l-8 -4.5 v9 Z"/>
+  <text class="note" x="370.65" y="98.0" text-anchor="middle">reads</text>
+  <g transform="translate(412 61.0) scale(0.9)">
+    <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
+      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
+      <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="36" cy="56.5" r="5"/></g></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="60" cy="56.5" r="5"/></g></g>
+      <g transform="rotate(-5 48 75.5)">
+        <rect class="page" x="25" y="67" width="46" height="17" rx="3"/>
+        <rect class="line l1" x="31" y="70.6" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l2" x="31" y="74.4" width="34" height="2.2" rx="1.1"/>
+        <rect class="line l3" x="31" y="78.2" width="22" height="2.2" rx="1.1"/>
+      </g>
+    </g>
+  </g>
+  <text class="eb" x="519.1" y="42">PROBE WRITES</text>
+  <rect class="mine" x="519.1" y="52" width="262" height="112" rx="10"/>
+  <rect class="row" x="528.1" y="61" width="244" height="21" rx="5"/>
+  <text class="p" x="539.1" y="76">scouting/</text>
+  <text class="ps" x="761.1" y="76" text-anchor="end">scheduled</text>
+  <rect class="row" x="528.1" y="86" width="244" height="21" rx="5"/>
+  <text class="p" x="539.1" y="101">analysis/</text>
+  <text class="ps" x="761.1" y="101" text-anchor="end">on demand</text>
+  <rect class="row" x="528.1" y="111" width="244" height="21" rx="5"/>
+  <text class="p" x="539.1" y="126">comparison/</text>
+  <text class="ps" x="761.1" y="126" text-anchor="end">on demand</text>
+  <rect class="row" x="528.1" y="136" width="244" height="21" rx="5"/>
+  <text class="p" x="539.1" y="151">presentation/</text>
+  <text class="ps" x="761.1" y="151" text-anchor="end">on demand</text>
+  <text class="note" x="400.55" y="190" text-anchor="middle">It reads context/ and never writes it. Changes come to you as proposals.</text></g>
+</svg>

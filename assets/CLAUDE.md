@@ -8,172 +8,101 @@ are in the root `CLAUDE.md`.
 
 Every image is a light/dark pair (`<name>.svg` + `<name>-dark.svg`) selected by
 `<picture>` + `prefers-color-scheme`, and the two files of a pair differ only in
-their `<style>` block.
+their colours.
 
 | File | Role |
 |---|---|
-| `wordmark.svg` | The brand lockup opening the README — the probe reading its one paper with a coffee beside it, until it nods off over the page |
-| `rule.svg` | The accent hairline under the lockup — one brand gradient fading out at both ends, and the only divider between the lockup and the three lines |
-| `claim.svg` | The middle of the front door's three lines, set in the accent |
-| `reading-site.svg` | The reading-site banner |
-| `probe-lost.svg`, `probe-locked.svg` | The two state icons heading the Why-PROBE comparison columns — out of it (dimmed hull, drooping beacon, crossed-out eyes) and on target (clay hull, a beacon under signal arcs, smiling eyes) |
-| `human.svg` | The author bust standing for the human in the *Written by* column of the folder table under How it works |
-| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg` | The four track icons filling the agent's cells in that same column |
-| `flow.svg` (880×348) | The How-it-works flow diagram — `context/` dropping into the run, the day's arXiv narrowing through the filter into the mark, and out to the scouting card and the on-demand card |
-| `build-flow.py` | Generates both flow files from one set of coordinates |
+| `hero.svg` (880×330) | The front door, and the link to the reading site. The headline, the claim and the button on the left; on the right, one 25 s cycle in two scenes — the flood, then the reader |
+| `own.svg` (880×204) | The picture under How it works — who writes what: you and `context/`, the probe that reads it, and the four folders it writes |
+| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons in the first column of the How-it-works table |
+| `build-art.py` | Generates `hero`, `own` and `probe-ideation`. The four other track icons are hand-authored |
 
 ## Drawing rules
 
 **Text is live `<text>`.** Every file is SVG whose text is real text, so the
-fonts are stacks (`ui-monospace`, `system-ui`) and the layout is left-aligned to
-tolerate the substitution. `claim.svg` is the one that centres instead: the
-README centres the image, so the sentence is anchored at the middle of a box
-wide enough to absorb a wider face and grows evenly into it.
+fonts are stacks (`ui-monospace`, `system-ui`) and every run is anchored with
+room to spare, so a wider substituted face grows into space rather than into
+its neighbour. An image that carries text repeats it in `aria-label` and in the
+`alt` the README embeds it with.
 
-**The accent carries one line, and the README carries the rest as text.**
-Markdown cannot colour a word, so the front door's claim is an image while the
-hook above it and the invitation below it stay live text — which is also what
-keeps the emphasis single. A second coloured line would leave the trio with no
-middle. `claim.svg` repeats its sentence in `aria-label` and in the `alt` the
-README embeds it with, so the line still reads where the image does not.
+**Rectangles are files.** A card in the feed is a paper, a row in `own.svg` is a
+folder, a frame holds files. The one rounded shape that is not a file is the
+hero's button, and it is a pill so it cannot be read as one.
 
-**Rectangles are files and only files.** Nothing else earns a box — a stage is
-drawn as a funnel, an act as a wire.
-
-**Every card sits on the same ground, and the accent draws the edge a reader
-meets first.** The two cards the README embeds — `reading-site.svg`
-and `flow.svg` — share one fill (`#FFFCFA` light, `#211C19` dark)
-and one outline, the accent (`#D97757`, `#E8916F`) that the reading-site card's
-own arrow already carries. A card tinted toward the accent reads as a different
-kind of object rather than a louder one, so the ground never carries the
-emphasis — the edge does. What the edge marks is depth rather than affordance: a
-card standing on the README's own page takes the accent, and a card drawn inside
-one of those images does not, so the outlines read as one set of panels rather
-than unrelated boxes. Every card inside `flow.svg` keeps the neutral
-`#E8CDBD` / `#3D3129`, where a border is a card's boundary and says nothing
-else; the paler `WASH` is the funnel's, not a card's.
-
-**A mark cell is the mark alone.** In the folder table under How it works the word a cell
-stands for rides in the image's `alt`, so the column still reads where the
-images do not.
+**The accent draws the edge a reader meets first.** A frame standing on the
+README's own page — the hero's card, the two frames in `own.svg` — takes the
+accent (`#D97757`, `#E8916F`) over the shared card ground (`#FFFCFA`,
+`#211C19`). A shape inside a frame keeps the neutral border (`#E8CDBD`,
+`#3D3129`). `context/`'s frame also carries a hairline just inside its edge:
+the one set of files the agent may not write, held in a matte.
 
 **The character's parts carry meaning, so they are not mixed.** Eyes belong to
-the character alone — `human.svg` is the same clay and the same shadow with no
-face and no beacon. Each track icon shows one character doing that track's own
-work: `probe-scouting.svg` sweeps (signal arcs pinging over the beacon, a scan
-band crossing the hull, the pupils tracking it), `probe-analysis.svg` reads (no
-arcs, one wide page held under the eyes, its lines lighting one after another
-and the pupils down on them), `probe-comparison.svg` weighs (two narrower pages
-riding up and down against each other like the pans of a scale, the raised one's
-lines lit and the eyes turned to it), and `probe-presentation.svg` presents (a screen
-standing behind, up and to the right so the character is beside it rather than
-under it, its bands lighting one after another as a talk advances, and one
-listener in front on the left — cut by the bottom edge, the way a front row
-is). The moving pages are what tell the weighing apart from the read, since the
-pupils and the lit lines do the same thing in both.
+the probe alone. The person in `own.svg` — and the listener in
+`probe-presentation.svg`, the same glyph scaled — is the probe's clay and
+shadow with no face and no beacon, and breathes on its own 4.6 s cycle rather
+than the probe's bob. The out-of-it probe is the same character dimmed, its
+beacon drooping and its eyes crossed; the only thing its eyes do is pulse, the
+two a half beat apart. A prop is placed, never gripped: a handless probe holds
+nothing, so the page rides under its eyes and the mug stands on the ground
+beside it.
 
-**The lockup reads too, and the mug is what sets it apart.** It holds the same
-page with the same lit lines as `probe-analysis.svg`; what separates the two is
-the mug and the doze the lockup ends in. The coffee belongs to the front door
-alone, where the invitation is to take the read at a coffee's pace. A track icon
-shows its track working; only the front door is allowed to lose the fight with
-the paper, so neither the mug nor the doze follows the character into a table
-cell.
+**Each track icon shows its track working, and its outline is what does the
+work.** At the 26 px a table cell gives them, the only thing that survives is
+the shape around the face: `probe-scouting.svg` sweeps (signal arcs over the
+beacon, a scan band crossing the hull, pupils tracking it), `probe-analysis.svg`
+reads (one wide page under the eyes, its lines lighting in turn),
+`probe-comparison.svg` weighs (two pages riding up and down like the pans of a
+scale), `probe-presentation.svg` presents (a screen up and to the right whose
+bands light as a talk advances, one listener in front on the left, cut by the
+bottom edge), and `probe-ideation.svg` thinks (pupils up at a thought whose
+dots light in turn). A new track needs a new outline, not a variation on one
+of these.
 
-`probe-presentation.svg` departs from the other three track icons in two ways.
+**Animation is inlined and stays in step with the site.** A README image
+carries no external stylesheet, so every motion lives in the file's own
+`<style>`, and `prefers-reduced-motion` stops all of it. The character is
+`site/builder/components.py`'s `mark()` redrawn: change `mark()` and these
+change with it.
 
-**Its outline is what does the work.** At the 22 px a table cell gives these,
-the only thing that survives is the **shape below the face** — one page for the
-read, two with a gap for the weighing, none for the sweep. A tilt, an inner
-rule or a pupil direction is gone at that size, so a fourth track needs a
-fourth outline: here the screen breaks the silhouette upward on the right and
-the listener breaks it downward on the left, and neither is a variation on the
-block the other three share. Nothing hangs under the chin at all, which is what
-makes this one legible beside `probe-analysis.svg` in a column.
+## The hero
 
-**It is the one icon with a second character**, and that is the point rather
-than an exception: reading and weighing are things one character does alone,
-and presenting is not. The listener is `human.svg` scaled — the same head
-radius over the same semicircle torso — rather than a new shape, so the room
-this track speaks to is the same human `human.svg` stands for in the folder
-table under How it works. It breathes on that file's own cycle, and only the
-character bobs: a screen that moved with the presenter would read as held
-rather than stood in front of, which is the one thing this icon is not saying.
+The right half runs one 25 s cycle in two scenes, so the contrast the Why
+table draws is on the first screen.
 
-**A prop is placed, never gripped.** A handless probe holds nothing: the page
-rides under the eyes and the mug stands on the ground beside the hull, outside
-the bob that lifts the character off it.
+- **The flood, 0–34 %.** The out-of-it probe, while loose papers fall where
+  the feed will stand — never on the probe — under the label
+  `arXiv · 50–100 A DAY`.
+- **The reader, 40–96 %.** The probe reading with its coffee, and the feed,
+  under `PROBE · 3–5 A WEEK`. The feed fades in with the reader, so nothing
+  is picked while the probe is out of it.
 
-**Animation is inlined and stays in step with the site.** The lockup, the two
-state icons, the four track icons and the flow diagram
-redraw `site/builder/components.py`'s `mark()` with their animation inlined,
-since a README image carries no external stylesheet. The lockup runs the full
-cycle — bob, and a mood swap between reading and dozing off: pupils down and
-scanning the page's lines as they light in turn, then closed lids, a snore
-bubble at the nose and three `z`s drifting off the hull. The blink lives in the
-same 14 s cycle, keyed to the reading half, so nothing squashes an eye that is
-already shut, and the mug steams outside it — the coffee goes cold at the same
-rate whether the reader is awake or not. Signal arcs belong to the images that
-hail (`probe-scouting.svg`, `probe-locked.svg`) and not to the front
-door, which shows one thing: the read. A beacon hailing over a sleeping reader
-reads as an alarm going off. Every icon holds one mood instead: the state pair
-fixed, the four track icons each moving through the one thing its own track does. Change
-`mark()` and these change with it, second mood apart: the site smiles, the
-lockup dozes.
+A card is marked where it crosses a reading line halfway down the window, and
+nothing is drawn at that line: the card lights and a ring spreads from its dot.
+Which rows are marked is chosen from the geometry: each picked row starts below
+the line, so the feed fades in unmarked; the copy scrolling in behind never
+reaches the line within a cycle, so the loop joins without a card changing
+state; and the last marked card has left the window before the flood returns.
+Moving the line, the rows or the speed moves these keyframes, which is why the
+hero is generated.
 
-## The flow diagram
+The count lives in the label because it belongs to the scene: a count line
+standing under both scenes would show the result while the probe is still
+drowning.
 
-`flow.svg` is the one image generated rather than hand-edited. `build-flow.py`
-writes both files from one set of coordinates and `--check` fails when they
-drift from it, because moving any of its twenty-odd elements drags the wires,
-arrowheads and keyframes pointing at it. Edit the script, never the SVG.
+## Who writes what
 
-Its right column is two shapes, one per cadence — the scheduled card and the
-on-demand card — and both are built by one `card()`: a header naming the
-cadence, then the paths that share it. A new track is one more path; a
-third cadence is what would earn a third card. Nothing is ruled between the
-paths, because a divider inside an output card groups or ranks, and the only
-thing these share is the cadence already named above them. The `context/`
-card is the one that keeps a divider, and there it separates two documents a
-run reads for different reasons. That divider, the drop wire and the mark
-share one vertical axis, so the read is "both documents feed one run".
+`own.svg` is one row: you, the `context/` frame, the probe, and the frame of
+four folders. Both frames share one top and one height with their labels above
+them, you and the probe centre on the frames, and the probe stands as far from
+its folders as you do from `context/`. The one wire is `context/` into the
+probe, labelled *reads*, with room at both ends. Nothing is drawn from the
+probe to its folders — the PROBE WRITES label says it — and nothing is drawn
+back into `context/`, since the agent never writes it: the caption under the
+picture says that a change comes to you as a proposal instead. The frame names
+`P#.md`, never a count of pillars, so adding one does not date the picture.
 
-The `context/` card takes the same ground and the same border as the outputs,
-and is marked instead by a hairline ruled just inside that border. It is the
-one card the agent may not write, and a document held in a matte frame is how
-the picture says so before any label does. The hairline is a frame on the
-card, not a second box: it never encloses a file of its own, so rectangles
-stay files. The two output cards clear the `context/` card by more than the
-gap between their own edges. They overlap it horizontally, so a thin gap would
-read as one stack of three boxes rather than an input and two outputs.
+## Generating
 
-The drawing ends at those two cards. It runs arXiv to files and stops: what a
-reader does with a report is a decision rather than a file, and a wire drawn
-back into `context/` would end the agent's own arrow at the one folder the
-agent may not write.
-
-Every wire is one drawing: the same accent, the same march, and the same gap
-off whatever it leaves. A wire says a hand-off happened, never whose hand —
-that is the cards' to say. Drawn weaker than its neighbours, a wire reads as a
-weaker hand-off rather than a different owner.
-
-The picking cycle earns every state it shows, in this order: a uniform field,
-a scan band that marks six as it passes their column, six dispatched toward
-the filter, three culled inside it — each stays a circle, turns from the
-accent to the muted ink and fades out as it drifts to a halt — three landed in
-the kept column. Nothing is marked before the scan reaches it and nothing sits
-at its destination before it travels.
-
-A path on a card is set in two registers, because it is two things. The folder
-is the track a reader is scanning for, and the rest is a filename pattern; set
-alike they read as one wall of bold, so the track takes the size and the ink
-and the pattern drops to the weight of a note. That pattern is always a `<…>`
-placeholder rather than a specimen filename, since the face is a system stack
-and a wide substitution needs somewhere to go before it leaves the card through
-its right edge.
-
-A card gets no subtitle, because a note under one card and not the others reads
-as that output mattering more, when the only difference is the cadence its
-header already states.
-
-Before pushing a change here: `python3 assets/build-flow.py --check`.
+`hero`, `own` and `probe-ideation` are written by `build-art.py` from one
+source per image, light and dark from the same markup. Edit the script, never
+the SVG. Before pushing a change here: `python3 assets/build-art.py --check`.
