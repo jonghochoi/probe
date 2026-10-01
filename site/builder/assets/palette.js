@@ -42,8 +42,15 @@ const PILLAR_LABELS = data.pillarLabels || {};
 /* Where the site's root is, seen from whatever depth this page sits at. Read
  * off this script's own resolved `src` rather than printed into every page: it
  * is right on `file://`, under `--serve`'s `/probe/` prefix, on Pages, and on
- * `404.html`, which is served at whatever depth the bad URL had. */
-const self = document.querySelector('script[src$="assets/palette.js"]');
+ * `404.html`, which is served at whatever depth the bad URL had.
+ *
+ * `currentScript` first, since it is this script whatever its URL says. The
+ * selector behind it matches a substring, not a suffix: every `src` carries
+ * the build's `?v=` token after the file name, so a suffix match finds no
+ * script, the root comes back empty, and every row resolves against the page
+ * it was opened from — `p/A/p/B/index.html` from any paper. */
+const self = document.currentScript
+  || document.querySelector('script[src*="assets/palette.js"]');
 const ROOT = self ? self.src.replace(/assets\/palette\.js(\?.*)?$/, "") : "";
 
 /* ── The index, compacted once ────────────────────────────────────────── */
