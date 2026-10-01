@@ -34,7 +34,7 @@ Usage (repo root):
 
 No PATH -> scan `context/` (MASTER, every pillar, the folder rule file) plus
 the index docs that carry pillar-set prose: `CLAUDE.md`, every
-`<dir>/CLAUDE.md`, `README.md` and `scouting/SETUP.md`. `context/_TEMPLATE.md`
+`<dir>/CLAUDE.md`, `README.md`, `scouting/SETUP.md` and `distinction/SETUP.md`. `context/_TEMPLATE.md`
 is the spine's source rather than a scan target. The anchors a check needs
 (the template, MASTER, the pillar files) are resolved next to the doc being
 scanned, so a copy of `context/` elsewhere can be scanned by passing its files
@@ -59,6 +59,7 @@ _DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",
     "scouting/SETUP.md",
+    "distinction/SETUP.md",
     "context/MASTER.md",
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"
