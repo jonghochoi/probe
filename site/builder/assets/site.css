@@ -1959,17 +1959,6 @@ html.js .nav-cmdk { display: inline-flex; }
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
 }
-/* A paper that has been read against others, in the same column a comparison
-   row's kind chip takes. Outlined and muted rather than amber: this is a fact
-   about the paper, not what the row is, and the two must not read alike in a
-   list where both appear. */
-.cmdk-held {
-  display: inline-flex; align-items: center; gap: .1rem;
-  font-size: .62rem; font-weight: 700; color: var(--text-muted);
-  border: 1px solid var(--border); border-radius: var(--radius-pill);
-  padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
 .cmdk-meta { display: flex; align-items: center; gap: .3rem; }
 /* A paper prints its own id and never reaches the cap; a comparison prints the
    two or three it holds, and the cap is what stops that list from taking the

@@ -180,7 +180,7 @@ def _pager(total: int) -> str:
 
 
 def landing_page(papers: list[Paper], katex=None, search_api: str = "",
-                 comps: list | None = None, partial: bool = False) -> str:
+                 partial: bool = False) -> str:
     """The corpus index — a briefing: newest rewrite in full, the rest as rows.
 
     The page answers "what should I read" before "what is here". The most
@@ -201,12 +201,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     lead block *is* the first of them and its own row stands down, so 10편 is
     ten papers there as it is on every other page.
 
-    A paper that has been read against others carries a count beside its
-    title, in the lead block and in every row alike. It is the only signal on
-    this page that points at the other track, and it is here rather than only
-    on the paper because whether a paper has been argued against something is
-    part of deciding to open it.
-
     Order is `Paper.order_key` — the order the rewrites landed on `main`, which
     is the order a reader watched them appear — and the rows carry that key on
     `data-order`, so the script's 최신순 reproduces this list rather than a
@@ -217,7 +211,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     page, and `index.css` hides it once a script runs.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
-    cmp_counts = Counter(pid for x in (comps or []) for pid in x.paper_ids)
 
     # Taglines and the lead summary are authored markdown — emphasis is what
     # makes a summary scannable, and a summary that opens with math is common
@@ -273,7 +266,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         for k in PILLAR_ORDER if primaries.get(k)
     )
     rows = "".join(
-        _row(p, renderer, lead=(i == 0), cmp_n=cmp_counts[p.stem])
+        _row(p, renderer, lead=(i == 0))
         for i, p in enumerate(ordered)
     )
 
@@ -318,7 +311,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
   <main class="corpus" data-corpus>
     {_first_run() if not ordered else ""}
     {_resume()}
-    {_lead_block(ordered[0], renderer, cmp_counts[ordered[0].stem]) if ordered else ""}
+    {_lead_block(ordered[0], renderer) if ordered else ""}
     {_search_tabs(search_api)}
     <div class="sem" data-sem hidden></div>
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
@@ -509,21 +502,6 @@ def _md(renderer, text: str) -> str:
     return renderer.inline(text) if renderer is not None else c.esc(text)
 
 
-def _cmp_count(n: int) -> str:
-    """How many comparisons hold this paper, wherever the paper is listed.
-
-    A count and not a link: the row already goes somewhere, and the paper's own
-    header carries the door. What this says is only that the door is there,
-    which is the thing a reader deciding what to open cannot otherwise know.
-    """
-    if not n:
-        return ""
-    return (
-        f'<span class="cmp-n" title="같이 읽은 글 {n}편" '
-        f'aria-label="같이 읽은 글 {n}편"><span aria-hidden="true">↔</span>{n}</span>'
-    )
-
-
 def _row_readout(paper: Paper) -> str:
     """A row's headline number, on a line of its own under the tagline.
 
@@ -555,7 +533,7 @@ def _lead_readout(paper: Paper) -> str:
     )
 
 
-def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
+def _lead_block(paper: Paper, renderer=None) -> str:
     """The newest rewrite, printed rather than summarised.
 
     A grid of equal cards makes every paper look equally likely to be the one
@@ -582,7 +560,6 @@ def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
   </a>
   <div class="lead-foot">
     {c.pillar_chips(paper.filed)}
-    {_cmp_count(cmp_n)}
     {links}
     <span class="filter-spacer"></span>
     <span class="lead-size">{c.esc(_size(paper))}</span>
@@ -590,8 +567,7 @@ def _lead_block(paper: Paper, renderer=None, cmp_n: int = 0) -> str:
 </article>"""
 
 
-def _row(paper: Paper, renderer=None, *, lead: bool = False,
-         cmp_n: int = 0) -> str:
+def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
     """One paper, one line.
 
     `data-lead-dup` marks the row the lead block is currently standing in for.
@@ -610,7 +586,7 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False,
   <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
   <span class="row-id">{c.esc(paper.stem)}</span>
   <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
-    <span class="row-title">{c.esc(paper.title)}{_cmp_count(cmp_n)}</span>
+    <span class="row-title">{c.esc(paper.title)}</span>
     <span class="row-tagline">{_md(renderer, paper.tagline)}</span>
     {_row_readout(paper)}
   </a>
