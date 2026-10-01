@@ -32,7 +32,7 @@ Usage (repo root):
     python3 linters/check-doc-links.py [PATH ...]
 
 No PATH -> scan the default doc set (`_DEFAULT_ROOT_DOCS` and the globs
-beside it). The four `AUTHORING.md` contracts and the prompts are out of it —
+beside it). The five `AUTHORING.md` contracts and the prompts are out of it —
 they carry illustrative example paths by design — but can be scanned by
 passing them as PATH args.
 
@@ -68,7 +68,7 @@ _MD_LINK = re.compile(r"\[(?:[^\]]*)\]\(([^)]+)\)")
 _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant
-# to point at real files — `CLAUDE.md`, `README.md`, `scouting/SETUP.md` —
+# to point at real files — `CLAUDE.md`, `README.md`, the two `SETUP.md` guides —
 # every per-folder `<dir>/CLAUDE.md`, and the `context/` files the scheduled
 # routine reads every run. The pillar files and the per-folder rule files are
 # globbed, not listed, so adding a pillar or a new `<dir>/CLAUDE.md` needs no
@@ -78,6 +78,7 @@ _DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",
     "scouting/SETUP.md",
+    "distinction/SETUP.md",
     "context/MASTER.md",
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"

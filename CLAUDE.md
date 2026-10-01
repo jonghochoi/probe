@@ -27,7 +27,7 @@ that folder's own `CLAUDE.md`, next to the code it governs:
 
 Output format is a third thing, one contract per track, owned by the track and
 never restated in a prompt: `scouting/AUTHORING.md`, `analysis/AUTHORING.md`,
-`comparison/AUTHORING.md`, `presentation/AUTHORING.md`. A folder's `README.md` maps what is in it
+`comparison/AUTHORING.md`, `presentation/AUTHORING.md`, `distinction/AUTHORING.md`. A folder's `README.md` maps what is in it
 (`site/README.md`, `site/search/README.md`) and states no rules.
 
 ## Repository map
@@ -52,17 +52,21 @@ belongs in that folder's own rule file or README, which the row points at.
 | `comparison/AUTHORING.md` | human | Format contract for `comparison/<slug>.md` — the one rule and its consequences (§1), front matter, the four-act spine, the fence allow-list and the length ceiling (§2), `probe-matrix` (§3), enforcement (§4) |
 | `presentation/` | agent | Presentations — one `<arxiv-id>.md` per paper, from `/present`: that paper as a talk, every slide carrying its act (起承轉結), its type and a speaker essay. **Only a paper with a rewrite in `analysis/` may have a presentation** |
 | `presentation/AUTHORING.md` | human | Format contract for `presentation/<arxiv-id>.md` — the spine, the fence schemas and the storyboard (§1), the two-register rule (§2), the word budget and the room's floor (§3), created figures, plotted results and the two lineage figures (§4), the authored line break (§5), the speaker essay (§6), enforcement (§7), motion — the authors' clip and the stepped figure (§8) |
-| `.claude/prompts/**` | human | Durable agent prompts (the repo's real asset) — `scouting.txt` (one routine instance per pillar via `<PILLAR>`), `analyze.txt`, `compare.txt`, `present.txt`, and `ideate.txt`, which writes nothing. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` — a rule restated in a prompt is a second source of truth |
-| `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, `compare.md`, `present.md`, `ideate.md` — each points its command at its prompt and, for a track that writes a file, at its `AUTHORING.md` |
+| `distinction/AUTHORING.md` | human | Format contract for the distinction track — the documents `/distinguish` writes into the **private folder on the machine that runs it**, never into this repo: the one rule (§1), what is read and written (§2), the ledger, the matrix, the delta and the shape of an idea (§3), the anchor grammars (§4), caps (§5), Korean authoring (§6), what never leaves (§7), enforcement (§8) |
+| `distinction/SETUP.md` | human | Operator guide for the local distinction routine — the private folder and its `BASKET.md` / `METHOD.md` / `CODEMAP.md` schemas, `PROBE_PRIVATE_DIR`, running by hand, the scheduler entries, first-run verification |
+| `distinction/templates/` | human | `BASKET.md` and `METHOD.md` skeletons the operator copies into the private folder — placeholders only |
+| `.claude/prompts/**` | human | Durable agent prompts (the repo's real asset) — `scouting.txt` (one routine instance per pillar via `<PILLAR>`), `analyze.txt`, `compare.txt`, `present.txt`, `distinguish.txt`, which writes only into the private folder, and `ideate.txt`, which writes nothing. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` — a rule restated in a prompt is a second source of truth |
+| `.claude/commands/**` | human | Slash-command wrappers — `analyze.md`, `compare.md`, `present.md`, `distinguish.md`, `ideate.md` — each points its command at its prompt and, for a track that writes a file, at its `AUTHORING.md` |
 | `assets/` | human | The images the root `README.md` embeds — each a light/dark SVG pair — plus `build-art.py`, which generates the hero, the who-writes-what picture and the ideation icon |
 | `assets/CLAUDE.md` | human | Rules for `assets/` — what each image is, the drawing and animation rules, the hero's cycle and the who-writes-what picture |
 | `site/` | human | The reading site's generator — `build-site.py` + `builder/`, publishing `analysis/`, `comparison/` and `presentation/` as pages and, for agents, as `llms.txt`, `corpus.json` and per-section Markdown. Folder map: `site/README.md` |
 | `site/query.py` | human | The agent's query CLI over a checkout, standard library only — the `corpus.json` records, relations, outlines and sections, Decision-Log lookups, uncompared pairs, and `search` through the deployed endpoint |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break, and the surfaces keyed to the pillar set |
 | `site/search/` | human | Semantic search over the rewrites — chunker, InsForge schema, indexer, the public endpoint and the operator's `verify.py`. Folder map: `site/search/README.md` |
-| `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
+| `linters/check-doc-links.py` | human | Verifies local path references resolve across the index set — this file, every `CLAUDE.md`, `README.md`, `scouting/SETUP.md`, `distinction/SETUP.md` and the `context/` files (`_TEMPLATE.md` is skipped — it is placeholders). Automates the "no orphan / no dangling path" step below |
 | `linters/check-decision-refs.py` | human | Verifies every `D#` citation in `analysis/*.md` / `scouting/P*/*.md` / `comparison/*.md` exists in the per-pillar Decision Log and that explicit `P# / D#` ties match the owning pillar |
 | `linters/check-presentation-format.py` | human | Validates `presentation/<arxiv-id>.md` against the `presentation/AUTHORING.md` rules the build cannot reach — the ones a presentation can break while rendering perfectly |
+| `linters/check-distinction-format.py` | human | Validates the distinction track's private folder — ledgers, matrix, deltas and the two human-written inputs — against `distinction/AUTHORING.md`. Nothing it checks is in a checkout, so it runs as the routine's own gate and by hand, never in CI |
 | `linters/check-context-consistency.py` | human | Verifies `context/` keeps the shape `context/_TEMPLATE.md` and `context/MASTER.md` promise — SPINE, COUNT, SECTION, PILLARSET. A finding is a drift, and the human's to resolve |
 | `linters/check-scouting-format.py` | human | Validates `scouting/P#/YYYY-MM-DD.md` against `scouting/AUTHORING.md`, for reports dated on or after its `_CONTRACT_EFFECTIVE`. Reports reach `main` without a PR, so the blocking gate is the routine's own LINT step and CI is the backstop |
 | `linters/check-commit-style.py` | human | Validates commit subjects / PR titles against the "Commit message style" grammar below. Local use: `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
@@ -94,8 +98,8 @@ Hard rules:
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types.
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
-   `site`, `scouting`, `analysis`, `comparison`, `presentation`, `context`,
-   `prompts`, `assets`, `linters`, `ci` (`.github/workflows/`), `config`. A
+   `site`, `scouting`, `analysis`, `comparison`, `presentation`, `distinction`,
+   `context`, `prompts`, `assets`, `linters`, `ci` (`.github/workflows/`), `config`. A
    track's scope covers its contract and its documents; the build code that
    publishes them is `site`. Omit the scope for repo-wide changes — a docs pass across several
    tracks is `docs: …`, never `docs(docs): …`.
@@ -139,6 +143,9 @@ analysis: add <arxiv-id> rewrite (<alias>)
 present: add <arxiv-id> talk (<alias>)
 ```
 
+The distinction track has no prefix: `/distinguish` writes into a private folder
+and commits nothing.
+
 `update` replaces `add` when redoing an existing rewrite, comparison or talk. The
 trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
 resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that resolves to no
@@ -180,11 +187,12 @@ pushing, so a red gate is not the first you hear of it.
 |---|---|
 | any doc in the index set | `python3 linters/check-doc-links.py` |
 | `analysis/`, `scouting/`, `comparison/`, `context/` | `python3 linters/check-decision-refs.py` |
-| `context/` or any `CLAUDE.md`, `README.md`, `scouting/SETUP.md` | `python3 linters/check-context-consistency.py` |
+| `context/` or any `CLAUDE.md`, `README.md`, `scouting/SETUP.md`, `distinction/SETUP.md` | `python3 linters/check-context-consistency.py` |
 | `scouting/` | `python3 linters/check-scouting-format.py` |
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
 | `analysis/`, `comparison/`, `presentation/` or `site/` | `python3 site/build-site.py --check --strict` for what discovery reads — front matter, the 요약 fences, a comparison's sources and fork, every presentation check — then `python3 site/build-site.py --strict --out /tmp/probe-check`, the full render, for the rewrite body rules, a comparison's fence and length rules and KaTeX (`--check` stops before any page renders) |
 | `presentation/` | `python3 linters/check-presentation-format.py` |
+| the private folder `/distinguish` writes (not in any checkout) | `python3 linters/check-distinction-format.py` — by hand or as the routine's own gate, with `PROBE_PRIVATE_DIR` set |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` hides site-packages, so it proves the standard library suffices) |
 | `assets/build-art.py` | `python3 assets/build-art.py --check` |
 | `site/search/function/` | `npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null` |
@@ -208,8 +216,8 @@ and may carry **one leading thematic emoji** right after it and a space
 (`# 🛸 …`) — exactly one, at the start, never at the end and never inside body
 text.
 
-**Reference / structural** — every `CLAUDE.md`, `scouting/SETUP.md`, the four
-`AUTHORING.md` contracts, `site/README.md` and `site/search/README.md`. Plain
+**Reference / structural** — every `CLAUDE.md`, `scouting/SETUP.md`,
+`distinction/SETUP.md`, the five `AUTHORING.md` contracts, `site/README.md` and `site/search/README.md`. Plain
 headers, **no emoji**. Numbered headers (`## N.`, `### N-M.`) are allowed and
 match the existing `scouting/AUTHORING.md`. A folder README's H1 is the folder
 name (e.g. `# analysis/`).
@@ -251,8 +259,8 @@ in?":
   Korean, and so are the templates those folders ship
   (`scouting/templates/`).
 - **English — contributor, style and operator docs.** Every `CLAUDE.md`,
-  `scouting/SETUP.md`, the four `AUTHORING.md` contracts and the folder
-  READMEs. The
+  `scouting/SETUP.md`, `distinction/SETUP.md`, the five `AUTHORING.md` contracts
+  and the folder READMEs. The
   audience is anyone reading PRs or history.
 - **English — the project front door.** `README.md`, the GitHub-rendered top
   page and the single onboarding surface for a newcomer.
@@ -309,7 +317,8 @@ list every time:
       at least one inbound link. Zero = orphan.
 - [ ] **Run `python3 linters/check-doc-links.py`** — the automated backstop for
       the dangling-path half of this list. It scans this file, every folder
-      `CLAUDE.md`, `README.md`, `scouting/SETUP.md` and the `context/` files;
+      `CLAUDE.md`, `README.md`, `scouting/SETUP.md`, `distinction/SETUP.md` and
+      the `context/` files;
       pass a
       prompt or an `AUTHORING.md` as an explicit arg to scan it too (they are
       off the default set because they carry illustrative example paths).
