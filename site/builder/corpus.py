@@ -98,8 +98,8 @@ FILED_PILLARS = 2
 LINK_KINDS = {
     "arxiv": ("arXiv", 0),
     "site": ("Page", 1),
-    "code": ("GitHub", 2),
-    "weights": ("Weights", 3),
+    "code": ("Code", 2),
+    "weights": ("Model", 3),
     "data": ("Dataset", 4),
     "demo": ("Demo", 5),
 }
