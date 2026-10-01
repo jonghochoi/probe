@@ -37,35 +37,21 @@ who disagrees with it can say so from that line alone, without sitting through
 the presentation. A `spine` that describes the method — rather than naming the
 turn — is not a spine yet.
 
-It is also the cover slide's headline. On every other slide the header is the
-claim and the body is its evidence; the cover reverses that — the header is the
-hook and the spine underneath is what the room reads while the talk starts. So
-the cover carries no evidence of its own and needs none: the sentence is the
-slide. The hook is still a claim the paper makes — a cover line the paper does
-not support is the first thing a sceptical room checks.
-A long spine takes its break the same way a title does (§5) — ` / `, at the
-seam where the claim turns. Only the cover honours it; the 발표 index drops the
-marker, since a row is not that width.
+It is also the cover slide's headline, under a hook that is itself a claim
+the paper makes. A long spine breaks at its seam with ` / ` (§5); only the
+cover honours the break.
 
-**The cover gives the right of its frame to the paper's own figure**, bled to
-the edge — a `probe-figure` fence (§1-2). It is the one place in a presentation
-where an image is not evidence: the room is looking at what the talk is about
-while the talk starts. The image is cropped to fill that column, and `focus`
-says where the crop centres — `"focus": "12% 40%"`, across then down, as a
-share of the image — because only the author knows where the apparatus is in a
-wide figure. `focus` only pans: when the photograph shares its image with other
-panels or with caption text set into the figure, `crop` (§1-3) cuts it to the
-photograph first. `source` rides over the image, because the cover has no
-other line to carry provenance; the `caption` — what the room is looking at, in
-one line — is the image's alt text and the presenter's to say (§3-5). Choose it
-the way a poster is chosen: the apparatus, the task, the moment of contact. A
-teaser that is itself a diagram is a figure for a reader, and it belongs on an
-`evidence` or `split` slide where the presentation argues with it.
+**The cover gives the right of its frame to the paper's own figure**, bled
+to the edge — a `probe-figure` fence (§1-2), the one image in a talk that is
+not evidence. `focus` says where the crop centres (`"focus": "12% 40%"`,
+across then down); it only pans, so a photograph sharing its image with other
+panels or caption text is cut with `crop` (§1-3) first. `source` rides over
+the image; `caption` is its alt text and the presenter's to say (§3-5). Choose
+it as a poster is chosen — the apparatus, the task, the moment of contact. A
+teaser that is a diagram belongs on an `evidence` or `split` slide instead.
 
-**Without one, the act rail fills the frame** — drawn by the build from the
-slide headers, so there is nothing to author. It is the fallback rather than
-the default: a photograph from the paper says more to a room than the
-presentation's own proportions do.
+**Without one, the build draws the act rail** from the slide headers — the
+fallback, not the default.
 
 `audience` is what makes a slide's omissions legible. A presentation written
 for a room that already knows action chunking may skip explaining it; the same
@@ -90,26 +76,16 @@ contents, which is what the paper already is. `轉` carries the paper's turn and
 needs two slides, not one: why the turn is permitted, and what it buys. What it
 costs is `結`'s to say, on a `ledger`. Everything else is compressible.
 
-The act is also what the room sees move: every slide's eyebrow draws the four
-beats as four short bars — the ones behind solid, the current one long, the
-ones ahead in outline — with the current beat's word beside them, each in its
-act's colour. Nothing about it is authored beyond the header, and the only
-other chrome is the page number.
-
 **The type** — the slide's shape, which decides its composition and the fence
 it is drawn from (§1-2).
 
-`statement` is the one frame on its own ground — the page tinted toward the
-`轉` colour, with a thick band of that colour down its left edge — so the room
-knows it has reached the sentence the talk exists for without being told. The
-frame stays in the theme's own ink: a turn that flips light to dark reads as a
-different deck, not a louder beat of this one. **A talk has exactly one, and
-it sits in `轉`**: a talk with three tinted frames has no turn, only three loud
-slides, and a talk with none has left its signature to chance. Whatever
-permits the turn goes under the sentence at the frame's width — the paper's
-own figure, a chart of the numbers that force the turn, or a drawing of the
-mechanism. The turn's sentence is the header; the line under it is its one
-condition, and it takes an authored break (§5) like any headline.
+`statement` is the one frame on its own tinted ground, so the room knows it
+has reached the sentence the talk exists for. **A talk has exactly one, and it
+sits in `轉`** — three tinted frames is no turn, and none leaves the talk's
+signature to chance. What permits the turn goes under the sentence: the
+paper's own figure, a chart of the numbers that force it, or a drawing of the
+mechanism. The line under the header is its one condition, with an authored
+break (§5) like any headline.
 
 **Two slides that make the same point are one slide.** When a created figure
 starts saying what a later panel says, the panel goes and its substance folds
@@ -141,8 +117,6 @@ not read.
 `evidence` or `split` is decided by the figure's shape, not by taste: a banner
 of four photographs squeezed into a column is a strip of thumbnails, and a
 square plot stretched across the frame is a small plot with white either side.
-Either way the figure sits on a card of the paper's own white, so it reads as a
-page laid on the slide in both themes.
 
 | Fence | Required keys | Optional keys | Limits |
 |---|---|---|---|
@@ -281,9 +255,8 @@ rewrite.
 ## 3. Filling the frame
 
 A slide reads thin because its content stops short of the frame, not because
-it has too few words. More text is never the fix: the build stretches and
-spaces what is there, and gives the slack of a short slide to its visual and
-its type size rather than to a second paragraph. The author's part is below.
+it has too few words. More text is never the fix: the build gives a short
+slide's slack to its visual and its type size.
 
 **3-1. The word budget.** A slide puts at most **40 words** in front of the room
 — counted as space-separated tokens, which in Korean is 어절.
@@ -326,12 +299,8 @@ marks already say is the same fact twice, and a ribbon on every slide is a
 template the room stops reading by the third. Most slides carry none. Its
 cells count toward §3-1.
 
-It is set as numbers, not as a table: the numerals in `값` are drawn large and
-every word around them — the unit, `약`, `d =` — small beside them, so write
-`값` as the number with its unit (`약 50 N`, `0.25 d₀`) and put the sentence in
-`라벨`. A `값` with no numeral in it is set as a phrase, one size. Beside a
-`split` figure it is the column next to the figure; everywhere else it closes
-the slide.
+Write `값` as the number with its unit (`약 50 N`, `0.25 d₀`) — the build sets
+the numerals large — and put the sentence in `라벨`.
 
 **3-4. A build is for a comparison the room should see arrive.** `"step": k` on
 a chart series or a timing row holds that item back until the presenter's k-th
@@ -341,19 +310,13 @@ reader browsing the tab and the overview see the whole slide. Use it where the
 order of arrival is the argument, not as decoration. A figure that steps
 through states (§8-2) takes the same press, after the slide's builds.
 
-**3-5. The room's floor.** Every line of content on a slide is set at or above
-the size a room reads from the back — 1.5 % of the slide's content width,
-which is 16 px in the tab and 26 px on a 1920 stage. Chrome (the act eyebrow,
-the page number) may go under it; a figure's provenance, a ribbon label and a
-panel item's `n` may not. What that rules out is fine print, and the rule that
-follows from it is where a figure's description goes: **the slide prints one
-line of provenance under a figure and nothing else** — `source`, the figure or
-table number, its section, and the setup the numbers come from — and the
-paper figure's `caption` is its alt text and closes the speaker essay, where
-the presenter walks the room through it. The one line under the figure that
-says what to see in it is the slide's claim line, which is the author's to
-write for the room and already counts toward §3-1. Keep `source` to one line:
-past that it is a second claim line set in the wrong face.
+**3-5. The room's floor.** Every line of content is set at a size the back of
+the room reads, so there is no fine print — and **the slide prints one line of
+provenance under a figure and nothing else**: `source`, the figure or table
+number, its section, and the setup the numbers come from. A paper figure's
+`caption` is its alt text and closes the speaker essay, where the presenter
+walks the room through it; what to see in the figure is the slide's claim
+line, which counts toward §3-1. Keep `source` to one line.
 
 ## 4. Created figures
 
@@ -673,28 +636,16 @@ stand, and the rest go into `omitted`. An example:
  "why": "…", "alt": "…"}
 ```
 
-**Against the word budget** (§3-1), what counts is what the room reads as a
-claim: a contrast's column heads and `key_note`, an inheritance's `gave`,
-`adds` and open question. Names, dates, `sub`, `where`, the glyph key and a
-cell's `n` say who, when and where, and do not count. A five-column contrast
-spends about a dozen words and an inheritance of three edges about twenty,
-which leaves the headline its room; a lineage figure that runs past the
-budget is carrying a paragraph of related work the script should say.
-
 ## 5. Line breaks
 
 **5-1. Breaks are authored.** ` / ` in the source is the only line break on a
 slide, and it breaks in the slide title, the `spine`, a `statement` slide's
 prose and a contrast's column heads — everywhere else it prints as written.
 
-A headline — a slide's title, the turn's statement, the cover's spine — is set
-as large as its column allows for its widest authored line, so the column never
-gets to break it. The cost lands on the author: one long line makes the whole
-headline smaller, and a break at the seam is how a long claim keeps its size.
-The width is estimated from the characters, erring wide so a miss leaves a
-margin rather than a wrap, and a header line long enough to be set at under
-about four-fifths of the headline size is refused a build pass until it is
-broken.
+A headline is set as large as its column allows for its widest authored
+line, so the column never breaks it: one long line makes the whole headline
+smaller, and a break at the seam keeps its size. A line long enough to shrink
+the headline past about four-fifths is refused until it is broken.
 
 **5-2. A break falls at a syntactic seam and leaves both halves readable alone.**
 `모든 입력이 같은 속도로 / 처리될 필요는 없다` — the first half is already a claim.
@@ -706,9 +657,7 @@ word the slide is about.
 ## 6. The speaker essay
 
 `probe-script` is what the presenter says while the slide is up, in the second
-person, written to be read once and delivered from memory. The presenter reads
-it on a screen of its own beside the stage, so it is written to be glanced at
-under load, not studied. Where a slide has builds, the essay marks each press
+person, written to be glanced at under load and delivered from memory. Where a slide has builds, the essay marks each press
 where it falls — `(다음)` — and where a figure steps, each state —
 `↓ — (b).` (§8-2-3).
 
@@ -731,19 +680,10 @@ essay does not restate them.
 
 ## 7. Enforcement
 
-Two gates, and they see different halves of this contract. The build validates
-what it needs in order to draw a slide; the linter validates the rules a
-presentation can break while rendering perfectly, which is exactly how a slide dump gets
-published.
-
-```bash
-python3 site/build-site.py --only <arxiv-id> --out /tmp/probe-check --strict
-python3 linters/check-presentation-format.py
-```
-
-Every build row in the table below runs while the presentation is discovered,
-so `--check` reports them too. What `--out` adds is the drawing itself — each
-slide composed into the page — which `--check` stops short of.
+Two gates see different halves of this contract: the build validates what it
+needs to draw a slide (`--check` runs every build row; only a full build draws
+the slides), and `linters/check-presentation-format.py` the rules a talk can
+break while rendering perfectly.
 
 | Rule | Gate | What it refuses |
 |---|---|---|
@@ -783,26 +723,16 @@ slide composed into the page — which `--check` stops short of.
 | §8-2-3 the essay says when to step | linter | a stepped slide whose `probe-script` never marks a state with `↓` |
 | §8-3 motion is the exception | linter | more than three moving slides in one presentation |
 
-The rules no gate can see are the ones that decide whether the presentation
-is a talk: whether the header sequence argues (§1-4); whether each header and
-the spine are as strong as the paper's sentence under them and no stronger
-(§1-3); whether §1-1's merge rule was actually applied; whether the paper's
-own figures were used where they carry the point (§1-3); whether every
-number on a slide and in a script is one the paper prints (§4-6, §6-1);
-whether each headline still holds against the rows its chart left out
-(§4-6); whether every second register is from the setup its claim names (§2);
-whether every row, cell and edge of a lineage figure is the paper's own
-account of its priors, and the inheritance names mechanisms rather than
-restating the contrast's gap in other words (§4-9);
-whether a drawn figure's labels land clear of its marks; and whether a slide
-that moves had to (§8). None of them can be judged from the source alone —
-they are judged by reading the original and looking at the rendered slides,
-which is why the `/present` prompt's procedure renders the talk and reads
-every frame. `--numbers <extract>` helps with the fifth: it prints every
-numeral on a slide, in a fence or in a script that the extract does not
-contain verbatim, and each one it prints is either arithmetic on numbers the
-paper prints — said so in the self-check — or a slip. It reports and never
-fails, since a derived gap is legitimate.
+The rules no gate can see decide whether the presentation is a talk: the
+header sequence argues (§1-4); each header is as strong as the paper's
+sentence under it and no stronger (§1-3); the merge rule was applied (§1-1);
+every number on a slide and in a script is one the paper prints (§4-6, §6-1)
+— `--numbers <extract>` lists the candidates, and never fails, since a derived
+gap is legitimate; each headline holds against its chart's omitted rows
+(§4-6); every second register is from its claim's setup (§2); a lineage figure
+is the paper's own account (§4-9); drawn labels land clear of their marks; and
+a moving slide had to move (§8). They are judged by reading the original and
+the rendered slides — the prompt's render-and-read step.
 
 ## 8. Motion
 
@@ -848,11 +778,9 @@ clip is not a number the paper prints (§4-6).
 
 **8-1-2. It is a file the authors publish.** `page` is the project page or
 supplementary material the arXiv original itself links, and `source` says whose
-clip it is. `clips` are https `.mp4` or `.webm` files that page serves. While
-the clip plays, the provenance line under the slide names `source` and the
-page's host; when it cannot play, the figure's `source`, as on any figure
-slide. Never an embedded player: YouTube, Vimeo or any `<iframe>` takes the
-keyboard the deck runs on and has no figure to fall back to. When an embed is
+clip it is. `clips` are https `.mp4` or `.webm` files that page serves. Never
+an embedded player: YouTube, Vimeo or any `<iframe>` takes the keyboard the
+deck runs on and has no figure to fall back to. When an embed is
 all the paper has, the slide stays on its figure and the essay names the video
 for after the talk.
 
@@ -865,10 +793,8 @@ plots on different axis scales, a speed-up burned into the frames, a cut. Like
 a figure's caption it closes the essay (§3-5), so the presenter says it before
 the room has to ask.
 
-**8-1-5. Seconds, not minutes.** The clip plays muted from its first frame when
-the slide arrives and stops when the slide leaves; the presenter pauses it with
-K and halves its speed with S, and a click on the clip pauses it rather than
-turning the page. Choose the cut that shows the moment, not the reel.
+**8-1-5. Seconds, not minutes.** The clip plays muted when the slide arrives;
+choose the cut that shows the moment, not the reel.
 
 ### 8-2. Stepped figures
 
@@ -904,19 +830,15 @@ An example — one buffer through the paper's three panels, as a loop:
  "source": "…", "why": "…", "omitted": [], "alt": "…"}
 ```
 
-A row of the states' labels stands over the figure: in the tab its buttons are
-how a reader steps, and on the stage it is the room's caption for the state on
-screen. Write the labels as the paper names its panels.
+The states' labels print over the figure as the reader's buttons and the
+room's caption — write them as the paper names its panels.
 
 **8-2-1. The first state stands alone.** It is the figure without a script and
 on paper, so order the states so that it already argues.
 
 **8-2-2. One press, the builds' press.** On the stage → takes the slide's
 builds first, then its states, then the next slide, so a clicker drives the
-whole talk; ↓ and ↑ move the figure without leaving the slide. In the tab ← and
-→ stay the slides' alone: ↓ and ↑ step a figure the reader is working, and its
-buttons step it. A slide arrives in its first state, and in its last when the
-presenter steps back onto it.
+whole talk.
 
 **8-2-3. The essay is written against the states.** It marks each state where
 it falls — `↓ — (b).` — with what the room should see when the figure moves. A

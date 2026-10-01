@@ -5,24 +5,14 @@
 > `.claude/prompts/scouting.txt` owns the *procedure* (retrieval, evidence,
 > commit) and defers to this file for the output contract, the rubric
 > included. Change a rule here first, then the prompt.
->
-> The reading site is a separate track with its own contract: `analysis/<id>.md`
-> is governed by `analysis/AUTHORING.md`, not by this guide. Nothing here applies to it.
 
 ---
 
 ## 1. Output File Convention
 
-Each run of the routine writes **one Korean file** for one pillar. The
-cadence is the routine's schedule, set in `scouting/SETUP.md`.
-
-| File | Language | Purpose |
-|------|----------|---------|
-| `scouting/P#/YYYY-MM-DD.md` | Korean | The scouting report. `P#` is the pillar (P0–P4); `YYYY-MM-DD` is the run date. |
-
-There is no separate English file. Paper titles, arXiv links, and `P#/D#`
-tags stay verbatim (§4-1), so de-duplication across previous reports works on
-those tokens regardless of prose language.
+Each run writes **one Korean file**, `scouting/P#/YYYY-MM-DD.md` — the pillar
+and the run date. There is no English twin: titles, arXiv links and `P#/D#`
+tags stay verbatim (§4-1), which is what de-duplication across reports keys on.
 
 ---
 
@@ -75,13 +65,6 @@ story — tie → contribution → what it means for us → what to check:
   code blocks, or in body text.
 - Do not use an emoji not listed in §2-1.
 - Emojis are not translated — use the symbols exactly as listed.
-
-#### Correct example
-```markdown
-## 🥇 논문 1 — 우선순위 ★★★
-### (a) 관련 Pillar / Decision
-### (b) 핵심 기여
-```
 
 #### Incorrect example
 ```markdown
@@ -140,10 +123,7 @@ badge**, color-coded by category:
 | every `D#` | `d97706` (amber) | single shared decision color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
-message). All `D#` share one color (they are codes, not a ranked palette);
-`P#` follows the per-pillar palette so one pillar always reads as one color
-across reports. A scouting report is single-pillar, so in practice one pillar
-color plus amber decisions appear.
+message).
 
 ```markdown
 ## 🔑 참조 약어 풀이
@@ -156,56 +136,34 @@ color plus amber decisions appear.
 
 If the body cites no such code (rare), omit the section entirely.
 
-**Meaning source** (deterministic — derive from `context/P#.md`,
-which the agent already reads; do not invent). The meaning is a **decode
-gloss**, so keep it clean: **English only** (the codes and their definitions
-are English; no Korean in this column) and **no `;` semicolon chains** —
-use commas, ≤~12 words:
+**Meaning** — derived from `context/P#.md`, never invented; **English only**,
+commas not `;`, ≤ ~12 words:
 
 | Code | Source in `context/P#.md` | Meaning string |
 |------|-----------------------------------|----------------|
 | `P#` | the pillar file's H1, `P# — <name>` | `<name>` + `(pillar)` |
-| `D#` | the Decision Log's `#### [D#] <title>` + its current default | `<title>` — concise gloss, ≤~12 words, commas not semicolons |
+| `D#` | the Decision Log's `#### [D#] <title>` + its current default | `<title>` — concise gloss |
 
-**Anchor convention.** Each legend row carries an explicit HTML anchor
-`<a id="ref-<CODE>"></a>` placed before the code badge (the legend badge
-itself is not a link). `<CODE>` is the verbatim code (`P1`, `D9ZP` — case
-preserved; GitHub matches explicit `id=` attributes verbatim).
+**Anchors.** Each legend row carries `<a id="ref-<CODE>"></a>` before its
+badge, `<CODE>` verbatim (`P1`, `D9ZP`); the legend badge itself is not a link.
 
-**In-body links (first occurrence per section).** Within each top-level
-`##` section (each Paper N and the other sections), the **first** textual
-occurrence of each distinct code is written as a **linked badge**
-`[![D9ZP](https://img.shields.io/badge/D9ZP-d97706.svg)](#ref-D9ZP)` (same
-palette as the legend). Later occurrences of that same code **in the same
-section** stay plain text.
-Each new `##` section links the first occurrence again, so any section is
-self-contained for jump-back. Codes inside table cells and code blocks are
-not linked. The legend rows themselves are not self-linked.
+**In-body links — first occurrence per `##` section.** The first occurrence of
+each code in a `##` section is a linked badge
+`[![D9ZP](https://img.shields.io/badge/D9ZP-d97706.svg)](#ref-D9ZP)`; later
+ones in that section stay plain. Codes in table cells and code blocks are not
+linked.
 
-**No inline gloss next to a body badge.** The decision-tie line (each
-paper's (a) section) is badges only — `[![P2](…)](#ref-P2) /
-[![D3AG](…)](#ref-D3AG) [![D8EJ](…)](#ref-D8EJ)` — never a badge followed by a
-parenthetical Korean description. The badge alone names the tie; its
-meaning is in the legend and the paper-specific angle is in the (b)–(d)
-개조식 bullets below. Separate the pillar badge from the decision badges
-with ` / `, and decision badges from each other with a **single space**.
+**The (a) line is badges only** — `[![P2](…)](#ref-P2) / [![D3AG](…)](#ref-D3AG)
+[![D8EJ](…)](#ref-D8EJ)`: the pillar badge, ` / `, then the decision badges
+separated by single spaces, never followed by a Korean gloss.
 
-**Paper sections stay paper-focused.** (a) is the badge line only — no body
-bullets; the substance starts in (b) (§2-2). In (b)–(d), **do not plaster
-internal decision bookkeeping**: avoid `D#` codes, `deferred`, config-key /
-`*.yaml` names in the prose. A reader should be able to follow the paper
-without stopping to ask "what is D3AG? what is deferred?". The decision link
-is carried by the (a) badges; concrete context-edit proposals (which `D#` to
-move, which deferred candidate to trigger) belong in 💡, the section built
-for them.
+**Paper sections stay paper-focused.** (a) holds no body bullets. In (b)–(d)
+no `D#` codes, `deferred` or config-key / `*.yaml` names — a reader follows the
+paper without asking "what is D3AG?". Which decision to move belongs in 💡.
 
 ---
 
 ## 4. Korean Authoring Principles
-
-The report is written directly in Korean. There is no English source
-file to translate from — but the same rules apply for which tokens stay
-verbatim in their original form versus which prose is Korean.
 
 ### 4-1. What to write in Korean vs. keep verbatim
 
@@ -266,11 +224,8 @@ prose only.
 
 ### 4-4. Register — 개조식 (outline form, 명사형 종결)
 
-The **scouting report** (`scouting/`) is **개조식**: a scanned decision
-document, not flowing prose. Its body content is written as terse outline
-bullets, not 합니다/됩니다 paragraphs. (The reading-site rewrites under
-`analysis/` keep an explanatory 합니다/됩니다 register — `analysis/AUTHORING.md` —
-since they are read, not scanned; only the scouting report is 개조식.)
+The report is **개조식**: a scanned decision document, terse outline bullets,
+not 합니다/됩니다 paragraphs.
 
 - **명사형 종결.** End body items on a noun or nominalized form
   (`~함 / ~음 / ~필요 / 명사`), not a full polite sentence. `D3AG 인코더 학습
@@ -303,9 +258,8 @@ token.
 
 ### 4-5. Scannability — repetitive structure goes in a table
 
-A decision-grade report is *scanned* by a reader hunting for the one row
-that matters, not read prose-first end to end. §4-4 governs the register
-inside a bullet; this rule governs the *layout above the sentence*.
+§4-4 governs the register inside a bullet; this rule governs the layout above
+it.
 
 - **Repetitive records become a table, never a run-on sentence.** Wherever
   the report enumerates the same shape N times — dropped paper → reason
@@ -331,17 +285,10 @@ inside a bullet; this rule governs the *layout above the sentence*.
 
 ### 4-6. No raw `~` in prose — it is a strikethrough delimiter on GitHub
 
-GitHub's strikethrough extension accepts a **single** tilde, not just the
-doubled `~~`. A raw `~` in body text therefore opens a strikethrough run, and
-the next raw `~` **in the same inline context** closes it — silently striking
-out every character in between on the rendered page. The failure is invisible
-in the source and invisible in most local previews (CommonMark requires `~~`);
-it appears only on github.com, which is where these documents are read.
-
-The pairing scope is one *inline context*, not one line: a paragraph, a single
-list item, one table cell, or one blockquote line. Two tildes on different
-lines of the same paragraph still pair; two tildes in different table cells do
-not.
+GitHub's strikethrough accepts a **single** tilde, so two raw `~` in one
+inline context — a paragraph, a list item, a table cell, a blockquote line —
+silently strike out everything between them on github.com, where these reports
+are read. A lone `~` renders, but becomes the bug the moment a second lands.
 
 **Write ranges and approximations like this instead:**
 
@@ -352,77 +299,39 @@ not.
 | Paper notation `\sim` | `` $`\sim 50`$ `` (inline math) | `~50` |
 | Open-ended range | `2026-05-11–`, or spell it (`2026-05-11 이후`) | `2026-05-11~` |
 
-**Where a raw `~` is still correct** — these are parsed before the
-strikethrough scan (or not rendered at all), so they never pair and must not
-be "fixed":
-
-- inside a fenced code block or an inline code span (`` `d ~ Uniform{1,…,d_max}` ``);
-- inside display math `$$…$$` or a ```` ```math ```` fence, where `~` is the
-  LaTeX non-breaking space and changing it alters the formula;
-- inside an HTML comment (`<!-- … -->`), which does not render;
-- a deliberate `~~strikethrough~~`, which is the doubled form.
-
-**English verbatim blockquotes are exempt and are never edited** — the quoted
-sentence is a byte-locked token (§4-1). If a quoted sentence genuinely contains
-a raw `~`, leave it and keep the Korean explanation line tilde-free so nothing
-pairs with it.
-
-Two or more raw tildes in one inline context is the condition that actually
-breaks a render. A lone tilde renders literally and is not an error, but it
-becomes one the moment another lands in the same context, so prefer the table
-above everywhere.
+**A raw `~` is still correct** inside a code span or fence, inside `$$…$$` or a
+` ```math ` fence (LaTeX's non-breaking space), in an HTML comment, and in a
+deliberate `~~strikethrough~~`. An English verbatim blockquote is byte-locked
+(§4-1) and never edited — keep the Korean line beside it tilde-free.
 
 ### 4-7. No bare URL in Korean prose — the following particle joins the href
 
-GitHub autolinks a bare `https://…` in body text. When it decides where the
-URL ends it strips *trailing punctuation* (`.` `,` `)` `?` …) but **not
-Hangul**, which it reads as an ordinary URL character. A Korean particle
-written straight after the URL is therefore swallowed into the link target,
-and the rendered link 404s while the source looks correct:
+GitHub autolinks a bare `https://…` and reads trailing Hangul as part of the
+URL, so a particle written straight after it joins the href and the link 404s.
+**In Korean prose a URL is always an explicit `[텍스트](…)` link:**
 
 | | Write | Not |
 |---|---|---|
 | URL with a following particle | `[프로젝트 페이지](https://example.org/x/) 하나뿐이며` | `프로젝트 페이지(https://example.org/x/)만` |
 | URL as the sentence subject | `[공식 저장소](https://example.org/r)에서 받습니다` | `https://example.org/r 에서 받습니다` |
 
-The rule is simple: **in Korean prose a URL is always an explicit
-`[텍스트](…)` link, never bare.** The particle then attaches to the link
-text or sits outside the brackets, and no Hangul can reach the href. This
-also keeps the prose readable — a raw URL mid-sentence is noise.
-
-**Where a bare URL is still correct** — these are not autolinked (or not
-rendered at all), so nothing can be glued to them:
-
-- inside a code span or fenced code block (a `curl` command, a config value);
-- inside an HTML comment (`<!-- … -->`), e.g. a retrieval-failure record;
-- inside an English verbatim blockquote, which is byte-locked (§4-1) — leave
-  it and keep the Korean explanation line free of an adjacent bare URL.
+A bare URL is still correct inside a code span or fence, an HTML comment, or
+an English verbatim blockquote.
 
 ### 4-8. Never close `**` between a closing paren and a particle
 
-CommonMark closes an emphasis run only where the delimiter is *right-flanking*,
-and a `**` sitting between a punctuation mark and a letter is not. In English
-that shape is rare. In Korean it is the most ordinary sentence in the corpus —
-a parenthetical gloss, then a particle:
-
-```
-**느린 채널(비전·언어)과 빠른 채널(고유수용감각)**로 쪼개    ← publishes ** literally
-```
-
-The run never closes, so both markers are printed as asterisks. Nothing errors,
-the source reads correctly, and the sentence still makes sense on the page —
-which is exactly why it survives review. It is the same class of failure as the
-tilde in §4-6: legible in the source, wrong in the render.
+A `**` between punctuation and a letter cannot close an emphasis run, so a
+parenthetical gloss followed by a particle publishes both markers as
+asterisks — and the sentence still reads, which is why it survives review:
 
 | Write | Not |
 |---|---|
 | `**느린 채널**(비전·언어)과 **빠른 채널**(고유수용감각)로` | `**느린 채널(비전·언어)과 빠른 채널(고유수용감각)**로` |
 | `**계단 스케줄**로` (letter before the marker — closes fine) | — |
 
-The rule in one line: **the character immediately before a closing `**` must
-not be punctuation** when a letter follows it. Bold the phrase, not the phrase
-plus its parenthesis. This track has no build step to catch it, so the rule
-is the only defense — nothing errors and review is what has to notice.
+**The character before a closing `**` is never punctuation** when a letter
+follows. Bold the phrase, not the phrase plus its parenthesis. No build step
+catches it on this track.
 
 ---
 
@@ -447,20 +356,13 @@ A paper is surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section when **Relevance
 Methodology and Sim2Real are each ≥ 2**. Reproducibility is scored, shown, and
 used for ranking (§5-3), but it is **not** part of the gate.
 
-A fresh preprint almost never has a public repository on the day it posts, so a
-Reproducibility term inside an AND-gate does not measure research quality — it
-measures how long the paper has been up, and it stalls a run into surfacing
-nothing while the same paper's Relevance and Methodology are the strongest of
-the week. Reproducibility governs how far a paper may be promoted, not whether
-the reader gets to see it.
+A fresh preprint rarely has a public repository on the day it posts, so a
+Reproducibility term in the gate measures the paper's age, not its quality.
 
 **The gate binds in both directions.** A candidate whose four gate dimensions
-are each ≥ 2 is surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section — there is no third
-outcome. Parking such a paper in `## 🔍` or `## 🚫` because its repository is
-still closed puts Reproducibility back inside the gate through the appendix
-tables, and the report then buries the week's strongest paper in a row whose
-재검토 조건 reads `코드 공개 시 승격`. A closed artifact caps the paper's
-priority at ★★ (§5-3); it never removes the paper from the report.
+are each ≥ 2 is surfaced — never parked in 🔍 or 🚫 over a closed repository,
+which would put Reproducibility back in the gate through the appendix tables.
+A closed artifact caps priority at ★★ (§5-3); it never removes the paper.
 
 **The gate decides whether a paper surfaces; its rank decides the shape.**
 The top three by rank (§5-3) take the full `## 🥇 / 🥈 / 🥉` sections, one
@@ -499,12 +401,10 @@ response the run already makes, so this costs no extra call.
 | 1 | Project page only, or a promise (`code will be released`, `release soon`, `upon acceptance`) |
 | 0 | No repository, page, or release statement anywhere in the abstract or the comment field |
 
-**Evaluation on a public benchmark is not reproducibility evidence.** LIBERO,
-CALVIN, SIMPLER, DexYCB and their siblings say the *paper* is comparable, not
-that the *artifact* is obtainable. A rationale bullet reading
-`Reproducibility 2 — 공개 벤치마크 4종 검증` is wrong at the rubric level, and a
-bullet that scores ≥ 2 while its own text says `코드 공개 미확인` contradicts
-itself. Neither is publishable.
+**Evaluation on a public benchmark is not reproducibility evidence** — LIBERO,
+CALVIN, SIMPLER, DexYCB say the paper is comparable, not that the artifact is
+obtainable. A bullet scoring ≥ 2 while its own text says `코드 공개 미확인`
+contradicts itself.
 
 Each 📊 rationale bullet **quotes the evidence it scored on**:
 
@@ -573,24 +473,15 @@ The block between the H1 and the first `---` is exactly two lines:
 **Papers surfaced (4축 게이트 통과):** <integer>
 ```
 
-- **No `Run date:` line.** The filename, the H1 and that field carry the same
-  date three times; the H1 is the one a reader sees.
-- **No `Agent version:` line.** A constant across every report is not
-  information — the report's provenance is its commit.
-- **`Papers surfaced` is an integer and nothing else**, and it equals the
-  number of `## 🥇 / 🥈 / 🥉 / 🌱` sections plus the `## 📋` rows (§5-1). Prose about *why* the
-  count is low belongs in 📊; the field is the count.
-- **`Papers scanned` is capped at 400 characters** and names, at most: the
-  source passes run, an order-of-magnitude count per pass, and any failure
-  still unresolved when the run ended. It is a provenance line, not an audit
-  trail — a reader checks that the sweep ran, then moves on. It is also the
-  report's only provenance: no section restates the retrieval (§7-2).
-
-What the line does **not** carry: per-query breakdowns, stage-by-stage funnel
-arithmetic (`661건 → 507편 → 226편 → 190편 → 19편`), per-pin request counts,
-or retry narration. A retry that succeeded is a non-event; only a call still
-failing at the end of the run is disclosed, verbatim, as `… 최종 실패`. The
-line names no retry or backoff at all unless that clause is there.
+- **No `Run date:` or `Agent version:` line** — the H1 carries the date, the
+  commit the provenance.
+- **`Papers surfaced` is a bare integer** equal to the `## 🥇 / 🥈 / 🥉 / 🌱`
+  sections plus the `## 📋` rows (§5-1); why it is low belongs in 📊.
+- **`Papers scanned` is ≤ 400 characters** and the report's only provenance:
+  the passes run, an order-of-magnitude count per pass, and any call still
+  failing at the end, verbatim as `… 최종 실패`. No per-query breakdown, no
+  funnel arithmetic (`661건 → 507편 → …`), no retry narration — a retry that
+  succeeded is a non-event.
 
 ```markdown
 **Papers scanned:** citation-graph 8핀 280편 + keyword sweep 110편(14일 44편)

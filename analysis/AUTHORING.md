@@ -15,21 +15,12 @@
 | 상세 | the full re-telling — four acts, term anchors, quizzes | §1–§3 |
 
 Both are written **in the same `/analyze` run, from the same reading of the
-arXiv original**, and they live in one `analysis/<id>.md`. 요약 is the tab a
-reader opens first, but it is not made by summarising 상세 — it is a second
-reading of the paper (G1, the rule it most often violates).
+arXiv original** — 요약 is never made by summarising 상세 (G1). **Both are
+required**: a file with only the body publishes an empty tab.
 
-**Both are required.** A file carrying only the body is an incomplete rewrite,
-not a shorter one: the page would publish an empty tab. Bringing an existing
-rewrite up to this contract is a `/analyze <id> --refresh` run, which re-reads
-the original — the one thing a from-the-body shortcut cannot do.
-
-**The output is an HTML page.** Markdown is only the source language: what a
-reader gets is `site/build-site.py`'s output, rendered by `markdown-it-py` plus
-this repo's own extensions. Every rule below is judged against that page, not
-against how github.com would render the same file. `scouting/AUTHORING.md`
-governs a track that *is* read on github.com and does not apply here; the rules
-the two tracks share are restated below in this renderer's terms.
+**The output is an HTML page.** Markdown is only the source language; every
+rule below is judged against what `site/build-site.py` renders, not against
+github.com.
 
 ---
 
@@ -298,39 +289,23 @@ reader should see the stub.
 prescribed something different for the same problem; `probe-parts` for one
 thing cut into named regions.
 
-**`us` marks 이 논문의 자리** — the card holding the position this paper takes
-in the contrast, and the only card that carries a color, as `us` does on a
-`probe-scale` row and `current` on a `probe-lineage` entry. So:
+**`us` marks 이 논문의 자리** — the one card holding the position this paper
+takes, and the only card with a color (like `us` on a `probe-scale` row and
+`current` on a lineage entry):
 
-- **At most one card, and often none.** Two peers held apart (`매끄러움` vs
-  `반응`), two rejected alternatives, two halves of the paper's own
-  architecture, a wins-column against a loses-column — none has a card that is
-  the paper's position, and all render plain. The build reports a second `us`.
-  Reach for it when a card can be labelled `이 논문 — …` or its note says
-  이 논문이 서는 자리, not to brighten a block.
-- **The paper's position, not the reading you prefer.** A contrast between
-  what this paper measured and what our stack would need marks the paper's
-  card; where we stand goes in `note`.
-- **Color is never card identity.** Cards are told apart by their titles and
-  `tag`, in the order the rewrite argues them — a contrast that grows a card
-  grows one more plain card.
+- **At most one card, and often none.** Two peers held apart, two rejected
+  alternatives, two halves of the paper's own architecture — none is the
+  paper's position, and all render plain; the build reports a second `us`.
+  Reach for it when a card can be labelled `이 논문 — …`; where *we* stand
+  goes in `note`.
+- **Color is never card identity.** Cards are told apart by `title` and `tag`.
 
-**`state` is the rewrite's own word**, not a value from a fixed list. Each
-paper cuts its object into the conditions *that* paper argues about — how
-pinned down a region is, which channel a block belongs to, which stage owns it
-— and the fence hands out a color per distinct state, in first-appearance
-order. Write the states as short parallel phrases, one grammatical shape
-across the rows, so the column reads as one question answered per region.
-
-- **Rows in the same state share a color, and that is the point** — the
-  rewrite says they are in one condition, and the printed state says which.
-  Colors are grouping, never row identity.
-- **Every row carries a state, or none does.** Unlabelled rows in a
-  half-labelled band render neutral and read as leftovers; the build reports
-  it.
-- **At most four distinct states.** Past four the color stops sorting anything
-  — merge the states that mean the same thing, or the decomposition is a
-  table. The build reports a fifth.
+**`state` is the rewrite's own word**, not a fixed vocabulary — how pinned
+down a region is, which channel or stage owns it — written as short parallel
+phrases. The fence colors each distinct state in first-appearance order, so
+rows in one state share a color: colors group, they never identify a row.
+**Every row carries a state, or none does**, and **at most four** distinct
+states — past four, merge them or make it a table. The build reports both.
 
 **4. 출처·배경** — where the technique came from, and why it arrives now. A
 `co-ctx` callout and term anchors.
@@ -348,15 +323,11 @@ arXiv:
      "caption": "<한글 캡션>", "source": "Figure <n>, 원문 §<x.y>"}
     ```
 
-**"First" is a ranking, and it is the rule most easily lost.** The authors drew
-their figures to carry the paper's argument, and the reader can hold ours
-against the original.
+**"First" is a ranking, and the rule most easily lost.** The figure that
+carries the paper's central mechanism — the schedule, the pipeline, the
+architecture the rewrite is named after — is cited in the section that
+explains it; an Act 2 with no figure while the paper has one is wrong.
 
-- **The figure that carries the paper's central mechanism is not optional.**
-  If the paper illustrates the thing the rewrite is named after — the schedule,
-  the pipeline, the architecture — that figure is cited, in the section that
-  explains it. An Act 2 with no figure while the paper has one is wrong
-  however good the prose is.
 - **A figure left out is a decision to be able to defend** — above all one
   that shows a mechanism, a timeline, a rig or a task set. Appendix figures
   count: they are usually the rig, the task set, the ablation curves and the
@@ -392,11 +363,9 @@ against the original.
                  {"label": "<단계>"}]}
       ```
 
-  **`why` is required and prints under the diagram.** A redrawn box competes
-  with figures the authors already made, and when it wins by accident the page
-  shows our labels where the paper had a picture. Name which figure would have
-  covered the point and why it cannot serve (no such figure / inline SVG with
-  no file). If the paper does illustrate it, use `probe-figure` instead.
+  **`why` is required and prints under the diagram**: name which figure would
+  have covered the point and why it cannot serve (none exists / inline SVG
+  with no file). If the paper illustrates it, use `probe-figure`.
 
 ### 2-7. R7 — Math
 
@@ -476,12 +445,9 @@ is used. Never write the `co-*` class by hand.
   after Act 4's verification plan — the authors' admission is an INPUT to our
   plan, not a footnote to it.
 - **One point per callout, and at most 400 printed characters** — counted on
-  what the reader sees, so emphasis markers and TeX macros cost nothing. A
-  callout is an aside the eye takes in one stop; past that length it is a
-  section wearing a border, and the paragraph it interrupted is gone by the
-  time the reader comes back. The build reports an over-long body. A run of
-  author-stated limitations is one clause each inside the callout, with the
-  elaboration in a `::: details` under it.
+  what the reader sees; past that it is a section wearing a border. The build
+  reports an over-long body. A run of author-stated limitations is one clause
+  each, with the elaboration in a `::: details` under it.
 
 ### 2-10. R10 — Resource links
 
@@ -517,17 +483,13 @@ without exactly one correct option.
 
 ### 2-12. R12–R14 — Implementation and authoring traps
 
-- **R12. Visual rules are the site's, not the author's.** Typography, spacing,
-  color and code highlighting live in `site/builder/assets/`; the invariants
-  they keep are in `site/CLAUDE.md`. No inline styles, no `<style>` blocks, and
-  no blank paragraph, `&nbsp;` line or `<br>` to open space around a component
-  — each component already sets its own. The page also *adds* chrome your
-  source never mentions, and re-adding it by hand duplicates it: the masthead
-  eyebrow (`읽기 쉬운 버전 · 원문에서 직접 발췌`), the rule that closes the
-  thesis + tagline + summary block, the hairline over every `###`, the act
-  divider's bar and each component's title band. Write the content; the page
-  frames it. A `###` keeps an `id` but prints no `#` link, so refer to another
-  section in plain words where that reads better than a `#id` link.
+- **R12. Visual rules are the site's, not the author's** (`site/CLAUDE.md`).
+  No inline styles, no `<style>`, and no blank paragraph, `&nbsp;` or `<br>`
+  to open space — every component sets its own. Never re-add chrome the page
+  already prints: the masthead eyebrow, the rule closing the thesis block,
+  the hairline over every `###`, the act divider's bar, a component's title
+  band. A `###` prints no `#` link, so refer to another section in words where
+  that reads better than a `#id` link.
 - **R13. No raw HTML.** The parser runs with `html=False`, so a tag in the
   source — `<br>` in a table cell, `<b>` in prose — prints as its own
   characters. Emphasis is `**…**`; a table cell that needs two parts takes
@@ -667,18 +629,11 @@ A file without the container is reported (the tab would publish empty).
 ### 4-1. G1 — Written from the original, like the body
 
 요약 draws on the same parsed original as the body and cites the same way. It
-is never written by re-reading `analysis/<id>.md` and shortening it:
-
-- a digest of a digest inherits every choice the body already made — which
-  figure was dropped, which number was rounded — and adds nothing;
-- the two surfaces rank the paper's material differently. A figure that sits
-  mid-body is often the one 요약 leads with;
-- a 요약 derived from the body goes stale the moment the body is edited, and
-  nothing on the page says so.
-
-What the two surfaces **do** share, as inputs rather than text: the thesis line
-(the body's `#`) and the act order. **No sentence is copied from the body** —
-same facts, written again.
+is never written by shortening `analysis/<id>.md`: a digest of a digest
+inherits every choice the body made, ranks the material the body's way rather
+than its own, and goes stale when the body is edited. The two surfaces share
+the thesis line and the act order as inputs; **no sentence is copied from the
+body**.
 
 ### 4-2. G2 — The spine, in this order
 
@@ -824,19 +779,11 @@ rendering:
 |---|---|
 | every `D#` cited exists in the Decision Log | `linters/check-decision-refs.py` |
 
-A `D#` that does not resolve is not a render failure — it silently loses its
-tooltip and prints as plain text, so the build cannot see it as wrong.
+A `D#` that does not resolve silently loses its tooltip and prints as plain
+text, so the build cannot see it as wrong.
 
-Verify before reporting a rewrite done:
-
-```bash
-python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
-python3 linters/check-decision-refs.py
-```
-
-`--strict` must exit 0. Everything in §1–§4 not in the tables above is
-enforced by review, which is why the prompt's self-check exists. The rules code
-cannot see decide whether 요약 is worth having: whether the narrative sounds
-like a person, whether it relays an opinion of ours without naming a `D#`,
-whether each act card's evidence is the right evidence, and whether the four
-card titles read as an argument when skimmed alone.
+Everything in §1–§4 not in the tables above is enforced by review — the
+prompt's self-check. The rules code cannot see decide whether 요약 is worth
+having: whether the narrative sounds like a person, whether it relays an
+opinion of ours without naming a `D#`, whether each act card's evidence is the
+right evidence, and whether the four card titles read as an argument alone.

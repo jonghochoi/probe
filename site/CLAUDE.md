@@ -36,15 +36,10 @@ own page rather than a page of its own, so the link back is the page it is
 already on — and `t/` is an index of those tabs rather than a second home for
 them: every row it prints links into the paper page it belongs to.
 
-**Every band draws what its own page holds.** `components.mast()` is one frame
-for the destinations the nav names, and the drawing beside each title is that
-page's own: 논문 the list, 비교 the fork a comparison opens, 발표 the four acts
-a talk is cut into with what is said under each, 서재 the window a browser
-keeps. A band that draws some *other* page's surface goes stale every time that
-page changes — a drawing of the paper page's tab strip asserts a shape that
-page stops having the moment a track is added, on a band whose own page has no
-tabs at all. A new track that earns a destination draws what its own list
-holds, and the ones already here stay true.
+**Every band draws what its own page holds.** The drawing beside each title in
+`components.mast()` is that page's own — 논문 the list, 비교 a comparison's
+fork, 발표 the four acts, 서재 the browser's window. A band that draws another
+page's surface goes stale whenever that page changes.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
@@ -91,14 +86,11 @@ the same query differently is a bug, not two behaviours.
 icons and who-writes-what picture redraw it with their animation inlined
 (`assets/CLAUDE.md`). Change the mark here and bring those into step.
 
-**Two modules serve the prompt, not the build.** `builder/arxiv.py` extracts an
-arXiv original — body and appendix, figures, tables — and raises `Unavailable`
-when a paper has no HTML edition, which is `/analyze`'s stop condition; run as
-a module it prints the index, `--grep`, `--tables` and `--section <anchor>`,
-which are what `/analyze` and `/present` confirm their numbers in, and `--bib`;
-`builder/mdext/probefence.py` owns the ` ```probe-* ` fences and their
-validation. Both are called by hand from a run, so keep them importable without
-the rest of the build.
+**Two modules serve the prompts, not the build.** `builder/arxiv.py` (its CLI:
+`site/README.md`) raises `Unavailable` when a paper has no HTML edition —
+`/analyze`'s stop condition — and `builder/mdext/probefence.py` owns the
+` ```probe-* ` fences. Both are called by hand from a run, so keep them
+importable without the rest of the build.
 
 **Search is an enhancement.** A build without `--search-api` emits no script and
 the site makes no request. `site/search/verify.py` needs a key and egress, so it
@@ -130,20 +122,12 @@ in `builder/corpus.py` (the build refuses to start when the two disagree),
 `PILLARS` in `search/function/search.ts` and the `--p<n>` tokens in the CSS each
 carry it. Adding a pillar walks the checklist in `context/CLAUDE.md`.
 
-## Before pushing
+## What each build command sees
 
-```bash
-python3 site/build-site.py --check --strict
-python3 site/build-site.py --strict --out /tmp/probe-check
-```
-
-`--check` stops after discovery and writes nothing: it reports front matter,
-the 요약 fences, a comparison's sources and fork, every presentation check and
-the `corpus.json` budget. The rewrite body rules in `render.py`, a comparison's
-fence and length rules, KaTeX warnings, the corpus-index budget and the asset
-pipeline run only while pages render, so the second command — the full build —
-is the one that sees them. Touching `search/function/`, also:
-
-```bash
-npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null
-```
+`python3 site/build-site.py --check --strict` stops after discovery and writes
+nothing: front matter, the 요약 fences, a comparison's sources and fork, every
+presentation check and the `corpus.json` budget. The rewrite body rules in
+`render.py`, a comparison's fence and length rules, KaTeX and the asset
+pipeline run only while pages render, so the full build —
+`python3 site/build-site.py --strict --out /tmp/probe-check` — is the one that
+sees them. The rest of the checks are in the root `CLAUDE.md`.

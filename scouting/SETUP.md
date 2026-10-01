@@ -81,14 +81,10 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
   on the shared branch. The prompt keeps a `git pull --rebase` retry as a
   backstop.
 - The form has no `context_files` field and needs none — the prompt names its
-  own inputs (the pillar file in full, recent `scouting/P1/` reports,
-  `analysis/` names — see its SOURCES), the
-  `curl` procedure, the venue and budget tables it scores with, and the
-  guards; the rubric itself is `scouting/AUTHORING.md` §5.
-- A pillar-scoped run never reads `context/MASTER.md`, so the two tables it
-  would need from there — Venue Priority and the monthly Cross-pollination
-  Budget — are inlined in the prompt's SCORING section. Keep them in sync with
-  `context/MASTER.md` §5–§6 when either moves.
+  own inputs (see its SOURCES); the rubric is `scouting/AUTHORING.md` §5.
+- A pillar-scoped run never reads `context/MASTER.md`, so its Venue Priority
+  and Cross-pollination Budget are inlined in the prompt's SCORING section.
+  Keep them in sync with `context/MASTER.md` §5–§6.
 
 ### 3-1. Re-paste after every prompt change
 
@@ -96,12 +92,9 @@ The form stores a **copy** of the prompt body, not a reference to the file. A
 merged change to `.claude/prompts/scouting.txt` reaches nothing until every
 routine is edited and the body re-pasted, `<PILLAR>` substitution redone.
 
-- Five pillars means five routines to update, every time.
-- Re-paste all five in one pass. A half-updated fleet has pillars scoring on
-  different contracts — exactly the drift the scoring contract
-  (`scouting/AUTHORING.md` §5) exists to prevent.
-- After the last one, **Run now** on a single pillar and walk §4 before
-  letting the cadence resume.
+Re-paste all five in one pass — a half-updated fleet scores pillars on
+different contracts — then **Run now** on one pillar and walk §4 before the
+cadence resumes.
 
 ## 4. First run
 

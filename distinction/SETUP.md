@@ -100,12 +100,10 @@ What it writes is the contract:
 | `## Entry points` | the classes and functions a ledger would name — signature and docstring first line | `path:line` |
 | `## Results` | the current numbers, from the experiment logs, as a table | the run or log the row comes from |
 
-The anchors are the point. `distinction/AUTHORING.md` §4 lets a ledger cite
-`path:line` and `cfg:key` only as the digest lists them or as a `grep` of
-`code/` found them, so a digest that lists a key without its file has given
-the ledger nothing to cite. When `codemap.sh` is absent the routine reads the
-`CODEMAP.md` it finds and notes its age in the delta; when `CODEMAP.md` is
-absent too, the routine stops.
+A digest that lists a key without its file gives the ledger nothing to cite
+(`distinction/AUTHORING.md` §4). With no `codemap.sh` the routine reads the
+`CODEMAP.md` it finds and notes its age in the delta; with no `CODEMAP.md`
+either, it stops.
 
 ### 2-4. `code`
 
@@ -115,10 +113,9 @@ only to `grep` for an anchor the digest lacks, never to read a directory.
 
 ### 2-5. `PROBE_PRIVATE_DIR`
 
-Set in the shell that runs `/distinguish` — the schedule's wrapper script (§4)
-exports it, and a session run by hand exports it first. The prompt's first
-step checks it and stops when it is unset or names no `BASKET.md`: a cloud
-session has no such folder, so the routine cannot run there by mistake.
+Exported by the schedule's wrapper script (§4), or by hand before a session.
+The prompt's first step stops when it is unset or names no `BASKET.md`, so the
+routine cannot run in a cloud session by mistake.
 
 ## 3. By hand
 

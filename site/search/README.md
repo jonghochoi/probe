@@ -3,31 +3,18 @@
 Semantic search for the reading site — the index, the endpoint, and what has to
 be true for both to be safe.
 
-The site's own filter (`builder/assets/filter.js`) matches strings, and strings
-are the wrong tool for the question a reader actually arrives with: *"정책이
-느려터진 거 해결한 논문"* shares no substring with anything in the corpus. This
-folder answers that question instead, from a vector index of the rewrites, and
-hands back a list of passages to open.
-
-The two are named on the page for what they match: **의미** is this folder, and
-**글자** is the filter — which compares substrings rather than words, so
-`액션청` finds `액션청킹` and a name promising word boundaries would be a name
-that lies.
-
-**It is an enhancement, never a dependency.** A build given no endpoint emits no
-search script, makes no request, and behaves exactly like a build without search. A build
-given one still ships the lexical filter underneath, and the remote block
-removes itself on any failure — offline, `file://`, a 502, an answer slower than
-5 s.
+The site's filter (`builder/assets/filter.js`, labelled **글자**) matches
+substrings, and *"정책이 느려터진 거 해결한 논문"* shares none with the corpus.
+This folder (**의미**) answers that question from a vector index of the
+rewrites and hands back passages to open. It is an enhancement, never a
+dependency (`site/CLAUDE.md`): the remote block removes itself on any failure —
+offline, `file://`, a 502, an answer slower than 5 s.
 
 ## When it asks
 
-The lexical filter narrows the list on every keystroke; this costs a round
-trip, a model call and an embedding, so it asks only when the reader submits —
-`Enter` or the 검색 button, which ships only with an endpoint — and a `#q=`
-link asks on arrival. An answer splits the result area into `의미 검색` and
-`글자 검색` tabs, landing on 의미. The page-side behaviour is
-`builder/assets/semantic.js`, whose comments carry the reasons.
+Only on submit — `Enter`, the 검색 button, or a `#q=` link on arrival —
+since each ask costs a model call and an embedding. The page side is
+`builder/assets/semantic.js`.
 
 ## What is indexed
 
@@ -36,14 +23,10 @@ chunk is one section, one term panel, one figure caption, the 요약 surface, or
 the paper as a whole. Sections rather than documents, because a rewrite is
 60 KB and "the paper is somewhere in here" is the answer the reader already had.
 
-Both surfaces, and a section carries the panels it holds. A term and a figure
-are chunks of their own — a term is the 한/영 bridge a reader searches by name,
-a caption is a different sentence about a different thing — and every other
-panel stays inside the section it argues for, contributing the keys that carry
-prose. What a panel keeps out is addressing and machinery: `tex` and `sym` are
-LaTeX, `url` and `link` are targets, `tone` drives layout. A quiz gives up its
-`why` alone, since its options are written to include wrong statements and a
-result must not hand one back as the corpus speaking.
+Both surfaces. Terms and figure captions are chunks of their own; every other
+panel stays inside its section and contributes only its prose keys — `tex`,
+`sym`, `url`, `link` and `tone` are machinery, and a quiz gives up its `why`
+alone, since its options include wrong statements.
 
 A rewrite yields about 44 chunks and about 22 K tokens to embed. The corpus
 only grows, so the rate is what this states rather than a count of it — for
@@ -108,19 +91,10 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
    endpoint; with them, every push to `main` embeds only the chunks that
    changed and the build's `llms.txt` lists the endpoint for agents.
 5. **Verify** — `python3 site/search/verify.py .search/index.jsonl`, with
-   `INSFORGE_URL`, `INSFORGE_API_KEY` and `PROBE_SEARCH_API` set. Seven checks,
-   each assuming the one before it: the migration answers, the table holds this
-   build's chunks at their current versions, a Korean question comes back a list
-   inside the 5 s the page waits, the same question twice is cached, a write
-   to the index clears that cache, `플로우매칭` is read as `flow matching`, and
-   the anon key reads neither table directly. Four of them fail invisibly —
-   the fallback above is what a reader sees either way — so the page cannot
-   tell you which. Not in CI: a gate needing a key and egress fails for reasons
-   its pull request did not cause, and in the deploy job it would make
-   publishing the site depend on a service the site does not need.
-
-`--dry-run` prints the token estimate before anyone runs a full re-index in CI,
-which is the number that matters as the corpus grows.
+   `INSFORGE_URL`, `INSFORGE_API_KEY` and `PROBE_SEARCH_API` set: seven checks
+   in dependency order (the docstring lists them). Four fail invisibly behind
+   the page's fallback, which is why this exists. Not in CI — it needs a key
+   and egress, and the site must not depend on a service it does not need.
 
 ## What keeps this safe
 

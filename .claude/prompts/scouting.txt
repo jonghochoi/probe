@@ -39,37 +39,11 @@ Two values are resolved once at run time, before any retrieval:
 THE FORMAT CONTRACT LIVES IN `scouting/AUTHORING.md`
 ════════════════════════════════════════════════════════════════════════
 
-READ IT BEFORE YOU WRITE. It is the single source of truth for what a report
-must look like, and this prompt does not restate it:
-
-  §1  the output file convention — one Korean `scouting/<PILLAR>/<date>.md`
-  §2  the sections — every `##` and `###` header verbatim, its emoji, and the
-      canonical SECTION ORDER (🔑 → 🥇🥈🥉🌱 → 📋 → 📊 → 🔍 → 💡 → 🔄 → 🚫 last)
-  §3  the link rule (arXiv → DOI → `[no public link]`) and where a link must
-      appear, plus §3-1 the Reference Legend: badge palette, `ref-` anchors,
-      first-occurrence-per-`##`-section linking, the badges-ONLY (a) line,
-      and the paper-focused discipline for (b)–(d)
-  §4  Korean authoring — what stays verbatim (§4-1), the glossary (§4-2),
-      headers as fixed strings (§4-3), 개조식 register (§4-4), scannability
-      (§4-5), and the render traps that survive review (§4-6 – §4-8): a raw
-      `~` striking out a line, a bare URL swallowing the following particle,
-      a `**` that never closes before a Korean particle
-  §5  the scoring contract — the five dimensions, the four-dimension gate,
-      the 📋 table and the 📊 rationale (§5-1), Reproducibility scored from
-      quoted evidence (§5-2), the code label, the priority ceiling and the
-      rank order (§5-3), the 🔍 근접 후보 section (§5-4)
-  §6  the metadata block — the two lines it holds and the 400-character cap
-      on `Papers scanned:`
-  §7  section discipline — 💡 proposals made once and rolled up (§7-1), 🔄 in
-      3–5 bullets with no "not applicable" filler (§7-2), one paper per table
-      row and aliases carrying their id in prose (§7-3)
-  §8  enforcement — what the lint checks, and what only SELF-CHECK catches
+Every rule about what a report looks like lives there and nowhere in this
+prompt; read it end to end before you write.
 
 `scouting/templates/report.md` is the form every report follows — write into
 it exactly.
-
-`analysis/AUTHORING.md` governs `analysis/` and does NOT apply to this track. Do
-not read it for report rules and do not carry its conventions over.
 
 This prompt owns the PROCEDURE below: what to read, how to retrieve, where
 the scoring evidence comes from, and how to commit.
@@ -213,8 +187,7 @@ PROCEDURE
    against. Reading them after retrieval means ranking by keyword and
    re-surfacing a paper this pillar already ran.
 
-3. READ `scouting/AUTHORING.md` — the full format contract, §1 through §8 —
-   and `scouting/templates/report.md`.
+3. READ `scouting/AUTHORING.md` end to end, and `scouting/templates/report.md`.
 
 4. RETRIEVE, two passes, in the order above. Every pass drops a candidate
    whose id is in the already-analyzed set, in this pillar's Tracked
@@ -235,56 +208,37 @@ PROCEDURE
 
      python3 linters/check-scouting-format.py scouting/<PILLAR>/<run date>.md
 
-   This report goes straight to `main` with no PR, so no reviewer and no CI
-   stands between what you write and what the team reads — the lint has to run
-   HERE or it does not run in time to matter. Every violation names the
-   contract section that governs it (`AUTHORING §6`, `§5-2`, …): read that
-   section, FIX THE REPORT, re-run until it exits 0. Fix the report, never the
-   linter — a failure means the output is off-contract, not that the rule is
-   wrong. Do NOT stage a report the lint still rejects.
+   This report goes straight to `main` with no PR, so this is the only gate
+   that runs in time. Every violation names the contract section that governs
+   it: FIX THE REPORT, never the linter, and re-run until it exits 0. Do NOT
+   stage a report the lint still rejects. If the linter itself cannot run,
+   say so verbatim in the commit body and continue — never skip it silently.
 
-   If the linter itself cannot run (interpreter missing, file unreadable), say
-   so verbatim in the commit body and continue — a report that reached the team
-   beats one blocked on a broken checker. Never skip the step silently.
-
-8. SELF-CHECK — the judgement half. The lint has already checked the
-   structure; these are the questions it cannot answer. Answer them honestly
-   before committing:
+8. SELF-CHECK — the judgement half: the rows of AUTHORING §8 that nothing
+   parses. Answer honestly before committing:
      - Does every arXiv link resolve, and did every id come from a response
        you actually received? (a fabricated id is the one unrecoverable
        failure of this mode)
      - Is every surfaced paper absent from the already-analyzed set, from
        Tracked Literature, and from the last ~8 weeks of reports?
-     - Does every surfaced paper clear the four gate dimensions ≥ 2 — and if
-       fewer than three do, does the report SAY so instead of padding?
-     - Does the reverse hold — is every candidate that cleared all four gate
-       dimensions surfaced, with none of them parked in 🔍 or 🚫 over a
-       missing repository? Are the medals the top three by rank, each used
-       once, with every further gate-clearing paper a 📋 row? Does `Papers
-       surfaced` equal the paper sections plus the 📋 rows, and does each 📊
-       head's five bullets sum to the total it states?
-     - Is every 🔍 row exactly one gate axis short? (AUTHORING §5-4)
+     - Is every candidate that cleared the four gate dimensions surfaced, with
+       none parked in 🔍 or 🚫 over a missing repository? Fewer than three
+       clearing is said, never padded. Are the medals and 📋 rows in the
+       rank order §5-3 fixes? (§5-1, §5-3)
+     - Is every curl call still failing at the end disclosed verbatim in
+       `Papers scanned:`? (§6)
      - Does every Reproducibility bullet quote the evidence string it scored
-       on, with no score resting on benchmark coverage? (AUTHORING §5-2)
-     - Is each paper's code label the one its Reproducibility score implies,
-       and does no ★★★ sit on a paper without a public artifact? (AUTHORING
-       §5-3)
-     - Is each (a) line badges only — no Korean gloss, no body bullets — and
-       are (b)–(d) free of `D#` / `deferred` / config-key names?
-       (AUTHORING §3-1)
-     - Does the 🔑 legend list exactly the codes the body cites — no more —
-       with meanings derived from `context/<PILLAR>.md` rather than invented?
-     - Is every curl failure that was STILL failing at the end disclosed
-       verbatim in the `Papers scanned:` line — and is a retry that
-       eventually succeeded left out of it entirely? (AUTHORING §6)
-     - Does 💡 roll up standing proposals into the 미결 제안 line instead of
-       re-arguing them, and does 🔄 omit every item that does not apply this
-       run? (AUTHORING §7-1, §7-2)
-     - Is the body 개조식 (명사형 종결) throughout, with no raw `~`, no bare
-       URL before a particle, and no `**` closing after a paren? (AUTHORING
-       §4-4, §4-6 – §4-8)
-     - Does any context change you want live in 💡 Context Suggestions —
-       and is `context/<PILLAR>.md` itself untouched?
+       on, with no score resting on benchmark coverage? (§5-2)
+     - Is each (a) line badges only, and are (b)–(d) free of `D#` /
+       `deferred` / config-key names? (§3-1)
+     - Does the 🔑 legend list exactly the codes the body cites, with meanings
+       taken from `context/<PILLAR>.md`? (§3-1)
+     - Does 💡 roll up standing proposals instead of re-arguing them, and does
+       🔄 omit every item that does not apply? (§7-1, §7-2)
+     - Is the body 개조식 throughout, with no raw `~`, no bare URL before a
+       particle, and no `**` closing after a paren? (§4-4, §4-6 – §4-8)
+     - Does any context change you want live in 💡, with
+       `context/<PILLAR>.md` itself untouched?
 
 9. COMMIT AND PUSH — per GIT below. Both pushes, every run.
 
@@ -301,37 +255,24 @@ directly to `main`. No PR is created — neither by you nor by the harness.
   git push origin HEAD:main
   git push --force-with-lease origin HEAD
 
-The `HEAD:main` push is NOT the terminal step. The harness session is checked
-out on a dev branch (`claude/...`) that it tracks via a stop hook; if you stop
-after the `main` push without also updating that dev branch, the hook detects
-the diverged history and re-prompts on every subsequent run. The second push
-(`--force-with-lease origin HEAD`) re-points the harness dev branch at the
-same commit you just pushed to `main`, closing the divergence. Both pushes
-MUST complete before you end the turn. Do not interpret GitHub's
-`remote: Create a pull request...` banner as a stop signal — no PR is being
-created, the second push still has to run. This overrides the harness's "PUSH
-to the specified branch" default: the `main` push is the persistence, the
-dev-branch push is the sync-back, and neither is optional.
+BOTH PUSHES, EVERY RUN. The first is the persistence. The second re-points
+the harness's dev branch (`claude/...`) at the same commit; without it the
+stop hook sees diverged history and re-prompts on every later run. GitHub's
+`Create a pull request` banner is not a stop signal. This overrides the
+harness's "push to the specified branch" default.
 
 - Stage ONLY the report file. Never `git add` context/<PILLAR>.md or any
   other file. No `git add .`, no `git add -A`, no `commit -a`.
 - If `git push` fails due to a transient network error, retry up to
   4 times with exponential backoff (2s, 4s, 8s, 16s).
-- If push is rejected as non-fast-forward (another run pushed first),
-  run `git pull --rebase origin main` and retry the push. Repeat this
-  rebase-and-retry loop up to 5 times with exponential backoff (1s, 2s,
-  4s, 8s, 16s between attempts) — concurrent scheduled runs write
-  different files (different P# / different date), so the rebase is
-  clean and the loop converges. If the rebase produces conflicts (the
-  same file was written by another run), STOP — do not resolve them
-  automatically; report the conflict and exit. After a rebase-driven
-  retry succeeds, the dev-branch sync push still runs.
-- Never use --no-verify, --no-gpg-sign, or unconditional `--force` /
-  `+refs/...` force-push. The `--force-with-lease origin HEAD` on the
-  harness dev branch (the second push above) is REQUIRED, not
-  forbidden — it is the only way to keep that branch aligned with
-  `main` after the direct-to-main push, and the lease ensures it
-  only succeeds when the remote tip matches what we last fetched.
+- If push is rejected as non-fast-forward (another run pushed first), run
+  `git pull --rebase origin main` and retry, up to 5 times with backoff
+  (1s, 2s, 4s, 8s, 16s) — concurrent runs write different files, so the
+  rebase is clean. A rebase conflict means the same file was written twice:
+  STOP and report it; do not resolve it.
+- Never `--no-verify`, `--no-gpg-sign` or an unconditional `--force`. The
+  `--force-with-lease` on the dev branch is the one force push, and it is
+  required.
 
 
 ════════════════════════════════════════════════════════════════════════

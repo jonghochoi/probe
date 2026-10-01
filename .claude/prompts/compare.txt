@@ -12,23 +12,11 @@ publish a comparison that breaks it.
 THE FORMAT CONTRACT LIVES IN `comparison/AUTHORING.md`
 ════════════════════════════════════════════════════════════════════════
 
-READ IT BEFORE YOU WRITE. It is the single source of truth for what a
-comparison must look like, and this prompt does not restate it:
-
-  §1  the one rule and the four consequences that hang off it
-  §2  the document — front matter and the slug (§2-1), why the prose never
-      introduces a paper (§2-2), the four-act spine and act 2's test (§2-3),
-      which fences are available (§2-4), the length ceiling (§2-5), what a
-      cell may state (§2-6), and the literal-text traps shared with
-      `analysis/` (§2-7)
-  §3  ```probe-matrix — axis count, what each axis owes every compared paper
-  §4  what the build checks, and what it cannot
-
-`analysis/AUTHORING.md` governs the REWRITES. You read them as a map (below);
-their body rules do not carry over (§2-3). Its §3 does, through §2-7.
-
-This prompt owns the PROCEDURE below: which papers, where the facts come from,
-how the axes get built, how to verify, and how to commit.
+Every rule about what the file looks like lives there and nowhere in this
+prompt. `analysis/AUTHORING.md` governs the REWRITES you read as a map; their
+body rules do not carry over, its §3 literal-text traps do (§2-7). This prompt
+owns the PROCEDURE: which papers, where facts come from, how the axes get
+built, how to verify, how to commit.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -42,20 +30,15 @@ will run in, so keep the order given.
   UNPARSEABLE → stop and say which token you could not read. Do not guess at
   an id.
 
-  EMPTY → the human has not chosen yet, which is the moment to hand them
-  something to choose from. Name the candidates (below), then stop. Which
-  papers are worth holding together stays their judgement — it is the one
-  judgement this mode cannot make for them, and a list to choose from is not
-  a choice.
+  EMPTY → name the candidates (below), then stop. Which papers are worth
+  holding together is the human's judgement; a list to choose from is not a
+  choice.
 
   FOUR OR MORE → stop and say so; `compares` holds two or three (§2-1).
 
   ANY NAMED PAPER WITH NO `analysis/<id>.md` → **STOP BEFORE YOU WRITE
   ANYTHING.** Name the missing ids and tell the human to run `/analyze <id>`
-  on each first. The build would refuse the finished document anyway, so
-  stopping now costs one message and stopping later costs the whole write.
-
-    ls analysis/<id>.md      for each id, before anything else
+  on each first — the build would refuse the finished document anyway.
 
 Optional flag — `--refresh`: `comparison/<slug>.md` already exists and you are
 redoing it. Same procedure; overwrite in place; commit with `update`.
@@ -65,20 +48,12 @@ redoing it. Same procedure; overwrite in place; commit with `update`.
 NAMING THE CANDIDATES — what an empty invocation answers with
 ────────────────────────────────────────────────────────────────────────
 
-The corpus outgrows its comparisons. A rewrite lands on its own merits and
-nothing looks back at what it now stands beside, so papers answering one
-question end up on pages that never meet.
+THE UNIT IS A QUESTION, NOT A PAIR. Shared Decision-Log codes make a
+candidate; a question the papers answer differently makes a comparison. A
+pair you cannot phrase one for is dropped.
 
-THE UNIT IS A QUESTION, NOT A PAIR. Two rewrites citing five of the same
-Decision-Log codes are a candidate; what makes them a comparison is a
-question they answer differently. A pair you cannot phrase one for is not a
-finding — drop it and hand back a shorter list.
-
-  1. RANK AND DROP in one command — the default `score` order, the one the
-     site's neighbour row uses, with every pair an existing comparison already
-     holds left out. `pairs --help` says what each column measures. It reads
-     Decision-Log codes and `pillars:`, no prose, so no body is opened yet.
-     Take the order it prints; do not rank by a rule of your own:
+  1. RANK — the site's neighbour score, with every pair an existing comparison
+     already holds left out. Take the order it prints:
 
          python3 site/query.py pairs --limit 12
 
@@ -123,13 +98,9 @@ characteristic failure, so they are stated separately.
    the full `Paper`. The version it reports is what goes in `sources:` — that
    is the one fact a comparison cannot recover later.
 
-WHY BOTH. A comparison written only from rewrites inherits each rewrite's
-choices about what to foreground, so the axes stop being the questions a reader
-would ask and become whatever three separate readings happened to emphasise.
-It is the failure `analysis/AUTHORING.md` G1 names — a digest of a digest — at
-three times the scale, and nothing on the page says it happened.
-
-The rewrites tell you WHERE TO LOOK. The papers tell you WHAT IS TRUE.
+A comparison written only from rewrites inherits each one's choices about
+what to foreground — a digest of a digest at three times the scale. The
+rewrites tell you WHERE TO LOOK; the papers tell you WHAT IS TRUE.
 
 3. **`context/MASTER.md` + `context/P#.md` (read-only) — THE AXIS VIEW**,
    which is act 4 and nothing else. Never edit any `context/` file: propose in the
@@ -143,11 +114,10 @@ ambiguous, is §2-6.
 PROCEDURE
 ════════════════════════════════════════════════════════════════════════
 
-1. CHECK THE ARGUMENT — count, and `analysis/<id>.md` for each id. Stop here
-   on any of the three conditions under INPUT. This is the cheapest step and
-   the only one that saves a whole write.
+1. CHECK THE ARGUMENT — count, and `ls analysis/<id>.md` for each id. Stop
+   on any condition under INPUT.
 
-2. READ `comparison/AUTHORING.md`, §1 through §4.
+2. READ `comparison/AUTHORING.md` end to end.
 
 3. READ THE REWRITES — all of them, before any original. This is the map pass.
    Come out of it with a written list of candidate divergences, not a summary
@@ -188,14 +158,10 @@ PROCEDURE
      python3 site/build-site.py --out /tmp/probe-check --strict
      python3 linters/check-decision-refs.py
 
-   The FULL build is the gate (§4): `--check` alone sees none of the fence,
-   grid or length rules, so reporting success on it is reporting on a gate
-   that did not look.
-
-   Do NOT pass `--only`: a partial build drops the papers your comparison
-   names, and every one of them then reads as a missing rewrite.
-
-   `--strict` must exit 0. Do not report success on a build you did not run.
+   The FULL build is the gate (§4): `--check` sees none of the fence, grid or
+   length rules, and `--only` drops the papers your comparison names so each
+   reads as a missing rewrite. `--strict` must exit 0. Do not report success
+   on a build you did not run.
 
 10. SELF-CHECK — **before committing, not before writing.** Walk
     `comparison/AUTHORING.md` §4's table row by row, and then these, which the
@@ -224,10 +190,7 @@ SCOPE
 
 ON-DEMAND, ONE COMPARISON AT A TIME, over papers the corpus already holds.
 
-This mode never runs `/analyze` on your behalf. A missing rewrite stops the
-run (INPUT) and the human decides whether that paper is worth a rewrite of its
-own — which is a bigger decision than this comparison, and not one to make as
-a side effect of wanting a third column.
-
-If asked to compare "everything in a pillar", say no. The value is in the
-question, and a question is what a human brings.
+This mode never runs `/analyze` on your behalf — whether a missing paper is
+worth a rewrite is the human's decision, not a side effect of wanting a third
+column. If asked to compare "everything in a pillar", say no: the value is in
+the question, and a question is what a human brings.

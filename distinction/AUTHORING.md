@@ -15,41 +15,24 @@ the routine. Edit this file first, then the prompt, then the lint.
 
 **Nothing this track writes reaches the repository.**
 
-The other tracks publish: a rewrite, a comparison and a talk are pages on the
-reading site, and a scouting report is a commit on `main`. A ledger cannot be
-either. Its every row sets a basket paper's mechanism next to this method's —
-a config key, a stated weakness, a number from a run that has not been
-published — and the repository is public. So the track has no output folder
-here, no site section, no CI gate and no commit step. The private folder
-(`distinction/SETUP.md` §2) is where it reads and the only place it writes.
-
-| Consequence | Where it is written down |
-|---|---|
-| The prompt has no GIT section; `git add`, `commit` and `push` are forbidden verbs in it | `.claude/prompts/distinguish.txt` |
-| The lint runs over the private folder, as the routine's own gate, never in CI | §8 |
-| The private folder lives outside the checkout, so no `git add -A` can reach it | `distinction/SETUP.md` §2 |
-| Examples in this file, the prompt and the templates use placeholder ids, claims and keys — never a real one | this file |
-| A ledger never names what `METHOD.md` §6 lists | §7 |
+Every row of a ledger sets a basket paper's mechanism next to this method's —
+a config key, a stated weakness, an unpublished number — and the repository is
+public. So the track has no output folder here, no site section, no CI gate
+and no commit step; the private folder (`distinction/SETUP.md` §2), outside
+the checkout, is where it reads and the only place it writes. Examples in this
+file, the prompt and the templates use placeholder ids, claims and keys —
+never a real one.
 
 The other rule the track inherits: **only a paper with a rewrite in
-`analysis/` gets a ledger.** The ledger reads the paper through
-`site/query.py`, and a paper the corpus has not rewritten has no sections to
-read, no act 4 to argue with and no `related` rows. A basket row without a
-rewrite is reported in the delta (§3-3) as the next action and left unwritten.
+`analysis/` gets a ledger** — the ledger reads it through `site/query.py`. A
+basket row without one is a next action in the delta (§3-3), not a ledger.
 
 ## 2. What the routine reads and writes
 
-Reads, all under `$PROBE_PRIVATE_DIR` and all human-owned:
-
-| File | Role | Schema |
-|---|---|---|
-| `BASKET.md` | The basket — which papers, in which role, against which claims | `distinction/SETUP.md` §2-1 |
-| `METHOD.md` | The method card — the private half of the thesis, the claims `C#`, the recipe, the measurements, the weaknesses, the strings that must not leave | `distinction/SETUP.md` §2-2 |
-| `CODEMAP.md` | The code digest the operator's script regenerates at the start of a run — every entry anchored `path:line` or `cfg:key` | `distinction/SETUP.md` §2-3 |
-| `code` | The codebase, opened only to `grep` for an anchor the digest lacks | `distinction/SETUP.md` §2-4 |
-
-From the checkout it reads what every other track reads: `context/MASTER.md`,
-the pillar files the basket touches, and the corpus through `site/query.py`.
+Reads the human-owned `BASKET.md`, `METHOD.md`, `CODEMAP.md` and `code` under
+`$PROBE_PRIVATE_DIR` (schemas: `distinction/SETUP.md` §2), and from the
+checkout `context/MASTER.md`, the pillar files the basket touches, and the
+corpus through `site/query.py`.
 
 Writes, all under `$PROBE_PRIVATE_DIR`:
 
@@ -155,10 +138,9 @@ Only what changed since the previous run, section by section:
 | `6 제안` | What the human should change in `BASKET.md` or `METHOD.md`: a basket candidate found citing a basket paper, a claim with no basket column, a row with empty `claims` |
 | `7 다음 행동` | `/analyze <id>` for a row without a rewrite, `/compare <id> <id>` where two basket papers need their divergence laid out first, one ablation to run |
 
-The `probe-state` block closes the file and is what the next run reads first:
-the checkout's `HEAD` when this run read it, the three input hashes, and the
-`related` ids per basket paper as `site/query.py related` returned them. It is
-the memory of the track, and it is why a run does not re-read everything.
+The `probe-state` block closes the file and is the track's memory — the
+checkout's `HEAD`, the three input hashes and the `related` ids per basket
+paper — so the next run diffs instead of re-reading everything.
 
 **The no-change run.** When `corpus_head`, the three hashes and every
 `related` list are unchanged, the run writes this file with `- 없음` under
@@ -222,23 +204,17 @@ Which sections need which is §3-1's table. Two further rules:
 
 ## 6. Korean authoring
 
-The register is `scouting/AUTHORING.md` §4 and binds here as written: what
-stays verbatim (§4-1 — paper titles, arXiv ids, `C#`, `D#`, config keys,
-every anchor), the glossary (§4-2), headers as fixed strings (§4-3), 개조식 /
-명사형 종결 (§4-4), and the three render traps — a raw `~` striking out a line
-(§4-6), a bare URL swallowing the particle after it (§4-7), a `**` closing
-between a paren and a particle (§4-8). The ledger is read on a screen like a
-scouting report and fails in the same places.
+`scouting/AUTHORING.md` §4 binds here as written — what stays verbatim (every
+anchor, `C#`, `D#`, id and config key included), the glossary, fixed headers,
+개조식, and the three render traps (§4-6 – §4-8).
 
 ## 7. What never leaves
 
-`METHOD.md` §6 is a list of literal strings — a codename, a number, a dataset,
-a collaborator — that must not appear in any output yet. The lint searches
-every ledger, the matrix and every run for each of them and fails on a hit,
-and the routine does not save an output the lint fails. The strings are the
-human's to list; the track's job is to never be the place one leaks from. A
-ledger that needs to say the thing says it by its `C#` or its `METHOD §n`
-anchor instead, which is what the anchors are also for.
+`METHOD.md` §6 lists literal strings — a codename, a number, a dataset, a
+collaborator — that no output may carry yet. The lint fails on any of them in
+a ledger, the matrix or a run, and the routine does not save an output the
+lint fails. A ledger that needs to say the thing says it by its `C#` or
+`METHOD §n` anchor.
 
 ## 8. Enforcement
 

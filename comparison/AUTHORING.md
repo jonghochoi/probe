@@ -12,19 +12,11 @@ originals are read, how to verify and commit. Edit this first, then the code.
 
 **Only papers that already have a rewrite in `analysis/` may be compared.**
 
-Every other rule here is a consequence of it, so it is worth stating why it
-exists rather than only that it does.
-
-A paper's own detail belongs to its own page. A reader who finishes an axis and
-wants to know how one of the three actually implements it should have somewhere
-to go, and `p/<id>/` is that somewhere — four acts, the figures, the equations,
-the term panels, the whole read. The comparison stays on what separates the
-papers and links out for everything else.
-
-A compared paper with no rewrite has no page to link to. The comparison would
-have to carry that paper's detail itself, and the moment it does, it is no
-longer a comparison — it is one rewrite and two summaries. So the build does
-not warn about a missing rewrite. It **refuses to publish the comparison**.
+A paper's own detail belongs to its own page, and the comparison links out to
+it for everything but what separates the papers. A compared paper with no
+rewrite has no page to link to, so the comparison would have to carry its
+detail and stop being a comparison — one rewrite and two summaries. The build
+therefore **refuses to publish** it rather than warning.
 
 What follows from that:
 
@@ -59,10 +51,10 @@ summary: >
 | Key | Rule |
 |---|---|
 | `compares` | 2–3 arXiv ids, **each with a rewrite in `analysis/`**. Two is a contrast, three is a field; four is a survey and wants a different shape. No duplicates. This list fixes the column order of every `probe-matrix` and the order of the paper cards |
-| `sources` | The arXiv edition actually read, `<id>v<n>`, **one per entry of `compares`, in the same order**. Which version was read is the one fact a comparison cannot recover later, and pairing it positionally means neither list can drift without the other noticing |
+| `sources` | The arXiv edition actually read, `<id>v<n>`, **one per entry of `compares`, in the same order**. Which version was read is the one fact a comparison cannot recover later |
 | `title` | The comparison's **question**, not a list of the papers' names. The cards below the header already name them |
 | `tagline` | One line: what reading these together tells you |
-| `stances` | **One per entry of `compares`, in the same order** — what that paper does about the question, in 20 characters or fewer (`끝까지 푼다`, `토큰으로 접는다`). The divergence in its shortest form. Positional like `sources`, so neither list can drift without the other noticing. A stance that needs a clause of mechanism to land is not a stance — that clause belongs in a `probe-matrix` cell |
+| `stances` | **One per entry of `compares`, in the same order** — what that paper does about the question, in 20 characters or fewer (`끝까지 푼다`, `토큰으로 접는다`). The divergence in its shortest form. A stance that needs a clause of mechanism to land is not a stance — that clause belongs in a `probe-matrix` cell |
 | `common` | One line, 30 characters or fewer: **the commitment all of them share** (`셋 다 이미지 평면에서 끝낸다`) — act 2 in its shortest form (§2-3). Required |
 | `pillars` | Ours, comma-separated. Which pillars this question sits in |
 | `generated` | `YYYY-MM-DD HH:MM` — the clock as you write |
@@ -70,30 +62,21 @@ summary: >
 | `summary` | 2–3 sentences read cold. Markdown and `` $`math`$ `` render |
 
 **Two registers, one thought.** `tagline` is prose and prints on the
-comparison's own page, under the H1. `stances` and `common` are the same claim
-as structure: the index card draws them as a fork — a branch per paper for what
-it does, the trunk for what they all accept. A branch carries that paper's
-`alias:` (`analysis/AUTHORING.md` §1) **and its arXiv id**: the alias is what a
-reader recognises, and the id is what they search, cite and type — a card that
-drops it makes the reader open the comparison to recover a number the list
-already had. A paper that resolves to no alias shows the id alone, which is why
-the alias is optional there and the id is not. The card prints the fork
-**instead of** the tagline, because the two carry one thought and printing both
-is the same sentence twice on one card.
+comparison's own page. `stances` and `common` are the same claim as structure:
+the index card draws them as a fork — a branch per paper, labelled with its
+`alias:` (`analysis/AUTHORING.md` §1) and its arXiv id, and the trunk for what
+they all accept — and prints it **instead of** the tagline.
 
 Writing `common` is the check, not the caption. The moment you cannot fill it
 in one line is the moment to ask whether these are the right two or three
 papers (§2-3).
 
-`analysis/` keys that are deliberately **absent**: `figures` · `appendix` ·
-`terms` · `metric` · `published` · `authors` · `links`. Each declares something
-about one paper's original, and each compared paper's own rewrite already
-carries it. Adding one here later is easier than emptying one now.
+`analysis/` keys that are deliberately **absent** — `figures` · `appendix` ·
+`terms` · `metric` · `published` · `authors` · `links` — each describe one
+paper's original, which that paper's rewrite already carries.
 
-**File name.** `comparison/<slug>.md`, lowercase words joined by hyphens, drawn
-from the question. Not the ids joined together: three run to forty characters,
-their order has no right answer, and what identifies a comparison is what it
-asks.
+**File name.** `comparison/<slug>.md`, lowercase words joined by hyphens,
+drawn from the question — never the ids joined together.
 
 ### 2-2. The prose never introduces a paper
 
@@ -160,26 +143,17 @@ natural shape when the three answers cost the decisions different things.
 
 ### 2-5. Length
 
-A comparison that runs as long as a rewrite has stopped comparing. The rewrites
-it sits beside run about 8,500–20,000 printed characters, median around
-13,000; the build warns a comparison past 7,000.
+A comparison that runs as long as a rewrite has stopped comparing. The build
+warns past 7,000 printed characters (rewrites run about 8,500–20,000).
 
-**The count is prose only.** Every fenced block is stripped before measuring, so
-a `probe-matrix` costs nothing against the ceiling — a grid is scanned, not read
-top to bottom. That makes the ceiling generous by construction, and it also
-means it watches the wrong half: the part of the document that *is* the
-comparison is the part the count cannot see.
+**The count is prose only** — every fenced block is stripped first, so a
+`probe-matrix` costs nothing. That also means it cannot see where a comparison
+usually starts explaining one paper: a **cell note** that grows a second clause
+of mechanism. Catching that is reading (§4).
 
-Which matters, because a comparison does not start explaining one paper in a
-paragraph. It starts in a **cell note** — one clause of mechanism to make the
-cell land, then a second. Nothing counts that and nothing will; catching it is
-reading, which is what §4's last paragraph is for.
-
-When the ceiling does fire, the fix is never to compress the prose — a short
-explanation of one paper is still an explanation of one paper. Find the
-paragraph that started explaining one paper and either link to its rewrite or
-drop the axis. A note that has grown a second clause has the same two options
-and no third.
+When the ceiling fires, the fix is never to compress the prose. Find the
+paragraph or note that started explaining one paper, and either link to its
+rewrite or drop the axis.
 
 ### 2-6. Where the facts come from
 
@@ -188,9 +162,6 @@ arXiv original**, never inherited from a rewrite, and `sources:` records which
 edition it was confirmed against. A number the paper does not give is not in a
 cell; a paper that is ambiguous on an axis gets a cell saying so — that is a
 finding, and one only a comparison produces.
-
-How the rewrites and the originals are read to get there, and why both, is the
-procedure's (`.claude/prompts/compare.txt`, SOURCES).
 
 ### 2-7. What publishes as literal text
 
@@ -217,11 +188,9 @@ collapse into three summaries sharing a file.
   spreadsheet.
 - Each axis needs `k`, the question it asks.
 - **Each axis needs one cell per compared paper.** `of` must name one of
-  `compares:`, with no duplicates and none missing. This is the whole point: an
-  axis that answers for two of three papers is a remark about those two, and on
-  the page it reads as though the third had nothing to say. A thought that only
-  fits two either gets reworded until it fits all three, or is dropped — and
-  that rewording is where the comparison actually happens.
+  `compares:`, with no duplicates and none missing. An axis that fits only two
+  papers is reworded until it fits all three, or dropped — that rewording is
+  where the comparison happens.
 - `v` is required; `note` is one optional line under it.
 - Cells are placed by `of`, not by position, so they may be written in whatever
   order the axis reads best.
@@ -245,14 +214,8 @@ pull requests build, and the last row as its own CI gate.
 | Term anchor ↔ definition pairing, unclosed `**`, math published as literal text (R4, §2-7) | `site/builder/render.py`, shared with `analysis/` |
 | Every `D#` cited exists in the Decision Log | `linters/check-decision-refs.py` |
 
-Verify before reporting a comparison done. `--check` reads front matter and
-writes nothing; the fence and length rules are checked while the page renders,
-so the full build is the gate that sees everything:
-
-```bash
-python3 site/build-site.py --out /tmp/probe-check --strict
-python3 linters/check-decision-refs.py
-```
+`--check` reads front matter only; the fence and length rules run while the
+page renders, so the full build is the gate.
 
 What the code cannot see is the rule that decides whether a comparison was
 worth writing: whether the axes are the ones a reader would have asked about,

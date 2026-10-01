@@ -5,16 +5,9 @@ its ORIGINAL text, and write `analysis/<arxiv-id>.md` — a Korean document a
 reader can understand *without opening the paper*. That file is what the site
 publishes; it is the only thing the site publishes.
 
-ONE FILE, TWO SURFACES. The page has two tabs and they both come out of
-this one run:
-
-  요약   `::: glance` — thesis, narrative, four evidence cards   AUTHORING §4
-  상세   the full re-telling                                  AUTHORING §1–§3
-
-Both are written from the SAME reading of the original. The short surface is
-NOT written by shortening the long one — see AUTHORING G1, and step 6 below.
-
-Everything here comes from the paper itself and from `context/`.
+ONE FILE, TWO SURFACES: the body (상세) and the `::: glance` container (요약),
+both written from the SAME reading of the original — the short one is never
+made by shortening the long one (AUTHORING G1, step 6).
 
 INPUT:
 The paper is the invocation argument: a bare arXiv id (`YYMM.NNNNN`), an
@@ -22,35 +15,11 @@ arXiv URL, or a versioned id (`YYMM.NNNNNv2`). Normalize to the bare id.
 If the argument is empty or unparseable, stop and ask — do not pick a paper.
 
 Optional flag — `--refresh`: `analysis/<id>.md` already exists and you are
-redoing it (a newer arXiv version, or a rewrite that missed). Same procedure;
-overwrite in place.
+redoing it. Same procedure; overwrite in place.
 
-
-════════════════════════════════════════════════════════════════════════
-THE FORMAT CONTRACT LIVES IN `analysis/AUTHORING.md`
-════════════════════════════════════════════════════════════════════════
-
-READ IT BEFORE YOU WRITE. It is the single source of truth for what a rewrite
-must look like, and this prompt does not restate it:
-
-  §1  file + front-matter contract (every key, and which ones the build
-      reports), plus the SOURCE and STANCE contracts the procedure below
-      implements
-  §2  body rules R1–R15 — the four acts, the heading spine, density, term
-      anchors, the five planted-context kinds and their ` ```probe-* ` fences,
-      figures, math, code blocks (language AND caption on the fence line),
-      callouts, resource links, quizzes
-  §3  what publishes as literal text — the three accepted math forms, `**`
-      before a particle, bare URLs and the automatic 재작성본 link marker
-  §4  the 요약 (`::: glance`) surface G1–G7 — the four-part spine, the
-      narrative's length band and register, the fact rail, four evidence
-      cards, and what this surface may NOT carry
-  §5  what the build enforces vs. what only review catches
-
-`scouting/AUTHORING.md` governs `scouting/` and does NOT apply to this track.
-
-This prompt owns the PROCEDURE below: which paper, where the facts come from,
-how to verify, and how to commit.
+THE FORMAT CONTRACT is `analysis/AUTHORING.md` — every rule about what the
+file looks like lives there and nowhere in this prompt. This prompt owns the
+PROCEDURE: where the facts come from, how to verify, how to commit.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -68,11 +37,8 @@ Two, with DIFFERENT jobs. Do not collapse them.
    supports, strains or contradicts, and what we would check. Never edit any
    `context/` file — propose in the document, never in the source.
 
-WHY the original and not a summary. A summary keeps a fraction of a paper's
-figures and drops what a rewrite cannot be written without — the
-preliminaries, a pipeline's actual parameters, the rig, the robustness
-mechanisms. Rewriting a summary produces a summary of a summary. That is the
-failure this mode exists to prevent.
+A summary keeps a fraction of a paper's figures and drops what a rewrite
+cannot be written without; rewriting one produces a summary of a summary.
 
 ACQUISITION:
 
@@ -118,7 +84,7 @@ PROCEDURE
 2. READ the paper end to end BEFORE any of the axis material. Reading it
    first anchors you to its framing and you will reproduce its omissions.
 
-3. READ `analysis/AUTHORING.md` — the full format contract, §1 through §5.
+3. READ `analysis/AUTHORING.md` end to end.
 
 4. READ `context/MASTER.md` and the `context/P#.md` for the pillars this
    paper plausibly touches. That is where act 4 and the `pillars:` front
@@ -142,44 +108,25 @@ PROCEDURE
      python3 site/build-site.py --only <id> --out /tmp/probe-check --strict
      python3 linters/check-decision-refs.py
 
-   The build is the gate — what it checks is AUTHORING §5. `--strict` must
-   exit 0. Do not report success on a build you did not run.
+   `--strict` must exit 0 (what each gate checks: AUTHORING §5). Do not report
+   success on a build you did not run.
 
-   `check-decision-refs.py` is the one lint outside it, and it is not a
-   formatting check — it verifies each `D#` you cite exists. A citation that
-   does not resolve is dropped to plain text on the page, tooltip and all,
-   which the build has no way to notice.
-
-8. SELF-CHECK — answer these honestly before committing:
-     - Could a reader who never opens the paper explain the mechanism?
-       (the R3 restoration floor. If not, you summarized.)
+8. SELF-CHECK — the rules no gate sees (AUTHORING §5). Answer honestly:
+     - Could a reader who never opens the paper explain the mechanism? (R3)
      - Does every section title name something specific to THIS paper? (R2)
-     - Is every `co-ten` about one of OUR decisions? (R9)
-     - Do the author-stated limitations close Act 3, not Act 4? (R9)
-     - Does every callout hold ONE point, inside the 400-character ceiling?
-       An overflowing one keeps its headline and the rest moves into body
-       prose or a `::: details`. (R9)
-     - Does `tagline:` say what the paper DOES without naming the paper? The
-       title prints directly above it. (§1)
+     - Is every `co-ten` about one of OUR decisions, and do the author-stated
+       limitations close Act 3, not Act 4? (R9)
+     - Does `tagline:` say what the paper DOES without naming it? (§1)
      - Is every resource link confirmed in the paper? (R10)
-     - Is the figure that carries the paper's CENTRAL mechanism on the page?
-       Walk `arxiv.py`'s figure list once more and name, for each linkable
-       figure you left out, why. (R6)
-     - Does any `probe-flow` on the page survive that walk — i.e. is its `why`
-       still true now that you have seen every figure? (R6)
-     - Which appendix sections did you take something from, and does
-       `appendix:` list exactly those? Limitations, the rig, the observation
-       vector, the training recipe and the baseline asymmetry are the five
-       that get skipped. (R15)
-     - Does every opinion anchor to a `D#` that actually exists?
-     - 요약 — is every number on it also in the original, and is each card's
-       figure, equation or scale the evidence its claim actually rests on? (G6)
-     - 요약 — does the narrative read as one person talking, with no bullets
-       and no heading, and does it close on the paper's OWN stated limit? (G4)
-     - 요약 — does any of our act-4 view reach that surface, even without a
-       `D#` or a `context/` path the build would catch? There must be none. (G7)
-     - 요약 — do the four card titles, read alone in order, make the
+     - Walk `arxiv.py`'s figure list once more: is the figure carrying the
+       CENTRAL mechanism on the page, can you name why each linkable figure
+       you left out is out, and is every `probe-flow`'s `why` still true? (R6)
+     - Does `appendix:` list exactly the appendix sections you drew on? (R15)
+     - 요약 — is every number on it in the original, is each card's evidence
+       what its claim rests on, and do the four titles alone make the
        argument? (G6)
+     - 요약 — does the narrative read as one person talking and close on the
+       paper's OWN stated limit (G4), with none of our act-4 view in it? (G7)
 
 9. COMMIT — one paper per commit:
        analysis: add <arxiv-id> rewrite (<alias>)
@@ -192,31 +139,19 @@ PROCEDURE
 10. NAME THE COMPARISON CANDIDATES — a short block at the end of the run,
     printed for the human and written nowhere.
 
-    A comparison earns its place when two or three rewrites answer one question
-    differently, and the corpus only changes at the moment a rewrite lands —
-    the moment that just happened. So the candidates are named here, while the
-    paper is still read, rather than looked for later against a corpus that has
-    not moved since.
-
-    Score with the rule the site already ranks neighbours by, never the
-    bodies of the other rewrites:
+    The corpus only changes when a rewrite lands, so candidates are named now,
+    while the paper is still read. Score with the rule the site ranks
+    neighbours by, never the bodies of the other rewrites:
 
         python3 site/query.py pairs --with <this id> --limit 6
 
-    It scores a pair by the Decision-Log codes both cite, a rarer code weighing
-    more, plus one per shared pillar (`corpus.score`), and drops any pair a
-    `comparison/<slug>.md` already holds in its `compares:`.
+    Print at most three, strongest first: the ids and aliases, the codes they
+    share, and the question that would divide them. A shared code is a
+    candidate, not a question — naming one you cannot phrase is worse than
+    naming none, and an honest none is the usual answer.
 
-    Print at most three, strongest first, each as: the ids and aliases, the
-    codes they share, and the question that would divide them. The question is
-    what makes a comparison — a shared code is a candidate, not a question, and
-    naming one you cannot phrase is worse than naming none. When nothing
-    scores, say so: an honest none is the usual answer for a paper that opens a
-    corner of the corpus nothing else occupies.
-
-    This is a proposal. Do not run `/compare`, do not write a file, do not edit
-    anything. The human decides whether any of it is worth writing, and
-    `comparison/AUTHORING.md` §1 binds what a comparison may hold.
+    Do not run `/compare`, write a file or edit anything; what a comparison
+    may hold is `comparison/AUTHORING.md` §1.
 
 
 ════════════════════════════════════════════════════════════════════════
