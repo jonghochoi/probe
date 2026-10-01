@@ -97,10 +97,10 @@ FILED_PILLARS = 2
 # sorts them.
 LINK_KINDS = {
     "arxiv": ("arXiv", 0),
-    "code": ("GitHub", 1),
-    "weights": ("Weights", 2),
-    "data": ("Dataset", 3),
-    "site": ("Page", 4),
+    "site": ("Page", 1),
+    "code": ("GitHub", 2),
+    "weights": ("Weights", 3),
+    "data": ("Dataset", 4),
     "demo": ("Demo", 5),
 }
 
