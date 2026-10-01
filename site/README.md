@@ -4,16 +4,11 @@ Everything the reading site is made of — the static-site generator and its
 build-time dependencies. The site publishes `analysis/<arxiv-id>.md`,
 `comparison/<slug>.md` and `presentation/<arxiv-id>.md`, and nothing else.
 
-One rewrite becomes **two tabs on one page** — 요약 (one screen, the tab a
-reader lands on) and 상세 (the body). Both come out of the same source file and
-the same `/analyze` run; their contracts are `analysis/AUTHORING.md` §4 (요약)
-and §1–§3 (상세). Two more tabs join them when the other tracks have something
-for that paper — 비교 for every comparison holding it, 발표 for its presentation.
-
-The corpus and its contracts stay at the repo root (`analysis/`,
-`comparison/`, `presentation/`); this folder only reads from there. The rules a
-change here must keep are in `site/CLAUDE.md`; the reasoning behind each
-surface sits in the docstring or header comment of the file that draws it.
+A paper's page carries the 요약 and 상세 tabs from its rewrite, plus 비교 and
+발표 when a comparison or a presentation holds it. The corpus and its
+contracts stay at the repo root; the rules a change here must keep are in
+`site/CLAUDE.md`, and the reasoning behind each surface sits in the header
+comment of the file that draws it.
 
 ## Layout
 

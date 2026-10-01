@@ -17,29 +17,16 @@ place it writes (`distinction/AUTHORING.md` §1).
 THE FORMAT CONTRACT LIVES IN `distinction/AUTHORING.md`
 ════════════════════════════════════════════════════════════════════════
 
-READ IT BEFORE YOU WRITE. It is the single source of truth for what the three
-documents must look like, and this prompt does not restate it:
-
-  §1  the one rule — nothing reaches the repository — and the rewrite rule
-  §2  what is read from the private folder and what is written there
-  §3  the documents — the ledger's spine and its seven sections (§3-1), the
-      matrix (§3-2), the delta and its `probe-state` block (§3-3), the shape
-      of an idea (§3-4)
-  §4  the anchor grammars, which sections need which, and the two rules on
-      numbers and code anchors
-  §5  the caps — active rows, ideas, ledger length
-  §6  Korean authoring, by reference to `scouting/AUTHORING.md` §4
-  §7  what never leaves — `METHOD.md` §6
-  §8  what the lint checks, and what only reading catches
+Every rule about what the three documents look like lives there and nowhere
+in this prompt; read it end to end before you write.
 
 The private folder's own files — `BASKET.md`, `METHOD.md`, `CODEMAP.md`,
 `code` — are the human's and their schemas are `distinction/SETUP.md` §2.
 Read them; never edit them. What you want changed goes under 제안 in the
 delta.
 
-This prompt owns the PROCEDURE below: the guard, what to read, how the delta
-is found, how the evidence is confirmed, and how the output is checked and
-saved.
+This prompt owns the PROCEDURE: the guard, what to read, how the delta is
+found, how evidence is confirmed, how the output is checked and saved.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -142,11 +129,7 @@ PROCEDURE
 
    Hold the paper's mechanism against `METHOD.md` §2 and the matching
    `CODEMAP.md` entries, section by section in the ledger's order
-   (AUTHORING §3-1). The order is the argument: what is shared (§1) is what
-   makes a difference (§2) a difference rather than two unrelated methods;
-   the paper's own gaps (§3) are what the method's §4 is held against (§4);
-   and only then does an improvement (§5), a threat (§6) or a refutation (§7)
-   mean anything.
+   (AUTHORING §3-1 — the order is the argument).
 
    EVIDENCE, BOTH SIDES. A §3 gap comes from the paper's own ablation,
    failure case or stated limit — `section --match` the term, and quote the

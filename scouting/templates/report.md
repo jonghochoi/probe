@@ -40,27 +40,8 @@
 
 ---
 
-## 🥈 논문 2 — 우선순위 ★★
-
-**<Paper Title>**
-[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue> · source: <...> · <코드 라벨>
-
-### (a) 관련 Pillar / Decision
-### (b) 핵심 기여
-### (c) 시사점
-### (d) 먼저 확인할 점
-
----
-
-## 🥉 논문 3 — 우선순위 ★
-
-**<Paper Title>**
-[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue> · source: <...> · <코드 라벨>
-
-### (a) 관련 Pillar / Decision
-### (b) 핵심 기여
-### (c) 시사점
-### (d) 먼저 확인할 점
+<!-- 🥈 논문 2 and 🥉 논문 3 repeat 🥇's form — header line, the four `###`
+     subsections — with their own medal and stars. -->
 
 ---
 

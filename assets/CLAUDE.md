@@ -82,30 +82,22 @@ table draws is on the first screen.
   under `PROBE · 3–5 A WEEK`. The feed fades in with the reader, so nothing
   is picked while the probe is out of it.
 
-A card is marked where it crosses a reading line halfway down the window, and
-nothing is drawn at that line: the card lights and a ring spreads from its dot.
-Which rows are marked is chosen from the geometry: each picked row starts below
-the line, so the feed fades in unmarked; the copy scrolling in behind never
-reaches the line within a cycle, so the loop joins without a card changing
-state; and the last marked card has left the window before the flood returns.
-Moving the line, the rows or the speed moves these keyframes, which is why the
-hero is generated.
-
-The count lives in the label because it belongs to the scene: a count line
-standing under both scenes would show the result while the probe is still
-drowning.
+A card is marked where it crosses a reading line, with nothing drawn at the
+line itself. Which rows are marked follows from the geometry, so moving the
+line, the rows or the speed moves the keyframes — which is why the hero is
+generated (`build-art.py` comments carry the constraints). The count lives in
+each scene's label, never in a line under both: that would show the result
+while the probe is still drowning.
 
 ## Who writes what
 
 `own.svg` is one row: you, the `context/` frame, the probe, and the frame of
-four folders. Both frames share one top and one height with their labels above
-them, you and the probe centre on the frames, and the probe stands as far from
-its folders as you do from `context/`. The one wire is `context/` into the
-probe, labelled *reads*, with room at both ends. Nothing is drawn from the
-probe to its folders — the PROBE WRITES label says it — and nothing is drawn
-back into `context/`, since the agent never writes it: the caption under the
-picture says that a change comes to you as a proposal instead. The frame names
-`P#.md`, never a count of pillars, so adding one does not date the picture.
+four folders, symmetric about the two frames. The one wire is `context/` into
+the probe, labelled *reads*. Nothing is drawn from the probe to its folders —
+the PROBE WRITES label says it — and nothing back into `context/`, which the
+agent never writes; the caption says a change comes to you as a proposal. The
+frame names `P#.md`, never a count of pillars, so adding one does not date the
+picture.
 
 ## Generating
 

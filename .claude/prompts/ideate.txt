@@ -22,11 +22,8 @@ repo root:
 
     python3 site/query.py --help
 
-It reads the same records the site publishes as `corpus.json`, so the
-relations it names are the ones a reader sees on the pages. Learn its
-subcommands from `--help` rather than from this prompt; the ones this
-procedure leans on are `catalog`, `show`, `related`, `pairs`, `outline`,
-`section` and `decision`.
+It reads the records the site publishes as `corpus.json`. Learn its
+subcommands from `--help`, not from this prompt.
 
 READ THROUGH IT, NOT AROUND IT. A rewrite is 50–90 KB; the whole corpus is
 far past one context window. `section` hands you the one part an argument
@@ -86,16 +83,11 @@ PROCEDURE
      is shared vocabulary (its row lists the `D#` codes behind it), `cites` /
      `mentions` are the rewrite's own reaching, and `compared_with` and
      `nearby_comparison` are questions already argued.
-   - A TOPIC: `search "<the topic as written>"` first — the site's semantic
-     index, which finds a paraphrase that shares no word with the rewrite, and
-     prints what it read the question as. It needs the network; when it says
-     it cannot reach the endpoint, go on without it. Then `catalog --match`
+   - A TOPIC: `search "<the topic as written>"` first (semantic; when it
+     cannot reach the endpoint, go on without it), then `catalog --match`
      with two to four terms, Korean and English both
-     (`"지연|latency|asynchronous"`) — it searches title, alias, tagline,
-     `keywords` and `summary`, and names the fields each row hit.
-     `catalog --pillar` / `--decision` narrow it. `catalog --json` prints the full records when a
-     row's tagline is not enough to judge it. Keep at most eight, and say for
-     each which field matched.
+     (`"지연|latency|asynchronous"`), narrowed by `--pillar` / `--decision`.
+     Keep at most eight, and say for each which field matched.
    - Any comparison that holds two of your papers already asked a question
      about them. Read its `stances` and `common` (`show <slug>`) and its
      act 4 (`section <slug> --act 4`) before proposing anything across that
@@ -107,12 +99,10 @@ PROCEDURE
      python3 site/query.py pairs --with <paper> --by contrast
      python3 site/query.py pairs --by contrast           # EMPTY input
 
-   `--by contrast` is the order this mode reads, because an idea lives where
-   each paper holds what the other lacks; `pairs --help` says what it and
-   every column measure. When no pair qualifies the command says so — fall
-   back to `--by score`, the order `/compare` names candidates from, and
-   treat its top rows as the most alike: a pair too alike to lend each other
-   anything is ruled out, not proposed.
+   `--by contrast` is the order this mode reads: an idea lives where each
+   paper holds what the other lacks. When no pair qualifies, fall back to
+   `--by score` and treat its top rows as too alike to lend each other
+   anything — ruled out, not proposed.
 
    Read the list down to about the twelfth row, not further, and take three
    or four candidates; for a TOPIC, take them from among the papers step 2
@@ -134,11 +124,8 @@ PROCEDURE
 
        cd site && python3 -m builder.arxiv <id> --grep "23\.1|20\.8 ms"
 
-   `--grep` prints every line of the original that matches, with the § or
-   table it sits in; that anchor goes beside the number. Without `--grep` the
-   command prints the section tree, which is where to look when a pattern
-   finds nothing. A number you did not check is written as the rewrite's, and
-   says so.
+   The § or table `--grep` names goes beside the number. A number you did not
+   check is written as the rewrite's, and says so.
 
 5. COMPOSE — at most three ideas, strongest first. Fewer is fine; none is an
    honest answer when the pairs share vocabulary and nothing else. Each idea
