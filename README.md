@@ -34,12 +34,12 @@ together, in Korean, on the reading site.
 holds one pillar's decision log, tracked literature and anti-topics.
 
 | Track | You run in [Claude Code](https://claude.com/claude-code) | It writes |
-|---|---|---|
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" height="26" align="absmiddle" alt="scouting"></picture> **Scouting** | scheduled, one pillar per run — [setup](scouting/SETUP.md) | `scouting/P#/<date>.md` — [format](scouting/AUTHORING.md) |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" height="26" align="absmiddle" alt="analysis"></picture> **Analysis** | `/analyze <arXiv id>` | `analysis/<id>.md` — [format](analysis/AUTHORING.md) |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" height="26" align="absmiddle" alt="comparison"></picture> **Comparison** | `/compare <id> <id> [<id>]` | `comparison/<slug>.md` — [format](comparison/AUTHORING.md) |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-presentation-dark.svg"><img src="assets/probe-presentation.svg" height="26" align="absmiddle" alt="presentation"></picture> **Presentation** | `/present <arXiv id>` | `presentation/<id>.md` — [format](presentation/AUTHORING.md) |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-ideation-dark.svg"><img src="assets/probe-ideation.svg" height="26" align="absmiddle" alt="ideation"></picture> **Ideation** | `/ideate [<id \| alias \| topic>]` | nothing, it answers in chat |
+|:---:|---|---|
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" height="64" alt="scouting"></picture><br><sub><b>Scouting</b></sub> | scheduled, one pillar per run — [setup](scouting/SETUP.md) | `scouting/P#/<date>.md` — [format](scouting/AUTHORING.md) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" height="64" alt="analysis"></picture><br><sub><b>Analysis</b></sub> | `/analyze <arXiv id>` | `analysis/<id>.md` — [format](analysis/AUTHORING.md) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" height="64" alt="comparison"></picture><br><sub><b>Comparison</b></sub> | `/compare <id> <id> [<id>]` | `comparison/<slug>.md` — [format](comparison/AUTHORING.md) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-presentation-dark.svg"><img src="assets/probe-presentation.svg" height="64" alt="presentation"></picture><br><sub><b>Presentation</b></sub> | `/present <arXiv id>` | `presentation/<id>.md` — [format](presentation/AUTHORING.md) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-ideation-dark.svg"><img src="assets/probe-ideation.svg" height="64" alt="ideation"></picture><br><sub><b>Ideation</b></sub> | `/ideate [<id \| alias \| topic>]` | nothing, it answers in chat |
 
 </details>
 

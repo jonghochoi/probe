@@ -380,13 +380,19 @@ IDEATION_CSS = """
 
 
 def ideation() -> str:
-    """The probe looking up at a thought whose dots light in turn."""
-    thought = """<g>
-      <circle class="bub" cx="80" cy="26" r="2.6"/><circle class="bub" cx="87" cy="16" r="4"/>
-      <ellipse class="bub" cx="104" cy="2" rx="16" ry="11"/>
-      <circle class="bdot t1" cx="96" cy="2" r="2.6"/><circle class="bdot t2" cx="104" cy="2" r="2.6"/><circle class="bdot t3" cx="112" cy="2" r="2.6"/></g>"""
-    return svg(84, 81, "PROBE — thinking up what nobody has tried", IDEATION_CSS,
-               probe(0, 0, 1, "up") + thought, vb="4 -14 122 118")
+    """The probe looking up at a thought whose dots light in turn. Drawn in
+    the four other track icons' frame — the 72 x 96 box from x = 12, the
+    probe at scale 1 — so the probe stands the same size and on the same
+    axis in the README's column. The thought rises off the head, its smallest
+    bubble on the hull's edge, and bobs with the head as one rig; the cloud
+    takes the frame's free top-right corner, as `probe-presentation.svg`'s
+    screen does."""
+    thought = """<g class="rig">
+      <circle class="bub" cx="61.5" cy="28.5" r="1.8"/><circle class="bub" cx="66" cy="22" r="2.6"/>
+      <ellipse class="bub" cx="71.5" cy="10.5" rx="11.5" ry="6.5"/>
+      <circle class="bdot t1" cx="66" cy="10.5" r="2"/><circle class="bdot t2" cx="71.5" cy="10.5" r="2"/><circle class="bdot t3" cx="77" cy="10.5" r="2"/></g>"""
+    return svg(72, 96, "PROBE — thinking up what nobody has tried", IDEATION_CSS,
+               probe(0, 0, 1, "up") + thought, vb="12 0 72 96")
 
 
 IMAGES = {"hero": hero, "own": own, "probe-ideation": ideation}

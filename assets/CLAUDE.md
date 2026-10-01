@@ -14,7 +14,7 @@ their colours.
 |---|---|
 | `hero.svg` (880×330) | The front door, and the link to the reading site. The headline, the claim and the button on the left; on the right, one 25 s cycle in two scenes — the flood, then the reader |
 | `own.svg` (880×204) | The picture under How it works — who writes what: you and `context/`, the probe that reads it, and the four folders it writes |
-| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons, each before its track's name in the How-it-works table |
+| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons, each above its track's name in the How-it-works table |
 | `build-art.py` | Generates `hero`, `own` and `probe-ideation`. The four other track icons are hand-authored |
 
 ## Drawing rules
@@ -47,7 +47,7 @@ nothing, so the page rides under its eyes and the mug stands on the ground
 beside it.
 
 **Each track icon shows its track working, and its outline is what does the
-work.** At the 26 px a table cell gives them, the only thing that survives is
+work.** At the 64 px a table cell gives them, the only thing that survives is
 the shape around the face: `probe-scouting.svg` sweeps (signal arcs over the
 beacon, a scan band crossing the hull, pupils tracking it), `probe-analysis.svg`
 reads (one wide page under the eyes, its lines lighting in turn),
@@ -61,8 +61,8 @@ of these.
 **An icon shares its track's cell, never a column of its own.** A table
 column that holds only an image has no minimum width — GitHub caps every image
 at `max-width: 100%` — so when the page is narrower than the table, the
-browser squeezes that column first and the icons shrink to nothing. Beside the
-track's name, the name holds the cell open.
+browser squeezes that column first and the icons shrink to nothing. Stacked
+above the track's name, the name holds the cell open.
 
 **Animation is inlined and stays in step with the site.** A README image
 carries no external stylesheet, so every motion lives in the file's own
