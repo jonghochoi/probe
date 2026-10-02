@@ -3,13 +3,13 @@
     .hull   { fill: #E8916F; }
     .iris   { fill: #FFF6F1; }
     .pupil  { fill: #2A1A12; }
-    .stalk  { stroke: #F0A183; stroke-width: 5; stroke-linecap: round; fill: none; }
-    .beacon { fill: #F0A183; }
+    .stem   { stroke: #F0A183; stroke-width: 3.6; stroke-linecap: round; fill: none; }
+    .leaf   { fill: #F0A183; }
     .page   { fill: #FFF6F1; stroke: #C98A6D; stroke-width: 2; }
     .line   { fill: #C98A6D; opacity: .3; }
     .shadow { fill: #F0A183; opacity: .45; }
     .dim    { fill: #6E625B; }
-    .dimst  { stroke: #5E534C; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .dimst  { stroke: #5E534C; stroke-width: 3.6; stroke-linecap: round; fill: none; }
     .dimbe  { fill: #5E534C; }
     .cross  { fill: none; stroke: #2A211C; stroke-width: 3.2; stroke-linecap: round; }
     .mug    { fill: #FFF6F1; stroke: #C98A6D; stroke-width: 2; stroke-linejoin: round; }
@@ -17,6 +17,8 @@
     .brew   { fill: #C98A6D; }
     .steam  { fill: none; stroke: #F0A183; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
     .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .sprout { transform-box: view-box; transform-origin: 48px 27px;
+              animation: sway 3.2s ease-in-out infinite; }
     .lid    { transform-box: fill-box; transform-origin: 50% 50%;
               animation: blink 7s ease-in-out infinite; }
     .readp  { animation: read 3.6s ease-in-out infinite; }
@@ -29,6 +31,7 @@
     .drift  { transform-box: fill-box; transform-origin: 50% 100%;
               animation: drift 4.6s ease-in-out infinite; }
     @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes sway  { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
     @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
     @keyframes read  { 0% { transform: translateX(-2.4px); } 72% { transform: translateX(2.4px); }
                        86%, 100% { transform: translateX(-2.4px); } }
@@ -67,7 +70,7 @@
   <text class="note" x="370.65" y="98.0" text-anchor="middle">reads</text>
   <g transform="translate(412 61.0) scale(0.9)">
     <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
-      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <g class="sprout"><path class="stem" d="M48 26.5 V18.5"/><path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/><path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>
       <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
       <g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="36" cy="56.5" r="5"/></g></g><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><g class="readp"><circle class="pupil" cx="60" cy="56.5" r="5"/></g></g>
       <g transform="rotate(-5 48 75.5)">

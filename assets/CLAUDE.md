@@ -37,31 +37,32 @@ accent (`#D97757`, `#E8916F`) over the shared card ground (`#FFFCFA`,
 the one set of files the agent may not write, held in a matte.
 
 **The character's parts carry meaning, so they are not mixed.** Eyes belong to
-the probe alone. The person in `own.svg` — and the listener in
-`probe-presentation.svg`, the same glyph scaled — is the probe's clay and
-shadow with no face and no beacon, and breathes on its own 4.6 s cycle rather
-than the probe's bob. The out-of-it probe is the same character dimmed, its
-beacon drooping and its eyes crossed; the only thing its eyes do is pulse, the
-two a half beat apart. A prop is placed or worn, never gripped: a handless
-probe holds nothing, so the page rides under its eyes, the mug stands on the
-ground beside it and the scouter hangs from the hull's edge.
+the probe alone, and so does the sprout on its head — a stem and two leaves
+that sway about the stem's root on a 3.2 s cycle, off the bob's beat. The
+person in `own.svg` — and the listener in `probe-presentation.svg`, the same
+glyph scaled — is the probe's clay and shadow with no face and no sprout, and
+breathes on its own 4.6 s cycle rather than the probe's bob. The out-of-it
+probe is the same character dimmed, its sprout wilted and its eyes crossed; the
+only thing its eyes do is pulse, the two a half beat apart. A prop is placed or
+worn, never gripped: a handless probe holds nothing, so the page rides under
+its eyes, the mug stands on the ground beside it and the scouter hangs from the
+hull's edge.
 
 **Each track icon shows its track working, and its outline is what does the
 work.** At the 64 px a table cell gives them, the only thing that survives is
 the shape around the face: `probe-scouting.svg` takes a reading (a scouter over
 the right eye — a round green lens in a purple ring, the earpiece on the hull's
 edge, and on its antenna a green Wi-Fi mark of a dot and two arcs that never
-touch and light in turn, standing in for signal arcs over the beacon — whose
-dial, dots in the ring's purple, fills one by one until the lens flashes, the
-scouter shakes and both pupils shrink; its green and purple are the only hues
-outside the clay and belong to the scouter alone), `probe-analysis.svg` reads
-(one wide page under the eyes, its lines lighting in turn),
-`probe-comparison.svg` weighs (two pages riding up and down like the pans of a
-scale), `probe-presentation.svg` presents (a screen up and to the right whose
-bands light as a talk advances, one listener in front on the left, cut by the
-bottom edge), and `probe-ideation.svg` thinks (pupils up at a thought whose
-dots light in turn). A new track needs a new outline, not a variation on one of
-these.
+touch and light in turn — whose dial, dots in the ring's purple, fills one by
+one until the lens flashes, the scouter shakes and both pupils shrink; its
+green and purple are the only hues outside the clay and belong to the scouter
+alone), `probe-analysis.svg` reads (one wide page under the eyes, its lines
+lighting in turn), `probe-comparison.svg` weighs (two pages riding up and down
+like the pans of a scale), `probe-presentation.svg` presents (a screen up and
+to the right whose bands light as a talk advances, one listener in front on the
+left, cut by the bottom edge), and `probe-ideation.svg` thinks (pupils up at a
+thought whose dots light in turn). A new track needs a new outline, not a
+variation on one of these.
 
 **An icon shares its track's cell, never a column of its own.** A table
 column that holds only an image has no minimum width — GitHub caps every image

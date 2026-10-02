@@ -53,13 +53,13 @@ CHARACTER_CSS = """
     .hull   { fill: ${HULL}; }
     .iris   { fill: ${IRIS}; }
     .pupil  { fill: ${PUPIL}; }
-    .stalk  { stroke: ${STALK}; stroke-width: 5; stroke-linecap: round; fill: none; }
-    .beacon { fill: ${STALK}; }
+    .stem   { stroke: ${STALK}; stroke-width: 3.6; stroke-linecap: round; fill: none; }
+    .leaf   { fill: ${STALK}; }
     .page   { fill: ${IRIS}; stroke: ${DEEP}; stroke-width: 2; }
     .line   { fill: ${DEEP}; opacity: .3; }
     .shadow { fill: ${STALK}; opacity: .45; }
     .dim    { fill: ${DIM}; }
-    .dimst  { stroke: ${DIMSTALK}; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .dimst  { stroke: ${DIMSTALK}; stroke-width: 3.6; stroke-linecap: round; fill: none; }
     .dimbe  { fill: ${DIMSTALK}; }
     .cross  { fill: none; stroke: ${DIMINK}; stroke-width: 3.2; stroke-linecap: round; }
     .mug    { fill: ${IRIS}; stroke: ${DEEP}; stroke-width: 2; stroke-linejoin: round; }
@@ -67,6 +67,8 @@ CHARACTER_CSS = """
     .brew   { fill: ${DEEP}; }
     .steam  { fill: none; stroke: ${STALK}; stroke-width: 2.2; stroke-linecap: round; opacity: 0; }
     .rig    { animation: bob 3.4s ease-in-out infinite; }
+    .sprout { transform-box: view-box; transform-origin: 48px 27px;
+              animation: sway 3.2s ease-in-out infinite; }
     .lid    { transform-box: fill-box; transform-origin: 50% 50%;
               animation: blink 7s ease-in-out infinite; }
     .readp  { animation: read 3.6s ease-in-out infinite; }
@@ -79,6 +81,7 @@ CHARACTER_CSS = """
     .drift  { transform-box: fill-box; transform-origin: 50% 100%;
               animation: drift 4.6s ease-in-out infinite; }
     @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    @keyframes sway  { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
     @keyframes blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
     @keyframes read  { 0% { transform: translateX(-2.4px); } 72% { transform: translateX(2.4px); }
                        86%, 100% { transform: translateX(-2.4px); } }
@@ -126,7 +129,7 @@ def probe(x: float, y: float, s: float, mood: str = "read",
         eyes.append(f'<g class="lid"><circle class="iris" cx="{cx}" cy="52" r="11"/>{pupil}</g>')
     return f"""<g transform="translate({x} {y}) scale({s})">
     <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
-      <path class="stalk" d="M48 26 V19"/><circle class="beacon" cx="48" cy="16" r="5"/>
+      <g class="sprout"><path class="stem" d="M48 26.5 V18.5"/><path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/><path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>
       <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
       {"".join(eyes)}
       {PAGE if page else ""}
@@ -135,8 +138,10 @@ def probe(x: float, y: float, s: float, mood: str = "read",
 
 
 def lost_probe(x: float, y: float, s: float) -> tuple[str, str]:
-    """The out-of-it probe — dimmed hull, drooping beacon, crossed
-    eyes — with the two crosses pulsing half a beat apart. Returns (svg, css)."""
+    """The out-of-it probe — dimmed hull, crossed eyes, and a wilted sprout:
+    the stem no longer than the upright one but bowed over, both leaves
+    hanging limp from its tip and a third already fallen by the shadow. The two crosses pulse half a
+    beat apart. Returns (svg, css)."""
     eyes, css = [], []
     for k, cx in enumerate((36, 60)):
         eyes.append(f'<circle class="iris" cx="{cx}" cy="52" r="10.5"/>'
@@ -148,8 +153,11 @@ def lost_probe(x: float, y: float, s: float) -> tuple[str, str]:
     css.append("    @keyframes xpulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(.74); } }")
     body = f"""<g transform="translate({x} {y}) scale({s})">
     <ellipse class="dimbe" opacity=".45" cx="48" cy="90" rx="20" ry="4"/>
+    <path class="dimbe" d="M12 88.2 C16 84.2, 23.4 84, 27.6 86.9 C23.4 90, 16 90.2, 12 88.2 Z"/>
     <g class="drift">
-      <path class="dimst" d="M48 26 q-2 -6 -8 -7"/><circle class="dimbe" cx="39" cy="18" r="5"/>
+      <path class="dimst" d="M48 27.5 C48 20, 46.5 15.5, 42.5 15.5 C39.2 15.5, 37.6 17.8, 37.4 20.6"/>
+      <path class="dimbe" d="M37.4 20.2 C33.6 20.4, 30.8 22.6, 30.4 26.2 C34 26.2, 36.8 23.8, 37.4 20.2 Z"/>
+      <path class="dimbe" d="M37.4 20.2 C40.6 21.2, 42.4 23.8, 42.2 27 C39 26.2, 37.2 23.6, 37.4 20.2 Z"/>
       <rect class="dim" x="17" y="27" width="62" height="54" rx="19"/>{"".join(eyes)}</g>
   </g>"""
     return body, "\n" + "\n".join(css)
@@ -157,7 +165,7 @@ def lost_probe(x: float, y: float, s: float) -> tuple[str, str]:
 
 def human(x: float, y: float, s: float) -> str:
     """You: the probe's clay and shadow, a head over a half-round torso, no
-    face and no beacon — eyes are the character's alone. It breathes on the
+    face and no sprout — eyes are the character's alone. It breathes on the
     cycle `probe-presentation.svg`'s listener shares."""
     return f"""<g transform="translate({x} {y}) scale({s})">
     <ellipse class="shadow" cx="48" cy="90" rx="18" ry="4"/>
