@@ -114,16 +114,14 @@ def mark(size: int) -> str:
     """The animated PROBE mark — a probe that looks back at the reader.
 
     One `viewBox` serves every size; the caller picks the pixel box. Geometry
-    only: the idle bob, the blink, the mood swap and the beacon's signal are
+    only: the idle bob, the blink, the mood swap and the sprout's sway are
     keyframes in `site.css`, and `brand.js` steers the pupils after the
     pointer. Two eyes rather than one, because a single eye reads as
     "something moved" while a pair reads as "it is looking at you" — which is
     the whole point of putting a face on a scouting agent. Each eye ships both
     of its faces at once — the round pupil and the `joy` arc it smiles with —
     because a stroke cannot be tweened into a disc, so the mood keyframes
-    cross-fade between them and each face holds half the cycle. The two signal
-    arcs sit at fixed radii a clear gap apart and light in sequence, the way a
-    reception meter fills. Decorative in every slot it appears in — the logo
+    cross-fade between them and each face holds half the cycle. Decorative in every slot it appears in — the logo
     and the masthead both name the site in text right next to it — so it stays
     out of the accessibility tree.
     """
@@ -140,10 +138,9 @@ def mark(size: int) -> str:
         'viewBox="0 0 96 96" aria-hidden="true" focusable="false">'
         '<ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>'
         '<g class="rig">'
-        '<path class="wave w1" d="M41.04 11.12 A8.5 8.5 0 0 1 54.96 11.12"/>'
-        '<path class="wave w2" d="M36.94 8.25 A13.5 13.5 0 0 1 59.06 8.25"/>'
-        '<path class="stalk" d="M48 26 V19"/>'
-        '<circle class="beacon" cx="48" cy="16" r="5"/>'
+        '<g class="sprout"><path class="stem" d="M48 26.5 V18.5"/>'
+        '<path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/>'
+        '<path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>'
         '<rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>'
         f"{eyes}"
         "</g></svg>"

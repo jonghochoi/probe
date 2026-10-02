@@ -353,20 +353,17 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 .probe-mark .iris   { fill: var(--mark-iris); }
 .probe-mark .pupil  { fill: var(--mark-pupil); transition: translate var(--dur-mid) var(--ease-track); }
 .probe-mark .joy    { fill: none; stroke: var(--mark-pupil); stroke-width: 3.4; stroke-linecap: round; }
-.probe-mark .stalk  { stroke: var(--orange); stroke-width: 5; stroke-linecap: round; }
-.probe-mark .beacon { fill: var(--orange); }
-.probe-mark .wave   { fill: none; stroke: var(--orange); stroke-width: 2.6;
-                      stroke-linecap: round; opacity: 0; }
+.probe-mark .stem   { fill: none; stroke: var(--orange); stroke-width: 3.6; stroke-linecap: round; }
+.probe-mark .leaf   { fill: var(--orange); }
 .probe-mark .shadow { fill: var(--orange); opacity: .55; }
 
 .probe-mark .rig    { animation: mark-bob 3.4s ease-in-out infinite; }
-/* The beacon carries the signal in two arcs above it, not in its own
-   opacity: a tip that fades next to a stalk that holds still reads as a
-   drawing error at logo size. Both arcs keep their radius and light in
-   sequence, the way a reception meter fills — an arc that travels outward
-   crosses the one above it and the pair reads as one thick smear. */
-.probe-mark .w1 { animation: mark-ping 2.6s ease-in-out infinite; }
-.probe-mark .w2 { animation: mark-ping 2.6s ease-in-out .34s infinite; }
+/* The sprout sways about the point where its stem meets the hull, so the
+   leaves move and the root holds still: a stem that slides along the head
+   reads as a drawing error at logo size. Its cycle is not the bob's, so the
+   two never lock into one stiff motion. */
+.probe-mark .sprout { transform-box: view-box; transform-origin: 48px 27px;
+                      animation: mark-sway 3.2s ease-in-out infinite; }
 /* The lid wraps both halves of an eye, so it never lands on a pupil that is
    still open. Every scale is about its own eye, not the viewBox centre. */
 .probe-mark .eye, .probe-mark .lid { transform-box: view-box; }
@@ -380,7 +377,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 .probe-mark .pupil { animation: mark-mood-open 14s ease-in-out infinite; }
 .probe-mark .joy   { animation: mark-mood-joy 14s ease-in-out infinite; }
 @keyframes mark-bob  { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
-@keyframes mark-ping { 0%, 100% { opacity: 0; } 12%, 42% { opacity: .85; } 58% { opacity: 0; } }
+@keyframes mark-sway { 0%, 100% { rotate: -5deg; } 50% { rotate: 5deg; } }
 @keyframes mark-blink  {
   0%, 88%, 100% { transform: scaleY(1); }
   92%           { transform: scaleY(.06); }
@@ -391,7 +388,6 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 @media (prefers-reduced-motion: reduce) {
   .probe-mark * { animation: none; transition: none; }
   .probe-mark .joy { opacity: 0; }
-  .probe-mark .wave { opacity: .55; }
 }
 
 .nav-spacer { flex: 1; }
