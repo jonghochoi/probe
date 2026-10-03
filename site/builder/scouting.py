@@ -22,6 +22,7 @@ Standard library only, like every module the agent's `query.py` could reach.
 from __future__ import annotations
 
 import re
+import textwrap
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -52,10 +53,23 @@ _COMMENT = re.compile(r"<!--.*?-->", re.S)
 # and its `#ref-` anchor points into a legend the page does not print.
 _BADGE_MD = re.compile(r"\[?!\[([A-Z0-9]+)\]\([^)]*\)\]?(?:\(#ref-[A-Za-z0-9]+\))?")
 _SCORE_LINE = re.compile(r"^\*\*점수 (?P<total>\d{1,2})/15\*\* · ")
+_SCORE_DIMS = re.compile(r"· R(?P<R>\d) · N(?P<N>\d) · M(?P<M>\d) · Real(?P<Real>\d) · "
+                         r"Repro(?P<Repro>\d)\b")
 _SCORE_HEAD = re.compile(r"^\*\*(?P<name>[^*]+?)\s*\((?P<total>\d{1,2})/15[^*]*\)\*\*")
 _ROW_SCORES = re.compile(r"\d·\d·\d·\d")
+# The rubric's five, in the order every report prints them (AUTHORING §5). A
+# 📊 bullet of an earlier report names each in full, and calls Real Sim2Real.
+DIMENSIONS = ("R", "N", "M", "Real", "Repro")
+_DIM_BULLET = re.compile(r"^- (?P<name>Relevance|Novelty|Methodology|Sim2Real|Real|Reproducibility)"
+                         r" (?P<score>\d)\b")
+_DIM_OF = {"Relevance": "R", "Novelty": "N", "Methodology": "M", "Sim2Real": "Real",
+           "Real": "Real", "Reproducibility": "Repro"}
 _CODE_LABELS = ("코드 공개 예정", "코드 미공개", "코드 공개")  # longest first
 _ALIAS_ID = re.compile(r"\s*\(\d{4}\.\d{4,5}\)$")
+# The paper brief's labels, in order (AUTHORING §2-2), and one labelled
+# top-level bullet with whatever nests under it.
+BRIEF_LABELS = ("문제", "기존 한계", "핵심 방법", "차별점", "핵심 기여", "가치")
+_BRIEF_ITEM = re.compile(r"^- \*\*(?P<label>[^*]+)\*\* — (?P<text>.*)$")
 
 
 @dataclass
@@ -74,10 +88,18 @@ class Pick:
     implic: str = ""
     check: str = ""
     gist: str = ""                # a 📋 row's 한 줄 근거
+    dims: dict[str, int] = field(default_factory=dict)   # R N M Real Repro, when all five are written
 
     @property
     def full(self) -> bool:
         return self.kind != ROW
+
+    @property
+    def brief(self) -> list[tuple[str, str]]:
+        """(b)'s labelled fields, `(label, Markdown)` in report order, or
+        nothing for a report written before the brief (AUTHORING §2-2). A
+        field's nested bullets stay in its Markdown."""
+        return brief(self.contrib)
 
 
 @dataclass
@@ -201,6 +223,24 @@ class Run:
         return out
 
 
+def brief(contrib: str) -> list[tuple[str, str]]:
+    fields: list[tuple[str, list[str]]] = []
+    for line in contrib.splitlines():
+        if (m := _BRIEF_ITEM.match(line.rstrip())) and m.group("label") in BRIEF_LABELS:
+            fields.append((m.group("label"), [m.group("text")]))
+        elif line.startswith("- "):
+            if fields:
+                break
+        elif fields and line.strip():
+            fields[-1][1].append(line)
+    if [label for label, _ in fields] != list(BRIEF_LABELS):
+        return []
+    # A field's nested bullets keep their indent in the report; dedented
+    # under its first line they render as the field's own list.
+    return [(label, "\n".join([body[0], textwrap.dedent("\n".join(body[1:]))]).strip())
+            for label, body in fields]
+
+
 def _sections(text: str) -> list[tuple[str, str]]:
     out = []
     for chunk in re.split(r"\n(?=## )", text):
@@ -274,6 +314,8 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
             sm = _SCORE_LINE.match(score)
             if sm:
                 pick.total = int(sm.group("total"))
+                if (dm := _SCORE_DIMS.search(score)):
+                    pick.dims = {d: int(dm.group(d)) for d in DIMENSIONS}
             elif has_score_lines:
                 problems.append(f"{report.source}: {header} has no score line under its "
                                 f"header line (scouting/AUTHORING.md §5-1)")
@@ -282,7 +324,9 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
             for line in body.splitlines():
                 if (h := _SCORE_HEAD.match(line.strip())):
                     heads.append((_ALIAS_ID.sub("", h.group("name").strip()),
-                                  int(h.group("total"))))
+                                  int(h.group("total")), {}))
+                elif heads and (d := _DIM_BULLET.match(line.strip())):
+                    heads[-1][2][_DIM_OF[d.group("name")]] = int(d.group("score"))
         elif emoji == ROW:
             for cells in _rows(body):
                 ident = next((i for c in cells if (i := _ID.search(c))), None)
@@ -291,10 +335,16 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
                 rows += 1
                 total = next((int(c.split("/")[0]) for c in cells
                               if re.fullmatch(r"\d{1,2}/15", c)), None)
+                # `R·N·M·Real`, then Repro in the next cell (AUTHORING §5-1).
+                at = next(i for i, c in enumerate(cells) if _ROW_SCORES.fullmatch(c))
+                four = [int(x) for x in cells[at].split("·")]
+                repro = cells[at + 1] if at + 1 < len(cells) else ""
+                dims = (dict(zip(DIMENSIONS, four + [int(repro)]))
+                        if re.fullmatch(r"\d", repro) else {})
                 report.picks.append(Pick(
                     pillar=pillar, kind=ROW, rank=4 + rows, paper_id=ident.group(1),
                     alias=_ALIAS_ID.sub("", cells[0]), code=_code(" ".join(cells)),
-                    total=total, gist=_plain(cells[-1])))
+                    total=total, gist=_plain(cells[-1]), dims=dims))
         elif emoji == "🔍":
             for cells in _rows(body):
                 ident = next((i for c in cells if (i := _ID.search(c))), None)
@@ -308,8 +358,10 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
     # unscored rather than shifting every score by one.
     if not has_score_lines:
         sections = [p for p in report.picks if p.full]
-        for pick, (alias, total) in zip(sections, heads):
+        for pick, (alias, total, dims) in zip(sections, heads):
             pick.alias, pick.total = alias, total
+            if len(dims) == len(DIMENSIONS):
+                pick.dims = {d: dims[d] for d in DIMENSIONS}
     return report
 
 

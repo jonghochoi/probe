@@ -36,10 +36,20 @@
 <!-- Linked badges only — AUTHORING §3-1:
      [![P#](…)](#ref-P#) / [![D#](…)](#ref-D#) [![D#](…)](#ref-D#) -->
 
-### (b) 핵심 기여
-<!-- 개조식 — AUTHORING §2-2, §4-4. No D# / deferred / config keys (§3-1).
-     The first bullet is the headline: ≤ 50 characters, aim for about 40;
-     (c) opens the same way. -->
+### (b) 논문 요지
+<!-- The paper brief — AUTHORING §2-2. 개조식 (§4-4), no D# / deferred /
+     config keys (§3-1). The first bullet is the headline: ≤ 50 characters,
+     aim for about 40; (c) opens the same way. Then the six labels, each
+     once, in this order, argued from the introduction: each opens on its
+     answer and nests `-` sub-bullets for the detail, with no length cap. -->
+
+- <headline — 이 논문이 한 일 한 줄>
+- **문제** — <저자들이 풀려는 문제>
+- **기존 한계** — <기존 방법의 무엇을 지적하는지>
+- **핵심 방법** — <어떻게 푸는지>
+- **차별점** — <가장 가까운 기존 접근과 갈리는 설계 하나>
+- **핵심 기여** — <결과와 수치, 또는 공개한 산출물>
+- **가치** — <주장이 성립하면 분야가 얻는 것>
 
 ### (c) 시사점
 
@@ -62,7 +72,7 @@
 **점수 <total>/15** · R<0–3> · N<0–3> · M<0–3> · Real<0–3> · Repro<0–3> — <evidence>
 
 ### (a) 관련 Pillar / Decision
-### (b) 핵심 기여
+### (b) 논문 요지
 ### (c) 시사점
 ### (d) 먼저 확인할 점
 

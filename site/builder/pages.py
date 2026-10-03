@@ -1541,7 +1541,10 @@ def _scout_chip(pick) -> str:
 # A figure in a report's prose — `1,880.2시간`, `84.0%`, `5개` — is what a
 # reader scanning a row is looking for, so the page marks it. A digit inside a
 # code (`D4QX`) or an id is not a figure.
-_FIGURE = re.compile(r"(?<![A-Za-z\d.])(\d[\d,]*(?:\.\d+)?\s?(?:%|시간|개|회|편|배|×|Hz)?)")
+# A bare number counts only when nothing word-like follows it: `1단계` and
+# `5과제` are an ordinal and a count-word, not figures a reader scans for.
+_FIGURE = re.compile(r"(?<![A-Za-z\d.])(\d[\d,]*(?:\.\d+)?"
+                     r"(?:\s?(?:%|시간|개|회|편|배|×|Hz)|(?![\d.,가-힣A-Za-z])))")
 _HTML_TAG = re.compile(r"(<[^>]+>)")
 
 
@@ -1556,18 +1559,54 @@ def _bullets(md: str) -> list[str]:
     return [line[2:].strip() for line in md.splitlines() if line.startswith("- ")]
 
 
+# The (c) headline's limit (`scouting/AUTHORING.md` §2-2). A reading whose
+# first line runs past it predates the rule and is drawn as plain prose.
+_HEADLINE_MAX = 50
+
+
 def _scout_axis(pick, decisions: dict) -> str:
-    """One pillar's reading of the paper: its rank beside everything it wrote
-    about what the paper means for it, every line in view."""
+    """One pillar's reading of the paper: its rank and its headline on one
+    line, and the rest of what it wrote under them, quieter. A 📋 row has only
+    its one line."""
     if not pick.full:
-        return (f'<div class="sc-ax sc-ax-row">{_scout_chip(pick)}<span class="sc-ax-t">'
-                f'{_figures(_scout_md(pick.gist, decisions, inline=True))}</span></div>')
+        return (f'<div class="sc-ax sc-ax-row"><p class="sc-ax-h">{_scout_chip(pick)}'
+                f'<span>{_figures(_scout_md(pick.gist, decisions, inline=True))}</span></p></div>')
     lines = [_figures(_scout_md(l, decisions, inline=True))
              for l in (_bullets(pick.implic) or [pick.implic])]
-    if len(lines) == 1:
-        return f'<div class="sc-ax">{_scout_chip(pick)}<span class="sc-ax-t">{lines[0]}</span></div>'
-    items = "".join(f"<li>{l}</li>" for l in lines)
-    return f'<div class="sc-ax">{_scout_chip(pick)}<ul class="sc-ax-t">{items}</ul></div>'
+    raw = (_bullets(pick.implic) or [pick.implic])[0]
+    long = ' class="sc-ax-long"' if len(_plain_text(raw)) > _HEADLINE_MAX else ""
+    head = f'<p class="sc-ax-h">{_scout_chip(pick)}<span{long}>{lines[0]}</span></p>'
+    rest = "".join(f"<li>{l}</li>" for l in lines[1:])
+    return f'<div class="sc-ax">{head}' + (f'<ul class="sc-ax-t">{rest}</ul>' if rest else "") + "</div>"
+
+
+# What the paper's Real score says about its hardware evidence, in the words
+# `scouting/AUTHORING.md` §5-3 gives the page. The rubric's numbers rank the
+# papers and stay in the report; a reader deciding what to open needs only
+# whether the result stands on a robot, said in words.
+_REAL_LABEL = {3: "실물 정량, 다수 과제", 2: "실물 정량 결과", 1: "실물 시연만", 0: "실물 결과 없음"}
+
+
+# The brief's six fields read as three steps of one argument — why the paper
+# exists, how it answers, what it leaves — and the card draws the steps so the
+# eye finds the field it wants by where it sits, not by reading every label.
+_BRIEF_STEPS = (("문제의식", ("문제", "기존 한계")),
+                ("접근", ("핵심 방법", "차별점")),
+                ("성과", ("핵심 기여", "가치")))
+
+
+def _scout_brief(brief: list[tuple[str, str]], decisions: dict) -> str:
+    """(b)'s labelled fields as one card (AUTHORING §2-2)."""
+    fields = dict(brief)
+    steps = []
+    for step, labels in _BRIEF_STEPS:
+        rows = "".join(
+            f'<div class="sc-bf"><dt>{c.esc(label)}</dt>'
+            f'<dd>{_figures(_scout_md(fields[label], decisions))}</dd></div>'
+            for label in labels)
+        steps.append(f'<div class="sc-bstep" data-step="{c.esc(step)}">'
+                     f'<span class="sc-bstep-h">{c.esc(step)}</span><dl>{rows}</dl></div>')
+    return f'<section class="sc-blk sc-brief"><h3>논문 요지</h3>{"".join(steps)}</section>'
 
 
 def _after_headline(md: str) -> str:
@@ -1582,7 +1621,7 @@ def _after_headline(md: str) -> str:
 # Characters a line holds in each open-row column at the widest list, fitted
 # to the measured height of every open row the site carries. Estimates only:
 # the placement below needs which arrangement is shorter, not by how much.
-_PER_LINE = {"what": 54, "axis": 40, "check_col": 52, "check_foot": 30}
+_PER_LINE = {"what": 54, "brief": 38, "axis": 40, "check_col": 52, "check_foot": 30}
 
 
 def _height(lines: list[str], per: int) -> int:
@@ -1598,7 +1637,10 @@ def _check_beside(contrib: str, picks, check: str) -> bool:
     the open row shorter there than across the foot."""
     if not contrib:
         return True
-    what = _height(_bullets(contrib) or [contrib], _PER_LINE["what"]) + 1
+    # The brief's text column is the "what" column less its two label
+    # columns, so a line of it holds fewer characters.
+    per = _PER_LINE["brief"] if scouting.brief(contrib) else _PER_LINE["what"]
+    what = _height(_bullets(contrib) or [contrib], per) + 1
     why = 1 + sum(_height(_bullets(p.implic) or [p.implic] if p.full else [p.gist],
                           _PER_LINE["axis"]) for p in picks)
     checks = _bullets(check) or [check]
@@ -1620,46 +1662,52 @@ def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
     rewrite = (f'<a class="sc-rw" href="{up}p/{c.esc(paper.paper_id)}/index.html">재작성본</a>'
                if paper.paper_id in papers_by_id else "")
     # Code that is out or promised is something to act on; 코드 미공개 is not,
-    # so the row prints nothing for it.
+    # so the row prints nothing for it. Beside it, whether the result stands
+    # on a robot — the one part of the rubric a reader decides by.
     code = "" if paper.code == "코드 미공개" else c.esc(paper.code)
-    code = f'<span class="sc-code">{code}{rewrite}</span>' if code or rewrite else ""
+    real = lead.dims.get("Real")
+    real = f"<span>{_REAL_LABEL[real]}</span>" if real is not None else ""
+    code = f"<span>{code}</span>" if code else ""
+    code = (f'<span class="sc-code">{real}{code}{rewrite}</span>'
+            if code or real or rewrite else "")
     meta = " · ".join(c.esc(m) for m in lead.meta)
     links = (f'<p class="sc-links"><a href="https://arxiv.org/abs/{c.esc(paper.paper_id)}" '
              f'target="_blank" rel="noopener">arXiv:{c.esc(paper.paper_id)}</a>'
              + (f" · {meta}" if meta else "") + "</p>")
     axes = "".join(_scout_axis(p, decisions) for p in picks)
-    # A report that wrote fewer 📊 heads than paper sections leaves a paper
-    # with no total; it reads as unscored, never as zero.
-    scored = any(p.total is not None for p in paper.picks)
-    score = f"{paper.best}<small>/15</small>" if scored else "–"
     # What the paper is beside what it means for each axis, and what to check
     # first wherever that leaves room: under the shorter "what" column when
     # the axes run longer, across the foot otherwise. The row already prints
     # the first "what" line as its headline, so the open row starts at the
     # second. Stacked on a phone. A paper no pillar wrote up has only its
-    # axis rows.
-    why = f'<section class="sc-blk"><h3>연구 축별로 왜</h3><div class="sc-axes">{axes}</div></section>'
+    # axis rows, and one 📋 row only its links.
+    why = f'<section class="sc-blk"><h3>연구 축별 시사점</h3><div class="sc-axes">{axes}</div></section>'
     if lead.full:
         contrib = _after_headline(lead.contrib)
-        what = (f'<section class="sc-blk"><h3>무엇인가</h3>'
-                f'{_figures(_scout_md(contrib, decisions))}</section>' if contrib else "")
+        if lead.brief:
+            what = _scout_brief(lead.brief, decisions)
+        else:
+            what = (f'<section class="sc-blk"><h3>무엇인가</h3>'
+                    f'{_figures(_scout_md(contrib, decisions))}</section>' if contrib else "")
         check = (f'<section class="sc-blk sc-check"><h3>먼저 확인할 점</h3>'
                  f'{_figures(_scout_md(lead.check, decisions))}</section>')
         if _check_beside(contrib, picks, lead.check):
             body = f'<div class="sc-cols2"><div class="sc-stack">{what}{check}</div>{why}</div>'
         else:
             body = f'<div class="sc-cols2">{what}{why}{check}</div>'
+    elif len(picks) == 1:
+        # One pillar's one 📋 line is the row's own headline already, so
+        # opened, the row adds only its links.
+        body = ""
     else:
         body = why
     return (
         f'<details class="sc-item" id="p-{c.esc(paper.paper_id)}" '
         f'data-pillars="{" ".join(paper.pillars)}">'
         '<summary class="sc-row">'
-        f'<span class="sc-score">{score}</span>'
         f'<span class="sc-main"><span class="sc-t"><b>{c.esc(paper.alias)}</b>{title}</span>'
         f'<span class="sc-gist">{_scout_md(paper.gist, decisions, inline=True)}</span></span>'
-        f'<span class="sc-picks">{chips}</span>'
-        + code +
+        f'<span class="sc-side"><span class="sc-picks">{chips}</span>{code}</span>'
         "</summary>"
         f'<div class="sc-body">{body}{links}</div>'
         "</details>"
@@ -1667,14 +1715,20 @@ def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
 
 
 def _scout_status(run) -> str:
-    """What the run holds, and any pillar it has no report for. The pillars
-    that did arrive are the filter's chips, so they are not printed twice;
-    their reports are linked at the foot of the page."""
+    """What the run holds, as four counts, and any pillar it has no report
+    for. The pillars that did arrive are the filter's chips, so they are not
+    printed twice; their reports are linked at the foot of the page."""
     missing = "".join(f'<span class="chip sc-missing">{p} {c.esc(why)}</span>'
                       for p, why in run.missing.items())
     shared = sum(1 for p in run.papers if p.group == "shared")
-    return (f'<div class="sc-status"><span class="sc-sum">연구 축 {len(run.arrived)}개 · '
-            f'게이트 통과 {len(run.papers)}편 · 여러 연구 축이 함께 지목 {shared}편</span>'
+    asked = len(run.arrived) + len(run.missing)
+    stats = (("게이트 통과", f"{len(run.papers)}", "편"),
+             ("여러 연구 축이 지목", f"{shared}", "편"),
+             ("근접 후보", f"{len(run.near)}", "편"),
+             ("연구 축", f"{len(run.arrived)}", f"/{asked}"))
+    tiles = "".join(f'<div><dt>{c.esc(k)}</dt><dd>{v}<small>{c.esc(u)}</small></dd></div>'
+                    for k, v, u in stats)
+    return (f'<div class="sc-status"><dl class="sc-stats">{tiles}</dl>'
             + (f'<span class="sc-arrive">{missing}</span>' if missing else "") + "</div>")
 
 
@@ -1749,8 +1803,8 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
     """One run, every pillar's surfaced papers on one list.
 
     Each paper is one row however many pillars surfaced it, and the row is
-    closed: the score, what the paper is in one line, which pillars flagged it
-    at what rank. Opened, it shows each pillar's reading side by side and the
+    closed: what the paper is in one line, which pillars flagged it at what
+    rank. Opened, it shows each pillar's reading side by side and the
     paper's own contribution and caveats once, so the list scans as rows
     rather than reads as write-ups.
 
