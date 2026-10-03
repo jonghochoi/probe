@@ -3,7 +3,7 @@
 > scheduled routine writes — the run file `scouting/runs/YYYY-MM-DD.md` beside
 > them (§8), and the skeletons in `scouting/templates/`.
 > This document is the single source of truth for that format.
-> `.claude/prompts/scouting.txt` owns the *procedure* (retrieval, evidence,
+> `.claude/prompts/scout.txt` owns the *procedure* (retrieval, evidence,
 > commit) and defers to this file for the output contract, the rubric
 > included. Change a rule here first, then the prompt.
 
@@ -647,7 +647,7 @@ prints its synthesis at the top of the date's page (§1).
 
 A run goes straight to `main` with no PR, so the routine runs
 `linters/check-scouting-format.py` on every file it wrote before committing
-(`.claude/prompts/scouting.txt`) and CI re-runs it on every push to `main` as
+(`.claude/prompts/scout.txt`) and CI re-runs it on every push to `main` as
 the backstop. The lint binds reports dated on or after its
 `_CONTRACT_EFFECTIVE`; the gate arithmetic binds from `_GATE_EFFECTIVE`, the
 medal, 📋 and retry rules from `_SHAPE_EFFECTIVE`, and the §2-1 section set,

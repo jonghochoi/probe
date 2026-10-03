@@ -56,7 +56,7 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 
 2. SCOUT — dispatch one pillar agent per pillar with the Agent tool, all in
    one message so they run in parallel, each on the Sonnet model:
-     "Read `.claude/prompts/scouting.txt` PART II and the shared sections,
+     "Read `.claude/prompts/scout.txt` PART II and the shared sections,
       and run phase SCOUT for pillar P<n>. Run date <date>. RUN=<RUN>.
       You are agent <i> of <k>: wait <i×20> seconds before your first
       network call."
@@ -81,7 +81,7 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 
 5. WRITE — dispatch the pillar agents again, one per pillar that has a plan,
    in one message:
-     "Read `.claude/prompts/scouting.txt` PART II and the shared sections,
+     "Read `.claude/prompts/scout.txt` PART II and the shared sections,
       and run phase WRITE for pillar P<n>. Run date <date>. RUN=<RUN>."
    Each writes `scouting/P<n>/<run date>.md`, lints it clean and returns one
    status line. A report still failing its lint after the agent's attempts
