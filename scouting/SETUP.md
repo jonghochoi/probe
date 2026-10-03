@@ -7,7 +7,7 @@ runs from any Claude Code session.
 | | Scheduled scouting routine |
 |---|---|
 | **Where** | The **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) or the `/schedule` CLI, never a repo config file |
-| **Durable asset** | The prompt `.claude/prompts/scouting.txt` in the checkout. One routine covers every pillar, given as its argument |
+| **Durable asset** | The prompt `.claude/prompts/scout.txt` in the checkout. One routine covers every pillar, given as its argument |
 | **Retrieval** | `curl` to arXiv and Semantic Scholar, never MCP — a cloud session cannot reach a local MCP server |
 | **Output** | One commit per run — every pillar's report and the run file — pushed with `git push origin HEAD:main`. No PR: commit history *is* the research log. The push redeploys the reading site with the run's page |
 
@@ -74,7 +74,7 @@ reaches the next run with nothing re-pasted.
 | Form field | Value |
 |---|---|
 | Name | `probe-scout` |
-| Prompt (Instructions) | `Read .claude/prompts/scouting.txt and run PART I with pillars: 0 1 2 3 4` — the pillar numbers are the one argument. Model → **Sonnet** |
+| Prompt (Instructions) | `Read .claude/prompts/scout.txt and run PART I with pillars: 0 1 2 3 4` — the pillar numbers are the one argument. Model → **Sonnet** |
 | Repositories | This repo |
 | Environment | The one from §2 |
 | Trigger | A recurring cadence of your choosing (the form takes local time → UTC, min interval 1 h) |
@@ -83,7 +83,7 @@ reaches the next run with nothing re-pasted.
 
 - The session is the master: it dispatches one pillar agent per pillar in
   parallel, one paper judge, then the pillar agents again to write, and
-  commits once (`.claude/prompts/scouting.txt`). A run therefore lasts about
+  commits once (`.claude/prompts/scout.txt`). A run therefore lasts about
   as long as its slowest pillar plus the judge, not five pillars end to end.
 - Set the environment to **at most one active session** — two runs of one
   date would write the same files. The prompt keeps a `git pull --rebase`
@@ -116,6 +116,6 @@ gates fired, and that the environment is sound:
       transfer caveat in plain terms, and a 🔄 Decision-Log bullet names the
       decision and the paper that moved it, not "tune DR wider".
 
-If anything fails, fix `.claude/prompts/scouting.txt` (or `context/P1.md`),
+If anything fails, fix `.claude/prompts/scout.txt` (or `context/P1.md`),
 merge it and re-run — do not
 leave automation on with a bad prompt.
