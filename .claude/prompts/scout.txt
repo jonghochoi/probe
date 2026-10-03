@@ -19,7 +19,9 @@ The run is three kinds of agent, and this file holds all three parts:
             pillar of the run (AUTHORING §5-4).
 
 An agent dispatched with "PART II" or "PART III" reads only its own part and
-the shared sections at the end of this file, and never commits.
+the shared sections at the end of this file, and never commits. Every agent
+runs on the master's own model — dispatch with no model named — so the
+routine's model setting is the one place the run's model is chosen.
 
 `context/` is human-owned and read-only in every mode: a decision this run's
 papers move is a 🔄 bullet in a report, never an edit to the source. The
@@ -55,7 +57,7 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
    again — say so and drop it. With no pillar left, stop.
 
 2. SCOUT — dispatch one pillar agent per pillar with the Agent tool, all in
-   one message so they run in parallel, each on the Sonnet model:
+   one message so they run in parallel:
      "Read `.claude/prompts/scout.txt` PART II and the shared sections,
       and run phase SCOUT for pillar P<n>. Run date <date>. RUN=<RUN>.
       You are agent <i> of <k>: wait <i×20> seconds before your first

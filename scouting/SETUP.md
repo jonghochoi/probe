@@ -74,7 +74,7 @@ reaches the next run with nothing re-pasted.
 | Form field | Value |
 |---|---|
 | Name | `probe-scout` |
-| Prompt (Instructions) | `Read .claude/prompts/scout.txt and run PART I with pillars: 0 1 2 3 4` — the pillar numbers are the one argument. Model → **Sonnet** |
+| Prompt (Instructions) | `Read .claude/prompts/scout.txt and run PART I with pillars: 0 1 2 3 4` — the pillar numbers are the one argument. Model → **Sonnet**; every agent the run dispatches runs on it |
 | Repositories | This repo |
 | Environment | The one from §2 |
 | Trigger | A recurring cadence of your choosing (the form takes local time → UTC, min interval 1 h) |
