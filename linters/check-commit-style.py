@@ -11,7 +11,7 @@ Accepted shapes:
 
   <type>(<scope>): <description>        type in feat|fix|refactor|docs|chore|
   <type>: <description>                 style|deps
-  scout: P<N> report YYYY-MM-DD         generated routine commits, formats per
+  scout: report YYYY-MM-DD (P# …)      generated routine commits, formats per
   analysis: add|update <id> rewrite …  CLAUDE.md "generated routine commits"
   compare: add|update <slug>            (the scouting routine, /analyze,
   present: add|update <id> talk …       /compare, /present)
@@ -37,7 +37,7 @@ _TYPES = "feat|fix|refactor|docs|chore|style|deps"
 _HUMAN = re.compile(rf"^({_TYPES})(\(([^)\s]+)\))?: (.+)$")
 
 _GENERATED = [
-    re.compile(r"^scout: P\d report \d{4}-\d{2}-\d{2}$"),
+    re.compile(r"^scout: report \d{4}-\d{2}-\d{2} \((?:P\d)(?: P\d)*\)$"),
     re.compile(r"^analysis: (add|update) \S+ rewrite.*"),
     # The slug is the comparison's question, so it carries no alias and there
     # is nothing to say after it — a subject that keeps going is describing

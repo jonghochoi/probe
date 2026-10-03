@@ -55,7 +55,7 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, catalog, comparisons, corpus, presentations, pages
+from builder import assets_out, catalog, comparisons, corpus, presentations, pages, scouting
 from builder.decisions import harvest_decisions, retired_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
@@ -86,6 +86,13 @@ def build(args) -> int:
     # rewrites, they are simply not in this build.
     presentation_map, presentation_problems = presentations.discover(papers_by_id, partial=bool(args.only))
     problems += presentation_problems
+    # Scouting runs need nothing from the corpus but the ids it holds, which a
+    # row links when the paper has a rewrite. A partial build skips them, as it
+    # does the comparisons: its corpus would mark every other rewrite missing.
+    runs: list = []
+    if not args.only:
+        runs, scout_problems = scouting.discover()
+        problems += scout_problems
 
     # The agent's entry points: `corpus.json` and `llms.txt`. A full build
     # only — under `--only` the catalog would describe a corpus of one and its
@@ -118,7 +125,8 @@ def build(args) -> int:
                   f"{len(comps)} comparison(s) and {len(presentation_map)} presentation(s)")
             return 1
         print(f"build-site --check: {len(papers)} rewrite(s), "
-              f"{len(comps)} comparison(s), {len(presentation_map)} presentation(s) clean")
+              f"{len(comps)} comparison(s), {len(presentation_map)} presentation(s), "
+              f"{len(runs)} scouting run(s) clean")
         return 0
 
     out = Path(args.out)
@@ -153,6 +161,13 @@ def build(args) -> int:
             comp, papers_by_id, katex, decisions, render_problems)
     rendered[out / "c" / "index.html"] = pages.comparison_index_page(comps, papers_by_id)
     rendered[out / "t" / "index.html"] = pages.talk_index_page(presentation_map, papers_by_id)
+    if not args.only:
+        for run in runs:
+            rendered[out / "s" / run.date / "index.html"] = pages.scouting_run_page(
+                run, runs, decisions, papers_by_id, depth=2)
+        rendered[out / "s" / "index.html"] = (
+            pages.scouting_run_page(runs[0], runs, decisions, papers_by_id, depth=1)
+            if runs else pages.scouting_empty_page())
     problems += render_problems
 
     # The landing page indexes whatever was built — with `--only`, a subset.

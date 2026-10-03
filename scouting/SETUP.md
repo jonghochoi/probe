@@ -7,9 +7,9 @@ runs from any Claude Code session.
 | | Scheduled scouting routine |
 |---|---|
 | **Where** | The **RemoteTrigger form** at [claude.ai/code/routines](https://claude.ai/code/routines) or the `/schedule` CLI, never a repo config file |
-| **Durable asset** | The shared prompt `.claude/prompts/scouting.txt`. Register one routine per pillar (P0–P4) — P1 is the worked example below |
+| **Durable asset** | The prompt `.claude/prompts/scouting.txt` in the checkout. One routine covers every pillar, given as its argument |
 | **Retrieval** | `curl` to arXiv and Semantic Scholar, never MCP — a cloud session cannot reach a local MCP server |
-| **Output** | The prompt commits and runs `git push origin HEAD:main`. No PR — commit history *is* the research log |
+| **Output** | One commit per run — every pillar's report and the run file — pushed with `git push origin HEAD:main`. No PR: commit history *is* the research log. The push redeploys the reading site with the run's page |
 
 ## 1. Prerequisites
 
@@ -67,34 +67,34 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
 
 ## 3. Routine
 
+One routine runs every pillar. Its prompt is one line that points at the
+files in the checkout, so a merged change to the prompt or the contract
+reaches the next run with nothing re-pasted.
+
 | Form field | Value |
 |---|---|
-| Name | `probe-scout-P1` |
-| Prompt (Instructions) | The full body of `.claude/prompts/scouting.txt`, every `<PILLAR>` replaced by `P1`. Model → **Sonnet** |
+| Name | `probe-scout` |
+| Prompt (Instructions) | `Read .claude/prompts/scouting.txt and run PART I with pillars: 0 1 2 3 4` — the pillar numbers are the one argument. Model → **Sonnet** |
 | Repositories | This repo |
 | Environment | The one from §2 |
 | Trigger | A recurring cadence of your choosing (the form takes local time → UTC, min interval 1 h) |
 | Connectors | None — retrieval is `curl`, not a connector |
 | Permissions | Must allow pushing to `main` — the default `claude/`-branch-only push is not sufficient |
 
-- Set the environment to **at most one active session** — concurrent runs race
-  on the shared branch. The prompt keeps a `git pull --rebase` retry as a
-  backstop.
-- The form has no `context_files` field and needs none — the prompt names its
-  own inputs (see its SOURCES); the rubric is `scouting/AUTHORING.md` §5.
-- A pillar-scoped run never reads `context/MASTER.md`, so its Venue Priority
-  and Cross-pollination Budget are inlined in the prompt's SCORING section.
-  Keep them in sync with `context/MASTER.md` §5–§6.
-
-### 3-1. Re-paste after every prompt change
-
-The form stores a **copy** of the prompt body, not a reference to the file. A
-merged change to `.claude/prompts/scouting.txt` reaches nothing until every
-routine is edited and the body re-pasted, `<PILLAR>` substitution redone.
-
-Re-paste all five in one pass — a half-updated fleet scores pillars on
-different contracts — then **Run now** on one pillar and walk §4 before the
-cadence resumes.
+- The session is the master: it dispatches one pillar agent per pillar in
+  parallel, one paper judge, then the pillar agents again to write, and
+  commits once (`.claude/prompts/scouting.txt`). A run therefore lasts about
+  as long as its slowest pillar plus the judge, not five pillars end to end.
+- Set the environment to **at most one active session** — two runs of one
+  date would write the same files. The prompt keeps a `git pull --rebase`
+  retry as a backstop.
+- Fewer pillars is a different argument, not a different routine:
+  `… with pillars: 1 3` runs P1 and P3, and the run file lists only those.
+- `/scout 0 1 2 3 4` (`.claude/commands/scout.md`) runs the same thing from an
+  interactive session.
+- The pillar agents never read `context/MASTER.md`, so its Venue Priority and
+  Cross-pollination Budget are inlined in the prompt's shared section. Keep
+  them in sync with `context/MASTER.md` §5–§6.
 
 ## 4. First run
 
@@ -105,17 +105,17 @@ rules belong to the prompt's SELF-CHECK (step 8) and
 gates fired, and that the environment is sound:
 
 - [ ] The transcript shows `linters/check-scouting-format.py` running on the
-      report and exiting 0 (PROCEDURE step 7). A run that skipped it, or
+      run file and every report and exiting 0 (PART I step 7). A run that skipped it, or
       committed while it still reported violations, is the failure to catch
       here — CI on `main` only reports after the fact.
 - [ ] The `Papers scanned:` header discloses **no** `curl` 403 / network-block
       error. One there means the Custom allowlist is missing.
-- [ ] The Anti-topics filter fired. An empty "did not pass filter" section is
-      suspicious.
+- [ ] The Anti-topics filter fired — 🔄 reports a filter count. A run that
+      dropped nothing is suspicious.
 - [ ] Implications are concrete — (c) names a specific cost, number or
-      transfer caveat in plain terms, and 💡 `### Decision Log` names the
-      decision and the evidence that moved it, not "tune DR wider".
+      transfer caveat in plain terms, and a 🔄 Decision-Log bullet names the
+      decision and the paper that moved it, not "tune DR wider".
 
 If anything fails, fix `.claude/prompts/scouting.txt` (or `context/P1.md`),
-**re-paste the corrected body into every routine** (§3-1) and re-run — do not
+merge it and re-run — do not
 leave automation on with a bad prompt.

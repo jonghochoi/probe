@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 PROBE is a research-scouting agent for dexterous manipulation. A human owns
 the research context in `context/`; agent tracks read it and write
-decision-grade Korean output — a scheduled per-pillar routine into `scouting/`,
+decision-grade Korean output — a scheduled scouting routine into `scouting/`,
 and on demand `/analyze`, `/compare` and `/present` into `analysis/`,
-`comparison/` and `presentation/`, the three the reading site publishes.
+`comparison/` and `presentation/`. The reading site publishes all four.
 `/distinguish` writes only outside the repo and `/ideate` writes nothing.
 `README.md` carries the motivation; this file is the contributor reference for
 **commit hygiene and document style**.
@@ -33,7 +33,7 @@ file the row points at.
 | `context/P{0..4}.md` | human | One per pillar — its Decision Log, Tracked Literature and Anti-topics. A run reads one |
 | `context/_TEMPLATE.md` | human | The skeleton a new pillar is copied from — the pillar section spine |
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format, adding a pillar |
-| `scouting/` | agent | Scouting reports, `P#/YYYY-MM-DD.md`, filling `scouting/templates/report.md` |
+| `scouting/` | agent | One run per date — a report per pillar, `P#/YYYY-MM-DD.md`, and the run file `runs/YYYY-MM-DD.md`, filling `scouting/templates/` — the site merges a run into one page |
 | `scouting/AUTHORING.md` | human | Format contract for scouting reports |
 | `scouting/SETUP.md` | human | Operator guide for the scheduled scouting routine |
 | `analysis/` | agent | The site's corpus — one `<arxiv-id>.md` per paper from `/analyze`, a Korean rewrite of the arXiv HTML original |
@@ -121,7 +121,7 @@ generating prompts, not to human commits — do not imitate them when authoring 
 changes. One canonical format per prompt:
 
 ```
-scout: P{N} report YYYY-MM-DD
+scout: report YYYY-MM-DD (P0 P1 P2 P3 P4)   # the pillars whose reports it carries
 compare: add <slug>                       # the slug is the question, so no alias
 analysis: add <arxiv-id> rewrite (<alias>)
 present: add <arxiv-id> talk (<alias>)
@@ -174,7 +174,7 @@ distinction lint. Run the ones your change touches before pushing.
 | `context/`, any `CLAUDE.md`, `README.md` or `SETUP.md` | `python3 linters/check-context-consistency.py` |
 | `scouting/` | `python3 linters/check-scouting-format.py` |
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `analysis/`, `comparison/`, `presentation/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
+| `analysis/`, `comparison/`, `presentation/`, `scouting/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
 | `presentation/` | `python3 linters/check-presentation-format.py` |
 | the private folder `/distinguish` writes | `python3 linters/check-distinction-format.py` with `PROBE_PRIVATE_DIR` set |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` proves the standard library suffices) |
