@@ -15,8 +15,16 @@ contract must say.
 
 ## Invariants
 
-**Only `analysis/`, `comparison/` and `presentation/` publish.** Nothing else in the
-repo reaches the site — `scouting/` and `context/` are not published surfaces.
+**Only `analysis/`, `comparison/`, `presentation/` and `scouting/` publish.**
+Nothing else in the repo reaches the site — `context/` is not a published
+surface beyond the `D#` titles a tooltip prints.
+
+**A scouting report is read as it was written.** `builder/scouting.py` reads
+each report in the form of its own day: a score line where the report has
+one, the `## 📊` heads of an earlier report otherwise. A report is the record
+of a run, so the build never asks one to be rewritten, and only a report that
+carries score lines is held to them. The page merges by arXiv id and prints
+each pillar's scores as that pillar wrote them.
 
 **Generated HTML is never committed.** `deploy-site.yml` builds it fresh; a
 local build goes to `--out` and stays there.

@@ -2,8 +2,8 @@ name: Check scouting format
 
 # Verify that scouting reports follow the output contract in
 # scouting/AUTHORING.md — an oversized `Papers scanned:` log, a Reproducibility
-# score that contradicts its own rationale, a ★★★ promotion for a paper with no
-# public artifact.
+# score that contradicts its own rationale, a paper header that grows a grade
+# beside its rank.
 #
 # The scouting track has no build step and no PR: the scheduled routine pushes
 # each report straight to `main`. A `pull_request` trigger alone would therefore

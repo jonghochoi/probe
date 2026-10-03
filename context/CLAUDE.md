@@ -78,9 +78,8 @@ a half-added pillar silently drops out of the index and the lints:
 - [ ] **Add a row** to `context/MASTER.md` §4's pillar table — what the pillar
       owns in one line, its decision count, and its file. The scope itself
       belongs in the pillar file and is not restated there.
-- [ ] **Create `scouting/P<N>/`** and deploy a scouting routine instance for it
-      (replace every `<PILLAR>` token in `.claude/prompts/scouting.txt` per
-      `scouting/SETUP.md`).
+- [ ] **Create `scouting/P<N>/`** and add `<N>` to the scouting routine's
+      pillar argument (`scouting/SETUP.md` §3).
 - [ ] **Extend the pillar-keyed tooling** — four surfaces, one entry each,
       because none of them can read the pillar set from another:
       `PILLAR_NAMES` in `site/builder/corpus.py` (the build's source of truth —

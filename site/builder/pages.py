@@ -7,9 +7,9 @@ import re
 from collections import Counter
 
 from . import components as c
-from . import corpus, presentations, glance as glance_mod
+from . import corpus, presentations, scouting, glance as glance_mod
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
-from .render import DocRenderer
+from .render import DocRenderer, _decorate_refs
 
 # Pages serves a project site under /<repo>/. 404.html and `build-site.py
 # serve` use this; every other page is depth-relative and needs no knowledge
@@ -272,7 +272,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
 
     head = c.mast(
         eyebrow="Dexterous manipulation",
-        title="논문, 읽기 좋게 옮겨 둡니다",
+        title="분석, 원문을 읽기 좋게 풀어 둡니다",
         art=c.mast_art(),
         count=f"{len(ordered)}편" + (f" · 최근 {ordered[0].date}" if ordered else ""),
     )
@@ -1094,7 +1094,7 @@ def _header(paper: Paper) -> str:
   <div class="paper-head-inner">
     <div class="crumb-row">
       <div class="crumb">
-        <a href="../../index.html">논문</a> ›
+        <a href="../../index.html">분석</a> ›
         <a href="../../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
         {c.esc(paper.stem)}
       </div>
@@ -1500,4 +1500,353 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
         body=body,
         depth=1,
         extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
+    )
+
+
+# ── 탐색 ────────────────────────────────────────────────────────────────────
+# One page per run date, every pillar on it, and an index of the dates. The
+# reports are written per pillar for the routine's sake — one context file and
+# one window each — and read per date for the reader's: what did this run turn
+# up, and which of it did more than one axis notice.
+
+# Where a pick sits in its pillar's report, as the row prints it. Words, not
+# the report's medal glyphs: an emoji is the reader's device's drawing, and
+# the rank is a fact a short label states as well.
+_PICK_LABEL = {"🥇": "1위", "🥈": "2위", "🥉": "3위", "🌱": "인접", "📋": "추가"}
+
+_SCOUT_MD = None
+
+
+def _scout_md(text: str, decisions: dict, *, inline: bool = False) -> str:
+    """A report's Markdown, with each `D#` given the tooltip a rewrite's gets.
+
+    The reports are not rewrites: none of `DocRenderer`'s rules binds them,
+    and its checks would fire on prose they were never written to. The one
+    thing they share with the rewrites is the decision codes, so the codes are
+    decorated the same way and nothing else is borrowed.
+    """
+    global _SCOUT_MD
+    if _SCOUT_MD is None:
+        from markdown_it import MarkdownIt
+        _SCOUT_MD = MarkdownIt("commonmark", {"html": False})
+    out = _SCOUT_MD.renderInline(text) if inline else _SCOUT_MD.render(text)
+    return _decorate_refs(out, decisions)
+
+
+def _scout_chip(pick) -> str:
+    return c.chip(f"{pick.pillar} · {_PICK_LABEL[pick.kind]}", "pillar",
+                  data={"p": pick.pillar})
+
+
+# A figure in a report's prose — `1,880.2시간`, `84.0%`, `5개` — is what a
+# reader scanning a row is looking for, so the page marks it. A digit inside a
+# code (`D4QX`) or an id is not a figure.
+_FIGURE = re.compile(r"(?<![A-Za-z\d.])(\d[\d,]*(?:\.\d+)?\s?(?:%|시간|개|회|편|배|×|Hz)?)")
+_HTML_TAG = re.compile(r"(<[^>]+>)")
+
+
+def _figures(html_text: str) -> str:
+    """Mark the figures in rendered HTML, in text and never inside a tag."""
+    parts = _HTML_TAG.split(html_text)
+    return "".join(p if p.startswith("<") else _FIGURE.sub(r'<b class="sc-fig">\1</b>', p)
+                   for p in parts)
+
+
+def _bullets(md: str) -> list[str]:
+    return [line[2:].strip() for line in md.splitlines() if line.startswith("- ")]
+
+
+def _scout_axis(pick, decisions: dict) -> str:
+    """One pillar's reading of the paper: its rank beside everything it wrote
+    about what the paper means for it, every line in view."""
+    if not pick.full:
+        return (f'<div class="sc-ax sc-ax-row">{_scout_chip(pick)}<span class="sc-ax-t">'
+                f'{_figures(_scout_md(pick.gist, decisions, inline=True))}</span></div>')
+    lines = [_figures(_scout_md(l, decisions, inline=True))
+             for l in (_bullets(pick.implic) or [pick.implic])]
+    if len(lines) == 1:
+        return f'<div class="sc-ax">{_scout_chip(pick)}<span class="sc-ax-t">{lines[0]}</span></div>'
+    items = "".join(f"<li>{l}</li>" for l in lines)
+    return f'<div class="sc-ax">{_scout_chip(pick)}<ul class="sc-ax-t">{items}</ul></div>'
+
+
+def _after_headline(md: str) -> str:
+    """A pick's "what" with its first bullet — the row's headline — taken out."""
+    lines = md.splitlines()
+    first = next((i for i, l in enumerate(lines) if l.startswith("- ")), None)
+    if first is None:
+        return md
+    return "\n".join(lines[:first] + lines[first + 1:]).strip()
+
+
+# Characters a line holds in each open-row column at the widest list, fitted
+# to the measured height of every open row the site carries. Estimates only:
+# the placement below needs which arrangement is shorter, not by how much.
+_PER_LINE = {"what": 54, "axis": 40, "check_col": 52, "check_foot": 30}
+
+
+def _height(lines: list[str], per: int) -> int:
+    return sum(-(-len(_plain_text(l)) // per) for l in lines)
+
+
+def _plain_text(md: str) -> str:
+    return re.sub(r"\]\([^)]*\)|[*`\[\]]", "", md)
+
+
+def _check_beside(contrib: str, picks, check: str) -> bool:
+    """Whether 먼저 확인할 점 belongs under the "what" column: when it leaves
+    the open row shorter there than across the foot."""
+    if not contrib:
+        return True
+    what = _height(_bullets(contrib) or [contrib], _PER_LINE["what"]) + 1
+    why = 1 + sum(_height(_bullets(p.implic) or [p.implic] if p.full else [p.gist],
+                          _PER_LINE["axis"]) for p in picks)
+    checks = _bullets(check) or [check]
+    beside = _height(checks, _PER_LINE["check_col"]) + 1
+    foot = max(_height([c], _PER_LINE["check_foot"]) for c in checks) + 1
+    return max(what + beside, why) < max(what, why) + foot
+
+
+def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
+    lead = paper.lead
+    picks = sorted(paper.picks, key=lambda p: (not p.full, p.rank))
+    chips = "".join(_scout_chip(p) for p in picks)
+    # A title that opens on its own alias (`WB-WAM: Heterogeneous …`) prints
+    # the rest only — the alias is already the bold word in front of it.
+    rest = paper.title
+    if rest.startswith(paper.alias):
+        rest = rest[len(paper.alias):].lstrip(" :—-")
+    title = f'<span class="sc-title">{c.esc(rest)}</span>' if rest else ""
+    rewrite = (f'<a class="sc-rw" href="{up}p/{c.esc(paper.paper_id)}/index.html">재작성본</a>'
+               if paper.paper_id in papers_by_id else "")
+    # Code that is out or promised is something to act on; 코드 미공개 is not,
+    # so the row prints nothing for it.
+    code = "" if paper.code == "코드 미공개" else c.esc(paper.code)
+    code = f'<span class="sc-code">{code}{rewrite}</span>' if code or rewrite else ""
+    meta = " · ".join(c.esc(m) for m in lead.meta)
+    links = (f'<p class="sc-links"><a href="https://arxiv.org/abs/{c.esc(paper.paper_id)}" '
+             f'target="_blank" rel="noopener">arXiv:{c.esc(paper.paper_id)}</a>'
+             + (f" · {meta}" if meta else "") + "</p>")
+    axes = "".join(_scout_axis(p, decisions) for p in picks)
+    # A report that wrote fewer 📊 heads than paper sections leaves a paper
+    # with no total; it reads as unscored, never as zero.
+    scored = any(p.total is not None for p in paper.picks)
+    score = f"{paper.best}<small>/15</small>" if scored else "–"
+    # What the paper is beside what it means for each axis, and what to check
+    # first wherever that leaves room: under the shorter "what" column when
+    # the axes run longer, across the foot otherwise. The row already prints
+    # the first "what" line as its headline, so the open row starts at the
+    # second. Stacked on a phone. A paper no pillar wrote up has only its
+    # axis rows.
+    why = f'<section class="sc-blk"><h3>연구 축별로 왜</h3><div class="sc-axes">{axes}</div></section>'
+    if lead.full:
+        contrib = _after_headline(lead.contrib)
+        what = (f'<section class="sc-blk"><h3>무엇인가</h3>'
+                f'{_figures(_scout_md(contrib, decisions))}</section>' if contrib else "")
+        check = (f'<section class="sc-blk sc-check"><h3>먼저 확인할 점</h3>'
+                 f'{_figures(_scout_md(lead.check, decisions))}</section>')
+        if _check_beside(contrib, picks, lead.check):
+            body = f'<div class="sc-cols2"><div class="sc-stack">{what}{check}</div>{why}</div>'
+        else:
+            body = f'<div class="sc-cols2">{what}{why}{check}</div>'
+    else:
+        body = why
+    return (
+        f'<details class="sc-item" id="p-{c.esc(paper.paper_id)}" '
+        f'data-pillars="{" ".join(paper.pillars)}">'
+        '<summary class="sc-row">'
+        f'<span class="sc-score">{score}</span>'
+        f'<span class="sc-main"><span class="sc-t"><b>{c.esc(paper.alias)}</b>{title}</span>'
+        f'<span class="sc-gist">{_scout_md(paper.gist, decisions, inline=True)}</span></span>'
+        f'<span class="sc-picks">{chips}</span>'
+        + code +
+        "</summary>"
+        f'<div class="sc-body">{body}{links}</div>'
+        "</details>"
+    )
+
+
+def _scout_status(run) -> str:
+    """What the run holds, and any pillar it has no report for. The pillars
+    that did arrive are the filter's chips, so they are not printed twice;
+    their reports are linked at the foot of the page."""
+    missing = "".join(f'<span class="chip sc-missing">{p} {c.esc(why)}</span>'
+                      for p, why in run.missing.items())
+    shared = sum(1 for p in run.papers if p.group == "shared")
+    return (f'<div class="sc-status"><span class="sc-sum">연구 축 {len(run.arrived)}개 · '
+            f'게이트 통과 {len(run.papers)}편 · 여러 연구 축이 함께 지목 {shared}편</span>'
+            + (f'<span class="sc-arrive">{missing}</span>' if missing else "") + "</div>")
+
+
+def _scout_runs(runs: list, here: str, up_to_s: str) -> str:
+    """The way to the other runs: one step older, one step newer, and every run
+    by month behind the run on screen.
+
+    One line however many runs there are — a run a week is a hundred runs in
+    two years, and a row of a hundred tabs is a row nobody can find a date in.
+    The neighbours cover the common move, reading back one run at a time; the
+    month list covers the rare one, going to a date. The list is a native
+    `<details>`, so it opens with no script; `scout.js` only closes it when the
+    reader clicks away."""
+    i = next(k for k, r in enumerate(runs) if r.date == here)
+    run = runs[i]
+
+    def href(date: str) -> str:
+        return f"{up_to_s}{date}/index.html"
+
+    older = (f'<a class="sc-step" href="{href(runs[i + 1].date)}" rel="prev">'
+             f'← {c.esc(runs[i + 1].date[5:])}</a>' if i + 1 < len(runs)
+             else '<span class="sc-step" aria-hidden="true"></span>')
+    newer = (f'<a class="sc-step sc-newer" href="{href(runs[i - 1].date)}" rel="next">'
+             f'{c.esc(runs[i - 1].date[5:])} →</a>' if i > 0
+             else '<span class="sc-step" aria-hidden="true"></span>')
+    months: dict[str, list] = {}
+    for r in runs:
+        months.setdefault(r.date[:7], []).append(r)
+    current = ' aria-current="page"'
+    menu = "".join(
+        f'<div class="sc-mo"><span class="sc-mo-h">{c.esc(month)}</span><span class="sc-mo-l">'
+        + "".join(f'<a href="{href(r.date)}"{current if r.date == here else ""}>'
+                  f'{c.esc(r.date[8:])}<small>{len(r.papers)}</small></a>' for r in members)
+        + "</span></div>"
+        for month, members in months.items())
+    return (
+        '<nav class="sc-runs" aria-label="회차">'
+        f"{older}"
+        '<details class="sc-pick" data-scout-pick>'
+        f'<summary><h2 class="sc-date">{c.esc(run.date)}</h2>'
+        f'<span class="sc-pick-n">{len(run.papers)}편 · 회차 {len(runs)}개</span></summary>'
+        f'<div class="sc-menu">{menu}</div></details>'
+        f"{newer}</nav>"
+    )
+
+
+def _scout_filter(run_pillars: list[str]) -> str:
+    """Which pillars to show, and the one switch that opens every row.
+
+    Scripted only — `scout.js` wires it and `scout.css` keeps it off an
+    unscripted page, which gets every row closed and the browser's own
+    disclosure to open each."""
+    pills = "".join(
+        f'<button type="button" class="chip pillar" data-p="{p}" aria-pressed="false" '
+        f'data-scout-p="{p}">{p} {c.esc(PILLAR_LABELS[p])}</button>'
+        for p in run_pillars)
+    return (f'<div class="sc-filter" role="group" aria-label="연구 축으로 거르기">{pills}'
+            '<span class="filter-spacer"></span>'
+            '<button type="button" class="sc-open" data-scout-open aria-pressed="false">모두 펼치기</button>'
+            '<span class="sc-shown" data-scout-shown aria-live="polite"></span></div>')
+
+
+# The band every scouting page opens on. It names the surface and what it
+# does, as the other four bands do; which run is on screen is the page's
+# business, under the band, so the band is the same on every run.
+SCOUT_EYEBROW = "Across five research axes"
+SCOUT_TITLE = "탐색, 읽을 논문을 먼저 고릅니다"
+
+
+def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
+                      *, depth: int) -> str:
+    """One run, every pillar's surfaced papers on one list.
+
+    Each paper is one row however many pillars surfaced it, and the row is
+    closed: the score, what the paper is in one line, which pillars flagged it
+    at what rank. Opened, it shows each pillar's reading side by side and the
+    paper's own contribution and caveats once, so the list scans as rows
+    rather than reads as write-ups.
+
+    The page is printed twice for the newest run: at `s/` — where the nav
+    lands, so a reader arrives on what came in last — and at `s/<date>/`, the
+    address that stays put once a newer run takes `s/`. `depth` is which of
+    the two this is.
+    """
+    up = "../" * depth
+    up_to_s = "" if depth == 1 else "../"
+
+    # Every group folds under its head. The last one — the papers no pillar
+    # wrote up, one 📋 row each — starts folded: it is the part of the run a
+    # reader goes looking in, not the part that should push the write-ups off
+    # the screen.
+    def group(key: str, label: str, members: list) -> str:
+        rows = "".join(_scout_item(p, decisions, papers_by_id, up) for p in members)
+        return (f'<details class="sc-group sc-fold" data-scout-group'
+                f'{"" if key == "rest" else " open"}>'
+                f'<summary class="sc-gh"><h2>{c.esc(label)}</h2>'
+                f'<span class="sc-gn">{len(members)}편</span></summary>{rows}</details>')
+    groups = "".join(group(*g) for g in run.grouped())
+    if not groups:
+        groups = '<p class="corpus-empty">이 회차에 게이트를 통과한 논문이 없습니다.</p>'
+
+    lead = ""
+    if run.run_file and run.run_file.synthesis:
+        lead = (f'<section class="sc-lead" aria-label="회차 종합">'
+                f'<h2>회차 종합</h2>{_scout_md(run.run_file.synthesis, decisions)}</section>')
+
+    near = run.near
+    near_html = ""
+    if near:
+        rows = "".join(
+            f'<tr><td><a href="https://arxiv.org/abs/{c.esc(n.paper_id)}" target="_blank" '
+            f'rel="noopener"><b>{c.esc(n.alias)}</b></a></td>'
+            f'<td>{c.chip(n.pillar, "pillar", data={"p": n.pillar})}</td>'
+            f'<td>{_scout_md(n.condition, decisions, inline=True)}</td></tr>'
+            for n in near)
+        # Folded under the same head the groups above use: it is one more
+        # cut of the run's papers, the ones a single gate axis kept out.
+        near_html = (
+            '<details class="sc-group sc-fold">'
+            f'<summary class="sc-gh"><h2>근접 후보</h2><span class="sc-gn">{len(near)}편</span></summary>'
+            '<div class="sc-scroll"><table class="sc-table"><thead><tr><th>논문</th><th>연구 축</th>'
+            f'<th>재검토 조건</th></tr></thead><tbody>{rows}</tbody></table></div>'
+            "</details>")
+    # A pillar's own 🔄 compares it with its earlier reports — the routine's
+    # working record, read in the pillar's file. The page reads the run as a
+    # whole, which is the run file's 🧭 at its head, and links the files.
+    sources = " · ".join(
+        f'<a href="{BLOB}/{c.esc(r.source)}" target="_blank" rel="noopener">{r.pillar}</a>'
+        for r in run.reports)
+    if run.run_file:
+        sources += (f' · <a href="{BLOB}/scouting/runs/{c.esc(run.date)}.md" target="_blank" '
+                    'rel="noopener">회차</a>')
+    sources_html = f'<p class="sc-sources">원본 리포트 · {sources}</p>'
+
+    head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE, art=c.scout_art())
+    body = f"""{head}
+
+<main class="hub hub-wide sc" data-scout>
+  {_scout_runs(runs, run.date, up_to_s)}
+  {_scout_status(run)}
+  {lead}
+  {_scout_filter(run.arrived)}
+  {groups}
+  {near_html}
+  {sources_html}
+</main>
+"""
+    return c.page(
+        title=f"{run.date} 탐색 · PROBE",
+        here="scout",
+        body=body,
+        depth=depth,
+        scripts=["scout.js"],
+        extra_head=(f'<link rel="stylesheet" href="{c.asset(f"{up}assets/index.css")}">'
+                    f'<link rel="stylesheet" href="{c.asset(f"{up}assets/scout.css")}">'),
+    )
+
+
+def scouting_empty_page() -> str:
+    """`s/` before the first run lands."""
+    head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE, art=c.scout_art())
+    body = f"""{head}
+
+<main class="hub hub-wide">
+  <p class="corpus-empty">아직 탐색 회차가 없습니다.</p>
+</main>
+"""
+    return c.page(
+        title="탐색 · PROBE",
+        here="scout",
+        body=body,
+        depth=1,
+        extra_head=(f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">'
+                    f'<link rel="stylesheet" href="{c.asset("../assets/scout.css")}">'),
     )

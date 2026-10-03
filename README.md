@@ -35,7 +35,7 @@ holds one pillar's decision log, tracked literature and anti-topics.
 
 | Track | You run in [Claude Code](https://claude.com/claude-code) | It writes |
 |:---:|---|---|
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" height="64" alt="scouting"></picture><br><sub><b>Scouting</b></sub> | scheduled, one pillar per run — [setup](scouting/SETUP.md) | `scouting/P#/<date>.md` — [format](scouting/AUTHORING.md) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-scouting-dark.svg"><img src="assets/probe-scouting.svg" height="64" alt="scouting"></picture><br><sub><b>Scouting</b></sub> | scheduled, every pillar in one run — [setup](scouting/SETUP.md) · `/scout [pillars]` | `scouting/P#/<date>.md` and `scouting/runs/<date>.md` — [format](scouting/AUTHORING.md) |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" height="64" alt="analysis"></picture><br><sub><b>Analysis</b></sub> | `/analyze <arXiv id>` | `analysis/<id>.md` — [format](analysis/AUTHORING.md) |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" height="64" alt="comparison"></picture><br><sub><b>Comparison</b></sub> | `/compare <id> <id> [<id>]` | `comparison/<slug>.md` — [format](comparison/AUTHORING.md) |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-presentation-dark.svg"><img src="assets/probe-presentation.svg" height="64" alt="presentation"></picture><br><sub><b>Presentation</b></sub> | `/present <arXiv id>` | `presentation/<id>.md` — [format](presentation/AUTHORING.md) |

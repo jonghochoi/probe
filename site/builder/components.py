@@ -149,7 +149,7 @@ def mark(size: int) -> str:
 
 # One box for all four masthead diagrams. The art column is the same width on
 # every band, so a second aspect ratio is a second band height — and "one frame
-# for the four destinations" stops being true the moment one of them is taller.
+# for the five destinations" stops being true the moment one of them is taller.
 # The foot stops just under the drawing: the band's own padding is the margin,
 # and a taller box would push the page down with empty space.
 _ART_BOX = "0 0 560 164"
@@ -287,6 +287,10 @@ TALK_LEAD = (
     "슬라이드마다 그 앞에서 무엇을 말할지가 아래에 붙고, "
     "재작성본이 있는 논문만 여기에 섭니다."
 )
+SCOUT_LEAD = (
+    "다섯 연구 축이 같은 날 따로 훑은 2주치 논문을 한 목록에 모읍니다. "
+    "여러 연구 축이 같은 논문을 집으면 한 줄로 합쳐지고, 그 줄이 맨 위에 섭니다."
+)
 SHELF_LEAD = (
     "즐겨찾기 · 읽은 논문 · 책갈피 · 메모. "
     "넷 다 이 브라우저에만 남고, 사이트 데이터를 지우면 사라집니다. "
@@ -417,6 +421,57 @@ def talk_art() -> str:
     )
 
 
+# The five lanes, one per pillar, and where on each the run's picks sit. Two
+# of them line up with a pick on another lane — the same paper, flagged twice —
+# and those are the pairs that join into one row on the right.
+_SCOUT_PICKS = ((96, 150), (120, 196), (84, 168), (132, 210), (108, 156))
+_SCOUT_JOINS = ((0, 1, 0), (2, 3, 1))  # (lane, lane, row): two lanes, one row
+
+
+def scout_art() -> str:
+    """The scouting masthead's diagram — `SCOUT_LEAD`, drawn.
+
+    Five lanes on the left, one per pillar in its own tint, each carrying the
+    papers its run surfaced. On the right the one list this page is. Most
+    picks cross alone; two pairs that sit on different lanes are one paper,
+    and their lines meet before they land, so the list holds one row for the
+    two of them — and those rows are drawn on top, which is where the page
+    puts them.
+
+    The lanes are the pillars and nothing else, so they are named `P0`–`P4`
+    and coloured the way every pillar chip on the site is.
+    """
+    lanes = "".join(
+        f'<g class="sca-lane" data-p="P{i}">'
+        f'<text class="sca-label" x="6" y="{30 + i * 26}">P{i}</text>'
+        f'<rect class="sca-track" x="30" y="{24 + i * 26}" width="230" height="8" rx="4"/>'
+        f'<rect class="sca-pick" style="--i:{2 * i}" x="{a}" y="{24 + i * 26}" width="22" height="8" rx="4"/>'
+        f'<rect class="sca-pick" style="--i:{2 * i + 1}" x="{b}" y="{24 + i * 26}" width="22" height="8" rx="4"/>'
+        "</g>"
+        for i, (a, b) in enumerate(_SCOUT_PICKS)
+    )
+    joins = "".join(
+        f'<path class="sca-join" style="--i:{row}" pathLength="1" '
+        f'd="M{_SCOUT_PICKS[l1][1] + 22} {28 + l1 * 26} '
+        f'C 330 {28 + l1 * 26}, 330 {40 + row * 24}, 380 {40 + row * 24}"/>'
+        f'<path class="sca-join" style="--i:{row}" pathLength="1" '
+        f'd="M{_SCOUT_PICKS[l2][1] + 22} {28 + l2 * 26} '
+        f'C 330 {28 + l2 * 26}, 330 {40 + row * 24}, 380 {40 + row * 24}"/>'
+        for l1, l2, row in _SCOUT_JOINS
+    )
+    rows = "".join(
+        f'<g class="sca-row{" sca-shared" if r < 2 else ""}" style="--i:{r}">'
+        f'<rect class="sca-card" x="384" y="{30 + r * 24}" width="170" height="20" rx="5"/>'
+        f'<rect class="sca-line" x="396" y="{38 + r * 24}" width="{w}" height="4" rx="2"/></g>'
+        for r, w in enumerate((96, 120, 84, 104, 70))
+    )
+    return (
+        f'<svg class="mast-art scout-art" viewBox="{_ART_BOX}" role="img" '
+        f'aria-label="{esc(SCOUT_LEAD)}" focusable="false">'
+        f'<g class="sca-all">{lanes}{joins}{rows}</g></svg>'
+    )
+
+
 # The four lists 서재 holds, in `pages.SHELF_TABS` order, and how far each
 # one's row runs. The widths differ only so the rows do not read as a table:
 # no number here is a count, because the build has none to give.
@@ -482,7 +537,7 @@ def shelf_art() -> str:
 def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
     """The band every list page opens on.
 
-    One frame for the four destinations the nav names, because they are one
+    One frame for the five destinations the nav names, because they are one
     level of the site and a band that changed shape between them would say
     otherwise. What differs is the drawing beside the title, and it has to:
     each art is its own page's claim, and the landing's — an original becoming
@@ -787,7 +842,7 @@ def repo_link() -> str:
     return (
         f'<a class="icon-btn nav-repo" href="{REPO_URL}" '
         'target="_blank" rel="noopener noreferrer" '
-        'aria-label="GitHub 저장소 (새 탭)" title="GitHub 저장소">'
+        'aria-label="GitHub (새 탭)" title="GitHub">'
         '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" '
         f'focusable="false"><path fill="currentColor" d="{GITHUB_MARK}"/>'
         '</svg></a>'
@@ -798,16 +853,24 @@ def repo_link() -> str:
 # phone's sheet print the same list rather than each keeping their own, so a
 # destination cannot arrive in one and be missing from the other.
 #
-# The key in front is what a page names itself with. A paper and a comparison
-# each sit *under* a destination rather than being one, so `p/<id>/` marks 논문
-# and `c/<slug>/` marks 비교 — the mark answers "which part of the site is
-# this", which is what a reader glancing at a nav is asking.
+# A track's destination is named for its track, in two syllables of Korean —
+# 탐색 Scouting, 분석 Analysis, 비교 Comparison, 발표 Presentation — and they
+# run in the pipeline's order, the order the README's table lists them in.
+# Five labels of one width read as one row on a desktop and fit beside the
+# controls without crowding them. 서재 is the reader's own shelf rather than a
+# track, and stands after them.
 #
-# 발표 is the one destination that is an index and nothing else: a presentation is a
-# tab on its paper's page, so the row it lists links back into 논문, and a paper
-# page opened at that tab still marks 논문 — which is the part of the site it
-# is standing in.
-DESTINATIONS = (("papers", "index.html", "논문"),
+# The key in front is what a page names itself with. A paper and a comparison
+# each sit *under* a destination rather than being one, so `p/<id>/` marks
+# 분석 and `c/<slug>/` marks 비교 — the mark answers "which part of the site
+# is this", which is what a reader glancing at a nav is asking.
+#
+# 발표 is the one destination that is an index and nothing else: a
+# presentation is a tab on its paper's page, so the row it lists links back
+# into 분석, and a paper page opened at that tab still marks 분석 — which is
+# the part of the site it is standing in.
+DESTINATIONS = (("scout", "s/index.html", "탐색"),
+                ("papers", "index.html", "분석"),
                 ("compare", "c/index.html", "비교"),
                 ("talk", "t/index.html", "발표"),
                 ("shelf", "shelf/index.html", "서재"))
@@ -842,20 +905,20 @@ def nav_sheet(up: str, here: str = "") -> str:
         for key, href, label in DESTINATIONS)
     return (f'<div class="nav-sheet" id="nav-sheet" hidden>{links}'
             f'<a class="nav-sheet-out" href="{REPO_URL}" target="_blank" '
-            'rel="noopener noreferrer">GitHub 저장소 ↗</a></div>')
+            'rel="noopener noreferrer">GitHub ↗</a></div>')
 
 
 def nav(up: str, here: str = "") -> str:
     """The row every page opens on — where the site goes, and what it can do.
 
-    Two clusters, and they are different kinds: four places to go, then three
+    Two clusters, and they are different kinds: five places to go, then three
     things to do to the page in front of the reader. A hairline stands between
     them (`site.css`), because the seam between an unboxed label and a bordered
     32px button reads as a control that lost its border unless something says
     the boundary is meant.
 
     `here` is the destination this page sits under, and marking it is the
-    other half of the same job: a row of four names that never says which one
+    other half of the same job: a row of five names that never says which one
     the reader is standing in is a row with a hole in it, and the hole is what
     makes the labels beside the controls look unfinished.
     """

@@ -2,10 +2,13 @@
 
 Everything the reading site is made of — the static-site generator and its
 build-time dependencies. The site publishes `analysis/<arxiv-id>.md`,
-`comparison/<slug>.md` and `presentation/<arxiv-id>.md`, and nothing else.
+`comparison/<slug>.md`, `presentation/<arxiv-id>.md` and the scouting reports
+`scouting/P#/<date>.md`, and nothing else.
 
 A paper's page carries the 요약 and 상세 tabs from its rewrite, plus 비교 and
-발표 when a comparison or a presentation holds it. The corpus and its
+발표 when a comparison or a presentation holds it. 탐색 (`s/<date>/`) is one
+page per run, every pillar's report merged by arXiv id, and `s/` prints the
+newest run with every date in a row above it. The corpus and its
 contracts stay at the repo root; the rules a change here must keep are in
 `site/CLAUDE.md`, and the reasoning behind each surface sits in the header
 comment of the file that draws it.
@@ -20,9 +23,10 @@ comment of the file that draws it.
 | `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, `probe-matrix` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
 | `builder/glance.py` | The 요약 tab and its checks (G1–G7) |
 | `builder/comparisons.py` | Comparison discovery and validation (`comparison/AUTHORING.md`) |
+| `builder/scouting.py` | Scouting run discovery — each `scouting/P#/<date>.md` and its run file `scouting/runs/<date>.md` read against `scouting/AUTHORING.md` and merged by date into one row per arXiv id |
 | `builder/presentations.py` | Presentation discovery, validation and slide drawing — the 발표 tab (`presentation/AUTHORING.md`) |
 | `builder/charts.py` | The 발표 tab's drawn figures — `probe-chart`, `probe-heat`, `probe-timing`, `probe-contrast`, `probe-inheritance` — as inline SVG laid out to the box the slide leaves them, stepped states included (`presentation/AUTHORING.md` §4-6 to §4-9, §8-2) |
-| `builder/pages.py`, `components.py` | Page assembly — the landing list, 같이 읽기 (`c/`), 발표 (`t/`), 내 서재, the paper page and its tabs, and the mastheads each list page opens on |
+| `builder/pages.py`, `components.py` | Page assembly — the landing list, 같이 읽기 (`c/`), 발표 (`t/`), 탐색 (`s/`), 내 서재, the paper page and its tabs, and the mastheads each list page opens on |
 | `builder/decisions.py` | The `context/P*.md` Decision-Log parser behind the `D<n>` tooltips |
 | `builder/catalog.py` | The corpus as data for an agent — `corpus.json`, `llms.txt` and the per-section Markdown under `p/<id>/s/` |
 | `builder/arxiv.py` | LaTeXML extraction of an arXiv original, for the prompts: `python3 -m builder.arxiv <id>` from this folder prints the section tree, figures and table captions; `--grep <regex>` the matching lines with their §, `--tables` every table as Markdown, `--section <anchor>` one section's text, `--bib` the bibliography with each arXiv id's first-version month |
