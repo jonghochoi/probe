@@ -19,9 +19,9 @@ which is what de-duplication across reports keys on.
 
 The reading site publishes the reports by date: every pillar's report of one
 run date on one page, one row per arXiv id (`site/builder/scouting.py`). A
-paper several pillars surfaced is one row with each pillar's rank and scores
-side by side — which is why the scores that describe the paper agree (§5-4) —
-and the run file's synthesis heads the page.
+paper several pillars surfaced is one row with each pillar's rank and reading
+side by side, and the run file's synthesis heads the page. The page orders
+the rows by score and prints none of them (§5-3).
 
 ---
 
@@ -50,12 +50,12 @@ The run file has two `##` sections of its own, `## 🧭 회차 종합` and
 ### 2-2. Subsection (`###`) headers
 
 Every paper section (🥇 🥈 🥉 🌱) carries the same four subsections, read as one
-story — tie → contribution → what it means for us → what to check:
+story — tie → what the paper is → what it means for us → what to check:
 
 | `###` header (verbatim) | Holds |
 |-------------------------|-------|
 | `### (a) 관련 Pillar / Decision` | The badge line only (§3-1) |
-| `### (b) 핵심 기여` | What the paper is and does, and what is genuinely new against the field |
+| `### (b) 논문 요지` | The paper brief — a headline and the six labelled fields below |
 | `### (c) 시사점` | What it could mean for us, in plain terms (`공개 기준점 확보`, `도입 비용 낮음`) |
 | `### (d) 먼저 확인할 점` | The paper's own limits and the cheapest transfer caveat |
 
@@ -66,11 +66,67 @@ scans: (b)'s on the paper's closed row, (c)'s as the pillar's line under
 `연구 축별로 왜`, each cut to two lines and opening to the rest. A headline
 that needs a clause for its evidence moves the evidence to the next bullet.
 
+#### The paper brief
+
+A reader deciding whether to open a paper asks the same questions of every
+one: what problem, what was wrong with what came before, how this paper
+answers, what sets it apart, what it showed, and why it matters. (b) answers
+them in that order, one labelled field each, so the answers sit in the same
+place in every paper and the site can lay them out as one card:
+
+| Label (verbatim) | Answers | Where the paper says it |
+|------------------|---------|-------------------------|
+| `**문제**` | The problem the authors set out to solve, and why it is a problem | The introduction's opening paragraphs |
+| `**기존 한계**` | Which existing approaches the authors argue against, and what each gets wrong or leaves out | "However, …", "existing methods …", the related-work paragraph of the introduction |
+| `**핵심 방법**` | How the paper answers — its components and how they connect, not the name alone | "We propose …", the method overview |
+| `**차별점**` | The design choice that separates it from the closest prior approach, and why that choice matters | "Unlike …", "rather than …", "without …" |
+| `**핵심 기여**` | Every contribution the paper lists — each result with its numbers and setting, each released artifact | The introduction's contribution list, the abstract's results |
+| `**가치**` | What the field gains if the claims hold — the paper's worth, read from the paper alone | The introduction's closing paragraph, the conclusion |
+
+- **Fixed labels, fixed order.** Each field is one top-level bullet,
+  `- **문제** — …`, after the headline and in the table's order. No label is
+  added, dropped, renamed or repeated.
+- **Depth, not a cap.** A field opens with its answer in one line, and nested
+  `-` sub-bullets carry what the paper gives to back it — the prior
+  approaches by name and what each misses, the method's components, every
+  listed contribution with its numbers. A field is as long as the paper's
+  answer; there is no length limit. A field that would read the same for
+  any paper in its area is not an answer.
+- **Read from the introduction.** The abstract compresses the paper to a few
+  sentences and drops most of what these fields need; the introduction is
+  where the authors state the problem, name the work they argue against and
+  list their contributions. The brief argues from the introduction, the
+  abstract and the comment field (`.claude/prompts/scout.txt` says how the
+  introduction is fetched). A paper with no HTML edition is briefed from its
+  abstract alone, and (d) says so first: `HTML 원문 없음 — 요지는 초록 기준`.
+- **The authors' claims, as theirs.** A field reports what the paper claims
+  and shows. A number carries its setting — simulation or hardware, the
+  benchmark, the baseline it beats — and a comparison the paper does not make
+  is not drawn. Compression that changes a claim's scope is a wrong brief,
+  however short.
+- **From the paper, not from us.** What the paper means for a pillar is (c);
+  `가치` states what the paper is worth to its field, never to a `P#` or
+  `D#`.
+- **An absent answer is said, not invented.** When the paper names no prior
+  approach, `기존 한계` and `차별점` read `원문에 대비 대상 언급 없음` — never a
+  gap the authors did not claim.
+
 ```markdown
-### (b) 핵심 기여
+### (b) 논문 요지
 
 - 몸통·루트·손 주석을 한 액션 공간으로 묶은 사전학습
-- 부분 주석 비디오·모션 1,880.2시간으로 비디오와 액션을 함께 학습, …
+- **문제** — 휴머노이드 전신 이동 조작 정책을 학습할 전신 모션 데이터 부족
+- **기존 한계** — 기존 로봇 사전학습 데이터의 전신 모션 커버리지 부족
+  - 로봇 궤적만으로는 인간 모션의 다양성을 담지 못함
+- **핵심 방법** — 몸통·루트·손가락 주석을 하나의 공유 물리 액션 공간으로 통합해 생성형 비디오 사전학습에 액션 지도로 편입
+  - 1단계 — 부분 주석 비디오·모션 1,880.2시간으로 비디오와 액션을 함께 학습
+  - 2단계 — PICO 미드트레이닝과 순기구학 보조 지도로 로봇 과제에 적응
+- **차별점** — 부분 주석 데이터를 버리지 않고 한 액션 공간에서 함께 학습
+- **핵심 기여** — 이종 주석을 함께 쓰는 전신 사전학습 레시피와 데이터셋
+  - WB-Datasets — 리타깃팅한 에고센트릭 인간 시연과 로봇 궤적을 함께 묶은 코퍼스
+  - 시뮬레이션 HumanoidArena 81.9%, 실물 5개 과제 평균 성공률 84.0%
+  - 과제 정합형 미드트레이닝이 실물 시연 필요량을 줄인다는 ablation
+- **가치** — 주석이 불완전한 인간 데이터를 전신 사전학습 자원으로 쓰는 경로 제시
 ```
 
 ### 2-3. Rules
@@ -480,6 +536,16 @@ Reproducibility score implies, as plain text (emoji stay on `##` headers — §2
 | 1 | `코드 공개 예정` |
 | 0 | `코드 미공개` |
 
+The site prints no score. Beside the code label it prints what the paper's
+Real score says, in words — the one part of the rubric a reader decides by:
+
+| Real | Site label |
+|---|---|
+| 3 | `실물 정량, 다수 과제` |
+| 2 | `실물 정량 결과` |
+| 1 | `실물 시연만` |
+| 0 | `실물 결과 없음` |
+
 The label is the report's only priority marker — a header carries no stars or
 other grade. Rank by Relevance, then by the /15 total, then by venue tier —
 this order assigns the medals and orders the 📋 rows (§5-1). Real and
@@ -658,7 +724,7 @@ under the contract of its day and is read, never rewritten, in that form.
 | Rule | Checked by |
 |---|---|
 | H1 form and its date against the filename; the two-line metadata block, the 400-character cap, no retry narration without `최종 실패`, `Papers surfaced` a bare integer equal to the paper sections plus the 📋 rows (§6) | lint |
-| Every `##` opens with a §2-1 emoji, sections in §2-1 order, each medal at most once, 📋 only under all three medals, no emoji on `###`, nothing after `논문 N` on a paper header, the (b) and (c) headlines within 50 characters (§2, §5-1, §5-3) | lint |
+| Every `##` opens with a §2-1 emoji, sections in §2-1 order, each medal at most once, 📋 only under all three medals, no emoji on `###`, nothing after `논문 N` on a paper header, the (b) and (c) headlines within 50 characters, the six (b) labels each once and in order (§2, §5-1, §5-3) | lint |
 | A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header, agreeing with its Reproducibility score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |

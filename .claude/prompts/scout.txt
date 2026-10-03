@@ -160,7 +160,14 @@ PHASE WRITE
 2. WRITE `scouting/P<n>/<run date>.md` directly in Korean, into the
    template's form, with the plan's papers in the plan's places and the
    plan's scores on every score line and row — never a score of your own.
-   (a)–(d) argue from the abstract and comment you kept.
+   (a), (c) and (d) argue from the abstract and comment you kept. (b) — the
+   paper brief, AUTHORING §2-2 — argues from the paper's introduction as
+   well, for every 🥇 🥈 🥉 🌱 paper:
+     cd site && python3 -m builder.arxiv <id>          # the section tree
+     cd site && python3 -m builder.arxiv <id> --section <intro anchor>
+   The introduction is usually `S1`; read the tree rather than assume it.
+   On `Unavailable` the paper has no HTML edition: brief it from the
+   abstract and open (d) with the line AUTHORING §2-2 gives for that case.
 3. LINT
      python3 linters/check-scouting-format.py scouting/P<n>/<run date>.md
    Fix the report, never the linter, until it exits 0 — at most three
@@ -294,6 +301,10 @@ committing.
     unchanged, and does `📐` quote the words each stands on? (§5-2, §5-4)
   - Is each (a) line badges only, and are (b)–(d) free of `D#` / `deferred` /
     config-key names? Does 🔑 list exactly the codes the body cites? (§3-1)
+  - Does every (b) answer its six labels from the paper's introduction,
+    each field as deep as the paper's answer, every number with its setting,
+    and `원문에 대비 대상 언급 없음` where the paper names no prior approach
+    rather than an invented one? (§2-2)
   - Does every 🔄 Decision-Log bullet name its decision and the paper that
     moved it, and does 🔄 — and 🧭 — omit every item that does not apply?
     (§7-1, §8)

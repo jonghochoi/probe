@@ -22,7 +22,8 @@ Checks, grouped by the contract section they enforce:
             only under all three medals, a paper header carries nothing
             after `논문 N` beyond the 🌱 tag, and from `_SECTIONS_EFFECTIVE`
             the first bullet of (b) and (c) is a headline of at most
-            `_HEADLINE_MAX` characters.
+            `_HEADLINE_MAX` characters and (b) is the paper brief — its
+            six labels each once, in order.
   AUTHORING §5  scoring contract — every 📊 paper head lists all five dimensions
             and its bullets sum to the total it states; the four gate
             dimensions of a surfaced paper and of a 📋 row are each >= 2, and
@@ -566,6 +567,42 @@ def _check_headlines(sections, findings: list[tuple[int, str]]) -> None:
                                              "bullet (AUTHORING §2-2)"))
 
 
+# The paper brief (AUTHORING §2-2): after the headline, these six labels, each
+# one top-level bullet, once and in this order.
+_BRIEF_LABELS = ("문제", "기존 한계", "핵심 방법", "차별점", "핵심 기여", "가치")
+_BRIEF_HEADER = "### (b) 논문 요지"
+_BRIEF_LABEL = re.compile(r"^- \*\*(?P<label>[^*]+)\*\* — \S")
+
+
+def _check_brief(sections, findings: list[tuple[int, str]]) -> None:
+    for emoji, header, start, body in sections:
+        if emoji not in _PAPER_SECTIONS:
+            continue
+        at = next((i for i, l in enumerate(body) if l.strip().startswith("### (b)")), None)
+        if at is None:
+            continue
+        if body[at].strip() != _BRIEF_HEADER:
+            findings.append((start + 1 + at, f"(b) header must read `{_BRIEF_HEADER}` "
+                                             "(AUTHORING §2-2)"))
+        labels: list[str] = []
+        bullets = 0
+        for line in body[at + 1:]:
+            if line.startswith("### "):
+                break
+            if not line.startswith("- "):
+                continue
+            bullets += 1
+            m = _BRIEF_LABEL.match(line.rstrip())
+            if bullets > 1:
+                labels.append(m.group("label").strip() if m else "")
+        if labels != list(_BRIEF_LABELS):
+            got = ", ".join(l or "<unlabelled>" for l in labels) or "none"
+            findings.append((start + 1 + at, f"{header}: (b) carries a headline and then "
+                                             f"`{' / '.join(_BRIEF_LABELS)}` once each, in "
+                                             f"order, as `- **<label>** — …` — found {got} "
+                                             "(AUTHORING §2-2)"))
+
+
 def _row_scores(cells: list[str]) -> dict[str, int] | None:
     """R/N/M/Real from a row's `R·N·M·Real` cell, plus Repro from a 📋 row."""
     score_cell = next((c for c in cells if _NEAR_MISS_SCORES.fullmatch(c)), None)
@@ -807,6 +844,7 @@ def check_file(path: str) -> list[tuple[int, str]]:
         _check_section_set(sections, findings)
         _check_score_lines(sections, findings)
         _check_headlines(sections, findings)
+        _check_brief(sections, findings)
         _check_against_run(abs_path, date_from_name, sections, findings)
     return sorted(findings)
 
