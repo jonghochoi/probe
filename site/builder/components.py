@@ -45,14 +45,13 @@ def esc(text: str) -> str:
 # the characters that stay are the ones that are punctuation rather than
 # controls: `↗` after a link's label, the `✓` and `●` that mark a row's state
 # inside a line of text.
-# The star is the one glyph drawn outside the icon set as well — 서재's
-# masthead fills it rather than stroking it — so the outline is a constant and
-# both callers take the same points.
+# The star is the one glyph whose points leave this file — `assets/shelf.js`
+# draws the same star on the rows it builds at runtime — so the outline is a
+# named constant rather than a line in the set, and a move here is a move there.
 _STAR_D = ("m8 1.9 1.85 3.75 4.15.6-3 2.93.71 4.13L8 11.4l-3.71 "
            "1.91.71-4.13-3-2.93 4.15-.6Z")
-# 책갈피, the same way: `mark_fab()` presses it, 서재's masthead drops it
-# into the window. `assets/shelf.js` and `assets/hub.js` carry the same points
-# for the rows they build at runtime, so a move here is a move there.
+# 책갈피, the same way: `mark_fab()` presses it, and `assets/shelf.js` and
+# `assets/hub.js` carry the same points for the rows they build at runtime.
 _FLAG_D = "M3.6 1.7h8.8v12.6L8 11.1l-4.4 3.2z"
 
 _ICON_PATHS = {
@@ -121,9 +120,9 @@ def mark(size: int) -> str:
     the whole point of putting a face on a scouting agent. Each eye ships both
     of its faces at once — the round pupil and the `joy` arc it smiles with —
     because a stroke cannot be tweened into a disc, so the mood keyframes
-    cross-fade between them and each face holds half the cycle. Decorative in every slot it appears in — the logo
-    and the masthead both name the site in text right next to it — so it stays
-    out of the accessibility tree.
+    cross-fade between them and each face holds half the cycle. Decorative — the
+    logo names the site in text right next to it — so it stays out of the
+    accessibility tree.
     """
     eyes = "".join(
         f'<g class="eye {side}"><g class="lid">'
@@ -147,408 +146,20 @@ def mark(size: int) -> str:
     )
 
 
-# One box for all four masthead diagrams. The art column is the same width on
-# every band, so a second aspect ratio is a second band height — and "one frame
-# for the five destinations" stops being true the moment one of them is taller.
-# The foot stops just under the drawing: the band's own padding is the margin,
-# and a taller box would push the page down with empty space.
-_ART_BOX = "0 0 560 164"
-
-# The landing diagram's geometry, in the box's units. The four pieces are the
-# only numbers that have to agree with anything: each one departs a line of an
-# original and lands on the part of the list it becomes, and `index.css` moves
-# them between exactly these coordinates.
-_ART_PIECES = ((62, 62), (62, 80), (62, 98), (62, 116))
-_ART_ROWS = ((40, 42), (40, 44), (40, 38), (40, 36),
-             (40, 42), (36, 44), (32, 40), (40, 28))
-# One row of the list per piece after the lead — where it sits, and how far its
-# title runs. Unequal on purpose: a column of equal bars is a table, and the
-# thing being drawn is a list of different papers.
-_ART_LIST = ((100, 168), (122, 210), (144, 140))
-
-
-def mast_art() -> str:
-    """The landing masthead's diagram — what this page holds, drawn.
-
-    A scan crosses originals that stay shut and lifts four pieces out of them;
-    the four wait in a rack over the mark; then they land, one at a time and
-    top to bottom, as the list this page is: the newest rewrite printed in
-    full, and every other one as a line.
-
-    The picture carries the title's two verbs. 옮김 is the lead block, where a
-    line of an original comes back as a line someone can read. 둠 is the rows
-    under it, where the rest of the corpus is filed rather than piled. Nothing
-    appears on the right that a piece did not carry there, which is what makes
-    the drawing an argument rather than an ornament.
-
-    It draws **this** page and no other. The paper page's tabs, the fork a
-    comparison opens, the shelf a browser keeps — each belongs to the band of
-    the page that holds it, and a band drawing a different page's surface goes
-    stale every time that page gains one. That is why the tabs are not here:
-    their set belongs to the paper page.
-
-    No pillar chip either. A chip only reads as an axis in that axis's colour,
-    and painting one here would put the pillar set in a fourth place
-    (`site/CLAUDE.md`). The rail directly under the band names the axes, in a
-    place that already knows them.
-
-    `mark()` is nested rather than redrawn, so the face here is the same
-    drawing as the one in the nav — same tokens, same blink, same pupils under
-    `brand.js`. Geometry only: every beat is a keyframe in `index.css`.
-
-    Nothing on the page states any of this in words, and the figure does not
-    either: it sets the band rather than carrying a claim, so it stays out of
-    the accessibility tree. Naming it there would hand a reader on a screen
-    reader a sentence no sighted reader is given.
-    """
-    rows = "".join(
-        f'<rect x="16" y="{y}" width="{w1}" height="3" rx="1.5"/>'
-        f'<rect x="62" y="{y}" width="{w2}" height="3" rx="1.5"/>'
-        for y, (w1, w2) in zip(range(56, 128, 9), _ART_ROWS)
-    )
-    pieces = "".join(
-        f'<circle class="ma-dot ma-d{i + 1}" cx="{x}" cy="{y}" r="3.4"/>'
-        for i, (x, y) in enumerate(_ART_PIECES)
-    )
-    # A row carries what a row on this page carries: the star it is kept with,
-    # its arXiv id, its title, and how long a sit it is.
-    listrows = "".join(
-        f'<g class="ma-row ma-r{i + 1}">'
-        f'<g transform="translate(206,{y - 6}) scale(.75)">'
-        f'<path class="ma-star" d="{_STAR_D}"/></g>'
-        f'<rect class="ma-id" x="226" y="{y - 2}" width="34" height="4" rx="2"/>'
-        f'<rect class="ma-title" x="270" y="{y - 2.5}" width="{w}" height="5" rx="2.5"/>'
-        f'<rect class="ma-id" x="506" y="{y - 2}" width="48" height="4" rx="2"/>'
-        f'<path class="ma-sep" d="M206 {y + 11} H554"/>'
-        "</g>"
-        for i, (y, w) in enumerate(_ART_LIST)
-    )
-    return (
-        f'<svg class="mast-art home-art" viewBox="{_ART_BOX}" aria-hidden="true" '
-        'focusable="false">'
-        "<defs>"
-        '<linearGradient id="ma-scan" x1="0" y1="0" x2="0" y2="1">'
-        '<stop offset="0" class="ma-scan-0"/><stop offset="1" class="ma-scan-1"/>'
-        "</linearGradient>"
-        '<clipPath id="ma-clip">'
-        '<rect x="6" y="26" width="112" height="126" rx="8"/></clipPath>'
-        "</defs>"
-
-        # The corpus as it arrives — stacked, and none of it opened. The scan
-        # crosses only the sheet on top, because one is enough to say what is
-        # happening to all of them.
-        '<text class="ma-label" x="6" y="17">arXiv 원문</text>'
-        '<rect class="ma-sheet ma-stack" x="18" y="34" width="112" height="126" rx="8"/>'
-        '<rect class="ma-sheet ma-stack" x="12" y="30" width="112" height="126" rx="8"/>'
-        '<rect class="ma-sheet" x="6" y="26" width="112" height="126" rx="8"/>'
-        '<rect class="ma-head" x="16" y="40" width="56" height="6" rx="3"/>'
-        f'<g class="ma-type">{rows}</g>'
-        '<rect class="ma-veil" x="6" y="26" width="112" height="126" rx="8"/>'
-        '<g clip-path="url(#ma-clip)"><g class="ma-band">'
-        '<rect x="6" y="26" width="112" height="26" fill="url(#ma-scan)"/>'
-        '<rect class="ma-edge" x="6" y="51" width="112" height="1.3"/>'
-        "</g></g>"
-        '<rect class="ma-pill" x="16" y="128" width="54" height="15" rx="7.5"/>'
-        '<text class="ma-pill-t" x="43" y="138.5">열지 않음</text>'
-
-        # What this page holds. The newest rewrite is a card because it is one
-        # here; the rest are lines because they are lines here. The card's own
-        # sheet stands for the whole loop — it is the surface the list is
-        # written on, the way the original's sheet is the surface it is read
-        # from, and only what gets written into it arrives.
-        '<text class="ma-label" x="206" y="17">PROBE 재작성 · 한글</text>'
-        '<rect class="ma-sheet" x="206" y="26" width="348" height="58" rx="8"/>'
-        '<g class="ma-lead">'
-        '<rect class="ma-flag" x="220" y="38" width="36" height="4" rx="2"/>'
-        '<rect class="ma-lead-t" x="220" y="54" width="210" height="7" rx="3.5"/>'
-        '<rect class="ma-lead-s" x="220" y="68" width="266" height="4" rx="2"/></g>'
-        f"{listrows}"
-
-        # The pieces sit under the mark, so one in transit passes behind the
-        # face and lands in front of the line it becomes.
-        '<g class="ma-rack"><rect x="144" y="55" width="56" height="1.2" rx=".6"/></g>'
-        f"{pieces}"
-        f'<g transform="translate(148,64)">{mark(44)}</g>'
-        "</svg>"
-    )
-
-
-
-# ── The two list mastheads that are not the landing ─────────────────────────
-# What each drawing argues, in words. A drawing that carries a claim rather
-# than setting the band is named in the accessibility tree instead of hidden
-# from it, and this is the name: the art writes it into its own `aria-label`.
-CMP_LEAD = (
-    "논문 두세 편을 한 질문 아래 놓고 갈리는 자리만 봅니다. "
-    "각 논문이 무엇을 하는지는 그 논문의 재작성본에 있습니다."
-)
-TALK_LEAD = (
-    "논문 한 편을 起承轉結 네 막의 슬라이드로 다시 짭니다. "
-    "슬라이드마다 그 앞에서 무엇을 말할지가 아래에 붙고, "
-    "재작성본이 있는 논문만 여기에 섭니다."
-)
-SCOUT_LEAD = (
-    "다섯 연구 축이 같은 날 따로 훑은 2주치 논문을 한 목록에 모읍니다. "
-    "여러 연구 축이 같은 논문을 집으면 한 줄로 합쳐지고, 그 줄이 맨 위에 섭니다."
-)
-SHELF_LEAD = (
-    "즐겨찾기 · 읽은 논문 · 책갈피 · 메모. "
-    "넷 다 이 브라우저에만 남고, 사이트 데이터를 지우면 사라집니다. "
-    "옮기거나 남길 것은 내보내세요."
-)
-
-
-# One branch per row, and the stance each one runs out to. Three is the most a
-# comparison may hold (`comparison/AUTHORING.md`), so three is what the picture
-# draws.
-_CMP_ROWS = (82, 112, 142)
-_CMP_STANCE = (196, 244, 160)
-
-
-def cmp_art() -> str:
-    """The comparison masthead's diagram — `CMP_LEAD`, drawn.
-
-    The claim is the track's own premise: two or three papers are put under one
-    question, and what is worth printing is only the place they part. So the
-    question is a card over everything, the papers arrive as the aliases they
-    are listed under, and the bracket opens beneath it — the same trunk, spine
-    and tick `pages._fork_bracket()` draws on every comparison card, at the
-    size a masthead can carry. What each paper *is* never appears: a branch
-    ends in an arrow leaving the frame, because that detail lives on the
-    paper's own page and the comparison links out to it.
-
-    `공통` is the trunk and takes the muted ink; the three stances take
-    `--act1..3`, so what the picture colours is exactly what the track exists
-    to show. Unlike the landing's diagram this one carries the page's sentence
-    rather than setting its band, so it is named in the accessibility tree
-    instead of hidden from it.
-    """
-    branches = "".join(
-        f'<g class="ca-b ca-b{i + 1}">'
-        f'<rect class="ca-pill" x="162" y="{y - 11}" width="56" height="22" rx="11"/>'
-        f'<rect class="ca-stance" x="238" y="{y - 3}" width="{w}" height="6" rx="3"/>'
-        f'<path class="ca-out" d="M524 {y - 5} l6 5 -6 5"/>'
-        "</g>"
-        for i, (y, w) in enumerate(zip(_CMP_ROWS, _CMP_STANCE))
-    )
-    ticks = "".join(
-        f'<path class="ca-tick ca-t{i + 1}" d="M132 {y} H152"/>'
-        for i, y in enumerate(_CMP_ROWS)
-    )
-    return (
-        f'<svg class="mast-art cmp-art" viewBox="{_ART_BOX}" role="img" '
-        f'aria-label="{esc(CMP_LEAD)}" focusable="false">'
-        # One group over the whole drawing, so the loop can dissolve and
-        # rebuild without any single piece being caught snapping back.
-        '<g class="ca-all">'
-
-        # The question, over everything it holds.
-        '<text class="ca-label" x="6" y="17">한 질문</text>'
-        '<rect class="ca-sheet" x="6" y="26" width="548" height="34" rx="8"/>'
-        '<rect class="ca-q" x="20" y="39" width="300" height="7" rx="3.5"/>'
-
-        # The trunk: what they all accept, and the stub that carries it in.
-        '<text class="ca-label ca-trunk-l" x="6" y="104">공통</text>'
-        '<rect class="ca-trunk" x="6" y="109" width="98" height="6" rx="3"/>'
-        '<path class="ca-stub" d="M110 112 H132"/>'
-
-        # The fork itself — spine first, then a tick per branch.
-        '<path class="ca-spine" d="M132 82 V142"/>'
-        f"{ticks}{branches}"
-        # The one place the three branches stop agreeing. Everything left
-        # of it is the question and the 공통; everything right of it is
-        # what the comparison was written to print. The title over the
-        # drawing names it, so the rule does not label itself.
-        '<path class="ca-cut" d="M232 66 V158"/>'
-        "</g></svg>"
-    )
-
-
-# The four beats a talk is cut into, and the slide the drawing gives each —
-# how wide its content runs, and how much there is to say under it. The acts
-# are `presentations.ACTS`; the numbers only say that four unequal slides are
-# four different slides.
-_TALK_SLIDES = ((78, 100), (96, 74), (62, 108), (88, 86))
-
-
-def talk_art() -> str:
-    """The talk masthead's diagram — `TALK_LEAD`, drawn.
-
-    One talk, in the shape the track's contract gives it: the spine over
-    everything — the one sentence a talk is allowed — then a slide per act,
-    ranked 起承轉結 in `--act1..4`, and under each one the speaker essay. The
-    two rows are the whole argument: a slide is what the room sees and the
-    essay is what is said in front of it, and neither is the other. A deck
-    with no second row is a slide dump, which is the thing
-    `presentation/AUTHORING.md` §6 exists to refuse.
-
-    Four is the act count, not a slide count. A talk carries as many slides as
-    it needs and the acts are what order them, so the drawing shows the beats
-    rather than pretending to count frames.
-
-    `--act1..4` mean the four acts everywhere else on this site, and here they
-    mean the same four. Unlike the landing's list, this drawing has acts.
-    """
-    slides = "".join(
-        f'<g class="pa-s pa-a{i + 1}">'
-        f'<text class="pa-act" x="{x + 2}" y="52">{act}</text>'
-        f'<rect class="pa-slide" x="{x}" y="58" width="117" height="62" rx="6"/>'
-        f'<rect class="pa-bar" x="{x}" y="58" width="117" height="3.5" rx="1.75"/>'
-        f'<g class="pa-body">'
-        f'<rect x="{x + 10}" y="76" width="{w}" height="4" rx="2"/>'
-        f'<rect x="{x + 10}" y="90" width="{w - 16}" height="4" rx="2"/>'
-        f'<rect x="{x + 10}" y="104" width="{w - 34}" height="4" rx="2"/></g>'
-        f'<g class="pa-say">'
-        f'<rect x="{x + 2}" y="132" width="{e}" height="3.5" rx="1.75"/>'
-        f'<rect x="{x + 2}" y="142" width="{e - 28}" height="3.5" rx="1.75"/></g>'
-        "</g>"
-        for i, (x, act, (w, e)) in enumerate(
-            zip((54, 181, 308, 435), "起承轉結", _TALK_SLIDES))
-    )
-    return (
-        f'<svg class="mast-art talk-art" viewBox="{_ART_BOX}" role="img" '
-        f'aria-label="{esc(TALK_LEAD)}" focusable="false">'
-        '<g class="pa-all">'
-
-        # What the three rows are, named once on the left so the drawing does
-        # not have to be guessed at.
-        '<text class="pa-label" x="6" y="32">한 문장</text>'
-        '<rect class="pa-spine" x="54" y="26" width="320" height="7" rx="3.5"/>'
-        '<text class="pa-label" x="6" y="92">슬라이드</text>'
-        '<text class="pa-label" x="6" y="142">말할 것</text>'
-        f"{slides}"
-        "</g></svg>"
-    )
-
-
-# The five lanes, one per pillar, and where on each the run's picks sit. Two
-# of them line up with a pick on another lane — the same paper, flagged twice —
-# and those are the pairs that join into one row on the right.
-_SCOUT_PICKS = ((96, 150), (120, 196), (84, 168), (132, 210), (108, 156))
-_SCOUT_JOINS = ((0, 1, 0), (2, 3, 1))  # (lane, lane, row): two lanes, one row
-
-
-def scout_art() -> str:
-    """The scouting masthead's diagram — `SCOUT_LEAD`, drawn.
-
-    Five lanes on the left, one per pillar in its own tint, each carrying the
-    papers its run surfaced. On the right the one list this page is. Most
-    picks cross alone; two pairs that sit on different lanes are one paper,
-    and their lines meet before they land, so the list holds one row for the
-    two of them — and those rows are drawn on top, which is where the page
-    puts them.
-
-    The lanes are the pillars and nothing else, so they are named `P0`–`P4`
-    and coloured the way every pillar chip on the site is.
-    """
-    lanes = "".join(
-        f'<g class="sca-lane" data-p="P{i}">'
-        f'<text class="sca-label" x="6" y="{30 + i * 26}">P{i}</text>'
-        f'<rect class="sca-track" x="30" y="{24 + i * 26}" width="230" height="8" rx="4"/>'
-        f'<rect class="sca-pick" style="--i:{2 * i}" x="{a}" y="{24 + i * 26}" width="22" height="8" rx="4"/>'
-        f'<rect class="sca-pick" style="--i:{2 * i + 1}" x="{b}" y="{24 + i * 26}" width="22" height="8" rx="4"/>'
-        "</g>"
-        for i, (a, b) in enumerate(_SCOUT_PICKS)
-    )
-    joins = "".join(
-        f'<path class="sca-join" style="--i:{row}" pathLength="1" '
-        f'd="M{_SCOUT_PICKS[l1][1] + 22} {28 + l1 * 26} '
-        f'C 330 {28 + l1 * 26}, 330 {40 + row * 24}, 380 {40 + row * 24}"/>'
-        f'<path class="sca-join" style="--i:{row}" pathLength="1" '
-        f'd="M{_SCOUT_PICKS[l2][1] + 22} {28 + l2 * 26} '
-        f'C 330 {28 + l2 * 26}, 330 {40 + row * 24}, 380 {40 + row * 24}"/>'
-        for l1, l2, row in _SCOUT_JOINS
-    )
-    rows = "".join(
-        f'<g class="sca-row{" sca-shared" if r < 2 else ""}" style="--i:{r}">'
-        f'<rect class="sca-card" x="384" y="{30 + r * 24}" width="170" height="20" rx="5"/>'
-        f'<rect class="sca-line" x="396" y="{38 + r * 24}" width="{w}" height="4" rx="2"/></g>'
-        for r, w in enumerate((96, 120, 84, 104, 70))
-    )
-    return (
-        f'<svg class="mast-art scout-art" viewBox="{_ART_BOX}" role="img" '
-        f'aria-label="{esc(SCOUT_LEAD)}" focusable="false">'
-        f'<g class="sca-all">{lanes}{joins}{rows}</g></svg>'
-    )
-
-
-# The four lists 서재 holds, in `pages.SHELF_TABS` order, and how far each
-# one's row runs. The widths differ only so the rows do not read as a table:
-# no number here is a count, because the build has none to give.
-_SHELF_ROWS = ((74, 196), (98, 150), (122, 232), (146, 168))
-
-
-def shelf_art() -> str:
-    """The shelf masthead's diagram — `SHELF_LEAD`, drawn.
-
-    Four kinds of mark fall into one browser window and stay there. The window
-    frame is the whole argument: it is a boundary, it lights once to say so,
-    and the only thing that crosses it is the export arrow. A reader who has
-    understood the picture has understood why the page has two export buttons
-    and no account.
-
-    Nothing here is counted. Rows are drawn without numbers because the build
-    cannot know what this browser holds — `site/CLAUDE.md`'s "reader state
-    never reaches the build" is a rule about the drawing too, not only about
-    the markup under it. The four glyphs are the site's own: the star every
-    row is starred with, the check a 읽음 mark leaves, the flag 책갈피 plants,
-    and a memo's card.
-    """
-    rows = "".join(
-        f'<g class="sa-row sa-r{i + 1}">'
-        f'<g class="sa-glyph" transform="translate(28,{y - 8})">{glyph}</g>'
-        f'<rect class="sa-title" x="56" y="{y - 2.5}" width="{w}" height="5" rx="2.5"/>'
-        "</g>"
-        for i, ((y, w), glyph) in enumerate(zip(_SHELF_ROWS, (
-            f'<path class="sa-star" d="{_STAR_D}"/>',
-            '<path class="sa-check" d="M3.4 8.4 6.6 11.6 12.8 4.8"/>',
-            f'<path class="sa-flag" d="{_FLAG_D}"/>',
-            '<g class="sa-memo"><rect x="3" y="2.4" width="10" height="11.2" rx="1.6"/>'
-            '<path d="M5.4 6.1h5.2M5.4 8.6h5.2M5.4 11.1h3"/></g>',
-        )))
-    )
-    return (
-        f'<svg class="mast-art shelf-art" viewBox="{_ART_BOX}" role="img" '
-        f'aria-label="{esc(SHELF_LEAD)}" focusable="false">'
-        '<g class="sa-all">'
-
-        # The window, and the edge that says it is one.
-        '<text class="sa-label" x="6" y="17">이 브라우저</text>'
-        '<rect class="sa-win" x="6" y="26" width="380" height="132" rx="10"/>'
-        '<path class="sa-rule" d="M6 54 H386"/>'
-        '<circle class="sa-dot" cx="26" cy="40" r="3.5"/>'
-        '<circle class="sa-dot" cx="40" cy="40" r="3.5"/>'
-        '<circle class="sa-dot" cx="54" cy="40" r="3.5"/>'
-        f"{rows}"
-        '<rect class="sa-edge" x="6" y="26" width="380" height="132" rx="10"/>'
-
-        # The one door out.
-        '<text class="sa-label sa-out-l" x="502" y="54">내보내기</text>'
-        '<g class="sa-arrow"><path d="M398 92 H432"/><path d="M426 86 l6 6 -6 6"/></g>'
-        '<g class="sa-file">'
-        '<rect class="sa-card" x="450" y="64" width="104" height="56" rx="7"/>'
-        '<rect class="sa-line" x="466" y="80" width="64" height="5" rx="2.5"/>'
-        '<rect class="sa-line" x="466" y="94" width="50" height="5" rx="2.5"/>'
-        '<rect class="sa-line" x="466" y="108" width="58" height="5" rx="2.5"/></g>'
-        "</g></svg>"
-    )
-
-
-def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
+def mast(*, eyebrow: str, title: str, count: str = "") -> str:
     """The band every list page opens on.
 
     One frame for the five destinations the nav names, because they are one
     level of the site and a band that changed shape between them would say
-    otherwise. What differs is the drawing beside the title, and it has to:
-    each art is its own page's claim, and the landing's — an original becoming
-    two tabs — argues nothing on a page about comparisons.
+    otherwise. Two things and no third: what this surface is, and what it does.
+    Nothing sits beside the title — the list under the band is what the page
+    is for, and anything set there either repeats that list or argues for it,
+    when the list makes its own case one scroll down.
 
-    Three things and no fourth: what this surface is, what it does, and the
-    drawing that argues it. `count` is the exception the landing earns — the
-    pair it prints beside its title for a reader whose filter bar has not
-    arrived — and it is the only number any band carries, because it is the
-    only one the build has. What this browser has kept is not a fact this
-    generator holds.
+    `count` is the exception the landing earns — the pair it prints beside its
+    title for a reader whose filter bar has not arrived — and it is the only
+    number any band carries, because it is the only one the build has. What
+    this browser has kept is not a fact this generator holds.
     """
     count_html = f'<p class="mast-count">{esc(count)}</p>' if count else ""
     return f"""<header class="mast">
@@ -559,7 +170,6 @@ def mast(*, eyebrow: str, title: str, art: str, count: str = "") -> str:
         <h1>{esc(title)}</h1>{count_html}
       </div>
     </div>
-    {art}
   </div>
 </header>"""
 

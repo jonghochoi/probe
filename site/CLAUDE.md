@@ -45,19 +45,18 @@ own page rather than a page of its own, so the link back is the page it is
 already on — and `t/` is an index of those tabs rather than a second home for
 them: every row it prints links into the paper page it belongs to.
 
-**Every band draws what its own page holds.** The drawing beside each title in
-`components.mast()` is that page's own — 논문 the list, 비교 a comparison's
-fork, 발표 the four acts, 서재 the browser's window. A band that draws another
-page's surface goes stale whenever that page changes.
+**A band is its eyebrow and its title, and nothing beside them.**
+`components.mast()` prints those two lines and no more: whatever sits next to
+the title either repeats the list under the band or argues for it, and the
+list makes its own case one scroll down. The five bands are one height, so
+moving between them in the nav moves nothing but the words.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
 under `assets/shelf.js` and `assets/memo.js`, and the landing page size — a view setting rather than
 a mark on a paper — under `probe.view.v1`. Both marks are set by the reader and
 never inferred: neither opening a page nor scrolling to its end is evidence it
-was read. This binds the drawings too — `components.shelf_art()` draws the four
-kinds without drawing how full any of them is, because a picture that implies a
-count leaks the same fact as markup that prints one.
+was read.
 
 **The article frame is the stylesheet's.** What `analysis/AUTHORING.md` R12
 forbids an author to write, `builder/assets/site.css` keeps:

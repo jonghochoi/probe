@@ -238,7 +238,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     # control, not a sentence, and `Starred` names the star beside it in a
     # width a Korean label needs two lines for. Everything that speaks in
     # sentences stays Korean — the group heading, 서재's tabs, the paper
-    # header, and the masthead's own title and lead.
+    # header, and the masthead's own title.
     #
     # The pair is printed twice, once for the rail and once for the filter bar,
     # because the rail leaves at 900px and these two would leave with it — and
@@ -273,7 +273,6 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     head = c.mast(
         eyebrow="Dexterous manipulation",
         title="분석, 원문을 읽기 좋게 풀어 둡니다",
-        art=c.mast_art(),
         count=f"{len(ordered)}편" + (f" · 최근 {ordered[0].date}" if ordered else ""),
     )
 
@@ -637,7 +636,6 @@ def shelf_page(papers: list[Paper]) -> str:
     head = c.mast(
         eyebrow="Kept in this browser",
         title="서재, 이 브라우저에만 남습니다",
-        art=c.shelf_art(),
     )
 
     body = f"""{head}
@@ -1374,7 +1372,6 @@ def talk_index_page(presentation_map: dict, papers_by_id: dict | None = None) ->
     head = c.mast(
         eyebrow="Slides and script",
         title="발표, 할 말을 순서대로 적어 둡니다",
-        art=c.talk_art(),
     )
 
     body = f"""{head}
@@ -1485,7 +1482,6 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
     head = c.mast(
         eyebrow="Side by side",
         title="비교, 갈리는 자리만 봅니다",
-        art=c.cmp_art(),
     )
 
     body = f"""{head}
@@ -1863,7 +1859,7 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
                     'rel="noopener">회차</a>')
     sources_html = f'<p class="sc-sources">원본 리포트 · {sources}</p>'
 
-    head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE, art=c.scout_art())
+    head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE)
     body = f"""{head}
 
 <main class="hub hub-wide sc" data-scout>
@@ -1889,7 +1885,7 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
 
 def scouting_empty_page() -> str:
     """`s/` before the first run lands."""
-    head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE, art=c.scout_art())
+    head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE)
     body = f"""{head}
 
 <main class="hub hub-wide">

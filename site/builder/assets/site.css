@@ -126,7 +126,6 @@
   --p2-ink: oklch(50% 0.12 140); --p3-ink: oklch(50% 0.12 262);
   --p4-ink: oklch(50% 0.13 304);
   --pna:  oklch(91.0% 0.009 56);
-  --pink: oklch(21.0% 0.018 50);   /* pillar chip ink */
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
   /* ── Type ───────────────────────────────────────────────────────────── */
@@ -246,7 +245,6 @@
   --p2-ink: oklch(80% 0.11 140); --p3-ink: oklch(78% 0.09 262);
   --p4-ink: oklch(78% 0.10 304);
   --pna:  oklch(32.7% 0.013 58);
-  --pink: oklch(93.6% 0.012 60);
   --dref: oklch(76.5% 0.139 73);
 
   --shadow:    0 0 0 transparent;
@@ -343,9 +341,9 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 }
 
 /* ── The mark ─────────────────────────────────────────────────────────── */
-/* A probe that looks back. It sits in the nav on every page and in the
-   landing masthead, so it lives here rather than in `index.css`. Geometry is
-   in `components.mark()`; `brand.js` steers the pupil after the pointer.
+/* A probe that looks back. It sits in the nav on every page, so it lives
+   here rather than in `index.css`. Geometry is in `components.mark()`;
+   `brand.js` steers the pupil after the pointer.
    Every part paints from a token, so the mark follows the theme with the rest
    of the page and the 16 px favicon stays a separate, static drawing. */
 .probe-mark { display: block; flex: none; overflow: visible; }
