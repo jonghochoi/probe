@@ -65,6 +65,14 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
   "http://export.arxiv.org/api/query?search_query=cat:cs.RO&max_results=1"
 ```
 
+The paper-brief fetch must print a section tree, not a TLS error — it goes
+through Python's `urllib`, which has to trust the environment's proxy CA as
+`curl` does:
+
+```bash
+cd site && python3 -m builder.arxiv 2410.24164 | head
+```
+
 ## 3. Routine
 
 One routine runs every pillar. Its prompt is one line that points at the
@@ -100,16 +108,20 @@ reaches the next run with nothing re-pasted.
 
 Use **Run now** on the routine detail page. A green status only means "exited
 without an infra error" — open the transcript. Report format and evidence
-rules belong to the prompt's SELF-CHECK (step 8) and
+rules belong to the prompt's SELF-CHECK and
 `linters/check-scouting-format.py`. What a first run checks is that those
 gates fired, and that the environment is sound:
 
 - [ ] The transcript shows `linters/check-scouting-format.py` running on the
-      run file and every report and exiting 0 (PART I step 7). A run that skipped it, or
+      run file and every report and exiting 0 (PART I, CHECK). A run that skipped it, or
       committed while it still reported violations, is the failure to catch
       here — CI on `main` only reports after the fact.
 - [ ] The `Papers scanned:` header discloses **no** `curl` 403 / network-block
       error. One there means the Custom allowlist is missing.
+- [ ] The per-paper briefs come from the paper's introduction — the
+      transcript shows `python3 -m builder.arxiv` fetching each 🥇 🥈 🥉 🌱
+      paper's section tree, and no (d) opens on `HTML 원문 없음` for a paper
+      that has an HTML edition.
 - [ ] The Anti-topics filter fired — 🔄 reports a filter count. A run that
       dropped nothing is suspicious.
 - [ ] Implications are concrete — (c) names a specific cost, number or

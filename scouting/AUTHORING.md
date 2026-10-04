@@ -444,7 +444,9 @@ The top three by rank (§5-3) take the full `## 🥇 / 🥈 / 🥉` sections, on
 medal each. Every further paper that clears the gate is still surfaced — as one
 row of `## 📋 기준 통과 · 추가 후보`, in rank order — so a strong week stays a
 report a reader can scan rather than a stack of full sections. The 🌱 pick
-keeps its own section (§5) and is not one of the three.
+keeps its own section (§5) and is not one of the three. A 🌱 proposal that
+does not clear the gate is not printed — no 🌱 section and no 🔍 row — and
+the pillar's monthly budget stays open.
 
 ```markdown
 | Paper | Link | R·N·M·Real | Repro | 합계 | 코드 | 한 줄 근거 |
@@ -525,6 +527,10 @@ file quotes all three (§8):
 … · Repro0 — 초록·arXiv comment 모두 코드·프로젝트 페이지 신호 없음
 ```
 
+The quote names its source, `arXiv comment "…"` or `초록 "…"`. A
+Reproducibility kept from an earlier report (§5-4) reads
+`<pillar> <date> 판정 유지` in its place (`… · Repro1 — P1 2026-10-01 판정 유지`).
+
 ### 5-3. The Reproducibility label and the rank order
 
 Every paper header line and every 📋 `코드` cell carries the label its
@@ -568,14 +574,20 @@ two answers about the paper itself.
   de-duplication window, before this run's date, **keeps** that report's
   three — the most recent date, and on one date the lowest pillar number. A
   score line and a 📋 row carry all three; a 🔍 row carries Methodology and
-  Real.
+  Real. In a report dated before the lint's `_SECTIONS_EFFECTIVE` (§9) the
+  three are its `📊 점수 요약` bullets — `Sim2Real` is Real — and its
+  `R·N·M·S2R` cells.
+- A source carrying only Methodology and Real keeps those two, and
+  Reproducibility is scored afresh; its 📐 `근거` reads
+  `M: P# date 판정 유지 · Real: P# date 판정 유지 · Repro: "<quote>"`.
 
 ### 5-5. Near-miss candidates
 
 `## 🔍 근접 후보` holds this run's candidates that are **exactly one gate axis
-short** — one of Relevance, Novelty and Methodology scores 1 and the other two
-are ≥ 2. Two or more axes short is dropped and appears in the report only as
-part of the filter count in 🔄 (§7-1); zero axes short is a surfaced paper
+short** — one of Relevance, Novelty and Methodology scores exactly 1 and the
+other two are ≥ 2. A 0 on any of the three is no near miss — it counts as two
+axes short. Two or more axes short is dropped and appears in the report only
+as part of the filter count in 🔄 (§7-1); zero axes short is a surfaced paper
 (§5-1), never a 🔍 row.
 
 The table is this run's alone. A row is not carried into the next report and
@@ -583,12 +595,13 @@ is not re-checked there; like every id a report names, the paper is then held
 out of later runs by the routine's de-duplication window. `재검토 조건` names,
 for the reader, what would lift the short axis.
 
-One table, no per-paper `###` subsections:
+One table, no per-paper `###` subsections. The `코드` cell is the §5-3 label
+of the run's Reproducibility score for the paper:
 
 ```markdown
 | Paper | Link | R·N·M·Real | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·1·3 | 공개 예정 | 베이스라인 비교가 추가되면 Methodology 충족 |
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·1·3 | 코드 공개 예정 | 베이스라인 비교가 추가되면 Methodology 충족 |
 ```
 
 Omit the section when it has no rows.
@@ -636,7 +649,8 @@ recent findings, Decision-Log triggers, filter health as a count,
 already-analyzed dedup count.
 
 - **A Decision-Log trigger names the decision and the paper that moved it**
-  (`D5DQ — Rho(2609.38164) 15회 교정 적응이 서브루프 없는 대안 제시`). It is
+  (`[![D5DQ](https://img.shields.io/badge/D5DQ-d97706.svg)](#ref-D5DQ) —
+  Rho(2609.38164) 15회 교정 적응이 서브루프 없는 대안 제시`). It is
   a signal for the reader, not an edit proposal — `context/` is the human's
   record, and the report names no pin, rule or wording to change there.
 - **Filter health is the only trace of a dropped candidate.** A count and a
@@ -653,6 +667,9 @@ ordinary occurrence in this corpus, and the reports read side by side across
 pillars. A bare alias is only safe where a `Link` column resolves it in the
 same row.
 
+- **The alias** is the paper's own codename — the part of its title before
+  the colon — or else the title's first words, up to about 30 characters.
+  Plain text: no `$…$` math, and a Δ is written as the character.
 - In **prose** (🔄), an alias carries its id on first use in the
   section: `Faster-WAM(2608.04404)`.
 - In the 📋 and 🔍 tables the `Paper` column stays alias-only — the `Link`
@@ -705,7 +722,7 @@ prints its synthesis at the top of the date's page (§1).
   uses for it, and the one the site prints on the paper's row.
   `근거` quotes the text each score stands on, `M:`, `Real:` and `Repro:` in
   that order; a score kept from an earlier report (§5-4) reads
-  `<pillar> <date> 판정 유지` instead.
+  `<pillar> <date> 판정 유지` instead, dimension by dimension (§5-4).
 
 ---
 
