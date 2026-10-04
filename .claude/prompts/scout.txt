@@ -53,56 +53,82 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
      TZ=Asia/Seoul date +%Y-%m-%d          → the run date
      RUN=/tmp/probe-scout/<run date>; mkdir -p "$RUN/arxiv"
    The run date is every filename and the commit subject; never re-derive
-   it. A pillar whose `scouting/P#/<run date>.md` already exists is not run
-   again — say so and drop it. With no pillar left, stop.
+   it. `$RUN` is the run directory's absolute path, and every Bash call is
+   a fresh shell, so a variable set in one call is empty in the next: begin
+   each call that uses it with `RUN=/tmp/probe-scout/<run date>;`, and hand
+   it to every agent as that path, never as `$RUN`. A pillar whose
+   `scouting/P#/<run date>.md` already exists is not run again — say so and
+   drop it. With no pillar left, stop.
 
 2. SCOUT — dispatch one pillar agent per pillar with the Agent tool, all in
    one message so they run in parallel:
      "Read `.claude/prompts/scout.txt` PART II and the shared sections,
-      and run phase SCOUT for pillar P<n>. Run date <date>. RUN=<RUN>.
-      You are agent <i> of <k>: wait <i×20> seconds before your first
-      network call."
-   The stagger and the shared `$RUN/arxiv/` cache keep five agents from
-   tripping the APIs' rate limits together. Each returns one status line and
-   leaves `$RUN/P<n>.candidates.json`. An agent that fails or leaves no file
-   is that pillar FAILED, with its error verbatim; the run goes on.
+      and run phase SCOUT for pillar P<n>. Run date <date>. The run
+      directory is /tmp/probe-scout/<date> — begin every Bash call that
+      uses it with `RUN=/tmp/probe-scout/<date>;`. You are agent <i> of
+      <k>: wait <i×20> seconds before your first network call."
+   The stagger, the arXiv lock and the shared `$RUN/arxiv/` cache keep five
+   agents from tripping the APIs' rate limits together. Each returns one
+   status line and leaves `$RUN/P<n>.candidates.json`. When all have
+   returned, run `ls "$RUN"/P*.candidates.json`: a pillar with no file there
+   is FAILED, with its agent's error verbatim; the run goes on.
 
 3. JUDGE — dispatch the paper judge (PART III) once, over every candidate id
-   in every `$RUN/P*.candidates.json`. It leaves `$RUN/judged.json`.
+   in every `$RUN/P*.candidates.json`:
+     "Read `.claude/prompts/scout.txt` PART III and the shared sections,
+      and judge the run of <date>. The run directory is
+      /tmp/probe-scout/<date> — begin every Bash call that uses it with
+      `RUN=/tmp/probe-scout/<date>;`."
+   It leaves `$RUN/judged.json`.
 
 4. PLAN — for each pillar, from its candidates and `judged.json`, apply
    AUTHORING §5 and write `$RUN/P<n>.plan.json`:
      · the surfaced papers (R, N and M each ≥ 2), ranked per §5-3 — the
        first three are 🥇 🥈 🥉, the rest 📋 rows;
-     · the 🌱 pick, when the pillar agent proposed one and it clears the gate;
-     · the 🔍 rows — exactly one of R, N, M at 1 (§5-5);
-     · the filter count for 🔄 — candidates out, by reason;
+     · the 🌱 pick — the first of the pillar agent's ranked `pick`
+       candidates that clears the gate. With none clearing it, the plan
+       carries no 🌱 and no 🔍 row for a proposal (§5-1);
+     · the 🔍 rows per AUTHORING §5-5;
+     · the filter count for 🔄 — the candidates file's `dropped` plus what
+       this step drops (two or more gate axes short, a 🌱 proposal not
+       printed), by reason;
      · for every listed paper, its five scores, M, Real and Repro taken
        from `judged.json` unchanged.
    The plan is arithmetic over scores already given. It re-scores nothing.
 
-5. WRITE — dispatch the pillar agents again, one per pillar that has a plan,
+5. RUN FILE, FIRST CUT — write `scouting/runs/<run date>.md` into
+   `scouting/templates/run.md` per AUTHORING §8: the H1, `Pillars:` as
+   asked, and `## 📐 논문 판정` from `judged.json` for every paper a plan
+   lists — `근거` from each dimension's `evidence`, or in the kept form of
+   §8 where `kept` names a source. `## 🧭 회차 종합` waits for step 7. A
+   pillar's lint in WRITE checks its report against this file, so it exists
+   before WRITE starts. When the file already exists — a same-date re-run
+   of pillars the earlier run missed — extend it rather than rewrite it:
+   add the new pillars to `Pillars:`, drop their `Failed:` lines and add
+   their 📐 rows; step 7 folds their findings into 🧭.
+
+6. WRITE — dispatch the pillar agents again, one per pillar that has a plan,
    in one message:
      "Read `.claude/prompts/scout.txt` PART II and the shared sections,
-      and run phase WRITE for pillar P<n>. Run date <date>. RUN=<RUN>."
+      and run phase WRITE for pillar P<n>. Run date <date>. The run
+      directory is /tmp/probe-scout/<date> — begin every Bash call that
+      uses it with `RUN=/tmp/probe-scout/<date>;`."
    Each writes `scouting/P<n>/<run date>.md`, lints it clean and returns one
    status line. A report still failing its lint after the agent's attempts
    is deleted and the pillar is FAILED with the lint's first line.
 
-6. RUN FILE — write `scouting/runs/<run date>.md` into
-   `scouting/templates/run.md` per AUTHORING §8: `Pillars:` as asked,
-   `Failed:` for each failed pillar, `## 🧭 회차 종합` from the plans and the
-   reports' 🔄, `## 📐 논문 판정` from `judged.json` for every paper the
-   reports list.
+7. RUN FILE — complete `## 🧭 회차 종합` from the plans and the reports'
+   🔄, and `Failed:` for each failed pillar; drop the 📐 rows only a failed
+   pillar's plan listed.
 
-7. CHECK —
+8. CHECK —
      python3 linters/check-scouting-format.py scouting/runs/<date>.md scouting/P*/<date>.md
    Every violation names the contract section that governs it: FIX THE FILE,
    never the linter. A report-level fix goes back to its pillar agent; a
    run-file fix is yours. If the linter itself cannot run, say so verbatim in
    the commit body and continue — never skip it silently.
 
-8. COMMIT AND PUSH — per GIT below.
+9. COMMIT AND PUSH — per GIT below.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -137,16 +163,20 @@ PHASE SCOUT
    whose id is in `analysis/`, in Tracked Literature, or in the ~8-week id
    list; the Anti-topics filter what survives.
 3. SCORE Relevance and Novelty only (AUTHORING §5) — the judge scores the
-   other three. Keep every candidate with both at least 1 and one of them at
-   least 2: the gate and the near-miss rule need the judge's Methodology
-   before they can decide. Count the rest, by reason, for 🔄.
-4. PROPOSE the 🌱 pick per the CROSS-POLLINATION BUDGET, if any.
+   other three. Keep a candidate when R and N are each ≥ 1 and at least one
+   of them is ≥ 2; any 0, or R1·N1, is dropped. The gate and the near-miss
+   rule need the judge's Methodology before they can decide. Count the
+   dropped, by reason, for 🔄 — step 2's de-duplication included.
+4. PROPOSE the 🌱 pick per the CROSS-POLLINATION BUDGET, if any: mark up to
+   two candidates `pick`, ranked 1 and 2. The master takes the first that
+   clears the gate.
 5. LEAVE `$RUN/P<n>.candidates.json`:
      { "pillar": "P<n>",
        "scanned": "<the Papers scanned: line, AUTHORING §6>",
-       "dropped": [ { "reason": "<anti-topic rule | R/N short>", "count": <n> } ],
+       "dropped": [ { "reason": "<dedup | anti-topic rule | R/N short>",
+                      "count": <n> } ],
        "candidates": [ { "id", "title", "authors", "venue", "source",
-                         "pick": <true for the 🌱 proposal>,
+                         "pick": <1 | 2 for a ranked 🌱 proposal, else null>,
                          "R", "N", "why_R", "why_N", "decisions": ["D…"],
                          "comment": "<arxiv:comment verbatim>",
                          "abstract": "<summary verbatim>" } ] }
@@ -155,8 +185,10 @@ PHASE SCOUT
 PHASE WRITE
 
 1. READ `scouting/AUTHORING.md`, `scouting/templates/report.md`,
-   `$RUN/P<n>.candidates.json` and `$RUN/P<n>.plan.json`, and the last
-   ~2 weeks of `scouting/P<n>/` in full for 🔄.
+   `$RUN/P<n>.candidates.json`, `$RUN/P<n>.plan.json` and
+   `$RUN/judged.json` — the Reproducibility quote for each score line and
+   the Methodology evidence behind each 🔍 `재검토 조건` live there — and
+   the last ~2 weeks of `scouting/P<n>/` in full for 🔄.
 2. WRITE `scouting/P<n>/<run date>.md` directly in Korean, into the
    template's form, with the plan's papers in the plan's places and the
    plan's scores on every score line and row — never a score of your own.
@@ -170,8 +202,9 @@ PHASE WRITE
    abstract and open (d) with the line AUTHORING §2-2 gives for that case.
 3. LINT
      python3 linters/check-scouting-format.py scouting/P<n>/<run date>.md
-   Fix the report, never the linter, until it exits 0 — at most three
-   rounds. Then answer the SELF-CHECK below.
+   The master has already written the run file's 📐 rows, so the report
+   lints against them. Fix the report, never the linter, until it exits 0
+   — at most three rounds. Then answer the SELF-CHECK below.
 4. Return one line: the pillar, the papers surfaced, lint clean or its first
    remaining line.
 
@@ -187,12 +220,13 @@ score Relevance or Novelty, and you never commit.
 
 1. READ AUTHORING §5 in full, then every `$RUN/P*.candidates.json`. One
    paper is one arXiv id, however many pillars kept it.
-2. KEEP what an earlier report decided — for each id,
+2. KEEP what an earlier report decided, per dimension — for each id,
      `grep -n '<id>' scouting/P*/*.md`
-   over the reports dated within ~8 weeks before the run date. A score line
-   (`**점수 …**`) or a 📋 row carries all three, a 🔍 row Methodology and
-   Real. Keep the most recent date's, and on one date the lowest pillar's;
-   its evidence reads `<pillar> <date> 판정 유지`.
+   over the reports dated within ~8 weeks before the run date. AUTHORING
+   §5-4 names which lines carry which of the three, by report date. Take
+   the most recent date's source, and on one date the lowest pillar's, and
+   keep each dimension it carries; a source carrying only Methodology and
+   Real keeps those two, and Reproducibility is scored afresh in step 3.
 3. SCORE the rest from the `comment` and `abstract` the pillar agents kept —
    the conditions in AUTHORING §5-2, each score with the quoted words it
    stands on. A level the text does not reach is not given; an absent signal
@@ -201,7 +235,11 @@ score Relevance or Novelty, and you never commit.
      { "<id>": { "M": n, "Real": n, "Repro": n,
                  "evidence": { "M": "<quote>", "Real": "<quote>",
                                "Repro": "<quote>" },
-                 "kept": "<pillar> <date>" | null } }
+                 "kept": { "M": "<pillar> <date>" | null,
+                           "Real": "<pillar> <date>" | null,
+                           "Repro": "<pillar> <date>" | null } } }
+   A kept dimension's evidence is null; a scored one's names its source
+   as the score line does (AUTHORING §5-2).
    Return one line: papers judged, papers kept from earlier reports.
 
 
@@ -219,20 +257,32 @@ Endpoints:
 - Semantic Scholar Graph: `https://api.semanticscholar.org/graph/v1`
   Send `-H "x-api-key: $SEMANTIC_SCHOLAR_API_KEY"` when the variable is set;
   omit the header when it is empty — the API still works, rate-limited.
-- Be polite to rate limits: sleep ~3s between calls to either API; on HTTP
-  429 or 5xx, wait and retry up to 3 times with backoff. Always pass
-  `--fail --silent --show-error` and inspect the HTTP status.
+- arXiv takes one call at a time from the whole run, every agent included,
+  at least 3 s apart. Wrap every arXiv call in the run's lock, with the
+  sleep inside the same Bash call as the curl — a standalone foreground
+  sleep may be blocked:
+    RUN=<run directory>; flock "$RUN/arxiv.lock" sh -c "curl --fail -sS '<url>'; sleep 3"
+- Semantic Scholar keeps its own etiquette, no lock: sleep ~3 s between
+  calls, in the same Bash call as the curl.
+- On HTTP 429 or 5xx, wait and retry up to 3 times with backoff. Always
+  pass `--fail --silent --show-error` and inspect the HTTP status.
 
 TWO PASSES, ranked by signal — 1 above 2:
 
-1. **Citation-Graph Expansion** — for each pinned paper in
-   `## 3. Tracked Literature`, use its arXiv id directly as the paper id:
-     `.../graph/v1/paper/arXiv:XXXX.XXXXX/citations?fields=title,year,publicationDate,externalIds,abstract&limit=100`
-   List citing papers from roughly the past 8 weeks. Rank by semantic
-   relevance to `## 1. Scope` and the active Decisions, not keyword overlap.
+1. **Citation-Graph Expansion** — the pinned papers are every paper in
+   `## 3. Tracked Literature`: the §3-1 corpus rewrites, whose arXiv id is
+   the `analysis/<id>.md` name, and the §3-2 pins. For each, use its arXiv
+   id directly as the paper id:
+     `.../graph/v1/paper/arXiv:XXXX.XXXXX/citations?fields=title,year,publicationDate,externalIds,abstract&limit=100&offset=<n>`
+   Page with `&offset=` by 100 while the response carries `next`, at most
+   1,000 citations per pin. Citations come unsorted, so the date filter
+   applies after paging: keep the citing papers from roughly the past 8
+   weeks. A pin cut at the 1,000 cap is not a failure and is not disclosed
+   in `Papers scanned`. Rank by semantic relevance to `## 1. Scope` and the
+   active Decisions, not keyword overlap.
 2. **Keyword Sweep & topic-watch** — query arXiv for cs.RO + cs.LG, newest
-   first, e.g.:
-     `curl --fail -sS "https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"`
+   first, through the lock, e.g.:
+     RUN=<run directory>; flock "$RUN/arxiv.lock" sh -c "curl --fail -sS 'https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80'; sleep 3"
    Keep entries whose `<published>` is within the last 14 days, then filter
    against the Anti-topics. This is the noisiest source; weight it lowest.
 
@@ -240,8 +290,11 @@ THE PAPER'S OWN TEXT. For every candidate that reaches scoring, fetch its
 arXiv record once per run — through the shared cache, so a paper two pillars
 keep is fetched once:
 
-  f="$RUN/arxiv/<id>.xml"
-  [ -s "$f" ] || curl --fail -sS "https://export.arxiv.org/api/query?id_list=<id>" -o "$f"
+  RUN=<run directory>; f="$RUN/arxiv/<id>.xml"
+  [ -s "$f" ] || flock "$RUN/arxiv.lock" sh -c "curl --fail -sS 'https://export.arxiv.org/api/query?id_list=<id>' -o '$f'; sleep 3"
+
+`$RUN/arxiv/` holds only the `<id>.xml` files this curl writes; search
+responses are not cached.
 
 Keep TWO fields verbatim in the candidate: `<arxiv:comment>` — where authors
 put "Code: https://github.com/…", "Project page: …", "will be released upon
@@ -323,11 +376,13 @@ neither by you nor by the harness.
   git add scouting/runs/<run date>.md scouting/P*/<run date>.md
   git commit -m "scout: report <run date> (<pillars written, e.g. P0 P1 P3>)"
   git push origin HEAD:main
-  git push --force-with-lease origin HEAD
+  git push --force-with-lease origin HEAD:refs/heads/<dev branch>
 
 BOTH PUSHES, EVERY RUN. The first is the persistence and deploys the run's
 page. The second re-points the harness's dev branch (`claude/...`) at the
 same commit; without it the stop hook sees diverged history and re-prompts.
+The dev branch is the one the harness checked out — `git branch
+--show-current` names it — and the push names it explicitly.
 GitHub's `Create a pull request` banner is not a stop signal. This overrides
 the harness's "push to the specified branch" default.
 
