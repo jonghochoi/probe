@@ -36,15 +36,13 @@ Checks, grouped by the contract section they enforce:
   AUTHORING §5  from `_SECTIONS_EFFECTIVE` — the gate is Relevance, Novelty
             and Methodology; every paper section carries a score line whose
             five scores sum to its total and clear the gate, each 📋 row's
-            합계 is its scores' sum, each 🔍 row's short axis scores exactly
-            1, every Reproducibility score agrees with
+            합계 is its scores' sum, every Reproducibility score agrees with
             its code label, and every report's Methodology, Real and
             Reproducibility equal its run file's 📐 row (§5-4).
   AUTHORING §8  the run file — its H1, `Pillars:` and `Failed:` lines, the 🧭
             and 📐 sections in order, a report for each pillar it lists and
             does not fail, and each 📐 row equal to the most recent earlier
-            report that scored the paper in the window — in a report dated
-            before `_SECTIONS_EFFECTIVE`, its 📊 bullets as well as its rows.
+            report that scored the paper in the window.
   AUTHORING §6  `Papers surfaced` agrees with the number of 🥇 / 🥈 / 🥉 / 🌱
             sections plus the 📋 rows.
   AUTHORING §7  section discipline — 🔍 / 📋 rows are one paper each (no
@@ -373,10 +371,8 @@ def _check_scoring(sections, findings: list[tuple[int, str]], gate_rules: bool) 
         close(head, head_line, head_total, seen)
 
 
-def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS,
-                     exact: bool = False) -> None:
-    """🔍 rows are exactly one gate axis short (AUTHORING §5-5); with `exact`,
-    the short axis scores exactly 1, since a 0 counts as two axes short."""
+def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS) -> None:
+    """🔍 rows are exactly one gate axis short (AUTHORING §5-5)."""
     for emoji, _header, start, body in sections:
         if emoji != "🔍":
             continue
@@ -409,12 +405,6 @@ def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMEN
                     offset,
                     f"🔍 row `{paper}` scores {score_cell}, short on {', '.join(short)} — 🔍 is "
                     "exactly one axis short, two or more is dropped (AUTHORING §5-5)",
-                ))
-            elif exact and scores[gate.index(short[0])] == 0:
-                findings.append((
-                    offset,
-                    f"🔍 row `{paper}` scores {score_cell}, {short[0]} at 0 — the short axis "
-                    "scores exactly 1, and a 0 counts as two axes short (AUTHORING §5-5)",
                 ))
 
 
@@ -703,79 +693,10 @@ def _check_score_lines(sections, findings: list[tuple[int, str]]) -> None:
                                          f"`{label}` (AUTHORING §5-3)"))
 
 
-# A 📊 bullet's dimension, in a report dated before `_SECTIONS_EFFECTIVE`, as
-# the paper dimension it scores (AUTHORING §5-4).
-_LEGACY_DIMENSION = {"Methodology": "M", "Sim2Real": "Real", "Real": "Real",
-                     "Reproducibility": "Repro"}
-_TITLE_LINE = re.compile(r"^\*\*(?P<title>[^*]+)\*\*")
-
-
-def _word_in(key: str, text: str) -> bool:
-    return re.search(rf"(?<![A-Za-z0-9]){re.escape(key)}(?![A-Za-z0-9])", text, re.IGNORECASE) is not None
-
-
-def _legacy_summary(sections) -> list[tuple[str, dict[str, int]]]:
-    """(arXiv id, M/Real/Repro) for each `📊 점수 요약` entry of a report dated
-    before `_SECTIONS_EFFECTIVE`. A 📊 head names its paper by alias only, so
-    the alias is matched to a paper section or a 📋 / 🔍 row: an id in the head
-    first, then a title or `Paper` cell opening on the alias, then the alias
-    as a word of one title, then of one paper section. An alias matching no
-    paper, or two at the first level that matches any, is skipped — a missed
-    source, never a wrong one."""
-    papers: list[tuple[str, str, str]] = []  # (id, title or Paper cell, section text)
-    for emoji, _header, start, body in sections:
-        if emoji in _PAPER_SECTIONS:
-            at = next((i for i, line in enumerate(body) if _PAPER_LINK_LINE.match(line.strip())), None)
-            m = _ARXIV_ID.search(body[at]) if at is not None else None
-            if not m:
-                continue
-            t = _TITLE_LINE.match(body[at - 1].strip()) if at > 0 else None
-            papers.append((m.group(1), t.group("title").strip() if t else "", "\n".join(body)))
-        elif emoji in ("📋", "🔍"):
-            for _offset, cells in _table_rows(body, start):
-                link = next((c for c in cells if _ARXIV_ID.search(c)), None)
-                if link:
-                    papers.append((_ARXIV_ID.search(link).group(1), cells[0], ""))
-
-    def resolve(name: str) -> str | None:
-        if (m := re.search(r"\d{4}\.\d{4,5}", name)):
-            return m.group(0)
-        keys = [k.strip() for k in re.sub(r"\(.*?\)", "", name).split("/") if k.strip()]
-        tiers = (
-            lambda k, p: re.match(rf"{re.escape(k)}(?![A-Za-z0-9])", p[1], re.IGNORECASE) is not None,
-            lambda k, p: _word_in(k, p[1]),
-            lambda k, p: _word_in(k, p[2]),
-        )
-        for hit in tiers:
-            ids = {p[0] for p in papers for k in keys if hit(k, p)}
-            if ids:
-                return ids.pop() if len(ids) == 1 else None
-        return None
-
-    out: list[tuple[str, dict[str, int]]] = []
-    for emoji, _header, _start, body in sections:
-        if emoji != "📊":
-            continue
-        pid: str | None = None
-        dims: dict[str, int] = {}
-        for line in body:
-            s = line.strip()
-            if (h := _SCORE_HEAD.match(s)):
-                if pid and dims:
-                    out.append((pid, dims))
-                pid, dims = resolve(h.group("name").strip()), {}
-            elif pid and (b := _SCORE_BULLET.match(s)) and b.group("dim") in _LEGACY_DIMENSION:
-                dims.setdefault(_LEGACY_DIMENSION[b.group("dim")], int(b.group("score")))
-        if pid and dims:
-            out.append((pid, dims))
-    return out
-
-
 def _earlier_sources(root: str, date: str) -> dict[str, tuple[str, str, dict[str, int]]]:
     """id -> (date, pillar, scores) from every pillar's reports dated in the window
     before `date`, keeping the most recent: the latest date, then the lowest pillar
-    (AUTHORING §5-4). A report dated before `_SECTIONS_EFFECTIVE` adds its 📊
-    bullets to what its rows carry."""
+    (AUTHORING §5-4)."""
     floor = (datetime.date.fromisoformat(date)
              - datetime.timedelta(days=_CARRY_WINDOW_DAYS)).isoformat()
     best: dict[str, tuple[str, str, dict[str, int]]] = {}
@@ -786,16 +707,7 @@ def _earlier_sources(root: str, date: str) -> dict[str, tuple[str, str, dict[str
         pillar = os.path.basename(os.path.dirname(other))
         with open(other, encoding="utf-8") as fh:
             sections = _split_sections(fh.readlines())
-        found: dict[str, dict[str, int]] = {}
-        sources = [(pid, dims) for _lineno, pid, dims in _scored(sections)]
-        if odate < _SECTIONS_EFFECTIVE:
-            sources += _legacy_summary(sections)
-        for pid, dims in sources:
-            if pid is None:
-                continue
-            have = found.setdefault(pid, {})
-            have.update({k: v for k, v in dims.items() if k not in have})
-        for pid, dims in found.items():
+        for _lineno, pid, dims in _scored(sections):
             have = best.get(pid)
             if have is None or (odate, -int(pillar[1:])) > (have[0], -int(have[1][1:])):
                 best[pid] = (odate, pillar, dims)
@@ -924,7 +836,7 @@ def check_file(path: str) -> list[tuple[int, str]]:
     current = date_from_name >= _SECTIONS_EFFECTIVE
     gate = _GATE_THREE if current else _GATE_DIMENSIONS
     if gate_rules:
-        _check_near_miss(sections, findings, gate, exact=current)
+        _check_near_miss(sections, findings, gate)
         _check_surfaced_count(lines, sections, findings)
     if shape_rules:
         _check_shape(sections, findings, gate)

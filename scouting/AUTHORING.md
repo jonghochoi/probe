@@ -574,19 +574,14 @@ two answers about the paper itself.
   de-duplication window, before this run's date, **keeps** that report's
   three — the most recent date, and on one date the lowest pillar number. A
   score line and a 📋 row carry all three; a 🔍 row carries Methodology and
-  Real. In a report dated before the lint's `_SECTIONS_EFFECTIVE` (§9) the
-  three are its `📊 점수 요약` bullets — `Sim2Real` is Real — and its
-  `R·N·M·S2R` cells.
-- A source carrying only Methodology and Real keeps those two, and
-  Reproducibility is scored afresh; its 📐 `근거` reads
-  `M: P# date 판정 유지 · Real: P# date 판정 유지 · Repro: "<quote>"`.
+  Real, which it keeps while Reproducibility is scored afresh. No other
+  line is a source.
 
 ### 5-5. Near-miss candidates
 
 `## 🔍 근접 후보` holds this run's candidates that are **exactly one gate axis
-short** — one of Relevance, Novelty and Methodology scores exactly 1 and the
-other two are ≥ 2. A 0 on any of the three is no near miss — it counts as two
-axes short. Two or more axes short is dropped and appears in the report only
+short** — one of Relevance, Novelty and Methodology scores 1 and the
+other two are ≥ 2. Two or more axes short is dropped and appears in the report only
 as part of the filter count in 🔄 (§7-1); zero axes short is a surfaced paper
 (§5-1), never a 🔍 row.
 
@@ -722,7 +717,7 @@ prints its synthesis at the top of the date's page (§1).
   uses for it, and the one the site prints on the paper's row.
   `근거` quotes the text each score stands on, `M:`, `Real:` and `Repro:` in
   that order; a score kept from an earlier report (§5-4) reads
-  `<pillar> <date> 판정 유지` instead, dimension by dimension (§5-4).
+  `<pillar> <date> 판정 유지` instead.
 
 ---
 

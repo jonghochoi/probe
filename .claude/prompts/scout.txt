@@ -89,13 +89,11 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
    AUTHORING §5 and write `$RUN/P<n>.plan.json`:
      · the surfaced papers (R, N and M each ≥ 2), ranked per §5-3 — the
        first three are 🥇 🥈 🥉, the rest 📋 rows;
-     · the 🌱 pick — the first of the pillar agent's ranked `pick`
-       candidates that clears the gate. With none clearing it, the plan
-       carries no 🌱 and no 🔍 row for a proposal (§5-1);
+     · the 🌱 pick, when the pillar agent proposed one and it clears the
+       gate — one that does not is printed nowhere (§5-1);
      · the 🔍 rows per AUTHORING §5-5;
-     · the filter count for 🔄 — the candidates file's `dropped` plus what
-       this step drops (two or more gate axes short, a 🌱 proposal not
-       printed), by reason;
+     · the filter count for 🔄 — `dropped` plus what this step drops, by
+       reason;
      · for every listed paper, its five scores, M, Real and Repro taken
        from `judged.json` unchanged.
    The plan is arithmetic over scores already given. It re-scores nothing.
@@ -103,13 +101,10 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 5. RUN FILE, FIRST CUT — write `scouting/runs/<run date>.md` into
    `scouting/templates/run.md` per AUTHORING §8: the H1, `Pillars:` as
    asked, and `## 📐 논문 판정` from `judged.json` for every paper a plan
-   lists — `근거` from each dimension's `evidence`, or in the kept form of
-   §8 where `kept` names a source. `## 🧭 회차 종합` waits for step 7. A
-   pillar's lint in WRITE checks its report against this file, so it exists
-   before WRITE starts. When the file already exists — a same-date re-run
-   of pillars the earlier run missed — extend it rather than rewrite it:
-   add the new pillars to `Pillars:`, drop their `Failed:` lines and add
-   their 📐 rows; step 7 folds their findings into 🧭.
+   lists, `근거` from each dimension's `evidence`. `## 🧭 회차 종합` waits
+   for step 7. A pillar's lint in WRITE checks its report against this
+   file, so it exists before WRITE starts. A same-date re-run extends the
+   file it finds.
 
 6. WRITE — dispatch the pillar agents again, one per pillar that has a plan,
    in one message:
@@ -172,9 +167,7 @@ PHASE SCOUT
    of them is ≥ 2; any 0, or R1·N1, is dropped. The gate and the near-miss
    rule need the judge's Methodology before they can decide. Count the
    dropped, by reason, for 🔄 — step 2's de-duplication included.
-4. PROPOSE the 🌱 pick per the CROSS-POLLINATION BUDGET, if any: mark up to
-   two candidates `pick`, ranked 1 and 2. The master takes the first that
-   clears the gate.
+4. PROPOSE the 🌱 pick per the CROSS-POLLINATION BUDGET, if any.
 5. LEAVE `$RUN/P<n>.candidates.json`:
      { "pillar": "P<n>",
        "scanned": "<the Papers scanned: line, AUTHORING §6>",
@@ -183,7 +176,7 @@ PHASE SCOUT
        "candidates": [ { "id", "title", "authors",
                          "venue": "<the comment's acceptance venue, else arXiv preprint>",
                          "source": "citation-graph | keyword-sweep",
-                         "pick": <1 | 2 for a ranked 🌱 proposal, else null>,
+                         "pick": <true for the 🌱 proposal>,
                          "R", "N", "why_R", "why_N", "decisions": ["D…"],
                          "comment": "<arxiv:comment verbatim>",
                          "abstract": "<summary verbatim>" } ] }
@@ -227,13 +220,12 @@ score Relevance or Novelty, and you never commit.
 
 1. READ AUTHORING §5 in full, then every `$RUN/P*.candidates.json`. One
    paper is one arXiv id, however many pillars kept it.
-2. KEEP what an earlier report decided, per dimension — for each id,
+2. KEEP what an earlier report decided — for each id,
      `grep -n '<id>' scouting/P*/*.md`
    over the reports dated within ~8 weeks before the run date. AUTHORING
-   §5-4 names which lines carry which of the three, by report date. Take
-   the most recent date's source, and on one date the lowest pillar's, and
-   keep each dimension it carries; a source carrying only Methodology and
-   Real keeps those two, and Reproducibility is scored afresh in step 3.
+   §5-4 names what each kind of line carries. Take the most recent date's
+   source, and on one date the lowest pillar's, and keep the dimensions it
+   carries; each reads `<pillar> <date> 판정 유지` as its evidence.
 3. SCORE the rest from the `comment` and `abstract` the pillar agents kept —
    the conditions in AUTHORING §5-2, each score with the quoted words it
    stands on. A level the text does not reach is not given; an absent signal
@@ -241,13 +233,9 @@ score Relevance or Novelty, and you never commit.
 4. LEAVE `$RUN/judged.json`:
      { "<id>": { "M": n, "Real": n, "Repro": n,
                  "evidence": { "M": "<quote>", "Real": "<quote>",
-                               "Repro": "<quote>" },
-                 "kept": { "M": "<pillar> <date>" | null,
-                           "Real": "<pillar> <date>" | null,
-                           "Repro": "<pillar> <date>" | null } } }
-   A kept dimension's evidence is null; a scored one's names its source
-   as the score line does (AUTHORING §5-2).
-   Return one line: papers judged, papers kept from earlier reports.
+                               "Repro": "<quote>" } } }
+   A scored dimension's evidence names its source as the score line does
+   (AUTHORING §5-2). Return one line: papers judged, papers kept.
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -284,8 +272,7 @@ TWO PASSES, ranked by signal — 1 above 2:
    Page with `&offset=` by 100 while the response carries `next`, at most
    1,000 citations per pin. Citations come unsorted, so the date filter
    applies after paging: keep the citing papers from roughly the past 8
-   weeks. A pin cut at the 1,000 cap is not a failure and is not disclosed
-   in `Papers scanned`. Rank by semantic relevance to `## 1. Scope` and the
+   weeks; a pin cut at the cap is not a failure. Rank by semantic relevance to `## 1. Scope` and the
    active Decisions, not keyword overlap.
 2. **Keyword Sweep & topic-watch** — query arXiv for cs.RO + cs.LG, newest
    first, through the lock — four to six queries worded from the pillar's
