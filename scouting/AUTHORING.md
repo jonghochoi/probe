@@ -446,7 +446,7 @@ row of `## 📋 기준 통과 · 추가 후보`, in rank order — so a strong w
 report a reader can scan rather than a stack of full sections. The 🌱 pick
 keeps its own section (§5) and is not one of the three. A 🌱 proposal that
 does not clear the gate is not printed — no 🌱 section and no 🔍 row — and
-the pillar's monthly budget stays open.
+the pillar's budget for the slot stays open.
 
 ```markdown
 | Paper | Link | R·N·M·Real | Repro | 합계 | 코드 | 한 줄 근거 |

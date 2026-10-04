@@ -64,7 +64,7 @@
 
 ## 🌱 논문 4 — 인접 분야 픽
 
-<!-- Once a month; the budget is in `.claude/prompts/scout.txt`. -->
+<!-- Once per slot; the budget is in `.claude/prompts/scout.txt`. -->
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...> · <코드 라벨>
