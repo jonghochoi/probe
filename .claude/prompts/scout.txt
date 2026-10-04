@@ -51,7 +51,7 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 1. RESOLVE, once, before any network call:
      git pull --rebase origin main
      TZ=Asia/Seoul date +%Y-%m-%d          → the run date
-     RUN=/tmp/probe-scout/<run date>; mkdir -p "$RUN/arxiv"
+     RUN=/tmp/probe-scout/<run date>; rm -rf "$RUN"; mkdir -p "$RUN/arxiv"
      python3 -c 'import datetime as d,sys;e=d.date(2026,1,5);r=d.date.fromisoformat(sys.argv[1]);n=(r-e).days//14;s=e+d.timedelta(14*n);print("ABCD"[n%4],s,s+d.timedelta(13))' <run date>
                                            → the 🌱 slot: letter, first day, last day
    The run date is every filename and the commit subject; never re-derive
@@ -69,7 +69,8 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
       <letter>, <first day>–<last day>. The run
       directory is /tmp/probe-scout/<date> — begin every Bash call that
       uses it with `RUN=/tmp/probe-scout/<date>;`. You are agent <i> of
-      <k>: wait <i×20> seconds before your first network call."
+      <k>: wait <i×20> seconds before your first network call, inside
+      that same Bash call."
    The stagger, the arXiv lock and the shared `$RUN/arxiv/` cache keep five
    agents from tripping the APIs' rate limits together. Each returns one
    status line and leaves `$RUN/P<n>.candidates.json`. When all have
@@ -139,7 +140,8 @@ PART II — A PILLAR AGENT
 ════════════════════════════════════════════════════════════════════════
 
 You work on ONE pillar, `P<n>`, named in your instruction. You never read
-another pillar's context file, and you never commit.
+another pillar's context file, and you run no git command — PART I step 1
+is the master's.
 
 SOURCES — three, read-only, with DIFFERENT jobs. Do not collapse them.
 
@@ -178,7 +180,9 @@ PHASE SCOUT
        "scanned": "<the Papers scanned: line, AUTHORING §6>",
        "dropped": [ { "reason": "<dedup | anti-topic rule | R/N short>",
                       "count": <n> } ],
-       "candidates": [ { "id", "title", "authors", "venue", "source",
+       "candidates": [ { "id", "title", "authors",
+                         "venue": "<the comment's acceptance venue, else arXiv preprint>",
+                         "source": "citation-graph | keyword-sweep",
                          "pick": <1 | 2 for a ranked 🌱 proposal, else null>,
                          "R", "N", "why_R", "why_N", "decisions": ["D…"],
                          "comment": "<arxiv:comment verbatim>",
@@ -263,8 +267,8 @@ Endpoints:
 - arXiv takes one call at a time from the whole run, every agent included,
   at least 3 s apart. Wrap every arXiv call in the run's lock, with the
   sleep inside the same Bash call as the curl — a standalone foreground
-  sleep may be blocked:
-    RUN=<run directory>; flock "$RUN/arxiv.lock" sh -c "curl --fail -sS '<url>'; sleep 3"
+  sleep may be blocked, and so is `flock … sh -c "…"`:
+    RUN=<run directory>; ( flock 9; curl --fail -sS '<url>'; sleep 3 ) 9>"$RUN/arxiv.lock"
 - Semantic Scholar keeps its own etiquette, no lock: sleep ~3 s between
   calls, in the same Bash call as the curl.
 - On HTTP 429 or 5xx, wait and retry up to 3 times with backoff. Always
@@ -284,8 +288,10 @@ TWO PASSES, ranked by signal — 1 above 2:
    in `Papers scanned`. Rank by semantic relevance to `## 1. Scope` and the
    active Decisions, not keyword overlap.
 2. **Keyword Sweep & topic-watch** — query arXiv for cs.RO + cs.LG, newest
-   first, through the lock, e.g.:
-     RUN=<run directory>; flock "$RUN/arxiv.lock" sh -c "curl --fail -sS 'https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80'; sleep 3"
+   first, through the lock — four to six queries worded from the pillar's
+   `## 1. Scope` and its active Decisions, plus one for the 🌱 slot's field
+   with no category filter — e.g.:
+     RUN=<run directory>; ( flock 9; curl --fail -sS 'https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80'; sleep 3 ) 9>"$RUN/arxiv.lock"
    Keep entries whose `<published>` is within the last 14 days, then filter
    against the Anti-topics. This is the noisiest source; weight it lowest.
 
@@ -294,7 +300,7 @@ arXiv record once per run — through the shared cache, so a paper two pillars
 keep is fetched once:
 
   RUN=<run directory>; f="$RUN/arxiv/<id>.xml"
-  [ -s "$f" ] || flock "$RUN/arxiv.lock" sh -c "curl --fail -sS 'https://export.arxiv.org/api/query?id_list=<id>' -o '$f'; sleep 3"
+  [ -s "$f" ] || ( flock 9; curl --fail -sS 'https://export.arxiv.org/api/query?id_list=<id>' -o "$f"; sleep 3 ) 9>"$RUN/arxiv.lock"
 
 `$RUN/arxiv/` holds only the `<id>.xml` files this curl writes; search
 responses are not cached.
