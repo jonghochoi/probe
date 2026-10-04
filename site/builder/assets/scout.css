@@ -3,49 +3,8 @@
  * The page's whole design is that it opens closed: one row per paper with a
  * line on what the paper is and the pillars that flagged it, and
  * everything else one click down. `pages.scouting_run_page` says why; this
- * file is how. It sits on `index.css`, whose list head, rules and mastheads it
+ * file is how. It sits on `index.css`, whose list head, rules and masthead it
  * shares with 비교 and 발표. */
-
-/* ── Masthead diagram ──────────────────────────────────────────────────── */
-/* Geometry is `components.scout_art()`; this block is the clock. The five
-   lanes fill with the run's picks one lane after another; then the two pairs
-   that are one paper draw their joins and land as the top rows, lit, and the
-   picks no other lane shares settle under them. The resting picture is the
-   finished one, so a reader with motion off sees what the page is.
-
-   `--sca` is the cycle and `--i` each piece's place in its sequence; every
-   move is a transform, an opacity or a dash offset. */
-.scout-art { --sca: 11s; }
-.scout-art .sca-label { fill: var(--text-muted); font-family: var(--num); font-size: 9px; font-weight: 700; }
-.scout-art .sca-track { fill: var(--surface-2); stroke: var(--border-soft); }
-.scout-art .sca-lane[data-p="P0"] .sca-pick { fill: var(--p0-ink); }
-.scout-art .sca-lane[data-p="P1"] .sca-pick { fill: var(--p1-ink); }
-.scout-art .sca-lane[data-p="P2"] .sca-pick { fill: var(--p2-ink); }
-.scout-art .sca-lane[data-p="P3"] .sca-pick { fill: var(--p3-ink); }
-.scout-art .sca-lane[data-p="P4"] .sca-pick { fill: var(--p4-ink); }
-.scout-art .sca-pick { opacity: .75; }
-.scout-art .sca-join { fill: none; stroke: var(--orange); stroke-width: 1.4; opacity: .8; stroke-dasharray: 1; }
-.scout-art .sca-card { fill: var(--surface); stroke: var(--border); }
-.scout-art .sca-line { fill: var(--border); }
-.scout-art .sca-shared .sca-card { stroke: var(--orange); }
-.scout-art .sca-shared .sca-line { fill: var(--orange); opacity: .7; }
-
-.scout-art .sca-pick,
-.scout-art .sca-row { transform-box: fill-box; transform-origin: center; }
-.scout-art .sca-all  { animation: art-cycle var(--sca) linear infinite; }
-.scout-art .sca-pick { animation: sca-pick var(--sca) var(--ease-out) infinite;
-                       animation-delay: calc(var(--i) * .18s); }
-.scout-art .sca-join { animation: sca-join var(--sca) var(--ease-out) infinite;
-                       animation-delay: calc(var(--i) * .3s); }
-.scout-art .sca-row  { animation: sca-row var(--sca) var(--ease-out) infinite;
-                       animation-delay: calc(var(--i) * .22s); }
-
-@keyframes sca-pick { 0%, 3%   { transform: scale(0); opacity: 0; }
-                      9%, 100%  { transform: none; opacity: .75; } }
-@keyframes sca-join { 0%, 22%  { stroke-dashoffset: 1; }
-                      32%, 100% { stroke-dashoffset: 0; } }
-@keyframes sca-row  { 0%, 30%  { transform: translateX(-10px); opacity: 0; }
-                      38%, 100% { transform: none; opacity: 1; } }
 
 /* ── Status and filter ─────────────────────────────────────────────────── */
 .sc-status {
