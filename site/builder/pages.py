@@ -1818,11 +1818,6 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
     if not groups:
         groups = '<p class="corpus-empty">이 회차에 게이트를 통과한 논문이 없습니다.</p>'
 
-    lead = ""
-    if run.run_file and run.run_file.synthesis:
-        lead = (f'<section class="sc-lead" aria-label="회차 종합">'
-                f'<h2>회차 종합</h2>{_scout_md(run.run_file.synthesis, decisions)}</section>')
-
     near = run.near
     near_html = ""
     if near:
@@ -1842,7 +1837,7 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
             "</details>")
     # A pillar's own 🔄 compares it with its earlier reports — the routine's
     # working record, read in the pillar's file. The page reads the run as a
-    # whole, which is the run file's 🧭 at its head, and links the files.
+    # whole and links the files.
     sources = " · ".join(
         f'<a href="{BLOB}/{c.esc(r.source)}" target="_blank" rel="noopener">{r.pillar}</a>'
         for r in run.reports)
@@ -1857,7 +1852,6 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
 <main class="hub hub-wide sc" data-scout>
   {_scout_runs(runs, run.date, up_to_s)}
   {_scout_status(run)}
-  {lead}
   {_scout_filter(run.arrived)}
   {groups}
   {near_html}

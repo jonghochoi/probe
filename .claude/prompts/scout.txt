@@ -101,10 +101,9 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 5. RUN FILE, FIRST CUT — write `scouting/runs/<run date>.md` into
    `scouting/templates/run.md` per AUTHORING §8: the H1, `Pillars:` as
    asked, and `## 📐 논문 판정` from `judged.json` for every paper a plan
-   lists, `근거` from each dimension's `evidence`. `## 🧭 회차 종합` waits
-   for step 7. A pillar's lint in WRITE checks its report against this
-   file, so it exists before WRITE starts. A same-date re-run extends the
-   file it finds.
+   lists, `근거` from each dimension's `evidence`. A pillar's lint in WRITE
+   checks its report against this file, so it exists before WRITE starts.
+   A same-date re-run extends the file it finds.
 
 6. WRITE — dispatch the pillar agents again, one per pillar that has a plan,
    in one message:
@@ -116,9 +115,8 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
    status line. A report still failing its lint after the agent's attempts
    is deleted and the pillar is FAILED with the lint's first line.
 
-7. RUN FILE — complete `## 🧭 회차 종합` from the plans and the reports'
-   🔄, and `Failed:` for each failed pillar; drop the 📐 rows only a failed
-   pillar's plan listed.
+7. RUN FILE — add `Failed:` for each failed pillar, and drop the 📐 rows
+   only a failed pillar's plan listed.
 
 8. CHECK —
      python3 linters/check-scouting-format.py scouting/runs/<date>.md scouting/P*/<date>.md
@@ -360,9 +358,8 @@ committing.
     each field as deep as the paper's answer, every number with its setting,
     and `원문에 대비 대상 언급 없음` where the paper names no prior approach
     rather than an invented one? (§2-2)
-  - Does 🔄 — and 🧭 — omit every item that does not apply, and cite no
-    `D#`?
-    (§7-1, §8)
+  - Does 🔄 omit every item that does not apply, and cite no `D#`?
+    (§7-1)
   - Is every paper named by its own title — the codename the title opens
     on, or the full title — and none by a name the title does not carry?
     (§7-2)
