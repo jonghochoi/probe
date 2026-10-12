@@ -4,9 +4,10 @@
  * The page is complete without this: every row is a `<details>` the browser
  * opens on its own, and `scout.css` keeps these controls off an unscripted
  * page. What the script adds is narrowing — show the papers any of the chosen
- * pillars flagged — and opening the whole list at once for a reader who
- * wants to read rather than scan. No choice is remembered: a filter is a
- * question about this run, not a setting.
+ * pillars flagged — opening the whole list at once for a reader who wants to
+ * read rather than scan, and pinning an open row's judgement column beside
+ * its longer brief. No choice is remembered: a filter is a question about
+ * this run, not a setting.
  */
 
 (function () {
@@ -69,6 +70,18 @@ if (pick) {
     }
   });
 }
+
+// An open row's judgement column stays in view while its brief scrolls past,
+// but only when the whole column fits under the sticky bars: pinned, a
+// taller one would hide its own foot until the row ran out.
+const STICK_TOP = 140;
+function pin(item) {
+  const judge = item.querySelector(".sc-judge");
+  if (!judge || !item.open) return;
+  judge.classList.toggle("sc-pin", judge.offsetHeight < window.innerHeight - STICK_TOP);
+}
+for (const item of items) item.addEventListener("toggle", () => pin(item));
+window.addEventListener("resize", () => { for (const item of items) pin(item); });
 
 // A link to `#p-<id>` lands on that paper open, filter or no filter.
 function reveal() {

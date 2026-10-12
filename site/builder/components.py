@@ -464,11 +464,12 @@ def repo_link() -> str:
 # destination cannot arrive in one and be missing from the other.
 #
 # A track's destination is named for its track, in two syllables of Korean —
-# 탐색 Scouting, 분석 Analysis, 비교 Comparison, 발표 Presentation — and they
-# run in the pipeline's order, the order the README's table lists them in.
-# Five labels of one width read as one row on a desktop and fit beside the
-# controls without crowding them. 서재 is the reader's own shelf rather than a
-# track, and stands after them.
+# 분석 Analysis, 탐색 Scouting, 비교 Comparison, 발표 Presentation. 분석 leads
+# because it is the landing page — the logo and the first label go to the same
+# place, so the row opens where the site does — and the rest follow in the
+# pipeline's order. Five labels of one width read as one row on a desktop and
+# fit beside the controls without crowding them. 서재 is the reader's own shelf
+# rather than a track, and stands after them.
 #
 # The key in front is what a page names itself with. A paper and a comparison
 # each sit *under* a destination rather than being one, so `p/<id>/` marks
@@ -479,8 +480,8 @@ def repo_link() -> str:
 # presentation is a tab on its paper's page, so the row it lists links back
 # into 분석, and a paper page opened at that tab still marks 분석 — which is
 # the part of the site it is standing in.
-DESTINATIONS = (("scout", "s/index.html", "탐색"),
-                ("papers", "index.html", "분석"),
+DESTINATIONS = (("papers", "index.html", "분석"),
+                ("scout", "s/index.html", "탐색"),
                 ("compare", "c/index.html", "비교"),
                 ("talk", "t/index.html", "발표"),
                 ("shelf", "shelf/index.html", "서재"))

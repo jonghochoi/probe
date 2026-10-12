@@ -1614,47 +1614,45 @@ def _after_headline(md: str) -> str:
     return "\n".join(lines[:first] + lines[first + 1:]).strip()
 
 
-# Characters a line holds in each open-row column at the widest list, fitted
-# to the measured height of every open row the site carries. Estimates only:
-# the placement below needs which arrangement is shorter, not by how much.
-_PER_LINE = {"what": 54, "brief": 38, "axis": 40, "check_col": 52, "check_foot": 30}
-
-
-def _height(lines: list[str], per: int) -> int:
-    return sum(-(-len(_plain_text(l)) // per) for l in lines)
-
-
 def _plain_text(md: str) -> str:
     return re.sub(r"\]\([^)]*\)|[*`\[\]]", "", md)
 
 
-def _check_beside(contrib: str, picks, check: str) -> bool:
-    """Whether 먼저 확인할 점 belongs under the "what" column: when it leaves
-    the open row shorter there than across the foot."""
-    if not contrib:
-        return True
-    # The brief's text column is the "what" column less its two label
-    # columns, so a line of it holds fewer characters.
-    per = _PER_LINE["brief"] if scouting.brief(contrib) else _PER_LINE["what"]
-    what = _height(_bullets(contrib) or [contrib], per) + 1
-    why = 1 + sum(_height(_bullets(p.implic) or [p.implic] if p.full else [p.gist],
-                          _PER_LINE["axis"]) for p in picks)
-    checks = _bullets(check) or [check]
-    beside = _height(checks, _PER_LINE["check_col"]) + 1
-    foot = max(_height([c], _PER_LINE["check_foot"]) for c in checks) + 1
-    return max(what + beside, why) < max(what, why) + foot
+def _scout_name(paper) -> str:
+    """The paper's own name: its title as the authors wrote it, the codename
+    in bold only where the title opens on it (`WB-WAM: Heterogeneous …`). A
+    name the title does not carry is never printed as if it were the paper's
+    — a reader searching arXiv for it finds nothing. A 📋 row carries no
+    title, only its `Paper` cell, which `scouting/AUTHORING.md` §7-2 makes
+    that same codename or the full title; a cell with a space in it is read
+    as a title."""
+    title, alias = paper.title, paper.alias
+    if title:
+        head, colon, rest = title.partition(":")
+        if colon and rest.strip() and head.strip() == alias:
+            return (f'<b class="sc-cn">{c.esc(alias)}</b>'
+                    f'<span class="sc-rest">: {c.esc(rest.strip())}</span>')
+        return f'<span class="sc-whole">{c.esc(title)}</span>'
+    if " " in alias:
+        return f'<span class="sc-whole">{c.esc(alias)}</span>'
+    return f'<b class="sc-cn">{c.esc(alias)}</b>'
+
+
+def _scout_rail(paper_id: str) -> str:
+    """The paper's arXiv id in front of the row, linking its abstract, open
+    without opening the row. The arXiv page is the one door: its own links
+    reach the HTML edition and the PDF. A column of ids down the list also
+    reads against a report or a run file by eye."""
+    pid = c.esc(paper_id)
+    return (f'<span class="sc-rail"><a class="sc-id" href="https://arxiv.org/abs/{pid}" '
+            f'target="_blank" rel="noopener" title="arXiv 초록">{pid}'
+            f'<span aria-hidden="true">↗</span></a></span>')
 
 
 def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
     lead = paper.lead
     picks = sorted(paper.picks, key=lambda p: (not p.full, p.rank))
     chips = "".join(_scout_chip(p) for p in picks)
-    # A title that opens on its own alias (`WB-WAM: Heterogeneous …`) prints
-    # the rest only — the alias is already the bold word in front of it.
-    rest = paper.title
-    if rest.startswith(paper.alias):
-        rest = rest[len(paper.alias):].lstrip(" :—-")
-    title = f'<span class="sc-title">{c.esc(rest)}</span>' if rest else ""
     rewrite = (f'<a class="sc-rw" href="{up}p/{c.esc(paper.paper_id)}/index.html">재작성본</a>'
                if paper.paper_id in papers_by_id else "")
     # Code that is out or promised is something to act on; 코드 미공개 is not,
@@ -1667,16 +1665,15 @@ def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
     code = (f'<span class="sc-code">{real}{code}{rewrite}</span>'
             if code or real or rewrite else "")
     meta = " · ".join(c.esc(m) for m in lead.meta)
-    links = (f'<p class="sc-links"><a href="https://arxiv.org/abs/{c.esc(paper.paper_id)}" '
-             f'target="_blank" rel="noopener">arXiv:{c.esc(paper.paper_id)}</a>'
-             + (f" · {meta}" if meta else "") + "</p>")
     axes = "".join(_scout_axis(p, decisions) for p in picks)
-    # What the paper is beside what it means for each axis, and what to check
-    # first wherever that leaves room: under the shorter "what" column when
-    # the axes run longer, across the foot otherwise. The row already prints
-    # the first "what" line as its headline, so the open row starts at the
-    # second. Stacked on a phone. A paper no pillar wrote up has only its
-    # axis rows, and one 📋 row only its links.
+    # Two columns and nothing across their foot: what the paper is on the
+    # left, and on the right the judgement — what it means for each axis,
+    # then what to check first. The right column is the short one, so it
+    # stays beside the reader while the left runs on (`scout.js` pins it
+    # when it fits the screen), and on a phone it comes first. The row
+    # already prints the first "what" line as its headline, so the open row
+    # starts at the second. A paper no pillar wrote up has only its axis
+    # rows, and one 📋 row has nothing to open.
     why = f'<section class="sc-blk"><h3>연구 축별 시사점</h3><div class="sc-axes">{axes}</div></section>'
     if lead.full:
         contrib = _after_headline(lead.contrib)
@@ -1687,27 +1684,22 @@ def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
                     f'{_figures(_scout_md(contrib, decisions))}</section>' if contrib else "")
         check = (f'<section class="sc-blk sc-check"><h3>먼저 확인할 점</h3>'
                  f'{_figures(_scout_md(lead.check, decisions))}</section>')
-        if _check_beside(contrib, picks, lead.check):
-            body = f'<div class="sc-cols2"><div class="sc-stack">{what}{check}</div>{why}</div>'
-        else:
-            body = f'<div class="sc-cols2">{what}{why}{check}</div>'
+        judge = f'<div class="sc-stack sc-judge">{why}{check}</div>'
+        body = f'<div class="sc-cols2">{what}{judge}</div>' if what else judge
     elif len(picks) == 1:
-        # One pillar's one 📋 line is the row's own headline already, so
-        # opened, the row adds only its links.
         body = ""
     else:
         body = why
-    return (
-        f'<details class="sc-item" id="p-{c.esc(paper.paper_id)}" '
-        f'data-pillars="{" ".join(paper.pillars)}">'
-        '<summary class="sc-row">'
-        f'<span class="sc-main"><span class="sc-t"><b>{c.esc(paper.alias)}</b>{title}</span>'
-        f'<span class="sc-gist">{_scout_md(paper.gist, decisions, inline=True)}</span></span>'
-        f'<span class="sc-side"><span class="sc-picks">{chips}</span>{code}</span>'
-        "</summary>"
-        f'<div class="sc-body">{body}{links}</div>'
-        "</details>"
-    )
+    row = (f'{_scout_rail(paper.paper_id)}'
+           f'<span class="sc-main"><span class="sc-t">{_scout_name(paper)}</span>'
+           f'<span class="sc-gist">{_scout_md(paper.gist, decisions, inline=True)}</span></span>'
+           f'<span class="sc-side"><span class="sc-picks">{chips}</span>{code}</span>')
+    attrs = f'id="p-{c.esc(paper.paper_id)}" data-pillars="{" ".join(paper.pillars)}"'
+    if not body:
+        return f'<div class="sc-item" {attrs}><div class="sc-row sc-flat">{row}</div></div>'
+    foot = f'<p class="sc-links">{meta}</p>' if meta else ""
+    return (f'<details class="sc-item" {attrs}><summary class="sc-row">{row}</summary>'
+            f'<div class="sc-body">{body}{foot}</div></details>')
 
 
 def _scout_status(run) -> str:

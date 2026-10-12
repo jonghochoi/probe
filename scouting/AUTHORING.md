@@ -648,6 +648,13 @@ already-analyzed dedup count.
 
 ### 7-2. Paper names must be unambiguous across reports
 
+A paper's name — its alias — is the one its own title gives it: the codename
+the title opens on (`WB-WAM: Heterogeneous …` → `WB-WAM`), and for a title
+that opens on none, the full title as written. A name the title does not
+carry — a coined acronym, a Korean label, a codename found only in the
+abstract — is never used: a reader searching arXiv for it finds nothing, and
+the site prints the alias as the paper's own name.
+
 Codenames collide — two unrelated papers both self-titling `Faster-WAM` is an
 ordinary occurrence in this corpus, and the reports read side by side across
 pillars. A bare alias is only safe where a `Link` column resolves it in the
