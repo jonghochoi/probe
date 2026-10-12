@@ -92,7 +92,10 @@ the same query differently is a bug, not two behaviours.
 
 **`components.mark()` has copies in `assets/`.** The README's hero, track
 icons and who-writes-what picture redraw it with their animation inlined
-(`assets/CLAUDE.md`). Change the mark here and bring those into step.
+(`assets/CLAUDE.md`), and `builder/assets/` carries it as the site's icons —
+`favicon.svg`, and `favicon-32.png` and `apple-touch-icon.png` rendered from
+it, which are what a phone's home-screen shortcut shows. Change the mark here
+and bring all of those into step.
 
 **Two modules serve the prompts, not the build.** `builder/arxiv.py` (its CLI:
 `site/README.md`) raises `Unavailable` when a paper has no HTML edition —
