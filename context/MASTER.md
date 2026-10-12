@@ -124,11 +124,14 @@ keep working.
 
 ## 6. Cross-pollination Budget [AGENT-INPUT]
 
-1 paper per month from an adjacent field that plausibly transfers. Rotating:
-- **Month A**: continual learning / catastrophic forgetting / PEFT (P4 adjacency)
-- **Month B**: VLA architecture advances broadly (π, OpenVLA, self-improving VLA)
-- **Month C**: spatial-geometric / multimodal fusion representation (P2 adjacency)
-- **Month D**: tactile sensing in prosthetics / neuroscience
+1 paper per pillar per slot from an adjacent field that plausibly transfers. A
+slot is a 14-day block counted from Monday 2026-01-05, numbered
+`n = ⌊days since 2026-01-05 ÷ 14⌋`; its field is A–D by `n mod 4` (A at 0), so
+the four fields cycle in eight weeks. Rotating:
+- **Slot A**: continual learning / catastrophic forgetting / PEFT (P4 adjacency)
+- **Slot B**: VLA architecture advances broadly (π, OpenVLA, self-improving VLA)
+- **Slot C**: spatial-geometric / multimodal fusion representation (P2 adjacency)
+- **Slot D**: tactile sensing in prosthetics / neuroscience
 
 ---
 
