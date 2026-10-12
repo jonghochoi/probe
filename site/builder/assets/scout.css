@@ -179,7 +179,8 @@ summary.sc-row:hover { background: var(--surface-3); }
    for each axis, then what to check first — under the row's own text
    rather than under the rail. `scout.js` pins the right column while the
    left runs on, only when it fits the screen: a pinned column taller than
-   the screen hides its own foot. The figures in the prose are marked: they
+   the screen hides its own foot, and never on a phone, where the two
+   columns stack. The figures in the prose are marked: they
    are what a scanning eye looks for. */
 .sc-body {
   padding: 1rem .6rem 1.4rem calc(1.9rem + var(--sc-rail) + 1rem);
@@ -264,8 +265,10 @@ ul.sc-ax-t li { line-height: 1.65; }
   .sc-body { padding: .7rem .2rem 1.1rem 1.6rem; }
   .sc-cols2 { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
   /* The judgement first: it is the short column, and the long one under it
-     is there for a reader who has already decided to read. */
+     is there for a reader who has already decided to read. Stacked, it is
+     never pinned: the brief would scroll up under it rather than past it. */
   .sc-cols2 > .sc-judge { order: -1; }
+  .sc-judge.sc-pin { position: static; }
   /* The step names its pair above it rather than beside it: a third column
      leaves the field text a phone's width of a few words. */
   .sc-bstep { grid-template-columns: minmax(0, 1fr); gap: .3rem; }
