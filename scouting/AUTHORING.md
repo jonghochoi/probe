@@ -425,9 +425,21 @@ that run prints the same three (§5-4).
 
 ### 5-1. The gate is Relevance, Novelty and Methodology
 
-A paper is surfaced as a `## 🥇 / 🥈 / 🥉 / 🌱` section when **Relevance, Novelty
-and Methodology are each ≥ 2**. Real and Reproducibility are scored, shown and
-counted in the total that ranks (§5-3), but they are **not** part of the gate.
+A paper is surfaced as a `## 🥇 / 🥈 / 🥉` section or a 📋 row when
+**Relevance, Novelty and Methodology are each ≥ 2, and Relevance or Novelty
+is 3**. Real and Reproducibility are scored, shown and counted in the total
+that ranks (§5-3), but they are **not** part of the gate.
+
+The 3 is what makes the gate select. Methodology 2 is two baselines and an
+ablation, which most papers reach once their own text is read, so a gate of
+three 2s passes nearly every on-topic paper and the report stops being a short
+list. A paper that is only partly on a pillar and only partly new (`R2·N2`)
+is not worth a full read in a scanned document; one that touches a pillar's
+decision directly, or is genuinely new against its tracked work, is.
+
+The 🌱 pick is the exception: its field is adjacent by definition, so it
+rarely scores 3 on a pillar's Relevance, and it clears with **Relevance,
+Novelty and Methodology each ≥ 2** alone.
 
 Both measure where a result stands rather than whether it is worth reading. A
 fresh preprint rarely has a public repository on the day it posts, and a paper
@@ -435,8 +447,8 @@ can be sound, new and on-topic with every result in simulation — or with no
 simulation at all, entirely on hardware. A gate term for either measures the
 kind of paper, not its quality.
 
-**The gate binds in both directions.** A candidate whose three gate dimensions
-are each ≥ 2 is surfaced — never parked in 🔍 or dropped over a closed
+**The gate binds in both directions.** A candidate that clears the gate is
+surfaced — never parked in 🔍 or dropped over a closed
 repository or a simulation-only result. Those cost the paper points in the
 total and show in its code label (§5-3); they never remove it.
 
@@ -593,10 +605,13 @@ two answers about the paper itself.
 ### 5-5. Near-miss candidates
 
 `## 🔍 근접 후보` holds this run's candidates that are **exactly one gate axis
-short** — one of Relevance, Novelty and Methodology scores 1 and the
-other two are ≥ 2. Two or more axes short is dropped and appears in the report only
-as part of the filter count in 🔄 (§7-1); zero axes short is a surfaced paper
-(§5-1), never a 🔍 row.
+short** — one of Relevance, Novelty and Methodology scores 1, the other two
+are ≥ 2, and the paper would clear the gate (§5-1) were that one score 2:
+`R3·N2·M1` and `R1·N3·M2` are 🔍 rows, `R2·N2·M1` is not. Every other
+candidate that fails the gate — two or more axes short, or `R2·N2` with no
+3 — is dropped and appears in the report only as part of the filter count in
+🔄 (§7-1); a candidate that clears the gate is a surfaced paper (§5-1), never
+a 🔍 row. A 🌱 proposal is never a 🔍 row (§5-1).
 
 The table is this run's alone. A row is not carried into the next report and
 is not re-checked there; like every id a report names, the paper is then held
@@ -737,14 +752,15 @@ the backstop. The lint binds reports dated on or after its
 `_CONTRACT_EFFECTIVE`; the gate arithmetic binds from `_GATE_EFFECTIVE`, the
 medal, 📋 and retry rules from `_SHAPE_EFFECTIVE`, and the §2-1 section set,
 the bare medal header, the score line, the three-axis gate and the run file
-from `_SECTIONS_EFFECTIVE`. A report dated earlier is the record of a run
+from `_SECTIONS_EFFECTIVE`, and the gate's Relevance-or-Novelty 3 with the 🔍
+rule that follows from it from `_FOCUS_EFFECTIVE`. A report dated earlier is the record of a run
 under the contract of its day and is read, never rewritten, in that form.
 
 | Rule | Checked by |
 |---|---|
 | H1 form and its date against the filename; the two-line metadata block, the 400-character cap, no retry narration without `최종 실패`, `Papers surfaced` a bare integer equal to the paper sections plus the 📋 rows (§6) | lint |
 | Every `##` opens with a §2-1 emoji, sections in §2-1 order, each medal at most once, 📋 only under all three medals, no emoji on `###`, nothing after `논문 N` on a paper header, the (b) and (c) headlines within 50 characters, the six (b) labels each once and in order (§2, §5-1, §5-3) | lint |
-| A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
+| A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate, the 🌱 pick without the 3; each 🔍 row exactly one gate axis short and clearing it were that axis 2; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |
 | Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |
