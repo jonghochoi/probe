@@ -1,43 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="72" height="96" viewBox="12 0 72 96" role="img" aria-label="PROBE — reading one paper">
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="96" viewBox="12 0 72 96" role="img" aria-label="PROBE — reading one paper like a detective until a clue turns up: !">
   <style>
     .hull   { fill: #E8916F; }
     .iris   { fill: #FFF6F1; }
     .pupil  { fill: #2A1A12; }
     .stem   { stroke: #F0A183; stroke-width: 3.6; stroke-linecap: round; fill: none; }
     .leaf   { fill: #F0A183; }
-    .sprout { transform-box: view-box; transform-origin: 48px 27px;
-              animation: sway 3.2s ease-in-out infinite; }
-    @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+    .sprout { transform-origin: 48px 27px; animation: sway 3.2s ease-in-out infinite; }
     .page   { fill: #FFF6F1; stroke: #C98A6D; stroke-width: 2; }
     .line   { fill: #C98A6D; opacity: .3; }
     .shadow { fill: #F0A183; opacity: .55; }
-    .rig   { animation: bob 4.2s ease-in-out infinite; }
-    .pupil { animation: read 1.6s ease-in-out infinite; }
-    .l1    { animation: lit 4.8s ease-in-out infinite; }
-    .l2    { animation: lit 4.8s ease-in-out 1.6s infinite; }
-    .l3    { animation: lit 4.8s ease-in-out 3.2s infinite; }
+    @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
     @keyframes bob  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-    @keyframes read { 0% { transform: translateX(-2.4px); }
-                      72% { transform: translateX(2.4px); }
-                      86%, 100% { transform: translateX(-2.4px); } }
-    @keyframes lit  { 0%, 28% { opacity: .95; } 34%, 100% { opacity: .3; } }
-    @media (prefers-reduced-motion: reduce) {
-      .rig, .sprout, .pupil, .line { animation: none; }
-      .line { opacity: .55; }
-    }
-  </style>
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 
+    .cap    { fill: #B08C68; }
+    .tweed  { fill: url(#tw); }
+    .visor  { fill: #7A5C42; }
+    .flap   { fill: #B08C68; stroke: #7A5C42; stroke-width: 1; }
+    .stone  { fill: #6CC0FF; fill-opacity: .22; stroke: #C98A6D; stroke-width: 1.6; }
+    .mag    { fill: #C98A6D; opacity: .85; }
+    .bang   { fill: #FF6B6E; font: 900 17px system-ui, sans-serif; opacity: 0; }
+    .rig    { animation: bob 4.2s ease-in-out infinite; }
+    .slide  { animation: slide 4.8s ease-in-out infinite; }
+    .pupil  { animation: look 4.8s ease-in-out infinite; }
+    .fL     { transform-origin: 21px 35px; animation: flapL 4.8s ease-in-out infinite; }
+    .fR     { transform-origin: 75px 35px; animation: flapR 4.8s ease-in-out infinite; }
+    .bang   { transform-origin: 75px 16px; animation: bang 4.8s ease-out infinite; }
+    @keyframes slide { 0%, 8% { transform: translateX(0); } 60%, 90% { transform: translateX(20px); }
+                       100% { transform: translateX(0); } }
+    @keyframes look  { 0%, 8% { transform: translateX(-2.6px); } 60% { transform: translateX(2.6px); }
+                       64%, 88% { transform: translate(2.6px, -3px); } 100% { transform: translateX(-2.6px); } }
+    @keyframes flapL { 0%, 60% { transform: rotate(0); } 64%, 86% { transform: rotate(115deg); }
+                       92%, 100% { transform: rotate(0); } }
+    @keyframes flapR { 0%, 60% { transform: rotate(0); } 64%, 86% { transform: rotate(-115deg); }
+                       92%, 100% { transform: rotate(0); } }
+    @keyframes bang  { 0%, 61% { opacity: 0; transform: scale(.3); } 65% { opacity: 1; transform: scale(1.25); }
+                       69%, 86% { opacity: 1; transform: scale(1); } 90%, 100% { opacity: 0; transform: scale(1); } }
+  </style>
+  <defs><pattern id="tw" width="3.4" height="3.4" patternUnits="userSpaceOnUse">
+    <path d="M0 0 H3.4 M0 0 V3.4" stroke="#7A5C42" stroke-width=".7" opacity=".55"/></pattern></defs>
   <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>
   <g class="rig">
-    <g class="sprout"><path class="stem" d="M48 26.5 V18.5"/><path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/><path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>
     <rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>
-    <g class="eye eL"><g class="lid"><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="56.5" r="5"/></g></g>
-    <g class="eye eR"><g class="lid"><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="56.5" r="5"/></g></g>
+    <path class="flap fL" d="M18 33 C13 38, 14 46, 17.5 49 C21 47, 23.5 41, 23 34 Z"/>
+    <path class="flap fR" d="M78 33 C83 38, 82 46, 78.5 49 C75 47, 72.5 41, 73 34 Z"/>
+    <path class="cap" d="M18.5 38 C18.5 25, 31 17.5, 48 17.5 C65 17.5, 77.5 25, 77.5 38 Z"/>
+    <path class="tweed" d="M18.5 38 C18.5 25, 31 17.5, 48 17.5 C65 17.5, 77.5 25, 77.5 38 Z"/>
+    <path class="visor" d="M26 37 C34 43.5, 62 43.5, 70 37 Z"/>
+    <g class="sprout"><path class="stem" d="M48 26.5 V18.5"/><path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/><path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>
+    <g><circle class="iris" cx="36" cy="52" r="11"/><circle class="pupil" cx="36" cy="56.5" r="5"/></g>
+    <g><circle class="iris" cx="60" cy="52" r="11"/><circle class="pupil" cx="60" cy="56.5" r="5"/></g>
     <g transform="rotate(-4 48 74.5)">
       <rect class="page" x="27" y="66" width="42" height="17" rx="3"/>
-      <rect class="line l1" x="33" y="69.6" width="30" height="2.2" rx="1.1"/>
-      <rect class="line l2" x="33" y="73.4" width="30" height="2.2" rx="1.1"/>
-      <rect class="line l3" x="33" y="77.2" width="19" height="2.2" rx="1.1"/>
+      <rect class="line" x="33" y="69.6" width="30" height="2.2" rx="1.1"/>
+      <rect class="line" x="33" y="73.4" width="30" height="2.2" rx="1.1"/>
+      <rect class="line" x="33" y="77.2" width="19" height="2.2" rx="1.1"/>
+      <g class="slide">
+        <rect class="mag" x="32" y="71.2" width="12" height="4.2" rx="2.1"/>
+        <circle class="stone" cx="38" cy="73.3" r="7"/>
+      </g>
     </g>
   </g>
+  <text class="bang" x="75" y="22" text-anchor="middle">!</text>
 </svg>

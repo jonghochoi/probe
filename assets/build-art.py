@@ -4,12 +4,11 @@
     hero.svg            the front door: the flood, then the reader, and the
                         link to the reading site
     own.svg             How it works: who writes what
-    probe-ideation.svg  the ideation mark, sized like the four track icons
 
     python3 assets/build-art.py            # write every pair
     python3 assets/build-art.py --check    # fail if any file is out of date
 
-The other images in this folder are hand-authored. These carry timed cycles
+The track icons in this folder are hand-authored. These two carry timed cycles
 whose keyframes are computed from the geometry — a card is marked when it
 crosses a line, so moving the line moves the keyframe — which is why they are
 generated: edit this script, never the SVG. What the images have to keep
@@ -113,19 +112,12 @@ MUG = """<g><ellipse class="shadow" cx="91.5" cy="90" rx="9.4" ry="2.6"/>
       <ellipse class="brew" cx="91.5" cy="68" rx="8.5" ry="2.5"/></g>"""
 
 
-def probe(x: float, y: float, s: float, mood: str = "read",
-          page: bool = False, mug: bool = False) -> str:
-    """The character in its 96-unit box, top-left at (x, y).
-
-    read — pupils down on the page, following its lines
-    up   — pupils up and to the right, at a thought
-    """
+def probe(x: float, y: float, s: float, page: bool = False, mug: bool = False) -> str:
+    """The character in its 96-unit box, top-left at (x, y), pupils down on
+    the page and following its lines."""
     eyes = []
     for cx in (36, 60):
-        if mood == "read":
-            pupil = f'<g class="readp"><circle class="pupil" cx="{cx}" cy="56.5" r="5"/></g>'
-        else:
-            pupil = f'<circle class="pupil" cx="{cx + 2.5}" cy="48" r="5"/>'
+        pupil = f'<g class="readp"><circle class="pupil" cx="{cx}" cy="56.5" r="5"/></g>'
         eyes.append(f'<g class="lid"><circle class="iris" cx="{cx}" cy="52" r="11"/>{pupil}</g>')
     return f"""<g transform="translate({x} {y}) scale({s})">
     <ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/><g class="rig">
@@ -282,7 +274,7 @@ def hero() -> str:
     rows, marks = feed()
     lost, lost_css = lost_probe(544, H - 164, 1.3)
     rain = "".join(sheet(x, y, r, f"rain rn{k % 4}") for k, (x, y, r) in enumerate(FLOOD))
-    reader = probe(534, H - 172, 1.4, "read", page=True, mug=True)
+    reader = probe(534, H - 172, 1.4, page=True, mug=True)
     return svg(880, H, "PROBE — Stop drowning in arXiv. PROBE marks the target. Open the reading site.",
                HERO_CSS + marks + lost_css, f"""
   <defs>
@@ -361,7 +353,7 @@ def own() -> str:
          f'<text class="ps" x="{cx+20}" y="{mid+28}">P#.md, one per pillar</text>',
          f'<path class="wire" d="M{wx} {mid} H{tip - 8}"/><path class="head" d="M{tip} {mid} l-8 -4.5 v9 Z"/>',
          f'<text class="note" x="{(wx + tip) / 2}" y="{mid-10}" text-anchor="middle">reads</text>',
-         probe(px, base - 90 * PS, PS, "read", page=True),
+         probe(px, base - 90 * PS, PS, page=True),
          f'<text class="eb" x="{ox}" y="{TOP-10}">PROBE WRITES</text>',
          f'<rect class="mine" x="{ox}" y="{TOP}" width="{ow}" height="{FH}" rx="10"/>']
     for k, (path, when) in enumerate(FOLDERS):
@@ -376,34 +368,7 @@ def own() -> str:
                OWN_CSS, f'<g transform="translate({shift:.1f} 0)">' + "\n  ".join(b) + "</g>")
 
 
-# ── probe-ideation ────────────────────────────────────────────────────
-
-IDEATION_CSS = """
-    .bub  { fill: ${IRIS}; stroke: ${DEEP}; stroke-width: 1.6; }
-    .bdot { fill: ${DEEP}; opacity: .2; }
-    .t1   { animation: think 2.4s ease-in-out infinite; }
-    .t2   { animation: think 2.4s ease-in-out .3s infinite; }
-    .t3   { animation: think 2.4s ease-in-out .6s infinite; }
-    @keyframes think { 0%, 100% { opacity: .2; } 40% { opacity: 1; } }"""
-
-
-def ideation() -> str:
-    """The probe looking up at a thought whose dots light in turn. Drawn in
-    the four other track icons' frame — the 72 x 96 box from x = 12, the
-    probe at scale 1 — so the probe stands the same size and on the same
-    axis in the README's column. The thought rises off the head, its smallest
-    bubble on the hull's edge, and bobs with the head as one rig; the cloud
-    takes the frame's free top-right corner, as `probe-presentation.svg`'s
-    screen does."""
-    thought = """<g class="rig">
-      <circle class="bub" cx="61.5" cy="28.5" r="1.8"/><circle class="bub" cx="66" cy="22" r="2.6"/>
-      <ellipse class="bub" cx="71.5" cy="10.5" rx="11.5" ry="6.5"/>
-      <circle class="bdot t1" cx="66" cy="10.5" r="2"/><circle class="bdot t2" cx="71.5" cy="10.5" r="2"/><circle class="bdot t3" cx="77" cy="10.5" r="2"/></g>"""
-    return svg(72, 96, "PROBE — thinking up what nobody has tried", IDEATION_CSS,
-               probe(0, 0, 1, "up") + thought, vb="12 0 72 96")
-
-
-IMAGES = {"hero": hero, "own": own, "probe-ideation": ideation}
+IMAGES = {"hero": hero, "own": own}
 
 
 def main() -> int:

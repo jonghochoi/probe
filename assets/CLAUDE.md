@@ -15,7 +15,7 @@ their colours.
 | `hero.svg` (880×330) | The front door, and the link to the reading site. The headline, the claim and the button on the left; on the right, one 25 s cycle in two scenes — the flood, then the reader |
 | `own.svg` (880×204) | The picture under How it works — who writes what: you and `context/`, the probe that reads it, and the four folders it writes |
 | `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons, each above its track's name in the How-it-works table |
-| `build-art.py` | Generates `hero`, `own` and `probe-ideation`. The four other track icons are hand-authored |
+| `build-art.py` | Generates `hero` and `own`. The five track icons are hand-authored |
 
 ## Drawing rules
 
@@ -45,8 +45,9 @@ breathes on its own 4.6 s cycle rather than the probe's bob. The out-of-it
 probe is the same character dimmed, its sprout wilted and its eyes crossed; the
 only thing its eyes do is pulse, the two a half beat apart. A prop is placed or
 worn, never gripped: a handless probe holds nothing, so the page rides under
-its eyes, the mug stands on the ground beside it and the scouter hangs from the
-hull's edge.
+its eyes, the mug stands on the ground beside it, the scouter hangs from the
+hull's edge, the deerstalker sits on its head with the reading stone lying on
+the page, and the bulb hangs over it where a thought would.
 
 **Each track icon shows its track working, and its outline is what does the
 work.** At the 64 px a table cell gives them, the only thing that survives is
@@ -54,15 +55,33 @@ the shape around the face: `probe-scouting.svg` takes a reading (a scouter over
 the right eye — a round green lens in a purple ring, the earpiece on the hull's
 edge, and on its antenna a green Wi-Fi mark of a dot and two arcs that never
 touch and light in turn — whose dial, dots in the ring's purple, fills one by
-one until the lens flashes, the scouter shakes and both pupils shrink; its
-green and purple are the only hues outside the clay and belong to the scouter
-alone), `probe-analysis.svg` reads (one wide page under the eyes, its lines
-lighting in turn), `probe-comparison.svg` weighs (two pages riding up and down
-like the pans of a scale), `probe-presentation.svg` presents (a screen up and
-to the right whose bands light as a talk advances, one listener in front on the
-left, cut by the bottom edge), and `probe-ideation.svg` thinks (pupils up at a
-thought whose dots light in turn). A new track needs a new outline, not a
-variation on one of these.
+one until the lens flashes, the scouter shakes and both pupils shrink),
+`probe-analysis.svg` reads like a detective (a tweed deerstalker whose ear
+flaps hang at the hull's sides, one wide page under the eyes and a reading
+stone sliding along its first line, until the stone stops, the flaps spring
+up and a red `!` pops over the cap), `probe-comparison.svg` rallies (two
+pages standing at the hull's sides bat a yellow ball back and forth, faster
+each time, the pupils chasing it, until it hits the top of the head — the
+probe reels, a red bump swells where it hit and the ball dribbles to a stop
+at its feet), `probe-presentation.svg` presents (a screen up and to the
+right whose bands light as a talk advances, one listener in front on the
+left, cut by the bottom edge, until the bands glitch and the screen crashes
+to a blue `:(` — the presenter freezes and sweats with shrunken pupils, the
+listener tilts its head, and the slide comes back), and `probe-ideation.svg`
+has an idea (pupils up at a bulb over the head that flickers like a tired
+tube, catches, and glows so bright the probe squints). A new track needs a
+new outline, not a variation on one of these.
+
+**Every track icon builds to one beat.** The scouter's dial is the model:
+something mounts over the cycle and a single beat releases it — the flash,
+the `!`, the bump, the crash, the glare — so each icon lands a punchline
+rather than idling in a loop. Hues outside the clay come only with a prop
+and stay on it: the scouter's green and purple, which no other icon uses,
+the deerstalker's tweed, the ball's and the bulb's yellow, the crashed
+screen's blue, and the red of the `!` and the bump. A blue sweat drop is
+the probe's one sign of strain that is not a prop. With motion off, an icon
+rests before its beat — the ball between the pages, the screen lit, the eyes
+open.
 
 **An icon shares its track's cell, never a column of its own.** A table
 column that holds only an image has no minimum width — GitHub caps every image
@@ -107,6 +126,6 @@ picture.
 
 ## Generating
 
-`hero`, `own` and `probe-ideation` are written by `build-art.py` from one
-source per image, light and dark from the same markup. Edit the script, never
-the SVG. Before pushing a change here: `python3 assets/build-art.py --check`.
+`hero` and `own` are written by `build-art.py` from one source per image,
+light and dark from the same markup. Edit the script, never the SVG. Before
+pushing a change here: `python3 assets/build-art.py --check`.
