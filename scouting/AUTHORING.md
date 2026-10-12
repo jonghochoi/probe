@@ -225,8 +225,9 @@ separated by single spaces, never followed by a Korean gloss.
 
 **Paper sections stay paper-focused.** (a) holds no body bullets. In (b)–(d)
 no `D#` codes, `deferred` or config-key / `*.yaml` names — a reader follows the
-paper without asking "what is D3AG?". A decision a run moves is a 🔄 bullet
-(§7-1).
+paper without asking "what is D3AG?". The (a) badges are the paper's whole
+tie to the Decision Log; no other section restates it. A paper's own name
+shaped like a code (`D4RT`) goes in a code span, which the lint reads past.
 
 ---
 
@@ -306,8 +307,7 @@ not 합니다/됩니다 paragraphs.
   (단정↔추측 preserved).
 - **No semicolon chains in body.** A `;` joining two or three clauses reads as
   an unstructured run-on. When a bullet carries multiple clauses, use a comma,
-  or — if they are genuinely parallel items — split into nested sub-bullets
-  (e.g. the 🔄 Decision-Log signal becomes one sub-bullet per D#).
+  or — if they are genuinely parallel items — split into nested sub-bullets.
 - **Where it applies.** All body content — paper (a)–(d) and 🔄 synthesis. Exempt: table cells (a `;` may separate
   distinct entries there) and verbatim English citation blockquotes.
 
@@ -444,7 +444,9 @@ The top three by rank (§5-3) take the full `## 🥇 / 🥈 / 🥉` sections, on
 medal each. Every further paper that clears the gate is still surfaced — as one
 row of `## 📋 기준 통과 · 추가 후보`, in rank order — so a strong week stays a
 report a reader can scan rather than a stack of full sections. The 🌱 pick
-keeps its own section (§5) and is not one of the three.
+keeps its own section (§5) and is not one of the three. A 🌱 proposal that
+does not clear the gate is not printed — no 🌱 section and no 🔍 row — and
+the pillar's budget for the slot stays open.
 
 ```markdown
 | Paper | Link | R·N·M·Real | Repro | 합계 | 코드 | 한 줄 근거 |
@@ -472,9 +474,10 @@ it per dimension.
 
 ### 5-2. The paper's three are scored from quoted evidence
 
-Methodology, Real and Reproducibility are scored from **strings the retrieval
-pass actually received** — the arXiv `<arxiv:comment>` field and the abstract
-body, both in the response the run already makes. Each level below names what
+Methodology, Real and Reproducibility are scored from **strings the run
+actually received** — the arXiv `<arxiv:comment>` field, the abstract, and
+for a candidate that can surface or near-miss the paper's own text, searched
+through its HTML edition. Each level below names what
 the text must say; a score the text does not support is not given, and an
 absent signal is stated as absent. `초록상 미확인` / `확인 필요` is not an
 outcome — the run has already read the text.
@@ -507,14 +510,24 @@ evaluation the release itself carries.
 | Score | Condition |
 |---|---|
 | 3 | Repository URL present **and** data / checkpoints **and** hardware or config detail |
-| 2 | A code repository URL is stated (`github.com/…`, `Code: …`) |
-| 1 | Project page only, or a promise (`code will be released`, `release soon`, `upon acceptance`) |
-| 0 | No repository, page, or release statement anywhere in the abstract or the comment field |
+| 2 | A code repository URL, or a code statement naming any URL (`github.com/…`, `Code: …`) |
+| 1 | A promise of code (`code will be released`, `release soon`, `upon acceptance`) |
+| 0 | Nothing about code — a project page, a dataset or a model page alone included |
 
 **Evaluation on a public benchmark is not reproducibility evidence** — LIBERO,
 CALVIN, SIMPLER, DexYCB say the paper is comparable, not that the artifact is
 obtainable. A Repro ≥ 2 whose evidence says `코드 공개 미확인` contradicts
 itself.
+
+**Cases the tables leave open** are read one way by every judge:
+
+| Case | Reading |
+|---|---|
+| A real-robot claim with no number (`improves on real robots`) | Real 1 |
+| "Several tasks or platforms" for Real 3 | Three or more real-robot tasks with numbers, or two or more platforms |
+| A dataset or benchmark with no component of its own to ablate | Its evaluated methods are the baselines and a controlled factor study is the ablation |
+| The paper's own variants, or the base model before its change | Each counts as a baseline |
+| A model's weights or a dataset released with no code statement | Repro 0 |
 
 The score line **quotes the Reproducibility evidence** after the `—`; the run
 file quotes all three (§8):
@@ -522,19 +535,25 @@ file quotes all three (§8):
 ```markdown
 … · Repro2 — arXiv comment "Code: https://github.com/LeapWM/leapbot-wa"
 … · Repro1 — arXiv comment "Code and model checkpoints will be released upon acceptance"
-… · Repro0 — 초록·arXiv comment 모두 코드·프로젝트 페이지 신호 없음
+… · Repro0 — 초록·arXiv comment·본문 모두 코드 저장소나 공개 약속 없음
 ```
+
+The quote names its source, `arXiv comment "…"`, `초록 "…"`, or the section of
+the paper's text it came from, `§4.2 "…"`. A
+Reproducibility kept from an earlier report (§5-4) reads
+`<pillar> <date> 판정 유지` in its place (`… · Repro1 — P1 2026-10-01 판정 유지`).
 
 ### 5-3. The Reproducibility label and the rank order
 
 Every paper header line and every 📋 `코드` cell carries the label its
-Reproducibility score implies, as plain text (emoji stay on `##` headers — §2):
+Reproducibility score implies, as plain text (emoji stay on `##` headers — §2),
+and a paper with nothing about code carries none — the cell stays empty:
 
 | Score | Label |
 |---|---|
 | 2–3 | `코드 공개` |
 | 1 | `코드 공개 예정` |
-| 0 | `코드 미공개` |
+| 0 | none |
 
 The site prints no score. Beside the code label it prints what the paper's
 Real score says, in words — the one part of the rubric a reader decides by:
@@ -567,15 +586,15 @@ two answers about the paper itself.
 - A paper already scored in a report dated within the ~8-week
   de-duplication window, before this run's date, **keeps** that report's
   three — the most recent date, and on one date the lowest pillar number. A
-  score line and a 📋 row carry all three; a 🔍 row carries Methodology and
-  Real.
+  score line and a 📋 row carry all three, and no other line is a source:
+  a 🔍 row's paper is scored afresh, from its text, like a new one.
 
 ### 5-5. Near-miss candidates
 
 `## 🔍 근접 후보` holds this run's candidates that are **exactly one gate axis
-short** — one of Relevance, Novelty and Methodology scores 1 and the other two
-are ≥ 2. Two or more axes short is dropped and appears in the report only as
-part of the filter count in 🔄 (§7-1); zero axes short is a surfaced paper
+short** — one of Relevance, Novelty and Methodology scores 1 and the
+other two are ≥ 2. Two or more axes short is dropped and appears in the report only
+as part of the filter count in 🔄 (§7-1); zero axes short is a surfaced paper
 (§5-1), never a 🔍 row.
 
 The table is this run's alone. A row is not carried into the next report and
@@ -583,12 +602,13 @@ is not re-checked there; like every id a report names, the paper is then held
 out of later runs by the routine's de-duplication window. `재검토 조건` names,
 for the reader, what would lift the short axis.
 
-One table, no per-paper `###` subsections:
+One table, no per-paper `###` subsections. The `코드` cell is the §5-3 label
+of the run's Reproducibility score for the paper:
 
 ```markdown
 | Paper | Link | R·N·M·Real | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·1·3 | 공개 예정 | 베이스라인 비교가 추가되면 Methodology 충족 |
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·1·3 | 코드 공개 예정 | 베이스라인 비교가 추가되면 Methodology 충족 |
 ```
 
 Omit the section when it has no rows.
@@ -632,13 +652,9 @@ section governs what each `##` section is allowed to repeat.
 
 `## 🔄 직전 리포트 대비 종합` covers, one bullet each and only when the run has
 something to say: papers already covered (verdict first), contradictions with
-recent findings, Decision-Log triggers, filter health as a count,
-already-analyzed dedup count.
+recent findings, filter health as a count, already-analyzed dedup count.
+It cites no `D#` — a paper's decisions are its (a) badges (§3-1).
 
-- **A Decision-Log trigger names the decision and the paper that moved it**
-  (`D5DQ — Rho(2609.38164) 15회 교정 적응이 서브루프 없는 대안 제시`). It is
-  a signal for the reader, not an edit proposal — `context/` is the human's
-  record, and the report names no pin, rule or wording to change there.
 - **Filter health is the only trace of a dropped candidate.** A count and a
   reason (`5편 제외 — WAM 아키텍처 4편, Methodology 미달 1편`), never a
   per-paper list and never the pipeline arithmetic from `Papers scanned` (§6).
@@ -653,6 +669,12 @@ ordinary occurrence in this corpus, and the reports read side by side across
 pillars. A bare alias is only safe where a `Link` column resolves it in the
 same row.
 
+- **The alias** is the paper's own codename — the part of its title before
+  the colon — or else a two-to-four-word noun phrase from the title's own
+  words that reads complete on its own: never cut mid-phrase, never ending
+  on a preposition or an article (`Temporal Visuo-Tactile Grasp`, not
+  `Temporal Visuo-Tactile Learning for`). Plain text: no `$…$` math, and a Δ
+  is written as the character.
 - In **prose** (🔄), an alias carries its id on first use in the
   section: `Faster-WAM(2608.04404)`.
 - In the 📋 and 🔍 tables the `Paper` column stays alias-only — the `Link`
@@ -697,8 +719,7 @@ prints its synthesis at the top of the date's page (§1).
   that stopped it verbatim. With nothing failed the `Failed:` line is absent.
 - **`## 🧭 회차 종합`** is 3–5 bullets about the run across pillars and
   nothing a pillar's own 🔄 already says: the papers several pillars surfaced
-  and why each wanted them, a decision two pillars' findings bear on together,
-  a pillar that came back thin. 개조식, §4-4.
+  and why each wanted them, a pillar that came back thin. 개조식, §4-4.
 - **`## 📐 논문 판정`** has one row for every paper any report of the run
   surfaces or lists in 🔍, with the three scores every report prints for it.
   `Paper` is the paper's alias (§7-2) — the name every report of the run
@@ -725,7 +746,7 @@ under the contract of its day and is read, never rewritten, in that form.
 |---|---|
 | H1 form and its date against the filename; the two-line metadata block, the 400-character cap, no retry narration without `최종 실패`, `Papers surfaced` a bare integer equal to the paper sections plus the 📋 rows (§6) | lint |
 | Every `##` opens with a §2-1 emoji, sections in §2-1 order, each medal at most once, 📋 only under all three medals, no emoji on `###`, nothing after `논문 N` on a paper header, the (b) and (c) headlines within 50 characters, the six (b) labels each once and in order (§2, §5-1, §5-3) | lint |
-| A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header, agreeing with its Reproducibility score (§5) | lint |
+| A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |
 | Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); 🔄 and 🧭 discipline (§7-1, §8) | the routine's SELF-CHECK and the reader — nothing parses them |

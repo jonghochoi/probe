@@ -103,7 +103,7 @@ _SHAPE_EFFECTIVE = "2026-09-27"
 # four axes under the contract of their day.
 _SECTIONS_EFFECTIVE = "2026-10-05"
 _OUT_OF_SET = {
-    "💡": "a decision a run moves is a 🔄 bullet, and `context/` edits are the human's",
+    "💡": "a paper's decisions are its (a) badges, and `context/` edits are the human's",
     "🚫": "a dropped candidate is part of the 🔄 filter count, not a row",
     "📊": "each paper section carries its scores on its own score line (AUTHORING §5-1)",
 }
@@ -114,8 +114,13 @@ _SCORE_LINE = re.compile(
     r"Real(?P<Real>\d) · Repro(?P<Repro>\d) — (?P<evidence>\S.*)$"
 )
 
-# The label each Reproducibility score implies (AUTHORING §5-3).
-_LABEL_OF_REPRO = {0: "코드 미공개", 1: "코드 공개 예정", 2: "코드 공개", 3: "코드 공개"}
+# The label each Reproducibility score implies (AUTHORING §5-3). Repro 0
+# carries none; `코드 미공개` is how an earlier report printed it, and still reads.
+_LABEL_OF_REPRO = {0: None, 1: "코드 공개 예정", 2: "코드 공개", 3: "코드 공개"}
+
+
+def _label_ok(repro: int, label: str | None) -> bool:
+    return label == _LABEL_OF_REPRO.get(repro) or (repro == 0 and label == "코드 미공개")
 
 # The dimensions that describe the paper rather than the pillar, and the window
 # an earlier judgement of them is kept from (AUTHORING §5-4). A row's fourth
@@ -507,22 +512,6 @@ def _check_section_set(sections, findings: list[tuple[int, str]]) -> None:
             ))
 
 
-def _check_paper_headers(sections, findings: list[tuple[int, str]]) -> None:
-    for emoji, _header, start, body in sections:
-        if emoji not in _PAPER_SECTIONS:
-            continue
-        for offset, line in enumerate(body, start=start + 1):
-            if not _PAPER_LINK_LINE.match(line.strip()):
-                continue
-            label = next((lb for lb in _CODE_LABELS if lb in line), None)
-            if label is None:
-                findings.append((
-                    offset,
-                    "paper header line is missing its code label "
-                    "(`코드 공개` / `코드 공개 예정` / `코드 미공개`) — AUTHORING §5-3",
-                ))
-            break
-
 
 def _check_tables(sections, findings: list[tuple[int, str]]) -> None:
     for emoji, _header, start, body in sections:
@@ -616,8 +605,10 @@ def _row_scores(cells: list[str]) -> dict[str, int] | None:
     return dims
 
 
-def _scored(sections) -> list[tuple[int, str, dict[str, int]]]:
-    """(lineno, arXiv id, scores) for every score line and 📋 / 🔍 row."""
+def _scored(sections, near: bool = True) -> list[tuple[int, str, dict[str, int]]]:
+    """(lineno, arXiv id, scores) for every score line and 📋 row, and with
+    `near` every 🔍 row — a 🔍 row is checked against its own run's 📐, but is
+    no source for a later run (AUTHORING §5-4)."""
     out: list[tuple[int, str, dict[str, int]]] = []
     for emoji, _header, start, body in sections:
         if emoji in _PAPER_SECTIONS:
@@ -631,7 +622,7 @@ def _scored(sections) -> list[tuple[int, str, dict[str, int]]]:
                 if (m := _SCORE_LINE.match(s)):
                     out.append((offset, pid, {k: int(m.group(k)) for k in _SCORES}))
                     break
-        elif emoji in ("📋", "🔍"):
+        elif emoji == "📋" or (near and emoji == "🔍"):
             for offset, cells in _table_rows(body, start):
                 link = next((c for c in cells if _ARXIV_ID.search(c)), None)
                 dims = _row_scores(cells)
@@ -673,9 +664,10 @@ def _check_score_lines(sections, findings: list[tuple[int, str]]) -> None:
         if dims["Repro"] >= 2 and _UNCONFIRMED.search(m.group("evidence")):
             findings.append((lineno, "Repro scores >= 2 while its evidence says the signal is "
                                      "unconfirmed — an absent signal scores 0 (AUTHORING §5-2)"))
-        if label and _LABEL_OF_REPRO.get(dims["Repro"]) != label:
-            findings.append((lineno, f"Repro{dims['Repro']} implies `{_LABEL_OF_REPRO.get(dims['Repro'])}`, "
-                                     f"the header line says `{label}` (AUTHORING §5-3)"))
+        if not _label_ok(dims["Repro"], label):
+            findings.append((lineno, f"Repro{dims['Repro']} implies "
+                                     f"{_LABEL_OF_REPRO.get(dims['Repro']) or 'no code label'}, "
+                                     f"the header line has {label or 'none'} (AUTHORING §5-3)"))
     for emoji, _header, start, body in sections:
         if emoji != "📋":
             continue
@@ -688,9 +680,9 @@ def _check_score_lines(sections, findings: list[tuple[int, str]]) -> None:
                 findings.append((offset, f"📋 row `{cells[0]}` states {total} but its scores sum to "
                                          f"{sum(dims.values())} (AUTHORING §5-1)"))
             label = next((lb for c in cells for lb in _CODE_LABELS if c == lb), None)
-            if label and _LABEL_OF_REPRO.get(dims["Repro"]) != label:
+            if not _label_ok(dims["Repro"], label):
                 findings.append((offset, f"📋 row `{cells[0]}` scores Repro {dims['Repro']} but reads "
-                                         f"`{label}` (AUTHORING §5-3)"))
+                                         f"{label or 'no code label'} (AUTHORING §5-3)"))
 
 
 def _earlier_sources(root: str, date: str) -> dict[str, tuple[str, str, dict[str, int]]]:
@@ -707,7 +699,7 @@ def _earlier_sources(root: str, date: str) -> dict[str, tuple[str, str, dict[str
         pillar = os.path.basename(os.path.dirname(other))
         with open(other, encoding="utf-8") as fh:
             sections = _split_sections(fh.readlines())
-        for _lineno, pid, dims in _scored(sections):
+        for _lineno, pid, dims in _scored(sections, near=False):
             have = best.get(pid)
             if have is None or (odate, -int(pillar[1:])) > (have[0], -int(have[1][1:])):
                 best[pid] = (odate, pillar, dims)
@@ -831,7 +823,6 @@ def check_file(path: str) -> list[tuple[int, str]]:
     _check_sections(lines, findings)
     sections = _split_sections(lines)
     _check_scoring(sections, findings, gate_rules)
-    _check_paper_headers(sections, findings)
     _check_tables(sections, findings)
     current = date_from_name >= _SECTIONS_EFFECTIVE
     gate = _GATE_THREE if current else _GATE_DIMENSIONS

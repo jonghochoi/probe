@@ -18,7 +18,8 @@ Precision over recall (mirroring check-doc-links.py): only `D` + digit + two
 capitals counts (a camera name like `D435` never matches, and neither does a
 model name like `DINO`), and matches immediately preceded by figure/table/
 appendix designators (`Fig. D2`, `Appendix D1`) are skipped — those are
-paper-internal labels, not Decision citations.
+paper-internal labels, not Decision citations — and so is anything inside an
+inline code span, where an output puts a paper's own name shaped like a code.
 
 Usage (repo root):
     python3 linters/check-decision-refs.py [PATH ...]
@@ -62,6 +63,7 @@ _DREF = re.compile(r"(?<![A-Za-z0-9_])(D\d[A-Z]{2})(?![A-Za-z0-9])")
 # dot is the separator the Korean output actually uses (badge pairs are covered
 # by the existence check on their D token).
 _PAIR = re.compile(r"(?<![A-Za-z0-9_])P(\d)\s*(?:[/·]\s*)?(D\d[A-Z]{2})(?![A-Za-z0-9])")
+_CODE_SPAN = re.compile(r"`[^`\n]*`")
 # Paper-internal designators — `Fig. D2` is a figure label, not a Decision.
 _DESIGNATOR = re.compile(
     r"(?:Fig\.?|Figure|Table|Tab\.?|Eq\.?|Equation|App\.?|Appendix|Sec\.?|Section|§)\s*$",
@@ -114,7 +116,9 @@ def check_file(path: str, owners: dict[str, int],
     except OSError as e:
         return [(0, f"<could not read: {e}>")]
 
-    for lineno, line in enumerate(lines, start=1):
+    for lineno, raw in enumerate(lines, start=1):
+        # A code span is a paper's own name (`D4RT`), never a citation.
+        line = _CODE_SPAN.sub(lambda c: " " * len(c.group()), raw)
         for m in _DREF.finditer(line):
             if _is_designator_label(line, m.start()):
                 continue

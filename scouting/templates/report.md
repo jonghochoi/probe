@@ -14,8 +14,8 @@
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P#"></a>![P#](https://img.shields.io/badge/P%23-e2f5d5.svg) | <pillar name> (pillar) |
-| <a id="ref-D#"></a>![D#](https://img.shields.io/badge/D%23-d97706.svg) | <decision title> — <concise gloss, ≤~12 words, commas not semicolons> |
+| <a id="ref-<P#>"></a>![<P#>](https://img.shields.io/badge/<P#>-<hex>.svg) | <pillar name> (pillar) |
+| <a id="ref-<D#>"></a>![<D#>](https://img.shields.io/badge/<D#>-d97706.svg) | <decision title> — <concise gloss, ≤~12 words, commas not semicolons> |
 
 ---
 
@@ -25,9 +25,9 @@
      the rest go to 📋 (§5-1). -->
 
 **<Paper Title>**
-[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue tier, or arXiv preprint> · source: <citation-graph | keyword-sweep> · <코드 공개 | 코드 공개 예정 | 코드 미공개>
+[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · <venue tier, or arXiv preprint> · source: <citation-graph | keyword-sweep> · <코드 공개 | 코드 공개 예정 — none at Repro0>
 
-**점수 <total>/15** · R<0–3> · N<0–3> · M<0–3> · Real<0–3> · Repro<0–3> — arXiv comment "<quoted substring>"
+**점수 <total>/15** · R<0–3> · N<0–3> · M<0–3> · Real<0–3> · Repro<0–3> — <arXiv comment "…" | 초록 "…" | P# YYYY-MM-DD 판정 유지>
 
 <!-- The score line — AUTHORING §5-1, §5-2. M, Real and Repro are the run
      file's 📐 row for this paper (§5-4, §8). -->
@@ -64,7 +64,7 @@
 
 ## 🌱 논문 4 — 인접 분야 픽
 
-<!-- Once a month; the budget is in `.claude/prompts/scout.txt`. -->
+<!-- Once per slot; the budget is in `.claude/prompts/scout.txt`. -->
 
 **<Paper Title>**
 [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) · <authors> · adjacent field: <...> · <코드 라벨>
@@ -95,7 +95,7 @@
 
 | Paper | Link | R·N·M·Real | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | 3·2·2·1 | 공개 예정 | <what would lift the short axis> |
+| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | 3·2·2·1 | 코드 공개 예정 | <what would lift the short axis> |
 
 ---
 
