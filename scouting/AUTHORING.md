@@ -20,8 +20,8 @@ which is what de-duplication across reports keys on.
 The reading site publishes the reports by date: every pillar's report of one
 run date on one page, one row per arXiv id (`site/builder/scouting.py`). A
 paper several pillars surfaced is one row with each pillar's rank and reading
-side by side, and the run file's synthesis heads the page. The page orders
-the rows by score and prints none of them (§5-3).
+side by side. The page orders the rows by score and prints none of them
+(§5-3).
 
 ---
 
@@ -44,8 +44,8 @@ synthesis last.
 | 🔍 | `## 🔍 근접 후보` | Near-Miss Candidates — this run's papers one gate axis short | §5-5 |
 | 🔄 | `## 🔄 직전 리포트 대비 종합` | Run-over-Run Synthesis — this run against the recent reports | §7-1 |
 
-The run file has two `##` sections of its own, `## 🧭 회차 종합` and
-`## 📐 논문 판정`, in that order (§8); the rules below bind them too.
+The run file has one `##` section of its own, `## 📐 논문 판정` (§8); the
+rules below bind it too.
 
 ### 2-2. Subsection (`###`) headers
 
@@ -282,6 +282,7 @@ shaped like a code (`D4RT`) goes in a code span, which the lint reads past.
 | VLM pretraining preservation | VLM 사전학습 보존 |
 | Action expert | 액션 전문가 |
 | Flow matching | 플로우 매칭 |
+| Pillar (`P#`) | 연구 축 — never 필라 |
 
 ### 4-3. Section headers are fixed strings
 
@@ -697,20 +698,13 @@ same row.
 One run of the routine covers the pillars it was asked for and writes, beside
 their reports, **one run file**: `scouting/runs/YYYY-MM-DD.md`. It is the
 record of the run as a whole — which pillars it covered, the one judgement of
-each paper's own scores (§5-4), and what the pillars found together. The site
-prints its synthesis at the top of the date's page (§1).
+each paper's own scores (§5-4).
 
 ```markdown
 # Probe 스카우트 회차 — YYYY-MM-DD
 
 **Pillars:** P0 P1 P2 P3 P4
 **Failed:** P2 — arXiv API HTTP 503 최종 실패
-
----
-
-## 🧭 회차 종합
-
-- <3–5 bullets>
 
 ---
 
@@ -724,9 +718,6 @@ prints its synthesis at the top of the date's page (§1).
 - **`Pillars:`** lists the pillars the run was asked for, in order. Each has
   a report of the same date unless `**Failed:**` names it, with the error
   that stopped it verbatim. With nothing failed the `Failed:` line is absent.
-- **`## 🧭 회차 종합`** is 3–5 bullets about the run across pillars and
-  nothing a pillar's own 🔄 already says: the papers several pillars surfaced
-  and why each wanted them, a pillar that came back thin. 개조식, §4-4.
 - **`## 📐 논문 판정`** has one row for every paper any report of the run
   surfaces or lists in 🔍, with the three scores every report prints for it.
   `Paper` is the paper's alias (§7-2) — the name every report of the run
@@ -756,4 +747,4 @@ under the contract of its day and is read, never rewritten, in that form.
 | A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate; each 🔍 row exactly one gate axis short; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |
-| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); 🔄 and 🧭 discipline (§7-1, §8) | the routine's SELF-CHECK and the reader — nothing parses them |
+| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |

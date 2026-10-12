@@ -5,8 +5,7 @@ file, one window each — and a run file beside them (`scouting/runs/`). The
 site's unit is the run instead: one page per date that puts every pillar's
 surfaced papers on one list, one row per arXiv id, so a paper four pillars
 flagged reads as one paper flagged four times rather than as four papers. The
-run file says which pillars failed, carries the run's synthesis and names
-each paper; a date with no run file publishes the pillars it has and marks
+run file says which pillars failed and names each paper; a date with no run file publishes the pillars it has and marks
 the rest as missing.
 
 The reports' form is `scouting/AUTHORING.md`; this module reads it and owns
@@ -177,10 +176,9 @@ class Paper:
 
 @dataclass
 class RunFile:
-    """`scouting/runs/<date>.md` — the pillars that failed, the run's
-    cross-pillar synthesis and each paper's alias (AUTHORING §8)."""
+    """`scouting/runs/<date>.md` — the pillars that failed and each paper's
+    alias (AUTHORING §8)."""
     failed: dict[str, str]
-    synthesis: str
     aliases: dict[str, str]       # arXiv id -> the alias every report of the run uses
 
 
@@ -368,17 +366,14 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
 def parse_run_file(path: Path) -> RunFile:
     text = _COMMENT.sub("", path.read_text(encoding="utf-8"))
     failed = dict(re.findall(r"^\*\*Failed:\*\*\s*(P\d) — (.*)$", text, re.M))
-    synthesis = ""
     aliases: dict[str, str] = {}
     for header, body in _sections(text):
-        if header.startswith("🧭"):
-            synthesis = _plain(re.sub(r"(\n\s*-{3,}\s*)+$", "", body.strip()))
-        elif header.startswith("📐"):
+        if header.startswith("📐"):
             for cells in _rows(body):
                 ident = next((i for c in cells if (i := _ID.search(c))), None)
                 if ident:
                     aliases[ident.group(1)] = _ALIAS_ID.sub("", cells[0])
-    return RunFile(failed=failed, synthesis=synthesis, aliases=aliases)
+    return RunFile(failed=failed, aliases=aliases)
 
 
 def discover() -> tuple[list[Run], list[str]]:

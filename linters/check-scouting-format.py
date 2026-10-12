@@ -39,8 +39,8 @@ Checks, grouped by the contract section they enforce:
             합계 is its scores' sum, every Reproducibility score agrees with
             its code label, and every report's Methodology, Real and
             Reproducibility equal its run file's 📐 row (§5-4).
-  AUTHORING §8  the run file — its H1, `Pillars:` and `Failed:` lines, the 🧭
-            and 📐 sections in order, a report for each pillar it lists and
+  AUTHORING §8  the run file — its H1, `Pillars:` and `Failed:` lines, the 📐
+            section alone, a report for each pillar it lists and
             does not fail, and each 📐 row equal to the most recent earlier
             report that scored the paper in the window.
   AUTHORING §6  `Papers surfaced` agrees with the number of 🥇 / 🥈 / 🥉 / 🌱
@@ -710,7 +710,7 @@ def _earlier_sources(root: str, date: str) -> dict[str, tuple[str, str, dict[str
 _RUN_H1 = re.compile(r"^# Probe 스카우트 회차 — (\d{4}-\d{2}-\d{2})\s*$")
 _RUN_PILLARS = re.compile(r"^\*\*Pillars:\*\*\s*((?:P\d\s*)+)$")
 _RUN_FAILED = re.compile(r"^\*\*Failed:\*\*\s*(P\d) — (\S.*)$")
-_RUN_SECTIONS = ("🧭", "📐")
+_RUN_SECTIONS = ("📐",)
 
 
 def _judged(lines: list[str]) -> dict[str, tuple[int, dict[str, int]]]:
@@ -788,7 +788,7 @@ def check_run_file(path: str) -> list[tuple[int, str]]:
     emojis = [e for e, _h, _s, _b in _split_sections(lines)]
     if tuple(emojis) != _RUN_SECTIONS:
         findings.append((1, f"the run file's sections are {' '.join(emojis) or 'none'}, and must be "
-                            "🧭 then 📐 (AUTHORING §8)"))
+                            "📐 alone (AUTHORING §8)"))
     judged = _judged(lines)
     earlier = _earlier_sources(root, date)
     for pid, (lineno, jd) in judged.items():

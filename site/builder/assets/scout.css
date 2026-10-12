@@ -79,14 +79,6 @@
 .sc-mo-l a[aria-current="page"] { background: var(--orange); color: var(--accent-ink); }
 .sc-mo-l a[aria-current="page"] small { color: inherit; }
 
-/* ── The run's own synthesis ───────────────────────────────────────────── */
-.sc-lead {
-  background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--orange); border-radius: 0 var(--radius) var(--radius) 0;
-  padding: .7rem .9rem; margin-bottom: 1rem; font-size: .88rem;
-}
-.sc-lead > h2 { font-size: .72rem; font-weight: 700; color: var(--text-muted); margin-bottom: .35rem; }
-.sc-lead ul { padding-left: 1.1rem; display: grid; gap: .3rem; }
 .sc-scroll { overflow-x: auto; }
 
 /* Controls with no script would be inert, so they leave with it. */
