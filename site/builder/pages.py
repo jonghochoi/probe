@@ -1782,7 +1782,7 @@ def _scout_filter(run_pillars: list[str]) -> str:
 # The band every scouting page opens on. It names the surface and what it
 # does, as the other four bands do; which run is on screen is the page's
 # business, under the band, so the band is the same on every run.
-SCOUT_EYEBROW = "Across five research axes"
+SCOUT_EYEBROW = "Across the research axes"
 SCOUT_TITLE = "탐색, 읽을 논문을 먼저 고릅니다"
 
 
