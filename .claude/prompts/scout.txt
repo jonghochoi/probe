@@ -87,7 +87,7 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 
 4. PLAN — for each pillar, from its candidates and `judged.json`, apply
    AUTHORING §5 and write `$RUN/P<n>.plan.json`:
-     · the surfaced papers (R, N and M each ≥ 2), ranked per §5-3 — the
+     · the surfaced papers (the §5-1 gate), ranked per §5-3 — the
        first three are 🥇 🥈 🥉, the rest 📋 rows;
      · the 🌱 pick, when the pillar agent proposed one and it clears the
        gate — one that does not is printed nowhere (§5-1);
@@ -161,10 +161,12 @@ PHASE SCOUT
    whose id is in `analysis/`, in Tracked Literature, or in the ~8-week id
    list; the Anti-topics filter what survives.
 3. SCORE Relevance and Novelty only (AUTHORING §5) — the judge scores the
-   other three. Keep a candidate when R and N are each ≥ 1 and at least one
-   of them is ≥ 2; any 0, or R1·N1, is dropped. The gate and the near-miss
-   rule need the judge's Methodology before they can decide. Count the
-   dropped, by reason, for 🔄 — step 2's de-duplication included.
+   other three. Keep a candidate when one of R and N is 3 and the other is
+   ≥ 1 — the only ones that can surface or near-miss (AUTHORING §5-1,
+   §5-5) — and the 🌱 proposal of step 4, whose R and N are each ≥ 2. The
+   rest are dropped. The gate and the near-miss rule need the judge's
+   Methodology before they can decide. Count the dropped, by reason, for
+   🔄 — step 2's de-duplication included.
 4. PROPOSE the 🌱 pick per the CROSS-POLLINATION BUDGET, if any.
 5. LEAVE `$RUN/P<n>.candidates.json`:
      { "pillar": "P<n>",
@@ -226,9 +228,9 @@ score Relevance or Novelty, and you never commit.
    carries; each reads `<pillar> <date> 판정 유지` as its evidence.
 3. SCORE the rest from the `comment` and `abstract` the pillar agents kept —
    the conditions in AUTHORING §5-2, each score with the quoted words it
-   stands on. For a candidate some pillar kept with R and N each ≥ 2 — the
-   ones that can surface or near-miss — search the paper's own text as well,
-   one fetch per paper, before scoring:
+   stands on. Every candidate a pillar agent keeps can surface or near-miss
+   (PART II step 3), so search each paper's own text as well, one fetch per
+   paper, before scoring:
      cd site && python3 -m builder.arxiv <id> --grep '(?i)github|\bcode\b|release|real[- ](world|robot)|hardware|success rate|baseline|ablat' | head -60; sleep 3
    Each hit prints with its section; a score it supports quotes it as
    `§<n> "…"`. On `Unavailable` the abstract and comment are all there is. A
@@ -347,7 +349,7 @@ committing.
     actually received? (a fabricated id is the one unrecoverable failure)
   - Is every surfaced paper absent from `analysis/`, from Tracked Literature
     and from the pillar's last ~8 weeks of reports?
-  - Is every paper whose R, N and M are each ≥ 2 surfaced, none parked in 🔍
+  - Is every paper that clears the gate surfaced, none parked in 🔍
     or dropped over a closed repository or a simulation-only result? Fewer
     than three clearing is said, never padded. (§5-1)
   - Do the score lines and rows carry the judge's M, Real and Repro

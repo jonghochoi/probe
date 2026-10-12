@@ -39,6 +39,9 @@ Checks, grouped by the contract section they enforce:
             합계 is its scores' sum, every Reproducibility score agrees with
             its code label, and every report's Methodology, Real and
             Reproducibility equal its run file's 📐 row (§5-4).
+  AUTHORING §5  from `_FOCUS_EFFECTIVE` — a medal paper and a 📋 row also
+            score 3 on Relevance or Novelty (the 🌱 pick is exempt), and a
+            🔍 row would clear that gate were its one short axis 2.
   AUTHORING §8  the run file — its H1, `Pillars:` and `Failed:` lines, the 📐
             section alone, a report for each pillar it lists and
             does not fail, and each 📐 row equal to the most recent earlier
@@ -63,7 +66,8 @@ SCOPE. Each rule binds reports dated on or after the day the rule takes
 effect: `_CONTRACT_EFFECTIVE` for the metadata, emoji, label and table rules,
 `_GATE_EFFECTIVE` for the gate arithmetic, `_SHAPE_EFFECTIVE` for the medal,
 📋 and retry rules, `_SECTIONS_EFFECTIVE` for the section set, the bare
-medal header, the score line, the three-axis gate and the run file. Earlier
+medal header, the score line, the three-axis gate and the run file,
+`_FOCUS_EFFECTIVE` for the Relevance-or-Novelty 3 and its 🔍 rule. Earlier
 reports are the record of runs that happened under the contract of their day;
 they are evidence, not drafts, so the lint skips them rather than inviting a
 rewrite of history.
@@ -102,6 +106,12 @@ _SHAPE_EFFECTIVE = "2026-09-27"
 # of the single routine. Reports dated earlier carry 💡, 🚫 and 📊 and gate on
 # four axes under the contract of their day.
 _SECTIONS_EFFECTIVE = "2026-10-05"
+
+# From here the gate also asks Relevance or Novelty to score 3, and a 🔍 row
+# is one that would clear that gate were its one short axis 2 (AUTHORING §5-1,
+# §5-5). Methodology 2 is reached by nearly every paper once its own text is
+# read, so three 2s alone select almost nothing.
+_FOCUS_EFFECTIVE = "2026-10-13"
 _OUT_OF_SET = {
     "💡": "a paper's decisions are its (a) badges, and `context/` edits are the human's",
     "🚫": "a dropped candidate is part of the 🔄 filter count, not a row",
@@ -376,7 +386,13 @@ def _check_scoring(sections, findings: list[tuple[int, str]], gate_rules: bool) 
         close(head, head_line, head_total, seen)
 
 
-def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS) -> None:
+def _lacks_focus(r: int, n: int) -> bool:
+    """Neither Relevance nor Novelty scores 3 (AUTHORING §5-1)."""
+    return max(r, n) < 3
+
+
+def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS,
+                     focus: bool = False) -> None:
     """🔍 rows are exactly one gate axis short (AUTHORING §5-5)."""
     for emoji, _header, start, body in sections:
         if emoji != "🔍":
@@ -411,6 +427,15 @@ def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMEN
                     f"🔍 row `{paper}` scores {score_cell}, short on {', '.join(short)} — 🔍 is "
                     "exactly one axis short, two or more is dropped (AUTHORING §5-5)",
                 ))
+            elif focus:
+                lifted = [2 if d in short else v for d, v in zip(gate, scores)]
+                if _lacks_focus(lifted[0], lifted[1]):
+                    findings.append((
+                        offset,
+                        f"🔍 row `{paper}` scores {score_cell} — with {short[0]} at 2 it still "
+                        "scores no 3 on Relevance or Novelty, so it would not clear the gate "
+                        "and is dropped (AUTHORING §5-1, §5-5)",
+                    ))
 
 
 def _table_rows(body: list[str], start: int):
@@ -425,7 +450,8 @@ def _table_rows(body: list[str], start: int):
         yield offset, cells
 
 
-def _check_shape(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS) -> None:
+def _check_shape(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS,
+                 focus: bool = False) -> None:
     """The top three take the medals once each; the rest are 📋 rows that clear
     the gate (AUTHORING §5-1)."""
     seen: dict[str, int] = {}
@@ -464,6 +490,12 @@ def _check_shape(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSION
                     offset,
                     f"📋 row `{paper}` scores {score_cell}, short on {', '.join(short)} — a 📋 "
                     "row is a surfaced paper and clears the gate (AUTHORING §5-1, §5-5)",
+                ))
+            elif focus and _lacks_focus(scores[0], scores[1]):
+                findings.append((
+                    offset,
+                    f"📋 row `{paper}` scores {score_cell} — the gate asks Relevance or "
+                    "Novelty to score 3 (AUTHORING §5-1)",
                 ))
 
 
@@ -631,7 +663,7 @@ def _scored(sections, near: bool = True) -> list[tuple[int, str, dict[str, int]]
     return out
 
 
-def _check_score_lines(sections, findings: list[tuple[int, str]]) -> None:
+def _check_score_lines(sections, findings: list[tuple[int, str]], focus: bool = False) -> None:
     """The score line under every paper header and the 📋 sums (AUTHORING §5-1 – §5-3)."""
     for emoji, _header, start, body in sections:
         if emoji not in _PAPER_SECTIONS:
@@ -661,6 +693,10 @@ def _check_score_lines(sections, findings: list[tuple[int, str]]) -> None:
             findings.append((lineno, f"surfaced with {', '.join(f'{k}{dims[k]}' for k in short)} — the "
                                      "three gate dimensions are each >= 2, and a paper short of one "
                                      "belongs in 🔍 (AUTHORING §5-1, §5-5)"))
+        elif focus and emoji in _MEDALS and _lacks_focus(dims["R"], dims["N"]):
+            findings.append((lineno, f"surfaced with R{dims['R']} · N{dims['N']} — the gate asks "
+                                     "Relevance or Novelty to score 3, the 🌱 pick alone "
+                                     "excepted (AUTHORING §5-1)"))
         if dims["Repro"] >= 2 and _UNCONFIRMED.search(m.group("evidence")):
             findings.append((lineno, "Repro scores >= 2 while its evidence says the signal is "
                                      "unconfirmed — an absent signal scores 0 (AUTHORING §5-2)"))
@@ -826,14 +862,15 @@ def check_file(path: str) -> list[tuple[int, str]]:
     _check_tables(sections, findings)
     current = date_from_name >= _SECTIONS_EFFECTIVE
     gate = _GATE_THREE if current else _GATE_DIMENSIONS
+    focus = date_from_name >= _FOCUS_EFFECTIVE
     if gate_rules:
-        _check_near_miss(sections, findings, gate)
+        _check_near_miss(sections, findings, gate, focus)
         _check_surfaced_count(lines, sections, findings)
     if shape_rules:
-        _check_shape(sections, findings, gate)
+        _check_shape(sections, findings, gate, focus)
     if current:
         _check_section_set(sections, findings)
-        _check_score_lines(sections, findings)
+        _check_score_lines(sections, findings, focus)
         _check_headlines(sections, findings)
         _check_brief(sections, findings)
         _check_against_run(abs_path, date_from_name, sections, findings)
