@@ -160,13 +160,18 @@ PHASE SCOUT
 2. RETRIEVE — the two passes under RETRIEVAL below. Each drops a candidate
    whose id is in `analysis/`, in Tracked Literature, or in the ~8-week id
    list; the Anti-topics filter what survives.
-3. SCORE Relevance and Novelty only (AUTHORING §5) — the judge scores the
-   other three. Keep a candidate when one of R and N is 3 and the other is
-   ≥ 1 — the only ones that can surface or near-miss (AUTHORING §5-1,
-   §5-5) — and the 🌱 proposal of step 4, whose R and N are each ≥ 2. The
-   rest are dropped. The gate and the near-miss rule need the judge's
-   Methodology before they can decide. Count the dropped, by reason, for
-   🔄 — step 2's de-duplication included.
+3. SCORE Relevance and Novelty only, by the level tables of AUTHORING §5-6
+   — the judge scores the other three. `why_R` names the Decision and
+   quotes the words that compare its alternatives (R3) or take one side
+   (R2); `why_N` names the closest tracked paper and quotes what the paper
+   adds over it. A 3 whose `why_` cannot name both is a 2: the 3 is what
+   keeps a candidate, so it is the score held hardest. Keep a candidate
+   when one of R and N is 3 and the other is ≥ 1 — the only ones that can
+   surface or near-miss (AUTHORING §5-1, §5-5) — and the 🌱 proposal of
+   step 4, whose R and N are each ≥ 2. The rest are dropped. The gate and
+   the near-miss rule need the judge's Methodology before they can decide.
+   Count the dropped, by reason, for 🔄 — step 2's de-duplication
+   included.
 4. PROPOSE the 🌱 pick per the CROSS-POLLINATION BUDGET, if any.
 5. LEAVE `$RUN/P<n>.candidates.json`:
      { "pillar": "P<n>",
@@ -177,7 +182,10 @@ PHASE SCOUT
                          "venue": "<the comment's acceptance venue, else arXiv preprint>",
                          "source": "citation-graph | keyword-sweep",
                          "pick": <true for the 🌱 proposal>,
-                         "R", "N", "why_R", "why_N", "decisions": ["D…"],
+                         "R", "N",
+                         "why_R": "<D#: the quoted words, AUTHORING §5-6>",
+                         "why_N": "<closest tracked paper: the quoted delta>",
+                         "decisions": ["D…"],
                          "comment": "<arxiv:comment verbatim>",
                          "abstract": "<summary verbatim>" } ] }
    Return one line: the pillar, the candidate count, any call still failing.
@@ -352,6 +360,8 @@ committing.
   - Is every paper that clears the gate surfaced, none parked in 🔍
     or dropped over a closed repository or a simulation-only result? Fewer
     than three clearing is said, never padded. (§5-1)
+  - Does every R3 and N3 in `$RUN/P<n>.candidates.json` name its Decision
+    or its closest tracked paper and quote the words it stands on? (§5-6)
   - Do the score lines and rows carry the judge's M, Real and Repro
     unchanged, and does `📐` quote the words each stands on? (§5-2, §5-4)
   - Is each (a) line badges only, and are (b)–(d) free of `D#` / `deferred` /

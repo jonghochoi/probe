@@ -411,8 +411,8 @@ rank order; the prompt owns how the evidence is fetched.
 
 | Dimension | Code | What it scores | Scored by |
 |---|---|---|---|
-| Relevance | `R` | Which `P#` / `D#` the paper touches, and how directly | the pillar |
-| Novelty | `N` | Genuinely new, or a delta over this pillar's tracked work | the pillar |
+| Relevance | `R` | What the paper does to one of the pillar's Decisions (§5-6) | the pillar |
+| Novelty | `N` | What the paper adds over the pillar's Tracked Literature (§5-6) | the pillar |
 | Methodology | `M` | Experimental rigor (§5-2) | the run, once per paper |
 | Real-robot evidence | `Real` | How much of the result stands on real hardware (§5-2) | the run, once per paper |
 | Reproducibility | `Repro` | Whether the artifact is obtainable (§5-2) | the run, once per paper |
@@ -477,7 +477,7 @@ under its header line — the total, the five dimensions and the Reproducibility
 evidence (§5-2), in this form and no other:
 
 ```markdown
-**점수 13/15** · R3 · N3 · M3 · Real3 · Repro1 — arXiv comment "Project Page: https://wb-wam.github.io"
+**점수 12/15** · R3 · N3 · M3 · Real3 · Repro0 — 초록·arXiv comment·본문 모두 코드 저장소나 공개 약속 없음
 ```
 
 The five sum to the total. A 📋 row carries the same scores in its own cells;
@@ -624,10 +624,53 @@ of the run's Reproducibility score for the paper:
 ```markdown
 | Paper | Link | R·N·M·Real | 코드 | 재검토 조건 |
 |---|---|---|---|---|
-| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 2·2·1·3 | 코드 공개 예정 | 베이스라인 비교가 추가되면 Methodology 충족 |
+| LIRA | [arXiv:2608.07596](https://arxiv.org/abs/2608.07596) | 3·2·1·3 | 코드 공개 예정 | 베이스라인 비교가 추가되면 Methodology 충족 |
 ```
 
 Omit the section when it has no rows.
+
+### 5-6. Relevance and Novelty are scored against the pillar's file
+
+Relevance and Novelty carry the gate's 3 (§5-1), so they are read off the
+pillar's own context file — its Decision Log and its Tracked Literature —
+with the same discipline as the paper's three (§5-2): each level names what
+the paper's text must show, and a level the text does not reach is not
+given. Both are scored from the abstract and the arXiv comment the pillar
+agent holds.
+
+**Relevance** — what the paper does to one of the pillar's Decisions.
+
+| Score | Condition |
+|---|---|
+| 3 | The paper puts a Decision's alternatives against each other — it compares, ablates or measures the choice that Decision makes, so its result bears on which alternative holds |
+| 2 | The paper takes one side of a Decision — its method adopts or proposes one of that Decision's alternatives, without testing it against another |
+| 1 | Inside the pillar's Scope, on none of its Decisions — the area, not a choice |
+| 0 | Outside the Scope, or an Anti-topic |
+
+**Novelty** — what the paper adds over the pillar's Tracked Literature.
+
+| Score | Condition |
+|---|---|
+| 3 | A result or mechanism no tracked paper accounts for — a new kind of method rather than a variant of a tracked one, or a measurement that contradicts a tracked paper's claim |
+| 2 | A named delta over the closest tracked paper — a new component, setting, modality or scale |
+| 1 | A tracked method carried to a new benchmark, robot or tuning, with nothing of its own |
+| 0 | Reproduces or repackages tracked work |
+
+**Cases the tables leave open** are read one way by every pillar:
+
+| Case | Reading |
+|---|---|
+| A paper that fits several Decisions | Relevance is its best single Decision, never a sum |
+| Ablations of the paper's own components, none of them a Decision's alternatives | Relevance 2 at most — a Decision is tested only when its own alternatives are the things compared |
+| A strong method on the pillar's topic that touches no Decision | Relevance 1, however good — Methodology and the total reward the quality, not Relevance |
+| No tracked paper close enough to name | Novelty is read against the Scope's sub-axes, and 3 still needs the new mechanism stated in the text |
+
+**Every 3 names its evidence.** A Relevance 3 names the Decision and the
+words that compare its alternatives; a Novelty 3 names the closest tracked
+paper and what the text shows it does not account for. A 3 that cannot name
+both is a 2. The report prints neither reason — (a) carries the Decision
+badges and (b)–(d) argue from the paper — so the rule binds the scoring, and
+the routine's SELF-CHECK is where it is held (§9).
 
 ---
 
@@ -727,7 +770,7 @@ each paper's own scores (§5-4).
 
 | Paper | Link | M | Real | Repro | 근거 |
 |---|---|---|---|---|---|
-| WB-WAM | [arXiv:2609.34199](https://arxiv.org/abs/2609.34199) | 3 | 3 | 1 | M: "outperforms … and ablates …" · Real: "84.0% on five real-world tasks" · Repro: "Project Page: https://wb-wam.github.io" |
+| WB-WAM | [arXiv:2609.34199](https://arxiv.org/abs/2609.34199) | 3 | 3 | 0 | M: "outperforms … and ablates …" · Real: "84.0% on five real-world tasks" · Repro: 초록·arXiv comment·본문 모두 코드 저장소나 공개 약속 없음 — 프로젝트 페이지만 |
 ```
 
 - **`Pillars:`** lists the pillars the run was asked for, in order. Each has
@@ -763,4 +806,4 @@ under the contract of its day and is read, never rewritten, in that form.
 | A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate, the 🌱 pick without the 3; each 🔍 row exactly one gate axis short and clearing it were that axis 2; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |
-| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |
+| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); every Relevance or Novelty 3 naming its Decision or closest tracked paper (§5-6); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |
