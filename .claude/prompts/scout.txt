@@ -308,6 +308,9 @@ committing.
   - Does every 🔄 Decision-Log bullet name its decision and the paper that
     moved it, and does 🔄 — and 🧭 — omit every item that does not apply?
     (§7-1, §8)
+  - Is every paper named by its own title — the codename the title opens
+    on, or the full title — and none by a name the title does not carry?
+    (§7-2)
   - Is the body 개조식 throughout, with no raw `~`, no bare URL before a
     particle, and no `**` closing after a paren? (§4-4, §4-6 – §4-8)
   - Is every `context/` file untouched, with no edit to one proposed?

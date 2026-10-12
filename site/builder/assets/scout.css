@@ -129,27 +129,43 @@ html.js .sc-filter {
 .sc-fold[open] > summary::before { transform: rotate(90deg); }
 .sc-fold:not([open]) > .sc-gh { border-bottom-color: var(--border); }
 
-.sc-item { border-bottom: 1px solid var(--border-soft); }
+.sc-item { --sc-rail: 6.6rem; border-bottom: 1px solid var(--border-soft); }
 .sc-item[hidden] { display: none; }
-/* Who the paper is and what it did, then who flagged it. The headline is the
-   line a reader decides by, so it gets the text color and the full width;
-   the English title is the formal name, one muted line. */
+/* The paper's arXiv id, then its name and what it did, then who flagged it.
+   The id stands in a rail of its own in front of the row and links the
+   abstract, so a reader goes to the paper without opening anything, and
+   the ids line up down the list. The name is the paper's title as written, in full and
+   in one ink; only a codename the title opens on is bold. A row that opens
+   says so with a caret at its edge; a row with nothing more has none. */
 .sc-row {
-  display: grid; align-items: start; gap: 1rem;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: .8rem .6rem; cursor: pointer; list-style: none;
+  display: grid; align-items: start; gap: .3rem 1rem;
+  grid-template-columns: var(--sc-rail) minmax(0, 1fr) auto;
+  padding: .8rem .6rem .8rem 1.9rem; list-style: none; position: relative;
 }
+summary.sc-row { cursor: pointer; }
 .sc-row::-webkit-details-marker { display: none; }
-.sc-row:hover { background: var(--surface-3); }
+summary.sc-row::before {
+  content: ""; position: absolute; left: .75rem; top: 1.12rem;
+  width: .36rem; height: .36rem;
+  border-right: 1.5px solid var(--text-muted); border-bottom: 1.5px solid var(--text-muted);
+  transform: rotate(-45deg); transition: transform .15s;
+}
+.sc-item[open] > summary.sc-row::before { transform: rotate(45deg); top: 1rem; }
+summary.sc-row:hover { background: var(--surface-3); }
 .sc-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .sc-item[open] > .sc-row { background: var(--surface-2); }
-.sc-main { display: grid; gap: .2rem; min-width: 0; }
-.sc-t { display: flex; align-items: baseline; gap: .5rem; min-width: 0; line-height: 1.35; }
-.sc-t > b { font-size: 1rem; flex: 0 1 auto; min-width: 0; }
-.sc-title {
-  color: var(--text-muted); font-size: .78rem; flex: 1 1 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 6rem;
+.sc-rail { padding-top: .12rem; }
+.sc-id {
+  font-family: var(--mono); font-size: .74rem; font-weight: 700; letter-spacing: -.01em;
+  color: var(--orange-ink); text-decoration: none; display: inline-flex; gap: .15rem;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
 }
+.sc-id > span { font-size: .66rem; }
+.sc-id:hover { text-decoration: underline; }
+.sc-main { display: grid; gap: .2rem; min-width: 0; }
+.sc-t { font-size: .95rem; line-height: 1.4; min-width: 0; }
+.sc-cn { font-weight: 800; }
+.sc-whole { font-weight: 500; }
 .sc-gist { font-size: .88rem; color: var(--text); line-height: 1.55; }
 .sc-side { display: grid; gap: .3rem; justify-items: end; padding-top: .1rem; }
 .sc-picks { display: flex; flex-wrap: wrap; gap: .2rem; justify-content: flex-end; max-width: 15rem; }
@@ -159,19 +175,22 @@ html.js .sc-filter {
 .sc-rw:hover { text-decoration: underline; }
 
 /* ── The open row ──────────────────────────────────────────────────────── */
-/* What the paper is beside what it means for each axis, and what to check
-   first wherever that leaves the row shorter. The figures in the prose are
-   marked: they are what a scanning eye looks for. */
-.sc-body { padding: 1rem .6rem 1.4rem; display: grid; gap: 1rem; }
+/* What the paper is on the left; on the right the judgement — what it means
+   for each axis, then what to check first — under the row's own text
+   rather than under the rail. `scout.js` pins the right column while the
+   left runs on, only when it fits the screen: a pinned column taller than
+   the screen hides its own foot. The figures in the prose are marked: they
+   are what a scanning eye looks for. */
+.sc-body {
+  padding: 1rem .6rem 1.4rem calc(1.9rem + var(--sc-rail) + 1rem);
+  display: grid; gap: 1rem;
+}
 .sc-cols2 {
   display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 1.4rem 2.6rem; align-items: start;
 }
-.sc-cols2 > .sc-check { grid-column: 1 / -1; }
 .sc-stack { display: grid; gap: 1.3rem; align-content: start; min-width: 0; }
-.sc-stack .sc-check ul { grid-template-columns: minmax(0, 1fr); }
-.sc-check ul { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); column-gap: 1.6rem; padding-left: 0; }
-.sc-check li { margin-left: 1.1rem; }
+.sc-judge.sc-pin { position: sticky; top: calc(var(--nav-h) + 3.6rem); }
 .sc-blk { display: grid; gap: .5rem; align-content: start; font-size: .87rem; }
 .sc-blk > h3 {
   display: flex; align-items: center; gap: .45rem;
@@ -218,7 +237,6 @@ html.js .sc-filter {
 ul.sc-ax-t { padding-left: 1.1rem; margin-top: .35rem; display: grid; gap: .3rem; color: var(--text-muted); font-size: .84rem; }
 ul.sc-ax-t li { line-height: 1.65; }
 .sc-links { font-size: .72rem; color: var(--text-muted); line-height: 1.6; padding-top: .2rem; border-top: 1px dashed var(--border-soft); }
-.sc-links a { color: var(--text-muted); }
 
 /* ── Near misses and sources ──────────────────────────────────────────── */
 .sc-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-bottom: .8rem; }
@@ -236,21 +254,20 @@ ul.sc-ax-t li { line-height: 1.65; }
   html.js .sc-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   html.js .sc-filter::-webkit-scrollbar { display: none; }
   .sc-filter > * { flex: none; }
-  .sc-row { grid-template-columns: minmax(0, 1fr); gap: .35rem; padding: .75rem .3rem; }
+  /* The id moves above the name: a column of ids takes a third of a
+     phone's width from the title. */
+  .sc-row { grid-template-columns: minmax(0, 1fr); gap: .35rem; padding: .75rem .3rem .75rem 1.6rem; }
+  summary.sc-row::before { left: .6rem; }
+  .sc-rail { padding-top: 0; }
   .sc-side { justify-items: start; display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem; }
   .sc-picks { justify-content: flex-start; }
-  /* The title under the alias rather than beside it: beside, a long alias
-     leaves it no room at all. */
-  .sc-t { display: grid; gap: .1rem; }
-  .sc-title { min-width: 0; }
-  .sc-body { padding: .7rem .2rem 1.1rem; }
+  .sc-body { padding: .7rem .2rem 1.1rem 1.6rem; }
   .sc-cols2 { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
-  /* One column reads what, why, then what to check, wherever the wide
-     layout put the last. */
-  .sc-stack { display: contents; }
+  /* The judgement first: it is the short column, and the long one under it
+     is there for a reader who has already decided to read. */
+  .sc-cols2 > .sc-judge { order: -1; }
   /* The step names its pair above it rather than beside it: a third column
      leaves the field text a phone's width of a few words. */
   .sc-bstep { grid-template-columns: minmax(0, 1fr); gap: .3rem; }
   .sc-bf { grid-template-columns: 4rem minmax(0, 1fr); gap: .5rem; }
-  .sc-stack > .sc-check { order: 1; }
 }
