@@ -664,6 +664,7 @@ agent holds.
 | Ablations of the paper's own components, none of them a Decision's alternatives | Relevance 2 at most — a Decision is tested only when its own alternatives are the things compared |
 | A strong method on the pillar's topic that touches no Decision | Relevance 1, however good — Methodology and the total reward the quality, not Relevance |
 | No tracked paper close enough to name | Novelty is read against the Scope's sub-axes, and 3 still needs the new mechanism stated in the text |
+| The 🌱 proposal | Adjacent by design, so it sits outside the Scope and the Anti-topics do not drop it for being in the slot's field. Relevance reads whether its method would bear on a Decision if carried over: 2 with that Decision named, 1 otherwise, never 3 |
 
 **Every 3 names its evidence.** A Relevance 3 names the Decision and the
 words that compare its alternatives; a Novelty 3 names the closest tracked

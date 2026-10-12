@@ -159,7 +159,8 @@ PHASE SCOUT
 1. READ the three sources and `scouting/AUTHORING.md` end to end.
 2. RETRIEVE — the two passes under RETRIEVAL below. Each drops a candidate
    whose id is in `analysis/`, in Tracked Literature, or in the ~8-week id
-   list; the Anti-topics filter what survives.
+   list; the Anti-topics filter what survives, except that the 🌱
+   proposal is never dropped for being in the slot's field (AUTHORING §5-6).
 3. SCORE Relevance and Novelty only, by the level tables of AUTHORING §5-6
    — the judge scores the other three. `why_R` names the Decision and
    quotes the words that compare its alternatives (R3) or take one side
