@@ -76,10 +76,10 @@ see that the method moved under this ledger.
 |---|---|---|
 | `1 공통` | The problem setting, the mechanism, the evaluation the two share | a paper anchor and a method anchor (`C#` or `METHOD §n`) |
 | `2 차이` | Axis by axis: their choice, this method's choice | a paper anchor and a code anchor (`path:line`, `cfg:key`) or `METHOD §n` |
-| `3 그들의 빈자리` | What the paper does not reach, **from its own ablation, failure case or stated limit** — never inferred from silence | a paper anchor, act 4 where it exists |
+| `3 그들의 빈자리` | What the paper does not reach, **from its own ablation, failure case or stated limit** — never inferred from silence | a paper anchor, act 4 where it exists, and a quote anchor |
 | `4 내 방법이 메우는가` | For each gap in §3: `메운다`, `부분` or `못 메운다`, then why, against `METHOD.md` §4 | the verdict first, then a `METHOD §n` anchor |
 | `5 그들을 개선할 아이디어` | At most two `###` ideas, strongest first, in the shape `/ideate` fixes (§3-4) | the five labels |
-| `6 위협` | The condition under which this paper takes a claim: which `C#`, on what number, in which setting | a paper anchor; a number confirmed in the original (§4) |
+| `6 위협` | The condition under which this paper takes a claim: which `C#`, on what number, in which setting — a condition on that claim's own axis, not a question the paper raises against it | a paper anchor and a quote anchor; a number confirmed in the original (§4) |
 | `7 최저가 반증 실험` | The cheapest run on this codebase that would show the position wrong | at least one `cfg:key` anchor — the keys to change and the values |
 
 A section with nothing to say holds the single bullet `- 없음`. That is a
@@ -179,8 +179,9 @@ they are the one check the lint can make that the facts were looked at.
 | method | `` `METHOD §<n>` `` | that section of `METHOD.md` |
 | code | `` `<path>:<line>` `` | a line of the codebase, as `CODEMAP.md` lists it |
 | config | `` `cfg:<key>` `` | a key `CODEMAP.md` lists under its config section |
+| quote | `원문 §<section> "<verbatim English>"` — at least a clause, copied byte for byte | `cd site && python3 -m builder.arxiv <id> --grep "<a phrase of it>"` prints it under that section |
 
-Which sections need which is §3-1's table. Two further rules:
+Which sections need which is §3-1's table. Four further rules:
 
 - **A number is confirmed in the original before a ledger states it.** The
   rewrites are a map, not the source of fact (`.claude/prompts/ideate.txt`,
@@ -192,6 +193,28 @@ Which sections need which is §3-1's table. Two further rules:
   Never from memory of what the code probably does — the digest is regenerated
   at the start of every run (`distinction/SETUP.md` §2-3) so that the anchors
   a ledger carries are the code as it is.
+- **What the authors did, found or meant is quoted, not paraphrased.** A
+  sentence that states why the paper chose something, what it was for, or
+  what it does not handle carries a quote anchor. When the original says
+  nothing on the point, the sentence is either cut or written as this
+  method's reading (`…로 읽힘`) — and a reading never carries a §6 threat or a
+  matrix verdict other than `무관`. When the original cannot be fetched (a
+  withdrawn paper), `원문 미확인` stands where the quote would, and the same
+  limit applies.
+- **The rewrite is a map, its commentary is not the paper.** A rewrite marks
+  its own inferences (`원문이 따로 논하지 않지만`, `…로 보입니다`). A ledger
+  that lifts one states it as the rewrite's reading, never as the paper's.
+
+### 4-1. Evidence grades
+
+Every paper-side statement in a ledger has one of three grades, and the grade
+decides where it may stand. The verify pass (prompt step 6) assigns them.
+
+| Grade | Means | May carry |
+|---|---|---|
+| `원문` | the original says it — a quote anchor or a confirmed number proves it | anything: §1–§3, a §6 threat, any matrix verdict |
+| `재작성본` | the rewrite says it, the original does not | §1 and §2 context, written as the rewrite's reading |
+| `추론` | the ledger's own inference from either | §2 and §5 only, written as a reading |
 
 ## 5. Caps
 
@@ -220,7 +243,7 @@ lint fails. A ledger that needs to say the thing says it by its `C#` or
 
 `linters/check-distinction-format.py` reads the private folder (`PROBE_PRIVATE_DIR`,
 or a path argument) and checks what a document can get wrong while reading
-perfectly. It is the routine's own gate — step 6 of the procedure — and it
+perfectly. It is the routine's own gate — step 7 of the procedure — and it
 is run by hand after editing a document. It is in no workflow, because what it
 checks is in no checkout.
 
@@ -228,7 +251,7 @@ checks is in no checkout.
 |---|---|
 | §1 | every `ledger/<id>.md` names a `BASKET.md` row and `analysis/<id>.md` exists |
 | §3-1 | the H1, the five-field metadata line, the seven headers verbatim and in order, no other `##` |
-| §3-1, §4 | per section, every bullet carries the anchors its row of the table requires, or is `- 없음`; a §4 bullet opens with a verdict; §7 holds a `cfg:` anchor |
+| §3-1, §4 | per section, every bullet carries the anchors its row of the table requires, or is `- 없음` — a §3 and a §6 bullet carry a quote anchor or `원문 미확인`; a §4 bullet opens with a verdict; §7 holds a `cfg:` anchor |
 | §3-2 | the matrix's rows are `METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the delta's H1 date is the file's, the seven headers, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
@@ -243,6 +266,9 @@ python3 linters/check-distinction-format.py ~/probe-private
 
 What the lint cannot see is whether a difference is a difference — whether §2
 names an axis on which the two really chose differently, or restates a paper's
-abstract against a config key — and whether §3 came from the paper's own
-ablation rather than from what it did not mention. Read every ledger the run
-rewrote once more with only those two questions.
+abstract against a config key — whether §3 came from the paper's own
+ablation rather than from what it did not mention, and whether a quote says
+what the bullet claims it says. Those are the verify pass's (prompt step 6):
+a separate agent that never saw the ledger being written reads it against the
+original and grades every paper-side statement (§4-1). The writer reads its
+own work with the reasons it wrote it; the verifier reads only the page.
