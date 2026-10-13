@@ -72,10 +72,17 @@ INPUT
 PROCEDURE
 ════════════════════════════════════════════════════════════════════════
 
-0. GUARD. Before anything else:
+0. GUARD. Before anything else, read the folder's path:
 
-     test -n "$PROBE_PRIVATE_DIR" && test -f "$PROBE_PRIVATE_DIR/BASKET.md" \
-                                  && test -f "$PROBE_PRIVATE_DIR/METHOD.md"
+     printenv PROBE_PRIVATE_DIR
+
+   Empty output → STOP. Otherwise write that absolute path into every later
+   command in place of the variable — `$PROBE_PRIVATE_DIR` below stands for
+   it, spelled out. A scheduled run is headless, and its permission check
+   refuses a command that expands a shell variable, so a command written
+   with the variable stops the run. Then:
+
+     test -f <path>/BASKET.md && test -f <path>/METHOD.md
 
    If that fails, STOP and say which part did. A cloud session has no such
    folder; this is what keeps the mode from running where the method is not.
@@ -91,7 +98,7 @@ PROCEDURE
      context/P<n>.md                  §1 Scope, §2 Decision Log — the pillars
                                       the active basket papers carry
 
-   Then the digest: run `sh "$PROBE_PRIVATE_DIR/codemap.sh"` when it exists
+   Then the digest: run `sh <path>/codemap.sh` when it exists
    and read `$PROBE_PRIVATE_DIR/CODEMAP.md`. Compute the three input hashes —
    `sha256sum` of `METHOD.md`, `CODEMAP.md` and `BASKET.md`, first seven hex
    digits each — and hold them.
@@ -209,7 +216,7 @@ PROCEDURE
 7. SELF-CHECK + LINT — before anything is saved. The lint is the structure
    half:
 
-     python3 linters/check-distinction-format.py "$PROBE_PRIVATE_DIR"
+     python3 linters/check-distinction-format.py
 
    Every violation names the contract section that governs it. Fix the
    document, never the lint, and re-run until it exits 0. Then the questions

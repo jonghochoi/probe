@@ -148,13 +148,16 @@ cd "$HOME/src/probe"
 git pull --ff-only origin main
 claude -p "/distinguish" \
   --add-dir "$PROBE_PRIVATE_DIR" \
-  --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python3 *),Bash(git log *),Bash(git rev-parse *),Bash(grep *),Bash(sha256sum *),Bash(sh *),Bash(cd *)" \
+  --allowedTools "Read,Write,Edit,Glob,Grep,Agent,Bash(printenv *),Bash(test *),Bash(date *),Bash(python3 *),Bash(git log *),Bash(git rev-parse *),Bash(grep *),Bash(sha256sum *),Bash(sh *),Bash(cd *)" \
   >> "$PROBE_PRIVATE_DIR/runs/distinguish.log" 2>&1
 ```
 
 `-p` runs one turn without a terminal, so every tool it needs is granted up
 front; the list above is what the procedure uses and nothing it must not (no
-`git add`, `commit` or `push`). Check the flag names against `claude --help`
+`git add`, `commit` or `push`). `Agent` is the verify pass (prompt step 6) —
+without it the run stops before saving. A headless run also refuses any
+command that expands a shell variable, which is why the prompt reads the
+folder once with `printenv` and writes its path out in every command after. Check the flag names against `claude --help`
 on the machine before the first scheduled run.
 
 Weekly, with a missed run made up at the next wake:
