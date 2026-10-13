@@ -127,6 +127,11 @@ PROCEDURE
      python3 site/query.py section <id> --match "<Term>" # the mechanism to set beside mine
      python3 site/query.py related <id>                 # with the kinds
 
+   QUOTE WHAT THE AUTHORS SAID. A gap, a threat, or a sentence about why
+   the paper chose something carries the original's words as a quote
+   anchor (AUTHORING §4). A rewrite's own asides — `원문이 따로 논하지
+   않지만`, `…로 보입니다` — are the rewriter's reading, not the paper's.
+
    Hold the paper's mechanism against `METHOD.md` §2 and the matching
    `CODEMAP.md` entries, section by section in the ledger's order
    (AUTHORING §3-1 — the order is the argument).
@@ -159,7 +164,41 @@ PROCEDURE
    opening with a verdict. Note every cell whose verdict changed; those are
    the run's 매트릭스 전이.
 
-6. SELF-CHECK + LINT — before anything is saved. The lint is the structure
+6. VERIFY — a second reader that did not write the ledgers. The writer
+   reads its own bullets with the reasons it wrote them in mind, which is how
+   a rewrite's aside or a resemblance between two mechanisms becomes "the
+   paper says". So each ledger drafted this run goes to a separate agent
+   (the Agent tool, one agent per ledger, launched together) that receives
+   only:
+
+     - the drafted ledger's text, as a file path
+     - the paper id and alias, and `METHOD.md` §1
+     - the instruction below, verbatim
+
+   It does not receive this run's notes, the other ledgers or the matrix.
+
+     Grade every paper-side statement in this ledger — every bullet of
+     §1, §2, §3 and §6, and the paper half of each idea's
+     "왜 어느 쪽도 혼자 못 하나" — as 원문, 재작성본 or 추론
+     (distinction/AUTHORING.md §4-1). Look it up, do not recall it:
+       cd site && python3 -m builder.arxiv <id> --grep "<phrase>"
+       python3 site/query.py section <id> --match "<Term>"
+     For every quote anchor, check that the original carries it byte for
+     byte under the section it names and that it says what the bullet
+     uses it for. For every §6 threat, check that its condition sits on
+     the named claim's own axis as METHOD.md §1 states it. Return one row
+     per statement: section, the statement in a few words, grade, the
+     line of the original that settles it (or "none"), and keep / cut /
+     rewrite-as-reading / regrade-to-무관.
+
+   Apply every row: a statement graded below what its section allows
+   (AUTHORING §4-1) is cut, rewritten as this method's reading, or its
+   matrix cell drops to `무관`. Refresh the matrix from what survives. A
+   ledger whose §3 or §6 empties holds `- 없음` there — that is the honest
+   result. When the Agent tool is not available, stop before persisting
+   and say so; an unverified ledger is not saved.
+
+7. SELF-CHECK + LINT — before anything is saved. The lint is the structure
    half:
 
      python3 linters/check-distinction-format.py "$PROBE_PRIVATE_DIR"
@@ -169,8 +208,10 @@ PROCEDURE
    the lint cannot answer:
      - Does every §2 row name an axis on which the two really chose
        differently — not the paper's abstract restated against a config key?
-     - Did every §3 gap come from the paper's own text, with the anchor to
+     - Did every §3 gap come from the paper's own text, with the quote to
        prove it, and none from what the paper did not mention?
+     - Was every row of step 6 applied — nothing graded 재작성본 or 추론
+       still standing in §3 or §6, or behind a verdict other than `무관`?
      - Is every §4 verdict honest against `METHOD.md` §4 — would the human
        who wrote that section agree with each `메운다`?
      - Was every number in §6 confirmed with `builder.arxiv --grep`, and does
@@ -183,7 +224,7 @@ PROCEDURE
      - Does `BASKET.md` and `METHOD.md` sit untouched, with every change you
        wanted under 제안?
 
-7. PERSIST — write the changed ledgers, `matrix.md` and
+8. PERSIST — write the changed ledgers, `matrix.md` and
    `runs/<run date>.md` under `$PROBE_PRIVATE_DIR`, the delta closing with
    its `probe-state` block: the run date, `corpus_head` from step 0, the
    three hashes from step 1, and `related` as step 2 read it for every active
@@ -202,3 +243,5 @@ WHAT THIS MODE NEVER DOES
   it had (AUTHORING §4).
 - Reads a directory of the codebase. `CODEMAP.md`, then `grep`.
 - Saves an output the lint rejects, or one carrying a `METHOD.md` §6 string.
+- Saves a ledger the verify pass (step 6) did not read, or keeps a §3 gap
+  or a §6 threat it graded below `원문`.

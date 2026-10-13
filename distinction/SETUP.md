@@ -179,6 +179,9 @@ Run `/distinguish --all` by hand (§3) before the schedule, then check:
       to cite.
 - [ ] `python3 linters/check-distinction-format.py` exits 0 over the folder,
       and the transcript shows it ran before anything was saved.
+- [ ] The transcript shows one verify agent per ledger (prompt step 6), and
+      its rows were applied — no §3 gap or §6 threat stands on a 재작성본 or
+      추론 grade (`distinction/AUTHORING.md` §4-1).
 - [ ] Every ledger §2 row names an axis on which the two really chose
       differently, and every §3 row came from the paper's own ablation or
       stated limit — the two things the lint cannot see

@@ -5,7 +5,7 @@ The distinction track writes nothing into the repository: its ledgers, matrix
 and deltas hold the method beside the papers, so they live in a private folder
 on the machine that runs `/distinguish` (`distinction/SETUP.md` §2). No build
 reads them and no workflow can, which makes this lint the track's only gate —
-the routine runs it before saving (prompt step 6), and a human runs it after
+the routine runs it before saving (prompt step 7), and a human runs it after
 editing a document by hand.
 
 Checks, grouped by the contract section they enforce:
@@ -16,7 +16,8 @@ Checks, grouped by the contract section they enforce:
              `##` headers verbatim and in order with no other `##`.
   AUTHORING §3-1 / §4  per section, every bullet carries the anchors its row
              of the table requires or is `- 없음`; a §4 bullet opens with a
-             verdict; §7 holds a `cfg:` anchor.
+             verdict; §7 holds a `cfg:` anchor; a §3 and a §6 bullet carry
+             a quote anchor (`원문 §<section> "<English>"`) or `원문 미확인`.
   AUTHORING §3-2 the matrix — rows are METHOD's claims, columns the active
              rewritten basket, each cell opening with a verdict.
   AUTHORING §3-3 the delta — the H1 date is the file's, the seven headers, at
@@ -107,6 +108,9 @@ _CLAIM_ANCHOR = re.compile(r"`C\d+`")
 _METHOD_ANCHOR = re.compile(r"`METHOD §[0-6]`")
 _CODE_ANCHOR = re.compile(r"`[^`\s:]+:\d+`")
 _CFG_ANCHOR = re.compile(r"`cfg:[^`\s]+`")
+# A quote is the original's own words (AUTHORING §4): a section and at least a
+# clause of English. `원문 미확인` stands in only where the original is gone.
+_QUOTE_ANCHOR = re.compile(r'원문 §[^\s"]+ "[^"]*[A-Za-z][^"]{11,}"|원문 미확인')
 _CLAIM_TOKEN = re.compile(r"\bC(\d+)\b")
 _DECISION_TOKEN = re.compile(r"\bD\d[A-Z]{2}\b")
 _CLAIM_HEADING = re.compile(r"^#### \[(C\d+)\] \S")
@@ -355,8 +359,8 @@ def check_ledger(path: str, basket: dict[str, dict], claims: set[str], forbidden
 
     need(_LEDGER_SPINE[0], "a paper anchor and a `C#` / `METHOD §n` anchor", (_PAPER_ANCHOR,), (_CLAIM_ANCHOR, _METHOD_ANCHOR))
     need(_LEDGER_SPINE[1], "a paper anchor and a `path:line` / `cfg:key` / `METHOD §n` anchor", (_PAPER_ANCHOR,), (_CODE_ANCHOR, _CFG_ANCHOR, _METHOD_ANCHOR))
-    need(_LEDGER_SPINE[2], "a paper anchor", (_PAPER_ANCHOR,))
-    need(_LEDGER_SPINE[5], "a paper anchor", (_PAPER_ANCHOR,))
+    need(_LEDGER_SPINE[2], "a paper anchor and a quote anchor", (_PAPER_ANCHOR,), (_QUOTE_ANCHOR,))
+    need(_LEDGER_SPINE[5], "a paper anchor and a quote anchor", (_PAPER_ANCHOR,), (_QUOTE_ANCHOR,))
     for ln, raw in bullets(_LEDGER_SPINE[3]):
         if raw.strip() == _NONE:
             continue
