@@ -135,7 +135,7 @@ Only what changed since the previous run, section by section:
 | `3 방법론 변화` | If `method` or `codemap` moved: which `METHOD.md` sections changed and which ledgers were rewritten because of it; a `METHOD.md` untouched for eight weeks or more earns one line here |
 | `4 매트릭스 전이` | Cells whose verdict changed, old to new, with the ledger section behind each |
 | `5 새 아이디어` | At most three `###` ideas across the whole run, in the `/ideate` shape (§3-4) — the strongest of what the rewritten ledgers' §5 hold, not a copy of all of them |
-| `6 제안` | What the human should change in `BASKET.md` or `METHOD.md`: a basket candidate found citing a basket paper, a claim with no basket column, a row with empty `claims` |
+| `6 제안` | What the human should change in `BASKET.md` or `METHOD.md`: a basket candidate found citing a basket paper, a claim with no basket column, a row with empty `claims`, a `parked` row that bears on a claim new since the previous run |
 | `7 다음 행동` | `/analyze <id>` for a row without a rewrite, `/compare <id> <id>` where two basket papers need their divergence laid out first, one ablation to run |
 
 The `probe-state` block closes the file and is the track's memory — the

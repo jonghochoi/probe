@@ -113,10 +113,18 @@ PROCEDURE
      changed section is a change under that ledger. When `METHOD.md` has not
      changed in eight weeks or more (its mtime, or the first run that recorded
      the current hash), one line under 방법론 변화 says so.
+   - CLAIMS: a `#### [C<n>]` in `METHOD.md` §1 with no row in the current
+     `matrix.md` is new since the previous run. A parked row was parked
+     against the claims of its day, so a new claim is the moment to look at
+     the parked rows again: for each new claim, read every `parked` row
+     against it — `python3 site/query.py show <id>`, then `section <id>
+     --act 4` — and name under 제안 each one that bears on it, with one line
+     on how. Re-activating a row is the human's; a parked row gets no ledger
+     in this run.
 
    No previous run → every active row is changed (the first run is `--all`).
    Nothing changed and `$ARGUMENTS` is empty → write the no-change delta
-   (AUTHORING §3-3) and go to step 6. The ledgers and matrix stay as they are.
+   (AUTHORING §3-3) and go to step 7. The ledgers and matrix stay as they are.
 
 3. CONFRONT — one ledger at a time, only the changed ones (or the named one,
    or all). For each:
