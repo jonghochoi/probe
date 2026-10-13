@@ -1,11 +1,12 @@
 /* 서재 — the one page that shows everything this browser has kept.
  *
- * Three lists off two stores: `window.ProbeShelf` (즐겨찾기, 읽기 상태) and
- * `window.ProbeMemo` (메모). Nothing here can be server-rendered, because none
- * of it ever reaches the build — what the build does hand this page is
- * `window.ProbeIndex`, which is how a bare id becomes a title, a tagline and a
- * link. A kept id the index does not carry is a paper that has left the
- * corpus: it still lists, without a link, rather than vanishing.
+ * Three lists off two stores: `window.ProbeShelf` (즐겨찾기, 책갈피, and the
+ * 읽음 mark each row states) and `window.ProbeMemo` (메모). Nothing here can
+ * be server-rendered, because none of it ever reaches the build — what the
+ * build does hand this page is `window.ProbeIndex`, which is how a bare id
+ * becomes a title, a tagline and a link. A kept id the index does not carry
+ * is a paper that has left the corpus: it still lists, without a link, rather
+ * than vanishing.
  *
  * This page is also the export surface. A shelf that lives in one browser
  * profile moves to another only as a file, so the JSON here is the whole
@@ -31,7 +32,6 @@ const FLAG =
 const status = document.querySelector("[data-hub-status]");
 const panels = {
   stars: main.querySelector('[data-shelf-panel="stars"]'),
-  reads: main.querySelector('[data-shelf-panel="reads"]'),
   marks: main.querySelector('[data-shelf-panel="marks"]'),
   memos: main.querySelector('[data-shelf-panel="memos"]'),
 };
@@ -59,11 +59,15 @@ function titleOf(id, fallback) {
 }
 
 /* ── The three lists ──────────────────────────────────────────────────── */
-function itemHtml(id, { title, when, whenLabel, state = true, hash = "", sub = "", lead = "" }) {
+function itemHtml(id, { title, when, whenLabel, hash = "", sub = "", lead = "" }) {
   const meta = INDEX.get(id);
   const name = titleOf(id, title);
   const second = sub || (meta && meta.tagline) || "";
-  const inner = `<span class="shelf-title">${esc(name)}</span>` +
+  // The id rides above the title: it is what the reader cites, searches arXiv
+  // with and finds in the landing's id column, and the one thing a paper that
+  // has left the corpus still has for certain.
+  const inner = `<span class="shelf-id">${esc(id)}</span>` +
+    `<span class="shelf-title">${esc(name)}</span>` +
     (second ? `<span class="shelf-tagline">${esc(second)}</span>` : "");
   const link = meta
     ? `<a class="shelf-main" href="../p/${esc(id)}/index.html${esc(hash)}">${inner}</a>`
@@ -83,7 +87,7 @@ function itemHtml(id, { title, when, whenLabel, state = true, hash = "", sub = "
   ${control}
   ${link}
   <span class="shelf-pillars">${pillars}</span>
-  <span class="shelf-state">${state ? esc(Reads.label(id)) : ""}</span>
+  <span class="shelf-state">${esc(Reads.label(id))}</span>
   <time class="shelf-when" datetime="${esc(when || "")}"
         title="${esc(whenLabel || "")}">${esc((when || "").slice(0, 10))}</time>
 </article>`;
@@ -97,21 +101,6 @@ function renderStars() {
         title: map[id].title, when: map[id].at, whenLabel: "즐겨찾기에 담은 날",
       })).join("")
     : empty("아직 즐겨찾기가 없습니다. 논문 목록의 별이나 논문 페이지의 즐겨찾기 버튼으로 담습니다.");
-  return ids.length;
-}
-
-function renderReads() {
-  const map = Reads.all();
-  // Every id in the store is a paper the reader marked, so the state column
-  // would say 읽음 on every row and tell nobody anything; the date says the
-  // only thing that differs.
-  const ids = Reads.list();
-  panels.reads.innerHTML = ids.length
-    ? ids.map((id) => itemHtml(id, {
-        title: map[id].title, when: map[id].at,
-        whenLabel: "읽음으로 표시한 날", state: false,
-      })).join("")
-    : empty("아직 읽음으로 표시한 논문이 없습니다. 논문 페이지 위쪽의 읽음 버튼으로 표시합니다.");
   return ids.length;
 }
 
@@ -136,6 +125,7 @@ function renderMemos() {
     ? memos.map((m) => `
     <article class="memo-card">
       <div class="memo-card-head">
+        <span class="shelf-id">${esc(m.paperId)}</span>
         <a href="../p/${esc(m.paperId)}/index.html">${esc(titleOf(m.paperId, m.title))}</a>
         <time datetime="${esc(m.updatedAt || "")}">${esc((m.updatedAt || "").slice(0, 10))}</time>
       </div>
@@ -152,8 +142,7 @@ function empty(text) {
 
 function render() {
   const counts = {
-    stars: renderStars(), reads: renderReads(),
-    marks: renderMarks(), memos: renderMemos(),
+    stars: renderStars(), marks: renderMarks(), memos: renderMemos(),
   };
   tabs.forEach((tab) => {
     const n = tab.querySelector("[data-tab-count]");
@@ -161,10 +150,11 @@ function render() {
   });
   // The build prints both exports closed, because an empty shelf has nothing
   // to write out and a file that downloads with nothing in it reports a
-  // success that did not happen. Any one list holding something opens both:
-  // the JSON is the whole envelope, and the Markdown prints every list it
-  // finds, so neither is tied to the tab that happens to be showing.
-  const kept = counts.stars + counts.reads + counts.marks + counts.memos;
+  // success that did not happen. Any one store holding something opens both:
+  // the JSON is the whole envelope — 읽음 marks included, though no tab lists
+  // them — and the Markdown prints every list it finds, so neither is tied to
+  // the tab that happens to be showing.
+  const kept = counts.stars + Reads.count() + counts.marks + counts.memos;
   for (const btn of main.querySelectorAll("[data-hub-action]")) btn.disabled = !kept;
   // The stores wrote the ids; the glyphs and the 읽음 marks are the shelf
   // layer's to fill, on this page as on every other.

@@ -99,8 +99,8 @@ def _shelf_facets(cls: str) -> str:
     Both name something the reader put there. What is left to read is not a
     mark anyone made: on a corpus a reader has barely started it counts almost
     every paper, which selects the list they are already looking at. 읽음 is
-    still kept and still listed — in 서재, where the papers a reader is done
-    with are the point — it just has no facet here.
+    still kept — as the state column on 서재's rows and in its export — it
+    just has no facet here.
     """
     flags = (("fresh", "New"), ("star", "Starred"))
     return "".join(
@@ -594,11 +594,10 @@ def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
 </article>"""
 
 
-# The four lists 서재 holds, in the order a reader meets them: what they
-# picked out, what they got through, where they stopped, what they wrote down.
+# The three lists 서재 holds, in the order a reader meets them: what they
+# picked out, where they stopped, what they wrote down.
 SHELF_TABS = (
     ("stars", "즐겨찾기"),
-    ("reads", "읽은 논문"),
     ("marks", "책갈피"),
     ("memos", "메모"),
 )

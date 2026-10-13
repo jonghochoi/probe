@@ -860,6 +860,13 @@ html.js .pager[hidden] { display: none; }
   padding: .7rem .3rem; border-bottom: 1px solid var(--border-soft);
 }
 .shelf-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
+/* The arXiv id in the figure face the landing's id column uses. */
+.shelf-id {
+  display: block; font-family: var(--num); font-size: .72rem; color: var(--text);
+  opacity: .7; font-variant-numeric: tabular-nums; white-space: nowrap;
+  margin-bottom: .1rem;
+}
+.memo-card-head .shelf-id { display: inline; margin: 0; }
 .shelf-title {
   display: block; font-size: .88rem; font-weight: 700; line-height: 1.45;
   letter-spacing: -.01em;
