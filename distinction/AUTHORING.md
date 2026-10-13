@@ -78,7 +78,7 @@ see that the method moved under this ledger.
 | `2 차이` | Axis by axis: their choice, this method's choice | a paper anchor and a code anchor (`path:line`, `cfg:key`) or `METHOD §n` |
 | `3 그들의 빈자리` | What the paper does not reach, **from its own ablation, failure case or stated limit** — never inferred from silence | a paper anchor, act 4 where it exists, and a quote anchor |
 | `4 내 방법이 메우는가` | For each gap in §3: `메운다`, `부분` or `못 메운다`, then why, against `METHOD.md` §4 | the verdict first, then a `METHOD §n` anchor |
-| `5 그들을 개선할 아이디어` | At most two `###` ideas, strongest first, in the shape `/ideate` fixes (§3-4) | the five labels |
+| `5 그들을 개선할 아이디어` | At most two `###` ideas, strongest first, in the §3-4 shape | the five labels |
 | `6 위협` | The condition under which this paper takes a claim: which `C#`, on what number, in which setting — a condition on that claim's own axis, not a question the paper raises against it | a paper anchor and a quote anchor; a number confirmed in the original (§4) |
 | `7 최저가 반증 실험` | The cheapest run on this codebase that would show the position wrong | at least one `cfg:key` anchor — the keys to change and the values |
 
@@ -134,7 +134,7 @@ Only what changed since the previous run, section by section:
 | `2 바구니 변화` | Rows added, removed or re-roled; rows with no rewrite yet; rows `graduated` |
 | `3 방법론 변화` | If `method` or `codemap` moved: which `METHOD.md` sections changed and which ledgers were rewritten because of it; a `METHOD.md` untouched for eight weeks or more earns one line here |
 | `4 매트릭스 전이` | Cells whose verdict changed, old to new, with the ledger section behind each |
-| `5 새 아이디어` | At most three `###` ideas across the whole run, in the `/ideate` shape (§3-4) — the strongest of what the rewritten ledgers' §5 hold, not a copy of all of them |
+| `5 새 아이디어` | At most three `###` ideas across the whole run, in the §3-4 shape — the strongest of what the rewritten ledgers' §5 hold, not a copy of all of them |
 | `6 제안` | What the human should change in `BASKET.md` or `METHOD.md`: a basket candidate found citing a basket paper, a claim with no basket column, a row with empty `claims`, a `parked` row that bears on a claim new since the previous run |
 | `7 다음 행동` | `/analyze <id>` for a row without a rewrite, `/compare <id> <id>` where two basket papers need their divergence laid out first, one ablation to run |
 
@@ -150,8 +150,10 @@ says so is the track working.
 
 ### 3-4. The shape of an idea
 
-A `###` under a ledger's §5 or a delta's §5 is one idea in the five labels
-`.claude/prompts/ideate.txt` fixes, each on its own line, bold, in this order:
+A `###` under a ledger's §5 or a delta's §5 is one idea in five labels, each
+on its own line, bold, in this order. They follow `/ideate`'s idea shape with
+one difference: a ledger is a position against the Decision Log, so where
+`/ideate` asks what an idea opens, a ledger names the `D#` it moves.
 
 ```
 ### <아이디어 한 줄>
