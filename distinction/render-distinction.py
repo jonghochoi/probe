@@ -1,44 +1,54 @@
 #!/usr/bin/env python3
-"""Render a dissection as one standalone HTML page for reading.
+"""Render the distinction track's documents as standalone HTML pages for reading.
 
-`dissect/<id>--<scope>.md` is the record: the lint reads it and a later run
-builds on it. This page is a view of it for a person — one file, opened from
-disk, that never leaves the private folder. It is written next to the
-Markdown and redrawn from it, so it is never edited by hand
-(`distinction/AUTHORING.md` §3-5).
+A ledger, a delta and a dissection are records: the lint reads them and the
+next run builds on them. Each gets a page beside it for a person —
+`ledger/<id>.html`, `runs/<date>.html`, `dissect/<id>--<scope>.html` — one
+file opened from disk that never leaves the private folder. A page is
+redrawn from its Markdown and never edited by hand
+(`distinction/AUTHORING.md` §3-6).
 
-The page borrows the reading site's look rather than its build: the design
+The pages borrow the reading site's look rather than its build: the design
 tokens are cut from `site/builder/assets/site.css`, the drawn figures from
 `site/builder/charts.py` and their rules from `presentation.css`. Nothing here
 reaches the site — `site/CLAUDE.md`'s publish list does not change — and
 the script runs on the standard library alone, like the lint, because the
 machine that runs `/distinguish` need not hold the site's dependencies.
 
-What the page adds to the Markdown is arrangement, never content:
+What a page adds to the Markdown is arrangement, never content:
 
-    §1        the count line as one bar split by verdict; every row under a
-              verdict badge, 틀림 and 과장 open, 원문 없음 and 맞음 folded
-    §4        one card per `###` stage, each bullet a label beside its text
-    §5        the table, the scope's column in the accent
-    §6        a ```probe-chart fence drawn where it stands
-    §7        the fill verdict as a badge
-    §8        one card per idea, its five labels as rows
-    everywhere  `원문 §… "…"` set as a quotation; `path:line` linked into the
+    ledger    §2 their choice and this method's side by side; §4 the fill
+              verdict as a badge; §5 one card per idea
+    delta     a basket id links to its ledger's page; §8 one row per audited
+              ledger; the closing state block as a table of when each
+              ledger was last verified, the raw block folded; the runs
+              before and after it one click away
+    dissection  §1 the count line as one bar split by verdict, 틀림 and 과장
+              open, 원문 없음 and 맞음 folded; §4 one card per stage, the two
+              sides side by side; §5 the table, the scope's column in the
+              accent; §6 a ```probe-chart fence drawn; §7 the fill verdict
+              as a badge; §8 one card per idea
+    everywhere  the anchors a bullet ends on set apart as its evidence;
+              `원문 §… "…"` set as a quotation; `path:line` linked into the
               editor through the code root; `cfg:`, `C#` and `METHOD §n` as
               chips, `C#` and `D#` titled on hover; the paper anchor linked
               to the rewrite on the reading site
 
 Usage (repo root):
-    python3 distinction/render-dissect.py <dissect/<id>--<scope>.md> [-o OUT]
+    python3 distinction/render-distinction.py              # every page in $PROBE_PRIVATE_DIR
+    python3 distinction/render-distinction.py <md> [<md>…] # those pages
+    python3 distinction/render-distinction.py <md> -o OUT  # one page, elsewhere
 
-No OUT -> the same path with `.html`. The code root is `code:` in the private
-folder's `METHOD.md`, else its `code` symlink (`distinction/SETUP.md` §2-4).
+A page is written next to its Markdown with `.html`. The code root is `code:`
+in the private folder's `METHOD.md`, else its `code` symlink
+(`distinction/SETUP.md` §2-4).
 
 Exit codes: 0 = written / 1 = a chart fence cannot be drawn / 2 = no input.
 """
 from __future__ import annotations
 
 import argparse
+import glob
 import html
 import json
 import os
@@ -73,6 +83,8 @@ _QUOTE = re.compile(r'원문 §([^\s"]+) "([^"]+)"')
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
 _LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 _DECISION = re.compile(r"\b(D\d[A-Z]{2})\b")
+# A bare arXiv id in running text — not one inside a URL or a path.
+_ID = re.compile(r"(?<![\w/.=])(\d{4}\.\d{5})(?![\w/])")
 _CLAIM = re.compile(r"^C\d+$")
 _METHOD = re.compile(r"^METHOD §(\d)$")
 _CFG = re.compile(r"^cfg:\S+")
@@ -88,9 +100,21 @@ def esc(text: str) -> str:
 
 
 class Context:
-    def __init__(self, private: str, paper_id: str):
+    def __init__(self, private: str, paper_id: str, kind: str):
         self.private = private
         self.paper_id = paper_id
+        self.kind = kind
+        # `{id: alias}` per ledger, read off each H1, so a basket id written
+        # anywhere can link to the page that holds the position on it.
+        self.ledgers: dict[str, str] = {}
+        for lp in sorted(glob.glob(os.path.join(private, "ledger", "*.md"))):
+            try:
+                with open(lp, encoding="utf-8") as fh:
+                    first = fh.readline()
+            except OSError:
+                continue
+            lid = os.path.basename(lp)[:-3]
+            self.ledgers[lid] = first[2:].partition(" — ")[0].strip() if first.startswith("# ") else lid
         self.decisions = {k: t for k, (_, t) in harvest_decisions().items()}
         self.claims: dict[str, str] = {}
         code = os.path.join(private, "code")
@@ -106,6 +130,9 @@ class Context:
         except OSError:
             pass
         self.code_root = os.path.realpath(code) if os.path.exists(code) else None
+
+    def ledger_href(self, pid: str) -> str:
+        return f"{pid}.html" if self.kind == "ledger" else f"../ledger/{pid}.html"
 
     def code_href(self, path: str, line: str) -> str | None:
         if not self.code_root:
@@ -156,6 +183,10 @@ def _prose(text: str, ctx: Context) -> str:
     out = _DECISION.sub(lambda m: (
         f'<abbr class="ax-dec" title="{esc(ctx.decisions[m.group(1)])}">{m.group(1)}</abbr>'
         if m.group(1) in ctx.decisions else m.group(1)), out)
+    out = _ID.sub(lambda m: (
+        f'<a class="ax-led" href="{ctx.ledger_href(m.group(1))}" title="장부 · {esc(ctx.ledgers[m.group(1)])}">'
+        f'{m.group(1)}</a>' if m.group(1) in ctx.ledgers and m.group(1) != (ctx.paper_id if ctx.kind == "ledger" else "")
+        else m.group(1)), out)
     return out.replace("원문 미확인", '<span class="dx-unq">원문 미확인</span>')
 
 
@@ -183,11 +214,21 @@ def _evidence(text: str) -> tuple[str, list[str]]:
     tail: list[str] = []
     while True:
         m = _TAIL.search(text)
-        if not m or not text[:m.start()].strip():
+        if not m or not text[:m.start()].strip() or not _is_anchor(m.group(1)):
             break
         tail.insert(0, m.group(1))
         text = text[:m.start()].rstrip()
     return text.rstrip(" ,·"), tail
+
+
+def _is_anchor(token: str) -> bool:
+    """A quote or one of the anchor kinds — not a value in code type."""
+    if not token.startswith("`"):
+        return True
+    code = token.strip("`")
+    m = _PATH_LINE.match(code)
+    return bool(_CLAIM.match(code) or _METHOD.match(code) or _CFG.match(code)
+                or (m and "/" in m.group(1)) or _PAPER.match(code))
 
 
 def _ev(tail: list[str], ctx: Context) -> str:
@@ -199,7 +240,7 @@ def _ev(tail: list[str], ctx: Context) -> str:
 
 # `<그들> 은 …, 이 범위는 …` — a §4 bullet that sets the two sides in one
 # sentence, cut where the scope's half begins.
-_SIDES = re.compile(r"^(.+?), (이 범위(?:는|의|도) .+)$")
+_SIDES = re.compile(r"^(.+?), ((이 범위|이 방법)(?:은|는|의|도) .+)$")
 
 
 def _labelled(text: str) -> tuple[str, str]:
@@ -258,13 +299,18 @@ def _row(text: str, ctx: Context, badge: str = "", cls: str = "",
     label, rest = _labelled(text)
     rest, tail = _evidence(rest)
     head = f'<span class="dx-badge" data-v="{esc(badge)}">{esc(badge)}</span>' if badge else ""
-    lab = f'<span class="dx-label">{inline(label, ctx)}</span>' if label else ""
+    if label in ctx.ledgers:
+        # A row about one ledger — a delta's audit — names the paper, not the id.
+        lab = (f'<a class="dx-label" href="{ctx.ledger_href(label)}">{esc(ctx.ledgers[label])}'
+               f' <small class="ax-led">{label}</small></a>')
+    else:
+        lab = f'<span class="dx-label">{inline(label, ctx)}</span>' if label else ""
     sides = _SIDES.match(rest) if alias else None
     if sides and rest.startswith(alias):
         theirs = re.sub(rf"^{re.escape(alias)}\s*(?:은|는|의)\s+", "", sides.group(1))
-        ours = re.sub(r"^이 범위(?:는|의|도)\s+", "", sides.group(2))
+        ours = re.sub(r"^이 (?:범위|방법)(?:은|는|의|도)\s+", "", sides.group(2))
         body = (f'<div class="dx-sides"><div><span class="dx-sh">{esc(alias)}</span>{inline(theirs, ctx)}</div>'
-                f'<div><span class="dx-sh">이 범위</span>{inline(ours, ctx)}</div></div>')
+                f'<div><span class="dx-sh">{sides.group(3)}</span>{inline(ours, ctx)}</div></div>')
     else:
         body = f'<div class="dx-text">{inline(rest, ctx)}</div>'
     return (f'<li class="dx-row {cls}"><div class="dx-head">{head}{lab}</div>'
@@ -294,15 +340,26 @@ def _chart(info: str, body: list[str], where: str) -> tuple[str, list[str]]:
     return f'<div class="prs-slide dx-chart">{charts.chart(spec, ratio)}{why}</div>', []
 
 
+# Per kind: the section drawn as errata, as stage cards, as idea cards, the
+# one whose bullets open on a fill verdict, the one whose bullets set the two
+# sides side by side, and the one a ```probe-chart is drawn in.
+_LAYOUT = {
+    "dissect": {"errata": "1", "stages": "4", "ideas": "8", "fills": "7", "sides": "", "charts": "6"},
+    "ledger": {"errata": "", "stages": "", "ideas": "5", "fills": "4", "sides": "2", "charts": ""},
+    "runs": {"errata": "", "stages": "", "ideas": "5", "fills": "", "sides": "", "charts": ""},
+}
+
+
 def section(num: str, lines: list[str], ctx: Context, problems: list[str],
             alias: str) -> str:
     bl = blocks(lines)
     out: list[str] = []
-    if num == "1":
+    lay = _LAYOUT[ctx.kind]
+    if num == lay["errata"]:
         return _errata(bl, ctx)
-    if num == "4":
+    if num == lay["stages"]:
         return _stages(bl, ctx, alias)
-    if num == "8":
+    if num == lay["ideas"]:
         return _ideas(bl, ctx)
     items: list[str] = []
 
@@ -315,23 +372,44 @@ def section(num: str, lines: list[str], ctx: Context, problems: list[str],
         if kind == "bullet":
             if val == "없음":
                 items.append('<li class="dx-none">없음</li>')
-            elif num == "7":
+            elif num == lay["fills"]:
                 v, rest = _verdict(val, _FILLS)
                 items.append(_row(rest, ctx, badge=v))
             else:
-                items.append(_row(val, ctx))
+                items.append(_row(val, ctx, alias=alias if num == lay["sides"] else ""))
             continue
         flush()
         if kind == "table":
             out.append(_table(val, ctx))
-        elif kind == "fence" and num == "6":
+        elif kind == "fence" and num == lay["charts"]:
             drawn, probs = _chart(val[0], val[1], f"§{num}")
             problems.extend(probs)
             out.append(drawn)
+        elif kind == "fence" and val[0] == "probe-state":
+            out.append(_state(val[1], ctx))
         elif kind == "para":
             out.append(f"<p>{inline(val, ctx)}</p>")
     flush()
     return "".join(out)
+
+
+def _state(body: list[str], ctx: Context) -> str:
+    """The delta's closing block: when each ledger was last verified, then
+    the block itself, folded — it is the next run's memory, not reading."""
+    raw = "\n".join(body)
+    try:
+        state = json.loads(raw)
+    except json.JSONDecodeError:
+        state = {}
+    rows = "".join(
+        f'<tr><th scope=row><a href="{ctx.ledger_href(pid)}">{esc(ctx.ledgers.get(pid, pid))}</a></th>'
+        f"<td>{esc(pid)}</td><td>{esc(str(day))}</td></tr>"
+        for pid, day in sorted((state.get("verified") or {}).items(), key=lambda kv: str(kv[1])))
+    table = (f'<h3>장부별 마지막 검증</h3><div class="dx-table"><table><thead><tr><th>장부</th><th>id</th>'
+             f"<th>날짜</th></tr></thead><tbody>{rows}</tbody></table></div>") if rows else ""
+    pretty = json.dumps(state, ensure_ascii=False, indent=1) if state else raw
+    return (f'<div class="dx-state">{table}<details class="dx-why"><summary>런 상태 원문 · probe-state</summary>'
+            f"<pre><code>{esc(pretty)}</code></pre></details></div>")
 
 
 def _table(rows: list[list[str]], ctx: Context) -> str:
@@ -340,7 +418,7 @@ def _table(rows: list[list[str]], ctx: Context) -> str:
     tr = "".join("<tr>" + "".join(
         f'<{"th scope=row" if i == 0 else "td"}>{inline(c, ctx)}</{"th" if i == 0 else "td"}>'
         for i, c in enumerate(r)) + "</tr>" for r in body)
-    return f'<div class="dx-table"><table><thead><tr>{th}</tr></thead><tbody>{tr}</tbody></table></div>'
+    return f'<div class="dx-table dx-scope"><table><thead><tr>{th}</tr></thead><tbody>{tr}</tbody></table></div>'
 
 
 def _errata(bl: list, ctx: Context) -> str:
@@ -517,9 +595,9 @@ a.ax:hover{text-decoration:none;border-color:var(--orange)}
 .dx-table table{border-collapse:collapse;width:100%;font-size:.88rem;line-height:1.55}
 .dx-table th,.dx-table td{padding:.65rem .8rem;text-align:left;vertical-align:top;border-top:1px solid var(--border-soft)}
 .dx-table thead th{background:var(--surface-2);border-top:0;font-size:.8rem;color:var(--text-muted)}
-.dx-table thead th:last-child{color:var(--orange-ink)}
+.dx-scope thead th:last-child{color:var(--orange-ink)}
 .dx-table tbody th{font-weight:700;white-space:nowrap}
-.dx-table td:last-child{background:color-mix(in oklch,var(--orange) 5%,transparent)}
+.dx-scope td:last-child{background:color-mix(in oklch,var(--orange) 5%,transparent)}
 .dx-chart{margin:1.4rem 0;padding:1.1rem 1.2rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);--room:.8rem}
 .dx-chart .prs-dfig>svg{height:auto}
 .dx-chart .prs-dfig figcaption{font-size:.78rem;margin-top:.4rem}
@@ -527,6 +605,12 @@ a.ax:hover{text-decoration:none;border-color:var(--orange)}
 .dx-why summary{cursor:pointer}
 .dx-om{font-size:.82rem}
 .dx-theme{position:fixed;right:1rem;top:1rem;font:600 .78rem var(--ko);background:var(--surface);color:var(--text-muted);border:1px solid var(--border);border-radius:var(--radius);padding:.35rem .6rem;cursor:pointer}
+h1 small{font:500 .9rem var(--mono);color:var(--text-muted)}
+.ax-led{font-family:var(--mono);font-size:.9em;font-weight:600}
+.dx-runs{display:flex;justify-content:space-between;font:600 .82rem var(--mono);margin-bottom:1.6rem}
+.dx-state{margin-top:2.2rem}
+.dx-state pre{margin-top:.6rem;padding:.8rem;background:var(--code-bg);border-radius:var(--radius);overflow-x:auto;font:.76rem/1.5 var(--mono);color:var(--text)}
+.dx-state pre code{border:0;background:none;padding:0;white-space:pre}
 footer{margin-top:4rem;font-size:.78rem;color:var(--text-muted)}
 @media (max-width:980px){.dx-shell{grid-template-columns:minmax(0,1fr);padding:2rem 1rem 4rem}.dx-toc{display:none}h1{font-size:1.6rem}.dx-idea{padding-left:1.3rem}.dx-ino{position:static;margin-bottom:.6rem}.dx-idea dl{grid-template-columns:1fr}.dx-sides{grid-template-columns:1fr}}
 @media print{.dx-toc,.dx-theme{display:none}.dx-shell{display:block}details{open:true}}
@@ -547,19 +631,53 @@ document.querySelectorAll('.dx-key').forEach(function(a){a.onclick=function(){va
 """
 
 
+_KINDS = {
+    "dissect": ("해부", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
+    "ledger": ("장부", "이 방법 × 논문 하나 · 비공개", "일곱 절"),
+    "runs": ("델타", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
+}
+
+
+def _kind(path: str) -> str | None:
+    folder = os.path.basename(os.path.dirname(os.path.abspath(path)))
+    return folder if folder in _KINDS else None
+
+
+def _runs_nav(path: str) -> str:
+    here = os.path.basename(path)[:-3]
+    days = sorted(os.path.basename(p)[:-3] for p in glob.glob(os.path.join(os.path.dirname(path), "*.md")))
+    if here not in days:
+        return ""
+    k = days.index(here)
+    prev = f'<a href="{days[k - 1]}.html">← {days[k - 1]}</a>' if k else "<span></span>"
+    nxt = f'<a href="{days[k + 1]}.html">{days[k + 1]} →</a>' if k + 1 < len(days) else "<span></span>"
+    return f'<div class="dx-runs">{prev}{nxt}</div>'
+
+
 def render(path: str) -> tuple[str, list[str]]:
     with open(path, encoding="utf-8") as fh:
         lines = fh.read().splitlines()
     name = os.path.basename(path)
-    m = re.match(r"^(\d{4}\.\d{5})--([a-z0-9_]+)\.md$", name)
-    pid, scope = m.groups() if m else ("", "")
-    ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), pid)
+    kind = _kind(path) or "dissect"
+    noun, eyebrow, spine = _KINDS[kind]
+    m = re.match(r"^(\d{4}\.\d{5})", name)
+    ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), m.group(1) if m else "", kind)
 
     h1 = lines[0][2:] if lines and lines[0].startswith("# ") else name
-    pair, _, thesis = h1.partition(" — ")
-    alias, _, scope_name = pair.partition(" × ")
-    meta_raw = next((ln for ln in lines[1:] if ln.strip()), "")
-    meta = _META.findall(meta_raw)
+    if kind == "runs":
+        heading, thesis, alias, meta = esc(h1), "", "", []
+    else:
+        pair, _, thesis = h1.partition(" — ")
+        alias, _, scope_name = pair.partition(" × ")
+        heading = (f'{esc(alias)}<span class="x">×</span>{esc(scope_name)}' if scope_name
+                   else f'{esc(alias)}<span class="x">·</span><small>{esc(ctx.paper_id)}</small>')
+        meta_raw = next((ln for ln in lines[1:] if ln.strip()), "")
+        meta = _META.findall(meta_raw) if not meta_raw.startswith("## ") else []
+        if kind == "ledger":
+            claims = re.search(r"Claims: ([^·]*)", meta_raw)
+            meta = [(k, v) for k, v in meta if k != "Claims"]
+            if claims and claims.group(1).strip():
+                meta.insert(1, ("Claims", claims.group(1).strip()))
 
     secs: list[tuple[str, str, list[str]]] = []
     for raw in lines[1:]:
@@ -569,33 +687,42 @@ def render(path: str) -> tuple[str, list[str]]:
         elif secs:
             secs[-1][2].append(raw)
 
+    lay = _LAYOUT[kind]
     problems: list[str] = []
     body, toc = [], []
     for num, title, sec in secs:
-        n = sum(1 for b in blocks(sec) if b[0] in ("bullet", "h3"))
-        if num in ("4", "8"):
-            n = sum(1 for b in blocks(sec) if b[0] == "h3")
+        bl = blocks(sec)
+        n = sum(1 for b in bl if b[0] in ("bullet", "h3") and b[1] != "없음")
+        if num in (lay["stages"], lay["ideas"]):
+            n = sum(1 for b in bl if b[0] == "h3")
         toc.append(f'<a href="#s{num}"><span>{num}</span>{esc(title)}<small>{n or ""}</small></a>')
         body.append(f'<section id="s{num}"><h2><span>{num}</span>{esc(title)}</h2>'
                     f'{section(num, sec, ctx, problems, alias)}</section>')
 
-    chips = "".join(f"<span>{esc(k)}<b>{esc(v)}</b></span>" for k, v in meta)
+    def chip(k: str, v: str) -> str:
+        if k == "Claims":
+            return f"<span>{esc(k)}<b>" + " ".join(_anchor(c.strip(), ctx) for c in v.split(",")) + "</b></span>"
+        return f"<span>{esc(k)}<b>{esc(v)}</b></span>"
+
+    chips = "".join(chip(k, v) for k, v in meta)
+    title = h1 if kind == "runs" else (f"{alias} — {noun}")
+    rel = os.path.join(os.path.basename(os.path.dirname(os.path.abspath(path))), name)
     page = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(alias)} × {esc(scope_name)} — 해부</title>
+<title>{esc(title)}</title>
 <style>{_tokens()}{_CSS}</style>
 <script>{_JS}</script></head>
 <body><button class="dx-theme" type="button">밝게 / 어둡게</button>
 <div class="dx-shell">
-<nav class="dx-toc"><b>해부 · 아홉 절</b>{"".join(toc)}</nav>
+<nav class="dx-toc"><b>{noun} · {spine}</b>{"".join(toc)}</nav>
 <main>
-<div class="dx-eyebrow">논문 하나 × 코드 범위 하나 · 비공개</div>
-<h1>{esc(alias)}<span class="x">×</span>{esc(scope_name)}</h1>
-<p class="dx-thesis">{inline(thesis, ctx)}</p>
-<div class="dx-meta">{chips}</div>
+{_runs_nav(path) if kind == "runs" else ""}<div class="dx-eyebrow">{eyebrow}</div>
+<h1>{heading}</h1>
+{f'<p class="dx-thesis">{inline(thesis, ctx)}</p>' if thesis else ""}
+{f'<div class="dx-meta">{chips}</div>' if chips else ""}
 {"".join(body)}
-<footer>{esc(name)} 에서 그린 보기입니다. 고칠 때는 Markdown 을 고치고 다시 그립니다 — <code>python3 distinction/render-dissect.py dissect/{esc(name)}</code></footer>
+<footer>{esc(rel)} 에서 그린 보기입니다. 고칠 때는 Markdown 을 고치고 다시 그립니다 — <code>python3 distinction/render-distinction.py {esc(rel)}</code></footer>
 </main></div></body></html>
 """
     return page, problems
@@ -603,22 +730,36 @@ def render(path: str) -> tuple[str, list[str]]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    ap.add_argument("dissection", help="dissect/<id>--<scope>.md")
-    ap.add_argument("-o", "--out", help="output path (default: the same path with .html)")
+    ap.add_argument("docs", nargs="*", help="ledger/, runs/ or dissect/ Markdown (default: every one in the folder)")
+    ap.add_argument("-o", "--out", help="output path for a single document (default: beside it, .html)")
     args = ap.parse_args(argv)
-    if not os.path.isfile(args.dissection):
-        print(f"render-dissect: no file {args.dissection}", file=sys.stderr)
+    docs = args.docs
+    if not docs:
+        folder = os.environ.get("PROBE_PRIVATE_DIR", "")
+        docs = [p for sub in _KINDS for p in sorted(glob.glob(os.path.join(folder, sub, "*.md")))] if folder else []
+    if not docs:
+        print("render-distinction: no document — pass a path or set PROBE_PRIVATE_DIR", file=sys.stderr)
         return 2
-    page, problems = render(args.dissection)
-    if problems:
-        for p in problems:
-            print(f"render-dissect: {p}", file=sys.stderr)
-        return 1
-    out = args.out or os.path.splitext(args.dissection)[0] + ".html"
-    with open(out, "w", encoding="utf-8") as fh:
-        fh.write(page)
-    print(out)
-    return 0
+    if args.out and len(docs) != 1:
+        print("render-distinction: -o takes one document", file=sys.stderr)
+        return 2
+    failed = False
+    for doc in docs:
+        if not os.path.isfile(doc) or _kind(doc) is None and not args.out:
+            print(f"render-distinction: {doc} is not a ledger/, runs/ or dissect/ document", file=sys.stderr)
+            failed = True
+            continue
+        page, problems = render(doc)
+        if problems:
+            for p in problems:
+                print(f"render-distinction: {doc}: {p}", file=sys.stderr)
+            failed = True
+            continue
+        out = args.out or os.path.splitext(doc)[0] + ".html"
+        with open(out, "w", encoding="utf-8") as fh:
+            fh.write(page)
+        print(out)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

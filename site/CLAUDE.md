@@ -103,11 +103,11 @@ and bring all of those into step.
 ` ```probe-* ` fences. Both are called by hand from a run, so keep them
 importable without the rest of the build.
 
-**Four pieces are borrowed by the distinction track.** `distinction/render-dissect.py`
-draws a private dissection with `builder/charts.py`, `builder/decisions.py`, the
+**Four pieces are borrowed by the distinction track.** `distinction/render-distinction.py`
+draws the private ledgers, deltas and dissections with `builder/charts.py`, `builder/decisions.py`, the
 `:root` blocks of `assets/site.css` and the drawn-figures section of
 `assets/presentation.css`, cut between its `/* ── drawn figures` and
-`/* ── motion` headers. It runs on the standard library and its page never
+`/* ── motion` headers. It runs on the standard library and its pages never
 reaches the site, so keep those two modules free of a third-party import at
 module scope, and keep those headers when the sheet moves.
 
