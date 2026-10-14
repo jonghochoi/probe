@@ -25,6 +25,12 @@ The private folder's own files — `BASKET.md`, `METHOD.md`, `CODEMAP.md`,
 Read them; never edit them. What you want changed goes under 제안 in the
 delta.
 
+Anything the run needs on disk before step 9 saves it — a drafted ledger
+for a verify agent to read, a helper script, a diff — goes under
+`$PROBE_PRIVATE_DIR/.scratch/`, never `/tmp` or any other directory: a
+file outside the private folder is the method outside it. Nothing reads
+`.scratch/` but this run, and the folder's own git ignores it.
+
 This prompt owns the PROCEDURE: the guard, what to read, how the delta is
 found, how evidence is confirmed, how the output is checked and saved.
 
@@ -193,8 +199,9 @@ PROCEDURE
    (the Agent tool, one agent per ledger, launched together) that receives
    only:
 
-     - the drafted ledger's text, as a file path
-     - the paper id and alias, and `METHOD.md` §1
+     - the drafted ledger, as its path under `.scratch/`
+     - the paper id and alias, and the path of `METHOD.md` with the
+       instruction to read its §1 — a path, never a copy
      - the instruction below, verbatim
 
    It does not receive this run's notes, the other ledgers or the matrix.
@@ -295,6 +302,7 @@ WHAT THIS MODE NEVER DOES
 
 - Runs `git add`, `git commit` or `git push`, or writes any file under the
   checkout. `git log` and `git rev-parse` are the only git it uses.
+- Writes anywhere outside `$PROBE_PRIVATE_DIR` — a scratch file included.
 - Edits `BASKET.md`, `METHOD.md`, `CODEMAP.md` or anything in `code/`.
 - Adds a paper to the basket. A candidate is a line under 제안.
 - Writes a bullet without its anchors, or a number it did not confirm as if
