@@ -241,7 +241,7 @@ they are the one check the lint can make that the facts were looked at.
 | method | `` `METHOD §<n>` `` | that section of `METHOD.md` |
 | code | `` `<path>:<line>` `` | a line of the codebase, as `CODEMAP.md` lists it |
 | config | `` `cfg:<key>` `` | a key `CODEMAP.md` lists under its config section |
-| quote | `원문 §<section> "<verbatim English>"` — at least a clause, copied byte for byte | `cd site && python3 -m builder.arxiv <id> --grep "<a phrase of it>"` prints it under that section |
+| quote | `원문 §<section> "<verbatim English>"` — at least a clause, copied byte for byte; a table row is quoted whole under `§TABLE-<n>` | `cd site && python3 -m builder.arxiv <id> --grep "<a phrase of it>"` prints it under that section, a table row under `Table TABLE <n>:` |
 
 Which sections need which is §3-1's table. Four further rules:
 
