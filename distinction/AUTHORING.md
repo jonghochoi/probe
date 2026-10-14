@@ -118,11 +118,13 @@ related-work table and the experiment table in draft, and a cell transition
 ## 5 새 아이디어
 ## 6 제안
 ## 7 다음 행동
+## 8 감사
 
 ```probe-state
 {"run": "YYYY-MM-DD", "corpus_head": "<git sha>", "method": "0000000",
  "codemap": "0000000", "basket": "0000000",
- "related": {"XXXX.XXXXX": ["XXXX.XXXXX", "XXXX.XXXXX"]}}
+ "related": {"XXXX.XXXXX": ["XXXX.XXXXX", "XXXX.XXXXX"]},
+ "verified": {"XXXX.XXXXX": "YYYY-MM-DD"}}
 ```
 ```
 
@@ -137,16 +139,21 @@ Only what changed since the previous run, section by section:
 | `5 새 아이디어` | At most three `###` ideas across the whole run, in the §3-4 shape — the strongest of what the rewritten ledgers' §5 hold, not a copy of all of them |
 | `6 제안` | What the human should change in `BASKET.md` or `METHOD.md`: a basket candidate found citing a basket paper, a claim with no basket column, a row with empty `claims`, a `parked` row that bears on a claim new since the previous run |
 | `7 다음 행동` | `/analyze <id>` for a row without a rewrite, `/compare <id> <id>` where two basket papers need their divergence laid out first, one ablation to run |
+| `8 감사` | One bullet per ledger the audit re-read (prompt step 7), naming its id: what it corrected — a quote, a moved code line, a verdict — or `고칠 것 없음`. Only a run that audits has this section: a delta run or `--audit`, not a single-paper or `--all` run |
 
 The `probe-state` block closes the file and is the track's memory — the
-checkout's `HEAD`, the three input hashes and the `related` ids per basket
-paper — so the next run diffs instead of re-reading everything.
+checkout's `HEAD`, the three input hashes, the `related` ids per basket
+paper, and `verified`, the date each ledger was last rewritten or audited —
+so the next run diffs instead of re-reading everything, and audits the
+ledgers read longest ago.
 
 **The no-change run.** When `corpus_head`, the three hashes and every
 `related` list are unchanged, the run writes this file with `- 없음` under
-sections 1 to 6, the standing next actions under 7, and the state block. It
-rewrites no ledger and leaves the matrix alone. A run that finds nothing and
-says so is the track working.
+sections 1 to 6, the standing next actions under 7, the audit under 8, and
+the state block. It rewrites no ledger, but the audit still corrects the ones
+it re-reads: nothing changing in the repository says nothing about whether
+what a ledger already states is true. A run that finds nothing and says so
+is the track working.
 
 ### 3-4. The shape of an idea
 
@@ -226,6 +233,7 @@ decides where it may stand. The verify pass (prompt step 6) assigns them.
 | Ideas per ledger (§3-1 `5`) | 2 | the ledger is a position, not a brainstorm |
 | Ideas per delta (§3-3 `5`) | 3 | `/ideate`'s own ceiling, for the same reason |
 | Ledger prose | 7,000 characters outside fences | the comparison ceiling; a ledger past it has started explaining the paper, which its rewrite already does |
+| Ledgers audited per delta run | half the active ones, rounded up | at the two scheduled runs a week (`distinction/SETUP.md` §4) every ledger is re-read within the week, and no run carries the whole basket |
 
 ## 6. Korean authoring
 
@@ -245,7 +253,7 @@ lint fails. A ledger that needs to say the thing says it by its `C#` or
 
 `linters/check-distinction-format.py` reads the private folder (`PROBE_PRIVATE_DIR`,
 or a path argument) and checks what a document can get wrong while reading
-perfectly. It is the routine's own gate — step 7 of the procedure — and it
+perfectly. It is the routine's own gate — step 8 of the procedure — and it
 is run by hand after editing a document. It is in no workflow, because what it
 checks is in no checkout.
 
@@ -255,7 +263,7 @@ checks is in no checkout.
 | §3-1 | the H1, the five-field metadata line, the seven headers verbatim and in order, no other `##` |
 | §3-1, §4 | per section, every bullet carries the anchors its row of the table requires, or is `- 없음` — a §3 and a §6 bullet carry a quote anchor or `원문 미확인`; a §4 bullet opens with a verdict; §7 holds a `cfg:` anchor |
 | §3-2 | the matrix's rows are `METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
-| §3-3 | the delta's H1 date is the file's, the seven headers, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key |
+| §3-3 | the delta's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a ledger id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
 | §5 | active rows, ideas per ledger and per delta, ledger prose length |
 | §7 | no `METHOD.md` §6 string in any output |
@@ -273,4 +281,7 @@ ablation rather than from what it did not mention, and whether a quote says
 what the bullet claims it says. Those are the verify pass's (prompt step 6):
 a separate agent that never saw the ledger being written reads it against the
 original and grades every paper-side statement (§4-1). The writer reads its
-own work with the reasons it wrote it; the verifier reads only the page.
+own work with the reasons it wrote it; the verifier reads only the page. The
+audit (prompt step 7) sends a ledger nothing changed under back to a fresh
+verifier and re-resolves its code and method anchors, so a miss or a moved
+line does not stand for longer than a week.
