@@ -27,8 +27,17 @@ Checks, grouped by the contract section they enforce:
              maps ids to dates.
   AUTHORING §3-4 every `###` idea carries the five labels in order, and a
              `D#` it names exists in a pillar's Decision Log.
-  AUTHORING §5   active rows <= 12, ideas per ledger <= 2, ledger prose
-             <= 7,000 characters outside fences.
+  AUTHORING §3-5 the dissection — `dissect/<id>--<scope>.md` names a paper
+             with a rewrite, its six-field metadata line agrees with the
+             file name, the nine `##` headers verbatim and in order; §1
+             opens with its count line and every bullet with a verdict and
+             a paper anchor, a quote anchor too unless `원문 없음`; §3 and
+             §4 bullets carry their anchors; §5 holds a table whose scope
+             cells carry an anchor or `없음`; §6 bullets a quote anchor; §7
+             bullets a verdict and a quote anchor; §9 a `cfg:` anchor.
+  AUTHORING §5   active rows <= 12, ideas per ledger <= 2 and per
+             dissection <= 3, prose <= 7,000 characters outside fences in a
+             ledger and <= 20,000 in a dissection.
   AUTHORING §7   no `METHOD.md` §6 string in any output.
   inputs         `BASKET.md` rows parse — id, role and status from their
              sets, no duplicate id; `METHOD.md` carries its spine and one
@@ -59,6 +68,7 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 _ARXIV_ID = re.compile(r"^\d{4}\.\d{5}$")
 _LEDGER_NAME = re.compile(r"^(\d{4}\.\d{5})\.md$")
+_DISSECT_NAME = re.compile(r"^(\d{4}\.\d{5})--([a-z0-9_]+)\.md$")
 _RUN_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.md$")
 _ARXIV_IN = re.compile(r"\b\d{4}\.\d{5}\b")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -67,12 +77,15 @@ _ROLES = ("baseline", "nearest", "threat", "donor")
 _STATUSES = ("active", "parked", "graduated")
 _VERDICTS = ("지지", "무관", "위협", "반박")
 _FILL_VERDICTS = ("메운다", "부분", "못 메운다")
+_ERRATA_VERDICTS = ("맞음", "틀림", "과장", "원문 없음")
 _NONE = "- 없음"
 
 _ACTIVE_CAP = 12
 _IDEAS_PER_LEDGER = 2
 _IDEAS_PER_RUN = 3
 _LEDGER_PROSE_MAX = 7000
+_IDEAS_PER_DISSECTION = 3
+_DISSECTION_PROSE_MAX = 20000
 
 _LEDGER_SPINE = (
     "## 1 공통", "## 2 차이", "## 3 그들의 빈자리", "## 4 내 방법이 메우는가",
@@ -81,6 +94,11 @@ _LEDGER_SPINE = (
 _RUN_SPINE = (
     "## 1 코퍼스 변화", "## 2 바구니 변화", "## 3 방법론 변화", "## 4 매트릭스 전이",
     "## 5 새 아이디어", "## 6 제안", "## 7 다음 행동",
+)
+_DISSECT_SPINE = (
+    "## 1 재작성본 정오표", "## 2 동기", "## 3 공통", "## 4 구성요소 대조",
+    "## 5 실험 설정", "## 6 결과 대조", "## 7 빈자리와 메움", "## 8 빌려 올 것",
+    "## 9 반증 실험",
 )
 # Present when the run audited (prompt step 7) — delta and `--audit` runs.
 _RUN_AUDIT = "## 8 감사"
@@ -104,6 +122,12 @@ _LEDGER_META = re.compile(
     r"^Role: (baseline|nearest|threat|donor) · Claims: (C\d+(?:, C\d+)*) · "
     r"Rewrite: analysis/(\d{4}\.\d{5})\.md · Method: [0-9a-f]{7} · Run: \d{4}-\d{2}-\d{2}$"
 )
+_DISSECT_H1 = re.compile(r"^# .+ × [a-z0-9_]+ — \S")
+_DISSECT_META = re.compile(
+    r"^Paper: (\d{4}\.\d{5}) · Scope: ([a-z0-9_]+) · Rewrite: analysis/(\d{4}\.\d{5})\.md · "
+    r"Code: [0-9a-f]{7,12} · Method: [0-9a-f]{7} · Run: \d{4}-\d{2}-\d{2}$"
+)
+_ERRATA_COUNT = re.compile(r"^점검 \d+ · 맞음 \d+ · 틀림 \d+ · 과장 \d+ · 원문 없음 \d+$")
 _MATRIX_META = re.compile(r"^Method: [0-9a-f]{7} · Run: \d{4}-\d{2}-\d{2}$")
 _RUN_H1 = re.compile(r"^# (\d{4}-\d{2}-\d{2}) 차별화 델타$")
 _MATRIX_H1 = "# 주장 × 바구니"
@@ -394,6 +418,113 @@ def check_ledger(path: str, basket: dict[str, dict], claims: set[str], forbidden
     return findings
 
 
+# ── The dissection ────────────────────────────────────────────────────────
+
+
+def _opens_with(raw: str, verdicts: tuple[str, ...]) -> str | None:
+    """The verdict a bullet opens with, bare or bold, else None."""
+    text = raw[2:].lstrip()
+    for v in sorted(verdicts, key=len, reverse=True):
+        for form in (v, f"**{v}**"):
+            if text == form or text.startswith(form + " ") or text.startswith(form + ","):
+                return v
+    return None
+
+
+def check_dissection(path: str, claims: set[str], forbidden: list[str],
+                     decisions: set[str]) -> list[Finding]:
+    name = "dissect/" + os.path.basename(path)
+    findings: list[Finding] = []
+    m = _DISSECT_NAME.match(os.path.basename(path))
+    if not m:
+        return [(name, 0, "§3-5 file name is not `<arxiv-id>--<scope>.md`")]
+    pid, scope = m.groups()
+    if not os.path.exists(os.path.join(_REPO_ROOT, "analysis", pid + ".md")):
+        findings.append((name, 0, f"§1 analysis/{pid}.md does not exist — the paper has no rewrite"))
+    lines = _read(path)
+    if lines is None:
+        return findings + [(name, 0, "unreadable")]
+
+    if not lines or not _DISSECT_H1.match(lines[0]):
+        findings.append((name, 1, "§3-5 line 1 is not the H1 `# <alias> × <scope> — <한 문장>`"))
+    elif f" × {scope} — " not in lines[0]:
+        findings.append((name, 1, f"§3-5 the H1 does not name the scope `{scope}`"))
+    meta_line = next((ln for ln, raw in enumerate(lines[1:], start=2) if raw.strip()), None)
+    mm = _DISSECT_META.match(lines[meta_line - 1]) if meta_line else None
+    if not mm:
+        findings.append((name, meta_line or 2, "§3-5 metadata line is not `Paper: <id> · Scope: <scope> · Rewrite: analysis/<id>.md · Code: <hash> · Method: <7 hex> · Run: YYYY-MM-DD`"))
+    elif (mm.group(1), mm.group(2), mm.group(3)) != (pid, scope, pid):
+        findings.append((name, meta_line, "§3-5 metadata `Paper:` / `Scope:` / `Rewrite:` disagree with the file name"))
+
+    headers = [(raw.rstrip(), ln) for ln, raw in enumerate(lines, start=1) if _H2.match(raw)]
+    if [h for h, _ in headers] != list(_DISSECT_SPINE):
+        findings.append((name, headers[0][1] if headers else 0, "§3-5 the `##` headers are not the nine of the spine, verbatim and in order"))
+
+    sections = {h: body for h, _, body in _sections(lines, _H2)}
+
+    def bullets(key: str) -> list[tuple[int, str]]:
+        return [(ln, raw) for ln, raw in _top_bullets(sections.get(key, [])) if raw.strip() != _NONE]
+
+    errata, motive, shared, stages, setup, results, gaps, ideas, runs = _DISSECT_SPINE
+
+    body = [(ln, raw) for ln, raw in _outside_fences(sections.get(errata, [])) if raw.strip()]
+    if body and not _ERRATA_COUNT.match(body[0][1].strip()):
+        findings.append((name, body[0][0], "§3-5 정오표 does not open with `점검 N · 맞음 n · 틀림 n · 과장 n · 원문 없음 n`"))
+    for ln, raw in bullets(errata):
+        verdict = _opens_with(raw, _ERRATA_VERDICTS)
+        if not verdict:
+            findings.append((name, ln, "§3-5 정오표 bullet does not open with 맞음 / 틀림 / 과장 / 원문 없음"))
+        if not _PAPER_ANCHOR.search(raw):
+            findings.append((name, ln, "§4 정오표 bullet lacks a paper anchor — where the rewrite says it"))
+        if verdict != "원문 없음" and not _QUOTE_ANCHOR.search(raw):
+            findings.append((name, ln, "§4 정오표 bullet lacks a quote anchor"))
+
+    for ln, raw in bullets(shared):
+        if not _PAPER_ANCHOR.search(raw) or not any(p.search(raw) for p in (_CODE_ANCHOR, _CFG_ANCHOR, _METHOD_ANCHOR)):
+            findings.append((name, ln, "§4 bullet under 공통 lacks a paper anchor and a `path:line` / `cfg:key` / `METHOD §n` anchor"))
+    # §4 is staged under `###`; its bullets are checked through the whole section.
+    for ln, raw in bullets(stages):
+        if not _PAPER_ANCHOR.search(raw) or not (_CODE_ANCHOR.search(raw) or _CFG_ANCHOR.search(raw)):
+            findings.append((name, ln, "§4 bullet under 구성요소 대조 lacks a paper anchor and a `path:line` / `cfg:key` anchor"))
+
+    setup_body = _outside_fences(sections.get(setup, []))
+    rows = [(ln, _split_row(raw)) for ln, raw in setup_body if _TABLE_ROW.match(raw) and not _TABLE_RULE.match(raw)]
+    if not rows and not any(raw.strip() == _NONE for _, raw in setup_body):
+        findings.append((name, 0, "§3-5 실험 설정 holds no table (write `- 없음` when there is nothing)"))
+    for ln, cells in rows[1:]:
+        cell = cells[-1] if cells else ""
+        if cell != "없음" and not any(p.search(cell) for p in (_CODE_ANCHOR, _CFG_ANCHOR, _METHOD_ANCHOR)):
+            findings.append((name, ln, "§4 실험 설정 row's scope cell lacks a `path:line` / `cfg:key` / `METHOD §n` anchor or `없음`"))
+
+    for ln, raw in bullets(results):
+        if not _QUOTE_ANCHOR.search(raw):
+            findings.append((name, ln, "§4 bullet under 결과 대조 lacks a quote anchor or `원문 미확인`"))
+    for ln, raw in bullets(gaps):
+        if not _opens_with(raw, _FILL_VERDICTS):
+            findings.append((name, ln, "§3-5 bullet under 빈자리와 메움 does not open with 메운다 / 부분 / 못 메운다"))
+        if not _QUOTE_ANCHOR.search(raw):
+            findings.append((name, ln, "§4 bullet under 빈자리와 메움 lacks a quote anchor or `원문 미확인`"))
+
+    last = _top_bullets(sections.get(runs, []))
+    if not last:
+        findings.append((name, 0, "§3-5 반증 실험 holds no bullet"))
+    elif not any(raw.strip() == _NONE for _, raw in last) and not any(_CFG_ANCHOR.search(raw) for _, raw in last):
+        findings.append((name, last[0][0], "§4 반증 실험 names no `cfg:` key"))
+    for key in (motive, shared, stages, results, gaps):
+        if key in sections and not _top_bullets(sections[key]):
+            findings.append((name, 0, f"§3-5 {key[3:]} holds no bullet (write `- 없음` when there is nothing)"))
+
+    _check_ideas(name, sections.get(ideas, []), _IDEAS_PER_DISSECTION, "빌려 올 것", decisions, findings)
+
+    prose = sum(len(raw) for _, raw in _outside_fences(list(enumerate(lines, start=1))))
+    if prose > _DISSECTION_PROSE_MAX:
+        findings.append((name, 0, f"§5 {prose} characters of prose, ceiling is {_DISSECTION_PROSE_MAX}"))
+
+    _check_claim_tokens(name, lines, claims, findings)
+    _check_forbidden(name, lines, forbidden, findings)
+    return findings
+
+
 # ── The matrix ────────────────────────────────────────────────────────────
 
 
@@ -543,6 +674,8 @@ def check_folder(folder: str) -> list[Finding]:
         findings += check_matrix(matrix, basket, claims, forbidden)
     for path in sorted(glob.glob(os.path.join(folder, "runs", "*.md"))):
         findings += check_run(path, claims, forbidden, decisions)
+    for path in sorted(glob.glob(os.path.join(folder, "dissect", "*.md"))):
+        findings += check_dissection(path, claims, forbidden, decisions)
     return findings
 
 

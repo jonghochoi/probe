@@ -7,6 +7,9 @@ does not reach, whether this method reaches it, what would improve the paper,
 and under what condition the paper takes one of this method's claims. It
 writes one ledger per basket paper, a claims × papers matrix and a delta per
 run — all into a private folder on this machine, none into the repository.
+On demand it also writes a dissection: one paper against one code scope,
+read far deeper than a ledger, with the rewrite itself checked against the
+original before anything is built on it.
 
 Nothing here is committed, pushed or published. The repository is public and
 the method is not; the private folder is where this mode reads and the only
@@ -17,7 +20,7 @@ place it writes (`distinction/AUTHORING.md` §1).
 THE FORMAT CONTRACT LIVES IN `distinction/AUTHORING.md`
 ════════════════════════════════════════════════════════════════════════
 
-Every rule about what the three documents look like lives there and nowhere
+Every rule about what the four documents look like lives there and nowhere
 in this prompt; read it end to end before you write.
 
 The private folder's own files — `BASKET.md`, `METHOD.md`, `CODEMAP.md`,
@@ -59,7 +62,7 @@ it.
 INPUT
 ════════════════════════════════════════════════════════════════════════
 
-`$ARGUMENTS` is one of four things:
+`$ARGUMENTS` is one of five things:
 
   EMPTY — DELTA MODE. Rewrite only the ledgers that something changed under
   (step 2), audit the least recently verified of the rest (step 7), and
@@ -75,7 +78,14 @@ INPUT
   to 6 are skipped; the delta's sections 1 to 6 report what step 2 found,
   for the next delta run to act on.
 
-  A PAPER NOT IN THE BASKET → stop and say so. Whether it enters is the
+  `--dissect <paper> <scope>` — one paper (an arXiv id or an alias)
+  against one code scope (a bare name `codemap.sh` resolves). Runs step 0,
+  then DISSECT below in place of steps 1 to 9. The paper needs a rewrite;
+  it need not be in the basket. Writes one file,
+  `dissect/<id>--<scope>.md`, and touches no ledger, no matrix, no
+  `runs/` file and no `probe-state` block.
+
+  A PAPER NOT IN THE BASKET (without `--dissect`) → stop and say so. Whether it enters is the
   human's; name it under 제안 if a delta is being written anyway.
 
 
@@ -297,13 +307,118 @@ PROCEDURE
 
 
 ════════════════════════════════════════════════════════════════════════
+DISSECT — one paper against one code scope
+════════════════════════════════════════════════════════════════════════
+
+The ledger is short so the schedule can re-read it; the dissection is the
+long reading of one paper the human chose, against the part of the codebase
+they named. Its format is `distinction/AUTHORING.md` §3-5. Resolve the
+paper's id with `python3 site/query.py show <paper>`; no
+`analysis/<id>.md` → STOP and name `/analyze <id>`.
+
+D1. DIGEST. The scope's own digest, not the method's:
+
+     sh <path>/codemap.sh <scope> <path>/.scratch/CODEMAP-<scope>.md
+
+   A non-zero exit → STOP: the scope is not one the operator's script
+   knows; say so and name the scope as given. Read `METHOD.md` all of it,
+   `context/MASTER.md` §1 and §4, and the pillar files the rewrite's act 4
+   names. Hold the digest's `Code:` hash, the `METHOD.md` hash and the run
+   date for the metadata line. Every code anchor comes from this digest or
+   a `grep -n` in `code/` that found it.
+
+D2. ERRATA — before a word is written on the rewrite. The rewrite is the
+   map the rest of the document reads from, and a rewrite can be wrong: a
+   number misread from a table, a mechanism compressed into something the
+   paper did not build, a limit the paper never stated. So the rewrite is
+   checked first, by readers that did not write it and will not write the
+   dissection. One agent per act of `python3 site/query.py outline <id>`,
+   launched together, each receiving only the rewrite's path, the id, its
+   act number and this instruction verbatim:
+
+     Read act <n> of this rewrite and list every statement in it about
+     the paper — each number, table cell, model or data size, mechanism
+     step, causal claim ("because", "so that", "to avoid"), and stated
+     limit. In act 4, only the statements about the paper; the rewrite's
+     own argument with the research context is not yours to grade. Look
+     each one up in the original, do not recall it:
+       cd site && python3 -m builder.arxiv <id> --grep "<phrase>"
+       cd site && python3 -m builder.arxiv <id> --tables
+       cd site && python3 -m builder.arxiv <id> --section <n>
+     Grade each: 맞음 (the original says it), 틀림 (the original says
+     otherwise), 과장 (the original says less — a narrower setting, a
+     hedge dropped, an average presented as a minimum), 원문 없음 (the
+     original does not say it). Return one row per statement: the H3 it
+     sits under with its Term, the statement in a few words, the grade,
+     and the original's line that settles it, byte for byte, with its
+     section — or "none".
+
+   Merge the rows into §1 and into a fact sheet under `.scratch/`: what
+   the paper actually says, with the original's line beside each. D3
+   writes from the fact sheet. A statement graded 틀림 or 원문 없음 is
+   never the paper's in §2 – §9.
+
+D3. CONFRONT — §2 to §9, in order. The paper's side comes from the fact
+   sheet, from `python3 site/query.py section <id> --match "<Term>"` for
+   the part a section needs, and from `builder.arxiv` for every quote and
+   every number. The scope's side comes from the digest and `grep -n` into
+   the files it lists; open a listed file at the lines a bullet needs, never
+   a directory. Walk the pipeline stage by stage for §4: what enters, what
+   is the anchor, how it is read, where it is injected, what is trained and
+   on what loss, what runs at inference. A stage one side does not have is
+   a bullet saying so, with the other side's anchor. §5 puts the two
+   experimental setups in one table; §6 sets numbers side by side only with
+   the condition that makes them comparable, and names the one that does
+   not. §7's gaps are the paper's own — an ablation, a failure case, a
+   stated limit, quoted — never what it did not mention. §8 follows step 4's
+   rules; §9 names keys the digest lists.
+
+D4. VERIFY — two readers, launched together, neither of which saw the
+   writing:
+
+     - PAPER: one agent with the draft's path under `.scratch/`, the id
+       and alias, the path of `METHOD.md`, and step 6's instruction
+       verbatim, with "§1, §2, §3 and §6" read as "§2 to §7".
+     - CODE: one agent with the draft's path, the path of `code/` and the
+       digest's path, and this instruction verbatim:
+
+         Open every `path:line` and `cfg:` anchor in this document at the
+         line it names and check the line says what the bullet uses it
+         for: the default, the branch, the tensor shape, the loss term.
+         A config key must be one the digest lists. Return one row per
+         anchor: the section, the anchor, holds / moved to <line> /
+         wrong — and the line as it reads.
+
+   Apply every row by step 6's rules: a paper statement below the grade its
+   section allows is cut or rewritten as a reading, a moved line takes its
+   new number, a wrong anchor takes its bullet with it or the bullet is
+   rewritten on what the code holds. When the Agent tool is not available,
+   stop before persisting and say so.
+
+D5. LINT + SELF-CHECK. Write the draft to `dissect/<id>--<scope>.md` —
+   the lint reads the folder — run step 8's lint, and fix the document
+   until it exits 0; a dissection that cannot pass is removed, not left
+   standing. Then:
+     - Does every §4 bullet name a stage on which the two really chose
+       differently, with the code that chose?
+     - Is every §6 pair comparable on the condition the bullet names?
+     - Did anything §1 graded 틀림 or 원문 없음 come back as the paper's?
+     - Was every row from D2 and D4 applied?
+
+D6. REPORT. In the chat, in Korean: the file's path, §1's count line, and
+   — when §1 holds a `틀림` or `과장` — `/analyze <id>` as the way to
+   correct the rewrite, which this mode never edits. Then stop.
+
+
+════════════════════════════════════════════════════════════════════════
 WHAT THIS MODE NEVER DOES
 ════════════════════════════════════════════════════════════════════════
 
 - Runs `git add`, `git commit` or `git push`, or writes any file under the
   checkout. `git log` and `git rev-parse` are the only git it uses.
 - Writes anywhere outside `$PROBE_PRIVATE_DIR` — a scratch file included.
-- Edits `BASKET.md`, `METHOD.md`, `CODEMAP.md` or anything in `code/`.
+- Edits `BASKET.md`, `METHOD.md`, `CODEMAP.md`, `codemap.sh` or anything in
+  `code/` — or a rewrite under `analysis/`, whatever the errata found.
 - Adds a paper to the basket. A candidate is a line under 제안.
 - Writes a bullet without its anchors, or a number it did not confirm as if
   it had (AUTHORING §4).
