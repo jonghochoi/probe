@@ -45,6 +45,7 @@ file the row points at.
 | `distinction/AUTHORING.md` | human | Format contract for what `/distinguish` writes into the operator's **private folder**, never into this repo |
 | `distinction/SETUP.md` | human | Operator guide for the private folder and the local distinction routine |
 | `distinction/templates/` | human | `BASKET.md` and `METHOD.md` skeletons for the private folder |
+| `distinction/run-distinguish.sh` | human | The script the local scheduler calls — pulls `main` and runs `/distinguish` headless with its tool list |
 | `.claude/prompts/**` | human | The agent prompts — one per track. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
 | `assets/` | human | The README images and `build-art.py` |
