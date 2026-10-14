@@ -38,6 +38,7 @@ $PROBE_PRIVATE_DIR/
   ledger/          one <arxiv-id>.md per basket paper the routine writes
   matrix.md        claims × papers                   the routine writes
   runs/            one YYYY-MM-DD.md per run         the routine writes
+  dissect/         one <arxiv-id>--<scope>.md each   `--dissect` writes
   .scratch/        the run's working files           the routine writes
 ```
 
@@ -101,6 +102,14 @@ What it writes is the contract:
 | `## Entry points` | the classes and functions a ledger would name — signature and docstring first line | `path:line` |
 | `## Results` | the current numbers, from the experiment logs, as a table | the run or log the row comes from |
 
+Run with no arguments, `codemap.sh` digests the code `METHOD.md` describes
+into `CODEMAP.md`. `--dissect` also calls it as `codemap.sh <scope> <out>`:
+`<scope>` is a bare name (`[a-z0-9_]+`) the script maps to a part of the
+codebase — which part is the script's alone, and no file in the checkout
+names it — and `<out>` is where the digest of that part goes, in the same
+four sections. A scope the script does not know exits non-zero and writes
+nothing, which stops the run.
+
 A digest that lists a key without its file gives the ledger nothing to cite
 (`distinction/AUTHORING.md` §4). With no `codemap.sh` the routine reads the
 `CODEMAP.md` it finds and notes its age in the delta; with no `CODEMAP.md`
@@ -129,6 +138,7 @@ claude --add-dir "$PROBE_PRIVATE_DIR"
 /distinguish            # delta mode
 /distinguish <alias>    # one ledger
 /distinguish --all      # every active row
+/distinguish --dissect <alias> <scope>   # one paper against one code scope
 ```
 
 `--add-dir` is what lets the session write outside the checkout. The first

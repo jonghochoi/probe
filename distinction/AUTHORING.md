@@ -2,7 +2,8 @@
 
 The format contract for the distinction track — the documents `/distinguish`
 writes into the private folder: one ledger per basket paper, the claims ×
-papers matrix, and one delta per run. Every one of them holds the method
+papers matrix, one delta per run, and on demand a dissection of one paper
+against one code scope. Every one of them holds the method or its code
 beside the papers, which is why none of them is in this repository.
 
 `.claude/prompts/distinguish.txt` defers to this file for what the documents
@@ -24,8 +25,9 @@ file, the prompt and the templates use placeholder ids, claims and keys —
 never a real one.
 
 The other rule the track inherits: **only a paper with a rewrite in
-`analysis/` gets a ledger** — the ledger reads it through `site/query.py`. A
-basket row without one is a next action in the delta (§3-3), not a ledger.
+`analysis/` gets a ledger** or a dissection — both read it through
+`site/query.py`. A basket row without one is a next action in the delta
+(§3-3), not a ledger.
 
 ## 2. What the routine reads and writes
 
@@ -41,11 +43,12 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 | `ledger/<arxiv-id>.md` | basket paper | yes — the ledger is the current position, never a history |
 | `matrix.md` | folder | yes |
 | `runs/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
+| `dissect/<arxiv-id>--<scope>.md` | `--dissect` run | yes — the latest reading of that paper against that scope |
 | `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
 
 ## 3. The documents
 
-All three are Korean, in the register `scouting/AUTHORING.md` §4 fixes (§6
+All four are Korean, in the register `scouting/AUTHORING.md` §4 fixes (§6
 below). Section headers are fixed strings: the lint matches them verbatim.
 
 ### 3-1. The ledger — `ledger/<arxiv-id>.md`
@@ -158,7 +161,7 @@ is the track working.
 
 ### 3-4. The shape of an idea
 
-A `###` under a ledger's §5 or a delta's §5 is one idea in five labels, each
+A `###` under a ledger's §5, a delta's §5 or a dissection's §8 is one idea in five labels, each
 on its own line, bold, in this order. They follow `/ideate`'s idea shape with
 one difference: a ledger is a position against the Decision Log, so where
 `/ideate` asks what an idea opens, a ledger names the `D#` it moves.
@@ -176,7 +179,56 @@ The method is the permanent third party here: an idea that does not take
 something from `METHOD.md` or `CODEMAP.md` is an `/ideate` answer and belongs
 in that chat, not in a ledger.
 
-## 4. Anchors
+### 3-5. The dissection — `dissect/<arxiv-id>--<scope>.md`
+
+The ledger is a position, kept short so the scheduled run can re-read it.
+The dissection is the long reading a human asks for when one paper matters:
+that paper's rewrite against one **code scope** — a bare name
+(`[a-z0-9_]+`) that the operator's `codemap.sh` resolves to a part of the
+codebase (`distinction/SETUP.md` §2-3) — and the rewrite itself checked
+against the original first, because every later section stands on what the
+paper actually says. The paper needs a rewrite; it need not be in the
+basket. Nothing else in the folder reads a dissection: no ledger, matrix or
+delta changes because one was written.
+
+```
+# <alias> × <scope> — <한 문장: 둘이 같은 문제를 어떻게 다르게 풀었나>
+Paper: XXXX.XXXXX · Scope: <scope> · Rewrite: analysis/XXXX.XXXXX.md · Code: 0000000 · Method: 0000000 · Run: YYYY-MM-DD
+
+## 1 재작성본 정오표
+## 2 동기
+## 3 공통
+## 4 구성요소 대조
+## 5 실험 설정
+## 6 결과 대조
+## 7 빈자리와 메움
+## 8 빌려 올 것
+## 9 반증 실험
+```
+
+The metadata line holds exactly six fields: the paper id, the scope, the
+rewrite read, the codebase's short commit hash as the scope's digest prints
+it, the first seven hex digits of the SHA-256 of `METHOD.md`, and the run
+date. The file name carries the same id and scope.
+
+| Section | Holds | Each bullet carries (§4) |
+|---|---|---|
+| `1 재작성본 정오표` | One line `점검 N · 맞음 n · 틀림 n · 과장 n · 원문 없음 n`, then one bullet per statement the errata pass graded other than `맞음`, and one per `맞음` statement a later section rests on | a verdict first — `맞음`, `틀림` the original says otherwise, `과장` it says less, `원문 없음` it does not say it — then a paper anchor; every verdict but `원문 없음` also a quote anchor |
+| `2 동기` | The problem each side set out to solve, and why then — theirs in their words, this scope's from `METHOD.md` §0 or as a reading | a quote anchor for theirs |
+| `3 공통` | The setting, the mechanism, the evaluation the two share | a paper anchor and a code, config or `METHOD §n` anchor |
+| `4 구성요소 대조` | One `###` per pipeline stage — input, anchor, read-out, injection, loss, inference, training recipe — each bullet their choice against this scope's | a paper anchor and a code or config anchor |
+| `5 실험 설정` | One table, `\| 축 \| <alias> \| <scope> \|`: benchmark, embodiment, data scale, metric, baselines, compute | each row's scope cell a code, config or `METHOD §n` anchor, or `없음` |
+| `6 결과 대조` | Their numbers, confirmed in the original, beside the scope's from the digest's Results or `METHOD.md` §3, and what keeps a pair from being comparable | a quote anchor or `원문 미확인` |
+| `7 빈자리와 메움` | Each gap the paper states itself — ablation, failure case, stated limit — and whether this scope reaches it | a verdict first — `메운다`, `부분` or `못 메운다` — then a quote anchor |
+| `8 빌려 올 것` | At most three `###` ideas, strongest first, in the §3-4 shape | the five labels |
+| `9 반증 실험` | The runs on this scope that would show a §3 – §7 reading wrong | at least one `cfg:` anchor — the keys and the values |
+
+A statement §1 grades `틀림` or `원문 없음` is never written as the paper's
+in §2 – §9; where a later section needs it, it is the rewrite's reading and
+says so. `C#` and `METHOD §n` anchors are allowed throughout and required
+nowhere: they bind only when the scope is the code `METHOD.md` describes.
+A section with nothing to say holds `- 없음`, as in the ledger.
+
 
 **A bullet without its anchors is not written.** The anchors are what make a
 row a lookup the reader can run rather than a claim the reader must trust, and
@@ -218,7 +270,8 @@ Which sections need which is §3-1's table. Four further rules:
 ### 4-1. Evidence grades
 
 Every paper-side statement in a ledger has one of three grades, and the grade
-decides where it may stand. The verify pass (prompt step 6) assigns them.
+decides where it may stand. The verify pass (prompt step 6, or D4 for a
+dissection) assigns them.
 
 | Grade | Means | May carry |
 |---|---|---|
@@ -234,6 +287,8 @@ decides where it may stand. The verify pass (prompt step 6) assigns them.
 | Ideas per ledger (§3-1 `5`) | 2 | the ledger is a position, not a brainstorm |
 | Ideas per delta (§3-3 `5`) | 3 | `/ideate`'s own ceiling, for the same reason |
 | Ledger prose | 7,000 characters outside fences | the comparison ceiling; a ledger past it has started explaining the paper, which its rewrite already does |
+| Ideas per dissection (§3-5 `8`) | 3 | `/ideate`'s ceiling |
+| Dissection prose | 20,000 characters outside fences | room for every stage and the errata, short of retelling the paper |
 | Ledgers audited per delta run | half the active ones, rounded up | at the two scheduled runs a week (`distinction/SETUP.md` §4) every ledger is re-read within the week, and no run carries the whole basket |
 
 ## 6. Korean authoring
@@ -246,7 +301,7 @@ anchor, `C#`, `D#`, id and config key included), the glossary, fixed headers,
 
 `METHOD.md` §6 lists literal strings — a codename, a number, a dataset, a
 collaborator — that no output may carry yet. The lint fails on any of them in
-a ledger, the matrix or a run, and the routine does not save an output the
+a ledger, the matrix, a run or a dissection, and the routine does not save an output the
 lint fails. A ledger that needs to say the thing says it by its `C#` or
 `METHOD §n` anchor.
 
@@ -266,7 +321,8 @@ checks is in no checkout.
 | §3-2 | the matrix's rows are `METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the delta's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a ledger id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
-| §5 | active rows, ideas per ledger and per delta, ledger prose length |
+| §3-5 | the dissection's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor |
+| §5 | active rows, ideas per ledger, per delta and per dissection, ledger and dissection prose length |
 | §7 | no `METHOD.md` §6 string in any output |
 | inputs | `BASKET.md` rows parse — id, role and status from their sets, no duplicate id; `METHOD.md` carries its spine and one bullet per `#### [C#]` |
 
@@ -285,4 +341,8 @@ original and grades every paper-side statement (§4-1). The writer reads its
 own work with the reasons it wrote it; the verifier reads only the page. The
 audit (prompt step 7) sends a ledger nothing changed under back to a fresh
 verifier and re-resolves its code and method anchors, so a miss or a moved
-line does not stand for longer than a week.
+line does not stand for longer than a week. A dissection gets readers of
+its own (prompt D2 and D4): the errata pass reads the rewrite against the
+original before anything is written on it, and a code reader opens every
+`path:line` and `cfg:` anchor and checks it says what the bullet uses it
+for.
