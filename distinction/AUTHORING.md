@@ -41,6 +41,7 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 | `ledger/<arxiv-id>.md` | basket paper | yes — the ledger is the current position, never a history |
 | `matrix.md` | folder | yes |
 | `runs/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
+| `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
 
 ## 3. The documents
 

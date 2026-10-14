@@ -38,6 +38,7 @@ $PROBE_PRIVATE_DIR/
   ledger/          one <arxiv-id>.md per basket paper the routine writes
   matrix.md        claims × papers                   the routine writes
   runs/            one YYYY-MM-DD.md per run         the routine writes
+  .scratch/        the run's working files           the routine writes
 ```
 
 The two human-written files start from `distinction/templates/BASKET.md` and
@@ -188,8 +189,10 @@ WantedBy=timers.target
 `systemctl --user enable --now distinguish.timer` starts it, and
 `systemctl --user start distinguish.service` runs it once now. A user timer
 runs only while the user is logged in unless `loginctl enable-linger` is on.
-The log is the place to read a run that no one watched; the private folder's
-own `.gitignore`, if it is a repository, lists it.
+The log is the place to read a run that no one watched. When the private
+folder is a git repository of its own — the way to keep its history — its
+`.gitignore` lists the log, `.scratch/`, `CODEMAP.md` (regenerated each run)
+and `code`.
 
 One run at a time: the delta reads the previous run's state block, and two
 runs reading the same block write two deltas against one baseline.
