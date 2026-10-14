@@ -5,7 +5,7 @@ The distinction track writes nothing into the repository: its ledgers, matrix
 and deltas hold the method beside the papers, so they live in a private folder
 on the machine that runs `/distinguish` (`distinction/SETUP.md` §2). No build
 reads them and no workflow can, which makes this lint the track's only gate —
-the routine runs it before saving (prompt step 7), and a human runs it after
+the routine runs it before saving (prompt step 8), and a human runs it after
 editing a document by hand.
 
 Checks, grouped by the contract section they enforce:
@@ -20,9 +20,11 @@ Checks, grouped by the contract section they enforce:
              a quote anchor (`원문 §<section> "<English>"`) or `원문 미확인`.
   AUTHORING §3-2 the matrix — rows are METHOD's claims, columns the active
              rewritten basket, each cell opening with a verdict.
-  AUTHORING §3-3 the delta — the H1 date is the file's, the seven headers, at
-             most three `###` under `5`, a closing `probe-state` fence that
-             parses and carries every key.
+  AUTHORING §3-3 the delta — the H1 date is the file's, the seven headers and
+             an optional eighth `## 8 감사` whose every bullet names a ledger
+             id, at most three `###` under `5`, a closing `probe-state` fence
+             that parses, carries every key and, when it has `verified`,
+             maps ids to dates.
   AUTHORING §3-4 every `###` idea carries the five labels in order, and a
              `D#` it names exists in a pillar's Decision Log.
   AUTHORING §5   active rows <= 12, ideas per ledger <= 2, ledger prose
@@ -58,6 +60,8 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _ARXIV_ID = re.compile(r"^\d{4}\.\d{5}$")
 _LEDGER_NAME = re.compile(r"^(\d{4}\.\d{5})\.md$")
 _RUN_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.md$")
+_ARXIV_IN = re.compile(r"\b\d{4}\.\d{5}\b")
+_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 _ROLES = ("baseline", "nearest", "threat", "donor")
 _STATUSES = ("active", "parked", "graduated")
@@ -78,6 +82,8 @@ _RUN_SPINE = (
     "## 1 코퍼스 변화", "## 2 바구니 변화", "## 3 방법론 변화", "## 4 매트릭스 전이",
     "## 5 새 아이디어", "## 6 제안", "## 7 다음 행동",
 )
+# Present when the run audited (prompt step 7) — delta and `--audit` runs.
+_RUN_AUDIT = "## 8 감사"
 _METHOD_SPINE = (
     "## 0. 문제의식", "## 1. 주장", "## 2. 방법", "## 3. 측정",
     "## 4. 알려진 약점", "## 5. 진행 중", "## 6. 외부 발화 금지",
@@ -459,13 +465,20 @@ def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[
         findings.append((name, 1, f"§3-3 H1 date {h1.group(1)} differs from the file name"))
 
     headers = [(raw.rstrip(), ln) for ln, raw in enumerate(lines, start=1) if _H2.match(raw)]
-    if [h for h, _ in headers] != list(_RUN_SPINE):
-        findings.append((name, headers[0][1] if headers else 0, "§3-3 the `##` headers are not the seven of the spine, verbatim and in order"))
+    if [h for h, _ in headers] not in (list(_RUN_SPINE), list(_RUN_SPINE) + [_RUN_AUDIT]):
+        findings.append((name, headers[0][1] if headers else 0, "§3-3 the `##` headers are not the seven of the spine and an optional `8 감사`, verbatim and in order"))
     sections = {h: body for h, _, body in _sections(lines, _H2)}
     for key in _RUN_SPINE:
         if key in sections and key != _RUN_SPINE[4] and not _top_bullets(sections[key]):
             findings.append((name, 0, f"§3-3 {key[3:]} holds no bullet (write `- 없음` when nothing moved)"))
     _check_ideas(name, sections.get(_RUN_SPINE[4], []), _IDEAS_PER_RUN, "새 아이디어", decisions, findings)
+    if _RUN_AUDIT in sections:
+        audited = _top_bullets(sections[_RUN_AUDIT])
+        if not audited:
+            findings.append((name, 0, "§3-3 감사 holds no bullet — one per audited ledger"))
+        for ln, raw in audited:
+            if not _ARXIV_IN.search(raw):
+                findings.append((name, ln, "§3-3 a 감사 bullet names no ledger id"))
 
     # The closing probe-state fence.
     state_start = None
@@ -501,6 +514,12 @@ def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[
                 findings.append((name, state_start + 2, "§3-3 probe-state `run` differs from the file date"))
             if not isinstance(state.get("related"), dict):
                 findings.append((name, state_start + 2, "§3-3 probe-state `related` is not an object of id -> [ids]"))
+            verified = state.get("verified")
+            if verified is not None and not (
+                isinstance(verified, dict)
+                and all(_ARXIV_ID.match(k) and isinstance(v, str) and _DATE.match(v) for k, v in verified.items())
+            ):
+                findings.append((name, state_start + 2, "§3-3 probe-state `verified` is not an object of id -> YYYY-MM-DD"))
         elif state is not None:
             findings.append((name, state_start + 2, "§3-3 probe-state is not a JSON object"))
 

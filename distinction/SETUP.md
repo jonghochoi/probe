@@ -141,7 +141,8 @@ tightened against.
 The scheduler calls `distinction/run-distinguish.sh` in the checkout. The
 script finds the checkout from its own path, appends everything it prints to
 `$PROBE_PRIVATE_DIR/runs/distinguish.log`, stops unless the checkout is on
-`main`, pulls, and runs `/distinguish` in delta mode with `claude -p`.
+`main`, pulls, and runs `/distinguish` in delta mode with `claude -p` — which also
+audits half the active ledgers (prompt step 7).
 
 `-p` runs one turn with no one to approve a tool, so the script grants every
 tool the procedure uses up front and nothing it must not — no `git add`,
@@ -155,13 +156,15 @@ the machine before the first scheduled run.
 
 The scheduler entry is the machine-specific half — it names the checkout,
 sets `PROBE_PRIVATE_DIR`, and puts `claude` on `PATH`, which a scheduled job
-does not inherit from the login shell. Weekly, with a missed run made up at
-the next boot:
+does not inherit from the login shell. Twice a week, Tuesday and Thursday at
+noon — the cadence the audit is sized to, so every ledger is re-read within
+the week (`distinction/AUTHORING.md` §5) — with a missed run made up at the
+next boot:
 
 | Scheduler | Entry |
 |---|---|
 | **systemd timer** (Linux) | A user service and timer, below. `Persistent=true` fires a timer missed while off at the next boot |
-| **cron** (Linux) | `0 7 * * 1 PROBE_PRIVATE_DIR=$HOME/probe-private PATH=$HOME/.local/bin:/usr/bin:/bin <checkout>/distinction/run-distinguish.sh`. cron does not make up a missed run — on a machine that is not always on, use the timer or `anacron` |
+| **cron** (Linux) | `0 12 * * 2,4 PROBE_PRIVATE_DIR=$HOME/probe-private PATH=$HOME/.local/bin:/usr/bin:/bin <checkout>/distinction/run-distinguish.sh`. cron does not make up a missed run — on a machine that is not always on, use the timer or `anacron` |
 
 The systemd pair, in `~/.config/systemd/user/`:
 
@@ -175,7 +178,7 @@ ExecStart=<checkout>/distinction/run-distinguish.sh
 
 # distinguish.timer
 [Timer]
-OnCalendar=weekly
+OnCalendar=Tue,Thu *-*-* 12:00:00
 Persistent=true
 
 [Install]
@@ -210,7 +213,9 @@ Run `/distinguish --all` by hand (§3) before the schedule, then check:
       stated limit — the two things the lint cannot see
       (`distinction/AUTHORING.md` §8).
 - [ ] `runs/<date>.md` ends in a `probe-state` block, and a second `/distinguish`
-      run straight after writes a no-change delta and rewrites no ledger.
+      run on a later day writes a no-change delta, rewrites no ledger, and
+      lists the ledgers it audited under `8 감사` with their dates in
+      `verified`.
 - [ ] `git status` in the checkout is clean. Nothing the run wrote is there.
 
 If a check fails, fix `.claude/prompts/distinguish.txt`, `distinction/AUTHORING.md`
