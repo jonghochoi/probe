@@ -70,6 +70,7 @@ is pointed at from §0, not repeated. The spine, which the lint reads:
 
 ```
 # METHOD — <working title>
+name: <short name>                    what every output calls this method
 code: <absolute path>                 optional; else the `code` symlink
 
 ## 0. 문제의식                        the half that cannot be public
