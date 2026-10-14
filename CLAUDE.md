@@ -45,6 +45,7 @@ file the row points at.
 | `distinction/AUTHORING.md` | human | Format contract for what `/distinguish` writes into the operator's **private folder**, never into this repo |
 | `distinction/SETUP.md` | human | Operator guide for the private folder and the local distinction routine |
 | `distinction/templates/` | human | `BASKET.md` and `METHOD.md` skeletons for the private folder |
+| `distinction/render-dissect.py` | human | Draws a dissection as one standalone HTML page beside it, on the standard library, with the site's tokens and charts |
 | `distinction/run-distinguish.sh` | human | The script the local scheduler calls — pulls `main` and runs `/distinguish` headless with its tool list |
 | `.claude/prompts/**` | human | The agent prompts — one per track. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
@@ -178,6 +179,7 @@ distinction lint. Run the ones your change touches before pushing.
 | `analysis/`, `comparison/`, `presentation/`, `scouting/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
 | `presentation/` | `python3 linters/check-presentation-format.py` |
 | the private folder `/distinguish` writes | `python3 linters/check-distinction-format.py` with `PROBE_PRIVATE_DIR` set |
+| `distinction/render-dissect.py`, `site/builder/charts.py`, `site/builder/decisions.py`, `site.css` tokens or `presentation.css` drawn figures | `python3 -I -S distinction/render-dissect.py <a dissection> -o <scratch>.html` (`-S` proves the standard library suffices) |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` proves the standard library suffices) |
 | `assets/build-art.py` | `python3 assets/build-art.py --check` |
 | `site/search/function/` | `npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null` |

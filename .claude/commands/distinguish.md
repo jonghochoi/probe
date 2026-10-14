@@ -6,5 +6,5 @@ argument-hint: [<arXiv id | alias> | --all | --audit | --dissect <arXiv id | ali
 - **실행** — `.claude/prompts/distinguish.txt` 를 읽고 그대로 실행 (로직 복제·변경 금지).
 - **출력 형식** — 프롬프트가 아니라 `distinction/AUTHORING.md` 가 정본. 쓰기 전에 끝까지 읽는다.
 - **어디서** — 코드베이스가 있는 **로컬 머신**에서만. `PROBE_PRIVATE_DIR` 이 비공개 폴더(`BASKET.md`·`METHOD.md`·`code`)를 가리켜야 하고, 없으면 첫 단계에서 멈춘다. 폴더 준비는 `distinction/SETUP.md`.
-- **인자** — `$ARGUMENTS` = 비어 있으면 **델타 모드**(지난 런 이후 바뀐 것에 걸린 논문만 다시 쓴다), 논문 하나(arXiv id 또는 alias)면 그 장부만, `--all` 이면 바구니 전부를 다시 쓴다. `--dissect <논문> <범위>` 면 재작성본을 원문과 먼저 대조한 뒤 그 논문을 코드 범위 하나(`codemap.sh` 가 해석하는 이름)와 맞댄 해부 한 편만 쓴다 — 바구니에 없는 논문도 되고, 장부·매트릭스·델타는 건드리지 않는다.
+- **인자** — `$ARGUMENTS` = 비어 있으면 **델타 모드**(지난 런 이후 바뀐 것에 걸린 논문만 다시 쓴다), 논문 하나(arXiv id 또는 alias)면 그 장부만, `--all` 이면 바구니 전부를 다시 쓴다. `--dissect <논문> <범위>` 면 재작성본을 원문과 먼저 대조한 뒤 그 논문을 코드 범위 하나(`codemap.sh` 가 해석하는 이름)와 맞댄 해부 한 편만 쓴다 — 바구니에 없는 논문도 되고, 장부·매트릭스·델타는 건드리지 않는다. 해부 옆에는 읽기용 HTML 보기(`dissect/<id>--<scope>.html`)를 그린다.
 - **쓰는 곳** — `$PROBE_PRIVATE_DIR` 아래 `ledger/`·`matrix.md`·`runs/`·`dissect/` 만. 이 레포에는 파일도 커밋도 남기지 않는다.

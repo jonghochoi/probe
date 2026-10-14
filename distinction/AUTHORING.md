@@ -44,6 +44,7 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 | `matrix.md` | folder | yes |
 | `runs/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
 | `dissect/<arxiv-id>--<scope>.md` | `--dissect` run | yes — the latest reading of that paper against that scope |
+| `dissect/<arxiv-id>--<scope>.html` | dissection | yes — redrawn from the Markdown by `distinction/render-dissect.py`, never edited by hand |
 | `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
 
 ## 3. The documents
@@ -229,6 +230,26 @@ says so. `C#` and `METHOD §n` anchors are allowed throughout and required
 nowhere: they bind only when the scope is the code `METHOD.md` describes.
 A section with nothing to say holds `- 없음`, as in the ledger.
 
+**§6 may draw the numbers it compares.** Up to three ` ```probe-chart `
+fences stand among §6's bullets, in the shape `presentation/AUTHORING.md`
+§4-6 fixes for a slide — `kind`, `series`, `source`, `why`, `omitted`, and
+`alt` for the sentence a reader without the drawing gets. Every value is one
+the original prints and this document already rests on — a §1 `맞음` row, a
+`원문 §TABLE-<n>` quote, a §6 bullet — or one of the scope's own results
+under the anchor that §6 gives it, and `source` names the table or the
+section. `us` marks the scope's series when the chart holds one, else the
+paper's own method; a gap a row measures is named by that row's `vs`. No
+`step` or `steps`: a page has no presenter to advance it. A fence anywhere
+but §6 is not drawn.
+
+**The page beside it is a view.** `python3 distinction/render-dissect.py
+dissect/<id>--<scope>.md` writes `dissect/<id>--<scope>.html` — one file in
+the reading site's look, opened from disk: the errata as a bar split by
+verdict, each §4 stage as a card, the anchors as links into the code and
+the rewrite, the §6 fences drawn. It adds arrangement and no content, so the
+Markdown stays the record the lint reads, and a fix goes into the Markdown
+and the page is drawn again.
+
 
 **A bullet without its anchors is not written.** The anchors are what make a
 row a lookup the reader can run rather than a claim the reader must trust, and
@@ -289,6 +310,7 @@ dissection) assigns them.
 | Ledger prose | 7,000 characters outside fences | the comparison ceiling; a ledger past it has started explaining the paper, which its rewrite already does |
 | Ideas per dissection (§3-5 `8`) | 3 | `/ideate`'s ceiling |
 | Dissection prose | 20,000 characters outside fences | room for every stage and the errata, short of retelling the paper |
+| Charts per dissection (§3-5 `6`) | 3 | a chart is for the comparison the section turns on, not for every number it states |
 | Ledgers audited per delta run | half the active ones, rounded up | at the two scheduled runs a week (`distinction/SETUP.md` §4) every ledger is re-read within the week, and no run carries the whole basket |
 
 ## 6. Korean authoring
@@ -321,8 +343,8 @@ checks is in no checkout.
 | §3-2 | the matrix's rows are `METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the delta's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a ledger id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
-| §3-5 | the dissection's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor |
-| §5 | active rows, ideas per ledger, per delta and per dissection, ledger and dissection prose length |
+| §3-5 | the dissection's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted`, with no `step` |
+| §5 | active rows, ideas per ledger, per delta and per dissection, charts per dissection, ledger and dissection prose length |
 | §7 | no `METHOD.md` §6 string in any output |
 | inputs | `BASKET.md` rows parse — id, role and status from their sets, no duplicate id; `METHOD.md` carries its spine and one bullet per `#### [C#]` |
 

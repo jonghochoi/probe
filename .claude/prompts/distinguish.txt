@@ -81,9 +81,9 @@ INPUT
   `--dissect <paper> <scope>` — one paper (an arXiv id or an alias)
   against one code scope (a bare name `codemap.sh` resolves). Runs step 0,
   then DISSECT below in place of steps 1 to 9. The paper needs a rewrite;
-  it need not be in the basket. Writes one file,
-  `dissect/<id>--<scope>.md`, and touches no ledger, no matrix, no
-  `runs/` file and no `probe-state` block.
+  it need not be in the basket. Writes `dissect/<id>--<scope>.md` and the
+  page drawn from it, and touches no ledger, no matrix, no `runs/` file and
+  no `probe-state` block.
 
   A PAPER NOT IN THE BASKET (without `--dissect`) → stop and say so. Whether it enters is the
   human's; name it under 제안 if a delta is being written anyway.
@@ -369,7 +369,8 @@ D3. CONFRONT — §2 to §9, in order. The paper's side comes from the fact
    a bullet saying so, with the other side's anchor. §5 puts the two
    experimental setups in one table; §6 sets numbers side by side only with
    the condition that makes them comparable, and names the one that does
-   not. §7's gaps are the paper's own — an ablation, a failure case, a
+   not; where a §6 pair turns on numbers, draw it with a ` ```probe-chart `
+   under `distinction/AUTHORING.md` §3-5's chart rule. §7's gaps are the paper's own — an ablation, a failure case, a
    stated limit, quoted — never what it did not mention. §8 follows step 4's
    rules; §9 names keys the digest lists.
 
@@ -404,8 +405,12 @@ D5. LINT + SELF-CHECK. Write the draft to `dissect/<id>--<scope>.md` —
      - Is every §6 pair comparable on the condition the bullet names?
      - Did anything §1 graded 틀림 or 원문 없음 come back as the paper's?
      - Was every row from D2 and D4 applied?
+   Then draw the page:
+   `python3 distinction/render-dissect.py "$PROBE_PRIVATE_DIR/dissect/<id>--<scope>.md"`.
+   A non-zero exit names the chart it cannot draw; fix the fence and draw
+   again.
 
-D6. REPORT. In the chat, in Korean: the file's path, §1's count line, and
+D6. REPORT. In the chat, in Korean: the file's path and its page's, §1's count line, and
    — when §1 holds a `틀림` or `과장` — `/analyze <id>` as the way to
    correct the rewrite, which this mode never edits. Then stop.
 
