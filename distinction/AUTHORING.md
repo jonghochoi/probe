@@ -44,7 +44,7 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 | `matrix.md` | folder | yes |
 | `runs/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
 | `dissect/<arxiv-id>--<scope>.md` | `--dissect` run | yes — the latest reading of that paper against that scope |
-| `dissect/<arxiv-id>--<scope>.html` | dissection | yes — redrawn from the Markdown by `distinction/render-dissect.py`, never edited by hand |
+| `ledger/<id>.html`, `runs/<date>.html`, `dissect/<id>--<scope>.html` | document | yes — the page drawn from it (§3-6) |
 | `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
 
 ## 3. The documents
@@ -242,14 +242,19 @@ paper's own method; a gap a row measures is named by that row's `vs`. No
 `step` or `steps`: a page has no presenter to advance it. A fence anywhere
 but §6 is not drawn.
 
-**The page beside it is a view.** `python3 distinction/render-dissect.py
-dissect/<id>--<scope>.md` writes `dissect/<id>--<scope>.html` — one file in
-the reading site's look, opened from disk: the errata as a bar split by
-verdict, each §4 stage as a card, the anchors as links into the code and
-the rewrite, the §6 fences drawn. It adds arrangement and no content, so the
-Markdown stays the record the lint reads, and a fix goes into the Markdown
-and the page is drawn again.
+### 3-6. The pages beside them
 
+Every ledger, delta and dissection gets a page beside it —
+`ledger/<id>.html`, `runs/<date>.html`, `dissect/<id>--<scope>.html` — drawn
+by `python3 distinction/render-distinction.py`: one file in the reading
+site's look, opened from disk. A page adds arrangement and no content — a
+ledger's §2 sides set side by side, a delta's ids linked to their ledgers and
+its runs to each other, a dissection's errata as a bar and its §6 fences
+drawn, every anchor a link into the code or the rewrite. The Markdown stays
+the record the lint reads and the next run builds on, so a fix goes into the
+Markdown and the page is drawn again; a page is never edited by hand.
+
+## 4. Anchors
 
 **A bullet without its anchors is not written.** The anchors are what make a
 row a lookup the reader can run rather than a claim the reader must trust, and

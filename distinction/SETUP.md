@@ -35,9 +35,9 @@ $PROBE_PRIVATE_DIR/
   CODEMAP.md       the code digest                   codemap.sh writes §2-3
   codemap.sh       the operator's digest script      human-written     §2-3
   code -> …        symlink to the codebase           or `code:` in METHOD.md §2-4
-  ledger/          one <arxiv-id>.md per basket paper the routine writes
+  ledger/          <arxiv-id>.md and .html per paper the routine writes
   matrix.md        claims × papers                   the routine writes
-  runs/            one YYYY-MM-DD.md per run         the routine writes
+  runs/            YYYY-MM-DD.md and .html per run   the routine writes
   dissect/         <arxiv-id>--<scope>.md and .html  `--dissect` writes
   .scratch/        the run's working files           the routine writes
 ```
@@ -141,11 +141,12 @@ claude --add-dir "$PROBE_PRIVATE_DIR"
 /distinguish --dissect <alias> <scope>   # one paper against one code scope
 ```
 
-A dissection's page is drawn from its Markdown, so after editing one by
-hand, draw it again:
+Each ledger, delta and dissection has a page drawn from its Markdown
+(`distinction/AUTHORING.md` §3-6). After editing one by hand, draw them
+again:
 
 ```bash
-python3 distinction/render-dissect.py "$PROBE_PRIVATE_DIR/dissect/<id>--<scope>.md"
+python3 distinction/render-distinction.py          # every page in $PROBE_PRIVATE_DIR
 ```
 
 `--add-dir` is what lets the session write outside the checkout. The first
