@@ -100,7 +100,7 @@ def esc(text: str) -> str:
 
 
 class Context:
-    def __init__(self, private: str, paper_id: str, kind: str):
+    def __init__(self, private: str, paper_id: str, kind: str, scope: str = ""):
         self.private = private
         self.paper_id = paper_id
         self.kind = kind
@@ -117,6 +117,9 @@ class Context:
             self.ledgers[lid] = first[2:].partition(" — ")[0].strip() if first.startswith("# ") else lid
         self.decisions = {k: t for k, (_, t) in harvest_decisions().items()}
         self.claims: dict[str, str] = {}
+        # What our side is called beside the paper's alias (AUTHORING §6):
+        # the scope a dissection names, else `METHOD.md`'s `name:`.
+        self.ours = scope
         code = os.path.join(private, "code")
         try:
             with open(os.path.join(private, "METHOD.md"), encoding="utf-8") as fh:
@@ -127,6 +130,9 @@ class Context:
                     m = re.match(r"^code: (/\S+)", raw)
                     if m:
                         code = m.group(1)
+                    m = re.match(r"^name: (\S+)", raw)
+                    if m and not self.ours:
+                        self.ours = m.group(1)
         except OSError:
             pass
         self.code_root = os.path.realpath(code) if os.path.exists(code) else None
@@ -238,9 +244,12 @@ def _ev(tail: list[str], ctx: Context) -> str:
             + "</div>")
 
 
-# `<그들> 은 …, 이 범위는 …` — a §4 bullet that sets the two sides in one
-# sentence, cut where the scope's half begins.
-_SIDES = re.compile(r"^(.+?), ((이 범위|이 방법)(?:은|는|의|도) .+)$")
+# `<alias> 은 …, <ours> 는 …` — a bullet that sets the two sides in one
+# sentence, cut where our side's half begins.
+def _sides(text: str, ours: str) -> re.Match | None:
+    if not ours:
+        return None
+    return re.match(rf"^(.+?), ({re.escape(ours)}\s*(?:은|는|의|도)\s+(.+))$", text)
 
 
 def _labelled(text: str) -> tuple[str, str]:
@@ -305,12 +314,11 @@ def _row(text: str, ctx: Context, badge: str = "", cls: str = "",
                f' <small class="ax-led">{label}</small></a>')
     else:
         lab = f'<span class="dx-label">{inline(label, ctx)}</span>' if label else ""
-    sides = _SIDES.match(rest) if alias else None
+    sides = _sides(rest, ctx.ours) if alias else None
     if sides and rest.startswith(alias):
         theirs = re.sub(rf"^{re.escape(alias)}\s*(?:은|는|의)\s+", "", sides.group(1))
-        ours = re.sub(r"^이 (?:범위|방법)(?:은|는|의|도)\s+", "", sides.group(2))
         body = (f'<div class="dx-sides"><div><span class="dx-sh">{esc(alias)}</span>{inline(theirs, ctx)}</div>'
-                f'<div><span class="dx-sh">{sides.group(3)}</span>{inline(ours, ctx)}</div></div>')
+                f'<div><span class="dx-sh">{esc(ctx.ours)}</span>{inline(sides.group(3), ctx)}</div></div>')
     else:
         body = f'<div class="dx-text">{inline(rest, ctx)}</div>'
     return (f'<li class="dx-row {cls}"><div class="dx-head">{head}{lab}</div>'
@@ -582,7 +590,7 @@ a.ax:hover{text-decoration:none;border-color:var(--orange)}
 .dx-sides{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-top:.35rem;font-size:.93rem}
 .dx-sides>div{padding:.55rem .75rem;border-radius:var(--radius);background:var(--surface-2)}
 .dx-sides>div:last-child{background:var(--orange-soft)}
-.dx-sides>div>.dx-sh{display:block;font:700 .72rem var(--ko);color:var(--text-muted);margin-bottom:.15rem}
+.dx-sides>div>.dx-sh{display:block;font:700 .72rem var(--ko);color:var(--text-muted);margin-bottom:.15rem;overflow-wrap:anywhere}
 .dx-sides>div:last-child>.dx-sh{color:var(--orange-ink)}
 .ax-code b{color:var(--orange-ink);font-weight:600}
 .ax-cfg span{color:var(--blue);margin-right:.35em;font-weight:700}
@@ -633,7 +641,7 @@ document.querySelectorAll('.dx-key').forEach(function(a){a.onclick=function(){va
 
 _KINDS = {
     "dissect": ("해부", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
-    "ledger": ("장부", "이 방법 × 논문 하나 · 비공개", "일곱 절"),
+    "ledger": ("장부", "방법 × 논문 하나 · 비공개", "일곱 절"),
     "runs": ("델타", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
 }
 
@@ -660,8 +668,9 @@ def render(path: str) -> tuple[str, list[str]]:
     name = os.path.basename(path)
     kind = _kind(path) or "dissect"
     noun, eyebrow, spine = _KINDS[kind]
-    m = re.match(r"^(\d{4}\.\d{5})", name)
-    ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), m.group(1) if m else "", kind)
+    m = re.match(r"^(\d{4}\.\d{5})(?:--([a-z0-9_]+))?\.md$", name)
+    ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), m.group(1) if m else "", kind,
+                  (m.group(2) or "") if m else "")
 
     h1 = lines[0][2:] if lines and lines[0].startswith("# ") else name
     if kind == "runs":

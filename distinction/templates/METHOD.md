@@ -1,5 +1,6 @@
 # METHOD — <working title of the paper>
 
+name: <short name — what a ledger and a delta call this method beside a paper's alias>
 code: <absolute path to the codebase — or leave this line out and put a `code` symlink beside this file>
 
 <!-- Human-owned. The routine reads this file and never edits it. Section

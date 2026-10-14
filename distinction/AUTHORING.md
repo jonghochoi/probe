@@ -58,7 +58,7 @@ below). Section headers are fixed strings: the lint matches them verbatim.
 against one paper**, and every section is one question asked in that order.
 
 ```
-# <alias> — <한 문장: 이 논문 앞에서 내 방법은 무엇인가>
+# <alias> — <한 문장: 이 논문 앞에서 METHOD.md 의 name 은 무엇인가>
 Role: baseline · Claims: C1, C3 · Rewrite: analysis/XXXX.XXXXX.md · Method: 0000000 · Run: YYYY-MM-DD
 
 ## 1 공통
@@ -324,6 +324,15 @@ dissection) assigns them.
 anchor, `C#`, `D#`, id and config key included), the glossary, fixed headers,
 개조식, and the three render traps (§4-6 – §4-8).
 
+**Both sides go by name.** A sentence that sets the paper beside our side
+names the paper by its alias and our side by its own name: in a ledger and a
+delta the `name:` line of `METHOD.md`, in a dissection the scope as its H1 and
+file name carry it. A pointer word — `이 방법`, `이 범위`, `내 방법`, `우리` —
+reads one way to the writer and another to someone who opens the page a month
+later from a different scope's dissection, so none of them is written outside
+a fixed `##` header or a quote. The name takes `은`, `는`, `의` or `도` after a
+space, as the alias does, and a page splits a two-sided sentence at it.
+
 ## 7. What never leaves
 
 `METHOD.md` §6 lists literal strings — a codename, a number, a dataset, a
@@ -350,8 +359,9 @@ checks is in no checkout.
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
 | §3-5 | the dissection's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted`, with no `step` |
 | §5 | active rows, ideas per ledger, per delta and per dissection, charts per dissection, ledger and dissection prose length |
+| §6 | no `이 방법`, `이 범위`, `내 방법` or `우리` in any output outside a `##` header or a `"…"` quote |
 | §7 | no `METHOD.md` §6 string in any output |
-| inputs | `BASKET.md` rows parse — id, role and status from their sets, no duplicate id; `METHOD.md` carries its spine and one bullet per `#### [C#]` |
+| inputs | `BASKET.md` rows parse — id, role and status from their sets, no duplicate id; `METHOD.md` carries its spine, a `name:` line and one bullet per `#### [C#]` |
 
 ```bash
 python3 linters/check-distinction-format.py            # $PROBE_PRIVATE_DIR

@@ -327,6 +327,8 @@ def read_method(path: str, findings: list[Finding]) -> tuple[set[str], list[str]
                     forbidden.append(text)
     if not claims:
         findings.append((name, 0, "inputs: METHOD.md §1 declares no `#### [C<n>]` claim (SETUP §2-2)"))
+    if not any(re.match(r"^name: \S", raw) for raw in lines):
+        findings.append((name, 0, "inputs: METHOD.md has no `name:` line (SETUP §2-2)"))
     return claims, forbidden
 
 
@@ -373,6 +375,16 @@ def _check_forbidden(name: str, lines: list[str], forbidden: list[str], findings
             if text in raw:
                 findings.append((name, lineno, "§7 carries a `METHOD.md` §6 string"))
                 break
+        if not raw.startswith("## "):
+            m = _POINTER.search(_QUOTED.sub("", raw))
+            if m:
+                findings.append((name, lineno, f"§6 `{m.group(0)}` points at our side — write its name"))
+
+
+# A word that stands for our side instead of naming it (§6), and the quotes
+# it may appear in because the rewrite or the original wrote it.
+_POINTER = re.compile(r"이 방법|이 범위|내 방법|우리(?=[는의가도]|\s)")
+_QUOTED = re.compile(r'"[^"]*"')
 
 
 def _check_claim_tokens(name: str, lines: list[str], claims: set[str], findings: list[Finding]) -> None:
