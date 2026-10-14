@@ -7,8 +7,8 @@ and writes must not be in a repository (`distinction/AUTHORING.md` §1).
 
 | | Distinction routine |
 |---|---|
-| **Where** | A machine with the codebase on disk — a workstation or server that stays on, or a laptop with a scheduler that runs a missed job at the next wake |
-| **Durable asset** | `.claude/prompts/distinguish.txt` in the checkout. The schedule runs `git pull` first, so a merged prompt change reaches the next run with nothing to re-paste |
+| **Where** | A Linux machine with the codebase on disk — a workstation or server that stays on, or one that is not, with a timer that runs a missed job at the next boot |
+| **Durable asset** | `.claude/prompts/distinguish.txt` and `distinction/run-distinguish.sh` in the checkout. The schedule runs `git pull` first, so a merged change to either reaches the next run with nothing to re-paste |
 | **Reads** | The checkout (`context/`, `analysis/` through `site/query.py`) and the private folder (§2) |
 | **Writes** | The private folder only. No commit, no PR, no site |
 
@@ -113,7 +113,7 @@ only to `grep` for an anchor the digest lacks, never to read a directory.
 
 ### 2-5. `PROBE_PRIVATE_DIR`
 
-Exported by the schedule's wrapper script (§4), or by hand before a session.
+Set by the scheduler entry (§4), or exported by hand before a session.
 The prompt's first step stops when it is unset or names no `BASKET.md`, so the
 routine cannot run in a cloud session by mistake.
 
@@ -138,35 +138,55 @@ tightened against.
 
 ## 4. The schedule
 
-A wrapper script the scheduler calls — `$PROBE_PRIVATE_DIR/run-distinguish.sh`:
+The scheduler calls `distinction/run-distinguish.sh` in the checkout. The
+script finds the checkout from its own path, appends everything it prints to
+`$PROBE_PRIVATE_DIR/runs/distinguish.log`, stops unless the checkout is on
+`main`, pulls, and runs `/distinguish` in delta mode with `claude -p`.
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-export PROBE_PRIVATE_DIR="$HOME/probe-private"
-cd "$HOME/src/probe"
-git pull --ff-only origin main
-claude -p "/distinguish" \
-  --add-dir "$PROBE_PRIVATE_DIR" \
-  --allowedTools "Read,Write,Edit,Glob,Grep,Agent,Bash(printenv *),Bash(test *),Bash(date *),Bash(python3 *),Bash(git log *),Bash(git rev-parse *),Bash(grep *),Bash(sha256sum *),Bash(sh *),Bash(cd *)" \
-  >> "$PROBE_PRIVATE_DIR/runs/distinguish.log" 2>&1
-```
+`-p` runs one turn with no one to approve a tool, so the script grants every
+tool the procedure uses up front and nothing it must not — no `git add`,
+`commit` or `push`. `Agent` is the verify pass (prompt step 6); without it the
+run stops before saving. A headless run also refuses any command that expands
+a shell variable, which is why the prompt reads the folder once with
+`printenv` and writes its path out in every command after. The tool list
+lives in the script alone, so a change to it reaches the schedule through the
+pull, like a prompt change. Check the flag names against `claude --help` on
+the machine before the first scheduled run.
 
-`-p` runs one turn without a terminal, so every tool it needs is granted up
-front; the list above is what the procedure uses and nothing it must not (no
-`git add`, `commit` or `push`). `Agent` is the verify pass (prompt step 6) —
-without it the run stops before saving. A headless run also refuses any
-command that expands a shell variable, which is why the prompt reads the
-folder once with `printenv` and writes its path out in every command after. Check the flag names against `claude --help`
-on the machine before the first scheduled run.
-
-Weekly, with a missed run made up at the next wake:
+The scheduler entry is the machine-specific half — it names the checkout,
+sets `PROBE_PRIVATE_DIR`, and puts `claude` on `PATH`, which a scheduled job
+does not inherit from the login shell. Weekly, with a missed run made up at
+the next boot:
 
 | Scheduler | Entry |
 |---|---|
-| **launchd** (macOS) | A `LaunchAgents` plist with `StartCalendarInterval` (`Weekday`, `Hour`, `Minute`) and `ProgramArguments` naming the script. A job whose time passed while the machine slept runs when it wakes |
-| **systemd timer** (Linux) | `OnCalendar=weekly` with `Persistent=true`, so a timer missed while off fires at the next boot |
-| **cron** (Linux) | `0 7 * * 1 $HOME/probe-private/run-distinguish.sh`. cron does not make up a missed run — on a machine that is not always on, use the timer or `anacron` |
+| **systemd timer** (Linux) | A user service and timer, below. `Persistent=true` fires a timer missed while off at the next boot |
+| **cron** (Linux) | `0 7 * * 1 PROBE_PRIVATE_DIR=$HOME/probe-private PATH=$HOME/.local/bin:/usr/bin:/bin <checkout>/distinction/run-distinguish.sh`. cron does not make up a missed run — on a machine that is not always on, use the timer or `anacron` |
+
+The systemd pair, in `~/.config/systemd/user/`:
+
+```ini
+# distinguish.service
+[Service]
+Type=oneshot
+Environment=PROBE_PRIVATE_DIR=%h/probe-private
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=<checkout>/distinction/run-distinguish.sh
+
+# distinguish.timer
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+`systemctl --user enable --now distinguish.timer` starts it, and
+`systemctl --user start distinguish.service` runs it once now. A user timer
+runs only while the user is logged in unless `loginctl enable-linger` is on.
+The log is the place to read a run that no one watched; the private folder's
+own `.gitignore`, if it is a repository, lists it.
 
 One run at a time: the delta reads the previous run's state block, and two
 runs reading the same block write two deltas against one baseline.
