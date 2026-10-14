@@ -38,7 +38,7 @@ $PROBE_PRIVATE_DIR/
   ledger/          one <arxiv-id>.md per basket paper the routine writes
   matrix.md        claims × papers                   the routine writes
   runs/            one YYYY-MM-DD.md per run         the routine writes
-  dissect/         one <arxiv-id>--<scope>.md each   `--dissect` writes
+  dissect/         <arxiv-id>--<scope>.md and .html  `--dissect` writes
   .scratch/        the run's working files           the routine writes
 ```
 
@@ -139,6 +139,13 @@ claude --add-dir "$PROBE_PRIVATE_DIR"
 /distinguish <alias>    # one ledger
 /distinguish --all      # every active row
 /distinguish --dissect <alias> <scope>   # one paper against one code scope
+```
+
+A dissection's page is drawn from its Markdown, so after editing one by
+hand, draw it again:
+
+```bash
+python3 distinction/render-dissect.py "$PROBE_PRIVATE_DIR/dissect/<id>--<scope>.md"
 ```
 
 `--add-dir` is what lets the session write outside the checkout. The first

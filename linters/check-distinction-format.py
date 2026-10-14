@@ -34,9 +34,11 @@ Checks, grouped by the contract section they enforce:
              a paper anchor, a quote anchor too unless `원문 없음`; §3 and
              §4 bullets carry their anchors; §5 holds a table whose scope
              cells carry an anchor or `없음`; §6 bullets a quote anchor; §7
-             bullets a verdict and a quote anchor; §9 a `cfg:` anchor.
+             bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a
+             ```probe-chart only under §6, drawable by `site/builder/charts.py`
+             with `source`, `why` and `omitted` and no `step`.
   AUTHORING §5   active rows <= 12, ideas per ledger <= 2 and per
-             dissection <= 3, prose <= 7,000 characters outside fences in a
+             dissection <= 3, charts per dissection <= 3, prose <= 7,000 characters outside fences in a
              ledger and <= 20,000 in a dissection.
   AUTHORING §7   no `METHOD.md` §6 string in any output.
   inputs         `BASKET.md` rows parse — id, role and status from their
@@ -86,6 +88,7 @@ _IDEAS_PER_RUN = 3
 _LEDGER_PROSE_MAX = 7000
 _IDEAS_PER_DISSECTION = 3
 _DISSECTION_PROSE_MAX = 20000
+_CHARTS_PER_DISSECTION = 3
 
 _LEDGER_SPINE = (
     "## 1 공통", "## 2 차이", "## 3 그들의 빈자리", "## 4 내 방법이 메우는가",
@@ -199,6 +202,49 @@ def _top_bullets(body: list[tuple[int, str]]) -> list[tuple[int, str]]:
         elif out and raw.startswith("  ") and raw.strip():
             out[-1] = (out[-1][0], out[-1][1] + " " + raw.strip())
     return out
+
+
+def _chart_fences(body: list[tuple[int, str]]) -> list[tuple[int, str]]:
+    """(line, JSON text) per ```probe-chart fence in a section body."""
+    out: list[tuple[int, str]] = []
+    start, buf = 0, None
+    for lineno, raw in body:
+        if buf is None:
+            if raw.strip() == "```probe-chart":
+                start, buf = lineno, []
+        elif _FENCE.match(raw):
+            out.append((start, "\n".join(buf)))
+            buf = None
+        else:
+            buf.append(raw)
+    return out
+
+
+def _check_charts(name: str, sections: dict, home: str, findings: list[Finding]) -> None:
+    for key, body in sections.items():
+        fences = _chart_fences(body)
+        if key != home:
+            findings.extend((name, ln, "§3-5 a ```probe-chart stands outside 6 결과 대조") for ln, _ in fences)
+            continue
+        if len(fences) > _CHARTS_PER_DISSECTION:
+            findings.append((name, fences[0][0], f"§5 {len(fences)} charts, ceiling is {_CHARTS_PER_DISSECTION}"))
+        for ln, text in fences:
+            try:
+                spec = json.loads(text)
+            except json.JSONDecodeError as err:
+                findings.append((name, ln, f"§3-5 ```probe-chart is not JSON — {err}"))
+                continue
+            # The drawing code is the site's, borrowed on the standard library.
+            sys.path.insert(0, os.path.join(_REPO_ROOT, "site"))
+            from builder import charts
+            for problem in charts.problems("", "chart", spec):
+                findings.append((name, ln, "§3-5 " + problem.lstrip(": ")))
+            if not isinstance(spec, dict):
+                continue
+            if "omitted" not in spec:
+                findings.append((name, ln, "§3-5 ```probe-chart has no `omitted` — the source rows it leaves out"))
+            if "steps" in spec or any("step" in s for s in spec.get("series", []) if isinstance(s, dict)):
+                findings.append((name, ln, "§3-5 ```probe-chart carries `step` or `steps` — a page has no presenter"))
 
 
 # ── Inputs: BASKET.md and METHOD.md ───────────────────────────────────────
@@ -515,6 +561,7 @@ def check_dissection(path: str, claims: set[str], forbidden: list[str],
             findings.append((name, 0, f"§3-5 {key[3:]} holds no bullet (write `- 없음` when there is nothing)"))
 
     _check_ideas(name, sections.get(ideas, []), _IDEAS_PER_DISSECTION, "빌려 올 것", decisions, findings)
+    _check_charts(name, sections, results, findings)
 
     prose = sum(len(raw) for _, raw in _outside_fences(list(enumerate(lines, start=1))))
     if prose > _DISSECTION_PROSE_MAX:
