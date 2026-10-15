@@ -8,7 +8,8 @@ PROBE is a research-scouting agent for dexterous manipulation. A human owns
 the research context in `context/`; agent tracks read it and write
 decision-grade Korean output — a scheduled scouting routine into `scouting/`,
 and on demand `/analyze`, `/compare` and `/present` into `analysis/`,
-`comparison/` and `presentation/`. The reading site publishes all four.
+`comparison/` and `presentation/`, with `/proofread` looping passes over a
+rewrite. The reading site publishes all four.
 `/distinguish` writes only outside the repo and `/ideate` writes nothing.
 `README.md` carries the motivation; this file is the contributor reference for
 **commit hygiene and document style**.
@@ -47,7 +48,7 @@ file the row points at.
 | `distinction/templates/` | human | `BASKET.md` and `METHOD.md` skeletons for the private folder |
 | `distinction/render-distinction.py` | human | Draws each ledger, delta and dissection as a standalone HTML page beside it, on the standard library, with the site's tokens and charts |
 | `distinction/run-distinguish.sh` | human | The script the local scheduler calls — pulls `main` and runs `/distinguish` headless with its tool list |
-| `.claude/prompts/**` | human | The agent prompts — one per track. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
+| `.claude/prompts/**` | human | The agent prompts — one per slash command. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
 | `assets/` | human | The README images and `build-art.py` |
 | `assets/CLAUDE.md` | human | Rules for `assets/` |
