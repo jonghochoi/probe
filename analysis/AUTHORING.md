@@ -408,6 +408,15 @@ configs, diffs. The info string carries two things:
   *demonstrates* is what turns transcribed pseudocode into an exhibit. Write it
   in Korean, as a noun phrase, and never name the language, which the chip
   already says.
+- **A paper's algorithm listing is `pseudo`** — the build's own lexer for
+  it, which colors keywords, line numbers and notes. The body is three
+  layers, each in one form: the paper's line numbers as `N:`, the paper's
+  statements in its own English, and every note — the paper's `▷` comments
+  and ours alike — after `#`, in Korean. A translated statement reads as a
+  note and a note in English reads as a statement, so neither is written.
+  A note says what the line does for the method — a value, a reason, what
+  is skipped — rather than restating the line, and the prose under the
+  block cites lines by their number.
 - **The code font covers only the characters this corpus uses**
   (`site/builder/fonts.py`), and the build reports one it cannot cover
   (`mono font gap`). The paper's own Greek letters, arrows and operators
