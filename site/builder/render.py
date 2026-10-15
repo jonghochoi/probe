@@ -28,7 +28,9 @@ from markdown_it import MarkdownIt
 from mdit_py_plugins.container import container_plugin
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
+from pygments.lexer import RegexLexer, bygroups, words
 from pygments.lexers import get_lexer_by_name, guess_lexer
+from pygments.token import Comment, Generic, Keyword, Number, Operator, Text
 from pygments.util import ClassNotFound
 
 from .mdext import callouts, ghmath, probefence
@@ -47,6 +49,46 @@ _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re
 _ARXIV_HREF = re.compile(
     r"^https?://arxiv\.org/(?:abs|html|pdf)/(\d{4}\.\d{4,5})(?:v\d+)?(?:\.pdf)?/?$"
 )
+
+
+class PseudoLexer(RegexLexer):
+    """The `pseudo` language of R8 — a paper's algorithm listing.
+
+    No stock lexer reads one: a programming-language lexer marks the paper's
+    `←` and `−` as errors, and a shell lexer's chip would name a language the
+    listing is not. This one knows the listing's three layers — the line
+    number, the paper's statements, and the `#` note — so the note reads as a
+    note in both themes.
+    """
+
+    name = "pseudo"
+    aliases = ["pseudo"]
+
+    tokens = {
+        "root": [
+            (r"^(\s*)(\d+:)", bygroups(Text, Generic.Prompt)),
+            (r"#.*$", Comment.Single),
+            (
+                words(
+                    (
+                        "Require", "Ensure", "Input", "Output",
+                        "procedure", "function", "end", "for", "each", "to",
+                        "do", "while", "if", "then", "else", "return",
+                        "acquire", "release", "in",
+                    ),
+                    prefix=r"(?<![\w^])",
+                    suffix=r"(?![\w(])",
+                ),
+                Keyword,
+            ),
+            (r"(?<![\w^])\d+(\.\d+)?(?![\w])", Number),
+            # A hyphen is an operator only between spaces; `pre-trained` is a word.
+            (r"[←∼~=+−·∈|]|(?<=\s)-(?=\s)", Operator),
+            (r"[^\S\n]+", Text),
+            (r"\n", Text),
+            (r".", Text),
+        ],
+    }
 
 
 def _render_details(self, tokens, idx, options, env) -> str:
@@ -350,7 +392,9 @@ class DocRenderer:
                 f"`{lang} <한글 캡션>`, one line saying what the block shows"
             )
         lexer = None
-        if lang:
+        if lang == "pseudo":
+            lexer = PseudoLexer()
+        elif lang:
             try:
                 lexer = get_lexer_by_name(lang)
             except ClassNotFound:
