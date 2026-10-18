@@ -86,7 +86,9 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
    It leaves `$RUN/judged.json`.
 
 4. PLAN — for each pillar, from its candidates and `judged.json`, apply
-   AUTHORING §5 and write `$RUN/P<n>.plan.json`:
+   AUTHORING §5 and write `$RUN/P<n>.plan.json`. First drop, as dedup, every
+   candidate a rewrite holds — `[ -e analysis/<id>.md ]` — however the
+   pillar agent scored it (AUTHORING §5-7). Then:
      · the surfaced papers (the §5-1 gate), ranked per §5-3 — the
        first three are 🥇 🥈 🥉, the rest 📋 rows;
      · the 🌱 pick, when the pillar agent proposed one and it clears the
@@ -151,15 +153,17 @@ SOURCES — three, read-only, with DIFFERENT jobs. Do not collapse them.
      · The 🔄 section — the last ~2 weeks, read in full. Every claim it
        makes about re-appearance is quantified over the ~8-week window.
 
-3. **`analysis/` — top-level NAMES only** (`ls analysis/`), for
-   de-duplication. Never read its contents.
+3. **`analysis/` — top-level NAMES only**, for de-duplication. Never read
+   its contents. A rewritten paper is never a candidate (AUTHORING §5-7):
+     ls analysis/ | sed -n 's/\.md$//p' > "$RUN/P<n>.rewritten"
 
 PHASE SCOUT
 
 1. READ the three sources and `scouting/AUTHORING.md` end to end.
 2. RETRIEVE — the two passes under RETRIEVAL below. Each drops a candidate
-   whose id is in `analysis/`, in Tracked Literature, or in the ~8-week id
-   list; the Anti-topics filter what survives, except that the 🌱
+   whose id — `vN` stripped — is in `$RUN/P<n>.rewritten`, in Tracked
+   Literature, or in the ~8-week id list, the 🌱 proposal included; the
+   Anti-topics filter what survives, except that the 🌱
    proposal is never dropped for being in the slot's field (AUTHORING §5-6).
 3. SCORE Relevance and Novelty only, by the level tables of AUTHORING §5-6
    — the judge scores the other three. `why_R` names the Decision and
@@ -356,8 +360,8 @@ committing.
 
   - Does every arXiv link resolve, and did every id come from a response you
     actually received? (a fabricated id is the one unrecoverable failure)
-  - Is every surfaced paper absent from `analysis/`, from Tracked Literature
-    and from the pillar's last ~8 weeks of reports?
+  - Is every surfaced paper absent from Tracked Literature and from the
+    pillar's last ~8 weeks of reports? (The lint holds `analysis/`, §5-7.)
   - Is every paper that clears the gate surfaced, none parked in 🔍
     or dropped over a closed repository or a simulation-only result? Fewer
     than three clearing is said, never padded. (§5-1)

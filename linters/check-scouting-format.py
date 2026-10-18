@@ -50,6 +50,9 @@ Checks, grouped by the contract section they enforce:
             sections plus the 📋 rows.
   AUTHORING §7  section discipline — 🔍 / 📋 rows are one paper each (no
             `X 외 2편` bundling behind a single link).
+  AUTHORING §5-7  no paper section, 📋 / 🔍 row or 📐 row for a paper whose
+            `analysis/<id>.md` rewrite was generated at least
+            `_REWRITE_MARGIN_DAYS` before the report's date.
 
 The gate checks are the ones with teeth. Reproducibility is scored but does
 not gate (§5-1), and the way that rule fails is not a report that ignores it
@@ -86,6 +89,7 @@ import argparse
 import datetime
 import glob
 import os
+import functools
 import re
 import sys
 
@@ -140,6 +144,14 @@ _SCORES = ("R", "N", "M", "Real", "Repro")
 _PAPER_DIMENSIONS = ("M", "Real", "Repro")
 _CARRY_WINDOW_DAYS = 56
 _ARXIV_ID = re.compile(r"arxiv\.org/abs/(\d{4}\.\d{4,5})")
+
+# A rewritten paper is never a candidate (AUTHORING §5-7). `generated` reads the
+# clock its writer had, Seoul or UTC, and a rewrite lands some time after it is
+# written, so a rewrite counts against a report only when generated at least
+# this many days before the report's date — one that may postdate the run's
+# start is never flagged.
+_REWRITE_MARGIN_DAYS = 2
+_GENERATED = re.compile(r"^generated:\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
 
 # A paper header after `논문 N`: nothing for a medal, the 🌱 tag for the pick.
 _MEDAL_HEADER = re.compile(r"^\S+ 논문 \d+$")
@@ -789,6 +801,53 @@ def _check_against_run(abs_path: str, date: str, sections, findings: list[tuple[
                                      "run (AUTHORING §5-4)"))
 
 
+@functools.lru_cache(maxsize=None)
+def _rewrites(repo: str) -> dict[str, str]:
+    """arXiv id -> the `generated` date of its `analysis/<id>.md` rewrite."""
+    out: dict[str, str] = {}
+    for path in glob.glob(os.path.join(repo, "analysis", "*.md")):
+        pid = os.path.basename(path)[:-3]
+        if not re.fullmatch(r"\d{4}\.\d{4,5}", pid):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            head = fh.read(4096)
+        if (m := _GENERATED.search(head)):
+            out[pid] = m.group(1)
+    return out
+
+
+def _listed(sections) -> list[tuple[int, str]]:
+    """(lineno, arXiv id) for every paper section's header line and every 📋 / 🔍 row."""
+    out: list[tuple[int, str]] = []
+    for emoji, _header, start, body in sections:
+        if emoji in _PAPER_SECTIONS:
+            for offset, line in enumerate(body, start=start + 1):
+                s = line.strip()
+                if _PAPER_LINK_LINE.match(s) and (m := _ARXIV_ID.search(s)):
+                    out.append((offset, m.group(1)))
+                    break
+        elif emoji in ("📋", "🔍"):
+            for offset, cells in _table_rows(body, start):
+                if (link := next((c for c in cells if _ARXIV_ID.search(c)), None)):
+                    out.append((offset, _ARXIV_ID.search(link).group(1)))
+    return out
+
+
+def _check_rewritten(abs_path: str, date: str, listed: list[tuple[int, str]],
+                     findings: list[tuple[int, str]]) -> None:
+    """No paper the corpus had already rewritten when the run began (AUTHORING §5-7)."""
+    repo = os.path.dirname(os.path.dirname(os.path.dirname(abs_path)))
+    cutoff = (datetime.date.fromisoformat(date)
+              - datetime.timedelta(days=_REWRITE_MARGIN_DAYS)).isoformat()
+    rewrites = _rewrites(repo)
+    for lineno, pid in listed:
+        generated = rewrites.get(pid)
+        if generated is not None and generated <= cutoff:
+            findings.append((lineno, f"{pid} has a rewrite, `analysis/{pid}.md`, generated "
+                                     f"{generated} — a rewritten paper is never a candidate "
+                                     "(AUTHORING §5-7)"))
+
+
 def check_run_file(path: str) -> list[tuple[int, str]]:
     """The run file's form, its pillars' reports and its judgements (AUTHORING §8)."""
     abs_path = path if os.path.isabs(path) else os.path.join(_REPO_ROOT, path)
@@ -835,6 +894,7 @@ def check_run_file(path: str) -> list[tuple[int, str]]:
         if off:
             findings.append((lineno, f"{pid} disagrees with {spillar} {sdate} on {', '.join(off)} — a "
                                      "paper scored in the window keeps that judgement (AUTHORING §5-4)"))
+    _check_rewritten(abs_path, date, [(ln, pid) for pid, (ln, _jd) in judged.items()], findings)
     return sorted(findings)
 
 
@@ -860,6 +920,7 @@ def check_file(path: str) -> list[tuple[int, str]]:
     sections = _split_sections(lines)
     _check_scoring(sections, findings, gate_rules)
     _check_tables(sections, findings)
+    _check_rewritten(abs_path, date_from_name, _listed(sections), findings)
     current = date_from_name >= _SECTIONS_EFFECTIVE
     gate = _GATE_THREE if current else _GATE_DIMENSIONS
     focus = date_from_name >= _FOCUS_EFFECTIVE

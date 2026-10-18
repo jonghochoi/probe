@@ -673,6 +673,20 @@ both is a 2. The report prints neither reason — (a) carries the Decision
 badges and (b)–(d) argue from the paper — so the rule binds the scoring, and
 the routine's SELF-CHECK is where it is held (§9).
 
+### 5-7. A rewritten paper is never a candidate
+
+A paper with a rewrite in the corpus — `analysis/<arxiv-id>.md`, the id
+without its `vN` — has already been read in full, so a report that scouts it
+again spends the reader's scan on a decision already made. Such a paper is
+dropped before scoring, in every pillar: never a `## 🥇 / 🥈 / 🥉 / 🌱`
+section, a 📋 row or a 🔍 row, and never a 📐 row of the run file. It
+counts only toward the already-analyzed dedup count in 🔄 (§7-1), and (b)–(d)
+or 🔄 may still name it as prior work.
+
+The rule binds the rewrites on `main` when the run starts. A paper whose
+rewrite lands after a report was written stays in that report — the report
+is the record of its day.
+
 ---
 
 ## 6. Report Metadata Block
@@ -807,4 +821,5 @@ under the contract of its day and is read, never rewritten, in that form.
 | A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate, the 🌱 pick without the 3; each 🔍 row exactly one gate axis short and clearing it were that axis 2; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |
+| No paper section, 📋 row, 🔍 row or 📐 row for a paper whose rewrite was generated at least two days before the report's date (§5-7) — the day's margin absorbs the clock `generated` was written in and the time between writing a rewrite and its landing | lint |
 | Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); every Relevance or Novelty 3 naming its Decision or closest tracked paper (§5-6); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |
