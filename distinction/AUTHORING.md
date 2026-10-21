@@ -98,7 +98,7 @@ Method: 0000000 · Run: YYYY-MM-DD
 
 | | <alias> (XXXX.XXXXX) | <alias> (XXXX.XXXXX) |
 |---|---|---|
-| C1 | 위협 — <한 줄> ([장부](versus/XXXX.XXXXX.md)) | 무관 |
+| C1 | 위협 — <한 줄> ([맞대기](versus/XXXX.XXXXX.md)) | 무관 |
 | C2 | 지지 — <한 줄> | 반박 — <한 줄> |
 ```
 
@@ -114,12 +114,12 @@ related-work table and the experiment table in draft, and a cell transition
 ### 3-3. The report — `reports/YYYY-MM-DD.md`
 
 ```
-# YYYY-MM-DD 차별화 델타
+# YYYY-MM-DD 회차 보고
 
 ## 1 코퍼스 변화
 ## 2 바구니 변화
 ## 3 방법론 변화
-## 4 매트릭스 전이
+## 4 점수판 변화
 ## 5 새 아이디어
 ## 6 제안
 ## 7 다음 행동
@@ -140,7 +140,7 @@ Only what changed since the previous run, section by section:
 | `1 코퍼스 변화` | Rewrites, comparisons and scouting reports landed since `corpus_head`, **only those `related` to a basket paper**, with the relation kind (`neighbour`, `cites`, `compared_with`, …) |
 | `2 바구니 변화` | Rows added, removed or re-roled; rows with no rewrite yet; rows `graduated` |
 | `3 방법론 변화` | If `method` or `codemap` moved: which `MY-METHOD.md` sections changed and which versus notes were rewritten because of it; a `MY-METHOD.md` untouched for eight weeks or more earns one line here |
-| `4 매트릭스 전이` | Cells whose verdict changed, old to new, with the versus note section behind each |
+| `4 점수판 변화` | Cells whose verdict changed, old to new, with the versus note section behind each |
 | `5 새 아이디어` | At most three `###` ideas across the whole run, in the §3-4 shape — the strongest of what the rewritten versus notes' §5 hold, not a copy of all of them |
 | `6 제안` | What the human should change in `BASKET.md` or `MY-METHOD.md`: a basket candidate found citing a basket paper, a claim with no basket column, a row with empty `claims`, a `parked` row that bears on a claim new since the previous run |
 | `7 다음 행동` | `/analyze <id>` for a row without a rewrite, `/compare <id> <id>` where two basket papers need their divergence laid out first, one ablation to run |

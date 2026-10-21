@@ -95,7 +95,7 @@ _LEDGER_SPINE = (
     "## 5 그들을 개선할 아이디어", "## 6 위협", "## 7 최저가 반증 실험",
 )
 _RUN_SPINE = (
-    "## 1 코퍼스 변화", "## 2 바구니 변화", "## 3 방법론 변화", "## 4 매트릭스 전이",
+    "## 1 코퍼스 변화", "## 2 바구니 변화", "## 3 방법론 변화", "## 4 점수판 변화",
     "## 5 새 아이디어", "## 6 제안", "## 7 다음 행동",
 )
 _DISSECT_SPINE = (
@@ -132,7 +132,7 @@ _DISSECT_META = re.compile(
 )
 _ERRATA_COUNT = re.compile(r"^점검 \d+ · 맞음 \d+ · 틀림 \d+ · 과장 \d+ · 원문 없음 \d+$")
 _MATRIX_META = re.compile(r"^Method: [0-9a-f]{7} · Run: \d{4}-\d{2}-\d{2}$")
-_RUN_H1 = re.compile(r"^# (\d{4}-\d{2}-\d{2}) 차별화 델타$")
+_RUN_H1 = re.compile(r"^# (\d{4}-\d{2}-\d{2}) 회차 보고$")
 _MATRIX_H1 = "# 주장 × 바구니"
 
 # Anchor grammars (AUTHORING §4).
@@ -650,7 +650,7 @@ def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[
         return [(name, 0, "unreadable")]
     h1 = _RUN_H1.match(lines[0]) if lines else None
     if not h1:
-        findings.append((name, 1, "§3-3 line 1 is not `# YYYY-MM-DD 차별화 델타`"))
+        findings.append((name, 1, "§3-3 line 1 is not `# YYYY-MM-DD 회차 보고`"))
     elif h1.group(1) != m.group(1):
         findings.append((name, 1, f"§3-3 H1 date {h1.group(1)} differs from the file name"))
 
