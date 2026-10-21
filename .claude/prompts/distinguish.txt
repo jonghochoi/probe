@@ -200,7 +200,7 @@ PROCEDURE
 5. SCOREBOARD — refresh `scoreboard.md` from the versus notes: one row per `C#` in
    `MY-METHOD.md` §1, one column per active row with a rewrite, every cell
    opening with a verdict. Note every cell whose verdict changed; those are
-   the run's 매트릭스 전이.
+   the run's 점수판 변화.
 
 6. VERIFY — a second reader that did not write the versus notes. The writer
    reads its own bullets with the reasons it wrote them in mind, which is how
@@ -265,7 +265,7 @@ PROCEDURE
 
    Apply what they return by step 6's rules, in place — an audit corrects a
    versus note, it does not redraft it. Refresh the scoreboard from what survives;
-   a cell whose verdict moved is a 매트릭스 전이 like any other. Each
+   a cell whose verdict moved is a 점수판 변화 like any other. Each
    audited versus note gets one line under `8 감사`: what changed, or `고칠 것
    없음`.
 

@@ -190,7 +190,7 @@ def _prose(text: str, ctx: Context) -> str:
         f'<abbr class="ax-dec" title="{esc(ctx.decisions[m.group(1)])}">{m.group(1)}</abbr>'
         if m.group(1) in ctx.decisions else m.group(1)), out)
     out = _ID.sub(lambda m: (
-        f'<a class="ax-led" href="{ctx.ledger_href(m.group(1))}" title="장부 · {esc(ctx.ledgers[m.group(1)])}">'
+        f'<a class="ax-led" href="{ctx.ledger_href(m.group(1))}" title="맞대기 · {esc(ctx.ledgers[m.group(1)])}">'
         f'{m.group(1)}</a>' if m.group(1) in ctx.ledgers and m.group(1) != (ctx.paper_id if ctx.kind == "versus" else "")
         else m.group(1)), out)
     return out.replace("원문 미확인", '<span class="dx-unq">원문 미확인</span>')
@@ -413,7 +413,7 @@ def _state(body: list[str], ctx: Context) -> str:
         f'<tr><th scope=row><a href="{ctx.ledger_href(pid)}">{esc(ctx.ledgers.get(pid, pid))}</a></th>'
         f"<td>{esc(pid)}</td><td>{esc(str(day))}</td></tr>"
         for pid, day in sorted((state.get("verified") or {}).items(), key=lambda kv: str(kv[1])))
-    table = (f'<h3>장부별 마지막 검증</h3><div class="dx-table"><table><thead><tr><th>장부</th><th>id</th>'
+    table = (f'<h3>맞대기별 마지막 검증</h3><div class="dx-table"><table><thead><tr><th>맞대기</th><th>id</th>'
              f"<th>날짜</th></tr></thead><tbody>{rows}</tbody></table></div>") if rows else ""
     pretty = json.dumps(state, ensure_ascii=False, indent=1) if state else raw
     return (f'<div class="dx-state">{table}<details class="dx-why"><summary>런 상태 원문 · probe-state</summary>'
@@ -640,9 +640,9 @@ document.querySelectorAll('.dx-key').forEach(function(a){a.onclick=function(){va
 
 
 _KINDS = {
-    "deepdive": ("해부", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
-    "versus": ("장부", "방법 × 논문 하나 · 비공개", "일곱 절"),
-    "reports": ("델타", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
+    "deepdive": ("정밀 대조", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
+    "versus": ("맞대기", "방법 × 논문 하나 · 비공개", "일곱 절"),
+    "reports": ("회차 보고", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
 }
 
 
