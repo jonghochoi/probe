@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check the distinction track's private folder against distinction/AUTHORING.md.
 
-The distinction track writes nothing into the repository: its ledgers, matrix
-and deltas hold the method beside the papers, so they live in a private folder
+The distinction track writes nothing into the repository: its versus notes, scoreboard
+and reports hold the method beside the papers, so they live in a private folder
 on the machine that runs `/distinguish` (`distinction/SETUP.md` §2). No build
 reads them and no workflow can, which makes this lint the track's only gate —
 the routine runs it before saving (prompt step 8), and a human runs it after
@@ -10,24 +10,24 @@ editing a document by hand.
 
 Checks, grouped by the contract section they enforce:
 
-  AUTHORING §1   every `ledger/<id>.md` names a `BASKET.md` row and the
+  AUTHORING §1   every `versus/<id>.md` names a `BASKET.md` row and the
              checkout holds `analysis/<id>.md`.
-  AUTHORING §3-1 the ledger — an H1, the five-field metadata line, the seven
+  AUTHORING §3-1 the versus note — an H1, the five-field metadata line, the seven
              `##` headers verbatim and in order with no other `##`.
   AUTHORING §3-1 / §4  per section, every bullet carries the anchors its row
              of the table requires or is `- 없음`; a §4 bullet opens with a
              verdict; §7 holds a `cfg:` anchor; a §3 and a §6 bullet carry
              a quote anchor (`원문 §<section> "<English>"`) or `원문 미확인`.
-  AUTHORING §3-2 the matrix — rows are METHOD's claims, columns the active
+  AUTHORING §3-2 the scoreboard — rows are METHOD's claims, columns the active
              rewritten basket, each cell opening with a verdict.
-  AUTHORING §3-3 the delta — the H1 date is the file's, the seven headers and
-             an optional eighth `## 8 감사` whose every bullet names a ledger
+  AUTHORING §3-3 the report — the H1 date is the file's, the seven headers and
+             an optional eighth `## 8 감사` whose every bullet names a versus note
              id, at most three `###` under `5`, a closing `probe-state` fence
              that parses, carries every key and, when it has `verified`,
              maps ids to dates.
   AUTHORING §3-4 every `###` idea carries the five labels in order, and a
              `D#` it names exists in a pillar's Decision Log.
-  AUTHORING §3-5 the dissection — `dissect/<id>--<scope>.md` names a paper
+  AUTHORING §3-5 the deep dive — `deepdive/<id>--<scope>.md` names a paper
              with a rewrite, its six-field metadata line agrees with the
              file name, the nine `##` headers verbatim and in order; §1
              opens with its count line and every bullet with a verdict and
@@ -37,12 +37,12 @@ Checks, grouped by the contract section they enforce:
              bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a
              ```probe-chart only under §6, drawable by `site/builder/charts.py`
              with `source`, `why` and `omitted` and no `step`.
-  AUTHORING §5   active rows <= 12, ideas per ledger <= 2 and per
-             dissection <= 3, charts per dissection <= 3, prose <= 7,000 characters outside fences in a
-             ledger and <= 20,000 in a dissection.
-  AUTHORING §7   no `METHOD.md` §6 string in any output.
+  AUTHORING §5   active rows <= 12, ideas per versus note <= 2 and per
+             deep dive <= 3, charts per deep dive <= 3, prose <= 7,000 characters outside fences in a
+             versus note and <= 20,000 in a deep dive.
+  AUTHORING §7   no `MY-METHOD.md` §6 string in any output.
   inputs         `BASKET.md` rows parse — id, role and status from their
-             sets, no duplicate id; `METHOD.md` carries its spine and one
+             sets, no duplicate id; `MY-METHOD.md` carries its spine and one
              bullet per `#### [C#]`.
 
 Precision over recall, mirroring the repo's other gates: every check keys off
@@ -103,7 +103,7 @@ _DISSECT_SPINE = (
     "## 5 실험 설정", "## 6 결과 대조", "## 7 빈자리와 메움", "## 8 빌려 올 것",
     "## 9 반증 실험",
 )
-# Present when the run audited (prompt step 7) — delta and `--audit` runs.
+# Present when the run audited (prompt step 7) — report and `--audit` runs.
 _RUN_AUDIT = "## 8 감사"
 _METHOD_SPINE = (
     "## 0. 문제의식", "## 1. 주장", "## 2. 방법", "## 3. 측정",
@@ -247,7 +247,7 @@ def _check_charts(name: str, sections: dict, home: str, findings: list[Finding])
                 findings.append((name, ln, "§3-5 ```probe-chart carries `step` or `steps` — a page has no presenter"))
 
 
-# ── Inputs: BASKET.md and METHOD.md ───────────────────────────────────────
+# ── Inputs: BASKET.md and MY-METHOD.md ───────────────────────────────────────
 
 
 def read_basket(path: str, findings: list[Finding]) -> dict[str, dict]:
@@ -296,12 +296,12 @@ def read_method(path: str, findings: list[Finding]) -> tuple[set[str], list[str]
     lines = _read(path)
     name = os.path.basename(path)
     if lines is None:
-        findings.append((name, 0, "inputs: METHOD.md is unreadable"))
+        findings.append((name, 0, "inputs: MY-METHOD.md is unreadable"))
         return set(), []
     headers = [raw.rstrip() for raw in lines if _H2.match(raw)]
     for want in _METHOD_SPINE:
         if want not in headers:
-            findings.append((name, 0, f'inputs: METHOD.md lacks "{want}" (SETUP §2-2)'))
+            findings.append((name, 0, f'inputs: MY-METHOD.md lacks "{want}" (SETUP §2-2)'))
     claims: set[str] = set()
     forbidden: list[str] = []
     for header, lineno, body in _sections(lines, _H2):
@@ -326,9 +326,9 @@ def read_method(path: str, findings: list[Finding]) -> tuple[set[str], list[str]
                 if text and not (text.startswith("<") and text.endswith(">")):
                     forbidden.append(text)
     if not claims:
-        findings.append((name, 0, "inputs: METHOD.md §1 declares no `#### [C<n>]` claim (SETUP §2-2)"))
+        findings.append((name, 0, "inputs: MY-METHOD.md §1 declares no `#### [C<n>]` claim (SETUP §2-2)"))
     if not any(re.match(r"^name: \S", raw) for raw in lines):
-        findings.append((name, 0, "inputs: METHOD.md has no `name:` line (SETUP §2-2)"))
+        findings.append((name, 0, "inputs: MY-METHOD.md has no `name:` line (SETUP §2-2)"))
     return claims, forbidden
 
 
@@ -373,7 +373,7 @@ def _check_forbidden(name: str, lines: list[str], forbidden: list[str], findings
     for lineno, raw in enumerate(lines, start=1):
         for text in forbidden:
             if text in raw:
-                findings.append((name, lineno, "§7 carries a `METHOD.md` §6 string"))
+                findings.append((name, lineno, "§7 carries a `MY-METHOD.md` §6 string"))
                 break
         if not raw.startswith("## "):
             m = _POINTER.search(_QUOTED.sub("", raw))
@@ -392,15 +392,15 @@ def _check_claim_tokens(name: str, lines: list[str], claims: set[str], findings:
         for m in _CLAIM_ANCHOR.finditer(raw):
             code = m.group(0).strip("`")
             if code not in claims:
-                findings.append((name, lineno, f"§4 `{code}` is not a claim in `METHOD.md` §1"))
+                findings.append((name, lineno, f"§4 `{code}` is not a claim in `MY-METHOD.md` §1"))
 
 
-# ── The ledger ────────────────────────────────────────────────────────────
+# ── The versus note ────────────────────────────────────────────────────────────
 
 
 def check_ledger(path: str, basket: dict[str, dict], claims: set[str], forbidden: list[str],
                  decisions: set[str]) -> list[Finding]:
-    name = "ledger/" + os.path.basename(path)
+    name = "versus/" + os.path.basename(path)
     findings: list[Finding] = []
     m = _LEDGER_NAME.match(os.path.basename(path))
     if not m:
@@ -476,7 +476,7 @@ def check_ledger(path: str, basket: dict[str, dict], claims: set[str], forbidden
     return findings
 
 
-# ── The dissection ────────────────────────────────────────────────────────
+# ── The deep dive ────────────────────────────────────────────────────────
 
 
 def _opens_with(raw: str, verdicts: tuple[str, ...]) -> str | None:
@@ -491,7 +491,7 @@ def _opens_with(raw: str, verdicts: tuple[str, ...]) -> str | None:
 
 def check_dissection(path: str, claims: set[str], forbidden: list[str],
                      decisions: set[str]) -> list[Finding]:
-    name = "dissect/" + os.path.basename(path)
+    name = "deepdive/" + os.path.basename(path)
     findings: list[Finding] = []
     m = _DISSECT_NAME.match(os.path.basename(path))
     if not m:
@@ -584,11 +584,11 @@ def check_dissection(path: str, claims: set[str], forbidden: list[str],
     return findings
 
 
-# ── The matrix ────────────────────────────────────────────────────────────
+# ── The scoreboard ────────────────────────────────────────────────────────────
 
 
 def check_matrix(path: str, basket: dict[str, dict], claims: set[str], forbidden: list[str]) -> list[Finding]:
-    name = "matrix.md"
+    name = "scoreboard.md"
     lines = _read(path)
     if lines is None:
         return [(name, 0, "unreadable")]
@@ -621,7 +621,7 @@ def check_matrix(path: str, basket: dict[str, dict], claims: set[str], forbidden
             continue
         label = cells[0]
         if label not in claims:
-            findings.append((name, lineno, f"§3-2 row `{label}` is not a claim in `METHOD.md` §1"))
+            findings.append((name, lineno, f"§3-2 row `{label}` is not a claim in `MY-METHOD.md` §1"))
         seen_rows.add(label)
         if len(cells) != len(header):
             findings.append((name, lineno, "§3-2 row does not have one cell per column"))
@@ -636,11 +636,11 @@ def check_matrix(path: str, basket: dict[str, dict], claims: set[str], forbidden
     return findings
 
 
-# ── The delta ─────────────────────────────────────────────────────────────
+# ── The report ─────────────────────────────────────────────────────────────
 
 
 def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[str]) -> list[Finding]:
-    name = "runs/" + os.path.basename(path)
+    name = "reports/" + os.path.basename(path)
     findings: list[Finding] = []
     m = _RUN_NAME.match(os.path.basename(path))
     if not m:
@@ -665,10 +665,10 @@ def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[
     if _RUN_AUDIT in sections:
         audited = _top_bullets(sections[_RUN_AUDIT])
         if not audited:
-            findings.append((name, 0, "§3-3 감사 holds no bullet — one per audited ledger"))
+            findings.append((name, 0, "§3-3 감사 holds no bullet — one per audited versus note"))
         for ln, raw in audited:
             if not _ARXIV_IN.search(raw):
-                findings.append((name, ln, "§3-3 a 감사 bullet names no ledger id"))
+                findings.append((name, ln, "§3-3 a 감사 bullet names no versus note id"))
 
     # The closing probe-state fence.
     state_start = None
@@ -724,16 +724,16 @@ def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[
 def check_folder(folder: str) -> list[Finding]:
     findings: list[Finding] = []
     basket = read_basket(os.path.join(folder, "BASKET.md"), findings)
-    claims, forbidden = read_method(os.path.join(folder, "METHOD.md"), findings)
+    claims, forbidden = read_method(os.path.join(folder, "MY-METHOD.md"), findings)
     decisions = _decision_ids()
-    for path in sorted(glob.glob(os.path.join(folder, "ledger", "*.md"))):
+    for path in sorted(glob.glob(os.path.join(folder, "versus", "*.md"))):
         findings += check_ledger(path, basket, claims, forbidden, decisions)
-    matrix = os.path.join(folder, "matrix.md")
+    matrix = os.path.join(folder, "scoreboard.md")
     if os.path.exists(matrix):
         findings += check_matrix(matrix, basket, claims, forbidden)
-    for path in sorted(glob.glob(os.path.join(folder, "runs", "*.md"))):
+    for path in sorted(glob.glob(os.path.join(folder, "reports", "*.md"))):
         findings += check_run(path, claims, forbidden, decisions)
-    for path in sorted(glob.glob(os.path.join(folder, "dissect", "*.md"))):
+    for path in sorted(glob.glob(os.path.join(folder, "deepdive", "*.md"))):
         findings += check_dissection(path, claims, forbidden, decisions)
     return findings
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Render the distinction track's documents as standalone HTML pages for reading.
 
-A ledger, a delta and a dissection are records: the lint reads them and the
+A versus note, a report and a deep dive are records: the lint reads them and the
 next run builds on them. Each gets a page beside it for a person —
-`ledger/<id>.html`, `runs/<date>.html`, `dissect/<id>--<scope>.html` — one
+`versus/<id>.html`, `reports/<date>.html`, `deepdive/<id>--<scope>.html` — one
 file opened from disk that never leaves the private folder. A page is
 redrawn from its Markdown and never edited by hand
 (`distinction/AUTHORING.md` §3-6).
@@ -17,13 +17,13 @@ machine that runs `/distinguish` need not hold the site's dependencies.
 
 What a page adds to the Markdown is arrangement, never content:
 
-    ledger    §2 their choice and this method's side by side; §4 the fill
+    versus note    §2 their choice and this method's side by side; §4 the fill
               verdict as a badge; §5 one card per idea
-    delta     a basket id links to its ledger's page; §8 one row per audited
-              ledger; the closing state block as a table of when each
-              ledger was last verified, the raw block folded; the runs
+    report     a basket id links to its versus note's page; §8 one row per audited
+              versus note; the closing state block as a table of when each
+              versus note was last verified, the raw block folded; the runs
               before and after it one click away
-    dissection  §1 the count line as one bar split by verdict, 틀림 and 과장
+    deep dive  §1 the count line as one bar split by verdict, 틀림 and 과장
               open, 원문 없음 and 맞음 folded; §4 one card per stage, the two
               sides side by side; §5 the table, the scope's column in the
               accent; §6 a ```probe-chart fence drawn; §7 the fill verdict
@@ -40,7 +40,7 @@ Usage (repo root):
     python3 distinction/render-distinction.py <md> -o OUT  # one page, elsewhere
 
 A page is written next to its Markdown with `.html`. The code root is `code:`
-in the private folder's `METHOD.md`, else its `code` symlink
+in the private folder's `MY-METHOD.md`, else its `code` symlink
 (`distinction/SETUP.md` §2-4).
 
 Exit codes: 0 = written / 1 = a chart fence cannot be drawn / 2 = no input.
@@ -104,10 +104,10 @@ class Context:
         self.private = private
         self.paper_id = paper_id
         self.kind = kind
-        # `{id: alias}` per ledger, read off each H1, so a basket id written
+        # `{id: alias}` per versus note, read off each H1, so a basket id written
         # anywhere can link to the page that holds the position on it.
         self.ledgers: dict[str, str] = {}
-        for lp in sorted(glob.glob(os.path.join(private, "ledger", "*.md"))):
+        for lp in sorted(glob.glob(os.path.join(private, "versus", "*.md"))):
             try:
                 with open(lp, encoding="utf-8") as fh:
                     first = fh.readline()
@@ -118,11 +118,11 @@ class Context:
         self.decisions = {k: t for k, (_, t) in harvest_decisions().items()}
         self.claims: dict[str, str] = {}
         # What our side is called beside the paper's alias (AUTHORING §6):
-        # the scope a dissection names, else `METHOD.md`'s `name:`.
+        # the scope a deep dive names, else `MY-METHOD.md`'s `name:`.
         self.ours = scope
         code = os.path.join(private, "code")
         try:
-            with open(os.path.join(private, "METHOD.md"), encoding="utf-8") as fh:
+            with open(os.path.join(private, "MY-METHOD.md"), encoding="utf-8") as fh:
                 for raw in fh:
                     m = re.match(r"^#### \[(C\d+)\] (.+)$", raw)
                     if m:
@@ -138,7 +138,7 @@ class Context:
         self.code_root = os.path.realpath(code) if os.path.exists(code) else None
 
     def ledger_href(self, pid: str) -> str:
-        return f"{pid}.html" if self.kind == "ledger" else f"../ledger/{pid}.html"
+        return f"{pid}.html" if self.kind == "versus" else f"../versus/{pid}.html"
 
     def code_href(self, path: str, line: str) -> str | None:
         if not self.code_root:
@@ -156,7 +156,7 @@ def _anchor(code: str, ctx: Context) -> str:
         return f'<span class="ax ax-claim" title="{esc(title)}">{esc(code)}</span>'
     m = _METHOD.match(code)
     if m:
-        return (f'<a class="ax ax-method" href="../METHOD.md">{esc(code)}</a>')
+        return (f'<a class="ax ax-method" href="../MY-METHOD.md">{esc(code)}</a>')
     if _CFG.match(code):
         key, eq, val = code[4:].partition("=")
         return (f'<code class="ax ax-cfg"><span>cfg</span>{esc(key.strip())}'
@@ -191,7 +191,7 @@ def _prose(text: str, ctx: Context) -> str:
         if m.group(1) in ctx.decisions else m.group(1)), out)
     out = _ID.sub(lambda m: (
         f'<a class="ax-led" href="{ctx.ledger_href(m.group(1))}" title="장부 · {esc(ctx.ledgers[m.group(1)])}">'
-        f'{m.group(1)}</a>' if m.group(1) in ctx.ledgers and m.group(1) != (ctx.paper_id if ctx.kind == "ledger" else "")
+        f'{m.group(1)}</a>' if m.group(1) in ctx.ledgers and m.group(1) != (ctx.paper_id if ctx.kind == "versus" else "")
         else m.group(1)), out)
     return out.replace("원문 미확인", '<span class="dx-unq">원문 미확인</span>')
 
@@ -309,7 +309,7 @@ def _row(text: str, ctx: Context, badge: str = "", cls: str = "",
     rest, tail = _evidence(rest)
     head = f'<span class="dx-badge" data-v="{esc(badge)}">{esc(badge)}</span>' if badge else ""
     if label in ctx.ledgers:
-        # A row about one ledger — a delta's audit — names the paper, not the id.
+        # A row about one versus note — a report's audit — names the paper, not the id.
         lab = (f'<a class="dx-label" href="{ctx.ledger_href(label)}">{esc(ctx.ledgers[label])}'
                f' <small class="ax-led">{label}</small></a>')
     else:
@@ -352,9 +352,9 @@ def _chart(info: str, body: list[str], where: str) -> tuple[str, list[str]]:
 # one whose bullets open on a fill verdict, the one whose bullets set the two
 # sides side by side, and the one a ```probe-chart is drawn in.
 _LAYOUT = {
-    "dissect": {"errata": "1", "stages": "4", "ideas": "8", "fills": "7", "sides": "", "charts": "6"},
-    "ledger": {"errata": "", "stages": "", "ideas": "5", "fills": "4", "sides": "2", "charts": ""},
-    "runs": {"errata": "", "stages": "", "ideas": "5", "fills": "", "sides": "", "charts": ""},
+    "deepdive": {"errata": "1", "stages": "4", "ideas": "8", "fills": "7", "sides": "", "charts": "6"},
+    "versus": {"errata": "", "stages": "", "ideas": "5", "fills": "4", "sides": "2", "charts": ""},
+    "reports": {"errata": "", "stages": "", "ideas": "5", "fills": "", "sides": "", "charts": ""},
 }
 
 
@@ -402,7 +402,7 @@ def section(num: str, lines: list[str], ctx: Context, problems: list[str],
 
 
 def _state(body: list[str], ctx: Context) -> str:
-    """The delta's closing block: when each ledger was last verified, then
+    """The report's closing block: when each versus note was last verified, then
     the block itself, folded — it is the next run's memory, not reading."""
     raw = "\n".join(body)
     try:
@@ -640,9 +640,9 @@ document.querySelectorAll('.dx-key').forEach(function(a){a.onclick=function(){va
 
 
 _KINDS = {
-    "dissect": ("해부", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
-    "ledger": ("장부", "방법 × 논문 하나 · 비공개", "일곱 절"),
-    "runs": ("델타", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
+    "deepdive": ("해부", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
+    "versus": ("장부", "방법 × 논문 하나 · 비공개", "일곱 절"),
+    "reports": ("델타", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
 }
 
 
@@ -666,14 +666,14 @@ def render(path: str) -> tuple[str, list[str]]:
     with open(path, encoding="utf-8") as fh:
         lines = fh.read().splitlines()
     name = os.path.basename(path)
-    kind = _kind(path) or "dissect"
+    kind = _kind(path) or "deepdive"
     noun, eyebrow, spine = _KINDS[kind]
     m = re.match(r"^(\d{4}\.\d{5})(?:--([a-z0-9_]+))?\.md$", name)
     ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), m.group(1) if m else "", kind,
                   (m.group(2) or "") if m else "")
 
     h1 = lines[0][2:] if lines and lines[0].startswith("# ") else name
-    if kind == "runs":
+    if kind == "reports":
         heading, thesis, alias, meta = esc(h1), "", "", []
     else:
         pair, _, thesis = h1.partition(" — ")
@@ -682,7 +682,7 @@ def render(path: str) -> tuple[str, list[str]]:
                    else f'{esc(alias)}<span class="x">·</span><small>{esc(ctx.paper_id)}</small>')
         meta_raw = next((ln for ln in lines[1:] if ln.strip()), "")
         meta = _META.findall(meta_raw) if not meta_raw.startswith("## ") else []
-        if kind == "ledger":
+        if kind == "versus":
             claims = re.search(r"Claims: ([^·]*)", meta_raw)
             meta = [(k, v) for k, v in meta if k != "Claims"]
             if claims and claims.group(1).strip():
@@ -714,7 +714,7 @@ def render(path: str) -> tuple[str, list[str]]:
         return f"<span>{esc(k)}<b>{esc(v)}</b></span>"
 
     chips = "".join(chip(k, v) for k, v in meta)
-    title = h1 if kind == "runs" else (f"{alias} — {noun}")
+    title = h1 if kind == "reports" else (f"{alias} — {noun}")
     rel = os.path.join(os.path.basename(os.path.dirname(os.path.abspath(path))), name)
     page = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
@@ -726,7 +726,7 @@ def render(path: str) -> tuple[str, list[str]]:
 <div class="dx-shell">
 <nav class="dx-toc"><b>{noun} · {spine}</b>{"".join(toc)}</nav>
 <main>
-{_runs_nav(path) if kind == "runs" else ""}<div class="dx-eyebrow">{eyebrow}</div>
+{_runs_nav(path) if kind == "reports" else ""}<div class="dx-eyebrow">{eyebrow}</div>
 <h1>{heading}</h1>
 {f'<p class="dx-thesis">{inline(thesis, ctx)}</p>' if thesis else ""}
 {f'<div class="dx-meta">{chips}</div>' if chips else ""}
@@ -739,7 +739,7 @@ def render(path: str) -> tuple[str, list[str]]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    ap.add_argument("docs", nargs="*", help="ledger/, runs/ or dissect/ Markdown (default: every one in the folder)")
+    ap.add_argument("docs", nargs="*", help="versus/, reports/ or deepdive/ Markdown (default: every one in the folder)")
     ap.add_argument("-o", "--out", help="output path for a single document (default: beside it, .html)")
     args = ap.parse_args(argv)
     docs = args.docs
@@ -755,7 +755,7 @@ def main(argv: list[str] | None = None) -> int:
     failed = False
     for doc in docs:
         if not os.path.isfile(doc) or _kind(doc) is None and not args.out:
-            print(f"render-distinction: {doc} is not a ledger/, runs/ or dissect/ document", file=sys.stderr)
+            print(f"render-distinction: {doc} is not a versus/, reports/ or deepdive/ document", file=sys.stderr)
             failed = True
             continue
         page, problems = render(doc)
