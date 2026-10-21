@@ -17,7 +17,7 @@ main() {
   fi
 
   # The private folder's git ignores this log.
-  exec >>"$PROBE_PRIVATE_DIR/runs/distinguish.log" 2>&1
+  exec >>"$PROBE_PRIVATE_DIR/reports/distinguish.log" 2>&1
   echo "── run-distinguish $(date -Iseconds) ──"
 
   cd "$(dirname "$(readlink -f "$0")")/.."

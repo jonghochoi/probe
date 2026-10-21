@@ -1,6 +1,6 @@
 # METHOD — <working title of the paper>
 
-name: <short name — what a ledger and a delta call this method beside a paper's alias>
+name: <short name — what a versus note and a report call this method beside a paper's alias>
 code: <absolute path to the codebase — or leave this line out and put a `code` symlink beside this file>
 
 <!-- Human-owned. The routine reads this file and never edits it. Section
@@ -18,7 +18,7 @@ D# 가 공중에 떠 있는가.>
 
 <!-- One `####` heading and one bullet per claim. `C` + a number, unique,
      never re-issued. The bullet carries the claim, its 반증 조건 and the D#
-     it implements — these are what the ledger's §1 / §4 and the matrix rows
+     it implements — these are what the versus note's §1 / §4 and the scoreboard rows
      hang off. -->
 
 #### [C1] <claim title>
@@ -50,7 +50,7 @@ D# 가 공중에 떠 있는가.>
 
 ## 6. 외부 발화 금지
 
-<!-- Literal strings. The lint searches every ledger, the matrix and every run
+<!-- Literal strings. The lint searches every versus note, the scoreboard and every run
      for each bullet and refuses to pass an output that carries one. -->
 
 - <아직 어느 출력에도 나가면 안 되는 문자열>

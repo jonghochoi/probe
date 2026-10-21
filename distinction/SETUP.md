@@ -31,20 +31,20 @@ even when `.gitignore` lists it.
 ```
 $PROBE_PRIVATE_DIR/
   BASKET.md        the basket                        human-written     §2-1
-  METHOD.md        the method card                   human-written     §2-2
+  MY-METHOD.md     the method card                   human-written     §2-2
   CODEMAP.md       the code digest                   codemap.sh writes §2-3
   codemap.sh       the operator's digest script      human-written     §2-3
-  code -> …        symlink to the codebase           or `code:` in METHOD.md §2-4
-  ledger/          <arxiv-id>.md and .html per paper the routine writes
-  matrix.md        claims × papers                   the routine writes
-  runs/            YYYY-MM-DD.md and .html per run   the routine writes
-  dissect/         <arxiv-id>--<scope>.md and .html  `--dissect` writes
+  code -> …        symlink to the codebase           or `code:` in MY-METHOD.md §2-4
+  versus/          <arxiv-id>.md and .html per paper the routine writes
+  scoreboard.md    claims × papers                   the routine writes
+  reports/         YYYY-MM-DD.md and .html per run   the routine writes
+  deepdive/        <arxiv-id>--<scope>.md and .html  `--deepdive` writes
   .scratch/        the run's working files           the routine writes
 ```
 
 The two human-written files start from `distinction/templates/BASKET.md` and
-`distinction/templates/METHOD.md`. Both are read-only to the routine, as
-`context/` is: a change it wants arrives under 제안 in the run's delta.
+`distinction/templates/MY-METHOD.md`. Both are read-only to the routine, as
+`context/` is: a change it wants arrives under 제안 in the run's report.
 
 ### 2-1. `BASKET.md`
 
@@ -52,10 +52,10 @@ One table, one paper per row.
 
 | Column | Values |
 |---|---|
-| `arXiv` | the bare id, `YYMM.NNNNN`. The ledger is written only once `analysis/<id>.md` exists in the checkout — `/analyze` it first |
+| `arXiv` | the bare id, `YYMM.NNNNN`. The versus note is written only once `analysis/<id>.md` exists in the checkout — `/analyze` it first |
 | `alias` | the rewrite's `alias:` where it has one, else a codename of your own |
 | `role` | `baseline` it goes in the experiment table · `nearest` the closest prior work · `threat` it could take a claim · `donor` a mechanism to borrow |
-| `claims` | the `C#` codes from `METHOD.md` §1 this paper bears on, comma-separated. Empty is allowed and is what the routine asks about first |
+| `claims` | the `C#` codes from `MY-METHOD.md` §1 this paper bears on, comma-separated. Empty is allowed and is what the routine asks about first |
 | `status` | `active` read every run · `parked` kept, not read · `graduated` carried into the paper, kept for the record |
 | `note` | why it is here, one line |
 
@@ -63,7 +63,7 @@ At most 12 `active` rows (`distinction/AUTHORING.md` §5). The routine never
 adds a row: a new paper it finds citing a basket paper is a candidate under
 제안, and whether it enters is yours.
 
-### 2-2. `METHOD.md`
+### 2-2. `MY-METHOD.md`
 
 The private counterpart of `context/MASTER.md`. The public thesis is there and
 is pointed at from §0, not repeated. The spine, which the lint reads:
@@ -77,7 +77,7 @@ code: <absolute path>                 optional; else the `code` symlink
 ## 1. 주장                            #### [C<n>] <title> + one bullet each
 ## 2. 방법                            architecture, recipe, data — with CODEMAP anchors
 ## 3. 측정                            benchmarks, metrics, current numbers
-## 4. 알려진 약점                     where it can be refuted — the section the ledger's §4 argues with
+## 4. 알려진 약점                     where it can be refuted — the section the versus note's §4 argues with
 ## 5. 진행 중                         running ablations and what they should show
 ## 6. 외부 발화 금지                  literal strings no output may carry
 ```
@@ -85,13 +85,13 @@ code: <absolute path>                 optional; else the `code` symlink
 A claim is one `####` heading and one bullet, like a Decision-Log entry
 (`context/CLAUDE.md`): `#### [C1] <title>` then the claim, its 반증 조건 and
 the `D#` it implements. Three to five claims is the working range — the
-matrix has one row per claim, and more rows than the basket can fill leaves
-cells empty, while fewer blurs the differences the ledger needs.
+scoreboard has one row per claim, and more rows than the basket can fill leaves
+cells empty, while fewer blurs the differences the versus note needs.
 
 ### 2-3. `CODEMAP.md` and `codemap.sh`
 
 The routine reads the codebase through a digest, not whole: a repository does
-not fit a context window, and the ledger's code anchors have to be lines that
+not fit a context window, and the versus note's code anchors have to be lines that
 exist. `codemap.sh` is yours — it lives in the private folder, is run by the
 routine at the start of every run, and must write `CODEMAP.md` next to itself.
 What it writes is the contract:
@@ -100,26 +100,26 @@ What it writes is the contract:
 |---|---|---|
 | `## Modules` | the module tree, one line per file with its one-line purpose | `path` |
 | `## Config` | every config key with its default and the file that defines it | `cfg:<key>` and `path:line` |
-| `## Entry points` | the classes and functions a ledger would name — signature and docstring first line | `path:line` |
+| `## Entry points` | the classes and functions a versus note would name — signature and docstring first line | `path:line` |
 | `## Results` | the current numbers, from the experiment logs, as a table | the run or log the row comes from |
 
-Run with no arguments, `codemap.sh` digests the code `METHOD.md` describes
-into `CODEMAP.md`. `--dissect` also calls it as `codemap.sh <scope> <out>`:
+Run with no arguments, `codemap.sh` digests the code `MY-METHOD.md` describes
+into `CODEMAP.md`. `--deepdive` also calls it as `codemap.sh <scope> <out>`:
 `<scope>` is a bare name (`[a-z0-9_]+`) the script maps to a part of the
 codebase — which part is the script's alone, and no file in the checkout
 names it — and `<out>` is where the digest of that part goes, in the same
 four sections. A scope the script does not know exits non-zero and writes
 nothing, which stops the run.
 
-A digest that lists a key without its file gives the ledger nothing to cite
+A digest that lists a key without its file gives the versus note nothing to cite
 (`distinction/AUTHORING.md` §4). With no `codemap.sh` the routine reads the
-`CODEMAP.md` it finds and notes its age in the delta; with no `CODEMAP.md`
+`CODEMAP.md` it finds and notes its age in the report; with no `CODEMAP.md`
 either, it stops.
 
 ### 2-4. `code`
 
 Either a symlink `code` in the private folder pointing at the codebase, or a
-line `code: <absolute path>` under the H1 of `METHOD.md`. The routine opens it
+line `code: <absolute path>` under the H1 of `MY-METHOD.md`. The routine opens it
 only to `grep` for an anchor the digest lacks, never to read a directory.
 
 ### 2-5. `PROBE_PRIVATE_DIR`
@@ -137,12 +137,12 @@ export PROBE_PRIVATE_DIR="$HOME/probe-private"
 claude --add-dir "$PROBE_PRIVATE_DIR"
 # then, in the session:
 /distinguish            # delta mode
-/distinguish <alias>    # one ledger
+/distinguish <alias>    # one versus note
 /distinguish --all      # every active row
-/distinguish --dissect <alias> <scope>   # one paper against one code scope
+/distinguish --deepdive <alias> <scope>   # one paper against one code scope
 ```
 
-Each ledger, delta and dissection has a page drawn from its Markdown
+Each versus note, report and deep dive has a page drawn from its Markdown
 (`distinction/AUTHORING.md` §3-6). After editing one by hand, draw them
 again:
 
@@ -151,18 +151,18 @@ python3 distinction/render-distinction.py          # every page in $PROBE_PRIVAT
 ```
 
 `--add-dir` is what lets the session write outside the checkout. The first
-run is `--all`, with two or three active rows and the `METHOD.md` sections 1
-and 4 written with care: those two sections are what the ledger argues with,
-and the first ledgers are what the rules in `distinction/AUTHORING.md` are
+run is `--all`, with two or three active rows and the `MY-METHOD.md` sections 1
+and 4 written with care: those two sections are what the versus note argues with,
+and the first versus notes are what the rules in `distinction/AUTHORING.md` are
 tightened against.
 
 ## 4. The schedule
 
 The scheduler calls `distinction/run-distinguish.sh` in the checkout. The
 script finds the checkout from its own path, appends everything it prints to
-`$PROBE_PRIVATE_DIR/runs/distinguish.log`, stops unless the checkout is on
+`$PROBE_PRIVATE_DIR/reports/distinguish.log`, stops unless the checkout is on
 `main`, pulls, and runs `/distinguish` in delta mode with `claude -p` — which also
-audits half the active ledgers (prompt step 7).
+audits half the active versus notes (prompt step 7).
 
 `-p` runs one turn with no one to approve a tool, so the script grants every
 tool the procedure uses up front and nothing it must not — no `git add`,
@@ -177,7 +177,7 @@ the machine before the first scheduled run.
 The scheduler entry is the machine-specific half — it names the checkout,
 sets `PROBE_PRIVATE_DIR`, and puts `claude` on `PATH`, which a scheduled job
 does not inherit from the login shell. Twice a week, Tuesday and Thursday at
-noon — the cadence the audit is sized to, so every ledger is re-read within
+noon — the cadence the audit is sized to, so every versus note is re-read within
 the week (`distinction/AUTHORING.md` §5) — with a missed run made up at the
 next boot:
 
@@ -213,8 +213,8 @@ folder is a git repository of its own — the way to keep its history — its
 `.gitignore` lists the log, `.scratch/`, `CODEMAP.md` (regenerated each run)
 and `code`.
 
-One run at a time: the delta reads the previous run's state block, and two
-runs reading the same block write two deltas against one baseline.
+One run at a time: the report reads the previous run's state block, and two
+runs reading the same block write two reports against one baseline.
 
 ## 5. First run
 
@@ -223,20 +223,20 @@ Run `/distinguish --all` by hand (§3) before the schedule, then check:
 - [ ] The session stopped at step 0 when `PROBE_PRIVATE_DIR` was unset, and
       ran when it was set — the guard works.
 - [ ] `codemap.sh` ran and `CODEMAP.md` carries `path:line` and `cfg:` anchors
-      in every section (§2-3). A digest without them gives the ledger nothing
+      in every section (§2-3). A digest without them gives the versus note nothing
       to cite.
 - [ ] `python3 linters/check-distinction-format.py` exits 0 over the folder,
       and the transcript shows it ran before anything was saved.
-- [ ] The transcript shows one verify agent per ledger (prompt step 6), and
+- [ ] The transcript shows one verify agent per versus note (prompt step 6), and
       its rows were applied — no §3 gap or §6 threat stands on a 재작성본 or
       추론 grade (`distinction/AUTHORING.md` §4-1).
-- [ ] Every ledger §2 row names an axis on which the two really chose
+- [ ] Every versus note §2 row names an axis on which the two really chose
       differently, and every §3 row came from the paper's own ablation or
       stated limit — the two things the lint cannot see
       (`distinction/AUTHORING.md` §8).
-- [ ] `runs/<date>.md` ends in a `probe-state` block, and a second `/distinguish`
-      run on a later day writes a no-change delta, rewrites no ledger, and
-      lists the ledgers it audited under `8 감사` with their dates in
+- [ ] `reports/<date>.md` ends in a `probe-state` block, and a second `/distinguish`
+      run on a later day writes a no-change report, rewrites no versus note, and
+      lists the versus notes it audited under `8 감사` with their dates in
       `verified`.
 - [ ] `git status` in the checkout is clean. Nothing the run wrote is there.
 
