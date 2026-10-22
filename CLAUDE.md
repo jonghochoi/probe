@@ -10,7 +10,8 @@ decision-grade Korean output — a scheduled scouting routine into `scouting/`,
 and on demand `/analyze`, `/compare` and `/present` into `analysis/`,
 `comparison/` and `presentation/`, with `/proofread` looping passes over a
 rewrite. The reading site publishes all four.
-`/distinguish` writes only outside the repo and `/ideate` writes nothing.
+`/distinguish` writes only outside the repo, and `/ideate` writes nothing into
+it — it answers in chat and on a private page packed outside the repo.
 `README.md` carries the motivation; this file is the contributor reference for
 **commit hygiene and document style**.
 
@@ -50,6 +51,8 @@ file the row points at.
 | `distinction/run-distinguish.sh` | human | The script the local scheduler calls — pulls `main` and runs `/distinguish` headless with its tool list |
 | `.claude/prompts/**` | human | The agent prompts — one per slash command. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
+| `.claude/prompts/ideate-page.html` | human | The page skeleton `/ideate` fills and packs outside the repo — ideation has no track folder, so its page format lives here and in `ideate.txt` |
+| `.claude/vendor/html-plan/` | human | The html-plan runtime that packs `/ideate`'s page. Folder map: `.claude/vendor/html-plan/README.md` |
 | `assets/` | human | The README images and `build-art.py` |
 | `assets/CLAUDE.md` | human | Rules for `assets/` |
 | `site/` | human | The reading site's generator. Folder map: `site/README.md` |

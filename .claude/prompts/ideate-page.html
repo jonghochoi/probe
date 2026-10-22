@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<title>「입력을 부르는 이름, 2–4 단어」</title>
+<link rel="stylesheet" href="htmlplan.css">
+<script src="htmlplan.js" defer></script>
+<!-- The skeleton /ideate copies for its answer page (ideate.txt step 8).
+     Every 「…」 is filled or its element removed. Cards read the runtime's color
+     tokens, which reach into each mock's shadow root, so both themes hold. -->
+<style data-mock-shared>
+  .ui { font: 14px/1.5 var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .ui .hd { padding: 9px 14px; font-weight: 600; font-size: 13px; }
+  .ui .hd + .hd, .ui .q + .hd, .ui .src + .hd { border-top: 1px solid var(--line-2); }
+  .ui .hd small { color: var(--ink-3); font-weight: 430; margin-left: 6px; }
+  .ui .q { padding: 0 14px 10px; font: 13px/1.55 var(--mono); color: var(--ink-2); white-space: pre-wrap; }
+  .ui .src { padding: 8px 14px 10px; color: var(--ink-3); font-size: 12.5px; border-top: 1px solid var(--line-2); }
+  .ui .grade { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--green-soft); color: var(--green); }
+  .ui .grade.warn { background: var(--amber-soft); color: var(--amber); }
+  .ui .bar { display: grid; grid-template-columns: 128px 1fr 52px; gap: 10px; align-items: center; padding: 6px 14px; }
+  .ui .bar .l { color: var(--ink-2); font-size: 13px; }
+  .ui .bar .t { height: 12px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+  .ui .bar .f { display: block; height: 100%; background: var(--ink-3); }
+  .ui .bar.us .f { background: var(--accent); }
+  .ui .bar.us .l { color: var(--ink); font-weight: 600; }
+  .ui .bar .v { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .ui table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  .ui th, .ui td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+  .ui th { color: var(--ink-3); font-weight: 430; font-size: 12px; }
+  .ui tr.us td { background: var(--accent-soft); }
+  .ui tr.us td:first-child { font-weight: 600; }
+</style>
+<body>
+
+<header>
+  <h1>「아이디어들을 한 줄로 묶는 제목, 3–7 단어」</h1>
+  <details class="thread"><summary>요청</summary>
+    <doc-quote via="prompt" from="사용자">「/ideate 와 인자를 그대로」</doc-quote>
+  </details>
+</header>
+<main>
+<doc-plan>
+
+<!-- ═════ one idea: repeat for each, strongest first ═════ -->
+<doc-claim>
+  <p>「조합이 참이면 성립할 문장 하나」</p>
+  <doc-flow caption="「무엇을 어디에 끼우는가, 한 문장」">
+<script type="text/plain">
+a = 「논문 A」 / 「빌려 오는 메커니즘」
++ b = 「논문 B」 / 「빌려 오는 메커니즘」 [green]
+out = 「조합이 내는 것」
+| a   | b |
+| out | . |
+a -> out
++ b -> out : 「새 연결」
+</script>
+  </doc-flow>
+  <doc-note tone="idea"><strong>열리는 질문</strong> 「되면 무엇을 알게 되나. 걸리는 D# 가 있으면 어느 쪽으로 미는지」</doc-note>
+  <doc-ask id="next-1">
+    <p>이 조합으로 다음에 무엇을 할까요?</p>
+    <label><input type="radio" name="next-1" value="compare" checked> <code>/compare 「A」 「B」</code> <small>「추천하는 이유」</small></label>
+    <label><input type="radio" name="next-1" value="ideate"> <code>/ideate 「A」</code> <small>이 논문에서 다시 출발</small></label>
+    <label><input type="radio" name="next-1" value="hold"> 보류</label>
+  </doc-ask>
+
+  <!-- one gap per paper: the original's own sentence, never a paraphrase -->
+  <doc-claim>
+    <p>「논문 A 가 스스로 적은 한계, 한 문장」</p>
+    <doc-mock frame="none" w="440" caption="「이 근거가 조합에 무엇을 넘기나」"><template>
+<div class="ui">
+  <div class="hd">「논문 A」 <small>「arXiv id」 · 원문 「§」</small></div>
+  <div class="q">「원문 문장 그대로」</div>
+  <div class="src">재작성본: 「alias §act Term」 · <span class="grade">원문 일치</span></div>
+</div></template></doc-mock>
+  </doc-claim>
+
+  <doc-claim>
+    <p>「무엇이 나오면 이 아이디어가 틀렸나, 한 문장」</p>
+    <doc-flow caption="「P2 의 손과 센서 위에서 무엇을 재나」">
+<script type="text/plain">
+d = 「데이터」 [db]
+x = 「(a) 대조군」
+y = 「(b) 조합」 [green]
+m = 「재는 것」 [diamond]
+| .  | d |
+| x  | y |
+| .  | m |
+d -> x
+d -> y
+x -> m
+y -> m
+</script>
+    </doc-flow>
+  </doc-claim>
+
+  <doc-claim>
+    <p>「가장 가까운 기존 작업과 무엇이 다른가, 한 문장」</p>
+    <doc-mock frame="none" w="460" caption="「새로운 것이 어느 칸인가」"><template>
+<div class="ui"><table>
+  <tr><th>논문</th><th>「축 1」</th><th>「축 2」</th></tr>
+  <tr><td>「기존 작업」</td><td>「…」</td><td>「…」</td></tr>
+  <tr class="us"><td>이 아이디어</td><td>「…」</td><td>「…」</td></tr>
+</table></div></template></doc-mock>
+  </doc-claim>
+</doc-claim>
+
+<doc-claim aux="shared">
+  <p>원문 감사: 「N」 편 「M」 문장을 대조해 「K」 곳을 고쳤다.</p>
+  <doc-mock frame="none" w="460" caption="감사는 초안을 쓰지 않은 에이전트가 arXiv 원문으로 했다."><template>
+<div class="ui"><table>
+  <tr><th>논문</th><th>확인</th><th>고침</th></tr>
+  <tr><td>「alias」</td><td>「M」</td><td>「고친 것, 한 줄. 없으면 없음」</td></tr>
+</table></div></template></doc-mock>
+</doc-claim>
+
+<doc-claim aux="scope">
+  <p>상상: 「이 절의 요지, 한 문장」</p>
+  <ul>
+    <li>「코퍼스가 받치지 않는 생각, 상상임을 밝혀서」</li>
+    <li>생각을 바꿀 관찰: 「…」</li>
+  </ul>
+</doc-claim>
+
+</doc-plan>
+</main>
+</body>
+</html>
