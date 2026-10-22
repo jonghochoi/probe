@@ -120,7 +120,9 @@ PROCEDURE
      - Is every resource link confirmed in the paper? (R10)
      - Walk `arxiv.py`'s figure list once more: is the figure carrying the
        CENTRAL mechanism on the page, can you name why each linkable figure
-       you left out is out, and is every `probe-flow`'s `why` still true? (R6)
+       you left out is out, and is every `probe-flow`'s `why` still true?
+       Does any flow list as consecutive steps what runs side by side
+       (`lanes`), or end on a step that says it repeats (`loop`)? (R6)
      - Does `appendix:` list exactly the appendix sections you drew on? (R15)
      - 요약 — is every number on it in the original, is each card's evidence
        what its claim rests on, and do the four titles alone make the

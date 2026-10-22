@@ -254,20 +254,143 @@ def flow(data: dict, inline_md) -> str:
             "(no such figure / inline SVG with no file to hotlink). "
             "If the paper does illustrate it, use `probe-figure` instead"
         )
-    items = "".join(
-        f'<li class="fstep"><span class="fs-label">{inline_md(str(s.get("label", "")))}</span>'
-        + (f'<span class="fs-note">{inline_md(str(s["note"]))}</span>' if s.get("note") else "")
-        + "</li>"
-        if isinstance(s, dict)
-        else f'<li class="fstep"><span class="fs-label">{inline_md(str(s))}</span></li>'
-        for s in steps
-    )
     title = (data.get("title") or "").strip()
     head = f'<p class="flow-title">{_esc(title)}</p>' if title else ""
     # Printed, not merely required: the reader deserves to know this box is
     # ours and what the paper had in its place.
     note = f'<p class="flow-why"><em class="fig-src">{_esc(why)}</em></p>'
-    return f'<div class="flow">{head}<ol class="fsteps">{items}</ol>{note}</div>'
+    hot = sum(1 for s in _flow_boxes(steps) if isinstance(s, dict) and s.get("hot"))
+    if hot > FLOW_HOT:
+        raise FenceError(
+            f"probe-flow: {hot} steps are `hot` — at most {FLOW_HOT}; the accent "
+            "marks what to look at first, and on every step it marks nothing"
+        )
+    return f'<div class="flow">{head}{_flow_grid(steps, inline_md)}{note}</div>'
+
+
+# A drawn flow keeps to what one look takes in; past these it is two flows.
+FLOW_ROWS = 9
+FLOW_LANES = (2, 3)
+FLOW_HOT = 2
+FLOW_LOOP_LABEL = 16
+
+
+def _flow_boxes(steps):
+    for s in steps:
+        if isinstance(s, dict) and isinstance(s.get("lanes"), list):
+            yield from s["lanes"]
+        else:
+            yield s
+
+
+def _flow_label(s) -> str:
+    return str(s.get("label", "") if isinstance(s, dict) else s).strip()
+
+
+def _flow_box(s, inline_md, cls: str, extra: str = "") -> str:
+    hot = " hot" if isinstance(s, dict) and s.get("hot") else ""
+    note = (f'<span class="fs-note">{inline_md(str(s["note"]))}</span>'
+            if isinstance(s, dict) and s.get("note") else "")
+    return (f'<li class="{cls}{hot}"><span class="fs-label">{inline_md(_flow_label(s))}</span>'
+            f'{note}{extra}</li>')
+
+
+def _flow_width(text: str) -> float:
+    """The width `text` takes at the loop label's size, in rem — a Hangul
+    syllable is a full em, anything else a little over half of one."""
+    em = sum(1.0 if "\uac00" <= ch <= "\ud7a3" else 0.56 for ch in text)
+    return em * 0.74
+
+
+def _flow_grid(steps: list, inline_md) -> str:
+    """Steps down one spine, with the two shapes a list cannot say — lanes
+    and a loop.
+
+    A `lanes` row is work that runs side by side: the row before forks into
+    it and the row after merges out of it, so two paths over the same input
+    are not read as one step after the other. A `loop` on a step sends it
+    back to an earlier one, named by its label, so a repeat is drawn once
+    rather than unrolled into copies or folded into a last step that says 반복.
+
+    Every connector is orthogonal and every bend one quarter arc — the
+    connector rules of a routed schematic — and the whole figure is grid and
+    borders, so labels wrap in the site's own type and the tokens carry it
+    into the dark theme. A loop's label sits in a gutter sized to it, beside
+    the line rather than on it.
+
+    The grid is an `<ol>`, so a screen reader hears the steps in order, a
+    lanes row as one item that says it splits (side by side in a
+    rewrite, one lane per paper in a comparison), and a loop as a
+    sentence on the step it leaves; the wires and the gutter label are
+    hidden from it, since the words already say what they draw.
+    """
+    if len(steps) > FLOW_ROWS:
+        raise FenceError(f"probe-flow: {len(steps)} rows — at most {FLOW_ROWS}; "
+                         "past that it is two flows")
+    loops = [(i, s["loop"]) for i, s in enumerate(steps, 1)
+             if isinstance(s, dict) and "loop" in s]
+    if len(loops) > 1:
+        raise FenceError("probe-flow: one `loop` per flow — two loops cross "
+                         "or nest, and either is two flows")
+    back, gutter = {}, []
+    for i, lp in loops:
+        if not isinstance(lp, dict):
+            raise FenceError(f"probe-flow: row {i} `loop` must be "
+                             '{"to": "<an earlier step\'s label>", "label": "…"}')
+        to, label = str(lp.get("to", "")).strip(), str(lp.get("label", "")).strip()
+        hits = [r for r, s in enumerate(steps[:i - 1], 1)
+                if not (isinstance(s, dict) and "lanes" in s) and _flow_label(s) == to]
+        if len(hits) != 1:
+            raise FenceError(f"probe-flow: row {i} `loop.to` must be the label of "
+                             f"exactly one earlier step, written as it is — {to!r} "
+                             f"matches {len(hits)}")
+        if isinstance(steps[i - 1], dict) and "lanes" in steps[i - 1]:
+            raise FenceError(f"probe-flow: row {i} `loop` — a loop leaves a single "
+                             "step, not lanes")
+        if not label or len(label) > FLOW_LOOP_LABEL:
+            raise FenceError(f"probe-flow: row {i} `loop.label` is required and at "
+                             f"most {FLOW_LOOP_LABEL} characters — what repeats and "
+                             "how often; the rest goes in the step's `note`")
+        back[i] = (f'<span class="sr"> 여기서 「{_esc(to)}」 단계로 돌아가 '
+                   f'반복합니다 — {_esc(label)}.</span>')
+        span = f"grid-row:{hits[0]} / {i + 1}"
+        # Two lines at most: half the label's width, kept between a word and
+        # the width the gutter can afford.
+        line = min(max(_flow_width(label) / 2 + 0.4, 2.5), 5.25)
+        gutter = [f"--fl-lw:{line:.2f}rem",
+                  f'<li class="fl-loop" style="{span}" aria-hidden="true"></li>'
+                  f'<li class="fl-loopnote" style="{span}" aria-hidden="true">'
+                  f'{inline_md(label)}</li>']
+    rows = []
+    for i, s in enumerate(steps, 1):
+        style = f' style="grid-row:{i}"'
+        fin = " fg-in" if i > 1 else ""
+        if isinstance(s, dict) and "lanes" in s:
+            lanes = s["lanes"]
+            if (not isinstance(lanes, list)
+                    or not FLOW_LANES[0] <= len(lanes) <= FLOW_LANES[1]):
+                raise FenceError(f"probe-flow: row {i} `lanes` must list "
+                                 f"{FLOW_LANES[0]}–{FLOW_LANES[1]} steps")
+            if any(isinstance(b, dict) and ("lanes" in b or "loop" in b) for b in lanes):
+                raise FenceError(f"probe-flow: row {i} — a lane is one step, "
+                                 "with no lanes or loop of its own")
+            fork, merge = i > 1, i < len(steps)
+            tip = " fg-tip" if fork else ""
+            boxes = "".join(_flow_box(b, inline_md, "fg-step" + tip) for b in lanes)
+            cls = (f"fg-lanes n{len(lanes)}" + (" fg-split" if fork else "")
+                   + (" fg-join" if merge else ""))
+            wires = ('<span class="fl-fork" aria-hidden="true"></span>' if fork else "") + (
+                '<span class="fl-merge" aria-hidden="true"></span>' if merge else "")
+            rows.append(f'<li class="{cls}" style="grid-row:{i};--n:{len(lanes)}">{wires}'
+                        f'<span class="sr">{len(lanes)} 갈래로 나뉨:</span>'
+                        f'<ul class="fl-par">{boxes}</ul></li>')
+            continue
+        rows.append(_flow_box(s, inline_md, "fg-step" + fin, back.get(i, ""))
+                    .replace("<li ", f"<li{style} ", 1))
+    if gutter:
+        return (f'<ol class="fgrid has-loop" style="{gutter[0]}">'
+                f'{"".join(rows)}{gutter[1]}</ol>')
+    return f'<ol class="fgrid">{"".join(rows)}</ol>'
 
 
 # ── ```probe-lineage ────────────────────────────────────────────────────────
