@@ -39,7 +39,7 @@ holds one pillar's decision log, tracked literature and anti-topics.
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-analysis-dark.svg"><img src="assets/probe-analysis.svg" height="64" alt="analysis — a detective reads until a clue turns up: !"></picture><br><sub><b>Analysis</b></sub> | `/analyze <arXiv id>`, then `/proofread <id>` for looped passes against the original and its code | `analysis/<id>.md` — [format](analysis/AUTHORING.md) |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-comparison-dark.svg"><img src="assets/probe-comparison.svg" height="64" alt="comparison"></picture><br><sub><b>Comparison</b></sub> | `/compare <id> <id> [<id>]` | `comparison/<slug>.md` — [format](comparison/AUTHORING.md) |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-presentation-dark.svg"><img src="assets/probe-presentation.svg" height="64" alt="presentation — the screen crashes mid-talk: :("></picture><br><sub><b>Presentation</b></sub> | `/present <arXiv id>` | `presentation/<id>.md` — [format](presentation/AUTHORING.md) |
-| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-ideation-dark.svg"><img src="assets/probe-ideation.svg" height="64" alt="ideation"></picture><br><sub><b>Ideation</b></sub> | `/ideate [<id \| alias \| topic>]` | nothing, it answers in chat |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/probe-ideation-dark.svg"><img src="assets/probe-ideation.svg" height="64" alt="ideation"></picture><br><sub><b>Ideation</b></sub> | `/ideate [<id \| alias \| topic>]` | nothing in the repo — a chat answer, and a private page you answer on |
 
 </details>
 
