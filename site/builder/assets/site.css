@@ -1274,30 +1274,96 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 
 
 /* ── Readable layer: hand-drawn step flow (R6 fallback) ───────────────── */
+/* One grid row per step down a spine; lanes fork from it and merge back,
+   and a loop takes a gutter column sized to its label, so the label sits
+   beside the line, never on it. Every wire is a border: orthogonal, each
+   bend one quarter arc of --fl-r, in --text-muted so it clears 3:1 against
+   the panel in both themes. The accent is the `hot` box's alone. */
 .flow {
   margin: 1.4rem 0; padding: .9rem 1.05rem;
   border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--surface-2);
+  --fl-line: var(--text-muted); --fl-w: 1.5px; --fl-r: 6px;
+  --fl-gap: 1.25rem; --fl-fk: 1rem; --fl-gut: 0px;
 }
 .flow-title { font-weight: 700; font-size: .85rem; margin-bottom: .6rem; }
-.fsteps { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin: 0; }
-.fstep {
-  position: relative; padding: .5rem .75rem;
+/* Two classes deep, so the article's nested-list indent (`.view li > ul`)
+   cannot shift a lanes row off its fork. */
+.flow .fgrid, .flow .fl-par { list-style: none; margin: 0; padding: 0; }
+.flow .fgrid li { margin: 0; }
+.flow .sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+.fgrid { display: grid; grid-template-columns: var(--fl-gut) minmax(0, 1fr); row-gap: var(--fl-gap); }
+.fgrid.has-loop { --fl-gut: calc(var(--fl-lw) + 1.25rem + 8px); }
+.fg-step {
+  grid-column: 2; position: relative; padding: .5rem .75rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); font-size: .86rem; margin: 0;
+  border-radius: var(--radius-sm); font-size: .86rem;
 }
-/* The connector is a rotated border chevron, never ASCII art. */
-.fstep + .fstep::before {
-  content: ""; position: absolute; left: 50%; top: -.32rem;
-  width: 7px; height: 7px; margin-left: -4px;
-  border-right: 2px solid var(--amber-soft); border-bottom: 2px solid var(--amber-soft);
-  transform: rotate(45deg);
-}
+.fg-step.hot { border-color: var(--orange-ink); background: var(--orange-soft); }
 .fs-label { display: block; font-weight: 700; }
 .fs-note { display: block; color: var(--text-muted); font-size: .82rem; margin-top: .12rem; }
+/* The wire into a row: down the gap to the box, with its head on the box. */
+.fg-in::before, .fg-lanes.fg-split::before {
+  content: ""; position: absolute; left: 50%; margin-left: calc(var(--fl-w) / -2);
+  top: calc(-1 * var(--fl-gap) - 1px); height: var(--fl-gap);
+  border-left: var(--fl-w) solid var(--fl-line);
+}
+.fg-lanes.fg-split::before { top: calc(-1 * var(--fl-gap)); }
+.fg-in::after, .fg-tip::after {
+  content: ""; position: absolute; left: 50%; top: -7px; margin-left: -4px;
+  border: 4px solid transparent; border-bottom: 0; border-top: 6px solid var(--fl-line);
+}
+.fg-lanes { grid-column: 2; position: relative; }
+.fg-lanes.fg-split { padding-top: var(--fl-fk); }
+.fg-lanes.fg-join { padding-bottom: var(--fl-fk); }
+.fl-par {
+  display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  column-gap: var(--fl-cg, .75rem);
+}
+.fl-par .fg-step { grid-column: auto; }
+/* Fork and merge bars run lane centre to lane centre; a third lane sits on
+   the spine, so its stub is the spine itself. */
+.fl-fork, .fl-merge {
+  position: absolute; height: var(--fl-fk); border: var(--fl-w) solid var(--fl-line);
+  --fl-c: calc((100% - (var(--n) - 1) * var(--fl-cg, .75rem)) / (2 * var(--n)));
+  left: var(--fl-c); right: var(--fl-c); margin-inline: calc(var(--fl-w) / -2);
+}
+.fl-fork { top: 0; border-bottom: 0; border-radius: var(--fl-r) var(--fl-r) 0 0; }
+.fl-merge { bottom: 0; border-top: 0; border-radius: 0 0 var(--fl-r) var(--fl-r); }
+.fg-lanes.n3 .fl-fork::after, .fg-lanes.n3 .fl-merge::after {
+  content: ""; position: absolute; left: 50%; top: 0; bottom: 0;
+  margin-left: calc(var(--fl-w) / -2); border-left: var(--fl-w) solid var(--fl-line);
+}
+/* The loop leaves the bottom of its last step and enters the top of its
+   first from the left, head on the box. */
+.fl-loop {
+  grid-column: 1; justify-self: end; position: relative; width: 1.25rem;
+  margin-block: 1.1rem; border: var(--fl-w) solid var(--fl-line); border-right: 0;
+  border-radius: var(--fl-r) 0 0 var(--fl-r);
+}
+.fl-loop::after {
+  content: ""; position: absolute; right: -1px; top: calc(-4px - var(--fl-w) / 2);
+  border: 4px solid transparent; border-right: 0; border-left: 6px solid var(--fl-line);
+}
+.fl-loopnote {
+  grid-column: 1; align-self: center; padding-right: calc(1.25rem + 8px);
+  text-align: right; font-size: .74rem; line-height: 1.4; color: var(--text-muted);
+  word-break: keep-all;
+}
 /* Says this box is ours and what the paper had instead (R6). Set like a figure
    origin, because that is the line it stands in for. */
 .flow-why { margin: .6rem 0 0; font-size: .78rem; line-height: 1.5; }
+/* A lane can be a third of a phone's width; a long Latin name breaks rather
+   than running out of its box. */
+.fl-par .fg-step { overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .fgrid.has-loop { --fl-gut: calc(min(var(--fl-lw), 3.75rem) + 1.25rem + 8px); }
+  .fg-lanes { --fl-cg: .5rem; }
+  .fl-par .fg-step { padding: .45rem .5rem; }
+}
 
 /* ── Readable layer: planted context (R5) ─────────────────────────────── */
 /* Four components for the three kinds of context that have nowhere else to go

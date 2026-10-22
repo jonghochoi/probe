@@ -127,7 +127,7 @@ that zoom into one paper are not** — that paper's own page has them.
 | `probe-split` · `probe-parts` | Available | contrast components; they already hold things apart |
 | `probe-scale` | Available | putting several numbers on one axis is what it does |
 | `probe-lineage` | Available | several papers on a time axis — act 1's natural shape |
-| `probe-flow` | Available | for a pipeline all of them share |
+| `probe-flow` | Available | for a pipeline all of them share — `lanes` for the one step where they part, one lane per paper, each lane one line of difference |
 | `probe-term` | Available, **shared vocabulary only** | a term only one paper uses belongs to that paper's panel |
 | `probe-figure` | **Unavailable** | one paper's figure is one paper's detail |
 | `probe-eq` | **Unavailable** | so is a derivation. Inline `` $`x`$ `` carries what an axis needs |

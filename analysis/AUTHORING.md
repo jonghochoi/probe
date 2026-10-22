@@ -367,6 +367,23 @@ explains it; an Act 2 with no figure while the paper has one is wrong.
   have covered the point and why it cannot serve (none exists / inline SVG
   with no file). If the paper illustrates it, use `probe-figure`.
 
+  **A list says "then"; two shapes say more, and are drawn rather than
+  unrolled.** Work that runs side by side over the same input is one row of
+  `lanes` — the row before forks into it, the row after merges out of it.
+  A step that repeats from an earlier one carries a `loop` back to that row,
+  labelled with what repeats and how often:
+
+      {"lanes": [{"label": "<갈래>", "note": "…"}, {"label": "<갈래>", "note": "…"}]}
+      {"label": "<단계>", "note": "…", "loop": {"to": "<되돌아갈 앞 단계의 label>", "label": "<반복 조건>"}}
+
+  `hot: true` on a step puts it in the accent — what to look at first. Two
+  parallel paths written as consecutive steps, or a last step that says
+  `… 에서 반복`, is the list hiding the shape. `loop.to` names the earlier
+  step by its `label`, written exactly as it is. Limits: at most nine rows;
+  two or three lanes, a lane is one step; one loop per flow, both ends single
+  steps, its label at most 16 characters with the rest in the step's `note`;
+  at most two `hot`. Past those it is two flows.
+
 ### 2-7. R7 — Math
 
 - Inline math is `` $`X`$ ``. Display math goes in a `probe-eq` fence, which
@@ -773,7 +790,7 @@ means "a strict build fails".
 | Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title, `alias:` and `metric:` within their widths (§1), `appendix:` present (R15), the `::: glance` container present (§4) | `site/builder/corpus.py` |
 | `figures:` ↔ every `probe-figure`, `probe-hub` and `probe-act` figure id across both surfaces, and every 요약 figure id declared by a body `probe-figure` (R6, G6) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), raw HTML published as text (R13), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
-| `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, R6), lineage, scale, split (at most one `us`), parts (all-or-none `state`, four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
+| `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, the nine-row ceiling, `loop.to` resolving to one earlier step and the `lanes` · `loop` · `hot` limits, R6), lineage, scale, split (at most one `us`), parts (all-or-none `state`, four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | Characters the code font cannot cover (R8) | `site/builder/fonts.py` |
