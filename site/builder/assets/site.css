@@ -1069,6 +1069,13 @@ figure.fig figcaption {
   color: var(--text-muted); white-space: nowrap;
 }
 .table-wrap tr:last-child td { border-bottom: none; }
+/* An identifier in a cell stays whole. `.article code` may break anywhere so a
+   long token cannot push prose past the column, but a table already scrolls
+   inside `.table-wrap` — breaking there only splits `align_corners=False`
+   across lines at a phone's width. */
+.table-wrap td code, .table-wrap th code {
+  word-break: normal; overflow-wrap: normal; white-space: nowrap;
+}
 
 /* ── Math ─────────────────────────────────────────────────────────────── */
 .math-display {
