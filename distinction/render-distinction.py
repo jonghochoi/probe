@@ -3,7 +3,7 @@
 
 A versus note, a report and a deep dive are records: the lint reads them and the
 next run builds on them. Each gets a page beside it for a person —
-`versus/<id>.html`, `reports/<date>.html`, `deepdive/<id>--<scope>.html` — one
+`versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` — one
 file opened from disk that never leaves the private folder. A page is
 redrawn from its Markdown and never edited by hand
 (`distinction/AUTHORING.md` §3-6).
@@ -105,15 +105,19 @@ class Context:
         self.paper_id = paper_id
         self.kind = kind
         # `{id: alias}` per versus note, read off each H1, so a basket id written
-        # anywhere can link to the page that holds the position on it.
+        # anywhere can link to the page that holds the position on it; the
+        # page's file stem beside it, since the name carries the alias too.
         self.ledgers: dict[str, str] = {}
+        self.ledger_stems: dict[str, str] = {}
         for lp in sorted(glob.glob(os.path.join(private, "versus", "*.md"))):
             try:
                 with open(lp, encoding="utf-8") as fh:
                     first = fh.readline()
             except OSError:
                 continue
-            lid = os.path.basename(lp)[:-3]
+            stem = os.path.basename(lp)[:-3]
+            lid = stem.partition("--")[0]
+            self.ledger_stems[lid] = stem
             self.ledgers[lid] = first[2:].partition(" — ")[0].strip() if first.startswith("# ") else lid
         self.decisions = {k: t for k, (_, t) in harvest_decisions().items()}
         self.claims: dict[str, str] = {}
@@ -138,7 +142,8 @@ class Context:
         self.code_root = os.path.realpath(code) if os.path.exists(code) else None
 
     def ledger_href(self, pid: str) -> str:
-        return f"{pid}.html" if self.kind == "versus" else f"../versus/{pid}.html"
+        page = self.ledger_stems.get(pid, pid) + ".html"
+        return page if self.kind == "versus" else f"../versus/{page}"
 
     def code_href(self, path: str, line: str) -> str | None:
         if not self.code_root:
@@ -665,9 +670,10 @@ def render(path: str) -> tuple[str, list[str]]:
     name = os.path.basename(path)
     kind = _kind(path) or "deepdive"
     noun, eyebrow, spine = _KINDS[kind]
-    m = re.match(r"^(\d{4}\.\d{5})(?:--([a-z0-9_]+))?\.md$", name)
-    ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), m.group(1) if m else "", kind,
-                  (m.group(2) or "") if m else "")
+    # `<id>--<alias>.md` for a versus note, `<id>--<alias>--<scope>.md` for a deep dive.
+    parts = name[:-3].split("--") if re.match(r"^\d{4}\.\d{5}--", name) else []
+    ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), parts[0] if parts else "", kind,
+                  parts[2] if kind == "deepdive" and len(parts) == 3 else "")
 
     h1 = lines[0][2:] if lines and lines[0].startswith("# ") else name
     if kind == "reports":

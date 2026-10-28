@@ -40,19 +40,27 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 
 | File | One per | Overwritten |
 |---|---|---|
-| `versus/<arxiv-id>.md` | basket paper | yes — the versus note is the current position, never a history |
+| `versus/<arxiv-id>--<alias>.md` | basket paper | yes — the versus note is the current position, never a history |
 | `scoreboard.md` | folder | yes |
 | `reports/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
-| `deepdive/<arxiv-id>--<scope>.md` | `--deepdive` run | yes — the latest reading of that paper against that scope |
-| `versus/<id>.html`, `reports/<date>.html`, `deepdive/<id>--<scope>.html` | document | yes — the page drawn from it (§3-6) |
+| `deepdive/<arxiv-id>--<alias>--<scope>.md` | `--deepdive` run | yes — the latest reading of that paper against that scope |
+| `versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` | document | yes — the page drawn from it (§3-6) |
 | `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
+
+`<alias>` in a file name is the paper's alias with every run of whitespace
+turned into `-` (`Dexterous Point Policy` → `Dexterous-Point-Policy`), so the
+name says which paper it holds without opening it; an alias never contains
+`--`, the separator. A versus note takes the `BASKET.md` row's `alias`; a deep
+dive takes the `<alias>` its H1 names. The routine finds a paper's file by its id
+(`versus/<id>--*.md`) and never renames one: when a row's alias changes, the
+operator renames its files, and until then the lint names the mismatch.
 
 ## 3. The documents
 
 All four are Korean, in the register `scouting/AUTHORING.md` §4 fixes (§6
 below). Section headers are fixed strings: the lint matches them verbatim.
 
-### 3-1. The versus note — `versus/<arxiv-id>.md`
+### 3-1. The versus note — `versus/<arxiv-id>--<alias>.md`
 
 `comparison/` holds papers against papers. The versus note holds **this method
 against one paper**, and every section is one question asked in that order.
@@ -98,7 +106,7 @@ Method: 0000000 · Run: YYYY-MM-DD
 
 | | <alias> (XXXX.XXXXX) | <alias> (XXXX.XXXXX) |
 |---|---|---|
-| C1 | 위협 — <한 줄> ([맞대기](versus/XXXX.XXXXX.md)) | 무관 |
+| C1 | 위협 — <한 줄> ([맞대기](versus/XXXX.XXXXX--<alias>.md)) | 무관 |
 | C2 | 지지 — <한 줄> | 반박 — <한 줄> |
 ```
 
@@ -180,7 +188,7 @@ The method is the permanent third party here: an idea that does not take
 something from `MY-METHOD.md` or `CODEMAP.md` is an `/ideate` answer and belongs
 in that chat, not in a versus note.
 
-### 3-5. The deep dive — `deepdive/<arxiv-id>--<scope>.md`
+### 3-5. The deep dive — `deepdive/<arxiv-id>--<alias>--<scope>.md`
 
 The versus note is a position, kept short so the scheduled run can re-read it.
 The deep dive is the long reading a human asks for when one paper matters:
@@ -266,7 +274,7 @@ table or the section. A fence anywhere but §6 is not drawn.
 ### 3-6. The pages beside them
 
 Every versus note, report and deep dive gets a page beside it —
-`versus/<id>.html`, `reports/<date>.html`, `deepdive/<id>--<scope>.html` — drawn
+`versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` — drawn
 by `python3 distinction/render-distinction.py`: one file in the reading
 site's look, opened from disk. A page adds arrangement and no content — a
 versus note's §2 sides set side by side, a report's ids linked to their versus notes and
@@ -372,13 +380,13 @@ checks is in no checkout.
 
 | Rule | Check |
 |---|---|
-| §1 | every `versus/<id>.md` names a `BASKET.md` row and `analysis/<id>.md` exists |
+| §1 | every `versus/<id>--<alias>.md` names a `BASKET.md` row by id and alias, one file per id, and `analysis/<id>.md` exists |
 | §3-1 | the H1, the five-field metadata line, the seven headers verbatim and in order, no other `##` |
 | §3-1, §4 | per section, every bullet carries the anchors its row of the table requires, or is `- 없음` — a §3 and a §6 bullet carry a quote anchor or `원문 미확인`; a §4 bullet opens with a verdict; §7 holds a `cfg:` anchor |
 | §3-2 | the scoreboard's rows are `MY-METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the report's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a versus note id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
-| §3-5 | the deep dive's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
+| §3-5 | the deep dive's file name, H1 alias and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
 | §5 | active rows, ideas per versus note, per report and per deep dive, charts per deep dive, versus note and deep dive prose length |
 | §6 | no `이 방법`, `이 범위`, `내 방법` or `우리` in any output outside a `##` header or a `"…"` quote |
 | §7 | no `MY-METHOD.md` §6 string in any output |

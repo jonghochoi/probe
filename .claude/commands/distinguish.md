@@ -1,5 +1,5 @@
 ---
-description: 바구니의 관심 논문들을 비공개 방법론·코드베이스와 맞대어 로컬에만 맞대기(versus/<id>.md)·점수판(scoreboard.md)·회차 보고(reports/)를, 요청하면 논문 한 편과 코드 범위 하나를 깊게 맞댄 정밀 대조(deepdive/)를 쓴다 (레포 커밋 없음)
+description: 바구니의 관심 논문들을 비공개 방법론·코드베이스와 맞대어 로컬에만 맞대기(versus/<id>--<alias>.md)·점수판(scoreboard.md)·회차 보고(reports/)를, 요청하면 논문 한 편과 코드 범위 하나를 깊게 맞댄 정밀 대조(deepdive/)를 쓴다 (레포 커밋 없음)
 argument-hint: [<arXiv id | alias> | --all | --audit | --deepdive <arXiv id | alias> <scope>]
 ---
 
