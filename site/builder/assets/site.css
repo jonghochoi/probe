@@ -640,42 +640,235 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 }
 
 /* ── Comparisons ──────────────────────────────────────────────────────── */
-/* Who the compared papers are, drawn from front matter the rewrites already
-   carry. It sits above the argument because the argument is forbidden from
-   introducing anybody — this row is the introduction. */
-.cmp-cards { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 0; }
-.cmp-cards-h {
-  font-size: .72rem; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: .7rem;
+/* A compared paper's mark, by its place in `compares:` — a shape first and a
+   hue second (`components.paper_mark`). The three hues are the site's act
+   colours, which already read apart in both themes. */
+.pmark { flex: 0 0 auto; display: inline-block; vertical-align: -.05em; }
+.pm-1 { color: var(--act1); }
+.pm-2 { color: var(--act2); }
+.pm-3 { color: var(--act3); }
+
+/* The tagline answers the question printed above it, so it sits in the header
+   with it rather than under the thesis further down. */
+.cmp-tagline {
+  max-width: 46rem; margin: .9rem 0 0; padding-bottom: 1.4rem;
+  font-size: 1.02rem; line-height: 1.65; color: var(--text); word-break: keep-all;
 }
+
+/* The fork at full size: `common:` as the trunk, the paper cards as its
+   branches. The cards are also the introduction — the argument is forbidden
+   from introducing anybody — so each leads with the name the fork, the matrix
+   and the prose all use, and its stance, and keeps the full title as
+   reference. */
+.cmp-cards { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 0; }
+.cmp-trunk {
+  display: flex; justify-content: center; align-items: baseline; gap: .55rem;
+  font-size: .9rem; line-height: 1.5; color: var(--text); text-align: center;
+  word-break: keep-all; text-wrap: balance;
+}
+.cmp-trunk .fork-l { font-size: .7rem; }
 .cmp-card-row {
-  display: grid; gap: .6rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  --gap: .7rem;
+  display: grid; gap: var(--gap); position: relative;
+  grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+}
+/* The bracket, in borders: a stub down from the trunk, a rail across the card
+   centres, a tick down into each card. Drawn only where the cards stand in a
+   row; stacked, a left rule says the same thing. */
+.has-trunk .cmp-card-row { padding-top: 1.5rem; margin-top: .55rem; }
+.has-trunk .cmp-card-row::before, .has-trunk .cmp-card-row::after {
+  content: ""; position: absolute; border-color: var(--amber-soft); border-style: solid;
+}
+.has-trunk .cmp-card-row::after { left: 50%; top: 0; height: .75rem; border-width: 0 0 0 1.5px; }
+.has-trunk .cmp-card-row::before {
+  --c: calc((100% - (var(--n) - 1) * var(--gap)) / var(--n) / 2);
+  top: .75rem; left: var(--c); right: var(--c); border-width: 1.5px 0 0;
 }
 .cmp-card {
+  position: relative;
   display: flex; flex-direction: column; gap: .3rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: .8rem .9rem;
+  border-radius: var(--radius); padding: .85rem .95rem .8rem;
   text-decoration: none; color: inherit;
   transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-mid) var(--ease-out),
-              transform var(--dur-mid) var(--ease-out);
+              transform var(--dur-mid) var(--ease-out), opacity var(--dur-short) var(--ease-out);
+}
+.has-trunk .cmp-card::before {
+  content: ""; position: absolute; left: 50%; top: -.75rem; height: .75rem;
+  border-left: 1.5px solid var(--amber-soft);
 }
 .cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
-.cmp-card-p {
-  font-size: .68rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em;
+.cmp-card-h { display: flex; align-items: center; gap: .45rem; }
+.cmp-card-n { font-size: 1rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.3; }
+.cmp-card:hover .cmp-card-n { color: var(--orange-ink); }
+.cmp-card-s { font-size: .92rem; font-weight: 600; line-height: 1.5; color: var(--text); word-break: keep-all; }
+.cmp-card-t {
+  font-size: .74rem; line-height: 1.5; color: var(--text-muted);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
 }
-.cmp-card-t { font-size: .88rem; font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
-.cmp-card:hover .cmp-card-t { color: var(--orange-ink); }
-.cmp-card-tag { font-size: .78rem; line-height: 1.55; color: var(--text-muted); }
 .cmp-card-foot {
   display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: baseline;
-  margin-top: .15rem;
+  margin-top: auto; padding-top: .2rem;
 }
 .cmp-card-id {
   font-family: var(--mono); font-size: .7rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 .cmp-card-m { font-size: .7rem; color: var(--orange-ink); font-weight: 600; }
+@media (max-width: 720px) {
+  .cmp-trunk { justify-content: flex-start; text-align: left; }
+  .cmp-card-row { grid-template-columns: minmax(0, 1fr); }
+  .has-trunk .cmp-card-row { padding: 0 0 0 .7rem; margin-top: .6rem; border-left: 2px solid var(--amber-soft); }
+  .has-trunk .cmp-card-row::before, .has-trunk .cmp-card-row::after, .has-trunk .cmp-card::before { display: none; }
+}
+
+/* `problem:` under the question, labelled so it reads as the question's
+   ground rather than its answer. */
+.cmp-problem-l {
+  display: block; font-size: .7rem; font-weight: 700; letter-spacing: .06em;
+  color: var(--orange-ink); margin-bottom: .2rem;
+}
+/* The stance in everyday words — a second register under the stance, never
+   louder than it. */
+.cmp-card-plain { font-size: .84rem; line-height: 1.55; color: var(--text-muted); word-break: keep-all; }
+
+/* The summary under a comparison's thesis prints folded: the fork above has
+   already said it in structure. Its label is the control. */
+.tldr-fold > summary { cursor: pointer; list-style: none; margin-bottom: 0; }
+.tldr-fold > summary::-webkit-details-marker { display: none; }
+.tldr-fold > summary::after { content: " · 펼쳐 보기"; color: var(--text-muted); font-weight: 600; letter-spacing: 0; }
+.tldr-fold[open] > summary { margin-bottom: .45rem; }
+.tldr-fold[open] > summary::after { content: ""; }
+.tldr-fold > summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+
+/* ── 읽기 전에 ───────────────────────────────────────────────────────── */
+/* The background cards under the fork (`builder/primers.py`): a drawing and
+   one line each, all one size and one hand, so a row of them reads as one
+   set rather than three pictures competing. */
+.cmp-primers { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.5rem 0; }
+.cmp-primers-h {
+  font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--text-muted);
+  margin: 0 0 .6rem;
+}
+/* Three columns whatever the count, so two cards stay the size of three
+   rather than stretching their drawings across half the page each. */
+.primer-row { display: grid; gap: .7rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* On a phone the cards stay one row the reader swipes through, rather than
+   three screens of pictures before the argument starts. */
+@media (max-width: 720px) {
+  .cmp-primers { padding: 1.2rem .9rem 0; }
+  .primer-row {
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%;
+    overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: .3rem;
+  }
+  .primer { scroll-snap-align: start; }
+}
+.primer {
+  margin: 0; display: grid; gap: .45rem; align-content: start;
+  background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius);
+  padding: .8rem .9rem .85rem;
+}
+.primer svg { width: 100%; height: auto; display: block; }
+.primer figcaption { display: grid; gap: .1rem; font-size: .84rem; line-height: 1.5; color: var(--text-muted); }
+.primer figcaption b { color: var(--text); font-size: .9rem; }
+.primer svg text { fill: var(--text); font-family: var(--ko); }
+.primer svg .pr-m { fill: var(--text-muted); }
+.primer svg .pr-k { fill: var(--orange-ink); }
+.primer svg .pr-mono { font-family: var(--mono); }
+.pr-box { fill: var(--surface); stroke: var(--text-muted); stroke-width: 1.4; }
+.pr-soft { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.2; }
+.pr-key { fill: var(--orange-soft); stroke: var(--orange); stroke-width: 1.5; }
+.pr-ice { fill: var(--wash-key); stroke: var(--act1); stroke-width: 1.5; }
+.pr-mask { fill: var(--text-muted); opacity: .55; }
+.pr-on { fill: var(--orange); }
+.pr-dot { fill: var(--text-muted); opacity: .45; }
+.pr-ring { fill: none; stroke: var(--text-muted); stroke-width: 2; }
+.pr-line { fill: none; stroke: var(--text-muted); stroke-width: 1.5; }
+.pr-head { fill: var(--text-muted); }
+.pr-arm { fill: none; stroke: var(--border); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.pr-joint { fill: var(--surface); stroke: var(--text-muted); stroke-width: 2; }
+.pr-curve { fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linejoin: round; }
+.pr-curve-on { fill: none; stroke: var(--orange); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.pr-trail { fill: none; stroke: var(--orange); stroke-width: 2; stroke-linecap: round; }
+
+/* ── ```probe-timeline ──────────────────────────────────────────────── */
+/* The compared papers on one ruler. A row's colour is its paper's mark hue;
+   shared cuts run through the bars and never through the words. */
+.timeline {
+  margin: 1.4rem 0; padding: .9rem 1.05rem;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2);
+}
+.tl-scroll { overflow-x: auto; }
+.tl-scroll svg { display: block; width: 100%; min-width: 36rem; height: auto; }
+.timeline svg text { font-family: var(--ko); fill: var(--text); }
+.timeline .tl-tick { font-family: var(--mono); font-size: 11px; fill: var(--text-muted); }
+.timeline .tl-unit { font-size: 11px; fill: var(--text-muted); }
+.tl-axis { stroke: var(--text-muted); stroke-width: 1; }
+.tl-label { font-size: 13.5px; font-weight: 700; }
+.timeline .tl-verb { font-size: 12px; font-weight: 700; fill: currentColor; }
+.timeline .tl-note { font-size: 11.5px; fill: var(--text-muted); }
+.tl-row { transition: opacity var(--dur-short) var(--ease-out); }
+.tl-solid { fill: currentColor; }
+.tl-part { stroke: currentColor; stroke-width: 1; }
+.tl-hatch { stroke: currentColor; stroke-width: 2.2; opacity: .6; }
+.tl-faint { fill: var(--border); }
+.tl-over { fill: currentColor; }
+.tl-every { stroke: currentColor; stroke-width: 2; }
+.tl-cut { stroke: var(--orange); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.timeline .tl-cutl { font-size: 11.5px; font-weight: 700; fill: var(--orange-ink); }
+
+/* ── ```probe-figs ───────────────────────────────────────────────────── */
+/* One frame, one paper's own figure at the column's full width; the tabs
+   switch papers in place. Figures are drawn on white by their authors, so the
+   frame is white in both themes. Without the script every figure stands in
+   order with its caption. */
+.figs { margin: 1.8rem 0; display: grid; gap: .7rem; }
+.figs-q { margin: 0; font-size: .95rem; font-weight: 700; }
+.figs-tabs { display: flex; flex-wrap: wrap; gap: .2rem; border-bottom: 1px solid var(--border); }
+.figs-tabs button {
+  font: inherit; font-size: .86rem; font-weight: 700; color: var(--text-muted);
+  background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  padding: .45rem .75rem .5rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
+}
+.figs-tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); }
+.figs-tabs button:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.figs-panels { display: grid; gap: 1.4rem; }
+.figs.is-live .figs-panels { gap: 0; }
+.figs-panel { margin: 0; display: grid; gap: .6rem; }
+/* The declared `display` wins over the UA's `[hidden]` rule, so the frame
+   says it again for the panels `compare.js` hides. */
+.figs-panel[hidden] { display: none; }
+.figs-frame {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; display: grid; place-items: center;
+}
+.figs-frame img { max-width: 100%; max-height: 26rem; height: auto; display: block; }
+.figs-panel figcaption {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .5rem;
+  align-items: baseline; font-size: .9rem; line-height: 1.6;
+}
+.figs-panel figcaption .pmark { align-self: center; }
+.figs-look { font-weight: 600; }
+.figs-src { grid-column: 2; font-family: var(--mono); font-size: .7rem; color: var(--text-muted); }
+
+/* `compare.js` sets the other papers back while the reader points at one. */
+.is-dim { opacity: .3; }
+table.mx td, table.mx thead th { transition: opacity var(--dur-short) var(--ease-out); }
+@media (prefers-reduced-motion: reduce) {
+  .cmp-card, table.mx td, table.mx thead th { transition: none; }
+}
+
+/* The research-axis act prints folded: its divider is the summary, and the
+   hint says the act is there to open. */
+.act-fold > summary { list-style: none; cursor: pointer; }
+.act-fold > summary::-webkit-details-marker { display: none; }
+.act-fold-hint {
+  order: 3; flex: 0 0 auto; font-size: .72rem; font-weight: 700; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: var(--radius-pill); padding: .05rem .55rem;
+}
+.act-fold > summary::after { order: 2; }
+.act-fold[open] .act-fold-hint { display: none; }
+.act-fold > summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
 
 /* ── ```probe-matrix ──────────────────────────────────────────────────── */
 /* One question per row, one paper per column. Three columns of Korean
@@ -709,6 +902,58 @@ table.mx thead th a {
   overflow: hidden;
 }
 table.mx thead th a:hover { color: var(--orange-ink); }
+table.mx thead th .pmark { margin-right: .35rem; }
+/* Typed axes (`comparison/AUTHORING.md` §3-1). A mark leads its sentence as a
+   word with a dot whose fill is the claim; `–` is drawn fainter than `○`, so
+   a paper that says nothing never reads as a paper that says no. */
+.mx-mk {
+  display: inline-flex; align-items: center; gap: .35rem; margin-bottom: .2rem;
+  font-size: .74rem; font-weight: 700; color: var(--text);
+}
+.mx-mk::before {
+  content: ""; width: .7rem; height: .7rem; border-radius: 50%;
+  border: 1.5px solid currentColor; box-sizing: border-box;
+}
+.mx-mk-full::before { background: currentColor; }
+.mx-mk-half::before { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.mx-mk-na { color: var(--text-muted); font-weight: 600; }
+.mx-mk-na::before { border-style: dashed; }
+/* A measurement's yardstick, named on the cell; one off the majority's is
+   flagged, because its number does not line up with the others'. */
+.mx-metric {
+  display: inline-block; margin-bottom: .25rem; padding: .02rem .45rem;
+  font-size: .7rem; font-weight: 700; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: var(--radius-pill);
+}
+/* The 한계 callout's amber: a yardstick that differs is a limit on reading
+   the numbers together, not a conflict with this project. */
+.mx-metric.is-off, .mx-flag { color: var(--amber); border-color: currentColor; background: var(--wash-warn); }
+.mx-flag {
+  display: inline-block; margin-top: .35rem; padding: .02rem .45rem;
+  font-size: .68rem; border: 1px solid; border-radius: var(--radius-pill);
+}
+/* A `stops` axis spans the paper columns: equal-width places — order, never
+   distance — with each paper's mark on the one it holds. */
+.mx-row-stops td { padding-top: .9rem; }
+.mx-stops {
+  display: grid; grid-template-columns: repeat(var(--k), minmax(0, 1fr));
+  border-top: 2px solid var(--border); margin-top: 1.4rem;
+}
+.mx-stop { display: grid; justify-items: center; gap: .3rem; position: relative; padding: 0 .3rem; }
+.mx-stop::before {
+  content: ""; position: absolute; top: -6px; left: 50%; width: 2px; height: 10px;
+  background: var(--border); transform: translateX(-50%);
+}
+.mx-pins { display: flex; gap: .3rem; min-height: 1.1rem; margin-top: -2.1rem; }
+.mx-pin { display: inline-flex; transition: opacity var(--dur-short) var(--ease-out); }
+.mx-pin .pmark { width: 15px; height: 15px; }
+.mx-pin.is-probe .pmark { fill: none; stroke: currentColor; stroke-width: 1.6; }
+.mx-stop-l { margin-top: .9rem; font-size: .76rem; line-height: 1.4; color: var(--text-muted); text-align: center; word-break: keep-all; }
+.mx-why { margin-top: .7rem; font-size: .8rem; }
+.mx-why > summary { cursor: pointer; color: var(--text-muted); }
+.mx-why ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .45rem; }
+.mx-why li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .45rem; align-items: baseline; }
+.mx-probe-l { font-size: .7rem; font-weight: 700; color: var(--text-muted); }
 /* The two widths that drive `table-layout: fixed` — the header row decides,
    so they are declared on it and every body row follows. */
 .mx-corner {
@@ -1312,6 +1557,26 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .fg-step.hot { border-color: var(--orange-ink); background: var(--orange-soft); }
 .fs-label { display: block; font-weight: 700; }
 .fs-note { display: block; color: var(--text-muted); font-size: .82rem; margin-top: .12rem; }
+/* In a comparison a step can carry the papers that act on it: each paper's
+   mark and what it does there, one line each, in column order. A step two
+   papers hold is the slot they compete for, so it takes the accent's ground;
+   a step every paper leaves (`blind`) is ruled dashed in the 한계 amber. */
+.fs-marks { display: grid; gap: .2rem; margin-top: .4rem; }
+.fs-mark {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .4rem;
+  align-items: baseline; font-size: .8rem; line-height: 1.45;
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+.fs-mark .pmark { align-self: center; }
+.fg-step.is-contested { border-color: var(--orange-ink); background: var(--orange-soft); }
+.fg-step.is-blind { border: 1.5px dashed var(--amber); background: var(--wash-warn); }
+.fs-blind { display: block; margin-top: .3rem; font-size: .8rem; font-weight: 700; color: var(--amber); }
+.flow-verdict { margin: -.2rem 0 .7rem; font-size: .84rem; }
+.flow-tag {
+  display: inline-block; margin-right: .45rem; padding: .02rem .45rem;
+  font-size: .72rem; font-weight: 800; color: var(--accent-ink);
+  background: var(--orange-ink); border-radius: var(--radius-xs);
+}
 /* The wire into a row: down the gap to the box, with its head on the box. */
 .fg-in::before, .fg-lanes.fg-split::before {
   content: ""; position: absolute; left: 50%; margin-left: calc(var(--fl-w) / -2);

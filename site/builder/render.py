@@ -35,10 +35,12 @@ from pygments.util import ClassNotFound
 
 from .mdext import callouts, ghmath, probefence
 
-# Printed above the thesis line on every rewrite: the reader has arrived from
-# an index of papers and needs to know in one glance that this page is our
-# re-telling, not the paper.
-EYEBROW = "읽기 쉬운 버전 · 원문에서 직접 발췌"
+# Printed above the thesis line, one per document kind: the reader has arrived
+# from an index and needs to know in one glance what this page is. A rewrite is
+# our re-telling of one paper, not the paper; a comparison retells none of its
+# papers — it sets them side by side and keeps only where they part.
+EYEBROW = {"paper": "읽기 쉬운 버전 · 원문에서 직접 발췌",
+           "compare": "같이 읽기 · 갈리는 자리만 원문에서 확인"}
 
 # `Figure 3 — <한글 캡션>` → ("Figure 3", "<한글 캡션>")
 _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re.I)
@@ -111,6 +113,9 @@ _ACT_NUM = re.compile(r"^\s*(\d{1,2})[.)]?\s+(.*)$")
 # `comparison/AUTHORING.md` §2-5.
 COMPARE_CHARS_MAX = 7000
 
+# The comparison act that prints folded (`comparison/AUTHORING.md` §2-3).
+COMPARE_FOLD_ACT = "4"
+
 
 def _split_act(text: str) -> tuple[str, str]:
     m = _ACT_NUM.match(text.strip())
@@ -147,6 +152,7 @@ class DocRenderer:
     def __init__(self, katex, *, decisions: dict | None = None,
                  lead_html: str = "", kind: str = "paper",
                  matrix_heads: list | None = None,
+                 figures: dict | None = None,
                  siblings: dict[str, str] | None = None,
                  self_id: str | None = None):
         self.katex = katex
@@ -163,10 +169,13 @@ class DocRenderer:
         # `comparison/AUTHORING.md`, which teaches nothing and so owes none of the
         # rules that exist to make one paper learnable.
         self.kind = kind
-        # `(id, label, href)` per column for ```probe-matrix, in column order.
+        # `(id, label, href, mark)` per column for ```probe-matrix, in column order.
         # The fence cannot know which papers are being compared; the document's
         # front matter does.
         self.matrix_heads = matrix_heads or []
+        # `{paper id: {figure id: (url, source)}}` for ```probe-figs — the
+        # figures each compared paper's own rewrite declares.
+        self.figures = figures or {}
         # Emitted immediately after the body H1 closes. The one-paragraph
         # summary is the first thing a reader wants and the front matter
         # already carries it, so the page prints it instead of reserving it
@@ -270,7 +279,7 @@ class DocRenderer:
             # rewrite claims, everything below is the argument for it.
             self._pending_close = "</h1>\n" + self.lead_html + "</header>\n"
             return ('<header class="lead">'
-                    f'<p class="eyebrow">{EYEBROW}</p>'
+                    f'<p class="eyebrow">{EYEBROW[self.kind]}</p>'
                     '<h1 class="thesis">')
 
         if level == 2:
@@ -280,9 +289,23 @@ class DocRenderer:
                              "label": act})
             take_inline()
             self._pending_close = ""
+            n = html.escape(number or str(self._acts_seen))
+            if self.kind == "compare" and n == COMPARE_FOLD_ACT:
+                # A comparison's last act is the research-axis layer — what the
+                # divergence costs this project's open decisions. It reads only
+                # after the divergence itself has landed, so it prints closed
+                # and runs to the end of the document (`render()` closes it).
+                self._fold_open = True
+                return (
+                    '<details class="act-fold"><summary class="pdiv">'
+                    f'<span class="pn">{n}</span>'
+                    f'<span class="pt">{self._inline(act)}</span>'
+                    '<span class="act-fold-hint">펼쳐 보기</span>'
+                    "</summary>\n"
+                )
             return (
                 '<div class="pdiv">'
-                f'<span class="pn">{html.escape(number or str(self._acts_seen))}</span>'
+                f'<span class="pn">{n}</span>'
                 f'<span class="pt">{self._inline(act)}</span>'
                 "</div>\n"
             )
@@ -461,7 +484,7 @@ class DocRenderer:
             if info == "probe-eq":
                 return probefence.equation(data, self.katex.block, self._inline)
             if info == "probe-flow":
-                return probefence.flow(data, self._inline)
+                return probefence.flow(data, self._inline, self.matrix_heads)
             if info == "probe-lineage":
                 self._context_kinds.add("계보")
                 return probefence.lineage(data, self._inline,
@@ -478,6 +501,10 @@ class DocRenderer:
             if info == "probe-matrix":
                 self._matrices += 1
                 return probefence.matrix(data, self._inline, self.matrix_heads)
+            if info == "probe-timeline":
+                return probefence.timeline(data, self._inline, self.matrix_heads)
+            if info == "probe-figs":
+                return probefence.figs(data, self._inline, self.matrix_heads, self.figures)
         except probefence.FenceError as exc:
             # Reported AND rendered: a build warning the reader never sees is
             # how a broken quiz stays broken.
@@ -788,10 +815,13 @@ class DocRenderer:
         self._context_kinds = set()
         self._sections_without_keywords = []
         self._matrices = 0
+        self._fold_open = False
         self._printed_chars = len(_printed(source))
         masked = ghmath.mask_source(source)
         self._prescan_terms(masked)
         out = self.md.render(masked)
+        if self._fold_open:
+            out += "</details>\n"
         self._close_section()
         self._check()
         self._check_stray_emphasis(self.lead_html + out)

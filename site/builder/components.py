@@ -208,6 +208,23 @@ def pillar_chips(pillars: list[str]) -> str:
     return "".join(chip(p, "pillar", data={"p": p}) for p in pillars)
 
 
+# A compared paper's mark: its place in `compares:` drawn as a shape first and
+# a hue second, so ● ▲ ■ still tell two or three papers apart for a reader who
+# cannot tell the hues apart. One comparison page uses one set everywhere a
+# paper appears — its card, its branch of the fork, its matrix column — so the
+# eye follows a paper by its mark rather than by counting positions.
+_PAPER_MARKS = ('<circle cx="6" cy="6" r="5"/>',
+                '<path d="M6 .9 11.4 10.7H.6Z"/>',
+                '<rect x="1.3" y="1.3" width="9.4" height="9.4" rx="1.2"/>')
+
+
+def paper_mark(i: int, size: int = 11) -> str:
+    """The mark of the `i`-th compared paper (0-based)."""
+    return (f'<svg class="pmark pm-{i + 1}" viewBox="0 0 12 12" width="{size}" '
+            f'height="{size}" fill="currentColor" aria-hidden="true" '
+            f'focusable="false">{_PAPER_MARKS[i]}</svg>')
+
+
 def mark_fab() -> str:
     """책갈피 for the section on screen, without going back to the contents.
 
