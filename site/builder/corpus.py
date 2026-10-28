@@ -745,6 +745,19 @@ def figure_urls(body: str) -> dict[str, str]:
     return out
 
 
+def figure_sources(body: str) -> dict[str, str]:
+    """`{figure id: source}` from the body's `probe-figure` fences — where in
+    the original each figure stands (`Figure 3, 원문 §3.2`). A comparison that
+    shows a paper's figure prints this beside it rather than restating it."""
+    out: dict[str, str] = {}
+    for block in re.findall(r"```probe-figure\n(.*?)```", body, re.S):
+        fid = _FIG_ID.search(block)
+        src = re.search(r'"source"\s*:\s*"([^"]+)"', block)
+        if fid and src:
+            out.setdefault(fid.group(1).strip(), src.group(1).strip())
+    return out
+
+
 # ── Neighbours ──────────────────────────────────────────────────────────────
 
 # A Decision-Log citation — `D`, one digit, two capitals, standing alone — the

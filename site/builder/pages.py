@@ -7,7 +7,7 @@ import re
 from collections import Counter
 
 from . import components as c
-from . import corpus, scouting, glance as glance_mod
+from . import corpus, primers, scouting, glance as glance_mod
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer, _decorate_refs
 
@@ -1068,13 +1068,23 @@ def _src_group(paper: Paper) -> str:
 
 def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
                     problems: list[str] | None = None) -> str:
-    """One comparison — the papers as cards, then the argument.
+    """One comparison — the question, the fork drawn as the papers' cards, then
+    the argument.
+
+    The first screen is the comparison's shape rather than its prose: the
+    question, the tagline under it, and the fork — `common:` as the trunk and
+    one card per paper as its branches, each card naming the paper by its
+    alias and its `stances:` line. A reader knows what the papers share and
+    where each one goes before a paragraph starts arguing it.
 
     The card row is where the track's constraint pays off. Every compared paper
-    is guaranteed to have a rewrite, so the page can state what the three
-    papers *are* entirely from front matter already written — title, tagline,
-    headline metric, pillars, and a link to the full read. Nothing here is
-    authored twice.
+    is guaranteed to have a rewrite, so the page can state what the papers
+    *are* entirely from front matter already written — alias, title, headline
+    metric, and a link to the full read. Nothing here is authored twice.
+
+    Each paper keeps one mark (`components.paper_mark`) on its card and its
+    matrix column, and `compare.js` lights one paper across the page while the
+    reader points at any of its places.
 
     That is what lets the contract forbid the prose from introducing anybody:
     the introduction is already on the page, so the first sentence of act 1 can
@@ -1087,10 +1097,16 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
     a shared vocabulary panel needs.
     """
     papers = [papers_by_id[pid] for pid in comp.paper_ids]
-    heads = [(p.stem, _alias(p), f"../../p/{p.stem}/index.html") for p in papers]
+    heads = [(p.stem, _alias(p), f"../../p/{p.stem}/index.html", c.paper_mark(i))
+             for i, p in enumerate(papers)]
 
+    figures = {}
+    for p in papers:
+        sources = corpus.figure_sources(p.body)
+        figures[p.stem] = {fid: (url, sources.get(fid, ""))
+                           for fid, url in corpus.figure_urls(p.body).items()}
     renderer = DocRenderer(katex, decisions=decisions, kind="compare",
-                           matrix_heads=heads,
+                           matrix_heads=heads, figures=figures,
                            siblings={pid: p.title
                                      for pid, p in papers_by_id.items()})
     renderer.lead_html = _cmp_lead(comp, renderer)
@@ -1098,8 +1114,9 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
     if problems is not None:
         problems.extend(f"comparison/{comp.slug}.md: {p}" for p in renderer.problems)
 
-    body = f"""{_cmp_header(comp)}
-{_cmp_cards(papers)}
+    body = f"""{_cmp_header(comp, renderer)}
+{_cmp_cards(comp, papers)}
+{_cmp_primers(comp)}
 <div class="shell one">
   <main class="article">
     <section class="view">{rendered}</section>
@@ -1112,7 +1129,7 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
         description=comp.preview,
         body=body,
         depth=2,
-        scripts=["paper.js"],
+        scripts=["paper.js", "compare.js"],
         extra_head=f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/comparison/{comp.slug}.md">',
     )
 
@@ -1136,7 +1153,8 @@ def _alias(paper: Paper) -> str:
 # ── The fork ────────────────────────────────────────────────────────────────
 # A comparison's list card draws `stances:` and `common:` (comparison/
 # AUTHORING.md §2-1) rather than its tagline: a branch per paper for what it
-# does, the trunk for what they all accept. The branch carries the alias AND
+# does, the trunk for what they all accept. The comparison's own page draws the
+# same two keys at full size as its paper cards (`_cmp_cards`). The branch carries the alias AND
 # the arXiv id — the alias is what a reader recognises, the id is what they
 # search and cite — and every branch is drawn the same. Nothing here is keyed
 # to a pillar: a comparison usually sits inside one axis, so a per-paper colour
@@ -1197,8 +1215,22 @@ def _fork(comp, papers_by_id: dict, mark: str = "") -> str:
     )
 
 
-def _cmp_header(comp) -> str:
+def _cmp_header(comp, renderer: DocRenderer) -> str:
+    """The question, its pillars and date, and one line under it.
+
+    That line is `problem:` — what every compared paper is up against, in plain
+    words — because a reader meeting the question needs the problem before any
+    answer to it. A comparison that has not written one prints its tagline
+    there instead, the comparison's own one-line answer.
+    """
     pillars = c.pillar_chips(comp.pillars)
+    if comp.problem:
+        tagline = (f'<p class="cmp-tagline cmp-problem"><span class="cmp-problem-l">'
+                   f'같이 붙든 문제</span>{c.esc(comp.problem)}</p>')
+    elif comp.tagline:
+        tagline = f'<p class="cmp-tagline">{renderer.inline(comp.tagline)}</p>'
+    else:
+        tagline = ""
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
     <div class="crumb-row">
@@ -1209,46 +1241,82 @@ def _cmp_header(comp) -> str:
     <h1 class="paper-title">{c.esc(comp.title)}</h1>
     {f'<div class="chip-row head-facts">{pillars}</div>' if pillars else ""}
     <div class="metaline"><span class="mi">{c.esc(comp.date)}</span><span class="mi">논문 {len(comp.paper_ids)}편</span></div>
+    {tagline}
   </div>
 </header>"""
 
 
 def _cmp_lead(comp, renderer: DocRenderer) -> str:
+    """The one-paragraph summary under the thesis, folded.
+
+    On a comparison page the fork and the cards above already say what the
+    summary says in prose, so it waits for a reader who wants the sentences.
+    """
     out = ""
-    if comp.tagline:
-        out += f'<p class="thesis-sub">{renderer.inline(comp.tagline)}</p>\n'
     if comp.summary_md:
         out += (
-            '<div class="tldr"><span class="tldr-label">한 문단 요약</span>'
-            f"<p>{renderer.inline(comp.summary_md)}</p></div>\n"
+            '<details class="tldr tldr-fold"><summary class="tldr-label">한 문단 요약</summary>'
+            f"<p>{renderer.inline(comp.summary_md)}</p></details>\n"
         )
     return f"\n{out}" if out else ""
 
 
-def _cmp_cards(papers: list[Paper]) -> str:
-    """Who the compared papers are, drawn entirely from their own front matter.
+def _cmp_cards(comp, papers: list[Paper]) -> str:
+    """The fork, drawn as the compared papers' cards.
+
+    `common:` is the trunk and each card is a branch: the paper's mark, its
+    alias and its `stances:` line lead, its `plain:` line says the same in
+    everyday words, and its full title, arXiv id and headline metric follow at
+    reference size — the alias is the name the fork,
+    the matrix and the prose all use, so the card leads with it.
 
     In `compares:` order, which is the comparison author's order and the same
     one every ```probe-matrix column runs in — so the third card and the third
-    column are the same paper wherever the reader is on the page.
+    column are the same paper, and carry the same mark.
+
+    A comparison whose `stances:` does not match its papers is reported by
+    discovery; its cards still draw, without the stance line and the trunk.
     """
+    stances = comp.stances if len(comp.stances) == len(papers) else [""] * len(papers)
+    plain = comp.plain if len(comp.plain) == len(papers) else [""] * len(papers)
     cards = "".join(
-        f'<a class="cmp-card" href="../../p/{c.esc(p.stem)}/index.html">'
-        f'<span class="cmp-card-p">{c.pillar_chips(p.filed)}</span>'
-        f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
-        f'<span class="cmp-card-tag">{c.esc(p.tagline)}</span>'
+        f'<a class="cmp-card" data-paper="{c.esc(p.stem)}" '
+        f'href="../../p/{c.esc(p.stem)}/index.html">'
+        f'<span class="cmp-card-h">{c.paper_mark(i, 12)}'
+        f'<span class="cmp-card-n">{c.esc(_alias(p))}</span></span>'
+        + (f'<span class="cmp-card-s">{c.esc(stance)}</span>' if stance else "")
+        + (f'<span class="cmp-card-plain">{c.esc(line)}</span>' if line else "")
+        + f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
         f'<span class="cmp-card-foot">'
         f'<span class="cmp-card-id">{c.esc(p.stem)}</span>'
         + (f'<span class="cmp-card-m">{c.esc(p.metric)}</span>' if p.metric else "")
         + "</span></a>"
-        for p in papers
+        for i, (p, stance, line) in enumerate(zip(papers, stances, plain))
     )
+    trunk = (f'<div class="cmp-trunk"><span class="fork-l">공통</span>'
+             f'<span>{c.esc(comp.common)}</span></div>'
+             if comp.common and any(stances) else "")
     return (
-        '<section class="cmp-cards">'
-        '<h2 class="cmp-cards-h">읽은 논문</h2>'
-        f'<div class="cmp-card-row">{cards}</div>'
+        f'<section class="cmp-cards{" has-trunk" if trunk else ""}" aria-label="읽은 논문">'
+        f'{trunk}<div class="cmp-card-row" style="--n:{len(papers)}">{cards}</div>'
         "</section>"
     )
+
+
+def _cmp_primers(comp) -> str:
+    """읽기 전에 — the background cards the comparison names, under the fork.
+
+    A drawing and one line each, at most three (`builder/primers.py`): the
+    background a reader outside the field needs before the divergence reads,
+    given as pictures rather than paragraphs. Unknown ids were reported at
+    discovery and are left out here.
+    """
+    cards = "".join(primers.card(pid) for pid in comp.primer if pid in primers.PRIMERS)
+    if not cards:
+        return ""
+    return ('<section class="cmp-primers" aria-label="읽기 전에">'
+            '<h2 class="cmp-primers-h">읽기 전에</h2>'
+            f'<div class="primer-row">{cards}</div></section>')
 
 
 def _ix_foot(count: str) -> str:

@@ -20,7 +20,8 @@ comment of the file that draws it.
 | `build-site.py` | Build entry point — `--out`, `--only <id>`, `--check`, `--strict`, `--serve`, `--index <file>`, `--search-api <url>` (see `--help`). A full build also writes `corpus.json` and `llms.txt` at the root; `--only` writes neither |
 | `builder/corpus.py` | Rewrite discovery and order (by the commit that landed each rewrite), front-matter validation, pillar names, the landing filter's haystacks, and `score` — the one neighbour rule every surface ranks by |
 | `builder/render.py` | Markdown → HTML, the rule checks with no other home (its row in `analysis/AUTHORING.md` §5, and a comparison's fence and length rules), and the 재작성본 sibling marker |
-| `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, `probe-matrix` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
+| `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, `probe-matrix` and `probe-figs` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
+| `builder/primers.py` | The background cards a comparison opens on (`primer:`) — a drawing and one line each |
 | `builder/glance.py` | The 요약 tab and its checks (G1–G7) |
 | `builder/comparisons.py` | Comparison discovery and validation (`comparison/AUTHORING.md`) |
 | `builder/scouting.py` | Scouting run discovery — each `scouting/P#/<date>.md` and its run file `scouting/runs/<date>.md` read against `scouting/AUTHORING.md` and merged by date into one row per arXiv id |

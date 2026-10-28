@@ -60,7 +60,7 @@ def _check_intact(before: str, after: str) -> list[str]:
 
 
 ASSET_FILES = ("site.css", "index.css", "scout.css", "theme.js",
-               "brand.js", "nav.js", "paper.js", "memo.js", "shelf.js",
+               "brand.js", "nav.js", "paper.js", "compare.js", "memo.js", "shelf.js",
                "match.js", "palette.js", "filter.js", "hub.js", "scout.js")
 # The icons `components.icon_links()` links. Shipped and hashed like everything else
 # but never scanned for characters: they carry no text the page renders, and

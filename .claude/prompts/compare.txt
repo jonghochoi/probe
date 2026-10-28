@@ -133,27 +133,54 @@ PROCEDURE
 5. BUILD THE AXES. **This is the work.** The prose comes after and is easier
    than it looks once the grid is right.
 
-   Draft more axes than will survive, then put each one through §3's test —
+   Draft more axes than will survive, then put each one through §3-1's test —
    can every compared paper answer it? — and reword or drop the ones that
-   fail, until the survivors land in §3's range. Rewording is where the
+   fail, until the survivors land in §3-1's range. Rewording is where the
    comparison happens: the wording that fits all three is usually a level
    above the wording that fitted two.
+
+   Then give each surviving axis its shape (§3-1). Answers that sit at places
+   with an order a reader would agree on are `stops`; does / partly / does not
+   is `mark`; numbers a reader would line up are `measure`, each cell naming
+   its metric the same way for the same measure. An axis stays sentences only
+   when none of the three fits — and an axis that is only sentences is the
+   one to check twice for being the easy one.
 
 6. FIND ACT 2 BEFORE YOU WRITE ACT 3. What do these papers SHARE — a
    commitment, a premise, a thing all of them decided not to question? Put
    the answer through §2-3's test, and fill `common` from it. If it will not
    pass, go back to the papers, not forward to act 3.
 
-7. WRITE `comparison/<slug>.md` — slug and front matter per §2-1, the opening
-   per §2-2.
+7. PICK THE FIGURES (§3-2). Every compared paper's rewrite lists its figures
+   as `probe-figure` ids; those ids are what `fig` names. For the one question
+   a reader most needs to SEE answered, open the candidates — download each
+   URL into a scratch directory outside the repo and look at the image — and
+   choose one figure per paper of one kind and similar shape whose text stays
+   legible at the column's width. No such set, no `probe-figs`: a figure that
+   needs a crop to find its point is the wrong figure.
 
-8. WRITE ACT 4 from `context/`. Read `context/MASTER.md` and the `context/P#.md`
+   Then draw the comparison's shape where the papers' figures cannot: a
+   `probe-flow` map (§3-3) when they act on one shared pipeline — marking the
+   step each one changes, and the step none of them touches as `blind` — or a
+   `probe-timeline` (§3-4) when they part over time. One of the two, not both,
+   and only from values the papers state.
+
+   Last, the background (§2-1, `primer`): at most three cards, only for what a
+   reader outside the field cannot read the divergence without. A concept with
+   no card is said in plain words in the prose, not defined at length.
+
+8. WRITE `comparison/<slug>.md` — slug and front matter per §2-1, the opening
+   per §2-2. Write `problem` and `plain` LAST, once the axes say what each
+   paper does: then say it again for a reader outside the field. A plain line
+   that needs a term is the line to rewrite, not the term to keep.
+
+9. WRITE ACT 4 from `context/`. Read `context/MASTER.md` and the `context/P#.md`
    for the pillars in your front matter, and cite the `D#` these papers
    actually bear on. A comparison earns a kind of act 4 a rewrite cannot: not
    "this paper supports D_n" three times over, but which of the three ways is
    the one OUR decisions can receive, and what it would cost to take another.
 
-9. VERIFY:
+10. VERIFY:
 
      python3 site/build-site.py --out /tmp/probe-check --strict
      python3 linters/check-decision-refs.py
@@ -163,11 +190,11 @@ PROCEDURE
    reads as a missing rewrite. `--strict` must exit 0. Do not report success
    on a build you did not run.
 
-10. SELF-CHECK — **before committing, not before writing.** Walk
+11. SELF-CHECK — **before committing, not before writing.** Walk
     `comparison/AUTHORING.md` §4's table row by row, and then these, which the
     build cannot see:
 
-      - Every cell an actual answer, not a placeholder? (§3)
+      - Every cell an actual answer, not a placeholder? (§3-1)
       - Are the axes the ones a reader would have asked about — or the ones
         that happened to be easy to fill?
       - Does act 2 still pass §2-3's test now that act 3 is written?
@@ -175,8 +202,15 @@ PROCEDURE
       - Is every number confirmed in the ORIGINAL, and is `sources:` the
         version you actually read?
       - `title:` a question, `#` a thesis? (§2-1, §2-3)
+      - Read `problem` and every `plain` line as someone outside the field.
+        Is there a word they would need explained? (§2-1)
+      - Does each typed axis draw what the sentences say — the stops in an
+        order a reader would agree with, `–` only where the paper is silent?
+        (§3-1)
+      - Does the map or the timeline say the comparison's shape — and does
+        its 경쟁형 or 보완형 match what act 3 argues? (§3-3, §3-4)
 
-11. COMMIT — one comparison per commit:
+12. COMMIT — one comparison per commit:
 
         compare: add <slug>
 

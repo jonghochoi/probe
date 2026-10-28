@@ -14,7 +14,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import corpus, frontmatter
+from . import corpus, frontmatter, primers
 
 COMPARISON_DIR = corpus.REPO_ROOT / "comparison"
 
@@ -28,6 +28,12 @@ COMPARE_MIN, COMPARE_MAX = 2, 3
 # a glance in a list, not down a page, so the ceilings are the width that keeps
 # them on one line rather than a stylistic preference.
 STANCE_MAX, COMMON_MAX = 20, 30
+# `problem` is the one sentence a reader meets under the question, and each
+# `plain` line sits on its paper's card — read before any term is explained, so
+# a plain line carries no Latin script and no math (`comparison/AUTHORING.md`
+# §2-1).
+PROBLEM_MAX, PLAIN_MAX = 60, 40
+_LATIN_OR_MATH = re.compile(r"[A-Za-z$\\]")
 
 
 @dataclass
@@ -62,6 +68,21 @@ class Comparison:
     def common(self) -> str:
         """The commitment all of them share — the trunk the stances leave."""
         return self.front.get("common", "").strip()
+
+    @property
+    def problem(self) -> str:
+        """The problem every compared paper faces, in plain words."""
+        return self.front.get("problem", "").strip()
+
+    @property
+    def plain(self) -> list[str]:
+        """What each paper does, in everyday words, in `compares` order."""
+        return frontmatter.as_list(self.front.get("plain", ""))
+
+    @property
+    def primer(self) -> list[str]:
+        """The background cards the page opens on (`builder/primers.py` ids)."""
+        return frontmatter.as_list(self.front.get("primer", ""))
 
     @property
     def pillars(self) -> list[str]:
@@ -152,6 +173,8 @@ def discover(papers_by_id: dict) -> tuple[list[Comparison], list[str]]:
 
         problems += _check_sources(name, ids, comp.sources)
         problems += _check_fork(name, ids, comp.stances, comp.common)
+        problems += _check_plain(name, ids, comp.problem, comp.plain)
+        problems += _check_primer(name, comp.primer)
         for required in ("title", "tagline", "summary"):
             if not front.get(required):
                 problems.append(f"comparison/{name}: missing `{required}`")
@@ -242,6 +265,62 @@ def _check_fork(name: str, ids: list[str], stances: list[str], common: str) -> l
             f"comparison/{name}: `common` is {len(common)} chars — keep it to "
             f"{COMMON_MAX}. It prints as the trunk of a fork, on one line"
         )
+    return problems
+
+
+def _check_plain(name: str, ids: list[str], problem: str, plain: list[str]) -> list[str]:
+    """`problem` and `plain` — the comparison in everyday words.
+
+    Both are optional: a comparison without them prints its tagline under the
+    question and its cards without a plain line. Written, they are held to the
+    width they print at, and a plain line to everyday words — it is read before
+    any term on the page is explained.
+    """
+    problems = []
+    if problem and len(problem) > PROBLEM_MAX:
+        problems.append(
+            f"comparison/{name}: `problem` is {len(problem)} chars — keep it to "
+            f"{PROBLEM_MAX}. It is the one sentence under the question"
+        )
+    if not plain:
+        return problems
+    if len(plain) != len(ids):
+        return problems + [
+            f"comparison/{name}: `plain` has {len(plain)} entries for {len(ids)} "
+            f"papers — one per compared paper, in `compares` order"
+        ]
+    for pid, line in zip(ids, plain):
+        if len(line) > PLAIN_MAX:
+            problems.append(
+                f"comparison/{name}: the plain line for {pid} is {len(line)} "
+                f"chars — keep it to {PLAIN_MAX}"
+            )
+        if _LATIN_OR_MATH.search(line):
+            problems.append(
+                f"comparison/{name}: the plain line for {pid} carries Latin "
+                f"script or math ({line!r}) — say it in everyday Korean; the "
+                f"term belongs in a cell"
+            )
+    return problems
+
+
+def _check_primer(name: str, primer: list[str]) -> list[str]:
+    """`primer` names at most three background cards, each one that exists."""
+    problems = []
+    if len(primer) > primers.PRIMER_MAX:
+        problems.append(
+            f"comparison/{name}: `primer` names {len(primer)} cards — at most "
+            f"{primers.PRIMER_MAX}; past that the background is a lesson, and the "
+            f"comparison has stopped comparing"
+        )
+    for pid in primer:
+        if pid not in primers.PRIMERS:
+            problems.append(
+                f"comparison/{name}: `primer` names {pid!r}, which is not a card — "
+                f"one of {', '.join(primers.PRIMERS)}"
+            )
+    if len(set(primer)) != len(primer):
+        problems.append(f"comparison/{name}: `primer` names a card twice")
     return problems
 
 

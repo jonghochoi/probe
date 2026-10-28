@@ -25,8 +25,11 @@ anything an author might mean literally.
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
+import re
+from collections import Counter
 
 FENCES = (
     "probe-term", "probe-figure", "probe-quiz", "probe-eq", "probe-flow",
@@ -45,7 +48,7 @@ SURFACE_FENCES = ("probe-hub", "probe-rail", "probe-act")
 # page, which every compared paper is guaranteed to have (comparison/AUTHORING.md).
 # Both directions are reported rather than silently dropped — a fence that
 # renders to nothing is one the author never learns was wrong.
-COMPARE_FENCES = ("probe-matrix",)
+COMPARE_FENCES = ("probe-matrix", "probe-figs", "probe-timeline")
 COMPARE_BANNED = ("probe-figure", "probe-eq", "probe-quiz")
 
 
@@ -233,7 +236,7 @@ def equation(data: dict, katex_block, inline_md) -> str:
 
 # ── ```probe-flow ───────────────────────────────────────────────────────────
 
-def flow(data: dict, inline_md) -> str:
+def flow(data: dict, inline_md, heads: list | None = None) -> str:
     """A hand-drawn step diagram — R6's fallback for a point the paper does
     not illustrate. HTML/CSS boxes, never ASCII art.
 
@@ -242,6 +245,15 @@ def flow(data: dict, inline_md) -> str:
     reader gets a box of our labels in place of the paper's own picture — with
     nothing on the page saying an original existed. Naming the gap is cheap;
     having to name it is the check.
+
+    In a comparison the same diagram is the map of where each paper intervenes:
+    a step's `marks` names, per compared paper, what that paper does at that
+    step, drawn with the paper's mark, and `blind` marks a step every paper
+    leaves untouched. `heads` is the comparison's `(id, label, href, mark)` per
+    paper; a rewrite passes none and may not mark. From the marks the build
+    reads the comparison's shape — one step held by two or more papers is
+    competition for one slot, marks on separate steps are papers filling
+    different slots — and prints it over the diagram.
     """
     steps = data.get("steps")
     if not isinstance(steps, list) or not steps:
@@ -254,8 +266,16 @@ def flow(data: dict, inline_md) -> str:
             "(no such figure / inline SVG with no file to hotlink). "
             "If the paper does illustrate it, use `probe-figure` instead"
         )
+    names = {pid: (label, mark) for pid, label, _, mark in (heads or [])}
+    marked = [_flow_marks(b, names) for b in _flow_boxes(steps)]
     title = (data.get("title") or "").strip()
     head = f'<p class="flow-title">{_esc(title)}</p>' if title else ""
+    if any(n >= 2 for n in marked):
+        head += ('<p class="flow-verdict"><span class="flow-tag">경쟁형</span>'
+                 '둘 이상이 같은 칸을 서로 다르게 메운다</p>')
+    elif sum(1 for n in marked if n) >= 2:
+        head += ('<p class="flow-verdict"><span class="flow-tag">보완형</span>'
+                 '저마다 다른 칸을 메운다</p>')
     # Printed, not merely required: the reader deserves to know this box is
     # ours and what the paper had in its place.
     note = f'<p class="flow-why"><em class="fig-src">{_esc(why)}</em></p>'
@@ -265,7 +285,7 @@ def flow(data: dict, inline_md) -> str:
             f"probe-flow: {hot} steps are `hot` — at most {FLOW_HOT}; the accent "
             "marks what to look at first, and on every step it marks nothing"
         )
-    return f'<div class="flow">{head}{_flow_grid(steps, inline_md)}{note}</div>'
+    return f'<div class="flow">{head}{_flow_grid(steps, inline_md, names)}{note}</div>'
 
 
 # A drawn flow keeps to what one look takes in; past these it is two flows.
@@ -273,6 +293,35 @@ FLOW_ROWS = 9
 FLOW_LANES = (2, 3)
 FLOW_HOT = 2
 FLOW_LOOP_LABEL = 16
+FLOW_MARK_MAX = 30
+
+
+def _flow_marks(s, names: dict) -> int:
+    """Check a step's `marks` and `blind`; the number of papers marking it."""
+    if not isinstance(s, dict):
+        return 0
+    marks, blind = s.get("marks"), s.get("blind")
+    if (marks or blind) and not names:
+        raise FenceError("probe-flow: `marks` and `blind` belong to a comparison — "
+                         "a rewrite describes one paper, so it has no papers to mark")
+    if blind is not None and (not str(blind).strip() or len(str(blind)) > FLOW_MARK_MAX):
+        raise FenceError(f"probe-flow: `blind` on {_flow_label(s)!r} says what every "
+                         f"paper leaves here, in {FLOW_MARK_MAX} characters or fewer")
+    if marks is None:
+        return 0
+    if blind is not None:
+        raise FenceError(f"probe-flow: {_flow_label(s)!r} is both marked and `blind`")
+    if not isinstance(marks, dict) or not marks:
+        raise FenceError(f"probe-flow: `marks` on {_flow_label(s)!r} must map paper "
+                         f"ids to what each does there")
+    for pid, text in marks.items():
+        if pid not in names:
+            raise FenceError(f"probe-flow: `marks` names {pid!r}, which is not one of "
+                             f"the compared papers ({', '.join(names)})")
+        if not str(text).strip() or len(str(text)) > FLOW_MARK_MAX:
+            raise FenceError(f"probe-flow: the mark of {pid} on {_flow_label(s)!r} is "
+                             f"what it does there, in {FLOW_MARK_MAX} characters or fewer")
+    return len(marks)
 
 
 def _flow_boxes(steps):
@@ -287,10 +336,21 @@ def _flow_label(s) -> str:
     return str(s.get("label", "") if isinstance(s, dict) else s).strip()
 
 
-def _flow_box(s, inline_md, cls: str, extra: str = "") -> str:
+def _flow_box(s, inline_md, cls: str, extra: str = "", names: dict | None = None) -> str:
     hot = " hot" if isinstance(s, dict) and s.get("hot") else ""
     note = (f'<span class="fs-note">{inline_md(str(s["note"]))}</span>'
             if isinstance(s, dict) and s.get("note") else "")
+    marks = s.get("marks") if isinstance(s, dict) else None
+    if marks:
+        # In the comparison's column order, so a paper keeps its place on every step.
+        hot += " has-marks" + (" is-contested" if len(marks) >= 2 else "")
+        note += '<span class="fs-marks">' + "".join(
+            f'<span class="fs-mark" data-paper="{_esc(pid)}">{names[pid][1]}'
+            f'<span>{inline_md(str(marks[pid]))}</span></span>'
+            for pid in (names or {}) if pid in marks) + "</span>"
+    if isinstance(s, dict) and s.get("blind"):
+        hot += " is-blind"
+        note += f'<span class="fs-blind">{inline_md(str(s["blind"]))}</span>'
     return (f'<li class="{cls}{hot}"><span class="fs-label">{inline_md(_flow_label(s))}</span>'
             f'{note}{extra}</li>')
 
@@ -302,7 +362,7 @@ def _flow_width(text: str) -> float:
     return em * 0.74
 
 
-def _flow_grid(steps: list, inline_md) -> str:
+def _flow_grid(steps: list, inline_md, names: dict | None = None) -> str:
     """Steps down one spine, with the two shapes a list cannot say — lanes
     and a loop.
 
@@ -376,7 +436,7 @@ def _flow_grid(steps: list, inline_md) -> str:
                                  "with no lanes or loop of its own")
             fork, merge = i > 1, i < len(steps)
             tip = " fg-tip" if fork else ""
-            boxes = "".join(_flow_box(b, inline_md, "fg-step" + tip) for b in lanes)
+            boxes = "".join(_flow_box(b, inline_md, "fg-step" + tip, names=names) for b in lanes)
             cls = (f"fg-lanes n{len(lanes)}" + (" fg-split" if fork else "")
                    + (" fg-join" if merge else ""))
             wires = ('<span class="fl-fork" aria-hidden="true"></span>' if fork else "") + (
@@ -385,7 +445,7 @@ def _flow_grid(steps: list, inline_md) -> str:
                         f'<span class="sr">{len(lanes)} 갈래로 나뉨:</span>'
                         f'<ul class="fl-par">{boxes}</ul></li>')
             continue
-        rows.append(_flow_box(s, inline_md, "fg-step" + fin, back.get(i, ""))
+        rows.append(_flow_box(s, inline_md, "fg-step" + fin, back.get(i, ""), names)
                     .replace("<li ", f"<li{style} ", 1))
     if gutter:
         return (f'<ol class="fgrid has-loop" style="{gutter[0]}">'
@@ -625,9 +685,20 @@ def error_block(message: str) -> str:
 # ── ```probe-matrix ─────────────────────────────────────────────────────────
 
 MATRIX_MIN, MATRIX_MAX = 3, 7
+# An axis's `type` says what shape its answers take, and so how it is drawn
+# (`comparison/AUTHORING.md` §3-1): sentences, a place on a few named stops,
+# a yes/partly/no mark, or a measurement whose yardstick may differ by paper.
+MATRIX_TYPES = ("text", "stops", "mark", "measure")
+MATRIX_STOPS = (3, 5)
+MATRIX_STOP_MAX = 16
+MATRIX_METRIC_MAX = 20
+# A mark is a claim, and `–` is the absence of one: drawn fainter than `○` so
+# a paper that says nothing never reads as a paper that says no.
+MATRIX_MARKS = {"●": ("full", "한다"), "◐": ("half", "일부"),
+                "○": ("none", "못 한다"), "–": ("na", "원문 언급 없음")}
 
 
-def matrix(data: dict, inline_md, heads: list[tuple[str, str, str]]) -> str:
+def matrix(data: dict, inline_md, heads: list[tuple[str, str, str, str]]) -> str:
     """The comparison track's grid — one question per row, one paper per column.
 
     Every other component here describes one paper. This one exists because a
@@ -639,9 +710,12 @@ def matrix(data: dict, inline_md, heads: list[tuple[str, str, str]]) -> str:
     Cells are placed by `of` rather than by position, so the author writes them
     in whatever order the axis reads best and the columns still line up.
 
-    `heads` is `(id, label, href)` per column, in column order — the fence has
-    no way to know which papers are being compared or where their rewrites
-    live, and both come from the document's front matter.
+    `heads` is `(id, label, href, mark)` per column, in column order — the
+    fence has no way to know which papers are being compared or where their
+    rewrites live, and both come from the document's front matter. `mark` is
+    the paper's mark as markup (`components.paper_mark`), the same one its card
+    and its branch of the fork carry. Every head and cell carries
+    `data-paper`, so a reader pointing at one paper lights its whole column.
     """
     axes = data.get("axes")
     if not isinstance(axes, list) or not MATRIX_MIN <= len(axes) <= MATRIX_MAX:
@@ -687,22 +761,31 @@ def matrix(data: dict, inline_md, heads: list[tuple[str, str, str]]) -> str:
                 f"answers for every compared paper or it is not an axis"
             )
 
+        kind = str(axis.get("type", "text")).strip() or "text"
+        if kind not in MATRIX_TYPES:
+            raise FenceError(f"probe-matrix[{key}]: `type` is {kind!r} — one of "
+                             f"{', '.join(MATRIX_TYPES)}")
+        if kind == "stops":
+            rows += _stops_row(key, axis, by_id, heads, inline_md)
+            continue
+        leads, flag = _cell_leads(key, kind, by_id, ids)
+
         tds = ""
         for pid in ids:
             cell = by_id[pid]
             note = str(cell.get("note", "")).strip()
             tds += (
-                "<td>"
+                f'<td data-paper="{_esc(pid)}">{leads.get(pid, "")}'
                 f'<span class="mx-v">{inline_md(str(cell["v"]))}</span>'
                 + (f'<span class="mx-note">{inline_md(note)}</span>' if note else "")
                 + "</td>"
             )
-        rows += f'<tr><th scope="row" class="mx-k">{inline_md(key)}</th>{tds}</tr>'
+        rows += f'<tr><th scope="row" class="mx-k">{inline_md(key)}{flag}</th>{tds}</tr>'
 
     cols = "".join(
-        f'<th scope="col"><a href="{_esc(href)}">{_esc(label)}</a>'
+        f'<th scope="col" data-paper="{_esc(pid)}"><a href="{_esc(href)}">{mark}{_esc(label)}</a>'
         f'<span class="mx-id">{_esc(pid)}</span></th>'
-        for pid, label, href in heads
+        for pid, label, href, mark in heads
     )
     title = str(data.get("title", "")).strip()
     head = f'<div class="box-head">{_esc(title)}</div>' if title else ""
@@ -715,3 +798,340 @@ def matrix(data: dict, inline_md, heads: list[tuple[str, str, str]]) -> str:
         f"<tbody>{rows}</tbody>"
         "</table></div></div>"
     )
+
+
+def _cell_leads(key: str, kind: str, by_id: dict, ids: list[str]) -> tuple[dict, str]:
+    """What a `mark` or `measure` cell prints before its sentence, and the flag
+    a `measure` row carries when its papers measured different things.
+
+    A measurement means nothing next to another on a different yardstick, and
+    the sentences rarely say so where a reader compares the numbers. So the
+    build compares the `metric` each cell names: the papers outside a majority
+    are flagged `다른 잣대`, and a row with no majority says its yardsticks all
+    differ.
+    """
+    leads: dict[str, str] = {}
+    if kind == "mark":
+        for pid in ids:
+            mark = str(by_id[pid].get("mark", "")).strip()
+            if mark not in MATRIX_MARKS:
+                raise FenceError(f"probe-matrix[{key}] · {pid}: a `mark` axis needs "
+                                 f"`mark`, one of {' '.join(MATRIX_MARKS)}")
+            cls, word = MATRIX_MARKS[mark]
+            leads[pid] = f'<span class="mx-mk mx-mk-{cls}">{word}</span>'
+        return leads, ""
+    if kind != "measure":
+        return leads, ""
+    metrics: dict[str, str] = {}
+    for pid in ids:
+        metric = str(by_id[pid].get("metric", "")).strip()
+        if not metric or len(metric) > MATRIX_METRIC_MAX:
+            raise FenceError(f"probe-matrix[{key}] · {pid}: a `measure` axis needs "
+                             f"`metric`, what the number measures, in "
+                             f"{MATRIX_METRIC_MAX} characters or fewer")
+        metrics[pid] = metric
+    top, n = Counter(metrics.values()).most_common(1)[0]
+    flag, off = "", set()
+    if len(set(metrics.values())) > 1:
+        if n * 2 > len(ids):
+            off = {pid for pid, m in metrics.items() if m != top}
+        else:
+            flag = '<span class="mx-flag">잣대가 모두 다름</span>'
+    for pid, metric in metrics.items():
+        tag = "다른 잣대 · " if pid in off else ""
+        leads[pid] = (f'<span class="mx-metric{" is-off" if pid in off else ""}">'
+                      f'{tag}{_esc(metric)}</span>')
+    return leads, flag
+
+
+def _plain(md: str) -> str:
+    """A cell's sentence as a tooltip — the markdown marks taken off."""
+    return re.sub(r"[*`$\\]", "", md)
+
+
+def _stops_row(key: str, axis: dict, by_id: dict, heads: list, inline_md) -> str:
+    """A `stops` axis: a few named places, each paper's mark on the one it holds.
+
+    The places are the author's, named from values the compared papers actually
+    reach, and they say order only — never distance — so the drawing gives
+    every stop the same width. `probes` are places a paper went only in an
+    ablation, drawn as its mark hollow, so an empty-looking stop that was tried
+    and failed does not read as one nobody tried. The sentences stay one click
+    down, under the strip, where each mark's grounds can be checked.
+    """
+    stops = axis.get("stops")
+    lo, hi = MATRIX_STOPS
+    if (not isinstance(stops, list) or not lo <= len(stops) <= hi
+            or not all(isinstance(t, str) and t.strip() for t in stops)):
+        raise FenceError(f"probe-matrix[{key}]: a `stops` axis needs `stops`, "
+                         f"{lo}–{hi} names for the places on it")
+    for t in stops:
+        if len(t) > MATRIX_STOP_MAX:
+            raise FenceError(f"probe-matrix[{key}]: stop {t!r} is {len(t)} chars — "
+                             f"keep a stop's name to {MATRIX_STOP_MAX}")
+    names = {pid: (label, mark) for pid, label, _, mark in heads}
+
+    def at(where: str, value) -> int:
+        if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value < len(stops):
+            raise FenceError(f"probe-matrix[{key}] · {where}: `at` must be the index "
+                             f"of a stop, 0–{len(stops) - 1}")
+        return value
+
+    pins: list[list[str]] = [[] for _ in stops]
+    lines = []
+    for pid, (label, mark) in names.items():
+        cell = by_id[pid]
+        i = at(pid, cell.get("at"))
+        pins[i].append(f'<span class="mx-pin" data-paper="{_esc(pid)}" '
+                       f'title="{_esc(label)} — {_esc(_plain(str(cell["v"])))}">{mark}</span>')
+        note = str(cell.get("note", "")).strip()
+        lines.append(f'<li data-paper="{_esc(pid)}">{mark}<span><span class="mx-v">'
+                     f'{inline_md(str(cell["v"]))}</span>'
+                     + (f'<span class="mx-note">{inline_md(note)}</span>' if note else "")
+                     + "</span></li>")
+    probes = axis.get("probes", [])
+    if not isinstance(probes, list):
+        raise FenceError(f"probe-matrix[{key}]: `probes` must be a list")
+    for probe in probes:
+        pid = str(probe.get("of", "")).strip() if isinstance(probe, dict) else ""
+        if pid not in names or not str(probe.get("v", "")).strip():
+            raise FenceError(f"probe-matrix[{key}]: each probe needs `of` (a compared "
+                             f"paper), `at` and `v`, what the ablation found")
+        i = at(f"probe of {pid}", probe.get("at"))
+        label, mark = names[pid]
+        pins[i].append(f'<span class="mx-pin is-probe" data-paper="{_esc(pid)}" '
+                       f'title="{_esc(label)} 절제 실험 — {_esc(_plain(str(probe["v"])))}">{mark}</span>')
+        lines.append(f'<li data-paper="{_esc(pid)}">{mark}<span><span class="mx-v">'
+                     f'<span class="mx-probe-l">절제 실험</span> {inline_md(str(probe["v"]))}</span></span></li>')
+    strip = "".join(
+        f'<div class="mx-stop"><span class="mx-pins">{"".join(p)}</span>'
+        f'<span class="mx-stop-l">{_esc(t.strip())}</span></div>'
+        for t, p in zip(stops, pins))
+    return (f'<tr class="mx-row-stops"><th scope="row" class="mx-k">{inline_md(key)}</th>'
+            f'<td colspan="{len(names)}"><div class="mx-stops" style="--k:{len(stops)}">{strip}</div>'
+            f'<details class="mx-why"><summary>칸마다 근거</summary><ul>{"".join(lines)}</ul></details>'
+            "</td></tr>")
+
+
+# ── ```probe-figs ───────────────────────────────────────────────────────────
+
+FIGS_Q_MAX, FIGS_LOOK_MAX = 40, 60
+
+
+def figs(data: dict, inline_md, heads: list, figures: dict) -> str:
+    """The compared papers' own figures for one question, one frame at a time.
+
+    The truest picture of a mechanism is the one its authors drew, and the
+    comparison may show it — but never three figures squeezed side by side,
+    where a diagram shrinks past reading and mismatched shapes pad out with
+    blank space. One frame holds one paper's figure at the column's full
+    width, and the reader switches papers in place, so what differs is what
+    changes on screen.
+
+    A figure is named by its id in that paper's own rewrite, which already
+    declares where it lives; the URL and the original's figure number come
+    from there, so a comparison cannot point at a figure the rewrite does not
+    carry. `figures` is `{paper id: {figure id: (url, source)}}`.
+    """
+    q = str(data.get("q", "")).strip()
+    if not q or len(q) > FIGS_Q_MAX:
+        raise FenceError(f"probe-figs: `q` is required — the one question every "
+                         f"figure here answers, in {FIGS_Q_MAX} characters or fewer")
+    items = data.get("figs")
+    names = {pid: (label, mark) for pid, label, _, mark in heads}
+    if not isinstance(items, list) or len(items) < 2:
+        raise FenceError("probe-figs: `figs` needs a figure from at least two of "
+                         "the compared papers — one paper's figure is its own page's")
+    by_id: dict[str, dict] = {}
+    for item in items:
+        pid = str(item.get("of", "")).strip() if isinstance(item, dict) else ""
+        if pid not in names:
+            raise FenceError(f"probe-figs: `of` is {pid!r}, which is not one of the "
+                             f"compared papers ({', '.join(names)})")
+        if pid in by_id:
+            raise FenceError(f"probe-figs: two figures for {pid} — one per paper")
+        fid = str(item.get("fig", "")).strip()
+        have = figures.get(pid, {})
+        if fid not in have:
+            raise FenceError(f"probe-figs · {pid}: `fig` is {fid!r}, which its rewrite "
+                             f"does not carry — one of {', '.join(have) or 'none'}")
+        look = str(item.get("look", "")).strip()
+        if not look or len(look) > FIGS_LOOK_MAX:
+            raise FenceError(f"probe-figs · {pid}: `look` is required — where in the "
+                             f"figure to look, in {FIGS_LOOK_MAX} characters or fewer")
+        by_id[pid] = item
+    tabs, panels = "", ""
+    for k, pid in enumerate(p for p in names if p in by_id):
+        label, mark = names[pid]
+        url, source = figures[pid][str(by_id[pid]["fig"]).strip()]
+        look = str(by_id[pid]["look"]).strip()
+        tabs += (f'<button type="button" role="tab" data-paper="{_esc(pid)}" '
+                 f'data-figs-tab="{_esc(pid)}" aria-selected="{"true" if k == 0 else "false"}">'
+                 f'{mark}{_esc(label)}</button>')
+        panels += (f'<figure class="figs-panel" data-figs-panel="{_esc(pid)}">'
+                   f'<div class="figs-frame"><img src="{_esc(url)}" loading="lazy" '
+                   f'alt="{_esc(label)} 원문 그림 — {_esc(_plain(look))}"></div>'
+                   f'<figcaption>{mark}<span class="figs-look">{inline_md(look)}</span>'
+                   f'<span class="figs-src">{_esc(label)} · {_esc(source)}</span></figcaption></figure>')
+    return (f'<div class="figs" data-figs><p class="figs-q">{_esc(q)}</p>'
+            f'<div class="figs-tabs" role="tablist" aria-label="논문 고르기" hidden>{tabs}</div>'
+            f'<div class="figs-panels">{panels}</div></div>')
+
+
+# ── ```probe-timeline ───────────────────────────────────────────────────────
+
+TL_STYLES = ("solid", "part", "faint", "over")
+TL_LEVELS = 4
+TL_LABEL_MAX, TL_NOTE_MAX, TL_UNIT_MAX, TL_CUT_MAX = 12, 60, 6, 40
+TL_EVENTS_MAX = 64
+
+
+def timeline(data: dict, inline_md, heads: list) -> str:
+    """The compared papers on one clock — what each does, and when.
+
+    A comparison that parts over time (a control period, a chunk being run,
+    what is read again mid-way) is drawn on one shared ruler: `span` units
+    long, one row per paper. A row is spans and ticks, never coordinates — the
+    author states values on the ruler and the build places them, so every mark
+    is checkable against the paper by reading the fence.
+
+    A span's `style` is what happens over that stretch: `solid` the paper does
+    it, `part` it is handed over half-made, `faint` it is made and thrown away,
+    `over` a thin layer added on top. `level` stacks a span on a sub-row of its
+    own, for a paper that redoes the same stretch more than once. `every` puts
+    a tick at a fixed period, for a signal read again and again. `cuts` are
+    places on the ruler every row shares, drawn through the rows' bars and
+    never through their words.
+
+    The drawing is ours, not the paper's, so `why` is required and printed, as
+    on `probe-flow`.
+    """
+    names = {pid: (i, label, mark) for i, (pid, label, _, mark) in enumerate(heads)}
+    span = data.get("span")
+    if not isinstance(span, (int, float)) or isinstance(span, bool) or span <= 0:
+        raise FenceError("probe-timeline: `span` is the ruler's length, a positive number")
+    unit = str(data.get("unit", "")).strip()
+    if not unit or len(unit) > TL_UNIT_MAX:
+        raise FenceError(f"probe-timeline: `unit` names the ruler's unit "
+                         f"(스텝, 초, ms), {TL_UNIT_MAX} characters or fewer")
+    why = str(data.get("why", "")).strip()
+    if not why:
+        raise FenceError("probe-timeline: `why` is required — which figure of the "
+                         "papers would have covered this and why none can")
+
+    def on_ruler(where: str, v) -> float:
+        if not isinstance(v, (int, float)) or isinstance(v, bool) or not 0 <= v <= span:
+            raise FenceError(f"probe-timeline: {where} must be a value on the ruler, 0–{span}")
+        return float(v)
+
+    ticks = data.get("ticks")
+    if ticks is None:
+        ticks = [span * k / 4 for k in range(5)]
+    if not isinstance(ticks, list) or not ticks:
+        raise FenceError("probe-timeline: `ticks` must be a list of values on the ruler")
+    ticks = [on_ruler("a tick", t) for t in ticks]
+    cuts = [on_ruler("a cut", c) for c in (data.get("cuts") or [])]
+    cut_label = str(data.get("cut_label", "")).strip()
+    if cuts and (not cut_label or len(cut_label) > TL_CUT_MAX):
+        raise FenceError(f"probe-timeline: `cuts` need `cut_label`, what the shared "
+                         f"places are, in {TL_CUT_MAX} characters or fewer")
+    rows = data.get("rows")
+    if not isinstance(rows, list) or len(rows) < 2:
+        raise FenceError("probe-timeline: `rows` needs at least two compared papers")
+    seen = set()
+    for r in rows:
+        pid = str(r.get("of", "")).strip() if isinstance(r, dict) else ""
+        if pid not in names or pid in seen:
+            raise FenceError(f"probe-timeline: a row's `of` is {pid!r} — each row is one "
+                             f"compared paper, once ({', '.join(names)})")
+        seen.add(pid)
+        label, note = str(r.get("label", "")).strip(), str(r.get("note", "")).strip()
+        if not label or len(label) > TL_LABEL_MAX:
+            raise FenceError(f"probe-timeline · {pid}: `label` is what this paper does, "
+                             f"{TL_LABEL_MAX} characters or fewer")
+        if len(note) > TL_NOTE_MAX:
+            raise FenceError(f"probe-timeline · {pid}: `note` is one line, "
+                             f"{TL_NOTE_MAX} characters or fewer")
+        spans = r.get("spans", [])
+        if not isinstance(spans, list) or not (spans or r.get("every")):
+            raise FenceError(f"probe-timeline · {pid}: a row needs `spans`, `every` or both")
+        for sp in spans:
+            if not isinstance(sp, dict) or sp.get("style", "solid") not in TL_STYLES:
+                raise FenceError(f"probe-timeline · {pid}: a span's `style` is one of "
+                                 f"{', '.join(TL_STYLES)}")
+            a, b = on_ruler(f"{pid} `from`", sp.get("from")), on_ruler(f"{pid} `to`", sp.get("to"))
+            if a >= b:
+                raise FenceError(f"probe-timeline · {pid}: a span runs `from` before `to`")
+            lv = sp.get("level", 0)
+            if not isinstance(lv, int) or isinstance(lv, bool) or not 0 <= lv < TL_LEVELS:
+                raise FenceError(f"probe-timeline · {pid}: `level` is 0–{TL_LEVELS - 1}")
+        every = r.get("every")
+        if every is not None:
+            ev = every.get("at") if isinstance(every, dict) else None
+            if not isinstance(ev, (int, float)) or isinstance(ev, bool) or ev <= 0 or span / ev > TL_EVENTS_MAX:
+                raise FenceError(f"probe-timeline · {pid}: `every` is "
+                                 f'{{"at": <period>, "label": "…"}}, at most {TL_EVENTS_MAX} ticks')
+
+    uid = hashlib.md5(json.dumps(data, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:6]
+    X0, X1, W = 170.0, 880.0, 900
+    px = lambda v: X0 + (X1 - X0) * v / span
+    num = lambda v: f"{v:g}"
+    out = ["<defs>"] + [
+        f'<pattern id="tl{uid}-{i}" class="pm-{i + 1}" width="6" height="6" '
+        f'patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+        f'<line x1="0" y1="0" x2="0" y2="6" class="tl-hatch"/></pattern>'
+        for i in range(len(heads))] + ["</defs>"]
+    out.append(f'<line x1="{X0}" y1="26" x2="{X1}" y2="26" class="tl-axis"/>')
+    for t in ticks:
+        out.append(f'<line x1="{px(t):.1f}" y1="22" x2="{px(t):.1f}" y2="30" class="tl-axis"/>'
+                   f'<text x="{px(t):.1f}" y="16" text-anchor="middle" class="tl-tick">{_esc(num(t))}</text>')
+    out.append(f'<text x="{X1:.0f}" y="44" text-anchor="end" class="tl-unit">{_esc(unit)}</text>')
+    y = 52.0
+    for r in sorted(rows, key=lambda r: names[r["of"]][0]):
+        pid = r["of"]
+        i, label, mark = names[pid]
+        spans = r.get("spans", [])
+        levels = max([sp.get("level", 0) for sp in spans] + [0]) + 1
+        has_over = any(sp.get("style") == "over" for sp in spans)
+        top = y + (10 if has_over else 2)
+        bar = 24.0 if levels == 1 else 10.0
+        band = bar * levels + 3 * (levels - 1)
+        g = [f'<g class="tl-row pm-{i + 1}" data-paper="{_esc(pid)}">',
+             f'<g transform="translate(0 {top + band / 2 - 12:.1f})">{mark}</g>',
+             f'<text x="18" y="{top + band / 2 - 2:.1f}" class="tl-label">{_esc(label)}</text>',
+             f'<text x="18" y="{top + band / 2 + 13:.1f}" class="tl-verb">{_esc(str(r["label"]).strip())}</text>']
+        for sp in spans:
+            st, lv = sp.get("style", "solid"), sp.get("level", 0)
+            a, b = px(float(sp["from"])), px(float(sp["to"]))
+            if st == "over":
+                g.append(f'<rect x="{a + 2:.1f}" y="{top - 8:.1f}" width="{b - a - 4:.1f}" height="5" rx="2" class="tl-over"/>')
+                continue
+            yy = top + lv * (bar + 3)
+            fill = f' fill="url(#tl{uid}-{i})"' if st == "part" else ""
+            g.append(f'<rect x="{a + 1:.1f}" y="{yy:.1f}" width="{b - a - 2:.1f}" height="{bar:.0f}" rx="3" class="tl-{st}"{fill}/>')
+        every = r.get("every")
+        if every:
+            per, k = float(every["at"]), 0
+            while k * per <= span + 1e-9:
+                x = px(k * per)
+                g.append(f'<line x1="{x:.1f}" y1="{top - 2:.1f}" x2="{x:.1f}" y2="{top + band + 2:.1f}" class="tl-every"/>')
+                k += 1
+        for c in cuts:
+            g.append(f'<line x1="{px(c):.1f}" y1="{top - 6:.1f}" x2="{px(c):.1f}" y2="{top + band + 4:.1f}" class="tl-cut"/>')
+        foot = str(r.get("note", "")).strip()
+        if every and str(every.get("label", "")).strip():
+            foot = (foot + " · " if foot else "") + str(every["label"]).strip()
+        if foot:
+            g.append(f'<text x="{X0}" y="{top + band + 20:.1f}" class="tl-note">{_esc(foot)}</text>')
+        g.append("</g>")
+        out += g
+        y = top + band + (34 if foot else 16)
+    if cuts:
+        out.append(f'<text x="{X0}" y="{y + 6:.1f}" class="tl-cutl">점선 — {_esc(cut_label)}</text>')
+        y += 14
+    title = str(data.get("title", "")).strip()
+    head = f'<p class="flow-title">{_esc(title)}</p>' if title else ""
+    return (f'<div class="timeline">{head}<div class="tl-scroll">'
+            f'<svg viewBox="0 0 {W} {y + 6:.0f}" role="img" aria-label="{_esc(title or "시간축")}">'
+            + "".join(out) + "</svg></div>"
+            f'<p class="flow-why"><em class="fig-src">{_esc(why)}</em></p></div>')
