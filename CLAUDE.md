@@ -130,8 +130,14 @@ compare: add <slug>                       # the slug is the question, so no alia
 analysis: add <arxiv-id> rewrite (<alias>)
 ```
 
-The distinction track has no prefix: `/distinguish` writes into a private folder
-and commits nothing.
+`/distinguish` writes into a private folder and commits nothing. The operator
+commits that folder in its own history, one canonical format per kind, so the
+same lint reads it:
+
+```
+run: record YYYY-MM-DD                          # what one run date wrote
+deepdive: add <arxiv-id> × <scope> (<alias>)    # one deep dive
+```
 
 `update` replaces `add` when redoing an existing rewrite or comparison. The
 trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
