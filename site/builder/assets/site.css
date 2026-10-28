@@ -861,6 +861,13 @@ table.mx td, table.mx thead th { transition: opacity var(--dur-short) var(--ease
 /* The research-axis act prints folded: its divider is the summary, and the
    hint says the act is there to open. */
 .act-fold > summary { list-style: none; cursor: pointer; }
+/* Opened, the folded act's content sits in the details' own box, where no
+   margin collapses into the divider's, so the divider keeps its space and
+   the step below it is written out: the same 2.8rem every act divider
+   leaves (see `.pdiv`). */
+.act-fold > summary.pdiv { margin-bottom: 0; }
+.act-fold > summary.pdiv + * { margin-top: 2.8rem; }
+.act-fold > summary.pdiv + h2.h-sec { margin-top: 2.2rem; }
 .act-fold > summary::-webkit-details-marker { display: none; }
 .act-fold-hint {
   order: 3; flex: 0 0 auto; font-size: .72rem; font-weight: 700; color: var(--text-muted);
@@ -1143,6 +1150,12 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .article h2.h-sec:first-child { margin-top: .25rem; }
 .pdiv + h2.h-sec { border-top: none; padding-top: .6rem; }
+/* Whatever opens an act starts the step below its divider that a section
+   heading arrives at — 3.2rem less the divider's 1rem pull, plus the
+   heading's .6rem padding: 2.8rem. A comparison's act can open on a
+   paragraph, a matrix or a figure, whose own margins would leave it
+   nearly touching the divider. */
+.view > .pdiv + :not(h2) { margin-top: 3.8rem; }
 /* The English keyword line belongs to the title, so it sits inside the <h2>
    and is excluded from its weight and size rather than being a paragraph the
    section happens to open with. */
@@ -1182,7 +1195,8 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .tldr p { margin: 0; font-size: .96rem; line-height: 1.75; }
 /* Prose margins belong to PROSE, and the selectors say where prose is: the
-   article's own flow, and the two containers that hold markdown bodies.
+   article's own flow — a comparison's folded act 4 included — and the two
+   containers that hold markdown bodies.
    `.article p` / `.article li` are (0,1,1) and beat every component's own
    (0,1,0) spacing rule, so each one silently inherited body-paragraph margins
    on top of the spacing it had asked for — a 계보 list carried a stray 25px
@@ -1190,12 +1204,13 @@ table.mx thead th[scope="col"] { width: 26%; }
    were pushed apart by 12.8px twice over, and the equation reading line sat a
    full paragraph gap above its formula. Every component in this file owns its
    internal spacing; nothing may reach in from out here. */
-.view > p, .c-body > p, .fold-body > p { margin: .8rem 0; }
-.view > ul, .view > ol,
+.view > p, .act-fold > p, .c-body > p, .fold-body > p { margin: .8rem 0; }
+.view > ul, .view > ol, .act-fold > ul, .act-fold > ol,
 .c-body ul, .c-body ol, .fold-body ul, .fold-body ol {
   margin: .8rem 0 .8rem 1.2rem;
 }
-.view > ul li, .view > ol li, .c-body li, .fold-body li { margin: .35rem 0; }
+.view > ul li, .view > ol li, .act-fold > ul li, .act-fold > ol li,
+.c-body li, .fold-body li { margin: .35rem 0; }
 .view li > ul, .view li > ol,
 .c-body li > ul, .fold-body li > ul { margin: .3rem 0 .3rem 1rem; }
 .article hr {
