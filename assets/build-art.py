@@ -157,8 +157,8 @@ def lost_probe(x: float, y: float, s: float) -> tuple[str, str]:
 
 def human(x: float, y: float, s: float) -> str:
     """You: the probe's clay and shadow, a head over a half-round torso, no
-    face and no sprout — eyes are the character's alone. It breathes on the
-    cycle `probe-presentation.svg`'s listener shares."""
+    face and no sprout — eyes are the character's alone. It breathes on a
+    cycle of its own."""
     return f"""<g transform="translate({x} {y}) scale({s})">
     <ellipse class="shadow" cx="48" cy="90" rx="18" ry="4"/>
     <g class="breathe"><circle class="hull" cx="48" cy="33" r="14.5"/>
@@ -329,7 +329,7 @@ OWN_CSS = f"""
     @keyframes march {{ to {{ stroke-dashoffset: -18; }} }}"""
 
 FOLDERS = [("scouting/", "scheduled"), ("analysis/", "on demand"),
-           ("comparison/", "on demand"), ("presentation/", "on demand")]
+           ("comparison/", "on demand")]
 
 
 def own() -> str:
@@ -356,15 +356,16 @@ def own() -> str:
          probe(px, base - 90 * PS, PS, page=True),
          f'<text class="eb" x="{ox}" y="{TOP-10}">PROBE WRITES</text>',
          f'<rect class="mine" x="{ox}" y="{TOP}" width="{ow}" height="{FH}" rx="10"/>']
+    first = TOP + (FH - (len(FOLDERS) * 25 - 4)) / 2   # the rows, centred in the frame
     for k, (path, when) in enumerate(FOLDERS):
-        y = TOP + 9 + k * 25
+        y = first + k * 25
         b += [f'<rect class="row" x="{ox+9}" y="{y}" width="{ow-18}" height="21" rx="5"/>',
               f'<text class="p" x="{ox+20}" y="{y+15}">{path}</text>',
               f'<text class="ps" x="{ox+ow-20}" y="{y+15}" text-anchor="end">{when}</text>']
     b.append(f'<text class="note" x="{W/2 - shift}" y="{H-14}" text-anchor="middle">'
              'It reads context/ and never writes it. Changes come to you as proposals.</text>')
     return svg(W, H, "Who writes what: you write context/, and PROBE reads it and writes scouting/, "
-               "analysis/, comparison/ and presentation/. Changes to context/ come to you as proposals.",
+               "analysis/ and comparison/. Changes to context/ come to you as proposals.",
                OWN_CSS, f'<g transform="translate({shift:.1f} 0)">' + "\n  ".join(b) + "</g>")
 
 

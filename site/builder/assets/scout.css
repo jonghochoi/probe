@@ -4,7 +4,7 @@
  * line on what the paper is and the pillars that flagged it, and
  * everything else one click down. `pages.scouting_run_page` says why; this
  * file is how. It sits on `index.css`, whose list head, rules and masthead it
- * shares with 비교 and 발표. */
+ * shares with 비교. */
 
 /* ── Status and filter ─────────────────────────────────────────────────── */
 .sc-status {

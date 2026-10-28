@@ -32,7 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from builder import catalog, comparisons, corpus, presentations  # noqa: E402
+from builder import catalog, comparisons, corpus  # noqa: E402
 from builder.decisions import harvest_decisions, retired_decisions  # noqa: E402
 
 ACTS = range(1, 5)
@@ -44,11 +44,10 @@ def load() -> tuple[dict, dict]:
     papers, _ = corpus.discover()
     by_id = {p.stem: p for p in papers}
     comps, _ = comparisons.discover(by_id)
-    presented, _ = presentations.discover(by_id)
     retired = retired_decisions()
     WEIGHTS = corpus.decision_weights(papers, retired)
     cat = catalog.records(papers, comps, harvest_decisions(),
-                          corpus.citations(papers), set(presented), retired)
+                          corpus.citations(papers), retired)
     return cat, {**by_id, **{x.slug: x for x in comps}}
 
 

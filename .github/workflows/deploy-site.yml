@@ -1,8 +1,8 @@
 name: Deploy site
 
-# Build the reading site from analysis/, comparison/, presentation/ and
-# scouting/ and publish it to GitHub Pages. A scouting run's push to main
-# lands here too, so the run's page is published as it lands.
+# Build the reading site from analysis/, comparison/ and scouting/ and publish
+# it to GitHub Pages. A scouting run's push to main lands here too, so the
+# run's page is published as it lands.
 #
 # The generated HTML is NOT committed — a page-per-rewrite bot commit on every
 # merge would bury the history this repo is read through. The artifact is built
@@ -21,7 +21,6 @@ on:
       - 'analysis/**'
       - 'scouting/**'
       - 'comparison/**'
-      - 'presentation/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   pull_request:
@@ -29,7 +28,6 @@ on:
       - 'analysis/**'
       - 'scouting/**'
       - 'comparison/**'
-      - 'presentation/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:

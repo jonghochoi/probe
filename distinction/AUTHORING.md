@@ -231,16 +231,37 @@ nowhere: they bind only when the scope is the code `MY-METHOD.md` describes.
 A section with nothing to say holds `- 없음`, as in the versus note.
 
 **§6 may draw the numbers it compares.** Up to three ` ```probe-chart `
-fences stand among §6's bullets, in the shape `presentation/AUTHORING.md`
-§4-6 fixes for a slide — `kind`, `series`, `source`, `why`, `omitted`, and
-`alt` for the sentence a reader without the drawing gets. Every value is one
-the original prints and this document already rests on — a §1 `맞음` row, a
-`원문 §TABLE-<n>` quote, a §6 bullet — or one of the scope's own results
-under the anchor that §6 gives it, and `source` names the table or the
-section. `us` marks the scope's series when the chart holds one, else the
-paper's own method; a gap a row measures is named by that row's `vs`. No
-`step` or `steps`: a page has no presenter to advance it. A fence anywhere
-but §6 is not drawn.
+fences stand among §6's bullets, each one JSON object that
+`site/builder/charts.py` draws:
+
+- **`kind` is the form the data has.** `line` is a sweep over an ordered x
+  where the slope is the finding — `x.ticks`, `x.values` when the ticks are
+  numbers so the points are spaced by them, a `y` scale with `min`, `max` and
+  `step`, and one value per tick in each series' `values`, `null` where the
+  paper measured nothing. `dots` is methods across categories — `rows` in
+  place of ticks, an `x` scale (`better: "lower"` when less is better), the
+  gap to `us` drawn on every row, `group` for the rows the paper singles out.
+  `scatter` is one quantity against another — `x` and `y` scales, `points`
+  of `{x, y, label, place}` per series, `frontier` and `guides`.
+- **At most one series is `us`**, in the accent: the scope's series when the
+  chart holds one, else the paper's own method. `vs` names the strongest
+  baseline at the point the note reads; a gap a `dots` row measures against a
+  fixed series is named by that row's `vs`.
+- **One annotation carries the takeaway** — `note` on a `line` (`at`, `text`,
+  `side`, `place`) or a `scatter` (pinned to a point's `label`), `group` on
+  `dots`.
+- **Numbers keep the precision they were written in**; `fmt` is `pct` or
+  `raw` with its `unit`, and a series' `labels` print exactly what they say.
+- **Every fence carries** `source` (where every value is printed), `why`
+  (which of the paper's figures or tables it redraws and what it leaves out),
+  `omitted` (one entry per source row it leaves out, `[]` when none, never
+  drawn) and `alt` (the chart in one sentence with its numbers, for a reader
+  without the drawing).
+
+Every value is one the original prints and this document already rests on —
+a §1 `맞음` row, a `원문 §TABLE-<n>` quote, a §6 bullet — or one of the
+scope's own results under the anchor that §6 gives it, and `source` names the
+table or the section. A fence anywhere but §6 is not drawn.
 
 ### 3-6. The pages beside them
 
@@ -357,7 +378,7 @@ checks is in no checkout.
 | §3-2 | the scoreboard's rows are `MY-METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the report's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a versus note id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
-| §3-5 | the deep dive's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted`, with no `step` |
+| §3-5 | the deep dive's file name and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
 | §5 | active rows, ideas per versus note, per report and per deep dive, charts per deep dive, versus note and deep dive prose length |
 | §6 | no `이 방법`, `이 범위`, `내 방법` or `우리` in any output outside a `##` header or a `"…"` quote |
 | §7 | no `MY-METHOD.md` §6 string in any output |

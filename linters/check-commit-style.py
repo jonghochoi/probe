@@ -14,7 +14,7 @@ Accepted shapes:
   scout: report YYYY-MM-DD (P# …)      generated routine commits, formats per
   analysis: add|update <id> rewrite …  CLAUDE.md "generated routine commits"
   compare: add|update <slug>            (the scouting routine, /analyze,
-  present: add|update <id> talk …       /compare, /present)
+                                        /compare)
 
 Checked for the human shapes: allowed type; description starts lowercase; no
 trailing period; ≤72 chars total; no manual "(#NN)" suffix (GitHub appends the
@@ -43,7 +43,6 @@ _GENERATED = [
     # is nothing to say after it — a subject that keeps going is describing
     # the comparison, which the file already does.
     re.compile(r"^compare: (add|update) [a-z0-9]+(-[a-z0-9]+)*$"),
-    re.compile(r"^present: (add|update) \S+ talk.*"),
 ]
 
 # Common non-imperative first words seen in the wild (past tense, gerund,

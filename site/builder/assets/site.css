@@ -1538,10 +1538,6 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
               border-color var(--dur-mid) var(--ease-out),
               transform var(--dur-mid) var(--ease-out);
 }
-/* The declared `display` above wins over the UA's `[hidden]` rule, so the
-   attribute needs saying again — `memo.js` takes the button off the 발표 tab,
-   where the frame's own arrow stands in this corner. */
-.memo-fab[hidden] { display: none; }
 .memo-fab:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: translateY(-1px); }
 .memo-fab .count {
   display: none; min-width: 18px; height: 18px; padding: 0 5px;
@@ -1687,7 +1683,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 /* ── Two surfaces: the tab strip ─────────────────────────────────────── */
 /* The strip sits inside the paper header's own width so the tabs line up with
    the title above them, but the panels below use their own — the article keeps
-   its reading column while the glance and the presentation run wide. */
+   its reading column while the glance runs wide. */
 .tabs-wrap { border-bottom: 1px solid var(--border); background: var(--surface); }
 .tabs {
   max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;

@@ -7,9 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 PROBE is a research-scouting agent for dexterous manipulation. A human owns
 the research context in `context/`; agent tracks read it and write
 decision-grade Korean output — a scheduled scouting routine into `scouting/`,
-and on demand `/analyze`, `/compare` and `/present` into `analysis/`,
-`comparison/` and `presentation/`, with `/proofread` looping passes over a
-rewrite. The reading site publishes all four.
+and on demand `/analyze` and `/compare` into `analysis/` and `comparison/`,
+with `/proofread` looping passes over a rewrite. The reading site publishes
+all three.
 `/distinguish` writes only outside the repo, and `/ideate` writes nothing into
 it — it answers in chat and on a private page packed outside the repo.
 `README.md` carries the motivation; this file is the contributor reference for
@@ -42,12 +42,10 @@ file the row points at.
 | `analysis/AUTHORING.md` | human | Format contract for `analysis/<id>.md` |
 | `comparison/` | agent | One `<slug>.md` per comparison from `/compare` — two or three rewritten papers under one question |
 | `comparison/AUTHORING.md` | human | Format contract for `comparison/<slug>.md` |
-| `presentation/` | agent | One `<arxiv-id>.md` per talk from `/present` — a rewritten paper as slides with a speaker essay each |
-| `presentation/AUTHORING.md` | human | Format contract for `presentation/<arxiv-id>.md` |
 | `distinction/AUTHORING.md` | human | Format contract for what `/distinguish` writes into the operator's **private folder**, never into this repo |
 | `distinction/SETUP.md` | human | Operator guide for the private folder and the local distinction routine |
 | `distinction/templates/` | human | `BASKET.md` and `MY-METHOD.md` skeletons for the private folder |
-| `distinction/render-distinction.py` | human | Draws each versus note, report and deep dive as a standalone HTML page beside it, on the standard library, with the site's tokens and charts |
+| `distinction/render-distinction.py` | human | Draws each versus note, report and deep dive as a standalone HTML page beside it, on the standard library, with the site's tokens and `probe-chart` |
 | `distinction/run-distinguish.sh` | human | The script the local scheduler calls — pulls `main` and runs `/distinguish` headless with its tool list |
 | `.claude/prompts/**` | human | The agent prompts — one per slash command. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
@@ -88,8 +86,8 @@ Hard rules:
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types.
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
-   `site`, `scouting`, `analysis`, `comparison`, `presentation`, `distinction`,
-   `context`, `prompts`, `assets`, `linters`, `ci` (`.github/workflows/`), `config`. A
+   `site`, `scouting`, `analysis`, `comparison`, `distinction`, `context`,
+   `prompts`, `assets`, `linters`, `ci` (`.github/workflows/`), `config`. A
    track's scope covers its contract and its documents; the build code that
    publishes them is `site`. Omit the scope for repo-wide changes — a docs pass across several
    tracks is `docs: …`, never `docs(docs): …`.
@@ -122,7 +120,7 @@ update prompts                                  # no type, vague verb "update"
 
 ### Generated routine commits
 
-The bare `scout:` / `analysis:` / `compare:` / `present:` prefixes belong to the
+The bare `scout:` / `analysis:` / `compare:` prefixes belong to the
 generating prompts, not to human commits — do not imitate them when authoring code or doc
 changes. One canonical format per prompt:
 
@@ -130,13 +128,12 @@ changes. One canonical format per prompt:
 scout: report YYYY-MM-DD (P0 P1 P2 P3 P4)   # the pillars whose reports it carries
 compare: add <slug>                       # the slug is the question, so no alias
 analysis: add <arxiv-id> rewrite (<alias>)
-present: add <arxiv-id> talk (<alias>)
 ```
 
 The distinction track has no prefix: `/distinguish` writes into a private folder
 and commits nothing.
 
-`update` replaces `add` when redoing an existing rewrite, comparison or talk. The
+`update` replaces `add` when redoing an existing rewrite or comparison. The
 trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
 resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that resolves to no
 alias there carries none here either, and the subject ends at `rewrite`.
@@ -180,10 +177,9 @@ distinction lint. Run the ones your change touches before pushing.
 | `context/`, any `CLAUDE.md`, `README.md` or `SETUP.md` | `python3 linters/check-context-consistency.py` |
 | `scouting/` | `python3 linters/check-scouting-format.py` |
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
-| `analysis/`, `comparison/`, `presentation/`, `scouting/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
-| `presentation/` | `python3 linters/check-presentation-format.py` |
+| `analysis/`, `comparison/`, `scouting/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
 | the private folder `/distinguish` writes | `python3 linters/check-distinction-format.py` with `PROBE_PRIVATE_DIR` set |
-| `distinction/render-distinction.py`, `site/builder/charts.py`, `site/builder/decisions.py`, `site.css` tokens or `presentation.css` drawn figures | `python3 -I -S distinction/render-distinction.py <a versus note, report or deep dive> -o <scratch>.html` (`-S` proves the standard library suffices) |
+| `distinction/render-distinction.py`, `site/builder/charts.py`, `site/builder/decisions.py`, `site.css` tokens or `charts.css` | `python3 -I -S distinction/render-distinction.py <a versus note, report or deep dive> -o <scratch>.html` (`-S` proves the standard library suffices) |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` proves the standard library suffices) |
 | `assets/build-art.py` | `python3 assets/build-art.py --check` |
 | `site/search/function/` | `npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null` |
@@ -220,8 +216,8 @@ prompts and context files move with it.
 
 ## Document language convention
 
-Agent outputs — `analysis/`, `comparison/`, `presentation/`, `scouting/` and
-the templates those folders ship — are **Korean**. Contributor docs and
+Agent outputs — `analysis/`, `comparison/`, `scouting/` and the templates
+those folders ship — are **Korean**. Contributor docs and
 `README.md` are **English**, so `git log`, PR threads and outside readers read
 uniformly. No `_KO` / `_EN` filename suffix: `head -1 <file>` tells the
 language.

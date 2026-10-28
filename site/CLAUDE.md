@@ -7,15 +7,15 @@ Repo-wide rules are in the root `CLAUDE.md`.
 
 ## The build implements contracts it does not own
 
-`analysis/AUTHORING.md`, `comparison/AUTHORING.md` and `presentation/AUTHORING.md` are
-the rules; this folder enforces them. A new rule is written into the contract
+`analysis/AUTHORING.md` and `comparison/AUTHORING.md` are the rules; this
+folder enforces them. A new rule is written into the contract
 first and checked here second — a rule that exists only in `builder/` is a rule
 no author can read. The same holds in reverse: what the build refuses, the
 contract must say.
 
 ## Invariants
 
-**Only `analysis/`, `comparison/`, `presentation/` and `scouting/` publish.**
+**Only `analysis/`, `comparison/` and `scouting/` publish.**
 Nothing else in the repo reaches the site — `context/` is not a published
 surface beyond the `D#` titles a tooltip prints.
 
@@ -38,17 +38,10 @@ the paper alone.
 `builder/comparisons.py` holds that line: every paper's own detail stays on its
 own page, and the comparison links out.
 
-**A presentation of a paper with no rewrite is not published.** `builder/presentations.py`
-holds the same line for the same reason: a slide compresses, and the rewrite is
-where the detail it dropped stays reachable. The presentation is a tab on that paper's
-own page rather than a page of its own, so the link back is the page it is
-already on — and `t/` is an index of those tabs rather than a second home for
-them: every row it prints links into the paper page it belongs to.
-
 **A band is its eyebrow and its title, and nothing beside them.**
 `components.mast()` prints those two lines and no more: whatever sits next to
 the title either repeats the list under the band or argues for it, and the
-list makes its own case one scroll down. The five bands are one height, so
+list makes its own case one scroll down. The four bands are one height, so
 moving between them in the nav moves nothing but the words.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
@@ -78,14 +71,6 @@ forbids an author to write, `builder/assets/site.css` keeps:
 **A browser with no script loses only the extras.** Every control removes
 itself rather than sitting inert, and the landing list falls back to one page.
 
-**A moving slide is a still first.** `builder/charts.py` draws every state a
-stepped figure can be in and `builder/presentations.py` draws the authors' clip
-over the paper's own figure; `assets/presentation.js` only chooses what is on
-screen and computes no number the room reads. A clip that cannot play, a
-printout and a browser with no script all get the figure or the first state —
-never an empty frame — and nothing of a clip is fetched until the talk is a
-slide away from it.
-
 **One query is read by one rule.** `assets/match.js` is what both the landing
 filter box and the ⌘K palette ask their question with; two surfaces answering
 the same query differently is a bug, not two behaviours.
@@ -104,12 +89,11 @@ and bring all of those into step.
 importable without the rest of the build.
 
 **Four pieces are borrowed by the distinction track.** `distinction/render-distinction.py`
-draws the private versus notes, reports and deep dives with `builder/charts.py`, `builder/decisions.py`, the
-`:root` blocks of `assets/site.css` and the drawn-figures section of
-`assets/presentation.css`, cut between its `/* ── drawn figures` and
-`/* ── motion` headers. It runs on the standard library and its pages never
-reaches the site, so keep those two modules free of a third-party import at
-module scope, and keep those headers when the sheet moves.
+draws the private versus notes, reports and deep dives with `builder/charts.py`,
+`builder/decisions.py`, the `:root` blocks of `assets/site.css` and the whole of
+`assets/charts.css`. It runs on the standard library and its pages never reach
+the site, so keep those two modules free of a third-party import at module
+scope.
 
 **Search is an enhancement.** A build without `--search-api` emits no script and
 the site makes no request. `site/search/verify.py` needs a key and egress, so it
@@ -131,7 +115,7 @@ returns. No reader surface links them; the page stays one page.
 
 **`query.py` runs with the standard library.** An agent in a checkout has not
 run `pip install`, so `query.py` and every `builder/` module it imports —
-`catalog`, `corpus`, `comparisons`, `presentations`, `decisions` and theirs —
+`catalog`, `corpus`, `comparisons`, `decisions` and theirs —
 keep a third-party import out of module scope. `query.py search` is the one
 subcommand that touches the network, and it points at `catalog --match` when
 the endpoint cannot be reached.
@@ -144,8 +128,8 @@ carry it. Adding a pillar walks the checklist in `context/CLAUDE.md`.
 ## What each build command sees
 
 `python3 site/build-site.py --check --strict` stops after discovery and writes
-nothing: front matter, the 요약 fences, a comparison's sources and fork, every
-presentation check and the `corpus.json` budget. The rewrite body rules in
+nothing: front matter, the 요약 fences, a comparison's sources and fork and the
+`corpus.json` budget. The rewrite body rules in
 `render.py`, a comparison's fence and length rules, KaTeX and the asset
 pipeline run only while pages render, so the full build —
 `python3 site/build-site.py --strict --out /tmp/probe-check` — is the one that

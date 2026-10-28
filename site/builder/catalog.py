@@ -198,7 +198,7 @@ def mentions(papers: list[Paper], cited: dict) -> dict[str, list[str]]:
 
 
 def records(papers: list[Paper], comps: list, decisions: dict,
-            cited: dict, presented: set[str], retired: set[str] = frozenset()) -> dict:
+            cited: dict, retired: set[str] = frozenset()) -> dict:
     """The whole corpus as one JSON-able dict — what `corpus.json` holds.
 
     `decisions` is `harvest_decisions()`; only the codes some rewrite cites are
@@ -243,7 +243,6 @@ def records(papers: list[Paper], comps: list, decisions: dict,
             "page": f"{SITE}p/{p.stem}/",
             "source": f"{RAW}/analysis/{p.stem}.md",
             "sections": f"{SITE}p/{p.stem}/sections.json",
-            "presentation": p.stem in presented,
             "compared_in": [x.slug for x in comps if p.stem in x.paper_ids],
             "cites": sorted(cites.get(p.stem, [])),
             "cited_by": [q.stem for q in cited.get(p.stem, [])],
