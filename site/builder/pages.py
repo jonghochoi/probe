@@ -7,7 +7,7 @@ import re
 from collections import Counter
 
 from . import components as c
-from . import corpus, presentations, scouting, glance as glance_mod
+from . import corpus, scouting, glance as glance_mod
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer, _decorate_refs
 
@@ -683,22 +683,16 @@ def not_found_page() -> str:
 # worth the long read, and that is the question the short surface answers. `en`
 # is printed beside the Korean label because the tab strip is also how a
 # contributor finds the rule set: 요약 is `analysis/AUTHORING.md` §4, 상세 is
-# §1–§3, 비교 is `comparison/AUTHORING.md` and 발표 is
-# `presentation/AUTHORING.md`.
+# §1–§3 and 비교 is `comparison/AUTHORING.md`.
 #
-# 비교 and 발표 are not further readings of this paper and their labels do not
-# pretend to be: BRIEF and FULL say how much of the paper a surface carries,
-# COMPARED says what happened to it, and TALK says what it is turned into.
-# They are also the two tabs that are not always there — 비교 appears only for a
-# paper some comparison holds and 발표 only for one some presentation retells, and a tab
-# that is empty for most of the corpus is furniture.
-#
-# 발표 sits last because it is the surface a reader reaches after deciding the
-# paper is worth carrying into a room, which is the decision the first two make.
+# 비교 is not a further reading of this paper and its label does not pretend
+# to be: BRIEF and FULL say how much of the paper a surface carries, COMPARED
+# says what happened to it. It is also the one tab that is not always there —
+# it appears only for a paper some comparison holds, and a tab that is empty
+# for most of the corpus is furniture.
 TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"),
-        ("cmp", "비교", "COMPARED"), ("presentation", "발표", "TALK"))
+        ("cmp", "비교", "COMPARED"))
 CMP_TAB = "cmp"
-PRESENTATION_TAB = "presentation"
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
@@ -706,8 +700,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
                neighbours: list[Paper] | None = None,
                comparisons: list | None = None,
                papers_by_id: dict | None = None,
-               citers: list[Paper] | None = None,
-               presentation=None) -> str:
+               citers: list[Paper] | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -742,7 +735,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
     comps = comparisons or []
     body = f"""{_header(paper)}
-{_tabstrip(len(comps), presentation is not None)}
+{_tabstrip(len(comps))}
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
   {glance_html or _missing("요약")}
 </div>
@@ -757,7 +750,6 @@ def paper_page(paper: Paper, katex, decisions: dict,
   </div>
 </div>
 {_cmp_panel(paper, comps, by_id)}
-{_presentation_panel(presentation)}
 {c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
@@ -767,15 +759,10 @@ def paper_page(paper: Paper, katex, decisions: dict,
         description=paper.preview,
         body=body,
         depth=2,
-        scripts=(["paper.js", "memo.js", "shelf.js"]
-                 + (["presentation.js"] if presentation else [])),
-        # The presentation's stylesheet rides only the pages that carry one: a slide is
-        # a frame with its own type scale, and no other surface uses a rule of it.
+        scripts=["paper.js", "memo.js", "shelf.js"],
         # The source an agent should read instead of this page's markup.
         extra_head=(
-            f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/analysis/{paper.stem}.md">'
-            + (f'\n<link rel="stylesheet" href="{c.asset("../../assets/presentation.css")}">'
-               if presentation else "")),
+            f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/analysis/{paper.stem}.md">'),
     )
 
 
@@ -803,22 +790,19 @@ def _acts(paper: Paper) -> str:
 </div>"""
 
 
-def _tabstrip(cmp_n: int = 0, has_presentation: bool = False) -> str:
+def _tabstrip(cmp_n: int = 0) -> str:
     """The tabs. Server-rendered and `hidden`-toggled, so the page is readable
     with JavaScript off — the first panel stays open and the rest are reachable
     by their anchors.
 
-    비교 and 발표 are printed only when there is something behind them, and 비교
-    carries its count: the number is the whole reason to look, and a tab that
-    made the reader click to find out it says zero would have spent their click
-    to tell them nothing. 발표 carries none — a paper has one presentation or none, and
-    the tab's own presence already says which.
+    비교 is printed only when there is something behind it, and it carries its
+    count: the number is the whole reason to look, and a tab that made the
+    reader click to find out it says zero would have spent their click to tell
+    them nothing.
     """
     buttons = []
     for i, (key, label, en) in enumerate(TABS):
         if key == CMP_TAB and not cmp_n:
-            continue
-        if key == PRESENTATION_TAB and not has_presentation:
             continue
         count = (f'<span class="cnt">{cmp_n}</span>' if key == CMP_TAB else "")
         buttons.append(
@@ -926,67 +910,6 @@ def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
     </p>
     <div class="incmp-list">{cards}</div>
   </section>
-</div>"""
-
-
-def _presentation_panel(presentation) -> str:
-    """발표 — the paper retold as a talk, one slide at a time.
-
-    The tab is a screen, not a scroll: every slide is in the document and only
-    the one being read is on, ← and → move it, and the deck under the frame
-    says where in the talk this is. A talk is a sequence, and scrolling past
-    twelve frames to reach the turn reads it as a document instead.
-
-    The speaker essay sits under the slide it belongs to, and while the tab is
-    browsed it stays hidden until 노트 asks for it — inline under the frame
-    while the tab is being read, and the second window once the talk is on a
-    stage, because those are the same request answered by whichever surface
-    the presenter is standing on.
-
-    Every control stands on one band above the frame (`.prs-tools`) rather
-    than beside it, where it would take width from the one element that cannot
-    spare any. The band carries no `hidden`: it is drawn under
-    `data-browsing`, which only `presentation.js` sets, so a browser with no
-    script never meets a 전체 화면 button that cannot present — it gets every
-    slide with its essay under it. The stage bar (목록, 레이저, zoom, exit)
-    sits outside `.prs-presentation`, which presenting takes over, but inside
-    `.prs-stage`, which is what goes fullscreen.
-    """
-    if presentation is None:
-        return ""
-    return f"""<div class="panel wide" id="p-presentation" role="tabpanel"
-     aria-labelledby="t-presentation" hidden>
-  <div class="prs-stage" data-pres-stage>
-  <div class="prs-bar" data-pres-bar>
-    <button type="button" class="prs-ico" data-pres-list
-            aria-pressed="false" aria-label="슬라이드 목록"
-            title="슬라이드 목록 (O)">{c.icon("grid", 15)}</button>
-    <button type="button" class="prs-ico" data-pres-laser
-            aria-pressed="false" aria-label="레이저 포인터"
-            title="레이저 포인터 (L)">{c.icon("laser", 15)}</button>
-    <span class="prs-zoom" data-pres-zoom>100%</span>
-    <span class="prs-sep" aria-hidden="true"></span>
-    <button type="button" class="prs-ico" data-pres-exit
-            aria-label="발표 끝내기" title="발표 끝내기 (Esc)">{c.icon("close", 15)}</button>
-  </div>
-  <div class="prs-presentation" data-pres-of="{c.esc(presentation.paper_id)}">
-    <div class="prs-tools">
-      <span class="prs-move">
-        <button type="button" class="prs-arrow" data-pres-step="-1"
-                aria-label="이전 슬라이드">{c.icon("prev", 16)}</button>
-        <button type="button" class="prs-arrow" data-pres-step="1"
-                aria-label="다음 슬라이드">{c.icon("next", 16)}</button>
-      </span>
-      <button type="button" class="prs-ico" data-pres-notes
-              aria-pressed="false" aria-label="노트"
-              title="노트">{c.icon("note", 15)}</button>
-      <button type="button" class="prs-ico" data-pres-start
-              aria-label="전체 화면" title="전체 화면">{c.icon("expand", 15)}</button>
-    </div>
-    {presentations.render(presentation)}
-    {presentations.deck(presentation)}
-  </div>
-  </div>
 </div>"""
 
 
@@ -1328,124 +1251,15 @@ def _cmp_cards(papers: list[Paper]) -> str:
     )
 
 
-def talk_index_page(presentation_map: dict, papers_by_id: dict | None = None) -> str:
-    """발표 — every presentation, and nothing about a paper that is not one.
-
-    The one destination in the nav that is an index and nothing else: a
-    presentation is a tab on its paper's page, so every row here links back
-    into 논문. It exists because a talk is the surface someone goes looking for
-    with a room already booked — "what do we have that can be presented on
-    Thursday" is a question the paper list cannot answer, since a paper that
-    has a talk looks exactly like one that does not until the page is open.
-
-    Each row says the sentence the talk lands and how long it takes — both the
-    presentation's own front matter, so nothing here is invented. Nothing else
-    from that front matter earns the space: `venue` dates the paper rather than
-    the talk, and `audience` is a sentence about a room this reader is not
-    standing in, printed at the width of a line they are scanning.
-
-    Under them the act rail, drawn the way the cover slide draws it: one block
-    per run of a beat, weighted by the slides it holds. It is the talk's shape,
-    and on this surface it is also the only thing that distinguishes two
-    fourteen-minute talks from each other before either is opened.
-
-    The row stands on the landing list's columns — when, id, the talk, its
-    axes, its cost — with the paper's own pillar chips, so 논문, 비교 and 발표
-    read as one table cut three ways rather than as three sites.
-    """
-    ordered = sorted(presentation_map.values(),
-                     key=lambda t: (t.front.get("generated", ""), t.paper_id),
-                     reverse=True)
-    papers_by_id = papers_by_id or {}
-    if ordered:
-        rows = "".join(_talk_row(t, papers_by_id.get(t.paper_id)) for t in ordered)
-        list_html = (
-            '<div class="ix-head ix-talk" aria-hidden="true"><span>작성</span>'
-            '<span>arXiv</span><span>발표 · 한 문장</span><span>연구 축</span>'
-            f'<span>분량</span></div><div class="talk-list">{rows}</div>'
-            + _ix_foot(f"발표 {len(ordered)}개", _act_key())
-        )
-    else:
-        list_html = '<p class="corpus-empty">아직 발표 자료로 만든 논문이 없습니다.</p>'
-
-    head = c.mast(
-        eyebrow="Slides and script",
-        title="발표, 할 말을 순서대로 적어 둡니다",
-    )
-
-    body = f"""{head}
-
-<main class="hub hub-wide">
-  {list_html}
-</main>
-"""
-    return c.page(
-        title="발표 · PROBE",
-        here="talk",
-        body=body,
-        depth=1,
-        extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
-    )
-
-
-def _act_key() -> str:
-    """The key to the rail every talk row draws: which colour is which act.
-
-    The rail is a talk's shape in four colours and nothing else, so the colours
-    are named once, under the table, in the order the acts run.
-    """
-    keys = "".join(
-        f'<span class="ak"><i class="talk-r{presentations.ACT_ORDER[a]}"></i>'
-        f"{c.esc(a)} {c.esc(name)}</span>"
-        for a, name in presentations.ACTS.items()
-    )
-    return f'<span class="act-key"><span class="ak-h">막</span>{keys}</span>'
-
-
-def _ix_foot(count: str, key: str = "") -> str:
-    """The table's last line: what the rail's colours mean, and that it ends.
+def _ix_foot(count: str) -> str:
+    """The table's last line: that it ends.
 
     A short list otherwise stops on a row rule with the page running on under
     it, and a reader cannot tell a list that is complete from one that has not
     finished arriving. The count says the former.
     """
-    return (f'<div class="ix-foot">{key}'
+    return (f'<div class="ix-foot">'
             f'<span class="ix-end">목록 끝 · {c.esc(count)}</span></div>')
-
-
-def _talk_row(presentation, paper: Paper | None = None) -> str:
-    """One talk, from outside it — the spine, its shape, what it was cut for.
-
-    The spine drops its ` / ` marker here (§1-0): the break is authored for the
-    width of a cover slide, and a row is not that width.
-    """
-    spine = presentations.inline(presentation.spine.replace(" / ", " "))
-    runs: list[list] = []
-    for sl in presentation.slides:
-        if runs and runs[-1][0] == sl.act:
-            runs[-1][1] += 1
-        else:
-            runs.append([sl.act, 1])
-    rail = "".join(
-        f'<i class="talk-r{presentations.ACT_ORDER[act]}" style="--n:{n}"'
-        f' title="{c.esc(presentations.ACTS[act])} · {n}장"></i>'
-        for act, n in runs)
-    cost = " · ".join(x for x in (
-        f"{presentation.minutes}분" if presentation.minutes else "",
-        f"{len(presentation.slides)}장") if x)
-    when = str(presentation.front.get("generated", ""))[:10]
-    pillars = c.pillar_chips(paper.filed) if paper else ""
-    return (
-        f'<a class="talk-item ix-row ix-talk" href="../p/{c.esc(presentation.paper_id)}'
-        f'/index.html#{PRESENTATION_TAB}">'
-        f'<span class="ix-when">{c.esc(when[5:] or when)}</span>'
-        f'<span class="talk-id">{c.esc(presentation.paper_id)}</span>'
-        f'<span class="ix-main"><span class="talk-t">{c.esc(presentation.title)}</span>'
-        f'<span class="talk-spine">{spine}</span>'
-        f'<span class="talk-rail" aria-hidden="true">{rail}</span></span>'
-        f'<span class="ix-pillars">{pillars}</span>'
-        f'<span class="talk-cost">{c.esc(cost)}</span></a>'
-    )
 
 
 def comparison_index_page(comps: list, papers_by_id: dict) -> str:

@@ -13,9 +13,9 @@ their colours.
 | File | Role |
 |---|---|
 | `hero.svg` (880×330) | The front door, and the link to the reading site. The headline, the claim and the button on the left; on the right, one 25 s cycle in two scenes — the flood, then the reader |
-| `own.svg` (880×204) | The picture under How it works — who writes what: you and `context/`, the probe that reads it, and the four folders it writes |
-| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-presentation.svg`, `probe-ideation.svg` | The five track icons, each above its track's name in the How-it-works table |
-| `build-art.py` | Generates `hero` and `own`. The five track icons are hand-authored |
+| `own.svg` (880×204) | The picture under How it works — who writes what: you and `context/`, the probe that reads it, and the three folders it writes |
+| `probe-scouting.svg`, `probe-analysis.svg`, `probe-comparison.svg`, `probe-ideation.svg` | The four track icons, each above its track's name in the How-it-works table |
+| `build-art.py` | Generates `hero` and `own`. The four track icons are hand-authored |
 
 ## Drawing rules
 
@@ -39,9 +39,8 @@ the one set of files the agent may not write, held in a matte.
 **The character's parts carry meaning, so they are not mixed.** Eyes belong to
 the probe alone, and so does the sprout on its head — a stem and two leaves
 that sway about the stem's root on a 3.2 s cycle, off the bob's beat. The
-person in `own.svg` — and the listener in `probe-presentation.svg`, the same
-glyph scaled — is the probe's clay and shadow with no face and no sprout, and
-breathes on its own 4.6 s cycle rather than the probe's bob. The out-of-it
+person in `own.svg` is the probe's clay and shadow with no face and no sprout,
+and breathes on its own 4.6 s cycle rather than the probe's bob. The out-of-it
 probe is the same character dimmed, its sprout wilted and its eyes crossed; the
 only thing its eyes do is pulse, the two a half beat apart. A prop is placed or
 worn, never gripped: a handless probe holds nothing, so the page rides under
@@ -63,25 +62,19 @@ up and a red `!` pops over the cap), `probe-comparison.svg` rallies (two
 pages standing at the hull's sides bat a yellow ball back and forth, faster
 each time, the pupils chasing it, until it hits the top of the head — the
 probe reels, a red bump swells where it hit and the ball dribbles to a stop
-at its feet), `probe-presentation.svg` presents (a screen up and to the
-right whose bands light as a talk advances, one listener in front on the
-left, cut by the bottom edge, until the bands glitch and the screen crashes
-to a blue `:(` — the presenter freezes and sweats with shrunken pupils, the
-listener tilts its head, and the slide comes back), and `probe-ideation.svg`
+at its feet), and `probe-ideation.svg`
 has an idea (pupils up at a bulb over the head that flickers like a tired
 tube, catches, and glows so bright the probe squints). A new track needs a
 new outline, not a variation on one of these.
 
 **Every track icon builds to one beat.** The scouter's dial is the model:
 something mounts over the cycle and a single beat releases it — the flash,
-the `!`, the bump, the crash, the glare — so each icon lands a punchline
+the `!`, the bump, the glare — so each icon lands a punchline
 rather than idling in a loop. Hues outside the clay come only with a prop
 and stay on it: the scouter's green and purple, which no other icon uses,
-the deerstalker's tweed, the ball's and the bulb's yellow, the crashed
-screen's blue, and the red of the `!` and the bump. A blue sweat drop is
-the probe's one sign of strain that is not a prop. With motion off, an icon
-rests before its beat — the ball between the pages, the screen lit, the eyes
-open.
+the deerstalker's tweed, the ball's and the bulb's yellow, and the red of
+the `!` and the bump. With motion off, an icon rests before its beat — the
+ball between the pages, the eyes open.
 
 **An icon shares its track's cell, never a column of its own.** A table
 column that holds only an image has no minimum width — GitHub caps every image
@@ -117,7 +110,7 @@ while the probe is still drowning.
 ## Who writes what
 
 `own.svg` is one row: you, the `context/` frame, the probe, and the frame of
-four folders, symmetric about the two frames. The one wire is `context/` into
+three folders, symmetric about the two frames. The one wire is `context/` into
 the probe, labelled *reads*. Nothing is drawn from the probe to its folders —
 the PROBE WRITES label says it — and nothing back into `context/`, which the
 agent never writes; the caption says a change comes to you as a proposal. The

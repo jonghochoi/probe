@@ -36,7 +36,7 @@ Checks, grouped by the contract section they enforce:
              cells carry an anchor or `없음`; §6 bullets a quote anchor; §7
              bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a
              ```probe-chart only under §6, drawable by `site/builder/charts.py`
-             with `source`, `why` and `omitted` and no `step`.
+             with `source`, `why` and `omitted`.
   AUTHORING §5   active rows <= 12, ideas per versus note <= 2 and per
              deep dive <= 3, charts per deep dive <= 3, prose <= 7,000 characters outside fences in a
              versus note and <= 20,000 in a deep dive.
@@ -243,8 +243,6 @@ def _check_charts(name: str, sections: dict, home: str, findings: list[Finding])
                 continue
             if "omitted" not in spec:
                 findings.append((name, ln, "§3-5 ```probe-chart has no `omitted` — the source rows it leaves out"))
-            if "steps" in spec or any("step" in s for s in spec.get("series", []) if isinstance(s, dict)):
-                findings.append((name, ln, "§3-5 ```probe-chart carries `step` or `steps` — a page has no presenter"))
 
 
 # ── Inputs: BASKET.md and MY-METHOD.md ───────────────────────────────────────

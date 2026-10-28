@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the PROBE reading site.
 
-Renders every `analysis/<id>.md`, `comparison/<slug>.md` and
-`presentation/<id>.md` into a static page tree under `--out`, and beside the
+Renders every `analysis/<id>.md` and `comparison/<slug>.md` into a static
+page tree under `--out`, and beside the
 pages what an agent reads instead — `corpus.json`, `llms.txt`, and per-paper
 `sections.json` with one Markdown file per section.
 Build-time dependencies only — the published site ships no runtime Python, no
@@ -55,7 +55,7 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, catalog, comparisons, corpus, presentations, pages, scouting
+from builder import assets_out, catalog, comparisons, corpus, pages, scouting
 from builder.decisions import harvest_decisions, retired_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
@@ -80,12 +80,6 @@ def build(args) -> int:
     if not args.only:
         comps, comp_problems = comparisons.discover(papers_by_id)
         problems += comp_problems
-    # A presentation belongs to one paper, so unlike a comparison it survives `--only` —
-    # the paper it retells is the paper being built. The presentations of papers the
-    # subset dropped are skipped rather than reported: they are not missing
-    # rewrites, they are simply not in this build.
-    presentation_map, presentation_problems = presentations.discover(papers_by_id, partial=bool(args.only))
-    problems += presentation_problems
     # Scouting runs need nothing from the corpus but the ids it holds, which a
     # row links when the paper has a rewrite. A partial build skips them, as it
     # does the comparisons: its corpus would mark every other rewrite missing.
@@ -104,8 +98,7 @@ def build(args) -> int:
     cited = corpus.citations(papers)
     agent_json = ""
     if not args.only:
-        cat = catalog.records(papers, comps, decisions, cited, set(presentation_map),
-                              retired)
+        cat = catalog.records(papers, comps, decisions, cited, retired)
         agent_json = json.dumps(cat, ensure_ascii=False, separators=(",", ":"))
         agent_size = len(agent_json.encode("utf-8"))
         if agent_size > catalog.BUDGET:
@@ -121,11 +114,11 @@ def build(args) -> int:
             print(line)
         if problems:
             print(f"\nbuild-site --check: {len(problems)} problem(s) "
-                  f"across {len(papers)} rewrite(s), "
-                  f"{len(comps)} comparison(s) and {len(presentation_map)} presentation(s)")
+                  f"across {len(papers)} rewrite(s) "
+                  f"and {len(comps)} comparison(s)")
             return 1
         print(f"build-site --check: {len(papers)} rewrite(s), "
-              f"{len(comps)} comparison(s), {len(presentation_map)} presentation(s), "
+              f"{len(comps)} comparison(s), "
               f"{len(runs)} scouting run(s) clean")
         return 0
 
@@ -154,13 +147,11 @@ def build(args) -> int:
             comparisons=comparisons.for_paper(paper.stem, comps),
             papers_by_id=papers_by_id,
             citers=cited.get(paper.stem, []),
-            presentation=presentation_map.get(paper.stem),
         )
     for comp in comps:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
             comp, papers_by_id, katex, decisions, render_problems)
     rendered[out / "c" / "index.html"] = pages.comparison_index_page(comps, papers_by_id)
-    rendered[out / "t" / "index.html"] = pages.talk_index_page(presentation_map, papers_by_id)
     if not args.only:
         for run in runs:
             rendered[out / "s" / run.date / "index.html"] = pages.scouting_run_page(
@@ -248,7 +239,7 @@ def build(args) -> int:
     kb = (stats["pretendard"] + stats["mono"]) / 1024
     print(
         f"build-site: {len(rendered)} page(s) · {len(papers)} rewrite(s) · "
-        f"{len(comps)} comparison(s) · {len(presentation_map)} presentation(s) · "
+        f"{len(comps)} comparison(s) · "
         f"{katex.rendered} formula(s) rendered · "
         f"{stats['glyphs']} glyph(s) → {kb:.0f} KB of webfont · "
         f"{size / 1024:.0f} KB of corpus index · "

@@ -432,10 +432,10 @@ def grep(paper: Paper, pattern: str) -> list[tuple[str, str]]:
 
 
 # A bibliography entry and an arXiv id inside it. An id encodes the month its
-# first version was posted (`2406.04806` is June 2024), which is how a talk's
-# lineage figures date a prior (`presentation/AUTHORING.md` §4-9). An entry is
-# one `<li>` with no list nested in it, so it is cut out by its id rather than
-# walked by the parser — the entry is read as flat text either way.
+# first version was posted (`2406.04806` is June 2024), which is how a prior
+# the paper names is dated. An entry is one `<li>` with no list nested in it,
+# so it is cut out by its id rather than walked by the parser — the entry is
+# read as flat text either way.
 _BIB_ITEM = re.compile(r'<li[^>]*\bid="bib\.bib\d+"[^>]*>(.*?)</li>', re.S)
 _BIB_ID = re.compile(r"(?<![\d.])(\d{2})(0[1-9]|1[0-2])\.\d{4,5}(?:v\d+)?(?![\d])")
 
@@ -475,15 +475,15 @@ def _main(argv: list[str]) -> int:
 
     Bare, it prints the index: the section tree (body and appendix apart),
     then every figure with the URL it hotlinks from — read from the page's own
-    `<img>`, whatever the file is called — so the inventory a talk or a
-    rewrite takes its figures from is one command rather than a grep for a
+    `<img>`, whatever the file is called — so the inventory a rewrite takes
+    its figures from is one command rather than a grep for a
     filename pattern. `--grep` prints every line of the original matching a
     pattern, with its §. `--tables` prints every table in full, caption first,
     as Markdown; `--section` prints a section's text, subsections included.
-    Every number a talk puts on a slide is confirmed in one of these two.
+    Every number a rewrite states is confirmed in one of these two.
     `--bib` prints the bibliography, one entry a line, each with the arXiv id
-    it gives and that id's first-version month — the date a lineage figure
-    puts on a prior.
+    it gives and that id's first-version month — the date a prior is placed
+    at.
     """
     import argparse
 

@@ -61,41 +61,12 @@ _ICON_PATHS = {
             '<path d="M8 1.2v1.5M8 13.3v1.5M2.6 2.6l1.1 1.1M12.3 12.3l1.1 1.1'
             'M1.2 8h1.5M13.3 8h1.5M2.6 13.4l1.1-1.1M12.3 3.7l1.1-1.1"/>'),
     "menu": '<path d="M2.3 4.6h11.4M2.3 8h11.4M2.3 11.4h11.4"/>',
-    "close": '<path d="M3.8 3.8 12.2 12.2M12.2 3.8 3.8 12.2"/>',
     # The one shape that carries a state rather than a name: `index.css` fills
     # it from `currentColor` on the pressed button, so on and off are the same
     # path and nothing has to swap markup to answer a click.
     "star": f'<path d="{_STAR_D}"/>',
     # 읽음 — the claim the reader makes, drawn as the mark people make for it.
     "check": '<path d="M3 8.4 6.4 11.6 13 4.6"/>',
-    # The presentation controls. A slide deck's controls are the one place on
-    # the site where a label costs more than it carries: every one of them sits
-    # on the frame a room is looking at, and 전체 화면 · 노트 · 목록 · 레이저 ·
-    # 나가기 spelled out is five words of chrome competing with the sentence on
-    # screen. So they are glyphs at the same weight as the rest of the set, and
-    # the word survives in `aria-label` and `title`, where a reader who needs it
-    # can still get it.
-    # Four corners pulling apart, which is the shape of the thing the button
-    # does: the frame stops being a card on a page and becomes the screen.
-    "expand": '<path d="M6 2.3H2.3V6M10 2.3h3.7V6M13.7 10v3.7H10M2.3 10v3.7H6"/>',
-    # A card with what is said over the slide written on it. Two rules rather
-    # than three: at 15px a third line closes the gaps and the card reads solid.
-    "note": ('<rect x="2.3" y="3.1" width="11.4" height="9.8" rx="1.7"/>'
-             '<path d="M5.2 6.7h5.6M5.2 9.4h3.3"/>'),
-    "grid": ('<rect x="2.2" y="2.2" width="5.1" height="5.1" rx="1.2"/>'
-             '<rect x="8.7" y="2.2" width="5.1" height="5.1" rx="1.2"/>'
-             '<rect x="2.2" y="8.7" width="5.1" height="5.1" rx="1.2"/>'
-             '<rect x="8.7" y="8.7" width="5.1" height="5.1" rx="1.2"/>'),
-    # A pointer is an aim rather than a beam: the dot is what the room follows,
-    # and the ticks say it is being held on something.
-    "laser": ('<circle cx="8" cy="8" r="4.5"/><circle cx="8" cy="8" r="1.25"/>'
-              '<path d="M8 1.1v1.7M8 13.2v1.7M1.1 8h1.7M13.2 8h1.7"/>'),
-    "prev": '<path d="M9.9 3.3 5.1 8l4.8 4.7"/>',
-    "next": '<path d="M6.1 3.3 10.9 8l-4.8 4.7"/>',
-    # A slide's clip. The button carries both and the stylesheet shows the one
-    # the clip's own state calls for.
-    "play": '<path d="M5 3.2v9.6L12.6 8Z"/>',
-    "pause": '<path d="M5.6 3.4v9.2M10.4 3.4v9.2"/>',
 }
 
 
@@ -149,7 +120,7 @@ def mark(size: int) -> str:
 def mast(*, eyebrow: str, title: str, count: str = "") -> str:
     """The band every list page opens on.
 
-    One frame for the five destinations the nav names, because they are one
+    One frame for the four destinations the nav names, because they are one
     level of the site and a band that changed shape between them would say
     otherwise. Two things and no third: what this surface is, and what it does.
     Nothing sits beside the title — the list under the band is what the page
@@ -464,10 +435,10 @@ def repo_link() -> str:
 # destination cannot arrive in one and be missing from the other.
 #
 # A track's destination is named for its track, in two syllables of Korean —
-# 분석 Analysis, 탐색 Scouting, 비교 Comparison, 발표 Presentation. 분석 leads
-# because it is the landing page — the logo and the first label go to the same
-# place, so the row opens where the site does — and the rest follow in the
-# pipeline's order. Five labels of one width read as one row on a desktop and
+# 분석 Analysis, 탐색 Scouting, 비교 Comparison. 분석 leads because it is the
+# landing page — the logo and the first label go to the same place, so the row
+# opens where the site does — and the rest follow in the pipeline's order.
+# Four labels of one width read as one row on a desktop and
 # fit beside the controls without crowding them. 서재 is the reader's own shelf
 # rather than a track, and stands after them.
 #
@@ -475,15 +446,9 @@ def repo_link() -> str:
 # each sit *under* a destination rather than being one, so `p/<id>/` marks
 # 분석 and `c/<slug>/` marks 비교 — the mark answers "which part of the site
 # is this", which is what a reader glancing at a nav is asking.
-#
-# 발표 is the one destination that is an index and nothing else: a
-# presentation is a tab on its paper's page, so the row it lists links back
-# into 분석, and a paper page opened at that tab still marks 분석 — which is
-# the part of the site it is standing in.
 DESTINATIONS = (("papers", "index.html", "분석"),
                 ("scout", "s/index.html", "탐색"),
                 ("compare", "c/index.html", "비교"),
-                ("talk", "t/index.html", "발표"),
                 ("shelf", "shelf/index.html", "서재"))
 
 
@@ -522,14 +487,14 @@ def nav_sheet(up: str, here: str = "") -> str:
 def nav(up: str, here: str = "") -> str:
     """The row every page opens on — where the site goes, and what it can do.
 
-    Two clusters, and they are different kinds: five places to go, then three
+    Two clusters, and they are different kinds: four places to go, then three
     things to do to the page in front of the reader. A hairline stands between
     them (`site.css`), because the seam between an unboxed label and a bordered
     32px button reads as a control that lost its border unless something says
     the boundary is meant.
 
     `here` is the destination this page sits under, and marking it is the
-    other half of the same job: a row of five names that never says which one
+    other half of the same job: a row of four names that never says which one
     the reader is standing in is a row with a hole in it, and the hole is what
     makes the labels beside the controls look unfinished.
     """

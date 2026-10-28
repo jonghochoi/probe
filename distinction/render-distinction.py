@@ -9,9 +9,9 @@ redrawn from its Markdown and never edited by hand
 (`distinction/AUTHORING.md` §3-6).
 
 The pages borrow the reading site's look rather than its build: the design
-tokens are cut from `site/builder/assets/site.css`, the drawn figures from
-`site/builder/charts.py` and their rules from `presentation.css`. Nothing here
-reaches the site — `site/CLAUDE.md`'s publish list does not change — and
+tokens are cut from `site/builder/assets/site.css`, the drawn charts come from
+`site/builder/charts.py` and their rules from `site/builder/assets/charts.css`,
+inlined whole. Nothing here reaches the site — `site/CLAUDE.md`'s publish list does not change — and
 the script runs on the standard library alone, like the lint, because the
 machine that runs `/distinguish` need not hold the site's dependencies.
 
@@ -333,19 +333,16 @@ def _chart(info: str, body: list[str], where: str) -> tuple[str, list[str]]:
     except json.JSONDecodeError as err:
         return "", [f"{where}: ```probe-chart is not JSON — {err}"]
     probs = charts.problems(where, "chart", spec)
-    if isinstance(spec, dict) and any("step" in s for s in spec.get("series", [])) or (
-            isinstance(spec, dict) and "steps" in spec):
-        probs.append(f"{where}: ```probe-chart carries `step`/`steps` — a page has no presenter")
     if probs:
         return "", probs
     why = (f'<details class="dx-why"><summary>이 그림이 원문에서 가져온 것</summary>'
            f'<p>{esc(spec["why"])}</p>'
            + (f'<p class="dx-om">뺀 것 — {esc(" · ".join(spec["omitted"]))}</p>' if spec.get("omitted") else "")
            + "</details>")
-    # A slide hands the chart a wide box; a page column hands it the shape its
-    # rows need, so a tall `dots` keeps its type size instead of widening.
+    # The page column hands the chart the shape its rows need, so a tall
+    # `dots` keeps its type size instead of widening.
     ratio = 1000 / (136 + 72 * len(spec.get("rows", []))) if spec["kind"] == "dots" else 1000 / 560
-    return f'<div class="prs-slide dx-chart">{charts.chart(spec, ratio)}{why}</div>', []
+    return f'<div class="pc-frame dx-chart">{charts.chart(spec, ratio)}{why}</div>', []
 
 
 # Per kind: the section drawn as errata, as stage cards, as idea cards, the
@@ -507,8 +504,8 @@ def _tokens() -> str:
     site = os.path.join(_ASSETS, "site.css")
     light = _cut(site, ":root {", "\n}\n") + "\n}\n"
     dark = _cut(site, ':root[data-theme="dark"] {', "\n}\n") + "\n}\n"
-    figs = _cut(os.path.join(_ASSETS, "presentation.css"),
-                "/* ── drawn figures", "/* ── motion")
+    with open(os.path.join(_ASSETS, "charts.css"), encoding="utf-8") as fh:
+        figs = fh.read()
     return light + dark + figs
 
 
@@ -606,9 +603,9 @@ a.ax:hover{text-decoration:none;border-color:var(--orange)}
 .dx-scope thead th:last-child{color:var(--orange-ink)}
 .dx-table tbody th{font-weight:700;white-space:nowrap}
 .dx-scope td:last-child{background:color-mix(in oklch,var(--orange) 5%,transparent)}
-.dx-chart{margin:1.4rem 0;padding:1.1rem 1.2rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);--room:.8rem}
-.dx-chart .prs-dfig>svg{height:auto}
-.dx-chart .prs-dfig figcaption{font-size:.78rem;margin-top:.4rem}
+.dx-chart{margin:1.4rem 0;padding:1.1rem 1.2rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.dx-chart .pc-fig>svg{height:auto}
+.dx-chart .pc-fig figcaption{margin-top:.4rem}
 .dx-why{margin-top:.6rem;font-size:.86rem;color:var(--text-muted)}
 .dx-why summary{cursor:pointer}
 .dx-om{font-size:.82rem}

@@ -1,4 +1,4 @@
-/* The list pages — the landing, 서재, the 비교 and 발표 indexes — and the
+/* The list pages — the landing, 서재, the 비교 index — and the
    404 page. Every paper and comparison page skips it. Tokens all come from
    site.css, so dark mode needs no work here beyond the two places that need a
    real surface color instead of a tint. */
@@ -42,8 +42,8 @@
   mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
 }
 /* The band is a heading for the list, not a pause before it, so it takes
-   only the room its two lines need. One box for all five bands, whatever
-   width the list under each one reads at: the nav names five destinations at
+   only the room its two lines need. One box for all four bands, whatever
+   width the list under each one reads at: the nav names four destinations at
    one level, and a band that changed shape between them would say they are
    not. */
 .mast-inner {
@@ -563,7 +563,7 @@ html.js .rail {
   gap: .9rem;
 }
 /* The column head is a band of its own, in the label voice at normal
-   tracking — its words are Korean. 비교 and 발표 print the same band. */
+   tracking — its words are Korean. 비교 prints the same band. */
 .listhead, .ix-head {
   font-family: var(--num); font-size: .68rem; font-weight: 600; color: var(--text-muted);
   background: var(--surface-2); padding: .5rem .35rem;
@@ -970,40 +970,6 @@ html:not(.js) .hub-actions { display: none; }
   padding: .1rem .35rem; font-variant-numeric: tabular-nums;
 }
 
-/* ── 발표 ─────────────────────────────────── */
-
-/* A talk is the one surface someone goes looking for with a room already
-   booked, so a row answers the two questions that decide whether to open it —
-   what it lands, and what it costs — before the paper's own title. */
-.talk-list { display: grid; }
-.talk-item {
-  padding-top: .85rem; padding-bottom: .85rem; border-bottom: 1px solid var(--border-soft);
-  text-decoration: none; color: inherit;
-  transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
-}
-.talk-item:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
-.talk-t { font-size: .95rem; font-weight: 700; line-height: 1.45; }
-.talk-item:hover .talk-t { color: var(--orange-ink); }
-.talk-spine {
-  font-size: .82rem; line-height: 1.65; color: var(--text-muted);
-  word-break: keep-all;
-}
-.talk-spine b { color: var(--text); font-weight: 700; }
-.talk-spine .m { font-family: var(--mono); font-style: normal; font-size: .94em; }
-/* The talk's own shape — one block per run of a beat, weighted by the slides
-   it holds, in the four colours the site already keeps for four acts. Nothing
-   in it is authored: it is the slide headers, counted. */
-.talk-rail { display: flex; gap: 3px; margin: .2rem 0 .1rem; }
-.talk-rail i { flex: var(--n); height: 4px; border-radius: 2px; background: currentColor; opacity: .5; }
-.talk-item:hover .talk-rail i { opacity: .85; }
-.talk-r1 { color: var(--act1); } .talk-r2 { color: var(--act2); }
-.talk-r3 { color: var(--act3); } .talk-r4 { color: var(--act4); }
-/* In mono, because 14분 · 9장 is read as a number rather than as a sentence. */
-.talk-cost {
-  font-family: var(--mono); font-size: .7rem; color: var(--text);
-  font-variant-numeric: tabular-nums;
-}
-
 @media (max-width: 900px) {
   /* The rail is the first thing to go: it is a shortcut for the search box,
      which is still there. */
@@ -1085,21 +1051,19 @@ html:not(.js) .hub-actions { display: none; }
 }
 .row:hover .row-ro { background: var(--surface-3); }
 
-/* ── 비교 and 발표: the landing's table, cut two more ways ────────────── */
+/* ── 비교: the landing's table, cut one more way ───────────────────── */
 /* The same head, the same ruled rows, the same columns where the facts are the
-   same kind — when, an id, the thing itself, its axes, its size — so the three
-   indexes read as one table. */
+   same kind — when, the thing itself, its axes, its size — so the two indexes
+   read as one table. */
 .hub-wide { max-width: 1240px; padding-top: 1.5rem; }
 .ix-head, .ix-row {
   display: grid; align-items: baseline; gap: .9rem; padding-left: .6rem; padding-right: .6rem;
 }
 .ix-cmp  { grid-template-columns: 4.2rem minmax(0, 1fr) 8rem 3.4rem; }
-.ix-talk { grid-template-columns: 4.2rem 5.6rem minmax(0, 1fr) 6.8rem 6.2rem; }
-.ix-when, .ix-size, .talk-id, .talk-cost {
+.ix-when, .ix-size {
   font-family: var(--num); font-size: .74rem; color: var(--text-muted);
   white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.talk-id { color: var(--text); opacity: .8; }
 .ix-main { display: grid; gap: .3rem; min-width: 0; }
 .ix-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
 .cmp-item .fork { margin-top: .2rem; padding-top: .45rem; border-top: 1px solid var(--border-soft); gap: .7rem; }
@@ -1109,23 +1073,15 @@ html:not(.js) .hub-actions { display: none; }
 }
 .cmp-item .fork-branches { grid-template-columns: max-content max-content max-content; }
 .cmp-item .fork-s { max-width: 32rem; }
-.talk-rail { max-width: 36rem; margin-top: .25rem; }
-.talk-rail i { height: 3px; border-radius: 0; opacity: .85; }
 
-/* The table's last line: what the rail's colours mean, and that it ends —
-   a short list otherwise stops on a row rule with the page running on. */
+/* The table's last line: that it ends — a short list otherwise stops on a
+   row rule with the page running on. */
 .ix-foot {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: .6rem 1.5rem; padding: .7rem .6rem; border-bottom: 1px solid var(--border);
   font-family: var(--num); font-size: .7rem; color: var(--text-muted);
 }
 .ix-end::before { content: "■ "; color: var(--orange); }
-.act-key { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem 1rem; }
-.ak-h { font-weight: 700; color: var(--text); }
-.ak { display: inline-flex; align-items: center; gap: .4rem; color: var(--text); }
-.ak i { width: 1.4rem; height: 3px; background: currentColor; }
-.ak .talk-r1 { color: var(--act1); } .ak .talk-r2 { color: var(--act2); }
-.ak .talk-r3 { color: var(--act3); } .ak .talk-r4 { color: var(--act4); }
 
 @media (max-width: 720px) {
   .lead-ro { width: auto; }
@@ -1135,11 +1091,10 @@ html:not(.js) .hub-actions { display: none; }
   /* The head goes and each row folds to a block, as the landing's does: the
      when and id on a line, the thing under them, the axes and size trailing. */
   .ix-head { display: none; }
-  .cmp-item.ix-row, .talk-item.ix-row { display: block; padding: .8rem .2rem; }
-  .ix-talk .ix-when::after { content: " ·"; margin-right: .3rem; }
+  .cmp-item.ix-row { display: block; padding: .8rem .2rem; }
   .ix-row .ix-main { margin: .2rem 0 .4rem; }
   .ix-pillars { display: inline-flex; vertical-align: middle; }
-  .ix-row .ix-size::before, .ix-row .talk-cost::before { content: "·"; margin: 0 .35rem; opacity: .5; }
+  .ix-row .ix-size::before { content: "·"; margin: 0 .35rem; opacity: .5; }
   .cmp-item .fork-trunk { width: auto; }
   .cmp-item .fork-branches { grid-template-columns: max-content minmax(0, 1fr); }
 }
