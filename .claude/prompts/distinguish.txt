@@ -81,7 +81,7 @@ INPUT
   `--deepdive <paper> <scope>` — one paper (an arXiv id or an alias)
   against one code scope (a bare name `codemap.sh` resolves). Runs step 0,
   then DEEP DIVE below in place of steps 1 to 9. The paper needs a rewrite;
-  it need not be in the basket. Writes `deepdive/<id>--<scope>.md` and the
+  it need not be in the basket. Writes `deepdive/<id>--<alias>--<scope>.md` and the
   page drawn from it, and touches no versus note, no scoreboard, no `reports/` file and
   no `probe-state` block.
 
@@ -297,7 +297,10 @@ PROCEDURE
      - Does `BASKET.md` and `MY-METHOD.md` sit untouched, with every change you
        wanted under 제안?
 
-9. PERSIST — write the changed versus notes, `scoreboard.md` and
+9. PERSIST — write the changed versus notes, each at
+   `versus/<id>--<alias>.md` (the existing `versus/<id>--*.md` when there is
+   one, named as `distinction/AUTHORING.md` §2 fixes when there is not),
+   `scoreboard.md` and
    `reports/<run date>.md` under `$PROBE_PRIVATE_DIR`, the report closing with
    its `probe-state` block: the run date, `corpus_head` from step 0, the
    three hashes from step 1, `related` as step 2 read it for every active
@@ -401,7 +404,7 @@ D4. VERIFY — two readers, launched together, neither of which saw the
    rewritten on what the code holds. When the Agent tool is not available,
    stop before persisting and say so.
 
-D5. LINT + SELF-CHECK. Write the draft to `deepdive/<id>--<scope>.md` —
+D5. LINT + SELF-CHECK. Write the draft to `deepdive/<id>--<alias>--<scope>.md` —
    the lint reads the folder — run step 8's lint, and fix the document
    until it exits 0; a deep dive that cannot pass is removed, not left
    standing. Then:
@@ -411,7 +414,7 @@ D5. LINT + SELF-CHECK. Write the draft to `deepdive/<id>--<scope>.md` —
      - Did anything §1 graded 틀림 or 원문 없음 come back as the paper's?
      - Was every row from D2 and D4 applied?
    Then draw the page:
-   `python3 distinction/render-distinction.py "$PROBE_PRIVATE_DIR/deepdive/<id>--<scope>.md"`.
+   `python3 distinction/render-distinction.py "$PROBE_PRIVATE_DIR/deepdive/<id>--<alias>--<scope>.md"`.
    A non-zero exit names the chart it cannot draw; fix the fence and draw
    again.
 

@@ -35,10 +35,10 @@ $PROBE_PRIVATE_DIR/
   CODEMAP.md       the code digest                   codemap.sh writes §2-3
   codemap.sh       the operator's digest script      human-written     §2-3
   code -> …        symlink to the codebase           or `code:` in MY-METHOD.md §2-4
-  versus/          <arxiv-id>.md and .html per paper the routine writes
+  versus/          <arxiv-id>--<alias>.md and .html  the routine writes
   scoreboard.md    claims × papers                   the routine writes
   reports/         YYYY-MM-DD.md and .html per run   the routine writes
-  deepdive/        <arxiv-id>--<scope>.md and .html  `--deepdive` writes
+  deepdive/        <id>--<alias>--<scope>.md, .html  `--deepdive` writes
   .scratch/        the run's working files           the routine writes
 ```
 

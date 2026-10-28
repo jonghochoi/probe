@@ -10,8 +10,9 @@ editing a document by hand.
 
 Checks, grouped by the contract section they enforce:
 
-  AUTHORING §1   every `versus/<id>.md` names a `BASKET.md` row and the
-             checkout holds `analysis/<id>.md`.
+  AUTHORING §1   every `versus/<id>--<alias>.md` names a `BASKET.md` row by
+             id and alias, one file per id, and the checkout holds
+             `analysis/<id>.md`.
   AUTHORING §3-1 the versus note — an H1, the five-field metadata line, the seven
              `##` headers verbatim and in order with no other `##`.
   AUTHORING §3-1 / §4  per section, every bullet carries the anchors its row
@@ -27,9 +28,9 @@ Checks, grouped by the contract section they enforce:
              maps ids to dates.
   AUTHORING §3-4 every `###` idea carries the five labels in order, and a
              `D#` it names exists in a pillar's Decision Log.
-  AUTHORING §3-5 the deep dive — `deepdive/<id>--<scope>.md` names a paper
-             with a rewrite, its six-field metadata line agrees with the
-             file name, the nine `##` headers verbatim and in order; §1
+  AUTHORING §3-5 the deep dive — `deepdive/<id>--<alias>--<scope>.md` names
+             a paper with a rewrite, its H1 alias and six-field metadata
+             line agree with the file name, the nine `##` headers verbatim and in order; §1
              opens with its count line and every bullet with a verdict and
              a paper anchor, a quote anchor too unless `원문 없음`; §3 and
              §4 bullets carry their anchors; §5 holds a table whose scope
@@ -69,8 +70,11 @@ import sys
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 _ARXIV_ID = re.compile(r"^\d{4}\.\d{5}$")
-_LEDGER_NAME = re.compile(r"^(\d{4}\.\d{5})\.md$")
-_DISSECT_NAME = re.compile(r"^(\d{4}\.\d{5})--([a-z0-9_]+)\.md$")
+# AUTHORING §2: `<alias>` is the alias with whitespace runs turned into `-`,
+# so it holds no whitespace and no `--`, the separator.
+_ALIAS_SLUG = r"[^\s/-]+(?:-[^\s/-]+)*"
+_LEDGER_NAME = re.compile(rf"^(\d{{4}}\.\d{{5}})--({_ALIAS_SLUG})\.md$")
+_DISSECT_NAME = re.compile(rf"^(\d{{4}}\.\d{{5}})--({_ALIAS_SLUG})--([a-z0-9_]+)\.md$")
 _RUN_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.md$")
 _ARXIV_IN = re.compile(r"\b\d{4}\.\d{5}\b")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -156,6 +160,11 @@ Finding = tuple[str, int, str]
 
 
 # ── Reading helpers ───────────────────────────────────────────────────────
+
+
+def alias_slug(alias: str) -> str:
+    """An alias as a file name writes it (AUTHORING §2)."""
+    return re.sub(r"\s+", "-", alias.strip())
 
 
 def _read(path: str) -> list[str] | None:
@@ -282,6 +291,8 @@ def read_basket(path: str, findings: list[Finding]) -> dict[str, dict]:
         if status not in _STATUSES:
             findings.append((name, lineno, f"inputs: status `{status}` not in {', '.join(_STATUSES)} (SETUP §2-1)"))
         claim_ids = [c.strip() for c in claims.split(",") if c.strip()]
+        if "--" in alias:
+            findings.append((name, lineno, f"inputs: alias `{alias}` holds `--`, the file-name separator (AUTHORING §2)"))
         rows[pid] = {"alias": alias, "role": role, "claims": claim_ids, "status": status, "line": lineno}
     active = sum(1 for r in rows.values() if r["status"] == "active")
     if active > _ACTIVE_CAP:
@@ -402,10 +413,12 @@ def check_ledger(path: str, basket: dict[str, dict], claims: set[str], forbidden
     findings: list[Finding] = []
     m = _LEDGER_NAME.match(os.path.basename(path))
     if not m:
-        return [(name, 0, "§3-1 file name is not `<arxiv-id>.md`")]
-    pid = m.group(1)
+        return [(name, 0, "§3-1 file name is not `<arxiv-id>--<alias>.md`")]
+    pid, slug = m.groups()
     if pid not in basket:
         findings.append((name, 0, f"§1 {pid} is not a `BASKET.md` row"))
+    elif slug != alias_slug(basket[pid]["alias"]):
+        findings.append((name, 0, f"§1 the file name says `{slug}`, the `BASKET.md` alias makes `{alias_slug(basket[pid]['alias'])}` — rename the note and its page"))
     if not os.path.exists(os.path.join(_REPO_ROOT, "analysis", pid + ".md")):
         findings.append((name, 0, f"§1 analysis/{pid}.md does not exist — the paper has no rewrite"))
     lines = _read(path)
@@ -493,8 +506,8 @@ def check_dissection(path: str, claims: set[str], forbidden: list[str],
     findings: list[Finding] = []
     m = _DISSECT_NAME.match(os.path.basename(path))
     if not m:
-        return [(name, 0, "§3-5 file name is not `<arxiv-id>--<scope>.md`")]
-    pid, scope = m.groups()
+        return [(name, 0, "§3-5 file name is not `<arxiv-id>--<alias>--<scope>.md`")]
+    pid, slug, scope = m.groups()
     if not os.path.exists(os.path.join(_REPO_ROOT, "analysis", pid + ".md")):
         findings.append((name, 0, f"§1 analysis/{pid}.md does not exist — the paper has no rewrite"))
     lines = _read(path)
@@ -505,6 +518,8 @@ def check_dissection(path: str, claims: set[str], forbidden: list[str],
         findings.append((name, 1, "§3-5 line 1 is not the H1 `# <alias> × <scope> — <한 문장>`"))
     elif f" × {scope} — " not in lines[0]:
         findings.append((name, 1, f"§3-5 the H1 does not name the scope `{scope}`"))
+    elif alias_slug(lines[0][2:].partition(" × ")[0]) != slug:
+        findings.append((name, 1, f"§3-5 the file name says `{slug}`, the H1 alias makes `{alias_slug(lines[0][2:].partition(' × ')[0])}`"))
     meta_line = next((ln for ln, raw in enumerate(lines[1:], start=2) if raw.strip()), None)
     mm = _DISSECT_META.match(lines[meta_line - 1]) if meta_line else None
     if not mm:
@@ -724,8 +739,15 @@ def check_folder(folder: str) -> list[Finding]:
     basket = read_basket(os.path.join(folder, "BASKET.md"), findings)
     claims, forbidden = read_method(os.path.join(folder, "MY-METHOD.md"), findings)
     decisions = _decision_ids()
+    seen: dict[str, str] = {}
     for path in sorted(glob.glob(os.path.join(folder, "versus", "*.md"))):
         findings += check_ledger(path, basket, claims, forbidden, decisions)
+        m = _LEDGER_NAME.match(os.path.basename(path))
+        if m and m.group(1) in seen:
+            findings.append(("versus/" + os.path.basename(path), 0,
+                             f"§1 a second versus note for {m.group(1)}, beside versus/{seen[m.group(1)]}"))
+        elif m:
+            seen[m.group(1)] = os.path.basename(path)
     matrix = os.path.join(folder, "scoreboard.md")
     if os.path.exists(matrix):
         findings += check_matrix(matrix, basket, claims, forbidden)
