@@ -60,7 +60,7 @@
   transform: translateX(-50%); width: min(30rem, calc(100vw - 2rem));
   max-height: min(60vh, 26rem); overflow-y: auto;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, .12); padding: .4rem 0;
+  box-shadow: var(--shadow-lg); padding: .4rem 0;
 }
 .sc-mo {
   display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: .6rem; align-items: baseline;

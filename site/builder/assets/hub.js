@@ -100,7 +100,7 @@ function renderStars() {
     ? ids.map((id) => itemHtml(id, {
         title: map[id].title, when: map[id].at, whenLabel: "즐겨찾기에 담은 날",
       })).join("")
-    : empty("아직 즐겨찾기가 없습니다. 논문 목록의 별이나 논문 페이지의 즐겨찾기 버튼으로 담습니다.");
+    : empty("아직 즐겨찾기가 없습니다. 논문 목록의 별이나 논문 페이지의 즐겨찾기 버튼으로 담습니다.") + starter();
   return ids.length;
 }
 
@@ -138,6 +138,20 @@ function renderMemos() {
 
 function empty(text) {
   return `<p class="corpus-empty">${esc(text)}</p>`;
+}
+
+/* A first visit finds every tab empty, and an empty tab says how to fill it
+ * but not where to start. So the 즐겨찾기 tab, the one that opens, also lists
+ * the newest rewrites as rows with their own star: the first thing kept can
+ * be kept from here. The index arrives newest first. */
+const START = 3;
+function starter() {
+  const data = window.ProbeIndex;
+  const recent = data && Array.isArray(data.papers) ? data.papers.slice(0, START) : [];
+  if (!recent.length) return "";
+  return `<div class="shelf-start"><p class="shelf-start-h">최근 재작성본에서 시작하기</p>` +
+    recent.map((p) => itemHtml(p.id, { when: p.date, whenLabel: "재작성" })).join("") +
+    "</div>";
 }
 
 function render() {

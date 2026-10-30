@@ -140,6 +140,7 @@ if (root) {
 
 
   input.addEventListener("input", () => {
+    if (undoKept) endUndo(root.querySelector('[data-memo-action="clear"]'));
     setStatus("입력 중…");
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => { flush(); setStatus("저장됨"); }, DEBOUNCE_MS);
@@ -183,13 +184,44 @@ if (root) {
       if (action === "export") {
         return download(`probe-memo-${id}.md`, MemoStore.exportAll("md"), "text/markdown");
       }
-      if (action === "clear") {
-        if (!confirm("이 논문의 메모를 삭제할까요? 되돌릴 수 없습니다.")) return;
-        input.value = ""; anchor = ""; showAnchor();
-        MemoStore.remove(id); refreshFab(); setStatus("삭제됨");
-      }
+      if (action === "clear") return undoKept ? restore(btn) : clear(btn);
     });
   });
+
+  /* Delete without asking, then offer the way back. A `confirm()` dialog
+   * stops the reader on the one press they meant, and some in-app browsers
+   * answer it with `false` before it is ever shown; an undo costs nothing
+   * on the press they meant and catches the one they did not. The button
+   * itself becomes 되돌리기 for the window, so the way back sits where the
+   * pointer already is. Typing ends the window — the draft is the newer
+   * thing then. */
+  const UNDO_MS = 6000;
+  let undoKept = null, undoTimer = null;
+
+  function clear(btn) {
+    const kept = MemoStore.load(id);
+    input.value = ""; anchor = ""; showAnchor();
+    MemoStore.remove(id); refreshFab();
+    if (!kept) { setStatus("삭제했습니다"); return; }
+    undoKept = kept;
+    btn.textContent = "되돌리기";
+    setStatus("삭제했습니다");
+    undoTimer = setTimeout(() => endUndo(btn), UNDO_MS);
+  }
+
+  function restore(btn) {
+    const kept = undoKept;
+    endUndo(btn);
+    MemoStore.save(id, kept);
+    input.value = kept.body || ""; anchor = kept.anchor || ""; showAnchor();
+    refreshFab(); setStatus("되돌렸습니다");
+  }
+
+  function endUndo(btn) {
+    if (undoTimer) clearTimeout(undoTimer);
+    undoKept = null; undoTimer = null;
+    btn.textContent = "삭제";
+  }
 
   function publish() {
     flush();

@@ -849,6 +849,11 @@ html.js .pager[hidden] { display: none; }
   background: var(--orange-soft); color: var(--orange-ink);
 }
 
+/* The empty 즐겨찾기 tab's way in: the sentence says how a shelf fills, the
+   rows under it are the first things to fill it with. */
+.shelf-start { max-width: 46rem; margin: -1.5rem auto 0; }
+.shelf-start-h { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); margin-bottom: .5rem; }
+
 /* A kept paper, in the same shape the landing list uses — star first, the
    paper itself, then what this browser knows about it. */
 .shelf-item {
@@ -948,6 +953,30 @@ html:not(.js) .hub-actions { display: none; }
 .notfound { text-align: center; padding: 6rem 1.25rem; }
 .notfound h1 { font-size: var(--fs-display); font-weight: 800; color: var(--orange-ink); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
+.notfound-acts {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .6rem 1.2rem;
+}
+/* The palette is script, so the button that opens it goes with the script. */
+.notfound-find {
+  display: none; font: inherit; font-size: var(--fs-sm); font-weight: 700;
+  padding: .5rem 1rem; border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--orange); border: 1px solid var(--orange); color: var(--accent-ink);
+}
+html.js .notfound-find { display: inline-block; }
+.notfound-find:hover { background: color-mix(in oklab, var(--orange) 88%, var(--text)); }
+.notfound-h {
+  margin: 3rem auto .7rem; max-width: 34rem; text-align: left;
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
+}
+.notfound-list {
+  list-style: none; margin: 0 auto; padding: 0; max-width: 34rem; text-align: left;
+  border-top: 1px solid var(--border);
+}
+.notfound-list a {
+  display: block; padding: .6rem .2rem; border-bottom: 1px solid var(--border);
+  color: var(--text); text-decoration: none; font-size: var(--fs-sm); font-weight: 600;
+}
+.notfound-list a:hover { color: var(--orange-ink); }
 
 /* ── 비교 ─────────────────────────────────── */
 .cmp-list { display: grid; }

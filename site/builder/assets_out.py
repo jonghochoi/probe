@@ -67,8 +67,9 @@ ASSET_FILES = ("site.css", "index.css", "scout.css", "theme.js",
 # two of them are bytes that cannot be decoded as any. `favicon.svg` is the
 # tab icon; the PNGs are what a client that will not take an SVG icon falls
 # back to — 32 px for a tab, and the 180 px opaque tile iOS composites onto
-# the home screen.
-ICON_FILES = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png")
+# the home screen. `og.png` is the 1200×630 card `components.share_meta()`
+# points a link preview at.
+ICON_FILES = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "og.png")
 # Shipped only when the build was given the endpoint it talks to. A tree with
 # no endpoint carries nothing about search: no script to load, and none of its
 # Korean strings dragged into the webfont subset for a file nobody fetches.

@@ -17,6 +17,10 @@ from . import assets_out
 REPO = "jonghochoi/probe"
 REPO_URL = f"https://github.com/{REPO}"
 RAW_URL = f"https://raw.githubusercontent.com/{REPO}/main"
+# The deployed root. Pages are linked relatively (see `page()`), but a link
+# preview is fetched by a crawler that never sees the page's own URL, so the
+# one image it is pointed at needs the absolute address.
+SITE = f"https://{REPO.split('/')[0]}.github.io/{REPO.split('/')[1]}/"
 
 
 def asset(url: str) -> str:
@@ -324,6 +328,30 @@ def icon_links(up: str) -> str:
     ])
 
 
+def share_meta(title: str, description: str) -> str:
+    """What a chat or a feed shows when a page's link is pasted into it.
+
+    Slack, KakaoTalk, Discord and a mail client read Open Graph, not the
+    `<title>`, and without it a paper's link unfurls as a bare URL. The image
+    is one card for the whole site — the mark and the name — because a
+    preview's job is to say which site the link is from; the title and the
+    description beside it say which page.
+    """
+    tags = [
+        '<meta property="og:site_name" content="PROBE">',
+        '<meta property="og:type" content="website">',
+        '<meta property="og:locale" content="ko_KR">',
+        f'<meta property="og:title" content="{esc(title)}">',
+        f'<meta property="og:image" content="{SITE}assets/og.png">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        '<meta name="twitter:card" content="summary_large_image">',
+    ]
+    if description:
+        tags.insert(4, f'<meta property="og:description" content="{esc(description)}">')
+    return "\n".join(tags)
+
+
 def page(
     *,
     title: str,
@@ -352,6 +380,9 @@ def page(
     arrives unstyled with dead links.
     """
     up = base or "../" * depth
+    # The skip link's target. Every page body opens one `<main>`, so the shell
+    # names it here rather than each page builder remembering to.
+    body = body.replace("<main ", '<main id="main" ', 1)
     # Classic scripts, not ES modules: `type="module"` is blocked by CORS on
     # `file://`, and opening a built page directly is the fastest way to check
     # a render. Shared state goes on `window.ProbeMemo` instead of exports.
@@ -374,6 +405,7 @@ def page(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(title)}</title>
 {f'<meta name="description" content="{esc(description)}">' if description else ""}
+{share_meta(title, description)}
 {icon_links(up)}
 <link rel="stylesheet" href="{asset(f"{up}assets/fonts.css")}">
 <link rel="stylesheet" href="{asset(f"{up}assets/katex/katex.min.css")}">
@@ -391,6 +423,7 @@ document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 </script>
 </head>
 <body{" " + body_attrs if body_attrs else ""}>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
 {nav(up, here)}
 {body}
 {script_tags}
