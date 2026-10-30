@@ -132,7 +132,7 @@ function renderMemos() {
       <pre>${esc(m.body || "")}</pre>
       ${m.published ? `<span class="published">발행됨 · ${esc(m.published.at.slice(0, 10))}</span>` : ""}
     </article>`).join("")
-    : empty("아직 메모가 없습니다. 논문 페이지 오른쪽 아래의 📝 버튼으로 남길 수 있습니다.");
+    : empty("아직 메모가 없습니다. 논문 페이지 오른쪽 아래의 메모 버튼으로 남길 수 있습니다.");
   return memos.length;
 }
 

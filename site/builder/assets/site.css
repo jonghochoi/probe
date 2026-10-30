@@ -1245,6 +1245,16 @@ table.mx thead th[scope="col"] { width: 26%; }
   border: none; border-top: 1px solid var(--border-soft); margin: 2.25rem 0;
 }
 .article strong { font-weight: 700; }
+/* Emphasis as 드러냄표, the dots Korean type sets over a stressed word.
+   Pretendard has no italic, so `font-style: italic` is the browser shearing
+   upright Hangul — a slant that reads as a rendering fault, not as stress.
+   Weight is already `**강조**`'s, so the dots keep `*…*` a second, quieter
+   level instead of folding the two into one bold. */
+em {
+  font-style: normal;
+  text-emphasis: filled dot var(--orange);
+  text-emphasis-position: over right;
+}
 
 /* Inline code vs math: code is an identifier, math is notation
    (`analysis/AUTHORING.md` §3-1). */
@@ -1338,7 +1348,7 @@ figure.fig figcaption {
   margin-top: .5rem; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.55;
 }
 .fig-num { font-weight: 800; color: var(--orange-ink); }
-.fig-src { font-style: italic; color: var(--text-muted); }
+.fig-src { font-style: normal; text-emphasis: none; color: var(--text-muted); }
 
 /* ── Tables ───────────────────────────────────────────────────────────── */
 .table-wrap {
@@ -1511,7 +1521,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-size: var(--fs-sm); color: var(--text-muted);
   border-left: 2px solid var(--orange); padding-left: .75rem; margin: 0 0 .2rem;
 }
-.eqread em { color: var(--text); font-style: normal; font-weight: 600; }
+.eqread em { color: var(--text); font-weight: 600; text-emphasis: none; }
 .eqblock .math-display { margin: .5rem 0; }
 
 /* A three-track grid, not a table. The 기호/이름/설명 header restated what a
@@ -1761,7 +1771,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 /* No rule above the note. The card is already bounded and its body already
    ends; a dashed line inside it cut a small card into two smaller ones. */
 .sp-note {
-  margin: .55rem 0 0; font-size: var(--fs-xs); font-style: italic;
+  margin: .55rem 0 0; font-size: var(--fs-xs);
   color: var(--text-muted);
 }
 /* No accent band on these. The 3px left border is this system's mark for a
@@ -1819,7 +1829,6 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   border-radius: var(--radius);
 }
 
-.fig-src { color: var(--text-muted); }
 
 /* ── Callouts ─────────────────────────────────────────────────────────── */
 .callout {
@@ -1852,6 +1861,14 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-size: var(--fs-3xs); font-weight: 800; line-height: 18px; text-align: center;
 }
 .memo-fab[data-has-memo="1"] .count { display: inline-block; }
+/* On a phone the button is the same 44px round target as 책갈피 above it, so
+   the pair covers as little of the line under them as the thumb allows; the
+   word comes back where there is a margin for it to sit in. */
+@media (max-width: 640px) {
+  .memo-fab { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; }
+  .memo-fab-l { display: none; }
+  .memo-fab .count { position: absolute; top: -4px; right: -4px; }
+}
 
 .memo {
   position: fixed; top: 0; right: 0; z-index: var(--z-panel);
