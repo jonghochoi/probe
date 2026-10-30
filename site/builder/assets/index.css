@@ -68,12 +68,12 @@
    other label: small, tracked, muted, and out of the way of the line under
    it. */
 .mast-eyebrow {
-  font-size: .64rem; font-weight: 700; letter-spacing: .16em;
+  font-size: var(--fs-3xs); font-weight: 700; letter-spacing: .16em;
   text-transform: uppercase; color: var(--text-muted);
   margin-bottom: .3rem;
 }
 .mast-count {
-  font-size: .76rem; color: var(--text-muted); white-space: nowrap;
+  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 /* 몇 편, 얼마나 새것 — asked and answered in the filter bar, where the count
@@ -114,7 +114,7 @@ html.js .filters { display: block; }
 .search:focus-within { border-color: var(--amber-soft); }
 .search .ico { color: var(--text-muted); }
 .search input {
-  font: inherit; font-size: .86rem; color: var(--text);
+  font: inherit; font-size: var(--fs-sm); color: var(--text);
   background: none; border: none; outline: none; width: 100%;
 }
 /* `--text-muted` at full strength: it is measured to clear 4.5:1 on every
@@ -151,7 +151,7 @@ html.js .filters { display: block; }
    perimeter inside a perimeter. */
 html.js .search-go {
   display: inline-flex; align-items: center; flex: none; align-self: stretch;
-  font: inherit; font-size: .72rem; font-weight: 700;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 700;
   padding: 0 .85rem; margin: -1px calc(-.8rem - 1px) -1px 0;
   background: none; border: none; border-left: 1px solid var(--border);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -171,7 +171,7 @@ html.js .search-go:disabled { color: var(--text-muted); cursor: default; }
         border: 1px solid var(--border); border-radius: var(--radius-sm);
         padding: .12rem; height: var(--ctl-h); }
 .sort button {
-  font: inherit; font-size: .74rem; font-weight: 600;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
   padding: .22rem .65rem; border-radius: var(--radius-xs); cursor: pointer;
   background: none; border: none; color: var(--text-muted);
   transition: color var(--dur-short) var(--ease-out),
@@ -206,7 +206,7 @@ html.js .search-go:disabled { color: var(--text-muted); cursor: default; }
 .segchip { display: none; }
 html.js .segwrap { display: inline-block; position: relative; }
 html.js .segchip {
-  font: inherit; font-size: .74rem; font-weight: 600;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
   display: inline-flex; align-items: center; gap: .3rem;
   padding: 0 .7rem; height: var(--ctl-h);
   border-radius: var(--radius-sm); cursor: pointer;
@@ -216,7 +216,7 @@ html.js .segchip {
 }
 html.js .segchip:hover { border-color: var(--amber-soft); }
 html.js .segchip[aria-expanded="true"] { border-color: var(--amber-soft); }
-.segcaret { font-size: .58rem; opacity: .55; }
+.segcaret { font-size: .75em; opacity: .55; }
 /* The panel is the group itself, stood on end under the chip — same buttons,
    same pressed state, same handler. It takes `--surface` because a panel over
    the page is the raised ground, where the bar it opens from is the tinted
@@ -257,7 +257,7 @@ html.js .segwrap > .sort button[aria-pressed="true"]::after {
    screen exactly when a filter is on that nothing else on this width can
    undo. Without it a shared link is a room with no door. */
 .barreset {
-  font: inherit; font-size: .74rem; font-weight: 600; display: none;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600; display: none;
   align-items: center; padding: 0 .7rem; height: var(--ctl-h);
   border-radius: var(--radius-sm); cursor: pointer;
   background: var(--surface-2); border: 1px solid var(--border);
@@ -299,14 +299,14 @@ html.js .rail {
    with it, which is where a running count is least worth the line it costs.
    Spacing is the following heading's, so the two never disagree. */
 .rail-stat {
-  font-size: .72rem; color: var(--text-muted);
+  font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums; padding-left: .3rem; margin: 0;
 }
 /* Beside the number rather than on the bar, because what it undoes is that
    number: a reset is the way back from `35 / 42편` to `42편`, and a control
    standing where its own effect is readable needs no label explaining it. */
 .rail-reset {
-  font: inherit; font-size: .66rem; font-weight: 600; margin-left: .4rem;
+  font: inherit; font-size: var(--fs-3xs); font-weight: 600; margin-left: .4rem;
   padding: .06rem .36rem; border-radius: var(--radius-xs); cursor: pointer;
   background: none; border: 1px solid var(--border); color: var(--text-muted);
   transition: border-color var(--dur-short) var(--ease-out),
@@ -314,14 +314,14 @@ html.js .rail {
 }
 .rail-reset:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .rail-h {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   color: var(--text-muted);
   margin: 0 0 .4rem; padding-left: .3rem;
 }
 .rail-h + .rail-item { margin-bottom: 0; }
 .rail-h:not(:first-child) { margin-top: 1.1rem; }
 .rail-item {
-  font: inherit; font-size: .76rem; width: 100%;
+  font: inherit; font-size: var(--fs-2xs); width: 100%;
   display: flex; align-items: center; gap: .4rem;
   padding: .18rem .3rem; border-radius: var(--radius-xs); cursor: pointer;
   background: none; border: none; color: var(--text-muted);
@@ -332,7 +332,7 @@ html.js .rail {
   text-overflow: ellipsis; white-space: nowrap;
 }
 .rail-item .rn {
-  margin-left: auto; font-size: .68rem; opacity: .6;
+  margin-left: auto; font-size: var(--fs-3xs); opacity: .6;
   font-variant-numeric: tabular-nums;
 }
 .rail-item .sw {
@@ -344,7 +344,7 @@ html.js .rail {
    only label here that is not also a filter token — `filter.js` reads
    `data-facet-pillar`, never this text. */
 .rail-item .rl {
-  font-size: .75rem; min-width: 0; margin-left: -.1rem;
+  font-size: var(--fs-2xs); min-width: 0; margin-left: -.1rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .rail-item .rl::before { content: "· "; opacity: .5; }
@@ -412,7 +412,7 @@ html.js .rail {
 .resume[hidden] { display: none; }
 .resume-k {
   flex: none; margin-right: .15rem;
-  font-size: .75rem; font-weight: 800;
+  font-size: var(--fs-2xs); font-weight: 800;
   color: var(--orange-ink);
 }
 /* The chips give up width before the row gives up its one line: each shrinks
@@ -437,12 +437,12 @@ html.js .rail {
   flex: 0 1 auto; min-width: 7.6rem; max-width: 15rem;
   padding: .2rem .55rem; border-radius: var(--radius-pill);
   background: var(--surface); border: 1px solid var(--border);
-  text-decoration: none; color: inherit; font-size: .76rem;
+  text-decoration: none; color: inherit; font-size: var(--fs-2xs);
   transition: border-color var(--dur-short) var(--ease-out);
 }
 .resume-chip:hover { border-color: var(--orange); }
 .resume-chip b {
-  flex: none; font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  flex: none; font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   color: var(--orange-ink); font-variant-numeric: tabular-nums;
 }
 .resume-chip span {
@@ -451,7 +451,7 @@ html.js .rail {
 }
 .resume-all {
   flex: none; margin-left: auto; padding: 0 .2rem 0 .45rem;
-  font-size: .74rem; font-weight: 600; color: var(--orange-ink); text-decoration: none;
+  font-size: var(--fs-2xs); font-weight: 600; color: var(--orange-ink); text-decoration: none;
 }
 .resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
@@ -479,12 +479,12 @@ html.js .rail {
   padding-bottom: .5rem; border-bottom: 1px solid var(--border-soft);
 }
 .lead-flag {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   color: var(--accent-ink); background: var(--orange);
   padding: .1rem .4rem; border-radius: var(--radius-xs);
 }
 .lead-when {
-  font-family: var(--num); font-size: .72rem; color: var(--text-muted);
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 .lead-body { display: block; text-decoration: none; color: inherit; }
@@ -494,7 +494,7 @@ html.js .rail {
 }
 .lead-body:hover .lead-title { color: var(--orange-ink); }
 .lead-tagline {
-  font-size: .85rem; color: var(--text-muted); margin-top: .25rem; font-weight: 500;
+  font-size: var(--fs-sm); color: var(--text-muted); margin-top: .25rem; font-weight: 500;
 }
 /* The figure a reader would quote stands on its own line at display size,
    keyed on its left, between the thesis it backs and the summary that
@@ -507,7 +507,7 @@ html.js .rail {
 }
 .lead-ro-k {
   display: flex; align-items: center; padding: 0 .7rem;
-  font-size: .75rem; font-weight: 700; color: var(--bg); background: var(--orange);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--bg); background: var(--orange);
   white-space: nowrap;
 }
 .lead-ro-v {
@@ -516,7 +516,7 @@ html.js .rail {
   font-variant-numeric: tabular-nums;
 }
 .lead-sum {
-  font-size: .85rem; line-height: 1.72; color: var(--text-muted);
+  font-size: var(--fs-sm); line-height: 1.72; color: var(--text-muted);
   margin-top: .75rem;
 }
 .lead-foot {
@@ -524,7 +524,7 @@ html.js .rail {
   margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border-soft);
 }
 .lead-size, .row-size {
-  font-family: var(--num); font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -563,7 +563,7 @@ html.js .rail {
 /* The column head is a band of its own, in the label voice at normal
    tracking — its words are Korean. 비교 prints the same band. */
 .listhead, .ix-head {
-  font-family: var(--num); font-size: .75rem; font-weight: 600; color: var(--text-muted);
+  font-family: var(--num); font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted);
   background: var(--surface-2); padding: .5rem .35rem;
   border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
 }
@@ -599,18 +599,18 @@ html.js .rowstar, html.js .lh-star { display: block; }
 .row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
 /* Dates and ids in the figure face, so the columns line up digit for digit. */
 .row-when, .row-id {
-  font-family: var(--num); font-size: .74rem; color: var(--text-muted);
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .row-id { color: var(--text); opacity: .8; }
 .row-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
 .row-title {
-  display: block; font-size: .89rem; font-weight: 700;
+  display: block; font-size: var(--fs-sm); font-weight: 700;
   line-height: 1.45; letter-spacing: -.01em;
 }
 .row-main:hover .row-title { color: var(--orange-ink); }
 .row-tagline {
-  display: block; font-size: .79rem; line-height: 1.55; color: var(--text-muted);
+  display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted);
   margin-top: .1rem;
 }
 .row-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
@@ -622,9 +622,9 @@ html.js .rowstar, html.js .lh-star { display: block; }
 }
 .rsep:first-child { padding-top: .1rem; }
 .rsep[hidden] { display: none; }
-.rsep h2 { font-size: .92rem; font-weight: 700; letter-spacing: -.01em; }
+.rsep h2 { font-size: var(--fs-base); font-weight: 700; letter-spacing: -.01em; }
 .rsep-n {
-  margin-left: auto; font-size: .72rem; color: var(--text-muted);
+  margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -648,7 +648,7 @@ html.js .pager {
 html.js .pager[hidden] { display: none; }
 .pgnums { display: flex; align-items: center; gap: .1rem; }
 .pgn, .pgstep {
-  font: inherit; font-size: .78rem; font-weight: 600; cursor: pointer;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600; cursor: pointer;
   padding: .34rem .55rem; border-radius: var(--radius-sm);
   background: none; border: none;
   color: var(--text-muted); font-variant-numeric: tabular-nums;
@@ -673,19 +673,19 @@ html.js .pager[hidden] { display: none; }
 .pggap { color: var(--text-muted); padding: 0 .1rem; }
 .pggap[hidden] { display: none; }
 .pgstat {
-  margin-left: auto; font-size: .74rem; color: var(--text-muted);
+  margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 
 .corpus-empty {
-  text-align: center; color: var(--text-muted); font-size: .88rem;
+  text-align: center; color: var(--text-muted); font-size: var(--fs-sm);
   padding: 3.5rem 1rem;
 }
 
 /* Says the bar dropped from "every term" to "any term". It sits above the rows
    rather than replacing them: the rows are the answer, this is the caveat. */
 .corpus-partial {
-  color: var(--text-muted); font-size: .82rem;
+  color: var(--text-muted); font-size: var(--fs-xs);
   padding: .55rem .75rem; margin: 0 0 .5rem;
   border-left: 2px solid var(--amber-soft); background: var(--surface-2);
 }
@@ -702,7 +702,7 @@ html.js .pager[hidden] { display: none; }
 }
 .restabs[hidden] { display: none; }
 .restab {
-  font: inherit; font-size: .82rem; font-weight: 700;
+  font: inherit; font-size: var(--fs-xs); font-weight: 700;
   display: inline-flex; align-items: baseline; gap: .38rem;
   padding: .3rem .1rem .45rem; margin-bottom: -1px;
   background: none; border: none; border-bottom: 2px solid transparent;
@@ -712,7 +712,7 @@ html.js .pager[hidden] { display: none; }
 }
 .restab:hover { color: var(--text); }
 .restab-n {
-  font-family: var(--mono); font-size: .64rem; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-3xs); font-weight: 600;
   opacity: .85; font-variant-numeric: tabular-nums;
 }
 .restab[data-restab="sem"][aria-pressed="true"] {
@@ -730,7 +730,7 @@ html.js .pager[hidden] { display: none; }
 .sem { margin: 0 0 1.1rem; }
 .sem[hidden] { display: none; }
 .sem-head {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   color: var(--orange-ink); margin-bottom: .4rem;
 }
 .sem-head span {
@@ -746,7 +746,7 @@ html.js .pager[hidden] { display: none; }
    placeholder: the box takes a query with or without the remote index, and a
    build with no endpoint ships neither this line nor the script that draws it. */
 .sem-key {
-  font-family: var(--mono); font-size: .62rem; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-3xs); font-weight: 600;
   padding: .02rem .3rem; border-radius: 3px;
   border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
 }
@@ -766,10 +766,10 @@ html.js .pager[hidden] { display: none; }
 }
 .sem-read {
   display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
-  font-size: .68rem; color: var(--text-muted); margin: -.15rem 0 .5rem;
+  font-size: var(--fs-3xs); color: var(--text-muted); margin: -.15rem 0 .5rem;
 }
 .sem-term {
-  font-family: var(--mono); font-size: .66rem;
+  font-family: var(--mono); font-size: var(--fs-3xs);
   padding: .05rem .32rem; border-radius: 3px;
   background: var(--surface-2); color: var(--text);
 }
@@ -783,12 +783,12 @@ html.js .pager[hidden] { display: none; }
   text-decoration: none; color: inherit;
 }
 .sem-ghead:hover .sem-gt { color: var(--orange-ink); }
-.sem-gt { font-size: .8rem; font-weight: 700; }
+.sem-gt { font-size: var(--fs-xs); font-weight: 700; }
 .sem-gid {
-  font-family: var(--mono); font-size: .64rem; color: var(--text-muted);
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.sem-gn { font-size: .64rem; color: var(--text-muted); margin-left: auto; }
+.sem-gn { font-size: var(--fs-3xs); color: var(--text-muted); margin-left: auto; }
 /* Indented under its heading, so a long group reads as one work rather than
    as the block starting over. */
 .sem-sub {
@@ -800,16 +800,16 @@ html.js .pager[hidden] { display: none; }
 }
 .sem-sub:hover { background: var(--surface); border-color: var(--border); }
 .sem-kind {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   padding: .1rem .3rem; border-radius: 3px; text-align: center;
   background: var(--surface-2); color: var(--text-muted);
 }
 .sem-kind.k-paper { background: var(--orange-soft); color: var(--orange-ink); }
 .sem-body { display: block; min-width: 0; }
-.sem-body b { font-size: .82rem; font-weight: 600; display: block; }
+.sem-body b { font-size: var(--fs-xs); font-weight: 600; display: block; }
 .sem-sub:hover .sem-body b { color: var(--orange-ink); }
 .sem-snip {
-  font-size: .76rem; line-height: 1.6; color: var(--text-muted); margin-top: .15rem;
+  font-size: var(--fs-2xs); line-height: 1.6; color: var(--text-muted); margin-top: .15rem;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -827,7 +827,7 @@ html.js .pager[hidden] { display: none; }
 }
 .hub-tabs::-webkit-scrollbar { display: none; }
 .hub-tabs button {
-  font: inherit; font-size: .84rem; font-weight: 700; cursor: pointer;
+  font: inherit; font-size: var(--fs-xs); font-weight: 700; cursor: pointer;
   flex: none; white-space: nowrap;
   display: inline-flex; align-items: center; gap: .35rem;
   background: none; border: none; padding: .5rem .8rem;
@@ -841,7 +841,7 @@ html.js .pager[hidden] { display: none; }
   color: var(--text); border-bottom-color: var(--orange);
 }
 .hub-tabs .tab-n {
-  font-size: .68rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  font-size: var(--fs-3xs); font-weight: 700; font-variant-numeric: tabular-nums;
   padding: .05rem .35rem; border-radius: var(--radius-pill);
   background: var(--surface-2); color: var(--text-muted);
 }
@@ -860,32 +860,32 @@ html.js .pager[hidden] { display: none; }
 .shelf-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
 /* The arXiv id in the figure face the landing's id column uses. */
 .shelf-id {
-  display: block; font-family: var(--num); font-size: .72rem; color: var(--text);
+  display: block; font-family: var(--num); font-size: var(--fs-2xs); color: var(--text);
   opacity: .7; font-variant-numeric: tabular-nums; white-space: nowrap;
   margin-bottom: .1rem;
 }
 .memo-card-head .shelf-id { display: inline; margin: 0; }
 .shelf-title {
-  display: block; font-size: .88rem; font-weight: 700; line-height: 1.45;
+  display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.45;
   letter-spacing: -.01em;
 }
 a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
 .shelf-tagline {
-  display: block; font-size: .78rem; line-height: 1.55; color: var(--text-muted);
+  display: block; font-size: var(--fs-2xs); line-height: 1.55; color: var(--text-muted);
   margin-top: .1rem;
 }
 /* A star or a memo outlives the rewrite it points at. The row stays, without a
    link, rather than disappearing and taking the reader's record with it. */
 .shelf-main.gone .shelf-title { color: var(--text-muted); }
-.shelf-note { display: block; font-size: .72rem; color: var(--red); margin-top: .15rem; }
+.shelf-note { display: block; font-size: var(--fs-2xs); color: var(--red); margin-top: .15rem; }
 .shelf-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
 .shelf-state {
-  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .shelf-item[data-read="done"] .shelf-state { color: var(--green); font-weight: 600; }
 .shelf-when {
-  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .hub-actions {
@@ -893,7 +893,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
   margin-bottom: 1.4rem;
 }
 .hub-actions button, .filebtn {
-  font: inherit; font-size: .78rem; font-weight: 600;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
   padding: .35rem .75rem; border-radius: var(--radius-sm); cursor: pointer;
   background: var(--surface); border: 1px solid var(--border);
   color: var(--text-muted);
@@ -919,7 +919,7 @@ a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
    browser and the import is read there — so the row leaves rather than sitting
    inert. The page's `noscript` line is what an unscripted reader gets instead. */
 html:not(.js) .hub-actions { display: none; }
-.hub-status { font-size: .74rem; color: var(--text-muted); }
+.hub-status { font-size: var(--fs-2xs); color: var(--text-muted); }
 
 .memo-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -929,24 +929,24 @@ html:not(.js) .hub-actions { display: none; }
   display: flex; align-items: baseline; gap: .5rem; margin-bottom: .5rem;
 }
 .memo-card-head a {
-  font-size: .9rem; font-weight: 700; text-decoration: none; color: var(--text);
+  font-size: var(--fs-sm); font-weight: 700; text-decoration: none; color: var(--text);
 }
 .memo-card-head a:hover { color: var(--orange-ink); }
 .memo-card-head time {
-  margin-left: auto; font-size: .72rem; color: var(--text-muted);
+  margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .memo-card pre {
-  font-family: inherit; font-size: .84rem; line-height: 1.65;
+  font-family: inherit; font-size: var(--fs-xs); line-height: 1.65;
   white-space: pre-wrap; word-break: break-word; color: var(--text-muted);
 }
 .memo-card .published {
-  display: inline-block; margin-top: .5rem; font-size: .72rem;
+  display: inline-block; margin-top: .5rem; font-size: var(--fs-2xs);
   color: var(--green); font-weight: 600;
 }
 
 .notfound { text-align: center; padding: 6rem 1.25rem; }
-.notfound h1 { font-size: 3rem; font-weight: 800; color: var(--orange-ink); }
+.notfound h1 { font-size: var(--fs-display); font-weight: 800; color: var(--orange-ink); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 
 /* ── 비교 ─────────────────────────────────── */
@@ -957,13 +957,13 @@ html:not(.js) .hub-actions { display: none; }
   transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
 }
 .cmp-item:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
-.cmp-item-t { font-size: .95rem; font-weight: 700; line-height: 1.45; }
+.cmp-item-t { font-size: var(--fs-base); font-weight: 700; line-height: 1.45; }
 .cmp-item:hover .cmp-item-t { color: var(--orange-ink); }
 /* The ids rather than the titles: three titles do not fit on a line and three
    ids always do — the same trade the 책갈피 strip makes. */
 .cmp-item-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .2rem; }
 .cmp-item-id {
-  font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   background: var(--surface-2); border-radius: var(--radius-xs);
   padding: .1rem .35rem; font-variant-numeric: tabular-nums;
 }
@@ -1005,7 +1005,7 @@ html:not(.js) .hub-actions { display: none; }
      and one line under it, with the numbers folded onto one trailing row. */
   .listhead { display: none; }
   .row { display: block; padding: .8rem .2rem; }
-  .row-when, .row-id { font-size: .72rem; }
+  .row-when, .row-id { font-size: var(--fs-2xs); }
   .row-when::after { content: " ·"; margin-right: .3rem; }
   .row-main { margin: .15rem 0 .35rem; }
   .row-pillars { display: inline-flex; gap: .2rem; vertical-align: middle; }
@@ -1042,9 +1042,9 @@ html:not(.js) .hub-actions { display: none; }
   margin-top: .35rem; padding: .08rem .5rem .1rem .45rem;
   border-left: 2px solid var(--orange); background: var(--surface-2);
 }
-.row-ro-k { font-size: .75rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+.row-ro-k { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); white-space: nowrap; }
 .row-ro-v {
-  font-family: var(--num); font-size: .74rem; font-weight: 600; color: var(--text);
+  font-family: var(--num); font-size: var(--fs-2xs); font-weight: 600; color: var(--text);
   font-variant-numeric: tabular-nums; min-width: 0;
 }
 .row:hover .row-ro { background: var(--surface-3); }
@@ -1059,7 +1059,7 @@ html:not(.js) .hub-actions { display: none; }
 }
 .ix-cmp  { grid-template-columns: 4.2rem minmax(0, 1fr) 8rem 3.4rem; }
 .ix-when, .ix-size {
-  font-family: var(--num); font-size: .74rem; color: var(--text-muted);
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
   white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 .ix-main { display: grid; gap: .3rem; min-width: 0; }
@@ -1077,7 +1077,7 @@ html:not(.js) .hub-actions { display: none; }
 .ix-foot {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: .6rem 1.5rem; padding: .7rem .6rem; border-bottom: 1px solid var(--border);
-  font-family: var(--num); font-size: .75rem; color: var(--text-muted);
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
 }
 .ix-end::before { content: "■ "; color: var(--orange); }
 

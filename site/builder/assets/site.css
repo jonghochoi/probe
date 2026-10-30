@@ -138,6 +138,23 @@
      Hangul and spaces falling through to Pretendard (`fonts.NUM_RANGE`), so a
      readout's numbers line up without its Korean looking letter-spaced. */
   --num: 'Probe Num', var(--ko);
+  /* The size steps. Every rem size in the sheets is one of these; what is
+     not a step is relative on purpose — an `em` that follows its component,
+     a `clamp()` heading, the body's own base, or a px size inside an SVG,
+     which is a drawing unit scaled with the viewBox. `--fs-2xs` is the floor
+     for anything that can hold Hangul: a syllable block packs a whole word's
+     strokes into one square and closes up below 12px, where Latin letters
+     still read. `--fs-3xs` is for ids, counts and Latin tags only. */
+  --fs-3xs:     .6875rem;  /* 11px */
+  --fs-2xs:     .75rem;    /* 12px */
+  --fs-xs:      .8125rem;  /* 13px */
+  --fs-sm:      .875rem;   /* 14px */
+  --fs-base:    .9375rem;  /* 15px */
+  --fs-md:      1rem;      /* 16px */
+  --fs-lg:      1.125rem;  /* 18px */
+  --fs-xl:      1.25rem;   /* 20px */
+  --fs-2xl:     1.375rem;  /* 22px */
+  --fs-display: 3rem;      /* the 404 numeral */
 
   /* ── Shape ──────────────────────────────────────────────────────────── */
   /* Panels meet at corners and a chip is a window rather than a pill: every
@@ -332,7 +349,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
    or a reader in forced-colours, where the background is dropped — still gets
    a solid accent rather than transparent letters. */
 .nav-logo {
-  font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em;
+  font-weight: 800; font-size: var(--fs-md); letter-spacing: -.01em;
   color: var(--orange); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
 }
@@ -402,7 +419,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
    different things that happen to be vertically centred together. */
 .nav-links a {
   text-decoration: none; color: var(--text-muted);
-  font-size: .82rem; font-weight: 500;
+  font-size: var(--fs-xs); font-weight: 500;
   display: flex; align-items: center; height: 32px;
   padding: 0 .6rem; border-radius: var(--radius-sm); white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
@@ -480,7 +497,7 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
    spelled out rather than left to the attribute. */
 .nav-sheet[hidden] { display: none; }
 .nav-sheet a {
-  padding: .62rem .3rem; font-size: .92rem; font-weight: 500;
+  padding: .62rem .3rem; font-size: var(--fs-base); font-weight: 500;
   color: var(--text); text-decoration: none;
   border-bottom: 1px solid var(--border-soft);
 }
@@ -492,7 +509,7 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 .nav-sheet a[aria-current="page"] { color: var(--orange-ink); font-weight: 700; }
 /* The one line that leaves the site, set apart the way the glyph it replaces
    is: last, and quieter than the places this site goes. */
-.nav-sheet-out { color: var(--text-muted); font-size: .84rem; }
+.nav-sheet-out { color: var(--text-muted); font-size: var(--fs-xs); }
 
 /* ── Paper header ─────────────────────────────────────────────────────── */
 .paper-head {
@@ -506,10 +523,10 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 .crumb-row .crumb { flex: 1 1 auto; min-width: 0; margin-bottom: 0; overflow: hidden;
                     text-overflow: ellipsis; white-space: nowrap; }
 .crumb-date {
-  flex: none; font-family: var(--num); font-size: .75rem; color: var(--text-muted);
+  flex: none; font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.crumb { font-size: .78rem; color: var(--text-muted); margin-bottom: .6rem; }
+.crumb { font-size: var(--fs-2xs); color: var(--text-muted); margin-bottom: .6rem; }
 .crumb a { color: var(--text-muted); text-decoration: none; }
 .crumb a:hover { color: var(--orange-ink); }
 
@@ -519,17 +536,17 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
   margin-bottom: .55rem;
 }
 .paper-authors {
-  font-size: .84rem; color: var(--text-muted); margin-bottom: .95rem;
+  font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: .95rem;
   max-width: 90ch;
 }
 /* Names, then affiliations on their own line and a step quieter. */
 .paper-authors .au-n, .paper-authors .au-a { display: block; }
-.paper-authors .au-a { font-size: .78rem; opacity: .85; margin-top: .1rem; }
+.paper-authors .au-a { font-size: var(--fs-2xs); opacity: .85; margin-top: .1rem; }
 .chip-row { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; margin-bottom: .9rem; }
 
 .chip {
   display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .73rem; font-weight: 600; letter-spacing: .01em;
+  font-size: var(--fs-2xs); font-weight: 600; letter-spacing: .01em;
   padding: .2rem .5rem; border-radius: var(--radius-pill);
   background: var(--surface-2); border: 1px solid var(--border);
   color: var(--text-muted); text-decoration: none; white-space: nowrap;
@@ -571,7 +588,7 @@ html:not(.js) .actbar:not(:has(a)) { display: none; }
 .src-group a, .act-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .36rem;
   height: 2.35rem; padding: 0 .7rem; white-space: nowrap;
-  font: inherit; font-size: .8rem; font-weight: 600; color: var(--text);
+  font: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--text);
   text-decoration: none; background: none; border: 0; cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
               background var(--dur-short) var(--ease-out);
@@ -598,7 +615,7 @@ html:not(.js) .actbar:not(:has(a)) { display: none; }
    the item ahead of it so a wrapped line never opens with a stray `·`. */
 .metaline {
   display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .55rem;
-  font-family: var(--num); font-size: .75rem; color: var(--text-muted);
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums; margin-bottom: .9rem;
 }
 .metaline .mi:not(:last-child)::after {
@@ -618,7 +635,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 /* ── Related, under the article ───────────────────────────────────────── */
 .related { margin-top: 3.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
 .related-h {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   color: var(--text-muted); margin-bottom: .7rem;
 }
 .rel-list { display: grid; gap: .5rem; }
@@ -633,17 +650,17 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 }
 .rel-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .rel-p {
-  grid-column: 1 / -1; font-size: .75rem; font-weight: 700;
+  grid-column: 1 / -1; font-size: var(--fs-2xs); font-weight: 700;
   color: var(--text-muted);
 }
-.rel-title { font-size: .88rem; font-weight: 700; letter-spacing: -.01em; line-height: 1.45; }
+.rel-title { font-size: var(--fs-sm); font-weight: 700; letter-spacing: -.01em; line-height: 1.45; }
 .rel-item:hover .rel-title { color: var(--orange-ink); }
 .rel-size {
-  font-size: .72rem; color: var(--text-muted); white-space: nowrap;
+  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums; grid-row: 2; grid-column: 2;
 }
 .rel-tagline {
-  grid-column: 1; font-size: .78rem; line-height: 1.55; color: var(--text-muted);
+  grid-column: 1; font-size: var(--fs-2xs); line-height: 1.55; color: var(--text-muted);
 }
 
 /* ── Comparisons ──────────────────────────────────────────────────────── */
@@ -659,7 +676,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
    with it rather than under the thesis further down. */
 .cmp-tagline {
   max-width: 46rem; margin: .9rem 0 0; padding-bottom: 1.4rem;
-  font-size: 1.02rem; line-height: 1.65; color: var(--text);
+  font-size: var(--fs-md); line-height: 1.65; color: var(--text);
 }
 
 /* The fork at full size: `common:` as the trunk, the paper cards as its
@@ -670,10 +687,10 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .cmp-cards { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 0; }
 .cmp-trunk {
   display: flex; justify-content: center; align-items: baseline; gap: .55rem;
-  font-size: .9rem; line-height: 1.5; color: var(--text); text-align: center;
+  font-size: var(--fs-sm); line-height: 1.5; color: var(--text); text-align: center;
   text-wrap: balance;
 }
-.cmp-trunk .fork-l { font-size: .75rem; }
+.cmp-trunk .fork-l { font-size: var(--fs-2xs); }
 .cmp-card-row {
   --gap: .7rem;
   display: grid; gap: var(--gap); position: relative;
@@ -706,11 +723,11 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 }
 .cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .cmp-card-h { display: flex; align-items: center; gap: .45rem; }
-.cmp-card-n { font-size: 1rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.3; }
+.cmp-card-n { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; line-height: 1.3; }
 .cmp-card:hover .cmp-card-n { color: var(--orange-ink); }
-.cmp-card-s { font-size: .92rem; font-weight: 600; line-height: 1.5; color: var(--text); }
+.cmp-card-s { font-size: var(--fs-base); font-weight: 600; line-height: 1.5; color: var(--text); }
 .cmp-card-t {
-  font-size: .74rem; line-height: 1.5; color: var(--text-muted);
+  font-size: var(--fs-2xs); line-height: 1.5; color: var(--text-muted);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
 }
 .cmp-card-foot {
@@ -718,10 +735,10 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   margin-top: auto; padding-top: .2rem;
 }
 .cmp-card-id {
-  font-family: var(--mono); font-size: .7rem; color: var(--text-muted);
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.cmp-card-m { font-size: .75rem; color: var(--orange-ink); font-weight: 600; }
+.cmp-card-m { font-size: var(--fs-2xs); color: var(--orange-ink); font-weight: 600; }
 @media (max-width: 720px) {
   .cmp-trunk { justify-content: flex-start; text-align: left; }
   .cmp-card-row { grid-template-columns: minmax(0, 1fr); }
@@ -732,12 +749,12 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 /* `problem:` under the question, labelled so it reads as the question's
    ground rather than its answer. */
 .cmp-problem-l {
-  display: block; font-size: .75rem; font-weight: 700;
+  display: block; font-size: var(--fs-2xs); font-weight: 700;
   color: var(--orange-ink); margin-bottom: .2rem;
 }
 /* The stance in everyday words — a second register under the stance, never
    louder than it. */
-.cmp-card-plain { font-size: .84rem; line-height: 1.55; color: var(--text-muted); }
+.cmp-card-plain { font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted); }
 
 /* The summary under a comparison's thesis prints folded: the fork above has
    already said it in structure. Its label is the control. */
@@ -754,7 +771,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
    set rather than three pictures competing. */
 .cmp-primers { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.5rem 0; }
 .cmp-primers-h {
-  font-size: .75rem; font-weight: 700; color: var(--text-muted);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
   margin: 0 0 .6rem;
 }
 /* Three columns whatever the count, so two cards stay the size of three
@@ -776,8 +793,8 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   padding: .8rem .9rem .85rem;
 }
 .primer svg { width: 100%; height: auto; display: block; }
-.primer figcaption { display: grid; gap: .1rem; font-size: .84rem; line-height: 1.5; color: var(--text-muted); }
-.primer figcaption b { color: var(--text); font-size: .9rem; }
+.primer figcaption { display: grid; gap: .1rem; font-size: var(--fs-xs); line-height: 1.5; color: var(--text-muted); }
+.primer figcaption b { color: var(--text); font-size: var(--fs-sm); }
 .primer svg text { fill: var(--text); font-family: var(--ko); }
 .primer svg .pr-m { fill: var(--text-muted); }
 .primer svg .pr-k { fill: var(--orange-ink); }
@@ -830,10 +847,10 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
    frame is white in both themes. Without the script every figure stands in
    order with its caption. */
 .figs { margin: 1.8rem 0; display: grid; gap: .7rem; }
-.figs-q { margin: 0; font-size: .95rem; font-weight: 700; }
+.figs-q { margin: 0; font-size: var(--fs-base); font-weight: 700; }
 .figs-tabs { display: flex; flex-wrap: wrap; gap: .2rem; border-bottom: 1px solid var(--border); }
 .figs-tabs button {
-  font: inherit; font-size: .86rem; font-weight: 700; color: var(--text-muted);
+  font: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted);
   background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
   padding: .45rem .75rem .5rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
 }
@@ -852,11 +869,11 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .figs-frame img { max-width: 100%; max-height: 26rem; height: auto; display: block; }
 .figs-panel figcaption {
   display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .5rem;
-  align-items: baseline; font-size: .9rem; line-height: 1.6;
+  align-items: baseline; font-size: var(--fs-sm); line-height: 1.6;
 }
 .figs-panel figcaption .pmark { align-self: center; }
 .figs-look { font-weight: 600; }
-.figs-src { grid-column: 2; font-family: var(--num); font-size: .75rem; color: var(--text-muted); }
+.figs-src { grid-column: 2; font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); }
 
 /* `compare.js` sets the other papers back while the reader points at one. */
 .is-dim { opacity: .3; }
@@ -877,7 +894,7 @@ table.mx td, table.mx thead th { transition: opacity var(--dur-short) var(--ease
 .act-fold > summary.pdiv + h2.h-sec { margin-top: 2.2rem; }
 .act-fold > summary::-webkit-details-marker { display: none; }
 .act-fold-hint {
-  order: 3; flex: 0 0 auto; font-size: .72rem; font-weight: 700; color: var(--text-muted);
+  order: 3; flex: 0 0 auto; font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
   border: 1px solid var(--border); border-radius: var(--radius-pill); padding: .05rem .55rem;
 }
 .act-fold > summary::after { order: 2; }
@@ -905,7 +922,7 @@ table.mx th, table.mx td {
 table.mx tbody tr:last-child th, table.mx tbody tr:last-child td { border-bottom: 0; }
 table.mx thead th {
   border-bottom: 1px solid var(--border); background: var(--surface-2);
-  font-size: .8rem; font-weight: 700; line-height: 1.4;
+  font-size: var(--fs-xs); font-weight: 700; line-height: 1.4;
 }
 /* A title with no codename before a colon arrives here in full, and a column
    is about nine characters wide. Clamping keeps the head a head; the id under
@@ -922,7 +939,7 @@ table.mx thead th .pmark { margin-right: .35rem; }
    a paper that says nothing never reads as a paper that says no. */
 .mx-mk {
   display: inline-flex; align-items: center; gap: .35rem; margin-bottom: .2rem;
-  font-size: .74rem; font-weight: 700; color: var(--text);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--text);
 }
 .mx-mk::before {
   content: ""; width: .7rem; height: .7rem; border-radius: 50%;
@@ -936,7 +953,7 @@ table.mx thead th .pmark { margin-right: .35rem; }
    flagged, because its number does not line up with the others'. */
 .mx-metric {
   display: inline-block; margin-bottom: .25rem; padding: .02rem .45rem;
-  font-size: .7rem; font-weight: 700; color: var(--text-muted);
+  font-size: var(--fs-3xs); font-weight: 700; color: var(--text-muted);
   border: 1px solid var(--border); border-radius: var(--radius-pill);
 }
 /* The 한계 callout's amber: a yardstick that differs is a limit on reading
@@ -944,7 +961,7 @@ table.mx thead th .pmark { margin-right: .35rem; }
 .mx-metric.is-off, .mx-flag { color: var(--amber); border-color: currentColor; background: var(--wash-warn); }
 .mx-flag {
   display: inline-block; margin-top: .35rem; padding: .02rem .45rem;
-  font-size: .68rem; border: 1px solid; border-radius: var(--radius-pill);
+  font-size: var(--fs-3xs); border: 1px solid; border-radius: var(--radius-pill);
 }
 /* A `stops` axis spans the paper columns: equal-width places — order, never
    distance — with each paper's mark on the one it holds. */
@@ -962,12 +979,12 @@ table.mx thead th .pmark { margin-right: .35rem; }
 .mx-pin { display: inline-flex; transition: opacity var(--dur-short) var(--ease-out); }
 .mx-pin .pmark { width: 15px; height: 15px; }
 .mx-pin.is-probe .pmark { fill: none; stroke: currentColor; stroke-width: 1.6; }
-.mx-stop-l { margin-top: .9rem; font-size: .76rem; line-height: 1.4; color: var(--text-muted); text-align: center; }
-.mx-why { margin-top: .7rem; font-size: .8rem; }
+.mx-stop-l { margin-top: .9rem; font-size: var(--fs-2xs); line-height: 1.4; color: var(--text-muted); text-align: center; }
+.mx-why { margin-top: .7rem; font-size: var(--fs-xs); }
 .mx-why > summary { cursor: pointer; color: var(--text-muted); }
 .mx-why ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .45rem; }
 .mx-why li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .45rem; align-items: baseline; }
-.mx-probe-l { font-size: .75rem; font-weight: 700; color: var(--text-muted); }
+.mx-probe-l { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); }
 /* The two widths that drive `table-layout: fixed` — the header row decides,
    so they are declared on it and every body row follows. */
 .mx-corner {
@@ -976,18 +993,18 @@ table.mx thead th .pmark { margin-right: .35rem; }
 table.mx thead th[scope="col"] { width: 26%; }
 .mx-id {
   display: block; margin-top: .15rem; font-family: var(--mono);
-  font-size: .66rem; font-weight: 400; color: var(--text-muted);
+  font-size: var(--fs-3xs); font-weight: 400; color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 /* The question column is the one a reader scans down, so it is the quiet one:
    tinting it as well as the head would make the grid read as a border. */
 .mx-k {
-  font-size: .8rem; font-weight: 700;
+  font-size: var(--fs-xs); font-weight: 700;
   color: var(--text-muted); line-height: 1.5;
 }
-.mx-v { display: block; font-size: .84rem; line-height: 1.65; }
+.mx-v { display: block; font-size: var(--fs-xs); line-height: 1.65; }
 .mx-note {
-  display: block; margin-top: .3rem; font-size: .74rem; line-height: 1.55;
+  display: block; margin-top: .3rem; font-size: var(--fs-2xs); line-height: 1.55;
   color: var(--text-muted);
 }
 
@@ -1006,10 +1023,10 @@ table.mx thead th[scope="col"] { width: 26%; }
 .toc {
   position: sticky; top: calc(var(--nav-h) + 1.25rem);
   max-height: calc(100vh - var(--nav-h) - 3rem);
-  overflow-y: auto; font-size: .8rem;
+  overflow-y: auto; font-size: var(--fs-xs);
 }
 .toc-title {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   color: var(--text-muted); margin-bottom: .6rem;
 }
 .toc a {
@@ -1033,10 +1050,10 @@ table.mx thead th[scope="col"] { width: 26%; }
   border-bottom: 1px solid var(--border);
 }
 .toc-n {
-  font-size: .72rem; font-weight: 800; color: var(--accent-ink); background: var(--orange);
+  font-size: var(--fs-2xs); font-weight: 800; color: var(--accent-ink); background: var(--orange);
   border-radius: var(--radius-xs); padding: .02rem .34rem; line-height: 1.5;
 }
-.toc-gl { font-size: .73rem; font-weight: 700; color: var(--text-muted); }
+.toc-gl { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); }
 .toc a { counter-increment: tocsec; border-radius: var(--radius-sm); }
 
 /* 책갈피 sits in the contents, not on the headings: the reading column keeps
@@ -1097,13 +1114,13 @@ table.mx thead th[scope="col"] { width: 26%; }
 .mark-fab:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: translateY(-1px); }
 .mark-fab[aria-pressed="true"] { color: var(--orange-ink); border-color: var(--amber-soft); }
 .mark-fab[aria-pressed="true"] svg { fill: currentColor; }
-.toc-k { display: block; font-size: .81rem; font-weight: 600; }
+.toc-k { display: block; font-size: var(--fs-xs); font-weight: 600; }
 .toc-k::before {
   content: counter(tocsec); color: var(--orange-ink); font-weight: 800;
-  margin-right: .4rem; font-size: .72rem; font-variant-numeric: tabular-nums;
+  margin-right: .4rem; font-size: var(--fs-2xs); font-variant-numeric: tabular-nums;
 }
 .toc-e {
-  display: block; font-size: .68rem; color: var(--text-muted);
+  display: block; font-size: var(--fs-3xs); color: var(--text-muted);
   margin-left: 1rem; line-height: 1.35;
 }
 
@@ -1114,7 +1131,7 @@ table.mx thead th[scope="col"] { width: 26%; }
    it is what this rewrite claims, below it the argument. */
 .lead { border-bottom: 2px solid var(--orange); padding-bottom: 1.4rem; margin-bottom: 1rem; }
 .eyebrow {
-  font-size: .75rem; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   color: var(--orange-ink); margin-bottom: .7rem;
 }
 
@@ -1137,11 +1154,11 @@ table.mx thead th[scope="col"] { width: 26%; }
   content: ""; flex: 1; height: 2px; background: var(--orange); opacity: .28;
 }
 .pdiv .pn {
-  font-size: .78rem; font-weight: 800; color: var(--accent-ink); background: var(--orange);
+  font-size: var(--fs-2xs); font-weight: 800; color: var(--accent-ink); background: var(--orange);
   border-radius: var(--radius-xs); padding: .08rem .45rem;
 }
 .pdiv .pt {
-  font-size: .82rem; font-weight: 800; letter-spacing: .02em;
+  font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em;
   color: var(--orange-ink);
 }
 
@@ -1150,7 +1167,7 @@ table.mx thead th[scope="col"] { width: 26%; }
    question started. The act divider already draws one, so a section opening an
    act does not draw a second. */
 .article h2.h-sec {
-  font-size: 1.42rem; font-weight: 750; letter-spacing: -.015em;
+  font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -.015em;
   line-height: 1.35; margin: 3.2rem 0 .3rem; padding-top: 1.6rem;
   border-top: 1px solid var(--border);
   scroll-margin-top: calc(var(--nav-h) + 1rem);
@@ -1167,20 +1184,20 @@ table.mx thead th[scope="col"] { width: 26%; }
    and is excluded from its weight and size rather than being a paragraph the
    section happens to open with. */
 .article h2.h-sec .en {
-  display: block; font-size: .74rem; font-weight: 600; letter-spacing: .01em;
+  display: block; font-size: var(--fs-2xs); font-weight: 600; letter-spacing: .01em;
   color: var(--text-muted); margin-top: .3rem;
 }
 /* Sub-headings take the accent, not grey. Muted, a `####` inside a section
    sat *below* body text in weight and read as a caption for the paragraph
    above it rather than as the opening of the one below. */
 .article h3, .article h4.h-sub {
-  font-size: 1.02rem; font-weight: 700; margin: 2rem 0 .5rem;
+  font-size: var(--fs-md); font-weight: 700; margin: 2rem 0 .5rem;
   color: var(--orange-ink);
 }
 
 /* Between our thesis and the paper's own title: what this paper does. */
 .article .thesis-sub {
-  font-size: 1rem; color: var(--text-muted); line-height: 1.6;
+  font-size: var(--fs-md); color: var(--text-muted); line-height: 1.6;
   margin: -1rem 0 1.3rem;
 }
 
@@ -1197,10 +1214,10 @@ table.mx thead th[scope="col"] { width: 26%; }
   padding: 1rem 1.15rem; margin: 1.4rem 0 0;
 }
 .tldr-label {
-  display: block; font-size: .75rem; font-weight: 800;
+  display: block; font-size: var(--fs-2xs); font-weight: 800;
   color: var(--orange-ink); margin-bottom: .45rem;
 }
-.tldr p { margin: 0; font-size: .96rem; line-height: 1.75; }
+.tldr p { margin: 0; font-size: var(--fs-base); line-height: 1.75; }
 /* Prose margins belong to PROSE, and the selectors say where prose is: the
    article's own flow — a comparison's folded act 4 included — and the two
    containers that hold markdown bodies.
@@ -1258,10 +1275,10 @@ table.mx thead th[scope="col"] { width: 26%; }
   background: var(--code-bar); border-bottom: 1px solid var(--code-rule);
 }
 .code-lang {
-  font-family: var(--mono); font-size: .66rem; font-weight: 800;
+  font-family: var(--mono); font-size: var(--fs-3xs); font-weight: 800;
   letter-spacing: .09em; text-transform: uppercase; color: var(--code-ink);
 }
-.code-cap { font-size: .75rem; color: var(--code-ink); margin-left: auto; }
+.code-cap { font-size: var(--fs-2xs); color: var(--code-ink); margin-left: auto; }
 /* Pygments wraps its `<pre>` in a `<div class="hl">`, so the padding goes on
    the `<pre>` ALONE. A `pre.hl, div.hl pre, .hl` list padded the wrapper and
    the pre both, and every code block on the site carried a doubled 30px band
@@ -1272,7 +1289,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 .hl { margin: 0; padding: 0; background: none; border-radius: 0; }
 .code pre {
   margin: 0; padding: .9rem 1.05rem; border-radius: 0;
-  overflow-x: auto; font-size: .83rem; line-height: 1.62;
+  overflow-x: auto; font-size: var(--fs-xs); line-height: 1.62;
   font-family: var(--mono);
   font-variant-ligatures: normal;
 }
@@ -1318,7 +1335,7 @@ figure.fig img {
   min-height: 120px;
 }
 figure.fig figcaption {
-  margin-top: .5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.55;
+  margin-top: .5rem; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.55;
 }
 .fig-num { font-weight: 800; color: var(--orange-ink); }
 .fig-src { font-style: italic; color: var(--text-muted); }
@@ -1329,13 +1346,13 @@ figure.fig figcaption {
   border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--surface);
 }
-.table-wrap table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: var(--fs-xs); }
 .table-wrap th, .table-wrap td {
   padding: .5rem .75rem; text-align: left;
   border-bottom: 1px solid var(--border-soft); vertical-align: top;
 }
 .table-wrap th {
-  background: var(--surface-2); font-weight: 700; font-size: .72rem;
+  background: var(--surface-2); font-weight: 700; font-size: var(--fs-2xs);
   letter-spacing: .03em; text-transform: uppercase;
   color: var(--text-muted); white-space: nowrap;
 }
@@ -1370,7 +1387,7 @@ abbr.dref {
    the sibling's page. */
 .sib {
   margin-left: .25em; padding: .04em .38em;
-  font-family: var(--num); font-size: .8em; vertical-align: .08em;
+  font-family: var(--num); font-size: max(.8em, var(--fs-2xs)); vertical-align: .08em;
   white-space: nowrap; text-decoration: none;
   color: var(--orange-ink); background: var(--orange-soft);
   border: 1px solid var(--orange); border-radius: var(--radius-pill);
@@ -1398,7 +1415,7 @@ abbr.dref {
 .tbox[hidden] { display: none; }
 .tdef {
   display: block; margin: .7rem 0;
-  padding: .75rem .95rem; font-size: .89rem; line-height: 1.68;
+  padding: .75rem .95rem; font-size: var(--fs-sm); line-height: 1.68;
   background: var(--surface); border: 1px solid var(--border);
   border-left: 3px solid var(--orange);
   border-radius: 0 var(--radius) var(--radius) 0;
@@ -1409,7 +1426,7 @@ abbr.dref {
    also catch every `<b>` in the definition body and break the line at each
    emphasis. */
 .tdef .th {
-  display: block; font-weight: 800; font-size: .83rem;
+  display: block; font-weight: 800; font-size: var(--fs-xs);
   color: var(--orange-ink); margin-bottom: .15rem;
 }
 .tdef .tbody b, .tdef .tbody strong { display: inline; font-weight: 700; color: var(--text); }
@@ -1424,10 +1441,10 @@ abbr.dref {
 /* Labelled, because an unlabelled bold question mid-article reads as the
    author asking rhetorically rather than as a section boundary to answer at. */
 .q-label {
-  display: block; font-size: .75rem; font-weight: 800;
+  display: block; font-size: var(--fs-2xs); font-weight: 800;
   color: var(--orange-ink); margin-bottom: .45rem;
 }
-.quiz .qq { font-weight: 700; font-size: .9rem; margin-bottom: .6rem; }
+.quiz .qq { font-weight: 700; font-size: var(--fs-sm); margin-bottom: .6rem; }
 .qopts { display: flex; flex-direction: column; gap: .33rem; }
 /* A full-width button, not a radio: the radio dot read as a form to fill in
    and invited a second pick, where the check has one shot at it. */
@@ -1435,7 +1452,7 @@ abbr.dref {
   display: block; width: 100%; text-align: left;
   padding: .48rem .75rem; border-radius: var(--radius-sm); cursor: pointer;
   border: 1px solid var(--border); background: var(--bg);
-  font: inherit; font-size: .87rem; color: var(--text);
+  font: inherit; font-size: var(--fs-sm); color: var(--text);
   transition: background var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
 }
 .qopt:hover { border-color: var(--orange); }
@@ -1453,7 +1470,7 @@ abbr.dref {
   opacity: .75;
 }
 .qwhy {
-  margin-top: .6rem; padding-left: .75rem; font-size: .85rem; line-height: 1.65;
+  margin-top: .6rem; padding-left: .75rem; font-size: var(--fs-sm); line-height: 1.65;
   border-left: 2px solid var(--orange); color: var(--text-muted);
 }
 .qwhy[hidden] { display: none; }
@@ -1468,7 +1485,7 @@ details.fold {
    pulled. */
 details.fold[open] { border-color: var(--orange); }
 details.fold > summary {
-  padding: .65rem .95rem; cursor: pointer; font-size: .85rem; font-weight: 700;
+  padding: .65rem .95rem; cursor: pointer; font-size: var(--fs-sm); font-weight: 700;
   color: var(--orange-ink); list-style: none; user-select: none;
 }
 details.fold > summary:hover { background: var(--orange-soft); }
@@ -1491,7 +1508,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 /* The reading line is a rule, not a boxed callout: it belongs to the equation
    under it, and a second frame would compete with the formula for the eye. */
 .eqread {
-  font-size: .88rem; color: var(--text-muted);
+  font-size: var(--fs-sm); color: var(--text-muted);
   border-left: 2px solid var(--orange); padding-left: .75rem; margin: 0 0 .2rem;
 }
 .eqread em { color: var(--text); font-style: normal; font-weight: 600; }
@@ -1505,12 +1522,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   display: grid; grid-template-columns: 7rem 10rem minmax(0, 1fr);
   gap: .6rem; align-items: baseline;
   padding: .42rem .2rem; border-bottom: 1px solid var(--border-soft);
-  font-size: .85rem;
+  font-size: var(--fs-sm);
 }
 .sym-row:last-child { border-bottom: none; }
 .sym-k { white-space: nowrap; }
-.sym-n { font-weight: 700; font-size: .83rem; }
-.sym-d { color: var(--text-muted); font-size: .82rem; }
+.sym-n { font-weight: 700; font-size: var(--fs-xs); }
+.sym-d { color: var(--text-muted); font-size: var(--fs-xs); }
 
 /* ── Readable layer: five callout roles (R9) ──────────────────────────── */
 /* Backgrounds stay pale on purpose — the signal is the left border and the
@@ -1533,7 +1550,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-size: inherit;
 }
 .c-label {
-  display: block; font-size: .75rem; font-weight: 800;
+  display: block; font-size: var(--fs-2xs); font-weight: 800;
   margin-bottom: .3rem;
 }
 .c-body > :first-child { margin-top: 0; }
@@ -1564,7 +1581,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   --fl-line: var(--text-muted); --fl-w: 1.5px; --fl-r: 6px;
   --fl-gap: 1.25rem; --fl-fk: 1rem; --fl-gut: 0px;
 }
-.flow-title { font-weight: 700; font-size: .85rem; margin-bottom: .6rem; }
+.flow-title { font-weight: 700; font-size: var(--fs-sm); margin-bottom: .6rem; }
 /* Two classes deep, so the article's nested-list indent (`.view li > ul`)
    cannot shift a lanes row off its fork. */
 .flow .fgrid, .flow .fl-par { list-style: none; margin: 0; padding: 0; }
@@ -1578,11 +1595,11 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .fg-step {
   grid-column: 2; position: relative; padding: .5rem .75rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); font-size: .86rem;
+  border-radius: var(--radius-sm); font-size: var(--fs-sm);
 }
 .fg-step.hot { border-color: var(--orange-ink); background: var(--orange-soft); }
 .fs-label { display: block; font-weight: 700; }
-.fs-note { display: block; color: var(--text-muted); font-size: .82rem; margin-top: .12rem; }
+.fs-note { display: block; color: var(--text-muted); font-size: var(--fs-xs); margin-top: .12rem; }
 /* In a comparison a step can carry the papers that act on it: each paper's
    mark and what it does there, one line each, in column order. A step two
    papers hold is the slot they compete for, so it takes the accent's ground;
@@ -1590,17 +1607,17 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .fs-marks { display: grid; gap: .2rem; margin-top: .4rem; }
 .fs-mark {
   display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .4rem;
-  align-items: baseline; font-size: .8rem; line-height: 1.45;
+  align-items: baseline; font-size: var(--fs-xs); line-height: 1.45;
   transition: opacity var(--dur-short) var(--ease-out);
 }
 .fs-mark .pmark { align-self: center; }
 .fg-step.is-contested { border-color: var(--orange-ink); background: var(--orange-soft); }
 .fg-step.is-blind { border: 1.5px dashed var(--amber); background: var(--wash-warn); }
-.fs-blind { display: block; margin-top: .3rem; font-size: .8rem; font-weight: 700; color: var(--amber); }
-.flow-verdict { margin: -.2rem 0 .7rem; font-size: .84rem; }
+.fs-blind { display: block; margin-top: .3rem; font-size: var(--fs-xs); font-weight: 700; color: var(--amber); }
+.flow-verdict { margin: -.2rem 0 .7rem; font-size: var(--fs-xs); }
 .flow-tag {
   display: inline-block; margin-right: .45rem; padding: .02rem .45rem;
-  font-size: .72rem; font-weight: 800; color: var(--accent-ink);
+  font-size: var(--fs-2xs); font-weight: 800; color: var(--accent-ink);
   background: var(--orange-ink); border-radius: var(--radius-xs);
 }
 /* The wire into a row: down the gap to the box, with its head on the box. */
@@ -1648,11 +1665,11 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .fl-loopnote {
   grid-column: 1; align-self: center; padding-right: calc(1.25rem + 8px);
-  text-align: right; font-size: .74rem; line-height: 1.4; color: var(--text-muted);
+  text-align: right; font-size: var(--fs-2xs); line-height: 1.4; color: var(--text-muted);
 }
 /* Says this box is ours and what the paper had instead (R6). Set like a figure
    origin, because that is the line it stands in for. */
-.flow-why { margin: .6rem 0 0; font-size: .78rem; line-height: 1.5; }
+.flow-why { margin: .6rem 0 0; font-size: var(--fs-2xs); line-height: 1.5; }
 /* A lane can be a third of a phone's width; a long Latin name breaks rather
    than running out of its box. */
 .fl-par .fg-step { overflow-wrap: anywhere; }
@@ -1677,7 +1694,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .box-head {
   padding: .5rem .9rem; background: var(--surface-2);
   border-bottom: 1px solid var(--border);
-  font-size: .75rem; font-weight: 800;
+  font-size: var(--fs-2xs); font-weight: 800;
   color: var(--text-muted);
 }
 .box-body { padding: .9rem 1.1rem; }
@@ -1689,12 +1706,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   column-gap: 1rem; margin: 0; align-items: baseline;
 }
 .ln-when {
-  font-family: var(--mono); font-size: .74rem; font-weight: 800;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 800;
   color: var(--orange-ink); font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.ln-text { display: block; font-size: .88rem; line-height: 1.62; }
-.ln-what { display: block; font-weight: 700; font-size: .87rem; margin-bottom: .12rem; }
-.ln-note { display: block; font-size: .84rem; color: var(--text-muted); line-height: 1.6; }
+.ln-text { display: block; font-size: var(--fs-sm); line-height: 1.62; }
+.ln-what { display: block; font-weight: 700; font-size: var(--fs-sm); margin-bottom: .12rem; }
+.ln-note { display: block; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 /* The paper being read, tinted so the reader can see where they are standing
    in the line they have just been walked down. The tint wraps the text cell
    only: the date column is the rail the eye runs down, and tinting it breaks
@@ -1708,7 +1725,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 /* 숫자의 지형 — one number against the others of its kind. */
 .sc-row {
   display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 4.5rem;
-  align-items: center; gap: .7rem; padding: .28rem 0; font-size: .85rem;
+  align-items: center; gap: .7rem; padding: .28rem 0; font-size: var(--fs-sm);
 }
 .sc-bar {
   display: block; height: .6rem; border-radius: var(--radius-xs);
@@ -1721,7 +1738,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   min-width: 3px; border-radius: var(--radius-xs);
 }
 .sc-v {
-  text-align: right; font-size: .8rem; color: var(--text-muted);
+  text-align: right; font-size: var(--fs-xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 .sc-row.us .sc-label, .sc-row.us .sc-v { font-weight: 700; color: var(--text); }
@@ -1732,11 +1749,11 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .split:has(.sp-card:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .sp-card {
   border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--surface); padding: .85rem .95rem; font-size: .86rem;
+  background: var(--surface); padding: .85rem .95rem; font-size: var(--fs-sm);
 }
 .sp-head { display: flex; align-items: center; gap: .45rem; font-weight: 800; margin: 0 0 .45rem; }
 .sp-tag {
-  font-size: .75rem; font-weight: 700; padding: .06rem .4rem; border-radius: var(--radius-pill);
+  font-size: var(--fs-2xs); font-weight: 700; padding: .06rem .4rem; border-radius: var(--radius-pill);
   border: 1px solid var(--border); color: var(--text-muted); background: var(--surface-2);
 }
 .sp-body p { margin: 0 0 .4rem; }
@@ -1744,7 +1761,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 /* No rule above the note. The card is already bounded and its body already
    ends; a dashed line inside it cut a small card into two smaller ones. */
 .sp-note {
-  margin: .55rem 0 0; font-size: .79rem; font-style: italic;
+  margin: .55rem 0 0; font-size: var(--fs-xs); font-style: italic;
   color: var(--text-muted);
 }
 /* No accent band on these. The 3px left border is this system's mark for a
@@ -1766,11 +1783,11 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    into parts, and floating them as separate rounded chips said the opposite. */
 .pt-row {
   display: grid; grid-template-columns: 9rem minmax(0, 1fr);
-  gap: .9rem; padding: .7rem .95rem; font-size: .87rem;
+  gap: .9rem; padding: .7rem .95rem; font-size: var(--fs-sm);
   border-bottom: 1px solid var(--border); align-items: baseline;
 }
 .pt-row:last-child { border-bottom: none; }
-.pt-label { font-family: var(--num); font-size: .8rem; font-weight: 800; }
+.pt-label { font-family: var(--num); font-size: var(--fs-xs); font-weight: 800; }
 .pt-label code { background: none; padding: 0; color: inherit; font-size: 1em; }
 .pt-range { margin-left: .35rem; font-weight: 400; color: var(--text-muted); }
 /* The state, printed under the region's name. The color groups the rows and
@@ -1778,7 +1795,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    palette that ran out rather than as two regions in the same condition. */
 .pt-state {
   display: block; margin-top: .2rem; font-family: var(--ko);
-  font-size: .72rem; font-weight: 700; letter-spacing: .01em;
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .01em;
 }
 /* Four slots, handed out in the order the states first appear. They carry no
    meaning of their own — the word beside them does — so they only have to stay
@@ -1796,7 +1813,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .pt-s0 .pt-state { color: var(--text-muted); }
 
 .fence-error {
-  margin: 1rem 0; padding: .7rem .9rem; font-size: .85rem;
+  margin: 1rem 0; padding: .7rem .9rem; font-size: var(--fs-sm);
   color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
   border-radius: var(--radius);
@@ -1808,10 +1825,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .callout {
   display: flex; gap: .7rem; align-items: flex-start;
   margin: 1.2rem 0; padding: .85rem 1rem;
-  border-radius: var(--radius); font-size: .87rem;
+  border-radius: var(--radius); font-size: var(--fs-sm);
   background: var(--surface-2); border: 1px solid var(--border);
 }
-.callout .ci { font-size: 1rem; line-height: 1.4; flex-shrink: 0; }
+.callout .ci { font-size: var(--fs-md); line-height: 1.4; flex-shrink: 0; }
 .callout.warn { background: color-mix(in srgb, var(--amber) 10%, transparent); border-color: color-mix(in srgb, var(--amber) 32%, transparent); }
 .callout.na   { background: color-mix(in srgb, var(--red) 8%, transparent);   border-color: color-mix(in srgb, var(--red) 26%, transparent); }
 .callout code { font-size: .82em; }
@@ -1822,7 +1839,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   display: inline-flex; align-items: center; gap: .45rem;
   background: var(--surface); color: var(--text);
   border: 1px solid var(--border); border-radius: var(--radius-pill);
-  padding: .6rem 1rem; font: inherit; font-size: .85rem; font-weight: 600;
+  padding: .6rem 1rem; font: inherit; font-size: var(--fs-sm); font-weight: 600;
   box-shadow: var(--shadow-lg); cursor: pointer;
   transition: color var(--dur-mid) var(--ease-out),
               border-color var(--dur-mid) var(--ease-out),
@@ -1832,7 +1849,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .memo-fab .count {
   display: none; min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: var(--radius-pill); background: var(--orange); color: var(--accent-ink);
-  font-size: .68rem; font-weight: 800; line-height: 18px; text-align: center;
+  font-size: var(--fs-3xs); font-weight: 800; line-height: 18px; text-align: center;
 }
 .memo-fab[data-has-memo="1"] .count { display: inline-block; }
 
@@ -1849,30 +1866,30 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   display: flex; align-items: center; gap: .6rem;
   padding: 1rem 1.15rem; border-bottom: 1px solid var(--border);
 }
-.memo-head h3 { font-size: .95rem; font-weight: 750; }
-.memo-status { font-size: .72rem; color: var(--text-muted); margin-left: auto; }
+.memo-head h3 { font-size: var(--fs-base); font-weight: 700; }
+.memo-status { font-size: var(--fs-2xs); color: var(--text-muted); margin-left: auto; }
 .memo-anchor {
-  font-size: .74rem; color: var(--text-muted);
+  font-size: var(--fs-2xs); color: var(--text-muted);
   padding: .5rem 1.15rem 0;
 }
 .memo-anchor a { color: var(--orange-ink); text-decoration: none; }
 .memo textarea {
   flex: 1; margin: .75rem 1.15rem; padding: .8rem;
-  font: inherit; font-size: .88rem; line-height: 1.7;
+  font: inherit; font-size: var(--fs-sm); line-height: 1.7;
   color: var(--text); background: var(--surface-2);
   border: 1px solid var(--border); border-radius: var(--radius);
   resize: none; outline: none;
 }
 .memo textarea:focus { border-color: var(--amber-soft); }
 .memo-note {
-  font-size: .72rem; color: var(--text-muted); padding: 0 1.15rem .5rem; line-height: 1.5;
+  font-size: var(--fs-2xs); color: var(--text-muted); padding: 0 1.15rem .5rem; line-height: 1.5;
 }
 .memo-actions {
   display: flex; flex-wrap: wrap; gap: .4rem;
   padding: .75rem 1.15rem 1.15rem; border-top: 1px solid var(--border);
 }
 .memo-actions button, .memo-actions a {
-  font: inherit; font-size: .78rem; font-weight: 600;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
   padding: .45rem .7rem; border-radius: var(--radius-sm); cursor: pointer;
   border: 1px solid var(--border); background: var(--surface-2);
   color: var(--text); text-decoration: none;
@@ -1986,7 +2003,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   display: flex; align-items: baseline; gap: .45rem;
   transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
 }
-.tab .en { font-family: var(--mono); font-size: .68rem; opacity: .8; }
+.tab .en { font-family: var(--mono); font-size: var(--fs-3xs); opacity: .8; }
 /* A tab label never breaks across two lines: a two-line target reads as two
    controls and halves the tap area of each. With three tabs the strip is what
    gives instead — the English gloss leaves first, since the Korean label is
@@ -2004,7 +2021,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    says how much is behind a tab, and an outline at this size reads as a second
    letter of the label. */
 .tab .cnt {
-  margin-left: -.12rem; font-family: var(--mono); font-size: .66rem;
+  margin-left: -.12rem; font-family: var(--mono); font-size: var(--fs-3xs);
   font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.5;
   background: var(--surface-3); color: var(--text-muted);
   border-radius: var(--radius-pill); padding: 0 .34rem;
@@ -2018,7 +2035,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    line the eye loses the start of on its way back. */
 .incmp { max-width: 900px; }
 .incmp-lead {
-  font-size: .88rem; line-height: 1.75; color: var(--text-muted);
+  font-size: var(--fs-sm); line-height: 1.75; color: var(--text-muted);
   padding-bottom: 1rem; margin-bottom: 1.2rem;
   border-bottom: 1px solid var(--border);
 }
@@ -2033,11 +2050,11 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .incmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .incmp-when {
-  font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   letter-spacing: .04em;
 }
 .incmp-t {
-  font-size: 1rem; font-weight: 700; line-height: 1.45; letter-spacing: -.015em;
+  font-size: var(--fs-md); font-weight: 700; line-height: 1.45; letter-spacing: -.015em;
   text-wrap: balance;
 }
 .incmp-item:hover .incmp-t { color: var(--orange-ink); }
@@ -2059,7 +2076,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .fork-trunk {
   flex: 0 0 auto; width: 17rem; text-align: right;
   display: flex; align-items: center; justify-content: flex-end; gap: .5rem;
-  font-size: .74rem; line-height: 1.35; color: var(--text-muted);
+  font-size: var(--fs-2xs); line-height: 1.35; color: var(--text-muted);
   /* `balance` evens the two lines a `common:` at the contract's ceiling
      still needs, rather than leaving one word under a full line. The width
      is what most of them fit on one line in, which `balance` cannot produce
@@ -2077,7 +2094,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    No `--mono` and no `text-transform`: neither reaches Hangul, and a
    declaration that does nothing is one a reader has to disprove. */
 .fork-l {
-  flex: 0 0 auto; font-size: .75rem; font-weight: 700;
+  flex: 0 0 auto; font-size: var(--fs-2xs); font-weight: 700;
   color: var(--orange-ink); white-space: nowrap;
 }
 /* `currentColor` on the path, so the bracket is one declaration here rather
@@ -2090,10 +2107,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   display: grid; grid-template-columns: max-content max-content minmax(0, 1fr);
   grid-auto-rows: 22px; align-items: center; column-gap: .55rem;
 }
-.fork-n { font-size: .78rem; font-weight: 700; color: var(--text); }
+.fork-n { font-size: var(--fs-2xs); font-weight: 700; color: var(--text); }
 .fork-n.is-self { color: var(--orange-ink); }
 .fork-id {
-  font-family: var(--mono); font-size: .64rem; color: var(--text-muted);
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 /* The stance is what the fork exists to show, so it takes the body ink and
@@ -2101,7 +2118,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    it reads at the same level as the arXiv id next to it — reference weight for
    the payload — and `--text-muted` ends up carrying four roles on one card. */
 .fork-s {
-  font-size: .78rem; color: var(--text);
+  font-size: var(--fs-2xs); color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 @media (max-width: 720px) {
@@ -2130,12 +2147,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   gap: 1.4rem; align-items: center;
 }
 @media (max-width: 820px) { .g-hub { grid-template-columns: 1fr; } }
-.gh-l { font-family: var(--num); font-size: .75rem; color: var(--text-muted); }
-.gh-thesis { font-size: 1.42rem; font-weight: 700; line-height: 1.3; letter-spacing: -.02em; margin: .3rem 0 .5rem; text-wrap: balance; }
-.gh-line { font-size: .88rem; color: var(--text-muted); }
+.gh-l { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); }
+.gh-thesis { font-size: var(--fs-2xl); font-weight: 700; line-height: 1.3; letter-spacing: -.02em; margin: .3rem 0 .5rem; text-wrap: balance; }
+.gh-line { font-size: var(--fs-sm); color: var(--text-muted); }
 .gh-facts { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: .9rem; }
-.gh-k { font-family: var(--num); font-size: .75rem; color: var(--text-muted); display: block; }
-.gh-v { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: 1.02rem; font-weight: 700; color: var(--orange-ink); }
+.gh-k { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); display: block; }
+.gh-v { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: var(--fs-md); font-weight: 700; color: var(--orange-ink); }
 .gh-fig .fig { margin: 0; }
 
 /* The narrative and its rail are one card: the rail answers the questions the
@@ -2149,7 +2166,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   align-items: start;
 }
 .g-narr-h { grid-column: 1 / -1; }
-.gn-l { font-family: var(--num); font-size: .75rem; color: var(--violet); font-weight: 500; }
+.gn-l { font-family: var(--num); font-size: var(--fs-2xs); color: var(--violet); font-weight: 500; }
 .g-narr-body p { margin: 0 0 .78rem; }
 .g-narr-body p:last-child { margin-bottom: 0; }
 .g-narr-body strong { color: var(--orange-ink); }
@@ -2158,10 +2175,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   .g-narr { grid-template-columns: 1fr; }
   .g-rail { border-left: 0; padding-left: 0; border-top: 1px solid var(--border); padding-top: 1rem; }
 }
-.gr-k { font-family: var(--num); font-size: .75rem; color: var(--text-muted); }
-.gr-v { font-size: .84rem; line-height: 1.55; }
+.gr-k { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); }
+.gr-v { font-size: var(--fs-xs); line-height: 1.55; }
 .gr-v strong, .gr-v b { font-family: var(--num); color: var(--orange-ink); }
-.gr-n { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
+.gr-n { font-size: var(--fs-2xs); color: var(--text-muted); line-height: 1.5; }
 
 .g-acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
 @media (max-width: 1100px) { .g-acts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -2182,17 +2199,17 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .g-act[data-n="2"] { border-top: 3px solid var(--act2); }
 .g-act[data-n="3"] { border-top: 3px solid var(--act3); }
 .g-act[data-n="4"] { border-top: 3px solid var(--act4); }
-.ga-n { font-family: var(--mono); font-size: .7rem; color: var(--text-muted); }
-.ga-t { font-size: .98rem; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; text-wrap: balance; }
-.ga-c { font-size: .84rem; color: var(--text-muted); line-height: 1.6; }
+.ga-n { font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted); }
+.ga-t { font-size: var(--fs-md); font-weight: 700; line-height: 1.4; letter-spacing: -.01em; text-wrap: balance; }
+.ga-c { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 .g-act .fig { margin: 0; }
-.g-act .fig figcaption { font-size: .7rem; }
-.ga-eq { overflow-x: auto; font-size: .92rem; }
-.ga-s { font-family: var(--num); font-size: .75rem; color: var(--green); border-top: 1px dashed var(--border); padding-top: .5rem; }
+.g-act .fig figcaption { font-size: var(--fs-3xs); }
+.ga-eq { overflow-x: auto; font-size: var(--fs-base); }
+.ga-s { font-family: var(--num); font-size: var(--fs-2xs); color: var(--green); border-top: 1px dashed var(--border); padding-top: .5rem; }
 .g-act .scale { margin: 0; }
 /* The act card is a quarter of the row, so a scale inside it gives the label
    less room than the number it is labelling. */
-.g-act .sc-row { grid-template-columns: minmax(0, 1fr) 3.5rem auto; font-size: .72rem; }
+.g-act .sc-row { grid-template-columns: minmax(0, 1fr) 3.5rem auto; font-size: var(--fs-2xs); }
 .g-act .sc-label { white-space: normal; line-height: 1.35; }
 
 /* ── ⌘K palette ───────────────────────────────────────────────────────── */
@@ -2243,13 +2260,13 @@ html.js .nav-cmdk { display: inline-flex; }
 .cmdk-icon { color: var(--text-muted); flex: none; }
 .cmdk-input {
   flex: 1; min-width: 0; border: 0; background: none; outline: none;
-  font-family: inherit; font-size: .98rem; color: var(--text);
+  font-family: inherit; font-size: var(--fs-md); color: var(--text);
 }
 .cmdk-input::placeholder { color: var(--text-muted); }
 .cmdk-esc {
   flex: none; border: 1px solid var(--border); background: var(--surface-2);
   color: var(--text-muted); border-radius: var(--radius-xs);
-  font-family: var(--mono); font-size: .68rem; padding: .18rem .4rem;
+  font-family: var(--mono); font-size: var(--fs-3xs); padding: .18rem .4rem;
   cursor: pointer;
 }
 .cmdk-esc:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
@@ -2279,24 +2296,24 @@ html.js .nav-cmdk { display: inline-flex; }
 .cmdk-star { color: var(--orange-ink); display: inline-flex; }
 .cmdk-star .ico { width: 12px; height: 12px; fill: currentColor; }
 .cmdk-read {
-  font-size: .62rem; font-weight: 700; color: var(--green);
+  font-size: var(--fs-3xs); font-weight: 700; color: var(--green);
   border: 1px solid currentColor; border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5;
 }
 .cmdk-main { min-width: 0; display: grid; gap: .1rem; }
 .cmdk-title {
-  font-size: .88rem; font-weight: 650; line-height: 1.35; color: var(--text);
+  font-size: var(--fs-sm); font-weight: 600; line-height: 1.35; color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .cmdk-line {
-  font-size: .76rem; color: var(--text-muted); line-height: 1.4;
+  font-size: var(--fs-2xs); color: var(--text-muted); line-height: 1.4;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* Which track a row belongs to, in the column a narrow screen keeps. Amber
    rather than the 읽음 green: it is not a mark the reader put there, it is what
    the row is. */
 .cmdk-kind {
-  font-size: .62rem; font-weight: 700; color: var(--orange-ink);
+  font-size: var(--fs-3xs); font-weight: 700; color: var(--orange-ink);
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
 }
@@ -2306,16 +2323,16 @@ html.js .nav-cmdk { display: inline-flex; }
    title's room — this column is `auto`, so anything it asks for the title
    gives up. */
 .cmdk-id {
-  font-family: var(--mono); font-size: .68rem; color: var(--text-muted);
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.cmdk-none { padding: 1.1rem .8rem; font-size: .84rem; color: var(--text-muted); text-align: center; }
+.cmdk-none { padding: 1.1rem .8rem; font-size: var(--fs-xs); color: var(--text-muted); text-align: center; }
 
 .cmdk-foot {
   flex: none; display: flex; align-items: center; gap: .6rem;
   padding: .45rem .85rem; border-top: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: .7rem; color: var(--text-muted);
+  font-size: var(--fs-3xs); color: var(--text-muted);
 }
 .cmdk-keys { margin-left: auto; font-family: var(--mono); }
 /* The page behind must not scroll under an open dialog — a wheel over the
