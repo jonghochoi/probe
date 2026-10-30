@@ -15,7 +15,7 @@
 .sc-missing { border-style: dashed; background: none; }
 .sc-stats { display: flex; flex-wrap: wrap; gap: .4rem 1.8rem; margin: 0; flex: 1; }
 .sc-stats > div { display: grid; gap: .05rem; }
-.sc-stats dt { font-size: .68rem; color: var(--text-muted); }
+.sc-stats dt { font-size: .75rem; color: var(--text-muted); }
 .sc-stats dd {
   margin: 0; font-family: var(--num); font-size: 1.25rem; font-weight: 800;
   font-variant-numeric: tabular-nums; line-height: 1.2;
@@ -54,7 +54,7 @@
   transform: rotate(45deg); transition: transform .15s;
 }
 .sc-pick[open] .sc-date::after { transform: rotate(225deg); margin-top: .2rem; }
-.sc-pick-n { font-family: var(--num); font-size: .7rem; color: var(--text-muted); }
+.sc-pick-n { font-family: var(--num); font-size: .75rem; color: var(--text-muted); }
 .sc-menu {
   position: absolute; z-index: calc(var(--z-raised) + 1); top: calc(100% + .35rem); left: 50%;
   transform: translateX(-50%); width: min(30rem, calc(100vw - 2rem));
@@ -161,7 +161,7 @@ summary.sc-row:hover { background: var(--surface-3); }
 .sc-gist { font-size: .88rem; color: var(--text); line-height: 1.55; }
 .sc-side { display: grid; gap: .3rem; justify-items: end; padding-top: .1rem; }
 .sc-picks { display: flex; flex-wrap: wrap; gap: .2rem; justify-content: flex-end; max-width: 15rem; }
-.sc-code { font-size: .7rem; color: var(--text-muted); display: flex; gap: .5rem; white-space: nowrap; }
+.sc-code { font-size: .75rem; color: var(--text-muted); display: flex; gap: .5rem; white-space: nowrap; }
 .sc-code > span + span::before { content: "·"; margin-right: .5rem; }
 .sc-rw { font-weight: 700; color: var(--orange-ink); text-decoration: none; }
 .sc-rw:hover { text-decoration: underline; }
@@ -187,7 +187,7 @@ summary.sc-row:hover { background: var(--surface-3); }
 .sc-blk { display: grid; gap: .5rem; align-content: start; font-size: .87rem; }
 .sc-blk > h3 {
   display: flex; align-items: center; gap: .45rem;
-  font-size: .74rem; font-weight: 800; letter-spacing: .04em; color: var(--text);
+  font-size: .74rem; font-weight: 800; color: var(--text);
 }
 .sc-blk > h3::before { content: ""; width: 3px; height: .9em; border-radius: 2px; background: var(--orange); }
 .sc-blk ul { padding-left: 1.1rem; display: grid; gap: .5rem; }
@@ -205,7 +205,7 @@ summary.sc-row:hover { background: var(--surface-3); }
 }
 .sc-brief > h3 + .sc-bstep { border-top: 0; padding-top: .3rem; }
 .sc-bstep-h {
-  font-size: .68rem; font-weight: 700; letter-spacing: .04em; color: var(--text-muted);
+  font-size: .75rem; font-weight: 700; color: var(--text-muted);
   padding-top: .2rem;
 }
 .sc-bstep dl { display: grid; gap: .4rem; margin: 0; }
@@ -234,7 +234,7 @@ ul.sc-ax-t li { line-height: 1.65; }
 /* ── Near misses and sources ──────────────────────────────────────────── */
 .sc-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-bottom: .8rem; }
 .sc-table th, .sc-table td { text-align: left; padding: .45rem .6rem; border-top: 1px solid var(--border-soft); vertical-align: baseline; }
-.sc-table th { font-size: .68rem; color: var(--text-muted); font-weight: 600; }
+.sc-table th { font-size: .75rem; color: var(--text-muted); font-weight: 600; }
 .sc-table a { color: var(--text); text-decoration: none; }
 .sc-table a:hover b { text-decoration: underline; }
 .sc-sources { margin-top: 1rem; font-family: var(--num); font-size: .72rem; color: var(--text-muted); }
