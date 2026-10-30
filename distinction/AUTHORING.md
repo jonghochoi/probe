@@ -345,7 +345,7 @@ deep dive) assigns them.
 | Ideas per deep dive (§3-5 `8`) | 3 | `/ideate`'s ceiling |
 | Deep dive prose | 20,000 characters outside fences | room for every stage and the errata, short of retelling the paper |
 | Charts per deep dive (§3-5 `6`) | 3 | a chart is for the comparison the section turns on, not for every number it states |
-| Versus notes audited per delta run | half the active ones, rounded up | at the two scheduled runs a week (`distinction/SETUP.md` §4) every versus note is re-read within the week, and no run carries the whole basket |
+| Versus notes audited per delta run | half the active ones, rounded up | every versus note is re-read within two delta runs, however the schedule spaces them (`distinction/SETUP.md` §4), and no run carries the whole basket |
 
 ## 6. Korean authoring
 
@@ -407,7 +407,7 @@ original and grades every paper-side statement (§4-1). The writer reads its
 own work with the reasons it wrote it; the verifier reads only the page. The
 audit (prompt step 7) sends a versus note nothing changed under back to a fresh
 verifier and re-resolves its code and method anchors, so a miss or a moved
-line does not stand for longer than a week. A deep dive gets readers of
+line does not stand for longer than two runs. A deep dive gets readers of
 its own (prompt D2 and D4): the errata pass reads the rewrite against the
 original before anything is written on it, and a code reader opens every
 `path:line` and `cfg:` anchor and checks it says what the bullet uses it
