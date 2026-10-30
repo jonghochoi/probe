@@ -20,7 +20,7 @@
   margin: 0; font-family: var(--num); font-size: var(--fs-xl); font-weight: 800;
   font-variant-numeric: tabular-nums; line-height: 1.2;
 }
-.sc-stats dd small { font-size: var(--fs-3xs); font-weight: 600; color: var(--text-muted); margin-left: .1rem; }
+.sc-stats dd small { font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted); margin-left: .1rem; }
 
 /* ── The run navigator ─────────────────────────────────────────────────── */
 /* One step older on the left, one step newer on the right, the run on screen

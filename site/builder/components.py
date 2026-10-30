@@ -273,8 +273,8 @@ def mark_fab() -> str:
 
 def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) -> str:
     return f"""
-<button class="memo-fab" data-memo-fab data-has-memo="0" aria-label="메모 열기">
-  {icon("pencil")}<span class="memo-fab-l">메모</span><span class="count"></span>
+<button class="memo-fab" data-memo-fab data-has-memo="0" aria-label="메모 열기" title="메모">
+  {icon("pencil")}<span class="count"></span>
 </button>
 <div class="scrim" data-scrim data-open="0"></div>
 <aside class="memo" data-memo-root data-open="0"
