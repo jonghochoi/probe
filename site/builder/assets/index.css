@@ -306,7 +306,7 @@ html.js .rail {
    number: a reset is the way back from `35 / 42편` to `42편`, and a control
    standing where its own effect is readable needs no label explaining it. */
 .rail-reset {
-  font: inherit; font-size: var(--fs-3xs); font-weight: 600; margin-left: .4rem;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600; margin-left: .4rem;
   padding: .06rem .36rem; border-radius: var(--radius-xs); cursor: pointer;
   background: none; border: 1px solid var(--border); color: var(--text-muted);
   transition: border-color var(--dur-short) var(--ease-out),

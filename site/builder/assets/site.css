@@ -971,7 +971,7 @@ table.mx thead th .pmark { margin-right: .35rem; }
    flagged, because its number does not line up with the others'. */
 .mx-metric {
   display: inline-block; margin-bottom: .25rem; padding: .02rem .45rem;
-  font-size: var(--fs-3xs); font-weight: 700; color: var(--text-muted);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
   border: 1px solid var(--border); border-radius: var(--radius-pill);
 }
 /* The 한계 callout's amber: a yardstick that differs is a limit on reading
@@ -979,7 +979,7 @@ table.mx thead th .pmark { margin-right: .35rem; }
 .mx-metric.is-off, .mx-flag { color: var(--amber); border-color: currentColor; background: var(--wash-warn); }
 .mx-flag {
   display: inline-block; margin-top: .35rem; padding: .02rem .45rem;
-  font-size: var(--fs-3xs); border: 1px solid; border-radius: var(--radius-pill);
+  font-size: var(--fs-2xs); border: 1px solid; border-radius: var(--radius-pill);
 }
 /* A `stops` axis spans the paper columns: equal-width places — order, never
    distance — with each paper's mark on the one it holds. */
@@ -1381,7 +1381,6 @@ figure.fig figcaption {
 }
 .table-wrap th {
   background: var(--surface-2); font-weight: 700; font-size: var(--fs-2xs);
-  letter-spacing: .03em; text-transform: uppercase;
   color: var(--text-muted); white-space: nowrap;
 }
 .table-wrap tr:last-child td { border-bottom: none; }
@@ -1861,32 +1860,28 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .callout code { font-size: .82em; }
 
 /* ── Memo: floating button + slide panel ──────────────────────────────── */
+/* The same 44px round icon target as 책갈피 above it, at every width: the pair
+   reads as one stack of controls, and covers as little of the line under them
+   as the thumb allows. The word lives in `aria-label` and `title`. */
 .memo-fab {
   position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: var(--z-raised);
-  display: inline-flex; align-items: center; gap: .45rem;
-  background: var(--surface); color: var(--text);
-  border: 1px solid var(--border); border-radius: var(--radius-pill);
-  padding: .6rem 1rem; font: inherit; font-size: var(--fs-sm); font-weight: 600;
-  box-shadow: var(--shadow-lg); cursor: pointer;
+  width: 44px; height: 44px; display: grid; place-items: center; padding: 0;
+  background: var(--surface); color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 50%;
+  box-shadow: var(--shadow-lg); cursor: pointer; touch-action: manipulation;
   transition: color var(--dur-mid) var(--ease-out),
               border-color var(--dur-mid) var(--ease-out),
               transform var(--dur-mid) var(--ease-out);
 }
 .memo-fab:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: translateY(-1px); }
+.memo-fab[data-has-memo="1"] { color: var(--orange-ink); border-color: var(--amber-soft); }
 .memo-fab .count {
-  display: none; min-width: 18px; height: 18px; padding: 0 5px;
+  display: none; position: absolute; top: -4px; right: -4px;
+  min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: var(--radius-pill); background: var(--orange); color: var(--accent-ink);
   font-size: var(--fs-3xs); font-weight: 800; line-height: 18px; text-align: center;
 }
 .memo-fab[data-has-memo="1"] .count { display: inline-block; }
-/* On a phone the button is the same 44px round target as 책갈피 above it, so
-   the pair covers as little of the line under them as the thumb allows; the
-   word comes back where there is a margin for it to sit in. */
-@media (max-width: 640px) {
-  .memo-fab { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; }
-  .memo-fab-l { display: none; }
-  .memo-fab .count { position: absolute; top: -4px; right: -4px; }
-}
 
 .memo {
   position: fixed; top: 0; right: 0; z-index: var(--z-panel);
@@ -2238,7 +2233,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .ga-t { font-size: var(--fs-md); font-weight: 700; line-height: 1.4; letter-spacing: -.01em; text-wrap: balance; }
 .ga-c { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.6; }
 .g-act .fig { margin: 0; }
-.g-act .fig figcaption { font-size: var(--fs-3xs); }
+.g-act .fig figcaption { font-size: var(--fs-2xs); }
 .ga-eq { overflow-x: auto; font-size: var(--fs-base); }
 .ga-s { font-family: var(--num); font-size: var(--fs-2xs); color: var(--green); border-top: 1px dashed var(--border); padding-top: .5rem; }
 .g-act .scale { margin: 0; }
@@ -2348,7 +2343,7 @@ html.js .nav-cmdk { display: inline-flex; }
    rather than the 읽음 green: it is not a mark the reader put there, it is what
    the row is. */
 .cmdk-kind {
-  font-size: var(--fs-3xs); font-weight: 700; color: var(--orange-ink);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--orange-ink);
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
 }
@@ -2367,9 +2362,9 @@ html.js .nav-cmdk { display: inline-flex; }
   flex: none; display: flex; align-items: center; gap: .6rem;
   padding: .45rem .85rem; border-top: 1px solid var(--border);
   background: var(--surface-2);
-  font-size: var(--fs-3xs); color: var(--text-muted);
+  font-size: var(--fs-2xs); color: var(--text-muted);
 }
-.cmdk-keys { margin-left: auto; font-family: var(--mono); }
+.cmdk-keys { margin-left: auto; font-family: var(--num); }
 /* The page behind must not scroll under an open dialog — a wheel over the
    scrim would otherwise take the reader somewhere they cannot see. */
 html.cmdk-on, html.cmdk-on body { overflow: hidden; }
