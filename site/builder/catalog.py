@@ -35,7 +35,7 @@ from . import components as c
 from . import corpus
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, Paper
 
-SITE = f"https://{c.REPO.split('/')[0]}.github.io/{c.REPO.split('/')[1]}/"
+SITE = c.SITE
 RAW = c.RAW_URL
 
 # How large `corpus.json` may get. It exists to fit in one context window next

@@ -655,6 +655,7 @@ def shelf_page(papers: list[Paper]) -> str:
     return c.page(
         title="서재 · PROBE",
         here="shelf",
+        description="즐겨찾기 · 책갈피 · 메모 — 이 브라우저에 담아 둔 논문과 읽던 자리",
         body=body,
         depth=1,
         scripts=["memo.js", "shelf.js", "hub.js"],
@@ -662,11 +663,25 @@ def shelf_page(papers: list[Paper]) -> str:
     )
 
 
-def not_found_page() -> str:
+def not_found_page(papers: list[Paper]) -> str:
+    """The page an old or mistyped link lands on.
+
+    It offers the two ways a reader usually recovers: the palette, for the
+    paper they came for, and the newest rewrites, for a link that pointed at
+    something recent. Both are absolute, since Pages serves this file at the
+    bad URL's own depth.
+    """
+    newest = sorted(papers, key=lambda p: p.order_key, reverse=True)[:5]
+    recent = "".join(
+        f'<li><a href="{SITE_BASE}p/{c.esc(p.stem)}/index.html">{c.esc(p.title)}</a></li>'
+        for p in newest
+    )
     body = f"""<main class="hub notfound">
   <h1>404</h1>
-  <p>이 주소에는 아무것도 없습니다.</p>
-  <p><a href="{SITE_BASE}">논문 목록으로 돌아가기</a></p>
+  <p>이 주소에는 아무것도 없습니다. 찾던 논문은 제목의 한 단어나 arXiv id 로 찾을 수 있습니다.</p>
+  <p class="notfound-acts"><button type="button" class="notfound-find" data-cmdk-open>논문 찾기</button>
+    <a href="{SITE_BASE}">논문 목록으로</a></p>
+  {f'<h2 class="notfound-h">최근 재작성본</h2><ul class="notfound-list">{recent}</ul>' if recent else ""}
 </main>
 """
     return c.page(
@@ -1374,6 +1389,7 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
     return c.page(
         title="비교 · PROBE",
         here="compare",
+        description="재작성본이 있는 논문 두세 편을 한 질문 아래 놓고, 갈리는 자리만 원문에서 확인한 비교",
         body=body,
         depth=1,
         extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
@@ -1742,6 +1758,7 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
     return c.page(
         title=f"{run.date} 탐색 · PROBE",
         here="scout",
+        description=f"{run.date} 스카우팅 회차 — 연구 축마다 먼저 읽을 논문을 고른 목록",
         body=body,
         depth=depth,
         scripts=["scout.js"],

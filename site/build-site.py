@@ -165,7 +165,7 @@ def build(args) -> int:
     rendered[out / "index.html"] = pages.landing_page(
         papers, katex, search_api=args.search_api, partial=bool(args.only))
     rendered[out / "shelf" / "index.html"] = pages.shelf_page(papers)
-    rendered[out / "404.html"] = pages.not_found_page()
+    rendered[out / "404.html"] = pages.not_found_page(papers)
 
     try:
         katex.flush()
