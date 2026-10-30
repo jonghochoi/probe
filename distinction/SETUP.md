@@ -176,15 +176,17 @@ the machine before the first scheduled run.
 
 The scheduler entry is the machine-specific half — it names the checkout,
 sets `PROBE_PRIVATE_DIR`, and puts `claude` on `PATH`, which a scheduled job
-does not inherit from the login shell. Twice a week, Tuesday and Thursday at
-noon — the cadence the audit is sized to, so every versus note is re-read within
-the week (`distinction/AUTHORING.md` §5) — with a missed run made up at the
-next boot:
+does not inherit from the login shell. `<days>` and `<hour>` below stand for
+the schedule the operator picks — systemd's weekday list or cron's
+day-of-week field, and an hour of the day. Each delta run audits half the
+active versus notes, so every versus note is re-read within two runs
+(`distinction/AUTHORING.md` §5) and the spacing between runs sets how long a
+moved anchor can stand. The timer makes up a missed run at the next boot:
 
 | Scheduler | Entry |
 |---|---|
 | **systemd timer** (Linux) | A user service and timer, below. `Persistent=true` fires a timer missed while off at the next boot |
-| **cron** (Linux) | `0 12 * * 2,4 PROBE_PRIVATE_DIR=$HOME/probe-private PATH=$HOME/.local/bin:/usr/bin:/bin <checkout>/distinction/run-distinguish.sh`. cron does not make up a missed run — on a machine that is not always on, use the timer or `anacron` |
+| **cron** (Linux) | `0 <hour> * * <days> PROBE_PRIVATE_DIR=$HOME/probe-private PATH=$HOME/.local/bin:/usr/bin:/bin <checkout>/distinction/run-distinguish.sh`. cron does not make up a missed run — on a machine that is not always on, use the timer or `anacron` |
 
 The systemd pair, in `~/.config/systemd/user/`:
 
@@ -198,7 +200,7 @@ ExecStart=<checkout>/distinction/run-distinguish.sh
 
 # distinguish.timer
 [Timer]
-OnCalendar=Tue,Thu *-*-* 12:00:00
+OnCalendar=<days> *-*-* <hour>:00:00
 Persistent=true
 
 [Install]
