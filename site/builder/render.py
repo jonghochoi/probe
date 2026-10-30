@@ -33,6 +33,7 @@ from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.token import Comment, Generic, Keyword, Number, Operator, Text
 from pygments.util import ClassNotFound
 
+from .components import glue_units
 from .mdext import callouts, ghmath, probefence
 
 # Printed above the thesis line, one per document kind: the reader has arrived
@@ -669,7 +670,7 @@ class DocRenderer:
 
     # ── D# / P# tooltips ────────────────────────────────────────────────
     def _text(self, tokens, idx, options, env):
-        text = html.escape(tokens[idx].content)
+        text = glue_units(html.escape(tokens[idx].content))
         if not self.decisions:
             return text
         return _decorate_refs(text, self.decisions)

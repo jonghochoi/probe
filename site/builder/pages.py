@@ -513,7 +513,7 @@ def _row_readout(paper: Paper) -> str:
         return ""
     return (
         '<span class="row-ro"><span class="row-ro-k">결과</span>'
-        f'<span class="row-ro-v">{c.esc(paper.metric)}</span></span>'
+        f'<span class="row-ro-v">{c.glue_units(c.esc(paper.metric))}</span></span>'
     )
 
 
@@ -528,7 +528,7 @@ def _lead_readout(paper: Paper) -> str:
         return ""
     return (
         '<span class="lead-ro"><span class="lead-ro-k">결과</span>'
-        f'<span class="lead-ro-v">{c.esc(paper.metric)}</span></span>'
+        f'<span class="lead-ro-v">{c.glue_units(c.esc(paper.metric))}</span></span>'
     )
 
 
@@ -1289,7 +1289,7 @@ def _cmp_cards(comp, papers: list[Paper]) -> str:
         + f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
         f'<span class="cmp-card-foot">'
         f'<span class="cmp-card-id">{c.esc(p.stem)}</span>'
-        + (f'<span class="cmp-card-m">{c.esc(p.metric)}</span>' if p.metric else "")
+        + (f'<span class="cmp-card-m">{c.glue_units(c.esc(p.metric))}</span>' if p.metric else "")
         + "</span></a>"
         for i, (p, stance, line) in enumerate(zip(papers, stances, plain))
     )

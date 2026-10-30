@@ -351,7 +351,7 @@ explains it; an Act 2 with no figure while the paper has one is wrong.
   not every one.
 - **`source` is split on its first comma** — the head becomes the
   figure-number badge that leads the caption (`Figure 3 — …`), the tail the
-  italic origin at the end (`(원문 §3.2)`). Written as one run with no comma,
+  muted origin at the end (`(원문 §3.2)`). Written as one run with no comma,
   the whole thing prints as the origin with no badge.
 - Where the paper has NO corresponding figure and a sequence still needs
   showing, use `probe-flow` — never ASCII art, never raw HTML:

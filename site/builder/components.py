@@ -7,6 +7,7 @@ a fifth dependency. Every interpolation goes through `esc()`.
 from __future__ import annotations
 
 import html
+import re
 
 from . import assets_out
 
@@ -31,6 +32,23 @@ def asset(url: str) -> str:
 
 def esc(text: str) -> str:
     return html.escape(str(text), quote=True)
+
+
+# The corpus writes a space between a number and its unit (`41.4 %`, `240 Hz`),
+# and that space is a break opportunity: a phone ends a line on `41.4` and
+# starts the next on `%`. A no-break space keeps the reading whole. Units only,
+# never a Hangul counter — `3 분석` is not `3 분`. Applied to printed text and
+# never to `esc()` as a whole, so a filter haystack keeps the plain space a
+# reader types.
+_UNIT_GAP = re.compile(
+    r"(?<=\d) (?=(?:%p?|pp|×|k?Hz|ms|s|h|min|mm/s|mm|cm|m|Nm|N|rad|FPS|fps"
+    r"|GB|μL|°|[MBK])(?![A-Za-z0-9]))"
+)
+
+
+def glue_units(text: str) -> str:
+    """`text` with each number–unit space made a no-break space."""
+    return _UNIT_GAP.sub("\u00a0", text)
 
 
 # ── The icon set ────────────────────────────────────────────────────────────
@@ -67,6 +85,8 @@ _ICON_PATHS = {
     "star": f'<path d="{_STAR_D}"/>',
     # 읽음 — the claim the reader makes, drawn as the mark people make for it.
     "check": '<path d="M3 8.4 6.4 11.6 13 4.6"/>',
+    # 메모 — a pencil, because the button opens a place to write.
+    "pencil": '<path d="M10.6 2.7 13.3 5.4 5.6 13.1 2.4 13.6 2.9 10.4Z"/><path d="M9.1 4.2l2.7 2.7"/>',
 }
 
 
@@ -250,7 +270,7 @@ def mark_fab() -> str:
 def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) -> str:
     return f"""
 <button class="memo-fab" data-memo-fab data-has-memo="0" aria-label="메모 열기">
-  📝 <span>메모</span><span class="count"></span>
+  {icon("pencil")}<span class="memo-fab-l">메모</span><span class="count"></span>
 </button>
 <div class="scrim" data-scrim data-open="0"></div>
 <aside class="memo" data-memo-root data-open="0"

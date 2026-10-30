@@ -254,7 +254,7 @@ def render(model: Glance, renderer, katex, figure_urls: dict[str, str]) -> str:
 
     facts = "".join(
         f'<div class="gh-fact"><span class="gh-k">{esc(f.get("k", ""))}</span>'
-        f'<span class="gh-v">{esc(f.get("v", ""))}</span></div>'
+        f'<span class="gh-v">{c.glue_units(esc(f.get("v", "")))}</span></div>'
         for f in model.hub.get("facts", []) if isinstance(f, dict)
     )
     fig = _figure(model.hub.get("figure"), model.hub.get("caption"), figure_urls)
