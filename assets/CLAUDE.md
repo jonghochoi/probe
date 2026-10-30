@@ -58,23 +58,23 @@ one until the lens flashes, the scouter shakes and both pupils shrink),
 `probe-analysis.svg` reads like a detective (a tweed deerstalker whose ear
 flaps hang at the hull's sides, one wide page under the eyes and a reading
 stone sliding along its first line, until the stone stops, the flaps spring
-up and a red `!` pops over the cap), `probe-comparison.svg` rallies (two
-pages standing at the hull's sides bat a yellow ball back and forth, faster
-each time, the pupils chasing it, until it hits the top of the head — the
-probe reels, a red bump swells where it hit and the ball dribbles to a stop
-at its feet), and `probe-ideation.svg`
-has an idea (pupils up at a bulb over the head that flickers like a tired
-tube, catches, and glows so bright the probe squints). A new track needs a
+up and a red `!` pops over the cap), `probe-comparison.svg` spots the
+difference (two bar-chart pages standing side by side under the eyes, alike
+but for their third bar, the pupils and the hull turning from one to the
+other faster each time, until a red pen ring draws itself round the same
+spot on both pages, the probe hops and both pupils shrink), and
+`probe-ideation.svg` has an idea (pupils up at a bulb over the head that
+flickers like a tired tube, catches, and glows so bright the probe squints). A new track needs a
 new outline, not a variation on one of these.
 
 **Every track icon builds to one beat.** The scouter's dial is the model:
 something mounts over the cycle and a single beat releases it — the flash,
-the `!`, the bump, the glare — so each icon lands a punchline
+the `!`, the pen ring, the glare — so each icon lands a punchline
 rather than idling in a loop. Hues outside the clay come only with a prop
 and stay on it: the scouter's green and purple, which no other icon uses,
-the deerstalker's tweed, the ball's and the bulb's yellow, and the red of
-the `!` and the bump. With motion off, an icon rests before its beat — the
-ball between the pages, the eyes open.
+the deerstalker's tweed, the bulb's yellow, and the red of the `!` and the
+pen ring. With motion off, an icon rests before its beat — the pages
+unmarked, the eyes open.
 
 **An icon shares its track's cell, never a column of its own.** A table
 column that holds only an image has no minimum width — GitHub caps every image
