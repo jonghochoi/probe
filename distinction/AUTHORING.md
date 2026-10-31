@@ -2,9 +2,13 @@
 
 The format contract for the distinction track — the documents `/distinguish`
 writes into the private folder: one versus note per basket paper, the claims ×
-papers scoreboard, one report per run, and on demand a deep dive of one paper
-against one code scope. Every one of them holds the method or its code
-beside the papers, which is why none of them is in this repository.
+papers scoreboard, one report per run, on demand a deep dive of one paper
+against one code scope, and on demand a notebook kit — slides, an
+infographic, an audio overview or a mind map that NotebookLM draws from one
+rewrite. The first four hold the method or its code beside the papers, which
+is why none of them is in this repository. The kit holds no method; it stays
+in the folder because it is generated from someone else's paper and checked
+only as far as its check note says (§3-7).
 
 `.claude/prompts/distinguish.txt` defers to this file for what the documents
 must look like, and owns the procedure — what is read, how the report is found,
@@ -25,8 +29,8 @@ file, the prompt and the templates use placeholder ids, claims and keys —
 never a real one.
 
 The other rule the track inherits: **only a paper with a rewrite in
-`analysis/` gets a versus note** or a deep dive — both read it through
-`site/query.py`. A basket row without one is a next action in the report
+`analysis/` gets a versus note**, a deep dive or a notebook kit — each reads
+it through `site/query.py`. A basket row without one is a next action in the report
 (§3-3), not a versus note.
 
 ## 2. What the routine reads and writes
@@ -45,19 +49,21 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 | `reports/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
 | `deepdive/<arxiv-id>--<alias>--<scope>.md` | `--deepdive` run | yes — the latest reading of that paper against that scope |
 | `versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` | document | yes — the page drawn from it (§3-6) |
+| `notebook/<arxiv-id>--<alias>/` | `--notebook` run | yes — the brief sent, the files NotebookLM drew and the check note (§3-7) |
 | `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
 
 `<alias>` in a file name is the paper's alias with every run of whitespace
 turned into `-` (`Dexterous Point Policy` → `Dexterous-Point-Policy`), so the
 name says which paper it holds without opening it; an alias never contains
 `--`, the separator. A versus note takes the `BASKET.md` row's `alias`; a deep
-dive takes the `<alias>` its H1 names. The routine finds a paper's file by its id
+dive takes the `<alias>` its H1 names; a notebook kit takes the rewrite's
+`alias:`, or its id when the rewrite has none. The routine finds a paper's file by its id
 (`versus/<id>--*.md`) and never renames one: when a row's alias changes, the
 operator renames its files, and until then the lint names the mismatch.
 
 ## 3. The documents
 
-All four are Korean, in the register `scouting/AUTHORING.md` §4 fixes (§6
+All five are Korean, in the register `scouting/AUTHORING.md` §4 fixes (§6
 below). Section headers are fixed strings: the lint matches them verbatim.
 
 ### 3-1. The versus note — `versus/<arxiv-id>--<alias>.md`
@@ -281,7 +287,81 @@ versus note's §2 sides set side by side, a report's ids linked to their versus 
 its runs to each other, a deep dive's errata as a bar and its §6 fences
 drawn, every anchor a link into the code or the rewrite. The Markdown stays
 the record the lint reads and the next run builds on, so a fix goes into the
-Markdown and the page is drawn again; a page is never edited by hand.
+Markdown and the page is drawn again; a page is never edited by hand. A
+notebook kit gets no page: its files are what a person opens, and its check
+note is read beside them.
+
+### 3-7. The notebook kit — `notebook/<arxiv-id>--<alias>/`
+
+A kit is what NotebookLM draws from one rewrite — a slide deck for a lab
+meeting, an infographic, an audio overview, a mind map — for reading or
+presenting the paper, not for arguing with it. It is the one output of this
+track that is made off the machine, so its first rule is about what leaves:
+
+**Only public material goes to NotebookLM.** The sources are the rewrite
+`analysis/<id>.md` and the arXiv original at the version the rewrite read
+(its `arxiv_html:`), and the instructions sent are `brief.md`, written from
+the rewrite and `context/` alone. Nothing from the private folder — no line
+of `MY-METHOD.md`, `CODEMAP.md`, a versus note, a deep dive, a report or the
+code — is uploaded or quoted into a brief, and a kit says nothing about this
+method.
+
+```
+notebook/<arxiv-id>--<alias>/
+  brief.md          the instructions sent, one `##` per kind     written first, linted before it is sent
+  check.md          the check note                               written last
+  slides.pdf        `slide-deck`, and slides.pptx beside it
+  infographic.png   `infographic`
+  audio.mp3         `audio`
+  mindmap.json      `mind-map`
+```
+
+Only the kinds the run asked for are present. **`brief.md`**:
+
+```
+# <alias> 노트북 지시문
+Paper: XXXX.XXXXX · Rewrite: analysis/XXXX.XXXXX.md · Run: YYYY-MM-DD
+
+## slide-deck
+<NotebookLM 에 보내는 지시 — 한국어>
+## audio
+<…>
+```
+
+Each `##` is a kind exactly as the NotebookLM CLI names it — `slide-deck`,
+`infographic`, `audio`, `mind-map` — and its body is the text sent as that
+kind's prompt, verbatim. The body asks for Korean, names the reader (the
+researcher `context/MASTER.md` §1 describes), follows the rewrite's thesis
+and its four acts in order, gives the numbers the rewrite's 요약 cards carry
+with their units and asks that no other number be stated, and closes on the
+paper's own stated limits and the `D#` its act 4 argues with. It carries no
+anchor of the private side — no `C#`, `METHOD §n`, `cfg:` or `path:line` —
+and no `MY-METHOD.md` §6 string (§7).
+
+**`check.md`**:
+
+```
+# <alias> 노트북 키트 — <한 문장: 이 키트를 보여 주기 전에 알아야 할 것>
+Paper: XXXX.XXXXX · Rewrite: analysis/XXXX.XXXXX.md · Notebook: <NotebookLM notebook id> · Run: YYYY-MM-DD
+
+## 1 소스
+## 2 생성물
+## 3 대조
+## 4 남은 오류
+```
+
+| Section | Holds | Each bullet carries |
+|---|---|---|
+| `1 소스` | Every source the notebook holds, one bullet each | exactly `` `analysis/<id>.md` `` or the arXiv URL of the read version — nothing else may stand here |
+| `2 생성물` | One bullet per kind made | the kind in backticks, its file names, then `점검함` or `미점검` — audio is always `미점검`, because no reader here hears it |
+| `3 대조` | One line `점검 N · 맞음 n · 틀림 n · 과장 n · 원문 없음 n`, then one bullet per statement graded other than `맞음` | a verdict first, the place — `slide-deck p.<n>`, `infographic` or `mind-map` — and, but for `원문 없음`, a quote anchor (§4) |
+| `4 남은 오류` | Each §3 statement still standing after the revision pass, so a reader knows which slide not to show | the place, and what the original says instead |
+
+A statement is anything a drawn page asserts about the paper: a number, a
+method or model name, a mechanism step, a causal claim, a stated limit. The
+grades are §3-5's errata grades, read against the original first and the
+rewrite second. `4 남은 오류` holds `- 없음` when the revision pass left
+nothing standing — the only state in which the kit is ready to show as it is.
 
 ## 4. Anchors
 
@@ -345,6 +425,7 @@ deep dive) assigns them.
 | Ideas per deep dive (§3-5 `8`) | 3 | `/ideate`'s ceiling |
 | Deep dive prose | 20,000 characters outside fences | room for every stage and the errata, short of retelling the paper |
 | Charts per deep dive (§3-5 `6`) | 3 | a chart is for the comparison the section turns on, not for every number it states |
+| Brief per kind (§3-7 `brief.md`) | 2,000 characters | NotebookLM follows a short instruction; a longer one restates the rewrite it already holds as a source |
 | Versus notes audited per delta run | half the active ones, rounded up | at the two scheduled runs a week (`distinction/SETUP.md` §4) every versus note is re-read within the week, and no run carries the whole basket |
 
 ## 6. Korean authoring
@@ -366,8 +447,10 @@ space, as the alias does, and a page splits a two-sided sentence at it.
 
 `MY-METHOD.md` §6 lists literal strings — a codename, a number, a dataset, a
 collaborator — that no output may carry yet. The lint fails on any of them in
-a versus note, the scoreboard, a run or a deep dive, and the routine does not save an output the
-lint fails. A versus note that needs to say the thing says it by its `C#` or
+a versus note, the scoreboard, a run, a deep dive or a notebook kit's
+`brief.md` and `check.md`, and the routine does not save an output the lint
+fails — nor send a brief it fails, since a brief is the one text that leaves
+the machine. A versus note that needs to say the thing says it by its `C#` or
 `METHOD §n` anchor.
 
 ## 8. Enforcement
@@ -387,9 +470,10 @@ checks is in no checkout.
 | §3-3 | the report's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a versus note id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
 | §3-5 | the deep dive's file name, H1 alias and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
-| §5 | active rows, ideas per versus note, per report and per deep dive, charts per deep dive, versus note and deep dive prose length |
+| §3-7 | the kit's folder name and both files' metadata agree, `analysis/<id>.md` exists; `brief.md` holds only kind headers, each once, and no private anchor; `check.md` the four headers verbatim and in order, every §1 bullet the rewrite or an arXiv URL of that id, every §2 bullet a kind and `점검함` or `미점검`, §3 its count line and every bullet a verdict, a place and — but for `원문 없음` — a quote anchor, every §4 bullet a place; a folder holding a drawn file has a `check.md` |
+| §5 | active rows, ideas per versus note, per report and per deep dive, charts per deep dive, versus note and deep dive prose length, brief length per kind |
 | §6 | no `이 방법`, `이 범위`, `내 방법` or `우리` in any output outside a `##` header or a `"…"` quote |
-| §7 | no `MY-METHOD.md` §6 string in any output |
+| §7 | no `MY-METHOD.md` §6 string in any output, a kit's `brief.md` included |
 | inputs | `BASKET.md` rows parse — id, role and status from their sets, no duplicate id; `MY-METHOD.md` carries its spine, a `name:` line and one bullet per `#### [C#]` |
 
 ```bash
@@ -411,4 +495,6 @@ line does not stand for longer than a week. A deep dive gets readers of
 its own (prompt D2 and D4): the errata pass reads the rewrite against the
 original before anything is written on it, and a code reader opens every
 `path:line` and `cfg:` anchor and checks it says what the bullet uses it
-for.
+for. A notebook kit gets one reader too (prompt N5): an agent that did not
+write the brief reads every drawn page against the original, and its rows
+are the check note's §3.

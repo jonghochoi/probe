@@ -50,7 +50,8 @@ D# 가 공중에 떠 있는가.>
 
 ## 6. 외부 발화 금지
 
-<!-- Literal strings. The lint searches every versus note, the scoreboard and every run
+<!-- Literal strings. The lint searches every versus note, the scoreboard, every run,
+     every deep dive and every notebook kit's brief — the one text sent off the machine —
      for each bullet and refuses to pass an output that carries one. -->
 
 - <아직 어느 출력에도 나가면 안 되는 문자열>

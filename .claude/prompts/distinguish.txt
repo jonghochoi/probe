@@ -9,18 +9,23 @@ writes one versus note per basket paper, a claims × papers scoreboard and a rep
 run — all into a private folder on this machine, none into the repository.
 On demand it also writes a deep dive: one paper against one code scope,
 read far deeper than a versus note, with the rewrite itself checked against the
-original before anything is built on it.
+original before anything is built on it. And on demand it has NotebookLM draw
+a notebook kit from one rewrite — slides, an infographic, an audio overview,
+a mind map — and checks every drawn page against the original.
 
 Nothing here is committed, pushed or published. The repository is public and
 the method is not; the private folder is where this mode reads and the only
-place it writes (`distinction/AUTHORING.md` §1).
+place it writes (`distinction/AUTHORING.md` §1). The kit is the one thing
+made off the machine, so it is made from public material only: the rewrite,
+the arXiv original and a brief written from them — never a line of the
+private folder (`distinction/AUTHORING.md` §3-7).
 
 
 ════════════════════════════════════════════════════════════════════════
 THE FORMAT CONTRACT LIVES IN `distinction/AUTHORING.md`
 ════════════════════════════════════════════════════════════════════════
 
-Every rule about what the four documents look like lives there and nowhere
+Every rule about what the five documents look like lives there and nowhere
 in this prompt; read it end to end before you write.
 
 The private folder's own files — `BASKET.md`, `MY-METHOD.md`, `CODEMAP.md`,
@@ -62,7 +67,7 @@ it.
 INPUT
 ════════════════════════════════════════════════════════════════════════
 
-`$ARGUMENTS` is one of five things:
+`$ARGUMENTS` is one of six things:
 
   EMPTY — DELTA MODE. Rewrite only the versus notes that something changed under
   (step 2), audit the least recently verified of the rest (step 7), and
@@ -84,6 +89,14 @@ INPUT
   it need not be in the basket. Writes `deepdive/<id>--<alias>--<scope>.md` and the
   page drawn from it, and touches no versus note, no scoreboard, no `reports/` file and
   no `probe-state` block.
+
+  `--notebook <paper> [<kinds>]` — one paper (an arXiv id or an alias) and
+  the kinds to draw, comma-separated from `slide-deck`, `infographic`,
+  `audio`, `mind-map`; no kinds → `slide-deck`. Runs step 0's guard — the
+  `printenv` and the `test -f`, not the codebase — then NOTEBOOK below in
+  place of steps 1 to 9. The paper needs a rewrite; it need not be in the
+  basket. Writes `notebook/<id>--<alias>/` and touches nothing else in the
+  folder.
 
   A PAPER NOT IN THE BASKET (without `--deepdive`) → stop and say so. Whether it enters is the
   human's; name it under 제안 if a report is being written anyway.
@@ -424,6 +437,148 @@ D6. REPORT. In the chat, in Korean: the file's path and its page's, §1's count 
 
 
 ════════════════════════════════════════════════════════════════════════
+NOTEBOOK — one rewrite drawn by NotebookLM
+════════════════════════════════════════════════════════════════════════
+
+The kit is for reading or presenting one paper. Its format is
+`distinction/AUTHORING.md` §3-7, and its first rule is what leaves the
+machine: the rewrite, the arXiv original and a `brief.md` the lint passed.
+So this mode reads nothing in the private folder but `notebook/` — not
+`MY-METHOD.md`, `BASKET.md`, `CODEMAP.md`, `code`, a versus note, a deep dive
+or a report. The lint reads `MY-METHOD.md` §6 for you; that is the only
+contact.
+
+NotebookLM is driven through the `notebooklm` CLI (`notebooklm-py`,
+`distinction/SETUP.md` §6), on the operator's dedicated Google account. Pass
+`-n <notebook id>` on every call from N3 on rather than `notebooklm use`, so
+the run never depends on, or changes, the CLI's active notebook. When a flag
+below is refused, read `notebooklm <command> --help` once and use what it
+lists; never guess a flag twice.
+
+N1. RESOLVE. `python3 site/query.py show <paper>` gives the id and the alias;
+   no `analysis/<id>.md` → STOP and name `/analyze <id>`. The kit's folder is
+   `$PROBE_PRIVATE_DIR/notebook/<id>--<alias>/`, `<alias>` written as
+   `distinction/AUTHORING.md` §2 fixes, the id in its place when the rewrite
+   has no alias. Read the version the rewrite read:
+
+     grep -m1 '^arxiv_html:' analysis/<id>.md
+
+   Then check the account before writing a word:
+
+     notebooklm auth check --test
+
+   A non-zero exit → STOP and tell the operator to run `notebooklm login`
+   (`distinction/SETUP.md` §6). Do not log in, and do not change the
+   account's language.
+
+N2. BRIEF. Read the rewrite's `::: glance` block (the 요약 tab — the thesis
+   and its four cards), `python3 site/query.py outline <id>`, `section <id>
+   --act 4`, `context/MASTER.md` §1, and the Decision-Log entries act 4 names
+   (`python3 site/query.py decision <D#>`). Write `brief.md` in the kit's
+   folder, one `##` per requested kind, each body the instruction for that
+   kind under `distinction/AUTHORING.md` §3-7: in Korean, for the reader
+   MASTER §1 names, in the rewrite's order, with the 요약 cards' numbers
+   verbatim and no others, closing on the paper's stated limits and the `D#`.
+   Per kind:
+
+     slide-deck   10–14 slides, one claim each; the figure a slide would show
+                  named by the original's figure number, since a drawing of
+                  it is NotebookLM's, not the paper's
+     infographic  the thesis, the mechanism in three steps, the headline
+                  numbers — one page, nothing the 요약 tab does not carry
+     audio        two voices, the 요약 tab's narrative first, the limits last
+     mind-map     the four acts as branches, Terms as leaves
+
+   Then the lint, before anything is sent:
+
+     python3 linters/check-distinction-format.py
+
+   A finding in this kit → fix `brief.md` and re-run until the kit is clean.
+   Findings elsewhere in the folder are not this run's; name them in the
+   chat and go on.
+
+N3. NOTEBOOK. A fresh notebook per run, so a source is never stale:
+
+     notebooklm create "PROBE <id> <alias> <run date>" --json
+
+   Read the notebook id from the JSON; hold it for every later call and for
+   `check.md`. Add the two sources and nothing else:
+
+     notebooklm source add analysis/<id>.md -n <notebook>
+     notebooklm source add "https://arxiv.org/html/<arxiv_html>" -n <notebook>
+
+   When the arXiv HTML will not process, add
+   `https://arxiv.org/pdf/<arxiv_html>` in its place. `notebooklm source list
+   -n <notebook> --json`, then `notebooklm source wait <source id> -n
+   <notebook>` for each, until both are ready.
+
+N4. GENERATE. Write each kind's `brief.md` body to
+   `$PROBE_PRIVATE_DIR/.scratch/notebook-<kind>.txt`, then, per requested kind:
+
+     notebooklm generate slide-deck --prompt-file <txt> --format detailed --wait -n <notebook>
+     notebooklm generate infographic --prompt-file <txt> --orientation portrait --detail detailed --wait -n <notebook>
+     notebooklm generate audio --prompt-file <txt> --format deep-dive --language ko --wait -n <notebook>
+     notebooklm generate mind-map --kind note-backed --instructions "<the body>" -n <notebook>
+
+   `mind-map` has no `--wait`: run `notebooklm artifact list -n <notebook>
+   --type mind-map --json` until it reads complete. Then download into the
+   kit's folder, `--latest` and `--force` on each:
+
+     notebooklm download slide-deck <kit>/slides.pdf -n <notebook>
+     notebooklm download slide-deck <kit>/slides.pptx --format pptx -n <notebook>
+     notebooklm download infographic <kit>/infographic.png -n <notebook>
+     notebooklm download audio <kit>/audio.mp3 -n <notebook>
+     notebooklm download mind-map <kit>/mindmap.json -n <notebook>
+
+   A quota, rate-limit or auth error → STOP: say which kind failed and that
+   `notebooklm usage` shows the window. Files already downloaded stay; the
+   lint names the kit as unchecked until a run writes its `check.md`.
+
+N5. CHECK — a reader that did not write the brief. A drawn page asserts what
+   NotebookLM made of the sources, and the brief's writer reads it with the
+   brief in mind. So one agent (the Agent tool) receives only the paths of
+   the drawn files that can be read — `slides.pdf`, `infographic.png`,
+   `mindmap.json` — the id, the rewrite's path and this instruction verbatim:
+
+     Read every page of these files and list every statement they make
+     about the paper — each number, method or model name, mechanism step,
+     causal claim and stated limit, with its place: `slide-deck p.<n>`
+     (counting from 1), `infographic` or `mind-map`. Look each one up in
+     the original first, then the rewrite; do not recall it:
+       cd site && python3 -m builder.arxiv <id> --grep "<phrase>"
+       cd site && python3 -m builder.arxiv <id> --tables
+       python3 site/query.py section <id> --match "<Term>"
+     Grade each: 맞음 (the original says it), 틀림 (the original says
+     otherwise), 과장 (the original says less — a narrower setting, a
+     hedge dropped, an average presented as a minimum), 원문 없음 (the
+     original does not say it). A drawn chart or diagram is a statement
+     too: its values and its arrows. Return one row per statement: the
+     place, the statement in a few words, the grade, and the original's
+     line that settles it, byte for byte, with its section — or "none".
+
+   When the Agent tool is not available, stop before `check.md` is written
+   and say so; an unchecked kit carries no check note.
+
+N6. REVISE — the slides only, one pass. For each slide with a row other than
+   `맞음`, one revision naming the original's line:
+
+     notebooklm generate revise-slide "<한국어 수정 지시: 원문이 말하는 것>" --artifact <slide-deck artifact id> --slide <n − 1> --wait -n <notebook>
+
+   Download `slides.pdf` and `slides.pptx` again, and send only the revised
+   pages to a fresh agent with N5's instruction. A row it still grades other
+   than `맞음` stands under `4 남은 오류`, as does every non-`맞음` row on the
+   infographic and the mind map, which are not revised — the operator reads
+   them and decides.
+
+N7. CHECK NOTE + LINT. Write `check.md` (`distinction/AUTHORING.md` §3-7):
+   `1 소스` from `notebooklm source list`, `2 생성물` one bullet per kind,
+   `3 대조` N5's rows merged with N6's, `4 남은 오류` what still stands. Run
+   the lint and fix the note until the kit is clean. Then report in the chat,
+   in Korean: the kit's folder, the count line, and each `4 남은 오류` place —
+   or that the kit is ready to show. Then stop.
+
+
+════════════════════════════════════════════════════════════════════════
 WHAT THIS MODE NEVER DOES
 ════════════════════════════════════════════════════════════════════════
 
@@ -439,3 +594,8 @@ WHAT THIS MODE NEVER DOES
 - Saves an output the lint rejects, or one carrying a `MY-METHOD.md` §6 string.
 - Saves a versus note the verify pass (step 6) did not read, or keeps a §3 gap
   or a §6 threat it graded below `원문`.
+- Sends NotebookLM anything but `analysis/<id>.md`, the arXiv original and a
+  `brief.md` the lint passed — or reads the private folder outside
+  `notebook/` while making a kit.
+- Runs `notebooklm share`, `notebooklm login` or `notebooklm language set`.
+  The account is the operator's.

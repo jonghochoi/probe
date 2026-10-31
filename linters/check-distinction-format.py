@@ -38,10 +38,22 @@ Checks, grouped by the contract section they enforce:
              bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a
              ```probe-chart only under §6, drawable by `site/builder/charts.py`
              with `source`, `why` and `omitted`.
+  AUTHORING §3-7 the notebook kit — `notebook/<id>--<alias>/` names a paper
+             with a rewrite; `brief.md` and `check.md` agree with the folder
+             name; the brief holds only kind headers, each once, within its
+             length, and no private anchor (`C#`, `METHOD §n`, `cfg:`,
+             `path:line`); the check note's four headers verbatim and in
+             order, every source the rewrite or an arXiv URL of that id,
+             every 생성물 bullet a kind and `점검함` / `미점검` (audio
+             always `미점검`) with its files present, 대조 its count line
+             and every bullet a verdict, a place and — but for `원문 없음`
+             — a quote anchor, every 남은 오류 bullet a place; a folder
+             holding a drawn file has a `check.md`.
   AUTHORING §5   active rows <= 12, ideas per versus note <= 2 and per
              deep dive <= 3, charts per deep dive <= 3, prose <= 7,000 characters outside fences in a
              versus note and <= 20,000 in a deep dive.
-  AUTHORING §7   no `MY-METHOD.md` §6 string in any output.
+  AUTHORING §7   no `MY-METHOD.md` §6 string in any output, a kit's brief
+             included — the one text that leaves the machine.
   inputs         `BASKET.md` rows parse — id, role and status from their
              sets, no duplicate id; `MY-METHOD.md` carries its spine and one
              bullet per `#### [C#]`.
@@ -93,6 +105,7 @@ _LEDGER_PROSE_MAX = 7000
 _IDEAS_PER_DISSECTION = 3
 _DISSECTION_PROSE_MAX = 20000
 _CHARTS_PER_DISSECTION = 3
+_BRIEF_MAX = 2000
 
 _LEDGER_SPINE = (
     "## 1 공통", "## 2 차이", "## 3 그들의 빈자리", "## 4 내 방법이 메우는가",
@@ -107,6 +120,15 @@ _DISSECT_SPINE = (
     "## 5 실험 설정", "## 6 결과 대조", "## 7 빈자리와 메움", "## 8 빌려 올 것",
     "## 9 반증 실험",
 )
+_KIT_SPINE = ("## 1 소스", "## 2 생성물", "## 3 대조", "## 4 남은 오류")
+# AUTHORING §3-7: each kind as the NotebookLM CLI names it, and the files a
+# run downloads for it.
+_KIT_KINDS = {
+    "slide-deck": ("slides.pdf", "slides.pptx"),
+    "infographic": ("infographic.png",),
+    "audio": ("audio.mp3",),
+    "mind-map": ("mindmap.json",),
+}
 # Present when the run audited (prompt step 7) — report and `--audit` runs.
 _RUN_AUDIT = "## 8 감사"
 _METHOD_SPINE = (
@@ -134,6 +156,15 @@ _DISSECT_META = re.compile(
     r"^Paper: (\d{4}\.\d{5}) · Scope: ([a-z0-9_]+) · Rewrite: analysis/(\d{4}\.\d{5})\.md · "
     r"Code: [0-9a-f]{7,12} · Method: [0-9a-f]{7} · Run: \d{4}-\d{2}-\d{2}$"
 )
+_KIT_NAME = re.compile(rf"^(\d{{4}}\.\d{{5}})--({_ALIAS_SLUG})$")
+_BRIEF_H1 = " 노트북 지시문"
+_BRIEF_META = re.compile(r"^Paper: (\d{4}\.\d{5}) · Rewrite: analysis/(\d{4}\.\d{5})\.md · Run: \d{4}-\d{2}-\d{2}$")
+_KIT_H1 = " 노트북 키트 — "
+_KIT_META = re.compile(
+    r"^Paper: (\d{4}\.\d{5}) · Rewrite: analysis/(\d{4}\.\d{5})\.md · Notebook: \S+ · Run: \d{4}-\d{2}-\d{2}$"
+)
+_KIT_PLACE = re.compile(r"slide-deck p\.\d+|infographic|mind-map")
+_KIT_DRAWN = re.compile(r"^- `(slide-deck|infographic|audio|mind-map)` — .+ · (점검함|미점검)$")
 _ERRATA_COUNT = re.compile(r"^점검 \d+ · 맞음 \d+ · 틀림 \d+ · 과장 \d+ · 원문 없음 \d+$")
 _MATRIX_META = re.compile(r"^Method: [0-9a-f]{7} · Run: \d{4}-\d{2}-\d{2}$")
 _RUN_H1 = re.compile(r"^# (\d{4}-\d{2}-\d{2}) 회차 보고$")
@@ -597,6 +628,134 @@ def check_dissection(path: str, claims: set[str], forbidden: list[str],
     return findings
 
 
+# ── The notebook kit ──────────────────────────────────────────────────────
+
+
+def _check_secrets(name: str, lines: list[str], forbidden: list[str], findings: list[Finding]) -> None:
+    for lineno, raw in enumerate(lines, start=1):
+        if any(text in raw for text in forbidden):
+            findings.append((name, lineno, "§7 carries a `MY-METHOD.md` §6 string"))
+
+
+def _kit_head(name: str, lines: list[str], h1: str, meta: re.Pattern, pid: str, slug: str,
+              findings: list[Finding]) -> None:
+    """The H1 names the folder's alias and the metadata line its id."""
+    if not lines or not lines[0].startswith("# ") or h1 not in lines[0]:
+        findings.append((name, 1, f"§3-7 line 1 is not the H1 `# <alias>{h1.rstrip(' —')}…`"))
+    elif alias_slug(lines[0][2:].partition(h1)[0]) != slug:
+        findings.append((name, 1, f"§3-7 the folder name says `{slug}`, the H1 alias makes `{alias_slug(lines[0][2:].partition(h1)[0])}`"))
+    meta_line = next((ln for ln, raw in enumerate(lines[1:], start=2) if raw.strip()), None)
+    mm = meta.match(lines[meta_line - 1]) if meta_line else None
+    if not mm:
+        findings.append((name, meta_line or 2, "§3-7 metadata line does not match the contract"))
+    elif (mm.group(1), mm.group(2)) != (pid, pid):
+        findings.append((name, meta_line, "§3-7 metadata `Paper:` / `Rewrite:` disagree with the folder name"))
+
+
+def check_notebook(folder: str, forbidden: list[str]) -> list[Finding]:
+    kit = "notebook/" + os.path.basename(folder)
+    findings: list[Finding] = []
+    m = _KIT_NAME.match(os.path.basename(folder))
+    if not m:
+        return [(kit, 0, "§3-7 folder name is not `<arxiv-id>--<alias>`")]
+    pid, slug = m.groups()
+    if not os.path.exists(os.path.join(_REPO_ROOT, "analysis", pid + ".md")):
+        findings.append((kit, 0, f"§1 analysis/{pid}.md does not exist — the paper has no rewrite"))
+
+    brief = _read(os.path.join(folder, "brief.md"))
+    note = _read(os.path.join(folder, "check.md"))
+    drawn = [f for files in _KIT_KINDS.values() for f in files if os.path.exists(os.path.join(folder, f))]
+    if brief is None:
+        findings.append((kit, 0, "§3-7 no `brief.md` — the brief is the record of what was sent"))
+    if note is None and drawn:
+        findings.append((kit, 0, f"§3-7 {', '.join(drawn)} drawn but no `check.md` — the kit is unchecked"))
+
+    if brief is not None:
+        name = kit + "/brief.md"
+        _kit_head(name, brief, _BRIEF_H1, _BRIEF_META, pid, slug, findings)
+        seen: set[str] = set()
+        for header, lineno, body in _sections(brief, _H2):
+            kind = header[3:].strip()
+            if kind not in _KIT_KINDS:
+                findings.append((name, lineno, f"§3-7 `{header}` is not a kind — {', '.join(_KIT_KINDS)}"))
+            elif kind in seen:
+                findings.append((name, lineno, f"§3-7 `{kind}` stands twice"))
+            seen.add(kind)
+            text = "\n".join(raw for _, raw in body).strip()
+            if not text:
+                findings.append((name, lineno, f"§3-7 `{kind}` holds no instruction"))
+            elif len(text) > _BRIEF_MAX:
+                findings.append((name, lineno, f"§5 `{kind}` is {len(text)} characters, ceiling is {_BRIEF_MAX}"))
+        if not seen:
+            findings.append((name, 0, "§3-7 the brief holds no kind"))
+        for lineno, raw in enumerate(brief, start=1):
+            for pattern in (_CLAIM_ANCHOR, _METHOD_ANCHOR, _CFG_ANCHOR, _CODE_ANCHOR):
+                hit = pattern.search(raw)
+                if hit:
+                    findings.append((name, lineno, f"§3-7 `{hit.group(0).strip('`')}` is a private anchor — the brief leaves the machine"))
+                    break
+        _check_secrets(name, brief, forbidden, findings)
+
+    if note is None:
+        return findings
+    name = kit + "/check.md"
+    _kit_head(name, note, _KIT_H1, _KIT_META, pid, slug, findings)
+    headers = [(raw.rstrip(), ln) for ln, raw in enumerate(note, start=1) if _H2.match(raw)]
+    if [h for h, _ in headers] != list(_KIT_SPINE):
+        findings.append((name, headers[0][1] if headers else 0, "§3-7 the `##` headers are not the four of the spine, verbatim and in order"))
+    sections = {h: body for h, _, body in _sections(note, _H2)}
+    sources, made, checked, standing = _KIT_SPINE
+
+    public = re.compile(
+        rf"^- (`analysis/{re.escape(pid)}\.md`|<?https://arxiv\.org/(?:html|pdf|abs)/{re.escape(pid)}(?:v\d+)?>?)$"
+    )
+    listed = _top_bullets(sections.get(sources, []))
+    if not listed:
+        findings.append((name, 0, "§3-7 소스 holds no bullet"))
+    for ln, raw in listed:
+        if not public.match(raw.strip()):
+            findings.append((name, ln, f"§3-7 source is neither `analysis/{pid}.md` nor an arXiv URL of {pid} — only public material goes to NotebookLM"))
+
+    kinds = _top_bullets(sections.get(made, []))
+    if not kinds:
+        findings.append((name, 0, "§3-7 생성물 holds no bullet"))
+    for ln, raw in kinds:
+        dm = _KIT_DRAWN.match(raw.strip())
+        if not dm:
+            findings.append((name, ln, "§3-7 생성물 bullet is not `` `<kind>` — <files> · 점검함 | 미점검 ``"))
+            continue
+        kind, state = dm.groups()
+        if kind == "audio" and state != "미점검":
+            findings.append((name, ln, "§3-7 audio is `미점검` — no reader here hears it"))
+        for f in _KIT_KINDS[kind]:
+            if not os.path.exists(os.path.join(folder, f)):
+                findings.append((name, ln, f"§3-7 `{kind}` is listed but `{f}` is not in the kit"))
+
+    body = [(ln, raw) for ln, raw in _outside_fences(sections.get(checked, [])) if raw.strip()]
+    if not body or not _ERRATA_COUNT.match(body[0][1].strip()):
+        findings.append((name, body[0][0] if body else 0, "§3-7 대조 does not open with `점검 N · 맞음 n · 틀림 n · 과장 n · 원문 없음 n`"))
+    for ln, raw in _top_bullets(sections.get(checked, [])):
+        if raw.strip() == _NONE:
+            continue
+        verdict = _opens_with(raw, _ERRATA_VERDICTS)
+        if not verdict:
+            findings.append((name, ln, "§3-7 대조 bullet does not open with 맞음 / 틀림 / 과장 / 원문 없음"))
+        if not _KIT_PLACE.search(raw):
+            findings.append((name, ln, "§3-7 대조 bullet names no place — `slide-deck p.<n>`, `infographic` or `mind-map`"))
+        if verdict != "원문 없음" and not _QUOTE_ANCHOR.search(raw):
+            findings.append((name, ln, "§4 대조 bullet lacks a quote anchor"))
+
+    left = _top_bullets(sections.get(standing, []))
+    if standing in sections and not left:
+        findings.append((name, 0, "§3-7 남은 오류 holds no bullet (write `- 없음` when nothing stands)"))
+    for ln, raw in left:
+        if raw.strip() != _NONE and not _KIT_PLACE.search(raw):
+            findings.append((name, ln, "§3-7 남은 오류 bullet names no place"))
+
+    _check_secrets(name, note, forbidden, findings)
+    return findings
+
+
 # ── The scoreboard ────────────────────────────────────────────────────────────
 
 
@@ -755,6 +914,8 @@ def check_folder(folder: str) -> list[Finding]:
         findings += check_run(path, claims, forbidden, decisions)
     for path in sorted(glob.glob(os.path.join(folder, "deepdive", "*.md"))):
         findings += check_dissection(path, claims, forbidden, decisions)
+    for path in sorted(glob.glob(os.path.join(folder, "notebook", "*", ""))):
+        findings += check_notebook(os.path.dirname(path), forbidden)
     return findings
 
 

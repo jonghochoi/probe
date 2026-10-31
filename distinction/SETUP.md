@@ -11,6 +11,7 @@ and writes must not be in a repository (`distinction/AUTHORING.md` §1).
 | **Durable asset** | `.claude/prompts/distinguish.txt` and `distinction/run-distinguish.sh` in the checkout. The schedule runs `git pull` first, so a merged change to either reaches the next run with nothing to re-paste |
 | **Reads** | The checkout (`context/`, `analysis/` through `site/query.py`) and the private folder (§2) |
 | **Writes** | The private folder only. No commit, no PR, no site |
+| **Sends** | Only `--notebook`, and only public material — a rewrite and its arXiv original go to NotebookLM (§6) |
 
 ## 1. Prerequisites
 
@@ -39,6 +40,7 @@ $PROBE_PRIVATE_DIR/
   scoreboard.md    claims × papers                   the routine writes
   reports/         YYYY-MM-DD.md and .html per run   the routine writes
   deepdive/        <id>--<alias>--<scope>.md, .html  `--deepdive` writes
+  notebook/        <id>--<alias>/ one kit per paper   `--notebook` writes
   .scratch/        the run's working files           the routine writes
 ```
 
@@ -140,6 +142,7 @@ claude --add-dir "$PROBE_PRIVATE_DIR"
 /distinguish <alias>    # one versus note
 /distinguish --all      # every active row
 /distinguish --deepdive <alias> <scope>   # one paper against one code scope
+/distinguish --notebook <alias> slide-deck,audio   # a NotebookLM kit (§6)
 ```
 
 Each versus note, report and deep dive has a page drawn from its Markdown
@@ -210,8 +213,9 @@ WantedBy=timers.target
 runs only while the user is logged in unless `loginctl enable-linger` is on.
 The log is the place to read a run that no one watched. When the private
 folder is a git repository of its own — the way to keep its history — its
-`.gitignore` lists the log, `.scratch/`, `CODEMAP.md` (regenerated each run)
-and `code`.
+`.gitignore` lists the log, `.scratch/`, `CODEMAP.md` (regenerated each run),
+`code` and the kits' drawn files (`notebook/*/*.pdf`, `*.pptx`, `*.png`,
+`*.mp3`, `*.json`), which are large and drawn again on demand.
 
 One run at a time: the report reads the previous run's state block, and two
 runs reading the same block write two reports against one baseline.
@@ -242,3 +246,43 @@ Run `/distinguish --all` by hand (§3) before the schedule, then check:
 
 If a check fails, fix `.claude/prompts/distinguish.txt`, `distinction/AUTHORING.md`
 or the private files, re-run by hand, and only then let the schedule run.
+
+## 6. NotebookLM kits
+
+`/distinguish --notebook <paper> [<kinds>]` has NotebookLM draw a slide deck,
+an infographic, an audio overview or a mind map from one rewrite, then checks
+every drawn page against the original (`distinction/AUTHORING.md` §3-7). It
+runs by hand only — never from the schedule — because NotebookLM meters its
+generation and the first kits are what the brief rules get tightened
+against.
+
+| Item | Note |
+|---|---|
+| A dedicated Google account | The CLI drives NotebookLM through its web session, and `language set` is account-wide. Keep it apart from the account your mail and Drive live on |
+| `notebooklm-py` | `uv tool install "notebooklm-py[browser]"` (or `pipx install`). An unofficial client of undocumented Google endpoints: it can break without notice, and its terms are Google's |
+| Login | `notebooklm login` opens a browser once; `notebooklm auth check --test` exits 0 when the session is good. The session lasts a few weeks — run `login` again when the routine stops at N1. Never the `--master-token` login: it is a full-account credential |
+| Output language | `notebooklm language set ko`, once. The routine never changes it |
+| Flags | The procedure's commands follow `notebooklm-py`'s CLI reference. Before the first kit, run `notebooklm generate --help` and `notebooklm download --help` and check that `--prompt-file`, `-n` and `--wait` are there |
+| Quota | Generation is rate-limited per account. `notebooklm usage` shows the window; a run that hits it stops and says which kind failed |
+
+The CLI keeps its session and settings in its own folder under your home
+directory, outside the private folder and the checkout. The kit itself is
+written only into `notebook/<id>--<alias>/`. Each run makes a fresh notebook
+in the account, named `PROBE <id> <alias> <date>`; the check note records its
+id, and deleting old notebooks is yours.
+
+**What leaves the machine** is the rewrite, the arXiv URL and `brief.md`,
+which the lint reads for `MY-METHOD.md` §6 strings and private anchors before
+it is sent. The kits are generated from someone else's paper, so they stay
+in the private folder: share a deck the way you would share your own notes
+on a paper, and never through `notebooklm share`.
+
+Check the first kit by hand:
+
+- [ ] `notebook/<id>--<alias>/check.md` lists exactly two sources under
+      `1 소스`, and `python3 linters/check-distinction-format.py` exits 0.
+- [ ] Every slide `3 대조` grades other than `맞음` is one you agree is wrong,
+      and every one still wrong is under `4 남은 오류`.
+- [ ] The deck is Korean, follows the rewrite's acts, and states no number
+      the 요약 tab does not carry.
+- [ ] `git status` in the checkout is clean.
