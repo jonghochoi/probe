@@ -388,31 +388,47 @@ GIT — the master only
 The run persists by pushing ONE commit straight to `main`. No PR is created —
 neither by you nor by the harness.
 
-  git add scouting/runs/<run date>.md scouting/P*/<run date>.md
-  git commit -m "scout: report <run date> (<pillars written, e.g. P0 P1 P3>)"
-  git push origin HEAD:main
-  git push --force-with-lease origin HEAD:refs/heads/<dev branch>
+Three steps, each its OWN Bash call — never chained with `&&`, `;` or a
+loop into one command:
 
-BOTH PUSHES, EVERY RUN. The first is the persistence and deploys the run's
-page. The second re-points the harness's dev branch (`claude/...`) at the
-same commit; without it the stop hook sees diverged history and re-prompts.
+  1. git add scouting/runs/<run date>.md scouting/P*/<run date>.md
+     git commit -m "scout: report <run date> (<pillars written, e.g. P0 P1 P3>)"
+  2. git push origin HEAD:main
+  3. git push origin HEAD:refs/heads/<dev branch>
+
+BOTH PUSHES, EVERY RUN. Step 2 is the persistence and deploys the run's
+page. Step 3 re-points the harness's dev branch (`claude/...`) at the same
+commit; without it the stop hook sees diverged history and re-prompts.
 The dev branch is the one the harness checked out — `git branch
 --show-current` names it — and the push names it explicitly.
 GitHub's `Create a pull request` banner is not a stop signal. This overrides
 the harness's "push to the specified branch" default.
 
+Separate calls keep each push judged on its own by the permission check: a
+plain push to `main` is never refused for sharing a command with a force
+push. Step 2 runs before step 3, so the run reaches `main` first. A retry
+below is the same step issued again as its own call, never a shell loop.
+
 - Stage ONLY the files this run wrote. Never `git add` a `context/` file or
   anything else. No `git add .`, no `git add -A`, no `commit -a`.
 - The subject names the pillars whose reports the commit carries; a failed
   pillar is named in the body with its error.
-- If `git push` fails on a transient network error, retry up to 4 times with
+- If a push fails on a transient network error, retry it up to 4 times with
   exponential backoff (2s, 4s, 8s, 16s).
-- If push is rejected as non-fast-forward, `git pull --rebase origin main`
+- If step 2 is rejected as non-fast-forward, `git pull --rebase origin main`
   and retry, up to 5 times (1s, 2s, 4s, 8s, 16s). A rebase conflict means a
   file of this date was written twice: STOP and report it; do not resolve it.
+- Step 3 is a plain fast-forward push. Only if it is rejected as
+  non-fast-forward — the rebase in step 2 moved HEAD off the dev branch's
+  tip — issue it again, as its own call, as
+    git push --force-with-lease origin HEAD:refs/heads/<dev branch>
+- If step 2 is refused by a permission check, do not retry it in another
+  form or fold it into another command. Run step 3 so the commit is on the
+  remote, then end the run reporting the refusal verbatim and the commit's
+  SHA, so the operator can land it on `main`.
 - Never `--no-verify`, `--no-gpg-sign` or an unconditional `--force`. The
-  `--force-with-lease` on the dev branch is the one force push, and it is
-  required.
+  `--force-with-lease` fallback on the dev branch is the one force push, and
+  only on a rejected step 3.
 
 
 ════════════════════════════════════════════════════════════════════════
