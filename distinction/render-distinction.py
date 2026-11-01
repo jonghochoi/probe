@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Render the distinction track's documents as standalone HTML pages for reading.
 
-A versus note, a report and a deep dive are records: the lint reads them and the
+A versus note, a report and a code note are records: the lint reads them and the
 next run builds on them. Each gets a page beside it for a person —
-`versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` — one
+`versus/<id>--<alias>.html`, `runs/<date>.html`, `versus/<id>--<alias>--<scope>.html` — one
 file opened from disk that never leaves the private folder. A page is
 redrawn from its Markdown and never edited by hand
 (`distinction/AUTHORING.md` §3-6).
@@ -23,7 +23,7 @@ What a page adds to the Markdown is arrangement, never content:
               versus note; the closing state block as a table of when each
               versus note was last verified, the raw block folded; the runs
               before and after it one click away
-    deep dive  §1 the count line as one bar split by verdict, 틀림 and 과장
+    code note  §1 the count line as one bar split by verdict, 틀림 and 과장
               open, 원문 없음 and 맞음 folded; §4 one card per stage, the two
               sides side by side; §5 the table, the scope's column in the
               accent; §6 a ```probe-chart fence drawn; §7 the fill verdict
@@ -115,6 +115,8 @@ class Context:
                     first = fh.readline()
             except OSError:
                 continue
+            if not _VERSUS_NAME.match(os.path.basename(lp)):
+                continue
             stem = os.path.basename(lp)[:-3]
             lid = stem.partition("--")[0]
             self.ledger_stems[lid] = stem
@@ -122,7 +124,7 @@ class Context:
         self.decisions = {k: t for k, (_, t) in harvest_decisions().items()}
         self.claims: dict[str, str] = {}
         # What our side is called beside the paper's alias (AUTHORING §6):
-        # the scope a deep dive names, else `MY-METHOD.md`'s `name:`.
+        # the scope a code note names, else `MY-METHOD.md`'s `name:`.
         self.ours = scope
         code = os.path.join(private, "code")
         try:
@@ -143,7 +145,7 @@ class Context:
 
     def ledger_href(self, pid: str) -> str:
         page = self.ledger_stems.get(pid, pid) + ".html"
-        return page if self.kind == "versus" else f"../versus/{page}"
+        return page if self.kind in ("versus", "code") else f"../versus/{page}"
 
     def code_href(self, path: str, line: str) -> str | None:
         if not self.code_root:
@@ -354,9 +356,9 @@ def _chart(info: str, body: list[str], where: str) -> tuple[str, list[str]]:
 # one whose bullets open on a fill verdict, the one whose bullets set the two
 # sides side by side, and the one a ```probe-chart is drawn in.
 _LAYOUT = {
-    "deepdive": {"errata": "1", "stages": "4", "ideas": "8", "fills": "7", "sides": "", "charts": "6"},
+    "code": {"errata": "1", "stages": "4", "ideas": "8", "fills": "7", "sides": "", "charts": "6"},
     "versus": {"errata": "", "stages": "", "ideas": "5", "fills": "4", "sides": "2", "charts": ""},
-    "reports": {"errata": "", "stages": "", "ideas": "5", "fills": "", "sides": "", "charts": ""},
+    "runs": {"errata": "", "stages": "", "ideas": "5", "fills": "", "sides": "", "charts": ""},
 }
 
 
@@ -642,15 +644,24 @@ document.querySelectorAll('.dx-key').forEach(function(a){a.onclick=function(){va
 
 
 _KINDS = {
-    "deepdive": ("정밀 대조", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
+    "code": ("코드 맞대기", "논문 하나 × 코드 범위 하나 · 비공개", "아홉 절"),
     "versus": ("맞대기", "방법 × 논문 하나 · 비공개", "일곱 절"),
-    "reports": ("회차 보고", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
+    "runs": ("회차 보고", "지난 런 이후 바뀐 것 · 비공개", "여덟 절"),
 }
+# A versus note and a code note share `versus/`, told apart by the scope a
+# code note's name carries (`distinction/AUTHORING.md` §2).
+_FOLDERS = ("versus", "runs")
+_VERSUS_NAME = re.compile(r"^\d{4}\.\d{5}--[^\s/-]+(?:-[^\s/-]+)*\.md$")
+_CODE_NAME = re.compile(r"^\d{4}\.\d{5}--[^\s/-]+(?:-[^\s/-]+)*--[a-z0-9_]+\.md$")
+_RUN_NAME = re.compile(r"^\d{4}-\d{2}-\d{2}\.md$")
 
 
 def _kind(path: str) -> str | None:
-    folder = os.path.basename(os.path.dirname(os.path.abspath(path)))
-    return folder if folder in _KINDS else None
+    name = os.path.basename(path)
+    for kind, pattern in (("code", _CODE_NAME), ("versus", _VERSUS_NAME), ("runs", _RUN_NAME)):
+        if pattern.match(name):
+            return kind
+    return None
 
 
 def _runs_nav(path: str) -> str:
@@ -668,15 +679,15 @@ def render(path: str) -> tuple[str, list[str]]:
     with open(path, encoding="utf-8") as fh:
         lines = fh.read().splitlines()
     name = os.path.basename(path)
-    kind = _kind(path) or "deepdive"
+    kind = _kind(path) or "code"
     noun, eyebrow, spine = _KINDS[kind]
-    # `<id>--<alias>.md` for a versus note, `<id>--<alias>--<scope>.md` for a deep dive.
+    # `<id>--<alias>.md` for a versus note, `<id>--<alias>--<scope>.md` for a code note.
     parts = name[:-3].split("--") if re.match(r"^\d{4}\.\d{5}--", name) else []
     ctx = Context(os.path.dirname(os.path.dirname(os.path.abspath(path))), parts[0] if parts else "", kind,
-                  parts[2] if kind == "deepdive" and len(parts) == 3 else "")
+                  parts[2] if kind == "code" and len(parts) == 3 else "")
 
     h1 = lines[0][2:] if lines and lines[0].startswith("# ") else name
-    if kind == "reports":
+    if kind == "runs":
         heading, thesis, alias, meta = esc(h1), "", "", []
     else:
         pair, _, thesis = h1.partition(" — ")
@@ -717,7 +728,7 @@ def render(path: str) -> tuple[str, list[str]]:
         return f"<span>{esc(k)}<b>{esc(v)}</b></span>"
 
     chips = "".join(chip(k, v) for k, v in meta)
-    title = h1 if kind == "reports" else (f"{alias} — {noun}")
+    title = h1 if kind == "runs" else (f"{alias} — {noun}")
     rel = os.path.join(os.path.basename(os.path.dirname(os.path.abspath(path))), name)
     page = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
@@ -729,7 +740,7 @@ def render(path: str) -> tuple[str, list[str]]:
 <div class="dx-shell">
 <nav class="dx-toc"><b>{noun} · {spine}</b>{"".join(toc)}</nav>
 <main>
-{_runs_nav(path) if kind == "reports" else ""}<div class="dx-eyebrow">{eyebrow}</div>
+{_runs_nav(path) if kind == "runs" else ""}<div class="dx-eyebrow">{eyebrow}</div>
 <h1>{heading}</h1>
 {f'<p class="dx-thesis">{inline(thesis, ctx)}</p>' if thesis else ""}
 {f'<div class="dx-meta">{chips}</div>' if chips else ""}
@@ -742,13 +753,13 @@ def render(path: str) -> tuple[str, list[str]]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    ap.add_argument("docs", nargs="*", help="versus/, reports/ or deepdive/ Markdown (default: every one in the folder)")
+    ap.add_argument("docs", nargs="*", help="versus/ or runs/ Markdown (default: every one in the folder)")
     ap.add_argument("-o", "--out", help="output path for a single document (default: beside it, .html)")
     args = ap.parse_args(argv)
     docs = args.docs
     if not docs:
         folder = os.environ.get("PROBE_PRIVATE_DIR", "")
-        docs = [p for sub in _KINDS for p in sorted(glob.glob(os.path.join(folder, sub, "*.md")))] if folder else []
+        docs = [p for sub in _FOLDERS for p in sorted(glob.glob(os.path.join(folder, sub, "*.md"))) if _kind(p)] if folder else []
     if not docs:
         print("render-distinction: no document — pass a path or set PROBE_PRIVATE_DIR", file=sys.stderr)
         return 2
@@ -758,7 +769,7 @@ def main(argv: list[str] | None = None) -> int:
     failed = False
     for doc in docs:
         if not os.path.isfile(doc) or _kind(doc) is None and not args.out:
-            print(f"render-distinction: {doc} is not a versus/, reports/ or deepdive/ document", file=sys.stderr)
+            print(f"render-distinction: {doc} is not a versus note, a code note or a report", file=sys.stderr)
             failed = True
             continue
         page, problems = render(doc)

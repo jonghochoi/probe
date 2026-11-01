@@ -36,9 +36,9 @@ $PROBE_PRIVATE_DIR/
   codemap.sh       the operator's digest script      human-written     §2-3
   code -> …        symlink to the codebase           or `code:` in MY-METHOD.md §2-4
   versus/          <arxiv-id>--<alias>.md and .html  the routine writes
+                   <id>--<alias>--<scope>.md, .html  `--code` writes
   scoreboard.md    claims × papers                   the routine writes
-  reports/         YYYY-MM-DD.md and .html per run   the routine writes
-  deepdive/        <id>--<alias>--<scope>.md, .html  `--deepdive` writes
+  runs/            YYYY-MM-DD.md and .html per run   the routine writes
   .scratch/        the run's working files           the routine writes
 ```
 
@@ -104,7 +104,7 @@ What it writes is the contract:
 | `## Results` | the current numbers, from the experiment logs, as a table | the run or log the row comes from |
 
 Run with no arguments, `codemap.sh` digests the code `MY-METHOD.md` describes
-into `CODEMAP.md`. `--deepdive` also calls it as `codemap.sh <scope> <out>`:
+into `CODEMAP.md`. `--code` also calls it as `codemap.sh <scope> <out>`:
 `<scope>` is a bare name (`[a-z0-9_]+`) the script maps to a part of the
 codebase — which part is the script's alone, and no file in the checkout
 names it — and `<out>` is where the digest of that part goes, in the same
@@ -139,10 +139,10 @@ claude --add-dir "$PROBE_PRIVATE_DIR"
 /distinguish            # delta mode
 /distinguish <alias>    # one versus note
 /distinguish --all      # every active row
-/distinguish --deepdive <alias> <scope>   # one paper against one code scope
+/distinguish <alias> --code <scope>   # one paper against one code scope
 ```
 
-Each versus note, report and deep dive has a page drawn from its Markdown
+Each versus note, report and code note has a page drawn from its Markdown
 (`distinction/AUTHORING.md` §3-6). After editing one by hand, draw them
 again:
 
@@ -160,7 +160,7 @@ tightened against.
 
 The scheduler calls `distinction/run-distinguish.sh` in the checkout. The
 script finds the checkout from its own path, appends everything it prints to
-`$PROBE_PRIVATE_DIR/reports/distinguish.log`, stops unless the checkout is on
+`$PROBE_PRIVATE_DIR/runs/distinguish.log`, stops unless the checkout is on
 `main`, pulls, and runs `/distinguish` in delta mode with `claude -p` — which also
 audits half the active versus notes (prompt step 7).
 
@@ -236,7 +236,7 @@ Run `/distinguish --all` by hand (§3) before the schedule, then check:
       differently, and every §3 row came from the paper's own ablation or
       stated limit — the two things the lint cannot see
       (`distinction/AUTHORING.md` §8).
-- [ ] `reports/<date>.md` ends in a `probe-state` block, and a second `/distinguish`
+- [ ] `runs/<date>.md` ends in a `probe-state` block, and a second `/distinguish`
       run on a later day writes a no-change report, rewrites no versus note, and
       lists the versus notes it audited under `8 감사` with their dates in
       `verified`.

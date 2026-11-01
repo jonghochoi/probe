@@ -68,7 +68,7 @@ _MD_LINK = re.compile(r"\[(?:[^\]]*)\]\(([^)]+)\)")
 _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant
-# to point at real files — `CLAUDE.md`, `README.md`, the two `SETUP.md` guides —
+# to point at real files — `CLAUDE.md`, `README.md`, the `SETUP.md` guides —
 # every per-folder `<dir>/CLAUDE.md`, and the `context/` files the scheduled
 # routine reads every run. The pillar files and the per-folder rule files are
 # globbed, not listed, so adding a pillar or a new `<dir>/CLAUDE.md` needs no
@@ -79,6 +79,7 @@ _DEFAULT_ROOT_DOCS = [
     "README.md",
     "scouting/SETUP.md",
     "distinction/SETUP.md",
+    "adaptation/SETUP.md",
     "context/MASTER.md",
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"

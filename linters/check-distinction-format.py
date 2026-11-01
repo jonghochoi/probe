@@ -2,7 +2,7 @@
 """Check the distinction track's private folder against distinction/AUTHORING.md.
 
 The distinction track writes nothing into the repository: its versus notes, scoreboard
-and reports hold the method beside the papers, so they live in a private folder
+and run reports hold the method beside the papers, so they live in a private folder
 on the machine that runs `/distinguish` (`distinction/SETUP.md` §2). No build
 reads them and no workflow can, which makes this lint the track's only gate —
 the routine runs it before saving (prompt step 8), and a human runs it after
@@ -28,7 +28,7 @@ Checks, grouped by the contract section they enforce:
              maps ids to dates.
   AUTHORING §3-4 every `###` idea carries the five labels in order, and a
              `D#` it names exists in a pillar's Decision Log.
-  AUTHORING §3-5 the deep dive — `deepdive/<id>--<alias>--<scope>.md` names
+  AUTHORING §3-5 the code note — `versus/<id>--<alias>--<scope>.md` names
              a paper with a rewrite, its H1 alias and six-field metadata
              line agree with the file name, the nine `##` headers verbatim and in order; §1
              opens with its count line and every bullet with a verdict and
@@ -39,8 +39,8 @@ Checks, grouped by the contract section they enforce:
              ```probe-chart only under §6, drawable by `site/builder/charts.py`
              with `source`, `why` and `omitted`.
   AUTHORING §5   active rows <= 12, ideas per versus note <= 2 and per
-             deep dive <= 3, charts per deep dive <= 3, prose <= 7,000 characters outside fences in a
-             versus note and <= 20,000 in a deep dive.
+             code note <= 3, charts per code note <= 3, prose <= 7,000 characters outside fences in a
+             versus note and <= 20,000 in a code note.
   AUTHORING §7   no `MY-METHOD.md` §6 string in any output.
   inputs         `BASKET.md` rows parse — id, role and status from their
              sets, no duplicate id; `MY-METHOD.md` carries its spine and one
@@ -487,7 +487,7 @@ def check_ledger(path: str, basket: dict[str, dict], claims: set[str], forbidden
     return findings
 
 
-# ── The deep dive ────────────────────────────────────────────────────────
+# ── The code note ────────────────────────────────────────────────────────
 
 
 def _opens_with(raw: str, verdicts: tuple[str, ...]) -> str | None:
@@ -502,7 +502,7 @@ def _opens_with(raw: str, verdicts: tuple[str, ...]) -> str | None:
 
 def check_dissection(path: str, claims: set[str], forbidden: list[str],
                      decisions: set[str]) -> list[Finding]:
-    name = "deepdive/" + os.path.basename(path)
+    name = "versus/" + os.path.basename(path)
     findings: list[Finding] = []
     m = _DISSECT_NAME.match(os.path.basename(path))
     if not m:
@@ -653,7 +653,7 @@ def check_matrix(path: str, basket: dict[str, dict], claims: set[str], forbidden
 
 
 def check_run(path: str, claims: set[str], forbidden: list[str], decisions: set[str]) -> list[Finding]:
-    name = "reports/" + os.path.basename(path)
+    name = "runs/" + os.path.basename(path)
     findings: list[Finding] = []
     m = _RUN_NAME.match(os.path.basename(path))
     if not m:
@@ -741,6 +741,10 @@ def check_folder(folder: str) -> list[Finding]:
     decisions = _decision_ids()
     seen: dict[str, str] = {}
     for path in sorted(glob.glob(os.path.join(folder, "versus", "*.md"))):
+        # A code note shares the folder; the scope its name carries tells it apart.
+        if _DISSECT_NAME.match(os.path.basename(path)):
+            findings += check_dissection(path, claims, forbidden, decisions)
+            continue
         findings += check_ledger(path, basket, claims, forbidden, decisions)
         m = _LEDGER_NAME.match(os.path.basename(path))
         if m and m.group(1) in seen:
@@ -751,10 +755,8 @@ def check_folder(folder: str) -> list[Finding]:
     matrix = os.path.join(folder, "scoreboard.md")
     if os.path.exists(matrix):
         findings += check_matrix(matrix, basket, claims, forbidden)
-    for path in sorted(glob.glob(os.path.join(folder, "reports", "*.md"))):
+    for path in sorted(glob.glob(os.path.join(folder, "runs", "*.md"))):
         findings += check_run(path, claims, forbidden, decisions)
-    for path in sorted(glob.glob(os.path.join(folder, "deepdive", "*.md"))):
-        findings += check_dissection(path, claims, forbidden, decisions)
     return findings
 
 

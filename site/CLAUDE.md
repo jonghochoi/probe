@@ -90,7 +90,7 @@ of those into step.
 importable without the rest of the build.
 
 **Four pieces are borrowed by the distinction track.** `distinction/render-distinction.py`
-draws the private versus notes, reports and deep dives with `builder/charts.py`,
+draws the private versus notes, reports and code notes with `builder/charts.py`,
 `builder/decisions.py`, the `:root` blocks of `assets/site.css` and the whole of
 `assets/charts.css`. It runs on the standard library and its pages never reach
 the site, so keep those two modules free of a third-party import at module
