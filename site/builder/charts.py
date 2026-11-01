@@ -1,6 +1,6 @@
 """The results chart drawn from a paper's own numbers, as inline SVG.
 
-One fence, ```probe-chart, which the distinction track's deep dives stand among
+One fence, ```probe-chart, which the distinction track's code notes stand among
 their §6 bullets (`distinction/AUTHORING.md` §3-5) and
 `distinction/render-distinction.py` draws on their pages: `line` over a sweep,
 `dots` across categories, `scatter` for one quantity against another (cost

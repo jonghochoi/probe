@@ -2,7 +2,7 @@
 
 The format contract for the distinction track — the documents `/distinguish`
 writes into the private folder: one versus note per basket paper, the claims ×
-papers scoreboard, one report per run, and on demand a deep dive of one paper
+papers scoreboard, one report per run, and on demand a code note of one paper
 against one code scope. Every one of them holds the method or its code
 beside the papers, which is why none of them is in this repository.
 
@@ -25,7 +25,7 @@ file, the prompt and the templates use placeholder ids, claims and keys —
 never a real one.
 
 The other rule the track inherits: **only a paper with a rewrite in
-`analysis/` gets a versus note** or a deep dive — both read it through
+`analysis/` gets a versus note** or a code note — both read it through
 `site/query.py`. A basket row without one is a next action in the report
 (§3-3), not a versus note.
 
@@ -41,19 +41,24 @@ Writes, all under `$PROBE_PRIVATE_DIR`:
 | File | One per | Overwritten |
 |---|---|---|
 | `versus/<arxiv-id>--<alias>.md` | basket paper | yes — the versus note is the current position, never a history |
+| `versus/<arxiv-id>--<alias>--<scope>.md` | `--code` run | yes — the latest reading of that paper against that scope |
 | `scoreboard.md` | folder | yes |
-| `reports/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
-| `deepdive/<arxiv-id>--<alias>--<scope>.md` | `--deepdive` run | yes — the latest reading of that paper against that scope |
-| `versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` | document | yes — the page drawn from it (§3-6) |
+| `runs/YYYY-MM-DD.md` | run | no — one file per run date, and the previous run's is what the next run diffs against |
+| `versus/<id>--<alias>.html`, `runs/<date>.html`, `versus/<id>--<alias>--<scope>.html` | document | yes — the page drawn from it (§3-6) |
 | `.scratch/` | run | yes — drafts for the verify agents and helper files; read by nothing after the run, and the only place a working file may go |
 
 `<alias>` in a file name is the paper's alias with every run of whitespace
 turned into `-` (`Dexterous Point Policy` → `Dexterous-Point-Policy`), so the
 name says which paper it holds without opening it; an alias never contains
-`--`, the separator. A versus note takes the `BASKET.md` row's `alias`; a deep
-dive takes the `<alias>` its H1 names. The routine finds a paper's file by its id
-(`versus/<id>--*.md`) and never renames one: when a row's alias changes, the
-operator renames its files, and until then the lint names the mismatch.
+`--`, the separator. A versus note takes the `BASKET.md` row's `alias`; a code
+note takes the `<alias>` its H1 names.
+
+**`versus/` holds both kinds, and the name says which.** Each sets one paper
+against something of ours, and the name ends on what: `<id>--<alias>.md` is
+the paper against the whole method, `<id>--<alias>--<scope>.md` against one
+code scope. The routine finds a paper's versus note by its id and the absence
+of a scope, and never renames one: when a row's alias changes, the operator
+renames its files, and until then the lint names the mismatch.
 
 ## 3. The documents
 
@@ -119,7 +124,7 @@ carry one line and a link to the versus note section behind it. The scoreboard i
 related-work table and the experiment table in draft, and a cell transition
 (`지지` to `위협`) is what the report records.
 
-### 3-3. The report — `reports/YYYY-MM-DD.md`
+### 3-3. The report — `runs/YYYY-MM-DD.md`
 
 ```
 # YYYY-MM-DD 회차 보고
@@ -170,7 +175,7 @@ is the track working.
 
 ### 3-4. The shape of an idea
 
-A `###` under a versus note's §5, a report's §5 or a deep dive's §8 is one idea in five labels, each
+A `###` under a versus note's §5, a report's §5 or a code note's §8 is one idea in five labels, each
 on its own line, bold, in this order. They follow `/ideate`'s idea shape with
 one difference: a versus note is a position against the Decision Log, so where
 `/ideate` asks what an idea opens, a versus note names the `D#` it moves.
@@ -188,16 +193,16 @@ The method is the permanent third party here: an idea that does not take
 something from `MY-METHOD.md` or `CODEMAP.md` is an `/ideate` answer and belongs
 in that chat, not in a versus note.
 
-### 3-5. The deep dive — `deepdive/<arxiv-id>--<alias>--<scope>.md`
+### 3-5. The code note — `versus/<arxiv-id>--<alias>--<scope>.md`
 
 The versus note is a position, kept short so the scheduled run can re-read it.
-The deep dive is the long reading a human asks for when one paper matters:
+The code note is the long reading a human asks for when one paper matters:
 that paper's rewrite against one **code scope** — a bare name
 (`[a-z0-9_]+`) that the operator's `codemap.sh` resolves to a part of the
 codebase (`distinction/SETUP.md` §2-3) — and the rewrite itself checked
 against the original first, because every later section stands on what the
 paper actually says. The paper needs a rewrite; it need not be in the
-basket. Nothing else in the folder reads a deep dive: no versus note, scoreboard or
+basket. Nothing else in the folder reads a code note: no versus note, scoreboard or
 report changes because one was written.
 
 ```
@@ -273,12 +278,12 @@ table or the section. A fence anywhere but §6 is not drawn.
 
 ### 3-6. The pages beside them
 
-Every versus note, report and deep dive gets a page beside it —
-`versus/<id>--<alias>.html`, `reports/<date>.html`, `deepdive/<id>--<alias>--<scope>.html` — drawn
+Every versus note, report and code note gets a page beside it —
+`versus/<id>--<alias>.html`, `runs/<date>.html`, `versus/<id>--<alias>--<scope>.html` — drawn
 by `python3 distinction/render-distinction.py`: one file in the reading
 site's look, opened from disk. A page adds arrangement and no content — a
 versus note's §2 sides set side by side, a report's ids linked to their versus notes and
-its runs to each other, a deep dive's errata as a bar and its §6 fences
+its runs to each other, a code note's errata as a bar and its §6 fences
 drawn, every anchor a link into the code or the rewrite. The Markdown stays
 the record the lint reads and the next run builds on, so a fix goes into the
 Markdown and the page is drawn again; a page is never edited by hand.
@@ -326,7 +331,7 @@ Which sections need which is §3-1's table. Four further rules:
 
 Every paper-side statement in a versus note has one of three grades, and the grade
 decides where it may stand. The verify pass (prompt step 6, or D4 for a
-deep dive) assigns them.
+code note) assigns them.
 
 | Grade | Means | May carry |
 |---|---|---|
@@ -342,9 +347,9 @@ deep dive) assigns them.
 | Ideas per versus note (§3-1 `5`) | 2 | the versus note is a position, not a brainstorm |
 | Ideas per report (§3-3 `5`) | 3 | `/ideate`'s own ceiling, for the same reason |
 | Versus note prose | 7,000 characters outside fences | the comparison ceiling; a versus note past it has started explaining the paper, which its rewrite already does |
-| Ideas per deep dive (§3-5 `8`) | 3 | `/ideate`'s ceiling |
-| Deep dive prose | 20,000 characters outside fences | room for every stage and the errata, short of retelling the paper |
-| Charts per deep dive (§3-5 `6`) | 3 | a chart is for the comparison the section turns on, not for every number it states |
+| Ideas per code note (§3-5 `8`) | 3 | `/ideate`'s ceiling |
+| Code note prose | 20,000 characters outside fences | room for every stage and the errata, short of retelling the paper |
+| Charts per code note (§3-5 `6`) | 3 | a chart is for the comparison the section turns on, not for every number it states |
 | Versus notes audited per delta run | half the active ones, rounded up | every versus note is re-read within two delta runs, however the schedule spaces them (`distinction/SETUP.md` §4), and no run carries the whole basket |
 
 ## 6. Korean authoring
@@ -355,10 +360,10 @@ anchor, `C#`, `D#`, id and config key included), the glossary, fixed headers,
 
 **Both sides go by name.** A sentence that sets the paper beside our side
 names the paper by its alias and our side by its own name: in a versus note and a
-report the `name:` line of `MY-METHOD.md`, in a deep dive the scope as its H1 and
+report the `name:` line of `MY-METHOD.md`, in a code note the scope as its H1 and
 file name carry it. A pointer word — `이 방법`, `이 범위`, `내 방법`, `우리` —
 reads one way to the writer and another to someone who opens the page a month
-later from a different scope's deep dive, so none of them is written outside
+later from a different scope's code note, so none of them is written outside
 a fixed `##` header or a quote. The name takes `은`, `는`, `의` or `도` after a
 space, as the alias does, and a page splits a two-sided sentence at it.
 
@@ -366,7 +371,7 @@ space, as the alias does, and a page splits a two-sided sentence at it.
 
 `MY-METHOD.md` §6 lists literal strings — a codename, a number, a dataset, a
 collaborator — that no output may carry yet. The lint fails on any of them in
-a versus note, the scoreboard, a run or a deep dive, and the routine does not save an output the
+a versus note, the scoreboard, a run or a code note, and the routine does not save an output the
 lint fails. A versus note that needs to say the thing says it by its `C#` or
 `METHOD §n` anchor.
 
@@ -386,8 +391,8 @@ checks is in no checkout.
 | §3-2 | the scoreboard's rows are `MY-METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the report's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a versus note id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
 | §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
-| §3-5 | the deep dive's file name, H1 alias and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
-| §5 | active rows, ideas per versus note, per report and per deep dive, charts per deep dive, versus note and deep dive prose length |
+| §3-5 | the code note's file name, H1 alias and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
+| §5 | active rows, ideas per versus note, per report and per code note, charts per code note, versus note and code note prose length |
 | §6 | no `이 방법`, `이 범위`, `내 방법` or `우리` in any output outside a `##` header or a `"…"` quote |
 | §7 | no `MY-METHOD.md` §6 string in any output |
 | inputs | `BASKET.md` rows parse — id, role and status from their sets, no duplicate id; `MY-METHOD.md` carries its spine, a `name:` line and one bullet per `#### [C#]` |
@@ -407,7 +412,7 @@ original and grades every paper-side statement (§4-1). The writer reads its
 own work with the reasons it wrote it; the verifier reads only the page. The
 audit (prompt step 7) sends a versus note nothing changed under back to a fresh
 verifier and re-resolves its code and method anchors, so a miss or a moved
-line does not stand for longer than two runs. A deep dive gets readers of
+line does not stand for longer than two runs. A code note gets readers of
 its own (prompt D2 and D4): the errata pass reads the rewrite against the
 original before anything is written on it, and a code reader opens every
 `path:line` and `cfg:` anchor and checks it says what the bullet uses it

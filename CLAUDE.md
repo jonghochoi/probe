@@ -10,8 +10,9 @@ decision-grade Korean output — a scheduled scouting routine into `scouting/`,
 and on demand `/analyze` and `/compare` into `analysis/` and `comparison/`,
 with `/proofread` looping passes over a rewrite. The reading site publishes
 all three.
-`/distinguish` writes only outside the repo, and `/ideate` writes nothing into
-it — it answers in chat and on a private page packed outside the repo.
+`/distinguish` and `/adapt` write only outside the repo, and `/ideate` writes
+nothing into it — it answers in chat and on a private page packed outside the
+repo.
 `README.md` carries the motivation; this file is the contributor reference for
 **commit hygiene and document style**.
 
@@ -45,8 +46,10 @@ file the row points at.
 | `distinction/AUTHORING.md` | human | Format contract for what `/distinguish` writes into the operator's **private folder**, never into this repo |
 | `distinction/SETUP.md` | human | Operator guide for the private folder and the local distinction routine |
 | `distinction/templates/` | human | `BASKET.md` and `MY-METHOD.md` skeletons for the private folder |
-| `distinction/render-distinction.py` | human | Draws each versus note, report and deep dive as a standalone HTML page beside it, on the standard library, with the site's tokens and `probe-chart` |
+| `distinction/render-distinction.py` | human | Draws each versus note, report and code note as a standalone HTML page beside it, on the standard library, with the site's tokens and `probe-chart` |
 | `distinction/run-distinguish.sh` | human | The script the local scheduler calls — pulls `main` and runs `/distinguish` headless with its tool list |
+| `adaptation/AUTHORING.md` | human | Format contract for the kits `/adapt` writes into its own folder **outside this repo** — the brief sent to NotebookLM and the check note |
+| `adaptation/SETUP.md` | human | Operator guide for `/adapt` — the Google account, the `notebooklm` CLI and the folder |
 | `.claude/prompts/**` | human | The agent prompts — one per slash command. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
 | `.claude/prompts/ideate-page.html` | human | The page skeleton `/ideate` fills and packs outside the repo — ideation has no track folder, so its page format lives here and in `ideate.txt` |
@@ -86,11 +89,12 @@ Hard rules:
 2. **`<type>`** — one of `feat`, `fix`, `refactor`, `docs`, `chore`, `style`,
    `deps`. Don't invent new types.
 3. **`<scope>`** — lowercase, naming the folder or track the change touches:
-   `site`, `scouting`, `analysis`, `comparison`, `distinction`, `context`,
-   `prompts`, `assets`, `linters`, `ci` (`.github/workflows/`), `config`. A
-   track's scope covers its contract and its documents; the build code that
-   publishes them is `site`. Omit the scope for repo-wide changes — a docs pass across several
-   tracks is `docs: …`, never `docs(docs): …`.
+   `site`, `scouting`, `analysis`, `comparison`, `distinction`,
+   `adaptation`, `context`, `prompts`, `assets`, `linters`, `ci`
+   (`.github/workflows/`), `config`. A track's scope covers its contract and
+   its documents; the build code that publishes them is `site`. Omit the
+   scope for repo-wide changes — a docs pass across several tracks is
+   `docs: …`, never `docs(docs): …`.
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
    does, not why (the why goes in the body).
@@ -136,8 +140,11 @@ same lint reads it:
 
 ```
 run: record YYYY-MM-DD                          # what one run date wrote
-deepdive: add <arxiv-id> × <scope> (<alias>)    # one deep dive
+versus: add <arxiv-id> × <scope> (<alias>)      # one code note
 ```
+
+`/adapt` writes into its own folder and commits nothing, and that folder has
+no commit format.
 
 `update` replaces `add` when redoing an existing rewrite or comparison. The
 trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
@@ -174,7 +181,8 @@ one logical area or needs context to be reviewable. When present:
 ## Local checks
 
 CI runs each of these on the PR except `build-art.py --check` and the
-distinction lint. Run the ones your change touches before pushing.
+distinction and adaptation lints. Run the ones your change touches before
+pushing.
 
 | Change touches | Command |
 |---|---|
@@ -185,7 +193,8 @@ distinction lint. Run the ones your change touches before pushing.
 | anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
 | `analysis/`, `comparison/`, `scouting/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
 | the private folder `/distinguish` writes | `python3 linters/check-distinction-format.py` with `PROBE_PRIVATE_DIR` set |
-| `distinction/render-distinction.py`, `site/builder/charts.py`, `site/builder/decisions.py`, `site.css` tokens or `charts.css` | `python3 -I -S distinction/render-distinction.py <a versus note, report or deep dive> -o <scratch>.html` (`-S` proves the standard library suffices) |
+| the folder `/adapt` writes | `python3 linters/check-adaptation-format.py` with `PROBE_ADAPT_DIR` set |
+| `distinction/render-distinction.py`, `site/builder/charts.py`, `site/builder/decisions.py`, `site.css` tokens or `charts.css` | `python3 -I -S distinction/render-distinction.py <a versus note, report or code note> -o <scratch>.html` (`-S` proves the standard library suffices) |
 | `site/query.py`, `site/builder/catalog.py` | `python3 -I -S site/query.py catalog >/dev/null` (`-S` proves the standard library suffices) |
 | `assets/build-art.py` | `python3 assets/build-art.py --check` |
 | `site/search/function/` | `npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null` |

@@ -16,7 +16,7 @@ Accepted shapes:
   compare: add|update <slug>            (the scouting routine, /analyze,
                                         /compare)
   run: record YYYY-MM-DD                the operator's commits of what
-  deepdive: add|update <id> × <scope> …  /distinguish wrote in its private folder
+  versus: add|update <id> × <scope> …    /distinguish wrote in its private folder
 
 Checked for the human shapes: allowed type; description starts lowercase; no
 trailing period; ≤72 chars total; no manual "(#NN)" suffix (GitHub appends the
@@ -46,7 +46,7 @@ _GENERATED = [
     # the comparison, which the file already does.
     re.compile(r"^compare: (add|update) [a-z0-9]+(-[a-z0-9]+)*$"),
     re.compile(r"^run: record \d{4}-\d{2}-\d{2}$"),
-    re.compile(r"^deepdive: (add|update) \d{4}\.\d{5} × [a-z0-9_]+( \(.+\))?$"),
+    re.compile(r"^versus: (add|update) \d{4}\.\d{5} × [a-z0-9_]+( \(.+\))?$"),
 ]
 
 # Common non-imperative first words seen in the wild (past tense, gerund,
