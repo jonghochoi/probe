@@ -180,6 +180,14 @@ PROCEDURE
 
      notebooklm generate revise-slide "<한국어 수정 지시: 원문이 말하는 것>" --artifact <slide-deck artifact id> --slide <n − 1> --wait --json -n <notebook>
 
+   A revision redraws the whole slide as one picture, so it keeps what the
+   picture is for — its scene, its arrows, the claim it carries — and
+   changes only the part the original contradicts. Drop only what the
+   original does not say. Information the original does say stays even
+   when its label keeps coming out garbled: make it fewer and larger — one
+   big label where there were several small ones, upright where it was
+   turned — rather than deleting it or moving it into a line of text.
+
    Each revision makes a new deck, so chain them: the first revises the deck
    step 4 drew, and each next one revises the deck the last returned
    (`task_id` in its JSON). Download the last deck by id (`-a <artifact id>`)
