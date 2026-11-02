@@ -98,9 +98,8 @@ PROCEDURE
    body the instruction for that kind under `adaptation/AUTHORING.md` §3-1.
    Per kind:
 
-     slide-deck   10–14 slides, one claim each; the figure a slide would show
-                  named by the original's figure number, since a drawing of
-                  it is NotebookLM's, not the paper's
+     slide-deck   10–14 slides, one claim each, each drawn in NotebookLM's
+                  own pictures rather than pointed at the original's figures
      infographic  the thesis, the mechanism in three steps, the headline
                   numbers — one page, nothing the 요약 tab does not carry
      audio        two voices, the 요약 tab's narrative first, the limits last
