@@ -68,11 +68,12 @@ kind's prompt, verbatim. The body:
 - follows the rewrite's thesis and its four acts, in order;
 - gives the numbers the rewrite's 요약 cards carry, with their units, and
   asks that no other number be stated;
-- asks that nothing be drawn the original does not show: no illustration,
-  scene or robot of its own, no heatmap or mechanism the paper does not
-  draw, and no shape whose size, length or position stands for a quantity —
-  a bubble, a bar, an axis — so the numbers stand as text and a figure is
-  pointed at by its number in the original;
+- leaves the pictures to NotebookLM — its own illustrations, scenes and
+  metaphors carry the deck, and nothing points at the original's figure
+  numbers, because a reader who needs the original's figures reads the
+  original — but asks that a drawn mechanism follow the paper's own steps
+  and arrows, and that no shape's size, length or position stand for a
+  quantity — a bubble, a bar, an axis — so the numbers stand as text;
 - asks that each claim keep the original's strength: its hedges stay ("개선
   여지", not "취약"), and no word of degree ("급락", "수직 하락") is added;
 - closes on the paper's own stated limits and the `D#` its act 4 argues
