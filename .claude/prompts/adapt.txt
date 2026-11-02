@@ -179,9 +179,16 @@ PROCEDURE
 6. REVISE — the slides only, one pass. For each slide with a row other than
    `맞음`, one revision naming the original's line:
 
-     notebooklm generate revise-slide "<한국어 수정 지시: 원문이 말하는 것>" --artifact <slide-deck artifact id> --slide <n − 1> --wait -n <notebook>
+     notebooklm generate revise-slide "<한국어 수정 지시: 원문이 말하는 것>" --artifact <slide-deck artifact id> --slide <n − 1> --wait --json -n <notebook>
 
-   Download `slides.pdf` and `slides.pptx` again, and send only the revised
+   Each revision makes a new deck, so chain them: the first revises the deck
+   step 4 drew, and each next one revises the deck the last returned
+   (`task_id` in its JSON). Download the last deck by id (`-a <artifact id>`)
+   as `slides.pdf` and `slides.pptx` again, then delete every other slide-deck
+   artifact in the notebook — `notebooklm artifact list -n <notebook> --type
+   slide-deck --json`, and `notebooklm artifact delete <artifact id> -y -n
+   <notebook>` for each but the kept one — so the notebook holds the deck the
+   kit carries and nothing that disagrees with it. Send only the revised
    pages to a fresh agent with step 5's instruction. A row it still grades
    other than `맞음` stands under `4 남은 오류`, as does every non-`맞음` row
    on the infographic and the mind map, which are not revised — the
