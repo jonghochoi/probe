@@ -30,10 +30,11 @@ SOURCES
    `arxiv.Unavailable` → stop the loop and say so.
 
 2. **The public code — a second source of fact, for what the paper leaves
-   unstated.** Only a repository the rewrite's `links:` carries as `code|`,
-   or one the paper itself names; never guess one (AUTHORING R10). Clone it
-   shallow into the scratchpad or `/tmp`, never into this repo, once per
-   loop. Read it for what the original cannot settle: an unstated
+   unstated.** Only a repository that passes AUTHORING R10 — the one
+   `links:` carries as `code|`, or one found or handed over that names this
+   paper; never guess one. One not yet in `links:` is added there in that
+   round's fix. Clone it shallow into the scratchpad or `/tmp`, never into
+   this repo, once per loop. Read it for what the original cannot settle: an unstated
    hyperparameter, a threshold, the real input to a module, a step the
    paper's pseudocode skips, a place where the code disagrees with the
    paper. If the clone fails, say so in the round log and go on without it.
