@@ -117,7 +117,8 @@ PROCEDURE
      - Is every `co-ten` about one of OUR decisions, and do the author-stated
        limitations close Act 3, not Act 4? (R9)
      - Does `tagline:` say what the paper DOES without naming it? (§1)
-     - Is every resource link confirmed in the paper? (R10)
+     - Does every resource link name this paper on its own page — opened,
+       not guessed? (R10)
      - Walk `arxiv.py`'s figure list once more: is the figure carrying the
        CENTRAL mechanism on the page, can you name why each linkable figure
        you left out is out, and is every `probe-flow`'s `why` still true?

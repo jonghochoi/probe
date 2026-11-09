@@ -485,8 +485,12 @@ in both plus the list below.
 
 - **Six kinds, and only these**: `arxiv` `code` `weights` `data` `site` `demo`.
   An unknown kind is dropped rather than guessed at.
-- **ONLY URLs confirmed in the paper body or abstract.** Never guess a
-  repository owner, never construct a model-hub path.
+- **A URL that traces back to this paper.** It may come from the paper body
+  or abstract, the paper's project page, the authors' repository or model
+  card, or the operator — code in particular is often released after the
+  paper and named only there. Whatever the source, open the page and confirm
+  it names this paper (its arXiv id or title) before writing the pair. Never
+  guess a repository owner, never construct a model-hub path.
 - **Unconfirmed → leave the slot empty.** Do not write "없음". A short link row
   is itself reproducibility information.
 - Write them in any order — the cells sort themselves.
