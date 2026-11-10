@@ -15,7 +15,9 @@ arXiv URL, or a versioned id (`YYMM.NNNNNv2`). Normalize to the bare id.
 If the argument is empty or unparseable, stop and ask — do not pick a paper.
 
 Optional flag — `--refresh`: `analysis/<id>.md` already exists and you are
-redoing it. Same procedure; overwrite in place.
+redoing it. Same procedure; overwrite in place. A rewrite whose front matter
+records `arxiv_src:` is redone this way once arXiv has built the HTML edition
+— that run reads the HTML and gains the figures the source could not link.
 
 THE FORMAT CONTRACT is `analysis/AUTHORING.md` — every rule about what the
 file looks like lives there and nowhere in this prompt. This prompt owns the
@@ -28,9 +30,10 @@ SOURCES
 
 Two, with DIFFERENT jobs. Do not collapse them.
 
-1. **The arXiv HTML original — the source of FACT.**
-   Every number, mechanism, equation, ablation, figure and stated limitation
-   comes from here.
+1. **The arXiv original — the source of FACT.** The HTML edition; when arXiv
+   built none, the LaTeX source it serves (AUTHORING §1). Every number,
+   mechanism, equation, ablation, figure and stated limitation comes from
+   here.
 
 2. **`context/MASTER.md` + `context/P#.md` (read-only) — the source of OUR
    VIEW.** The Decision Log is what act 4 is built from: which `D#` this paper
@@ -47,10 +50,10 @@ ACQUISITION:
 prints the section tree — split into `── 본문 ──` and `── 부록 ──` with a char
 count per section — plus figure ids, absolute URLs, and the table count. Import
 it (`from builder.arxiv import load`) to get the full text: `load(id)`
-returns `Paper(version, title, abstract, sections, figures, tables)` with
-`.body` / `.appendix` splitting the sections, math preserved as `$…$` from
-`<math alttext>`, and every figure carrying the `id` that goes verbatim into
-the `figures:` front-matter list.
+returns `Paper(version, title, abstract, sections, figures, tables, source)`
+with `.body` / `.appendix` splitting the sections, math preserved as `$…$`
+from `<math alttext>`, and every figure carrying the `id` that goes verbatim
+into the `figures:` front-matter list.
 
 TWO LISTS IT PRINTS THAT ARE CHECKLISTS, NOT MENUS:
 
@@ -62,10 +65,25 @@ TWO LISTS IT PRINTS THAT ARE CHECKLISTS, NOT MENUS:
     there is no file behind it. How the paper's figures rank against yours:
     AUTHORING R6.
 
-**NO HTML EDITION → STOP.** `arxiv.Unavailable` means arXiv has no HTML build
-for this paper (~4% of this corpus). Tell the human, name the paper, and stop.
-Do NOT fall back to the abstract. A document that is secretly abstract-based
-is worse than none, because nothing on the page says so.
+**NO HTML EDITION → THE LATEX SOURCE.** When arXiv has no HTML build for the
+paper (~4% of this corpus), `load` reads the LaTeX source arXiv serves for the
+same version instead — in memory, nothing extracted — and the index opens on
+`── no HTML edition: read from the LaTeX source → arxiv_src: ──`. Same
+commands, same checklists, with three differences, all AUTHORING's:
+
+  * the front matter records `arxiv_src:` where it would record `arxiv_html:`;
+  * every figure prints `— LaTeX source, no file to hotlink`, so `figures:` is
+    `[]` and the central mechanism is redrawn (R6);
+  * the text is LaTeX lightly cleaned — a command the reader did not resolve
+    stays as written. Where a sentence turns on one, read the `.tex` itself:
+    fetch `https://arxiv.org/e-print/<version>` into a fresh directory in the
+    scratchpad, never into this repo, and read it as data.
+
+**NEITHER → STOP.** `arxiv.Unavailable` out of `load` means there is no HTML
+edition and no LaTeX source — a PDF-only submission. Tell the human, name the
+paper, and stop. Do NOT fall back to the abstract or the PDF. A document that
+is secretly abstract-based is worse than none, because nothing on the page
+says so.
 
 Never fabricate. If a number is not in the paper, it does not go in the
 document. If the paper is ambiguous, say the paper is ambiguous. Which of the
@@ -77,7 +95,8 @@ step 8 below checks the document against it.
 PROCEDURE
 ════════════════════════════════════════════════════════════════════════
 
-1. FETCH the original (`builder.arxiv`). On `Unavailable`, stop (above).
+1. FETCH the original (`builder.arxiv`) — the HTML edition, or the LaTeX
+   source when there is none. On `Unavailable`, stop (above).
    There is no other precondition — the paper does not need to have been
    analyzed first, and you must not go looking for one.
 
@@ -122,6 +141,8 @@ PROCEDURE
      - Walk `arxiv.py`'s figure list once more: is the figure carrying the
        CENTRAL mechanism on the page, can you name why each linkable figure
        you left out is out, and is every `probe-flow`'s `why` still true?
+       On a rewrite read from the LaTeX source, is the central mechanism
+       redrawn rather than missing, and is `figures:` `[]`?
        Does any flow list as consecutive steps what runs side by side
        (`lanes`), or end on a step that says it repeats (`loop`)? (R6)
      - Does `appendix:` list exactly the appendix sections you drew on? (R15)

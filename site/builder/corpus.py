@@ -1,6 +1,6 @@
 """Discover the analysis rewrites the site publishes.
 
-A rewrite is written from the paper's own arXiv HTML, so everything the site
+A rewrite is written from the paper's own arXiv original, so everything the site
 needs — title, authors, pillars, links, the card preview — is declared in
 the rewrite's own front matter. There is no second source to reconcile
 against.

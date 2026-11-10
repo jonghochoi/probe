@@ -18,8 +18,10 @@ rather than a regex sweep: the caption of a figure routinely contains nested `<m
 silently truncate a caption at the first `>`.
 
 Not every paper has an HTML edition — measured at 22/23 on a sample of this
-corpus. `fetch` raises `Unavailable` in that case, and the prompt is required
-to stop rather than fall back to a summary-based rewrite.
+corpus. `fetch` raises `Unavailable` in that case, and `load` reads the LaTeX
+source arXiv serves instead (`builder.arxivsrc`) — the full text the HTML is
+built from, never a summary of it. `Unavailable` out of `load` means neither
+exists: a PDF-only submission, and no rewrite.
 """
 
 from __future__ import annotations
@@ -66,7 +68,8 @@ _APPENDIX_ID = re.compile(r"^A\d+\b")
 
 
 class Unavailable(RuntimeError):
-    """No HTML edition for this paper (or the fetch failed)."""
+    """No edition to read — no HTML (from `fetch`), or neither HTML nor LaTeX
+    source (from `load`), or the fetch failed."""
 
 
 @dataclass
@@ -116,12 +119,14 @@ class Table:
 @dataclass
 class Paper:
     id: str              # as fetched, e.g. "<arxiv-id>"
-    version: str         # "<arxiv-id>v<n>" — what `arxiv_html:` records
+    version: str         # "<arxiv-id>v<n>" — what `arxiv_html:` / `arxiv_src:` records
     title: str
     abstract: str
     sections: list[Section] = field(default_factory=list)
     figures: list[Figure] = field(default_factory=list)
     tables: list[Table] = field(default_factory=list)
+    source: str = "html"  # "html" → `arxiv_html:`; "tex" → `arxiv_src:` (AUTHORING §1)
+    bib: list[str] = field(default_factory=list)   # filled for "tex" only
 
     @property
     def appendix(self) -> list[Section]:
@@ -412,7 +417,16 @@ def parse(html: str, paper_id: str) -> Paper:
 
 
 def load(paper_id: str) -> Paper:
-    html, _ = fetch(paper_id)
+    """The HTML edition, or the LaTeX source when arXiv built no HTML.
+    `Unavailable` only when neither can be read."""
+    try:
+        html, _ = fetch(paper_id)
+    except Unavailable as html_exc:
+        from builder.arxivsrc import load_source
+        try:
+            return load_source(paper_id)
+        except Unavailable as src_exc:
+            raise Unavailable(f"{html_exc}; {src_exc}") from src_exc
     return parse(html, paper_id)
 
 
@@ -502,10 +516,13 @@ def _main(argv: list[str]) -> int:
     if args.bib:
         try:
             html, _ = fetch(args.paper_id)
-        except Unavailable as exc:
-            print(f"unavailable: {exc}", file=sys.stderr)
-            return 1
-        print("\n".join(bibliography(html)))
+            print("\n".join(bibliography(html)))
+        except Unavailable:
+            try:
+                print("\n".join(load(args.paper_id).bib))
+            except Unavailable as exc:
+                print(f"unavailable: {exc}", file=sys.stderr)
+                return 1
         return 0
     try:
         paper = load(args.paper_id)
@@ -540,6 +557,10 @@ def _main(argv: list[str]) -> int:
     linkable = [f for f in paper.figures if f.linkable]
     appendix = paper.appendix
     print(f"{paper.version}  {paper.title}")
+    if paper.source == "tex":
+        # Said first because it changes what the rewrite records and what its
+        # figures can be (AUTHORING §1, R6).
+        print("  ── no HTML edition: read from the LaTeX source → `arxiv_src:` ──")
     print(f"  abstract {len(paper.abstract)} chars · "
           f"{len(paper.sections)} sections ({len(appendix)} in the appendix) · "
           f"{len(paper.figures)} figures ({len(linkable)} linkable) · "
@@ -556,8 +577,10 @@ def _main(argv: list[str]) -> int:
     for f in paper.figures:
         # An unlinkable figure is a decision to make, not a line to skim past:
         # R6 wants the paper's own figure wherever one exists.
-        print(f"  {f.id:12} Fig {f.number:4} "
-              f"{f.url or '— inline SVG, no file to hotlink (R6: redraw or skip)'}")
+        unlinkable = ("— LaTeX source, no file to hotlink (R6: redraw or skip)"
+                      if paper.source == "tex" else
+                      "— inline SVG, no file to hotlink (R6: redraw or skip)")
+        print(f"  {f.id:12} Fig {f.number:4} {f.url or unlinkable}")
         print(f"  {'':12} {' ' * 8} {f.caption.lstrip(': ')[:110]}")
     if paper.tables:
         print("\n  ── 표 ── (본문은 --tables)")

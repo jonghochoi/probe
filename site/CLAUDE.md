@@ -83,11 +83,13 @@ it, which are what a phone's home-screen shortcut shows — and as `og.png`, the
 1200×630 card a pasted link unfurls with. Change the mark here and bring all
 of those into step.
 
-**Two modules serve the prompts, not the build.** `builder/arxiv.py` (its CLI:
-`site/README.md`) raises `Unavailable` when a paper has no HTML edition —
-`/analyze`'s stop condition — and `builder/mdext/probefence.py` owns the
-` ```probe-* ` fences. Both are called by hand from a run, so keep them
-importable without the rest of the build.
+**Three modules serve the prompts, not the build.** `builder/arxiv.py` (its
+CLI: `site/README.md`) reads a paper's HTML edition, falling back to
+`builder/arxivsrc.py` for the LaTeX source, and raises `Unavailable` only when
+there is neither — `/analyze`'s stop condition — and
+`builder/mdext/probefence.py` owns the ` ```probe-* ` fences. All three are
+called by hand from a run, so keep them importable without the rest of the
+build.
 
 **Four pieces are borrowed by the distinction track.** `distinction/render-distinction.py`
 draws the private versus notes, reports and code notes with `builder/charts.py`,

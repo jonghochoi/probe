@@ -43,7 +43,7 @@ links: [arxiv|<url>, code|<url>]
 published: YYYY-MM-DD            # the paper's date, from arXiv
 generated: YYYY-MM-DD HH:MM      # yours — the clock as you write it
 generator: analyze/v3
-arxiv_html: <arxiv-id>v<n>       # the exact version actually read
+arxiv_html: <arxiv-id>v<n>       # the exact version read — `arxiv_src:` when it was the LaTeX source
 arxiv_fetched: YYYY-MM-DD
 figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
 appendix: [<A>, <B.2>, <G>]      # appendix sections drawn on, or `none`
@@ -65,8 +65,8 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly, **most relevant first**. The site files the paper under the **first two** only: the chips its card prints, the axes the landing rail counts it in, and what a click on those counts returns. A third is harmless and does not publish. The first entry decides the card's group; empty → 미분류, which beats a wrong pillar |
 | `links` | `kind\|url` pairs — kinds and sourcing rules in R10 |
 | `published` / `generated` | the paper's date / this rewrite's, as the clock reads when you write it. The landing page **orders the corpus by the commit that lands the file** — its add, or the `analysis: update <id> rewrite` that redoes it — so 최근 is the order a reader watched rewrites appear. `generated` dates a rewrite that has not landed yet and separates two that land in one commit, which is why it carries the clock time. The build reports a value it cannot read |
-| `arxiv_html` / `arxiv_fetched` | the exact version read, and when |
-| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **One list for both surfaces** — the build matches it both ways against every figure id cited anywhere in the file (body and 요약) and reports an id in one and not the other |
+| `arxiv_html` / `arxiv_src` / `arxiv_fetched` | the exact version read, and when. `arxiv_html` when the original was the HTML edition, `arxiv_src` when it was the LaTeX source (the source contract below) — exactly one of the two, because it is what every later reader of the rewrite goes back to |
+| `figures` | cited figure ids, verbatim from the original as `arxiv.py` reports them. **One list for both surfaces** — the build matches it both ways against every figure id cited anywhere in the file (body and 요약) and reports an id in one and not the other. `[]` on a rewrite read from the LaTeX source, which has no figure to cite (R6) |
 | `appendix` | the appendix sections this rewrite drew on (`[A, B, D.2, G]`), or `none` for a paper without one. Required — the build reports a missing key (R15). Never leave it empty: "I looked and there was nothing" and "I never looked" are the two cases this key exists to separate, and only `none` says the first |
 | `terms` | count of inline term anchors |
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment — `<지표> <전> → <후> <단위>` for a number the paper moved, `<수치> <단위> · <함께 성립한 조건>` for one it holds under a constraint. The landing list cannot pull a number out of `summary`'s prose, so it is stated once here and printed on the landing list on its own 결과 line under the tagline, and in the foot of a comparison's paper card. Under 40 characters (the build reports longer), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
@@ -87,10 +87,16 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 4. Otherwise **omit the key.** A descriptive title whose method is never given
    a name of its own gets no alias; one is never invented.
 
-**Source contract.** Facts come from the paper's arXiv HTML original; *the
-axis view* — `D#` impact, tensions, what the research axes would check — comes
-from `context/`. A paper with no HTML edition gets **no rewrite**: an
-abstract-based fallback would be indistinguishable on the page from a real one.
+**Source contract.** Facts come from the paper's arXiv original; *the axis
+view* — `D#` impact, tensions, what the research axes would check — comes from
+`context/`. The original is the paper's **HTML edition**. When arXiv built
+none, it is the **LaTeX source** arXiv serves for the same version — the full
+text the authors submitted, which the HTML edition is generated from, so it
+carries every section, table and equation the HTML would have. A paper with
+neither — a PDF-only submission — gets **no rewrite**, and nothing stands in:
+an abstract-based fallback would be indistinguishable on the page from a real
+one. A rewrite read from the source is one `--refresh` away from its figures
+once arXiv builds the HTML edition (R6).
 
 **Stance.** Facts are the paper's. Opinions are ours and must anchor to a `D#`
 that exists in the Decision Log — never invent a position `context/` does not
@@ -340,6 +346,15 @@ explains it; an Act 2 with no figure while the paper has one is wrong.
   broken URL. **An algorithm listing** is transcribed as a captioned code block
   (R8) rather than redrawn as boxes: it is the paper's own artifact, line
   numbers and all.
+- **A rewrite read from the LaTeX source has no figure to link.** The
+  source's image files exist only inside its archive, and the next rule
+  forbids mirroring them, so every figure is unlinkable and `figures:` is `[]`.
+  The figure carrying the central mechanism is still owed to its section:
+  redrawn as `probe-flow`, whose `why` names it
+  (`원문 Figure 3 — HTML 판이 없어 링크할 그림 파일이 없음`), with a results
+  plot carried as the table or `probe-scale` its numbers support. Figure,
+  table and section numbers in a citation are the ones `arxiv.py` prints,
+  counted in the source's own order as the PDF prints them.
 - **Never mirror an image into the repo** — hotlink only, on copyright
   grounds. The build reports a relative `url`.
 - Caption: translate the original caption to Korean. The origin goes in
