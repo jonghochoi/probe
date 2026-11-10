@@ -79,7 +79,7 @@ PROCEDURE
    The kit's folder is `$PROBE_ADAPT_DIR/<id>--<alias>/` (`adaptation/
    AUTHORING.md` §2). Read the version the rewrite read:
 
-     grep -m1 '^arxiv_html:' analysis/<id>.md
+     grep -m1 -E '^arxiv_(html|src):' analysis/<id>.md
 
    Then check the account before writing a word:
 
@@ -123,8 +123,9 @@ PROCEDURE
      notebooklm source add analysis/<id>.md -n <notebook>
      notebooklm source add "https://arxiv.org/html/<arxiv_html>" -n <notebook>
 
-   When the arXiv HTML will not process, add
-   `https://arxiv.org/pdf/<arxiv_html>` in its place. `notebooklm source list
+   When the arXiv HTML will not process — or the rewrite records `arxiv_src:`,
+   so there is no HTML edition to add — add `https://arxiv.org/pdf/<version>`
+   in its place. `notebooklm source list
    -n <notebook> --json`, then `notebooklm source wait <source id> -n
    <notebook>` for each, until both are ready.
 

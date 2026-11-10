@@ -30,6 +30,7 @@ comment of the file that draws it.
 | `builder/decisions.py` | The `context/P*.md` Decision-Log parser behind the `D<n>` tooltips |
 | `builder/catalog.py` | The corpus as data for an agent — `corpus.json`, `llms.txt` and the per-section Markdown under `p/<id>/s/` |
 | `builder/arxiv.py` | LaTeXML extraction of an arXiv original, for the prompts: `python3 -m builder.arxiv <id>` from this folder prints the section tree, figures and table captions; `--grep <regex>` the matching lines with their §, `--tables` every table as Markdown, `--section <anchor>` one section's text, `--bib` the bibliography with each arXiv id's first-version month |
+| `builder/arxivsrc.py` | The LaTeX source arXiv serves, read in memory into the same `Paper` when a paper has no HTML edition — `builder.arxiv` falls back to it, so every flag above works on either |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |
 | `builder/fonts.py` | Webfont subsetting, `Probe Num` included |
 | `builder/assets_out.py`, `builder/assets/` | The site's CSS, JS and icons, copied into the output tree. Each script opens on a comment stating what it owns |

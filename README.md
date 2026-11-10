@@ -47,7 +47,7 @@ holds one pillar's decision log, tracked literature and anti-topics.
 
 - **Start by hand.** One report, reviewed ruthlessly, *then* the schedule.
 - **You name the papers.** A report never feeds `analysis/` on its own.
-- **No arXiv HTML, no rewrite.** Never written from the abstract.
+- **No arXiv original, no rewrite.** The HTML edition, else the LaTeX source — never the abstract.
 - **The rewrite comes first.** `/compare` reads what `/analyze` wrote.
 
 </details>

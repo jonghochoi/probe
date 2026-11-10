@@ -20,14 +20,18 @@ INPUT (the loop prompt carries it):
 SOURCES
 ════════════════════════════════════════════════════════════════════════
 
-1. **The arXiv HTML original — the source of FACT**, exactly as
-   `.claude/prompts/analyze.txt` SOURCES defines it. Fetch it the same way:
+1. **The arXiv original — the source of FACT**, exactly as
+   `.claude/prompts/analyze.txt` SOURCES defines it: the HTML edition, or the
+   LaTeX source for a rewrite whose front matter records `arxiv_src:`. Fetch
+   it the same way:
 
        cd site && python3 -m builder.arxiv <id>
 
    and `from builder.arxiv import load` for the text. Re-read it every round —
    a round that proofreads the rewrite against itself only polishes prose.
-   `arxiv.Unavailable` → stop the loop and say so.
+   `arxiv.Unavailable` → stop the loop and say so. A rewrite read from the
+   source whose paper has since gained an HTML edition is not proofread
+   into it — it is redone with `/analyze <id> --refresh`; say so and stop.
 
 2. **The public code — a second source of fact, for what the paper leaves
    unstated.** Only a repository that passes AUTHORING R10 — the one

@@ -12,7 +12,7 @@ file first, then the prompt, then the lint.
 
 **Only public material goes to NotebookLM.** The sources are the rewrite
 `analysis/<id>.md` and the arXiv original at the version the rewrite read
-(its `arxiv_html:`), and the instructions sent are `brief.md`, written from
+(its `arxiv_html:` or `arxiv_src:`), and the instructions sent are `brief.md`, written from
 the rewrite and `context/` alone. Nothing of the operator's private folder
 (`distinction/SETUP.md` §2) is read, uploaded or quoted into a brief, and a
 kit says nothing about the operator's own method.
