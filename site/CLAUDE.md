@@ -41,7 +41,7 @@ own page, and the comparison links out.
 **A band is its eyebrow and its title, and nothing beside them.**
 `components.mast()` prints those two lines and no more: whatever sits next to
 the title either repeats the list under the band or argues for it, and the
-list makes its own case one scroll down. The five bands are one height, so
+list makes its own case one scroll down. The bands are one height, so
 moving between them in the nav moves nothing but the words.
 
 **계보 is read, never written.** `builder/lineage.py` draws only what the

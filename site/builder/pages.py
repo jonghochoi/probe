@@ -289,6 +289,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
     </label>
     <button type="button" class="barreset" data-reset="facet" hidden>필터 초기화</button>
     <span class="filter-spacer"></span>
+    {c.views("", "list")}
     {_seg("정렬", "", '<button type="button" data-sort="recent" aria-pressed="true">최신순</button>'
                       '<button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>'
                       '<button type="button" data-sort="title" aria-pressed="false">제목순</button>')}
@@ -1459,6 +1460,9 @@ def _rank(title: str, why: str, rows: list[tuple[lineage.Node, int]], href) -> s
 def lineage_page(graph: lineage.Graph | None) -> str:
     """계보 — the whole corpus on one map, and what the map says to read.
 
+    It sits under 분석 as that destination's second view (`components.views`),
+    the list being the first: both lay out the same rewrites.
+
     Drawn from what the rewrites already hold (`builder/lineage.py`), so the
     page needs no upkeep of its own: it changes on the day a rewrite lands.
     A partial build passes no graph and gets the empty page, so the nav's
@@ -1501,9 +1505,9 @@ def lineage_page(graph: lineage.Graph | None) -> str:
         for p in PILLAR_NAMES)
 
     if svg:
-        main = f"""<p class="gm-facts"><span><b>{len(inside)}</b>재작성본</span>
+        main = f"""<div class="gm-top"><p class="gm-facts"><span><b>{len(inside)}</b>재작성본</span>
     <span><b>{edges}</b>재작성본 사이의 연결</span>
-    <span><b>{len(outside)}</b>둘 이상이 함께 꼽은 바깥 조상</span></p>
+    <span><b>{len(outside)}</b>둘 이상이 함께 꼽은 바깥 조상</span></p>{c.views("../", "map")}</div>
   <div class="gm-bar">
     <div class="gm-filter chip-row" role="group" aria-label="연구 축으로 거르기">{chips}</div>
     <p class="gm-legend">
@@ -1520,7 +1524,8 @@ def lineage_page(graph: lineage.Graph | None) -> str:
   <p class="gm-foot">가로 위치는 arXiv 번호의 연·월, 세로 띠는 재작성본의 첫 번째 연구 축입니다.
   재작성본이 없는 조상은 두 편 이상이 계보 레일에 함께 올린 것만 그립니다.</p>"""
     else:
-        main = '<p class="corpus-empty">아직 그릴 계보가 없습니다.</p>'
+        main = (f'<div class="gm-top">{c.views("../", "map")}</div>'
+                '<p class="corpus-empty">아직 그릴 계보가 없습니다.</p>')
 
     body = f"""{c.mast(eyebrow="Who stands on whom", title="계보, 누가 누구를 딛는지 봅니다")}
 
@@ -1530,7 +1535,7 @@ def lineage_page(graph: lineage.Graph | None) -> str:
 """
     return c.page(
         title="계보 · PROBE",
-        here="lineage",
+        here="papers",
         description="재작성본의 계보 레일과 본문 링크로 그린, 논문이 서로를 딛는 지도",
         body=body,
         depth=1,

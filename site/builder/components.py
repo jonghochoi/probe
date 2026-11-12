@@ -144,7 +144,7 @@ def mark(size: int) -> str:
 def mast(*, eyebrow: str, title: str, count: str = "") -> str:
     """The band every list page opens on.
 
-    One frame for the five destinations the nav names, because they are one
+    One frame for the four destinations the nav names, because they are one
     level of the site and a band that changed shape between them would say
     otherwise. Two things and no third: what this surface is, and what it does.
     Nothing sits beside the title — the list under the band is what the page
@@ -432,6 +432,22 @@ document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 """
 
 
+def views(up: str, here: str) -> str:
+    """목록 · 계보 — the two ways 분석 lays the same corpus out.
+
+    The list answers "what is new" and the map answers "what stands on what",
+    and they are one destination cut two ways, so the switch between them is a
+    pair of links inside 분석 rather than a fifth name in the nav. Links and
+    not buttons: each view is its own page. On the list they ride the filter
+    bar, which only a scripted browser shows — an unscripted reader reaches
+    the map from 계보에서의 자리 on any paper's page.
+    """
+    pairs = (("list", "index.html", "목록"), ("map", "g/index.html", "계보"))
+    return ('<nav class="views" aria-label="분석 보기 방식">' + "".join(
+        f'<a href="{up}{href}"{_current(key, here)}>{label}</a>'
+        for key, href, label in pairs) + "</nav>")
+
+
 def cmdk_button() -> str:
     """The one part of the ⌘K palette the build prints.
 
@@ -514,12 +530,11 @@ def repo_link() -> str:
 #
 # The key in front is what a page names itself with. A paper and a comparison
 # each sit *under* a destination rather than being one, so `p/<id>/` marks
-# 분석 and `c/<slug>/` marks 비교 — the mark answers "which part of the site
+# 분석, as does the 계보 map at `g/`, and `c/<slug>/` marks 비교 — the mark answers "which part of the site
 # is this", which is what a reader glancing at a nav is asking.
 DESTINATIONS = (("papers", "index.html", "분석"),
                 ("scout", "s/index.html", "탐색"),
                 ("compare", "c/index.html", "비교"),
-                ("lineage", "g/index.html", "계보"),
                 ("shelf", "shelf/index.html", "서재"))
 
 
@@ -537,7 +552,7 @@ def _current(key: str, here: str) -> str:
 def nav_sheet(up: str, here: str = "") -> str:
     """The phone's menu — the row's destinations, one per line, plus the way out.
 
-    A phone is not wide enough for the mark, the site's name, five
+    A phone is not wide enough for the mark, the site's name, four
     destinations and three glyph controls on one line, and the name is the part
     that says which site this is. So the destinations fold behind one button
     and the name stays: the row keeps what a reader cannot reconstruct, and the
@@ -558,14 +573,14 @@ def nav_sheet(up: str, here: str = "") -> str:
 def nav(up: str, here: str = "") -> str:
     """The row every page opens on — where the site goes, and what it can do.
 
-    Two clusters, and they are different kinds: five places to go, then three
+    Two clusters, and they are different kinds: four places to go, then three
     things to do to the page in front of the reader. A hairline stands between
     them (`site.css`), because the seam between an unboxed label and a bordered
     32px button reads as a control that lost its border unless something says
     the boundary is meant.
 
     `here` is the destination this page sits under, and marking it is the
-    other half of the same job: a row of five names that never says which one
+    other half of the same job: a row of four names that never says which one
     the reader is standing in is a row with a hole in it, and the hole is what
     makes the labels beside the controls look unfinished.
     """

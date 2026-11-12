@@ -188,6 +188,22 @@ html.js .search-go:disabled { color: var(--text-muted); cursor: default; }
   box-shadow: var(--shadow-sm);
 }
 
+/* 목록 · 계보 (`components.views`) — the same pill group, made of links: the
+   lifted pill is the view the reader is on, and the other is where a click
+   goes. */
+.views { display: flex; gap: .1rem; background: var(--surface-2);
+         border: 1px solid var(--border); border-radius: var(--radius-sm);
+         padding: .12rem; height: var(--ctl-h); }
+.views a {
+  display: flex; align-items: center; padding: 0 .65rem;
+  font-size: var(--fs-2xs); font-weight: 600; text-decoration: none;
+  border-radius: var(--radius-xs); color: var(--text-muted);
+}
+.views a:hover { color: var(--text); }
+.views a[aria-current="page"] {
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm);
+}
+
 /* ── The two groups, folded ───────────────────────────────────────────── */
 /* Each group is one chip carrying the choice that is on, and the group itself
    is the panel it opens. Folded at every width rather than only where the bar

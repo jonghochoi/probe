@@ -8,7 +8,7 @@ nothing else.
 A paper's page carries the 요약 and 상세 tabs from its rewrite, plus 비교 when
 a comparison holds it. 탐색 (`s/<date>/`) is one
 page per run, every pillar's report merged by arXiv id, and `s/` prints the
-newest run with every date in a row above it. 계보 (`g/`) is one map of which
+newest run with every date in a row above it. 계보 (`g/`) is 분석's second view — one map of which
 rewrite stands on which, and each paper's page carries its own corner of it.
 The corpus and its
 contracts stay at the repo root; the rules a change here must keep are in

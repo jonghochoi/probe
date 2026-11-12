@@ -8,8 +8,13 @@
    sets; with no script the map is still every node, every line and every
    link, and the filter and the card are not printed. */
 
+.gm-top {
+  display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center;
+  justify-content: space-between; margin-bottom: 1rem;
+}
+.gm-top .views { margin-left: auto; }
 .gm-facts {
-  display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; margin-bottom: 1rem;
+  display: flex; flex-wrap: wrap; gap: .3rem 1.4rem;
   font-size: var(--fs-xs); color: var(--text-muted);
 }
 .gm-facts b { font-family: var(--num); font-weight: 700; color: var(--text); margin-right: .35rem; }
