@@ -258,7 +258,9 @@ At most one entry carries `current: true` — the paper being read. That is what
 turns a bibliography into a position. **Do not invent a lineage**: draw it from
 `context/P#.md` §Tracked Literature and from the rest of `analysis/`, and
 verify each link resolves before citing it. `link` is always the paper's own
-arXiv abstract; the build adds the 재작성본 marker itself (§3-3).
+arXiv abstract; the build adds the 재작성본 marker itself (§3-3). The site's
+계보 map is drawn from these entries: each one with an arXiv `link` becomes an
+ancestor of this paper there, named by its `what` up to the dash.
 
 **2. 숫자의 지형** — the paper's key number placed against the others of its
 kind (a human baseline, a hardware limit, another paper we read).

@@ -55,7 +55,7 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, catalog, comparisons, corpus, pages, scouting
+from builder import assets_out, catalog, comparisons, corpus, lineage, pages, scouting
 from builder.decisions import harvest_decisions, retired_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
@@ -140,6 +140,9 @@ def build(args) -> int:
     # `cited` is one pass over every rewrite's source, made above before any
     # page is rendered: the backlinks on a paper's page are written by papers
     # that come later in the loop as often as earlier ones.
+    # A partial build holds a corner of the corpus, and a 계보 drawn from it
+    # would show most of every paper's ancestors as missing.
+    graph = None if args.only else lineage.build(papers, pages._alias)
     for paper in papers:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
             paper, katex, decisions, render_problems,
@@ -147,11 +150,13 @@ def build(args) -> int:
             comparisons=comparisons.for_paper(paper.stem, comps),
             papers_by_id=papers_by_id,
             citers=cited.get(paper.stem, []),
+            graph=graph,
         )
     for comp in comps:
         rendered[out / "c" / comp.slug / "index.html"] = pages.comparison_page(
             comp, papers_by_id, katex, decisions, render_problems)
     rendered[out / "c" / "index.html"] = pages.comparison_index_page(comps, papers_by_id)
+    rendered[out / "g" / "index.html"] = pages.lineage_page(graph)
     if not args.only:
         for run in runs:
             rendered[out / "s" / run.date / "index.html"] = pages.scouting_run_page(

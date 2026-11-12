@@ -7,7 +7,7 @@ import re
 from collections import Counter
 
 from . import components as c
-from . import corpus, primers, scouting, glance as glance_mod
+from . import corpus, lineage, primers, scouting, glance as glance_mod
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
 from .render import DocRenderer, _decorate_refs
 
@@ -715,7 +715,8 @@ def paper_page(paper: Paper, katex, decisions: dict,
                neighbours: list[Paper] | None = None,
                comparisons: list | None = None,
                papers_by_id: dict | None = None,
-               citers: list[Paper] | None = None) -> str:
+               citers: list[Paper] | None = None,
+               graph: lineage.Graph | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -759,6 +760,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
     <aside class="toc">{_toc(renderer.toc)}</aside>
     <main class="article">
       <section class="view">{rendered}</section>
+      {_near(paper, graph)}
       {_related(neighbours or [])}
       {_citers(citers or [])}
     </main>
@@ -841,6 +843,36 @@ def _missing(name: str) -> str:
             f'없습니다 — <code>/analyze &lt;id&gt; --refresh</code> 로 다시 씁니다.</p>')
 
 
+
+
+def _node_href(up: str):
+    """Where a 계보 node goes: the rewrite's page, or arXiv for a paper without one."""
+    def href(node: lineage.Node) -> str:
+        if node.paper:
+            return f"{up}p/{node.id}/index.html"
+        return f"https://arxiv.org/abs/{node.id}"
+    return href
+
+
+def _near(paper: Paper, graph: lineage.Graph | None) -> str:
+    """The paper's place in the 계보, drawn at the end of its own article.
+
+    First of the three sections under the article, because it is the only one
+    that looks both ways: `_related` and `_citers` each list rewrites, and this
+    also draws what the paper itself stood on — including papers the corpus
+    does not hold. A partial build has no graph to draw from and prints none.
+    """
+    svg = lineage.near_svg(graph, paper.stem, _node_href("../../")) if graph else ""
+    if not svg:
+        return ""
+    return (
+        '<section class="related near">'
+        '<h2 class="related-h">계보에서의 자리</h2>'
+        f'<div class="near-frame">{svg}</div>'
+        '<p class="near-foot">실선은 계보 레일에 올린 조상, 점선은 본문에서 링크한 논문입니다. '
+        f'<a href="../../g/index.html#{c.esc(paper.stem)}">전체 계보에서 보기</a></p>'
+        "</section>"
+    )
 
 
 def _related(neighbours: list[Paper]) -> str:
@@ -1393,6 +1425,118 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
         body=body,
         depth=1,
         extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
+    )
+
+
+# ── 계보 ────────────────────────────────────────────────────────────────────
+# One page, and the map is the page: the three lists under it are the map read
+# three ways — where to start, what is missing, where the line has got to.
+
+_RANK_ROWS = 8
+
+
+def _rank(title: str, why: str, rows: list[tuple[lineage.Node, int]], href) -> str:
+    """One ranked list under the map — a name, a bar and the count it draws.
+
+    Each row links where the node itself links, so the list works with no
+    script; `assets/lineage.js` turns the click into lighting that node on the
+    map instead, and the card it opens carries the same link.
+    """
+    if not rows:
+        return ""
+    top = max(n for _, n in rows) or 1
+    items = "".join(
+        f'<li data-lane="{node.lane}">'
+        f'<a href="{c.esc(href(node))}" data-go="{node.id}" title="{c.esc(node.name)}"'
+        f'{"" if node.paper else lineage._NEW_TAB}>{c.esc(node.name)}</a>'
+        f'<span class="gm-trk"><i style="width:{n / top * 100:.0f}%"></i></span>'
+        f'<span class="gm-n">{n}</span></li>'
+        for node, n in rows)
+    return (f'<section class="gm-list"><h2>{c.esc(title)}</h2>'
+            f'<p>{c.esc(why)}</p><ol class="gm-rank">{items}</ol></section>')
+
+
+def lineage_page(graph: lineage.Graph | None) -> str:
+    """계보 — the whole corpus on one map, and what the map says to read.
+
+    Drawn from what the rewrites already hold (`builder/lineage.py`), so the
+    page needs no upkeep of its own: it changes on the day a rewrite lands.
+    A partial build passes no graph and gets the empty page, so the nav's
+    link still lands somewhere.
+    """
+    graph = graph or lineage.Graph()
+    href = _node_href("../")
+    keep = lineage.drawn(graph)
+    svg = lineage.map_svg(graph, list(PILLAR_ORDER), href)
+    nodes = [graph.nodes[n] for n in sorted(keep)]
+    inside = [n for n in nodes if n.paper]
+    outside = [n for n in nodes if not n.paper]
+
+    def kids(n: lineage.Node) -> int:
+        return len(graph.down.get(n.id, {}))
+
+    def roots(n: lineage.Node) -> int:
+        return len([p for p in graph.up.get(n.id, {}) if p in keep])
+
+    def top(pool, count) -> list[tuple[lineage.Node, int]]:
+        ranked = sorted(pool, key=lambda n: (-count(n), n.id))[:_RANK_ROWS]
+        return [(n, count(n)) for n in ranked if count(n)]
+
+    lists = (
+        _rank("먼저 읽을 재작성본",
+              "다른 재작성본이 가장 많이 딛는 논문입니다. 여기부터 읽으면 뒤의 논문들이 짧아집니다.",
+              top(inside, kids), href)
+        + _rank("아직 재작성본이 없는 뿌리",
+                "여러 재작성본이 조상으로 꼽는데 코퍼스에는 없는 논문입니다.",
+                top(outside, kids), href)
+        + _rank("가지 끝",
+                "딛고 선 것은 많은데 아직 아무도 딛지 않은 논문입니다. 흐름이 어디까지 왔는지 보여 줍니다.",
+                top([n for n in inside if not kids(n)], roots), href)
+    )
+    edges = sum(1 for child in keep for parent in graph.up.get(child, {})
+                if parent in keep and graph.nodes[parent].paper)
+    chips = "".join(
+        f'<button type="button" class="chip pillar" data-p="{p}" aria-pressed="false">'
+        f'{p} {c.esc(PILLAR_LABELS.get(p, ""))}</button>'
+        for p in PILLAR_NAMES)
+
+    if svg:
+        main = f"""<p class="gm-facts"><span><b>{len(inside)}</b>재작성본</span>
+    <span><b>{edges}</b>재작성본 사이의 연결</span>
+    <span><b>{len(outside)}</b>둘 이상이 함께 꼽은 바깥 조상</span></p>
+  <div class="gm-bar">
+    <div class="gm-filter chip-row" role="group" aria-label="연구 축으로 거르기">{chips}</div>
+    <p class="gm-legend">
+      <span><svg width="12" height="12" aria-hidden="true"><circle class="gm-k-in" cx="6" cy="6" r="4.5"/></svg>재작성본</span>
+      <span><svg width="12" height="12" aria-hidden="true"><circle class="gm-k-out" cx="6" cy="6" r="4"/></svg>재작성본 없는 조상</span>
+      <span><svg width="22" height="8" aria-hidden="true"><path class="gm-k-rail" d="M0 4H22"/></svg>계보 레일</span>
+      <span><svg width="22" height="8" aria-hidden="true"><path class="gm-k-text" d="M0 4H22"/></svg>본문 링크</span>
+      <span>원 크기는 딛는 글의 수</span>
+    </p>
+  </div>
+  <div class="gm-card" id="gm-card" aria-live="polite" hidden></div>
+  <div class="gm-frame" id="gm-frame" tabindex="0" aria-label="계보 지도, 가로로 스크롤">{svg}</div>
+  <div class="gm-lists">{lists}</div>
+  <p class="gm-foot">가로 위치는 arXiv 번호의 연·월, 세로 띠는 재작성본의 첫 번째 연구 축입니다.
+  재작성본이 없는 조상은 두 편 이상이 계보 레일에 함께 올린 것만 그립니다.</p>"""
+    else:
+        main = '<p class="corpus-empty">아직 그릴 계보가 없습니다.</p>'
+
+    body = f"""{c.mast(eyebrow="Who stands on whom", title="계보, 누가 누구를 딛는지 봅니다")}
+
+<main class="hub hub-wide">
+  {main}
+</main>
+"""
+    return c.page(
+        title="계보 · PROBE",
+        here="lineage",
+        description="재작성본의 계보 레일과 본문 링크로 그린, 논문이 서로를 딛는 지도",
+        body=body,
+        depth=1,
+        scripts=["lineage.js"],
+        extra_head=(f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">'
+                    f'<link rel="stylesheet" href="{c.asset("../assets/lineage.css")}">'),
     )
 
 

@@ -41,8 +41,14 @@ own page, and the comparison links out.
 **A band is its eyebrow and its title, and nothing beside them.**
 `components.mast()` prints those two lines and no more: whatever sits next to
 the title either repeats the list under the band or argues for it, and the
-list makes its own case one scroll down. The four bands are one height, so
+list makes its own case one scroll down. The five bands are one height, so
 moving between them in the nav moves nothing but the words.
+
+**계보 is read, never written.** `builder/lineage.py` draws only what the
+rewrites already say — a `probe-lineage` rail entry and an arXiv link in the
+prose — so no file exists to keep in step with the corpus. A partial build
+(`--only`) draws none and prints the page empty: a corner of the corpus shows every paper's ancestors as
+missing.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`

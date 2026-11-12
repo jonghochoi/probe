@@ -144,7 +144,7 @@ def mark(size: int) -> str:
 def mast(*, eyebrow: str, title: str, count: str = "") -> str:
     """The band every list page opens on.
 
-    One frame for the four destinations the nav names, because they are one
+    One frame for the five destinations the nav names, because they are one
     level of the site and a band that changed shape between them would say
     otherwise. Two things and no third: what this surface is, and what it does.
     Nothing sits beside the title — the list under the band is what the page
@@ -519,6 +519,7 @@ def repo_link() -> str:
 DESTINATIONS = (("papers", "index.html", "분석"),
                 ("scout", "s/index.html", "탐색"),
                 ("compare", "c/index.html", "비교"),
+                ("lineage", "g/index.html", "계보"),
                 ("shelf", "shelf/index.html", "서재"))
 
 
@@ -526,8 +527,8 @@ def _current(key: str, here: str) -> str:
     """`aria-current` on the destination the reader is standing in.
 
     One attribute carries the whole mark: `site.css` draws the rule under it
-    from `[aria-current="page"]`, and a screen reader is told which of the
-    three it is without a second, visual-only class to keep in step. `here`
+    from `[aria-current="page"]`, and a screen reader is told which of them
+    it is without a second, visual-only class to keep in step. `here`
     may be empty — 404 stands under no destination and marks none.
     """
     return ' aria-current="page"' if key and key == here else ""
@@ -536,7 +537,7 @@ def _current(key: str, here: str) -> str:
 def nav_sheet(up: str, here: str = "") -> str:
     """The phone's menu — the row's destinations, one per line, plus the way out.
 
-    A phone is not wide enough for the mark, the site's name, four
+    A phone is not wide enough for the mark, the site's name, five
     destinations and three glyph controls on one line, and the name is the part
     that says which site this is. So the destinations fold behind one button
     and the name stays: the row keeps what a reader cannot reconstruct, and the
@@ -557,14 +558,14 @@ def nav_sheet(up: str, here: str = "") -> str:
 def nav(up: str, here: str = "") -> str:
     """The row every page opens on — where the site goes, and what it can do.
 
-    Two clusters, and they are different kinds: four places to go, then three
+    Two clusters, and they are different kinds: five places to go, then three
     things to do to the page in front of the reader. A hairline stands between
     them (`site.css`), because the seam between an unboxed label and a bordered
     32px button reads as a control that lost its border unless something says
     the boundary is meant.
 
     `here` is the destination this page sits under, and marking it is the
-    other half of the same job: a row of four names that never says which one
+    other half of the same job: a row of five names that never says which one
     the reader is standing in is a row with a hole in it, and the hole is what
     makes the labels beside the controls look unfinished.
     """

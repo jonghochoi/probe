@@ -681,6 +681,33 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   grid-column: 1; font-size: var(--fs-2xs); line-height: 1.55; color: var(--text-muted);
 }
 
+/* ── 계보에서의 자리 ───────────────────────────────────────────────────── */
+/* One paper between what it stands on and what stands on it
+   (`builder/lineage.py` `near_svg`). The drawing is a fixed 640 wide, so on a
+   phone its frame scrolls and the page does not. A node takes its axis's ink
+   from `data-lane`, which the 계보 page's own nodes carry too. */
+[data-lane="P0"] { --lane: var(--p0-ink); }
+[data-lane="P1"] { --lane: var(--p1-ink); }
+[data-lane="P2"] { --lane: var(--p2-ink); }
+[data-lane="P3"] { --lane: var(--p3-ink); }
+[data-lane="P4"] { --lane: var(--p4-ink); }
+.near-frame {
+  overflow-x: auto; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.near-svg { display: block; margin: 0 auto; }
+.near-svg text { font-family: var(--ko); font-size: 12px; fill: var(--text); }
+.near-svg .near-head { font-size: 11px; font-weight: 700; fill: var(--text-muted); }
+.near-edge { fill: none; stroke: var(--text-muted); stroke-width: 1; opacity: .55; }
+.near-edge.is-text { stroke-dasharray: 2 3; }
+.near-node circle { fill: var(--lane, var(--text-muted)); stroke: var(--surface); stroke-width: 1.5; }
+.near-node.is-out circle { fill: var(--surface); stroke: var(--text-muted); }
+.near-node.is-out text { fill: var(--text-muted); }
+.near-node:hover text, .near-node:focus-visible text { fill: var(--orange-ink); }
+.near-me circle { fill: var(--lane, var(--text)); stroke: var(--text); stroke-width: 2; }
+.near-foot { margin-top: .6rem; font-size: var(--fs-2xs); color: var(--text-muted); }
+.near-foot a { color: var(--orange-ink); }
+
 /* ── Comparisons ──────────────────────────────────────────────────────── */
 /* A compared paper's mark, by its place in `compares:` — a shape first and a
    hue second (`components.paper_mark`). The three hues are the site's act
