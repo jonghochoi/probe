@@ -58,17 +58,17 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; box-shadow: 0 0
       ["nav", "다른 축으로 가는 길", "", [["axes", "연구 축 줄 (분석 목록과 같은 줄)"], ["chips", "칩 줄"], ["none", "없음"]]]
     ]],
     ["본문", [
-      ["layout", "짜임", "분석 · 탐색 · 결정 · 비교 네 묶음", [["tabs", "탭 — 한 번에 하나"], ["stack", "차례로 쌓기"], ["two", "두 단"]]],
+      ["layout", "짜임", "탭은 탐색 · 분석 · 비교, 결정은 탭 아래", [["tabs", "탭 — 한 번에 하나"], ["stack", "차례로 쌓기"], ["two", "두 단"]]],
       ["alist", "분석 모양", "", [["table", "분석 목록과 같은 표"], ["cards", "카드"]]],
       ["acount", "분석 개수", "", [["5", "5편 + 모두 보기"], ["all", "전부"]]]
     ]],
     ["결정", [
       ["dec", "결정 한 줄", "결정 기록(D#)은 제목을 앞세웁니다", [["choice", "제목 + 현재 선택"], ["title", "제목만"]]],
       ["dcode", "결정 기호(D9NB 등)", "", [["show", "작게 곁들임"], ["hide", "숨김"]]],
-      ["decpos", "결정 위치", "'차례로 쌓기'일 때만", [["last", "맨 아래"], ["first", "맨 위"]]]
+      ["decpos", "결정 위치", "'차례로 쌓기'일 때만 — 탭일 때는 늘 탭 아래", [["last", "맨 아래"], ["first", "맨 위"]]]
     ]]
   ];
-  var DEF = { head: "tint", desc: "ko", stats: "show", crumb: "show", nav: "axes", layout: "tabs",
+  var DEF = { head: "tint", desc: "ko", stats: "hide", crumb: "hide", nav: "none", layout: "tabs",
               alist: "table", acount: "5", dec: "choice", dcode: "show", decpos: "last" };
   var PAGES = [["P0", "P0"], ["P1", "P1"], ["P2", "P2"], ["P3", "P3"], ["P4", "P4"], ["all", "다섯 축 모음"]];
   var VPS = [["desk", "데스크톱", 1280], ["mobile", "휴대폰", 390]];

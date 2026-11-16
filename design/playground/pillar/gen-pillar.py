@@ -47,7 +47,11 @@ for code in PILLAR_NAMES:
     for m in re.finditer(r"^#### \[(D\w{3})\] (.+?) \((P\d)\)( — \*\*OPEN\*\*)?\n- (.+)$", text, re.M):
         did, title, _, open_, bullet = m.groups()
         bold = re.search(r"\*\*(.+?)\*\*", bullet.replace("**Working, not settled** —", ""))
-        choice = bold.group(1) if bold else re.sub(r"[*`]", "", bullet)[:80]
+        if bold:
+            choice = bold.group(1)
+        else:  # no bolded answer: the bullet's first clause, cut at a word
+            first = re.split(r" — |; ", re.sub(r"[*`]", "", bullet))[0]
+            choice = first if len(first) <= 90 else first[:90].rsplit(" ", 1)[0] + "…"
         DECS.setdefault(code, []).append({"id": did, "title": title, "choice": choice,
                                           "open": bool(open_)})
 cited = {}
@@ -183,10 +187,12 @@ def pillar_page(code):
     counts = {"a": len(ps), "s": n_s, "c": len(cs), "d": n_d}
     names = {"a": "분석", "s": "탐색", "c": "비교", "d": "결정"}
     tabbar = ('<div class="pl-tabs" role="tablist">'
-              + "".join(f'<button type="button" role="tab" data-pl-tab="{k}" aria-selected="{str(k == "a").lower()}">'
-                        f'{names[k]}<span class="tab-n">{counts[k]}</span></button>' for k in "asdc")
+              + "".join(f'<button type="button" role="tab" data-pl-tab="{k}" aria-selected="{str(k == "s").lower()}">'
+                        f'{names[k]}<span class="tab-n">{counts[k]}</span></button>' for k in "sac")
               + "</div>")
-    body_secs = "".join(f'<section class="pl-sec" data-sec="{k}">{h}{b}</section>' for k, (h, b) in sec.items())
+    # The tabs hold what the axis has read and asked (탐색 · 분석 · 비교); its
+    # decisions stand under them, always open.
+    body_secs = "".join(f'<section class="pl-sec" data-sec="{k}">{sec[k][0]}{sec[k][1]}</section>' for k in "sacd")
     body = f"""{head}
 <div class="deck pl" data-pl>
   {axis_line(code)}

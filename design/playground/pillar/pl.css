@@ -86,8 +86,10 @@ html[data-pl-dcode="hide"] .pl-dcode { display: none; }
   background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat; }
 .pl-tabs .tab-n { font-size: var(--fs-2xs); color: var(--text-muted); font-weight: 500; }
 html[data-pl-layout="tabs"] .pl-tabs { display: flex; }
-html[data-pl-layout="tabs"] .pl-sec:not(.is-on) { display: none; }
-html[data-pl-layout="tabs"] .pl-sec > .pl-h { display: none; }
+html[data-pl-layout="tabs"] .pl-sec:not(.is-on):not([data-sec="d"]) { display: none; }
+html[data-pl-layout="tabs"] .pl-sec:not([data-sec="d"]) > .pl-h { display: none; }
+/* the decisions stand under the tabs, always open, set off by a rule */
+html[data-pl-layout="tabs"] .pl-sec[data-sec="d"] { margin-top: 1.2rem; padding-top: 1.6rem; border-top: 1px solid var(--border); }
 html[data-pl-layout="two"] .pl-body { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
 html[data-pl-layout="two"] .pl-sec[data-sec="a"] { grid-column: 1; grid-row: 1; }
 html[data-pl-layout="two"] .pl-sec[data-sec="s"] { grid-column: 1; grid-row: 2; }
