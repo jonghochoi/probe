@@ -201,6 +201,7 @@ button { font: inherit; color: inherit; }
     ]],
     ["정보량", [
       ["rowLinks", "목록 · 오른쪽 끝 열", "분량·용어 자리", [["size", "분량·용어"], ["icons", "링크를 아이콘만 한 줄로"], ["sizeicon", "분량 + 아이콘 (올려 두면)"], ["links", "링크 이름까지"], ["none", "비우기"]]],
+      ["figHover", "목록 · 논문 위에 올리면 주요 그림", "데스크톱에서만 · 휴대폰엔 마우스가 없음", [["pop", "줄 아래에 떠오르는 카드"], ["cursor", "마우스를 따라오는 카드"], ["pane", "오른쪽에 고정된 미리보기 칸"], ["off", "없음"]]],
       ["linkSpot", "데스크톱 · 링크 아이콘 자리", "오른쪽 끝 열을 없애고 옮김 · 휴대폰은 연구 축 옆 그대로", [["under", "한 줄 요약 아래"], ["inline", "제목 바로 뒤"], ["title", "제목 줄 오른쪽"], ["pillcol", "연구 축 칩 아래"], ["idcol", "arXiv 번호 아래"], ["right", "오른쪽 끝 열 (지금)"]]],
       ["pageBg", "배경", "첫 화면의 가장자리 물듦을 이 페이지에도", [["off", "없음 (지금)"], ["same", "첫 화면과 같게"], ["light", "더 옅게"]]],
       ["leadSum", "가장 최근 카드 · 요약 문단", "", [["show", "전부"], ["clamp", "2줄만"], ["hide", "숨기기"]]],
@@ -239,6 +240,7 @@ button { font: inherit; color: inherit; }
       ["shStars", "새 서재 · 즐겨찾기 모양", "", [["table", "분석 목록과 같은 표"], ["cards", "탐색 추천처럼 카드"]]],
       ["shActions", "새 서재 · 내보내기·가져오기", "", [["menu", "위 줄 끝 ⋯ 메뉴"], ["bar", "줄 아래 버튼 (지금)"]]],
       ["shSample", "새 서재 · 보여 줄 내용", "", [["show", "예시 데이터"], ["mine", "이 브라우저에 저장된 것"]]],
+      ["snFig", "새 탐색 · 추천 카드의 주요 그림", "arXiv 원문에서 고른 개요 그림", [["hover", "올리면 떠오르는 그림 (데스크톱)"], ["thumb", "카드 안 작은 그림"], ["cover", "카드 맨 위 표지 그림"], ["off", "없음"]]],
       ["snRows", "새 탐색 · 후보 목록 모양", "", [["table", "분석 목록과 같은 표"], ["line", "한 줄 (지금)"]]],
       ["snFolds", "새 탐색 · 목록에만 오른 논문 · 근접 후보", "", [["hide", "보이지 않음"], ["show", "접어서 보이기 (지금)"]]],
       ["scStats", "맨 위 숫자 줄", "", [["show", "보이기"], ["hide", "숨기기"]]],
@@ -310,7 +312,7 @@ button { font: inherit; color: inherit; }
   var DEFAULT = { titleFont: "gowund", titleScope: "big", titleWeight: "700", bodyFont: "gowund", numFont: "body",
     size: "17", leading: "1.85", sizeM: "15.5", leadingM: "1.7",
     navStyle: "dark", bandEnd: "melt", bodyZone: "plain", navForm: "bar", bandForm: "full", gapSize: "normal",
-    accent: "indigo", strength: "1", band: "grad", filterBar: "none", ctlSpot: "colsort", leadCard: "hide", recKind: "none", recStyle: "plain", snNames: "none", snHead: "short", snCard: "full", snTags: "card", snFolds: "hide", snRunSpot: "date", snFilter: "hide", snRows: "table", cmpFilter: "show", cmpList: "cards", cmpSub: "fork", shTop: "tabs", shLayout: "tabs", shStars: "table", shActions: "menu", shSample: "show", snDates: "count", snDetail: "drawer", snRank: "show", snRankStyle: "pill", snCards: "even", labelCol: "icontint", recPhone: "hide", rowLinks: "icons", linkSpot: "inline", pageBg: "light", railSpot: "top", leadOrder: "text", leadSum: "show", leadRo: "show", leadFoot: "show", rowTagline: "show", rowRo: "hide", rowId: "show", rowSize: "show", rowPillars: "show", rail: "show", hoverPhone: "show", pillarMode: "page", tocActive: "tint", homeTop: "none", homeOrder: "feed", homeFill: "more", homeNames: "noun", homeMascot: "greet", homeEnter: "on", homePlInfo: "new", homeBg: "edge", homeBgAmt: "2", homeBgMove: "on", homeLine: "pick", homeMascotKind: "basic", navMark: "hide", decisionLevel: "choice", pillarNav: "off", shelfBadge: "on", hubFacts: "show", narrBody: "show", narrRail: "show", actC: "show", actFigs: "show", scStats: "show", scFilter: "show", scGist: "show", scSide: "show", cmpFork: "show", cmpSize: "show", themePicker: "on", pickerSet: "indigo,sage,probe", glow: "on", point: "two", pillar: "multi",
+    accent: "indigo", strength: "1", band: "grad", filterBar: "none", ctlSpot: "colsort", leadCard: "hide", recKind: "none", recStyle: "plain", snNames: "none", snHead: "short", snCard: "full", snTags: "card", snFolds: "hide", snRunSpot: "date", snFilter: "hide", snRows: "table", snFig: "hover", cmpFilter: "show", cmpList: "cards", cmpSub: "fork", shTop: "tabs", shLayout: "tabs", shStars: "table", shActions: "menu", shSample: "show", snDates: "count", snDetail: "drawer", snRank: "show", snRankStyle: "pill", snCards: "even", labelCol: "icontint", recPhone: "hide", figHover: "pop", rowLinks: "icons", linkSpot: "inline", pageBg: "light", railSpot: "top", leadOrder: "text", leadSum: "show", leadRo: "show", leadFoot: "show", rowTagline: "show", rowRo: "hide", rowId: "show", rowSize: "show", rowPillars: "show", rail: "show", hoverPhone: "show", pillarMode: "page", tocActive: "tint", homeTop: "none", homeOrder: "feed", homeFill: "more", homeNames: "noun", homeMascot: "greet", homeEnter: "on", homePlInfo: "new", homeBg: "edge", homeBgAmt: "2", homeBgMove: "on", homeLine: "pick", homeMascotKind: "basic", navMark: "hide", decisionLevel: "choice", pillarNav: "off", shelfBadge: "on", hubFacts: "show", narrBody: "show", narrRail: "show", actC: "show", actFigs: "show", scStats: "show", scFilter: "show", scGist: "show", scSide: "show", cmpFork: "show", cmpSize: "show", themePicker: "on", pickerSet: "indigo,sage,probe", glow: "on", point: "two", pillar: "multi",
     radius: "12", shadow: "soft", cardBg: "glass", chip: "pill", leadMark: "ring",
     tabs: "underline", navCur: "underline", iconStroke: "1.2", iconBtn: "square", mascot: "on", wordmark: "grad", wordFont: "title" };
   var BASE_NAME = "내 설정 15차";
@@ -618,6 +620,14 @@ button { font: inherit; color: inherit; }
       ".pg-psize-menu button:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}", ".pg-psize-menu button[aria-pressed='true']{color:var(--orange-ink);background:var(--orange-soft)}",
       "html.js .pg-pagerow > .pager{flex-wrap:nowrap}",
       "@media (max-width:680px){.pg-pagerow{gap:.25rem}.pg-pagerow .pgn{min-width:1.6rem;padding:.34rem .35rem}.pg-pagerow .pgstep{padding:.34rem .4rem}.pg-psize-cur{padding:.3rem .35rem;gap:.2rem}}");
+    if (s.figHover && s.figHover !== "off") css.push(
+      ".pg-fig{position:absolute;z-index:50;width:400px;padding:.55rem .55rem .6rem;border-radius:var(--radius);background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 16%,transparent);box-shadow:0 14px 36px color-mix(in srgb,#0b0d1c 20%,transparent);pointer-events:none}",
+      ".pg-fig[hidden]{display:none}", ".pg-fig.is-in{animation:pg-figin .16s ease-out}", "@keyframes pg-figin{from{opacity:0;transform:translateY(4px)}}",
+      ".pg-fig img{display:block;width:100%;max-height:250px;object-fit:contain;background:#fff;border-radius:calc(var(--radius) - 5px)}",
+      ".pg-fig-c{margin:.5rem .2rem 0;font-size:var(--fs-2xs);line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}",
+      ".pg-fig-s{margin:.2rem .2rem 0;font-size:var(--fs-3xs);color:var(--text-muted)}",
+      ".pg-fig-pane{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:360px}", ".pg-fig-pane.is-in{animation:none}",
+      "@media (hover: none), (max-width: 720px){.pg-fig{display:none!important}}");
     css.push(".pg-rec{margin:0 0 .9rem}", ".pg-rec-h{display:flex;align-items:baseline;gap:.6rem;margin:0 0 .4rem;font-size:var(--fs-2xs);color:var(--text-muted)}",
       ".pg-rec-h b{font-size:var(--fs-xs);color:var(--orange-ink)}", ".pg-rec-h button{margin-left:auto;border:0;background:none;color:var(--orange-ink);font:inherit;font-weight:700;cursor:pointer;padding:.2rem .1rem}",
       ".pg-rc{position:relative;display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:'t' 's';align-items:start;gap:.3rem 1rem;padding:.8rem 1rem .75rem;overflow:hidden;border-radius:var(--radius);background:var(--card-bg,var(--surface));background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 16%,transparent);box-shadow:0 1px 2px color-mix(in srgb,var(--text) 6%,transparent),0 4px 14px color-mix(in srgb,var(--text) 5%,transparent)}",
@@ -837,6 +847,7 @@ button { font: inherit; color: inherit; }
     foldStory(doc);
     linkPillars(doc);
     listTweaks(doc);
+    figPreview(doc);
     moveRail(doc);
     drawRec(doc);
     wrapLab(doc);
@@ -870,6 +881,52 @@ button { font: inherit; color: inherit; }
   }
   var ROWLINKS = null;
   fetch("site/assets/row-links.json").then(function (r) { return r.json(); }).then(function (d) { ROWLINKS = d; var dc = frame.contentDocument; if (dc) listTweaks(dc); }).catch(function () {});
+  // hovering a list row shows that paper's main figure — desktop only, where there is a pointer to hover with
+  var FIGS = null;
+  fetch("site/assets/figs.json").then(function (r) { return r.json(); }).then(function (d) { FIGS = d; }).catch(function () {});
+  function figPreview(doc) {
+    var w = doc.defaultView; if (!w || !doc.querySelector(".rows .row")) return;
+    var old = doc.querySelector(".pg-fig"); if (old) old.remove();
+    if (state.figHover === "off") return;
+    var card = doc.createElement("div"); card.className = "pg-fig pg-fig-" + state.figHover; card.hidden = true; card.setAttribute("aria-hidden", "true");
+    card.innerHTML = '<img alt=""><p class="pg-fig-c"></p><p class="pg-fig-s"></p>';
+    doc.body.appendChild(card);
+    if (doc.pgFigBound) return;
+    doc.pgFigBound = true;
+    var timer = null, cur = null, last = null;
+    var can = function () { return state.figHover !== "off" && w.matchMedia("(hover: hover) and (min-width: 721px)").matches; };
+    var place = function (c, row, ev) {
+      var vw = w.innerWidth, vh = w.innerHeight, cw = c.offsetWidth, ch = c.offsetHeight;
+      if (state.figHover === "pane") return;
+      if (state.figHover === "cursor" && ev) {
+        var x = ev.clientX + 18, y = ev.clientY + 18;
+        if (x + cw > vw - 12) x = ev.clientX - cw - 18;
+        if (y + ch > vh - 12) y = Math.max(12, vh - ch - 12);
+        c.style.left = (x + w.scrollX) + "px"; c.style.top = (y + w.scrollY) + "px"; return;
+      }
+      var r = row.getBoundingClientRect(), m = (row.querySelector(".row-main") || row).getBoundingClientRect();
+      var top = r.bottom + 6; if (top + ch > vh - 12) top = r.top - ch - 6;
+      c.style.left = (Math.min(m.left, vw - cw - 16) + w.scrollX) + "px"; c.style.top = (top + w.scrollY) + "px";
+    };
+    var fill = function (c, row) {
+      var f = FIGS && FIGS[row.dataset.id]; if (!f) { c.hidden = true; return false; }
+      var img = c.querySelector("img"); if (img.getAttribute("src") !== f.src) img.src = f.src;
+      var cap = f.caption.length > 150 ? f.caption.slice(0, 148) + "…" : f.caption;
+      c.querySelector(".pg-fig-c").textContent = cap; c.querySelector(".pg-fig-s").textContent = f.source;
+      c.hidden = false; return true;
+    };
+    doc.addEventListener("mouseover", function (e) {
+      var c = doc.querySelector(".pg-fig"); if (!c || !can()) return;
+      var row = e.target.closest(".rows .row"); if (!row || row === cur) return;
+      cur = row; clearTimeout(timer);
+      timer = setTimeout(function () { if (cur === row && fill(c, row)) { c.classList.remove("is-in"); void c.offsetWidth; c.classList.add("is-in"); place(c, row, last); } }, 160);
+    });
+    doc.addEventListener("mousemove", function (e) { last = e; var c = doc.querySelector(".pg-fig"); if (c && !c.hidden && state.figHover === "cursor" && cur) place(c, cur, e); });
+    doc.addEventListener("mouseout", function (e) {
+      var row = e.target.closest(".rows .row"); if (!row || row.contains(e.relatedTarget)) return;
+      cur = null; clearTimeout(timer); var c = doc.querySelector(".pg-fig"); if (c && state.figHover !== "pane") c.hidden = true;
+    });
+  }
   function listTweaks(doc) {
     var rows = doc.querySelectorAll(".rows .row"); if (!rows.length) return;
     // with the lead card gone, its row is just the first row of page one
@@ -1143,7 +1200,7 @@ button { font: inherit; color: inherit; }
   // the new scouting page draws itself; hand it the options and let it redraw
   function scoutOpts(doc) {
     var w = doc.defaultView; if (!w || !doc.querySelector("#sn-run")) return;
-    w.SN_OPTS = { names: state.snNames, head: state.snHead, card: state.snCard, tags: state.snTags, folds: state.snFolds, runSpot: state.snRunSpot, rank: state.snRank, rankStyle: state.snRankStyle, cards: state.snCards, filter: state.snFilter, detail: state.snDetail, rows: state.snRows, dates: state.snDates };
+    w.SN_OPTS = { names: state.snNames, head: state.snHead, card: state.snCard, tags: state.snTags, folds: state.snFolds, runSpot: state.snRunSpot, rank: state.snRank, rankStyle: state.snRankStyle, cards: state.snCards, filter: state.snFilter, detail: state.snDetail, rows: state.snRows, fig: state.snFig, dates: state.snDates };
     if (w.snRedraw) w.snRedraw();
   }
   // the new comparison and shelf pages read their options the same way
@@ -1250,7 +1307,7 @@ button { font: inherit; color: inherit; }
   var form = document.getElementById("form");
   function swatch(k) { return ACC[k].fill; }
   var DECIDED = { "글꼴": 1, "영역 구분": 1, "색 테마 선택": 1, "색": 1, "카드와 모양": 1, "탐색 요소": 1, "아이콘과 로고": 1 };
-  var PAGE_OF = { shTop: "shelf2", cmpFilter: "cmp2", cmpList: "cmp2", cmpSub: "cmp2", shLayout: "shelf2", shStars: "shelf2", shActions: "shelf2", shSample: "shelf2", snRankStyle: "scout2", snDates: "scout2", snRows: "scout2", snFilter: "scout2", snDetail: "scout2", snRunSpot: "scout2", snRank: "scout2", snCards: "scout2", snNames: "scout2", snHead: "scout2", snCard: "scout2", snTags: "scout2", snFolds: "scout2", recStyle: "home", labelCol: "home", recPhone: "home", recKind: "home", railSpot: "home", leadOrder: "home", linkSpot: "home", leadCard: "home", rowLinks: "home", hoverPhone: "home", leadSum: "home", leadRo: "home", leadFoot: "home", rowTagline: "home", rowRo: "home", rowId: "home", rowSize: "home", rowPillars: "home", rail: "home",
+  var PAGE_OF = { figHover: "home", snFig: "scout2", shTop: "shelf2", cmpFilter: "cmp2", cmpList: "cmp2", cmpSub: "cmp2", shLayout: "shelf2", shStars: "shelf2", shActions: "shelf2", shSample: "shelf2", snRankStyle: "scout2", snDates: "scout2", snRows: "scout2", snFilter: "scout2", snDetail: "scout2", snRunSpot: "scout2", snRank: "scout2", snCards: "scout2", snNames: "scout2", snHead: "scout2", snCard: "scout2", snTags: "scout2", snFolds: "scout2", recStyle: "home", labelCol: "home", recPhone: "home", recKind: "home", railSpot: "home", leadOrder: "home", linkSpot: "home", leadCard: "home", rowLinks: "home", hoverPhone: "home", leadSum: "home", leadRo: "home", leadFoot: "home", rowTagline: "home", rowRo: "home", rowId: "home", rowSize: "home", rowPillars: "home", rail: "home",
     hubFacts: "paper", narrBody: "paper", narrRail: "paper", actC: "paper", actFigs: "paper",
     scStats: "scout", scFilter: "scout", scGist: "scout", scSide: "scout", cmpFork: "cmp", cmpSize: "cmp" };
   var PAGE_NAME = { home: "분석 목록", paper: "논문 요약", scout: "탐색", cmp: "비교" };

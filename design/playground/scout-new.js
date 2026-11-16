@@ -6,6 +6,9 @@
   // the playground sets these; unset, the page reads its trimmed defaults
   var CAL_ICON = '<svg viewBox="0 0 20 20"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg>';
   var X_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>';
+  // each recommended paper's overview figure, picked from its arXiv HTML for the playground
+  var FIGS = {};
+  fetch("assets/scout-figs.json").then(function (r) { return r.json(); }).then(function (d) { FIGS = d || {}; if (window.snRedraw) window.snRedraw(); }).catch(function () {});
   var opt = function (k, d) { var o = window.SN_OPTS || {}; return o[k] || d; };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -66,10 +69,11 @@
     var full = opt("card", "full") === "full", tags = opt("tags", "card") !== "none";
     // "1위" is what the section title already says; a second axis's mark stays
     var ranks = opt("rank", "show") === "trim";
-    return '<article class="sn-card" data-card="' + esc(it.id) + '"><div class="sn-ctop"><p class="sn-chips">' + it.picks.map(function (k) { return chip(k[0], ranks && k[1] === "1위" ? "" : k[1]); }).join("") + "</p>" +
+    var fig = FIGS[it.id], how = opt("fig", "off"), figHtml = fig && (how === "thumb" || how === "cover") ? '<div class="sn-fig sn-fig-' + how + '"><img src="' + esc(fig.src) + '" alt="" loading="lazy"></div>' : "";
+    return '<article class="sn-card' + (fig && how === "cover" ? " has-cover" : "") + '" data-card="' + esc(it.id) + '">' + (how === "cover" ? figHtml : "") + '<div class="sn-ctop"><p class="sn-chips">' + it.picks.map(function (k) { return chip(k[0], ranks && k[1] === "1위" ? "" : k[1]); }).join("") + "</p>" +
       '<a class="sn-id" href="https://arxiv.org/abs/' + esc(it.id) + '" target="_blank" rel="noopener">' + esc(it.id) + "</a></div>" +
       '<h3><a href="#p-' + esc(it.id) + '" data-detail="' + esc(it.id) + '" title="' + esc(it.title) + '">' + esc(it.alias) + "</a></h3>" +
-      (full ? '<p class="sn-title">' + esc(it.title) + "</p>" : "") + (it.gist ? '<p class="sn-gist">' + esc(it.gist) + "</p>" : "") +
+      (how === "thumb" ? figHtml : "") + (full ? '<p class="sn-title">' + esc(it.title) + "</p>" : "") + (it.gist ? '<p class="sn-gist">' + esc(it.gist) + "</p>" : "") +
       (tags ? '<p class="sn-tags">' + (tags ? it.tags.map(function (t) { return "<span>" + esc(t) + "</span>"; }).join("") : "") +
         "</p>" : "") + "</article>";
   }
@@ -247,4 +251,26 @@
   });
   drawCalendar(); drawUpcoming(); drawRun();
   window.snRedraw = drawRun;
+  // hover: the figure floats under the card, the same card the analysis list shows on its rows
+  (function () {
+    var pop = document.createElement("div"); pop.className = "sn-figpop"; pop.hidden = true; pop.setAttribute("aria-hidden", "true");
+    pop.innerHTML = '<img alt=""><p class="sn-figpop-c"></p><p class="sn-figpop-s"></p>'; document.body.appendChild(pop);
+    var cur = null, timer = null;
+    var can = function () { return opt("fig", "off") === "hover" && window.matchMedia("(hover: hover) and (min-width: 721px)").matches; };
+    document.addEventListener("mouseover", function (e) {
+      if (!can()) return; var card = e.target.closest(".sn-card[data-card]"); if (!card || card === cur) return;
+      cur = card; clearTimeout(timer);
+      timer = setTimeout(function () {
+        var f = FIGS[card.getAttribute("data-card")]; if (cur !== card || !f) return;
+        var img = pop.querySelector("img"); if (img.getAttribute("src") !== f.src) img.src = f.src;
+        pop.querySelector(".sn-figpop-c").textContent = f.caption.length > 150 ? f.caption.slice(0, 148) + "…" : f.caption;
+        pop.querySelector(".sn-figpop-s").textContent = f.source; pop.hidden = false;
+        var r = card.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+        var left = Math.min(Math.max(12, r.left + (r.width - pw) / 2), vw - pw - 12), top = r.bottom + 8; if (top + ph > vh - 12) top = r.top - ph - 8;
+        pop.style.left = (left + window.scrollX) + "px"; pop.style.top = (top + window.scrollY) + "px";
+        pop.classList.remove("is-in"); void pop.offsetWidth; pop.classList.add("is-in");
+      }, 160);
+    });
+    document.addEventListener("mouseout", function (e) { var card = e.target.closest(".sn-card[data-card]"); if (!card || card.contains(e.relatedTarget)) return; cur = null; clearTimeout(timer); pop.hidden = true; });
+  })();
 })();

@@ -11,6 +11,7 @@ carries the decisions.
 | `playground/gen-pages.py` | Writes the mock pages the playground adds — the new first screen, scouting, comparison and shelf pages, and the pillar pages |
 | `playground/scout-new.css`, `playground/scout-new.js` | Style and script of the new scouting page; the stylesheet also carries the new comparison and shelf pages |
 | `playground/next-pages.js` | Script of the new comparison and shelf pages, each drawn in the variants the playground switches between |
+| `playground/fetch-figs.py` | Picks each paper's main figure — an overview or architecture figure over a results chart — and fetches a small copy for the hover previews: from the rewrites for the analysis list, from arXiv HTML for the scouting page's recommended papers |
 | `playground/row-links.json` | Each paper's link icons, keyed by arXiv id, for the list rows |
 | `playground/build.sh` | Builds the site at this checkout, lays the mock pages and assets on top, and writes one playground copy per page |
 

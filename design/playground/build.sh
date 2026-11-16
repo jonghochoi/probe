@@ -22,6 +22,8 @@ cp "$here/scout-new.css" "$here/scout-new.js" "$here/next-pages.js" "$here/row-l
 mkdir -p "$out/site/assets/mascots"
 cp assets/probe-*.svg "$out/site/assets/mascots/"
 python3 "$here/gen-pages.py" "$out/base" "$out/site"
+# each paper's main figure for the hover previews; needs arxiv.org, and the pages work without it
+python3 "$here/fetch-figs.py" "$out/site" || echo "figure previews skipped"
 
 # the list offers 10 / 20 / 30 a page, where the site offers 10 / 20 / all
 sed -i 's#<button type="button" data-size="0" aria-pressed="false">전체</button>#<button type="button" data-size="30" aria-pressed="false">30편</button>#' "$out/site/index.html"
