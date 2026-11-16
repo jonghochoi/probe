@@ -12,7 +12,10 @@
     pillars: '<svg viewBox="0 0 20 20"><path d="M10 3 3 6.5l7 3.5 7-3.5z"/><path d="M3 10l7 3.5 7-3.5"/><path d="M3 13.5 10 17l7-3.5"/></svg>',
     fork: '<svg viewBox="0 0 20 20"><circle cx="5" cy="4.5" r="1.8"/><circle cx="15" cy="4.5" r="1.8"/><circle cx="10" cy="15.5" r="1.8"/><path d="M5 6.3c0 4 5 4 5 7.4M15 6.3c0 4-5 4-5 7.4"/></svg>',
     shelf: '<svg viewBox="0 0 20 20"><path d="M6 3h8v14l-4-3-4 3z"/></svg>',
-    more: '<svg viewBox="0 0 20 20"><circle cx="5" cy="10" r="1.3"/><circle cx="10" cy="10" r="1.3"/><circle cx="15" cy="10" r="1.3"/></svg>'
+    more: '<svg viewBox="0 0 20 20"><circle cx="5" cy="10" r="1.3"/><circle cx="10" cy="10" r="1.3"/><circle cx="15" cy="10" r="1.3"/></svg>',
+    stars: '<svg viewBox="0 0 20 20"><path d="m10 2.8 2.2 4.6 5 .7-3.6 3.5.9 5L10 14.2l-4.5 2.4.9-5L2.8 8.1l5-.7z"/></svg>',
+    marks: '<svg viewBox="0 0 20 20"><path d="M6 3h8v14l-4-3-4 3z"/></svg>',
+    memos: '<svg viewBox="0 0 20 20"><path d="M4 16h3.2L16 7.2 12.8 4 4 12.8z"/><path d="m11.2 5.6 3.2 3.2"/></svg>'
   };
   var line = function (icon, label, items, right) {
     return '<div class="sn-lc nx-lc"><span class="sn-lab" title="' + label + '" aria-hidden="true">' + icon + "</span>" +
@@ -32,7 +35,7 @@
           '><span class="sw"></span><b>' + p + '</b><span class="rl">' + esc(PL[p]) + '</span><span class="rn">' + (counts[p] || 0) + "</span></button>";
       }).join(""), '<span class="nx-stat">' + all.length + "편 · 최근 " + esc((all[0] || {}).date || "") + "</span>");
     }
-    var how = opt("cmpList", "table"), sub = opt("cmpSub", "fork"), body;
+    var how = opt("cmpList", "cards"), sub = opt("cmpSub", "fork"), body;
     var forkLine = function (c) {
       return c.papers.map(function (p) { return '<span class="nx-br"><b>' + esc(p.alias) + "</b>" + esc(p.stance) + "</span>"; }).join('<i class="nx-vs">vs</i>');
     };
@@ -115,8 +118,53 @@
             '<span class="sn-tp">' + end + "</span></li>";
         }).join("") + "</ul>";
     };
-    var body = layout === "tabs" ? table(tab) : ["stars", "marks", "memos"].map(function (k) { return '<section class="nx-sec" id="nx-' + k + '">' + table(k) + "</section>"; }).join("");
-    root.innerHTML = line(ICON.shelf, "서재 보기", items, menu) + bar + '<p class="nx-status" aria-live="polite"></p>' + body;
+    var top = opt("shTop", "tabs"), KINDS = ["stars", "marks", "memos"], status = '<p class="nx-status" aria-live="polite"></p>';
+    var on = function (k) { return layout === "tabs" && tab === k; };
+    var latest = function (k) {
+      var ids = k === "stars" ? stars : k === "marks" ? marks : memos; if (!ids.length) return "아직 없음";
+      var rec = (k === "stars" ? S.stars : k === "marks" ? S.marks : S.memos)[ids[0]];
+      return esc(paper(ids[0]).alias) + " · " + md(k === "memos" ? rec.updatedAt : rec.at);
+    };
+    var body = layout === "tabs" ? table(tab) : KINDS.map(function (k) { return '<section class="nx-sec" id="nx-' + k + '">' + table(k) + "</section>"; }).join("");
+    var head;
+    if (top === "line") head = line(ICON.shelf, "서재 보기", items, menu) + bar;
+    else if (top === "tiles") head = '<div class="nx-tiles' + (layout === "tabs" ? " is-tabs" : "") + '">' + KINDS.map(function (k) {
+        return '<button type="button" class="nx-tile" data-nx-tab="' + k + '" aria-pressed="' + on(k) + '"><span class="nx-ti">' + ICON[k] + '</span><span class="nx-tn"><b>' + NAME[k] + '</b><span class="nx-cnt">' + N[k] + '</span></span><span class="nx-tl">' + latest(k) + "</span></button>";
+      }).join("") + "</div>" + (acts === "menu" ? '<div class="nx-tools">' + menu + "</div>" : bar);
+    else if (top === "seg") head = '<div class="nx-segrow"><div class="nx-seg" role="group" aria-label="서재 보기">' + KINDS.map(function (k) {
+        return '<button type="button" data-nx-tab="' + k + '" aria-pressed="' + on(k) + '">' + ICON[k] + "<b>" + NAME[k] + '</b><span class="nx-cnt">' + N[k] + "</span></button>";
+      }).join("") + "</div>" + menu + "</div>" + bar;
+    else if (top === "side") head = "";
+    else if (top === "merged") head = "";
+    else head = '<div class="nx-utabs" role="tablist" aria-label="서재 보기">' + KINDS.map(function (k) {
+        return '<button type="button" role="tab" data-nx-tab="' + k + '" aria-selected="' + on(k) + '">' + ICON[k] + "<b>" + NAME[k] + '</b><span class="nx-cnt">' + N[k] + "</span></button>";
+      }).join("") + '<span class="nx-sp"></span>' + menu + "</div>" + bar;
+    if (top === "side") {
+      root.innerHTML = '<div class="nx-sidegrid"><nav class="nx-side-nav" aria-label="서재 보기">' + KINDS.map(function (k) {
+        return '<button type="button" data-nx-tab="' + k + '" aria-pressed="' + on(k) + '">' + ICON[k] + "<b>" + NAME[k] + '</b><span class="nx-cnt">' + N[k] + "</span></button>";
+      }).join("") + '<div class="nx-side-acts"><button type="button" data-nx-act="json">JSON 내보내기</button><button type="button" data-nx-act="md">마크다운 내보내기</button><button type="button" data-nx-act="import">가져오기</button></div></nav><div class="nx-side-body">' + status + body + "</div></div>";
+      return;
+    }
+    if (top === "merged") {
+      var kindF = window.__nxKind || "all", rows = [];
+      KINDS.forEach(function (k) {
+        var map = k === "stars" ? S.stars : k === "marks" ? S.marks : S.memos;
+        Object.keys(map || {}).forEach(function (id) { rows.push({ k: k, id: id, rec: map[id], at: (k === "memos" ? map[id].updatedAt : map[id].at) || "" }); });
+      });
+      rows.sort(function (a, b) { return b.at.localeCompare(a.at); });
+      var shown = rows.filter(function (r) { return kindF === "all" || r.k === kindF; });
+      var chipsK = '<div class="nx-kinds" role="group" aria-label="종류로 거르기"><button type="button" data-nx-kind="all" aria-pressed="' + (kindF === "all") + '"><b>전체</b><span class="nx-cnt">' + rows.length + "</span></button>" +
+        KINDS.map(function (k) { return '<button type="button" data-nx-kind="' + k + '" aria-pressed="' + (kindF === k) + '">' + ICON[k] + "<b>" + NAME[k] + '</b><span class="nx-cnt">' + N[k] + "</span></button>"; }).join("") + '<span class="nx-sp"></span>' + menu + "</div>";
+      var tbl = '<div class="sn-lh nx-cols-mg" aria-hidden="true"><span>날짜</span><span>종류</span><span>논문 · 남긴 것</span><span>연구 축</span></div><ul class="sn-rows sn-tbl">' + shown.map(function (r) {
+        var p = paper(r.id), sub = r.k === "stars" ? esc(p.tagline) : r.k === "marks" ? '<span class="nx-mk">' + esc(r.rec.label) + "</span>" : esc(r.rec.body);
+        var end = r.k === "memos" ? '<span class="nx-tag' + (r.rec.published ? " is-pub" : "") + '">' + (r.rec.published ? "게시됨" : "초안") + "</span>" : p.pillars.map(chip).join("");
+        return '<li class="sn-tr nx-cols-mg"><span class="sn-tid">' + esc(r.at.slice(5, 10)) + '</span><span class="nx-kind k-' + r.k + '" title="' + NAME[r.k] + '">' + ICON[r.k] + "</span>" +
+          '<a class="sn-tmain" href="' + link(r.id, r.k === "marks" ? r.rec.anchor : "") + '"><span class="sn-tt">' + esc(p.title) + readTag(r.id) + '</span><span class="sn-tg' + (r.k === "memos" ? " nx-memo" : "") + '">' + sub + '</span></a><span class="sn-tp">' + end + "</span></li>";
+      }).join("") + "</ul>";
+      root.innerHTML = chipsK + bar + status + (shown.length ? tbl : '<p class="nx-empty">아직 남긴 것이 없습니다.</p>');
+      return;
+    }
+    root.innerHTML = head + status + body;
   }
 
   function draw() { if (KIND === "cmp") drawCmp(); else drawShelf(); }
@@ -124,6 +172,8 @@
   document.addEventListener("click", function (e) {
     var t = e.target.closest("[data-nx-pick]");
     if (t) { var v = t.getAttribute("data-nx-pick"); pick = pick === v ? "" : v; draw(); return; }
+    var kd = e.target.closest("[data-nx-kind]");
+    if (kd) { window.__nxKind = kd.getAttribute("data-nx-kind"); draw(); return; }
     var tb = e.target.closest("[data-nx-tab]");
     if (tb) {
       var k = tb.getAttribute("data-nx-tab");
