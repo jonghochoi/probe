@@ -189,6 +189,55 @@
       DETAIL[date] = m; cb(m[id] || "");
     }).catch(function () { cb(""); });
   }
+  // the run page's brief, read into parts so it can be laid out more than one way
+  function parseDetail(html) {
+    var d = new DOMParser().parseFromString("<div>" + html + "</div>", "text/html").body.firstChild;
+    var inner = function (el) { return el ? el.innerHTML.trim() : ""; };
+    var steps = [].map.call(d.querySelectorAll(".sc-bstep"), function (st) {
+      return { name: st.getAttribute("data-step") || inner(st.querySelector(".sc-bstep-h")), fields: [].map.call(st.querySelectorAll(".sc-bf"), function (f) {
+        var dd = f.querySelector("dd"), p = dd && dd.querySelector("p");
+        return { label: inner(f.querySelector("dt")), lead: p ? inner(p) : "", items: dd ? [].map.call(dd.querySelectorAll(":scope > ul > li"), inner) : [] };
+      }) };
+    });
+    var axes = [].map.call(d.querySelectorAll(".sc-ax"), function (a) {
+      var h = a.querySelector(".sc-ax-h"), chip = h && h.querySelector(".chip"), spans = h ? h.querySelectorAll(":scope > span") : [];
+      return { chip: chip ? chip.outerHTML : "", head: spans.length ? inner(spans[spans.length - 1]) : "", items: [].map.call(a.querySelectorAll(":scope > ul > li"), inner) };
+    });
+    var check = d.querySelector(".sc-check");
+    return { steps: steps, axes: axes, checks: check ? [].map.call(check.querySelectorAll(":scope > ul > li"), inner) : [], links: inner(d.querySelector(".sc-links")) };
+  }
+  function renderDetail(html) {
+    var how = opt("detailStyle", "brief");
+    if (how === "site") return '<div class="sc-body">' + html + "</div>";
+    var D = parseDetail(html);
+    var list = function (items) { return items.length ? "<ul>" + items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>" : ""; };
+    var field = function (f) { return '<div class="dx-f"><b class="dx-l">' + f.label + '</b><div class="dx-c">' + (f.lead ? '<p class="dx-lead">' + f.lead + "</p>" : "") + list(f.items) + "</div></div>"; };
+    var axisHtml = function (a) { return '<div class="dx-ax"><p class="dx-ax-h">' + a.chip + "<span>" + a.head + "</span></p>" + list(a.items) + "</div>"; };
+    var steps = D.steps.map(function (st) { return '<section class="dx-step"><h4 class="dx-sh">' + st.name + "</h4>" + st.fields.map(field).join("") + "</section>"; }).join("");
+    var axes = D.axes.length ? '<section class="dx-blk"><h4 class="dx-h">연구 축별 시사점</h4>' + D.axes.map(axisHtml).join("") + "</section>" : "";
+    var checks = D.checks.length ? '<section class="dx-blk dx-check"><h4 class="dx-h">먼저 확인할 점</h4>' + list(D.checks) + "</section>" : "";
+    var foot = D.links ? '<p class="dx-links">' + D.links + "</p>" : "";
+    if (how === "brief") {
+      var all = []; D.steps.forEach(function (st) { st.fields.forEach(function (f) { all.push(f); }); });
+      var pickF = function (lbl) { return all.filter(function (f) { return f.label.replace(/\s/g, "") === lbl; })[0]; };
+      var glance = ["문제", "핵심 방법", "핵심 기여", "가치"].map(function (l) { var f = pickF(l.replace(/\s/g, "")); return f && f.lead ? "<dt>" + l + "</dt><dd>" + f.lead + "</dd>" : ""; }).join("");
+      return '<div class="dx dx-brief"><section class="dx-glance"><h4 class="dx-h">한눈에</h4><dl>' + glance + "</dl></section>" + axes + checks +
+        D.steps.map(function (st, i) { return '<details class="dx-more"' + (i ? "" : "") + "><summary><b>" + st.name + "</b><span>" + st.fields.map(function (f) { return f.label; }).join(" · ") + "</span></summary>" + st.fields.map(field).join("") + "</details>"; }).join("") + foot + "</div>";
+    }
+    if (how === "tabs") {
+      var T = [["brief", "요지", D.steps.length], ["axes", "시사점", D.axes.length], ["check", "확인할 점", D.checks.length]].filter(function (t) { return t[2]; });
+      return '<div class="dx dx-tabs"><div class="dx-tabbar" role="tablist">' + T.map(function (t, i) { return '<button type="button" role="tab" data-dx-tab="' + t[0] + '" aria-selected="' + (i === 0) + '">' + t[1] + "</button>"; }).join("") + "</div>" +
+        '<div class="dx-pane" data-dx-pane="brief">' + steps + "</div>" + '<div class="dx-pane" data-dx-pane="axes" hidden>' + D.axes.map(axisHtml).join("") + "</div>" +
+        '<div class="dx-pane dx-check" data-dx-pane="check" hidden>' + list(D.checks) + "</div>" + foot + "</div>";
+    }
+    if (how === "cards") {
+      var cards = []; D.steps.forEach(function (st) { st.fields.forEach(function (f) { cards.push('<div class="dx-card"><p class="dx-eb">' + st.name + "</p><h5>" + f.label + "</h5>" + (f.lead ? '<p class="dx-lead">' + f.lead + "</p>" : "") + list(f.items) + "</div>"); }); });
+      return '<div class="dx dx-cards"><div class="dx-grid">' + cards.join("") + "</div>" +
+        (D.axes.length ? '<div class="dx-grid dx-grid-ax">' + D.axes.map(function (a) { return '<div class="dx-card dx-card-ax">' + axisHtml(a) + "</div>"; }).join("") + "</div>" : "") +
+        (D.checks.length ? '<div class="dx-card dx-card-check"><h5>먼저 확인할 점</h5>' + list(D.checks) + "</div>" : "") + foot + "</div>";
+    }
+    return '<div class="dx dx-flow">' + steps + axes + checks + foot + "</div>";
+  }
   function closeDetail() {
     [].forEach.call(document.querySelectorAll(".sn-dw, .sn-inl"), function (n) { n.remove(); });
     [].forEach.call(document.querySelectorAll(".is-open[data-card]"), function (n) { n.classList.remove("is-open"); });
@@ -201,7 +250,7 @@
     if (!document.querySelector('link[data-sc-css]')) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "assets/scout.css"; l.setAttribute("data-sc-css", ""); document.head.appendChild(l); }
     var head = '<p class="sn-chips">' + it.picks.map(function (k) { return chip(k[0], k[1]); }).join("") + "</p>" +
       '<a class="sn-id" href="https://arxiv.org/abs/' + esc(it.id) + '" target="_blank" rel="noopener">arXiv ' + esc(it.id) + " ↗</a>";
-    var f = FIGS[id], figBlock = f ? '<figure class="sn-dt-fig"><img src="' + esc(f.src) + '" alt=""><figcaption>' + esc(f.caption.length > 220 ? f.caption.slice(0, 218) + "…" : f.caption) + "<span>" + esc(f.source) + "</span></figcaption></figure>" : "";
+    var f = FIGS[id], figBlock = f ? '<figure class="sn-dt-fig"><img src="' + esc(f.src) + '" alt=""><figcaption>' + esc(f.caption) + "<span>" + esc(f.source) + "</span></figcaption></figure>" : "";
     var box = figBlock + '<div class="sn-dt-body sc-body-host"><p class="sn-dt-wait">불러오는 중…</p></div>';
     if (opt("detail", "drawer") === "inline" && host) {
       var anchor = host;
@@ -210,7 +259,7 @@
       inl.innerHTML = '<div class="sn-inl-h">' + head + '<button type="button" class="sn-dw-x" data-dw-close aria-label="닫기">' + X_ICON + "</button></div>" + box;
       anchor.after(inl); host.classList.add("is-open");
     } else {
-      var dw = document.createElement("div"); dw.className = "sn-dw";
+      var dw = document.createElement("div"); dw.className = "sn-dw" + (opt("detail", "drawer") === "page" ? " is-page" : "");
       dw.innerHTML = '<div class="sn-dw-bg" data-dw-close></div><section class="sn-dw-p" role="dialog" aria-modal="true" aria-label="' + esc(it.alias) + '">' +
         '<header class="sn-dw-h"><div class="sn-dw-top">' + head + '<button type="button" class="sn-dw-x" data-dw-close aria-label="닫기">' + X_ICON + "</button></div>" +
         "<h2>" + esc(it.alias) + '</h2><p class="sn-dw-t">' + esc(it.title) + "</p>" + (it.gist ? '<p class="sn-dw-g">' + esc(it.gist) + "</p>" : "") +
@@ -220,7 +269,7 @@
     }
     detailFor(selected, id, function (html) {
       var b = document.querySelector(".sn-dt-body"); if (!b) return;
-      b.innerHTML = html ? '<div class="sc-body">' + html + "</div>" : '<p class="sn-dt-wait">이 논문은 회차 리포트에 세부 내용이 없습니다.</p>';
+      b.innerHTML = html ? renderDetail(html) : '<p class="sn-dt-wait">이 논문은 회차 리포트에 세부 내용이 없습니다.</p>';
     });
   }
 
@@ -230,6 +279,9 @@
   document.addEventListener("scroll", function (e) { var t = e.target; if (t && t.classList && t.classList.contains("sn-pf")) t.classList.toggle("at-end", t.scrollLeft + t.clientWidth >= t.scrollWidth - 4); }, true);
   document.addEventListener("click", function (e) {
     if (e.target.closest("[data-dw-close]")) { closeDetail(); return; }
+    var dxt = e.target.closest("[data-dx-tab]");
+    if (dxt) { var box = dxt.closest(".dx-tabs"); [].forEach.call(box.querySelectorAll("[data-dx-tab]"), function (b) { b.setAttribute("aria-selected", String(b === dxt)); });
+      [].forEach.call(box.querySelectorAll("[data-dx-pane]"), function (p) { p.hidden = p.getAttribute("data-dx-pane") !== dxt.getAttribute("data-dx-tab"); }); return; }
     var dt = e.target.closest("[data-detail]");
     if (dt) { e.preventDefault(); openDetail(dt.getAttribute("data-detail")); return; }
     var cd = e.target.closest(".sn-card[data-card], .sn-tr[data-card]");
