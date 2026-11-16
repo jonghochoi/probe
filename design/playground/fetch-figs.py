@@ -9,7 +9,7 @@ results chart:
 - the new scouting page's recommended papers: the figures of each paper's arXiv HTML edition,
   written to `assets/scout-figs.json` with thumbnails `assets/figs/s-<id>.webp`
 
-Thumbnails are 720 px wide WebP (SVG figures are kept as they are). Needs network access to
+Thumbnails are up to 1100 px wide WebP (SVG figures are kept as they are). Needs network access to
 arxiv.org and Pillow; a figure that cannot be fetched is left out and its row shows no preview.
 """
 import html
@@ -30,6 +30,7 @@ REPO = Path(__file__).resolve().parents[2]
 FIGS = SITE / "assets" / "figs"
 FIGS.mkdir(parents=True, exist_ok=True)
 TMP = Path(tempfile.mkdtemp(prefix="probe-figs-"))
+WIDTH = 1100  # sharp at the 640 px preview on a 2x screen
 
 KO_POS = ["개요", "구조", "아키텍처", "파이프라인", "프레임워크", "전체 구성", "전체 흐름", "모듈",
           "overview", "architecture", "pipeline", "framework"]
@@ -65,8 +66,8 @@ def thumb(url, stem):
         else:
             im = im.convert("RGB")
         w, h = im.size
-        if w > 720:
-            im = im.resize((720, round(h * 720 / w)), Image.LANCZOS)
+        if w > WIDTH:
+            im = im.resize((WIDTH, round(h * WIDTH / w)), Image.LANCZOS)
         im.save(FIGS / f"{stem}.webp", "WEBP", quality=80)
         return f"assets/figs/{stem}.webp"
     except Exception:

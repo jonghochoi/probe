@@ -618,3 +618,10 @@ p.nx-cm { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-hei
 .sn-figpop-c { margin: .5rem .2rem 0; font-size: var(--fs-2xs); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .sn-figpop-s { margin: .2rem .2rem 0; font-size: var(--fs-3xs); color: var(--text-muted); }
 @media (hover: none), (max-width: 720px) { .sn-figpop { display: none !important; } }
+/* the opened detail leads with the paper's overview figure */
+.sn-dt-fig { margin: 1rem 1.4rem .2rem; padding: .6rem; border: 1px solid var(--border-soft); border-radius: var(--radius); background: var(--surface); }
+.sn-dt-fig img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: #fff; border-radius: calc(var(--radius) - 5px); }
+.sn-dt-fig figcaption { margin: .55rem .2rem 0; font-size: var(--fs-xs); line-height: 1.55; color: var(--text); }
+.sn-dt-fig figcaption span { display: block; margin-top: .2rem; font-size: var(--fs-2xs); color: var(--text-muted); }
+.sn-inl .sn-dt-fig { margin: .8rem 0 .2rem; }
+@media (max-width: 680px) { .sn-dt-fig { margin: .8rem 1.1rem .2rem; } .sn-dt-fig img { max-height: 300px; } }

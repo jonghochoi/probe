@@ -69,7 +69,7 @@
     var full = opt("card", "full") === "full", tags = opt("tags", "card") !== "none";
     // "1위" is what the section title already says; a second axis's mark stays
     var ranks = opt("rank", "show") === "trim";
-    var fig = FIGS[it.id], how = opt("fig", "off"), figHtml = fig && (how === "thumb" || how === "cover") ? '<div class="sn-fig sn-fig-' + how + '"><img src="' + esc(fig.src) + '" alt="" loading="lazy"></div>' : "";
+    var fig = FIGS[it.id], how = opt("fig", "thumb"), figHtml = fig && (how === "thumb" || how === "cover") ? '<div class="sn-fig sn-fig-' + how + '"><img src="' + esc(fig.src) + '" alt="" loading="lazy"></div>' : "";
     return '<article class="sn-card' + (fig && how === "cover" ? " has-cover" : "") + '" data-card="' + esc(it.id) + '">' + (how === "cover" ? figHtml : "") + '<div class="sn-ctop"><p class="sn-chips">' + it.picks.map(function (k) { return chip(k[0], ranks && k[1] === "1위" ? "" : k[1]); }).join("") + "</p>" +
       '<a class="sn-id" href="https://arxiv.org/abs/' + esc(it.id) + '" target="_blank" rel="noopener">' + esc(it.id) + "</a></div>" +
       '<h3><a href="#p-' + esc(it.id) + '" data-detail="' + esc(it.id) + '" title="' + esc(it.title) + '">' + esc(it.alias) + "</a></h3>" +
@@ -201,7 +201,8 @@
     if (!document.querySelector('link[data-sc-css]')) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "assets/scout.css"; l.setAttribute("data-sc-css", ""); document.head.appendChild(l); }
     var head = '<p class="sn-chips">' + it.picks.map(function (k) { return chip(k[0], k[1]); }).join("") + "</p>" +
       '<a class="sn-id" href="https://arxiv.org/abs/' + esc(it.id) + '" target="_blank" rel="noopener">arXiv ' + esc(it.id) + " ↗</a>";
-    var box = '<div class="sn-dt-body sc-body-host"><p class="sn-dt-wait">불러오는 중…</p></div>';
+    var f = FIGS[id], figBlock = f ? '<figure class="sn-dt-fig"><img src="' + esc(f.src) + '" alt=""><figcaption>' + esc(f.caption.length > 220 ? f.caption.slice(0, 218) + "…" : f.caption) + "<span>" + esc(f.source) + "</span></figcaption></figure>" : "";
+    var box = figBlock + '<div class="sn-dt-body sc-body-host"><p class="sn-dt-wait">불러오는 중…</p></div>';
     if (opt("detail", "drawer") === "inline" && host) {
       var anchor = host;
       if (host.classList.contains("sn-card")) { var top = host.offsetTop; [].forEach.call(host.parentNode.children, function (c) { if (c.classList.contains("sn-card") && c.offsetTop === top) anchor = c; }); }
@@ -256,7 +257,7 @@
     var pop = document.createElement("div"); pop.className = "sn-figpop"; pop.hidden = true; pop.setAttribute("aria-hidden", "true");
     pop.innerHTML = '<img alt=""><p class="sn-figpop-c"></p><p class="sn-figpop-s"></p>'; document.body.appendChild(pop);
     var cur = null, timer = null;
-    var can = function () { return opt("fig", "off") === "hover" && window.matchMedia("(hover: hover) and (min-width: 721px)").matches; };
+    var can = function () { return opt("fig", "thumb") === "hover" && window.matchMedia("(hover: hover) and (min-width: 721px)").matches; };
     document.addEventListener("mouseover", function (e) {
       if (!can()) return; var card = e.target.closest(".sn-card[data-card]"); if (!card || card === cur) return;
       cur = card; clearTimeout(timer);
