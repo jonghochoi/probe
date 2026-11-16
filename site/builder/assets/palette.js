@@ -315,13 +315,16 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("[data-cmdk-open]")) { e.preventDefault(); open(); }
 });
 
-// Which key the button's tooltip advertises is the one thing about it the
-// build cannot know, so it prints the majority platform's and this corrects
-// it for a Mac.
+// Which key the nav pill advertises — in its tooltip, its name and the key it
+// prints beside the magnifier — is the one thing about it the build cannot
+// know, so it prints the majority platform's and this corrects it for a Mac.
 if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) {
-  document.querySelectorAll(".nav-cmdk").forEach((btn) => {
+  document.querySelectorAll("[data-cmdk-open]").forEach((btn) => {
     btn.title = btn.title.replace("Ctrl K", "⌘K");
+    const name = btn.getAttribute("aria-label");
+    if (name) btn.setAttribute("aria-label", name.replace("Ctrl K", "⌘K"));
   });
+  document.querySelectorAll("[data-cmdk-key]").forEach((k) => { k.textContent = "⌘K"; });
 }
 
 // A star or a 읽음 mark set on the page behind changes what a row should say.

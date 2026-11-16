@@ -97,6 +97,11 @@ _ICON_PATHS = {
                 '<circle cx="5" cy="7" r=".5"/><circle cx="7.6" cy="4.6" r=".5"/><circle cx="10.6" cy="5.6" r=".5"/>'),
     # 책갈피 — the flag a paper's contents mark a section with.
     "flag": f'<path d="{_FLAG_D}"/>',
+    # 설정 — two sliders, the button the nav's card opens from.
+    "sliders": ('<path d="M2.4 4.6h6.2M12 4.6h1.6M2.4 11.4h1.6M7.4 11.4h6.2"/>'
+                '<circle cx="10.3" cy="4.6" r="1.7"/><circle cx="5.7" cy="11.4" r="1.7"/>'),
+    # 닫기 — the cross a card closes with.
+    "close": '<path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6"/>',
     # More — the three dots a menu of the rarer actions opens from.
     "more": '<circle cx="3.6" cy="8" r=".7"/><circle cx="8" cy="8" r=".7"/><circle cx="12.4" cy="8" r=".7"/>',
     # 탐색 회차 — a month page, the cell the date line opens its calendar from.
@@ -400,8 +405,8 @@ def page(
     # a render. Shared state goes on `window.ProbeMemo` instead of exports.
     #
     # The unconditional ones are the ones every page carries: theme.js drives
-    # the nav's own button, brand.js the mark beside it, nav.js the menu the
-    # nav folds its destinations into on a phone, and the ⌘K palette is
+    # the nav card's 화면 and 색 테마 rows, brand.js the mark beside it, nav.js
+    # the pill and the card it grows into, and the ⌘K palette is
     # reachable from anywhere — so its index, its matching rule and the script
     # itself ride along too, and so does `pillar.js`, since an axis chip on any
     # page opens its axis's popup. `defer` runs them in this order, which is
@@ -446,28 +451,6 @@ var a=localStorage.getItem('probe.accent');if(a)document.documentElement.setAttr
 """
 
 
-def cmdk_button() -> str:
-    """The one part of the ⌘K palette the build prints.
-
-    The dialog itself is `palette.js`'s markup, so a browser with no script
-    never has it — but a reader needs something to press, and a shortcut nobody
-    is told about is a shortcut nobody uses. `site.css` keeps the button off an
-    unscripted page, the same way every other JS-only control here removes
-    itself rather than sitting inert.
-
-    It is the glyph alone, on every viewport — a desktop and a phone read the
-    same button rather than one growing a label the other never had room for.
-    The shortcut lives in the `title`, a pointer's-length away rather than
-    printed beside the icon at all times. It reads `Ctrl K` here, which is
-    what it is on every platform but one; `palette.js` swaps it to `⌘K` on a
-    Mac, since which keyboard is in front of the reader is the one thing about
-    this button the build cannot know.
-    """
-    return ('<button type="button" class="nav-cmdk" data-cmdk-open '
-            'aria-label="논문 찾기" title="논문 찾기 (Ctrl K)">'
-            f'{icon("search", 15)}</button>')
-
-
 # GitHub's own mark, the one shape a reader recognises as "the source is over
 # there". One path at a 16 px viewBox, inlined like every other glyph here —
 # the site fetches nothing from a third party, least of all a logo.
@@ -483,39 +466,31 @@ GITHUB_MARK = (
 )
 
 
+def _github(size: int) -> str:
+    return (f'<svg viewBox="0 0 16 16" width="{size}" height="{size}" aria-hidden="true" '
+            f'focusable="false"><path fill="currentColor" d="{GITHUB_MARK}"/></svg>')
+
+
 def repo_link() -> str:
-    """The way out to the repository, on every page.
+    """The way out to the repository, for a browser that runs no script.
 
     The site publishes one half of this project — the rewrites and the
     comparisons — and the other half is the part that produced them: the
     prompts, the human's `context/`, the format contracts, this generator. A
-    reader who wants to know how a paper came to be written this way has
-    nowhere on the site to go and ask.
-
-    It sits last in the nav, past the theme toggle, and is spaced and drawn
-    exactly like it: the three of them are one row of glyph-sized controls, and
-    a glyph set apart by its border or by its spacing reads as a control that
-    lost something rather than as one of a different kind. Last is what says it
-    is of a different kind, and it is also what lets it arrive without moving
-    anything that was already in reach.
-
-    The glyph alone, like the two controls beside it, with the destination in
-    the `title` and in `aria-label` — an icon-sized link is nothing to a screen
-    reader unless it is named. Nothing here needs a script, so unlike the ⌘K
-    button this one is on an unscripted page too.
+    scripted page carries the link as the last line of the nav's settings
+    card (`nav_island()`); an unscripted page has no card, so the link stands
+    in the row on its own, drawn as an outlined glyph and named in `title`
+    and `aria-label`. `site.css` keeps it off a scripted page.
     """
     return (
         f'<a class="icon-btn nav-repo" href="{REPO_URL}" '
         'target="_blank" rel="noopener noreferrer" '
-        'aria-label="GitHub (새 탭)" title="GitHub">'
-        '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" '
-        f'focusable="false"><path fill="currentColor" d="{GITHUB_MARK}"/>'
-        '</svg></a>'
+        f'aria-label="GitHub (새 탭)" title="GitHub">{_github(16)}</a>'
     )
 
 
 # Every place the site goes, in the order the nav offers them. The row and the
-# phone's sheet print the same list rather than each keeping their own, so a
+# phone's card print the same list rather than each keeping their own, so a
 # destination cannot arrive in one and be missing from the other.
 #
 # A track's destination is named for its track, in two syllables of Korean —
@@ -554,28 +529,7 @@ def _current(key: str, here: str) -> str:
     return ' aria-current="page"' if key and key == here else ""
 
 
-def nav_sheet(up: str, here: str = "") -> str:
-    """The phone's menu — the row's destinations, one per line, plus the way out.
-
-    A phone is not wide enough for the mark, the site's name, four
-    destinations and three glyph controls on one line, and the name is the part
-    that says which site this is. So the destinations fold behind one button
-    and the name stays: the row keeps what a reader cannot reconstruct, and the
-    sheet takes what a label can name in full.
-
-    It is `hidden` until `nav.js` opens it, and the button that opens it is
-    printed only for a scripted browser — an unscripted phone keeps the row of
-    links it always had, and gives up the name instead (`site.css`).
-    """
-    links = "".join(
-        f'<a href="{up}{href}"{_current(key, here)}>{label}{_badge(key)}</a>'
-        for key, href, label in DESTINATIONS)
-    return (f'<div class="nav-sheet" id="nav-sheet" hidden>{links}'
-            f'<a class="nav-sheet-out" href="{REPO_URL}" target="_blank" '
-            'rel="noopener noreferrer">GitHub ↗</a></div>')
-
-
-# The colours a reader can pick, in the menu's order: the name, the key
+# The colours a reader can pick, in the card's order: the name, the key
 # `site.css` reads off `data-accent` (indigo is the default and has none),
 # and the swatch. The swatches are the light fills.
 ACCENTS = (("인디고", "", "oklch(51% 0.21 277)"),
@@ -583,27 +537,77 @@ ACCENTS = (("인디고", "", "oklch(51% 0.21 277)"),
            ("테라코타", "terracotta", "oklch(67.2% 0.131 39)"))
 
 
-def palette_button() -> str:
-    """The reader's colour, beside the dark-mode button: a palette that opens
-    the three colours. `theme.js` keeps the pick in `probe.accent`."""
-    items = "".join(
-        f'<button type="button" role="menuitemradio" data-accent-pick="{key}" '
-        f'aria-checked="false"><i style="background:{swatch}"></i>{name}</button>'
+def _seg(label: str, title: str, items: str) -> str:
+    """One row of the card that picks one of several: a track, the items,
+    and the indicator `nav.js` slides under whichever item is marked."""
+    tip = f' title="{title}"' if title else ""
+    return (f'<div class="isl-seg" role="radiogroup" aria-label="{label}"{tip}>'
+            f'<span class="isl-blob" aria-hidden="true"></span>{items}</div>')
+
+
+def nav_island(up: str, here: str = "") -> str:
+    """The nav's right end on a scripted page: one pill, and the card it opens.
+
+    The pill holds two things. The magnifier opens the ⌘K palette
+    (`palette.js` answers any `[data-cmdk-open]`), with the shortcut printed
+    beside it on a viewport wide enough to have a keyboard; `palette.js`
+    rewrites it to `⌘K` on a Mac. The second button opens the card — the
+    sliders glyph on a desktop, ☰ on a phone, because on a phone the card also
+    carries the destinations the row hands over.
+
+    The card is the pill grown in place rather than a box dropped under it, so
+    the thing that opened is visibly the thing that was pressed. `nav.js`
+    animates the grow and the indicator in each row; `theme.js` owns what the
+    화면 and 색 테마 rows set. Every control in it is printed here, so the
+    script only moves what already exists.
+
+    None of it works without a script, so `site.css` keeps the whole pill off
+    an unscripted page, which falls back to the row of links and
+    `repo_link()`.
+    """
+    go = "".join(
+        f'<a class="isl-i" href="{up}{href}"{_current(key, here)}>'
+        f'{label}{_badge(key)}</a>'
+        for key, href, label in DESTINATIONS)
+    theme = (f'<button type="button" class="isl-i" role="radio" data-theme-set="light" '
+             f'aria-checked="false">{icon("sun", 14)}라이트</button>'
+             f'<button type="button" class="isl-i" role="radio" data-theme-set="dark" '
+             f'aria-checked="false">{icon("moon", 14)}다크</button>')
+    accents = "".join(
+        f'<button type="button" class="isl-i" role="radio" data-accent-pick="{key}" '
+        f'aria-checked="false"><i class="isl-sw" style="background:{swatch}"></i>{name}</button>'
         for name, key, swatch in ACCENTS)
-    return (f'<span class="pal-w"><button class="icon-btn" data-accent-open aria-haspopup="true" '
-            f'aria-expanded="false" aria-label="색 테마" title="색 테마">{icon("palette", 15)}</button>'
-            f'<span class="pal-menu" role="menu" aria-label="색 테마" hidden>'
-            f'<span class="pal-h">색 테마</span>{items}</span></span>')
+    return f"""<div class="isl" data-isl>
+    <div class="isl-shell">
+      <div class="isl-face isl-rest is-on" data-isl-face="rest">
+        <button type="button" class="isl-q" data-cmdk-open aria-label="논문 찾기 (Ctrl K)"
+                title="논문 찾기 (Ctrl K)">{icon("search", 14)}<kbd data-cmdk-key>Ctrl K</kbd></button>
+        <span class="isl-sep" aria-hidden="true"></span>
+        <button type="button" class="isl-b" data-isl-open aria-expanded="false" aria-controls="isl-card"
+                aria-label="설정" title="설정">{icon("sliders", 15)}{icon("menu", 15)}</button>
+      </div>
+      <div class="isl-face isl-card" id="isl-card" data-isl-face="card" role="dialog"
+           aria-label="설정" tabindex="-1" inert>
+        <div class="isl-top"><span>설정</span>
+          <button type="button" class="isl-x" data-isl-close aria-label="닫기">{icon("close", 14)}</button></div>
+        <nav class="isl-sec isl-go" aria-label="이동"><span class="isl-h">이동</span>
+          <div class="isl-seg">{'<span class="isl-blob" aria-hidden="true"></span>'}{go}</div></nav>
+        <div class="isl-sec"><span class="isl-h">화면</span>{_seg("화면", "다크 모드 전환 (Ctrl+Shift+L)", theme)}</div>
+        <div class="isl-sec"><span class="isl-h">색 테마</span>{_seg("색 테마", "", accents)}</div>
+        <a class="isl-out" href="{REPO_URL}" target="_blank" rel="noopener noreferrer">{_github(15)}GitHub 저장소<span class="isl-arr" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </div>"""
 
 
 def nav(up: str, here: str = "") -> str:
     """The row every page opens on — where the site goes, and what it can do.
 
-    Two clusters, and they are different kinds: four places to go, then three
-    things to do to the page in front of the reader. A hairline stands between
-    them (`site.css`), because the seam between an unboxed label and a bordered
-    32px button reads as a control that lost its border unless something says
-    the boundary is meant.
+    Two clusters, and they are different kinds: four places to go, then the
+    pill that acts on the page in front of the reader (`nav_island()`). A
+    hairline stands between them (`site.css`), because a row of unboxed
+    labels running straight into a filled pill reads as one control that
+    lost its edge unless something says the boundary is meant.
 
     `here` is the destination this page sits under, and marking it is the
     other half of the same job: a row of four names that never says which one
@@ -619,13 +623,8 @@ def nav(up: str, here: str = "") -> str:
     <span class="nav-spacer"></span>
     <ul class="nav-links">{links}</ul>
     <span class="nav-rule"></span>
-    {cmdk_button()}
-    {palette_button()}
-    <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">{icon("moon", 15)}{icon("sun", 15)}</button>
     {repo_link()}
-    <button class="icon-btn nav-menu" data-nav-menu aria-expanded="false"
-            aria-controls="nav-sheet" aria-label="메뉴 열기" title="메뉴">{icon("menu", 15)}</button>
+    {nav_island(up, here)}
   </div>
-  {nav_sheet(up, here)}
 </nav>"""
 
