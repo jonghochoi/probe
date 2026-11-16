@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연구 축 팝업 조율실</title>
+<style>
+:root { --bg: #f6f6fb; --panel: #ffffff; --ink: #1d1f2e; --muted: #6a6d82; --line: #e1e2ec; --acc: oklch(51% 0.21 277); --acc-soft: oklch(95% 0.03 277); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); } }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 "Pretendard Variable", system-ui, sans-serif; display: grid; grid-template-columns: 22rem minmax(0, 1fr); }
+aside { height: 100vh; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 1rem 1rem 3rem; }
+h1 { font-size: 1.05rem; margin: 0 0 .2rem; }
+.sub { margin: 0 0 1rem; color: var(--muted); font-size: 12px; }
+.grp { margin: 0 0 1rem; }
+.grp h2 { font-size: 11px; letter-spacing: .06em; color: var(--muted); margin: 1.2rem 0 .5rem; text-transform: uppercase; }
+.opt { margin: 0 0 .85rem; }
+.opt > b { display: block; font-size: 13px; margin-bottom: .1rem; }
+.opt > small { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: .35rem; }
+.seg { display: flex; flex-wrap: wrap; gap: .3rem; }
+.seg button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: .32rem .7rem; font: inherit; font-size: 12.5px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: #fff; }
+.bar { display: flex; flex-wrap: wrap; gap: .3rem; }
+.sum { margin-top: 1rem; padding: .7rem .8rem; border-radius: 10px; background: var(--acc-soft); font-size: 12px; white-space: pre-wrap; }
+.reset { margin-top: .6rem; border: 0; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+main { position: relative; overflow: hidden; height: 100vh; }
+#box { position: absolute; left: 50%; top: 0; transform-origin: top center; }
+iframe { border: 0; width: 100%; height: 100%; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+@media (max-width: 860px) { body { grid-template-columns: 1fr; grid-template-rows: auto 70vh; } aside { height: auto; max-height: 45vh; } main { height: 70vh; } }
+</style>
+</head>
+<body>
+<aside>
+  <h1>연구 축 팝업 조율실</h1>
+  <p class="sub">오른쪽 사이트에서 연구 축 칩(P0–P4)을 눌러 보세요. 고른 값은 이 브라우저에 남습니다.</p>
+  <div class="grp"><h2>보기</h2>
+    <div class="opt"><b>페이지</b><div class="seg" data-view="page"></div></div>
+    <div class="opt"><b>화면 폭</b><div class="seg" data-view="vp"></div></div>
+  </div>
+  <div id="opts"></div>
+  <div class="sum" id="sum"></div>
+  <button class="reset" type="button" id="reset">기본값으로</button>
+</aside>
+<main><div id="box"><iframe id="view" title="연구 축 페이지 미리보기"></iframe></div></main>
+<script>
+(function () {
+  "use strict";
+  var KEY = "probe.pg.pop.v1", VKEY = "probe.pg.pop.view.v1";
+  var SECTIONS = [
+    ["모양", [
+      ["desk", "데스크톱에서", "", [["pop", "칩 아래 카드"], ["modal", "화면 가운데 창"], ["drawer", "옆에서 여는 서랍"]]],
+      ["phone", "휴대폰에서", "", [["sheet", "아래에서 올라오는 시트"], ["pop", "칩 아래 카드"], ["modal", "가운데 창"]]],
+      ["open", "여는 방법", "", [["click", "누르면"], ["hover", "올리면 (데스크톱)"]]],
+      ["head", "머리", "", [["tint", "축 색 띠"], ["line", "위쪽 색 선"], ["plain", "색 없음"]]]
+    ]],
+    ["내용", [
+      ["desc", "축 설명", "문장은 초안 — 실제 문장은 각 축 파일에 직접 씁니다", [["show", "있을 때"], ["hide", "없을 때"]]],
+      ["dname", "결정 묶음 이름", "결정 제목은 이 축이 다루는 문제들", [["problems", "다루는 문제"], ["decisions", "결정"]]],
+      ["dcode", "결정 기호(D9NB 등)", "", [["small", "작게 곁들임"], ["hide", "숨김"]]],
+      ["link", "아래 링크", "'이 축의 분석 보기' — 분석 목록을 그 축으로 거른 화면", [["on", "두기"], ["off", "두지 않기"]]]
+    ]]
+  ];
+  var DEF = { desk: "pop", phone: "sheet", head: "tint", desc: "show", decs: "titles", dname: "problems",
+              dcode: "small", link: "on", open: "click" };
+  var PAGES = [["home", "첫 화면", "site/index.html"], ["list", "분석 목록", "site/p/index.html"], ["scout", "탐색", "site/s/index.html"],
+               ["cmp", "비교", "site/c/index.html"], ["paper", "논문", "site/p/2610.16337/index.html"]];
+  var VPS = [["desk", "데스크톱", 1280], ["mobile", "휴대폰", 390]];
+  function load(k, d) { try { return JSON.parse(localStorage.getItem(k) || "null") || d; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var state = Object.assign({}, DEF, load(KEY, {}));
+  // a saved value the current choices no longer offer falls back to the default
+  SECTIONS.forEach(function (g) { g[1].forEach(function (o) { if (!o[3].some(function (c) { return c[0] === state[o[0]]; })) state[o[0]] = DEF[o[0]]; }); });
+  var view = Object.assign({ page: "list", vp: "desk" }, load(VKEY, {}));
+  if (!PAGES.some(function (p) { return p[0] === view.page; })) view.page = "list";
+  var frame = document.getElementById("view"), box = document.getElementById("box"), main = document.querySelector("main");
+
+  function seg(el, items, cur, pick) {
+    el.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = it[1];
+      b.setAttribute("aria-pressed", String(it[0] === cur));
+      b.addEventListener("click", function () { pick(it[0]); });
+      el.appendChild(b);
+    });
+  }
+  function drawOpts() {
+    var root = document.getElementById("opts"); root.innerHTML = "";
+    SECTIONS.forEach(function (g) {
+      var grp = document.createElement("div"); grp.className = "grp"; grp.innerHTML = "<h2>" + g[0] + "</h2>";
+      g[1].forEach(function (o) {
+        var d = document.createElement("div"); d.className = "opt";
+        d.innerHTML = "<b>" + o[1] + "</b>" + (o[2] ? "<small>" + o[2] + "</small>" : "") + '<div class="seg"></div>';
+        seg(d.querySelector(".seg"), o[3], state[o[0]], function (v) { state[o[0]] = v; save(KEY, state); drawOpts(); apply(); });
+        grp.appendChild(d);
+      });
+      root.appendChild(grp);
+    });
+    var lines = [];
+    SECTIONS.forEach(function (g) { g[1].forEach(function (o) { var c = o[3].filter(function (x) { return x[0] === state[o[0]]; })[0]; lines.push(o[1] + ": " + c[1]); }); });
+    document.getElementById("sum").textContent = "내 설정\n" + lines.join("\n");
+  }
+  function drawView() {
+    seg(document.querySelector('[data-view="page"]'), PAGES, view.page, function (v) { view.page = v; save(VKEY, view); drawView(); load_(); });
+    seg(document.querySelector('[data-view="vp"]'), VPS, view.vp, function (v) { view.vp = v; save(VKEY, view); drawView(); fit(); });
+  }
+  function apply() {
+    save(KEY, state);
+    try { if (frame.contentWindow && frame.contentWindow.ppClose) frame.contentWindow.ppClose(); } catch (e) {}
+  }
+  // the popup is the playground's, laid over each page the frame loads
+  function inject() {
+    var doc; try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || doc.querySelector("[data-pp-injected]")) return;
+    var css = doc.createElement("link"); css.rel = "stylesheet"; css.href = new URL("site/assets/plpop.css", location.href).href;
+    css.setAttribute("data-pp-injected", ""); doc.head.appendChild(css);
+    var d = doc.createElement("script"); d.src = new URL("site/assets/plpop-data.js", location.href).href;
+    d.onload = function () { var s = doc.createElement("script"); s.src = new URL("site/assets/plpop.js", location.href).href; doc.body.appendChild(s); };
+    doc.body.appendChild(d);
+  }
+  function load_() { frame.src = PAGES.filter(function (p) { return p[0] === view.page; })[0][2]; }
+  function fit() {
+    var W = VPS.filter(function (v) { return v[0] === view.vp; })[0][2];
+    var aw = main.clientWidth - 24, ah = main.clientHeight, k = Math.min(1, aw / W);
+    box.style.width = W + "px"; box.style.height = (ah / k) + "px";
+    box.style.transform = "translateX(-50%) scale(" + k + ")";
+  }
+  frame.addEventListener("load", inject);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(main); else addEventListener("resize", fit);
+  document.getElementById("reset").addEventListener("click", function () { state = Object.assign({}, DEF); save(KEY, state); drawOpts(); apply(); });
+  save(KEY, state); drawOpts(); drawView(); load_(); fit();
+})();
+</script>
+</body>
+</html>

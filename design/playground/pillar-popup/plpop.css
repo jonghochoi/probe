@@ -1,0 +1,51 @@
+/* Pillar-popup drafts. */
+html.pp-ready .chip.pillar[data-p] { cursor: pointer; position: relative; z-index: 2; }
+html.pp-ready .chip.pillar[data-p]:hover { filter: brightness(.95); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pi, var(--orange)) 30%, transparent); }
+html.pp-lock { overflow: hidden; }
+.pp { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+.pp[hidden] { display: none; }
+.pp-bg { position: absolute; inset: 0; pointer-events: auto; }
+.pp-pop .pp-bg { background: transparent; }
+.pp-sheet .pp-bg, .pp-modal .pp-bg, .pp-drawer .pp-bg { background: color-mix(in srgb, #0b0d1c 38%, transparent); animation: pp-fade .18s ease-out; }
+.pp-p {
+  position: absolute; pointer-events: auto; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--surface); color: var(--text); border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
+  border-radius: var(--radius); box-shadow: 0 14px 40px color-mix(in srgb, #0b0d1c 22%, transparent);
+  font-size: var(--fs-sm); line-height: 1.6;
+}
+/* the four shapes */
+.pp-pop .pp-p { width: min(26rem, calc(100vw - 24px)); max-height: min(70vh, 34rem); animation: pp-in .16s ease-out; }
+.pp-modal .pp-p { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(34rem, calc(100vw - 32px)); max-height: 80vh; animation: pp-fade .18s ease-out; }
+.pp-drawer .pp-p { top: 0; right: 0; bottom: 0; width: min(28rem, 92vw); border-radius: 0; animation: pp-side .22s ease-out; }
+.pp-sheet .pp-p { left: 0; right: 0; bottom: 0; max-height: 82vh; border-radius: 16px 16px 0 0; animation: pp-up .22s ease-out; }
+@keyframes pp-fade { from { opacity: 0; } }
+@keyframes pp-in { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes pp-side { from { transform: translateX(24px); opacity: .4; } }
+@keyframes pp-up { from { transform: translateY(40px); opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .pp-p, .pp-bg { animation: none !important; } }
+
+/* head */
+.pp-h { position: sticky; top: 0; z-index: 1; display: flex; align-items: flex-start; gap: .7rem; padding: 1rem 1rem .8rem 1.1rem; background: var(--surface); }
+.pp-head-tint .pp-h { background: linear-gradient(100deg, color-mix(in oklab, var(--pc) 70%, var(--surface)), var(--surface) 85%); }
+.pp-head-line .pp-h { border-bottom: 1px solid var(--border-soft); }
+.pp-head-line .pp-p { border-top: 3px solid var(--pci); }
+.pp-h .chip { flex: none; margin-top: .15rem; }
+.pp-names { display: grid; flex: 1; min-width: 0; }
+.pp-names b { font-family: var(--t-display); font-size: var(--fs-lg); line-height: 1.3; }
+.pp-names span { font-size: var(--fs-2xs); color: var(--text-muted); }
+.pp-x { flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; cursor: pointer;
+  border: 1px solid var(--border-soft); border-radius: 999px; background: var(--surface); color: var(--text-muted); }
+.pp-x:hover { color: var(--orange-ink); border-color: var(--orange); }
+.pp-desc { margin: .2rem 1.1rem .9rem; color: var(--text); }
+.pp-draft { display: inline-block; margin-left: .4rem; font-size: var(--fs-3xs); padding: .02rem .4rem; border-radius: 999px; border: 1px dashed var(--text-muted); color: var(--text-muted); vertical-align: middle; }
+.pp-decs { margin: 0 1.1rem .9rem; padding-top: .8rem; border-top: 1px solid var(--border-soft); }
+.pp-decs h3 { margin: 0 0 .4rem; font-family: var(--ko); font-size: var(--fs-xs); font-weight: 700; color: var(--text); letter-spacing: 0; }
+.pp-decs h3 span { margin-left: .4rem; font-weight: 500; color: var(--text-muted); }
+.pp-decs ul { list-style: none; margin: 0; padding: 0; }
+.pp-decs li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .45rem; padding: .4rem 0; border-bottom: 1px dashed var(--border-soft); }
+.pp-decs li:last-child { border-bottom: 0; }
+.pp-dt { font-size: var(--fs-xs); }
+.pp-dc { font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.pp-open { font-size: var(--fs-3xs); font-weight: 700; padding: .02rem .4rem; border-radius: 999px; background: var(--orange-soft); color: var(--orange-ink); }
+.pp-more { margin: 0; padding: .7rem 1.1rem .9rem; border-top: 1px solid var(--border-soft); font-size: var(--fs-xs); }
+.pp-more a { color: var(--orange-ink); font-weight: 700; text-decoration: none; }
