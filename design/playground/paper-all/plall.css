@@ -1,0 +1,65 @@
+/* Paper page drafts against the built page. The decided value of each option
+   is the page as built; every rule here draws an alternative. */
+
+/* 큰 제목 */
+.pa-ko {
+  font-family: var(--t-display); font-weight: 700; letter-spacing: -.015em; color: var(--text);
+  font-size: clamp(1.35rem, 3.2vw, 1.95rem); line-height: 1.35; margin: 0 0 .35rem;
+}
+.pa-ko-below { font-size: clamp(1.05rem, 2.2vw, 1.3rem); margin: -.2rem 0 .5rem; }
+html:not([data-pa-title="ko"]) .pa-ko:not(.pa-ko-below) { display: none; }
+html:not([data-pa-title="en"]) .pa-ko-below { display: none; }
+html[data-pa-title="ko"] .paper-title { font-size: var(--fs-sm); font-weight: 500; color: var(--text-muted); font-family: inherit; letter-spacing: 0; }
+
+/* 연구 축 칩 · 핵심 수치 · 날짜 */
+html[data-pa-chips="none"] .ph-line .chip.pillar { display: none; }
+html[data-pa-chips="none"] .ph-id { margin-left: 0; }
+html[data-pa-metric="none"] .ph-metric { display: none; }
+html[data-pa-date="none"] .ph-date { display: none; }
+
+/* 한 문단 요약 */
+.pa-tldr { margin: 0 0 1rem; max-width: 90ch; }
+.pa-tldr summary { cursor: pointer; font-size: var(--fs-xs); font-weight: 600; color: var(--orange-ink); list-style: none; }
+.pa-tldr summary::-webkit-details-marker { display: none; }
+.pa-tldr summary::after { content: " ⌄"; }
+.pa-tldr-b { margin-top: .5rem; padding: .75rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); font-size: var(--fs-sm); line-height: 1.75; }
+html:not([data-pa-tldr="fold"]) .pa-tldr { display: none; }
+
+/* 분량 */
+.pa-size { display: none; margin: .3rem 0 0; font-size: var(--fs-2xs); font-family: var(--num); }
+html[data-pa-size="meta"] .pa-size { display: block; }
+
+/* 링크 · 서재 버튼 */
+.pa-bar { display: none; }
+html[data-pa-bar="head"] .pa-bar {
+  display: flex; justify-content: space-between; align-items: center; gap: .6rem;
+  border-top: 1px solid var(--border); padding: .75rem 0 .85rem; margin-top: -.4rem;
+}
+html[data-pa-bar="head"] .pa-bar .src-group span { display: inline; }
+html[data-pa-bar="head"] .pa-bar .src-group a { padding: 0 .7rem; }
+
+/* 탭 줄 */
+html[data-pa-stick="flow"] .tabs-wrap { position: static; }
+html[data-pa-stick="flow"] { --tabs-h: 0px; }
+html[data-pa-stick="flow"] .tabs { height: 3.3rem; }
+
+/* 근거 카드 */
+@media (min-width: 1101px) { html[data-pa-gacts="four"] .g-acts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* 목차 */
+@media (min-width: 1025px) and (hover: hover) {
+  html[data-pa-toc="full"] .shell > .toc .toc-row { display: grid !important; }
+  html[data-pa-toc="full"] .shell > .toc { max-height: calc(100vh - var(--nav-h) - var(--tabs-h, 0px) - 3rem); overflow-y: auto; }
+}
+html[data-pa-lines="1"] .ms-t { -webkit-line-clamp: 1; }
+html[data-pa-num="hide"] .ms-num { display: none; }
+
+/* 막 머리 */
+.pa-q { display: none; font-size: var(--fs-xs); font-weight: 800; color: var(--orange-ink); }
+html[data-pa-act="q"] .pdiv-named .pt, html[data-pa-act="q"] .pdiv-named .ps { display: none; }
+html[data-pa-act="q"] .pdiv-named .pa-q { display: inline; }
+html[data-pa-act="q"] .pdiv-named::after { height: 2px; background: var(--orange); opacity: .28; }
+
+/* 영어 열쇠말 · 진행 선 */
+html[data-pa-secen="hide"] .article h2.h-sec .en { display: none; }
+html[data-pa-prog="off"] .read-prog { display: none !important; }
