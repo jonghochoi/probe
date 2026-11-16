@@ -624,7 +624,7 @@ button { font: inherit; color: inherit; }
       ".pg-fig{position:absolute;z-index:50;width:min(640px,calc(100vw - 32px));padding:.55rem .55rem .6rem;border-radius:var(--radius);background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 16%,transparent);box-shadow:0 14px 36px color-mix(in srgb,#0b0d1c 20%,transparent);pointer-events:none}",
       ".pg-fig[hidden]{display:none}", ".pg-fig.is-in{animation:pg-figin .16s ease-out}", "@keyframes pg-figin{from{opacity:0;transform:translateY(4px)}}",
       ".pg-fig img{display:block;width:100%;max-height:min(420px,55vh);object-fit:contain;background:#fff;border-radius:calc(var(--radius) - 5px)}",
-      ".pg-fig-c{margin:.55rem .25rem 0;font-size:var(--fs-xs);line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}",
+      ".pg-fig-c{margin:.55rem .25rem 0;font-size:var(--fs-xs);line-height:1.55;color:var(--text)}",
       ".pg-fig-s{margin:.2rem .2rem 0;font-size:var(--fs-3xs);color:var(--text-muted)}",
       ".pg-fig-pane{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:360px}", ".pg-fig-pane.is-in{animation:none}",
       "@media (hover: none), (max-width: 720px){.pg-fig{display:none!important}}");
@@ -906,13 +906,13 @@ button { font: inherit; color: inherit; }
       }
       var r = row.getBoundingClientRect(), m = (row.querySelector(".row-main") || row).getBoundingClientRect();
       var top = r.bottom + 6; if (top + ch > vh - 12) top = r.top - ch - 6;
+      top = Math.max(12, Math.min(top, vh - ch - 12));
       c.style.left = (Math.min(m.left, vw - cw - 16) + w.scrollX) + "px"; c.style.top = (top + w.scrollY) + "px";
     };
     var fill = function (c, row) {
       var f = FIGS && FIGS[row.dataset.id]; if (!f) { c.hidden = true; return false; }
       var img = c.querySelector("img"); if (img.getAttribute("src") !== f.src) img.src = f.src;
-      var cap = f.caption.length > 150 ? f.caption.slice(0, 148) + "…" : f.caption;
-      c.querySelector(".pg-fig-c").textContent = cap; c.querySelector(".pg-fig-s").textContent = f.source;
+      c.querySelector(".pg-fig-c").textContent = f.caption; c.querySelector(".pg-fig-s").textContent = f.source;
       c.hidden = false; return true;
     };
     doc.addEventListener("mouseover", function (e) {
