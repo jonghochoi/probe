@@ -708,3 +708,5 @@ p.nx-cm { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-hei
 .dx-tc { margin-left: .35rem; font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .dx-nouns .dx-tabbar button[aria-selected="true"] .dx-tc { color: var(--orange-ink); }
 .dx-fold .dx-tc { margin-left: .3rem; }
+.sn-dw-by { margin: .15rem 0 0; font-size: var(--fs-2xs); color: var(--text-muted); }
+.sn-inl-h + .sn-dw-by { margin: .1rem 0 .2rem; }

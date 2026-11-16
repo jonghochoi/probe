@@ -265,7 +265,7 @@
         tabs = tabs.filter(function (t) { return t.body; });
         return '<div class="dx dx-tabs dx-nouns ' + cls + '"><div class="dx-tabbar" role="tablist">' + tabs.map(function (t, i) {
           return '<button type="button" role="tab" data-dx-tab="' + t.key + '" aria-selected="' + (i === 0) + '">' + t.name + (t.n ? '<span class="dx-tc">' + t.n + "</span>" : "") + "</button>";
-        }).join("") + "</div>" + tabs.map(function (t, i) { return '<div class="dx-pane" data-dx-pane="' + t.key + '"' + (i ? " hidden" : "") + ">" + t.body + "</div>"; }).join("") + foot + "</div>";
+        }).join("") + "</div>" + tabs.map(function (t, i) { return '<div class="dx-pane" data-dx-pane="' + t.key + '"' + (i ? " hidden" : "") + ">" + t.body + "</div>"; }).join("") + "</div>";
       };
       var all6 = fieldsOf(["문제", "기존 한계", "핵심 방법", "차별점", "핵심 기여", "가치"]);
       if (how === "tabs4") return tabsN("dx-t4", [
@@ -339,6 +339,13 @@
     }
     detailFor(selected, id, function (html) {
       var b = document.querySelector(".sn-dt-body"); if (!b) return;
+      if (html) {
+        // who wrote it and where it came from belongs with the title, once, not at the foot of every tab
+        var by = parseDetail(html).links, head = document.querySelector(".sn-dw .sn-dw-t") || document.querySelector(".sn-inl .sn-inl-h");
+        if (by && head && opt("detailNames", "noun") === "noun" && /^tabs/.test(opt("detailStyle", "tabs4")) && opt("detailStyle", "tabs4") !== "tabs" && !document.querySelector(".sn-dw-by")) {
+          var pb = document.createElement("p"); pb.className = "sn-dw-by"; pb.innerHTML = by; head.after(pb);
+        }
+      }
       b.innerHTML = html ? renderDetail(html, { gist: it.gist || "", fig: figInTab ? figBlock : "" }) : '<p class="sn-dt-wait">이 논문은 회차 리포트에 세부 내용이 없습니다.</p>';
     });
   }
