@@ -23,6 +23,8 @@ var groups = [].map.call(toc.querySelectorAll(".toc-grp"), function (g) {
 var num = 0;
 groups.forEach(function (g) { g.rows.forEach(function (r) { r.num = ++num; }); });
 
+var FLAG = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path d="M3.6 1.7h8.8v12.6L8 11.1l-4.4 3.2z"/></svg>';
+
 /* ── milestone list (desktop rail and the sheet) ── */
 function milestones() {
   var root = el("div", "ms");
@@ -40,7 +42,15 @@ function milestones() {
       s.appendChild(el("span", "ms-dot"));
       s.appendChild(el("span", "ms-num", String(r.num)));
       s.appendChild(el("span", "ms-t", r.text));
-      s.title = r.text;
+      var f = el("button", "ms-flag"); f.type = "button";
+      f.setAttribute("aria-label", r.text + " 에 책갈피");
+      f.innerHTML = FLAG;
+      f.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var o = toc.querySelector('.toc-mark[data-mark-at="' + r.href.slice(1) + '"]');
+        if (o) o.click();
+      });
+      s.appendChild(f);
       list.appendChild(s);
     });
     grp.appendChild(list);
@@ -50,6 +60,37 @@ function milestones() {
 }
 var rail = milestones(); rail.classList.add("ms-rail");
 toc.appendChild(rail);
+// the whole list, opened over the article when the reader reaches for the rail
+var fly = milestones(); fly.classList.add("ms-fly");
+toc.appendChild(fly);
+
+/* ── a rail scaled to the article's length ── */
+var scale = el("div", "sc-rail");
+scale.appendChild(el("i", "sc-line"));
+var scMarks = [];
+groups.forEach(function (g) {
+  var a = el("a", "sc-act"); a.href = "#act-" + g.n;
+  a.appendChild(el("span", "sc-node", g.n)); a.appendChild(el("span", "sc-name", g.label));
+  scale.appendChild(a); scMarks.push({ el: a, id: "act-" + g.n });
+  g.rows.forEach(function (r) {
+    var t = el("a", "sc-tick"); t.href = r.href; t.setAttribute("data-id", r.href.slice(1));
+    t.innerHTML = FLAG;
+    scale.appendChild(t); scMarks.push({ el: t, id: r.href.slice(1) });
+  });
+});
+toc.appendChild(scale);
+var laidOut = false;
+function layoutScale() {
+  var art = doc.querySelector("#p-full .article");
+  if (!art || full.hidden) return;
+  var r = art.getBoundingClientRect(); if (!r.height) return;
+  scMarks.forEach(function (m) {
+    var h = doc.getElementById(m.id); if (!h) return;
+    var f = (h.getBoundingClientRect().top - r.top) / r.height;
+    m.el.style.top = (Math.max(0, Math.min(1, f)) * 100).toFixed(2) + "%";
+  });
+  laidOut = true;
+}
 // the sheet is built by paper.js from a clone; give it its own list
 var sheetToc = doc.querySelector(".toc-sheet .toc");
 var sheetMs = null;
@@ -98,7 +139,10 @@ function follow() {
   heads.forEach(function (x) { if (x.h.getBoundingClientRect().top < t) cur = x; });
   if (cur && cur.g !== g) cur = null;
   var id = cur ? cur.r.href.slice(1) : "";
-  [rail, sheetMs].forEach(function (ms) {
+  if (!laidOut) layoutScale();
+  [].forEach.call(scale.querySelectorAll(".sc-tick"), function (e) { e.classList.toggle("on", e.getAttribute("data-id") === id); });
+  [].forEach.call(scale.querySelectorAll(".sc-act"), function (e, i) { e.classList.toggle("on", i === g); });
+  [rail, sheetMs, fly].forEach(function (ms) {
     if (!ms) return;
     [].forEach.call(ms.querySelectorAll(".ms-g"), function (e, i) { e.classList.toggle("on", i === g); e.classList.toggle("past", i < g); });
     [].forEach.call(ms.querySelectorAll(".ms-sec"), function (e) {
@@ -128,7 +172,18 @@ function follow() {
   [].forEach.call(dots.children, function (d, i) { d.classList.toggle("on", i === g); d.classList.toggle("past", i < g); });
 }
 addEventListener("scroll", function () { requestAnimationFrame(follow); }, { passive: true });
-addEventListener("resize", follow);
+addEventListener("resize", function () { laidOut = false; follow(); });
+
+/* ── the reader's 책갈피, mirrored from the contents' own buttons ── */
+function syncMarks() {
+  var on = toc.querySelector('.toc-mark[aria-pressed="true"]');
+  var id = on ? on.getAttribute("data-mark-at") : "";
+  [].forEach.call(doc.querySelectorAll(".ms-sec, .sc-tick"), function (e) {
+    e.classList.toggle("marked", e.getAttribute("data-id") === id);
+  });
+}
+new MutationObserver(syncMarks).observe(toc, { subtree: true, attributes: true, attributeFilter: ["aria-pressed"] });
+syncMarks();
 [].forEach.call(doc.querySelectorAll(".tab"), function (b) { b.addEventListener("click", function () { setTimeout(follow, 30); }); });
 
 function apply(s) {

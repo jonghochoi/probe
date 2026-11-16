@@ -130,3 +130,105 @@ html[data-pt-num="hide"] .ms-num { display: none; }
 html[data-pt-sheet="ms"] .toc-sheet .toc > :not(.ms) { display: none; }
 html[data-pt-sheet="ms"] .ms-sheet { display: block; }
 .ms-sheet .ms-t { white-space: normal; }
+
+/* ── 책갈피 in the list ── */
+.ms .ms-flag {
+  flex: none; margin-left: auto; align-self: center; display: grid; place-items: center;
+  width: 1.4rem; height: 1.4rem; padding: 0; border: 0; background: none; cursor: pointer;
+  color: var(--text-muted); opacity: 0; border-radius: var(--radius-sm);
+}
+.ms .ms-flag svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
+.ms .ms-sec:hover .ms-flag, .ms .ms-flag:focus-visible { opacity: 1; }
+.ms .ms-sec.marked .ms-flag { opacity: 1; color: var(--orange-ink); }
+.ms .ms-sec.marked .ms-flag svg { fill: currentColor; }
+@media (hover: none) { .ms .ms-flag { opacity: .55; } }
+/* a marked section's dot becomes a flag */
+html[data-pt-desk="dots"] .ms-rail .ms-sec.marked .ms-dot, html[data-pt-desk="dotsx"] .ms-rail .ms-sec.marked .ms-dot, .sc-tick.marked {
+  border: 0 !important; border-radius: 0 !important; width: 8px !important; height: 10px !important;
+  background: var(--orange) !important; box-shadow: none !important;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+
+/* ── calm: only the section being read is marked ── */
+html[data-pt-motion="calm"] .ms *, html[data-pt-motion="calm"] .pt-dot * { transition: none !important; }
+html[data-pt-motion="calm"] .ms-g.past::before, html[data-pt-motion="calm"] .ms-g.on::before { background: var(--border); }
+html[data-pt-motion="calm"] .ms-g.past .ms-node { border-color: var(--border); color: var(--text-muted); }
+html[data-pt-motion="calm"] .ms-g.on .ms-node { background: var(--surface); border-color: var(--orange); color: var(--orange-ink); }
+html[data-pt-motion="calm"] .ms-sec.past .ms-dot { background: var(--surface); border-color: var(--border); }
+html[data-pt-motion="calm"] .ms-sec.on .ms-dot { width: 7px; height: 7px; box-shadow: none; }
+html[data-pt-motion="calm"] .pt-dot.past i { background: var(--surface); border-color: var(--border); }
+html[data-pt-motion="calm"] .pt-dot.past + .pt-dot::before, html[data-pt-motion="calm"] .pt-dot.on + .pt-dot::before { background: var(--border); }
+html[data-pt-motion="calm"] .pt-dot.on i { box-shadow: none; }
+
+/* ── the whole list, over the article ── */
+.ms-fly { display: none; }
+@media (min-width: 1025px) {
+  html[data-pt-desk="acts"] .shell > .toc, html[data-pt-desk="dotsx"] .shell > .toc,
+  html[data-pt-desk="scale"] .shell > .toc { overflow: visible; max-height: none; }
+  html[data-pt-desk="acts"] .ms-fly, html[data-pt-desk="dotsx"] .ms-fly, html[data-pt-desk="scale"] .ms-fly {
+    display: block; position: absolute; left: -.9rem; top: -.6rem; z-index: 40; width: 22rem;
+    max-height: calc(100vh - var(--nav-h) - var(--tabs-h, 0px) - 2rem); overflow-y: auto;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: var(--shadow-lg); padding: .85rem .9rem .6rem;
+    visibility: hidden; opacity: 0;
+    transition: opacity .15s ease .25s, visibility 0s linear .4s;
+  }
+  html[data-pt-desk="acts"] .shell > .toc:hover .ms-fly, html[data-pt-desk="acts"] .shell > .toc:focus-within .ms-fly,
+  html[data-pt-desk="dotsx"] .shell > .toc:hover .ms-fly, html[data-pt-desk="dotsx"] .shell > .toc:focus-within .ms-fly,
+  html[data-pt-desk="scale"] .shell > .toc:hover .ms-fly, html[data-pt-desk="scale"] .shell > .toc:focus-within .ms-fly {
+    visibility: visible; opacity: 1; transition: opacity .15s ease .2s, visibility 0s linear .2s;
+  }
+  .ms-fly .ms-t { white-space: normal; }
+
+  /* acts: four milestones and the section being read; the rest on reach */
+  html[data-pt-desk="acts"] .ms-rail .ms-sec:not(.on):not(.marked) { display: none; }
+  html[data-pt-desk="acts"] .ms-rail .ms-g { padding-bottom: .9rem; }
+  html[data-pt-desk="acts"] .ms-rail .ms-sec.marked:not(.on) { opacity: .8; }
+
+  /* dotsx: the dot rail with room between dots and the acts named */
+  html[data-pt-desk="dotsx"] .shell { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 2rem; max-width: 1100px; }
+  html[data-pt-desk="dotsx"] .shell > .toc .toc-title { display: none; }
+  html[data-pt-desk="dotsx"] .ms-rail .ms-at span, html[data-pt-desk="dotsx"] .ms-rail .ms-cnt,
+  html[data-pt-desk="dotsx"] .ms-rail .ms-num, html[data-pt-desk="dotsx"] .ms-rail .ms-t,
+  html[data-pt-desk="dotsx"] .ms-rail .ms-flag { display: none; }
+  html[data-pt-desk="dotsx"] .ms-rail .ms-at b { font-size: var(--fs-xs); }
+  html[data-pt-desk="dotsx"] .toc .ms-rail a.ms-sec { padding: .5rem 0 .5rem 1.3rem; width: 1.3rem; }
+  html[data-pt-desk="dotsx"] .ms-rail .ms-g { padding-bottom: .5rem; }
+
+  /* scale: one line as tall as the screen, acts and sections where they fall in the article */
+  html[data-pt-desk="scale"] .shell { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 2rem; max-width: 1100px; }
+  html[data-pt-desk="scale"] .shell > .toc > :not(.sc-rail):not(.ms-fly) { display: none; }
+  html[data-pt-desk="scale"][data-pt] .shell > .toc > .sc-rail.sc-rail { display: block; }
+}
+.sc-rail {
+  display: none; position: relative;
+  height: calc(100vh - var(--nav-h) - var(--tabs-h, 0px) - 5rem); margin-top: .8rem;
+}
+.sc-line { position: absolute; left: .62rem; top: 0; bottom: 0; width: 1.5px; background: var(--border); transform: translateX(-50%); }
+.sc-act {
+  position: absolute; left: 0; display: flex; align-items: center; gap: .45rem; transform: translateY(-50%);
+  text-decoration: none; color: var(--text-muted); font-size: var(--fs-xs); z-index: 2;
+}
+.sc-node {
+  width: 1.25rem; height: 1.25rem; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--num); font-size: var(--fs-3xs); font-weight: 800;
+  background: var(--surface); border: 1.5px solid var(--border);
+}
+.sc-act.on { color: var(--orange-ink); font-weight: 700; }
+.sc-act.on .sc-node { border-color: var(--orange); }
+.sc-tick {
+  position: absolute; left: .62rem; width: 9px; height: 1.5px; transform: translate(-50%, -50%);
+  background: color-mix(in oklab, var(--text-muted) 60%, transparent); z-index: 1;
+}
+.sc-tick svg { display: none; }
+.sc-tick.on { width: 13px; height: 3px; background: var(--orange); border-radius: 2px; }
+html[data-pt-desk="dots"] .ms-rail .ms-flag { display: none; }
+/* the site's `.toc a` rule again — restate */
+.toc .sc-rail a.sc-act { display: flex; padding: 0; border-left: 0; margin: 0; background: none; border-radius: 0; }
+.toc .sc-rail a.sc-tick { display: block; padding: 0; border-left: 0; margin: 0; border-radius: 1px; }
+.toc .sc-rail a.sc-tick:hover { background: var(--text); }
+/* the pop-out list sits above the article, whose equations and figures are positioned */
+@media (min-width: 1025px) {
+  html[data-pt-desk="acts"] .shell > .toc, html[data-pt-desk="dotsx"] .shell > .toc,
+  html[data-pt-desk="scale"] .shell > .toc { z-index: 30; }
+}
