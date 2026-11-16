@@ -74,6 +74,11 @@
   --nav-ink-hi:  oklch(97.0% 0.010 277);
   --nav-line:    rgba(255, 255, 255, .22);
   --nav-mark:    oklch(78.0% 0.120 299);
+  /* The nav's pill (`components.nav_island()`): the bar's own ground lifted
+     a step, so it reads as a raised part of the bar rather than a second
+     colour. Mixed from `--nav-bg`, so every accent and the dark theme carry
+     it without a value of their own. */
+  --nav-pill:    color-mix(in oklch, var(--nav-bg), white 9%);
   --orange-soft: oklch(95.0% 0.030 277);
   --amber-soft:  var(--orange);
   --focus:       var(--orange-ink);
@@ -511,55 +516,131 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 }
 .icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: var(--lift); }
 /* On the dark bar the controls are outlines in the bar's own ink. */
-.site-nav .icon-btn, .site-nav .nav-cmdk, .site-nav .nav-menu {
+.site-nav .icon-btn {
   background: transparent; border-color: var(--nav-line); color: var(--nav-ink-hi);
 }
-.site-nav .icon-btn:hover, .site-nav .nav-cmdk:hover { color: var(--nav-ink-hi); border-color: var(--nav-ink); }
-/* The theme button carries both of its icons and shows the one that names
-   where the click goes. Which that is answers to `data-theme` alone, so the
-   button is drawn correctly by the boot script's attribute, before any of the
-   deferred scripts arrive. */
-html[data-theme="dark"] .ico-moon,
-html:not([data-theme="dark"]) .ico-sun { display: none; }
+.site-nav .icon-btn:hover { color: var(--nav-ink-hi); border-color: var(--nav-ink); }
 
-/* The one thing in the nav that leaves the site. It takes `.icon-btn` whole —
-   the same box, the same hover, the same gap in front of it — because the
-   three of them are one row of glyph-sized controls, and a glyph set apart
-   from the other two by its border or by its spacing reads as a control that
-   lost something rather than as one of a different kind. What says it is of a
-   different kind is its place: last, past everything that acts on the page in
-   front of the reader. */
+/* The way out to the repository on an unscripted page, where there is no
+   pill and no card to carry it. A scripted page has it as the card's last
+   line, so the glyph leaves the row. */
 .nav-repo { text-decoration: none; }
+html.js .nav-repo { display: none; }
 
-/* ── The phone's menu ─────────────────────────────────────────────────── */
-/* The button is off the row at every width the row still carries its
-   destinations, and off an unscripted page at every width — it opens markup
-   only a script can reach. `components.nav_sheet()` prints the panel; the
-   rules that hand the destinations over to it are in the 640px block below. */
-.nav-menu { display: none; }
-.nav-sheet {
-  position: absolute; top: 100%; left: 0; right: 0;
-  display: flex; flex-direction: column;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow); padding: .2rem .9rem .5rem;
+/* ── The nav's pill and its card ──────────────────────────────────────── */
+/* `components.nav_island()` prints both and `nav.js` grows one into the
+   other. `.isl` keeps the pill's box in the row — the script sizes it to the
+   pill — and the shell over it is what grows: its top and right edges stay
+   pinned, so the card opens down and to the left from the place that was
+   pressed. Each face sits at the shell's top right at its own natural size
+   and the shell's clip reveals it, which is what makes the card read as the
+   pill grown rather than as a box dropped beneath it. Without a script there
+   is no pill: the row keeps its links and `.nav-repo`. */
+.isl { position: relative; flex: none; display: none; width: 76px; height: 36px; }
+html.js .isl { display: block; }
+.isl.is-open { z-index: var(--z-panel); }
+.isl-shell {
+  position: absolute; top: 0; right: 0; width: 100%; height: 100%; overflow: hidden;
+  border-radius: var(--radius-pill); background: var(--nav-pill);
+  box-shadow: inset 0 0 0 1px var(--nav-line);
+  transition: background-color var(--dur-long) var(--ease-out),
+              box-shadow var(--dur-long) var(--ease-out);
 }
-/* `[hidden]`'s own rule loses to the class above it, so the closed state is
-   spelled out rather than left to the attribute. */
-.nav-sheet[hidden] { display: none; }
-.nav-sheet a {
-  padding: .62rem .3rem; font-size: var(--fs-base); font-weight: 500;
-  color: var(--text); text-decoration: none;
-  border-bottom: 1px solid var(--border-soft);
+/* Open, the dark pill turns into a card of the page's own ground: the card
+   holds text to read and choices to make, which is what that ground is for. */
+.isl.is-open .isl-shell {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border), var(--shadow-lg);
 }
-.nav-sheet a:last-child { border-bottom: 0; }
-.nav-sheet a:hover { color: var(--orange-ink); }
-/* The sheet answers the same question the row does, so it carries the same
-   mark — in a stack, where a rule under a line is the divider between two of
-   them, the accent moves to the label itself. */
-.nav-sheet a[aria-current="page"] { color: var(--orange-ink); font-weight: 700; }
-/* The one line that leaves the site, set apart the way the glyph it replaces
-   is: last, and quieter than the places this site goes. */
-.nav-sheet-out { color: var(--text-muted); font-size: var(--fs-xs); }
+.isl-face {
+  position: absolute; top: 0; right: 0; width: max-content;
+  opacity: 0; transform: scale(.94); transform-origin: top right; filter: blur(4px);
+  pointer-events: none;
+  transition: opacity var(--dur-micro) ease, transform var(--dur-mid) var(--ease-out),
+              filter var(--dur-short) ease;
+}
+.isl-face.is-on {
+  opacity: 1; transform: none; filter: none; pointer-events: auto;
+  transition-delay: calc(var(--dur-micro) / 2);
+}
+
+.isl-rest { display: flex; align-items: center; height: 36px; padding: 0 3px; color: var(--nav-ink-hi); }
+.isl-q, .isl-b {
+  height: 30px; border: 0; background: none; color: inherit; cursor: pointer;
+  border-radius: var(--radius-pill); display: inline-flex; align-items: center; justify-content: center;
+  transition: background var(--dur-short) var(--ease-out);
+}
+.isl-q { gap: .45rem; padding: 0 .55rem; }
+.isl-b { width: 30px; }
+.isl-q:hover, .isl-b:hover { background: rgba(255, 255, 255, .1); }
+.isl-q kbd {
+  font-family: var(--mono); font-size: var(--fs-3xs); line-height: 1;
+  padding: .2rem .35rem; border: 1px solid var(--nav-line); border-radius: var(--radius-xs);
+  color: var(--nav-ink);
+}
+.isl-sep { width: 1px; height: 16px; background: var(--nav-line); margin: 0 3px; flex: none; }
+.isl-b .ico-menu { display: none; }
+
+.isl-card {
+  width: 18rem; padding: .35rem .5rem .5rem; display: grid; gap: .1rem;
+  color: var(--text); outline: none;
+}
+.isl-top {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 2rem; padding-left: .5rem; font-size: var(--fs-xs); font-weight: 700;
+}
+.isl-x {
+  width: 30px; height: 30px; border: 0; background: none; cursor: pointer;
+  border-radius: var(--radius-pill); color: var(--text-muted); display: grid; place-items: center;
+}
+.isl-x:hover { background: var(--surface-2); color: var(--text); }
+.isl-sec { display: grid; gap: .35rem; padding: .35rem .1rem; }
+.isl-h { font-size: var(--fs-3xs); color: var(--text-muted); padding-left: .4rem; }
+/* A row that picks one of several is a track with a light indicator under
+   the marked item, and `nav.js` slides the indicator when the mark moves —
+   the same row whether it picks a theme, a colour or, on a phone, a place. */
+.isl-seg {
+  position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 3px; border-radius: var(--radius); background: var(--surface-2);
+}
+.isl-blob {
+  position: absolute; left: 0; top: 3px; bottom: 3px; width: 0;
+  border-radius: calc(var(--radius) - 3px); background: var(--surface);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-short) var(--ease-out);
+}
+.isl-i {
+  position: relative; z-index: 1; height: 32px; padding: 0 .5rem;
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+  border: 0; background: none; border-radius: calc(var(--radius) - 3px); cursor: pointer;
+  font: inherit; font-size: var(--fs-xs); color: var(--text-muted); text-decoration: none; white-space: nowrap;
+  transition: color var(--dur-short) var(--ease-out);
+}
+.isl-i:hover, .isl-i[aria-checked="true"], .isl-i[aria-current="page"] { color: var(--text); }
+.isl-i[aria-current="page"] { font-weight: 700; }
+.isl-sw { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.isl-go { display: none; }
+.isl-go .nav-badge { margin-left: .2rem; }
+.isl-out {
+  display: flex; align-items: center; gap: .55rem; padding: .6rem;
+  border-radius: var(--radius-sm); font-size: var(--fs-xs); color: var(--text-muted); text-decoration: none;
+}
+.isl-out:hover { background: var(--surface-2); color: var(--text); }
+.isl-arr { margin-left: auto; }
+
+/* A phone has no keyboard to name and no room for the row's destinations, so
+   the pill is two glyphs and its second button opens a card that carries the
+   destinations too — ☰ says so where the sliders would not. */
+@media (max-width: 640px) {
+  .isl-q kbd, .isl-b .ico-sliders { display: none; }
+  .isl-b .ico-menu { display: block; }
+  .isl-q { width: 30px; padding: 0; }
+  .isl-go { display: grid; }
+  .isl-card { width: min(19rem, calc(100vw - 1.8rem)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .isl-shell, .isl-face, .isl-blob { transition: none; }
+}
 
 /* ── Paper header ─────────────────────────────────────────────────────── */
 .paper-head { position: relative; isolation: isolate; }
@@ -2002,22 +2083,18 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   body { font-size: 14.5px; }
   .shell { padding: 1.25rem .9rem 5rem; }
   .paper-head-inner { padding: 1.5rem .9rem 0; }
-  /* The nav is a row of seven things and a phone is not wide enough for all
-     of them at full size. What goes is the four destinations: they fold into the
-     sheet the ☰ opens, where each one gets a full line, and the name stays on
-     the row — the mark beside it is a picture of the site, not its name, and
-     nothing else on a phone screen says which site this is. The way out to the
-     repository goes with them, since it reads as a line in a menu at least as
-     well as it reads as a glyph, and the row is left with the two controls
-     that act on the page in front of the reader.
+  /* A phone is not wide enough for the name, four destinations and the
+     pill on one line. What goes is the four destinations: they move into the
+     card the pill's ☰ opens, and the name stays on the row — the mark beside
+     it is a picture of the site, not its name, and nothing else on a phone
+     screen says which site this is.
 
      None of that exists without a script, so an unscripted phone keeps the row
      of links it always had and gives up the name instead — the only part of
      the row it can lose and still be navigable. */
   .nav-inner { gap: .5rem; padding: 0 .9rem; }
   html:not(.js) .nav-word { display: none; }
-  html.js .nav-links, html.js .nav-rule, html.js .nav-repo { display: none; }
-  html.js .nav-menu { display: grid; }
+  html.js .nav-links, html.js .nav-rule { display: none; }
   .nav-links a { padding: 0 .35rem; }
 
   /* The R5 components are all two- or three-track grids sized for a reading
@@ -2286,23 +2363,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .g-act .sc-label { white-space: normal; line-height: 1.35; }
 
 /* ── ⌘K palette ───────────────────────────────────────────────────────── */
-/* The whole dialog is `palette.js`'s markup: an unscripted page has none of it,
-   so nothing here needs a `html.js` guard. The nav button that opens it is the
-   one piece the build prints, and it is the one piece that does. */
-.nav-cmdk {
-  display: none;
-  align-items: center; justify-content: center;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text-muted); border-radius: var(--radius-sm);
-  width: 32px; height: 32px; flex: none; cursor: pointer;
-  transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
-}
-html.js .nav-cmdk { display: inline-flex; }
-.nav-cmdk:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
-/* The glyph alone, at every width — a desktop and a phone read the same
-   button. The shortcut lives in its `title`, a pointer's length away on a
-   device that can hover, rather than printed beside the icon at all times. */
+/* The whole dialog is `palette.js`'s markup: an unscripted page has none of
+   it, so nothing here needs a `html.js` guard. What opens it is the nav pill's
+   magnifier (`.isl-q`), which leaves an unscripted page with the rest of the
+   pill. */
 
 .cmdk { position: fixed; inset: 0; z-index: var(--z-cmdk); }
 .cmdk-scrim {
@@ -2414,10 +2478,14 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
 
 /* A device driven by a thumb has no key to name and no pointer to hover a
    tooltip with, so the dialog's own shortcuts go and the hit areas grow
-   instead — the nav button already carries no key on any viewport. */
+   instead — the pill's printed key included. */
 @media (hover: none) and (pointer: coarse) {
-  .nav-cmdk, .cmdk-esc { position: relative; }
-  .nav-cmdk::after, .cmdk-esc::after { content: ""; position: absolute; inset: -7px; }
+  .isl-q kbd { display: none; }
+  .isl-q, .isl-b, .cmdk-esc { position: relative; }
+  .cmdk-esc::after { content: ""; position: absolute; inset: -7px; }
+  /* The pill's two glyphs grow up and down only: sideways they would reach
+     into each other across the hairline. */
+  .isl-q::after, .isl-b::after { content: ""; position: absolute; inset: -7px 0; }
   .cmdk-esc .k { display: none; }
   .cmdk-esc .x { display: inline-flex; }
   .cmdk-keys { display: none; }
@@ -2557,27 +2625,6 @@ body::before {
   --band-a:      oklch(24.0% 0.027 40);
   --band-b:      oklch(22.0% 0.022 62);
 }
-
-/* The palette button's menu: the three colours, each with its swatch. A
-   script-only control, so it leaves a page with no script. */
-.pal-w { position: relative; display: none; }
-html.js .pal-w { display: inline-flex; }
-.pal-menu {
-  position: absolute; right: 0; top: calc(100% + .5rem); z-index: var(--z-panel); min-width: 9.5rem;
-  display: flex; flex-direction: column; padding: .3rem; border-radius: var(--radius-sm);
-  background: var(--surface); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
-  box-shadow: var(--shadow-lg);
-}
-.pal-menu[hidden] { display: none; }
-.pal-h { padding: .35rem .6rem .25rem; font-size: var(--fs-3xs); font-weight: 700; color: var(--text-muted); }
-.pal-menu button {
-  display: flex; align-items: center; gap: .55rem; padding: .45rem .6rem; border: 0; cursor: pointer;
-  border-radius: calc(var(--radius-sm) - 2px); background: none; color: var(--text); font: inherit; font-size: var(--fs-xs); text-align: left;
-}
-.pal-menu button:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
-.pal-menu button[aria-checked="true"] { font-weight: 700; }
-.pal-menu button[aria-checked="true"]::after { content: "✓"; margin-left: auto; color: var(--orange-ink); }
-.pal-menu i { width: .9rem; height: .9rem; border-radius: 50%; flex: none; }
 
 /* ── 연구 축 popup ────────────────────────────────────────────────────── */
 /* What an axis chip opens (`pillar.js`): a card under the chip, a sheet from

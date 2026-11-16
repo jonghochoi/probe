@@ -1,71 +1,60 @@
-/* Theme toggle and the reader's colour. Every page has both nav buttons, so
-   this is loaded everywhere.
-   The initial `data-theme` is already set by the inline boot script in the
-   document head — this only handles the click, the shortcut, and keeps the
-   tooltip in sync. Which of the button's two icons is on screen is
-   `site.css`'s answer to `data-theme`, so the swap needs no script and a
-   theme set before this file arrives is already drawn correctly. */
+/* The theme and the reader's colour — the nav card's 화면 and 색 테마 rows,
+   and the theme shortcut. Every page has the card, so this is loaded
+   everywhere.
+   The initial `data-theme` and `data-accent` are already set by the inline
+   boot script in the document head; this marks which radio in each row is
+   on, answers a pick and the shortcut, and stores the choice. `nav.js` moves
+   each row's indicator when its mark changes, so this file never touches
+   layout. Indigo is the default colour and is stored as no key at all. */
 
 (function () {
   "use strict";
   var root = document.documentElement;
-  var toggle = document.querySelector("[data-theme-toggle]");
-  if (!toggle) return;
+  var themes = document.querySelectorAll("[data-theme-set]");
+  var accents = document.querySelectorAll("[data-accent-pick]");
 
-  // Which key the tooltip names is the one thing about this button the build
-  // cannot know — the same reasoning `palette.js` swaps the search shortcut
-  // by, for the same reason.
-  var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-  var key = isMac ? "⌘⇧L" : "Ctrl+Shift+L";
+  function mark() {
+    var t = root.getAttribute("data-theme") || "light";
+    var a = root.getAttribute("data-accent") || "";
+    for (var i = 0; i < themes.length; i++)
+      themes[i].setAttribute("aria-checked", String(themes[i].getAttribute("data-theme-set") === t));
+    for (var j = 0; j < accents.length; j++)
+      accents[j].setAttribute("aria-checked", String(accents[j].getAttribute("data-accent-pick") === a));
+  }
 
-  function apply(mode) {
+  function setTheme(mode) {
+    try { localStorage.setItem("probe.theme", mode); } catch (e) {}
     root.setAttribute("data-theme", mode);
-    var label = (mode === "dark" ? "라이트 모드로" : "다크 모드로") + " (" + key + ")";
-    toggle.setAttribute("aria-label", label);
-    toggle.title = label;
+    mark();
   }
 
-  function flip() {
-    var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    try { localStorage.setItem("probe.theme", next); } catch (e) {}
-    apply(next);
+  function setAccent(key) {
+    if (key) root.setAttribute("data-accent", key); else root.removeAttribute("data-accent");
+    try { if (key) localStorage.setItem("probe.accent", key); else localStorage.removeItem("probe.accent"); } catch (e) {}
+    mark();
   }
 
-  toggle.addEventListener("click", flip);
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-theme-set]");
+    if (t) { setTheme(t.getAttribute("data-theme-set")); return; }
+    var a = e.target.closest("[data-accent-pick]");
+    if (a) setAccent(a.getAttribute("data-accent-pick"));
+  });
 
   addEventListener("keydown", function (e) {
     if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "l" || e.key === "L")) {
       e.preventDefault();
-      flip();
+      setTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
     }
   });
 
-  apply(root.getAttribute("data-theme") || "light");
-
-  /* The reader's colour. The boot script in the head already set
-     `data-accent` from `probe.accent`; this opens the menu, marks the pick and
-     stores a new one. Indigo is the default and is stored as no key at all. */
-  var open = document.querySelector("[data-accent-open]");
-  var menu = open && open.parentNode.querySelector(".pal-menu");
-  if (open && menu) {
-    var picks = menu.querySelectorAll("[data-accent-pick]");
-    var mark = function () {
-      var on = root.getAttribute("data-accent") || "";
-      for (var i = 0; i < picks.length; i++)
-        picks[i].setAttribute("aria-checked", String(picks[i].getAttribute("data-accent-pick") === on));
-    };
-    var show = function (on) { menu.hidden = !on; open.setAttribute("aria-expanded", String(on)); };
-    mark();
-    open.addEventListener("click", function (e) { e.stopPropagation(); show(menu.hidden); });
-    menu.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-accent-pick]");
-      if (!b) return;
-      var key = b.getAttribute("data-accent-pick");
-      if (key) root.setAttribute("data-accent", key); else root.removeAttribute("data-accent");
-      try { if (key) localStorage.setItem("probe.accent", key); else localStorage.removeItem("probe.accent"); } catch (err) {}
-      mark();
-    });
-    document.addEventListener("click", function (e) { if (!menu.hidden && !open.parentNode.contains(e.target)) show(false); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !menu.hidden) { show(false); open.focus(); } });
+  // Which key the 화면 row's tooltip names is the one thing about it the
+  // build cannot know — the same reasoning `palette.js` swaps the search
+  // shortcut by.
+  if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) {
+    var tips = document.querySelectorAll('[title*="Ctrl+Shift+L"]');
+    for (var k = 0; k < tips.length; k++) tips[k].title = tips[k].title.replace("Ctrl+Shift+L", "⌘⇧L");
   }
+
+  mark();
 })();
