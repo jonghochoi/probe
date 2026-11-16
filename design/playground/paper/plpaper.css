@@ -1,0 +1,177 @@
+/* Paper-page drafts. Every variant is a `data-pp-*` value on <html>. */
+
+/* 상세's own lead moves into the head (decided): it never shows. */
+html[data-pp] header.lead { display: none; }
+html[data-pp] .lead + .pdiv, html[data-pp] #main > .pdiv:first-of-type { margin-top: .5rem; }
+
+/* ── 머리 ── */
+.pp-chips { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0 0 .7rem; }
+.pp-chips .chip.pillar { cursor: pointer; }
+.pp-num { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); text-decoration: none; margin-left: .2rem; }
+.pp-num:hover { color: var(--orange-ink); text-decoration: underline; }
+.pp-metric {
+  font-size: var(--fs-2xs); font-weight: 600; color: var(--orange-ink);
+  background: var(--orange-soft); border-radius: var(--radius-pill); padding: .18rem .6rem; margin-left: .2rem;
+}
+.pp-date-top { margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted); }
+.pp-crumbchips { display: inline-flex; gap: .3rem; margin-left: .5rem; vertical-align: middle; }
+.pp-crumbchips .chip { font-size: var(--fs-3xs); padding: .08rem .42rem; cursor: pointer; }
+
+/* chips: a line of their own replacing the breadcrumb, beside the breadcrumb, or none */
+html[data-pp-chips="row"] .crumb-row { display: none; }
+html[data-pp-chips="row"] .pp-crumbchips { display: none; }
+html[data-pp-chips="crumb"] .pp-chips .chip.pillar, html[data-pp-chips="crumb"] .pp-num { display: none; }
+html[data-pp-chips="none"] .pp-chips .chip.pillar, html[data-pp-chips="none"] .pp-crumbchips { display: none; }
+html[data-pp-chips="none"] .pp-num { margin-left: 0; }
+html[data-pp-chips="crumb"] .pp-metric, html[data-pp-chips="none"] .pp-metric { margin-left: 0; }
+html[data-pp-metric="none"] .pp-metric { display: none; }
+.pp-date-top, .pp-date-meta { display: none; }
+html:not([data-pp-date="top"]) .crumb-date, html[data-pp-chips="row"] .crumb-date { display: none; }
+html[data-pp-chips="row"][data-pp-date="top"] .pp-date-top { display: inline; }
+html[data-pp-date="meta"] .pp-date-meta { display: inline; }
+
+/* the Korean thesis */
+.pp-ko {
+  font-family: var(--t-display); font-weight: 700; letter-spacing: -.015em;
+  font-size: clamp(1.35rem, 3.2vw, 1.95rem); line-height: 1.35; margin: 0 0 .35rem; color: var(--text);
+}
+.pp-ko-below { font-size: clamp(1.05rem, 2.2vw, 1.3rem); color: var(--text); margin: -.2rem 0 .5rem; }
+html:not([data-pp-title="ko"]) .pp-ko:not(.pp-ko-below) { display: none; }
+html:not([data-pp-title="en"]) .pp-ko-below { display: none; }
+html[data-pp-title="ko"] .paper-title {
+  font-family: var(--sans, inherit); font-size: var(--fs-sm); font-weight: 500; color: var(--text-muted);
+  letter-spacing: 0; margin-bottom: .55rem;
+}
+.pp-tag { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.6; margin: 0 0 .7rem; max-width: 80ch; }
+
+/* the one-paragraph summary */
+.pp-tldr { margin: 0 0 .9rem; max-width: 90ch; }
+.pp-tldr summary {
+  cursor: pointer; font-size: var(--fs-xs); font-weight: 600; color: var(--orange-ink);
+  list-style: none; display: inline-flex; align-items: center; gap: .35rem;
+}
+.pp-tldr summary::-webkit-details-marker { display: none; }
+.pp-tldr summary::after { content: "⌄"; font-size: .9em; transition: transform .2s; }
+.pp-tldr[open] summary::after { transform: rotate(180deg); }
+.pp-tldr-b {
+  margin-top: .5rem; padding: .75rem 1rem; border-radius: 12px;
+  background: color-mix(in oklab, var(--surface) 70%, transparent); border: 1px solid var(--border);
+  font-size: var(--fs-sm); line-height: 1.75;
+}
+html[data-pp-tldr="none"] .pp-tldr { display: none; }
+html[data-pp-tldr="open"] .pp-tldr summary { pointer-events: none; }
+html[data-pp-tldr="open"] .pp-tldr summary::after { display: none; }
+
+.pp-meta { display: flex; gap: .8rem; margin: .25rem 0 0; font-size: var(--fs-2xs); }
+html:not([data-pp-size="meta"]) .pp-size { display: none; }
+.pp-tabmin { font-size: var(--fs-2xs); color: var(--text-muted); font-weight: 400; }
+html:not([data-pp-size="tab"]) .pp-tabmin { display: none; }
+
+/* links and library buttons, at the right end of the tab strip */
+.pp-tabtools { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
+html[data-pp-bar="tabs"] .actbar { display: none; }
+html[data-pp-bar="tabs"] .pp-tabtools .src-group a,
+html[data-pp-bar="tabs"] .pp-tabtools .act-btn { padding-top: .3rem; padding-bottom: .3rem; }
+@media (max-width: 640px) { html[data-pp-bar="tabs"] .pp-tabtools .src-group span { display: none; } }
+
+/* sticky tab strip */
+html[data-pp-stick="stick"] .tabs-wrap { position: sticky; top: var(--nav-h); z-index: 40; }
+
+/* ── 요약 ── */
+@media (min-width: 1101px) {
+  html[data-pp-gacts="two"] .g-acts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ── 상세: 막 줄 ── */
+.pp-actbar {
+  position: sticky; top: calc(var(--nav-h) + var(--pp-tabs-h, 0px)); z-index: 30;
+  background: color-mix(in oklab, var(--surface) 88%, transparent); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border); display: none;
+}
+.pp-actbar-in { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem; display: flex; gap: .2rem; align-items: stretch; overflow-x: auto; scrollbar-width: none; }
+.pp-actlink {
+  display: inline-flex; align-items: center; gap: .4rem; padding: .55rem .75rem; white-space: nowrap;
+  text-decoration: none; color: var(--text-muted); font-size: var(--fs-xs); font-weight: 500;
+  background: linear-gradient(currentColor, currentColor) bottom / 0 2px no-repeat;
+}
+.pp-actlink:hover { color: var(--text); }
+.pp-actlink.on { color: var(--orange-ink); background-size: 100% 2px; font-weight: 600; }
+.pp-al-n { font-family: var(--num); font-size: var(--fs-3xs); font-weight: 800; opacity: .7; }
+.pp-al-noun { display: none; }
+html[data-pp-act="noun"] .pp-al-q { display: none; }
+html[data-pp-act="noun"] .pp-al-noun { display: inline; }
+.pp-tocbtn {
+  margin-left: auto; display: none; align-items: center; gap: .3rem; border: 0; background: none; font: inherit;
+  font-size: var(--fs-xs); color: var(--text-muted); cursor: pointer; padding: .5rem .3rem;
+}
+@media (min-width: 1025px) {
+  html[data-pp-toc="top"] .pp-actbar, html[data-pp-toc="both"] .pp-actbar { display: block; }
+  html[data-pp-toc="top"] .shell { grid-template-columns: minmax(0, 1fr); max-width: 900px; }
+  html[data-pp-toc="top"] .shell > .toc { display: none; }
+  html[data-pp-toc="top"] .pp-tocbtn { display: inline-flex; }
+  html[data-pp-toc="both"] .toc { top: calc(var(--nav-h) + var(--pp-tabs-h, 0px) + 3.6rem); }
+}
+@media (max-width: 1024px) {
+  html[data-pp-mtoc="sheet"] .pp-actbar, html[data-pp-mtoc="acts"] .pp-actbar { display: block; }
+  html[data-pp-mtoc="sheet"] .shell > .toc, html[data-pp-mtoc="acts"] .shell > .toc { display: none; }
+  html[data-pp-mtoc="sheet"] .pp-tocbtn { display: inline-flex; }
+  .pp-actbar-in { padding: 0 .6rem; }
+  .pp-actlink { padding: .55rem .5rem; }
+  /* on a phone the strip shows the short noun: four questions do not fit */
+  .pp-al-q { display: none; }
+  .pp-al-noun { display: inline; }
+}
+.pp-actbar ~ .shell .h-sec, .pp-actbar ~ .shell .pdiv { scroll-margin-top: calc(var(--nav-h) + var(--pp-tabs-h, 0px) + 3.4rem); }
+
+/* ── 상세: 막 머리 ── */
+.pp-noun { display: none; }
+html[data-pp-act="noun"] .pdiv .pt, html[data-pp-act="noun"] .toc .toc-gl, html[data-pp-act="noun"] .pp-sheet .toc-gl { display: none; }
+html[data-pp-act="noun"] .pp-noun { display: inline-flex; align-items: baseline; gap: .45rem; }
+html[data-pp-act="noun"] .pdiv .pp-noun b { font-family: var(--t-display); font-size: var(--fs-lg); color: var(--text); font-weight: 700; }
+html[data-pp-act="noun"] .pdiv .pp-noun span { font-size: var(--fs-xs); color: var(--text-muted); }
+html[data-pp-act="noun"] .toc .pp-noun b, html[data-pp-act="noun"] .pp-sheet .pp-noun b { font-size: var(--fs-xs); color: var(--text); }
+html[data-pp-act="noun"] .toc .pp-noun span, html[data-pp-act="noun"] .pp-sheet .pp-noun span { font-size: var(--fs-3xs); color: var(--text-muted); font-weight: 400; }
+html[data-pp-act="noun"] .pdiv::after { height: 1px; opacity: .5; background: var(--border); }
+
+/* ── 상세: 목차 소절 ── */
+html[data-pp-tocsub="ko"] .toc-e, html[data-pp-tocsub="cur"] .toc-e { display: none; }
+html[data-pp-tocsub="cur"] .shell > .toc .toc-grp:not(.pp-cur) .toc-row { display: none; }
+html[data-pp-tocsub="cur"] .shell > .toc .toc-grp:not(.pp-cur) { margin-bottom: .3rem; }
+html[data-pp-secen="hide"] .article h2.h-sec .en { display: none; }
+
+/* ── 상세: 확인 문제 ── */
+.pp-qtoggle { display: none; }
+html[data-pp-quiz="hide"] #main .quiz { display: none; }
+html[data-pp-quiz="fold"] #main .quiz:not(.pp-open) > :not(.pp-qtoggle) { display: none; }
+html[data-pp-quiz="fold"] #main .quiz:not(.pp-open) { padding: 0; background: none; border-color: transparent; box-shadow: none; }
+html[data-pp-quiz="fold"] #main .quiz.pp-open > .q-label { display: none; }
+html[data-pp-quiz="fold"] .pp-qtoggle {
+  display: flex; width: 100%; align-items: center; gap: .6rem; text-align: left; cursor: pointer;
+  font: inherit; font-size: var(--fs-xs); color: var(--text-muted);
+  background: color-mix(in oklab, var(--surface) 70%, transparent); border: 1px solid var(--border);
+  border-radius: 12px; padding: .55rem .85rem;
+}
+html[data-pp-quiz="fold"] .quiz.pp-open .pp-qtoggle { border: 0; background: none; padding: 0 0 .5rem; }
+.pp-q-l { font-weight: 700; color: var(--orange-ink); flex: none; }
+.pp-q-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-q-c { flex: none; transition: transform .2s; }
+.quiz.pp-open .pp-q-c { transform: rotate(90deg); }
+.quiz.pp-open .pp-q-t { white-space: normal; color: var(--text); font-weight: 600; }
+html[data-pp-quiz="fold"] .quiz.pp-open .qq { display: none; }
+
+/* ── 진행 선 ── */
+.pp-prog { position: fixed; left: 0; right: 0; top: var(--nav-h); height: 2px; z-index: 60; pointer-events: none; }
+.pp-prog i { display: block; height: 100%; background: var(--orange); transform-origin: left; transform: scaleX(0); }
+html:not([data-pp-prog="on"]) .pp-prog { display: none; }
+
+/* ── 목차 시트 ── */
+.pp-sheet { position: fixed; inset: 0; z-index: 200; background: var(--scrim, rgba(0,0,0,.35)); display: flex; align-items: flex-end; }
+.pp-sheet[hidden] { display: none; }
+.pp-sheet-in {
+  width: 100%; max-height: 75vh; overflow-y: auto; background: var(--surface);
+  border-radius: 16px 16px 0 0; padding: .6rem 1rem 1.5rem; box-shadow: var(--shadow-lg);
+}
+.pp-sheet-h { display: flex; justify-content: space-between; align-items: center; padding: .3rem 0 .6rem; position: sticky; top: -.6rem; background: var(--surface); }
+.pp-sheet-x { border: 0; background: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer; }
+.pp-toc-clone { position: static !important; max-height: none !important; border: 0 !important; padding: 0 !important; background: none !important; }
+html[data-pp-tocsub="ko"] .pp-toc-clone .toc-e { display: none; }

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>논문 상세 조율실</title>
+<style>
+:root { --bg: #f6f6fb; --panel: #ffffff; --ink: #1d1f2e; --muted: #6a6d82; --line: #e1e2ec; --acc: oklch(51% 0.21 277); --acc-soft: oklch(95% 0.03 277); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 "Pretendard Variable", system-ui, sans-serif; display: grid; grid-template-columns: 23rem minmax(0, 1fr); }
+aside { height: 100vh; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 1rem 1rem 3rem; }
+h1 { font-size: 1.05rem; margin: 0 0 .2rem; }
+.sub { margin: 0 0 1rem; color: var(--muted); font-size: 12px; }
+.grp { margin: 0 0 1rem; }
+.grp h2 { font-size: 11px; letter-spacing: .06em; color: var(--muted); margin: 1.2rem 0 .5rem; text-transform: uppercase; }
+.opt { margin: 0 0 .85rem; }
+.opt > b { display: block; font-size: 13px; margin-bottom: .1rem; }
+.opt > small { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: .35rem; }
+.seg { display: flex; flex-wrap: wrap; gap: .3rem; }
+.seg button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: .32rem .7rem; font: inherit; font-size: 12.5px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: #fff; }
+.bar { display: flex; flex-wrap: wrap; gap: .3rem; }
+.sum { margin-top: 1rem; padding: .7rem .8rem; border-radius: 10px; background: var(--acc-soft); font-size: 12px; white-space: pre-wrap; }
+.reset { margin-top: .6rem; border: 0; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+main { position: relative; overflow: hidden; height: 100vh; }
+#box { position: absolute; left: 50%; top: 0; transform-origin: top center; }
+iframe { border: 0; width: 100%; height: 100%; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+@media (max-width: 860px) { body { grid-template-columns: 1fr; grid-template-rows: auto 70vh; } aside { height: auto; max-height: 45vh; } main { height: 70vh; } }
+.note { font-size: 11.5px; color: var(--muted); margin: .2rem 0 1rem; padding: .55rem .7rem; border: 1px dashed var(--line); border-radius: 8px; }
+.copy { margin-top: .5rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: .3rem .8rem; font: inherit; font-size: 12px; cursor: pointer; }
+</style>
+</head>
+<body>
+<aside>
+  <h1>논문 상세 조율실</h1>
+  <p class="sub">오른쪽은 지금 빌드한 사이트입니다. 옵션을 바꾸면 바로 바뀌고, 고른 값은 이 브라우저에 남습니다.</p>
+  <p class="note">이미 정한 것 — 탭 이름은 "요약 · 상세"(영어 부제 없음), 상세 첫머리의 주장·부제·한 문단 요약은 머리로 올림, 재작성본 내용은 그대로.</p>
+  <div class="grp"><h2>보기</h2>
+    <div class="opt"><b>논문</b><div class="seg" data-view="page"></div></div>
+    <div class="opt"><b>탭</b><div class="seg" data-view="tab"></div></div>
+    <div class="opt"><b>화면 폭</b><div class="seg" data-view="vp"></div></div>
+  </div>
+  <div id="opts"></div>
+  <div class="sum" id="sum"></div>
+  <button class="copy" type="button" id="copy">내 설정 복사</button>
+  <button class="reset" type="button" id="reset">기본값으로</button>
+</aside>
+<main><div id="box"><iframe id="view" title="논문 페이지 미리보기"></iframe></div></main>
+<script>
+(function () {
+  "use strict";
+  var KEY = "probe.pg.paper.v1", VKEY = "probe.pg.paper.view.v1";
+  var SECTIONS = [
+    ["머리", [
+      ["title", "큰 제목", "주장 = 상세 첫머리에 있던 한국어 한 줄", [["en", "영어 원제목, 아래 주장"], ["ko", "주장, 아래 영어 원제목(회색)"], ["enonly", "영어 원제목만"]]],
+      ["chips", "연구 축 칩", "누르면 연구 축 팝업", [["row", "제목 위 칩 줄 (이동 경로 대신)"], ["crumb", "이동 경로 옆"], ["none", "없음"]]],
+      ["metric", "핵심 수치", "재작성본의 metric 한 줄", [["show", "칩 줄에 보이기"], ["none", "숨기기"]]],
+      ["tldr", "한 문단 요약", "한 줄 요약(회색)은 늘 보입니다", [["fold", "접어 두기"], ["open", "펼쳐 두기"], ["none", "빼기 (요약 탭이 대신)"]]],
+      ["date", "작성 날짜", "", [["top", "오른쪽 위"], ["meta", "저자 아래"], ["none", "없음"]]],
+      ["size", "분량 (본문 36분 · 용어 14 · 그림 6)", "", [["meta", "저자 아래"], ["tab", "상세 탭 옆 (분만)"], ["none", "없음"]]],
+      ["bar", "링크 · 즐겨찾기 · 읽음 버튼", "", [["head", "머리 아래 따로 한 줄 (지금)"], ["tabs", "탭 줄 오른쪽 끝"]]]
+    ]],
+    ["탭", [
+      ["stick", "탭 줄", "", [["flow", "그대로 (지금)"], ["stick", "내비 아래 고정"]]],
+      ["gacts", "요약 · 근거 카드 넷", "데스크톱", [["four", "한 줄에 넷 (지금)"], ["two", "두 줄에 둘씩"]]]
+    ]],
+    ["상세 · 길 찾기", [
+      ["toc", "목차 자리 (데스크톱)", "", [["side", "왼쪽 목차 (지금)"], ["top", "위쪽 막 줄 + 목차 버튼"], ["both", "둘 다"]]],
+      ["mtoc", "목차 자리 (휴대폰 · 태블릿)", "", [["box", "글 위 목차 상자 (지금)"], ["sheet", "위쪽 막 줄 + 목차 시트"], ["acts", "위쪽 막 줄만"]]],
+      ["tocsub", "목차의 소절 제목", "", [["koen", "한국어 + 영어 열쇠말 (지금)"], ["ko", "한국어만"], ["cur", "지금 막만 펼침"]]],
+      ["act", "막 머리", "", [["now", "번호 + 질문 (지금)"], ["noun", "짧은 명사 + 회색 부제"]]],
+      ["secen", "본문 소절 제목의 영어 열쇠말", "", [["show", "보이기 (지금)"], ["hide", "숨기기"]]],
+      ["quiz", "확인 문제 (소절마다 하나)", "", [["open", "펼쳐 둠 (지금)"], ["fold", "한 줄로 접음"], ["hide", "숨김"]]],
+      ["prog", "읽기 진행 선", "내비 바로 아래 얇은 선", [["off", "없음"], ["on", "두기"]]]
+    ]]
+  ];
+  var DEF = { title: "en", chips: "row", metric: "show", tldr: "fold", date: "top", size: "meta", bar: "head",
+              stick: "flow", gacts: "four", toc: "side", mtoc: "box", tocsub: "koen", act: "now", secen: "show", quiz: "open", prog: "off" };
+  var PAGES = [["2606.15768", "LaWAM (짧은 편)"], ["2610.16308", "PACE (중간)"], ["2610.09455", "RLHND (긴 편)"]];
+  var TABS = [["glance", "요약"], ["full", "상세"]];
+  var VPS = [["desk", "데스크톱", 1280], ["mobile", "휴대폰", 390]];
+  function load(k, d) { try { return JSON.parse(localStorage.getItem(k) || "null") || d; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var state = Object.assign({}, DEF, load(KEY, {}));
+  SECTIONS.forEach(function (g) { g[1].forEach(function (o) { if (!o[3].some(function (c) { return c[0] === state[o[0]]; })) state[o[0]] = DEF[o[0]]; }); });
+  Object.keys(state).forEach(function (k) { if (!(k in DEF)) delete state[k]; });
+  var view = Object.assign({ page: "2610.16308", tab: "glance", vp: "desk" }, load(VKEY, {}));
+  if (!PAGES.some(function (p) { return p[0] === view.page; })) view.page = "2610.16308";
+  var frame = document.getElementById("view"), box = document.getElementById("box"), main = document.querySelector("main");
+
+  function seg(el, items, cur, pick) {
+    el.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = it[1];
+      b.setAttribute("aria-pressed", String(it[0] === cur));
+      b.addEventListener("click", function () { pick(it[0]); });
+      el.appendChild(b);
+    });
+  }
+  function summary() {
+    var lines = [];
+    SECTIONS.forEach(function (g) { g[1].forEach(function (o) { var c = o[3].filter(function (x) { return x[0] === state[o[0]]; })[0]; lines.push(g[0] + " · " + o[1] + ": " + c[1]); }); });
+    return "내 설정 (논문 상세)\n" + lines.join("\n");
+  }
+  function drawOpts() {
+    var root = document.getElementById("opts"); root.innerHTML = "";
+    SECTIONS.forEach(function (g) {
+      var grp = document.createElement("div"); grp.className = "grp"; grp.innerHTML = "<h2>" + g[0] + "</h2>";
+      g[1].forEach(function (o) {
+        var d = document.createElement("div"); d.className = "opt";
+        d.innerHTML = "<b>" + o[1] + "</b>" + (o[2] ? "<small>" + o[2] + "</small>" : "") + '<div class="seg"></div>';
+        seg(d.querySelector(".seg"), o[3], state[o[0]], function (v) { state[o[0]] = v; save(KEY, state); drawOpts(); apply(); });
+        grp.appendChild(d);
+      });
+      root.appendChild(grp);
+    });
+    document.getElementById("sum").textContent = summary();
+  }
+  function drawView() {
+    seg(document.querySelector('[data-view="page"]'), PAGES, view.page, function (v) { view.page = v; save(VKEY, view); drawView(); load_(); });
+    seg(document.querySelector('[data-view="tab"]'), TABS, view.tab, function (v) { view.tab = v; save(VKEY, view); drawView(); tab(); });
+    seg(document.querySelector('[data-view="vp"]'), VPS, view.vp, function (v) { view.vp = v; save(VKEY, view); drawView(); fit(); });
+  }
+  function win() { try { return frame.contentWindow; } catch (e) { return null; } }
+  function apply() { save(KEY, state); var w = win(); if (w && w.ppApply) w.ppApply(state); }
+  function tab() { var w = win(); if (w && w.ppTab) { w.ppTab(view.tab); w.scrollTo(0, 0); } }
+  function inject() {
+    var doc; try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || doc.querySelector("[data-pp-injected]")) return;
+    var base = new URL("site/assets/", location.href).href;
+    var css = doc.createElement("link"); css.rel = "stylesheet"; css.href = base + "plpaper.css";
+    css.setAttribute("data-pp-injected", ""); doc.head.appendChild(css);
+    var d = doc.createElement("script"); d.src = base + "plpaper-data.js";
+    d.onload = function () {
+      var s = doc.createElement("script"); s.src = base + "plpaper.js";
+      s.onload = function () { apply(); tab(); };
+      doc.body.appendChild(s);
+    };
+    doc.body.appendChild(d);
+  }
+  function load_() { frame.src = "site/p/" + view.page + "/index.html"; }
+  function fit() {
+    var W = VPS.filter(function (v) { return v[0] === view.vp; })[0][2];
+    var aw = main.clientWidth - 24, ah = main.clientHeight, k = Math.min(1, aw / W);
+    box.style.width = W + "px"; box.style.height = (ah / k) + "px";
+    box.style.transform = "translateX(-50%) scale(" + k + ")";
+  }
+  // the page's own scripts run on DOMContentLoaded; wait for them
+  frame.addEventListener("load", function () { setTimeout(inject, 60); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(main); else addEventListener("resize", fit);
+  document.getElementById("reset").addEventListener("click", function () { state = Object.assign({}, DEF); save(KEY, state); drawOpts(); apply(); });
+  document.getElementById("copy").addEventListener("click", function () {
+    var t = summary(), b = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = "복사함"; }, function () { b.textContent = "위 칸을 직접 복사해 주세요"; });
+    setTimeout(function () { b.textContent = "내 설정 복사"; }, 1800);
+  });
+  save(KEY, state); drawOpts(); drawView(); load_(); fit();
+})();
+</script>
+</body>
+</html>
