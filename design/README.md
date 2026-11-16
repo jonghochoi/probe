@@ -14,6 +14,7 @@ carries the decisions.
 | `playground/fetch-figs.py` | Picks each paper's main figure — an overview or architecture figure over a results chart — and fetches a small copy for the hover previews: from the rewrites for the analysis list, from arXiv HTML for the scouting page's recommended papers |
 | `playground/row-links.json` | Each paper's link icons, keyed by arXiv id, for the list rows |
 | `playground/build.sh` | Builds the site at this checkout, lays the mock pages and assets on top, and writes one playground copy per page |
+| `playground/pillar/` | The pillar-page playground — `gen-pillar.py` writes one draft page per axis and an overview with every variant's markup, `pl.css` and `pl.js` switch the variants, `playground-pillar.html` is the option panel, and `build.sh <checkout>` builds it over a checkout whose `site/` carries the redesign |
 
 To open it, run `design/playground/build.sh`, then
 `python3 -m http.server -d design/playground/out 8000` and open

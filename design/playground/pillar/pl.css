@@ -1,0 +1,109 @@
+/* Pillar-page drafts. Every variant's markup is on the page; html[data-pl-*]
+   (set by pl.js from the playground's choices) picks which shows. */
+
+/* ── Head ─────────────────────────────────────────────── */
+.pl-head { position: relative; isolation: isolate; }
+.pl-head-in { max-width: 1240px; margin: 0 auto; padding: 1.6rem 1.25rem 1.4rem; display: grid; gap: .45rem; }
+.pl-crumb { margin: 0; font-size: var(--fs-2xs); color: var(--text-muted); }
+.pl-crumb a { color: var(--text-muted); text-decoration: none; }
+.pl-crumb a:hover { color: var(--orange-ink); }
+.pl-eyebrow { display: none; margin: 0; font-size: var(--fs-2xs); letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
+.pl-title { display: flex; align-items: center; gap: .7rem; }
+.pl-title .chip { font-size: var(--fs-sm); padding: .25rem .65rem; }
+.pl-title h1 { margin: 0; font-family: var(--t-display); font-weight: 700; font-size: clamp(1.6rem, 3.5vw, 2.2rem); line-height: 1.2; }
+.pl-en { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
+.pl-desc { margin: .3rem 0 0; max-width: 48rem; font-size: var(--fs-md); line-height: 1.75; }
+.pl-draft { display: inline-block; margin-left: .4rem; font-size: var(--fs-3xs); padding: .05rem .45rem; border-radius: var(--radius-pill); border: 1px dashed var(--text-muted); color: var(--text-muted); vertical-align: middle; }
+.pl-stats { margin: .35rem 0 0; display: flex; flex-wrap: wrap; gap: .3rem 1.3rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.pl-stats b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* tint: the axis's own colour fading into the page */
+html[data-pl-head="tint"] .pl-head::before { content: ""; position: absolute; inset: 0 0 -3rem; z-index: -1;
+  background: linear-gradient(100deg, color-mix(in oklab, var(--pc) 75%, var(--bg)), var(--bg) 78%);
+  -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+/* band: the other lists' band — eyebrow and title only, the chip goes */
+html[data-pl-head="band"] .pl-head::before { content: ""; position: absolute; inset: 0 0 -3.6rem; z-index: -1;
+  background: linear-gradient(100deg, var(--band-a), var(--band-b));
+  -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+html[data-pl-head="band"] .pl-eyebrow { display: block; }
+html[data-pl-head="band"] .pl-title .chip, html[data-pl-head="band"] .pl-en { display: none; }
+/* plain: no band at all */
+html[data-pl-head="plain"] .pl-head-in { padding-bottom: .4rem; }
+
+html:not([data-pl-desc="en"]) .pl-desc-en, html:not([data-pl-desc="ko"]) .pl-desc-ko { display: none; }
+html[data-pl-stats="hide"] .pl-stats { display: none; }
+html[data-pl-crumb="hide"] .pl-crumb { display: none; }
+
+/* ── Other axes ───────────────────────────────────────── */
+.pl { display: grid; gap: 1.2rem; }
+html.js .pl .pl-axes { margin: 0; }
+.pl-axes .rail-item { text-decoration: none; }
+.pl-axes .rail-item[aria-current="page"] { background: var(--orange); }
+.pl-axes .rail-item[aria-current="page"] b, .pl-axes .rail-item[aria-current="page"] .rl { color: var(--accent-ink); }
+.pl-axes .rail-item[aria-current="page"] .sw { box-shadow: 0 0 0 2px var(--accent-ink); }
+.pl-chiprow { display: flex; flex-wrap: wrap; gap: .4rem; }
+.pl-sw { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .7rem .3rem .35rem; border-radius: var(--radius-pill);
+  border: 1px solid var(--border-soft); background: var(--card-bg, var(--surface)); font-size: var(--fs-xs); color: var(--text); text-decoration: none; }
+.pl-sw:hover { border-color: var(--orange); }
+.pl-sw.is-on { border-color: var(--orange); box-shadow: 0 0 0 2px var(--orange-soft); font-weight: 700; }
+html:not([data-pl-nav="axes"]) .pl-axes { display: none !important; }
+html:not([data-pl-nav="chips"]) .pl-chiprow { display: none; }
+
+/* ── Sections ─────────────────────────────────────────── */
+.pl-body { display: grid; gap: 2rem; min-width: 0; }
+.pl-sec { display: block; min-width: 0; }
+.pl-sec > .pl-h { margin-bottom: .8rem; }
+.pl-sec > .pl-morelink { margin-top: .8rem; }
+.pl-h { margin: 0; display: flex; align-items: baseline; gap: .5rem; font-family: var(--ko); font-size: var(--fs-sm); font-weight: 700; letter-spacing: 0; }
+.pl-h .hm-sub { font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); }
+.pl .tl-head { --tl-cols: 4.2rem 5.6rem minmax(0, 1fr) 7.8rem; }
+.pl .tl-row { --tl-cols: 4.2rem 5.6rem minmax(0, 1fr) 7.8rem; }
+.pl-morelink { margin: 0; font-size: var(--fs-xs); }
+.pl-morelink a { color: var(--orange-ink); font-weight: 700; text-decoration: none; }
+html[data-pl-alist="table"] .pl-a-cards, html[data-pl-alist="cards"] .pl-a-table { display: none; }
+html[data-pl-acount="5"] .pl-more { display: none !important; }
+html[data-pl-acount="all"] .pl-morelink { display: none; }
+.pi-card h3 { font-size: var(--fs-lg); }
+
+/* decisions: the title read first, the current choice under it, the code small */
+.pl-decs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border-soft); }
+.pl-dec { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; padding: .75rem .2rem; border-bottom: 1px solid var(--border-soft); }
+.pl-dec-t { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .5rem; }
+.pl-dec-t b { font-size: var(--fs-sm); }
+.pl-dcode { font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.pl-open { font-size: var(--fs-3xs); font-weight: 700; padding: .02rem .45rem; border-radius: var(--radius-pill); background: var(--orange-soft); color: var(--orange-ink); }
+.pl-dec-c { grid-column: 1; margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.55; }
+.pl-dec-k { font-weight: 700; color: var(--text); margin-right: .45rem; }
+.pl-dec-n { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap; }
+html[data-pl-dec="title"] .pl-dec-c { display: none; }
+html[data-pl-dcode="hide"] .pl-dcode { display: none; }
+
+/* layout: tabs (one section at a time), a stack, or two columns */
+.pl-tabs { display: none; gap: .2rem; border-bottom: 1px solid var(--border); }
+.pl-tabs button { display: inline-flex; align-items: center; gap: .35rem; padding: .7rem .8rem .65rem; border: 0; background: none;
+  color: var(--text-muted); font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.pl-tabs button[aria-selected="true"] { color: var(--orange-ink); font-weight: 700;
+  background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat; }
+.pl-tabs .tab-n { font-size: var(--fs-2xs); color: var(--text-muted); font-weight: 500; }
+html[data-pl-layout="tabs"] .pl-tabs { display: flex; }
+html[data-pl-layout="tabs"] .pl-sec:not(.is-on) { display: none; }
+html[data-pl-layout="tabs"] .pl-sec > .pl-h { display: none; }
+html[data-pl-layout="two"] .pl-body { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
+html[data-pl-layout="two"] .pl-sec[data-sec="a"] { grid-column: 1; grid-row: 1; }
+html[data-pl-layout="two"] .pl-sec[data-sec="s"] { grid-column: 1; grid-row: 2; }
+html[data-pl-layout="two"] .pl-sec[data-sec="d"] { grid-column: 2; grid-row: 1; }
+html[data-pl-layout="two"] .pl-sec[data-sec="c"] { grid-column: 2; grid-row: 2; }
+html[data-pl-layout="two"] .pl-sec[data-sec="c"] .cards { --cols: 1 !important; }
+html[data-pl-layout="two"] .pl-a-cards { --cols: 2 !important; }
+html[data-pl-layout="stack"][data-pl-decpos="first"] .pl-sec[data-sec="d"] { order: -1; }
+@media (max-width: 960px) { html[data-pl-layout="two"] .pl-body { grid-template-columns: minmax(0, 1fr); }
+  html[data-pl-layout="two"] .pl-sec { grid-column: 1 !important; grid-row: auto !important; } }
+@media (max-width: 680px) {
+  .pl-head-in { padding: 1.2rem .9rem 1rem; }
+  .pl .tl-head { display: none; }
+  .pl .tl-id { display: inline-block; margin: 0 .5rem .2rem 0; }
+  .pl-dec { grid-template-columns: minmax(0, 1fr); }
+  .pl-dec-n { grid-column: 1; grid-row: auto; }
+  .pl-tabs { overflow-x: auto; scrollbar-width: none; }
+  .pl-tabs button { flex: none; padding: .65rem .55rem .6rem; }
+}
