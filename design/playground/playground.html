@@ -846,6 +846,7 @@ button { font: inherit; color: inherit; }
     pageSize(doc);
     foldStory(doc);
     linkPillars(doc);
+    navOrder(doc);
     listTweaks(doc);
     figPreview(doc);
     moveRail(doc);
@@ -925,6 +926,16 @@ button { font: inherit; color: inherit; }
     doc.addEventListener("mouseout", function (e) {
       var row = e.target.closest(".rows .row"); if (!row || row.contains(e.relatedTarget)) return;
       cur = null; clearTimeout(timer); var c = doc.querySelector(".pg-fig"); if (c && state.figHover !== "pane") c.hidden = true;
+    });
+  }
+  // the tabs read 탐색 · 분석 · 비교 · 서재: what arrived, then what was rewritten, then what was set side by side
+  function navOrder(doc) {
+    [].forEach.call(doc.querySelectorAll(".nav-links, .nav-sheet"), function (box) {
+      var pick = function (t) { return [].filter.call(box.querySelectorAll("a"), function (a) { return a.textContent.trim().indexOf(t) === 0; })[0]; };
+      var s = pick("탐색"), a = pick("분석"); if (!s || !a) return;
+      var sn = s.parentNode.tagName === "LI" ? s.parentNode : s, an = a.parentNode.tagName === "LI" ? a.parentNode : a;
+      if (sn.nextElementSibling === an) return;
+      an.before(sn);
     });
   }
   function listTweaks(doc) {
