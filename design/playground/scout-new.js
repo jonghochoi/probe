@@ -249,6 +249,38 @@
     };
     var axesBody = D.axes.map(axisHtml).join(""), checkBody = D.checks.length ? '<div class="dx-check">' + list(D.checks) + "</div>" : "";
     var usBody = (axesBody ? '<h4 class="dx-h">연구 축별 시사점</h4>' + axesBody : "") + (checkBody ? '<h4 class="dx-h dx-h2">먼저 확인할 점</h4>' + checkBody : "");
+    // the first screen's rule: every heading, tab or section, is a short noun and a grey line
+    if (opt("detailNames", "noun") === "noun" && (how === "tabs4" || how === "tabs2" || how === "tabsfig")) {
+      var NOUN = { "문제": ["질문", "이 논문이 푸는 것"], "기존한계": ["한계", "기존 방법이 막힌 곳"], "핵심방법": ["핵심", "무엇을 하나"], "차별점": ["차이", "기존과 다른 점"],
+        "핵심기여": ["기여", "저자가 내세우는 것"], "가치": ["가치", "남는 것"] };
+      var nh = function (noun, sub, n) { return '<h4 class="dx-nh">' + noun + '<span class="dx-nsub">' + sub + (n ? " · " + n : "") + "</span></h4>"; };
+      var sec = function (f) { var k = NOUN[f.label.replace(/\s/g, "")] || [f.label, ""];
+        return '<section class="dx-ns">' + nh(k[0], k[1]) + (f.lead ? '<p class="dx-lead">' + f.lead + "</p>" : "") + list(f.items) + "</section>"; };
+      var secFold = function (f) { var k = NOUN[f.label.replace(/\s/g, "")] || [f.label, ""];
+        var more = f.items.length ? '<details class="dx-fold"><summary>' + (f.lead ? "자세히" : "펼치기") + '<span class="dx-tc">' + f.items.length + "</span></summary>" + list(f.items) + "</details>" : "";
+        return '<section class="dx-ns">' + nh(k[0], k[1]) + (f.lead ? '<p class="dx-lead">' + f.lead + "</p>" : "") + more + "</section>"; };
+      var judge = (D.axes.length ? '<section class="dx-ns">' + nh("시사점", "연구 축별") + D.axes.map(axisHtml).join("") + "</section>" : "") +
+        (D.checks.length ? '<section class="dx-ns dx-check">' + nh("확인", "먼저 볼 것", D.checks.length) + list(D.checks) + "</section>" : "");
+      var tabsN = function (cls, tabs) {
+        tabs = tabs.filter(function (t) { return t.body; });
+        return '<div class="dx dx-tabs dx-nouns ' + cls + '"><div class="dx-tabbar" role="tablist">' + tabs.map(function (t, i) {
+          return '<button type="button" role="tab" data-dx-tab="' + t.key + '" aria-selected="' + (i === 0) + '">' + t.name + (t.n ? '<span class="dx-tc">' + t.n + "</span>" : "") + "</button>";
+        }).join("") + "</div>" + tabs.map(function (t, i) { return '<div class="dx-pane" data-dx-pane="' + t.key + '"' + (i ? " hidden" : "") + ">" + t.body + "</div>"; }).join("") + foot + "</div>";
+      };
+      var all6 = fieldsOf(["문제", "기존 한계", "핵심 방법", "차별점", "핵심 기여", "가치"]);
+      if (how === "tabs4") return tabsN("dx-t4", [
+        { key: "q", name: "문제", body: fieldsOf(["문제", "기존 한계"]).map(sec).join("") },
+        { key: "m", name: "방법", body: fieldsOf(["핵심 방법", "차별점"]).map(sec).join("") },
+        { key: "r", name: "결과", body: fieldsOf(["핵심 기여", "가치"]).map(sec).join("") },
+        { key: "u", name: "판단", n: D.checks.length, body: judge }]);
+      if (how === "tabs2") return tabsN("dx-t2", [
+        { key: "u", name: "판단", n: D.checks.length, body: judge },
+        { key: "b", name: "요지", body: all6.map(secFold).join("") }]);
+      return tabsN("dx-tf", [
+        { key: "o", name: "개요", body: (ctx.fig || "") + fieldsOf(["문제", "핵심 방법", "가치"]).filter(function (f) { return f.lead; }).map(function (f) { var k = NOUN[f.label.replace(/\s/g, "")]; return '<section class="dx-ns">' + nh(k[0], k[1]) + '<p class="dx-lead">' + f.lead + "</p></section>"; }).join("") },
+        { key: "d", name: "방법", body: fieldsOf(["기존 한계", "핵심 방법", "차별점", "핵심 기여"]).map(sec).join("") },
+        { key: "u", name: "판단", n: D.checks.length, body: judge }]);
+    }
     if (how === "tabs4") return tabbed("dx-t4", [
       { key: "q", name: "문제", body: fieldsOf(["문제", "기존 한계"]).map(field).join("") },
       { key: "m", name: "방법", body: fieldsOf(["핵심 방법", "차별점"]).map(field).join("") },

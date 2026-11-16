@@ -698,3 +698,13 @@ p.nx-cm { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-hei
 .dx-glance-l dt { font-size: var(--fs-xs); font-weight: 700; color: var(--orange-ink); padding-top: .12rem; }
 .dx-glance-l dd { margin: 0; color: var(--text); }
 @media (max-width: 680px) { .dx-glance-l { grid-template-columns: minmax(0, 1fr); gap: .1rem; } .dx-glance-l dd { margin-bottom: .45rem; } .dx-tabbar { overflow-x: auto; scrollbar-width: none; } .dx-tabbar button { flex: none; } }
+/* noun headings in the detail: the first screen's heading — a short bold noun, a grey line after it */
+.dx-nh { margin: 0 0 .35rem; display: flex; align-items: baseline; font-size: var(--fs-sm); font-weight: 700; color: var(--text); }
+.dx-nsub { margin-left: .5rem; font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); }
+.dx-ns { padding: .85rem 0; border-top: 1px solid var(--border-soft); }
+.dx-ns:first-child { border-top: 0; padding-top: .2rem; }
+.dx-nouns .dx-pane > .sn-dt-fig + .dx-ns { border-top: 0; }
+.dx-nouns .dx-ax { padding: .4rem 0; border-top: 0; }
+.dx-tc { margin-left: .35rem; font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.dx-nouns .dx-tabbar button[aria-selected="true"] .dx-tc { color: var(--orange-ink); }
+.dx-fold .dx-tc { margin-left: .3rem; }
