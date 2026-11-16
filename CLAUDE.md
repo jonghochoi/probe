@@ -34,6 +34,7 @@ file the row points at.
 | `README.md` | human | Project front door — motivation, the pipeline, which track to run for what |
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only |
 | `context/P{0..4}.md` | human | One per pillar — its Decision Log, Tracked Literature and Anti-topics. A run reads one |
+| `context/EVENTS.md` | human | The conference and submission dates the site's first screen counts down to |
 | `context/_TEMPLATE.md` | human | The skeleton a new pillar is copied from — the pillar section spine |
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format, adding a pillar |
 | `scouting/` | agent | One run per date — a report per pillar, `P#/YYYY-MM-DD.md`, and the run file `runs/YYYY-MM-DD.md`, filling `scouting/templates/` — the site merges a run into one page |

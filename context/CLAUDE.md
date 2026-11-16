@@ -11,7 +11,10 @@ rules — commits, contributor-doc style, the local checks — are in the root
 believes a pillar file is wrong or stale says so **in its report**, as a
 proposal the human acts on; it never edits `MASTER.md` or a `P#.md` itself.
 This file and the pillar template are contributor material rather than research
-input, and are edited like any other doc.
+input, and are edited like any other doc. `EVENTS.md` is neither: it holds the
+conference and submission dates the reading site's first screen counts down
+to, edited by hand like the rest of the folder and read only by the build
+(`site/builder/events.py`), never by a run.
 
 Ownership inside the folder is just as fixed. The Decision Log, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;
@@ -58,6 +61,22 @@ The allocation, which the lint reads back off these files:
 | P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG, D9WZ |
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM, D7VC |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D5ZL, D3WV, D9QJ, D1WE |
+
+## Pillar introduction
+
+A pillar file may carry one Korean introduction — what the axis takes on,
+for a reader of the site rather than for a run. It is optional: a pillar
+without one is complete, and `_TEMPLATE.md` does not ask for it. Where it
+exists it is one blockquote, anywhere in the file, whose first line opens
+`> **소개** —`:
+
+```
+> **소개** — <the axis in a few plain Korean sentences>
+> <continuation lines, each opening `>`>
+```
+
+The site's axis-chip popup prints it above the titles of the pillar's
+decisions (`site/builder/decisions.py`); a run does not read it.
 
 ## When adding a new pillar (P5+)
 

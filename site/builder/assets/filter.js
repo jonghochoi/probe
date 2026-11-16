@@ -1,4 +1,4 @@
-/* Landing-page filter, sort and deep-link state.
+/* Analysis-list filter, pager and deep-link state.
  *
  * The rows are already in the DOM — this only toggles `hidden` and reorders
  * nodes inside the one list container. Nothing is fetched and nothing is
@@ -11,36 +11,26 @@
  * a query is read before it meets them is `match.js`, which the ⌘K palette
  * reads the same query with.
  *
- * Two of the filters are not the corpus's but the reader's — New and
- * Starred — and they come off `window.ProbeShelf`, which reads this browser's
- * own localStorage. They behave like any other facet here; the only difference
- * is that their counts are computed rather than printed by the build, and that
- * they disappear when the shelf layer is missing.
- *
  * This page is also the only one that knows the whole corpus, so it is where
- * the 새 글 set is kept honest: it seeds the set on first sight (silently —
- * arriving to be told every paper is new is not news) and prunes ids that
- * have left the site.
+ * the 새 글 set (`window.ProbeShelf`, the dot before a row's date) is kept
+ * honest: it seeds the set on first sight (silently — arriving to be told
+ * every paper is new is not news) and prunes ids that have left the site.
  *
  * The list is also paged, which is the same toggling seen from a different
  * angle: the rows outside the current page are `hidden` exactly like the rows
- * a facet dropped. A page is counted in papers rather than rows, so the lead
- * block — which is the first paper, printed rather than listed — is the first
- * paper of the first page, and its own row stands down while it is.
+ * a facet dropped.
  *
  * Only one 연구 축 is on at a time: an axis is where a paper is filed, so
  * two of them at once is not a narrower question but a vaguer one, and the
  * union it returns reads as no filter at all. Pressing the axis that is
  * already on turns it off.
  *
- * Filter state lives in the URL hash (`#q=<query>&p=P<n>&s=title`) so a
- * view can be bookmarked and shared, and `replaceState` keeps it out of the
- * back-button history — Back should leave the page, not undo a keystroke. The
- * two shelf filters ride there too (`&n=1`, `&f=1`) — a bookmark of "my
- * starred P2 papers" is a view worth keeping — even though what they select is
- * local to the browser that opens the link. So do the page and its size
- * (`&pg=3`, `&sz=5`), which is what makes a link land on the list the sender
- * was looking at.
+ * Filter state lives in the URL hash (`#q=<query>&p=P<n>`) so a view can be
+ * bookmarked and shared, and `replaceState` keeps it out of the back-button
+ * history — Back should leave the page, not undo a keystroke. So do the page
+ * and its size (`&pg=3`, `&sz=20`), which is what makes a link land on the
+ * list the sender was looking at. The list has no search box — a word search
+ * is ⌘K's — so a query reaches it only through the address.
  */
 
 (function () {
@@ -52,39 +42,35 @@ if (!root || !bar) return;
 
 const list = root.querySelector("[data-rows]");
 const cards = [...root.querySelectorAll("[data-card]")];
-const seps = [...root.querySelectorAll("[data-sep]")];
-const lead = root.querySelector("[data-lead]");
 const listhead = root.querySelector("[data-listhead]");
 const emptyMsg = root.querySelector("[data-empty]");
 const partialMsg = root.querySelector("[data-partial]");
 const tabsEl = root.querySelector("[data-restabs]");
 const tabBtns = tabsEl ? [...tabsEl.querySelectorAll("[data-restab]")] : [];
-// The two readouts live in the rail, not the bar: what the filter leaves
-// behind is a fact about the list, and the rail is the column the list is
-// filtered from. Scoped to the document for that reason.
+// The two readouts close the axis line: what the filter leaves behind is a
+// fact about the list, said where the list is filtered from.
 const countEl = document.querySelector("[data-result-count]");
 const whenEl = document.querySelector("[data-corpus-when]");
-const input = bar.querySelector("[data-q]");
-const sortBtns = [...bar.querySelectorAll("[data-sort]")];
+// The analysis list has no search box — a word search is ⌘K's — so a query arrives
+// only through the address (`#q=`), and the box is read when a page has one.
+const input = document.querySelector("[data-q]");
 const resetBtns = [...document.querySelectorAll("[data-reset]")];
 
 const pager = root.querySelector("[data-pager]");
-const sizeBtns = [...bar.querySelectorAll("[data-size]")];
+const sizeBtns = [...document.querySelectorAll("[data-size]")];
+const sizeLabel = document.querySelector("[data-psize-label]");
+const sizeMenu = document.querySelector(".psize-menu");
+const sizeOpen = document.querySelector("[data-psize-open]");
 const pageBtns = pager ? [...pager.querySelectorAll("[data-page]")] : [];
 const stepBtns = pager ? [...pager.querySelectorAll("[data-page-rel]")] : [];
 const gapLo = pager && pager.querySelector('[data-gap="lo"]');
 const gapHi = pager && pager.querySelector('[data-gap="hi"]');
-const pageStat = pager && pager.querySelector("[data-page-stat]");
 
-const SORTS = ["recent", "pillar", "title"];
-const PILLARS = seps.map((s) => s.dataset.sep);
 const shelf = window.ProbeShelf;
-const flagBtns = [...document.querySelectorAll("[data-facet-flag]")];
 
 // Which page sizes exist, and which one is the default, are the build's to
 // decide (`pages.PAGE_SIZES`) — both are read back off the markup rather than
-// restated here, so the bar and the script can never offer different numbers.
-// `0` is 전체.
+// restated here, so the menu and the script can never offer different numbers.
 const SIZES = sizeBtns.map((b) => +b.dataset.size);
 const SIZE_PRESSED = sizeBtns.find((b) => b.getAttribute("aria-pressed") === "true");
 const SIZE_DEFAULT = SIZE_PRESSED ? +SIZE_PRESSED.dataset.size : 0;
@@ -106,12 +92,7 @@ function keepSize(n) {
   try { localStorage.setItem(VIEW_KEY, JSON.stringify({ size: n })); } catch (e) { /* full or blocked */ }
 }
 
-const state = {
-  q: "", pillar: "", sort: "recent",
-  fresh: false, star: false,
-  size: SIZE_DEFAULT, page: 1,
-};
-const freshNote = root.querySelector("[data-fresh-note]");
+const state = { q: "", pillar: "", size: SIZE_DEFAULT, page: 1 };
 
 /* One question reaches the corpus two ways, and they are two answers rather
  * than one long one: 의미 is what the remote index found by meaning, 글자 is
@@ -140,13 +121,6 @@ function setPane(next) {
   apply();
 }
 
-// Without the shelf layer there is nothing to filter on, so the group leaves
-// rather than offering two buttons that would select every paper or none.
-if (!shelf) {
-  flagBtns.forEach((b) => b.remove());
-  document.querySelectorAll("[data-mine-h]").forEach((h) => h.remove());
-}
-
 /* ── State ↔ URL ──────────────────────────────────────────────────────── */
 function readHash() {
   const h = new URLSearchParams(location.hash.replace(/^#/, ""));
@@ -158,9 +132,6 @@ function readHash() {
   state.q = [h.get("q") || "", ...words].filter(Boolean).join(" ");
   // One axis, and a link that names several is read for the first of them.
   state.pillar = (h.get("p") || "").split(",").filter(Boolean)[0] || "";
-  state.sort = SORTS.includes(h.get("s")) ? h.get("s") : "recent";
-  state.fresh = !!shelf && h.get("n") === "1";
-  state.star = !!shelf && h.get("f") === "1";
   // A link that names a size means it — otherwise this browser's last choice,
   // and the build's default for a browser that has never made one.
   const sz = parseInt(h.get("sz"), 10);
@@ -172,9 +143,6 @@ function writeHash() {
   const h = new URLSearchParams();
   if (state.q) h.set("q", state.q);
   if (state.pillar) h.set("p", state.pillar);
-  if (state.sort !== "recent") h.set("s", state.sort);
-  if (state.fresh) h.set("n", "1");
-  if (state.star) h.set("f", "1");
   if (state.size !== SIZE_DEFAULT) h.set("sz", state.size);
   if (state.page > 1) h.set("pg", state.page);
   const hash = h.toString();
@@ -182,7 +150,7 @@ function writeHash() {
 }
 
 function syncControls() {
-  if (input.value !== state.q) {
+  if (input && input.value !== state.q) {
     input.value = state.q;
     // Setting `.value` fires no `input`, so Escape and 필터 초기화 change the
     // query without anything hearing it. Whatever else reads the box off the
@@ -193,72 +161,10 @@ function syncControls() {
   document.querySelectorAll("[data-facet-pillar]").forEach((b) => {
     b.setAttribute("aria-pressed", b.dataset.facetPillar === state.pillar ? "true" : "false");
   });
-  flagBtns.forEach((b) => b.setAttribute(
-    "aria-pressed", state[b.dataset.facetFlag] ? "true" : "false"));
   sizeBtns.forEach((b) => b.setAttribute(
     "aria-pressed", +b.dataset.size === state.size ? "true" : "false"));
-  // While a query ranks the list, none of the three is what the rows are in —
-  // pressing 최신순 during a relevance sort would be the control lying about
-  // the order. Clicking one still takes the list back.
-  const ranked = !!state.q.trim() && state.sort === "recent";
-  sortBtns.forEach((b) => b.setAttribute(
-    "aria-pressed", !ranked && b.dataset.sort === state.sort ? "true" : "false"));
-  segs.forEach(nameSeg);
+  if (sizeLabel) sizeLabel.textContent = String(state.size);
 }
-
-/* ── 정렬 · 한 쪽에, folded into a chip ───────────────────────────────── */
-/* Below 680px each group sits in a panel under a chip (`index.css`), and the
- * chip says which of the group's buttons is pressed. The name is read off the
- * pressed button rather than kept beside it: this is the same group the bar
- * shows at full width, and a label the script maintained separately would be a
- * second answer to what the list is in.
- *
- * While a query ranks the list none of the three sorts is pressed, and the
- * chip says so — 관련도순 is what the rows are actually in, and printing
- * 최신순 there would be the control lying about the order.
- */
-const segs = [...bar.querySelectorAll("[data-seg]")];
-
-function nameSeg(seg) {
-  const chip = seg.querySelector("[data-seg-toggle]");
-  const label = seg.querySelector("[data-seg-label]");
-  const on = seg.querySelector('[aria-pressed="true"]');
-  label.textContent = on ? on.textContent : "관련도순";
-  chip.setAttribute("aria-label", `${chip.dataset.segName}: ${label.textContent}`);
-}
-
-function openSeg(seg) {
-  segs.forEach((s) => {
-    const on = s === seg;
-    s.toggleAttribute("data-open", on);
-    s.querySelector("[data-seg-toggle]").setAttribute("aria-expanded", String(on));
-  });
-}
-
-segs.forEach((seg) => {
-  const chip = seg.querySelector("[data-seg-toggle]");
-  chip.addEventListener("click", () => {
-    const wasOpen = seg.hasAttribute("data-open");
-    openSeg(wasOpen ? null : seg);
-    if (!wasOpen) (seg.querySelector('[aria-pressed="true"]') || chip).focus();
-  });
-  // Choosing is closing: the panel exists to be spent on one press.
-  seg.querySelector(".sort").addEventListener("click", (e) => {
-    if (e.target.closest("button")) openSeg(null);
-  });
-});
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest("[data-seg]")) openSeg(null);
-});
-
-addEventListener("keydown", (e) => {
-  const open = segs.find((s) => s.hasAttribute("data-open"));
-  if (e.key === "Escape" && open) {
-    openSeg(null);
-    open.querySelector("[data-seg-toggle]").focus();
-  }
-});
 
 /* ── Query normalisation ──────────────────────────────────────────────── */
 /* The compaction and the particle strip are `match.js` — the palette asks the
@@ -276,12 +182,8 @@ const { parse, inFragment } = window.ProbeMatch;
 const KEY_HIT = 3, HAY_HIT = 1;
 
 function facetOk(card) {
-  // The reader's two come first: they are the cheapest tests and the ones
-  // most likely to cut the pool to a handful.
-  if (state.fresh && !shelf.Corpus.isNew(card.dataset.id)) return false;
-  if (state.star && !shelf.Stars.has(card.dataset.id)) return false;
   // `data-pillars` is `Paper.filed` — the two axes the row's own chips print
-  // and the rail counted — so the list a click opens is as long as the number
+  // and the axis line counted — so the list a click opens is as long as the number
   // that was clicked.
   if (state.pillar && !card.dataset.pillars.split(" ").includes(state.pillar)) return false;
   return true;
@@ -306,32 +208,16 @@ function ordered(shown, scored) {
   const byOrder = (a, b) =>
     b.dataset.order.localeCompare(a.dataset.order) ||
     b.dataset.id.localeCompare(a.dataset.id);
-  // A query asks a question, and "newest" is not an answer to it. While one is
-  // typed the default sort ranks by how well a paper answers it; the three sort
-  // buttons still override, so asking for 최신순 during a search still gets it.
+  // A query asks a question, and "newest" is not an answer to it: while one
+  // stands, the list ranks by how well a paper answers it.
   if (scored) return shown.slice().sort((a, b) => b._score - a._score || byOrder(a, b));
-  if (state.sort === "title") {
-    return shown.slice().sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
-  }
-  if (state.sort !== "pillar") return shown.slice().sort(byOrder);
-  // Pillar order comes from the separators, which the build emitted in
-  // `PILLAR_ORDER`: the JS never has to know the pillar taxonomy.
-  const rank = (el) => {
-    const i = PILLARS.indexOf(el.dataset.primary);
-    return i === -1 ? PILLARS.length : i;
-  };
-  return shown.slice().sort((a, b) => rank(a) - rank(b) || byOrder(a, b));
+  return shown.slice().sort(byOrder);
 }
 
 /* ── Apply ────────────────────────────────────────────────────────────── */
 function apply() {
   const terms = parse(state.q);
-  const dirty = !!(state.q || state.pillar || state.fresh || state.star);
-  // Everything narrowing the list except the query, which clears itself: the
-  // search box carries its own ✕. A reset marked `facet` answers to this
-  // instead, so the one on the phone bar — where a facet can only arrive by
-  // link — is on screen exactly when there is something ✕ cannot reach.
-  const facetDirty = !!(state.pillar || state.fresh || state.star);
+  const dirty = !!(state.q || state.pillar);
 
   const pool = cards.filter(facetOk);
   let shown = pool, partial = false;
@@ -356,13 +242,11 @@ function apply() {
 
   // On 의미 the list is not on screen at all: the other tab is.
   const listOff = answered && pane === "sem";
-  if (freshNote) freshNote.hidden = listOff || !state.fresh;
-  const scored = terms.length > 0 && state.sort === "recent";
+  const scored = terms.length > 0;
   const rows = ordered(shown, scored);
 
   // ── One page of that ─────────────────────────────────────────────────
-  // 전체 is the whole list as one page, which is also what an empty result and
-  // a browser with no script get. The page is clamped rather than trusted: it
+  // The page is clamped rather than trusted: it
   // arrives from a hash anyone can edit, and a filter can shrink the list under
   // the reader's feet between one click and the next.
   const size = state.size || rows.length || 1;
@@ -371,43 +255,11 @@ function apply() {
   const from = (state.page - 1) * size;
   const onPage = new Set(listOff ? [] : rows.slice(from, from + size));
 
-  // The lead block stands in for the newest paper only while it *is* the top
-  // of the list. Filter, re-sort or step to page 2 and it stops being that, so
-  // it steps aside and its row takes over — the paper is never in both places,
-  // and never in neither.
-  const leadOn = !!lead && !dirty && state.sort === "recent" && state.page === 1;
-  if (lead) lead.hidden = !leadOn;
-
   cards.forEach((card) => {
-    card.hidden = !onPage.has(card) || (leadOn && card.hasAttribute("data-lead-dup"));
+    card.hidden = !onPage.has(card);
   });
 
-  if (state.sort === "pillar") {
-    seps.forEach((sep) => {
-      const mine = rows.filter((r) => r.dataset.primary === sep.dataset.sep);
-      // A separator belongs to the page its pillar has rows on; its count is
-      // the pillar's whole share of what the filter left standing, the same
-      // number the rail prints beside it, not the handful under it right now.
-      sep.hidden = !mine.some((r) => onPage.has(r));
-      const n = sep.querySelector("[data-sep-count]");
-      if (n) n.textContent = mine.length;
-    });
-    // Each separator is moved into place by the row loop below, at the moment
-    // its pillar first appears — so it lands above its own rows and nowhere
-    // else, whatever the filter left standing.
-    let current = null;
-    rows.forEach((row) => {
-      if (row.dataset.primary !== current) {
-        current = row.dataset.primary;
-        const sep = seps.find((s) => s.dataset.sep === current);
-        if (sep) list.appendChild(sep);
-      }
-      list.appendChild(row);
-    });
-  } else {
-    seps.forEach((sep) => { sep.hidden = true; });
-    rows.forEach((row) => list.appendChild(row));
-  }
+  rows.forEach((row) => list.appendChild(row));
   // Rows filtered out keep their DOM position; only the visible ones are
   // reordered, which is enough because nothing hidden is ever painted.
 
@@ -421,10 +273,8 @@ function apply() {
   // found — it is what the string match found, and saying it under a list of
   // passages would read as the corpus having nothing.
   if (emptyMsg) emptyMsg.hidden = answered || visible > 0;
-  if (listhead) listhead.hidden = onPage.size - (leadOn ? 1 : 0) < 1;
-  resetBtns.forEach((b) => {
-    b.hidden = b.dataset.reset === "facet" ? !facetDirty : !dirty;
-  });
+  if (listhead) listhead.hidden = onPage.size < 1;
+  resetBtns.forEach((b) => { b.hidden = !dirty; });
   // The date describes the corpus, not the subset a filter leaves behind.
   if (whenEl) whenEl.hidden = dirty;
 }
@@ -458,7 +308,7 @@ function paintTabs(visible) {
  */
 function paintPager(total, pageCount, from, size) {
   if (!pager) return;
-  // Nothing to step through — 전체, a filter down to one page, or an empty
+  // Nothing to step through — a filter down to one page, or an empty
   // result. The strip leaves rather than standing there as a lone dead `1`.
   pager.hidden = pageCount < 2;
   if (pager.hidden) return;
@@ -473,7 +323,7 @@ function paintPager(total, pageCount, from, size) {
   if (gapHi) {
     // Which button is last depends on the filter, so the trailing `…` is moved
     // in front of it rather than parked before the highest page the corpus
-    // could ever reach — the same move the pillar separators make.
+    // could ever reach.
     const last = pageBtns[pageCount - 1];
     if (last) last.parentNode.insertBefore(gapHi, last);
     gapHi.hidden = cur + 1 >= pageCount - 1;
@@ -482,7 +332,6 @@ function paintPager(total, pageCount, from, size) {
     const next = cur + +b.dataset.pageRel;
     b.disabled = next < 1 || next > pageCount;
   });
-  if (pageStat) pageStat.textContent = `${from + 1}–${Math.min(from + size, total)} / ${total}편`;
 }
 
 const SMOOTH = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
@@ -496,113 +345,72 @@ function toPage(n) {
   root.scrollIntoView({ block: "start", behavior: SMOOTH });
 }
 
-/* The two shelf counts, over the corpus this page is showing — a star on a
- * paper that has since left the site is real but not selectable here, so
- * counting the store rather than the rows would promise rows that do not
- * exist. */
-function countFlags() {
-  if (!shelf) return;
-  let fresh = 0, star = 0;
-  cards.forEach((card) => {
-    if (shelf.Corpus.isNew(card.dataset.id)) fresh++;
-    if (shelf.Stars.has(card.dataset.id)) star++;
-  });
-  // Every copy: the pair is printed once for the rail and once for the filter
-  // bar, and only one of the two is on screen at any width.
-  const set = (key, n) => {
-    document.querySelectorAll(`[data-flag-count="${key}"]`)
-      .forEach((el) => { el.textContent = n; });
-  };
-  set("fresh", fresh);
-  set("star", star);
-  // `New 0` is not a filter anyone would press, and on most visits that is
-  // what it says — so the control is there only while there is something new.
-  // It stays while the filter is on, or turning the last one off would take
-  // the control away mid-click.
-  const show = !(fresh === 0 && !state.fresh);
-  document.querySelectorAll('[data-facet-flag="fresh"]')
-    .forEach((el) => { el.hidden = !show; });
-}
-
-/* Every control that routes through here — a facet, a sort, a page, a page
- * size — is about the list, so using one is a request for the tab the list is
+/* Every control that routes through here — an axis, a page, a page size — is about the list, so using one is a request for the tab the list is
  * on. Typing does not: `apply()` is what a keystroke calls, and the strip
  * stays where the answer left it. */
 function refresh() {
   // `apply()` runs at the end of this function either way, so the switch only
   // has to say so — going through `setPane()` would paint the page twice.
   if (answered && pane !== "lex") { pane = "lex"; tellPane(); }
-  syncControls(); countFlags(); shelf && shelf.paint(); apply(); writeHash();
+  syncControls(); shelf && shelf.paint(); apply(); writeHash();
 }
 
 /* ── Wiring ───────────────────────────────────────────────────────────── */
 let debounce = null;
-input.addEventListener("input", () => {
+if (input) input.addEventListener("input", () => {
   state.q = input.value;
   // Every keystroke asks a new question, and the answer starts at its top.
   state.page = 1;
   if (debounce) clearTimeout(debounce);
   // Filtering is instant; the delay is only so the hash does not get
   // rewritten on every keystroke.
-  //
-  // The controls are re-read along with it because a query changes what they
-  // say: the first character puts the list in relevance order, which is none
-  // of the three sorts, and the group — and the chip a phone folds it into —
-  // has to stop claiming one.
-  syncControls();
   apply();
   debounce = setTimeout(writeHash, 250);
 });
 
-// One handler for the sort group in the bar and the facet rail beside the
-// list — they set the same state and differ only in where they sit.
+/* 한 쪽에 몇 편 — only the current count shows at the strip's end; the three
+ * choices open above it and close on a pick, a click elsewhere or Escape. */
+function openSizes(on) {
+  if (!sizeMenu) return;
+  sizeMenu.hidden = !on;
+  if (sizeOpen) sizeOpen.setAttribute("aria-expanded", on ? "true" : "false");
+}
+document.addEventListener("click", (e) => {
+  if (sizeOpen && e.target.closest("[data-psize-open]")) { openSizes(sizeMenu.hidden); return; }
+  if (sizeMenu && !sizeMenu.hidden && !e.target.closest("[data-psize]")) openSizes(false);
+});
+
 document.addEventListener("click", (e) => {
   const p = e.target.closest("[data-facet-pillar]");
-  const s = e.target.closest("[data-sort]");
-  const flag = e.target.closest("[data-facet-flag]");
-  const ack = e.target.closest("[data-fresh-ack]");
   const sizeBtn = e.target.closest("[data-size]");
   const pageBtn = e.target.closest("[data-page]");
   const stepBtn = e.target.closest("[data-page-rel]");
   // Every control that changes which papers are in the list sends the reader
   // back to its first page: page 4 of one filter is not page 4 of the next,
   // and landing on an emptied page would read as a broken list.
-  if (ack) {
-    shelf.Corpus.markAll(cards.map((card) => card.dataset.id));
-    state.fresh = false;
-    state.page = 1;
-    refresh();
-  }
-  else if (flag) {
-    state[flag.dataset.facetFlag] = !state[flag.dataset.facetFlag];
-    state.page = 1;
-    refresh();
-  }
   // The axis is a radio the reader can also switch off: pressing the one
   // that is on clears it, pressing another moves to it.
-  else if (p) {
+  if (p) {
     const k = p.dataset.facetPillar;
     state.pillar = state.pillar === k ? "" : k;
     state.page = 1;
     refresh();
   }
-  else if (s) { state.sort = s.dataset.sort; state.page = 1; refresh(); }
   else if (pageBtn) { toPage(+pageBtn.dataset.page); }
   else if (stepBtn) { toPage(state.page + +stepBtn.dataset.pageRel); }
   // Changing the page size keeps the reader where they are rather than
   // returning them to the top: the paper that was first on screen is still on
   // the page they land on.
   else if (sizeBtn) {
-    const first = state.size ? (state.page - 1) * state.size : 0;
+    const first = (state.page - 1) * state.size;
     state.size = +sizeBtn.dataset.size;
-    state.page = state.size ? Math.floor(first / state.size) + 1 : 1;
+    state.page = Math.floor(first / state.size) + 1;
     keepSize(state.size);
+    openSizes(false);
     refresh();
   }
   else if (e.target.closest("[data-reset]")) {
-    state.q = ""; state.pillar = "";
-    state.fresh = false; state.star = false;
-    state.page = 1;
+    state.q = ""; state.pillar = ""; state.page = 1;
     refresh();
   }
 });
@@ -623,25 +431,79 @@ tabBtns.forEach((b) => {
   b.addEventListener("click", () => setPane(b.dataset.restab));
 });
 
-// A star toggled on a row is a filter input like any other: the counts move,
-// and a list that is currently showing 즐겨찾기 has to lose the row that just
-// stopped being one.
-document.addEventListener("probe:shelf-change", () => { countFlags(); apply(); });
-
 addEventListener("hashchange", () => {
   readHash(); syncControls(); apply();
   // A `t=` that `readHash` folded into the query leaves the address with it.
   if (new URLSearchParams(location.hash.replace(/^#/, "")).has("t")) writeHash();
 });
 
-// `/` focuses search, the shortcut every list page has; Escape clears it.
+// Escape closes the page-size menu. Where a page has a search box, `/`
+// focuses it and Escape clears it.
 addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && sizeMenu && !sizeMenu.hidden) { openSizes(false); return; }
+  if (!input) return;
   if (e.key === "/" && document.activeElement !== input && !e.metaKey && !e.ctrlKey) {
     e.preventDefault(); input.focus(); input.select();
   } else if (e.key === "Escape" && document.activeElement === input) {
     state.q = ""; state.page = 1; refresh(); input.blur();
   }
 });
+
+/* ── A row's figure, on a resting pointer ─────────────────────────────── */
+/* A pointer that rests on a row for a moment brings up the paper's overview
+ * figure under it, with its whole caption — the architecture a title only
+ * names. Desktop only: a phone has no pointer to rest, and its tap opens the
+ * paper. The card is one element, moved and refilled, and it never takes the
+ * pointer, so the row under it stays clickable. */
+(function () {
+  const can = matchMedia("(hover: hover) and (min-width: 721px)");
+  const card = document.createElement("div");
+  card.className = "figpeek"; card.hidden = true; card.setAttribute("aria-hidden", "true");
+  card.innerHTML = '<img alt=""><p class="figpeek-c"></p><p class="figpeek-s"></p>';
+  document.body.appendChild(card);
+  const img = card.querySelector("img");
+  let cur = null, timer = 0;
+  function place(row) {
+    const r = row.getBoundingClientRect(), m = (row.querySelector(".row-main") || row).getBoundingClientRect();
+    const cw = card.offsetWidth, ch = card.offsetHeight, vw = innerWidth, vh = innerHeight;
+    let top = r.bottom + 6;
+    if (top + ch > vh - 12) top = r.top - ch - 6;
+    top = Math.max(12, Math.min(top, vh - ch - 12));
+    card.style.left = `${Math.min(m.left, vw - cw - 16) + scrollX}px`;
+    card.style.top = `${top + scrollY}px`;
+  }
+  root.addEventListener("mouseover", (e) => {
+    if (!can.matches) return;
+    const row = e.target.closest(".row[data-fig]");
+    if (!row || row === cur) return;
+    cur = row; clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (cur !== row) return;
+      if (img.getAttribute("src") !== row.dataset.fig) img.src = row.dataset.fig;
+      card.querySelector(".figpeek-c").textContent = row.dataset.figCap || "";
+      card.querySelector(".figpeek-s").textContent = row.dataset.figSrc || "";
+      card.hidden = false; place(row);
+    }, 160);
+  });
+  root.addEventListener("mouseout", (e) => {
+    const row = e.target.closest(".row[data-fig]");
+    if (!row || row.contains(e.relatedTarget)) return;
+    cur = null; clearTimeout(timer); card.hidden = true;
+  });
+  // Once the figure has its real size the card is taller than it was laid out.
+  img.addEventListener("load", () => { if (cur && !card.hidden) place(cur); });
+})();
+
+/* On a phone the axis line scrolls sideways; its fade says so until the end
+ * is in view. */
+const plineItems = document.querySelector("[data-pline]");
+if (plineItems) {
+  const edge = () => bar.classList.toggle("at-end",
+    plineItems.scrollLeft + plineItems.clientWidth >= plineItems.scrollWidth - 4);
+  plineItems.addEventListener("scroll", edge, { passive: true });
+  addEventListener("resize", edge);
+  edge();
+}
 
 // Seed or prune before the first paint, so a first visit never flashes a
 // badge it is about to withdraw.

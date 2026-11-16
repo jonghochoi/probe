@@ -1,4 +1,5 @@
-/* Theme toggle. Every page has the nav button, so this is loaded everywhere.
+/* Theme toggle and the reader's colour. Every page has both nav buttons, so
+   this is loaded everywhere.
    The initial `data-theme` is already set by the inline boot script in the
    document head — this only handles the click, the shortcut, and keeps the
    tooltip in sync. Which of the button's two icons is on screen is
@@ -40,4 +41,31 @@
   });
 
   apply(root.getAttribute("data-theme") || "light");
+
+  /* The reader's colour. The boot script in the head already set
+     `data-accent` from `probe.accent`; this opens the menu, marks the pick and
+     stores a new one. Indigo is the default and is stored as no key at all. */
+  var open = document.querySelector("[data-accent-open]");
+  var menu = open && open.parentNode.querySelector(".pal-menu");
+  if (open && menu) {
+    var picks = menu.querySelectorAll("[data-accent-pick]");
+    var mark = function () {
+      var on = root.getAttribute("data-accent") || "";
+      for (var i = 0; i < picks.length; i++)
+        picks[i].setAttribute("aria-checked", String(picks[i].getAttribute("data-accent-pick") === on));
+    };
+    var show = function (on) { menu.hidden = !on; open.setAttribute("aria-expanded", String(on)); };
+    mark();
+    open.addEventListener("click", function (e) { e.stopPropagation(); show(menu.hidden); });
+    menu.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-accent-pick]");
+      if (!b) return;
+      var key = b.getAttribute("data-accent-pick");
+      if (key) root.setAttribute("data-accent", key); else root.removeAttribute("data-accent");
+      try { if (key) localStorage.setItem("probe.accent", key); else localStorage.removeItem("probe.accent"); } catch (err) {}
+      mark();
+    });
+    document.addEventListener("click", function (e) { if (!menu.hidden && !open.parentNode.contains(e.target)) show(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !menu.hidden) { show(false); open.focus(); } });
+  }
 })();

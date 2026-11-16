@@ -69,3 +69,37 @@ def retired_decisions() -> set[str]:
     text = (REPO_ROOT / "context" / "MASTER.md").read_text(encoding="utf-8")
     m = _RETIRED_LINE.search(text)
     return set(_CODE.findall(m.group(1))) if m else set()
+
+
+# A pillar's optional Korean introduction: one blockquote in its file whose
+# first line opens `> **소개** —` (context/CLAUDE.md "Pillar introduction").
+_INTRO = re.compile(r"^> \*\*소개\*\* —[ \t]*(.*(?:\n>.*)*)", re.MULTILINE)
+_OPEN = re.compile(r"\s*—\s*\*\*OPEN\*\*\s*$")
+_OWNER = re.compile(r"\s*\(P\d\)\s*$")
+
+
+def pillar_cards() -> dict[str, dict]:
+    """{`P<m>`: {"intro": str, "decisions": [[id, title, open]]}} — what an
+    axis chip's popup says about its axis: the owner's introduction where the
+    file has one, and the titles of the decisions it owns, in file order. A
+    decision's chosen answer stays in the file; the popup lists the questions
+    the axis takes on, not how each was settled.
+    """
+    out: dict[str, dict] = {}
+    for path in sorted((REPO_ROOT / "context").glob("P*.md")):
+        m = _PILLAR_FILE.match(path.name)
+        if not m:
+            continue
+        text = path.read_text(encoding="utf-8")
+        intro = _INTRO.search(text)
+        intro_text = ""
+        if intro:
+            lines = [l.lstrip(">").strip() for l in intro.group(1).splitlines()]
+            intro_text = " ".join(l for l in lines if l)
+        decisions = []
+        for h in _HEADING.finditer(text):
+            title = (h.group(2) or "").strip()
+            decisions.append([h.group(1), _OWNER.sub("", _OPEN.sub("", title)),
+                              bool(_OPEN.search(title))])
+        out[f"P{m.group(1)}"] = {"intro": intro_text, "decisions": decisions}
+    return out

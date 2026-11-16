@@ -1,4 +1,4 @@
-/* The phone's nav menu.
+/* The phone's nav menu, and the star count on 서재.
  *
  * One button, one panel under the nav, and the four destinations the row
  * hands over below 640px so the site's name can stay on the line. The panel
@@ -45,4 +45,29 @@
   });
 
   wide.addEventListener("change", (e) => { if (e.matches) open(false); });
+})();
+
+/* How many papers this browser has starred, on 서재 in the row and in the
+ * phone's menu — shown only when there is at least one. The count is read
+ * straight from the shelf's store (`shelf.js`), because every page has the nav
+ * and not every page loads the shelf; it follows a star toggled on this page
+ * and one toggled in another tab. */
+(function () {
+  const slots = document.querySelectorAll("[data-star-count]");
+  if (!slots.length) return;
+  function paint() {
+    let n = 0;
+    try {
+      const map = JSON.parse(localStorage.getItem("probe.stars.v1") || "{}");
+      if (map && typeof map === "object" && !Array.isArray(map)) n = Object.keys(map).length;
+    } catch (e) { /* blocked or unreadable storage: no count */ }
+    slots.forEach((s) => {
+      s.hidden = !n;
+      s.textContent = n ? String(n) : "";
+      if (n) s.setAttribute("aria-label", `즐겨찾기 ${n}편`); else s.removeAttribute("aria-label");
+    });
+  }
+  document.addEventListener("probe:shelf-change", paint);
+  addEventListener("storage", (e) => { if (!e.key || e.key === "probe.stars.v1") paint(); });
+  paint();
 })();

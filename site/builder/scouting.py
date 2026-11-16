@@ -5,8 +5,8 @@ file, one window each — and a run file beside them (`scouting/runs/`). The
 site's unit is the run instead: one page per date that puts every pillar's
 surfaced papers on one list, one row per arXiv id, so a paper four pillars
 flagged reads as one paper flagged four times rather than as four papers. The
-run file says which pillars failed and names each paper; a date with no run file publishes the pillars it has and marks
-the rest as missing.
+run file names each paper; a date with no run file publishes the pillars it
+has.
 
 The reports' form is `scouting/AUTHORING.md`; this module reads it and owns
 none of it. A report carries its total on a score line under each paper's
@@ -33,13 +33,9 @@ MEDALS = {"🥇": 1, "🥈": 2, "🥉": 3}
 PICK = "🌱"
 ROW = "📋"
 
-# How a merged paper is grouped on its date's page, in page order: flagged by
-# more than one pillar, written up in full by one, or one 📋 row only.
-GROUPS = (
-    ("shared", "여러 연구 축이 함께 지목"),
-    ("top", "연구 축별 상위"),
-    ("rest", "그 밖에 게이트 통과"),
-)
+# How a merged paper ranks on its date's page, in order: flagged by more than
+# one pillar, written up in full by one, or one 📋 row only.
+GROUPS = ("shared", "top", "rest")
 
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ID = re.compile(r"arxiv\.org/abs/(\d{4}\.\d{4,5})")
@@ -102,20 +98,11 @@ class Pick:
 
 
 @dataclass
-class NearMiss:
-    pillar: str
-    paper_id: str
-    alias: str
-    condition: str
-
-
-@dataclass
 class Report:
     pillar: str
     date: str
     path: Path
     picks: list[Pick] = field(default_factory=list)
-    near: list[NearMiss] = field(default_factory=list)
 
     @property
     def source(self) -> str:
@@ -176,9 +163,7 @@ class Paper:
 
 @dataclass
 class RunFile:
-    """`scouting/runs/<date>.md` — the pillars that failed and each paper's
-    alias (AUTHORING §8)."""
-    failed: dict[str, str]
+    """`scouting/runs/<date>.md` — each paper's alias (AUTHORING §8)."""
     aliases: dict[str, str]       # arXiv id -> the alias every report of the run uses
 
 
@@ -188,37 +173,6 @@ class Run:
     reports: list[Report]
     papers: list[Paper]
     run_file: RunFile | None = None
-
-    @property
-    def arrived(self) -> list[str]:
-        return [r.pillar for r in self.reports]
-
-    @property
-    def missing(self) -> dict[str, str]:
-        """Pillar -> why it has no report on this date: the run file's
-        `Failed:` reason, or, on a date with no run file, 대기."""
-        if self.run_file:
-            return {p: f"실패 — {why}" for p, why in self.run_file.failed.items()}
-        return {p: "대기" for p in PILLAR_NAMES if p not in self.arrived}
-
-    @property
-    def near(self) -> list[NearMiss]:
-        """Near misses no pillar surfaced, one per id, pillars in order."""
-        surfaced = {p.paper_id for p in self.papers}
-        out: dict[str, NearMiss] = {}
-        for r in self.reports:
-            for n in r.near:
-                if n.paper_id not in surfaced and n.paper_id not in out:
-                    out[n.paper_id] = n
-        return list(out.values())
-
-    def grouped(self) -> list[tuple[str, str, list[Paper]]]:
-        out = []
-        for key, label in GROUPS:
-            members = [p for p in self.papers if p.group == key]
-            if members:
-                out.append((key, label, members))
-        return out
 
 
 def brief(contrib: str) -> list[tuple[str, str]]:
@@ -343,14 +297,6 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
                     pillar=pillar, kind=ROW, rank=4 + rows, paper_id=ident.group(1),
                     alias=_ALIAS_ID.sub("", cells[0]), code=_code(" ".join(cells)),
                     total=total, gist=_plain(cells[-1]), dims=dims))
-        elif emoji == "🔍":
-            for cells in _rows(body):
-                ident = next((i for c in cells if (i := _ID.search(c))), None)
-                if ident is None:
-                    continue
-                report.near.append(NearMiss(
-                    pillar=pillar, paper_id=ident.group(1), alias=_ALIAS_ID.sub("", cells[0]),
-                    condition=_plain(cells[-1])))
     # A report with no score lines scores in its 📊 heads, which follow the
     # paper sections in order. Fewer heads than sections leaves the last ones
     # unscored rather than shifting every score by one.
@@ -365,7 +311,6 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
 
 def parse_run_file(path: Path) -> RunFile:
     text = _COMMENT.sub("", path.read_text(encoding="utf-8"))
-    failed = dict(re.findall(r"^\*\*Failed:\*\*\s*(P\d) — (.*)$", text, re.M))
     aliases: dict[str, str] = {}
     for header, body in _sections(text):
         if header.startswith("📐"):
@@ -373,7 +318,7 @@ def parse_run_file(path: Path) -> RunFile:
                 ident = next((i for c in cells if (i := _ID.search(c))), None)
                 if ident:
                     aliases[ident.group(1)] = _ALIAS_ID.sub("", cells[0])
-    return RunFile(failed=failed, aliases=aliases)
+    return RunFile(aliases=aliases)
 
 
 def discover() -> tuple[list[Run], list[str]]:
@@ -396,7 +341,7 @@ def discover() -> tuple[list[Run], list[str]]:
         # Within a group: more pillars first, then a medal before the pick,
         # then the total. 📋 ranks are row positions in one pillar's table and
         # mean nothing across pillars, so a row-only paper sorts on its total.
-        order = {k: i for i, (k, _label) in enumerate(GROUPS)}
+        order = {k: i for i, k in enumerate(GROUPS)}
         papers.sort(key=lambda p: (order[p.group], -len(p.pillars),
                                    min((x.rank for x in p.picks if x.full), default=9),
                                    -p.best))

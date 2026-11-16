@@ -55,8 +55,8 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, catalog, comparisons, corpus, pages, scouting
-from builder.decisions import harvest_decisions, retired_decisions
+from builder import assets_out, catalog, comparisons, corpus, events, pages, scouting, scoutfigs
+from builder.decisions import harvest_decisions, pillar_cards, retired_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
 
@@ -81,12 +81,16 @@ def build(args) -> int:
         comps, comp_problems = comparisons.discover(papers_by_id)
         problems += comp_problems
     # Scouting runs need nothing from the corpus but the ids it holds, which a
-    # row links when the paper has a rewrite. A partial build skips them, as it
-    # does the comparisons: its corpus would mark every other rewrite missing.
+    # paper's detail links when the paper has a rewrite. A partial build skips
+    # them, as it does the comparisons: its corpus would mark every other
+    # rewrite missing.
     runs: list = []
     if not args.only:
         runs, scout_problems = scouting.discover()
         problems += scout_problems
+    # The dates the first screen counts down to (`context/EVENTS.md`).
+    sched, sched_problems = events.discover()
+    problems += sched_problems
 
     # The agent's entry points: `corpus.json` and `llms.txt`. A full build
     # only — under `--only` the catalog would describe a corpus of one and its
@@ -132,7 +136,7 @@ def build(args) -> int:
 
     # Before a page is rendered, because every asset URL a page prints carries
     # a token hashed over what this build ships (`assets_out.version`).
-    index_js = pages.corpus_index(papers, comps)
+    index_js = pages.corpus_index(papers, comps, pillar_cards())
     assets_out.register("corpus-index.js", index_js)
 
     rendered: dict[Path, str] = {}
@@ -153,17 +157,25 @@ def build(args) -> int:
             comp, papers_by_id, katex, decisions, render_problems)
     rendered[out / "c" / "index.html"] = pages.comparison_index_page(comps, papers_by_id)
     if not args.only:
+        # Each written-up paper's overview figure, from its arXiv HTML edition
+        # when the build is asked to fetch, from the cache either way.
+        ids = [p.paper_id for run in runs for part in pages.scout_split(run) for p in part]
+        figs = scoutfigs.figures(ids, corpus.REPO_ROOT / ".site-cache", fetch=args.scout_figures)
         for run in runs:
             rendered[out / "s" / run.date / "index.html"] = pages.scouting_run_page(
-                run, runs, decisions, papers_by_id, depth=2)
+                run, runs, decisions, papers_by_id, figs, depth=2)
         rendered[out / "s" / "index.html"] = (
-            pages.scouting_run_page(runs[0], runs, decisions, papers_by_id, depth=1)
+            pages.scouting_run_page(runs[0], runs, decisions, papers_by_id, figs, depth=1)
             if runs else pages.scouting_empty_page())
     problems += render_problems
 
-    # The landing page indexes whatever was built — with `--only`, a subset.
-    rendered[out / "index.html"] = pages.landing_page(
+    # The analysis list indexes whatever was built — with `--only`, a subset.
+    rendered[out / "p" / "index.html"] = pages.analysis_page(
         papers, katex, search_api=args.search_api, partial=bool(args.only))
+    # The first screen, at the root: what came in lately, the axes, the dates.
+    import datetime as _dt
+    rendered[out / "index.html"] = pages.home_page(
+        papers, comps, runs, sched, _dt.date.today().isoformat())
     rendered[out / "shelf" / "index.html"] = pages.shelf_page(papers)
     rendered[out / "404.html"] = pages.not_found_page(papers)
 
@@ -328,6 +340,9 @@ def main() -> int:
     ap.add_argument("--index", metavar="FILE",
                     help="write the search index (JSONL) and build no pages")
     ap.add_argument("--strict", action="store_true", help="fail on any warning")
+    ap.add_argument("--scout-figures", action="store_true",
+                    help="fetch each scouted paper's overview figure from arXiv "
+                         "(cached in .site-cache/)")
     ap.add_argument("--serve", action="store_true", help="serve --out after building")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--katex", choices=("server", "client"), default="server")

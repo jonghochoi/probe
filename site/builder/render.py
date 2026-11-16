@@ -180,7 +180,7 @@ class DocRenderer:
         # Emitted immediately after the body H1 closes. The one-paragraph
         # summary is the first thing a reader wants and the front matter
         # already carries it, so the page prints it instead of reserving it
-        # for the landing card and opening the article on paragraph one.
+        # for a list card and opening the article on paragraph one.
         self.lead_html = lead_html
         self.toc: list[dict] = []
         self._heading_seq = 0

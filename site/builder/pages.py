@@ -8,7 +8,7 @@ from collections import Counter
 
 from . import components as c
 from . import corpus, primers, scouting, glance as glance_mod
-from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper
+from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper, main_figure
 from .render import DocRenderer, _decorate_refs
 
 # Pages serves a project site under /<repo>/. 404.html and `build-site.py
@@ -18,15 +18,13 @@ SITE_BASE = f"/{c.REPO.split('/')[1]}/"
 BLOB = f"{c.REPO_URL}/blob/main"
 DISCUSSIONS_NEW = f"{c.REPO_URL}/discussions/new?category=paper-notes"
 
-# How many rewrites one page of the list holds, and which of them the bar
-# offers. `0` is 전체 — the whole list on one page, which is what a browser with
-# no script gets and what the reader can always come back to.
+# How many rewrites one page of the list holds — the choices the menu at the
+# end of the page strip offers. A browser with no script gets the whole list.
 #
 # The default is a page rather than the whole corpus: the list is the one part
 # of this page that grows without limit, and a reader arriving at it should
-# meet a screen of papers, not a year of them. Ten is a screen and a half with
-# the lead block above it.
-PAGE_SIZES = (10, 20, 0)
+# meet a screen of papers, not a year of them.
+PAGE_SIZES = (10, 20, 30)
 PAGE_DEFAULT = 10
 
 # How large `assets/corpus-index.js` may get before it stops being a file every
@@ -36,7 +34,8 @@ PAGE_DEFAULT = 10
 INDEX_BUDGET = 100 * 1024
 
 
-def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
+def corpus_index(papers: list[Paper], comps: list | None = None,
+                 axes: dict | None = None) -> str:
     """`assets/corpus-index.js` — the corpus, as much of it as a row needs.
 
     One file for the whole site rather than a blob inlined into every page: the
@@ -53,7 +52,7 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
 
     Both pillar vocabularies ride along so either surface can match a query
     against an axis without carrying the dicts: the Korean label because a
-    reader reads it off the rail and may type it here, and the English name
+    reader reads it off the axis line and may type it here, and the English name
     because the papers themselves are English and a reader may type that
     instead. Neither is printed — a row marks its axes with the id, which is
     what the chips beside it are keyed to.
@@ -66,12 +65,18 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
 
     A comparison carries the ids it compares, so typing an arXiv id finds both
     the paper and the comparisons that hold it.
+
+    `axes` is what an axis chip's popup says (`decisions.pillar_cards()`, read
+    by `pillar.js`): each pillar's introduction and the titles of the
+    decisions it owns. It rides here because every page has chips and every
+    page already carries this file.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     ranked = sorted(comps or [], key=lambda x: x.order_key, reverse=True)
     payload = {
         "pillars": PILLAR_NAMES,
         "pillarLabels": PILLAR_LABELS,
+        "axes": axes or {},
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
              "pillars": p.filed, "date": p.date}
@@ -88,66 +93,18 @@ def corpus_index(papers: list[Paper], comps: list | None = None) -> str:
     return f"window.ProbeIndex={body};\n"
 
 
-def _shelf_facets(cls: str) -> str:
-    """New / Starred, the two facets the rail carries beside the axes.
-
-    Server-rendered with a zero count and no pressed state, because which
-    papers are starred or new is the reader's and the build cannot know either.
-    New ships `hidden` and stays hidden until there is something new to point
-    at — a zero that never moves is furniture.
-
-    Both name something the reader put there. What is left to read is not a
-    mark anyone made: on a corpus a reader has barely started it counts almost
-    every paper, which selects the list they are already looking at. 읽음 is
-    still kept — as the state column on 서재's rows and in its export — it
-    just has no facet here.
-    """
-    flags = (("fresh", "New"), ("star", "Starred"))
-    return "".join(
-        f'<button type="button" class="{c.esc(cls)}" data-facet-flag="{key}" '
-        f'aria-pressed="false"{" hidden" if key == "fresh" else ""}>'
-        f'<span class="sw {key}" aria-hidden="true"></span><b>{label}</b>'
-        f'<span class="rn" data-flag-count="{key}">0</span></button>'
-        for key, label in flags
-    )
-
-
 def _page_sizes() -> str:
-    """10편 · 20편 · 전체 — how much of the list one page holds.
+    """10편 · 20편 · 30편 — how much of the list one page holds.
 
-    A view control, so it sits with 정렬 and wears the same pill group. The
-    pressed state printed here is the default; `filter.js` moves it to whatever
-    the hash or this browser's last choice says, the same way the shelf facets
-    have their counts filled in.
+    The menu at the end of the page strip; only the current choice shows until
+    it is opened. The pressed state printed here is the default; `filter.js`
+    moves it to whatever the hash or this browser's last choice says.
     """
     return "".join(
         f'<button type="button" data-size="{n}" '
-        f'aria-pressed="{"true" if n == PAGE_DEFAULT else "false"}">'
-        f'{f"{n}편" if n else "전체"}</button>'
+        f'aria-pressed="{"true" if n == PAGE_DEFAULT else "false"}">{n}편</button>'
         for n in PAGE_SIZES
     )
-
-
-def _seg(name: str, cls: str, buttons: str) -> str:
-    """A pill group, and the chip a phone folds it into.
-
-    The group is the same three buttons at every width — `filter.js` binds
-    them, presses one and reads the pressed one back, and none of that knows
-    the chip exists. What changes below 680px is where the group sits: it
-    becomes a panel under a chip that names the choice currently pressed, so
-    the bar carries 정렬 and 한 쪽에 in the width of two words rather than six.
-
-    The chip's label is filled in by `filter.js` off the pressed button, for
-    the same reason the shelf facets get their counts there: printing it twice
-    is two places for it to disagree with what the list is actually in.
-    """
-    return (f'<div class="segwrap" data-seg>'
-            f'<button type="button" class="segchip" data-seg-toggle '
-            f'data-seg-name="{c.esc(name)}" aria-expanded="false" '
-            f'aria-haspopup="true"><span data-seg-label></span>'
-            f'<span class="segcaret" aria-hidden="true">▾</span></button>'
-            f'<div class="sort {cls}" role="group" aria-label="{c.esc(name)}">'
-            f'{buttons}</div></div>')
 
 
 def _pager(total: int) -> str:
@@ -175,77 +132,171 @@ def _pager(total: int) -> str:
   <button type="button" class="pgstep" data-page-rel="-1">이전</button>
   <span class="pgnums">{"".join(nums)}</span>
   <button type="button" class="pgstep" data-page-rel="1">다음</button>
-  <span class="pgstat" data-page-stat></span>
+  <div class="psize" data-psize>
+    <button type="button" class="psize-cur" data-psize-open aria-haspopup="true" aria-expanded="false" title="한 쪽에 몇 편">{c.icon("menu", 15)}<span data-psize-label>{PAGE_DEFAULT}</span><span class="psize-caret" aria-hidden="true">▾</span></button>
+    <div class="psize-menu" role="group" aria-label="한 쪽에 몇 편" hidden>{_page_sizes()}</div>
+  </div>
 </nav>"""
 
 
-def landing_page(papers: list[Paper], katex=None, search_api: str = "",
-                 partial: bool = False) -> str:
-    """The corpus index — a briefing: newest rewrite in full, the rest as rows.
+# ── 첫 화면 ─────────────────────────────────────────────────────────────────
+# The site's front door at its root: what came in lately, the axes it is
+# filed under, and the dates coming up. No band and no title — the nav names
+# the site, and the mascot's one line says where to start.
+_COUNT_WORD = {2: "두", 3: "세", 4: "네", 5: "다섯", 6: "여섯", 7: "일곱"}
 
-    The page answers "what should I read" before "what is here". The most
-    recent rewrite is printed as a lead block with its thesis, summary and
-    numbers; everything else is one scannable row per paper, sorted newest
-    first. Facets live in a left rail rather than a chip bank above the list,
-    which is what lets the rows start in the first screen.
+
+def _thesis(paper: Paper) -> str:
+    """The rewrite's body H1 — its thesis line."""
+    return next((l[2:].strip() for l in paper.body.splitlines() if l.startswith("# ")), "")
+
+
+def _md_plain(md: str) -> str:
+    """Markdown as plain text — links, emphasis and code marks taken off."""
+    return re.sub(r"\]\([^)]*\)|[*`\[\]]", "", md)
+
+
+def home_page(papers: list[Paper], comps: list, runs: list, events: list,
+              today: str) -> str:
+    """첫 화면 — one line from the mascot, then 최근 and 연구 축 side by
+    side, then 일정.
+
+    최근 is one of each kind first — the newest rewrite, the run's first
+    recommendation, the newest comparison — and on a wide screen the rest of
+    the latest under them. 연구 축 counts each axis's rewrites, what the
+    newest run surfaced on it, and what came in this week. 일정 is the rows of
+    `context/EVENTS.md` that have not ended as of the build; `home.js` counts
+    the days to each against the reader's own date and drops what has passed
+    since.
+    """
+    import datetime as _dt
+    ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
+    cmps = sorted(comps, key=lambda x: x.order_key, reverse=True)
+    run = runs[0] if runs else None
+    first, more = scout_split(run) if run else ([], [])
+    tops = [p for p in first + more if p.lead.full]
+
+    def li(kind: str, when: str, href: str, title: str, sub: str, extra: bool) -> str:
+        sub = f'<span class="hm-s">{c.esc(sub)}</span>' if sub else ""
+        return (f'<li{" class=\"hm-x\"" if extra else ""}><a href="{href}">'
+                f'<span class="hm-k">{kind}<small>{c.esc(when)}</small></span>'
+                f'<b>{c.esc(title)}</b>{sub}</a></li>')
+
+    feed = ([("분석", p.date, f"p/{c.esc(p.stem)}/index.html", _alias(p), p.tagline) for p in ordered[:3]]
+            + [("탐색", run.date, f"s/index.html#p-{c.esc(p.paper_id)}", p.alias, _md_plain(p.gist))
+               for p in tops[:2]]
+            + [("비교", x.date, f"c/{c.esc(x.slug)}/index.html", x.title, "") for x in cmps[:1]])
+    feed.sort(key=lambda f: f[1], reverse=True)
+    lean = [next(f for f in feed if f[0] == k) for k in ("분석", "탐색", "비교")
+            if any(f[0] == k for f in feed)]
+    feed_html = ("".join(li(k, _md_date(d) + (" 회차" if k == "탐색" else ""), h, t, s, False)
+                         for k, d, h, t, s in lean)
+                 + "".join(li(k, _md_date(d) + (" 회차" if k == "탐색" else ""), h, t, s, True)
+                           for k, d, h, t, s in feed if (k, d, h, t, s) not in lean))
+
+    # This week is the week of the newest rewrite, Monday on.
+    newest = _dt.date.fromisoformat(ordered[0].date) if ordered else _dt.date.fromisoformat(today)
+    monday = (newest - _dt.timedelta(days=newest.weekday())).isoformat()
+    filed = Counter(k for p in ordered for k in p.filed)
+    week = Counter(k for p in ordered if p.date >= monday for k in p.filed)
+    scouted = Counter(k for p in (run.papers if run else []) for k in p.pillars)
+    pillars = "".join(
+        f'<li><span class="hm-pchip">{c.pillar_chips([k])}</span><b>{c.esc(PILLAR_LABELS[k])}</b>'
+        + (f'<span class="hm-pnew">이번 주 +{week[k]}</span>' if week[k]
+           else '<span class="hm-pnew is-zero">이번 주 0</span>')
+        + f'<span class="hm-pn">분석 {filed[k]} · 이번 탐색 {scouted[k]}</span></li>'
+        for k in PILLAR_ORDER if k in PILLAR_LABELS and filed.get(k))
+
+    upcoming = [e for e in events if e.end >= today][:6]
+
+    def when(e) -> str:
+        span = _md_date(e.start) if e.start == e.end else f"{_md_date(e.start)}–{_md_date(e.end)}"
+        return span + (f" · {e.place}" if e.place else "")
+
+    def dday(e) -> str:
+        n = (_dt.date.fromisoformat(e.start) - _dt.date.fromisoformat(today)).days
+        return "진행 중" if n <= 0 else f"D-{n}"
+    evs = "".join(
+        f'<a class="hm-ev {e.kind}{" hm-x" if i >= 4 else ""}" href="{c.esc(e.url)}" target="_blank" '
+        f'rel="noopener" data-start="{e.start}" data-end="{e.end}">'
+        f'<span class="hm-dd" data-dday>{dday(e)}</span><b>{c.esc(e.name)}</b>'
+        f'<span>{c.esc(when(e))}</span></a>'
+        for i, e in enumerate(upcoming))
+    events_html = (f'<section class="hm-blk" data-events><h2 class="hm-h">일정'
+                   f'<span class="hm-sub">학회 · 투고 마감</span></h2>'
+                   f'<div class="hm-evs">{evs}</div></section>' if evs else "")
+
+    line = ""
+    if ordered:
+        p = ordered[0]
+        thesis = _thesis(p)
+        line = (f'이번 주엔 <b>{c.esc(_alias(p))}</b>부터 읽어 보세요.'
+                + (f" “{c.esc(_md_plain(thesis))}”" if thesis else ""))
+    mascot = (f'<div class="hm-mascot"><span class="hm-mk" aria-hidden="true">{c.mark(64)}</span>'
+              f'<p class="hm-bubble">{line}</p></div>' if line else "")
+    n_axes = _COUNT_WORD.get(len(PILLAR_NAMES), str(len(PILLAR_NAMES)))
+
+    body = f"""<main class="hm">
+  {mascot}
+  <div class="hm-two">
+    <section class="hm-blk"><h2 class="hm-h">최근<span class="hm-sub">분석 · 탐색 · 비교</span></h2>
+      <ul class="hm-feed">{feed_html}</ul></section>
+    <section class="hm-blk"><h2 class="hm-h">연구 축<span class="hm-sub">{n_axes} 갈래</span></h2>
+      <ul class="hm-pl">{pillars}</ul></section>
+  </div>
+  {events_html}
+</main>
+"""
+    return c.page(
+        title="PROBE",
+        body=body,
+        depth=0,
+        description="손 조작 연구를 고르고, 풀어 쓰고, 나란히 놓는 곳 — 최근 글과 연구 축, 학회 일정",
+        scripts=["home.js"],
+        extra_head=f'<link rel="stylesheet" href="{c.asset("assets/home.css")}">',
+        body_attrs="data-home",
+    )
+
+
+def analysis_page(papers: list[Paper], katex=None, search_api: str = "",
+                 partial: bool = False) -> str:
+    """The corpus index — one line of axes over one row per paper, newest first.
+
+    The page opens on the list itself: the axes as a line over it (the only
+    filter here — a word search is ⌘K's, from any page), then the rows, the
+    newest at the top. Each row is the paper's title with its link icons, the
+    tagline under it, and the axes it is filed under.
 
     Every row is server-rendered with its facets on `data-` attributes rather
     than hydrated from an inline JSON blob. That keeps the page fully readable
-    with JavaScript off (the filter bar, the rail and the page strip hide
-    themselves, the rows stay, newest first, all of them), and the filter
-    script only ever reorders and toggles `hidden` on nodes that already exist.
+    with JavaScript off (the axis line and the page strip hide themselves, the
+    rows stay, newest first, all of them), and the filter script only ever
+    reorders and toggles `hidden` on nodes that already exist.
 
-    The list is paged — `PAGE_DEFAULT` rewrites at a time, the bar offering
-    `PAGE_SIZES` — because it is the one part of this page that grows with the
-    corpus. A page is counted in papers, not in rows: on the first page the
-    lead block *is* the first of them and its own row stands down, so 10편 is
-    ten papers there as it is on every other page.
+    The list is paged — `PAGE_DEFAULT` rewrites at a time, the strip's menu
+    offering `PAGE_SIZES` — because it is the one part of this page that grows
+    with the corpus.
 
     Order is `Paper.order_key` — the order the rewrites landed on `main`, which
     is the order a reader watched them appear — and the rows carry that key on
-    `data-order`, so the script's 최신순 reproduces this list rather than a
-    near-miss of it.
-
-    The corpus's size and freshness are stated in the filter bar, whose count
-    is the live one; the masthead carries the same pair only for an unscripted
-    page, and `index.css` hides it once a script runs.
+    `data-order`, so the script's newest-first reproduces this list rather than
+    a near-miss of it.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
 
-    # Taglines and the lead summary are authored markdown — emphasis is what
-    # makes a summary scannable, and a summary that opens with math is common
-    # enough that escaping it would publish backticks. `decisions` is left
+    # Taglines are authored markdown — emphasis is what makes a line
+    # scannable, and a line that opens with math is common enough that
+    # escaping it would publish backticks. `decisions` is left
     # empty on purpose: a `D#` tooltip needs `paper.js`, which this page does
     # not load.
     renderer = DocRenderer(katex) if katex is not None else None
 
     # Counted over the axes a paper is *filed* under — `Paper.filed`, the two
-    # its card prints — because that is what the facet below selects on. Count
-    # one set and filter on another and the rail promises rows the click never
-    # delivers. The pillar separators in the list still count primaries: a
-    # paper sits under one heading, and that is a different question asked in
-    # place.
+    # its row prints — because that is what the axis line selects on. Count
+    # one set and filter on another and the line promises rows the click
+    # never delivers.
     filed = Counter(p for paper in ordered for p in paper.filed)
-    primaries = Counter(p.primary for p in ordered)
 
-    # The reader's own two filters answer a question the corpus cannot: not
-    # "which papers are about X" but "which ones are mine" and "which ones are
-    # new here". Their counts are the only numbers on this page the build does
-    # not know — `filter.js` fills them from the shelf, and the group hides
-    # itself when nothing is scripted.
-    #
-    # They are English for the reason the masthead's eyebrow is: a label is a
-    # control, not a sentence, and `Starred` names the star beside it in a
-    # width a Korean label needs two lines for. Everything that speaks in
-    # sentences stays Korean — the group heading, 서재's tabs, the paper
-    # header, and the masthead's own title.
-    #
-    # The pair is printed twice, once for the rail and once for the filter bar,
-    # because the rail leaves at 900px and these two would leave with it — and
-    # unlike the 연구 축 below them, nothing else on a phone can reach what
-    # they select. Exactly one copy is ever on screen (`index.css`);
-    # `filter.js` binds every copy it finds, so the pair never disagrees.
-    rail_mine = _shelf_facets("rail-item mine")
     rail_pillars = "".join(
         f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
         f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
@@ -255,20 +306,7 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         for k in PILLAR_ORDER if filed.get(k)
     )
 
-    # One separator per pillar, parked in the list and shown only by the
-    # pillar sort. Rendering them up front keeps the sort a reordering of
-    # existing nodes — the script never builds markup.
-    seps = "".join(
-        f'<div class="rsep" data-sep="{c.esc(k)}" hidden>'
-        f'<span class="chip pillar" data-p="{c.esc(k)}">{c.esc(k)}</span>'
-        f"<h2>{c.esc(PILLAR_LABELS.get(k, '축 미지정'))}</h2>"
-        f'<span class="rsep-n" data-sep-count>{primaries[k]}</span></div>'
-        for k in PILLAR_ORDER if primaries.get(k)
-    )
-    rows = "".join(
-        _row(p, renderer, lead=(i == 0))
-        for i, p in enumerate(ordered)
-    )
+    rows = "".join(_row(p, renderer) for p in ordered)
 
     head = c.mast(
         eyebrow="Dexterous manipulation",
@@ -276,54 +314,34 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         count=f"{len(ordered)}편" + (f" · 최근 {ordered[0].date}" if ordered else ""),
     )
 
+    # The axes as one line over the list — the analysis page's only filter.
+    # The icon cell on its left names the line without a word; the right end
+    # carries the count the filter leaves standing.
+    line = (
+        '<div class="pline" data-filters role="group" aria-label="연구 축으로 거르기">'
+        f'<span class="pline-ic" aria-hidden="true">{c.icon("layers", 18)}</span>'
+        f'<div class="pline-items" data-pline>{rail_pillars}</div>'
+        f'<span class="pline-stat"><span data-result-count>{len(ordered)}편</span>'
+        + (f'<span data-corpus-when> · 최근 {c.esc(ordered[0].date)}</span>' if ordered else "")
+        + "</span></div>"
+    )
+
     body = f"""{head}
 
-<div class="filters" data-filters>
-  <div class="filters-inner">
-    <label class="search">
-      {c.icon("search", 14)}
-      <input type="search" data-q autocomplete="off" spellcheck="false"
-             placeholder="제목 · 본문 · 용어 · 태그 · 저자 · arXiv id 로 검색"
-             aria-label="논문 검색">
-      {_search_go(search_api)}
-    </label>
-    <button type="button" class="barreset" data-reset="facet" hidden>필터 초기화</button>
-    <span class="filter-spacer"></span>
-    {_seg("정렬", "", '<button type="button" data-sort="recent" aria-pressed="true">최신순</button>'
-                      '<button type="button" data-sort="pillar" aria-pressed="false">연구 축별</button>'
-                      '<button type="button" data-sort="title" aria-pressed="false">제목순</button>')}
-    {_seg("한 쪽에 몇 편", "psize", _page_sizes())}
-  </div>
-</div>
-
 <div class="deck">
-  <aside class="rail" data-rail>
-    <p class="rail-stat"><span data-result-count>{len(ordered)}편</span>{
-      f'<span data-corpus-when> · <span class="when-word">최근 </span>'
-      f'{c.esc(ordered[0].date)}</span>' if ordered else ""}<button type="button"
-      class="rail-reset" data-reset hidden>초기화</button></p>
-    <p class="rail-h" data-mine-h>서재</p>
-    {rail_mine}
-    <p class="rail-h">연구 축</p>
-    {rail_pillars}
-  </aside>
   <main class="corpus" data-corpus>
+    {line}
     {_first_run() if not ordered else ""}
     {_resume()}
-    {_lead_block(ordered[0], renderer) if ordered else ""}
     {_search_tabs(search_api)}
     <div class="sem" data-sem hidden></div>
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
-      <span class="lh-star"></span><span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>연구 축</span><span>분량</span>
+      <span class="lh-star"></span><span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>연구 축</span>
     </div>
     <p class="corpus-partial" data-partial hidden>
       모든 단어를 포함하는 논문이 없어, <b>일부만 일치</b>하는 논문을 관련도순으로 보여줍니다.
     </p>
-    <p class="corpus-partial" data-fresh-note hidden>
-      이 브라우저에서 <b>아직 열지 않은</b> 새 글입니다. 논문을 열면 하나씩 빠집니다.
-      <button type="button" class="linkish" data-fresh-ack>모두 확인</button>
-    </p>
-    <div class="rows" data-rows>{seps}{rows}</div>
+    <div class="rows" data-rows>{rows}</div>
     {_pager(len(ordered))}
     <p class="corpus-empty" data-empty hidden>
       조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
@@ -336,32 +354,17 @@ def landing_page(papers: list[Paper], katex=None, search_api: str = "",
         here="papers",
         description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
-        depth=0,
+        depth=1,
         # `semantic.js` ships only when the build is handed an endpoint, so a
         # default build makes no request and needs no network to be correct.
         scripts=["shelf.js", "filter.js"] + (["semantic.js"] if search_api else []),
         # `llms.txt` is where an agent handed this URL finds the corpus as
         # data; a partial build writes none, so it links none.
-        extra_head=(f'<link rel="stylesheet" href="{c.asset("assets/index.css")}">'
+        extra_head=(f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">'
                     + ("" if partial else
-                       '\n<link rel="alternate" type="text/plain" title="llms.txt" href="llms.txt">')),
+                       '\n<link rel="alternate" type="text/plain" title="llms.txt" href="../llms.txt">')),
         body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
     )
-
-
-def _search_go(search_api: str) -> str:
-    """The button that submits the question, beside the box that holds it.
-
-    It ships with the endpoint and with nothing else: the list below filters as
-    the reader types, so where there is no remote index there is nothing for a
-    button to do. `index.css` keeps it off a browser with no script for the same
-    reason — the control that cannot run removes itself rather than sitting
-    there — and `semantic.js` disables it until there is a question to ask.
-    """
-    if not search_api:
-        return ""
-    return ('<button type="button" class="search-go" data-ask disabled '
-            'aria-label="의미 검색 (Enter)">검색</button>')
 
 
 def _search_tabs(search_api: str) -> str:
@@ -401,11 +404,10 @@ def _search_tabs(search_api: str) -> str:
 def _resume() -> str:
     """One line back to wherever the reader put a 책갈피.
 
-    Above the lead block, because it is the only thing on the page that is
-    about this reader rather than about the corpus, and because a reader who
-    left a mark came back for it. One line and no more: the lead block under
-    it is the site's own answer to "what should I read", and a stack of the
-    reader's unfinished business would push it off the first screen.
+    Above the list, because it is the only thing on the page that is about
+    this reader rather than about the corpus, and because a reader who left a
+    mark came back for it. One line and no more: a stack of the reader's
+    unfinished business would push the list off the first screen.
 
     That is what makes the chips carry the arXiv id rather than the title —
     three titles do not fit on a line, three ids always do, and the id is
@@ -418,10 +420,10 @@ def _resume() -> str:
     Shipped empty and hidden; `shelf.js` fills it or leaves it alone.
     """
     return (
-        '<div class="resume" data-resume="p/" hidden>'
+        '<div class="resume" data-resume="" hidden>'
         '<span class="resume-k">책갈피</span>'
         '<span class="resume-chips" data-resume-chips></span>'
-        '<a class="resume-all" data-resume-all href="shelf/index.html#marks">'
+        '<a class="resume-all" data-resume-all href="../shelf/index.html#marks">'
         '서재 →</a></div>'
     )
 
@@ -443,22 +445,20 @@ def _facets(paper: Paper) -> str:
     """The `data-` attributes the filter script reads off a row.
 
     The two haystacks are built and compacted in `corpus` — the row carries
-    them ready to match, so a keystroke costs the script a substring test and
+    them ready to match, so a query costs the script a substring test and
     nothing else (`corpus.HAY_MAX` bounds what one row can weigh).
     """
     return (
         f'data-id="{c.esc(paper.stem)}" '
         f'data-pillars="{c.esc(" ".join(paper.filed))}" '
-        f'data-primary="{c.esc(paper.primary)}" '
         f'data-order="{c.esc(paper.order_token)}" '
-        f'data-title="{c.esc(paper.title.lower())}" '
         f'data-key="{c.esc(paper.search_key)}" '
         f'data-hay="{c.esc(paper.search_hay)}"'
     )
 
 
-def _star(paper: Paper, cls: str = "rowstar") -> str:
-    """The star, wherever a paper is named.
+def _star(paper: Paper) -> str:
+    """The star on a row of the analysis list.
 
     Server-rendered hollow; `shelf.js` presses it and `index.css` fills the one
     path from `currentColor`. Which papers are starred is the reader's, not the
@@ -469,25 +469,18 @@ def _star(paper: Paper, cls: str = "rowstar") -> str:
     removes itself there (`index.css`) instead of sitting inert.
     """
     return (
-        f'<button type="button" class="{cls}" data-star="{c.esc(paper.stem)}" '
+        f'<button type="button" class="rowstar" data-star="{c.esc(paper.stem)}" '
         f'data-star-title="{c.esc(paper.title)}" aria-pressed="false" '
         f'aria-label="즐겨찾기">{c.icon("star", 15)}</button>'
     )
 
 
-def _size(paper: Paper, *, short: bool = False) -> str:
+def _size(paper: Paper) -> str:
     """본문 27분 · 용어 18 · 그림 5 — how much of a sit this is.
 
     Printed before the reader commits, which is the only moment the number is
     worth anything. All three come from what the rewrite already declares.
-    `short` drops the figure count and the label for the list, where the column
-    heading already says 분량 and the row has one line to give it.
     """
-    if short:
-        bits = [f"{paper.read_minutes}분"]
-        if paper.term_count:
-            bits.append(f"용어 {paper.term_count}")
-        return " · ".join(bits)
     bits = [f"본문 {paper.read_minutes}분"]
     if paper.term_count:
         bits.append(f"용어 {paper.term_count}")
@@ -501,105 +494,57 @@ def _md(renderer, text: str) -> str:
     return renderer.inline(text) if renderer is not None else c.esc(text)
 
 
-def _row_readout(paper: Paper) -> str:
-    """A row's headline number, on a line of its own under the tagline.
+def _row_links(paper: Paper, cls: str) -> str:
+    """The paper's outside links as icons alone — arXiv, project, code, model.
 
-    Riding at the end of the title, the figure lands wherever the title
-    happens to wrap — inline on one row, alone on the next line on another —
-    and the column loses its rhythm. A fixed slot is what lets a reader run an
-    eye down the list and compare results, which is why the number is there.
+    The label rides on `title` and `aria-label`, so the row spends a glyph's
+    width on each rather than a word's.
     """
-    if not paper.metric:
-        return ""
-    return (
-        '<span class="row-ro"><span class="row-ro-k">결과</span>'
-        f'<span class="row-ro-v">{c.glue_units(c.esc(paper.metric))}</span></span>'
-    )
-
-
-def _lead_readout(paper: Paper) -> str:
-    """The lead's headline number, at display size and keyed on its left.
-
-    A row gives the figure a slot under its tagline (`_row_readout`); on the
-    lead it is the number a reader would quote, so it stands on its own line
-    between the thesis it backs and the summary that explains it.
-    """
-    if not paper.metric:
-        return ""
-    return (
-        '<span class="lead-ro"><span class="lead-ro-k">결과</span>'
-        f'<span class="lead-ro-v">{c.glue_units(c.esc(paper.metric))}</span></span>'
-    )
-
-
-def _lead_block(paper: Paper, renderer=None) -> str:
-    """The newest rewrite, printed rather than summarised.
-
-    A grid of equal cards makes every paper look equally likely to be the one
-    you came for. The one that landed most recently is the one a returning
-    reader has not seen, so it gets the space — and with it the thesis line, which is
-    ours and appears nowhere else on this page.
-    """
-    links = "".join(
-        c.chip(label, "src-link", href=url, mark=c.src_mark(kind))
+    return "".join(
+        f'<a class="{cls}" href="{c.esc(url)}" target="_blank" rel="noopener" '
+        f'title="{c.esc(label)}" aria-label="{c.esc(label)}">{c.src_mark(kind)}</a>'
         for kind, label, url in paper.links
     )
-    return f"""<article class="lead" data-lead data-read-of="{c.esc(paper.stem)}">
-  <div class="lead-top">
-    <span class="lead-flag">가장 최근</span>
-    <span class="lead-when">{c.esc(paper.date)} · arXiv {c.esc(paper.stem)}</span>
-    <span class="filter-spacer"></span>
-    {_star(paper, "leadstar")}
-  </div>
-  <a class="lead-body" href="p/{c.esc(paper.stem)}/index.html">
-    <h2 class="lead-title">{c.esc(paper.title)}</h2>
-    <p class="lead-tagline">{_md(renderer, paper.tagline)}</p>
-    {_lead_readout(paper)}
-    <p class="lead-sum">{_md(renderer, paper.summary_md)}</p>
-  </a>
-  <div class="lead-foot">
-    {c.pillar_chips(paper.filed)}
-    {links}
-    <span class="filter-spacer"></span>
-    <span class="lead-size">{c.esc(_size(paper))}</span>
-  </div>
-</article>"""
 
 
-def _row(paper: Paper, renderer=None, *, lead: bool = False) -> str:
+def _row(paper: Paper, renderer=None) -> str:
     """One paper, one line.
 
-    `data-lead-dup` marks the row the lead block is currently standing in for.
-    The row still exists — it has to, or filtering and the other two sorts
-    would silently lose a paper — but it ships `hidden`, so with JavaScript
-    off the paper appears once (in the lead) instead of twice. The script
-    reveals it the moment the lead block stops being the right thing to show.
+    The title is the link to the paper, and its `::after` stretches over the
+    title and the tagline so the whole block still opens it; the link icons sit
+    above that box right after the title. A link cannot hold a link, which is
+    why the title rather than the block is the anchor. On a phone the icons
+    move to the axis chips' line, where the row has room for them.
     """
-    # The axes the paper is filed under, which are also the ones the rail
+    # The axes the paper is filed under, which are also the ones the axis line
     # counts and filters on — the chips on a row are what a reader checks the
-    # rail's number against.
+    # line's number against.
     pillars = c.pillar_chips(paper.filed)
-    return f"""<article class="row" data-card{' data-lead-dup hidden' if lead else ''}
+    links = _row_links(paper, "row-link")
+    # The figure a pointer resting on the row previews (`filter.js`): the
+    # paper's overview, at the URL its own page shows it from.
+    fig = main_figure(paper.body)
+    figattrs = (f' data-fig="{c.esc(fig["url"])}" data-fig-cap="{c.esc(fig["caption"])}" '
+                f'data-fig-src="{c.esc(fig["source"])}"' if fig else "")
+    return f"""<article class="row" data-card{figattrs}
   data-read-of="{c.esc(paper.stem)}" {_facets(paper)}>
   {_star(paper)}
   <span class="row-when">{c.esc(paper.date[5:] or paper.date)}</span>
   <span class="row-id">{c.esc(paper.stem)}</span>
-  <a class="row-main" href="p/{c.esc(paper.stem)}/index.html">
-    <span class="row-title">{c.esc(paper.title)}</span>
+  <div class="row-main">
+    <span class="row-title"><a class="row-go" href="{c.esc(paper.stem)}/index.html">{c.esc(paper.title)}</a>{f'<span class="row-links">{links}</span>' if links else ""}</span>
     <span class="row-tagline">{_md(renderer, paper.tagline)}</span>
-    {_row_readout(paper)}
-  </a>
-  <span class="row-pillars">{pillars}</span>
-  <span class="row-size">{c.esc(_size(paper, short=True))}</span>
+  </div>
+  <span class="row-pillars">{pillars}{f'<span class="row-links-m">{links}</span>' if links else ""}</span>
 </article>"""
 
 
 # The three lists 서재 holds, in the order a reader meets them: what they
 # picked out, where they stopped, what they wrote down.
 SHELF_TABS = (
-    ("stars", "즐겨찾기"),
-    ("marks", "책갈피"),
-    ("memos", "메모"),
+    ("stars", "즐겨찾기", "star"),
+    ("marks", "책갈피", "flag"),
+    ("memos", "메모", "pencil"),
 )
 
 
@@ -613,23 +558,37 @@ def shelf_page(papers: list[Paper]) -> str:
     needs no index of its own. A kept id missing from it is a paper that has
     left the corpus, and 서재 says so rather than dropping it.
 
-    The page is also the export surface, and the only one: a shelf that lives
-    in one browser profile reaches a second machine as a file or not at all.
-    The two export buttons are printed `disabled` for the same reason the
-    lists are printed empty — an empty shelf has nothing to write out, and a
+    One kind at a time under underline tabs, each kind with its own icon —
+    a star, a bookmark and a memo are three different things to have kept —
+    and each as the analysis list's table. The page is also the export
+    surface, and the only one: a shelf that lives in one browser profile
+    reaches a second machine as a file or not at all. Export and import are
+    rare, so they sit behind the ⋯ at the tab row's end. The two exports are
+    printed `disabled`, because an empty shelf has nothing to write out and a
     file that downloads with nothing in it reports a success that did not
-    happen. `hub.js` opens them the moment a count is non-zero.
+    happen; `hub.js` opens them the moment a count is non-zero.
     """
     tabs = "".join(
         f'<button type="button" role="tab" id="sh-t-{key}" aria-controls="sh-{key}" '
         f'aria-selected="{"true" if i == 0 else "false"}" data-shelf-tab="{key}">'
-        f'{c.esc(label)} <span class="tab-n" data-tab-count>0</span></button>'
-        for i, (key, label) in enumerate(SHELF_TABS)
+        f'{c.icon(icon, 16)}<b>{c.esc(label)}</b><span class="tab-n" data-tab-count>0</span></button>'
+        for i, (key, label, icon) in enumerate(SHELF_TABS)
     )
     panels = "".join(
         f'<section id="sh-{key}" role="tabpanel" aria-labelledby="sh-t-{key}" '
         f'data-shelf-panel="{key}"{"" if i == 0 else " hidden"}></section>'
-        for i, (key, label) in enumerate(SHELF_TABS)
+        for i, (key, _, _) in enumerate(SHELF_TABS)
+    )
+    menu = (
+        '<div class="sh-more">'
+        '<button type="button" class="sh-more-b" data-hub-more aria-haspopup="true" '
+        'aria-expanded="false" aria-label="내보내기 · 가져오기" title="내보내기 · 가져오기">'
+        f'{c.icon("more", 18)}</button>'
+        '<div class="sh-menu" data-hub-menu hidden>'
+        '<button type="button" data-hub-action="export-json" disabled>JSON 내보내기</button>'
+        '<button type="button" data-hub-action="export-md" disabled>마크다운 내보내기</button>'
+        '<label class="sh-menu-i">가져오기<input type="file" accept="application/json" '
+        'data-hub-import hidden></label></div></div>'
     )
 
     head = c.mast(
@@ -639,18 +598,12 @@ def shelf_page(papers: list[Paper]) -> str:
 
     body = f"""{head}
 
-<main class="hub" data-hub>
-  <div class="hub-tabs" role="tablist" aria-label="서재 보기">{tabs}</div>
-  <div class="hub-actions">
-    <button type="button" data-hub-action="export-json" disabled>JSON 내보내기</button>
-    <button type="button" data-hub-action="export-md" disabled>마크다운 내보내기</button>
-    <label class="filebtn">가져오기<input type="file" accept="application/json" data-hub-import hidden></label>
-    <span class="filter-spacer"></span>
-    <span class="hub-status" data-hub-status aria-live="polite"></span>
-  </div>
+<div class="deck"><main class="shelf" data-hub>
+  <div class="sh-tabs" role="tablist" aria-label="서재 보기">{tabs}<span class="filter-spacer"></span>{menu}</div>
+  <p class="hub-status" data-hub-status aria-live="polite"></p>
   {panels}
   <noscript><p class="corpus-empty">서재는 브라우저에 저장되므로 JavaScript 가 필요합니다.</p></noscript>
-</main>
+</main></div>
 """
     return c.page(
         title="서재 · PROBE",
@@ -680,7 +633,7 @@ def not_found_page(papers: list[Paper]) -> str:
   <h1>404</h1>
   <p>이 주소에는 아무것도 없습니다. 찾던 논문은 제목의 한 단어나 arXiv id 로 찾을 수 있습니다.</p>
   <p class="notfound-acts"><button type="button" class="notfound-find" data-cmdk-open>논문 찾기</button>
-    <a href="{SITE_BASE}">논문 목록으로</a></p>
+    <a href="{SITE_BASE}p/">논문 목록으로</a></p>
   {f'<h2 class="notfound-h">최근 재작성본</h2><ul class="notfound-list">{recent}</ul>' if recent else ""}
 </main>
 """
@@ -931,7 +884,7 @@ def _cmp_panel(paper: Paper, comps: list, papers_by_id: dict) -> str:
 def _cmp_card(paper: Paper, comp, papers_by_id: dict) -> str:
     """One comparison, from this paper's side of it.
 
-    The same fork the list draws, with this paper's branch marked — which is
+    The comparison as a fork, with this paper's branch marked — which is
     what makes the card a position rather than a list: not only that these
     papers were on one table, but which answer was this one's.
     """
@@ -1029,8 +982,8 @@ def _header(paper: Paper) -> str:
   <div class="paper-head-inner">
     <div class="crumb-row">
       <div class="crumb">
-        <a href="../../index.html">분석</a> ›
-        <a href="../../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
+        <a href="../index.html">분석</a> ›
+        <a href="../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
         {c.esc(paper.stem)}
       </div>
       {f'<span class="crumb-date">재작성 {c.esc(paper.date)}</span>' if paper.date else ""}
@@ -1166,10 +1119,11 @@ def _alias(paper: Paper) -> str:
 
 
 # ── The fork ────────────────────────────────────────────────────────────────
-# A comparison's list card draws `stances:` and `common:` (comparison/
-# AUTHORING.md §2-1) rather than its tagline: a branch per paper for what it
-# does, the trunk for what they all accept. The comparison's own page draws the
-# same two keys at full size as its paper cards (`_cmp_cards`). The branch carries the alias AND
+# A paper page's 비교 panel draws a comparison's `stances:` and `common:`
+# (comparison/AUTHORING.md §2-1) rather than its tagline: a branch per paper
+# for what it does, the trunk for what they all accept. The comparison's own
+# page draws the same two keys at full size as its paper cards (`_cmp_cards`),
+# and the 비교 index as one line per paper on its card. The branch carries the alias AND
 # the arXiv id — the alias is what a reader recognises, the id is what they
 # search and cite — and every branch is drawn the same. Nothing here is keyed
 # to a pillar: a comparison usually sits inside one axis, so a per-paper colour
@@ -1334,44 +1288,53 @@ def _cmp_primers(comp) -> str:
             f'<div class="primer-row">{cards}</div></section>')
 
 
-def _ix_foot(count: str) -> str:
-    """The table's last line: that it ends.
-
-    A short list otherwise stops on a row rule with the page running on under
-    it, and a reader cannot tell a list that is complete from one that has not
-    finished arriving. The count says the former.
-    """
-    return (f'<div class="ix-foot">'
-            f'<span class="ix-end">목록 끝 · {c.esc(count)}</span></div>')
-
-
 def comparison_index_page(comps: list, papers_by_id: dict) -> str:
-    """비교 — every comparison, newest first.
+    """비교 — every comparison, newest first, as cards under the axis line.
 
-    A row carries the question, then the fork: what each paper does about it and
-    what they all accept. The tagline is not printed here — it is the same
-    thought as prose, and it prints under the H1 on the comparison's own page.
-    Around it the landing list's columns: when, the comparison's axes, and how
-    many papers it holds.
+    A card is one question: its axes and date on top, the question, what the
+    papers share, and under a rule each paper's name with what it does about
+    the question. The tagline is not printed here — it is the same thought as
+    prose, and it prints under the H1 on the comparison's own page. The axis
+    line above is the analysis list's: pressing an axis keeps its comparisons
+    (`cards.js`).
     """
     ordered = sorted(comps, key=lambda x: x.order_key, reverse=True)
     if ordered:
-        rows = "".join(
-            f'<a class="cmp-item ix-row ix-cmp" href="{c.esc(x.slug)}/index.html">'
-            f'<span class="ix-when">{c.esc(x.date[5:] or x.date)}</span>'
-            f'<span class="ix-main">'
-            f'<span class="cmp-item-t">{c.esc(x.title)}</span>'
-            f"{_fork(x, papers_by_id)}</span>"
-            f'<span class="ix-pillars">{c.pillar_chips(x.pillars)}</span>'
-            f'<span class="ix-size">{len(x.paper_ids)}편</span></a>'
-            for x in ordered
-        )
+        counts = Counter(p for x in ordered for p in x.pillars)
+        items = "".join(
+            f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
+            f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
+            f'<span class="sw"></span><b>{c.esc(k)}</b>'
+            f'<span class="rl">{c.esc(PILLAR_LABELS.get(k, "축 미지정"))}</span>'
+            f'<span class="rn">{counts[k]}</span></button>'
+            for k in PILLAR_ORDER if counts.get(k))
+        line = (
+            '<div class="pline" data-filters role="group" aria-label="연구 축으로 거르기">'
+            f'<span class="pline-ic" aria-hidden="true">{c.icon("layers", 18)}</span>'
+            f'<div class="pline-items" data-pline>{items}</div>'
+            f'<span class="pline-stat"><span data-result-count>{len(ordered)}편</span>'
+            f' · 최근 {c.esc(ordered[0].date)}</span></div>')
+
+        def card(x) -> str:
+            names = [_alias(papers_by_id[pid]) if pid in papers_by_id else pid
+                     for pid in x.paper_ids]
+            stances = x.stances if len(x.stances) == len(names) else [""] * len(names)
+            sides = "".join(f'<p class="cmp-st"><b>{c.esc(n)}</b><span>{c.esc(s)}</span></p>'
+                            for n, s in zip(names, stances))
+            common = (f'<p class="cmp-common"><b>공통</b>{c.esc(x.common)}</p>'
+                      if x.common else "")
+            return (f'<a class="card cmp-q" href="{c.esc(x.slug)}/index.html" '
+                    f'data-pillars="{" ".join(x.pillars)}">'
+                    f'<div class="card-top"><p class="card-chips">{c.pillar_chips(x.pillars)}</p>'
+                    f'<span class="card-id">{c.esc(_md_date(x.date))}</span></div>'
+                    f'<h3>{c.esc(x.title)}</h3>{common}<div class="cmp-sts">{sides}</div></a>')
+
+        # Three across at most, as many columns as keep the rows even.
+        cols = -(-len(ordered) // -(-len(ordered) // 3))
         list_html = (
-            '<div class="ix-head ix-cmp" aria-hidden="true"><span>작성</span>'
-            '<span>질문 · 공통 → 갈래</span><span>연구 축</span><span>논문</span></div>'
-            f'<div class="cmp-list">{rows}</div>'
-            + _ix_foot(f"비교 {len(ordered)}건")
-        )
+            f'{line}<div class="cards" style="--cols:{cols}" data-cards>'
+            + "".join(card(x) for x in ordered) + "</div>"
+            '<p class="corpus-empty" data-empty hidden>이 연구 축의 비교가 아직 없습니다.</p>')
     else:
         list_html = '<p class="corpus-empty">아직 비교한 글이 없습니다.</p>'
 
@@ -1382,9 +1345,9 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
 
     body = f"""{head}
 
-<main class="hub hub-wide">
+<div class="deck"><main class="cmps">
   {list_html}
-</main>
+</main></div>
 """
     return c.page(
         title="비교 · PROBE",
@@ -1392,6 +1355,7 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
         description="재작성본이 있는 논문 두세 편을 한 질문 아래 놓고, 갈리는 자리만 원문에서 확인한 비교",
         body=body,
         depth=1,
+        scripts=["cards.js"],
         extra_head=f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">',
     )
 
@@ -1402,7 +1366,7 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
 # one window each — and read per date for the reader's: what did this run turn
 # up, and which of it did more than one axis notice.
 
-# Where a pick sits in its pillar's report, as the row prints it. Words, not
+# Where a pick sits in its pillar's report, as the chip prints it. Words, not
 # the report's medal glyphs: an emoji is the reader's device's drawing, and
 # the rank is a fact a short label states as well.
 _PICK_LABEL = {"🥇": "1위", "🥈": "2위", "🥉": "3위", "🌱": "인접", "📋": "추가"}
@@ -1427,13 +1391,16 @@ def _scout_md(text: str, decisions: dict, *, inline: bool = False) -> str:
 
 
 def _scout_chip(pick) -> str:
-    return c.chip(f"{pick.pillar} · {_PICK_LABEL[pick.kind]}", "pillar",
-                  data={"p": pick.pillar})
+    """The axis and the rank it gave the paper, in one pill — `P2 · 1위`.
+    The same chip on a card, a row and the detail, so a rank reads the same
+    wherever the paper is."""
+    return (f'<span class="chip pillar sn-rk" data-p="{c.esc(pick.pillar)}">'
+            f'{c.esc(pick.pillar)}<i>·</i>{_PICK_LABEL[pick.kind]}</span>')
 
 
 # A figure in a report's prose — `1,880.2시간`, `84.0%`, `5개` — is what a
-# reader scanning a row is looking for, so the page marks it. A digit inside a
-# code (`D4QX`) or an id is not a figure.
+# reader scanning the detail is looking for, so the page marks it. A digit
+# inside a code (`D4QX`) or an id is not a figure.
 # A bare number counts only when nothing word-like follows it: `1단계` and
 # `5과제` are an ordinal and a count-word, not figures a reader scans for.
 _FIGURE = re.compile(r"(?<![A-Za-z\d.])(\d[\d,]*(?:\.\d+)?"
@@ -1452,25 +1419,13 @@ def _bullets(md: str) -> list[str]:
     return [line[2:].strip() for line in md.splitlines() if line.startswith("- ")]
 
 
-# The (c) headline's limit (`scouting/AUTHORING.md` §2-2). A reading whose
-# first line runs past it predates the rule and is drawn as plain prose.
-_HEADLINE_MAX = 50
-
-
-def _scout_axis(pick, decisions: dict) -> str:
-    """One pillar's reading of the paper: its rank and its headline on one
-    line, and the rest of what it wrote under them, quieter. A 📋 row has only
-    its one line."""
-    if not pick.full:
-        return (f'<div class="sc-ax sc-ax-row"><p class="sc-ax-h">{_scout_chip(pick)}'
-                f'<span>{_figures(_scout_md(pick.gist, decisions, inline=True))}</span></p></div>')
-    lines = [_figures(_scout_md(l, decisions, inline=True))
-             for l in (_bullets(pick.implic) or [pick.implic])]
-    raw = (_bullets(pick.implic) or [pick.implic])[0]
-    long = ' class="sc-ax-long"' if len(_plain_text(raw)) > _HEADLINE_MAX else ""
-    head = f'<p class="sc-ax-h">{_scout_chip(pick)}<span{long}>{lines[0]}</span></p>'
-    rest = "".join(f"<li>{l}</li>" for l in lines[1:])
-    return f'<div class="sc-ax">{head}' + (f'<ul class="sc-ax-t">{rest}</ul>' if rest else "") + "</div>"
+def _after_headline(md: str) -> str:
+    """A pick's "what" with its first bullet — the card's one line — taken out."""
+    lines = md.splitlines()
+    first = next((i for i, l in enumerate(lines) if l.startswith("- ")), None)
+    if first is None:
+        return md
+    return "\n".join(lines[:first] + lines[first + 1:]).strip()
 
 
 # What the paper's Real score says about its hardware evidence, in the words
@@ -1480,218 +1435,281 @@ def _scout_axis(pick, decisions: dict) -> str:
 _REAL_LABEL = {3: "실물 정량, 다수 과제", 2: "실물 정량 결과", 1: "실물 시연만", 0: "실물 결과 없음"}
 
 
-# The brief's six fields read as three steps of one argument — why the paper
-# exists, how it answers, what it leaves — and the card draws the steps so the
-# eye finds the field it wants by where it sits, not by reading every label.
-_BRIEF_STEPS = (("문제의식", ("문제", "기존 한계")),
-                ("접근", ("핵심 방법", "차별점")),
-                ("성과", ("핵심 기여", "가치")))
+def _scout_tags(paper) -> str:
+    """The two judgements a reader decides by — whether the result stands on
+    a robot, and whether the code is out — as quiet tags."""
+    real = paper.lead.dims.get("Real")
+    tags = [t for t in ((_REAL_LABEL[real] if real is not None else ""), paper.code) if t]
+    return ('<p class="card-tags">' + "".join(f"<span>{c.esc(t)}</span>" for t in tags) + "</p>"
+            if tags else "")
 
 
-def _scout_brief(brief: list[tuple[str, str]], decisions: dict) -> str:
-    """(b)'s labelled fields as one card (AUTHORING §2-2)."""
-    fields = dict(brief)
-    steps = []
-    for step, labels in _BRIEF_STEPS:
-        rows = "".join(
-            f'<div class="sc-bf"><dt>{c.esc(label)}</dt>'
-            f'<dd>{_figures(_scout_md(fields[label], decisions))}</dd></div>'
-            for label in labels)
-        steps.append(f'<div class="sc-bstep" data-step="{c.esc(step)}">'
-                     f'<span class="sc-bstep-h">{c.esc(step)}</span><dl>{rows}</dl></div>')
-    return f'<section class="sc-blk sc-brief"><h3>논문 요지</h3>{"".join(steps)}</section>'
-
-
-def _after_headline(md: str) -> str:
-    """A pick's "what" with its first bullet — the row's headline — taken out."""
-    lines = md.splitlines()
-    first = next((i for i, l in enumerate(lines) if l.startswith("- ")), None)
-    if first is None:
-        return md
-    return "\n".join(lines[:first] + lines[first + 1:]).strip()
-
-
-def _plain_text(md: str) -> str:
-    return re.sub(r"\]\([^)]*\)|[*`\[\]]", "", md)
-
-
-def _scout_name(paper) -> str:
-    """The paper's own name: its title as the authors wrote it, the codename
-    in bold only where the title opens on it (`WB-WAM: Heterogeneous …`). A
-    name the title does not carry is never printed as if it were the paper's
-    — a reader searching arXiv for it finds nothing. A 📋 row carries no
-    title, only its `Paper` cell, which `scouting/AUTHORING.md` §7-2 makes
-    that same codename or the full title; a cell with a space in it is read
-    as a title."""
+def _scout_title(paper) -> str:
+    """The English title with its codename taken off the front when the card
+    already prints that codename as its name (`WB-WAM: Heterogeneous …`)."""
     title, alias = paper.title, paper.alias
-    if title:
-        head, colon, rest = title.partition(":")
-        if colon and rest.strip() and head.strip() == alias:
-            return (f'<b class="sc-cn">{c.esc(alias)}</b>'
-                    f'<span class="sc-rest">: {c.esc(rest.strip())}</span>')
-        return f'<span class="sc-whole">{c.esc(title)}</span>'
-    if " " in alias:
-        return f'<span class="sc-whole">{c.esc(alias)}</span>'
-    return f'<b class="sc-cn">{c.esc(alias)}</b>'
+    head, colon, rest = title.partition(":")
+    if colon and rest.strip() and head.strip() == alias:
+        return rest.strip()
+    return title if title != alias else ""
 
 
-def _scout_rail(paper_id: str) -> str:
-    """The paper's arXiv id in front of the row, linking its abstract, open
-    without opening the row. The arXiv page is the one door: its own links
-    reach the HTML edition and the PDF. A column of ids down the list also
-    reads against a report or a run file by eye."""
-    pid = c.esc(paper_id)
-    return (f'<span class="sc-rail"><a class="sc-id" href="https://arxiv.org/abs/{pid}" '
-            f'target="_blank" rel="noopener" title="arXiv 초록">{pid}'
-            f'<span aria-hidden="true">↗</span></a></span>')
+def _scout_picks(paper) -> list:
+    return sorted(paper.picks, key=lambda p: (not p.full, p.rank))
 
 
-def _scout_item(paper, decisions: dict, papers_by_id: dict, up: str) -> str:
-    lead = paper.lead
-    picks = sorted(paper.picks, key=lambda p: (not p.full, p.rank))
-    chips = "".join(_scout_chip(p) for p in picks)
-    rewrite = (f'<a class="sc-rw" href="{up}p/{c.esc(paper.paper_id)}/index.html">재작성본</a>'
-               if paper.paper_id in papers_by_id else "")
-    # Code that is out or promised is something to act on; 코드 미공개 is not,
-    # so the row prints nothing for it. Beside it, whether the result stands
-    # on a robot — the one part of the rubric a reader decides by.
-    code = "" if paper.code == "코드 미공개" else c.esc(paper.code)
-    real = lead.dims.get("Real")
-    real = f"<span>{_REAL_LABEL[real]}</span>" if real is not None else ""
-    code = f"<span>{code}</span>" if code else ""
-    code = (f'<span class="sc-code">{real}{code}{rewrite}</span>'
-            if code or real or rewrite else "")
-    meta = " · ".join(c.esc(m) for m in lead.meta)
-    axes = "".join(_scout_axis(p, decisions) for p in picks)
-    # Two columns and nothing across their foot: what the paper is on the
-    # left, and on the right the judgement — what it means for each axis,
-    # then what to check first. The right column is the short one, so it
-    # stays beside the reader while the left runs on (`scout.js` pins it
-    # when it fits the screen), and on a phone it comes first. The row
-    # already prints the first "what" line as its headline, so the open row
-    # starts at the second. A paper no pillar wrote up has only its axis
-    # rows, and one 📋 row has nothing to open.
-    why = f'<section class="sc-blk"><h3>연구 축별 시사점</h3><div class="sc-axes">{axes}</div></section>'
-    if lead.full:
-        contrib = _after_headline(lead.contrib)
-        if lead.brief:
-            what = _scout_brief(lead.brief, decisions)
+def _arxiv_href(paper_id: str) -> str:
+    return f"https://arxiv.org/abs/{c.esc(paper_id)}"
+
+
+def _scout_card(paper, decisions: dict, fig: dict | None) -> str:
+    """A recommended paper: its axes and rank, its arXiv id, its name, the
+    overview figure, the English title, one line, the two tags. The whole
+    card opens the detail; the id is the one link out."""
+    pid = c.esc(paper.paper_id)
+    chips = "".join(_scout_chip(p) for p in _scout_picks(paper))
+    title = _scout_title(paper)
+    figure = (f'<div class="card-fig"><img src="{c.esc(fig["url"])}" alt="" loading="lazy" '
+              f'decoding="async"></div>' if fig else "")
+    gist = (f'<p class="card-gist">{_scout_md(paper.gist, decisions, inline=True)}</p>'
+            if paper.gist else "")
+    return (f'<article class="card" data-open="{pid}">'
+            f'<div class="card-top"><p class="card-chips">{chips}</p>'
+            f'<a class="card-id" href="{_arxiv_href(paper.paper_id)}" target="_blank" '
+            f'rel="noopener" title="arXiv 초록">{pid}</a></div>'
+            f'<h3><a href="#p-{pid}" data-detail="{pid}" title="{c.esc(paper.title)}">'
+            f'{c.esc(paper.alias)}</a></h3>{figure}'
+            + (f'<p class="card-title">{c.esc(title)}</p>' if title else "")
+            + f'{gist}{_scout_tags(paper)}</article>')
+
+
+def _scout_row(paper, decisions: dict) -> str:
+    """A candidate in the analysis list's table: the arXiv id, the name over
+    its line, the axes with their ranks."""
+    pid = c.esc(paper.paper_id)
+    chips = "".join(_scout_chip(p) for p in _scout_picks(paper))
+    line = _scout_md(paper.gist, decisions, inline=True) if paper.gist else c.esc(paper.title)
+    return (f'<li class="tl-row" data-open="{pid}">'
+            f'<a class="tl-id" href="{_arxiv_href(paper.paper_id)}" target="_blank" '
+            f'rel="noopener" title="arXiv 초록">{pid}</a>'
+            f'<a class="tl-main" href="#p-{pid}" data-detail="{pid}" title="{c.esc(paper.title)}">'
+            f'<span class="tl-t">{c.esc(paper.alias)}</span><span class="tl-g">{line}</span></a>'
+            f'<span class="tl-p">{chips}</span></li>')
+
+
+# ── The detail ──────────────────────────────────────────────────────────────
+# The brief's six fields, read as four tabs of about one length each: three
+# fields to a tab would put three quarters of a write-up behind its first tab.
+# Every heading inside is the first screen's heading — a short bold noun, then
+# a grey line saying what the noun stands for.
+_TAB_FIELDS = (("q", "문제", ("문제", "기존 한계")),
+               ("m", "방법", ("핵심 방법", "차별점")),
+               ("r", "결과", ("핵심 기여", "가치")))
+_FIELD_NOUN = {"문제": ("질문", "이 논문이 푸는 것"), "기존 한계": ("한계", "기존 방법이 막힌 곳"),
+               "핵심 방법": ("핵심", "무엇을 하나"), "차별점": ("차이", "기존과 다른 점"),
+               "핵심 기여": ("기여", "저자가 내세우는 것"), "가치": ("가치", "남는 것")}
+# A field's first line that only announces the list under it ("저자들이
+# 주장하는 세 가지") says nothing the list does not, and is left out.
+_ANNOUNCE_MAX = 22
+_WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
+
+
+def _noun_head(noun: str, sub: str) -> str:
+    return f'<h4 class="dx-nh">{c.esc(noun)}<span class="dx-nsub">{c.esc(sub)}</span></h4>'
+
+
+def _brief_field(label: str, md: str, gist_words: list[str], decisions: dict) -> str:
+    """One field under its noun heading: its first line, then its list.
+
+    The first line is dropped when it only announces the list, or when it
+    says again what the one line under the paper's name already said."""
+    lead, _, rest = md.partition("\n")
+    plain = _md_plain(lead).strip()
+    words = _WORD.findall(plain)
+    shared = sum(1 for w in gist_words if w in words)
+    announce = bool(rest.strip()) and len(plain) < _ANNOUNCE_MAX
+    repeat = bool(gist_words) and shared >= max(2, -(-len(gist_words) // 2))
+    body = ("" if announce or repeat
+            else f'<p class="dx-lead">{_figures(_scout_md(lead, decisions, inline=True))}</p>')
+    if rest.strip():
+        body += _figures(_scout_md(rest, decisions))
+    return f'<section class="dx-ns">{_noun_head(*_FIELD_NOUN[label])}{body}</section>'
+
+
+def _scout_axes(paper, decisions: dict) -> str:
+    """Each pillar's reading: its chip and headline on one line, the rest of
+    what it wrote under them. A 📋 row has only its one line."""
+    out = []
+    for pick in _scout_picks(paper):
+        if pick.full:
+            lines = _bullets(pick.implic) or [pick.implic]
+            head, rest = lines[0], lines[1:]
         else:
-            what = (f'<section class="sc-blk"><h3>무엇인가</h3>'
-                    f'{_figures(_scout_md(contrib, decisions))}</section>' if contrib else "")
-        check = (f'<section class="sc-blk sc-check"><h3>먼저 확인할 점</h3>'
-                 f'{_figures(_scout_md(lead.check, decisions))}</section>')
-        judge = f'<div class="sc-stack sc-judge">{why}{check}</div>'
-        body = f'<div class="sc-cols2">{what}{judge}</div>' if what else judge
-    elif len(picks) == 1:
-        body = ""
-    else:
-        body = why
-    row = (f'{_scout_rail(paper.paper_id)}'
-           f'<span class="sc-main"><span class="sc-t">{_scout_name(paper)}</span>'
-           f'<span class="sc-gist">{_scout_md(paper.gist, decisions, inline=True)}</span></span>'
-           f'<span class="sc-side"><span class="sc-picks">{chips}</span>{code}</span>')
-    attrs = f'id="p-{c.esc(paper.paper_id)}" data-pillars="{" ".join(paper.pillars)}"'
-    if not body:
-        return f'<div class="sc-item" {attrs}><div class="sc-row sc-flat">{row}</div></div>'
-    foot = f'<p class="sc-links">{meta}</p>' if meta else ""
-    return (f'<details class="sc-item" {attrs}><summary class="sc-row">{row}</summary>'
-            f'<div class="sc-body">{body}{foot}</div></details>')
+            head, rest = pick.gist, []
+        items = "".join(f"<li>{_figures(_scout_md(l, decisions, inline=True))}</li>" for l in rest)
+        out.append(f'<div class="dx-ax"><p class="dx-ax-h">{_scout_chip(pick)}'
+                   f'<span>{_figures(_scout_md(head, decisions, inline=True))}</span></p>'
+                   + (f"<ul>{items}</ul>" if items else "") + "</div>")
+    return "".join(out)
 
 
-def _scout_status(run) -> str:
-    """What the run holds, as four counts, and any pillar it has no report
-    for. The pillars that did arrive are the filter's chips, so they are not
-    printed twice; their reports are linked at the foot of the page."""
-    missing = "".join(f'<span class="chip sc-missing">{p} {c.esc(why)}</span>'
-                      for p, why in run.missing.items())
-    shared = sum(1 for p in run.papers if p.group == "shared")
-    asked = len(run.arrived) + len(run.missing)
-    stats = (("게이트 통과", f"{len(run.papers)}", "편"),
-             ("여러 연구 축이 지목", f"{shared}", "편"),
-             ("근접 후보", f"{len(run.near)}", "편"),
-             ("연구 축", f"{len(run.arrived)}", f"/{asked}"))
-    tiles = "".join(f'<div><dt>{c.esc(k)}</dt><dd>{v}<small>{c.esc(u)}</small></dd></div>'
-                    for k, v, u in stats)
-    return (f'<div class="sc-status"><dl class="sc-stats">{tiles}</dl>'
-            + (f'<span class="sc-arrive">{missing}</span>' if missing else "") + "</div>")
+def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "") -> str:
+    """Everything the run says about one paper, as one article.
+
+    `rewrite` is the address of the paper's own rewrite when the corpus has
+    one: the head links it beside arXiv, so a scouted paper already read in
+    full is one click from that reading.
+
+    With a script the article opens in a drawer — from the side, or from
+    below on a phone — and its four tabs show one at a time. Without one the
+    articles stand in a column at the page's foot, every tab open under its
+    own name, and a card's link is a jump to its article."""
+    pid = c.esc(paper.paper_id)
+    lead = paper.lead
+    chips = "".join(_scout_chip(p) for p in _scout_picks(paper))
+    title = _scout_title(paper)
+    # Who wrote it and where it appeared belongs with the title, once, not at
+    # the foot of every tab.
+    by = " · ".join(c.esc(m) for m in lead.meta)
+    head = (f'<header class="sd-h"><div class="sd-top"><p class="card-chips">{chips}</p>'
+            f'<a class="card-id" href="{_arxiv_href(paper.paper_id)}" target="_blank" '
+            f'rel="noopener">arXiv {pid} ↗</a>'
+            + (f'<a class="card-id sd-rw" href="{c.esc(rewrite)}">분석 읽기</a>' if rewrite else "")
+            + '</div>'
+            f'<h2>{c.esc(paper.alias)}</h2>'
+            + (f'<p class="sd-t">{c.esc(title)}</p>' if title else "")
+            + (f'<p class="sd-by">{by}</p>' if by else "")
+            + (f'<p class="sd-g">{_scout_md(paper.gist, decisions, inline=True)}</p>'
+               if paper.gist else "")
+            + _scout_tags(paper) + "</header>")
+    figure = (f'<figure class="sd-fig"><img src="{c.esc(fig["url"])}" alt="" loading="lazy" '
+              f'decoding="async"><figcaption>{c.esc(fig["caption"])}'
+              f'<span>{c.esc(fig["source"])}</span></figcaption></figure>' if fig else "")
+
+    gist_words = _WORD.findall(_md_plain(paper.gist))
+    tabs: list[tuple[str, str, str, str]] = []   # key, name, count, body
+    if lead.full and lead.brief:
+        fields = dict(lead.brief)
+        for key, name, labels in _TAB_FIELDS:
+            tabs.append((key, name, "", "".join(
+                _brief_field(l, fields[l], gist_words, decisions) for l in labels)))
+    elif lead.full:
+        # A report written before the brief has one block of prose on what
+        # the paper is; it reads as one tab.
+        what = _after_headline(lead.contrib)
+        if what:
+            tabs.append(("w", "요지", "", f'<section class="dx-ns">{_noun_head("요지", "무엇인가")}'
+                                         f'{_figures(_scout_md(what, decisions))}</section>'))
+    checks = _bullets(lead.check) if lead.full else []
+    judge = (f'<section class="dx-ns">{_noun_head("시사점", "연구 축별")}'
+             f'{_scout_axes(paper, decisions)}</section>')
+    if lead.full and lead.check.strip():
+        n = f" · {len(checks)}" if checks else ""
+        judge += (f'<section class="dx-ns dx-check"><h4 class="dx-nh">확인'
+                  f'<span class="dx-nsub">먼저 볼 것{n}</span></h4>'
+                  f'{_figures(_scout_md(lead.check, decisions))}</section>')
+    tabs.append(("u", "판단", str(len(checks)) if checks else "", judge))
+
+    bar = "".join(
+        f'<button type="button" role="tab" data-dx-tab="{k}" aria-selected="{str(i == 0).lower()}">'
+        f'{name}' + (f'<span class="dx-tc">{n}</span>' if n else "") + "</button>"
+        for i, (k, name, n, _) in enumerate(tabs))
+    panes = "".join(
+        f'<div class="dx-pane" role="tabpanel" data-dx-pane="{k}">'
+        f'<h3 class="dx-pt">{name}</h3>{body}</div>'
+        for k, name, _, body in tabs)
+    return (f'<article class="sd" id="p-{pid}" data-sd="{pid}">{head}{figure}'
+            f'<div class="dx"><div class="dx-tabbar" role="tablist">{bar}</div>{panes}</div>'
+            "</article>")
 
 
-def _scout_runs(runs: list, here: str, up_to_s: str) -> str:
-    """The way to the other runs: one step older, one step newer, and every run
-    by month behind the run on screen.
-
-    One line however many runs there are — a run a week is a hundred runs in
-    two years, and a row of a hundred tabs is a row nobody can find a date in.
-    The neighbours cover the common move, reading back one run at a time; the
-    month list covers the rare one, going to a date. The list is a native
-    `<details>`, so it opens with no script; `scout.js` only closes it when the
-    reader clicks away."""
-    i = next(k for k, r in enumerate(runs) if r.date == here)
-    run = runs[i]
-
-    def href(date: str) -> str:
-        return f"{up_to_s}{date}/index.html"
-
-    older = (f'<a class="sc-step" href="{href(runs[i + 1].date)}" rel="prev">'
-             f'← {c.esc(runs[i + 1].date[5:])}</a>' if i + 1 < len(runs)
-             else '<span class="sc-step" aria-hidden="true"></span>')
-    newer = (f'<a class="sc-step sc-newer" href="{href(runs[i - 1].date)}" rel="next">'
-             f'{c.esc(runs[i - 1].date[5:])} →</a>' if i > 0
-             else '<span class="sc-step" aria-hidden="true"></span>')
-    months: dict[str, list] = {}
-    for r in runs:
-        months.setdefault(r.date[:7], []).append(r)
-    current = ' aria-current="page"'
-    menu = "".join(
-        f'<div class="sc-mo"><span class="sc-mo-h">{c.esc(month)}</span><span class="sc-mo-l">'
-        + "".join(f'<a href="{href(r.date)}"{current if r.date == here else ""}>'
-                  f'{c.esc(r.date[8:])}<small>{len(r.papers)}</small></a>' for r in members)
-        + "</span></div>"
-        for month, members in months.items())
-    return (
-        '<nav class="sc-runs" aria-label="회차">'
-        f"{older}"
-        '<details class="sc-pick" data-scout-pick>'
-        f'<summary><h2 class="sc-date">{c.esc(run.date)}</h2>'
-        f'<span class="sc-pick-n">{len(run.papers)}편 · 회차 {len(runs)}개</span></summary>'
-        f'<div class="sc-menu">{menu}</div></details>'
-        f"{newer}</nav>"
-    )
+# ── The run picker ──────────────────────────────────────────────────────────
+_WEEKDAYS = ("월", "화", "수", "목", "금", "토", "일")
 
 
-def _scout_filter(run_pillars: list[str]) -> str:
-    """Which pillars to show, and the one switch that opens every row.
+def _md_date(date: str) -> str:
+    return f"{date[5:7]}.{date[8:10]}"
 
-    Scripted only — `scout.js` wires it and `scout.css` keeps it off an
-    unscripted page, which gets every row closed and the browser's own
-    disclosure to open each."""
-    pills = "".join(
-        f'<button type="button" class="chip pillar" data-p="{p}" aria-pressed="false" '
-        f'data-scout-p="{p}">{p} {c.esc(PILLAR_LABELS[p])}</button>'
-        for p in run_pillars)
-    return (f'<div class="sc-filter" role="group" aria-label="연구 축으로 거르기">{pills}'
-            '<span class="filter-spacer"></span>'
-            '<button type="button" class="sc-open" data-scout-open aria-pressed="false">모두 펼치기</button>'
-            '<span class="sc-shown" data-scout-shown aria-live="polite"></span></div>')
+
+def _scout_calendar(runs: list, here: str, href) -> str:
+    """Every month that has a run, as a month grid with each run's day a link.
+
+    The months stand one under another; `scout.js` shows the one the page's
+    run is in and steps between them. The grid is a native `<details>` behind
+    the date line's calendar cell, so it opens with no script."""
+    import calendar as _cal
+    by_date = {r.date: r for r in runs}
+    months = sorted({r.date[:7] for r in runs}, reverse=True)
+    out = []
+    for ym in months:
+        y, m = int(ym[:4]), int(ym[5:])
+        start, days = _cal.monthrange(y, m)          # Monday is 0
+        cells = [f'<span class="sn-dow">{d}</span>' for d in _WEEKDAYS]
+        cells += ['<span class="sn-day is-pad"></span>'] * start
+        for d in range(1, days + 1):
+            key = f"{ym}-{d:02d}"
+            run = by_date.get(key)
+            if run:
+                sel = ' is-sel" aria-current="page' if key == here else ""
+                cells.append(f'<a class="sn-day has-run{sel}" href="{href(key)}" '
+                             f'aria-label="{m}월 {d}일 회차, {len(run.papers)}편">'
+                             f'<span class="sn-dn">{d}</span>'
+                             f'<span class="sn-cnt">{len(run.papers)}편</span></a>')
+            else:
+                cells.append(f'<span class="sn-day"><span class="sn-dn">{d}</span></span>')
+        out.append(f'<div class="sn-month" data-month="{ym}">'
+                   '<div class="sn-cal-h">'
+                   '<button type="button" class="sn-nav" data-cal="1" aria-label="이전 달">‹</button>'
+                   f'<h2>{y}년 {m}월</h2>'
+                   '<button type="button" class="sn-nav" data-cal="-1" aria-label="다음 달">›</button>'
+                   f'</div><div class="sn-grid">{"".join(cells)}</div></div>')
+    return (f'<details class="sn-calw" data-scout-cal>'
+            f'<summary class="sn-lab" title="달력으로 보기" aria-label="달력으로 보기">'
+            f'{c.icon("calendar", 20)}</summary>'
+            f'<div class="sn-cal" data-here="{here[:7]}">{"".join(out)}</div></details>')
+
+
+def _scout_dates(runs: list, here: str, href) -> str:
+    """The date line: one link a run, newest first, its paper count beside it.
+    It stands where the analysis list's axis line stands, at the same size."""
+    items = "".join(
+        f'<a class="rail-item" href="{href(r.date)}"'
+        + (' aria-current="page"' if r.date == here else "")
+        + f' aria-label="{int(r.date[5:7])}월 {int(r.date[8:10])}일 회차, {len(r.papers)}편">'
+        f'<b>{_md_date(r.date)}</b><span class="rn">{len(r.papers)}</span></a>'
+        for r in runs)
+    return (f'<nav class="pline sn-dline" aria-label="탐색 회차">'
+            f'{_scout_calendar(runs, here, href)}'
+            f'<div class="pline-items" data-pline>{items}</div></nav>')
+
+
+def scout_split(run) -> tuple[list, list]:
+    """The run's papers as the page lays them out: the cards — a paper some
+    axis ranked first, or one more than one axis picked — and the table,
+    every other paper an axis wrote up."""
+    ordered = sorted(run.papers, key=lambda p: (p.group != "shared", not p.lead.full,
+                                                p.lead.rank))
+    first = [p for p in ordered if p.group == "shared" or (p.lead.full and p.lead.rank == 1)]
+    more = [p for p in ordered if p not in first and p.lead.full]
+    return first, more
 
 
 # The band every scouting page opens on. It names the surface and what it
-# does, as the other four bands do; which run is on screen is the page's
+# does, as the other bands do; which run is on screen is the date line's
 # business, under the band, so the band is the same on every run.
 SCOUT_EYEBROW = "Across the research axes"
 SCOUT_TITLE = "탐색, 읽을 논문을 먼저 고릅니다"
 
 
 def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
-                      *, depth: int) -> str:
-    """One run, every pillar's surfaced papers on one list.
+                      figures: dict, *, depth: int) -> str:
+    """One run: the date line, the recommended papers as cards, the rest of
+    the written-up papers as a table, and each paper's detail.
 
-    Each paper is one row however many pillars surfaced it, and the row is
-    closed: what the paper is in one line, which pillars flagged it at what
-    rank. Opened, it shows each pillar's reading side by side and the
-    paper's own contribution and caveats once, so the list scans as rows
-    rather than reads as write-ups.
+    A card is a paper some axis ranked first, or one more than one axis
+    picked; the table holds every other paper an axis wrote up. A paper an
+    axis only listed (📋) and a near miss stay in the reports, which the
+    page's foot links: the page is for choosing what to read.
 
     The page is printed twice for the newest run: at `s/` — where the nav
     lands, so a reader arrives on what came in last — and at `s/<date>/`, the
@@ -1701,58 +1719,47 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
     up = "../" * depth
     up_to_s = "" if depth == 1 else "../"
 
-    # Every group folds under its head. The last one — the papers no pillar
-    # wrote up, one 📋 row each — starts folded: it is the part of the run a
-    # reader goes looking in, not the part that should push the write-ups off
-    # the screen.
-    def group(key: str, label: str, members: list) -> str:
-        rows = "".join(_scout_item(p, decisions, papers_by_id, up) for p in members)
-        return (f'<details class="sc-group sc-fold" data-scout-group'
-                f'{"" if key == "rest" else " open"}>'
-                f'<summary class="sc-gh"><h2>{c.esc(label)}</h2>'
-                f'<span class="sc-gn">{len(members)}편</span></summary>{rows}</details>')
-    groups = "".join(group(*g) for g in run.grouped())
-    if not groups:
-        groups = '<p class="corpus-empty">이 회차에 게이트를 통과한 논문이 없습니다.</p>'
+    def href(date: str) -> str:
+        return f"{up_to_s}{date}/index.html"
 
-    near = run.near
-    near_html = ""
-    if near:
-        rows = "".join(
-            f'<tr><td><a href="https://arxiv.org/abs/{c.esc(n.paper_id)}" target="_blank" '
-            f'rel="noopener"><b>{c.esc(n.alias)}</b></a></td>'
-            f'<td>{c.chip(n.pillar, "pillar", data={"p": n.pillar})}</td>'
-            f'<td>{_scout_md(n.condition, decisions, inline=True)}</td></tr>'
-            for n in near)
-        # Folded under the same head the groups above use: it is one more
-        # cut of the run's papers, the ones a single gate axis kept out.
-        near_html = (
-            '<details class="sc-group sc-fold">'
-            f'<summary class="sc-gh"><h2>근접 후보</h2><span class="sc-gn">{len(near)}편</span></summary>'
-            '<div class="sc-scroll"><table class="sc-table"><thead><tr><th>논문</th><th>연구 축</th>'
-            f'<th>재검토 조건</th></tr></thead><tbody>{rows}</tbody></table></div>'
-            "</details>")
+    first, more = scout_split(run)
+
+    # As many columns as keep the rows even — five cards are three and two,
+    # never four and one — and a short row's cards widen to fill it.
+    cols = -(-len(first) // -(-len(first) // 4)) if first else 1
+    cards = "".join(_scout_card(p, decisions, figures.get(p.paper_id)) for p in first)
+    cards = (f'<div class="cards" style="--cols:{cols}">{cards}</div>' if cards
+             else '<p class="corpus-empty">이 회차에 게이트를 통과한 논문이 없습니다.</p>')
+    table = ""
+    if more:
+        rows = "".join(_scout_row(p, decisions) for p in more)
+        table = ('<div class="tl-head" aria-hidden="true"><span>arXiv</span>'
+                 '<span>논문 · 한 줄</span><span>연구 축</span></div>'
+                 f'<ul class="tl">{rows}</ul>')
+    details = "".join(
+        _scout_detail(p, decisions, figures.get(p.paper_id),
+                      f"{up}p/{p.paper_id}/index.html" if p.paper_id in papers_by_id else "")
+        for p in first + more)
+
     # A pillar's own 🔄 compares it with its earlier reports — the routine's
     # working record, read in the pillar's file. The page reads the run as a
-    # whole and links the files.
+    # whole and links the files, which also hold what the page leaves out.
     sources = " · ".join(
         f'<a href="{BLOB}/{c.esc(r.source)}" target="_blank" rel="noopener">{r.pillar}</a>'
         for r in run.reports)
     if run.run_file:
         sources += (f' · <a href="{BLOB}/scouting/runs/{c.esc(run.date)}.md" target="_blank" '
                     'rel="noopener">회차</a>')
-    sources_html = f'<p class="sc-sources">원본 리포트 · {sources}</p>'
 
     head = c.mast(eyebrow=SCOUT_EYEBROW, title=SCOUT_TITLE)
     body = f"""{head}
 
-<main class="hub hub-wide sc" data-scout>
-  {_scout_runs(runs, run.date, up_to_s)}
-  {_scout_status(run)}
-  {_scout_filter(run.arrived)}
-  {groups}
-  {near_html}
-  {sources_html}
+<main class="sn" data-scout>
+  {_scout_dates(runs, run.date, href)}
+  {cards}
+  {table}
+  <section class="sd-all" aria-label="세부 내용">{details}</section>
+  <p class="sc-sources">원본 리포트 · {sources}</p>
 </main>
 """
     return c.page(

@@ -1,13 +1,11 @@
-/* 탐색 — the pillar filter, the one switch that opens every row, and the
- * run picker's closing.
+/* 탐색 — the detail drawer, its tabs, the calendar and the date line.
  *
- * The page is complete without this: every row is a `<details>` the browser
- * opens on its own, and `scout.css` keeps these controls off an unscripted
- * page. What the script adds is narrowing — show the papers any of the chosen
- * pillars flagged — opening the whole list at once for a reader who wants to
- * read rather than scan, and pinning an open row's judgement column beside
- * its longer brief. No choice is remembered: a filter is a question about
- * this run, not a setting.
+ * The page is complete without this: the date line and the calendar are
+ * links, and every paper's detail stands at the page's foot with a card's
+ * link a jump to it. What the script adds is reading a paper without leaving
+ * the list — its detail opens in a drawer from the side (a sheet from below
+ * on a phone) with its four parts as tabs — and a calendar that shows one
+ * month at a time.
  */
 
 (function () {
@@ -16,85 +14,112 @@
 const root = document.querySelector("[data-scout]");
 if (!root) return;
 
-const pills = Array.from(root.querySelectorAll("[data-scout-p]"));
-const openBtn = root.querySelector("[data-scout-open]");
-const shown = root.querySelector("[data-scout-shown]");
-const groups = Array.from(root.querySelectorAll("[data-scout-group]"));
-const items = Array.from(root.querySelectorAll(".sc-item"));
+/* ── The drawer ───────────────────────────────────────────────────────── */
+const dw = document.createElement("div");
+dw.className = "sd-dw"; dw.hidden = true;
+dw.innerHTML = '<div class="sd-bg" data-sd-close></div>'
+  + '<section class="sd-p" role="dialog" aria-modal="true"></section>';
+document.body.appendChild(dw);
+const panel = dw.querySelector(".sd-p");
+const X = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" '
+  + 'stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>';
+let host = null, back = null;
 
-function apply() {
-  const on = pills.filter(b => b.getAttribute("aria-pressed") === "true")
-                  .map(b => b.dataset.scoutP);
-  let visible = 0;
-  for (const item of items) {
-    const ps = item.dataset.pillars.split(" ");
-    const hit = !on.length || ps.some(p => on.includes(p));
-    item.hidden = !hit;
-    if (hit) visible += 1;
-  }
-  for (const g of groups) {
-    const n = g.querySelectorAll(".sc-item:not([hidden])").length;
-    g.hidden = n === 0;
-  }
-  shown.textContent = on.length ? `${visible}편 표시` : "";
+function close() {
+  if (dw.hidden) return;
+  dw.hidden = true; panel.innerHTML = "";
+  document.documentElement.classList.remove("sd-on");
+  if (host) host.classList.remove("is-open");
+  if (location.hash.startsWith("#p-")) history.replaceState(null, "", location.pathname + location.search);
+  if (back) back.focus({ preventScroll: true });
+  host = back = null;
 }
 
-for (const b of pills) {
-  b.addEventListener("click", () => {
-    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
-    apply();
+function open(id, from) {
+  const src = document.getElementById("p-" + id);
+  if (!src) return;
+  close();
+  // A copy, so the column the script hid keeps its articles and the ids stay
+  // unique; the copy's own id goes.
+  const art = src.cloneNode(true);
+  art.removeAttribute("id");
+  const top = art.querySelector(".sd-top");
+  top.insertAdjacentHTML("beforeend",
+    `<button type="button" class="sd-x" data-sd-close aria-label="닫기">${X}</button>`);
+  art.querySelectorAll("[data-dx-pane]").forEach((p, i) => { p.hidden = i > 0; });
+  panel.appendChild(art);
+  panel.setAttribute("aria-label", (art.querySelector("h2") || {}).textContent || "");
+  panel.scrollTop = 0;
+  dw.hidden = false;
+  document.documentElement.classList.add("sd-on");
+  host = root.querySelector(`[data-open="${CSS.escape(id)}"]`);
+  if (host) host.classList.add("is-open");
+  back = from || null;
+  history.replaceState(null, "", "#p-" + id);
+  panel.querySelector(".sd-x").focus({ preventScroll: true });
+}
+
+/* ── The calendar ─────────────────────────────────────────────────────── */
+/* One month at a time, starting on the run's own; ‹ goes back in time. The
+ * months are printed newest first, so "back" is the next one down. */
+const cal = root.querySelector("[data-scout-cal]");
+const months = cal ? [...cal.querySelectorAll(".sn-month")] : [];
+let shown = Math.max(0, months.findIndex((m) => m.dataset.month === cal.querySelector(".sn-cal").dataset.here));
+function showMonth(i) {
+  shown = Math.min(Math.max(i, 0), months.length - 1);
+  months.forEach((m, k) => {
+    m.hidden = k !== shown;
+    const [older, newer] = m.querySelectorAll("[data-cal]");
+    older.disabled = k === months.length - 1;
+    newer.disabled = k === 0;
   });
 }
+if (months.length) showMonth(shown);
 
-openBtn.addEventListener("click", () => {
-  const open = openBtn.getAttribute("aria-pressed") !== "true";
-  openBtn.setAttribute("aria-pressed", open ? "true" : "false");
-  openBtn.textContent = open ? "모두 접기" : "모두 펼치기";
-  for (const item of items) item.open = open;
-  // Opening everything opens the folded groups too; closing closes the rows
-  // and leaves each group as it stands, so the heads stay a table of contents.
-  if (open) for (const g of groups) g.open = true;
+/* ── The date line ────────────────────────────────────────────────────── */
+/* On a phone it scrolls sideways: the run on screen is brought into view,
+ * and the edge fades while more of the line is off to the right. */
+const line = root.querySelector(".sn-dline");
+const items = line && line.querySelector("[data-pline]");
+if (items) {
+  const on = items.querySelector('[aria-current="page"]');
+  if (on && items.scrollWidth > items.clientWidth)
+    items.scrollLeft = Math.max(0, on.offsetLeft - items.clientWidth / 2 + on.offsetWidth / 2);
+  const edge = () => line.classList.toggle("at-end",
+    items.scrollLeft + items.clientWidth >= items.scrollWidth - 4);
+  items.addEventListener("scroll", edge, { passive: true });
+  addEventListener("resize", edge);
+  edge();
+}
+
+/* ── Clicks ───────────────────────────────────────────────────────────── */
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-sd-close]")) { close(); return; }
+  const tab = e.target.closest("[data-dx-tab]");
+  if (tab) {
+    const box = tab.closest(".dx");
+    box.querySelectorAll("[data-dx-tab]").forEach((b) => b.setAttribute("aria-selected", String(b === tab)));
+    box.querySelectorAll("[data-dx-pane]").forEach((p) => { p.hidden = p.dataset.dxPane !== tab.dataset.dxTab; });
+    return;
+  }
+  const step = e.target.closest("[data-cal]");
+  if (step) { showMonth(shown + Number(step.dataset.cal)); return; }
+  // A click outside the open calendar closes it.
+  if (cal && cal.open && !e.target.closest("[data-scout-cal]")) cal.open = false;
+  if (!root.contains(e.target)) return;
+  const link = e.target.closest("[data-detail]");
+  if (link) { e.preventDefault(); open(link.dataset.detail, link); return; }
+  // The whole card or row opens the detail; its arXiv id still goes out.
+  const card = e.target.closest("[data-open]");
+  if (card && !e.target.closest("a, button")) open(card.dataset.open, card.querySelector("[data-detail]"));
 });
 
-// The run picker is a native `<details>` and opens without this; a reader who
-// clicks elsewhere or presses Escape expects it to close, as a menu does.
-const pick = root.querySelector("[data-scout-pick]");
-if (pick) {
-  document.addEventListener("click", e => {
-    if (pick.open && !pick.contains(e.target)) pick.open = false;
-  });
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && pick.open) {
-      pick.open = false;
-      pick.querySelector("summary").focus();
-    }
-  });
-}
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!dw.hidden) close();
+  else if (cal && cal.open) { cal.open = false; cal.querySelector("summary").focus(); }
+});
 
-// An open row's judgement column stays in view while its brief scrolls past,
-// but only when the whole column fits under the sticky bars: pinned, a
-// taller one would hide its own foot until the row ran out.
-const STICK_TOP = 140;
-function pin(item) {
-  const judge = item.querySelector(".sc-judge");
-  if (!judge || !item.open) return;
-  judge.classList.toggle("sc-pin", judge.offsetHeight < window.innerHeight - STICK_TOP);
-}
-for (const item of items) item.addEventListener("toggle", () => pin(item));
-window.addEventListener("resize", () => { for (const item of items) pin(item); });
-
-// A link to `#p-<id>` lands on that paper open, filter or no filter.
-function reveal() {
-  const id = decodeURIComponent(location.hash.slice(1));
-  const item = id && document.getElementById(id);
-  if (item && item.classList.contains("sc-item")) {
-    item.hidden = false;
-    const group = item.closest("[data-scout-group]");
-    group.hidden = false;
-    if (group.tagName === "DETAILS") group.open = true;
-    item.open = true;
-  }
-}
-window.addEventListener("hashchange", reveal);
-reveal();
+// An address that names a paper opens it, so a shared link lands on the detail.
+if (location.hash.startsWith("#p-")) open(decodeURIComponent(location.hash.slice(3)));
 })();

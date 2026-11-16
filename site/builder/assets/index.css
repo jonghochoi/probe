@@ -1,45 +1,27 @@
-/* The list pages — the landing, 서재, the 비교 index — and the
+/* The list pages — the analysis list, 탐색, 서재, the 비교 index — and the
    404 page. Every paper and comparison page skips it. Tokens all come from
    site.css, so dark mode needs no work here beyond the two places that need a
    real surface color instead of a tint. */
 
-:root {
-  /* The rail's 즐겨찾기 mark. It is the same star `components.icon("star")`
-     draws, as a mask rather than an element, because the rail paints it from
-     the swatch a facet already has rather than from an icon of its own. */
-  --star-mask: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'><path%20d='m8%201.9%201.85%203.75%204.15.6-3%202.93.71%204.13L8%2011.4l-3.71%201.91.71-4.13-3-2.93%204.15-.6Z'/></svg>");
-  /* One height for every control in the filter bar. They sit side by side on
-     one line and read as one row, so each taking whatever height its own
-     padding and font size add up to leaves the row visibly ragged — the box
-     that holds an input and a button ends up the tallest of them. */
-  --ctl-h: 2.1rem;
-}
-
 /* ── Masthead ─────────────────────────────────────────────────────────── */
-/* A band, not a hero: full width, square, one rule under it, stacked between
-   the nav and the filter bar. The list is what the page is for, so the title
+/* A band, not a hero: full width, stacked between the nav and the line the
+   list is filtered from. The list is what the page is for, so the title
    states what this is in one line and gets out of the way — which is why the
    brand arrives as a wash behind it rather than as a block of its own. Nothing
    sits beside that line: a picture there either repeats the list under the
    band or argues for it, and the list is one scroll away making its own case. */
 .mast {
-  position: relative; overflow: hidden;
-  border-bottom: 1px solid var(--border);
-  background:
-    radial-gradient(120% 150% at 88% -30%, var(--orange-soft) 0%, transparent 58%),
-    var(--surface);
+  position: relative; isolation: isolate;
 }
-/* A scan grid, faded out before it reaches the text. Two gradients and a mask
-   rather than an image, so it costs no request and follows the theme: in dark
-   `--orange-soft` is a near-black ember and the whole ground sinks. */
+/* The band: an accent wash that leans toward the second stop and melts into
+   the page below the title rather than ending on a rule — the list starts on
+   the same ground the title sits on. It runs a little past the band's box so
+   the fade has room. */
 .mast::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(var(--border-soft) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
-  background-size: 34px 34px;
-  -webkit-mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
-  mask-image: radial-gradient(120% 130% at 82% 0%, #000 12%, transparent 68%);
+  content: ""; position: absolute; inset: 0 0 -3.6rem 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, var(--band-a) 0%, var(--band-b) 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
 }
 /* The band is a heading for the list, not a pause before it, so it takes
    only the room its two lines need. One box for all four bands, whatever
@@ -76,201 +58,12 @@
   font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-/* 몇 편, 얼마나 새것 — asked and answered in the filter bar, where the count
-   is live. This one is the same pair for the reader who has no filter bar
-   because the page is unscripted, so it leaves as soon as the script arrives. */
+/* 몇 편, 얼마나 새것 — asked and answered at the axis line's end, where the
+   count is live. This one is the same pair for the reader who has no axis
+   line because the page is unscripted, so it leaves as soon as the script arrives. */
 html.js .mast-count { display: none; }
 
-/* ── Filter bar ───────────────────────────────────────────────────────── */
-/* With JS off the controls would be inert decoration, so they remove
-   themselves and the full grid below stays perfectly readable. */
-.filters {
-  display: none;
-  position: sticky; top: var(--nav-h); z-index: var(--z-raised);
-  background: color-mix(in srgb, var(--bg) 94%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-}
-html.js .filters { display: block; }
-.filters-inner {
-  max-width: 1240px; margin: 0 auto; padding: .55rem 1.25rem;
-  display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
-}
 .filter-spacer { flex: 1; }
-
-/* The box sits on the same ground as the two pill groups beside it. An input
-   is a well and a segmented group is a panel, but on one bar they are three
-   controls of one bar first — and `--surface` is above `--bg` in light while
-   `--surface-2` is below it, so grounding them differently makes the search
-   box the raised one in light and the sunken one in dark. One token is what
-   keeps the row reading the same in both themes. */
-.search {
-  display: flex; align-items: center; gap: .45rem;
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 0 .8rem;
-  height: var(--ctl-h); flex: 1 1 260px; max-width: 420px;
-  transition: border-color var(--dur-short) var(--ease-out);
-}
-.search:focus-within { border-color: var(--amber-soft); }
-.search .ico { color: var(--text-muted); }
-.search input {
-  font: inherit; font-size: var(--fs-sm); color: var(--text);
-  background: none; border: none; outline: none; width: 100%;
-}
-/* `--text-muted` at full strength: it is measured to clear 4.5:1 on every
-   ground it can land on, and thinning it with opacity spends exactly that
-   margin on the one line of text a reader needs before they know what to type. */
-.search input::placeholder { color: var(--text-muted); }
-/* The submit, inside the box it submits, and only where both halves of it
-   exist: the build emits it with the endpoint, and it stays off a browser with
-   no script to run it — the list is already filtering without either.
-
-   It carries the accent at rest, because it is the one control on this bar
-   that leaves the browser: the list below is already filtering letter for
-   letter as the reader types, and this is what spends a round trip to ask the
-   remote index the same question by meaning. Hover deepens that accent from
-   outline to fill rather than introducing it — a button whose rank arrives
-   with the cursor is a button with no rank. Outline rather than fill at rest
-   for the same reason `--orange-soft` is not used here: a full fill is what
-   `.rail-item[aria-pressed="true"]` says 선택됨 with, and that is not what an
-   idle submit means.
-
-   Corners: `--radius-sm` is what this sheet draws a control with, the nav's
-   own buttons included, and every control on this bar takes it. The two
-   radii either side of it are already spoken for — `--radius` is the card and
-   the panel (`.lead`, the chip's own dropdown), `--radius-pill` is the label
-   (`.chip`, an axis badge) — so a control borrowing one of those
-   reads as the wrong kind of thing rather than as a softer version of the
-   right one. */
-.search-go { display: none; }
-/* It is the box's right cap rather than a second box inside the first: it
-   stretches to the full height, eats the padding and the border on that side,
-   and takes the box's own radius there, so the field and its submit are one
-   shape divided rather than two shapes nested. A rule divides them, which is
-   the only edge the cap draws — an outline of its own would put a second
-   perimeter inside a perimeter. */
-html.js .search-go {
-  display: inline-flex; align-items: center; flex: none; align-self: stretch;
-  font: inherit; font-size: var(--fs-2xs); font-weight: 700;
-  padding: 0 .85rem; margin: -1px calc(-.8rem - 1px) -1px 0;
-  background: none; border: none; border-left: 1px solid var(--border);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  color: var(--orange-ink); cursor: pointer; white-space: nowrap;
-  transition: background var(--dur-short) var(--ease-out),
-              color var(--dur-short) var(--ease-out);
-}
-html.js .search-go:hover:not(:disabled) {
-  background: var(--orange); color: var(--accent-ink);
-}
-/* Nothing to ask yet. The cap keeps its place and drops to the bar's own quiet
-   ink, so the accent arriving is the signal that the question is long enough
-   to send. */
-html.js .search-go:disabled { color: var(--text-muted); cursor: default; }
-
-.sort { display: flex; gap: .1rem; background: var(--surface-2);
-        border: 1px solid var(--border); border-radius: var(--radius-sm);
-        padding: .12rem; height: var(--ctl-h); }
-.sort button {
-  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
-  padding: .22rem .65rem; border-radius: var(--radius-xs); cursor: pointer;
-  background: none; border: none; color: var(--text-muted);
-  transition: color var(--dur-short) var(--ease-out),
-              background var(--dur-short) var(--ease-out),
-              box-shadow var(--dur-short) var(--ease-out);
-}
-.sort button:hover { color: var(--text); }
-/* Which sort or which page size is on is a fact about the view, not about
-   the corpus — the lifted pill already says which one it is, so it says it in
-   ink. The accent stays on the controls that select papers: the rail's axes
-   and the reader's own two flags. */
-.sort button[aria-pressed="true"] {
-  background: var(--surface); color: var(--text);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ── The two groups, folded ───────────────────────────────────────────── */
-/* Each group is one chip carrying the choice that is on, and the group itself
-   is the panel it opens. Folded at every width rather than only where the bar
-   runs out of room: three sort buttons and three page sizes are six controls
-   standing open to say two words, and a bar that states the view in two words
-   leaves the eye on the list the view is of.
-
-   What it costs is that the alternatives are no longer on screen — a reader
-   sees 최신순 and has to open the chip to learn 연구 축별 exists. The chip
-   naming its group (`filter.js` writes `정렬: 최신순` into its `aria-label`)
-   is what keeps that one press away rather than a guess.
-
-   With no script the chip cannot open anything, so the groups stay open and
-   take the line they need. */
-.segwrap { display: contents; }
-.segchip { display: none; }
-html.js .segwrap { display: inline-block; position: relative; }
-html.js .segchip {
-  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
-  display: inline-flex; align-items: center; gap: .3rem;
-  padding: 0 .7rem; height: var(--ctl-h);
-  border-radius: var(--radius-sm); cursor: pointer;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text); white-space: nowrap;
-  transition: border-color var(--dur-short) var(--ease-out);
-}
-html.js .segchip:hover { border-color: var(--amber-soft); }
-html.js .segchip[aria-expanded="true"] { border-color: var(--amber-soft); }
-.segcaret { font-size: .75em; opacity: .55; }
-/* The panel is the group itself, stood on end under the chip — same buttons,
-   same pressed state, same handler. It takes `--surface` because a panel over
-   the page is the raised ground, where the bar it opens from is the tinted
-   one. */
-html.js .segwrap > .sort {
-  display: none; position: absolute; z-index: var(--z-panel);
-  top: calc(100% + .3rem); left: 0; min-width: 100%;
-  flex-direction: column; height: auto; padding: .25rem;
-  background: var(--surface); border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-}
-html.js .segwrap[data-open] > .sort { display: flex; }
-html.js .segwrap > .sort button {
-  display: flex; align-items: center; justify-content: space-between; gap: 1.2rem;
-  text-align: left; padding: .38rem .7rem; white-space: nowrap;
-}
-html.js .segwrap > .sort button:hover { background: var(--surface-3); }
-/* In the panel the choice that is on is marked by ink and a tick, and by
-   nothing else. The lift the group uses is a ground one step off the ground
-   under it, and inside a panel already on `--surface` there is no such step
-   left to take: `--surface-2` reads 1.06:1 against it in dark. A tick is a
-   shape rather than a ratio, so it survives a palette whose grounds sit
-   within six points of each other. */
-html.js .segwrap > .sort button[aria-pressed="true"] {
-  background: none; box-shadow: none; color: var(--text);
-}
-html.js .segwrap > .sort button[aria-pressed="true"]::after {
-  content: "✓"; font-size: .8em; line-height: 1;
-}
-
-/* The reset rides the rail's count, where the number it puts back is. This is
-   the copy for the width that has no rail, and the one control on that width
-   that sets nothing: below 900px the bar offers no facet at all, so the only
-   filter a phone can be in is one a link brought it to (`filter.js` reads
-   `#p=`, `#t=` and the shelf pair off the hash, which is what makes a filtered
-   view shareable). It is marked `data-reset="facet"`, so a typed query does
-   not raise it — the search box's own ✕ already clears that — and it is on
-   screen exactly when a filter is on that nothing else on this width can
-   undo. Without it a shared link is a room with no door. */
-.barreset {
-  font: inherit; font-size: var(--fs-2xs); font-weight: 600; display: none;
-  align-items: center; padding: 0 .7rem; height: var(--ctl-h);
-  border-radius: var(--radius-sm); cursor: pointer;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-muted); white-space: nowrap;
-  transition: border-color var(--dur-short) var(--ease-out),
-              color var(--dur-short) var(--ease-out);
-}
-.barreset:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
-@media (max-width: 900px) { html.js .barreset { display: inline-flex; } }
-/* Outweighs the media rule above, which is what `hidden` has to do here: it
-   is the attribute `filter.js` toggles, so a selector that cannot beat the
-   one putting the button on screen leaves it there with nothing to reset. */
-html.js .barreset[hidden] { display: none; }
 
 .linkish {
   font: inherit; font-size: inherit; background: none; border: none;
@@ -278,48 +71,46 @@ html.js .barreset[hidden] { display: none; }
   text-decoration: underline; text-underline-offset: 2px;
 }
 
-/* ── Deck: facet rail + list ─────────────────────────────────────── */
-/* The rail is nothing but filter controls, so with JS off it removes itself
-   and the list takes the full width. */
+/* ── Deck: the axis line over the list ────────────────────────────── */
 .deck { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
-html.js .deck {
-  display: grid; grid-template-columns: 13.5rem minmax(0, 1fr); gap: 2rem;
-  align-items: start;
+/* One card over the list: a tinted icon cell names it, the axes follow as
+   pills, and the count the filter leaves sits at the right end. The edge is a
+   firm hairline and one thin shadow — a wide soft shadow melts into the page's
+   glow and the card loses its border. It stands above the band's fade, which
+   reaches below the title. With no script the axes would be inert, so the
+   line leaves. */
+.pline { display: none; }
+html.js .pline {
+  position: relative; z-index: 1;
+  display: flex; align-items: stretch; margin: 0 0 1rem; min-width: 0;
+  border-radius: var(--radius); background: var(--surface); overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 8%, transparent);
 }
-.rail { display: none; }
-html.js .rail {
-  display: block; position: sticky; top: calc(var(--nav-h) + 3rem);
+.pline-ic {
+  flex: none; display: grid; place-items: center; width: 2.9rem;
+  background: var(--orange-soft); color: var(--orange-ink);
 }
-/* What the list currently holds, at the head of the column it is filtered
-   from. The corpus's last date rides inside the count's own box rather than
-   beside it: they are one phrase. It states what the whole corpus is, so a
-   filtered count — which is about a subset — drops it (`filter.js`).
-
-   The rail is the whole of its mobile rule: it leaves at 900px and takes this
-   with it, which is where a running count is least worth the line it costs.
-   Spacing is the following heading's, so the two never disagree. */
-.rail-stat {
-  font-size: var(--fs-2xs); color: var(--text-muted);
-  font-variant-numeric: tabular-nums; padding-left: .3rem; margin: 0;
+.pline-items {
+  flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .2rem;
+  padding: .55rem .6rem;
+  border-left: 1px solid color-mix(in srgb, var(--orange) 25%, transparent);
 }
-/* Beside the number rather than on the bar, because what it undoes is that
-   number: a reset is the way back from `35 / 42편` to `42편`, and a control
-   standing where its own effect is readable needs no label explaining it. */
-.rail-reset {
-  font: inherit; font-size: var(--fs-2xs); font-weight: 600; margin-left: .4rem;
-  padding: .06rem .36rem; border-radius: var(--radius-xs); cursor: pointer;
-  background: none; border: 1px solid var(--border); color: var(--text-muted);
-  transition: border-color var(--dur-short) var(--ease-out),
-              color var(--dur-short) var(--ease-out);
+.pline-stat {
+  flex: none; align-self: center; padding: 0 1rem;
+  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.rail-reset:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
-.rail-h {
-  font-size: var(--fs-2xs); font-weight: 700;
-  color: var(--text-muted);
-  margin: 0 0 .4rem; padding-left: .3rem;
-}
-.rail-h + .rail-item { margin-bottom: 0; }
-.rail-h:not(:first-child) { margin-top: 1.1rem; }
+.pline .rail-item { width: auto; padding: .3rem .55rem; border-radius: var(--radius-pill);
+                    font-size: var(--fs-xs); color: var(--text); align-items: baseline; }
+.pline .rail-item .sw { align-self: center; }
+.pline .rail-item .rn { font-size: var(--fs-2xs); }
+.pline .rail-item .rl { color: var(--text-muted); }
+.pline .rail-item[data-p="P0"] .sw { background: var(--p0-ink); }
+.pline .rail-item[data-p="P1"] .sw { background: var(--p1-ink); }
+.pline .rail-item[data-p="P2"] .sw { background: var(--p2-ink); }
+.pline .rail-item[data-p="P3"] .sw { background: var(--p3-ink); }
+.pline .rail-item[data-p="P4"] .sw { background: var(--p4-ink); }
+.pline .rail-item[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--accent-ink); }
 .rail-item {
   font: inherit; font-size: var(--fs-2xs); width: 100%;
   display: flex; align-items: center; gap: .4rem;
@@ -349,58 +140,16 @@ html.js .rail {
 }
 .rail-item .rl::before { content: "· "; opacity: .5; }
 .rail-item.pillar b { flex: none; }
-.rail-item[data-p="P0"] .sw { background: var(--p0); }
-.rail-item[data-p="P1"] .sw { background: var(--p1); }
-.rail-item[data-p="P2"] .sw { background: var(--p2); }
-.rail-item[data-p="P3"] .sw { background: var(--p3); }
-.rail-item[data-p="P4"] .sw { background: var(--p4); }
 .rail-item:hover { background: var(--surface-2); color: var(--text); }
 .rail-item[aria-pressed="true"] { background: var(--orange); }
 .rail-item[aria-pressed="true"] b,
 .rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
 .rail-item[aria-pressed="true"] .rl { color: var(--accent-ink); opacity: .85; }
-/* 서재's pair. The swatch slot carries a mark instead of a pillar colour —
-   a filled dot for New, a star for Starred — because neither is a colour in
-   the palette and both are already drawn on the rows they filter.
-
-   Both are drawn *inside* the 9px slot rather than replacing it: the slot is
-   what makes the labels start on one line, down the group and across to the
-   연구 축 swatches under it. Both are shapes rather than characters, and the
-   star is why. A ★ is a text node wider than its slot, and neither inline flow
-   nor grid centring will straddle a box over a track it overflows — both put
-   it at the start edge — so a glyph lands right of the axis the dot keeps, by
-   whatever that font's advance width happens to be. A masked SVG is ours: it
-   is the box this file gives it, centred by a translate that no alignment
-   fallback can clamp, and the accent shows through the mask so the pressed
-   state is one colour to change.
-
-   The star's box is 11px against the dot's 9 because a five-pointed outline
-   encloses about half the ink of a disc at the same size; matched by box it
-   reads as the smaller mark. */
-.sw.star,
-.sw.fresh {
-  position: relative; background: none; border-radius: 0;
-}
-.sw.star::before,
-.sw.fresh::before {
-  content: ""; position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  width: 9px; height: 9px; box-sizing: border-box;
-}
-.sw.fresh::before { background: var(--orange); border-radius: 50%; }
-.sw.star::before {
-  width: 11px; height: 11px; background: var(--orange);
-  -webkit-mask: var(--star-mask) center / contain no-repeat;
-  mask: var(--star-mask) center / contain no-repeat;
-}
-[aria-pressed="true"] .sw.star::before { background: var(--accent-ink); }
-[aria-pressed="true"] .sw.fresh::before { background: var(--accent-ink); }
 .rail-item[hidden] { display: none; }
 
 /* ── 책갈피: one line back to where the reader stopped ────────────────── */
-/* Above the lead block and quieter than it: the lead is the site's answer to
-   "what should I read", this is the reader's own unfinished business, and it
-   is only there at all when they left a mark. One line, whatever the count —
+/* The reader's own unfinished business, over the list: it is only there at
+   all when they left a mark. One line, whatever the count —
    the marks are chips so that three of them cost the first screen one row
    rather than three, and the strip is not there when there are none. */
 .resume {
@@ -455,114 +204,30 @@ html.js .rail {
 }
 .resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
-/* ── Lead: the newest rewrite, printed ────────────────────────────────── */
-/* The newest paper is marked by its frame — two accent brackets on opposite
-   corners, drawn over the hairline — and reads as three ruled bands: when,
-   what, and where it is filed. */
-.lead {
-  position: relative;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: 1.1rem 1.2rem .85rem; margin-bottom: 1.6rem;
-  transition: box-shadow var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
-}
-.lead:hover { box-shadow: var(--shadow-lg); transform: var(--lift); }
-.lead::before, .lead::after {
-  content: ""; position: absolute; width: 12px; height: 12px; pointer-events: none;
-  border-color: var(--orange); border-style: solid;
-}
-.lead::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-.lead::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-.lead[hidden] { display: none; }
-.lead-top {
-  display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem;
-  padding-bottom: .5rem; border-bottom: 1px solid var(--border-soft);
-}
-.lead-flag {
-  font-size: var(--fs-2xs); font-weight: 700;
-  color: var(--accent-ink); background: var(--orange);
-  padding: .1rem .4rem; border-radius: var(--radius-xs);
-}
-.lead-when {
-  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-.lead-body { display: block; text-decoration: none; color: inherit; }
-.lead-title {
-  font-size: clamp(1.1rem, 2.4vw, 1.35rem); font-weight: 800;
-  letter-spacing: -.025em; line-height: 1.35; text-wrap: balance;
-}
-.lead-body:hover .lead-title { color: var(--orange-ink); }
-.lead-tagline {
-  font-size: var(--fs-sm); color: var(--text-muted); margin-top: .25rem; font-weight: 500;
-}
-/* The figure a reader would quote stands on its own line at display size,
-   keyed on its left, between the thesis it backs and the summary that
-   explains it. */
-.lead-ro {
-  display: flex; align-items: stretch; margin: .85rem 0 .2rem;
-  border: 1px solid color-mix(in oklab, var(--orange) 45%, var(--border));
-  background: color-mix(in oklab, var(--orange) 7%, var(--surface));
-  border-radius: var(--radius-sm); max-width: 100%; width: fit-content;
-}
-.lead-ro-k {
-  display: flex; align-items: center; padding: 0 .7rem;
-  font-size: var(--fs-2xs); font-weight: 700; color: var(--bg); background: var(--orange);
-  white-space: nowrap;
-}
-.lead-ro-v {
-  font-family: var(--num); font-size: clamp(1rem, 2.1vw, 1.32rem); font-weight: 600;
-  color: var(--orange-ink); padding: .38rem .85rem; line-height: 1.35;
-  font-variant-numeric: tabular-nums;
-}
-.lead-sum {
-  font-size: var(--fs-sm); line-height: 1.72; color: var(--text-muted);
-  margin-top: .75rem;
-}
-.lead-foot {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
-  margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border-soft);
-}
-.lead-size, .row-size {
-  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
 /* ── 즐겨찾기 ─────────────────────────────────────────────────────────── */
 /* Empty until it is the reader's: an unstarred star is drawn in the border
    colour, so a list of forty papers reads as forty rows rather than forty
    controls. Only the pressed one takes the accent. */
-.rowstar, .leadstar, .starbtn {
+.rowstar {
   line-height: 0; padding: .1rem .15rem;
   background: none; border: none; cursor: pointer; color: var(--border);
   transition: color var(--dur-short) var(--ease-out),
               transform var(--dur-short) var(--ease-out);
 }
-/* The 책갈피 row's control removes the mark rather than setting one, so it is
-   drawn in the accent it already has and turns red under the cursor. */
-.markbtn {
-  font: inherit; line-height: 1; padding: .1rem .15rem;
-  background: none; border: none; cursor: pointer; color: var(--orange-ink);
-  transition: color var(--dur-short) var(--ease-out);
-}
-.markbtn svg { fill: currentColor; display: block; }
-.markbtn:hover { color: var(--red); }
-.rowstar:hover, .leadstar:hover, .starbtn:hover {
+.rowstar:hover {
   color: var(--amber-soft); transform: scale(1.12);
 }
-.rowstar[aria-pressed="true"],
-.leadstar[aria-pressed="true"],
-.starbtn[aria-pressed="true"] { color: var(--orange-ink); }
+.rowstar[aria-pressed="true"] { color: var(--orange-ink); }
 
 /* ── The list ─────────────────────────────────────────────────────────── */
 .listhead, .row {
   display: grid; align-items: baseline;
-  grid-template-columns: 4.2rem 5.6rem minmax(0, 1fr) 4.8rem 6.2rem;
+  grid-template-columns: 4.2rem 5.6rem minmax(0, 1fr) 7.8rem;
   gap: .9rem;
 }
 /* The column head is a band of its own, in the label voice at normal
    tracking — its words are Korean. 비교 prints the same band. */
-.listhead, .ix-head {
+.listhead {
   font-family: var(--num); font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted);
   background: var(--surface-2); padding: .5rem .35rem;
   border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
@@ -575,22 +240,20 @@ html.js .rail {
 }
 .row[hidden] { display: none; }
 /* The star is a control and nothing else, so with JavaScript off it leaves and
-   takes its column with it — the five-column list is unchanged there. */
+   takes its column with it — the four-column list is unchanged there. */
 .rowstar, .lh-star { display: none; }
 html.js .listhead, html.js .row {
-  grid-template-columns: 1.2rem 4.2rem 5.6rem minmax(0, 1fr) 4.8rem 6.2rem;
+  grid-template-columns: 1.2rem 4.2rem 5.6rem minmax(0, 1fr) 7.8rem;
 }
 html.js .rowstar, html.js .lh-star { display: block; }
 /* 읽음 is a tick in front of the date rather than a chip of its own: the row
-   has five columns already, and the state is a footnote to the paper, not a
+   has its columns already, and the state is a footnote to the paper, not a
    fact about it. 새 글 takes the same slot — the two cannot both hold, since
    opening a paper is what takes its badge off. */
-.row[data-read="done"] .row-when::before,
-.lead[data-read="done"] .lead-when::before {
+.row[data-read="done"] .row-when::before {
   content: "✓"; color: var(--green); font-weight: 700; margin-right: .28rem;
 }
-.row[data-fresh="1"] .row-when::before,
-.lead[data-fresh="1"] .lead-when::before {
+.row[data-fresh="1"] .row-when::before {
   content: "●"; color: var(--orange-ink); font-size: .62em;
   vertical-align: .15em; margin-right: .3rem;
 }
@@ -603,35 +266,38 @@ html.js .rowstar, html.js .lh-star { display: block; }
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .row-id { color: var(--text); opacity: .8; }
-.row-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
+/* The title is the row's link and its `::after` covers the title and the
+   tagline, so the whole block opens the paper; the icons after the title sit
+   above that cover and open their own targets. */
+.row-main { position: relative; min-width: 0; }
 .row-title {
   display: block; font-size: var(--fs-sm); font-weight: 700;
   line-height: 1.45; letter-spacing: -.01em;
 }
-.row-main:hover .row-title { color: var(--orange-ink); }
+.row-go { color: inherit; text-decoration: none; }
+.row-go::after { content: ""; position: absolute; inset: 0; }
+.row-main:hover .row-go { color: var(--orange-ink); }
+.row-links, .row-links-m { display: inline-flex; gap: .2rem; vertical-align: .1em; white-space: nowrap; }
+.row-links { position: relative; z-index: 1; margin-left: .45rem; }
+.row-links-m { display: none; }
+.row-link {
+  display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem;
+  border-radius: 50%; border: 1px solid var(--border-soft); background: var(--card-bg);
+  color: var(--text-muted);
+  transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+}
+.row-link:hover { color: var(--orange-ink); border-color: var(--orange); }
+.row-link .src-mark { width: .8rem; height: .8rem; }
 .row-tagline {
   display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted);
   margin-top: .1rem;
 }
-.row-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
-
-/* The 연구 축 separator — only the `연구 축별` sort shows these. */
-.rsep {
-  display: flex; align-items: baseline; gap: .5rem;
-  padding: 1.3rem .35rem .45rem; border-bottom: 1px solid var(--border);
-}
-.rsep:first-child { padding-top: .1rem; }
-.rsep[hidden] { display: none; }
-.rsep h2 { font-size: var(--fs-base); font-weight: 700; letter-spacing: -.01em; }
-.rsep-n {
-  margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
+.row-pillars { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem; }
 
 /* ── The page strip ───────────────────────────────────────────────────── */
-/* Paging is a control like the rail and the bar, so it leaves when nothing is
+/* Paging is a control like the axis line, so it leaves when nothing is
    scripted — and what it leaves behind is every paper in one list, which needs
-   no strip. The list is brought back under the sticky bar when a page changes,
+   no strip. The list is brought back under the nav when a page changes,
    which is what the scroll margin is for. */
 .corpus { scroll-margin-top: calc(var(--nav-h) + 3rem); }
 .pager { display: none; }
@@ -663,7 +329,7 @@ html.js .pager[hidden] { display: none; }
    nothing in the row shifts when it moves. */
 .pgn[aria-current="page"] {
   color: var(--orange-ink); border-radius: 0;
-  box-shadow: inset 0 -2px 0 var(--orange);
+  background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat;
 }
 .pgn[hidden] { display: none; }
 /* 이전 and 다음 go dim rather than away: they hold the two ends of the strip,
@@ -672,10 +338,31 @@ html.js .pager[hidden] { display: none; }
 .pgstep:disabled { opacity: .4; cursor: default; }
 .pggap { color: var(--text-muted); padding: 0 .1rem; }
 .pggap[hidden] { display: none; }
-.pgstat {
-  margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
+/* 한 쪽에 몇 편 at the strip's end: the current count only, the three
+   choices opening above it. */
+.psize { position: relative; margin-left: auto; flex: none; }
+.psize-cur {
+  display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .5rem;
+  border: 0; border-radius: var(--radius-sm); background: none; cursor: pointer;
+  font: inherit; font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; user-select: none;
 }
+.psize-cur:hover, .psize-cur[aria-expanded="true"] { color: var(--orange-ink); background: var(--orange-soft); }
+.psize-caret { font-size: .8em; }
+.psize-menu {
+  position: absolute; right: 0; bottom: calc(100% + .35rem); z-index: var(--z-raised);
+  display: flex; flex-direction: column; min-width: 5.2rem; padding: .25rem;
+  border-radius: var(--radius-sm); background: var(--surface);
+  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+}
+.psize-menu[hidden] { display: none; }
+.psize-menu button {
+  font: inherit; font-size: var(--fs-xs); font-weight: 600; text-align: left;
+  padding: .4rem .65rem; border: 0; border-radius: var(--radius-xs);
+  background: none; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.psize-menu button:hover { background: var(--surface-2); }
+.psize-menu button[aria-pressed="true"] { color: var(--orange-ink); background: var(--orange-soft); }
 
 .corpus-empty {
   text-align: center; color: var(--text-muted); font-size: var(--fs-sm);
@@ -815,139 +502,71 @@ html.js .pager[hidden] { display: none; }
 }
 
 /* ── 서재 ──────────────────────────────────────────────────────────── */
-/* Three lists on one page, and the tab strip is what keeps them one page: the
-   reader's shelf is a single thing, cut three ways. */
+/* One kind at a time under underline tabs — the paper page's 요약 · 상세
+   underline — each with its own icon, and the ⋯ menu at the row's end. */
 .hub { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
-/* Four tabs, and on a narrow phone they are wider than the screen: the strip
-   scrolls sideways rather than breaking 즐겨찾기 across two lines. */
-.hub-tabs {
-  display: flex; gap: .1rem; margin-bottom: 1.1rem;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto; scrollbar-width: none;
+.shelf { --tl-cols: 3.4rem 5.6rem minmax(0, 1fr) 7.8rem; display: grid; gap: .9rem; }
+.sh-tabs { display: flex; align-items: stretch; gap: .2rem; border-bottom: 1px solid var(--border); }
+.sh-tabs > button {
+  display: inline-flex; align-items: center; gap: .4rem; padding: .7rem .8rem .65rem; flex: none;
+  border: 0; background: none; color: var(--text-muted); font: inherit; font-size: var(--fs-sm); cursor: pointer;
 }
-.hub-tabs::-webkit-scrollbar { display: none; }
-.hub-tabs button {
-  font: inherit; font-size: var(--fs-xs); font-weight: 700; cursor: pointer;
-  flex: none; white-space: nowrap;
-  display: inline-flex; align-items: center; gap: .35rem;
-  background: none; border: none; padding: .5rem .8rem;
-  color: var(--text-muted); border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
+.sh-tabs > button b { font-weight: 600; }
+.sh-tabs > button:hover { color: var(--text); }
+.sh-tabs > button[aria-selected="true"] {
+  color: var(--orange-ink);
+  background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat;
 }
-.hub-tabs button:hover { color: var(--text); }
-.hub-tabs button[aria-selected="true"] {
-  color: var(--text); border-bottom-color: var(--orange);
+.sh-tabs > button[aria-selected="true"] b { font-weight: 700; }
+.sh-tabs .tab-n { font-size: var(--fs-2xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.sh-tabs > button[aria-selected="true"] .tab-n { color: var(--orange-ink); }
+/* Nothing behind the ⋯ works without a script — both exports are built in the
+   browser and the import is read there — so it leaves rather than sitting
+   inert. The page's `noscript` line is what an unscripted reader gets. */
+.sh-more { position: relative; display: none; align-self: center; }
+html.js .sh-more { display: block; }
+.sh-more-b {
+  display: grid; place-items: center; width: 2.2rem; height: 2.2rem; padding: 0; cursor: pointer;
+  border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-muted);
 }
-.hub-tabs .tab-n {
-  font-size: var(--fs-3xs); font-weight: 700; font-variant-numeric: tabular-nums;
-  padding: .05rem .35rem; border-radius: var(--radius-pill);
-  background: var(--surface-2); color: var(--text-muted);
+.sh-more-b:hover, .sh-more-b[aria-expanded="true"] { color: var(--orange-ink); background: var(--orange-soft); }
+.sh-more-b .ico circle { fill: currentColor; }
+.sh-menu {
+  position: absolute; right: 0; top: calc(100% + .35rem); z-index: var(--z-raised); display: flex; flex-direction: column;
+  min-width: 10rem; padding: .3rem; border-radius: var(--radius-sm); background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
 }
-.hub-tabs button[aria-selected="true"] .tab-n {
-  background: var(--orange-soft); color: var(--orange-ink);
+.sh-menu[hidden] { display: none; }
+.sh-menu button, .sh-menu-i {
+  text-align: left; padding: .5rem .7rem; border: 0; border-radius: calc(var(--radius-sm) - 2px);
+  background: none; color: var(--text); font: inherit; font-size: var(--fs-xs); cursor: pointer;
 }
-
-/* The empty 즐겨찾기 tab's way in: the sentence says how a shelf fills, the
-   rows under it are the first things to fill it with. */
-.shelf-start { max-width: 46rem; margin: -1.5rem auto 0; }
-.shelf-start-h { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); margin-bottom: .5rem; }
-
-/* A kept paper, in the same shape the landing list uses — star first, the
-   paper itself, then what this browser knows about it. */
-.shelf-item {
-  position: relative;
-  display: grid; align-items: baseline; gap: .7rem;
-  grid-template-columns: 1.3rem minmax(0, 1fr) 4.6rem 5.4rem 4.6rem;
-  padding: .7rem .3rem; border-bottom: 1px solid var(--border-soft);
+.sh-menu button:hover, .sh-menu-i:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.sh-menu button[disabled] { opacity: .45; cursor: not-allowed; background: none; }
+.hub-status { margin: 0; font-size: var(--fs-2xs); color: var(--orange-ink); }
+.hub-status:empty { display: none; }
+.sh-tag {
+  display: inline-block; margin-left: .45rem; padding: .05rem .45rem; border-radius: var(--radius-pill);
+  font-size: var(--fs-3xs); font-weight: 600; vertical-align: .12em; color: var(--text-muted);
+  background: var(--surface-2); border: 1px solid var(--border-soft);
 }
-.shelf-main { display: block; text-decoration: none; color: inherit; min-width: 0; }
-/* The arXiv id in the figure face the landing's id column uses. */
-.shelf-id {
-  display: block; font-family: var(--num); font-size: var(--fs-2xs); color: var(--text);
-  opacity: .7; font-variant-numeric: tabular-nums; white-space: nowrap;
-  margin-bottom: .1rem;
-}
-.memo-card-head .shelf-id { display: inline; margin: 0; }
-.shelf-title {
-  display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.45;
-  letter-spacing: -.01em;
-}
-a.shelf-main:hover .shelf-title { color: var(--orange-ink); }
-.shelf-tagline {
-  display: block; font-size: var(--fs-2xs); line-height: 1.55; color: var(--text-muted);
-  margin-top: .1rem;
-}
+.tl-p .sh-tag { margin-left: 0; }
+.sh-tag.is-pub { color: var(--orange-ink); background: var(--orange-soft); border-color: transparent; }
+.sh-mk { display: inline-flex; align-items: center; gap: .3rem; color: var(--orange-ink); }
+.sh-mk svg { fill: currentColor; }
+.tl-g.sh-memo { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
 /* A star or a memo outlives the rewrite it points at. The row stays, without a
    link, rather than disappearing and taking the reader's record with it. */
-.shelf-main.gone .shelf-title { color: var(--text-muted); }
-.shelf-note { display: block; font-size: var(--fs-2xs); color: var(--red); margin-top: .15rem; }
-.shelf-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
-.shelf-state {
-  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+.tl-main.gone .tl-t { color: var(--text-muted); }
+.sh-note { display: block; font-size: var(--fs-2xs); color: var(--red); margin-top: .15rem; }
+.sh-empty {
+  margin: .4rem 0; padding: 1.4rem 1rem; text-align: center; font-size: var(--fs-sm); color: var(--text-muted);
+  border: 1px dashed var(--border); border-radius: var(--radius);
 }
-.shelf-item[data-read="done"] .shelf-state { color: var(--green); font-weight: 600; }
-.shelf-when {
-  font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.hub-actions {
-  display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
-  margin-bottom: 1.4rem;
-}
-.hub-actions button, .filebtn {
-  font: inherit; font-size: var(--fs-2xs); font-weight: 600;
-  padding: .35rem .75rem; border-radius: var(--radius-sm); cursor: pointer;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text-muted);
-  transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
-}
-.hub-actions button:hover, .filebtn:hover {
-  border-color: var(--amber-soft); color: var(--orange-ink);
-}
-/* The three read alike, and none of them takes the accent. On this page the
-   accent already answers one question — the tab strip's rule and its count
-   chip say which list is open — and a filled button under that strip is read
-   as a fourth thing that is on rather than as the action to take first. What
-   the reader came here to do is read the shelf; writing it out is what they
-   do afterwards, and once. */
-.hub-actions button[disabled] {
-  opacity: .48; cursor: not-allowed;
-}
-.hub-actions button[disabled]:hover {
-  border-color: var(--border); color: var(--text-muted);
-}
-/* Nothing in this row works without a script — both exports are built in the
-   browser and the import is read there — so the row leaves rather than sitting
-   inert. The page's `noscript` line is what an unscripted reader gets instead. */
-html:not(.js) .hub-actions { display: none; }
-.hub-status { font-size: var(--fs-2xs); color: var(--text-muted); }
-
-.memo-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: .95rem 1.1rem; margin-bottom: .7rem;
-}
-.memo-card-head {
-  display: flex; align-items: baseline; gap: .5rem; margin-bottom: .5rem;
-}
-.memo-card-head a {
-  font-size: var(--fs-sm); font-weight: 700; text-decoration: none; color: var(--text);
-}
-.memo-card-head a:hover { color: var(--orange-ink); }
-.memo-card-head time {
-  margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.memo-card pre {
-  font-family: inherit; font-size: var(--fs-xs); line-height: 1.65;
-  white-space: pre-wrap; word-break: break-word; color: var(--text-muted);
-}
-.memo-card .published {
-  display: inline-block; margin-top: .5rem; font-size: var(--fs-2xs);
-  color: var(--green); font-weight: 600;
+@media (max-width: 680px) {
+  .sh-tabs > button { padding: .65rem .55rem .6rem; gap: .3rem; }
+  .shelf .tl-id { display: inline-block; margin: 0 .5rem .2rem 0; }
 }
 
 .notfound { text-align: center; padding: 6rem 1.25rem; }
@@ -978,57 +597,10 @@ html.js .notfound-find { display: inline-block; }
 }
 .notfound-list a:hover { color: var(--orange-ink); }
 
-/* ── 비교 ─────────────────────────────────── */
-.cmp-list { display: grid; }
-.cmp-item {
-  padding-top: .85rem; padding-bottom: .85rem; border-bottom: 1px solid var(--border-soft);
-  text-decoration: none; color: inherit;
-  transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
-}
-.cmp-item:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
-.cmp-item-t { font-size: var(--fs-base); font-weight: 700; line-height: 1.45; }
-.cmp-item:hover .cmp-item-t { color: var(--orange-ink); }
-/* The ids rather than the titles: three titles do not fit on a line and three
-   ids always do — the same trade the 책갈피 strip makes. */
-.cmp-item-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .2rem; }
-.cmp-item-id {
-  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
-  background: var(--surface-2); border-radius: var(--radius-xs);
-  padding: .1rem .35rem; font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 900px) {
-  /* The rail is the first thing to go: it is a shortcut for the search box,
-     which is still there. */
-  html.js .deck { grid-template-columns: minmax(0, 1fr); }
-  html.js .rail { display: none; }
-}
 @media (max-width: 680px) {
-  /* The bar is one line on a phone. Three controls are all that is left at
-     this width — the facets are the rail's and the rail is gone — so what
-     remains is the field a phone searches with and the two chips that say how
-     its answer is laid out, and three is few enough to keep on the line the
-     list starts under. The field gives up the width: it is the only one of
-     the three that can be read at any size, since a chip that loses its label
-     stops naming the choice it carries.
-
-     `min-width: 0` on both the box and its input is what lets it: a flex item
-     will not shrink past its content's own minimum, and an input's is its
-     default size. The spacer goes, so the room it would hold is the field's,
-     and the row still wraps if a link brings a reset onto it. */
-  .filters-inner { gap: .4rem; row-gap: .45rem; }
-  .search { flex: 1 1 120px; min-width: 0; max-width: none; }
-  .search input { min-width: 0; }
-  .filters-inner .filter-spacer { display: none; }
-
-  /* The chip tightens where the bar is narrowest; the fold itself is not a
-     width rule and lives in the base. */
-  html.js .segchip { padding: 0 .5rem; }
-
   .mast-inner { padding: 1.2rem .9rem 1rem; }
   .mast-line { flex-wrap: wrap; gap: .4rem; }
   .mast h1 { white-space: normal; }
-  .filters-inner { padding: .5rem .9rem; }
   .deck { padding: 1.1rem .9rem 4rem; }
   /* A five-column row cannot survive a phone, so it becomes a block: title
      and one line under it, with the numbers folded onto one trailing row. */
@@ -1038,90 +610,138 @@ html.js .notfound-find { display: inline-block; }
   .row-when::after { content: " ·"; margin-right: .3rem; }
   .row-main { margin: .15rem 0 .35rem; }
   .row-pillars { display: inline-flex; gap: .2rem; vertical-align: middle; }
-  .row-size::before { content: "·"; margin: 0 .35rem; opacity: .5; }
+  .row-links { display: none; }
+  .row-links-m { display: inline-flex; margin-left: .3rem; }
+  html.js .pline-items { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .pline-items::-webkit-scrollbar { display: none; }
+  .pline .rail-item { flex: none; }
+  .pline .rail-item .rl, .pline-stat { display: none; }
+  .pline-ic { width: 2.5rem; }
   /* The block row has no column to keep the star in, so it goes to the corner
      the thumb reaches for and the text makes room for it. */
   .row { padding-right: 1.7rem; }
   html.js .rowstar { position: absolute; top: .7rem; right: .1rem; }
-  .shelf-item { display: block; padding-right: 1.7rem; }
-  .starbtn { position: absolute; top: .65rem; right: .1rem; }
-  .shelf-pillars { display: inline-flex; vertical-align: middle; margin-top: .3rem; }
-  .shelf-state::before, .shelf-when::before { content: "·"; margin: 0 .35rem; opacity: .5; }
   /* A phone fits one chip and a bit of the next, which is what says the rail
      swipes. Hiding the others would make `외 N개` a lie about what is there. */
   .resume { padding-left: .55rem; gap: .3rem; }
   .resume-chip { min-width: 9rem; }
 }
 
-/* The controls' line ends with the count, which is where the reader is looking
-   for it — and the count is what fills the space beside a lone Starred. Under
-   ~380px that line is one word short of holding all of it, and the word that
-   goes is 최근: the date beside a corpus count is its most recent paper whether
-   or not the word is there to say so. */
-@media (max-width: 380px) {
-  .when-word { display: none; }
-}
-
-/* ── A row's result ───────────────────────────────────────────────────── */
-/* A row's result gets a fixed slot under the tagline, so a reader can run an
-   eye down the list and compare figures: the key in the label voice, the
-   figure in body ink on a quiet well, the accent a 2px tick at its edge. */
-.row-ro {
-  display: inline-flex; align-items: baseline; gap: .5rem; max-width: 100%;
-  margin-top: .35rem; padding: .08rem .5rem .1rem .45rem;
-  border-left: 2px solid var(--orange); background: var(--surface-2);
-}
-.row-ro-k { font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); white-space: nowrap; }
-.row-ro-v {
-  font-family: var(--num); font-size: var(--fs-2xs); font-weight: 600; color: var(--text);
-  font-variant-numeric: tabular-nums; min-width: 0;
-}
-.row:hover .row-ro { background: var(--surface-3); }
-
-/* ── 비교: the landing's table, cut one more way ───────────────────── */
-/* The same head, the same ruled rows, the same columns where the facts are the
-   same kind — when, the thing itself, its axes, its size — so the two indexes
-   read as one table. */
+/* The wide column 탐색 stands in before its first run lands. */
 .hub-wide { max-width: 1240px; padding-top: 1.5rem; }
-.ix-head, .ix-row {
-  display: grid; align-items: baseline; gap: .9rem; padding-left: .6rem; padding-right: .6rem;
-}
-.ix-cmp  { grid-template-columns: 4.2rem minmax(0, 1fr) 8rem 3.4rem; }
-.ix-when, .ix-size {
-  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
-  white-space: nowrap; font-variant-numeric: tabular-nums;
-}
-.ix-main { display: grid; gap: .3rem; min-width: 0; }
-.ix-pillars { display: flex; flex-wrap: wrap; gap: .2rem; }
-.cmp-item .fork { margin-top: .2rem; padding-top: .45rem; border-top: 1px solid var(--border-soft); gap: .7rem; }
-.cmp-item .fork-trunk {
-  width: 15rem; flex-direction: column; align-items: flex-start;
-  justify-content: center; text-align: left; gap: .15rem;
-}
-.cmp-item .fork-branches { grid-template-columns: max-content max-content max-content; }
-.cmp-item .fork-s { max-width: 32rem; }
+@media (max-width: 720px) { .hub-wide { padding: 1rem .9rem 4rem; } }
 
-/* The table's last line: that it ends — a short list otherwise stops on a
-   row rule with the page running on. */
-.ix-foot {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: .6rem 1.5rem; padding: .7rem .6rem; border-bottom: 1px solid var(--border);
-  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
+/* ── Cards ────────────────────────────────────────────────────────────── */
+/* The card list 탐색 and 비교 share. As many columns as keep the rows even
+   (five cards: three and two, `--cols` from the build), a short row's cards
+   widening to fill it. Two across on a tablet, one on a phone. */
+.cards { display: flex; flex-wrap: wrap; gap: 1rem; }
+.card {
+  flex: 1 1 calc((100% - (var(--cols) - 1) * 1rem) / var(--cols)); min-width: 0;
+  display: flex; flex-direction: column; gap: .45rem; padding: 1.1rem 1.15rem 1rem; cursor: pointer; color: inherit; text-decoration: none;
+  background: var(--card-bg, var(--surface)); border: 1px solid var(--border-soft); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); transition: border-color var(--dur-short), box-shadow var(--dur-short);
 }
-.ix-end::before { content: "■ "; color: var(--orange); }
+.card:hover, .card.is-open { border-color: color-mix(in srgb, var(--orange) 45%, var(--border-soft)); }
+.card.is-open { box-shadow: 0 0 0 3px var(--orange-soft); }
+.card-top { display: flex; align-items: center; gap: .5rem; }
+.card-top .card-chips { flex: 1; min-width: 0; }
+.card-chips { margin: 0; display: inline-flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.card-id { flex: none; text-decoration: none; font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.card-id:hover { color: var(--orange-ink); }
+.card h3 { margin: .1rem 0 0; font-family: var(--t-display); font-size: var(--fs-xl); line-height: 1.3; }
+.card h3 a:hover, a.card:hover h3 { color: var(--orange-ink); }
+.card-fig {
+  height: 150px; margin: .15rem 0 .1rem; overflow: hidden;
+  background: var(--fig-pad); border: 1px solid var(--border-soft); border-radius: calc(var(--radius) - 4px);
+}
+.card-fig img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.card-title { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.5; }
+.card-gist { margin: .1rem 0 0; font-size: var(--fs-sm); line-height: 1.65; }
+/* The tag line sits on each card's bottom edge, so a row's endings line up. */
+.card-tags { margin: 0; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+.card .card-tags { margin-top: auto; padding-top: .55rem; }
+.card-tags span {
+  font-size: var(--fs-3xs); line-height: 1.5; padding: .1rem .5rem; border-radius: var(--radius-pill);
+  background: var(--surface-2); color: var(--text-muted);
+}
 
-@media (max-width: 720px) {
-  .lead-ro { width: auto; }
-  .lead-ro-k { padding: 0 .5rem; }
-  .lead-ro-v { padding: .35rem .6rem; }
-  .hub-wide { padding: 1rem .9rem 4rem; }
-  /* The head goes and each row folds to a block, as the landing's does: the
-     when and id on a line, the thing under them, the axes and size trailing. */
-  .ix-head { display: none; }
-  .cmp-item.ix-row { display: block; padding: .8rem .2rem; }
-  .ix-row .ix-main { margin: .2rem 0 .4rem; }
-  .ix-pillars { display: inline-flex; vertical-align: middle; }
-  .ix-row .ix-size::before { content: "·"; margin: 0 .35rem; opacity: .5; }
-  .cmp-item .fork-trunk { width: auto; }
-  .cmp-item .fork-branches { grid-template-columns: max-content minmax(0, 1fr); }
+@media (max-width: 960px) { .card { flex-basis: calc((100% - 1rem) / 2); } }
+@media (max-width: 680px) { .card { flex-basis: 100%; padding: .9rem .95rem; gap: .35rem; } }
+
+/* A comparison as a card: the question, what the papers share, and under a
+   rule each paper's name with its stance on the question. */
+.card[hidden] { display: none; }
+.cmp-q h3 { font-size: var(--fs-lg); line-height: 1.4; }
+.cmp-common { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.55; }
+.cmp-common b { font-weight: 700; color: var(--text); margin-right: .35rem; }
+.cmp-sts { margin-top: auto; display: grid; gap: .35rem; padding-top: .55rem; border-top: 1px solid var(--border-soft); }
+.cmp-st { margin: 0; display: grid; grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr); gap: .6rem; font-size: var(--fs-xs); line-height: 1.45; }
+.cmp-st b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp-st span { color: var(--text-muted); }
+.cmps > .pline { margin-bottom: 1.2rem; }
+
+/* ── A light table ────────────────────────────────────────────────────── */
+/* The analysis list's head band and ruled rows for a list with fewer facts
+   per row (탐색's candidates, 서재): an id or date column, the title over one
+   line, and a trailing column. `--tl-cols` sets the columns. */
+.tl-head, .tl-row {
+  display: grid; grid-template-columns: var(--tl-cols, 5.6rem minmax(0, 1fr) 7.8rem);
+  gap: .9rem; align-items: baseline;
+}
+.tl-head {
+  font-family: var(--num); font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted);
+  background: var(--surface-2); padding: .5rem .35rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.tl { list-style: none; margin: 0; padding: 0; }
+.tl-row {
+  padding: .65rem .35rem; border-bottom: 1px solid var(--border-soft);
+  transition: background var(--dur-short), box-shadow var(--dur-short);
+}
+.tl-row[data-open] { cursor: pointer; }
+.tl-row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
+.tl-row.is-open { background: var(--orange-soft); box-shadow: inset 2px 0 0 var(--orange); }
+.tl-id {
+  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text); opacity: .8;
+  font-variant-numeric: tabular-nums; white-space: nowrap; text-decoration: none;
+}
+a.tl-id:hover { color: var(--orange-ink); opacity: 1; }
+.tl-main { display: block; min-width: 0; color: inherit; text-decoration: none; }
+.tl-t { display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
+a.tl-main:hover .tl-t { color: var(--orange-ink); }
+.tl-g { display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted); margin-top: .1rem; }
+.tl-p { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem; align-self: center; }
+@media (max-width: 680px) {
+  .tl-head { display: none; }
+  .tl { border-top: 1px solid var(--border-soft); }
+  .tl-row { display: block; padding: .8rem .2rem; }
+  .tl-id { display: block; margin-bottom: .2rem; }
+  .tl-p { margin-top: .45rem; }
+}
+
+/* ── A row's figure ───────────────────────────────────────────────────── */
+/* The preview card under a resting pointer: the figure on its own white, its
+   whole caption, and where it stands in the original. */
+.figpeek {
+  position: absolute; z-index: var(--z-raised); width: min(640px, calc(100vw - 32px));
+  padding: .55rem .55rem .6rem; border-radius: var(--radius); background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
+  box-shadow: var(--shadow-lg); pointer-events: none;
+}
+.figpeek[hidden] { display: none; }
+.figpeek img {
+  display: block; width: 100%; max-height: min(420px, 55vh); object-fit: contain;
+  background: var(--fig-pad); border-radius: calc(var(--radius) - 5px);
+}
+.figpeek-c { margin: .55rem .25rem 0; font-size: var(--fs-xs); line-height: 1.55; color: var(--text); }
+.figpeek-s { margin: .2rem .25rem 0; font-size: var(--fs-2xs); color: var(--text-muted); }
+@media (hover: none), (max-width: 720px) { .figpeek { display: none !important; } }
+@media (max-width: 680px) {
+  /* The axis line's edge fades while more of it is off to the right. */
+  html.js .pline::after {
+    content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 2.6rem; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--surface) 75%);
+    border-radius: 0 var(--radius) var(--radius) 0; transition: opacity var(--dur-mid) var(--ease-out);
+  }
+  html.js .pline.at-end::after { opacity: 0; }
 }

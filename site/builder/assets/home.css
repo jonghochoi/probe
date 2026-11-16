@@ -1,0 +1,100 @@
+/* 첫 화면 — the mascot's line, 최근 and 연구 축 side by side, then 일정.
+   No band: the page opens on the line. Every heading is a short noun with a
+   grey line after it, the same heading 탐색's detail uses. */
+
+.hm { max-width: 1240px; margin: 0 auto; padding: 2.4rem 1.25rem 5rem; display: grid; gap: 2.2rem; }
+.hm a { color: inherit; text-decoration: none; }
+.hm-blk { display: grid; gap: .8rem; align-content: start; min-width: 0; }
+.hm-h { margin: 0; display: flex; align-items: baseline; gap: .5rem; font-size: var(--fs-sm); font-weight: 700; }
+.hm-sub { font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); }
+
+/* The mascot and its one line: where to start this week. */
+.hm-mascot { display: flex; align-items: center; gap: .8rem; }
+.hm-mk { flex: none; display: grid; place-items: center; width: 72px; height: 72px; }
+.hm-mk .probe-mark { width: 64px; height: 64px; }
+.hm-bubble {
+  position: relative; margin: 0; padding: .6rem .9rem; border-radius: 14px; font-size: var(--fs-sm);
+  background: var(--card-bg, var(--surface)); border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm);
+}
+.hm-bubble::before {
+  content: ""; position: absolute; left: -7px; top: 50%; width: 12px; height: 12px; background: inherit;
+  border-left: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft);
+  transform: translateY(-50%) rotate(45deg);
+}
+.hm-bubble b { color: var(--orange-ink); }
+
+.hm-two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 2.2rem; }
+
+/* 최근 */
+.hm-feed, .hm-pl { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border-soft); }
+.hm-feed a { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: .1rem .8rem; padding: .8rem .2rem; border-bottom: 1px solid var(--border-soft); }
+.hm-feed a:hover b { color: var(--orange-ink); }
+.hm-k { grid-row: span 2; font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); padding-top: .15rem; }
+.hm-k small { display: block; font-weight: 500; font-size: 10px; margin-top: .1rem; font-variant-numeric: tabular-nums; }
+.hm-s { font-size: var(--fs-sm); color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.hm-x { display: none; }
+
+/* 연구 축 */
+.hm-pl li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: .7rem; align-items: center; padding: .65rem .2rem; border-bottom: 1px solid var(--border-soft); }
+.hm-pl b { font-size: var(--fs-sm); }
+.hm-pn { font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap; }
+.hm-pnew {
+  font-size: var(--fs-2xs); white-space: nowrap; padding: .05rem .5rem; border-radius: var(--radius-pill);
+  background: var(--orange-soft); color: var(--orange-ink); font-weight: 700;
+}
+.hm-pnew.is-zero { background: var(--surface-2); color: var(--text-muted); font-weight: 500; }
+
+/* 일정 */
+.hm-evs { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .7rem; }
+.hm-ev {
+  display: grid; gap: .25rem; padding: .8rem .9rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft); background: var(--card-bg, var(--surface));
+}
+.hm-ev:hover { border-color: var(--orange); }
+.hm-ev b { font-size: var(--fs-sm); }
+.hm-ev > span:last-child { font-size: var(--fs-2xs); color: var(--text-muted); }
+.hm-dd {
+  justify-self: start; font-size: var(--fs-3xs); font-weight: 800; padding: .1rem .45rem;
+  border-radius: var(--radius-pill); background: var(--surface-2); font-variant-numeric: tabular-nums;
+}
+.hm-ev.deadline .hm-dd { background: color-mix(in oklab, var(--p0) 60%, var(--surface)); color: var(--p0-ink); }
+.hm-ev.conf .hm-dd { background: color-mix(in oklab, var(--p3) 60%, var(--surface)); color: var(--p3-ink); }
+.hm-ev.notice .hm-dd { background: color-mix(in oklab, var(--p2) 60%, var(--surface)); color: var(--p2-ink); }
+
+/* A desktop fills with more of each; a phone keeps the first few. */
+@media (min-width: 900px) {
+  .hm-feed .hm-x { display: list-item; list-style: none; }
+  .hm-evs .hm-x { display: grid; }
+  .hm-evs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hm-pl li { padding: .75rem .2rem; }
+}
+@media (max-width: 900px) { .hm-two { grid-template-columns: minmax(0, 1fr); } }
+/* A date `home.js` dropped as ended stays dropped, extra or not. */
+.hm-evs > .hm-ev[hidden] { display: none; }
+@media (max-width: 680px) {
+  .hm { padding: 1.6rem .9rem 4rem; gap: 1.6rem; }
+  .hm-pn { display: none; }
+  .hm-mk { width: 56px; height: 56px; }
+  .hm-mk .probe-mark { width: 52px; height: 52px; }
+}
+
+/* The edge glow, a step stronger here than on the other pages. */
+body[data-home]::before {
+  background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%,
+              color-mix(in srgb, var(--orange) 12%, transparent) 100%);
+}
+
+/* The groups rise in one after another as the page opens, then their rows. */
+@keyframes hm-up { from { opacity: 0; transform: translateY(12px); } }
+.hm > * { animation: hm-up .7s cubic-bezier(.16, 1, .3, 1) both; }
+.hm > :nth-child(1) { animation-delay: 90ms; }
+.hm > :nth-child(2) { animation-delay: 180ms; }
+.hm > :nth-child(3) { animation-delay: 270ms; }
+.hm-feed li, .hm-pl li, .hm-evs > * { animation: hm-up .55s cubic-bezier(.16, 1, .3, 1) both; }
+.hm-feed li:nth-child(1), .hm-pl li:nth-child(1), .hm-evs > :nth-child(1) { animation-delay: 320ms; }
+.hm-feed li:nth-child(2), .hm-pl li:nth-child(2), .hm-evs > :nth-child(2) { animation-delay: 390ms; }
+.hm-feed li:nth-child(3), .hm-pl li:nth-child(3), .hm-evs > :nth-child(3) { animation-delay: 460ms; }
+.hm-feed li:nth-child(4), .hm-pl li:nth-child(4), .hm-evs > :nth-child(4) { animation-delay: 530ms; }
+.hm-feed li:nth-child(5), .hm-pl li:nth-child(5), .hm-evs > :nth-child(5) { animation-delay: 600ms; }
+.hm-feed li:nth-child(6), .hm-pl li:nth-child(6), .hm-evs > :nth-child(6) { animation-delay: 670ms; }
+@media (prefers-reduced-motion: reduce) { .hm *, .hm > * { animation: none !important; } }
