@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>논문 목차 조율실</title>
+<style>
+:root { --bg: #f6f6fb; --panel: #ffffff; --ink: #1d1f2e; --muted: #6a6d82; --line: #e1e2ec; --acc: oklch(51% 0.21 277); --acc-soft: oklch(95% 0.03 277); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 "Pretendard Variable", system-ui, sans-serif; display: grid; grid-template-columns: 23rem minmax(0, 1fr); }
+aside { height: 100vh; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 1rem 1rem 3rem; }
+h1 { font-size: 1.05rem; margin: 0 0 .2rem; }
+.sub { margin: 0 0 1rem; color: var(--muted); font-size: 12px; }
+.grp { margin: 0 0 1rem; }
+.grp h2 { font-size: 11px; letter-spacing: .06em; color: var(--muted); margin: 1.2rem 0 .5rem; text-transform: uppercase; }
+.opt { margin: 0 0 .85rem; }
+.opt > b { display: block; font-size: 13px; margin-bottom: .1rem; }
+.opt > small { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: .35rem; }
+.seg { display: flex; flex-wrap: wrap; gap: .3rem; }
+.seg button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: .32rem .7rem; font: inherit; font-size: 12.5px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: #fff; }
+.bar { display: flex; flex-wrap: wrap; gap: .3rem; }
+.sum { margin-top: 1rem; padding: .7rem .8rem; border-radius: 10px; background: var(--acc-soft); font-size: 12px; white-space: pre-wrap; }
+.reset { margin-top: .6rem; border: 0; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+main { position: relative; overflow: hidden; height: 100vh; }
+#box { position: absolute; left: 50%; top: 0; transform-origin: top center; }
+iframe { border: 0; width: 100%; height: 100%; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+@media (max-width: 860px) { body { grid-template-columns: 1fr; grid-template-rows: auto 70vh; } aside { height: auto; max-height: 45vh; } main { height: 70vh; } }
+.note { font-size: 11.5px; color: var(--muted); margin: .2rem 0 1rem; padding: .55rem .7rem; border: 1px dashed var(--line); border-radius: 8px; }
+.copy { margin-top: .5rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: .3rem .8rem; font: inherit; font-size: 12px; cursor: pointer; }
+</style>
+</head>
+<body>
+<aside>
+  <h1>논문 목차 조율실</h1>
+  <p class="sub">오른쪽은 지금 빌드한 사이트입니다. 옵션을 바꾸면 바로 바뀌고, 고른 값은 이 브라우저에 남습니다.</p>
+  <p class="note">오른쪽은 논문 상세 설정을 옮긴 지금 사이트입니다(탭 줄 고정, 근거 카드 2×2 포함). 여기서는 상세 탭의 목차만 바꿔 봅니다. 상세 탭에서 아래로 내리면 지금 위치가 따라 움직입니다.</p>
+  <div class="grp"><h2>보기</h2>
+    <div class="opt"><b>논문</b><div class="seg" data-view="page"></div></div>
+    <div class="opt"><b>탭</b><div class="seg" data-view="tab"></div></div>
+    <div class="opt"><b>화면 폭</b><div class="seg" data-view="vp"></div></div>
+  </div>
+  <div id="opts"></div>
+  <div class="sum" id="sum"></div>
+  <button class="copy" type="button" id="copy">내 설정 복사</button>
+  <button class="reset" type="button" id="reset">기본값으로</button>
+</aside>
+<main><div id="box"><iframe id="view" title="논문 페이지 미리보기"></iframe></div></main>
+<script>
+(function () {
+  "use strict";
+  var KEY = "probe.pg.toc.v1", VKEY = "probe.pg.toc.view.v1";
+  var SECTIONS = [
+    ["데스크톱 목차", [
+      ["desk", "모양", "왼쪽 목차 자리", [["now", "지금 (모든 소절, 두세 줄)"], ["ms", "이정표 — 막 마디 + 소절 한 줄"], ["msact", "이정표 — 지금 막만 펼침"], ["dots", "점 레일 — 글자는 올리면"]]],
+      ["lines", "이정표의 소절 제목", "지금 읽는 소절은 늘 전부 보입니다", [["1", "한 줄로 자름"], ["2", "두 줄까지"]]],
+      ["num", "소절 번호", "", [["show", "보이기"], ["hide", "숨기기"]]]
+    ]],
+    ["휴대폰 · 태블릿", [
+      ["phone", "막 줄", "탭 줄 아래 고정된 줄", [["now", "지금 (막 넷 + 목차)"], ["where", "지금 위치 한 줄 + 막별 진행 막대"], ["dots", "이정표 점 (막 넷을 선으로) + 목차"], ["fab", "막 줄 없이 구석의 목차 버튼"]]],
+      ["sheet", "목차 시트", "목차 버튼을 누르면 아래에서 올라옴", [["now", "지금 모양"], ["ms", "이정표 모양"]]]
+    ]]
+  ];
+  var DEF = { desk: "ms", lines: "1", num: "show", phone: "where", sheet: "ms" };
+  var PAGES = [["2606.15768", "LaWAM (짧은 편)"], ["2610.16308", "PACE (중간)"], ["2610.09455", "RLHND (긴 편)"]];
+  var TABS = [["glance", "요약"], ["full", "상세"]];
+  var VPS = [["desk", "데스크톱", 1280], ["tablet", "태블릿", 900], ["mobile", "휴대폰", 390]];
+  function load(k, d) { try { return JSON.parse(localStorage.getItem(k) || "null") || d; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var state = Object.assign({}, DEF, load(KEY, {}));
+  SECTIONS.forEach(function (g) { g[1].forEach(function (o) { if (!o[3].some(function (c) { return c[0] === state[o[0]]; })) state[o[0]] = DEF[o[0]]; }); });
+  Object.keys(state).forEach(function (k) { if (!(k in DEF)) delete state[k]; });
+  var view = Object.assign({ page: "2610.16308", tab: "full", vp: "desk" }, load(VKEY, {}));
+  if (!PAGES.some(function (p) { return p[0] === view.page; })) view.page = "2610.16308";
+  var frame = document.getElementById("view"), box = document.getElementById("box"), main = document.querySelector("main");
+
+  function seg(el, items, cur, pick) {
+    el.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = it[1];
+      b.setAttribute("aria-pressed", String(it[0] === cur));
+      b.addEventListener("click", function () { pick(it[0]); });
+      el.appendChild(b);
+    });
+  }
+  function summary() {
+    var lines = [];
+    SECTIONS.forEach(function (g) { g[1].forEach(function (o) { var c = o[3].filter(function (x) { return x[0] === state[o[0]]; })[0]; lines.push(g[0] + " · " + o[1] + ": " + c[1]); }); });
+    return "내 설정 (논문 목차)\n" + lines.join("\n");
+  }
+  function drawOpts() {
+    var root = document.getElementById("opts"); root.innerHTML = "";
+    SECTIONS.forEach(function (g) {
+      var grp = document.createElement("div"); grp.className = "grp"; grp.innerHTML = "<h2>" + g[0] + "</h2>";
+      g[1].forEach(function (o) {
+        var d = document.createElement("div"); d.className = "opt";
+        d.innerHTML = "<b>" + o[1] + "</b>" + (o[2] ? "<small>" + o[2] + "</small>" : "") + '<div class="seg"></div>';
+        seg(d.querySelector(".seg"), o[3], state[o[0]], function (v) { state[o[0]] = v; save(KEY, state); drawOpts(); apply(); });
+        grp.appendChild(d);
+      });
+      root.appendChild(grp);
+    });
+    document.getElementById("sum").textContent = summary();
+  }
+  function drawView() {
+    seg(document.querySelector('[data-view="page"]'), PAGES, view.page, function (v) { view.page = v; save(VKEY, view); drawView(); load_(); });
+    seg(document.querySelector('[data-view="tab"]'), TABS, view.tab, function (v) { view.tab = v; save(VKEY, view); drawView(); tab(); });
+    seg(document.querySelector('[data-view="vp"]'), VPS, view.vp, function (v) { view.vp = v; save(VKEY, view); drawView(); fit(); });
+  }
+  function win() { try { return frame.contentWindow; } catch (e) { return null; } }
+  function apply() { save(KEY, state); var w = win(); if (w && w.ppApply) w.ppApply(state); }
+  function tab() { var w = win(); if (w && w.ppTab) { w.ppTab(view.tab); w.scrollTo(0, 0); } }
+  function inject() {
+    var doc; try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || doc.querySelector("[data-pp-injected]")) return;
+    var base = new URL("site/assets/", location.href).href;
+    var css = doc.createElement("link"); css.rel = "stylesheet"; css.href = base + "pltoc.css";
+    css.setAttribute("data-pp-injected", ""); doc.head.appendChild(css);
+    var d = doc.createElement("script"); d.src = base + "pltoc.js";
+    d.onload = function () { apply(); tab(); };
+    doc.body.appendChild(d);
+  }
+  function load_() { frame.src = "site/p/" + view.page + "/index.html"; }
+  function fit() {
+    var W = VPS.filter(function (v) { return v[0] === view.vp; })[0][2];
+    var aw = main.clientWidth - 24, ah = main.clientHeight, k = Math.min(1, aw / W);
+    box.style.width = W + "px"; box.style.height = (ah / k) + "px";
+    box.style.transform = "translateX(-50%) scale(" + k + ")";
+  }
+  // the page's own scripts run on DOMContentLoaded; wait for them
+  frame.addEventListener("load", function () { setTimeout(inject, 60); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(main); else addEventListener("resize", fit);
+  document.getElementById("reset").addEventListener("click", function () { state = Object.assign({}, DEF); save(KEY, state); drawOpts(); apply(); });
+  document.getElementById("copy").addEventListener("click", function () {
+    var t = summary(), b = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = "복사함"; }, function () { b.textContent = "위 칸을 직접 복사해 주세요"; });
+    setTimeout(function () { b.textContent = "내 설정 복사"; }, 1800);
+  });
+  save(KEY, state); drawOpts(); drawView(); load_(); fit();
+})();
+</script>
+</body>
+</html>

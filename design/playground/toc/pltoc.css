@@ -1,0 +1,132 @@
+/* Contents drafts. Every variant is a `data-pt-*` value on <html>. */
+
+/* ── milestone list ── */
+.ms { position: relative; font-size: var(--fs-xs); }
+.ms-g { position: relative; padding-bottom: .55rem; }
+/* the line the milestones hang on */
+.ms-g::before {
+  content: ""; position: absolute; left: .62rem; top: 1.3rem; bottom: -.05rem; width: 1.5px;
+  background: var(--border); transform: translateX(-50%);
+}
+.ms-g:last-child::before { bottom: .4rem; }
+.ms-g.past::before, .ms-g.on::before { background: color-mix(in oklab, var(--orange) 45%, var(--border)); }
+.ms-act {
+  position: relative; display: flex; align-items: center; gap: .55rem;
+  text-decoration: none; color: var(--text); padding: .15rem 0 .35rem;
+}
+.ms-node {
+  flex: none; width: 1.25rem; height: 1.25rem; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--num); font-size: var(--fs-3xs); font-weight: 800;
+  background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); position: relative; z-index: 1;
+}
+.ms-g.past .ms-node { border-color: var(--orange); color: var(--orange-ink); }
+.ms-g.on .ms-node { background: var(--orange); border-color: var(--orange); color: var(--accent-ink); }
+.ms-at { display: flex; align-items: baseline; gap: .4rem; min-width: 0; flex: 1; }
+.ms-at b { font-size: var(--fs-sm); font-weight: 700; }
+.ms-at span { font-size: var(--fs-3xs); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-cnt { font-family: var(--num); font-size: var(--fs-3xs); color: var(--text-muted); }
+/* the site's `.toc a` rule is more specific than these; restate what it sets */
+.toc .ms a.ms-act { display: flex; padding: .15rem 0 .35rem; border-left: 0; margin-left: 0; border-radius: 0; }
+.toc .ms a.ms-act:hover { background: none; }
+.toc .ms a.ms-sec { display: flex; padding: .22rem .4rem .22rem 1.6rem; border-left: 0; margin-left: 0; }
+.ms-rows { display: grid; gap: .05rem; padding: .05rem 0 .2rem; }
+.ms-sec {
+  position: relative; display: flex; align-items: baseline; gap: .45rem;
+  padding: .22rem .4rem .22rem 1.6rem; border-radius: var(--radius-sm);
+  text-decoration: none; color: var(--text-muted); line-height: 1.4;
+}
+.ms-sec:hover { color: var(--text); background: var(--orange-soft); }
+.ms-dot {
+  position: absolute; left: .62rem; top: .78em; width: 7px; height: 7px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: var(--surface); border: 1.5px solid var(--border); z-index: 1;
+}
+.ms-sec.past .ms-dot { background: color-mix(in oklab, var(--orange) 55%, var(--surface)); border-color: transparent; }
+.ms-sec.on { color: var(--orange-ink); font-weight: 600; }
+.ms-sec.on .ms-dot { width: 9px; height: 9px; background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+.ms-num { flex: none; font-family: var(--num); font-size: var(--fs-3xs); opacity: .75; min-width: 1.1em; }
+.ms-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-pt-lines="2"] .ms-t { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+html[data-pt-lines="2"] .ms-sec.on .ms-t { -webkit-line-clamp: unset; }
+html[data-pt-lines="1"] .ms-sec.on .ms-t { white-space: normal; }
+html[data-pt-num="hide"] .ms-num { display: none; }
+
+/* ── desktop rail ── */
+.ms-rail { display: none; }
+@media (min-width: 1025px) {
+  html:not([data-pt-desk="now"]) .shell > .toc > :not(.ms):not(.toc-title) { display: none; }
+  html:not([data-pt-desk="now"]) .ms-rail { display: block; }
+  html[data-pt-desk="msact"] .ms-rail .ms-g:not(.on) .ms-rows { display: none; }
+  html[data-pt-desk="msact"] .ms-rail .ms-g:not(.on) { padding-bottom: .9rem; }
+
+  /* dots: a thin rail, words on hover only */
+  html[data-pt-desk="dots"] .shell { grid-template-columns: 2.4rem minmax(0, 1fr); gap: 2rem; max-width: 1040px; }
+  html[data-pt-desk="dots"] .shell > .toc { overflow: visible; }
+  html[data-pt-desk="dots"] .shell > .toc .toc-title { display: none; }
+  html[data-pt-desk="dots"] .ms-rail .ms-at,
+  html[data-pt-desk="dots"] .ms-rail .ms-cnt,
+  html[data-pt-desk="dots"] .ms-rail .ms-num { display: none; }
+  html[data-pt-desk="dots"] .toc .ms-rail a.ms-sec { padding: .32rem 0 .32rem 1.3rem; width: 1.3rem; }
+  html[data-pt-desk="dots"] .ms-rail .ms-t {
+    position: absolute; left: 1.7rem; top: 50%; transform: translateY(-50%);
+    white-space: nowrap; max-width: 26rem; overflow: hidden; text-overflow: ellipsis;
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    box-shadow: var(--shadow); border-radius: var(--radius-sm); padding: .3rem .6rem;
+    font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 5;
+  }
+  html[data-pt-desk="dots"] .ms-rail .ms-sec:hover .ms-t { opacity: 1; }
+  html[data-pt-desk="dots"] .ms-rail .ms-sec:hover { background: none; }
+  html[data-pt-desk="dots"] .ms-rail .ms-act { padding: .15rem 0 .4rem; }
+}
+
+/* ── phone and tablet strip ── */
+.pt-where, .pt-segs, .pt-dots, .pt-fab { display: none; }
+@media (max-width: 1024px) {
+  /* where: one line saying where the reader is, the four acts as a bar under it */
+  html[data-pt-phone="where"] .actstrip-in { display: none; }
+  html[data-pt-phone="where"] .pt-where {
+    display: flex; align-items: center; gap: .45rem; width: 100%;
+    border: 0; background: none; font: inherit; cursor: pointer; text-align: left;
+    padding: .55rem .9rem .45rem; color: var(--text);
+  }
+  .pt-w-n {
+    flex: none; font-family: var(--num); font-size: var(--fs-3xs); font-weight: 800;
+    color: var(--accent-ink); background: var(--orange); border-radius: var(--radius-xs); padding: .02rem .36rem;
+  }
+  .pt-w-a { flex: none; font-weight: 700; font-size: var(--fs-xs); }
+  .pt-w-s { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-xs); color: var(--text-muted); }
+  .pt-w-c { flex: none; color: var(--text-muted); }
+  html[data-pt-phone="where"] .pt-segs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 0 .9rem .45rem; }
+  .pt-seg { position: relative; height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; }
+  .pt-seg span { display: none; }
+  .pt-seg i { position: absolute; inset: 0; background: var(--orange); transform-origin: left; transform: scaleX(0); }
+
+  /* dots: four milestones on a line, then 목차 */
+  html[data-pt-phone="dots"] .as-link { display: none; }
+  html[data-pt-phone="dots"] .pt-dots { display: flex; align-items: center; flex: 1; min-width: 0; padding: .5rem .2rem; }
+  .pt-dot {
+    display: inline-flex; align-items: center; gap: .3rem; text-decoration: none;
+    font-size: var(--fs-xs); color: var(--text-muted); white-space: nowrap;
+  }
+  .pt-dot + .pt-dot::before { content: ""; width: .9rem; height: 1.5px; background: var(--border); margin: 0 .35rem 0 .1rem; }
+  .pt-dot.past + .pt-dot::before, .pt-dot.on + .pt-dot::before { background: color-mix(in oklab, var(--orange) 50%, var(--border)); }
+  .pt-dot i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--surface); }
+  .pt-dot.past i { background: color-mix(in oklab, var(--orange) 55%, var(--surface)); border-color: transparent; }
+  .pt-dot.on { color: var(--orange-ink); font-weight: 700; }
+  .pt-dot.on i { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+
+  /* fab: no strip; a 목차 button in the corner names the act */
+  html[data-pt-phone="fab"] .actstrip { display: none; }
+  html[data-pt-phone="fab"] .pt-fab:not([hidden]) {
+    display: inline-flex; align-items: center; gap: .4rem; position: fixed; z-index: var(--z-raised);
+    left: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); height: 44px; padding: 0 1rem;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    box-shadow: var(--shadow-lg); font: inherit; font-size: var(--fs-xs); font-weight: 600; cursor: pointer;
+  }
+  html[data-pt-phone="fab"] .article h2.h-sec, html[data-pt-phone="fab"] .pdiv-named { scroll-margin-top: calc(var(--nav-h) + var(--tabs-h, 0px) + 1rem); }
+}
+
+/* ── sheet ── */
+.ms-sheet { display: none; }
+html[data-pt-sheet="ms"] .toc-sheet .toc > :not(.ms) { display: none; }
+html[data-pt-sheet="ms"] .ms-sheet { display: block; }
+.ms-sheet .ms-t { white-space: normal; }
