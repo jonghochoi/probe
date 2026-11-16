@@ -321,3 +321,147 @@ html[data-theme="dark"] .hm-mki.t-light, html:not([data-theme="dark"]) .hm-mki.t
 .sn-runmenu button[aria-pressed="true"] span { color: inherit; }
 .sn-runmenu .sn-runmenu-cal { grid-column: 1 / -1; justify-content: center; margin-top: .15rem; border-top: 1px solid var(--border-soft); border-radius: 0; color: var(--orange-ink); font-weight: 700; }
 @media (max-width: 680px) { .sn-more-side { display: none !important; } }
+.sn-fold summary span { margin-left: .5rem; font-weight: 500; font-size: var(--fs-2xs); color: var(--text-muted); }
+/* cards in a row share one height; the tag line sits on the bottom edge of each, so the row's endings line up */
+.sn-card { display: flex; flex-direction: column; gap: .45rem; }
+.sn-card .sn-tags { margin-top: auto; padding-top: .55rem; }
+.sn-card .sn-tags span { line-height: 1.5; }
+
+/* cards: the arXiv number on the top line, opposite the axis chips */
+.sn-ctop { display: flex; align-items: center; gap: .5rem; }
+.sn-ctop .sn-chips { flex: 1; min-width: 0; }
+.sn-id { flex: none; font-size: var(--fs-3xs); color: var(--text-muted) !important; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.sn-id:hover { color: var(--orange-ink) !important; }
+/* candidate rows: chips close to the title, the arXiv number at the end */
+.sn-row { grid-template-columns: 4.6rem minmax(0, 1fr) auto; gap: .6rem; }
+.sn-row .sn-chips { flex-wrap: wrap; }
+@media (max-width: 680px) { .sn-row { grid-template-columns: minmax(0, 1fr) auto; } .sn-row .sn-chips { grid-column: 1 / -1; order: 3; } .sn-row a { grid-column: 1; } .sn-row .sn-id { align-self: start; } }
+/* even rows: as many columns as keep the rows balanced (5 cards: 3 + 2), and a short row's cards widen to fill it */
+.sn-cards.is-even { display: flex; flex-wrap: wrap; gap: 1rem; }
+.sn-cards.is-even > .sn-card { flex: 1 1 calc((100% - (var(--cols) - 1) * 1rem) / var(--cols)); min-width: 0; }
+@media (max-width: 960px) { .sn-cards.is-even > .sn-card { flex-basis: calc((100% - 1rem) / 2); } }
+@media (max-width: 680px) { .sn-cards.is-even > .sn-card { flex-basis: 100%; } }
+/* the run picker at the filter line's right end; the card no longer clips, so its first cell keeps its own corners */
+.sn-lc { overflow: visible; min-width: 0; }
+.sn-run { min-width: 0; }
+.sn-lab { border-radius: calc(var(--radius) - 1px) 0 0 calc(var(--radius) - 1px); }
+.sn-lc .sn-pf::after { border-radius: 0 !important; }
+.sn-runcell { flex: none; display: flex; align-items: center; gap: .05rem; padding: 0 .35rem; border-left: 1px solid color-mix(in srgb, var(--text) 14%, transparent); }
+.sn-runcell .sn-runpick { font-size: var(--fs-sm); font-weight: 700; padding: .35rem .45rem; font-variant-numeric: tabular-nums; }
+.sn-runcell .sn-runpick svg { width: .8rem; height: .8rem; }
+.sn-runcell .sn-runstep { width: 1.7rem; height: 1.7rem; }
+.sn-runcell .sn-runstep svg { width: .85rem; height: .85rem; }
+.sn-runcell .sn-runstep.is-off { width: .6rem; }
+.sn-runcell .sn-runmenu { left: auto; right: 0; }
+@media (max-width: 680px) { .sn-runcell .sn-runstep, .sn-runw { display: none; } .sn-runcell { padding: 0 .15rem; } }
+@media (max-width: 680px) { .sn-card .sn-tags { display: none; } }
+
+/* the run dates in the filter line's place */
+.sn-lc-date { margin-top: 0; }
+.sn-dates .rail-item { gap: .35rem; }
+.sn-dates .rail-item b { font-variant-numeric: tabular-nums; }
+.sn-dates-cal { flex: none; align-self: stretch; padding: 0 .9rem; border: 0; border-left: 1px solid color-mix(in srgb, var(--text) 14%, transparent); border-radius: 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0; background: none; color: var(--orange-ink); font: inherit; font-size: var(--fs-xs); font-weight: 700; cursor: pointer; white-space: nowrap; }
+.sn-dates-cal:hover { background: var(--orange-soft); }
+.sn-lab svg rect, .sn-lab svg path { fill: none; }
+.sn-run-h.is-static { border-bottom: 0; padding-bottom: .2rem; }
+.sn-run-h.is-static h2 { margin: 0 0 .15rem; }
+@media (max-width: 680px) { .sn-dates-cal { padding: 0 .65rem; } }
+
+/* a recommended paper opens its detail: the brief, the per-axis notes, what to check first */
+.sn-card[data-card] { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.sn-card[data-card]:hover, .sn-card.is-open { border-color: color-mix(in srgb, var(--orange) 45%, var(--border-soft)); }
+.sn-card.is-open { box-shadow: 0 0 0 3px var(--orange-soft); }
+.sn-row.is-open { background: var(--orange-soft); }
+.sn-dt-wait { margin: 1rem 0; color: var(--text-muted); font-size: var(--fs-sm); }
+/* drawer from the right; a sheet from below on a phone */
+html.sn-dw-on { overflow: hidden; }
+.sn-dw { position: fixed; inset: 0; z-index: 1000; }
+.sn-dw-bg { position: absolute; inset: 0; background: color-mix(in srgb, #0b0d1c 38%, transparent); animation: sn-fade .18s ease-out; }
+.sn-dw-p { position: absolute; top: 0; right: 0; bottom: 0; width: min(46rem, 92vw); overflow-y: auto; overscroll-behavior: contain; background: var(--bg, var(--surface)); box-shadow: -12px 0 40px color-mix(in srgb, #0b0d1c 22%, transparent); animation: sn-in .22s ease-out; }
+.sn-dw-h { position: sticky; top: 0; z-index: 1; padding: 1rem 1.4rem .9rem; background: var(--surface); border-bottom: 1px solid var(--border-soft); }
+.sn-dw-top { display: flex; align-items: center; gap: .6rem; }
+.sn-dw-top .sn-chips { flex: 1; }
+.sn-dw-h h2 { margin: .55rem 0 .15rem; font-family: var(--t-display, var(--ko)); font-size: var(--fs-2xl, 1.6rem); line-height: 1.25; }
+.sn-dw-t { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.5; }
+.sn-dw-g { margin: .45rem 0 0; font-size: var(--fs-sm); line-height: 1.6; }
+.sn-dw-h .sn-tags { margin-top: .5rem; }
+.sn-dw-x { flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--border-soft); border-radius: 999px; background: var(--surface); color: var(--text-muted); cursor: pointer; }
+.sn-dw-x:hover { color: var(--orange-ink); border-color: var(--orange); }
+.sn-dw-x svg { width: .85rem; height: .85rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.sn-dt-body { padding: .4rem 1.4rem 2rem; }
+.sn-dt-body .sc-body { display: block; padding: 0; border: 0; background: none; }
+.sn-dt-body .sc-cols2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
+@keyframes sn-fade { from { opacity: 0; } }
+@keyframes sn-in { from { transform: translateX(24px); opacity: .4; } }
+@media (max-width: 680px) {
+  .sn-dw-p { top: 8vh; left: 0; width: auto; border-radius: 16px 16px 0 0; animation-name: sn-up; }
+  .sn-dw-h { border-radius: 16px 16px 0 0; padding: .9rem 1.1rem .8rem; }
+  .sn-dt-body { padding: .3rem 1.1rem 2rem; }
+}
+@keyframes sn-up { from { transform: translateY(40px); opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .sn-dw-bg, .sn-dw-p { animation: none; } }
+/* opened in place: a full-width panel under the card's row, or under the list row */
+.sn-cards .sn-inl { flex: 1 1 100%; }
+.sn-inl { border: 1px solid color-mix(in srgb, var(--orange) 35%, var(--border-soft)); border-radius: var(--radius); background: var(--surface); padding: .9rem 1.2rem 1.2rem; }
+li.sn-inl { list-style: none; margin: .4rem 0 .8rem; }
+.sn-inl-h { display: flex; align-items: center; gap: .6rem; }
+.sn-inl-h .sn-chips { flex: 1; }
+.sn-inl .sn-dt-body { padding: .2rem 0 0; }
+/* candidate rows: the title and its line share one baseline; the chips and the number sit on the row's middle */
+.sn-row { align-items: center; }
+.sn-row a { align-items: baseline; }
+.sn-row a b { line-height: 1.35; }
+.sn-row a span { line-height: 1.5; }
+
+/* candidates in the analysis list's table: the same head band, the same row */
+.sn-lh, .sn-tr { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 7.2rem; gap: .9rem; align-items: baseline; }
+.sn-lh { font-family: var(--num); font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted); background: var(--surface-2); padding: .5rem .35rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.sn-rows.sn-tbl { border-top: 0; }
+.sn-tr { list-style: none; padding: .65rem .35rem; border-bottom: 1px solid var(--border-soft); cursor: pointer; transition: background .15s, box-shadow .15s; }
+.sn-tr:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
+.sn-tr.is-open { background: var(--orange-soft); box-shadow: inset 2px 0 0 var(--orange); }
+.sn-tid { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text) !important; opacity: .8; font-variant-numeric: tabular-nums; white-space: nowrap; text-decoration: none; }
+.sn-tid:hover { color: var(--orange-ink) !important; opacity: 1; }
+.sn-tmain { display: block; min-width: 0; color: inherit; text-decoration: none; }
+.sn-tt { display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
+.sn-tmain:hover .sn-tt { color: var(--orange-ink); }
+.sn-tg { display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted); margin-top: .1rem; }
+.sn-tp { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem; align-self: center; }
+@media (max-width: 680px) {
+  .sn-lh { display: none; }
+  .sn-tr { display: block; padding: .8rem .2rem; }
+  .sn-tid { display: block; margin-bottom: .2rem; }
+  .sn-tp { margin-top: .45rem; }
+}
+/* the page frame matches the analysis list's, so the date card lands where the pillar card does */
+.sn { padding-top: 1.5rem; }
+@media (max-width: 680px) { .sn { padding: 1.1rem .9rem 4rem; } }
+/* date line variants */
+.sn-dates.is-month .rail-item { min-width: 2.1rem; justify-content: center; }
+.sn-dm { flex: none; align-self: center; margin: 0 .15rem 0 .55rem; padding-left: .7rem; border-left: 1px solid color-mix(in srgb, var(--text) 14%, transparent); font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); }
+.sn-dates .sn-dm:first-child { margin-left: .1rem; padding-left: 0; border-left: 0; }
+.sn-dots { display: inline-flex; gap: 2px; align-self: center; }
+.sn-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--orange); opacity: .55; }
+.sn-dates .rail-item[aria-pressed="true"] .sn-dots i { background: var(--accent-ink); opacity: .9; }
+.sn-dates.is-stack .rail-item { flex-direction: column; align-items: center; gap: 0; line-height: 1.2; padding: .28rem .65rem; }
+.sn-dates.is-stack .rail-item .rn { margin: 0; }
+/* the calendar opens from the date line's own icon cell */
+.sn-lab-btn { border: 0; padding: 0; font: inherit; cursor: pointer; transition: background .15s, color .15s; }
+.sn-lab-btn:hover { background: color-mix(in srgb, var(--orange) 18%, var(--orange-soft)); }
+.sn-lab-btn:focus-visible { outline: 2px solid var(--orange); outline-offset: -3px; }
+.sn-lc-date .sn-pf::after { border-radius: 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 !important; }
+/* the calendar drops from the icon that opens it, at the date line's left end */
+@media (min-width: 681px) { .sn.show-side .sn-side { left: 1.25rem; right: auto; top: 5.15rem; } }
+/* on a phone the calendar pops up under the date line as well, rather than sitting at the page's end */
+@media (max-width: 680px) {
+  .sn.show-side .sn-side { display: grid; position: absolute; left: .9rem; right: .9rem; top: 4.6rem; width: auto; z-index: 30; padding: .3rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 10px 32px color-mix(in srgb, #0b0d1c 20%, transparent); border: 1px solid color-mix(in srgb, var(--text) 14%, transparent); }
+}
+
+/* rank styles */
+.chip.pillar.sn-chip-rk i { font-style: normal; opacity: .55; }
+.sn-rk.is-num { font-size: var(--fs-2xs); font-variant-numeric: tabular-nums; }
+.sn-bw { position: relative; display: inline-flex; margin-right: .45rem; }
+.sn-badge { position: absolute; top: -.35rem; right: -.45rem; display: grid; place-items: center; min-width: 1.05rem; height: 1.05rem; padding: 0 .2rem; border-radius: 999px; background: var(--text); color: var(--surface); border: 1.5px solid var(--surface); font-family: var(--num); font-size: 10px; font-weight: 700; line-height: 1; }
+.sn-lh.has-rk, .sn-tbl.has-rk .sn-tr { grid-template-columns: 5.6rem minmax(0, 1fr) 2.6rem 5.4rem; }
+.sn-trk { font-family: var(--num); font-size: var(--fs-sm); font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; align-self: center; }
+@media (max-width: 680px) { .sn-trk { display: inline-block; margin: .45rem .4rem 0 0; font-size: var(--fs-2xs); color: var(--text-muted); } .sn-trk.is-n::after { content: "위"; } .sn-tbl.has-rk .sn-tp { display: inline-flex; } }
