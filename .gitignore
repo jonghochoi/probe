@@ -12,6 +12,8 @@ venv/
 # installed on demand with `npm install --no-save`.
 .site/
 .site-cache/
+# The redesign playground's build output (design/playground/build.sh).
+design/playground/out/
 site/builder/node_modules/
 # …and anywhere else a stray `npm install` puts them.
 node_modules/

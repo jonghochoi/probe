@@ -57,6 +57,7 @@ file the row points at.
 | `assets/` | human | The README images and `build-art.py` |
 | `assets/CLAUDE.md` | human | Rules for `assets/` |
 | `site/` | human | The reading site's generator. Folder map: `site/README.md` |
+| `design/` | human | The site redesign's working set — `DECISIONS.md` and the playground they were made in. Folder map: `design/README.md` |
 | `site/query.py` | human | The agent's standard-library query CLI over a checkout |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break |
 | `site/search/` | human | Semantic search over the rewrites. Folder map: `site/search/README.md` |

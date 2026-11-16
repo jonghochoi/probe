@@ -1,0 +1,1396 @@
+<title>PROBE 테마 조율실</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;700;800&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;600;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&family=Gothic+A1:wght@400;500;600;700;800&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: a control column beside a live stage that frames the real PROBE pages; on a phone the stage pins to the top and the controls scroll under it. */
+@font-face { font-family: 'SUIT'; src: url(site/assets/tfonts/SUIT-Variable.woff2) format('woff2-variations'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Wanted Sans'; src: url(site/assets/tfonts/WantedSansVariable.woff2) format('woff2-variations'); font-weight: 400 1000; font-display: swap; }
+@font-face { font-family: 'MaruBuri'; src: url(site/assets/tfonts/MaruBuri-Regular.woff2) format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'MaruBuri'; src: url(site/assets/tfonts/MaruBuri-SemiBold.woff2) format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'MaruBuri'; src: url(site/assets/tfonts/MaruBuri-Bold.woff2) format('woff2'); font-weight: 700 900; font-display: swap; }
+@font-face { font-family: 'Pretendard Variable'; src: url(site/assets/fonts/pretendard-subset.woff2) format('woff2-variations'); font-weight: 45 930; font-display: swap; }
+
+:root {
+  --bg: oklch(97.2% 0.004 255);
+  --panel: oklch(99.6% 0.002 255);
+  --ink: oklch(22% 0.012 255);
+  --muted: oklch(47% 0.014 255);
+  --line: oklch(89.5% 0.006 255);
+  --chip: oklch(95.6% 0.005 255);
+  --sel: oklch(24% 0.014 255);
+  --sel-ink: oklch(98.5% 0.003 255);
+  --mark: oklch(60% 0.15 45);
+  --stage: oklch(91.5% 0.006 255);
+  --ui: 'SUIT', 'Pretendard Variable', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: oklch(17% 0.008 255); --panel: oklch(20.5% 0.009 255); --ink: oklch(93% 0.006 255); --muted: oklch(72% 0.012 255);
+    --line: oklch(31% 0.01 255); --chip: oklch(25% 0.01 255); --sel: oklch(92% 0.006 255); --sel-ink: oklch(19% 0.008 255);
+    --mark: oklch(74% 0.13 50); --stage: oklch(13.5% 0.006 255); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: oklch(17% 0.008 255); --panel: oklch(20.5% 0.009 255); --ink: oklch(93% 0.006 255); --muted: oklch(72% 0.012 255);
+  --line: oklch(31% 0.01 255); --chip: oklch(25% 0.01 255); --sel: oklch(92% 0.006 255); --sel-ink: oklch(19% 0.008 255);
+  --mark: oklch(74% 0.13 50); --stage: oklch(13.5% 0.006 255); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 1.5; word-break: keep-all; }
+button { font: inherit; color: inherit; }
+
+.app { display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 100vh; }
+
+/* ── Stage ─────────────────────────────────────────── */
+.stage { order: 2; position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; display: flex; flex-direction: column; background: var(--stage); min-width: 0; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--panel); border-bottom: 1px solid var(--line); }
+.bar .grow { flex: 1; }
+.entry-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.entry-wrap[hidden] { display: none; }
+.entry-lbl { font-size: 12px; font-weight: 700; color: var(--mark); }
+#entrySeg button[aria-pressed="true"] { color: var(--mark); }
+.seg { display: inline-flex; background: var(--chip); border-radius: 9px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 6px 11px; border-radius: 7px; cursor: pointer; color: var(--muted); font-weight: 600; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px oklch(0% 0 0 / .12); }
+.seg button:focus-visible, .opt input:focus-visible + span, .act:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+.frame-wrap { flex: 1; position: relative; overflow: hidden; }
+.frame-box { position: absolute; top: 0; left: 50%; transform-origin: top center; box-shadow: 0 0 0 1px var(--line), 0 10px 40px oklch(0% 0 0 / .12); background: #fff; }
+.frame-box iframe { display: block; border: 0; width: 100%; height: 100%; }
+
+/* ── Panel ─────────────────────────────────────────── */
+.panel { order: 1; background: var(--panel); border-right: 1px solid var(--line); height: 100vh; position: sticky; top: 0; overflow-y: auto; padding-block: 18px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: 16px; }
+.head h1 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 6px; }
+.act { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 11px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.act.primary { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
+.diffcount { font-size: 12px; color: var(--muted); margin: 0 0 4px; min-height: 18px; }
+.diffcount b { color: var(--mark); }
+
+.sec { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
+.sec > h2 { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+.grp { border: 0; margin: 0 0 12px; padding: 0; min-width: 0; }
+.grp legend { padding: 0; margin-bottom: 6px; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
+.grp legend .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mark); visibility: hidden; }
+.grp.changed legend .dot { visibility: visible; }
+.grp .hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+.opts { display: flex; flex-wrap: wrap; gap: 5px; }
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.opt span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: var(--chip); border: 1px solid transparent; font-size: 13px; line-height: 1.3; cursor: pointer; }
+.opt input:checked + span { background: var(--sel); color: var(--sel-ink); }
+.opt .def { font-size: 10.5px; opacity: .7; }
+.opt .sw { width: 13px; height: 13px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px oklch(0% 0 0 / .15); }
+.opt.font span { font-size: 15px; padding: 6px 11px; }
+
+.presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 6px; }
+.preset { display: flex; align-items: baseline; gap: 8px; text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 9px; padding: 8px 10px; cursor: pointer; font-size: 13px; line-height: 1.35; }
+.preset b { font-size: 14px; color: var(--mark); }
+.preset[aria-pressed="true"] { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
+.preset[aria-pressed="true"] b { color: inherit; }
+.preset:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+.pnote { margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+.decided { margin-top: 18px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; }
+.decided > summary { cursor: pointer; padding: 11px 0; font-weight: 700; font-size: 13px; color: var(--muted); }
+.decided > summary span { font-weight: 400; font-size: 12px; margin-left: 4px; }
+.decided[open] > summary { color: var(--ink); }
+.pgnote { margin: 0 0 12px; font-size: 12px; color: var(--ink); background: var(--chip); border-radius: 8px; padding: 8px 10px; }
+#form[data-page="home"] .grp[data-pg]:not([data-pg="home"]),
+#form[data-page="paper"] .grp[data-pg]:not([data-pg="paper"]),
+#form[data-page="scout"] .grp[data-pg]:not([data-pg="scout"]),
+#form[data-page="cmp"] .grp[data-pg]:not([data-pg="cmp"]),
+#form[data-page=""] .grp[data-pg] { display: none; }
+.out { margin-top: 18px; }
+.out textarea { width: 100%; min-height: 150px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; background: var(--chip); color: var(--ink); font: 12.5px/1.55 var(--ui); padding: 10px; }
+.out label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+.toast { font-size: 12px; color: var(--muted); min-height: 18px; margin-top: 4px; }
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .stage { order: 1; height: 56vh; z-index: 5; box-shadow: 0 6px 16px oklch(0% 0 0 / .12); }
+  .panel { order: 2; height: auto; position: static; border-right: 0; padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+  .bar { gap: 6px 8px; }
+  .seg button { padding: 5px 8px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <section class="stage" aria-label="미리보기">
+    <div class="bar">
+      <div class="seg" role="group" aria-label="페이지" id="pageSeg"></div>
+      <div class="entry-wrap" hidden><span class="entry-lbl">입구 시안</span><div class="seg" role="group" aria-label="입구 시안" id="entrySeg"></div></div>
+      <div class="grow"></div>
+      <div class="seg" role="group" aria-label="화면 폭" id="vpSeg"></div>
+      <div class="seg" role="group" aria-label="밝기" id="modeSeg"></div>
+    </div>
+    <div class="frame-wrap" id="wrap"><div class="frame-box" id="box"><iframe id="view" title="PROBE 페이지 미리보기" src="site/index.html"></iframe></div></div>
+  </section>
+
+  <aside class="panel">
+    <div class="head">
+      <h1>PROBE 테마 조율실</h1>
+      <p>실제 PROBE 페이지에 지금까지 고르신 설정(내 설정 14차: 6차 테마 · 분석 목록은 거르기 줄을 목록 위로(왼쪽에 연구 축 아이콘 칸), 링크 아이콘은 제목 바로 뒤, 결과 줄 없이, 추천 카드 없이, 한 쪽에 10·20·30편 · 모든 페이지에 옅은 배경 · 새 첫 화면(최근 글 먼저 · 기본 로봇 인사 · 가장자리만 물드는 배경) · 연구 축 칩은 연구 축 페이지로 · 내비 로봇 로고 숨김)을 입혀 두었습니다. 항목을 바꾸면 미리보기가 바로 바뀝니다. 글자 크기와 줄 간격은 위의 데스크톱·모바일 전환으로 각각 확인할 수 있습니다.</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="act" id="reset">내 설정 14차로 되돌리기</button>
+      <button type="button" class="act primary" id="copy">설정 복사</button>
+    </div>
+    <p class="diffcount" id="diff"></p>
+    <form id="form" onsubmit="return false"></form>
+    <div class="out">
+      <label for="summary">지금 설정 (이 글을 그대로 보내 주시면 됩니다)</label>
+      <textarea id="summary" readonly></textarea>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var LOCK = ""; // set per copy: this playground then shows one page and only that page's items
+  var FONT = {
+    maru: ["마루부리", "'MaruBuri', serif"],
+    hahmlet: ["함렛", "'Hahmlet', serif"],
+    gowunb: ["고운바탕", "'Gowun Batang', serif"],
+    nanumm: ["나눔명조", "'Nanum Myeongjo', serif"],
+    notoserif: ["본명조", "'Noto Serif KR', serif"],
+    suit: ["SUIT", "'SUIT', 'Pretendard Variable', sans-serif"],
+    wanted: ["원티드 산스", "'Wanted Sans', 'Pretendard Variable', sans-serif"],
+    pretendard: ["Pretendard", "'Pretendard Variable', sans-serif"],
+    plex: ["IBM Plex Sans KR", "'IBM Plex Sans KR', 'Pretendard Variable', sans-serif"],
+    notosans: ["본고딕", "'Noto Sans KR', 'Pretendard Variable', sans-serif"],
+    gothica1: ["고딕 A1", "'Gothic A1', 'Pretendard Variable', sans-serif"],
+    gowund: ["고운돋움", "'Gowun Dodum', 'Pretendard Variable', sans-serif"]
+  };
+  // h: hue the neutrals, bands and glows are tinted with. fill/ink: the accent as a fill and as readable text.
+  var ACC = {
+    apricot: { name: "애프리콧", h: 45, fill: "oklch(58% 0.155 45)", ink: "oklch(49% 0.14 43)", aink: "#ffffff" },
+    probe:   { name: "지금 PROBE 주황", h: 40, fill: "oklch(67.2% 0.131 39)", ink: "oklch(51.4% 0.155 41)", aink: "oklch(21% 0.018 50)" },
+    coral:   { name: "코랄", h: 28, fill: "oklch(60% 0.16 28)", ink: "oklch(50% 0.16 27)", aink: "#ffffff" },
+    honey:   { name: "허니", h: 72, fill: "oklch(74% 0.14 72)", ink: "oklch(48% 0.11 66)", aink: "oklch(22% 0.02 60)" },
+    rose:    { name: "로즈", h: 8, fill: "oklch(56% 0.16 8)", ink: "oklch(49% 0.16 8)", aink: "#ffffff" },
+    indigo:  { name: "인디고", h: 277, fill: "oklch(51% 0.21 277)", ink: "oklch(46% 0.2 277)", aink: "#ffffff" },
+    sage:    { name: "세이지", h: 165, fill: "oklch(52% 0.1 165)", ink: "oklch(45% 0.09 165)", aink: "#ffffff" }
+  };
+
+  var SECTIONS = [
+    ["글꼴", [
+      ["titleFont", "제목 서체", "", Object.keys(FONT).map(function (k) { return [k, FONT[k][0]]; }), "font"],
+      ["titleScope", "제목 서체 적용 범위", "", [["big", "큰 제목만"], ["all", "소제목까지"]]],
+      ["titleWeight", "제목 굵기", "", [["600", "600"], ["700", "700"], ["800", "800"]]],
+      ["bodyFont", "본문 서체", "", ["suit", "wanted", "pretendard", "plex", "notosans", "gothica1", "gowund"].map(function (k) { return [k, FONT[k][0]]; }), "font"],
+      ["numFont", "숫자 표기", "48.3 → 73.1%", [["body", "본문 서체 그대로"], ["mono", "고정폭 (지금 사이트)"]]],
+      ["size", "본문 크기 · 데스크톱", "폭 720px 넘을 때", [["15", "15"], ["15.5", "15.5"], ["16", "16"], ["17", "17"], ["18", "18"]]],
+      ["leading", "줄 간격 · 데스크톱", "", [["1.6", "좁게"], ["1.7", "보통"], ["1.85", "넓게"], ["2", "아주 넓게"]]],
+      ["sizeM", "본문 크기 · 모바일", "폭 720px 이하", [["14.5", "14.5"], ["15", "15"], ["15.5", "15.5"], ["16", "16"], ["17", "17"]]],
+      ["leadingM", "줄 간격 · 모바일", "", [["1.6", "좁게"], ["1.7", "보통"], ["1.85", "넓게"], ["2", "아주 넓게"]]]
+    ]],
+    ["영역 구분", [
+      ["navStyle", "내비 바", "맨 위 메뉴 줄", [["glass", "반투명 (지금)"], ["solid", "흰 면 + 선"], ["tint", "옅은 주색 면"], ["dark", "진한 색"]]],
+      ["bandEnd", "상단 띠 끝", "제목·검색바·탭 영역이 끝나는 곳", [["melt", "녹아듦 (지금)"], ["line", "선으로 끊음"], ["shadow", "그림자로 끊음"]]],
+      ["bodyZone", "본문 바탕", "", [["same", "띠와 같은 바탕 (지금)"], ["plain", "번짐 없는 단색"], ["sheet", "흰 시트 위에"]]],
+      ["navForm", "내비 바 형태", "", [["bar", "꽉 찬 막대 (지금)"], ["float", "떠 있는 둥근 막대"]]],
+      ["bandForm", "상단 띠 형태", "", [["full", "가로로 꽉 참 (지금)"], ["card", "둥근 카드"]]],
+      ["gapSize", "띠와 본문 사이", "", [["normal", "보통 (지금)"], ["wide", "넓게"]]],
+      ["filterBar", "랜딩 검색바", "검색은 위쪽 돋보기가 같은 규칙으로 맡음", [["bar", "지금처럼 띠로"], ["compact", "검색칸 없이 정렬·개수만 작게"], ["merge", "줄은 없애고 정렬·개수는 다른 자리로"], ["none", "모두 없애기 (최신순 · 10편 고정)"]]],
+      ["ctlSpot", "정렬·개수 자리", "'다른 자리로'일 때 · 좁은 화면에서는 숨기고 최신순 · 10편으로 고정", [["colsort", "열 제목으로 정렬 + 개수는 페이지 줄"], ["listhead", "목록 머리줄 오른쪽 끝"], ["rail", "왼쪽 레일 안"], ["mast", "상단 띠 제목 오른쪽"]]]
+    ]],
+    ["정보량", [
+      ["rowLinks", "목록 · 오른쪽 끝 열", "분량·용어 자리", [["size", "분량·용어"], ["icons", "링크를 아이콘만 한 줄로"], ["sizeicon", "분량 + 아이콘 (올려 두면)"], ["links", "링크 이름까지"], ["none", "비우기"]]],
+      ["linkSpot", "데스크톱 · 링크 아이콘 자리", "오른쪽 끝 열을 없애고 옮김 · 휴대폰은 연구 축 옆 그대로", [["under", "한 줄 요약 아래"], ["inline", "제목 바로 뒤"], ["title", "제목 줄 오른쪽"], ["pillcol", "연구 축 칩 아래"], ["idcol", "arXiv 번호 아래"], ["right", "오른쪽 끝 열 (지금)"]]],
+      ["pageBg", "배경", "첫 화면의 가장자리 물듦을 이 페이지에도", [["off", "없음 (지금)"], ["same", "첫 화면과 같게"], ["light", "더 옅게"]]],
+      ["leadSum", "가장 최근 카드 · 요약 문단", "", [["show", "전부"], ["clamp", "2줄만"], ["hide", "숨기기"]]],
+      ["leadRo", "가장 최근 카드 · 결과 상자", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["leadFoot", "가장 최근 카드 · 아래 칩·링크 줄", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["rowTagline", "목록 · 한 줄 요약", "올려 두면 보이기는 데스크톱만", [["show", "보이기"], ["clamp", "1줄로 자르기"], ["hover", "올려 두면 보이기"], ["hide", "숨기기"]]],
+      ["rowRo", "목록 · 결과 줄", "", [["show", "보이기"], ["hover", "올려 두면 보이기"], ["hide", "숨기기"]]],
+      ["rowId", "목록 · arXiv 번호 열", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["rowSize", "목록 · 분량 열", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["rowPillars", "목록 · 연구 축 칩", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["hoverPhone", "휴대폰에서 '올려 두면 보이기' 항목", "휴대폰엔 마우스가 없어서 따로 정함", [["show", "그대로 보이기"], ["hide", "숨기기"]]],
+      ["railSpot", "서재·연구 축 거르기 자리", "왼쪽 레일 모양 그대로", [["top", "목록 위 가로 줄"], ["left", "왼쪽 레일 (지금)"]]],
+      ["leadOrder", "가장 최근 카드 · 글 순서", "결과 상자 위아래로 나뉜 글", [["text", "글을 붙이고 결과는 아래로"], ["resultTop", "결과를 제목 바로 아래로"], ["now", "지금 (글 사이에 결과)"]]],
+      ["rail", "왼쪽 레일 (서재·연구 축)", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["hubFacts", "요약 카드 · 수치 네 칸", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["narrBody", "한 번에 읽는 이야기", "", [["show", "전부"], ["fold", "두 문단 + 이어 읽기"]]],
+      ["narrRail", "이야기 옆 정보 칸", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["actC", "네 단계 카드 · 설명", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["actFigs", "네 단계 카드 · 그래프·출처", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["scStats", "맨 위 숫자 줄", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["scFilter", "연구 축 필터 줄", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["scGist", "논문마다 한 줄 요약", "", [["show", "보이기"], ["hover", "올려 두면 보이기"], ["hide", "숨기기"]]],
+      ["scSide", "오른쪽 순위·코드 표시", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["cmpFork", "두 입장 갈래 그림", "", [["show", "보이기"], ["hide", "숨기기"]]],
+      ["cmpSize", "편수 열", "", [["show", "보이기"], ["hide", "숨기기"]]]
+    ]],
+    ["연결", [
+      ["pillarMode", "연구 축 칩(P0–P4)을 누르면", "따로 된 탭 없이 칩이 연구 축의 입구가 됨", [["pop", "그 자리에 설명 카드"], ["filter", "분석 목록을 그 축으로 거름"], ["page", "연구 축 페이지로"], ["none", "아무 일 없음"]]],
+      ["decisionLevel", "연구 축 설명에 결정(D#)을", "공개 범위는 아래 설명 참고", [["choice", "제목 + 현재 선택 한 구절"], ["title", "제목만"], ["none", "보이지 않음"]]],
+      ["pillarNav", "내비에 '연구 축' 메뉴", "", [["off", "없음"], ["on", "비교 다음에 추가"]]],
+      ["shelfBadge", "서재 메뉴에 즐겨찾기 개수", "별표한 논문이 있을 때만", [["on", "표시"], ["off", "없음"]]]
+    ]],
+    ["첫 화면", [
+      ["homeTop", "맨 위 제목과 요약 카드", "아래 '최근에 들어온 것'과 겹침", [["none", "모두 빼기"], ["title", "제목 한 줄만"], ["cards", "요약 카드만"], ["all", "모두 (지금)"]]],
+      ["homeOrder", "묶음 순서", "", [["feed", "최근 글 먼저"], ["events", "일정 먼저"]]],
+      ["homeFill", "데스크톱에서 채우는 방식", "휴대폰은 그대로", [["more", "항목을 조금 더"], ["columns", "분석·탐색·비교 세 칸"], ["lean", "지금처럼 하나씩"]]],
+      ["homeNames", "묶음 제목 짓는 방식", "", [["noun", "짧은 명사 + 회색 부제"], ["phrase", "모두 꾸미는 말 + 명사"], ["now", "지금 (섞여 있음)"]]]
+    ]],
+    ["첫 화면 움직임", [
+      ["homeBg", "배경", "무늬 없이 화면 전체에 옅게 번지는 색", [["drift", "큰 빛 덩어리가 천천히 흐름"], ["breath", "대각선 두 색이 숨 쉬듯"], ["silk", "비단처럼 도는 색"], ["edge", "가장자리만 물듦"], ["hue", "바탕 색조가 천천히 바뀜"], ["scroll", "스크롤 따라 색이 바뀜"], ["off", "없음"]]],
+      ["homeBgAmt", "배경 진하기", "", [["1", "아주 옅게"], ["2", "옅게"], ["3", "보통"]]],
+      ["homeBgMove", "배경 움직임", "", [["on", "천천히 움직임"], ["off", "멈춤"]]],
+      ["homeMascot", "로봇 마스코트", "", [["greet", "맨 위 인사 줄"], ["corner", "오른쪽 아래 구석"], ["off", "없음"]]],
+      ["homeMascotKind", "어떤 마스코트", "레포의 트랙별 마스코트 4종", [["match", "하는 말에 맞는 마스코트"], ["basic", "기본 로봇만"], ["rotate", "넷이 번갈아"]]],
+      ["homeLine", "마스코트가 하는 말", "", [["pick", "이번 주 한 편 추천"], ["rotate", "추천·탐색·마감을 번갈아"], ["scout", "탐색 추천"], ["deadline", "다가오는 마감"], ["count", "숫자 요약 (지금)"]]],
+      ["navMark", "내비의 작은 로봇 로고", "마스코트와 겹칠 때", [["homehide", "첫 화면에서만 숨김"], ["keep", "모든 페이지 유지"], ["hide", "모든 페이지에서 숨김"]]],
+      ["homeEnter", "처음 들어올 때", "", [["on", "묶음이 차례로 떠오름"], ["off", "바로 보임"]]],
+      ["homePlInfo", "연구 축 옆에 보일 것", "", [["latest", "가장 최근 글 이름"], ["new", "이번 주 새 글 수"], ["none", "없음"], ["bars", "8주 막대 (이전)"]]]
+    ]],
+    ["논문 상세", [
+      ["tocActive", "목차에서 지금 읽는 항목 표시", "상세 탭 왼쪽 목차", [["tint", "옅은 바탕"], ["text", "글자색만"], ["dot", "작은 점"], ["band", "왼쪽 띠 (지금)"]]]
+    ]],
+    ["색 테마 선택", [
+      ["themePicker", "독자용 색 테마 버튼", "내비의 다크 모드 버튼 옆 · 미리보기에서 눌러 보세요", [["on", "보이기"], ["off", "숨기기"]]],
+      ["pickerSet", "버튼에 넣을 색", "여러 개 고르기", Object.keys(ACC).map(function (k) { return [k, ACC[k].name]; }), "multi"]
+    ]],
+    ["색", [
+      ["accent", "주색", "", Object.keys(ACC).map(function (k) { return [k, ACC[k].name]; }), "swatch"],
+      ["strength", "그라데이션 세기", "", [["0", "없음"], ["1", "옅게"], ["2", "중간"], ["3", "진하게"]]],
+      ["band", "상단 띠 채움", "", [["grad", "그라데이션"], ["flat", "단색"], ["none", "없음"]]],
+      ["glow", "바탕 번짐", "위쪽 모서리의 은은한 빛", [["on", "켬"], ["off", "끔"]]],
+      ["point", "포인트 색", "요약 카드 윗선 · 탭 · 로고", [["two", "두 톤"], ["one", "한 톤"]]],
+      ["pillar", "연구 축 배지 색", "P0–P4", [["multi", "다섯 색"], ["mono", "주색 한 톤"]]]
+    ]],
+    ["카드와 모양", [
+      ["radius", "모서리 둥글기", "", [["3", "3px (지금)"], ["8", "8px"], ["12", "12px"], ["18", "18px"]]],
+      ["shadow", "카드 그림자", "", [["none", "없음"], ["soft", "옅게"], ["strong", "뚜렷하게"]]],
+      ["cardBg", "카드 바탕", "", [["glass", "반투명"], ["solid", "불투명"]]],
+      ["chip", "칩·배지 모양", "", [["pill", "알약"], ["square", "사각"]]],
+      ["leadMark", "가장 최근 카드 강조", "랜딩 첫 카드", [["bracket", "직각 꺾쇠 (지금)"], ["arc", "둥근 꺾쇠"], ["topline", "윗선"], ["ring", "주색 테두리"], ["glow", "은은한 후광"], ["none", "없음"]]]
+    ]],
+    ["탐색 요소", [
+      ["tabs", "요약·상세 탭", "논문 페이지", [["pill", "알약"], ["underline", "밑줄 (지금)"], ["segment", "묶음 버튼"]]],
+      ["navCur", "내비 현재 메뉴", "", [["pill", "알약"], ["underline", "밑줄 (지금)"], ["bold", "굵게만"]]]
+    ]],
+    ["아이콘과 로고", [
+      ["iconStroke", "아이콘 선 굵기", "", [["1.2", "얇게"], ["1.6", "보통"], ["2.1", "굵게"]]],
+      ["iconBtn", "아이콘 버튼 모양", "검색 · 다크 · GitHub", [["square", "사각"], ["circle", "원형"], ["ghost", "테두리 없음"]]],
+      ["mascot", "로봇 마스코트", "", [["on", "보이기"], ["off", "숨기기"]]],
+      ["wordmark", "PROBE 글자 색", "", [["grad", "그라데이션"], ["accent", "주색"], ["ink", "먹색"]]],
+      ["wordFont", "PROBE 글자 서체", "", [["title", "제목 서체"], ["body", "본문 서체"]]]
+    ]]
+  ];
+
+  // 내 설정 2차: the first round sent back (desktop type at 17 / 넓게), then indigo, no search box, and a reader-facing theme button.
+  var DEFAULT = { titleFont: "gowund", titleScope: "big", titleWeight: "700", bodyFont: "gowund", numFont: "body",
+    size: "17", leading: "1.85", sizeM: "15.5", leadingM: "1.7",
+    navStyle: "dark", bandEnd: "melt", bodyZone: "plain", navForm: "bar", bandForm: "full", gapSize: "normal",
+    accent: "indigo", strength: "1", band: "grad", filterBar: "none", ctlSpot: "colsort", leadCard: "hide", recKind: "none", recStyle: "plain", labelCol: "icontint", recPhone: "hide", rowLinks: "icons", linkSpot: "inline", pageBg: "light", railSpot: "top", leadOrder: "text", leadSum: "show", leadRo: "show", leadFoot: "show", rowTagline: "show", rowRo: "hide", rowId: "show", rowSize: "show", rowPillars: "show", rail: "show", hoverPhone: "show", pillarMode: "page", tocActive: "tint", homeTop: "none", homeOrder: "feed", homeFill: "more", homeNames: "noun", homeMascot: "greet", homeEnter: "on", homePlInfo: "new", homeBg: "edge", homeBgAmt: "2", homeBgMove: "on", homeLine: "pick", homeMascotKind: "basic", navMark: "hide", decisionLevel: "choice", pillarNav: "off", shelfBadge: "on", hubFacts: "show", narrBody: "show", narrRail: "show", actC: "show", actFigs: "show", scStats: "show", scFilter: "show", scGist: "show", scSide: "show", cmpFork: "show", cmpSize: "show", themePicker: "on", pickerSet: "indigo,apricot,sage,rose", glow: "on", point: "two", pillar: "multi",
+    radius: "12", shadow: "soft", cardBg: "glass", chip: "pill", leadMark: "ring",
+    tabs: "underline", navCur: "underline", iconStroke: "1.2", iconBtn: "square", mascot: "on", wordmark: "grad", wordFont: "title" };
+  var BASE_NAME = "내 설정 14차";
+  // Region-separation proposals: each sets the three 영역 구분 axes at once.
+  // 정보량 steps: each sets every 정보량 item at once, from today's pages down to titles only.
+  var D_ALL = ["leadSum","leadRo","leadFoot","rowTagline","rowRo","rowId","rowSize","rowPillars","rail","hubFacts","narrBody","narrRail","actC","actFigs","scStats","scFilter","scGist","scSide","cmpFork","cmpSize"];
+  function dset(o) { var r = {}; D_ALL.forEach(function (k) { r[k] = o[k] || "show"; }); return r; }
+  var DENSITY = [
+    ["0", "지금", dset({})],
+    ["1", "조금 덜", dset({ leadSum: "clamp", rowTagline: "clamp", rowRo: "hover", rowId: "hide", rowSize: "hide", narrBody: "fold", scStats: "hide", cmpSize: "hide" })],
+    ["2", "많이 덜", dset({ leadSum: "hide", leadFoot: "hide", rowTagline: "hover", rowRo: "hide", rowId: "hide", rowSize: "hide", rail: "hide", narrBody: "fold", narrRail: "hide", actFigs: "hide", scStats: "hide", scFilter: "hide", scGist: "hover", cmpFork: "hide", cmpSize: "hide" })],
+    ["3", "제목만", dset({ leadSum: "hide", leadRo: "hide", leadFoot: "hide", rowTagline: "hide", rowRo: "hide", rowId: "hide", rowSize: "hide", rowPillars: "hide", rail: "hide", hubFacts: "hide", narrBody: "fold", narrRail: "hide", actC: "hide", actFigs: "hide", scStats: "hide", scFilter: "hide", scGist: "hide", scSide: "hide", cmpFork: "hide", cmpSize: "hide" })]
+  ];
+  var PRESETS = [
+    ["A", "지금 (녹아듦)", { navStyle: "glass", bandEnd: "melt", bodyZone: "same", navForm: "bar", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["B", "선으로 나눔", { navStyle: "solid", bandEnd: "line", bodyZone: "same", navForm: "bar", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["C", "세 겹 톤", { navStyle: "solid", bandEnd: "shadow", bodyZone: "plain", navForm: "bar", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["D", "진한 내비", { navStyle: "dark", bandEnd: "melt", bodyZone: "plain", navForm: "bar", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["E", "본문 시트", { navStyle: "solid", bandEnd: "line", bodyZone: "sheet", navForm: "bar", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["F", "옅은 주색 내비 + 시트", { navStyle: "tint", bandEnd: "shadow", bodyZone: "sheet", navForm: "bar", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["G", "떠 있는 내비", { navStyle: "solid", bandEnd: "melt", bodyZone: "same", navForm: "float", bandForm: "full", gapSize: "normal", strength: "1" }],
+    ["H", "카드형 상단", { navStyle: "glass", bandEnd: "melt", bodyZone: "plain", navForm: "bar", bandForm: "card", gapSize: "wide", strength: "1" }],
+    ["I", "떠 있는 내비 + 카드형 상단", { navStyle: "solid", bandEnd: "melt", bodyZone: "plain", navForm: "float", bandForm: "card", gapSize: "wide", strength: "1" }],
+    ["J", "카드형 상단 + 진하게", { navStyle: "solid", bandEnd: "melt", bodyZone: "plain", navForm: "bar", bandForm: "card", gapSize: "wide", strength: "3" }]
+  ];
+  var VIEW_DEFAULT = { page: "front", vp: "desktop", mode: "light", entry: "" };
+  var FORCE_REAL = true;
+  var ENTRIES = [["", "실제 페이지"], ["H", "H 홈 한 장"], ["S", "S 오늘의 한 편"], ["P", "P 연구 축"], ["T", "T 주간 흐름"], ["L", "L 한 줄 목록"]];
+  var SECTION = { front: "analysis", home: "analysis", paper: "analysis", scout: "scout", cmp: "compare", scout2: "scout", pillar: "analysis" };
+
+  var PAGES = [["front", "첫 화면 (새)", "site/home.html"], ["home", "분석", "site/index.html"], ["paper", "논문", "site/p/2611.12806/index.html"], ["scout", "탐색", "site/s/index.html"], ["cmp", "비교", "site/c/index.html"],
+    ["scout2", "탐색 새 시안", "site/scout-new.html"]];
+  var VPS = [["desktop", "데스크톱", 1280], ["mobile", "모바일", 390]];
+  var MODES = [["light", "라이트"], ["dark", "다크"]];
+
+  var KEY = "probe.playground.v46" + (LOCK ? "." + LOCK : "");
+  if (window.matchMedia && window.matchMedia("(max-width: 860px)").matches) VIEW_DEFAULT.vp = "mobile";
+  if (LOCK) VIEW_DEFAULT.page = LOCK;
+  var state = Object.assign({}, DEFAULT), view = Object.assign({}, VIEW_DEFAULT);
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved) { Object.assign(state, saved.state || {}); Object.assign(view, saved.view || {}); }
+  } catch (e) {}
+  // only what differs from the defaults is kept, so a later default reaches a reader who never touched that item
+  function save() {
+    try {
+      var d = {}; Object.keys(state).forEach(function (k) { if (state[k] !== DEFAULT[k]) d[k] = state[k]; });
+      localStorage.setItem(KEY, JSON.stringify({ state: d, view: view }));
+    } catch (e) {}
+  }
+
+  var FONT_URL = new URL("site/assets/tfonts/", document.baseURI).href;
+  var GF_URL = document.querySelector('link[href*="fonts.googleapis.com"]').href;
+
+  function lab(L, C, h) { return "oklch(" + L + "% " + C + " " + h + ")"; }
+
+  function buildCSS(s, mode) {
+    var A = ACC[s.accent], h = A.h, h2 = (h + 22) % 360, dark = mode === "dark";
+    var st = +s.strength, fillKind = st === 0 ? "none" : s.band, end = s.bandEnd;
+    var fill = dark ? lab(75, 0.12, h) : A.fill, ink = dark ? lab(79, 0.11, h) : A.ink;
+    var aink = dark ? lab(17.5, 0.01, h) : A.aink;
+    var sec = dark ? lab(78, 0.11, h2) : lab(72, 0.13, h2);
+    var soft = dark ? lab(27, 0.045, h) : lab(95, 0.03, h);
+    var Lb = dark ? [0, 24, 27, 30][st] : [0, 95, 92, 88.5][st];
+    var Cb = [0, 0.03, 0.05, 0.075][st] * (dark ? 0.9 : 1);
+    var b1 = lab(Lb, Cb, h), b2 = lab(dark ? Lb - 2 : Lb + 2.5, (Cb * 0.8).toFixed(3), h2);
+    var R = +s.radius;
+    var N = dark
+      ? { bg: lab(17.5, 0.01, h), sf: lab(20.5, 0.012, h), s2: lab(23.5, 0.014, h), s3: lab(27, 0.016, h), bd: lab(34, 0.018, h), bs: lab(27.5, 0.014, h), tx: lab(93, 0.01, h), mu: lab(72, 0.02, h) }
+      : { bg: lab(98.4, 0.007, h), sf: lab(99.8, 0.002, h), s2: lab(95.6, 0.012, h), s3: lab(92.6, 0.016, h), bd: lab(86.5, 0.02, h), bs: lab(92, 0.014, h), tx: lab(22, 0.02, h), mu: lab(46, 0.025, h) };
+    var cardBg = s.cardBg === "glass" ? (dark ? "color-mix(in srgb, " + N.sf + " 78%, transparent)" : "rgba(255,255,255,.74)") : "var(--surface)";
+    var shadow = { none: "none",
+      soft: dark ? "0 2px 14px rgba(0,0,0,.3)" : "0 1px 2px rgba(40,30,20,.04), 0 6px 22px rgba(40,30,20,.06)",
+      strong: dark ? "0 4px 28px rgba(0,0,0,.5)" : "0 2px 4px rgba(40,30,20,.06), 0 12px 32px rgba(40,30,20,.13)" }[s.shadow];
+    var accentLine = s.point === "two" ? "linear-gradient(90deg, var(--orange), var(--sec))" : "linear-gradient(var(--orange), var(--orange))";
+    var big = ".paper-title, .mast h1, .lead-title, .article h1.thesis, .article h2.h-sec, .gh-thesis, .row-title, .cmp-card-t, .rel-title";
+    var titleSel = s.titleScope === "all" ? big + ", .article h3, .article h4.h-sub, .ga-t, .toc-gh, .cmp-card-s, .figs-q" : big;
+    var css = [];
+    var root = "html:root[data-theme]";
+    css.push("@font-face{font-family:'SUIT';src:url(" + FONT_URL + "SUIT-Variable.woff2) format('woff2-variations');font-weight:100 900;font-display:swap}",
+      "@font-face{font-family:'Wanted Sans';src:url(" + FONT_URL + "WantedSansVariable.woff2) format('woff2-variations');font-weight:400 1000;font-display:swap}",
+      "@font-face{font-family:'MaruBuri';src:url(" + FONT_URL + "MaruBuri-Regular.woff2) format('woff2');font-weight:400;font-display:swap}",
+      "@font-face{font-family:'MaruBuri';src:url(" + FONT_URL + "MaruBuri-SemiBold.woff2) format('woff2');font-weight:600;font-display:swap}",
+      "@font-face{font-family:'MaruBuri';src:url(" + FONT_URL + "MaruBuri-Bold.woff2) format('woff2');font-weight:700 900;font-display:swap}");
+    var tokens = [
+      "--ko:" + FONT[s.bodyFont][1], "--t-display:" + FONT[s.titleFont][1],
+      "--num:" + (s.numFont === "body" ? "var(--ko)" : "'Probe Num', var(--ko)"),
+      "--bg:" + N.bg, "--surface:" + N.sf, "--surface-2:" + N.s2, "--surface-3:" + N.s3, "--border:" + N.bd, "--border-soft:" + N.bs,
+      "--text:" + N.tx, "--text-muted:" + N.mu,
+      "--orange:" + fill, "--orange-ink:" + ink, "--wm-a:" + ink, "--wm-b:" + (s.point === "two" ? sec : fill), "--accent-ink:" + aink,
+      "--orange-soft:" + soft, "--amber-soft:" + fill, "--focus:" + ink, "--sec:" + sec, "--card-bg:" + cardBg, "--act4:" + fill,
+      "--radius-xs:" + Math.max(1, Math.round(R / 3)) + "px", "--radius-sm:" + Math.max(2, Math.round(R * 0.66)) + "px", "--radius:" + R + "px",
+      "--radius-pill:" + (s.chip === "pill" ? "999px" : Math.max(2, Math.round(R * 0.5)) + "px")
+    ];
+    if (s.pillar === "mono") for (var i = 0; i < 5; i++) tokens.push("--p" + i + ":" + soft, "--p" + i + "-ink:" + ink);
+    css.push(root + "{" + tokens.join(";") + "}");
+    var glowOn = s.glow === "on" && st > 0 && s.bodyZone === "same";
+    css.push("body{font-size:" + s.size + "px;line-height:" + s.leading + ";letter-spacing:-0.005em;" +
+      (glowOn ? "background:radial-gradient(1000px 560px at 6% -8%," + b1 + " 0%,transparent 70%),radial-gradient(1000px 600px at 96% 2%," + b2 + " 0%,transparent 70%),var(--bg);background-attachment:fixed;" : "background:var(--bg);") + "}");
+    css.push("@media (max-width: 720px){body{font-size:" + s.sizeM + "px;line-height:" + s.leadingM + "}}");
+    css.push(titleSel + "{font-family:var(--t-display);letter-spacing:-0.015em}");
+    css.push(big + "{font-weight:" + s.titleWeight + "}");
+    css.push(".nav-logo{font-family:" + (s.wordFont === "title" ? "var(--t-display)" : "var(--ko)") + "}");
+
+    // the nav bar
+    if (s.navStyle === "glass") {
+      css.push(".site-nav{background:color-mix(in srgb,var(--bg) 70%,transparent);border-bottom-color:var(--border-soft)}");
+    } else if (s.navStyle === "solid") {
+      css.push(".site-nav{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:1px solid var(--border);box-shadow:0 1px 3px " + (dark ? "rgba(0,0,0,.35)" : "rgba(40,30,20,.05)") + "}");
+    } else if (s.navStyle === "tint") {
+      css.push(".site-nav{background:" + (dark ? lab(23, 0.035, h) : lab(93.5, 0.035, h)) + ";-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:1px solid " + (dark ? lab(32, 0.04, h) : lab(85, 0.045, h)) + "}");
+    } else {
+      var navBg = dark ? lab(12.5, 0.015, h) : lab(25, 0.035, h), navInk = lab(86, 0.02, h), navHi = lab(97, 0.01, h);
+      css.push(".site-nav{background:" + navBg + ";-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:0}",
+        ".site-nav .nav-links a{color:" + navInk + "}", ".site-nav .nav-links a:hover{color:" + navHi + ";background:rgba(255,255,255,.08)}",
+        ".site-nav .nav-links a[aria-current='page']{color:" + navHi + "}",
+        ".site-nav .nav-links a[aria-current='page']" + (s.navCur === "underline" ? "{box-shadow:inset 0 -2px 0 " + lab(78, 0.12, h2) + "}" : s.navCur === "pill" ? "{background:rgba(255,255,255,.12)}" : "{}"),
+        ".site-nav .icon-btn,.site-nav .nav-cmdk,.site-nav .nav-menu{background:transparent;border-color:rgba(255,255,255,.22);color:" + navHi + "}",
+        ".site-nav .nav-rule{background:rgba(255,255,255,.22)}",
+        ".site-nav .nav-word{background:none!important;-webkit-text-fill-color:" + navHi + ";color:" + navHi + "}");
+    }
+
+    // the top band (title, search bar, tabs) and how it ends
+    var fillBg = fillKind === "grad" ? "linear-gradient(100deg," + b1 + " 0%," + b2 + " 100%)" : fillKind === "flat" ? b1 : "transparent";
+    if (end === "melt" && fillKind !== "none") {
+      css.push(".paper-head{position:relative;isolation:isolate;background:transparent;border-bottom:0}",
+        ".paper-head::before{content:'';position:absolute;inset:0;z-index:-1;background:" + fillBg + ";-webkit-mask-image:linear-gradient(180deg,#000 25%,transparent 100%);mask-image:linear-gradient(180deg,#000 25%,transparent 100%)}",
+        ".mast{position:relative;isolation:isolate;background:transparent;border-bottom:0;overflow:visible}",
+        ".mast::before{display:block;z-index:-1;inset:0 0 -3.6rem 0;background:" + fillBg + ";background-size:auto;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%)}",
+        ".filters{background:transparent;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}",
+        "@supports (animation-timeline: scroll()){@keyframes pg-dock{from{background-color:transparent;border-bottom-color:transparent}to{background-color:color-mix(in srgb,var(--bg) 90%,transparent);border-bottom-color:var(--border-soft)}}.filters{animation:pg-dock linear both;animation-timeline:scroll(root);animation-range:0 140px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}",
+        "@supports not (animation-timeline: scroll()){.filters{background:color-mix(in srgb,var(--bg) 90%,transparent)}}",
+        ".tabs-wrap{background:transparent;border-bottom:0}");
+    } else if (end === "melt") {
+      css.push(".paper-head,.mast{background:transparent;border-bottom-color:var(--border-soft)}", ".mast::before{display:none}",
+        ".tabs-wrap{background:transparent}");
+    } else {
+      // one band from the title down to the search bar or the tabs, cut off where it ends
+      var cut = end === "line" ? "1px solid var(--border)" : "1px solid var(--border-soft)";
+      var drop = end === "shadow" ? (dark ? "0 10px 18px -12px rgba(0,0,0,.7)" : "0 10px 18px -12px rgba(60,40,20,.28)") : "none";
+      var solidFill = fillKind === "none" ? "var(--surface)" : fillBg;
+      css.push(".paper-head,.mast{background:" + solidFill + ";background-attachment:scroll;border-bottom:0}", ".mast::before{display:none}",
+        ".tabs-wrap,.filters{background:" + solidFill + ";-webkit-backdrop-filter:none;backdrop-filter:none;animation:none}",
+        ".tabs-wrap,.filters,.mast{border-bottom:" + cut + ";box-shadow:" + drop + ";position:relative;z-index:2}",
+        ".filters{position:sticky;z-index:var(--z-raised)}",
+        ".mast:has(+ .filters){border-bottom:0;box-shadow:none}");
+    }
+
+    // shape: a floating nav, a band drawn as a card, and the gap under it
+    if (s.navForm === "float") {
+      css.push(".site-nav{top:10px;width:calc(100% - 2rem);max-width:1240px;margin:10px auto 0;border-radius:16px;border:1px solid var(--border);" +
+        "box-shadow:" + (dark ? "0 6px 22px rgba(0,0,0,.45)" : "0 4px 18px rgba(60,40,20,.09)") + "}",
+        ".nav-inner{padding:0 1rem}", ".filters{top:calc(var(--nav-h) + 18px)}");
+    }
+    if (s.bandForm === "card") {
+      var cardFill = fillKind === "none" ? "var(--surface)" : fillBg;
+      css.push(".mast,.paper-head{width:calc(100% - 2rem);max-width:1240px;margin:1.1rem auto 0;border-radius:22px;overflow:hidden;background:" + cardFill + ";" +
+        "border:1px solid var(--border-soft);box-shadow:" + (dark ? "0 8px 28px rgba(0,0,0,.4)" : "0 6px 24px rgba(60,40,20,.08)") + ";isolation:auto}",
+        ".mast::before,.paper-head::before{display:none}",
+        ".mast-inner{padding-top:1.9rem;padding-bottom:1.7rem}", ".paper-head-inner{padding-bottom:.4rem}",
+        ".filters{margin-top:.6rem}",
+        ".tabs-wrap{background:transparent;border-bottom:1px solid var(--border-soft);box-shadow:none;margin-top:.6rem}");
+    }
+    if (s.gapSize === "wide") css.push(".deck,.panel.wide,main.hub{padding-top:2.75rem}");
+    if (s.filterBar === "compact") {
+      css.push(".filters{position:static;background:transparent!important;border-bottom:0!important;box-shadow:none!important;animation:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}",
+        ".filters .search{display:none}", ".filters-inner{justify-content:flex-end;padding-top:.7rem;padding-bottom:0}",
+        ".filters .filter-spacer{display:none}", ".deck{padding-top:.6rem}");
+    } else if (s.filterBar === "merge" || s.filterBar === "none") {
+      css.push(".filters{display:none!important}");
+    }
+    // where 정렬 and 개수 land once their bar is gone
+    css.push(".pg-ctl{display:inline-flex;align-items:center;gap:.4rem;flex:none}",
+      ".pg-ctl .segchip{height:1.9rem}",
+      ".mast-line .pg-ctl{margin-left:auto;align-self:center}",
+      ".listhead.pg-has-ctl{position:relative}", ".listhead.pg-has-ctl > span:last-of-type{visibility:hidden}",
+      ".listhead .pg-ctl{position:absolute;right:.4rem;top:50%;transform:translateY(-50%)}",
+      ".listhead .pg-sortable{cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;border-radius:var(--radius-xs);text-decoration:none}",
+      ".listhead .pg-sortable::after{content:'↕';font-size:.85em;opacity:.35}",
+      ".listhead .pg-sortable:hover{color:var(--orange-ink)}",
+      ".listhead .pg-sortable[aria-sort]::after{content:'↓';opacity:1;color:var(--orange-ink)}",
+      ".listhead .pg-sortable[aria-sort]{color:var(--orange-ink);font-weight:700}",
+      ".pg-foot{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}", ".pg-foot > .pg-ctl{margin-left:auto}",
+      ".pg-foot-label{font-size:var(--fs-2xs);color:var(--text-muted)}",
+      ".rail .pg-ctl{display:flex;flex-direction:column;align-items:stretch;gap:.35rem;margin:.9rem 0 .4rem}",
+      ".rail .pg-ctl .segwrap{display:block}", ".rail .pg-ctl .segchip{width:100%;justify-content:space-between}",
+      ".pg-hidden{display:none!important}");
+    css.push(".pgp-wrap{position:absolute;z-index:300;padding:1rem 1.05rem .8rem;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);font-size:var(--fs-sm);line-height:1.6}",
+      ".pgp-top{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem}", ".pgp-top b{font-size:var(--fs-md)}", ".pgp-top > span:last-child{flex-basis:100%;font-size:var(--fs-3xs);color:var(--text-muted)}",
+      ".pgp-desc{margin:.5rem 0 0}", ".pgp-draft{font-size:10px;padding:0 .35rem;border:1px dashed var(--text-muted);border-radius:999px;color:var(--text-muted);white-space:nowrap}",
+      ".pgp-n{margin:.4rem 0 0;font-size:var(--fs-2xs);color:var(--text-muted)}",
+      ".pgd{margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--border-soft)}", ".pgd-h{margin:0 0 .3rem;font-size:var(--fs-2xs);font-weight:700;color:var(--text-muted)}",
+      ".pgd ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}", ".pgd li{display:grid;grid-template-columns:3rem minmax(0,1fr);gap:0 .5rem}",
+      ".pgd-id{font-size:var(--fs-2xs);font-weight:700;color:var(--dref,var(--orange-ink));font-variant-numeric:tabular-nums}", ".pgd-t{font-size:var(--fs-xs);line-height:1.45}", ".pgd-t em{font-style:normal;font-size:10px;color:var(--amber)}",
+      ".pgd-c{grid-column:2;font-size:var(--fs-2xs);color:var(--text-muted);line-height:1.45}", ".pgd-more summary{cursor:pointer;font-size:var(--fs-2xs);color:var(--orange-ink);font-weight:700;margin-top:.3rem}", ".pgd-more ul{margin-top:.35rem}",
+      ".pgp-act{margin:.7rem 0 0;display:flex;gap:.4rem}", ".pgp-act button{height:2rem;padding:0 .8rem;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-xs);cursor:pointer}",
+      ".pgp-act button:first-child{background:var(--orange);border-color:var(--orange);color:var(--accent-ink);font-weight:700}",
+      ".pgb{position:relative;margin:0 0 1.2rem;padding:1.1rem 1.2rem;border-radius:var(--radius);background:color-mix(in srgb,var(--orange-soft) 60%,var(--surface));border:1px solid var(--border-soft)}",
+      ".pgb-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.2rem 1.6rem;font-size:var(--fs-sm);line-height:1.6}", ".pgb-in .pgd{grid-column:2;grid-row:1/span 3;margin:0;padding:0;border:0}",
+      ".pgb-x{position:absolute;top:.8rem;right:.9rem;height:1.8rem;padding:0 .7rem;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:var(--fs-2xs);cursor:pointer}",
+      "@media (max-width:820px){.pgb-in{grid-template-columns:minmax(0,1fr)}.pgb-in .pgd{grid-column:1;grid-row:auto;margin-top:.6rem}}");
+    css.push("a.chip.pillar{text-decoration:none;cursor:pointer}", "a.chip.pillar:hover{text-decoration:underline;text-underline-offset:2px}",
+      ".pg-badge{display:inline-flex;align-items:center;justify-content:center;min-width:1.15rem;height:1.15rem;margin-left:.3rem;padding:0 .3rem;border-radius:999px;background:var(--orange);color:var(--accent-ink);font-size:10px;font-weight:800;line-height:1}");
+    css.push(".pg-pal-wrap{position:relative;display:inline-flex}",
+      ".pg-pal-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:200;min-width:190px;padding:6px;border-radius:12px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);display:grid;gap:2px}",
+      ".pg-pal-menu[hidden]{display:none}",
+      ".pg-pal-menu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--text);font:inherit;font-size:var(--fs-sm);padding:7px 10px;border-radius:8px;cursor:pointer;text-align:left}",
+      ".pg-pal-menu button:hover{background:var(--surface-2)}",
+      ".pg-pal-menu button[aria-checked='true']{background:var(--orange-soft);color:var(--orange-ink);font-weight:700}",
+      ".pg-pal-menu i{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}",
+      ".pg-pal-h{font-size:var(--fs-2xs);color:var(--text-muted);padding:4px 10px 2px}");
+
+    // the body area under the band
+    if (s.bodyZone === "sheet") {
+      var sheetBg = dark ? lab(20.5, 0.012, h) : lab(99.8, 0.002, h);
+      css.push("html:root[data-theme]{--card-bg:" + (s.cardBg === "glass" ? (dark ? lab(22.5, 0.014, h) : lab(98.6, 0.006, h)) : "var(--surface-2)") + "}",
+        ".deck,.panel.wide,main.hub{background:" + sheetBg + ";border-radius:22px 22px 0 0;margin-top:1.4rem;padding-top:1.9rem;position:relative;z-index:1;" +
+        "box-shadow:0 0 0 1px var(--border-soft)," + (dark ? "0 -6px 30px rgba(0,0,0,.35)" : "0 -6px 28px rgba(60,40,20,.07)") + "}",
+        ".g-narr,.g-act,.g-hub,.corpus .lead{-webkit-backdrop-filter:none;backdrop-filter:none}");
+    }
+
+    // cards
+    css.push(".g-hub,.g-narr,.g-act,.corpus .lead,.tldr{box-shadow:" + shadow + "}",
+      ".g-narr,.g-act,.corpus .lead,.tldr{background-color:var(--card-bg);border-color:var(--border-soft)}",
+      ".g-hub{border:1px solid var(--border-soft);background:" + accentLine + " top / 100% 3px no-repeat, var(--card-bg)}");
+    if (s.cardBg === "glass") css.push(".g-narr,.g-act,.g-hub,.corpus .lead{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}");
+    // analysis list: no lead card, and the size column handed to the paper's own links
+    if (s.leadCard === "hide") css.push(".corpus .lead{display:none!important}");
+    if (s.rowLinks === "links") css.push(".row-size .pg-links{display:flex;flex-wrap:wrap;gap:.25rem;justify-content:flex-end}", ".row-size .pg-links .chip{font-size:var(--fs-3xs);padding:.1rem .45rem}",
+      "html.js .listhead.listhead,html.js .row.row{grid-template-columns:1.2rem 4.2rem 5.6rem minmax(0,1fr) 4.8rem 13.5rem}",
+      "@media (max-width:680px){.row-size{display:inline-flex!important;vertical-align:middle;margin-left:.25rem}.row-size::before{content:none!important}.row-size .pg-links{justify-content:flex-start}}");
+    if (s.rowLinks === "none") css.push(".row-size{visibility:hidden}");
+    if (s.rowLinks === "icons" || s.rowLinks === "sizeicon") css.push("html.js .listhead.listhead,html.js .row.row{grid-template-columns:1.2rem 4.2rem 5.6rem minmax(0,1fr) 4.8rem 7.8rem}", ".pg-ic{display:inline-flex;gap:.15rem;justify-content:flex-end;flex-wrap:nowrap}",
+      ".pg-ic a{display:grid;place-items:center;width:1.65rem;height:1.65rem;border-radius:999px;color:var(--text-muted);border:1px solid var(--border-soft);background:var(--card-bg,var(--surface))}",
+      ".pg-ic a:hover{color:var(--orange-ink);border-color:var(--orange)}", ".pg-ic .src-mark{width:.85rem;height:.85rem;fill:none;stroke:currentColor;stroke-width:1.5}");
+    if (s.rowLinks === "sizeicon") css.push("@media (hover:hover) and (min-width:681px){.row:not(:hover):not(:focus-within) .row-size .pg-ic{display:none}.row:hover .row-size .pg-sz,.row:focus-within .row-size .pg-sz{display:none}}",
+      "@media (max-width:680px){.row-size .pg-sz{display:none}}");
+    // phone: icons sit on the pillar chips' line, centred on it and as tall as a chip
+    css.push("@media (max-width:680px){.row-pillars,.row-size{vertical-align:middle}.row-size{display:inline-flex!important;align-items:center;margin-left:.3rem}.row-size::before{content:none!important}.row-size .pg-ic{align-items:center}.row-size .pg-ic a{width:28px;height:28px}}");
+    // desktop: drop the right column and put the icons somewhere the row already has room
+    if (s.linkSpot !== "right") {
+      css.push("@media (min-width:681px){html.js .listhead.listhead,html.js .row.row{grid-template-columns:1.2rem 4.2rem 5.6rem minmax(0,1fr) " + (s.linkSpot === "pillcol" ? "6.2rem" : "4.8rem") + "}.row-size,.listhead > span:last-child{display:none!important}}",
+        ".pg-ic2{display:none}", ".row-main.pg-stretch{position:relative}", ".pg-tlink{color:inherit;text-decoration:none}", ".pg-tlink::after{content:'';position:absolute;inset:0}", "@media (min-width:681px){.pg-ic2{display:inline-flex;align-items:center;gap:.2rem}.pg-ic2 a{display:grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:999px;color:var(--text-muted);border:1px solid var(--border-soft);background:var(--card-bg,var(--surface))}.pg-ic2 a:hover{color:var(--orange-ink);border-color:var(--orange)}.pg-ic2 .src-mark{width:.8rem;height:.8rem;fill:none;stroke:currentColor;stroke-width:1.5}}",
+        "@media (min-width:681px){.pg-mainwrap{min-width:0}.pg-mainwrap.is-title{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:.8rem;align-items:start}.pg-ic2.at-under{display:flex;margin-top:.45rem}.row-title .pg-ic2.at-inline{position:relative;z-index:1;margin-left:.45rem;vertical-align:.12em;white-space:nowrap}.pg-ic2.at-title{padding-top:.05rem}.row-pillars{flex-wrap:wrap}.pg-ic2.at-pillcol{display:flex;flex-basis:100%;flex-wrap:wrap;margin-top:.35rem}.pg-ic2.at-idcol{display:flex;flex-wrap:wrap;margin-top:.35rem}}");
+    }
+
+    // the rail's filters as one line above the list, in the rail's own look
+    if (s.railSpot === "top" && s.rail === "show") css.push("html.js .deck{grid-template-columns:minmax(0,1fr)!important}",
+      "html.js .rail.pg-top{display:flex!important;position:static;flex-wrap:wrap;align-items:center;gap:.25rem .2rem;margin:0 0 1rem;padding:.55rem .6rem;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm)}",
+      ".rail.pg-top .rail-item.mine,.rail.pg-top .rail-h,.rail.pg-top .pg-sep{display:none!important}",
+      // phone: the line scrolls sideways; a fade on the far edge says there is more until the end is reached
+      "@media (max-width:900px){html.js .rail.pg-top::after{content:'';position:sticky;right:-.6rem;flex:none;align-self:stretch;width:2.6rem;margin:-.55rem -.6rem -.55rem -2.6rem;border-radius:0 var(--radius) var(--radius) 0;background:linear-gradient(90deg,transparent,var(--surface) 75%);pointer-events:none;transition:opacity .2s}html.js .rail.pg-top.at-end::after{opacity:0}}",
+      // a clear edge and readable labels: the line sits on the tinted band, so its border and type need more contrast than the rail had
+      ".rail.pg-top{border-color:color-mix(in srgb,var(--text) 16%,transparent)!important;box-shadow:0 1px 2px color-mix(in srgb,var(--text) 6%,transparent),0 4px 14px color-mix(in srgb,var(--text) 5%,transparent)!important}",
+      ".rail.pg-top .rail-item{font-size:var(--fs-xs);color:var(--text);align-items:baseline}", ".rail.pg-top .rail-item .sw{align-self:center}", ".rail.pg-top .rail-item .rn{font-size:var(--fs-2xs)}", ".rail.pg-top .rail-item .rl{font-size:var(--fs-xs);color:var(--text-muted)}", ".rail.pg-top .rail-item .rn{opacity:.8}",
+      ".rail.pg-top .rail-h{font-size:var(--fs-xs);color:var(--text)}", ".rail.pg-top .rail-stat{font-size:var(--fs-2xs);color:var(--text-muted)}",
+      ".rail.pg-top .rail-item[data-p] .sw{width:10px;height:10px;border-radius:50%}",
+      ".rail.pg-top .rail-item[data-p='P0'] .sw{background:var(--p0-ink)}.rail.pg-top .rail-item[data-p='P1'] .sw{background:var(--p1-ink)}.rail.pg-top .rail-item[data-p='P2'] .sw{background:var(--p2-ink)}.rail.pg-top .rail-item[data-p='P3'] .sw{background:var(--p3-ink)}.rail.pg-top .rail-item[data-p='P4'] .sw{background:var(--p4-ink)}",
+      ".rail.pg-top .rail-item[aria-pressed='true'] .sw{box-shadow:0 0 0 2px var(--accent-ink)}",
+      ".rail.pg-top .rail-item[aria-pressed='true'],.rail.pg-top .rail-item[aria-pressed='true'] b,.rail.pg-top .rail-item[aria-pressed='true'] .rl,.rail.pg-top .rail-item[aria-pressed='true'] .rn{color:var(--accent-ink)!important;opacity:1}",
+      ".rail.pg-top .rail-item[aria-pressed='true'] .rl::before{opacity:.7}",
+      ".rail.pg-top .rail-stat{order:9;margin-left:auto;padding:0 .3rem}", ".rail.pg-top .rail-h{margin:0 .15rem 0 .5rem!important;padding:0}", ".rail.pg-top .rail-h:first-of-type{margin-left:.2rem!important}",
+      ".rail.pg-top .rail-item{width:auto;padding:.3rem .55rem;border-radius:999px}", ".rail.pg-top .rail-item .rn{margin-left:.15rem}",
+      ".rail.pg-top .pg-sep{width:1px;height:1.1rem;background:var(--border);margin:0 .35rem}",
+      "@media (max-width:900px){html.js .rail.pg-top{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.rail.pg-top::-webkit-scrollbar{display:none}.rail.pg-top .rail-item .rl{display:none}.rail.pg-top .rail-stat{display:none}.rail.pg-top .rail-item,.rail.pg-top .rail-h{flex:none}}");
+    // the card above the list: a random pick, said by its thesis
+    if (s.recKind !== "latest") css.push(".corpus .lead{display:none!important}");
+    if (s.recPhone === "hide") css.push("@media (max-width:680px){.pg-rec{display:none!important}}");
+    if (s.labelCol && s.labelCol !== "none") css.push(
+      ".pg-lc{position:relative;z-index:1;display:flex;align-items:stretch;overflow:hidden;border-radius:var(--radius);background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 24%,transparent);box-shadow:0 1px 2px color-mix(in srgb,var(--text) 8%,transparent)}",
+      ".pg-lc-rail{margin:0 0 1rem}",
+      ".pg-lc > .pg-rc:not(.st-tint),html.js .pg-lc > .rail.pg-top{background:transparent}",
+      ".pg-lc > .pg-rc,html.js .pg-lc > .rail.pg-top{flex:1;min-width:0;margin:0;border:0!important;border-radius:0;box-shadow:none!important}",
+      ".pg-lc .pg-rc-t .pg-rc-tag{display:none}",
+      ".pg-lab{flex:none;width:5.2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;padding:.45rem .5rem;font-size:var(--fs-xs);font-weight:800;letter-spacing:.02em;color:var(--orange-ink);text-align:center;white-space:nowrap}",
+      ".pg-lab svg{width:1.1rem;height:1.1rem;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}",
+      ".lab-line .pg-lab,.lab-icon .pg-lab,.lab-iconly .pg-lab{border-right:1px solid color-mix(in srgb,var(--text) 14%,transparent)}",
+      ".lab-iconly .pg-lab,.lab-icontint .pg-lab{position:relative;display:grid;place-items:center;width:2.9rem;padding:0;border-right:0!important;box-shadow:none!important}", ".lab-iconly .pg-lab svg,.lab-icontint .pg-lab svg{display:block}", "html.js .pg-lc.lab-iconly > .rail.pg-top,html.js .pg-lc.lab-icontint > .rail.pg-top{border-left:1px solid color-mix(in srgb,var(--text) 14%,transparent)!important}", "html.js .pg-lc.lab-icontint > .rail.pg-top{border-left-color:color-mix(in srgb,var(--orange) 25%,transparent)!important}", ".lab-iconly .pg-lab svg,.lab-icontint .pg-lab svg{width:1.25rem;height:1.25rem}",
+      ".lab-iconly .pg-lab-t,.lab-icontint .pg-lab-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}",
+      ".lab-icontint .pg-lab{background:var(--orange-soft);box-shadow:inset -1px 0 0 color-mix(in srgb,var(--orange) 25%,transparent)}",
+      ".lab-tint .pg-lab{background:var(--orange-soft);box-shadow:inset -1px 0 0 color-mix(in srgb,var(--orange) 25%,transparent)}",
+      ".lab-vert .pg-lab{width:2.1rem;padding:.5rem 0;background:var(--orange-soft);font-size:var(--fs-2xs)}",
+      ".lab-vert .pg-lab-t{writing-mode:vertical-rl;letter-spacing:.25em}",
+      ".lab-solid .pg-lab{background:var(--orange);color:var(--accent-ink)}",
+      "@media (max-width:680px){.pg-lab{width:3.7rem;padding:.35rem .3rem;font-size:var(--fs-2xs)}.lab-vert .pg-lab{width:1.8rem}.lab-iconly .pg-lab,.lab-icontint .pg-lab{width:2.5rem;padding:0}}"
+    );
+    css.push(".pg-pagerow{display:flex;align-items:center;gap:1rem;padding-top:.85rem}", "html.js .pg-pagerow > .pager{flex:1;min-width:0;padding-top:0}", ".pg-pagerow .pgstat{display:none}",
+      ".pg-psize{position:relative;margin-left:auto;flex:none}", ".pg-pagerow .pgn,.pg-pagerow .pgstep,.pg-psize button{outline:0;border:0;-webkit-tap-highlight-color:transparent}", ".pg-pagerow .pgn:focus-visible,.pg-pagerow .pgstep:focus-visible,.pg-psize button:focus-visible{outline:2px solid var(--orange);outline-offset:2px}", ".pg-pagerow .pgn[aria-current='page']{box-shadow:none;background:linear-gradient(var(--orange),var(--orange)) center bottom/100% 2px no-repeat}",
+      ".pg-pagerow button{-webkit-user-select:none;user-select:none}",
+      ".pg-psize-cur{display:inline-flex;align-items:center;gap:.3rem;font:inherit;font-size:var(--fs-2xs);font-weight:600;padding:.3rem .5rem;border-radius:var(--radius-sm);background:none;color:var(--text-muted);cursor:pointer;font-variant-numeric:tabular-nums}",
+      ".pg-psize-cur:hover,.pg-psize-cur[aria-expanded='true']{color:var(--orange-ink);background:var(--orange-soft)}",
+      ".pg-psize-i,.pg-psize-c{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}", ".pg-psize-c{width:.8rem;height:.8rem}",
+      ".pg-psize-menu{position:absolute;right:0;bottom:calc(100% + .35rem);z-index:20;display:flex;flex-direction:column;min-width:5.2rem;padding:.25rem;border-radius:var(--radius-sm);background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 18%,transparent);box-shadow:0 6px 20px color-mix(in srgb,var(--text) 14%,transparent)}",
+      ".pg-psize-menu[hidden]{display:none}",
+      ".pg-psize-menu button{font:inherit;font-size:var(--fs-xs);font-weight:600;text-align:left;padding:.4rem .65rem;border:0;border-radius:calc(var(--radius-sm) - 2px);background:none;color:var(--text);cursor:pointer;font-variant-numeric:tabular-nums}",
+      ".pg-psize-menu button:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}", ".pg-psize-menu button[aria-pressed='true']{color:var(--orange-ink);background:var(--orange-soft)}",
+      "html.js .pg-pagerow > .pager{flex-wrap:nowrap}",
+      "@media (max-width:680px){.pg-pagerow{gap:.25rem}.pg-pagerow .pgn{min-width:1.6rem;padding:.34rem .35rem}.pg-pagerow .pgstep{padding:.34rem .4rem}.pg-psize-cur{padding:.3rem .35rem;gap:.2rem}}");
+    css.push(".pg-rec{margin:0 0 .9rem}", ".pg-rec-h{display:flex;align-items:baseline;gap:.6rem;margin:0 0 .4rem;font-size:var(--fs-2xs);color:var(--text-muted)}",
+      ".pg-rec-h b{font-size:var(--fs-xs);color:var(--orange-ink)}", ".pg-rec-h button{margin-left:auto;border:0;background:none;color:var(--orange-ink);font:inherit;font-weight:700;cursor:pointer;padding:.2rem .1rem}",
+      ".pg-rc{position:relative;display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:'t' 's';align-items:start;gap:.3rem 1rem;padding:.8rem 1rem .75rem;overflow:hidden;border-radius:var(--radius);background:var(--card-bg,var(--surface));background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 16%,transparent);box-shadow:0 1px 2px color-mix(in srgb,var(--text) 6%,transparent),0 4px 14px color-mix(in srgb,var(--text) 5%,transparent)}",
+      ".pg-rc-eb{grid-area:eb;margin:0}", ".pg-rc-t{grid-area:t}", ".pg-rc-s{grid-area:s}", ".pg-rc-k,.pg-rc-act{display:contents}", ".pg-rc-f{grid-area:f;align-self:start;padding-top:.15rem}", ".pg-rc-m{grid-area:m;justify-self:start;align-self:center;margin-top:.2rem}", ".pg-rc-again{grid-area:a;justify-self:end;align-self:end}", ".pg-rc-div{grid-area:d;display:none}", ".pg-rc-art{display:none;grid-area:art}",
+      // tint: the card takes the theme's wash
+      ".pg-rc.st-tint{background:linear-gradient(120deg,color-mix(in srgb,var(--orange) 11%,var(--surface)),color-mix(in srgb,var(--sec) 9%,var(--surface)) 70%)}",
+      ".pg-rc.st-tint .pg-rc-tag{background:var(--orange);color:var(--accent-ink)}",
+      // quote: the claim on the left, set large, the paper on the right
+      ".pg-rc.st-quote{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:'s t';align-items:center;column-gap:1.4rem;padding:1rem 1.1rem}",
+      ".pg-rc.st-quote .pg-rc-s{position:relative;align-self:stretch;display:flex;align-items:center;padding:.2rem 1.4rem .2rem 2.1rem;border-right:1px solid var(--border-soft);font-family:var(--t-display,var(--ko));font-weight:700;font-size:var(--fs-xl);line-height:1.5}",
+      ".pg-rc.st-quote .pg-rc-s::before{content:'“';position:absolute;left:0;top:-.35rem;font-size:3.2rem;line-height:1;color:var(--orange);font-family:Georgia,serif}",
+      ".pg-rc.st-quote .pg-rc-t{font-size:var(--fs-md)}",
+      "@media (max-width:820px){.pg-rc.st-quote{grid-template-columns:minmax(0,1fr);grid-template-areas:'t' 's'}.pg-rc.st-quote .pg-rc-s{border-right:0;padding:.2rem 0 .2rem 2.1rem}}",
+      // cover: a band in the paper's own axis colours across the top
+      // mascot: the probe hands over the claim in a speech bubble
+      ".pg-rc.st-mascot{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'art t' 'art s';column-gap:1rem}",
+      ".pg-rc.st-mascot .pg-rc-art{display:grid;place-items:center;align-self:center;width:72px;height:72px}", ".pg-rc.st-mascot .pg-rc-art .probe-mark{width:64px;height:64px;display:block!important}",
+      ".pg-rc.st-mascot .pg-rc-s{position:relative;justify-self:start;padding:.5rem .85rem;border-radius:14px;background:var(--orange-soft);margin:.15rem 0}",
+      ".pg-rc.st-mascot .pg-rc-s::before{content:'';position:absolute;left:-6px;top:50%;width:12px;height:12px;background:inherit;transform:translateY(-50%) rotate(45deg)}",
+      "@media (max-width:560px){.pg-rc.st-mascot{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'art t' 's s';column-gap:.5rem}.pg-rc.st-mascot .pg-rc-art{width:40px;height:40px}.pg-rc.st-mascot .pg-rc-art .probe-mark{width:36px;height:36px}}",
+      ".pg-rc-t .pg-rc-tag{display:inline-block;margin:0 .5rem 0 0;vertical-align:.12em}", ".pg-rc-tag{font-size:var(--fs-2xs);font-weight:800;color:var(--orange-ink);background:var(--orange-soft);padding:.12rem .5rem;border-radius:999px;margin-right:.15rem}",
+      ".pg-rc-div{width:1px;height:1rem;background:var(--border);margin:0 .15rem;align-self:center}",
+      ".pg-rc-m{min-width:0;line-height:1.45}", ".pg-rc-again{display:grid;place-items:center;width:1.5rem;height:1.5rem;padding:0;border-radius:999px;border:1px solid var(--border-soft);background:transparent;color:var(--orange-ink);cursor:pointer}",
+      ".pg-rc-again:hover{border-color:var(--orange);background:var(--orange-soft)}", ".pg-rc-again svg{width:.85rem;height:.85rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}",
+      ".pg-rc-again:active svg{transform:rotate(-90deg);transition:transform .2s}",
+      ".pg-rc-t{margin:0;font-weight:700;font-size:var(--fs-lg);line-height:1.4;text-wrap:balance}", ".pg-rc-t a{color:inherit;text-decoration:none}", ".pg-rc-t a:hover{color:var(--orange-ink)}",
+      ".pg-rc-s{margin:0;font-size:var(--fs-md);line-height:1.6;color:var(--text)}", ".pg-rc-m{margin-left:0;font-size:var(--fs-xs);font-weight:700;color:var(--orange-ink);background:var(--orange-soft);padding:.15rem .55rem;border-radius:var(--radius-sm)}",
+      ".pg-rc-f{display:flex;align-items:center;gap:.25rem;margin:0}", ".pg-rc-f a{display:grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:999px;color:var(--text-muted);border:1px solid var(--border-soft)}", ".pg-rc-f .src-mark{width:.8rem;height:.8rem;fill:none;stroke:currentColor;stroke-width:1.5}",
+      ".pg-rc-go{margin-left:auto;font-size:var(--fs-xs);font-weight:700;color:var(--orange-ink)!important;text-decoration:none;white-space:nowrap;width:auto!important;height:auto!important;border:0!important;display:inline!important}",
+      ".pg-rec2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}", ".pg-rec2 .pg-rc-t{font-size:var(--fs-lg)}", "@media (max-width:820px){.pg-rec2{grid-template-columns:minmax(0,1fr)}}", "@media (max-width:560px){.pg-rc-t{font-size:var(--fs-md)}}",
+      ".pg-strip{display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;border-radius:var(--radius);background:var(--card-bg,var(--surface));border:1px solid color-mix(in srgb,var(--orange) 35%,var(--border-soft))}",
+      ".pg-strip b{flex:none;font-size:var(--fs-xs);color:var(--orange-ink)}", ".pg-strip a.pg-st{min-width:0;flex:1;color:var(--text);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}", ".pg-strip a.pg-st:hover{color:var(--orange-ink)}", ".pg-strip button{flex:none;border:0;background:none;color:var(--orange-ink);font:inherit;font-size:var(--fs-xs);font-weight:700;cursor:pointer}",
+      ".pg-quote{margin:0;padding:.4rem 0 .4rem 0;font-family:var(--t-display,var(--ko));font-weight:700;font-size:clamp(1.15rem,2.2vw,1.45rem);line-height:1.5;text-wrap:balance}", ".pg-quote a{color:inherit;text-decoration:none}", ".pg-quote a:hover{color:var(--orange-ink)}",
+      ".pg-quote-by{margin:.2rem 0 0;font-size:var(--fs-xs);color:var(--text-muted)}", ".pg-quote-by button{border:0;background:none;color:var(--orange-ink);font:inherit;font-weight:700;cursor:pointer;margin-left:.5rem}");
+
+    // the newest card: keep its two paragraphs together
+    if (s.leadOrder !== "now") css.push(".lead-body{display:flex;flex-direction:column}", ".lead-body .lead-title{order:0}", ".lead-body .lead-tagline{order:1}",
+      s.leadOrder === "text" ? ".lead-body .lead-sum{order:2;margin-top:.5rem}.lead-body .lead-ro{order:3;align-self:flex-start;margin-top:.8rem}" : ".lead-body .lead-ro{order:1;align-self:flex-start;margin:.4rem 0 .6rem}.lead-body .lead-tagline{order:2}.lead-body .lead-sum{order:3;margin-top:.4rem}");
+
+    // page background: the first screen's edge wash, on the other pages too
+    if (s.pageBg !== "off") {
+      var pk = s.pageBg === "light" ? .55 : 1, bk = ([0, .55, .85, 1.25][+s.homeBgAmt] || .85) * pk;
+      css.push("body:not(:has(.hm))::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 75% 70% at 50% 45%,transparent 55%,color-mix(in srgb,var(--orange) " + Math.round(14 * bk) + "%,transparent) 100%)" + (s.homeBgMove === "on" ? ";animation:pg-edge2 12s ease-in-out infinite alternate" : "") + "}",
+        "@keyframes pg-edge2{to{opacity:.55}}", "@media (prefers-reduced-motion: reduce){body::before{animation:none!important}}");
+    }
+
+    // 정보량: hide or trim parts of today's pages without moving anything else
+    var H = function (sel) { css.push(sel + "{display:none!important}"); };
+    // hidden only while not hovered, so hovering hands the element back its own layout
+    var hov = function (row, sel) {
+      css.push("@media (min-width: 721px) and (hover: hover){" + row + ":not(:hover):not(:focus-within) " + sel + "{display:none!important}}",
+        "@media (min-width: 721px) and (hover: none){" + sel + "{display:none!important}}");
+      if (s.hoverPhone === "hide") css.push("@media (max-width: 720px){" + sel + "{display:none!important}}");
+    };
+    if (s.leadSum === "clamp") css.push(".lead-sum{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}");
+    if (s.leadSum === "hide") H(".lead-sum");
+    if (s.leadRo === "hide") H(".lead-ro");
+    if (s.leadFoot === "hide") H(".lead-foot");
+    if (s.rowTagline === "clamp") css.push(".row-tagline{display:-webkit-box!important;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}");
+    if (s.rowTagline === "hover") hov(".row", ".row-tagline");
+    if (s.rowTagline === "hide") H(".row-tagline");
+    if (s.rowRo === "hover") hov(".row", ".row-ro");
+    if (s.rowRo === "hide") H(".row-ro");
+    var cols = ["1.2rem", "4.2rem"], hideNth = [];
+    if (s.rowId === "show") cols.push("5.6rem"); else { H(".row-id"); hideNth.push(3); }
+    cols.push("minmax(0, 1fr)");
+    if (s.rowPillars === "show") cols.push("4.8rem"); else { H(".row-pillars"); hideNth.push(5); }
+    if (s.rowSize === "show") cols.push("6.2rem"); else { H(".row-size"); hideNth.push(6); }
+    if (hideNth.length) {
+      css.push("html.js .listhead.listhead,html.js .row.row{grid-template-columns:" + cols.join(" ") + "}");
+      hideNth.forEach(function (n) { H(".listhead > span:nth-child(" + n + ")"); });
+    }
+    if (s.rail === "hide") css.push("html.js .rail{display:none!important}", "html.js .deck{grid-template-columns:minmax(0,1fr)!important}");
+    if (s.hubFacts === "hide") H(".gh-facts");
+    if (s.narrRail === "hide") css.push(".g-rail{display:none!important}", ".g-narr{grid-template-columns:minmax(0,1fr)!important}");
+    if (s.narrBody === "fold") css.push(".g-narr.pg-fold .g-narr-body > p:nth-of-type(n+3){display:none}",
+      ".pg-more{margin-top:.4rem;border:0;background:none;padding:0;color:var(--orange-ink);font:inherit;font-weight:700;font-size:var(--fs-sm);cursor:pointer}");
+    if (s.actC === "hide") H(".g-act .ga-c");
+    if (s.actFigs === "hide") css.push(".g-act .scale,.g-act .fig,.g-act .ga-s,.g-act .ga-eq,.g-act .box-body{display:none!important}");
+    if (s.scStats === "hide") H(".sc-status");
+    if (s.scFilter === "hide") H(".sc-filter");
+    if (s.scGist === "hover") hov(".sc-row", ".sc-gist");
+    if (s.scGist === "hide") H(".sc-gist");
+    if (s.scSide === "hide") H(".sc-side");
+    if (s.cmpFork === "hide") H(".cmp-item .fork");
+    if (s.cmpSize === "hide") H(".ix-size");
+
+    // first screen: the opening block repeats the feed under it, so it can go
+    if (s.homeTop === "none") css.push(".hm-top{display:none}");
+    if (s.homeTop === "title") css.push(".hm-eyebrow,.hm-now{display:none}");
+    if (s.homeTop === "cards") css.push(".hm-eyebrow,.hm-t{display:none}");
+    if (s.homeOrder === "feed") css.push(".hm-two{order:-1}", ".hm-top{order:-2}");
+    // first screen: a little life, each part on its own switch
+    var ease = "cubic-bezier(.16,1,.3,1)";
+    if (s.homeMascot === "greet") css.push(".hm-mascot{display:flex;order:-4}");
+    if (s.homeMascot === "corner") css.push(".hm-mascot{display:flex;position:fixed;right:18px;bottom:18px;z-index:50;flex-direction:row-reverse}",
+      ".hm-mascot .hm-bubble::before{left:auto;right:-7px;transform:translateY(-50%) rotate(225deg)}",
+      ".hm-mascot .hm-bubble{animation:pg-bubble 6s ease both}", "@keyframes pg-bubble{0%{opacity:0;transform:translateX(8px)}10%,80%{opacity:1;transform:none}100%{opacity:0;visibility:hidden}}");
+    if (s.homeEnter === "on") {
+      css.push("@keyframes pg-up{from{opacity:0;transform:translateY(12px)}}", ".hm > *{animation:pg-up .7s " + ease + " both}");
+      for (var q = 1; q <= 6; q++) css.push(".hm > :nth-child(" + q + "){animation-delay:" + (q * 90) + "ms}",
+        ".hm-feed li:nth-child(" + q + "),.hm-pl li:nth-child(" + q + "),.hm-evs > :nth-child(" + q + "){animation:pg-up .55s " + ease + " both;animation-delay:" + (250 + q * 70) + "ms}");
+    }
+    if (s.homePlInfo === "latest") css.push(".hm-plat{display:block}");
+    if (s.homePlInfo === "new") css.push(".hm-pnew{display:inline-block}");
+    if (s.homePlInfo === "bars") css.push(".hm-spark{display:flex}", "@keyframes pg-grow{from{transform:scaleY(0)}}", ".hm-spark i{animation:pg-grow .8s " + ease + " both;animation-delay:calc(500ms + var(--d))}");
+    // background: a soft colour field across the whole screen, no pattern, fixed while it scrolls
+    var bgK = [0, .55, .85, 1.25][+s.homeBgAmt] || .85, mv = s.homeBgMove === "on";
+    var A = function (p) { return "color-mix(in srgb,var(--orange) " + Math.round(p * bgK) + "%,transparent)"; };
+    var B = function (p) { return "color-mix(in srgb,var(--sec) " + Math.round(p * bgK) + "%,transparent)"; };
+    var P1 = "body:has(.hm)::before", P2 = "body:has(.hm)::after", fix = "content:'';position:fixed;z-index:-1;pointer-events:none";
+    var run = function (a) { return mv ? ";animation:" + a : ""; };
+    var bg = s.homeBg;
+    if (bg === "drift") css.push(P1 + "{" + fix + ";inset:-20vmax;background:radial-gradient(28vmax 24vmax at 22% 18%," + A(16) + ",transparent 70%),radial-gradient(30vmax 26vmax at 82% 42%," + B(14) + ",transparent 70%),radial-gradient(26vmax 22vmax at 40% 88%," + A(11) + ",transparent 70%);filter:blur(10px)" + run("pg-drift 34s ease-in-out infinite alternate") + "}",
+      "@keyframes pg-drift{to{transform:translate3d(6vmax,-4vmax,0) rotate(8deg) scale(1.06)}}");
+    if (bg === "breath") css.push(P1 + "{" + fix + ";inset:0;background:linear-gradient(155deg," + A(13) + " 0%,transparent 42%,transparent 58%," + B(12) + " 100%);background-size:180% 180%" + run("pg-breath 40s ease-in-out infinite alternate") + "}",
+      "@keyframes pg-breath{from{background-position:0% 0%}to{background-position:100% 100%}}");
+    if (bg === "silk") css.push(P1 + "{" + fix + ";left:50%;top:50%;width:180vmax;height:180vmax;margin:-90vmax 0 0 -90vmax;background:conic-gradient(from 0deg," + A(12) + ",transparent 22%," + B(11) + " 38%,transparent 60%," + A(9) + " 78%,transparent 92%," + A(12) + ");filter:blur(60px)" + run("pg-silk 90s linear infinite") + "}",
+      "@keyframes pg-silk{to{transform:rotate(360deg)}}");
+    if (bg === "edge") css.push(P1 + "{" + fix + ";inset:0;background:radial-gradient(ellipse 75% 70% at 50% 45%,transparent 55%," + A(14) + " 100%)" + run("pg-edge 12s ease-in-out infinite alternate") + "}",
+      "@keyframes pg-edge{to{opacity:.55}}");
+    if (bg === "hue") css.push(P1 + "{" + fix + ";inset:0;background:" + A(9) + "}", P2 + "{" + fix + ";inset:0;background:" + B(9) + ";opacity:0" + run("pg-hue 24s ease-in-out infinite alternate") + "}",
+      "@keyframes pg-hue{to{opacity:1}}");
+    if (bg === "scroll") css.push(P1 + "{" + fix + ";inset:0;background:linear-gradient(180deg," + A(12) + ",transparent 60%)}", P2 + "{" + fix + ";inset:0;background:linear-gradient(0deg," + B(12) + ",transparent 60%);opacity:0}",
+      "@supports (animation-timeline: scroll()){" + P1 + "{animation:pg-sc1 linear both;animation-timeline:scroll(root)}" + P2 + "{animation:pg-sc2 linear both;animation-timeline:scroll(root)}}",
+      "@keyframes pg-sc1{to{opacity:.15}}@keyframes pg-sc2{to{opacity:1}}");
+    // the mascot: the plain probe, or the track probe that does what the line says
+    var KIND_OF = { pick: "analysis", scout: "scouting", deadline: "ideation", count: "analysis" };
+    if (s.homeMascotKind !== "basic") css.push(".hm-mkb{display:none}");
+    if (s.homeMascotKind === "match") {
+      if (s.homeLine === "rotate") css.push(".hm-mki[data-kind='analysis'],.hm-mki[data-kind='scouting'],.hm-mki[data-kind='ideation']{display:block;animation:pg-rot 18s infinite both}",
+        ".hm-mki[data-kind='scouting']{animation-delay:6s}", ".hm-mki[data-kind='ideation']{animation-delay:12s}");
+      else css.push(".hm-mki[data-kind='" + KIND_OF[s.homeLine] + "']{display:block}");
+    }
+    if (s.homeMascotKind === "rotate") css.push(".hm-mki{display:block;animation:pg-rot4 20s infinite both}",
+      ".hm-mki[data-kind='scouting']{animation-delay:5s}", ".hm-mki[data-kind='comparison']{animation-delay:10s}", ".hm-mki[data-kind='ideation']{animation-delay:15s}",
+      "@keyframes pg-rot4{0%{opacity:0}3%,22%{opacity:1}25%,100%{opacity:0}}");
+    css.push("@media (prefers-reduced-motion: reduce){.hm *,.hm::before,.hm::after{animation:none!important}}");
+    // what the mascot says: one line, or three taking turns
+    if (s.homeLine === "rotate") {
+      css.push(".hm-bubble[data-line='pick'],.hm-bubble[data-line='scout'],.hm-bubble[data-line='deadline']{display:block;animation:pg-rot 18s infinite both}",
+        ".hm-bubble[data-line='scout']{animation-delay:6s}", ".hm-bubble[data-line='deadline']{animation-delay:12s}",
+        "@keyframes pg-rot{0%{opacity:0;transform:translateY(4px)}3%,30%{opacity:1;transform:none}34%,100%{opacity:0;transform:translateY(-4px)}}",
+        "@media (prefers-reduced-motion: reduce){.hm-bubble[data-line='scout'],.hm-bubble[data-line='deadline']{display:none!important}.hm-bubble[data-line='pick']{opacity:1!important}}");
+    } else css.push(".hm-bubble[data-line='" + s.homeLine + "']{display:block}");
+    // the small nav mark, next to a big mascot
+    if (s.navMark === "hide") css.push(".nav-logo .probe-mark{display:none}");
+    if (s.navMark === "homehide" && s.homeMascot !== "off") css.push("body:has(.hm-mascot) .nav-logo .probe-mark{display:none}");
+    if (s.homeFill === "more") css.push("@media (min-width: 900px){.hm-feed .hm-x{display:list-item!important;list-style:none}.hm-evs .hm-x{display:grid!important}.hm-pd{display:block}.hm-evs{grid-template-columns:repeat(3,minmax(0,1fr))}.hm-pl li{padding:.75rem .2rem}}");
+    if (s.homeFill === "columns") css.push("@media (min-width: 900px){.hm-colsblk{display:grid;order:-3}.hm-feedblk{display:none}.hm-two{grid-template-columns:minmax(0,1fr)}.hm-pd{display:block}.hm-pl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:2.2rem}.hm-evs .hm-x{display:grid!important}.hm-evs{grid-template-columns:repeat(3,minmax(0,1fr))}}");
+
+    // contents list: how the section being read is marked
+    if (s.tocActive !== "band") {
+      css.push(".toc a.active{border-left-color:transparent}");
+      if (s.tocActive === "tint") css.push(".toc a.active{background:var(--orange-soft);color:var(--orange-ink)}");
+      if (s.tocActive === "text") css.push(".toc a.active{background:none}");
+      if (s.tocActive === "dot") css.push(".toc a.active{position:relative;background:none}", ".toc a.active::before{content:'';position:absolute;left:-.15rem;top:.78em;width:6px;height:6px;border-radius:50%;background:var(--orange)}");
+    }
+
+    // the newest card's mark: the square brackets only fit a square corner, so each option here answers a rounded card
+    if (s.leadMark === "arc") {
+      css.push(".corpus .lead::before,.corpus .lead::after{width:calc(var(--radius) + 14px);height:calc(var(--radius) + 14px)}",
+        ".corpus .lead::before{border-top-left-radius:var(--radius)}", ".corpus .lead::after{border-bottom-right-radius:var(--radius)}");
+    } else if (s.leadMark !== "bracket") {
+      css.push(".corpus .lead::before,.corpus .lead::after{display:none}");
+      if (s.leadMark === "topline") css.push(".corpus .lead{background:" + accentLine + " top / 100% 3px no-repeat, var(--card-bg)}");
+      else if (s.leadMark === "ring") css.push(".corpus .lead{border-color:color-mix(in srgb,var(--orange) 55%,transparent);box-shadow:0 0 0 3px var(--orange-soft)," + (shadow === "none" ? "0 0 0 transparent" : shadow) + "}");
+      else if (s.leadMark === "glow") css.push(".corpus .lead{border-color:color-mix(in srgb,var(--orange) 25%,var(--border-soft));box-shadow:0 10px 34px -8px color-mix(in srgb,var(--orange) " + (dark ? "45%" : "32%") + ",transparent)}");
+    }
+
+    // tabs
+    if (s.tabs === "pill") {
+      css.push(".tabs{gap:.4rem;padding-top:.5rem;padding-bottom:.5rem}", ".tab{border-bottom:0;border-radius:999px;padding:.45rem 1rem}",
+        ".tab[aria-selected='true']{background:" + (s.point === "two" ? "linear-gradient(100deg,var(--orange),color-mix(in srgb,var(--orange) 65%,var(--sec)))" : "var(--orange)") + ";color:var(--accent-ink)}");
+    } else if (s.tabs === "segment") {
+      css.push(".tabs{gap:0;padding-top:.6rem;padding-bottom:.6rem}",
+        ".tab{border:1px solid var(--border);background:var(--surface);margin-left:-1px;padding:.4rem 1.05rem}",
+        ".tab:first-child{margin-left:0;border-radius:var(--radius-sm) 0 0 var(--radius-sm)}", ".tab:last-child{border-radius:0 var(--radius-sm) var(--radius-sm) 0}",
+        ".tab[aria-selected='true']{background:var(--orange-soft);color:var(--orange-ink);border-color:var(--border)}");
+    } else {
+      css.push(".tab[aria-selected='true']{color:var(--orange-ink);border-bottom-color:var(--orange)}");
+    }
+    // nav current item
+    if (s.navCur === "pill") css.push(".nav-links a{border-radius:999px}", ".nav-links a[aria-current='page']{box-shadow:none;background:var(--orange-soft);border-radius:999px}");
+    else if (s.navCur === "bold") css.push(".nav-links a[aria-current='page']{box-shadow:none;color:var(--text);font-weight:800}");
+
+    // icons and logo
+    css.push(".ico{stroke-width:" + s.iconStroke + "}");
+    if (s.iconBtn === "circle") css.push(".icon-btn,.nav-cmdk{border-radius:999px}");
+    else if (s.iconBtn === "ghost") css.push(".icon-btn,.nav-cmdk{border-color:transparent;background:transparent;box-shadow:none}");
+    else css.push(".icon-btn,.nav-cmdk{border-radius:var(--radius-sm)}");
+    if (s.mascot === "off") css.push(".nav-logo .probe-mark{display:none}");
+    var markFill = s.point === "two" ? "var(--sec)" : "var(--orange)";
+    css.push(".probe-mark .hull,.probe-mark .leaf,.probe-mark .shadow{fill:" + markFill + "}", ".probe-mark .stem{stroke:" + markFill + "}");
+    if (s.wordmark === "accent") css.push(".nav-word{background:none!important;-webkit-text-fill-color:var(--orange-ink);color:var(--orange-ink)}");
+    else if (s.wordmark === "ink") css.push(".nav-word{background:none!important;-webkit-text-fill-color:var(--text);color:var(--text)}");
+    return css.join("\n");
+  }
+
+  // ── apply to the framed page ───────────────────────────
+  var frame = document.getElementById("view");
+  function apply() {
+    var doc;
+    try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || !doc.head) return;
+    doc.documentElement.setAttribute("data-theme", view.mode);
+    try { doc.defaultView.localStorage.setItem("probe.theme", view.mode); } catch (e) {}
+    if (!doc.getElementById("pg-gf")) {
+      var l = doc.createElement("link"); l.id = "pg-gf"; l.rel = "stylesheet"; l.href = GF_URL; doc.head.appendChild(l);
+    }
+    var st = doc.getElementById("pg-style");
+    if (!st) { st = doc.createElement("style"); st.id = "pg-style"; doc.head.appendChild(st); }
+    st.textContent = buildCSS(state, view.mode);
+    mountPicker(doc);
+    placeControls(doc);
+    pageSize(doc);
+    foldStory(doc);
+    linkPillars(doc);
+    listTweaks(doc);
+    moveRail(doc);
+    drawRec(doc);
+    wrapLab(doc);
+    nameHome(doc);
+    tintMascots(doc);
+    if (pendingPillar && doc.querySelector(".rail-item[data-p]")) { var pp = pendingPillar; pendingPillar = null; setTimeout(function () { filterTo(doc, pp); }, 150); }
+  }
+  var SITE = new URL("site/", document.baseURI).href;
+  // first-screen headings, named by one rule
+  var HOME_NAMES = {
+    noun: { feed: ["최근", "분석 · 탐색 · 비교"], pillars: ["연구 축", "다섯 갈래"], events: ["일정", "학회 · 투고 마감"] },
+    phrase: { feed: ["새로 들어온 글", "분석 · 탐색 · 비교"], pillars: ["살펴보는 연구 축", "다섯 갈래"], events: ["다가오는 일정", "학회 · 투고 마감"] },
+    now: { feed: ["최근에 들어온 것", ""], pillars: ["연구 축", ""], events: ["다가오는 일정", "학회 · 투고 마감"] }
+  };
+  // the track icons are drawn in the README's clay; repaint their body in this theme's accent
+  var svgCache = {};
+  function tintMascots(doc) {
+    var imgs = doc.querySelectorAll("img.hm-mki"); if (!imgs.length) return;
+    var cs = doc.defaultView.getComputedStyle(doc.documentElement), body = cs.getPropertyValue("--orange").trim(), leaf = cs.getPropertyValue("--sec").trim() || body;
+    [].slice.call(imgs).forEach(function (img) {
+      var url = img.dataset.orig || (img.dataset.orig = img.getAttribute("src"));
+      var go = function (txt) {
+        var t = txt.replace(/#D97757|#E8916F/gi, body).replace(/#CC785C|#F0A183/gi, leaf);
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(t); img.classList.add("is-tinted");
+      };
+      if (svgCache[url]) go(svgCache[url]);
+      else fetch(new URL(url, doc.baseURI).href).then(function (r) { return r.text(); }).then(function (t) { svgCache[url] = t; go(t); }).catch(function () {});
+    });
+  }
+  var ROWLINKS = null;
+  fetch("site/assets/row-links.json").then(function (r) { return r.json(); }).then(function (d) { ROWLINKS = d; var dc = frame.contentDocument; if (dc) listTweaks(dc); }).catch(function () {});
+  function listTweaks(doc) {
+    var rows = doc.querySelectorAll(".rows .row"); if (!rows.length) return;
+    // with the lead card gone, its row is just the first row of page one
+    if (state.leadCard === "hide" || state.recKind !== "latest") {
+      var lead = doc.querySelector(".corpus .lead"); if (lead) lead.setAttribute("data-pg-off", "");
+      var dup = doc.querySelector(".rows .row[data-lead-dup]");
+      // the list put this row on page one and hid it only for the lead; clear the mark and it stays shown on every re-sort
+      if (dup) { dup.removeAttribute("data-lead-dup"); dup.hidden = false; }
+    }
+    var head = doc.querySelector(".listhead > span:last-child");
+    if (head) head.textContent = (state.rowLinks === "links" || state.rowLinks === "icons") ? "링크" : state.rowLinks === "none" ? "" : "분량";
+    [].slice.call(rows).forEach(function (r) {
+      var cell = r.querySelector(".row-size"); if (!cell) return;
+      if (!cell.dataset.orig) cell.dataset.orig = cell.innerHTML;
+      var id = (r.querySelector(".row-id") || {}).textContent; id = id && id.trim();
+      var lk = ROWLINKS && ROWLINKS[id] || "";
+      // icon-only: the same chips with their words kept as the accessible name
+      var ic = lk.replace(/<a class="chip src-link link" ([^>]*)>(<svg[\s\S]*?<\/svg>)([^<]*)<\/a>/g, '<a $1 aria-label="$3" title="$3">$2</a>');
+      if (state.rowLinks === "links" && ROWLINKS) cell.innerHTML = '<span class="pg-links">' + lk + "</span>";
+      else if (state.rowLinks === "icons" && ROWLINKS) cell.innerHTML = '<span class="pg-ic">' + ic + "</span>";
+      else if (state.rowLinks === "sizeicon" && ROWLINKS) cell.innerHTML = '<span class="pg-sz">' + cell.dataset.orig + '</span><span class="pg-ic">' + ic + "</span>";
+      else cell.innerHTML = cell.dataset.orig;
+      var old = r.querySelector(".pg-ic2"); if (old) old.remove();
+      if (state.linkSpot !== "right" && ROWLINKS && ic) {
+        var g = doc.createElement("span"); g.className = "pg-ic2 at-" + state.linkSpot; g.innerHTML = ic;
+        g.addEventListener("click", function (e) { e.stopPropagation(); });
+        if (state.linkSpot === "under" || state.linkSpot === "title") {
+          // the title and summary are one link, so the icons go beside it in a shared cell, never inside it
+          var m = r.querySelector(".row-main"), w = m && m.parentNode.classList.contains("pg-mainwrap") ? m.parentNode : null;
+          if (m && !w) { w = doc.createElement("div"); w.className = "pg-mainwrap"; m.before(w); w.appendChild(m); }
+          if (w) { w.classList.toggle("is-title", state.linkSpot === "title"); w.appendChild(g); }
+        }
+        else if (state.linkSpot === "inline") {
+          // a link may not hold a link, so the title becomes the link and stretches over the cell; the icons sit above it
+          var m2 = r.querySelector(".row-main");
+          if (m2 && m2.tagName === "A") {
+            var d2 = doc.createElement("div"); d2.className = "row-main pg-stretch";
+            var t2 = m2.querySelector(".row-title"), a2 = doc.createElement("a");
+            a2.className = "pg-tlink"; a2.href = m2.getAttribute("href"); a2.textContent = t2.textContent; t2.textContent = ""; t2.appendChild(a2);
+            while (m2.firstChild) d2.appendChild(m2.firstChild); m2.replaceWith(d2); m2 = d2;
+          }
+          var t3 = m2 && m2.querySelector(".row-title"); if (t3) t3.appendChild(g);
+        }
+        else if (state.linkSpot === "pillcol") { var pc = r.querySelector(".row-pillars"); if (pc) pc.appendChild(g); }
+        else if (state.linkSpot === "idcol") { var ic2 = r.querySelector(".row-id"); if (ic2) ic2.appendChild(g); }
+      }
+    });
+  }
+  var REC = null, recSeed = null;
+  fetch("site/assets/rec.json").then(function (r) { return r.json(); }).then(function (d) { REC = d; var dc = frame.contentDocument; if (dc) drawRec(dc); }).catch(function () {});
+  function shuffle(n) { var a = []; for (var i = 0; i < REC.length; i++) a.push(i); for (var j = a.length - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; } return a.slice(0, n); }
+  function drawRec(doc) {
+    var old = doc.querySelector(".pg-rec"); if (old) old.remove();
+    var corpus = doc.querySelector(".corpus"); if (!corpus || !REC || state.recKind === "latest" || state.recKind === "none") return;
+    if (!recSeed) recSeed = shuffle(2);
+    var esc = function (t) { return String(t || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+    var href = function (p) { return "p/" + p.id + "/index.html"; };
+    var chips = function (p) { return p.pillars.map(function (c) { return '<span class="chip pillar" data-p="' + c + '">' + c + "</span>"; }).join(""); };
+    // title and its links on one line, the claim under it at reading size, axes and result on one closing line
+    var againIcon = '<button type="button" class="pg-rc-again" data-pg-again aria-label="다른 논문 추천" title="다른 논문 추천"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 6.5A6.2 6.2 0 1 0 16.2 11"/><path d="M15.8 2.8v3.9h-3.9"/></svg></button>';
+    var markSvg = (doc.querySelector(".probe-mark") || {}).outerHTML || "";
+    var card = function (p) {
+      return '<article class="pg-rc st-' + state.recStyle + '">' +
+        '<span class="pg-rc-art" aria-hidden="true">' + (state.recStyle === "mascot" ? markSvg : "") + "</span>" +
+        '<h3 class="pg-rc-t"><span class="pg-rc-tag">추천</span><a href="' + href(p) + '">' + esc(p.title) + "</a>" + "</h3>" +
+        '<p class="pg-rc-s">' + esc(p.thesis || p.tagline) + "</p></article>";
+    };
+    var w = doc.createElement("section"); w.className = "pg-rec"; w.setAttribute("aria-label", "추천 논문");
+    var again = '<button type="button" data-pg-again aria-label="다른 논문 추천">다른 논문</button>';
+    var a = REC[recSeed[0]], b = REC[recSeed[1]];
+    if (state.recKind === "pick1") w.innerHTML = card(a);
+    else if (state.recKind === "pick2") w.innerHTML = '<p class="pg-rec-h"><b>오늘의 추천 두 편</b><span>들어올 때마다 바뀜</span>' + again + '</p><div class="pg-rec2">' + card(a) + card(b) + "</div>";
+    else if (state.recKind === "strip") w.innerHTML = '<div class="pg-strip"><b>추천</b><a class="pg-st" href="' + href(a) + '"><strong>' + esc(a.alias) + "</strong> — " + esc(a.thesis) + "</a>" + again + "</div>";
+    else if (state.recKind === "quote") w.innerHTML = '<p class="pg-quote"><a href="' + href(a) + '">“' + esc(a.thesis) + '”</a></p><p class="pg-quote-by">' + esc(a.alias) + " · " + esc(a.title) + again + "</p>";
+    var rail = corpus.querySelector(".rail.pg-top");
+    corpus.insertBefore(w, corpus.firstChild);
+    var bt = w.querySelector("[data-pg-again]"); if (bt) bt.addEventListener("click", function () { recSeed = shuffle(2); drawRec(doc); });
+    wrapLab(doc);
+  }
+  // one left label column shared by the recommendation card and the pillar line, so both read as the same kind of card
+  var LAB_ICON = {
+    rec: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5l1.9 4.6 4.6 1.9-4.6 1.9L10 15.5l-1.9-4.6L3.5 9l4.6-1.9z"/></svg>',
+    rail: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3 3 6.5l7 3.5 7-3.5z"/><path d="M3 10l7 3.5 7-3.5"/><path d="M3 13.5 10 17l7-3.5"/></svg>'
+  };
+  function wrapLab(doc) {
+    if (!doc || !doc.body) return;
+    [[doc.querySelector(".pg-rec > .pg-rc"), "추천", "rec"], [doc.querySelector(".rail.pg-top"), "연구 축", "rail"]].forEach(function (t) {
+      var el = t[0]; if (!el) return;
+      var w = el.parentNode && el.parentNode.classList.contains("pg-lc") ? el.parentNode : null;
+      if (state.labelCol === "none") { if (w) { w.before(el); w.remove(); } return; }
+      if (!w) { w = doc.createElement("div"); el.before(w); w.appendChild(el); var l = doc.createElement("span"); l.className = "pg-lab"; w.insertBefore(l, el); }
+      w.className = "pg-lc pg-lc-" + t[2] + " lab-" + state.labelCol;
+      var lab = w.querySelector(".pg-lab"), ico = /^icon/.test(state.labelCol);
+      lab.innerHTML = (ico ? LAB_ICON[t[2]] : "") + '<span class="pg-lab-t">' + t[1] + "</span>";
+      lab.title = t[1];
+    });
+  }
+  // the rail is moved, not copied, so the list's own filter keeps working on its buttons
+  function moveRail(doc) {
+    var rail = doc.querySelector(".rail"), corpus = doc.querySelector(".corpus"); if (!rail || !corpus) return;
+    if (!rail.pgHome) { rail.pgHome = rail.parentNode; rail.pgNext = rail.nextSibling; }
+    if (state.railSpot === "top") {
+      rail.classList.add("pg-top");
+      if (!rail.querySelector(".pg-sep")) { var h2 = rail.querySelectorAll(".rail-h")[1]; if (h2) { var sp = doc.createElement("span"); sp.className = "pg-sep"; sp.setAttribute("aria-hidden", "true"); h2.before(sp); } }
+      var host = rail.parentNode && rail.parentNode.classList.contains("pg-lc") ? rail.parentNode : rail;
+      if (host.parentNode !== corpus) corpus.insertBefore(host, corpus.firstChild);
+      if (!rail.pgScroll) { rail.pgScroll = true; var edge = function () { rail.classList.toggle("at-end", rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4); }; rail.addEventListener("scroll", edge, { passive: true }); doc.defaultView.addEventListener("resize", edge); setTimeout(edge, 50); }
+    } else {
+      rail.classList.remove("pg-top"); var sep = rail.querySelector(".pg-sep"); if (sep) sep.remove();
+      if (rail.parentNode && rail.parentNode.classList.contains("pg-lc")) { var lw = rail.parentNode; lw.before(rail); lw.remove(); }
+      if (rail.parentNode !== rail.pgHome) rail.pgHome.insertBefore(rail, rail.pgNext);
+    }
+  }
+  function nameHome(doc) {
+    var set = HOME_NAMES[state.homeNames] || HOME_NAMES.noun;
+    [].slice.call(doc.querySelectorAll(".hm-h[data-k]")).forEach(function (h) {
+      var n = set[h.dataset.k]; if (!n) return;
+      h.innerHTML = n[0] + (n[1] ? '<span class="hm-sub">' + n[1] + "</span>" : "");
+    });
+  }
+  var PDATA = null, pendingPillar = null;
+  fetch("site/assets/pillar-data.json").then(function (r) { return r.json(); }).then(function (d) { PDATA = d; }).catch(function () {});
+  function decHTML(code, max) {
+    if (!PDATA || state.decisionLevel === "none") return "";
+    var ds = PDATA[code].decisions, show = ds.slice(0, max);
+    var li = function (d) { return '<li><span class="pgd-id">' + d.id + '</span><span class="pgd-t">' + d.title + (d.open ? ' <em>미정</em>' : "") + "</span>" +
+      (state.decisionLevel === "choice" && d.choice ? '<span class="pgd-c">현재 선택 · ' + d.choice + "</span>" : "") + "</li>"; };
+    return '<div class="pgd"><p class="pgd-h">이 축에서 내린 결정 ' + ds.length + "개</p><ul>" + show.map(li).join("") + "</ul>" +
+      (ds.length > max ? '<details class="pgd-more"><summary>' + (ds.length - max) + "개 더</summary><ul>" + ds.slice(max).map(li).join("") + "</ul></details>" : "") + "</div>";
+  }
+  function pillarCard(code, cls) {
+    var d = PDATA && PDATA[code]; if (!d) return "";
+    return '<div class="' + cls + '"><p class="pgp-top"><span class="chip pillar" data-p="' + code + '">' + code + "</span><b>" + d.label + "</b><span>" + d.name + "</span></p>" +
+      '<p class="pgp-desc">' + d.desc + ' <span class="pgp-draft">설명 초안</span></p>' +
+      '<p class="pgp-n">분석 ' + d.papers + "편 · 비교 " + d.comps + "개 · 이번 탐색 " + d.scout + "편</p>" + decHTML(code, cls === "pgp" ? 3 : 6) + "</div>";
+  }
+  function closePop(doc) { var o = doc.querySelector(".pgp-wrap"); if (o) o.remove(); }
+  function showPop(doc, el, code) {
+    closePop(doc);
+    var w = doc.createElement("div"); w.className = "pgp-wrap"; w.setAttribute("role", "dialog"); w.setAttribute("aria-label", code + " 연구 축");
+    w.innerHTML = pillarCard(code, "pgp") + '<p class="pgp-act"><button type="button" data-pg-filter="' + code + '">이 축 논문만 보기</button><button type="button" data-pg-close>닫기</button></p>';
+    doc.body.appendChild(w);
+    var r = el.getBoundingClientRect(), win = doc.defaultView, W = Math.min(360, win.innerWidth - 24);
+    w.style.width = W + "px";
+    w.style.left = Math.max(12, Math.min(r.left + win.scrollX, win.scrollX + win.innerWidth - W - 12)) + "px";
+    w.style.top = (r.bottom + win.scrollY + 8) + "px";
+  }
+  function filterTo(doc, code) {
+    var item = doc.querySelector('.rail-item[data-p="' + code + '"]');
+    if (!item) { pendingPillar = code; view.page = "home"; save(); segment(document.getElementById("pageSeg"), PAGES, "page", function () { frame.src = srcFor(); showPageItems(); }); frame.src = srcFor(); showPageItems(); return; }
+    [].slice.call(doc.querySelectorAll('.rail-item[data-p][aria-pressed="true"]')).forEach(function (b) { if (b !== item) b.click(); });
+    if (item.getAttribute("aria-pressed") !== "true") item.click();
+    var old = doc.querySelector(".pgb"); if (old) old.remove();
+    var corpus = doc.querySelector(".corpus"); if (!corpus) return;
+    var b = doc.createElement("section"); b.className = "pgb";
+    b.innerHTML = pillarCard(code, "pgb-in") + '<button type="button" class="pgb-x" data-pg-unfilter="' + code + '">축 거르기 해제</button>';
+    corpus.insertBefore(b, corpus.firstChild);
+    doc.defaultView.scrollTo({ top: corpus.getBoundingClientRect().top + doc.defaultView.scrollY - 80, behavior: "smooth" });
+  }
+  function bindPillarClicks(doc) {
+    if (doc.pgPlBound) return; doc.pgPlBound = true;
+    doc.addEventListener("click", function (e) {
+      var f = e.target.closest("[data-pg-filter]"); if (f) { e.preventDefault(); closePop(doc); filterTo(doc, f.getAttribute("data-pg-filter")); return; }
+      if (e.target.closest("[data-pg-close]")) { closePop(doc); return; }
+      var u = e.target.closest("[data-pg-unfilter]");
+      if (u) { var it = doc.querySelector('.rail-item[data-p="' + u.getAttribute("data-pg-unfilter") + '"]'); if (it && it.getAttribute("aria-pressed") === "true") it.click(); var bb = doc.querySelector(".pgb"); if (bb) bb.remove(); return; }
+      var c = e.target.closest("a.chip.pillar[data-p]");
+      if (c && !c.closest(".pgp-wrap,.pgb")) {
+        if (state.pillarMode === "pop") { e.preventDefault(); e.stopPropagation(); showPop(doc, c, c.dataset.p); return; }
+        if (state.pillarMode === "filter") { e.preventDefault(); e.stopPropagation(); filterTo(doc, c.dataset.p); return; }
+        return;
+      }
+      if (!e.target.closest(".pgp-wrap")) closePop(doc);
+    }, true);
+    doc.addEventListener("keydown", function (e) { if (e.key === "Escape") closePop(doc); });
+  }
+  // Wire the reader to the pillar pages and the shelf now that the left rail is gone.
+  function linkPillars(doc) {
+    var lg = doc.querySelector(".nav-logo"); if (lg) lg.href = SITE + "home.html";
+    if (state.pillarMode !== "none") {
+      bindPillarClicks(doc);
+      [].slice.call(doc.querySelectorAll("span.chip.pillar[data-p]")).forEach(function (sp) {
+        if (sp.closest("button, a")) return;
+        var a = doc.createElement("a"); a.className = sp.className; a.dataset.p = sp.dataset.p;
+        a.href = SITE + "pillar-" + sp.dataset.p + ".html"; a.textContent = sp.textContent; a.title = sp.textContent + " 연구 축 소개";
+        sp.replaceWith(a);
+      });
+      [].slice.call(doc.querySelectorAll(".crumb a")).forEach(function (a) { if (/^P[0-4]$/.test(a.textContent.trim())) a.href = SITE + "pillar-" + a.textContent.trim() + ".html"; });
+    }
+    var here = doc.location.pathname.indexOf("/pillar-") >= 0;
+    if (state.pillarNav === "on" && !doc.querySelector(".pg-navpl")) {
+      var ul = doc.querySelector(".nav-links"), cmpLi = ul && ul.querySelector('a[href$="c/index.html"]');
+      if (cmpLi) {
+        var li = doc.createElement("li"); li.className = "pg-navpl";
+        li.innerHTML = '<a href="' + SITE + 'pillar-index.html"' + (here ? ' aria-current="page"' : "") + ">연구 축</a>";
+        cmpLi.parentNode.parentNode.insertBefore(li, cmpLi.parentNode.nextSibling);
+      }
+      var sheet = doc.querySelector(".nav-sheet"), cmpA = sheet && sheet.querySelector('a[href$="c/index.html"]');
+      if (cmpA) { var a2 = doc.createElement("a"); a2.className = "pg-navpl"; a2.href = SITE + "pillar-index.html"; a2.textContent = "연구 축"; cmpA.after(a2); }
+    }
+    if (state.shelfBadge === "on" && !doc.querySelector(".pg-badge")) {
+      var n = 0;
+      try { var st = JSON.parse(doc.defaultView.localStorage.getItem("probe.stars.v1") || "{}"); n = Object.keys(st || {}).length; } catch (e) {}
+      if (n) [].slice.call(doc.querySelectorAll('.nav-links a[href$="shelf/index.html"], .nav-sheet a[href$="shelf/index.html"]')).forEach(function (a) {
+        var b = doc.createElement("span"); b.className = "pg-badge"; b.textContent = n; b.setAttribute("aria-label", "즐겨찾기 " + n + "편"); a.appendChild(b);
+      });
+    }
+  }
+  // 두 문단 + 이어 읽기: the story keeps its first two paragraphs and opens the rest on a click.
+  function foldStory(doc) {
+    var n = doc.querySelector(".g-narr"), body = n && n.querySelector(".g-narr-body");
+    if (!body) return;
+    var old = body.querySelector(".pg-more"); if (old) old.remove();
+    var ps = body.querySelectorAll(":scope > p");
+    if (state.narrBody !== "fold" || ps.length < 3) { n.classList.remove("pg-fold"); return; }
+    n.classList.add("pg-fold");
+    var b = doc.createElement("button"); b.type = "button"; b.className = "pg-more"; b.textContent = "이어 읽기 · " + (ps.length - 2) + "문단 더";
+    b.addEventListener("click", function () { n.classList.remove("pg-fold"); b.remove(); });
+    body.appendChild(b);
+  }
+  // Move the landing's own 정렬 / 개수 controls (listeners and all) into the spot chosen; put them back first every time.
+  function placeControls(doc) {
+    var inner = doc.querySelector(".filters-inner");
+    if (!inner) return;
+    var c = doc.pgCtl;
+    if (!c) {
+      var segs = inner.querySelectorAll(".segwrap");
+      if (segs.length < 2) return;
+      c = doc.pgCtl = { home: inner, sort: segs[0], size: segs[1], pager: doc.querySelector(".pager") };
+      c.pagerHome = c.pager ? c.pager.parentNode : null; c.pagerNext = c.pager ? c.pager.nextSibling : null;
+    }
+    // undo the last placement
+    c.home.appendChild(c.sort); c.home.appendChild(c.size); c.sort.classList.remove("pg-hidden");
+    if (c.pager && c.pagerHome && c.pager.parentNode !== c.pagerHome) c.pagerHome.insertBefore(c.pager, c.pagerNext);
+    [].slice.call(doc.querySelectorAll(".pg-ctl,.pg-foot,.pg-rail-h")).forEach(function (n) { n.remove(); });
+    var lh = doc.querySelector(".listhead");
+    if (lh) {
+      lh.classList.remove("pg-has-ctl");
+      [].slice.call(lh.querySelectorAll(".pg-sortable")).forEach(function (n) { n.classList.remove("pg-sortable"); n.removeAttribute("role"); n.removeAttribute("tabindex"); n.removeAttribute("aria-sort"); n.onclick = null; n.onkeydown = null; });
+    }
+    if (state.filterBar !== "merge") return;
+    var w = doc.defaultView.innerWidth, spot = state.ctlSpot;
+    // narrow screens get no sort or count controls at all: the list stays 최신순, 10편
+    if (w <= 680 || (spot === "rail" && w <= 900)) return;
+    function box(nodes) { var b = doc.createElement("div"); b.className = "pg-ctl"; nodes.forEach(function (n) { b.appendChild(n); }); return b; }
+    if (spot === "mast") {
+      var line = doc.querySelector(".mast-line"); if (line) line.appendChild(box([c.sort, c.size]));
+    } else if (spot === "listhead" && lh) {
+      lh.classList.add("pg-has-ctl"); lh.appendChild(box([c.sort, c.size]));
+    } else if (spot === "rail") {
+      var stat = doc.querySelector(".rail-stat"); if (stat) stat.parentNode.insertBefore(box([c.sort, c.size]), stat.nextSibling);
+    } else if (spot === "colsort" && lh) {
+      // 재작성 → 최신순, 논문 · 한 줄 → 제목순, 연구 축 → 연구 축별; the dropdown stays in the page, hidden, and does the sorting
+      c.sort.classList.add("pg-hidden"); c.home.appendChild(c.sort);
+      var map = { "재작성": "recent", "논문 · 한 줄": "title", "연구 축": "pillar" };
+      var cur = (c.sort.querySelector('[data-sort][aria-pressed="true"]') || {}).dataset;
+      [].slice.call(lh.children).forEach(function (sp) {
+        var key = map[sp.textContent.trim()]; if (!key) return;
+        sp.classList.add("pg-sortable"); sp.setAttribute("role", "button"); sp.tabIndex = 0;
+        if (cur && cur.sort === key) sp.setAttribute("aria-sort", "descending");
+        var go = function () { var b = c.sort.querySelector('[data-sort="' + key + '"]'); if (b) b.click(); placeControls(doc); };
+        sp.onclick = go; sp.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+      });
+      var foot = doc.createElement("div"); foot.className = "pg-foot";
+      if (c.pager) { c.pager.parentNode.insertBefore(foot, c.pager); foot.appendChild(c.pager); }
+      else { var rows = doc.querySelector(".corpus .rows"); if (rows) rows.parentNode.insertBefore(foot, rows.nextSibling); }
+      var lbl = doc.createElement("span"); lbl.className = "pg-foot-label"; lbl.textContent = "한 쪽에";
+      foot.appendChild(box([lbl, c.size]));
+    }
+  }
+  // The page-size choice sits at the end of the pager row; its buttons carry data-size, so the list script's own click handler does the work
+  function pageSize(doc) {
+    var pager = doc.querySelector(".pager[data-pager]"); if (!pager || !doc.querySelector(".psize")) return;
+    var row = doc.querySelector(".pg-pagerow");
+    if (!row) { row = doc.createElement("div"); row.className = "pg-pagerow"; }
+    if (pager.parentNode !== row) { pager.before(row); row.insertBefore(pager, row.firstChild); }
+    if (row.querySelector(".pg-psize")) return;
+    // only the current count shows; tapping it opens the three choices, which carry data-size so the list script applies them
+    var ctl = doc.createElement("div"); ctl.className = "pg-psize";
+    ctl.innerHTML = '<button type="button" class="pg-psize-cur" aria-haspopup="true" aria-expanded="false" title="한 쪽에 몇 편">' +
+      '<svg class="pg-psize-i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M3 8h10M3 12h10"/></svg><span class="pg-psize-n">10</span>' +
+      '<svg class="pg-psize-c" viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 6.5 3.5 3.5 3.5-3.5"/></svg></button>' +
+      '<div class="pg-psize-menu" role="group" aria-label="한 쪽에 몇 편" hidden>' +
+      [10, 20, 30].map(function (n) { return '<button type="button" data-size="' + n + '">' + n + "편</button>"; }).join("") + "</div>";
+    row.appendChild(ctl);
+    var cur = ctl.querySelector(".pg-psize-cur"), menu = ctl.querySelector(".pg-psize-menu");
+    var open = function (on) { menu.hidden = !on; cur.setAttribute("aria-expanded", on ? "true" : "false"); };
+    var sync = function () {
+      var p = doc.querySelector('.psize [data-size][aria-pressed="true"]'), v = p ? p.dataset.size : "10";
+      ctl.querySelector(".pg-psize-n").textContent = v;
+      [].forEach.call(menu.querySelectorAll("[data-size]"), function (b) { b.setAttribute("aria-pressed", b.dataset.size === v ? "true" : "false"); });
+    };
+    cur.addEventListener("click", function () { open(menu.hidden); });
+    menu.addEventListener("click", function (e) { if (e.target.closest("[data-size]")) { open(false); setTimeout(sync, 0); } });
+    doc.addEventListener("click", function (e) { if (!e.target.closest(".pg-psize")) open(false); });
+    doc.addEventListener("keydown", function (e) { if (e.key === "Escape") open(false); });
+    sync();
+  }
+  // A mock of the reader-facing theme button: it lives in the framed page's nav, next to the dark-mode toggle.
+  function mountPicker(doc) {
+    var old = doc.querySelector(".pg-pal-wrap");
+    if (old) old.remove();
+    if (state.themePicker !== "on") return;
+    var anchor = doc.querySelector("[data-theme-toggle]");
+    if (!anchor) return;
+    var wrap = doc.createElement("span"); wrap.className = "pg-pal-wrap";
+    var btn = doc.createElement("button"); btn.type = "button"; btn.className = "icon-btn"; btn.setAttribute("aria-label", "색 테마"); btn.title = "색 테마";
+    btn.innerHTML = '<svg class="ico" viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M8 1.8a6.2 6.2 0 1 0 0 12.4c.9 0 1.3-.6 1.3-1.2 0-.8-.6-1-.6-1.7 0-.6.5-1 1.1-1h1.6a2.8 2.8 0 0 0 2.8-2.8C14.2 4.4 11.4 1.8 8 1.8Z"/><circle cx="5" cy="7" r=".9" fill="currentColor" stroke="none"/><circle cx="7.6" cy="4.6" r=".9" fill="currentColor" stroke="none"/><circle cx="10.6" cy="5.6" r=".9" fill="currentColor" stroke="none"/></svg>';
+    var menu = doc.createElement("div"); menu.className = "pg-pal-menu"; menu.hidden = true; menu.setAttribute("role", "menu");
+    menu.innerHTML = '<div class="pg-pal-h">색 테마</div>';
+    state.pickerSet.split(",").filter(function (k) { return ACC[k]; }).forEach(function (k) {
+      var it = doc.createElement("button"); it.type = "button"; it.setAttribute("role", "menuitemradio");
+      it.setAttribute("aria-checked", String(state.accent === k));
+      it.innerHTML = '<i style="background:' + ACC[k].fill + '"></i>' + ACC[k].name;
+      it.addEventListener("click", function (e) { e.stopPropagation(); state.accent = k; save(); syncForm(); apply(); writeSummary(); var m = doc.querySelector(".pg-pal-menu"); if (m) m.hidden = false; });
+      menu.appendChild(it);
+    });
+    btn.addEventListener("click", function (e) { e.stopPropagation(); menu.hidden = !menu.hidden; });
+    if (!doc.pgPalBound) {
+      doc.pgPalBound = true;
+      doc.addEventListener("click", function (e) {
+        var w = doc.querySelector(".pg-pal-wrap"), m = doc.querySelector(".pg-pal-menu");
+        if (w && m && !w.contains(e.target)) m.hidden = true;
+      });
+    }
+    wrap.appendChild(btn); wrap.appendChild(menu);
+    anchor.parentNode.insertBefore(wrap, anchor);
+  }
+  frame.addEventListener("load", apply);
+
+  // ── fit the frame into the stage ───────────────────────
+  var wrap = document.getElementById("wrap"), box = document.getElementById("box");
+  function fit() {
+    var W = VPS.filter(function (v) { return v[0] === view.vp; })[0][2];
+    var aw = wrap.clientWidth - (view.vp === "mobile" ? 24 : 0), ah = wrap.clientHeight;
+    var k = Math.min(1, aw / W);
+    box.style.width = W + "px";
+    box.style.height = (ah / k) + "px";
+    box.style.transform = "translateX(-50%) scale(" + k + ")";
+    box.style.top = view.vp === "mobile" && k === 1 ? "12px" : "0";
+  }
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(wrap); else window.addEventListener("resize", fit);
+
+  // ── controls ───────────────────────────────────────────
+  function segment(el, items, key, onPick) {
+    el.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = it[1];
+      b.setAttribute("aria-pressed", String(view[key] === it[0]));
+      b.addEventListener("click", function () { view[key] = it[0]; save(); segment(el, items, key, onPick); onPick(it); });
+      el.appendChild(b);
+    });
+  }
+  function srcFor() {
+    if (FORCE_REAL) view.entry = "";
+    if (view.entry === "H") return "site/entry-H-home.html";
+    if (view.entry) return "site/entry-" + view.entry + "-" + SECTION[view.page] + ".html";
+    return (PAGES.filter(function (p) { return p[0] === view.page; })[0] || PAGES[0])[2];
+  }
+  segment(document.getElementById("pageSeg"), PAGES, "page", function () { frame.src = srcFor(); showPageItems(); });
+  segment(document.getElementById("entrySeg"), ENTRIES, "entry", function () { frame.src = srcFor(); });
+  segment(document.getElementById("vpSeg"), VPS, "vp", function () { fit(); setTimeout(apply, 60); });
+  segment(document.getElementById("modeSeg"), MODES, "mode", function () { apply(); writeSummary(); });
+  if (frame.getAttribute("src") !== srcFor()) frame.src = srcFor();
+
+  var form = document.getElementById("form");
+  function swatch(k) { return ACC[k].fill; }
+  var DECIDED = { "글꼴": 1, "영역 구분": 1, "색 테마 선택": 1, "색": 1, "카드와 모양": 1, "탐색 요소": 1, "아이콘과 로고": 1 };
+  var PAGE_OF = { recStyle: "home", labelCol: "home", recPhone: "home", recKind: "home", railSpot: "home", leadOrder: "home", linkSpot: "home", leadCard: "home", rowLinks: "home", hoverPhone: "home", leadSum: "home", leadRo: "home", leadFoot: "home", rowTagline: "home", rowRo: "home", rowId: "home", rowSize: "home", rowPillars: "home", rail: "home",
+    hubFacts: "paper", narrBody: "paper", narrRail: "paper", actC: "paper", actFigs: "paper",
+    scStats: "scout", scFilter: "scout", scGist: "scout", scSide: "scout", cmpFork: "cmp", cmpSize: "cmp" };
+  var PAGE_NAME = { home: "분석 목록", paper: "논문 요약", scout: "탐색", cmp: "비교" };
+  var decidedBox = document.createElement("details"); decidedBox.className = "decided";
+  decidedBox.innerHTML = '<summary>결정한 테마 항목 · ' + BASE_NAME + ' <span>펼쳐서 다시 보기</span></summary>';
+  SECTIONS.forEach(function (sec) {
+    var wrapS = document.createElement("div"); wrapS.className = "sec";
+    var h = document.createElement("h2"); h.textContent = sec[0]; wrapS.appendChild(h);
+    if (sec[0] === "정보량") {
+      var df = document.createElement("div"); df.className = "presets"; df.setAttribute("role", "group"); df.setAttribute("aria-label", "정보량 단계");
+      DENSITY.forEach(function (d) {
+        var b = document.createElement("button"); b.type = "button"; b.className = "preset dens"; b.dataset.id = d[0];
+        b.innerHTML = "<b>" + d[0] + "</b><span>" + d[1] + "</span>";
+        b.addEventListener("click", function () { Object.assign(state, d[2]); save(); syncForm(); apply(); writeSummary(); });
+        df.appendChild(b);
+      });
+      wrapS.appendChild(df);
+      var dn = document.createElement("p"); dn.className = "pnote"; dn.textContent = "단계를 고르면 아래 항목이 한꺼번에 바뀝니다. 그다음 항목별로 하나씩 되살리거나 숨겨 보세요. 페이지 구조는 그대로입니다."; wrapS.appendChild(dn);
+    }
+    if (sec[0] === "영역 구분") {
+      var pf = document.createElement("div"); pf.className = "presets"; pf.setAttribute("role", "group"); pf.setAttribute("aria-label", "영역 구분 안");
+      PRESETS.forEach(function (pr) {
+        var b = document.createElement("button"); b.type = "button"; b.className = "preset"; b.dataset.id = pr[0];
+        b.innerHTML = "<b>" + pr[0] + "</b><span>" + pr[1] + "</span>";
+        if (pr[2].strength) b.title = "그라데이션 세기도 진하게로 바꿉니다";
+        b.addEventListener("click", function () { Object.assign(state, pr[2]); save(); syncForm(); apply(); writeSummary(); });
+        pf.appendChild(b);
+      });
+      wrapS.appendChild(pf);
+      var note = document.createElement("p"); note.className = "pnote"; note.textContent = "A–F는 색과 선으로, G–J는 형태로 나눈 안입니다. 안을 고르면 아래 항목이 함께 바뀌고, 그다음 항목별로 따로 바꿔도 됩니다."; wrapS.appendChild(note);
+    }
+    sec[1].forEach(function (g) {
+      var key = g[0], fs = document.createElement("fieldset"); fs.className = "grp"; fs.dataset.key = key;
+      if (PAGE_OF[key]) fs.dataset.pg = PAGE_OF[key];
+      var lg = document.createElement("legend");
+      lg.innerHTML = '<span class="dot" aria-hidden="true"></span>' + g[1] + (g[2] ? ' <span class="hint">' + g[2] + "</span>" : "");
+      fs.appendChild(lg);
+      var opts = document.createElement("div"); opts.className = "opts";
+      g[3].forEach(function (o) {
+        var id = "o-" + key + "-" + o[0].replace(/\W/g, "_");
+        var lb = document.createElement("label"); lb.className = "opt" + (g[4] === "font" ? " font" : ""); lb.htmlFor = id;
+        var inp = document.createElement("input"); inp.type = g[4] === "multi" ? "checkbox" : "radio"; inp.name = key; inp.value = o[0]; inp.id = id;
+        var sp = document.createElement("span");
+        if (g[4] === "swatch" || g[4] === "multi") { var sw = document.createElement("i"); sw.className = "sw"; sw.style.background = swatch(o[0]); sp.appendChild(sw); }
+        if (g[4] === "font") sp.style.fontFamily = FONT[o[0]][1];
+        sp.appendChild(document.createTextNode(o[1]));
+        if (g[4] !== "multi" && DEFAULT[key] === o[0]) { var d = document.createElement("small"); d.className = "def"; d.textContent = "기본"; sp.appendChild(d); }
+        lb.appendChild(inp); lb.appendChild(sp); opts.appendChild(lb);
+      });
+      fs.appendChild(opts); wrapS.appendChild(fs);
+    });
+    (DECIDED[sec[0]] ? decidedBox : form).appendChild(wrapS);
+  });
+  form.appendChild(decidedBox);
+  // the items each locked copy keeps, beyond the 정보량 items tagged with its page
+  var GROUP_PAGES = { pageBg: ["home", "paper", "scout", "scout2", "cmp"], homeBgAmt: ["front"], homeBgMove: ["front"], homeMascotKind: ["front"], homeMascot: ["front"], homeEnter: ["front"], homePlInfo: ["front"], homeBg: ["front"], homeLine: ["front"], navMark: ["front", "home", "paper", "scout", "scout2", "cmp"], homeTop: ["front"], homeOrder: ["front"], homeFill: ["front"], homeNames: ["front"], pillarMode: ["front", "home", "paper", "scout2"], decisionLevel: ["front", "home", "paper", "scout2"],
+    pillarNav: ["front", "home", "paper", "scout", "scout2", "cmp"], shelfBadge: ["front", "home", "paper", "scout", "scout2", "cmp"], tocActive: ["paper"] };
+  var PAGE_LABEL = { front: "첫 화면", home: "분석 목록", paper: "논문", scout: "탐색 (지금)", scout2: "탐색 새 시안", cmp: "비교" };
+  if (LOCK) {
+    view.page = LOCK;
+    document.getElementById("pageSeg").hidden = true;
+    document.querySelector(".head h1").textContent = "PROBE 조율실 · " + PAGE_LABEL[LOCK];
+    [].slice.call(form.querySelectorAll(".grp")).forEach(function (fs) {
+      if (fs.closest(".decided")) return;
+      var k = fs.dataset.key, keep = PAGE_OF[k] === LOCK || (GROUP_PAGES[k] || []).indexOf(LOCK) >= 0;
+      if (!keep) fs.remove();
+    });
+    [].slice.call(form.querySelectorAll(":scope > .sec")).forEach(function (sec) { if (!sec.querySelector(".grp")) sec.remove(); });
+  }
+  var pageNote = document.createElement("p"); pageNote.className = "pgnote";
+  var densSec = form.querySelector(":scope > .sec"); if (densSec) densSec.insertBefore(pageNote, densSec.querySelector(".grp"));
+  function showPageItems() {
+    if (LOCK) { form.dataset.page = PAGE_NAME[LOCK] ? LOCK : "none"; pageNote.textContent = "이 조율실은 " + PAGE_LABEL[LOCK] + " 페이지만 다룹니다. 다른 페이지는 각자의 조율실에서 보세요."; return; }
+    var pgk = PAGE_NAME[view.page] ? view.page : "";
+    form.dataset.page = pgk;
+    pageNote.textContent = pgk ? "지금 보고 있는 " + PAGE_NAME[pgk] + " 페이지 항목만 보입니다. 위쪽에서 페이지를 바꾸면 그 페이지 항목으로 바뀝니다." : "이 페이지에는 정보량 항목이 없습니다. 위쪽에서 분석·논문·탐색·비교 중 하나를 고르세요.";
+  }
+  function syncForm() {
+    Object.keys(state).forEach(function (k) {
+      if (k === "pickerSet") {
+        var on = state[k].split(",");
+        form.querySelectorAll('input[name="pickerSet"]').forEach(function (c) { c.checked = on.indexOf(c.value) >= 0; });
+      } else {
+        var inp = form.querySelector('input[name="' + k + '"][value="' + state[k] + '"]');
+        if (inp) inp.checked = true;
+      }
+      var fs = form.querySelector('fieldset[data-key="' + k + '"]');
+      if (fs) fs.classList.toggle("changed", state[k] !== DEFAULT[k]);
+    });
+    PRESETS.forEach(function (pr) {
+      var on = Object.keys(pr[2]).every(function (k) { return state[k] === pr[2][k]; });
+      var b = form.querySelector('.preset:not(.dens)[data-id="' + pr[0] + '"]'); if (b) b.setAttribute("aria-pressed", String(on));
+    });
+    DENSITY.forEach(function (d) {
+      var on = Object.keys(d[2]).every(function (k) { return state[k] === d[2][k]; });
+      var b = form.querySelector('.preset.dens[data-id="' + d[0] + '"]'); if (b) b.setAttribute("aria-pressed", String(on));
+    });
+  }
+  form.addEventListener("change", function (e) {
+    if (!(e.target.name in state)) return;
+    if (e.target.type === "checkbox") {
+      var picked = [].slice.call(form.querySelectorAll('input[name="' + e.target.name + '"]:checked')).map(function (c) { return c.value; });
+      if (!picked.length) { e.target.checked = true; return; }
+      state[e.target.name] = picked.join(",");
+    } else state[e.target.name] = e.target.value;
+    save(); syncForm(); writeSummary();
+    if (/^(pillarMode|decisionLevel|pillarNav|shelfBadge|homeMascot|homeEnter|homePlInfo|homeBg|homeBgAmt|homeBgMove|homeLine|homeMascotKind|leadCard|rowLinks|pageBg|linkSpot|railSpot|recKind|recStyle)$/.test(e.target.name)) frame.src = frame.getAttribute("src"); else apply();
+  });
+
+  // ── summary ────────────────────────────────────────────
+  var summary = document.getElementById("summary"), diff = document.getElementById("diff");
+  function optLabel(key, val) {
+    for (var i = 0; i < SECTIONS.length; i++) for (var j = 0; j < SECTIONS[i][1].length; j++) {
+      var g = SECTIONS[i][1][j];
+      if (g[0] === key && g[4] === "multi") return [g[1], val.split(",").map(function (v) { var o = g[3].filter(function (x) { return x[0] === v; })[0]; return o ? o[1] : v; }).join(", ")];
+      if (g[0] === key) { var o = g[3].filter(function (x) { return x[0] === val; })[0]; return [g[1], o ? o[1] : val]; }
+    }
+    return [key, val];
+  }
+  function writeSummary() {
+    if (LOCK) {
+      var ls = ["PROBE 테마 설정 · " + PAGE_LABEL[LOCK] + " (" + BASE_NAME + " 기준)"], ch = [];
+      SECTIONS.forEach(function (sec) {
+        var gs = sec[1].filter(function (g) { var fs = form.querySelector('fieldset[data-key="' + g[0] + '"]'); return fs && !fs.closest(".decided"); });
+        if (!gs.length) return;
+        ls.push("", "[" + sec[0] + "]");
+        gs.forEach(function (g) { var l = optLabel(g[0], state[g[0]]), mark = state[g[0]] !== DEFAULT[g[0]]; if (mark) ch.push(l[0]); ls.push((mark ? "* " : "- ") + l[0] + ": " + l[1]); });
+      });
+      var dl = [];
+      SECTIONS.forEach(function (sec) { if (!DECIDED[sec[0]]) return; sec[1].forEach(function (g) { if (state[g[0]] !== DEFAULT[g[0]]) { var l = optLabel(g[0], state[g[0]]); ch.push(l[0]); dl.push("* " + l[0] + ": " + l[1]); } }); });
+      if (dl.length) { ls.push("", "[결정한 테마 항목에서 바꾼 것]"); ls.push.apply(ls, dl); }
+      ls.push("", "* 표시는 " + BASE_NAME + "에서 바꾼 항목");
+      summary.value = ls.join("\n");
+      diff.innerHTML = ch.length ? BASE_NAME + "에서 <b>" + ch.length + "개</b> 바꿈 · " + ch.join(", ") : BASE_NAME + " 그대로입니다";
+      return;
+    }
+    var lines = ["PROBE 테마 설정 (" + BASE_NAME + " 기준)"], changed = [];
+    var later = [];
+    SECTIONS.forEach(function (sec) {
+      if (DECIDED[sec[0]]) {
+        sec[1].forEach(function (g) {
+          var l = optLabel(g[0], state[g[0]]);
+          if (state[g[0]] !== DEFAULT[g[0]]) { changed.push(l[0]); later.push("* " + l[0] + ": " + l[1]); }
+        });
+        return;
+      }
+      var loose = sec[1].filter(function (g) { return !PAGE_OF[g[0]]; });
+      if (loose.length) {
+        lines.push("", "[" + sec[0] + "]");
+        loose.forEach(function (g) {
+          var l = optLabel(g[0], state[g[0]]), mark = state[g[0]] !== DEFAULT[g[0]];
+          if (mark) changed.push(l[0]);
+          lines.push((mark ? "* " : "- ") + l[0] + ": " + l[1]);
+        });
+      }
+      ["home", "paper", "scout", "cmp"].forEach(function (pk) {
+        var gs = sec[1].filter(function (g) { return PAGE_OF[g[0]] === pk; });
+        if (!gs.length) return;
+        lines.push("", "[정보량 · " + PAGE_NAME[pk] + "]");
+        gs.forEach(function (g) {
+          var l = optLabel(g[0], state[g[0]]), mark = state[g[0]] !== DEFAULT[g[0]];
+          if (mark) changed.push(l[0]);
+          lines.push((mark ? "* " : "- ") + l[0] + ": " + l[1]);
+        });
+      });
+    });
+    if (later.length) lines.push("", "[결정한 테마 항목에서 바꾼 것]").concat ? lines.push.apply(lines, later) : null;
+    lines.push("", "* 표시는 " + BASE_NAME + "에서 바꾼 항목");
+    summary.value = lines.join("\n");
+    diff.innerHTML = changed.length ? BASE_NAME + "에서 <b>" + changed.length + "개</b> 바꿈 · " + changed.join(", ") : BASE_NAME + " 그대로입니다";
+  }
+
+  document.getElementById("reset").addEventListener("click", function () {
+    state = Object.assign({}, DEFAULT); save(); syncForm(); apply(); writeSummary(); toast(BASE_NAME + "로 되돌렸습니다");
+  });
+  var toastEl = document.getElementById("toast"), tt;
+  function toast(m) { toastEl.textContent = m; clearTimeout(tt); tt = setTimeout(function () { toastEl.textContent = ""; }, 2600); }
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = summary.value;
+    var done = function () { toast("설정을 복사했습니다. 대화창에 붙여 넣어 주세요"); };
+    var fallback = function () { summary.focus(); summary.select(); toast("아래 글을 선택해 두었습니다. 직접 복사해 주세요"); };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  showPageItems(); syncForm(); writeSummary(); fit(); apply();
+})();
+</script>
