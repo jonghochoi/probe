@@ -349,3 +349,47 @@ home = f'''<main class="hm" id="main">
 </main>'''
 (OUT / "home.html").write_text(shell(None, home))
 print("home v2 ok")
+
+
+# ── comparison and shelf, redrawn in the scouting page's and the list's grammar ──
+PAPERS = {p["id"]: {"alias": p.get("alias") or p["id"], "title": p.get("title", ""), "tagline": p.get("tagline", ""),
+                    "date": p.get("date", ""), "pillars": list(p.get("pillars") or [])} for p in corpus["papers"]}
+CMPS = [{"slug": c["slug"], "title": c["title"], "tagline": c.get("tagline", ""), "common": c.get("common", ""),
+         "date": c.get("date", ""), "pillars": c.get("pillars", []),
+         "papers": [{"id": i, "alias": PAPERS.get(i, {}).get("alias", i), "stance": s}
+                    for i, s in zip(c.get("compares", []), c.get("stances", []))]} for c in corpus["comparisons"]]
+CMPS.sort(key=lambda c: c["date"], reverse=True)
+PL_LABEL = {k: v["label"] for k, v in PILL.items()}
+
+
+def mast(eyebrow, title):
+    return (f'<header class="mast"><div class="mast-inner"><div class="mast-text"><p class="mast-eyebrow">{eyebrow}</p>'
+            f'<div class="mast-line"><h1>{title}</h1></div></div></div></header>')
+
+
+cmp_body = mast("Side by side", "비교, 갈리는 자리만 봅니다") + f'''
+<main class="sn nx" id="main"><section class="sn-run" id="nx-root" aria-live="polite"></section></main>
+<script>window.NX_KIND = "cmp"; window.NX_CMPS = {json.dumps(CMPS, ensure_ascii=False)}; window.NX_PILLARS = {json.dumps(PL_LABEL, ensure_ascii=False)};</script>
+<script src="assets/next-pages.js"></script>
+'''
+(OUT / "cmp-new.html").write_text(shell("c/index.html", cmp_body))
+
+# a sample shelf, shown only when the playground asks for it, so nothing is written into the reader's own storage
+_recent = sorted(PAPERS, key=lambda i: PAPERS[i]["date"], reverse=True)
+SAMPLE = {
+    "stars": {i: {"at": f"2026-11-{15 - n:02d}T09:00:00Z"} for n, i in enumerate(_recent[:5])},
+    "marks": {_recent[1]: {"anchor": "s2", "label": "2. 무엇을 바꿨나", "at": "2026-11-14T21:10:00Z"},
+              _recent[6]: {"anchor": "s4", "label": "4. 결과는 어디까지인가", "at": "2026-11-12T08:30:00Z"}},
+    "memos": {_recent[0]: {"body": "촉각 토큰을 얼린 인코더에서 그대로 쓰는 부분 — 우리 정책에도 바로 붙여 볼 만함. 실기 과제 수가 적은 점은 확인.",
+                           "updatedAt": "2026-11-15T10:20:00Z", "published": None},
+              _recent[3]: {"body": "기준선 표에서 π0.5 수치가 본문과 다름. 원문 표 3과 대조할 것.",
+                           "updatedAt": "2026-11-11T17:45:00Z", "published": {"url": "#"}}},
+    "reads": {i: {"at": "2026-11-13T12:00:00Z"} for i in _recent[2:4]},
+}
+shelf_body = mast("Kept in this browser", "서재, 이 브라우저에만 남습니다") + f'''
+<main class="sn nx" id="main"><section class="sn-run" id="nx-root" aria-live="polite"></section></main>
+<script>window.NX_KIND = "shelf"; window.NX_PAPERS = {json.dumps(PAPERS, ensure_ascii=False)}; window.NX_SAMPLE = {json.dumps(SAMPLE, ensure_ascii=False)}; window.NX_PILLARS = {json.dumps(PL_LABEL, ensure_ascii=False)};</script>
+<script src="assets/next-pages.js"></script>
+'''
+(OUT / "shelf-new.html").write_text(shell("shelf/index.html", shelf_body))
+print("cmp/shelf ok", len(CMPS))

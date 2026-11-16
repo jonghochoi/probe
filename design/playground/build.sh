@@ -18,7 +18,7 @@ rm -rf "$out/site"
 cp -r "$out/base" "$out/site"
 
 # the mock assets, the track mascots, and the pages the playground adds
-cp "$here/scout-new.css" "$here/scout-new.js" "$here/row-links.json" "$out/site/assets/"
+cp "$here/scout-new.css" "$here/scout-new.js" "$here/next-pages.js" "$here/row-links.json" "$out/site/assets/"
 mkdir -p "$out/site/assets/mascots"
 cp assets/probe-*.svg "$out/site/assets/mascots/"
 python3 "$here/gen-pages.py" "$out/base" "$out/site"
@@ -28,7 +28,7 @@ sed -i 's#<button type="button" data-size="0" aria-pressed="false">전체</butto
 
 # one copy per page: the copy shows that page and only that page's options
 cp "$here/playground.html" "$out/playground.html"
-for pair in "front:첫 화면" "home:분석 목록" "paper:논문" "scout:탐색 (지금)" "scout2:탐색 새 시안" "cmp:비교"; do
+for pair in "front:첫 화면" "home:분석 목록" "paper:논문" "scout:탐색 (지금)" "scout2:탐색 새 시안" "cmp:비교" "cmp2:비교 새 시안" "shelf2:서재 새 시안"; do
   key="${pair%%:*}"; label="${pair#*:}"
   sed -e "1s#<title>PROBE 테마 조율실</title>#<title>PROBE 조율실 $label</title>#" \
       -e "s#  var LOCK = \"\"; // set per copy#  var LOCK = \"$key\"; // set per copy#" \
