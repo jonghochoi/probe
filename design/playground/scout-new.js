@@ -206,8 +206,19 @@
     var check = d.querySelector(".sc-check");
     return { steps: steps, axes: axes, checks: check ? [].map.call(check.querySelectorAll(":scope > ul > li"), inner) : [], links: inner(d.querySelector(".sc-links")) };
   }
-  function renderDetail(html) {
-    var how = opt("detailStyle", "brief");
+  // a lead line that only announces its bullets, or that restates the header's one-liner, is left out
+  var words = function (t) { return (String(t).replace(/<[^>]+>/g, "").match(/[가-힣A-Za-z0-9]{2,}/g) || []); };
+  function trimFields(fields, gist) {
+    var gw = words(gist);
+    return fields.map(function (f) {
+      var plain = f.lead.replace(/<[^>]+>/g, "").trim(), lw = words(plain), shared = gw.filter(function (w) { return lw.indexOf(w) >= 0; }).length;
+      var filler = f.items.length && plain.length < 22, repeat = gw.length && shared >= Math.max(2, Math.ceil(gw.length / 2));
+      return { label: f.label, lead: filler || repeat ? "" : f.lead, items: f.items };
+    });
+  }
+  function renderDetail(html, ctx) {
+    ctx = ctx || {};
+    var how = opt("detailStyle", "tabs4");
     if (how === "site") return '<div class="sc-body">' + html + "</div>";
     var D = parseDetail(html);
     var list = function (items) { return items.length ? "<ul>" + items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>" : ""; };
@@ -224,6 +235,32 @@
       return '<div class="dx dx-brief"><section class="dx-glance"><h4 class="dx-h">한눈에</h4><dl>' + glance + "</dl></section>" + axes + checks +
         D.steps.map(function (st, i) { return '<details class="dx-more"' + (i ? "" : "") + "><summary><b>" + st.name + "</b><span>" + st.fields.map(function (f) { return f.label; }).join(" · ") + "</span></summary>" + st.fields.map(field).join("") + "</details>"; }).join("") + foot + "</div>";
     }
+    var byLabel = {}; D.steps.forEach(function (st) { trimFields(st.fields, ctx.gist).forEach(function (f) { byLabel[f.label.replace(/\s/g, "")] = f; }); });
+    var fieldsOf = function (labels) { return labels.map(function (l) { return byLabel[l.replace(/\s/g, "")]; }).filter(Boolean); };
+    var tabbed = function (cls, tabs) {
+      tabs = tabs.filter(function (t) { return t.body; });
+      return '<div class="dx dx-tabs ' + cls + '"><div class="dx-tabbar" role="tablist">' + tabs.map(function (t, i) {
+        return '<button type="button" role="tab" data-dx-tab="' + t.key + '" aria-selected="' + (i === 0) + '">' + t.name + (t.n ? '<span class="dx-tn">' + t.n + "</span>" : "") + "</button>";
+      }).join("") + "</div>" + tabs.map(function (t, i) { return '<div class="dx-pane' + (t.cls ? " " + t.cls : "") + '" data-dx-pane="' + t.key + '"' + (i ? " hidden" : "") + ">" + t.body + "</div>"; }).join("") + foot + "</div>";
+    };
+    var folded = function (f) {
+      var more = f.items.length ? '<details class="dx-fold"><summary>' + (f.lead ? "자세히" : f.items.length + "가지") + '<span class="dx-tn">' + f.items.length + "</span></summary>" + list(f.items) + "</details>" : "";
+      return '<div class="dx-f"><b class="dx-l">' + f.label + '</b><div class="dx-c">' + (f.lead ? '<p class="dx-lead">' + f.lead + "</p>" : "") + more + "</div></div>";
+    };
+    var axesBody = D.axes.map(axisHtml).join(""), checkBody = D.checks.length ? '<div class="dx-check">' + list(D.checks) + "</div>" : "";
+    var usBody = (axesBody ? '<h4 class="dx-h">연구 축별 시사점</h4>' + axesBody : "") + (checkBody ? '<h4 class="dx-h dx-h2">먼저 확인할 점</h4>' + checkBody : "");
+    if (how === "tabs4") return tabbed("dx-t4", [
+      { key: "q", name: "문제", body: fieldsOf(["문제", "기존 한계"]).map(field).join("") },
+      { key: "m", name: "방법", body: fieldsOf(["핵심 방법", "차별점"]).map(field).join("") },
+      { key: "r", name: "결과", body: fieldsOf(["핵심 기여", "가치"]).map(field).join("") },
+      { key: "u", name: "우리에게", n: D.checks.length ? String(D.checks.length) : "", body: usBody }]);
+    if (how === "tabs2") return tabbed("dx-t2", [
+      { key: "u", name: "판단", n: D.checks.length ? String(D.checks.length) : "", body: usBody },
+      { key: "b", name: "요지", body: D.steps.map(function (st) { return '<section class="dx-step"><h4 class="dx-sh">' + st.name + "</h4>" + fieldsOf(st.fields.map(function (f) { return f.label; })).map(folded).join("") + "</section>"; }).join("") }]);
+    if (how === "tabsfig") return tabbed("dx-tf", [
+      { key: "o", name: "개요", body: (ctx.fig || "") + '<dl class="dx-glance-l">' + fieldsOf(["문제", "핵심 방법", "가치"]).filter(function (f) { return f.lead; }).map(function (f) { return "<dt>" + f.label + "</dt><dd>" + f.lead + "</dd>"; }).join("") + "</dl>" },
+      { key: "d", name: "방법 · 결과", body: fieldsOf(["기존 한계", "핵심 방법", "차별점", "핵심 기여"]).map(field).join("") },
+      { key: "u", name: "우리에게", n: D.checks.length ? String(D.checks.length) : "", body: usBody }]);
     if (how === "tabs") {
       var T = [["brief", "요지", D.steps.length], ["axes", "시사점", D.axes.length], ["check", "확인할 점", D.checks.length]].filter(function (t) { return t[2]; });
       return '<div class="dx dx-tabs"><div class="dx-tabbar" role="tablist">' + T.map(function (t, i) { return '<button type="button" role="tab" data-dx-tab="' + t[0] + '" aria-selected="' + (i === 0) + '">' + t[1] + "</button>"; }).join("") + "</div>" +
@@ -251,7 +288,8 @@
     var head = '<p class="sn-chips">' + it.picks.map(function (k) { return chip(k[0], k[1]); }).join("") + "</p>" +
       '<a class="sn-id" href="https://arxiv.org/abs/' + esc(it.id) + '" target="_blank" rel="noopener">arXiv ' + esc(it.id) + " ↗</a>";
     var f = FIGS[id], figBlock = f ? '<figure class="sn-dt-fig"><img src="' + esc(f.src) + '" alt=""><figcaption>' + esc(f.caption) + "<span>" + esc(f.source) + "</span></figcaption></figure>" : "";
-    var box = figBlock + '<div class="sn-dt-body sc-body-host"><p class="sn-dt-wait">불러오는 중…</p></div>';
+    var figInTab = opt("detailStyle", "tabs4") === "tabsfig";
+    var box = (figInTab ? "" : figBlock) + '<div class="sn-dt-body sc-body-host"><p class="sn-dt-wait">불러오는 중…</p></div>';
     if (opt("detail", "drawer") === "inline" && host) {
       var anchor = host;
       if (host.classList.contains("sn-card")) { var top = host.offsetTop; [].forEach.call(host.parentNode.children, function (c) { if (c.classList.contains("sn-card") && c.offsetTop === top) anchor = c; }); }
@@ -269,7 +307,7 @@
     }
     detailFor(selected, id, function (html) {
       var b = document.querySelector(".sn-dt-body"); if (!b) return;
-      b.innerHTML = html ? renderDetail(html) : '<p class="sn-dt-wait">이 논문은 회차 리포트에 세부 내용이 없습니다.</p>';
+      b.innerHTML = html ? renderDetail(html, { gist: it.gist || "", fig: figInTab ? figBlock : "" }) : '<p class="sn-dt-wait">이 논문은 회차 리포트에 세부 내용이 없습니다.</p>';
     });
   }
 

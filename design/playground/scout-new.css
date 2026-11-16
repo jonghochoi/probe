@@ -684,3 +684,17 @@ p.nx-cm { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-hei
 .sn-dw.is-page .sn-dw-h { border-bottom: 0; padding-top: 1.6rem; }
 .sn-dw.is-page .sn-dt-fig { margin-top: .4rem; }
 @media (max-width: 680px) { .sn-dw.is-page .sn-dw-p { top: 0; border-radius: 0; } .sn-dw.is-page .sn-dw-h { border-radius: 0; } }
+/* tab variants: a count beside a tab name, folded bullets, the figure inside the first tab */
+.dx-tn { margin-left: .35rem; padding: 0 .38rem; border-radius: 999px; font-size: var(--fs-3xs); font-weight: 700; color: var(--orange-ink); background: var(--orange-soft); }
+.dx-h2 { margin-top: 1rem; }
+.dx-pane { padding-top: .5rem; }
+.dx-fold { margin-top: .15rem; }
+.dx-fold > summary { display: inline-flex; align-items: center; cursor: pointer; list-style: none; font-size: var(--fs-2xs); font-weight: 600; color: var(--orange-ink); }
+.dx-fold > summary::-webkit-details-marker { display: none; }
+.dx-fold > summary::after { content: "›"; margin-left: .3rem; transition: transform .15s; }
+.dx-fold[open] > summary::after { transform: rotate(90deg); }
+.dx-tf .sn-dt-fig { margin: .2rem 0 .8rem; }
+.dx-glance-l { margin: 0; display: grid; grid-template-columns: 5.6rem minmax(0, 1fr); gap: .45rem 1rem; }
+.dx-glance-l dt { font-size: var(--fs-xs); font-weight: 700; color: var(--orange-ink); padding-top: .12rem; }
+.dx-glance-l dd { margin: 0; color: var(--text); }
+@media (max-width: 680px) { .dx-glance-l { grid-template-columns: minmax(0, 1fr); gap: .1rem; } .dx-glance-l dd { margin-bottom: .45rem; } .dx-tabbar { overflow-x: auto; scrollbar-width: none; } .dx-tabbar button { flex: none; } }

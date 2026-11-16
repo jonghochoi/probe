@@ -139,7 +139,7 @@ def scout_fig(pid):
     src, cap = max(enumerate(figs), key=rank)[1]
     out = thumb(urljoin(f"https://arxiv.org/html/{pid}", src), f"s-{pid}")
     num = re.match(r"((?:Figure|Fig\.?)\s*\d+)", cap)
-    return pid, out and {"src": out, "caption": re.sub(r"^(Figure|Fig\.?)\s*\d+\s*[:.]?\s*", "", cap)[:400],
+    return pid, out and {"src": out, "caption": re.sub(r"^(Figure|Fig\.?)\s*\d+\s*[:.]?\s*", "", cap),
                          "source": (num.group(1).replace("Fig.", "Figure") if num else "Figure") + ", arXiv 원문"}
 
 
