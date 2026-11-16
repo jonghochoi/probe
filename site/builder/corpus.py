@@ -10,6 +10,7 @@ One rewrite per file, `analysis/<arxiv-id>.md` — flat, no per-paper folder.
 
 from __future__ import annotations
 
+import json
 import math
 import re
 import subprocess
@@ -64,7 +65,7 @@ PILLAR_NAMES = {
     "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",
 }
-# What every reader-facing surface prints for an axis — the rail facet and the
+# What every reader-facing surface prints for an axis — the axis-line chip and the
 # `연구 축별` separator. Short enough to sit on one line in a 13.5rem column,
 # and the axis as a reader would name it rather than as the pillar file titles
 # it. Its keys are PILLAR_NAMES's; the build refuses to start on a mismatch, so
@@ -85,8 +86,8 @@ PILLAR_RE = re.compile(r"\b(?:%s)\b" % "|".join(map(re.escape, PILLAR_NAMES)))
 # How many of a rewrite's declared pillars the site files it under. Front
 # matter lists them most relevant first, and a paper that names four axes has
 # named the two it is about and two more it touches. Every surface that counts,
-# prints or filters on an axis reads exactly this many, so the number the rail
-# prints beside an axis is the number of papers clicking it returns.
+# prints or filters on an axis reads exactly this many, so the number the axis
+# line prints beside an axis is the number of papers clicking it returns.
 FILED_PILLARS = 2
 
 # Link kind → (label, sort rank). THE single source for the resource links'
@@ -110,7 +111,7 @@ LINK_KINDS = {
 # 최근 means the order the rewrites appeared on the site, and that is the order
 # their files landed on `main` — not the clock `generated:` recorded. A rewrite
 # written on Monday and merged on Friday shows up after everything merged
-# before it, and the landing page has to agree with what the reader watched
+# before it, and the analysis list has to agree with what the reader watched
 # happen. History here is squash-merged, so the commit that lands
 # `analysis/<id>.md` is one commit and git's own walk order is the merge order.
 #
@@ -268,7 +269,7 @@ class Paper:
         rewrites of equal rank, and the arXiv id descending settles the rest.
         Both tie-breaks are load-bearing: without them equal rows fall back to
         discovery order — `sorted(glob(...))`, i.e. arXiv id *ascending* — so
-        the oldest id takes the lead block and nothing displaces it.
+        the oldest id heads the list and nothing displaces it.
         """
         return (self.landing.rank if self.landing else 0, self.generated_at, self.stem)
 
@@ -370,7 +371,7 @@ class Paper:
 
     @property
     def preview(self) -> str:
-        """The summary flattened for the landing card and `<meta>`."""
+        """The summary flattened for the page's `<meta>` description."""
         return _plain(self.front.get("summary", ""))
 
     @property
@@ -385,7 +386,7 @@ class Paper:
 
     @property
     def search_hay(self) -> str:
-        """Everything the landing filter may match, compacted (`HAY_MAX` cap)."""
+        """Everything the analysis list's filter may match, compacted (`HAY_MAX` cap)."""
         return _haystack(_fragments(self))
 
 
@@ -466,7 +467,7 @@ def _plain(md: str, limit: int = 240) -> str:
 
 
 # ── Search haystack ─────────────────────────────────────────────────────────
-# What the landing filter can match a query against. The card preview is 240
+# What the analysis list's filter can match a query against. The card preview is 240
 # clamped characters — a preview, not an index — so a reader searching for a
 # term the rewrite spends a whole section on finds nothing. The haystack is
 # built instead from the parts of a rewrite that *name* things: headings, term
@@ -548,7 +549,7 @@ def _haystack(fragments: list[str]) -> str:
 def discover(partial: bool = False) -> tuple[list[Paper], list[str]]:
     """Every `analysis/<id>.md`, plus the problems found reading them.
 
-    `partial` says the build is a subset (`--only`). Its landing page lists
+    `partial` says the build is a subset (`--only`). Its analysis list lists
     only that subset and is never the one deployed, so a merge order it cannot
     read is not a defect in what it builds: the missing history is printed as
     a note rather than reported as a problem, and `--strict` judges the pages
@@ -630,10 +631,10 @@ def discover(partial: bool = False) -> tuple[list[Paper], list[str]]:
         papers.append(paper)
 
     if papers and no_history:
-        line = (f"analysis/: {no_history} — the landing page orders by `generated:` "
+        line = (f"analysis/: {no_history} — the analysis list orders by `generated:` "
                 f"instead of by the order the rewrites landed")
         if partial:
-            print(f"note: {line} (a partial build's landing page is never published)",
+            print(f"note: {line} (a partial build's analysis list is never published)",
                   file=sys.stderr)
         else:
             problems.append(line)
@@ -641,8 +642,8 @@ def discover(partial: bool = False) -> tuple[list[Paper], list[str]]:
 
 
 # ── Tagline ─────────────────────────────────────────────────────────────────
-# The tagline prints directly under the title — on the landing row, on the lead
-# block and on the paper page's masthead. The title is right there, so a
+# The tagline prints directly under the title — on the analysis list's row and on the
+# paper page's masthead. The title is right there, so a
 # tagline that opens by naming the paper again spends its one line saying what
 # the line above it already said, and the pair reads as a stutter.
 
@@ -743,6 +744,53 @@ def figure_urls(body: str) -> dict[str, str]:
         if fid and url:
             out.setdefault(fid.group(1).strip(), url.group(1).strip())
     return out
+
+
+# Which of a rewrite's figures stands for the paper on the list: an overview or
+# architecture figure over a results chart. The words are read off the opening
+# of each caption, where a figure says what it is; an appendix figure never
+# stands for the paper, and the method sections and Figures 1–3 lean ahead.
+_FIG_POS = ("개요", "구조", "아키텍처", "파이프라인", "프레임워크", "전체 구성", "전체 흐름", "모듈",
+            "overview", "architecture", "pipeline", "framework")
+_FIG_NEG = ("성공률", "그래프", "곡선", "결과", "비교", "ablation", "절제", "분포", "표준편차", "오차",
+            "정확도", "실험", "scaling", "스케일링", "시각화", "예시", "사례", "실패", "실기 구성",
+            "롤아웃", "분석")
+
+
+def main_figure(body: str) -> dict | None:
+    """The one figure the list previews for a paper — `{url, caption, source}`.
+
+    Taken from the body's `probe-figure` fences, so the preview hotlinks the
+    URL the page itself shows. None when the rewrite declares no figure.
+    """
+    figs = []
+    for block in re.findall(r"```probe-figure\n(.*?)```", body, re.S):
+        try:
+            d = json.loads(block)
+        except ValueError:
+            continue
+        if d.get("url"):
+            figs.append(d)
+    if not figs:
+        return None
+
+    def score(item):
+        i, d = item
+        cap, src, fid = d.get("caption", ""), d.get("source", ""), d.get("id", "")
+        low = cap.lower()
+        s = (sum(3 for k in _FIG_POS if k in low[:90]) + sum(1 for k in _FIG_POS if k in low)
+             - sum(2 for k in _FIG_NEG if k in low[:90]))
+        m = re.search(r"figure\s*(\d+)", src, re.I)
+        s += {1: 1, 2: 2, 3: 1}.get(int(m.group(1)) if m else 99, 0)
+        sec = re.search(r"§\s*(\d+)", src)
+        if sec and sec.group(1) in ("2", "3", "4"):
+            s += 1
+        if re.search(r"부록|appendix", src, re.I) or re.search(r"\.A\d|^A\d|Pt0\.A", fid):
+            s -= 4
+        return (s, -i)
+
+    best = max(enumerate(figs), key=score)[1]
+    return {"url": best["url"], "caption": best.get("caption", "").strip(), "source": best.get("source", "").strip()}
 
 
 def figure_sources(body: str) -> dict[str, str]:

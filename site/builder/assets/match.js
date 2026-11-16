@@ -1,9 +1,9 @@
 /* The one rule both search surfaces match a query with.
  *
- * Two surfaces ask the same question of the same corpus — the landing's filter
+ * Two surfaces ask the same question of the same corpus — the analysis list's filter
  * box (`filter.js`) and the ⌘K palette (`palette.js`). The rule that decides
  * whether a query matches a paper lives here rather than in either of them: a
- * query that finds a paper on the landing and nothing in the palette is not two
+ * query that finds a paper on the analysis list and nothing in the palette is not two
  * behaviours, it is one bug.
  *
  * `window.ProbeMatch` rather than an export — the site ships classic scripts,

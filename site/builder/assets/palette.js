@@ -17,7 +17,7 @@
  *
  * What it searches is `window.ProbeIndex` (`assets/corpus-index.js`) — one file
  * for the whole site, so it is fetched once and cached across every page. How a
- * query is read is `match.js`, the same rule the landing's own filter box uses:
+ * query is read is `match.js`, the same rule the analysis list reads a `#q=` with:
  * the two surfaces answer the same question the same way or one of them is
  * lying.
  *
@@ -58,7 +58,7 @@ const ROOT = self ? self.src.replace(/assets\/palette\.js(\?.*)?$/, "") : "";
  * character that could have fenced them off, so a list is what keeps a query
  * from matching across the end of the title and the start of an axis.
  *
- * Where a word lands is a signal, as it is on the landing. The id and the title
+ * Where a word lands is a signal, as it is on the analysis list. The id and the title
  * are what the paper *is*; its 연구 축 are what it is filed under; the
  * tagline is what it does, in the reader's own language — and in this corpus it
  * is the only Korean any of these fields carry, so it is the field a Korean
@@ -139,7 +139,7 @@ function search(q) {
   // Every term must land — typing more narrows. But one wrong word should not
   // empty a corpus that answers the rest of the query, so when nothing matches
   // in full the bar drops to "any term" and the footer says so. Same fallback
-  // the landing's filter makes, for the same reason.
+  // the analysis list's filter makes, for the same reason.
   let kept = scored.filter((s) => s.hit === terms.length);
   const partial = !kept.length && scored.length > 0;
   if (partial) kept = scored;

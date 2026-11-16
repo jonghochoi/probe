@@ -41,19 +41,16 @@ _MODULES = _HERE / "node_modules"
 _PRETENDARD = _MODULES / "pretendard" / "dist" / "public" / "variable" / "PretendardVariable.ttf"
 _JBM = _MODULES / "jetbrains-mono" / "fonts" / "webfonts"
 _JBM_FACES = {400: "Regular", 700: "Bold"}
+# Gowun Dodum, the display and body face. Fontsource ships it as ~100 woff2
+# pieces split by character range; the pieces the corpus touches are each cut
+# to the corpus and merged back into one file, so a page still fetches one
+# shared subset rather than a range per few hundred syllables.
+_GOWUN = _MODULES / "@fontsource" / "gowun-dodum" / "files"
 
 # Characters the markup never contains because JavaScript writes them at
 # runtime. The asset sources are scanned for exactly this reason, but a string
 # built by concatenation at runtime would still slip through.
 RUNTIME_CHARS = "저장됨입력중삭제발행가져옴실패공간이가득찼습니다개편"
-
-
-# The readout face: the same JetBrains Mono files, bound to printable ASCII
-# minus the space. A metadata run like `슬립 76 % 를 23.1 ms 안에` then sets its
-# digits, units and Latin in mono while its Hangul *and its spaces* fall
-# through to Pretendard — a mono space between two proportional syllables is
-# what makes a Korean readout look letter-spaced.
-NUM_RANGE = "U+0021-007E, U+00B1, U+00D7, U+2190-2193"
 
 
 def _face(family: str, url: str, weight: str, fmt: str = "woff2",
@@ -125,6 +122,49 @@ def subset_mono(weight: int, charset: set[str]) -> bytes | None:
     return buf.getvalue()
 
 
+def subset_gowun(charset: set[str]) -> bytes | None:
+    """Merge the Gowun Dodum pieces covering `charset` into one woff2 subset."""
+    pieces = sorted(_GOWUN.glob("gowun-dodum-*-400-normal.woff2")) if _GOWUN.is_dir() else []
+    if not pieces:
+        return None
+    try:
+        from fontTools import subset
+        from fontTools.merge import Merger
+        from fontTools.ttLib import TTFont
+    except ImportError:
+        return None
+    import tempfile
+
+    wanted = {ord(c) for c in charset}
+    cut: list[str] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for i, src in enumerate(pieces):
+            font = TTFont(src)
+            have = set(font.getBestCmap() or {})
+            hit = have & wanted
+            if not hit:
+                font.close()
+                continue
+            options = subset.Options()
+            options.layout_features = ["*"]
+            options.notdef_outline = True
+            subsetter = subset.Subsetter(options=options)
+            subsetter.populate(unicodes=sorted(hit))
+            subsetter.subset(font)
+            font.flavor = None
+            out = f"{tmp}/{i}.ttf"
+            font.save(out)
+            font.close()
+            cut.append(out)
+        if not cut:
+            return None
+        merged = Merger().merge(cut)
+        merged.flavor = "woff2"
+        buf = io.BytesIO()
+        merged.save(buf)
+        return buf.getvalue()
+
+
 def _is_hangul(ch: str) -> bool:
     """A Korean syllable or jamo — R8 code fences carry Korean captions and
     comments alongside transcribed pseudocode (AUTHORING §2-8), and no
@@ -171,7 +211,13 @@ def emit(dest: Path, charset: set[str], mono_charset: set[str] | None = None) ->
     fonts.mkdir(parents=True, exist_ok=True)
     faces: list[str] = []
     mono_charset = charset if mono_charset is None else mono_charset
-    stats = {"pretendard": 0, "mono": 0, "glyphs": len(charset), "problems": []}
+    stats = {"pretendard": 0, "gowun": 0, "mono": 0, "glyphs": len(charset), "problems": []}
+
+    data = subset_gowun(charset | set(RUNTIME_CHARS))
+    if data:
+        (fonts / "gowun-dodum-subset.woff2").write_bytes(data)
+        stats["gowun"] = len(data)
+        faces.append(_face("Gowun Dodum", "fonts/gowun-dodum-subset.woff2", "400"))
 
     data = subset_pretendard(charset | set(RUNTIME_CHARS))
     if data:
@@ -192,8 +238,6 @@ def emit(dest: Path, charset: set[str], mono_charset: set[str] | None = None) ->
         (fonts / name).write_bytes(data)
         stats["mono"] += len(data)
         faces.append(_face("JetBrains Mono", f"fonts/{name}", str(weight)))
-        faces.append(_face("Probe Num", f"fonts/{name}", str(weight),
-                           unicode_range=NUM_RANGE))
 
     gap = mono_coverage_gap(mono_charset)
     if gap:

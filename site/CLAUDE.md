@@ -17,7 +17,10 @@ contract must say.
 
 **Only `analysis/`, `comparison/` and `scouting/` publish.**
 Nothing else in the repo reaches the site — `context/` is not a published
-surface beyond the `D#` titles a tooltip prints.
+surface beyond the `D#` titles a tooltip prints, the dates of
+`context/EVENTS.md`, which the first screen counts down to, and what an axis
+chip's popup prints: each pillar's optional introduction and the titles of
+the decisions it owns. A decision's chosen answer never reaches the site.
 
 **A scouting report is read as it was written.** `builder/scouting.py` reads
 each report in the form of its own day: a score line where the report has
@@ -46,8 +49,9 @@ moving between them in the nav moves nothing but the words.
 
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
-under `assets/shelf.js` and `assets/memo.js`, and the landing page size — a view setting rather than
-a mark on a paper — under `probe.view.v1`. Both marks are set by the reader and
+under `assets/shelf.js` and `assets/memo.js`; the analysis list's page size
+— a view setting rather than a mark on a paper — under `probe.view.v1`; and
+the reader's colour under `probe.accent`. Both marks are set by the reader and
 never inferred: neither opening a page nor scrolling to its end is evidence it
 was read.
 
@@ -69,11 +73,11 @@ forbids an author to write, `builder/assets/site.css` keeps:
   a `>` child combinator.
 
 **A browser with no script loses only the extras.** Every control removes
-itself rather than sitting inert, and the landing list falls back to one page.
+itself rather than sitting inert, and the analysis list falls back to one page.
 
-**One query is read by one rule.** `assets/match.js` is what both the landing
-filter box and the ⌘K palette ask their question with; two surfaces answering
-the same query differently is a bug, not two behaviours.
+**One query is read by one rule.** `assets/match.js` is what both the analysis
+list (a `#q=` address) and the ⌘K palette ask their question with; two
+surfaces answering the same query differently is a bug, not two behaviours.
 
 **`components.mark()` has copies in `assets/`.** The README's hero, track
 icons and who-writes-what picture redraw it with their animation inlined
@@ -83,13 +87,13 @@ it, which are what a phone's home-screen shortcut shows — and as `og.png`, the
 1200×630 card a pasted link unfurls with. Change the mark here and bring all
 of those into step.
 
-**Three modules serve the prompts, not the build.** `builder/arxiv.py` (its
-CLI: `site/README.md`) reads a paper's HTML edition, falling back to
+**Three modules serve the prompts as well as the build.** `builder/arxiv.py`
+(its CLI: `site/README.md`) reads a paper's HTML edition, falling back to
 `builder/arxivsrc.py` for the LaTeX source, and raises `Unavailable` only when
 there is neither — `/analyze`'s stop condition — and
 `builder/mdext/probefence.py` owns the ` ```probe-* ` fences. All three are
 called by hand from a run, so keep them importable without the rest of the
-build.
+build. The build's one use of `arxiv.py` is `builder/scoutfigs.py`.
 
 **Four pieces are borrowed by the distinction track.** `distinction/render-distinction.py`
 draws the private versus notes, reports and code notes with `builder/charts.py`,
@@ -97,6 +101,13 @@ draws the private versus notes, reports and code notes with `builder/charts.py`,
 `assets/charts.css`. It runs on the standard library and its pages never reach
 the site, so keep those two modules free of a third-party import at module
 scope.
+
+**The build reaches the network only when asked.** `--scout-figures` fetches
+the arXiv HTML of each written-up scouted paper to pick its overview figure,
+and every answer stays in `scout-figures.json` under `.site-cache/`; without
+the flag the build prints what that cache holds and a paper it lacks shows no
+figure. A paper arXiv cannot reach is not remembered, so the next fetch asks
+again.
 
 **Search is an enhancement.** A build without `--search-api` emits no script and
 the site makes no request. `site/search/verify.py` needs a key and egress, so it

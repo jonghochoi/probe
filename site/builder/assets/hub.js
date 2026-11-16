@@ -23,7 +23,7 @@ const main = document.querySelector("[data-hub]");
 if (!memoApi || !shelf || !main) return;
 
 const { MemoStore, download } = memoApi;
-const { Stars, Reads, Marks, STAR } = shelf;
+const { Stars, Reads, Marks } = shelf;
 
 const FLAG =
   '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" ' +
@@ -58,49 +58,51 @@ function titleOf(id, fallback) {
   return (meta && meta.title) || fallback || id;
 }
 
-/* ── The three lists ──────────────────────────────────────────────────── */
-function itemHtml(id, { title, when, whenLabel, hash = "", sub = "", lead = "" }) {
+/* ── The three tables ─────────────────────────────────────────────────── */
+/* Each kind is the analysis list's table: when it was kept, the arXiv id, the
+ * title over a second line that says what was kept, and a trailing column.
+ * A paper this browser marked 읽음 says so at its title's end. */
+const HEAD = {
+  stars: ["저장", "arXiv", "논문 · 한 줄", "연구 축"],
+  marks: ["저장", "arXiv", "논문 · 책갈피 자리", "연구 축"],
+  memos: ["고침", "arXiv", "논문 · 메모", "상태"],
+};
+
+function rowHtml(id, { when, hash = "", sub = "", subCls = "", end }) {
   const meta = INDEX.get(id);
-  const name = titleOf(id, title);
-  const second = sub || (meta && meta.tagline) || "";
-  // The id rides above the title: it is what the reader cites, searches arXiv
-  // with and finds in the landing's id column, and the one thing a paper that
-  // has left the corpus still has for certain.
-  const inner = `<span class="shelf-id">${esc(id)}</span>` +
-    `<span class="shelf-title">${esc(name)}</span>` +
-    (second ? `<span class="shelf-tagline">${esc(second)}</span>` : "");
-  const link = meta
-    ? `<a class="shelf-main" href="../p/${esc(id)}/index.html${esc(hash)}">${inner}</a>`
-    : `<span class="shelf-main gone">${inner}` +
-      `<span class="shelf-note">사이트에 없는 논문입니다</span></span>`;
+  const title = `<span class="tl-t">${esc(titleOf(id))}` +
+    (Reads.isDone(id) ? '<span class="sh-tag">읽음</span>' : "") + "</span>";
+  const second = sub ? `<span class="tl-g${subCls}">${sub}</span>` : "";
+  const main = meta
+    ? `<a class="tl-main" href="../p/${esc(id)}/index.html${esc(hash)}">${title}${second}</a>`
+    : `<span class="tl-main gone">${title}${second}` +
+      `<span class="sh-note">사이트에 없는 논문입니다</span></span>`;
   // The index carries the axes the paper is filed under and nothing else
   // (`Paper.filed`), so this prints what it is handed — the same pair the
-  // landing row and the palette print.
+  // analysis list's row and the palette print.
   const pillars = meta && meta.pillars
-    ? meta.pillars
-        .map((p) => `<span class="chip pillar" data-p="${esc(p)}">${esc(p)}</span>`).join("")
+    ? meta.pillars.map((p) => `<span class="chip pillar" data-p="${esc(p)}">${esc(p)}</span>`).join("")
     : "";
-  const control = lead || `<button type="button" class="starbtn" data-star="${esc(id)}"
-          data-star-title="${esc(name)}" aria-pressed="false"
-          aria-label="즐겨찾기">${STAR}</button>`;
-  return `<article class="shelf-item" data-read-of="${esc(id)}">
-  ${control}
-  ${link}
-  <span class="shelf-pillars">${pillars}</span>
-  <span class="shelf-state">${esc(Reads.label(id))}</span>
-  <time class="shelf-when" datetime="${esc(when || "")}"
-        title="${esc(whenLabel || "")}">${esc((when || "").slice(0, 10))}</time>
-</article>`;
+  return `<li class="tl-row" data-read-of="${esc(id)}">` +
+    `<time class="tl-id" datetime="${esc(when || "")}">${esc((when || "").slice(5, 10).replace("-", "."))}</time>` +
+    `<a class="tl-id sh-id" href="https://arxiv.org/abs/${esc(id)}" target="_blank" rel="noopener" title="arXiv 초록">${esc(id)}</a>` +
+    `${main}<span class="tl-p">${end === undefined ? pillars : end}</span></li>`;
+}
+
+function table(kind, rows) {
+  return `<div class="tl-head" aria-hidden="true">${HEAD[kind].map((h) => `<span>${h}</span>`).join("")}</div>` +
+    `<ul class="tl">${rows.join("")}</ul>`;
 }
 
 function renderStars() {
   const map = Stars.all();
   const ids = Stars.list();
   panels.stars.innerHTML = ids.length
-    ? ids.map((id) => itemHtml(id, {
-        title: map[id].title, when: map[id].at, whenLabel: "즐겨찾기에 담은 날",
-      })).join("")
-    : empty("아직 즐겨찾기가 없습니다. 논문 목록의 별이나 논문 페이지의 즐겨찾기 버튼으로 담습니다.") + starter();
+    ? table("stars", ids.map((id) => {
+        const meta = INDEX.get(id);
+        return rowHtml(id, { when: map[id].at, sub: esc((meta && meta.tagline) || "") });
+      }))
+    : empty("아직 즐겨찾기한 논문이 없습니다. 분석 목록의 별이나 논문 페이지의 즐겨찾기 버튼을 누르면 여기에 모입니다.");
   return ids.length;
 }
 
@@ -108,13 +110,11 @@ function renderMarks() {
   const map = Marks.all();
   const ids = Marks.list();
   panels.marks.innerHTML = ids.length
-    ? ids.map((id) => itemHtml(id, {
-        title: map[id].title, when: map[id].at, whenLabel: "책갈피를 꽂은 날",
-        hash: `#${map[id].anchor}`, sub: `${map[id].label} 에서 멈춤`,
-        lead: `<button type="button" class="markbtn" data-mark-drop="${esc(id)}"
-          aria-label="책갈피 지우기" title="책갈피 지우기">${FLAG}</button>`,
-      })).join("")
-    : empty("아직 책갈피가 없습니다. 논문 상세 탭의 목차에서 섹션 옆 깃발을 눌러 꽂습니다.");
+    ? table("marks", ids.map((id) => rowHtml(id, {
+        when: map[id].at, hash: `#${map[id].anchor}`,
+        sub: `<span class="sh-mk">${FLAG}${esc(map[id].label)}</span>`,
+      })))
+    : empty("아직 책갈피가 없습니다. 논문 상세 탭의 목차에서 섹션 옆 깃발을 누르면 여기에 남습니다.");
   return ids.length;
 }
 
@@ -122,36 +122,18 @@ function renderMemos() {
   const memos = MemoStore.list().map((id) => MemoStore.load(id)).filter(Boolean);
   memos.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
   panels.memos.innerHTML = memos.length
-    ? memos.map((m) => `
-    <article class="memo-card">
-      <div class="memo-card-head">
-        <span class="shelf-id">${esc(m.paperId)}</span>
-        <a href="../p/${esc(m.paperId)}/index.html">${esc(titleOf(m.paperId, m.title))}</a>
-        <time datetime="${esc(m.updatedAt || "")}">${esc((m.updatedAt || "").slice(0, 10))}</time>
-      </div>
-      <pre>${esc(m.body || "")}</pre>
-      ${m.published ? `<span class="published">발행됨 · ${esc(m.published.at.slice(0, 10))}</span>` : ""}
-    </article>`).join("")
-    : empty("아직 메모가 없습니다. 논문 페이지 오른쪽 아래의 메모 버튼으로 남길 수 있습니다.");
+    ? table("memos", memos.map((m) => rowHtml(m.paperId, {
+        when: m.updatedAt, sub: esc(m.body || ""), subCls: " sh-memo",
+        end: m.published
+          ? `<span class="sh-tag is-pub" title="${esc(m.published.at.slice(0, 10))}">게시됨</span>`
+          : '<span class="sh-tag">초안</span>',
+      })))
+    : empty("아직 메모가 없습니다. 논문 페이지 오른쪽 아래의 메모 버튼으로 남기면 여기에 모입니다.");
   return memos.length;
 }
 
 function empty(text) {
-  return `<p class="corpus-empty">${esc(text)}</p>`;
-}
-
-/* A first visit finds every tab empty, and an empty tab says how to fill it
- * but not where to start. So the 즐겨찾기 tab, the one that opens, also lists
- * the newest rewrites as rows with their own star: the first thing kept can
- * be kept from here. The index arrives newest first. */
-const START = 3;
-function starter() {
-  const data = window.ProbeIndex;
-  const recent = data && Array.isArray(data.papers) ? data.papers.slice(0, START) : [];
-  if (!recent.length) return "";
-  return `<div class="shelf-start"><p class="shelf-start-h">최근 재작성본에서 시작하기</p>` +
-    recent.map((p) => itemHtml(p.id, { when: p.date, whenLabel: "재작성" })).join("") +
-    "</div>";
+  return `<p class="sh-empty">${esc(text)}</p>`;
 }
 
 function render() {
@@ -170,10 +152,27 @@ function render() {
   // the tab that happens to be showing.
   const kept = counts.stars + Reads.count() + counts.marks + counts.memos;
   for (const btn of main.querySelectorAll("[data-hub-action]")) btn.disabled = !kept;
-  // The stores wrote the ids; the glyphs and the 읽음 marks are the shelf
-  // layer's to fill, on this page as on every other.
   shelf.paint(main);
 }
+
+/* ── The ⋯ menu ───────────────────────────────────────────────────────── */
+const moreBtn = main.querySelector("[data-hub-more]");
+const menu = main.querySelector("[data-hub-menu]");
+function openMenu(on) {
+  if (!menu) return;
+  menu.hidden = !on;
+  moreBtn.setAttribute("aria-expanded", String(on));
+}
+document.addEventListener("click", (e) => {
+  if (!menu) return;
+  if (e.target.closest("[data-hub-more]")) { openMenu(menu.hidden); return; }
+  // A pick closes it, and so does a click anywhere else. The import label
+  // stays open until the file dialog it opens has answered.
+  if (e.target.closest("[data-hub-action]") || !e.target.closest("[data-hub-menu]")) openMenu(false);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && menu && !menu.hidden) { openMenu(false); moreBtn.focus(); }
+});
 
 /* ── Tabs ─────────────────────────────────────────────────────────────── */
 function showTab(key, push) {
@@ -305,14 +304,10 @@ if (file) {
         if (status) status.textContent = "가져오기 실패 — JSON 형식이 아닙니다";
       }
       file.value = "";
+      openMenu(false);
     });
   });
 }
-
-document.addEventListener("click", (e) => {
-  const drop = e.target.closest("[data-mark-drop]");
-  if (drop) Marks.remove(drop.dataset.markDrop);
-});
 
 document.addEventListener("probe:shelf-change", render);
 document.addEventListener("probe:shelf-error", (e) => {

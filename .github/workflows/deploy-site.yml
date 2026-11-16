@@ -86,17 +86,20 @@ jobs:
         # removes KaTeX and breaks the math render.
         run: |
           npm install --no-save --prefix site/builder \
-            katex@0.16.22 pretendard jetbrains-mono
+            katex@0.16.22 pretendard jetbrains-mono @fontsource/gowun-dodum@5.3.0
 
-      - name: Cache rendered formulas
+      - name: Cache rendered formulas and scouting figures
         # Formulas are keyed by sha256(tex|display), so a warm cache turns the
         # KaTeX stage into a no-op and a cold one costs a single batched node
-        # call, not one per formula.
+        # call, not one per formula. The scouting figures are keyed by arXiv
+        # id, so a warm cache fetches only a new run's papers.
         uses: actions/cache@v4
         with:
           path: .site-cache
-          key: katex-${{ hashFiles('analysis/*.md') }}
-          restore-keys: katex-
+          key: site-cache-${{ hashFiles('analysis/*.md', 'scouting/**/*.md') }}
+          restore-keys: |
+            site-cache-
+            katex-
 
       - name: Build
         # `PROBE_SEARCH_API` is a repository *variable*, not a secret: it is the
@@ -104,7 +107,7 @@ jobs:
         # semantic script and the site makes no requests at all.
         env:
           PROBE_SEARCH_API: ${{ vars.PROBE_SEARCH_API }}
-        run: python3 site/build-site.py --out .site --strict
+        run: python3 site/build-site.py --out .site --strict --scout-figures
 
       - name: Refresh the search index
         # Only from main, and only once the project secrets exist — until then

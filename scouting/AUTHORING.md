@@ -62,9 +62,10 @@ story — tie → what the paper is → what it means for us → what to check:
 **(b) and (c) open on a headline.** Their first bullet is the whole point in
 one line — about 40 characters and never more than 50 — and the bullets
 after it carry the detail. The site prints the two headlines where a reader
-scans: (b)'s on the paper's closed row, (c)'s as the pillar's line under
-`연구 축별로 왜`, each cut to two lines and opening to the rest. A headline
-that needs a clause for its evidence moves the evidence to the next bullet.
+scans: (b)'s as the one line under the paper's name on its card or row, (c)'s
+as the pillar's line under `시사점` in the paper's detail, the rest of each
+under it. A headline that needs a clause for its evidence moves the evidence
+to the next bullet.
 
 #### The paper brief
 

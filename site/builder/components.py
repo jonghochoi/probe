@@ -83,12 +83,24 @@ _ICON_PATHS = {
             '<path d="M8 1.2v1.5M8 13.3v1.5M2.6 2.6l1.1 1.1M12.3 12.3l1.1 1.1'
             'M1.2 8h1.5M13.3 8h1.5M2.6 13.4l1.1-1.1M12.3 3.7l1.1-1.1"/>'),
     "menu": '<path d="M2.3 4.6h11.4M2.3 8h11.4M2.3 11.4h11.4"/>',
+    # 연구 축 — three stacked layers, the axes a list is filtered by.
+    "layers": '<path d="M8 2.4 2.4 5.2 8 8l5.6-2.8z"/><path d="M2.4 8 8 10.8 13.6 8"/><path d="M2.4 10.8 8 13.6l5.6-2.8"/>',
     # The one shape that carries a state rather than a name: `index.css` fills
     # it from `currentColor` on the pressed button, so on and off are the same
     # path and nothing has to swap markup to answer a click.
     "star": f'<path d="{_STAR_D}"/>',
     # 읽음 — the claim the reader makes, drawn as the mark people make for it.
     "check": '<path d="M3 8.4 6.4 11.6 13 4.6"/>',
+    # 색 테마 — a painter's palette, the reader's colour.
+    "palette": ('<path d="M8 1.8a6.2 6.2 0 1 0 0 12.4c.9 0 1.3-.6 1.3-1.2 0-.8-.6-1-.6-1.7 0-.6.5-1 '
+                '1.1-1h1.6a2.8 2.8 0 0 0 2.8-2.8C14.2 4.4 11.4 1.8 8 1.8Z"/>'
+                '<circle cx="5" cy="7" r=".5"/><circle cx="7.6" cy="4.6" r=".5"/><circle cx="10.6" cy="5.6" r=".5"/>'),
+    # 책갈피 — the flag a paper's contents mark a section with.
+    "flag": f'<path d="{_FLAG_D}"/>',
+    # More — the three dots a menu of the rarer actions opens from.
+    "more": '<circle cx="3.6" cy="8" r=".7"/><circle cx="8" cy="8" r=".7"/><circle cx="12.4" cy="8" r=".7"/>',
+    # 탐색 회차 — a month page, the cell the date line opens its calendar from.
+    "calendar": '<rect x="2.4" y="3.4" width="11.2" height="10.4" rx="1.6"/><path d="M2.4 6.6h11.2M5.6 1.8v2.8M10.4 1.8v2.8"/>',
     # 메모 — a pencil, because the button opens a place to write.
     "pencil": '<path d="M10.6 2.7 13.3 5.4 5.6 13.1 2.4 13.6 2.9 10.4Z"/><path d="M9.1 4.2l2.7 2.7"/>',
 }
@@ -151,7 +163,7 @@ def mast(*, eyebrow: str, title: str, count: str = "") -> str:
     is for, and anything set there either repeats that list or argues for it,
     when the list makes its own case one scroll down.
 
-    `count` is the exception the landing earns — the pair it prints beside its
+    `count` is the exception the analysis list earns — the pair it prints beside its
     title for a reader whose filter bar has not arrived — and it is the only
     number any band carries, because it is the only one the build has. What
     this browser has kept is not a fact this generator holds.
@@ -371,8 +383,8 @@ def page(
     identically — and a future custom domain needs no rebuild.
 
     `here` is the `DESTINATIONS` key this page sits under, which the nav marks
-    as the reader's place. Every page passes one but `404.html`, which stands
-    under no destination.
+    as the reader's place. Every page passes one but the first screen and
+    `404.html`, which stand under no destination.
 
     `base` overrides that with an absolute prefix. Exactly one page needs it:
     Pages serves `404.html` at whatever depth the bad URL had, so a relative
@@ -391,12 +403,13 @@ def page(
     # the nav's own button, brand.js the mark beside it, nav.js the menu the
     # nav folds its destinations into on a phone, and the ⌘K palette is
     # reachable from anywhere — so its index, its matching rule and the script
-    # itself ride along too. `defer` runs them in this order, which is what
-    # lets `filter.js` further down the list read `match.js`.
+    # itself ride along too, and so does `pillar.js`, since an axis chip on any
+    # page opens its axis's popup. `defer` runs them in this order, which is
+    # what lets `filter.js` further down the list read `match.js`.
     script_tags = "".join(
         f'<script src="{asset(f"{up}assets/{s}")}" defer></script>'
         for s in ["theme.js", "brand.js", "nav.js", "corpus-index.js",
-                  "match.js", "palette.js", *(scripts or [])]
+                  "match.js", "palette.js", "pillar.js", *(scripts or [])]
     )
     return f"""<!DOCTYPE html>
 <html lang="ko" data-theme="light">
@@ -412,14 +425,15 @@ def page(
 <link rel="stylesheet" href="{asset(f"{up}assets/site.css")}">
 {extra_head}
 <script>
-/* Runs before first paint. Two jobs: set the theme (otherwise a dark-mode
-   reader gets a white flash on every navigation) and mark the document as
-   scripted, so JS-only controls can hide themselves in CSS instead of
+/* Runs before first paint. Two jobs: set the theme and the reader's colour
+   (otherwise a dark-mode reader gets a white flash on every navigation) and
+   mark the document as scripted, so JS-only controls can hide themselves in CSS instead of
    appearing and then vanishing once a deferred script loads. */
 (function(){{document.documentElement.classList.add('js');
 try{{var t=localStorage.getItem('probe.theme');
 if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
-document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
+document.documentElement.setAttribute('data-theme',t);
+var a=localStorage.getItem('probe.accent');if(a)document.documentElement.setAttribute('data-accent',a);}}catch(e){{}}}})();
 </script>
 </head>
 <body{" " + body_attrs if body_attrs else ""}>
@@ -505,9 +519,8 @@ def repo_link() -> str:
 # destination cannot arrive in one and be missing from the other.
 #
 # A track's destination is named for its track, in two syllables of Korean —
-# 분석 Analysis, 탐색 Scouting, 비교 Comparison. 분석 leads because it is the
-# landing page — the logo and the first label go to the same place, so the row
-# opens where the site does — and the rest follow in the pipeline's order.
+# 탐색 Scouting, 분석 Analysis, 비교 Comparison — the pipeline's own order:
+# what arrived, then what was rewritten, then what was set side by side.
 # Four labels of one width read as one row on a desktop and
 # fit beside the controls without crowding them. 서재 is the reader's own shelf
 # rather than a track, and stands after them.
@@ -516,10 +529,18 @@ def repo_link() -> str:
 # each sit *under* a destination rather than being one, so `p/<id>/` marks
 # 분석 and `c/<slug>/` marks 비교 — the mark answers "which part of the site
 # is this", which is what a reader glancing at a nav is asking.
-DESTINATIONS = (("papers", "index.html", "분석"),
-                ("scout", "s/index.html", "탐색"),
+DESTINATIONS = (("scout", "s/index.html", "탐색"),
+                ("papers", "p/index.html", "분석"),
                 ("compare", "c/index.html", "비교"),
                 ("shelf", "shelf/index.html", "서재"))
+
+
+def _badge(key: str) -> str:
+    """The count of starred papers on 서재 — printed empty and hidden, filled
+    by `nav.js` from this browser's shelf and shown only when it is not
+    zero."""
+    return ('<span class="nav-badge" data-star-count hidden></span>'
+            if key == "shelf" else "")
 
 
 def _current(key: str, here: str) -> str:
@@ -547,11 +568,32 @@ def nav_sheet(up: str, here: str = "") -> str:
     links it always had, and gives up the name instead (`site.css`).
     """
     links = "".join(
-        f'<a href="{up}{href}"{_current(key, here)}>{label}</a>'
+        f'<a href="{up}{href}"{_current(key, here)}>{label}{_badge(key)}</a>'
         for key, href, label in DESTINATIONS)
     return (f'<div class="nav-sheet" id="nav-sheet" hidden>{links}'
             f'<a class="nav-sheet-out" href="{REPO_URL}" target="_blank" '
             'rel="noopener noreferrer">GitHub ↗</a></div>')
+
+
+# The colours a reader can pick, in the menu's order: the name, the key
+# `site.css` reads off `data-accent` (indigo is the default and has none),
+# and the swatch. The swatches are the light fills.
+ACCENTS = (("인디고", "", "oklch(51% 0.21 277)"),
+           ("세이지", "sage", "oklch(52% 0.1 165)"),
+           ("테라코타", "terracotta", "oklch(67.2% 0.131 39)"))
+
+
+def palette_button() -> str:
+    """The reader's colour, beside the dark-mode button: a palette that opens
+    the three colours. `theme.js` keeps the pick in `probe.accent`."""
+    items = "".join(
+        f'<button type="button" role="menuitemradio" data-accent-pick="{key}" '
+        f'aria-checked="false"><i style="background:{swatch}"></i>{name}</button>'
+        for name, key, swatch in ACCENTS)
+    return (f'<span class="pal-w"><button class="icon-btn" data-accent-open aria-haspopup="true" '
+            f'aria-expanded="false" aria-label="색 테마" title="색 테마">{icon("palette", 15)}</button>'
+            f'<span class="pal-menu" role="menu" aria-label="색 테마" hidden>'
+            f'<span class="pal-h">색 테마</span>{items}</span></span>')
 
 
 def nav(up: str, here: str = "") -> str:
@@ -569,7 +611,7 @@ def nav(up: str, here: str = "") -> str:
     makes the labels beside the controls look unfinished.
     """
     links = "".join(
-        f'<li><a href="{up}{href}"{_current(key, here)}>{label}</a></li>'
+        f'<li><a href="{up}{href}"{_current(key, here)}>{label}{_badge(key)}</a></li>'
         for key, href, label in DESTINATIONS)
     return f"""<nav class="site-nav">
   <div class="nav-inner">
@@ -578,6 +620,7 @@ def nav(up: str, here: str = "") -> str:
     <ul class="nav-links">{links}</ul>
     <span class="nav-rule"></span>
     {cmdk_button()}
+    {palette_button()}
     <button class="icon-btn" data-theme-toggle aria-label="다크 모드로" title="다크 모드로">{icon("moon", 15)}{icon("sun", 15)}</button>
     {repo_link()}
     <button class="icon-btn nav-menu" data-nav-menu aria-expanded="false"

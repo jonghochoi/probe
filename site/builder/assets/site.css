@@ -28,14 +28,14 @@
 
 :root {
   /* ── Ground and ink ─────────────────────────────────────────────────── */
-  --bg:          oklch(96.6% 0.005 57);
-  --surface:     oklch(99.4% 0.003 60);   /* card ground — warm, not #fff */
-  --surface-2:   oklch(93.6% 0.011 62);   /* tinted panel */
-  --surface-3:   oklch(90.5% 0.015 58);   /* hover / pressed ground */
-  --border:      oklch(86.0% 0.020 54);
-  --border-soft: oklch(90.8% 0.015 56);
-  --text:        oklch(21.0% 0.018 50);
-  --text-muted:  oklch(46.5% 0.025 54);
+  --bg:          oklch(98.4% 0.007 277);
+  --surface:     oklch(99.8% 0.002 277);   /* card ground — warm, not #fff */
+  --surface-2:   oklch(95.6% 0.012 277);   /* tinted panel */
+  --surface-3:   oklch(92.6% 0.016 277);   /* hover / pressed ground */
+  --border:      oklch(86.5% 0.020 277);
+  --border-soft: oklch(92.0% 0.014 277);
+  --text:        oklch(22.0% 0.020 277);
+  --text-muted:  oklch(46.0% 0.025 277);
 
   /* ── Accent ─────────────────────────────────────────────────────────── */
   /* One accent, in two roles. `--orange` is the brand value: it draws the
@@ -48,18 +48,34 @@
      ink is the accent and there is nothing to keep in step. The pressed step
      of a filled button is mixed from the accent rather than named separately:
      one accent means one value to move when it moves. */
-  --orange:      oklch(67.2% 0.131 39);
-  --orange-ink:  oklch(51.4% 0.155 41);
+  --orange:      oklch(51.0% 0.210 277);
+  --orange-ink:  oklch(46.0% 0.200 277);
   /* The wordmark's two stops. They are named rather than borrowed from the
      pair above because the pair collapses in dark — there `--orange-ink` *is*
      `--orange`, and a gradient between them is a flat fill. Both stops stay on
      the accent's hue so the lockup reads as one colour deepening across five
      letters rather than as two colours meeting. */
-  --wm-a:        oklch(49.0% 0.152 36);
-  --wm-b:        oklch(70.5% 0.128 44);
-  --accent-ink:  oklch(21.0% 0.018 50);
-  --orange-soft: oklch(95.8% 0.021 52);
-  --amber-soft:  oklch(77.3% 0.101 50);
+  --wm-a:        oklch(46.0% 0.200 277);
+  --wm-b:        oklch(72.0% 0.130 299);
+  --accent-ink:  #ffffff;
+  /* The accent's second stop: the band, the wordmark and the current tab
+     lean from the accent toward it, so a ground can carry colour without a
+     second hue competing for meaning. */
+  --sec:         oklch(72.0% 0.130 299);
+  /* A card is a little translucent so the page's edge glow reads through. */
+  --card-bg:     rgba(255, 255, 255, .74);
+  /* The nav is the one dark ground on a light page — the frame the reading
+     sits in — and the band under each page title is a soft accent wash. */
+  --nav-bg:      oklch(25.0% 0.035 277);
+  --band-a:      oklch(95.0% 0.030 277);
+  --band-b:      oklch(97.5% 0.024 299);
+  /* Ink on the nav's dark ground, the same in both themes. */
+  --nav-ink:     oklch(86.0% 0.020 277);
+  --nav-ink-hi:  oklch(97.0% 0.010 277);
+  --nav-line:    rgba(255, 255, 255, .22);
+  --nav-mark:    oklch(78.0% 0.120 299);
+  --orange-soft: oklch(95.0% 0.030 277);
+  --amber-soft:  var(--orange);
   --focus:       var(--orange-ink);
   /* The mark's eye. Both sit on the accent hull, which is bright in either
      theme, so they hold their one value across the pair. */
@@ -129,15 +145,16 @@
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
   /* ── Type ───────────────────────────────────────────────────────────── */
-  /* Latin glyphs come from Pretendard too — a separate Latin face next to
-     Korean text gives two different x-heights on the same line. */
-  --ko: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+  /* Gowun Dodum sets the reading and the titles alike; Pretendard stays
+     behind it for any glyph the Gowun subset lacks, so a rare symbol falls to
+     a matching sans rather than to the system. */
+  --ko: 'Gowun Dodum', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
         'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif;
+  --t-display: var(--ko);
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
-  /* The figure face: JetBrains Mono for digits, units and Latin only, with
-     Hangul and spaces falling through to Pretendard (`fonts.NUM_RANGE`), so a
-     readout's numbers line up without its Korean looking letter-spaced. */
-  --num: 'Probe Num', var(--ko);
+  /* Figures read in the body face, so a number sits in its sentence rather
+     than in a second voice. */
+  --num: var(--ko);
   /* The size steps. Every rem size in the sheets is one of these; what is
      not a step is relative on purpose — an `em` that follows its component,
      a `clamp()` heading, the body's own base, or a px size inside an SVG,
@@ -157,16 +174,13 @@
   --fs-display: 3rem;      /* the 404 numeral */
 
   /* ── Shape ──────────────────────────────────────────────────────────── */
-  /* Panels meet at corners and a chip is a window rather than a pill: every
-     radius is all but square, and `--radius-pill` keeps its name so a rule
-     that asks for one gets the square version (a dot that is round by nature,
-     `50%`, stays round). A surface sits on the page by its hairline rather
-     than on a shadow; `--shadow-lg` is for what really is above the page — an
-     overlay, a slide, a card lifted under the pointer. */
-  --radius-xs:   1px;
-  --radius-sm:   2px;
-  --radius:      3px;
-  --radius-pill: 2px;
+  /* Cards round at 12px and chips are pills. A surface sits on the page by
+     its hairline and a faint shadow; `--shadow-lg` is for what really is
+     above the page — an overlay, a drawer, a card lifted under the pointer. */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius:      12px;
+  --radius-pill: 999px;
   --shadow:      0 0 0 transparent;
   --shadow-sm:   0 1px 0 oklch(21% 0.018 50 / .06);
   --shadow-lg:   0 14px 40px oklch(21% 0.018 50 / .18), 0 0 0 1px oklch(21% 0.018 50 / .04);
@@ -217,21 +231,21 @@
 @supports (height: 100dvh) { :root { --vh-live: 100dvh; } }
 
 :root[data-theme="dark"] {
-  --bg:          oklch(18.1% 0.006 56);
-  --surface:     oklch(21.3% 0.009 59);
-  --surface-2:   oklch(23.7% 0.014 58);
-  --surface-3:   oklch(27.0% 0.015 58);
-  --border:      oklch(33.2% 0.017 59);
-  --border-soft: oklch(27.6% 0.014 62);
-  --text:        oklch(92.3% 0.012 60);
-  --text-muted:  oklch(67.4% 0.022 53);
+  --bg:          oklch(17.5% 0.010 277);
+  --surface:     oklch(20.5% 0.012 277);
+  --surface-2:   oklch(23.5% 0.014 277);
+  --surface-3:   oklch(27.0% 0.016 277);
+  --border:      oklch(34.0% 0.018 277);
+  --border-soft: oklch(27.5% 0.014 277);
+  --text:        oklch(93.0% 0.010 277);
+  --text-muted:  oklch(72.0% 0.020 277);
 
-  --orange:      oklch(73.9% 0.116 42);
-  --orange-ink:  var(--orange);
-  --wm-a:        oklch(60.5% 0.135 34);
-  --wm-b:        oklch(80.0% 0.104 50);
-  --accent-ink:  oklch(18.1% 0.006 56);
-  --orange-soft: oklch(25.0% 0.031 46);
+  --orange:      oklch(75.0% 0.120 277);
+  --orange-ink:  oklch(79.0% 0.110 277);
+  --wm-a:        oklch(79.0% 0.110 277);
+  --wm-b:        oklch(78.0% 0.110 299);
+  --accent-ink:  oklch(17.5% 0.010 277);
+  --orange-soft: oklch(27.0% 0.045 277);
 
   --blue:        oklch(75.0% 0.113 257);
   --green:       oklch(77.3% 0.126 162);
@@ -267,6 +281,11 @@
   --shadow:    0 0 0 transparent;
   --shadow-sm: 0 1px 0 oklch(0% 0 0 / .4);
   --shadow-lg: 0 16px 44px oklch(0% 0 0 / .6), 0 0 0 1px oklch(30% 0.017 59 / .6);
+  --sec:         oklch(78.0% 0.110 299);
+  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 277) 78%, transparent);
+  --nav-bg:      oklch(12.5% 0.015 277);
+  --band-a:      oklch(24.0% 0.027 277);
+  --band-b:      oklch(22.0% 0.022 299);
 }
 
 html {
@@ -279,7 +298,7 @@ html {
   overflow-x: clip;
   /* The gutter is reserved whether or not the page currently overflows, so a
      view that changes height does not change width. Without it, switching the
-     landing sort or a paper's tab can cross the one-viewport line, and the
+     list's page or a paper's tab can cross the one-viewport line, and the
      scrollbar arriving or leaving narrows the viewport under every centered
      `max-width` container — the whole frame jumps sideways to make room for a
      bar the reader did not ask for. Where scrollbars are overlays the gutter
@@ -297,8 +316,9 @@ body {
   font-family: var(--ko);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.7;
-  font-size: 15px;
+  line-height: 1.85;
+  font-size: 17px;
+  letter-spacing: -.005em;
   word-break: keep-all; overflow-wrap: break-word;
   -webkit-text-size-adjust: 100%;
   overflow-x: clip;
@@ -332,7 +352,7 @@ a { color: var(--orange-ink); }
    `transform`, so it composes with the lift a hover already applies instead
    of replacing it. */
 button:active:not(:disabled), .chip:active, [role="tab"]:active,
-.src-group a:active, .filebtn:active { translate: 0 1px; }
+.src-group a:active { translate: 0 1px; }
 
 /* Long titles are the one string on the page with no break opportunity of its
    own — a hyphenated English paper title at 320px overflows unless the engine
@@ -344,9 +364,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 /* ── Nav ──────────────────────────────────────────────────────────────── */
 .site-nav {
   position: sticky; top: 0; z-index: var(--z-nav);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
   height: var(--nav-h);
   display: flex; align-items: center;
 }
@@ -367,17 +385,16 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
    or a reader in forced-colours, where the background is dropped — still gets
    a solid accent rather than transparent letters. */
 .nav-logo {
+  font-family: var(--t-display);
   font-weight: 800; font-size: var(--fs-md); letter-spacing: -.01em;
-  color: var(--orange); white-space: nowrap; text-decoration: none;
+  color: var(--nav-ink-hi); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
 }
-@supports (background-clip: text) or (-webkit-background-clip: text) {
-  .nav-word {
-    background: linear-gradient(96deg, var(--wm-a) 0%, var(--wm-b) 100%);
-    -webkit-background-clip: text; background-clip: text;
-    color: transparent;
-  }
-}
+/* On the dark nav the wordmark is plain light ink: a gradient there would
+   compete with the current-tab mark, the one accent the bar carries. The
+   robot mark stays off the bar — the first screen's greeting is where it
+   stands. */
+.nav-logo .probe-mark { display: none; }
 @media (forced-colors: active) {
   .nav-word { background: none; color: currentColor; }
 }
@@ -436,31 +453,41 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
    of 32px boxes with three labels sitting in it rather than two rows of
    different things that happen to be vertically centred together. */
 .nav-links a {
-  text-decoration: none; color: var(--text-muted);
+  text-decoration: none; color: var(--nav-ink);
   font-size: var(--fs-xs); font-weight: 500;
   display: flex; align-items: center; height: 32px;
   padding: 0 .6rem; border-radius: var(--radius-sm); white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
-.nav-links a:hover { color: var(--orange-ink); background: var(--orange-soft); }
+.nav-links a:hover { color: var(--nav-ink-hi); background: rgba(255, 255, 255, .08); }
 /* Where the reader is, marked the way the pagination strip marks it: a rule
    under the label, not a filled pill. The nav has no card to fill, and the
    underline is the one mark that sits on the ground the rest of the row sits
    on. It is drawn inside the box, so nothing in the row shifts when the mark
    moves from one destination to the next, and the hover ground is dropped
-   under it — a label that is already the answer does not also offer itself. */
+   under it — a label that is already the answer does not also offer itself.
+   The rule is a background stripe rather than an inset shadow: some engines
+   leave a shadow's edge as a hairline down the box's side. */
 .nav-links a[aria-current="page"] {
-  color: var(--orange-ink); font-weight: 600;
-  border-radius: 0; box-shadow: inset 0 -2px 0 var(--orange);
+  color: var(--nav-ink-hi); font-weight: 600; border-radius: 0;
+  background: linear-gradient(var(--nav-mark), var(--nav-mark)) center bottom / 100% 2px no-repeat;
 }
 .nav-links a[aria-current="page"]:hover { background: none; }
+/* 서재's star count: a small filled pill after the word, in the accent. */
+.nav-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.15rem; height: 1.15rem; margin-left: .3rem; padding: 0 .3rem;
+  border-radius: var(--radius-pill); background: var(--orange); color: var(--accent-ink);
+  font-size: var(--fs-3xs); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums;
+}
+.nav-badge[hidden] { display: none; }
 
 /* One hairline between the two clusters. They are different kinds — three
    places to go, then three things to do to the page in front of you — and
    without a boundary the seam between an unboxed label and a bordered 32px
    button reads as a control that lost its border rather than as the end of
    one kind and the start of another. It goes wherever the destinations go. */
-.nav-rule { width: 1px; height: 18px; background: var(--border); flex: none; }
+.nav-rule { width: 1px; height: 18px; background: var(--nav-line); flex: none; }
 
 /* ── The icon set ─────────────────────────────────────────────────────── */
 /* Every control's glyph is one of `components.icon()`'s paths: no fill, 1.6px
@@ -483,6 +510,11 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
               transform var(--dur-short) var(--ease-out);
 }
 .icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: var(--lift); }
+/* On the dark bar the controls are outlines in the bar's own ink. */
+.site-nav .icon-btn, .site-nav .nav-cmdk, .site-nav .nav-menu {
+  background: transparent; border-color: var(--nav-line); color: var(--nav-ink-hi);
+}
+.site-nav .icon-btn:hover, .site-nav .nav-cmdk:hover { color: var(--nav-ink-hi); border-color: var(--nav-ink); }
 /* The theme button carries both of its icons and shows the one that names
    where the click goes. Which that is answers to `data-theme` alone, so the
    button is drawn correctly by the boot script's attribute, before any of the
@@ -530,9 +562,12 @@ html:not([data-theme="dark"]) .ico-sun { display: none; }
 .nav-sheet-out { color: var(--text-muted); font-size: var(--fs-xs); }
 
 /* ── Paper header ─────────────────────────────────────────────────────── */
-.paper-head {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+.paper-head { position: relative; isolation: isolate; }
+.paper-head::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, var(--band-a) 0%, var(--band-b) 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 25%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 25%, transparent 100%);
 }
 .paper-head-inner { max-width: 1240px; margin: 0 auto; padding: 2rem 1.25rem 0; }
 /* The breadcrumb shares its line with the rewrite's date, so it takes the
@@ -2088,9 +2123,17 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   text-wrap: balance;
 }
 .incmp-item:hover .incmp-t { color: var(--orange-ink); }
+/* A comparison with no `stances:` to draw prints its ids instead — the ids
+   rather than the titles, since three titles do not fit on a line and three
+   ids always do. */
+.cmp-item-ids { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .2rem; }
+.cmp-item-id {
+  font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
+  background: var(--surface-2); border-radius: var(--radius-xs);
+  padding: .1rem .35rem; font-variant-numeric: tabular-nums;
+}
 /* ── The fork ──────────────────────────────────────────────────────────────
-   A comparison wherever it is listed — the 비교 index and the paper page's
-   비교 panel both draw this, so the two surfaces name one thing one way.
+   A comparison as the paper page's 비교 panel lists it.
    `stances:` are the branches, `common:` the trunk, in `compares:` order,
    which is the order the comparison's own matrix columns run in.
 
@@ -2401,3 +2444,187 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Reading size and the page's edge glow ────────────────────────────── */
+/* A desktop reads at 17px with open leading; a phone, held closer, at 15.5px
+   with tighter leading so a paragraph is not a column of three words. */
+@media (max-width: 720px) { body { font-size: 15.5px; line-height: 1.7; } }
+/* The accent pools faintly at the window's edges and breathes, so a page
+   is never flat white; the reading column in the middle stays clear. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%,
+              color-mix(in srgb, var(--orange) 7%, transparent) 100%);
+  animation: edge-breathe 12s ease-in-out infinite alternate;
+}
+@keyframes edge-breathe { to { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+
+/* Every page title and list title in the display face at one weight. */
+.paper-title, .mast h1, .article h1.thesis, .article h2.h-sec, .gh-thesis,
+.row-title, .cmp-card-t, .rel-title { font-family: var(--t-display); font-weight: 700; letter-spacing: -.015em; }
+
+/* ── Reader colour ────────────────────────────────────────────────────── */
+/* The accent a reader picks from the nav's palette button (`theme.js`):
+   인디고, the `:root` above, or one of these two. Each tints the neutrals,
+   the band and the nav with its own hue, as indigo does with 277, so a
+   colour is a whole palette rather than a recoloured button. */
+:root[data-accent="sage"] {
+  --bg:          oklch(98.4% 0.007 165);
+  --surface:     oklch(99.8% 0.002 165);
+  --surface-2:   oklch(95.6% 0.012 165);
+  --surface-3:   oklch(92.6% 0.016 165);
+  --border:      oklch(86.5% 0.020 165);
+  --border-soft: oklch(92.0% 0.014 165);
+  --text:        oklch(22.0% 0.020 165);
+  --text-muted:  oklch(46.0% 0.025 165);
+  --orange:      oklch(52.0% 0.100 165);
+  --orange-ink:  oklch(45.0% 0.090 165);
+  --wm-a:        oklch(45.0% 0.090 165);
+  --wm-b:        oklch(72.0% 0.130 187);
+  --accent-ink:  #ffffff;
+  --sec:         oklch(72.0% 0.130 187);
+  --orange-soft: oklch(95.0% 0.030 165);
+  --nav-bg:      oklch(25.0% 0.035 165);
+  --nav-ink:     oklch(86.0% 0.020 165);
+  --nav-ink-hi:  oklch(97.0% 0.010 165);
+  --nav-mark:    oklch(78.0% 0.120 187);
+  --band-a:      oklch(95.0% 0.030 165);
+  --band-b:      oklch(97.5% 0.024 187);
+}
+:root[data-accent="sage"][data-theme="dark"] {
+  --bg:          oklch(17.5% 0.010 165);
+  --surface:     oklch(20.5% 0.012 165);
+  --surface-2:   oklch(23.5% 0.014 165);
+  --surface-3:   oklch(27.0% 0.016 165);
+  --border:      oklch(34.0% 0.018 165);
+  --border-soft: oklch(27.5% 0.014 165);
+  --text:        oklch(93.0% 0.010 165);
+  --text-muted:  oklch(72.0% 0.020 165);
+  --orange:      oklch(75.0% 0.120 165);
+  --orange-ink:  oklch(79.0% 0.110 165);
+  --wm-a:        oklch(79.0% 0.110 165);
+  --wm-b:        oklch(78.0% 0.110 187);
+  --accent-ink:  oklch(17.5% 0.010 165);
+  --orange-soft: oklch(27.0% 0.045 165);
+  --sec:         oklch(78.0% 0.110 187);
+  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 165) 78%, transparent);
+  --nav-bg:      oklch(12.5% 0.015 165);
+  --band-a:      oklch(24.0% 0.027 165);
+  --band-b:      oklch(22.0% 0.022 187);
+}
+:root[data-accent="terracotta"] {
+  --bg:          oklch(98.4% 0.007 40);
+  --surface:     oklch(99.8% 0.002 40);
+  --surface-2:   oklch(95.6% 0.012 40);
+  --surface-3:   oklch(92.6% 0.016 40);
+  --border:      oklch(86.5% 0.020 40);
+  --border-soft: oklch(92.0% 0.014 40);
+  --text:        oklch(22.0% 0.020 40);
+  --text-muted:  oklch(46.0% 0.025 40);
+  --orange:      oklch(67.2% 0.131 39);
+  --orange-ink:  oklch(51.4% 0.155 41);
+  --wm-a:        oklch(51.4% 0.155 41);
+  --wm-b:        oklch(72.0% 0.130 62);
+  --accent-ink:  oklch(21.0% 0.018 50);
+  --sec:         oklch(72.0% 0.130 62);
+  --orange-soft: oklch(95.0% 0.030 40);
+  --nav-bg:      oklch(25.0% 0.035 40);
+  --nav-ink:     oklch(86.0% 0.020 40);
+  --nav-ink-hi:  oklch(97.0% 0.010 40);
+  --nav-mark:    oklch(78.0% 0.120 62);
+  --band-a:      oklch(95.0% 0.030 40);
+  --band-b:      oklch(97.5% 0.024 62);
+}
+:root[data-accent="terracotta"][data-theme="dark"] {
+  --bg:          oklch(17.5% 0.010 40);
+  --surface:     oklch(20.5% 0.012 40);
+  --surface-2:   oklch(23.5% 0.014 40);
+  --surface-3:   oklch(27.0% 0.016 40);
+  --border:      oklch(34.0% 0.018 40);
+  --border-soft: oklch(27.5% 0.014 40);
+  --text:        oklch(93.0% 0.010 40);
+  --text-muted:  oklch(72.0% 0.020 40);
+  --orange:      oklch(75.0% 0.120 40);
+  --orange-ink:  oklch(79.0% 0.110 40);
+  --wm-a:        oklch(79.0% 0.110 40);
+  --wm-b:        oklch(78.0% 0.110 62);
+  --accent-ink:  oklch(17.5% 0.010 40);
+  --orange-soft: oklch(27.0% 0.045 40);
+  --sec:         oklch(78.0% 0.110 62);
+  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 40) 78%, transparent);
+  --nav-bg:      oklch(12.5% 0.015 40);
+  --band-a:      oklch(24.0% 0.027 40);
+  --band-b:      oklch(22.0% 0.022 62);
+}
+
+/* The palette button's menu: the three colours, each with its swatch. A
+   script-only control, so it leaves a page with no script. */
+.pal-w { position: relative; display: none; }
+html.js .pal-w { display: inline-flex; }
+.pal-menu {
+  position: absolute; right: 0; top: calc(100% + .5rem); z-index: var(--z-panel); min-width: 9.5rem;
+  display: flex; flex-direction: column; padding: .3rem; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  box-shadow: var(--shadow-lg);
+}
+.pal-menu[hidden] { display: none; }
+.pal-h { padding: .35rem .6rem .25rem; font-size: var(--fs-3xs); font-weight: 700; color: var(--text-muted); }
+.pal-menu button {
+  display: flex; align-items: center; gap: .55rem; padding: .45rem .6rem; border: 0; cursor: pointer;
+  border-radius: calc(var(--radius-sm) - 2px); background: none; color: var(--text); font: inherit; font-size: var(--fs-xs); text-align: left;
+}
+.pal-menu button:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.pal-menu button[aria-checked="true"] { font-weight: 700; }
+.pal-menu button[aria-checked="true"]::after { content: "✓"; margin-left: auto; color: var(--orange-ink); }
+.pal-menu i { width: .9rem; height: .9rem; border-radius: 50%; flex: none; }
+
+/* ── 연구 축 popup ────────────────────────────────────────────────────── */
+/* What an axis chip opens (`pillar.js`): a card under the chip, a sheet from
+   below on a phone. The chips become controls only where the script runs. */
+html.axp-on .chip.pillar[data-p] { cursor: pointer; position: relative; z-index: 2; }
+html.axp-on .chip.pillar[data-p]:hover,
+html.axp-on .chip.pillar[data-p]:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pi, var(--orange)) 35%, transparent); }
+html.axp-lock { overflow: hidden; }
+.axp { position: fixed; inset: 0; z-index: var(--z-panel); pointer-events: none; }
+.axp[hidden] { display: none; }
+.axp-bg { position: absolute; inset: 0; pointer-events: auto; }
+.axp-sheet .axp-bg { background: var(--scrim); animation: axp-fade .18s ease-out; }
+.axp-p {
+  position: absolute; pointer-events: auto; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--surface); color: var(--text); font-size: var(--fs-sm); line-height: 1.6;
+  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+.axp-pop .axp-p { width: min(26rem, calc(100vw - 24px)); max-height: min(70vh, 34rem); animation: axp-in .16s ease-out; }
+.axp-sheet .axp-p { left: 0; right: 0; bottom: 0; max-height: 82vh; border-radius: 16px 16px 0 0; animation: axp-up .22s ease-out; }
+@keyframes axp-fade { from { opacity: 0; } }
+@keyframes axp-in { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes axp-up { from { transform: translateY(40px); opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .axp-p, .axp-bg { animation: none; } }
+/* the head carries the axis's own colour, fading into the card */
+.axp-h {
+  position: sticky; top: 0; z-index: 1; display: flex; align-items: flex-start; gap: .7rem; padding: 1rem 1rem .8rem 1.1rem;
+  background: linear-gradient(100deg, color-mix(in oklab, var(--pc) 70%, var(--surface)), var(--surface) 85%);
+}
+.axp-h .chip { flex: none; margin-top: .15rem; }
+.axp-names { display: grid; flex: 1; min-width: 0; }
+.axp-names b { font-family: var(--t-display); font-size: var(--fs-lg); line-height: 1.3; }
+.axp-names span { font-size: var(--fs-2xs); color: var(--text-muted); }
+.axp-x {
+  flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; cursor: pointer;
+  border: 1px solid var(--border-soft); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-muted);
+}
+.axp-x:hover { color: var(--orange-ink); border-color: var(--orange); }
+.axp-intro { margin: .2rem 1.1rem .9rem; }
+.axp-decs { margin: 0 1.1rem .9rem; padding-top: .8rem; border-top: 1px solid var(--border-soft); }
+.axp-intro + .axp-decs { margin-top: 0; }
+.axp-h + .axp-decs { border-top: 0; padding-top: .2rem; }
+.axp-decs h3 { margin: 0 0 .4rem; font-family: var(--ko); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0; }
+.axp-decs h3 span { margin-left: .4rem; font-weight: 500; color: var(--text-muted); }
+.axp-decs ul { list-style: none; margin: 0; padding: 0; }
+.axp-decs li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .45rem; padding: .4rem 0; border-bottom: 1px dashed var(--border-soft); }
+.axp-decs li:last-child { border-bottom: 0; }
+.axp-dt { font-size: var(--fs-xs); }
+.axp-dc { font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.axp-open { font-size: var(--fs-3xs); font-weight: 700; padding: .02rem .4rem; border-radius: var(--radius-pill); background: var(--orange-soft); color: var(--orange-ink); }

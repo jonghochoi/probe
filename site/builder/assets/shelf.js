@@ -18,7 +18,7 @@
  * Four stores in one file because they are one shelf seen from four sides —
  * 즐겨찾기 is what the reader picked out, 읽음 is what they are done with,
  * 책갈피 is where they stopped, and the corpus set is what they have already
- * been shown — and every surface that shows one shows another: a landing row,
+ * been shown — and every surface that shows one shows another: an analysis-list row,
  * a paper page, the hub.
  *
  * 책갈피 is placed by hand, in the table of contents rather than on the
@@ -32,7 +32,7 @@
  *   [data-star="<id>"]      a toggle; gets its pressed state and glyph here
  *   [data-read-of="<id>"]   any element that wants `data-read` on it
  *   [data-paper-acts]       the paper header's controls, and 책갈피's context
- *   [data-resume]           the landing's one-line link back to the 책갈피
+ *   [data-resume]           the analysis list's one-line link back to the 책갈피
  * Landing, paper page and hub each load it and take what applies.
  */
 
@@ -162,7 +162,7 @@ const Marks = {
       (map[b].at || "").localeCompare(map[a].at || ""));
   },
 
-  /** The one the landing offers to take the reader back to. */
+  /** The one the analysis list offers to take the reader back to. */
   latest() {
     const id = this.list()[0];
     return id ? { id, ...this.all()[id] } : null;
@@ -195,7 +195,7 @@ const Marks = {
  * last look. Set difference cannot be wrong.
  *
  * `seeded` is what keeps the first visit quiet. Arriving at a 32-paper corpus
- * to be told all 32 are new is not news, so the first sight of the landing
+ * to be told all 32 are new is not news, so the first sight of the analysis list
  * records the whole corpus silently and the badge starts from the next one.
  */
 const Corpus = {
@@ -215,7 +215,7 @@ const Corpus = {
     emit("probe:shelf-change", { kind: "corpus" });
   },
 
-  /** Called by the landing, the one page that knows the whole corpus.
+  /** Called by the analysis list, the one page that knows the whole corpus.
    *  Prunes ids that have left it, so the set stays the size of the site. */
   sync(corpusIds) {
     const r = this.read();
@@ -267,7 +267,7 @@ function paint(root = document) {
   paintResume(root);
 }
 
-/* The landing's one line back to wherever the reader stopped — the three most
+/* The analysis list's one line back to wherever the reader stopped — the three most
  * recent marks as chips, and a door to the rest. Everything it prints came out
  * of the marks themselves, so it needs no corpus index to render.
  *
