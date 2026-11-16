@@ -14,6 +14,7 @@ venv/
 .site-cache/
 # The redesign playground's build output (design/playground/build.sh).
 design/playground/out/
+design/playground/pillar/out/
 site/builder/node_modules/
 # …and anywhere else a stray `npm install` puts them.
 node_modules/
