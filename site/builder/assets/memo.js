@@ -158,7 +158,7 @@ if (root) {
   let topmost = "";
   const obs = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) topmost = e.target.id; });
-  }, { rootMargin: "-70px 0px -75% 0px" });
+  }, { rootMargin: "-120px 0px -75% 0px" });
   const observeHeads = () => heads().forEach((h) => obs.observe(h));
   observeHeads();
 

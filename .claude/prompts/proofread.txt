@@ -74,12 +74,12 @@ all six:
      as the paper's claim, in the corpus's own form: `공개 코드(\`<file>\`)에서
      보면 …` inline, a `논문 대 공개 코드` table in a `::: details` when the
      differences are several. Name the file (and the identifier when it
-     helps). A code fact never enters the 요약 surface's evidence cards.
+     helps). A code fact never enters the 요약 surface.
 
 Each round leads with ONE lens so consecutive rounds do not re-read the same
 way, in this order and then again from A: round 1 → A, 2 → B and C, 3 → D
 and E, 4 → F, 5 → the 요약 surface against the original (AUTHORING §4,
-G1–G7), 6 onward → whichever lens the previous rounds' logs found most in.
+G1–G6), 6 onward → whichever lens the previous rounds' logs found most in.
 Leading with one lens does not excuse the others.
 
 

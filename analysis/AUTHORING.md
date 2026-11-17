@@ -11,7 +11,7 @@
 
 | Tab | What it is | Rules |
 |---|---|---|
-| 요약 (`::: glance`) | one screen: our thesis, a narrative, the evidence in four cards | §4 |
+| 요약 (`::: glance`) | one screen: our thesis, a narrative in four moves, the conditions beside it | §4 |
 | 상세 | the full re-telling — four acts, term anchors, quizzes | §1–§3 |
 
 Both are written **in the same `/analyze` run, from the same reading of the
@@ -49,7 +49,7 @@ figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
 appendix: [<A>, <B.2>, <G>]      # appendix sections drawn on, or `none`
 terms: <n>                       # count of inline term anchors
 metric: <the headline number>    # optional — omit rather than invent one
-summary: >                       # 한 문단 요약 — on the page AND on the card
+summary: >                       # 한 문단 요약 — <meta>, search, corpus.json
   …
 ---
 ```
@@ -59,10 +59,10 @@ summary: >                       # 한 문단 요약 — on the page AND on the 
 | `analysis_of` | must equal the file name — the build reports a mismatch. It catches the copy-paste that lands a rewrite under the wrong id |
 | `title` | required. The paper's title, as the card and the page header print it |
 | `alias` | **optional.** The paper's own codename, for surfaces with no room for a title — a reader sees `T-Rex` where an id says nothing. `comparison/` names every compared paper by it (`comparison/AUTHORING.md` §2-1), and a rewrite's commit subject carries it as `(<alias>)`. Resolved by the ladder below; under 24 characters |
-| `tagline` | required. **One line naming what the paper does**, printed under the body H1 and under the title on the analysis list. The H1 is our thesis, often a metaphor, and does not say which paper this is; the header prints the paper's own title; the tagline is the sentence between them. **It never restates the paper's name** — `<코드명> — <무엇을 하는가>` under a title reading `<코드명>: <…>` spends its one line on the word directly above it. Open with what the paper does; the build reports the echo |
-| `summary` | required. 2–3 sentences, read cold. Printed **on the page** as the `한 문단 요약` block between the thesis line and act 1, and flattened for the page's `<meta>` description. Authored as markdown — `**강조**` and `` $`math`$ `` render on the page and are stripped for the card, so bold the three or four phrases that carry the argument (§3-2 applies) |
+| `tagline` | required. **One line naming what the paper does**, printed under the paper's title in the page header and under the title on the analysis list. The H1 is our thesis, often a metaphor, and does not say which paper this is; the tagline is the sentence that does, under the paper's own title. **It never restates the paper's name** — `<코드명> — <무엇을 하는가>` under a title reading `<코드명>: <…>` spends its one line on the word directly above it. Open with what the paper does; the build reports the echo |
+| `summary` | required. 2–3 sentences, read cold. Not printed on the page — the 요약 tab says it at length. Flattened for the page's `<meta>` description, the semantic index and `corpus.json`. Authored as markdown — `**강조**` and `` $`math`$ `` are stripped there, and bold still marks the three or four phrases that carry the argument for a reader of the source (§3-2 applies) |
 | `authors` | one line, as printed |
-| `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly, **most relevant first**. The site files the paper under the **first two** only: the chips its row prints, the axes the analysis list's axis line counts it in, and what a click on those counts returns. A third is harmless and does not publish. The first entry is the axis the paper page's breadcrumb names; empty → 미분류, which beats a wrong pillar |
+| `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly, **most relevant first**. The site files the paper under the **first two** only: the chips its row prints, the axes the analysis list's axis line counts it in, and what a click on those counts returns. A third is harmless and does not publish. The paper page's header prints the same two as its axis chips; empty → 미분류, which beats a wrong pillar |
 | `links` | `kind\|url` pairs — kinds and sourcing rules in R10 |
 | `published` / `generated` | the paper's date / this rewrite's, as the clock reads when you write it. The analysis list **orders the corpus by the commit that lands the file** — its add, or the `analysis: update <id> rewrite` that redoes it — so 최근 is the order a reader watched rewrites appear. `generated` dates a rewrite that has not landed yet and separates two that land in one commit, which is why it carries the clock time. The build reports a value it cannot read |
 | `arxiv_html` / `arxiv_src` / `arxiv_fetched` | the exact version read, and when. `arxiv_html` when the original was the HTML edition, `arxiv_src` when it was the LaTeX source (the source contract below) — exactly one of the two, because it is what every later reader of the rewrite goes back to |
@@ -140,6 +140,10 @@ to fill in.
 4 연구축에 무엇이 걸리나 — the axis layer: `D#` impact, and what it checks
 ```
 
+The page names each act by its number, not by the `##` text: a short noun and
+its question in grey — 문제 · 무엇이 막혔나, 방법 · 무엇을 바꿨나, 검증 · 정말 되는가,
+시사점 · 연구 축에 걸리는 것 (`ACT_NAMES` in `site/builder/render.py`).
+
 Section count varies per paper; the acts are always four. **Act 2 legitimately
 thins out** on a dataset, benchmark or survey paper — it then covers what was
 built and the choices behind it (collection protocol, annotation, splits,
@@ -153,8 +157,8 @@ Four levels, none of which renders as its own tag.
 
 | Level | Renders as | Carries |
 |---|---|---|
-| `#` | the page's thesis line | one sentence — **not** the paper's title |
-| `##` | a numbered divider band | an act name, no content |
+| `#` | not printed — the 요약 tab's `probe-hub` states it (G3) | one sentence — **not** the paper's title |
+| `##` | a numbered divider band, named by the page (R1) | an act name, no content |
 | `###` | the page's `<h2>` + a TOC entry | a section title **and** its English keyword line |
 | `####` | a sub-point inside a section | — |
 
@@ -166,13 +170,16 @@ Four levels, none of which renders as its own tag.
 ```
 
 - **`#` carries the thesis.** The header already prints the title from
-  `title:`, so repeating it wastes the first line. If the paper has a metaphor
-  in it, this is where it goes. Exactly one H1, before act 1. The `한 문단 요약`
-  block is printed under it from `summary:` — do not write one into the body.
+  `title:`, so repeating it wastes the line. If the paper has a metaphor in it,
+  this is where it goes. Exactly one H1, before act 1. 상세 opens at act 1 and
+  does not print it; the 요약 tab's claim card carries the same sentence (G3)
+  and the first screen quotes it. Do not write a one-paragraph summary into
+  the body either — `summary:` is that paragraph.
 - **`##` keeps its act number.** The table of contents groups sections under it.
 - **`###` carries its English keyword line in the heading**, after a `|`.
-  Written as the paragraph below, it becomes body text, never reaches the TOC,
-  and reads as a stray sentence — the build reports it.
+  Written as the paragraph below, it becomes body text, never reaches the
+  heading, and reads as a stray sentence — the build reports it. The table of
+  contents prints the Korean half only.
 - **Section titles describe *this* paper.** Template titles are banned:
   "왜 이 문제가 생기는가" or "무엇을 시사하는가" fit any paper and therefore say
   nothing. Skimming the titles alone must convey the argument. Aim for a claim,
@@ -512,7 +519,7 @@ in both plus the list below.
 - **Unconfirmed → leave the slot empty.** Do not write "없음". A short link row
   is itself reproducibility information.
 - Write them in any order — the cells sort themselves.
-- No `P#` pillar chips in the header. No eyebrow tag above the title.
+- The header's axis chips come from `pillars:` — write no `P#` chip and no eyebrow into the body.
 
 ### 2-11. R11 — Quizzes
 
@@ -526,16 +533,16 @@ Exactly one per section, three options, one correct.
 The explanation must say why the *other* two are wrong; one that only restates
 the answer teaches nothing. The quiz locks on the first click, so write three
 options a reader could plausibly hold, not two obvious throwaways beside the
-answer. The build reports a section without exactly one quiz, and a quiz
-without exactly one correct option.
+answer. The page prints each quiz folded to its question, so the question
+alone is what a reader decides to open it by. The build reports a section without exactly
+one quiz, and a quiz without exactly one correct option.
 
 ### 2-12. R12–R14 — Implementation and authoring traps
 
 - **R12. Visual rules are the site's, not the author's** (`site/CLAUDE.md`).
   No inline styles, no `<style>`, and no blank paragraph, `&nbsp;` or `<br>`
   to open space — every component sets its own. Never re-add chrome the page
-  already prints: the masthead eyebrow, the rule closing the thesis block,
-  the hairline over every `###`, the act divider's bar, a component's title
+  already prints: the hairline over every `###`, the act divider's rule, a component's title
   band. A `###` prints no `#` link, so refer to another section in words where
   that reads better than a `#id` link.
 - **R13. No raw HTML.** The parser runs with `html=False`, so a tag in the
@@ -642,7 +649,7 @@ An `arxiv.org/abs|html|pdf` link whose id has a rewrite in `analysis/` gains a
 
 ---
 
-## 4. The 요약 Surface (G1–G7)
+## 4. The 요약 Surface (G1–G6)
 
 One screen that answers "what is this paper, and why should I care" before the
 reader commits to the body. It is authored as a `::: glance` container at the
@@ -658,16 +665,11 @@ the body renders, so nothing inside it reaches 상세:
 {…}
 ```
 
-<내러티브 — 8–10 연>
+<내러티브 — 8–10 연, [문제] · [방법] · [결과] · [한계]>
 
 ```probe-rail
 {…}
 ```
-
-```probe-act
-{"n": 1, …}
-```
-…three more probe-act…
 
 :::
 ````
@@ -687,14 +689,15 @@ body**.
 
 ```
 probe-hub      중심 주장 카드 — the thesis, one line, a few numbers, one figure
-<내러티브>       flowing Korean prose, no bullets
+<내러티브>       flowing Korean prose in four tagged moves, no bullets
 probe-rail     팩트 레일 — 어떤 판본 · 무엇에 · 얼마나 · 어떤 조건에서
-probe-act ×4   the evidence, one card per act
 ```
 
-Four parts, always, in that order. The reader's path is
-**claim → story → conditions → evidence**; reordering them makes the numbers
-arrive before the reason they matter.
+Three parts, always, in that order. The reader's path is
+**claim → story → conditions**; reordering them makes the numbers arrive
+before the reason they matter. The evidence itself — figures, equations,
+per-row numbers — is the body's: 요약 is read for the story, and a card grid
+under it is skipped.
 
 ### 4-3. G3 — `probe-hub`, the claim in one card
 
@@ -711,7 +714,10 @@ arrive before the reason they matter.
 - `facts` — **2 to 4**, and each must be a number the paper itself states. Past
   four they stop being headlines and become a table.
 - `figure` is optional and, when present, is the figure a reader would keep if
-  they could keep only one (figure ids on this surface: G6).
+  they could keep only one. It is cited by id, never by URL: the id resolves
+  through the body's own `probe-figure` (R6), which already declared where the
+  figure lives, so an id the body never declares publishes an empty frame and
+  the build reports it. The id also goes in `figures:` (§1).
 
 ### 4-4. G4 — The narrative
 
@@ -721,17 +727,24 @@ report. The body argues; this talks.
 | | |
 |---|---|
 | Length | **8–10 연**, 900–1,100 printed characters (about 1 분 40 초 읽기). The build reports outside **8–10 연 / 750–1,350 자** — "roughly" is the author's business, "a paragraph" and "the body again" are the build's |
-| Shape | stanzas of 2–4 sentences, one move per stanza: 무슨 일 → 그 결과 → 이유 |
+| Shape | stanzas of 2–4 sentences, one beat per stanza: 무슨 일 → 그 결과 → 이유. The stanza's **first sentence carries it** — the page sets it bold, so a reader skimming the bold reads the story |
+| Moves | four, in order — **문제** (what was blocked, and why) → **방법** (what the paper changes) → **결과** (what the experiments show) → **한계** (the authors' own limits). The stanza a move starts on opens with its tag: `[문제] …`, `[방법] …`, `[결과] …`, `[한계] …` |
 | Register | 폴라이트-캐주얼 종결 (`~요` / `~ㅂ니다`), 괄호 방백 허용, 감탄은 진짜일 때만 |
-| Closing | the last stanza is a **한 줄 토** built from the paper's own stated limits |
+| Closing | the last stanza is a **한 줄 토** built from the paper's own stated limits, inside `[한계]` |
 
 Hard constraints:
 
+- **Each tag exactly once, in order.** `[문제]` opens the first stanza and
+  `[한계]` one of the last two; where 방법 and 결과 start is the author's
+  call — the stanza's role decides it, not its first word (a stanza that
+  diagnoses the cause is still 문제 even when it opens on 그래서). The page
+  prints each name in the margin beside its move.
 - **No bullets, no headings, no numbered lists, no quote blocks.** A list here
-  is a summary wearing prose clothes, and the tab already has cards for that.
-- **Every number in it appears elsewhere with a citation** — the rail or an act
-  card. The narrative itself carries no source marks; they would break the read.
-- **No opinion the paper does not hold** (G7). Relaying is the whole job here.
+  is a summary wearing prose clothes; the four tags are the only structure the
+  prose carries.
+- **Every number in it appears elsewhere with a citation** — the rail or the
+  body. The narrative itself carries no source marks; they would break the read.
+- **No opinion the paper does not hold** (G6). Relaying is the whole job here.
 - **Not `summary:` again.** That is 2–3 sentences read cold; this is a
   different artifact at ten times the length and does not restate it phrase for
   phrase.
@@ -758,40 +771,10 @@ The last row is not optional padding: without it the tab reads as advocacy.
 The rail is **information, not decoration** — a rail of restated adjectives is
 worse than no rail.
 
-### 4-6. G6 — `probe-act`, four cards and no more
-
-    ```probe-act
-    {"n": <1–4>, "title": "<주장형 제목 — 이 논문에만 맞는>",
-     "claim": "<한 줄>",
-     "figure": "<figure id>",
-     "eq": "<LaTeX, 구분자 없이>",
-     "scale": {"rows": [{"label": "<비교 대상>", "n": <number>, "value": "<표기>"}]},
-     "source": "<원문 §<x> · Table <n> · 부록 <X>>"}
-    ```
-
-- **Exactly four**, `n` = 1…4, mapping to the body's four acts. The act
-  *names* are the ones this paper earns (문제 / 관찰 / 방법 / 증거 is the common
-  shape, not a fixed vocabulary), but the count is fixed — a fifth card means
-  the tab is becoming the body.
-- **Each card carries at least one of `figure` / `eq` / `scale`.** A card of
-  three prose lines is the failure this tab exists to avoid.
-- **`eq` is ONE relation.** The card is a quarter of the row, and a wider
-  formula scrolls inside it with its tail off-screen. Two relations joined by
-  `\qquad` is the shape that overflows; pick the one the claim rests on.
-- `title` follows R2: a claim about *this* paper, never a template heading.
-- `source` is required on every card, so every number on this tab is
-  traceable without leaving the tab.
-
-**Figures on this surface are cited by id, never by URL** — in `probe-hub` and
-`probe-act` alike. The id resolves through the body's own `probe-figure` (R6),
-which already declared where the figure lives; an id the body never declares
-publishes an empty frame, and the build reports it. Every such id also goes in
-`figures:` (§1).
-
-### 4-7. G7 — What 요약 may not contain
+### 4-6. G6 — What 요약 may not contain
 
 - **No `D#`, no `context/` material, no our-view opinion.** Our layer is act 4
-  of the body; here it would put a claim the paper never made one card away
+  of the body; here it would put a claim the paper never made one stanza away
   from the paper's own numbers.
 - **No number that is not in the original.** Nothing is computed for effect;
   a ratio the paper does not state is not ours to print.
@@ -810,15 +793,15 @@ means "a strict build fails".
 | Rule | Enforced by |
 |---|---|
 | Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title, `alias:` and `metric:` within their widths (§1), `appendix:` present (R15), the `::: glance` container present (§4) | `site/builder/corpus.py` |
-| `figures:` ↔ every `probe-figure`, `probe-hub` and `probe-act` figure id across both surfaces, and every 요약 figure id declared by a body `probe-figure` (R6, G6) | `site/builder/corpus.py` |
+| `figures:` ↔ every `probe-figure` and `probe-hub` figure id across both surfaces, and every 요약 figure id declared by a body `probe-figure` (R6, G3) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), raw HTML published as text (R13), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, the nine-row ceiling, `loop.to` resolving to one earlier step and the `lanes` · `loop` · `hot` limits, R6), lineage, scale, split (at most one `us`), parts (all-or-none `state`, four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |
 | Characters the code font cannot cover (R8) | `site/builder/fonts.py` |
 | The vendored KaTeX stylesheet keeping its faces — without it every formula publishes in the body font | `site/builder/assets_out.py` |
-| 요약's spine — hub, narrative, rail, exactly four `probe-act` (G2, G6); `probe-hub` / `probe-rail` / `probe-act` payload shapes, including each card's `source` and its figure, equation or scale (G3, G5, G6); narrative length band and its list ban (G4) | `site/builder/glance.py` |
-| A `D#` token or a `context/…md` path inside `::: glance` (G7) | `site/builder/glance.py` |
+| 요약's spine — hub, narrative, rail (G2); `probe-hub` / `probe-rail` payload shapes (G3, G5); narrative length band, its list ban and its four move tags in order (G4) | `site/builder/glance.py` |
+| A `D#` token or a `context/…md` path inside `::: glance` (G6) | `site/builder/glance.py` |
 
 One check sits outside the build, because it is about meaning rather than
 rendering:
@@ -833,5 +816,5 @@ text, so the build cannot see it as wrong.
 Everything in §1–§4 not in the tables above is enforced by review — the
 prompt's self-check. The rules code cannot see decide whether 요약 is worth
 having: whether the narrative sounds like a person, whether it relays an
-opinion of ours without naming a `D#`, whether each act card's evidence is the
-right evidence, and whether the four card titles read as an argument alone.
+opinion of ours without naming a `D#`, whether each move starts where its
+role does, and whether the bold first sentences alone tell the story.

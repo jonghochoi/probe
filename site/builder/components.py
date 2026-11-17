@@ -106,6 +106,8 @@ _ICON_PATHS = {
     "more": '<circle cx="3.6" cy="8" r=".7"/><circle cx="8" cy="8" r=".7"/><circle cx="12.4" cy="8" r=".7"/>',
     # 탐색 회차 — a month page, the cell the date line opens its calendar from.
     "calendar": '<rect x="2.4" y="3.4" width="11.2" height="10.4" rx="1.6"/><path d="M2.4 6.6h11.2M5.6 1.8v2.8M10.4 1.8v2.8"/>',
+    # 목차 — three lines, the last one short: a list of headings.
+    "list": '<path d="M2.6 4h10.8M2.6 8h10.8M2.6 12h6.4"/>',
     # 메모 — a pencil, because the button opens a place to write.
     "pencil": '<path d="M10.6 2.7 13.3 5.4 5.6 13.1 2.4 13.6 2.9 10.4Z"/><path d="M9.1 4.2l2.7 2.7"/>',
 }
@@ -230,6 +232,20 @@ def src_mark(kind: str) -> str:
         return ""
     return (f'<svg class="src-mark" viewBox="0 0 20 20" aria-hidden="true">'
             f"{body}</svg>")
+
+
+# A rewrite's four acts, as the page names them: a short noun the act strip,
+# the contents and the 요약 cards can hold at a phone's width, and the question
+# under it in grey. The acts are fixed by `analysis/AUTHORING.md` R1, so their
+# names are the page's, keyed by act number.
+ACT_NAMES = {"1": ("문제", "무엇이 막혔나"), "2": ("방법", "무엇을 바꿨나"),
+             "3": ("검증", "정말 되는가"), "4": ("시사점", "연구 축에 걸리는 것")}
+
+
+def card_head(noun: str, sub: str = "") -> str:
+    """A 요약 card's head: its short noun, underlined, and a grey line."""
+    return (f'<div class="g-head"><b>{esc(noun)}</b>'
+            + (f'<span>{esc(sub)}</span>' if sub else "") + "</div>")
 
 
 def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None,

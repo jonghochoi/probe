@@ -369,7 +369,7 @@ if (acts) {
     const link = row.querySelector("a[href^='#']");
     if (!link) return;
     const anchor = link.getAttribute("href").slice(1);
-    const label = (link.querySelector(".toc-k") || link).textContent.trim();
+    const label = (link.querySelector(".ms-t") || link).textContent.trim();
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "toc-mark";
@@ -416,7 +416,7 @@ if (acts) {
           hereLabel = headLabel(e.target);
           paintMarks();
         });
-      }, { rootMargin: "-70px 0px -75% 0px" });
+      }, { rootMargin: "-120px 0px -75% 0px" });
       heads.forEach((h) => obs.observe(h));
     }
 

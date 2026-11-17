@@ -67,11 +67,14 @@ was read.
 **The article frame is the stylesheet's.** What `analysis/AUTHORING.md` R12
 forbids an author to write, `builder/assets/site.css` keeps:
 
-- A 3px left accent band means "aside" — the 요약 block, the five callouts, a
-  term panel, a quiz — and every such card squares off on that edge
+- A 3px left accent band means "aside" — the five callouts, a term panel, a
+  quiz — and every such card squares off on that edge
   (`border-radius: 0 var(--radius) var(--radius) 0`), since a rounded band
   reads as a different component. A card inside a multi-card grid
-  (`probe-split`) is keyed by its heading color, never a band.
+  (`probe-split`) is keyed by its heading color, never a band. The 요약
+  cards are the surface, not asides: each is named by an underlined head
+  and a glow from its top edge, and carries no band. Inside the story a
+  move is named in the margin beside it, never by a band either.
 - Every component owns its internal spacing; body paragraph and list margins
   apply only to the article flow, a callout body and a `::: details` body.
 - A `###` section keeps its `id` (contents, scroll-spy and memo anchor resolve
