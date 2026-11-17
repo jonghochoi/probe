@@ -158,8 +158,8 @@ edition's host for a venue whose edition has ended or ends within 60 days,
 and keeps every host it cannot reach in `context/EVENTS.md` under **Hosts to
 allow** — committed even in a week no date moved, and dropped the week the
 host answers. Its report, which the routine's push notification carries
-(§5-2), opens with `허용 주소 추가 필요: <host>` for each one. Add the host
-here, and the next run reads it.
+(§5-2), opens with the week's counts and then `허용 주소 추가 필요: <host>`
+for each one. Add the host here, and the next run reads it.
 
 A site can refuse the routine on its own side as well, once the allowlist
 has let it through — a bot challenge (`403` with `cf-mitigated: challenge`),
@@ -178,7 +178,7 @@ by hand.
 | Environment | The one from §2, with §5-1's hosts |
 | Trigger | Weekly, on a fixed morning in your time zone — dates move slowly, and a deadline a week away is caught in time |
 | Connectors | None |
-| Notifications | Push on — the run's report reaches the phone, and it leads with any host to add |
+| Notifications | Push on — the run's report reaches the phone: the week's counts on its first line, then any host to add |
 | Permissions | Nothing to set, as §3 |
 
 `/follow` (`.claude/commands/follow.md`) runs the same thing from an
