@@ -115,7 +115,7 @@ PROCEDURE
 
      $PROBE_PRIVATE_DIR/MY-METHOD.md     all of it; §1 주장 and §4 알려진 약점 twice
      $PROBE_PRIVATE_DIR/BASKET.md     every row; the `active` ones are the run
-     context/MASTER.md                §1 Identity, §4 Pillars
+     context/MASTER.md                §2 Long-term Context, §3 Pillars
      context/P<n>.md                  §1 Scope, §2 Open Questions — the pillars
                                       the active basket papers carry
 
@@ -332,7 +332,7 @@ D1. DIGEST. The scope's own digest, not the method's:
 
    A non-zero exit → STOP: the scope is not one the operator's script
    knows; say so and name the scope as given. Read `MY-METHOD.md` all of it,
-   `context/MASTER.md` §1 and §4, and the pillar files the rewrite's act 4
+   `context/MASTER.md` §2 and §3, and the pillar files the rewrite's act 4
    names. Hold the digest's `Code:` hash, the `MY-METHOD.md` hash and the run
    date for the metadata line. Every code anchor comes from this digest or
    a `grep -n` in `code/` that found it.

@@ -72,7 +72,7 @@ PROCEDURE
 
 1. ORIENT — a light pass over where this team stands, then let it go.
 
-     context/MASTER.md       §2 Purpose, §4 Pillars
+     context/MASTER.md       §1 Purpose, §3 Pillars
      context/P2.md           the hand and sensors — the Premises paragraph
                              of its §1; the experiments in step 5 run on it
      context/P<n>.md         §2 Open Questions, §1 Anti-topics — background

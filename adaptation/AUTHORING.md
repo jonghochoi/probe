@@ -64,8 +64,8 @@ Each `##` is a kind exactly as the NotebookLM CLI names it — `slide-deck`,
 `infographic`, `audio`, `mind-map` — and its body is the text sent as that
 kind's prompt, verbatim. The body:
 
-- asks for Korean and names the reader — the researcher `context/MASTER.md`
-  §1 describes;
+- asks for Korean and names the reader — a researcher working in the scope
+  `context/MASTER.md` §2 sets;
 - follows the rewrite's thesis and its four acts, in order;
 - gives the numbers the rewrite's 요약 cards carry, with their units, and
   asks that no other number be stated;

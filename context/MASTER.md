@@ -5,7 +5,7 @@
 
 # Research Context — Hand-centric Dexterous Manipulation
 
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P4.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P5.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -13,15 +13,15 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P0–P4.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P0–P5.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
-- `[STABLE]`: changes rarely (identity, purpose, scope)
+- `[STABLE]`: changes rarely (purpose, scope)
 - `[LIVING]`: updated as research progresses
 - `[AGENT-INPUT]`: retrieval agent conditions on this — keep signal-dense
 
 **Update protocol**
-- Identity / Purpose: change only with deliberate review (semantic shift, not phrasing)
+- Purpose / Scope of work: change only with deliberate review (semantic shift, not phrasing)
 - Pillars: structure stable; the open questions and their threads evolve as evidence accumulates
 
 **Output formatting & authoring rules**
@@ -31,20 +31,7 @@ Output format is one contract per track — `scouting/AUTHORING.md`, `analysis/A
 
 ---
 
-## 1. Identity [STABLE] [AGENT-INPUT]
-
-> PROBE scouts research on **hand-centric dexterous manipulation at the VLA
-> level** — how each part of a VLA is built, and what each choice buys and
-> costs on a dexterous, contact-rich task. The common default of a part is a
-> **thread to be measured against**, never a position to argue against.
-
-The context holds questions, never an answer or a bet on one — where the
-operator's stance lives instead is `context/CLAUDE.md`'s rule. Each pillar
-says why its axis is asked, and §4 says which pillar owns what. Neither is restated here.
-
----
-
-## 2. Purpose [STABLE]
+## 1. Purpose [STABLE]
 
 This document serves *two coupled functions*:
 
@@ -56,25 +43,33 @@ This document serves *two coupled functions*:
 
 ---
 
-## 3. Long-term Context [STABLE → semi-LIVING]
+## 2. Long-term Context [STABLE → semi-LIVING] [AGENT-INPUT]
 
-### 3.1 Field
+### 2.1 Field
 Human-level dexterous manipulation spans a full stack — hardware that
 expresses rich contact, data collection that preserves human interaction,
 control, models that absorb multimodal supervision at scale, and evaluation
 that makes iteration reproducible. The research this repo scouts can sit
 anywhere on it.
 
-### 3.2 Scope of work
-The current scope is **modeling at the VLA level** — the five pillars of §4.
+### 2.2 Scope of work
+The current scope is **hand-centric dexterous manipulation at the VLA level** —
+how each part of a VLA is built, what each choice buys and costs on a
+dexterous, contact-rich task, and the human-to-robot data collection it learns
+from: the six pillars of §3.
 The rest of the stack is read where it bears on a pillar question and is not
 scouted for its own sake.
 
+The context holds questions about this scope, never an answer or a bet on
+one: the common default of a VLA part is a **thread to be measured
+against**, never a position to argue against, and where the operator's
+stance lives instead is `context/CLAUDE.md`'s rule.
+
 ---
 
-## 4. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
+## 3. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Five pillars (P0–P4)**, none ranked above another.
+**Six pillars (P0–P5)**, none ranked above another.
 
 Each pillar file owns its own scope, scouting lens, anti-topics, open questions
 and tracked literature. This table is the index — what a pillar owns in one
@@ -89,6 +84,7 @@ is a second copy to keep in step, so it is not restated.
 | P2 — Structured Multimodal Observation Fusion | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder | 4 | `context/P2.md` |
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P4.md` |
+| P5 — Retargeting & Human-in-the-Loop Data Collection | how human motion becomes robot training data — the retargeting map, its yield, the human-in-the-loop handover, where operator time goes | 4 | `context/P5.md` |
 
 Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**, **D4QX**, **D5SH**, **D5DQ**, **D8SD**, **D9WZ**, **D7VC**, **D5ZL**.
 A retired id is never re-issued. When a question folds into another, every
@@ -98,7 +94,7 @@ rather than part of another question — so no published page points at it.
 
 ---
 
-## 5. Venue Priority [AGENT-INPUT]
+## 4. Venue Priority [AGENT-INPUT]
 
 | Tier | Venues |
 |------|--------|
@@ -110,7 +106,7 @@ rather than part of another question — so no published page points at it.
 
 ---
 
-## 6. Cross-pollination Budget [AGENT-INPUT]
+## 5. Cross-pollination Budget [AGENT-INPUT]
 
 1 paper per pillar per slot from an adjacent field that plausibly transfers. A
 slot is a 14-day block counted from Monday 2026-01-05, numbered

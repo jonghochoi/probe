@@ -83,7 +83,7 @@ reaches the next run with nothing re-pasted.
 | Form field | Value |
 |---|---|
 | Name | `probe-scout` |
-| Prompt (Instructions) | `Read .claude/prompts/scout.txt and run PART I with pillars: 0 1 2 3 4` — the pillar numbers are the one argument. Model → **Sonnet**; every agent the run dispatches runs on it |
+| Prompt (Instructions) | `Read .claude/prompts/scout.txt and run PART I with pillars: 0 1 2 3 4 5` — the pillar numbers are the one argument. Model → **Sonnet**; every agent the run dispatches runs on it |
 | Repositories | This repo |
 | Environment | The one from §2 |
 | Trigger | A recurring cadence of your choosing (the form takes local time → UTC, min interval 1 h) |
@@ -93,15 +93,15 @@ reaches the next run with nothing re-pasted.
 - The session is the master: it dispatches one pillar agent per pillar in
   parallel, one paper judge, then the pillar agents again to write, and
   commits once (`.claude/prompts/scout.txt`). A run therefore lasts about
-  as long as its slowest pillar plus the judge, not five pillars end to end.
+  as long as its slowest pillar plus the judge, not six pillars end to end.
 - Set the environment to **at most one active session** — two runs of one
   date would write the same files. The prompt keeps a `git pull --rebase`
   retry as a backstop.
 - Fewer pillars is a different argument, not a different routine:
   `… with pillars: 1 3` runs P1 and P3, and the run file lists only those.
-- `/scout 0 1 2 3 4` (`.claude/commands/scout.md`) runs the same thing from an
+- `/scout 0 1 2 3 4 5` (`.claude/commands/scout.md`) runs the same thing from an
   interactive session.
-- Of `context/MASTER.md` the run reads §5 Venue Priority and §6
+- Of `context/MASTER.md` the run reads §4 Venue Priority and §5
   Cross-pollination Budget alone, there, so an edit to either reaches the
   next run with nothing else to change.
 

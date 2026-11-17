@@ -2,15 +2,16 @@
 """Check that `context/` keeps the shape its own documents promise.
 
 `context/_TEMPLATE.md` defines the pillar section spine, `context/MASTER.md`
-§4 states how many questions each pillar holds and which sections MASTER owns,
-and `context/CLAUDE.md` restates that ownership — every one of those is a claim
+§3 states how many questions each pillar holds, the pillar files' opening
+blockquote names which sections MASTER owns, and `context/CLAUDE.md` restates
+that ownership — every one of those is a claim
 some other file has to keep true, and nothing reads them back. This lint turns
 those claims into checks:
 
   1. SPINE — every `context/P<n>.md` carries the `## N.` sections
      `context/_TEMPLATE.md` defines. The spine is read from the template at run
      time, so a section added there is demanded everywhere with no code change.
-  2. COUNT — each row of MASTER §4's pillar table states a question count equal
+  2. COUNT — each row of MASTER §3's pillar table states a question count equal
      to the number of `#### [D…]` headings in the pillar file the row names.
   3. SECTION — every section name a document claims MASTER owns resolves to a
      real `## ` heading in MASTER. The claims live in two closed forms: the
@@ -32,7 +33,7 @@ Precision over recall, mirroring the repo's other gates. SECTION resolves a
 claim by a deliberately small normalization — lowercase, drop a leading `the`,
 drop the `## N.` number and the trailing `[STABLE]`-style markers, then accept
 an exact match or a word-prefix of a heading (`Venue` → `Venue Priority`) —
-plus two aliases for the names MASTER files under a different heading, listed
+plus one alias for the name MASTER files under a different heading, listed
 in `_SECTION_ALIASES`. PILLARSET only fires on a number word directly
 qualifying a pillar, so "six gates" and "five helpers" are left alone.
 
@@ -89,7 +90,7 @@ _PILLAR_TAG = re.compile(r"\s*[—-]\s*P(?:\d+|<N>)\s*$")
 
 _DECISION_HEADING = re.compile(r"^####\s+\[D")
 
-# MASTER §4's pillar table: a header row naming a `Questions` cell and a `File`
+# MASTER §3's pillar table: a header row naming a `Questions` cell and a `File`
 # cell, then one row per pillar.
 _TABLE_ROW = re.compile(r"^\s*\|(.+)\|\s*$")
 _TABLE_RULE = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
@@ -105,12 +106,10 @@ _CLAIM_SPLIT = re.compile(r",|\band\b")
 # List glue that is not a section name.
 _CLAIM_STOPWORDS = {"those", "that", "which", "it", "them"}
 
-# Claims MASTER files under a heading of another name. Two entries, each a
-# pointer the documents already make explicit: a pillar's `Thesis tie` points
-# at MASTER §1 Identity, and the pillar overview is MASTER §4 Pillars — written
-# as a range so a new pillar does not need an entry here.
+# Claims MASTER files under a heading of another name. One entry, a pointer
+# the documents already make explicit: the pillar overview is MASTER §3
+# Pillars — written as a range so a new pillar does not need an entry here.
 _SECTION_ALIASES = (
-    (re.compile(r"^thesis$"), "identity"),
     (re.compile(r"^(?:pillars?|p\d+-p\d+) overview$"), "pillars"),
 )
 

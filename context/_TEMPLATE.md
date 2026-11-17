@@ -1,11 +1,11 @@
 # P<N> — <Pillar Name>
 
 > **Owns** the P<N> Open Questions, Anti-topics and Tracked
-> Literature. The thesis, the pillar overview, venue and
-> cross-pollination are `context/MASTER.md`'s — a fact in both files is one of
+> Literature. The pillar overview, venue and cross-pollination
+> are `context/MASTER.md`'s — a fact in both files is one of
 > them going stale.
 > **Static context, read-only.** A scouting run reads this file, and of
-> `context/MASTER.md` §5 and §6 alone, and writes
+> `context/MASTER.md` §4 and §5 alone, and writes
 > `scouting/P<N>/YYYY-MM-DD.md`; the on-demand commands (`/analyze`,
 > `/compare`, `/ideate`, `/distinguish`, `/adapt`) read it beside
 > `context/MASTER.md`. Output format is the track's own contract
@@ -21,9 +21,9 @@ dense paragraph — what a paper must be about to land here, stated as what is
 asked, not as an answer.>
 
 **Thesis tie** — why this axis is asked: <what is open on this axis, in a
-line or two back to `context/MASTER.md` §1 — the sentence that makes a paper
-P<N>-relevant rather than merely adjacent. A tension the questions keep open,
-never a bet on how it resolves.>
+line or two back to the scope `context/MASTER.md` §2 sets — the sentence
+that makes a paper P<N>-relevant rather than merely adjacent. A tension the
+questions keep open, never a bet on how it resolves.>
 
 **Questions**: <short form> (D<id>), <short form> (D<id>), … — one per question.
 
