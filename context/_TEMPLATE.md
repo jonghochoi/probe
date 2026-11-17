@@ -23,8 +23,15 @@ sentence that makes a paper P<N>-relevant rather than merely adjacent.>
 
 **Tracked items**: <axis 1> (D<id>), <axis 2> (D<id>), … — one per Decision.
 
-**Scouting lens**: <how wide recall runs around the north star — the comparison
-group that gets surfaced and scored rather than rejected.>
+**Scouting lens** — three tiers, and a paper is placed on this ladder before
+it is scored:
+
+1. **<the north star>** — <what a paper must show to rank first>.
+2. **<the evidence pool>** — <what transfers to this pillar's decisions>.
+3. **<the outermost ring>** — <what is still surfaced, often as the
+   comparison group>.
+
+Recall runs wide across all three; the ranking anchor stays tier 1.
 
 **Anti-topics** (noise filter — excluded unless an unusually strong tie to
 P<N> or a P<N> Decision):
@@ -37,12 +44,11 @@ P<N> or a P<N> Decision):
 
 ## 2. Decision Log — P<N> [LIVING] [AGENT-INPUT]
 
-One `####` heading and one bullet per decision — the current choice, **bold**
-on the chosen alternative, tracked and deferred alternatives named inline. Rationale lives outside this file. Entry format and
-the `D#` allocation across pillars: `context/CLAUDE.md`.
+The current choice per decision. The entry format and the allocation across
+pillars are `context/CLAUDE.md`'s.
 
 #### [D<id>] <Decision title> (P<N>)
-- <the current choice>
+- **<the choice, in words>** — <what it commits to>. Tracked: <alternatives>. Deferred: <alternatives>. Reopens if: <condition>.
 #### [D<id>] <Decision title> (P<N>)
 - …
 
@@ -77,4 +83,4 @@ already says.
 
 | Paper | arXiv | Year | Role |
 |---|---|---|---|
-| <codename> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | YYYY | <why it anchors the pillar> (D<id>) |
+| <codename> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | YYYY | **tier <n>** — <what it is and what it anchors> (D<id>) |
