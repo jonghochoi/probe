@@ -21,6 +21,10 @@
  * the two surfaces answer the same question the same way or one of them is
  * lying.
  *
+ * A build given a search endpoint adds a second answer: a tab of passages the
+ * remote index finds by meaning, asked for only when the reader takes the row
+ * that offers it (see "의미" below).
+ *
  * Shelf state rides along where there is any — a starred paper and a read one
  * say so on their own row — but the palette works without `shelf.js`, since
  * finding a paper is not a thing the reader has to have kept anything to do.
@@ -147,6 +151,183 @@ function search(q) {
   return { rows: kept.map((s) => s.row), partial: partial, all: false };
 }
 
+/* ── How an excerpt prints ─────────────────────────────────────────────
+ * The index answers with excerpts of the rewrites as written, and a rewrite
+ * writes its inline math as TeX — `\hat{\mathbf{x}}_{o}` reads as noise in a
+ * two-line excerpt — so a passage prints through this and reads `x̂ₒ`. It
+ * covers the commands the corpus actually writes — fonts, accents, Greek, the
+ * common operators, sub- and superscripts — and leaves anything else as its
+ * bare name rather than guessing; the page itself is where a formula is read
+ * properly. */
+const SYM = {
+  alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", varepsilon: "ε",
+  zeta: "ζ", eta: "η", theta: "θ", iota: "ι", kappa: "κ", lambda: "λ", mu: "μ",
+  nu: "ν", xi: "ξ", pi: "π", rho: "ρ", sigma: "σ", tau: "τ", upsilon: "υ",
+  phi: "φ", varphi: "φ", chi: "χ", psi: "ψ", omega: "ω",
+  Gamma: "Γ", Delta: "Δ", Theta: "Θ", Lambda: "Λ", Xi: "Ξ", Pi: "Π",
+  Sigma: "Σ", Phi: "Φ", Psi: "Ψ", Omega: "Ω",
+  times: "×", cdot: "·", in: "∈", notin: "∉", to: "→", rightarrow: "→",
+  leftarrow: "←", Rightarrow: "⇒", mapsto: "↦", top: "⊤", sim: "~", pm: "±",
+  dots: "…", ldots: "…", cdots: "⋯", star: "⋆", mid: "|", sum: "∑", prod: "∏",
+  int: "∫", le: "≤", leq: "≤", ge: "≥", geq: "≥", neq: "≠", ne: "≠",
+  approx: "≈", propto: "∝", odot: "⊙", otimes: "⊗", oplus: "⊕", circ: "∘",
+  partial: "∂", nabla: "∇", infty: "∞", ell: "ℓ", forall: "∀", exists: "∃",
+  subset: "⊂", subseteq: "⊆", cup: "∪", cap: "∩", langle: "⟨", rangle: "⟩",
+  lVert: "‖", rVert: "‖", Vert: "‖", lvert: "|", rvert: "|", lfloor: "⌊",
+  rfloor: "⌋", lceil: "⌈", rceil: "⌉", max: "max", min: "min", log: "log",
+  exp: "exp", sin: "sin", cos: "cos", tanh: "tanh", arg: "arg", argmax: "argmax",
+  argmin: "argmin", left: "", right: "", quad: " ", qquad: " ",
+};
+const ACCENT = { hat: "̂", widehat: "̂", tilde: "̃", widetilde: "̃",
+                 bar: "̄", overline: "̄", dot: "̇", ddot: "̈", vec: "⃗" };
+// Patterns as strings: each is built into the rule that reads its argument.
+const FONT = "\\\\(?:mathbf|mathrm|mathcal|mathbb|mathit|mathsf|mathtt|boldsymbol|bm|" +
+             "text|textbf|textit|textrm|operatorname|rm)(?![A-Za-z])";
+const ACCENTS = "\\\\(" + Object.keys(ACCENT).join("|") + ")(?![A-Za-z])";
+const SUB = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉",
+              "+": "₊", "-": "₋", "=": "₌", "(": "₍", ")": "₎", ".": ".", ",": ",", a: "ₐ", e: "ₑ", h: "ₕ", i: "ᵢ",
+              j: "ⱼ", k: "ₖ", l: "ₗ", m: "ₘ", n: "ₙ", o: "ₒ", p: "ₚ", r: "ᵣ", s: "ₛ", t: "ₜ",
+              u: "ᵤ", v: "ᵥ", x: "ₓ" };
+const SUP = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹",
+              "+": "⁺", "-": "⁻", "=": "⁼", "(": "⁽", ")": "⁾", ".": ".", a: "ᵃ", b: "ᵇ", c: "ᶜ", d: "ᵈ",
+              e: "ᵉ", f: "ᶠ", g: "ᵍ", h: "ʰ", i: "ⁱ", j: "ʲ", k: "ᵏ", l: "ˡ", m: "ᵐ", n: "ⁿ",
+              o: "ᵒ", p: "ᵖ", r: "ʳ", s: "ˢ", t: "ᵗ", u: "ᵘ", v: "ᵛ", w: "ʷ", x: "ˣ", y: "ʸ",
+              z: "ᶻ", T: "ᵀ", "⊤": "ᵀ", "*": "*", "′": "′", "'": "′" };
+// One brace group, innermost first — every rule below reads a group that has
+// no group inside it, and the loop runs until none is left to read.
+const ARG = "\\{([^{}]*)\\}";
+
+function script(body, table, mark) {
+  const chars = [...body.replace(/\s+/g, "")];
+  if (chars.length && chars.every((ch) => table[ch])) return chars.map((ch) => table[ch]).join("");
+  return mark + (chars.length > 1 ? "(" + body + ")" : body);
+}
+
+function readable(s) {
+  let t = String(s == null ? "" : s)
+    .replace(/\\\\(?=[A-Za-z{}|%,!; ])/g, "\\")        // a fence's doubled escape
+    .replace(/\$`([^`]*)`\$/g, "$1")
+    // Escaped braces are text, not groups: parked where the group rules below
+    // cannot read them, and put back at the end.
+    .replace(/\\\{/g, "").replace(/\\\}/g, "")
+    .replace(/\\([%#&_$])/g, "$1").replace(/\\\|/g, "‖")
+    // Symbols first, while each command still ends where its letters do —
+    // with a font command dropped, `\neq\mathcal{F}` would read as `\neqF`.
+    .replace(/\\([A-Za-z]+)/g, (m, k) => (k in SYM ? SYM[k] : m));
+  for (let i = 0; i < 8; i++) {
+    const before = t;
+    t = t
+      .replace(new RegExp(FONT + "\\s*" + ARG, "g"), (m, a) => a)
+      .replace(new RegExp("\\\\[dt]?frac\\s*" + ARG + "\\s*" + ARG, "g"), (m, a, b) => a + "/" + b)
+      .replace(new RegExp("\\\\sqrt\\s*" + ARG, "g"), (m, a) => "√" + a)
+      .replace(new RegExp(ACCENTS + "\\s*" + ARG, "g"),
+        (m, k, a) => ([...a].length === 1 ? a + ACCENT[k] : a))
+      .replace(new RegExp("_" + ARG, "g"), (m, a) => script(a, SUB, "_"))
+      .replace(new RegExp("\\^" + ARG, "g"), (m, a) => script(a, SUP, "^"))
+      .replace(new RegExp(ARG, "g"), "$1");
+    if (t === before) break;
+  }
+  return t
+    .replace(new RegExp(FONT + "\\s*", "g"), "")
+    .replace(new RegExp(ACCENTS + "\\s*([A-Za-z])", "g"), (m, k, a) => a + ACCENT[k])
+    .replace(/\\([A-Za-z]+)/g, "$1")
+    .replace(/\\[,;:! ]/g, " ")
+    .replace(/_([A-Za-z0-9])/g, (m, ch) => SUB[ch] || m)
+    .replace(/\^([A-Za-z0-9⊤*'])/g, (m, ch) => SUP[ch] || m)
+    .replace(//g, "{").replace(//g, "}")
+    .replace(/[ \t]{2,}/g, " ");
+}
+
+/* ── 의미 — the remote index ──────────────────────────────────────────── */
+/* The endpoint `site/search/` deploys, carried by the index rather than by
+ * each page: the index already reaches every page, and a build without
+ * `--search-api` leaves the field out, so a default build shows no tab and
+ * makes no request.
+ *
+ * It is asked only when the reader chooses to. A sentence typed here is
+ * matched letter for letter as it is typed, and that list is often noise — a
+ * question's particles land in some tagline or other, and "일부만 일치" can be
+ * forty papers — but a round trip and two model calls per keystroke is a cost
+ * nobody chose. So the 글자 list ends on one row that offers the question to
+ * the index, and the 의미 tab holds the same row until it is taken. */
+const API = typeof data.searchApi === "string" ? data.searchApi : "";
+const MIN = 2;
+/* An uncached question spends two to six seconds in the function before the
+ * reader's own round trip, so the cap sits well past the slow end of that: a
+ * give-up costs the reader the answer they chose to wait for. */
+const TIMEOUT = 10000;
+const KINDS = { paper: "논문", section: "섹션", term: "용어", figure: "그림" };
+const PASSAGES = 3;      // per paper: the best three are the answer, the rest repeat it
+const PAPER = new Map(PAPERS.map((p) => [p.id, p]));
+
+/* One answer per question for the life of the page: going back to the 글자
+ * tab and returning, or editing back to a question already asked, costs no
+ * second request. */
+const answers = new Map();
+/* The question the 의미 tab is about and where it stands: `idle` (offered,
+ * not asked), `wait`, `done` or `fail`. */
+let sem = { q: "", state: "idle", data: null };
+let inflight = null;
+
+function forget() {
+  if (inflight) { inflight.abort(); inflight = null; }
+  sem = { q: "", state: "idle", data: null };
+}
+
+function ask(q) {
+  if (!API || q.length < MIN) return;
+  tab = "sem";
+  active = 0;
+  if (sem.q === q && sem.state !== "fail" && sem.state !== "idle") return draw();
+  if (inflight) { inflight.abort(); inflight = null; }
+  if (answers.has(q)) {
+    sem = { q: q, state: "done", data: answers.get(q) };
+    return draw();
+  }
+  sem = { q: q, state: "wait", data: null };
+  draw();
+  const ctl = new AbortController();
+  inflight = ctl;
+  const bail = setTimeout(() => ctl.abort(), TIMEOUT);
+  fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ q: q, limit: 12 }),
+    signal: ctl.signal,
+  })
+    .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then((d) => {
+      answers.set(q, d);
+      // An answer to a question no longer in the box is dropped: the tab
+      // belongs to what the reader is looking at.
+      if (sem.q === q) { sem = { q: q, state: "done", data: d }; active = 0; draw(); }
+    })
+    .catch(() => {
+      if (inflight === ctl && sem.q === q) { sem = { q: q, state: "fail", data: null }; draw(); }
+    })
+    .finally(() => {
+      clearTimeout(bail);
+      if (inflight === ctl) inflight = null;
+    });
+}
+
+/* Papers, ordered by their best hit, each with its passages. One question is
+ * often answered in one paper several times over, and a flat list spends the
+ * tab on that repetition while never saying how many works are behind it. */
+function byPaper(hits) {
+  const order = [];
+  const groups = new Map();
+  for (const hit of hits || []) {
+    const id = hit.paperId || "";
+    if (!groups.has(id)) { groups.set(id, []); order.push(id); }
+    const kept = groups.get(id);
+    // Two chunks of one passage are one place to go, not two.
+    if (!kept.some((h) => h.kind === hit.kind && h.title === hit.title
+                       && h.anchor === hit.anchor)) kept.push(hit);
+  }
+  return order.map((id) => ({ id: id, hits: groups.get(id) }));
+}
+
 /* ── The dialog ───────────────────────────────────────────────────────── */
 function esc(s) {
   return String(s === undefined || s === null ? "" : s)
@@ -166,7 +347,9 @@ root.innerHTML =
       '</svg>' +
       '<input class="cmdk-input" type="text" role="combobox" aria-expanded="true" ' +
         'aria-controls="cmdk-list" aria-autocomplete="list" autocomplete="off" ' +
-        'spellcheck="false" placeholder="제목 · 태그 · 연구 축 · arXiv id">' +
+        'spellcheck="false" placeholder="' +
+        (API ? "제목 · 태그 · arXiv id — 또는 찾는 내용을 문장으로"
+             : "제목 · 태그 · 연구 축 · arXiv id") + '">' +
       '<button type="button" class="cmdk-esc" data-cmdk-dismiss aria-label="닫기">' +
         '<span class="k">esc</span><span class="x">' +
         '<svg class="ico ico-close" viewBox="0 0 16 16" width="13" height="13" ' +
@@ -174,20 +357,36 @@ root.innerHTML =
           'stroke-linecap="round" aria-hidden="true" focusable="false">' +
           '<path d="M3.8 3.8 12.2 12.2M12.2 3.8 3.8 12.2"/></svg></span></button>' +
     '</div>' +
+    /* The two answers, one at a time. Two buttons, one pressed — the same
+     * reading the analysis list's strip has, for the same reason: what each
+     * shows is a list of rows rather than one panel to point a `tab` at. */
+    '<div class="cmdk-tabs" role="group" aria-label="검색 결과" hidden>' +
+      '<button type="button" class="cmdk-tab" data-cmdk-tab="lex" aria-pressed="true">' +
+        '글자<span class="cmdk-tab-n" data-cmdk-n="lex"></span></button>' +
+      '<button type="button" class="cmdk-tab" data-cmdk-tab="sem" aria-pressed="false">' +
+        '의미<span class="cmdk-tab-n" data-cmdk-n="sem"></span></button>' +
+      '<span class="cmdk-tab-key" aria-hidden="true">Tab 으로 바꾸기</span>' +
+    '</div>' +
     '<ul class="cmdk-list" id="cmdk-list" role="listbox" aria-label="검색 결과"></ul>' +
     '<p class="cmdk-foot"><span data-cmdk-note></span>' +
-      '<span class="cmdk-keys" aria-hidden="true">↑↓ 이동 · ↵ 열기 · esc 닫기</span></p>' +
+      '<span class="cmdk-keys" aria-hidden="true" data-cmdk-keys></span></p>' +
   '</div>';
 
 const box = root.querySelector(".cmdk-box");
 const input = root.querySelector(".cmdk-input");
+const tabs = root.querySelector(".cmdk-tabs");
 const list = root.querySelector(".cmdk-list");
 const note = root.querySelector("[data-cmdk-note]");
+const keys = root.querySelector("[data-cmdk-keys]");
 document.body.appendChild(root);
 
-let shown = [];
+let result = search("");
+let tab = "lex";
 let active = 0;
 let opener = null;
+/* What a row that is not a link does, by its index. The ask row is the one:
+ * choosing it puts the question to the index instead of leaving the page. */
+let acts = [];
 
 function shelfMarks(id) {
   const shelf = window.ProbeShelf;
@@ -200,37 +399,128 @@ function shelfMarks(id) {
   return star + read;
 }
 
-function draw(result) {
-  shown = result.rows;
-  active = 0;
-  if (!shown.length) {
-    list.innerHTML = '<li class="cmdk-none" role="presentation">' +
-      '찾는 글이 없습니다. 제목의 한 단어나 arXiv id 로 다시 해보세요.</li>';
-  } else {
-    list.innerHTML = shown.slice(0, LIMIT).map((row, i) => {
-      const chips = row.pillars.map((k) =>
-        '<span class="chip pillar" data-p="' + esc(k) + '">' + esc(k) + '</span>').join("");
-      /* Which kind a row is rides on the left, beside the shelf marks, because
-       * that is the column a narrow screen keeps — and where Enter lands is
-       * the one thing about a row a reader has to know before pressing it. */
-      const kind = row.kind === "comparison"
-        ? '<span class="cmdk-kind">비교</span>' : "";
-      return '<li role="presentation"><a class="cmdk-row" role="option" ' +
-        'id="cmdk-o-' + i + '" data-i="' + i + '" ' +
-        'aria-selected="' + (i === 0 ? "true" : "false") + '" ' +
-        'href="' + esc(row.href) + '">' +
-        '<span class="cmdk-marks">' + kind + shelfMarks(row.id) + '</span>' +
-        '<span class="cmdk-main"><span class="cmdk-title">' + esc(row.title) + '</span>' +
-        '<span class="cmdk-line">' + esc(row.tagline) + '</span></span>' +
-        '<span class="cmdk-meta">' + chips +
-        '<span class="cmdk-id">' + esc(row.tail) + '</span></span></a></li>';
-    }).join("");
+function chips(pillars) {
+  return pillars.map((k) =>
+    '<span class="chip pillar" data-p="' + esc(k) + '">' + esc(k) + '</span>').join("");
+}
+
+/* Every choosable row goes through here, so the index `data-i` carries, the
+ * id `aria-activedescendant` names and the place in `acts` stay one count. */
+function option(cls, href, inner, act) {
+  const i = acts.length;
+  acts.push(act || null);
+  return '<li role="presentation"><a class="cmdk-row' + (cls ? " " + cls : "") +
+    '" role="option" id="cmdk-o-' + i + '" data-i="' + i + '" ' +
+    'aria-selected="false" href="' + esc(href || "#") + '">' + inner + '</a></li>';
+}
+
+function line(text, cls) {
+  return '<li class="' + (cls || "cmdk-none") + '" role="presentation">' + text + '</li>';
+}
+
+function docRow(row) {
+  /* Which kind a row is rides on the left, beside the shelf marks, because
+   * that is the column a narrow screen keeps — and where Enter lands is
+   * the one thing about a row a reader has to know before pressing it. */
+  const kind = row.kind === "comparison"
+    ? '<span class="cmdk-kind">비교</span>' : "";
+  return option("", row.href,
+    '<span class="cmdk-marks">' + kind + shelfMarks(row.id) + '</span>' +
+    '<span class="cmdk-main"><span class="cmdk-title">' + esc(row.title) + '</span>' +
+    '<span class="cmdk-line">' + esc(row.tagline) + '</span></span>' +
+    '<span class="cmdk-meta">' + chips(row.pillars) +
+    '<span class="cmdk-id">' + esc(row.tail) + '</span></span>');
+}
+
+function askRow(q) {
+  return option("cmdk-ask", "",
+    '<span class="cmdk-marks"><span class="cmdk-hit">의미</span></span>' +
+    '<span class="cmdk-main"><span class="cmdk-title">“' + esc(q) + '” 의 뜻으로 찾기</span>' +
+    '<span class="cmdk-line">글자가 아니라 뜻이 가까운 대목을 찾습니다 · 몇 초 걸립니다</span></span>',
+    () => ask(q));
+}
+
+/* A hit lands on the passage it matched, not on the paper: "the paper is
+ * somewhere in here" is the answer the reader already had. The paper's own
+ * row above its passages is the one link to the whole of it. Its axes come
+ * from this index rather than the hit, so a chip says what the paper page
+ * says even when the remote index was built from an older rewrite. */
+function hitHref(hit) {
+  return ROOT + hit.path + "index.html" + (hit.anchor ? "#" + hit.anchor : "");
+}
+
+function group(g) {
+  const doc = PAPER.get(g.id);
+  let html = option("cmdk-paper", ROOT + "p/" + g.id + "/index.html",
+    '<span class="cmdk-marks">' + shelfMarks(g.id) + '</span>' +
+    '<span class="cmdk-main"><span class="cmdk-title">' + esc(doc ? doc.title : g.id) + '</span></span>' +
+    '<span class="cmdk-meta">' + chips(doc ? doc.pillars : []) +
+    '<span class="cmdk-id">' + esc(g.id) + '</span></span>');
+  for (const hit of g.hits.slice(0, PASSAGES)) {
+    html += option("cmdk-sub", hitHref(hit),
+      '<span class="cmdk-marks"><span class="cmdk-hit">' +
+        esc(KINDS[hit.kind] || hit.kind) + '</span></span>' +
+      '<span class="cmdk-main"><span class="cmdk-title">' + esc(readable(hit.title)) + '</span>' +
+      // A caption is its own chunk and trims to nothing: no empty line under
+      // a title that says it all.
+      (hit.snippet ? '<span class="cmdk-line">' + esc(readable(hit.snippet)) + '</span>' : "") +
+      '</span>');
   }
+  return html;
+}
+
+/* What the question was read as. A search that silently rewrites itself
+ * cannot be trusted, and a reader who sees "느려터진 → inference latency"
+ * can tell a good answer from a misread one at a glance. */
+function gist(terms) {
+  if (!terms || !terms.length) return "";
+  return line('<span class="cmdk-gist-h">읽은 뜻</span>' + terms.slice(0, 5).map(
+    (t) => '<span class="cmdk-term">' + esc(t) + '</span>').join(""), "cmdk-gist");
+}
+
+function semPane(q) {
+  if (sem.q !== q || sem.state === "idle") return askRow(q);
+  if (sem.state === "wait")
+    return line("“" + esc(q) + "” 에 가까운 대목을 찾는 중…", "cmdk-none cmdk-wait");
+  if (sem.state === "fail")
+    return line("의미 검색에 닿지 못했습니다. 글자 탭의 결과를 보세요.");
+  const groups = byPaper(sem.data.hits);
+  if (!groups.length) return line("뜻이 가까운 대목이 없습니다.");
+  return gist(sem.data.expanded) + groups.map(group).join("");
+}
+
+function draw() {
+  const q = input.value.trim();
+  const offer = API && !result.all && q.length >= MIN;
+  if (!offer) tab = "lex";
+  acts = [];
+  let html;
+  if (tab === "sem") {
+    html = semPane(q);
+  } else {
+    const rows = result.rows.slice(0, LIMIT);
+    html = rows.length ? rows.map(docRow).join("")
+      : offer ? "" : line("찾는 글이 없습니다. 제목의 한 단어나 arXiv id 로 다시 해보세요.");
+    if (offer) html += askRow(q);
+  }
+  list.innerHTML = html;
+
+  tabs.hidden = !offer;
+  const answered = offer && sem.q === q && sem.state === "done";
+  const semCount = answered ? byPaper(sem.data.hits).length + "편"
+    : offer && sem.q === q && sem.state === "wait" ? "…" : "";
+  if (offer) {
+    tabs.querySelectorAll("[data-cmdk-tab]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.cmdkTab === tab)));
+    tabs.querySelector('[data-cmdk-n="lex"]').textContent = result.rows.length + "편";
+    tabs.querySelector('[data-cmdk-n="sem"]').textContent = semCount;
+  }
+  const count = result.rows.length;
   note.textContent = result.all
-    ? "최근 " + shown.length + "편"
-    : result.partial
-      ? "일부만 일치 · " + shown.length + "편"
-      : shown.length + "편";
+    ? "최근 " + count + "편"
+    : (result.partial ? "일부만 일치 · " : "") + (API ? "글자 " : "") + count + "편" +
+      (answered ? " · 의미 " + semCount : "");
+  keys.textContent = "↑↓ 이동 · ↵ 열기" + (offer ? " · Tab 글자/의미" : "") + " · esc 닫기";
   paintActive();
 }
 
@@ -249,9 +539,32 @@ function move(step) {
   const n = rows().length;
   if (!n) return;
   // Wrapping is what makes ↑ from the top reach the last result, which is the
-  // fastest way to the bottom of a short list.
+  // fastest way to the bottom of a short list — and to the ask row.
   active = (active + step + n) % n;
   paintActive();
+}
+
+function choose(el) {
+  const act = acts[+el.dataset.i];
+  if (act) { act(); input.focus(); return; }
+  close();
+  el.click();
+}
+
+function show(which) {
+  if (tabs.hidden || which === tab) return;
+  tab = which;
+  active = 0;
+  draw();
+}
+
+function typed() {
+  const q = input.value.trim();
+  result = search(q);
+  active = 0;
+  // A new question starts on the letters again; the old answer stays cached.
+  if (sem.q !== q) { forget(); tab = "lex"; }
+  draw();
 }
 
 function open() {
@@ -260,7 +573,7 @@ function open() {
   root.hidden = false;
   document.documentElement.classList.add("cmdk-on");
   input.value = "";
-  draw(search(""));
+  typed();
   input.focus();
 }
 
@@ -275,11 +588,18 @@ function close() {
 }
 
 /* ── Wiring ───────────────────────────────────────────────────────────── */
-input.addEventListener("input", () => draw(search(input.value)));
+input.addEventListener("input", typed);
 
 root.addEventListener("click", (e) => {
   if (e.target.closest("[data-cmdk-dismiss]")) { close(); return; }
-  if (e.target.closest(".cmdk-row")) close();       // the link navigates on its own
+  const t = e.target.closest("[data-cmdk-tab]");
+  if (t) { show(t.dataset.cmdkTab); input.focus(); return; }
+  const row = e.target.closest(".cmdk-row");
+  // A plain click on a link navigates on its own; the ask row has nowhere to
+  // go, and a modified click is the reader's own business.
+  if (!row) return;
+  if (acts[+row.dataset.i]) { e.preventDefault(); choose(row); }
+  else if (!e.metaKey && !e.ctrlKey && !e.shiftKey) close();
 });
 
 list.addEventListener("pointermove", (e) => {
@@ -293,15 +613,23 @@ list.addEventListener("pointermove", (e) => {
 });
 
 box.addEventListener("keydown", (e) => {
+  // On a Korean keyboard the first Enter commits the syllable under the
+  // cursor; taking that one would open a row for a half-written word.
+  if (e.isComposing || e.keyCode === 229) return;
   if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
   else if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
   else if (e.key === "Enter") {
     const row = rows()[active];
-    if (row) { e.preventDefault(); close(); row.click(); }
+    if (row) { e.preventDefault(); choose(row); }
   } else if (e.key === "Escape") { e.preventDefault(); close(); }
   // Nothing inside is focusable but the box itself, so Tab has nowhere to go
-  // that is not out of an open dialog.
-  else if (e.key === "Tab") { e.preventDefault(); input.focus(); }
+  // that is not out of an open dialog — it moves between the two answers
+  // instead, where there are two.
+  else if (e.key === "Tab") {
+    e.preventDefault();
+    show(tab === "lex" ? "sem" : "lex");
+    input.focus();
+  }
 });
 
 addEventListener("keydown", (e) => {
@@ -329,6 +657,6 @@ if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) {
 
 // A star or a 읽음 mark set on the page behind changes what a row should say.
 document.addEventListener("probe:shelf-change", () => {
-  if (!root.hidden) draw(search(input.value));
+  if (!root.hidden) draw();
 });
 })();

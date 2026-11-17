@@ -37,7 +37,7 @@ INDEX_BUDGET = 100 * 1024
 
 
 def corpus_index(papers: list[Paper], comps: list | None = None,
-                 axes: dict | None = None) -> str:
+                 axes: dict | None = None, search_api: str = "") -> str:
     """`assets/corpus-index.js` — the corpus, as much of it as a row needs.
 
     One file for the whole site rather than a blob inlined into every page: the
@@ -72,6 +72,10 @@ def corpus_index(papers: list[Paper], comps: list | None = None,
     by `pillar.js`): each pillar's introduction and the titles of the
     decisions it owns. It rides here because every page has chips and every
     page already carries this file.
+
+    `searchApi` is the semantic-search endpoint, present only when the build
+    was given one: the palette's 의미 tab asks it, and every page carries the
+    palette. Absent, the palette shows no tab and the site makes no request.
     """
     ordered = sorted(papers, key=lambda p: p.order_key, reverse=True)
     ranked = sorted(comps or [], key=lambda x: x.order_key, reverse=True)
@@ -91,6 +95,8 @@ def corpus_index(papers: list[Paper], comps: list | None = None,
             for x in ranked
         ],
     }
+    if search_api:
+        payload["searchApi"] = search_api
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     return f"window.ProbeIndex={body};\n"
 
@@ -295,7 +301,7 @@ def _gaps(graph: lineage.Graph | None) -> str:
         f'<span>원문</span></div><ol class="tl">{items}</ol></section>')
 
 
-def analysis_page(papers: list[Paper], katex=None, search_api: str = "",
+def analysis_page(papers: list[Paper], katex=None,
                  partial: bool = False, graph: lineage.Graph | None = None) -> str:
     """The corpus index — one line of axes over one row per paper, newest first.
 
@@ -370,8 +376,6 @@ def analysis_page(papers: list[Paper], katex=None, search_api: str = "",
     {line}
     {_first_run() if not ordered else ""}
     {_resume()}
-    {_search_tabs(search_api)}
-    <div class="sem" data-sem hidden></div>
     <div class="listhead" data-listhead{" hidden" if len(ordered) < 2 else ""}>
       <span class="lh-star"></span><span>재작성</span><span>arXiv</span><span>논문 · 한 줄</span><span>연구 축</span>
     </div>
@@ -393,49 +397,12 @@ def analysis_page(papers: list[Paper], katex=None, search_api: str = "",
         description=f"Dexterous manipulation 논문 {len(ordered)}편을 원문에서 다시 쓴 한글 판",
         body=body,
         depth=1,
-        # `semantic.js` ships only when the build is handed an endpoint, so a
-        # default build makes no request and needs no network to be correct.
-        scripts=["shelf.js", "filter.js"] + (["semantic.js"] if search_api else []),
+        scripts=["shelf.js", "filter.js"],
         # `llms.txt` is where an agent handed this URL finds the corpus as
         # data; a partial build writes none, so it links none.
         extra_head=(f'<link rel="stylesheet" href="{c.asset("../assets/index.css")}">'
                     + ("" if partial else
                        '\n<link rel="alternate" type="text/plain" title="llms.txt" href="../llms.txt">')),
-        body_attrs=f'data-search-api="{c.esc(search_api)}"' if search_api else "",
-    )
-
-
-def _search_tabs(search_api: str) -> str:
-    """The strip that splits a search into its two answers.
-
-    A question reaches the corpus two ways and they are not the same answer:
-    의미 is what the remote index found by meaning, 글자 is what the filter in
-    this browser matched letter for letter. The strip names both, carries each
-    one's count, and shows one at a time.
-
-    It ships with the endpoint, like the button that submits to it, and stays
-    hidden until there is something on both sides to choose between — a tab
-    over nothing is a tab nobody can use. `filter.js` fills in the counts and
-    owns which one is on; the build only prints the control.
-
-    It reads as the paper page's tab strip and is announced as what it is: two
-    buttons, one pressed. The 글자 answer is the listing below and everything
-    that describes it — a head, a note, the rows, the page strip — rather than
-    one element, and a `tab` with no panel to point at is a promise to a screen
-    reader that nothing keeps.
-    """
-    if not search_api:
-        return ""
-    return (
-        '<div class="restabs" data-restabs role="group" '
-        'aria-label="검색 결과" hidden>'
-        '<button type="button" class="restab" data-restab="sem" '
-        'aria-pressed="true">의미 검색<span class="restab-n" '
-        'data-restab-n="sem"></span></button>'
-        '<button type="button" class="restab" data-restab="lex" '
-        'aria-pressed="false">글자 검색<span class="restab-n" '
-        'data-restab-n="lex"></span></button>'
-        '</div>'
     )
 
 

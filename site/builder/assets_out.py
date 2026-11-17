@@ -71,17 +71,9 @@ ASSET_FILES = ("site.css", "index.css", "scout.css", "lineage.css", "theme.js",
 # the home screen. `og.png` is the 1200×630 card `components.share_meta()`
 # points a link preview at.
 ICON_FILES = ("favicon.svg", "favicon-32.png", "apple-touch-icon.png", "og.png")
-# Shipped only when the build was given the endpoint it talks to. A tree with
-# no endpoint carries nothing about search: no script to load, and none of its
-# Korean strings dragged into the webfont subset for a file nobody fetches.
-OPTIONAL = {"search": ("semantic.js",)}
 
 
-def _files(extras: tuple[str, ...] = ()) -> tuple[str, ...]:
-    return ASSET_FILES + ICON_FILES + extras
-
-
-def asset_text(extras: tuple[str, ...] = ()) -> str:
+def asset_text() -> str:
     """Every character the assets themselves contribute to the page.
 
     The JS files carry Korean UI strings that never appear in the markup —
@@ -90,7 +82,7 @@ def asset_text(extras: tuple[str, ...] = ()) -> str:
     """
     return "".join(
         (_ASSETS / name).read_text(encoding="utf-8")
-        for name in ASSET_FILES + extras if (_ASSETS / name).is_file()
+        for name in ASSET_FILES if (_ASSETS / name).is_file()
     )
 
 
@@ -120,16 +112,9 @@ def version() -> str:
     which looks broken in a way a missing feature never does. The token moves
     with the bytes, so markup and the rules that style it are always fetched
     as a pair.
-
-    Every shipped file is hashed, optional ones included, so the token does
-    not depend on which flags the build ran with — two builds of the same
-    tree agree, and a search build does not invalidate a reader's cache of
-    the files it shares with a plain one.
     """
     h = hashlib.sha256()
-    names = (ASSET_FILES + ICON_FILES
-             + tuple(n for group in OPTIONAL.values() for n in group))
-    for name in sorted(names):
+    for name in sorted(ASSET_FILES + ICON_FILES):
         src = _ASSETS / name
         if src.is_file():
             h.update(src.read_bytes())
@@ -139,12 +124,11 @@ def version() -> str:
 
 
 def copy_all(out: Path, charset: set[str] | None = None,
-             extras: tuple[str, ...] = (),
              mono_charset: set[str] | None = None) -> dict:
     dest = out / "assets"
     dest.mkdir(parents=True, exist_ok=True)
 
-    for name in _files(extras):
+    for name in ASSET_FILES + ICON_FILES:
         src = _ASSETS / name
         if src.is_file():
             shutil.copy2(src, dest / name)

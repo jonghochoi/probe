@@ -51,12 +51,12 @@ CHUNKS = "probe_chunks"
 CACHE = "probe_query_cache"
 DIMS = 1536
 ROWS_PER_CALL = 1000
-# What `semantic.js` waits before it drops the remote block. An answer slower
-# than this is one no reader ever sees, so it is a failure the operator wants
-# named even though every call in it succeeded.
-PAGE_BUDGET_MS = 5_000
+# What the ⌘K palette (`palette.js`) waits before it gives up on an answer. An
+# answer slower than this is one no reader ever sees, so it is a failure the
+# operator wants named even though every call in it succeeded.
+PAGE_BUDGET_MS = 10_000
 # What the page asks for, so the cache key exercised here is the key it writes.
-LIMIT = 8
+LIMIT = 12
 # The question the lexical filter cannot answer — the reason this folder exists.
 PROBE_Q = "정책이 느려터진 거 해결한 논문"
 # A transliteration sharing no character with the term it transliterates, so an

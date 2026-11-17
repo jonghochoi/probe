@@ -103,8 +103,8 @@ jobs:
 
       - name: Build
         # `PROBE_SEARCH_API` is a repository *variable*, not a secret: it is the
-        # public endpoint the published page posts to. Unset, the build emits no
-        # semantic script and the site makes no requests at all.
+        # public endpoint the ⌘K palette posts to. Unset, the build carries no
+        # endpoint and the site makes no requests at all.
         env:
           PROBE_SEARCH_API: ${{ vars.PROBE_SEARCH_API }}
         run: python3 site/build-site.py --out .site --strict --scout-figures

@@ -30,7 +30,7 @@ const SNIPPET_MAX = 240;    // enough to recognise the passage, not to replace i
 /* The query-expansion model, as an OpenRouter id. No default: unset, the step
  * is skipped and the endpoint behaves exactly as it does without it. Pick a
  * small fast one — this runs in front of every uncached query and its budget is
- * the slice of `TIMEOUT` in `semantic.js` that the embedding and the search do
+ * the slice of `TIMEOUT` in `palette.js` that the embedding and the search do
  * not need. */
 const REWRITE_MODEL = Deno.env.get("PROBE_REWRITE_MODEL") ?? "";
 const REWRITE_MS = 1_200;

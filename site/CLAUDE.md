@@ -121,7 +121,8 @@ the flag the build prints what that cache holds and a paper it lacks shows no
 figure. A paper arXiv cannot reach is not remembered, so the next fetch asks
 again.
 
-**Search is an enhancement.** A build without `--search-api` emits no script and
+**Search is an enhancement.** A build without `--search-api` carries no
+endpoint in `assets/corpus-index.js`, so the ⌘K palette shows no 의미 tab and
 the site makes no request. `site/search/verify.py` needs a key and egress, so it
 is run by hand and never in CI.
 
