@@ -69,8 +69,8 @@ def corpus_index(papers: list[Paper], comps: list | None = None,
     the paper and the comparisons that hold it.
 
     `axes` is what an axis chip's popup says (`decisions.pillar_cards()`, read
-    by `pillar.js`): each pillar's introduction and the titles of the
-    decisions it owns. It rides here because every page has chips and every
+    by `pillar.js`): each pillar's introduction and the titles of its open
+    questions. It rides here because every page has chips and every
     page already carries this file.
 
     `searchApi` is the semantic-search endpoint, present only when the build
@@ -997,8 +997,8 @@ def _related(neighbours: list[Paper]) -> str:
 
     Placed after the article rather than in the sidebar: it is a next step, not
     a navigation aid, and it should not compete with the table of contents
-    while there is still text above it. Empty when nothing shares a Decision-Log
-    code or a pillar — see `corpus.related`.
+    while there is still text above it. Empty when nothing shares an
+    open-question code or a pillar — see `corpus.related`.
     """
     if not neighbours:
         return ""

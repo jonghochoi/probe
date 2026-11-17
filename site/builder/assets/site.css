@@ -95,7 +95,7 @@
   /* The first three acts on 상세 and the three coloured moves on 요약, cool
      to warm in the order they run, so they read as a sequence rather than
      three categories; the fourth (한계) is grey. Deliberately not the callout
-     roles' colours: a reader who learned red = 우리와 충돌 on 상세 should not
+     roles' colours: a reader who learned red = 질문을 흔든다 on 상세 should not
      meet a red stage that means 문제. */
   --act1:        oklch(49.0% 0.059 247);
   --act2:        oklch(48.0% 0.080 180);
@@ -2804,7 +2804,9 @@ html.axp-lock { overflow: hidden; }
 .axp-intro { margin: .2rem 1.1rem .9rem; }
 .axp-decs { margin: 0 1.1rem .9rem; padding-top: .8rem; border-top: 1px solid var(--border-soft); }
 .axp-intro + .axp-decs { margin-top: 0; }
-.axp-h + .axp-decs { border-top: 0; padding-top: .2rem; }
+/* Under the band the list's heading stands as far from it as one row stands
+   from the next, so the band reads as the card's head, not as crowding. */
+.axp-h + .axp-decs { border-top: 0; padding-top: .8rem; }
 .axp-decs h3 { margin: 0 0 .4rem; font-family: var(--ko); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0; }
 .axp-decs h3 span { margin-left: .4rem; font-weight: 500; color: var(--text-muted); }
 .axp-decs ul { list-style: none; margin: 0; padding: 0; }
@@ -2812,4 +2814,3 @@ html.axp-lock { overflow: hidden; }
 .axp-decs li:last-child { border-bottom: 0; }
 .axp-dt { font-size: var(--fs-xs); }
 .axp-dc { font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.axp-open { font-size: var(--fs-3xs); font-weight: 700; padding: .02rem .4rem; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--accent-ink); }

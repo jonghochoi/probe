@@ -17,7 +17,7 @@ every record, shortlists, and only then opens two or three sources.
 
 **Every kind of link keeps its own field.** A citation, a sibling named by
 alias, a comparison that already set two papers side by side and the
-Decision-Log entries both rewrites argue about are different claims. Folded
+open-question entries both rewrites bear on are different claims. Folded
 into one number they would stop being checkable, so only `neighbours` is a
 score — the same `corpus.score` the page's own neighbour row ranks by, built
 from the shared codes and pillars the records also list — and the rest are
@@ -307,14 +307,14 @@ def llms_txt(cat: dict, search_api: str = "") -> str:
         "Every rewrite follows one four-part spine: `## 1 무엇이 문제인가` "
         "(the problem), `## 2 무엇을 바꿨나` (the method), `## 3 정말 되는가` "
         "(the evidence) and `## 4 연구축에 무엇이 걸리나` (what it means for this "
-        "team's research pillars, citing Decision-Log codes like `D9NB`). Each H3 "
+        "team's research pillars, citing open-question codes like `D9NB`). Each H3 "
         "ends `| English · Terms`, the section's vocabulary.",
         "",
         "## Data",
         "",
         f"- [corpus.json]({site}corpus.json): every paper and comparison as one "
         "record — front matter, English keywords, pillars, and the five "
-        "relations kept apart: `neighbours` (scored by the Decision-Log codes both "
+        "relations kept apart: `neighbours` (scored by the open-question codes both "
         "cite, rarer codes weighing more, plus shared pillars), "
         "`cites` / `cited_by` (arXiv links), "
         "`mentions` / `mentioned_by` (named by alias without a link), "
@@ -327,7 +327,7 @@ def llms_txt(cat: dict, search_api: str = "") -> str:
         "and each is `" + site + "p/<arxiv-id>/s/<anchor>.md`, a few KB instead "
         "of the whole rewrite. A record's `sections` is that list's URL.",
         f"- Research context the `## 4` parts argue against — pillars, the "
-        f"Decision Log, anti-topics: {src}/tree/main/context",
+        f"open questions, anti-topics: {src}/tree/main/context",
         f"- In a checkout, `python3 site/query.py --help` answers the same "
         "questions from the repo, standard library only.",
         "",

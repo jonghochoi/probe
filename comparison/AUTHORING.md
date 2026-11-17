@@ -166,8 +166,8 @@ silently dropped — a fence that renders to nothing is one the author never
 learns was wrong.
 
 GFM alert callouts are not fences and the table does not govern them. They are
-available, and `> [!CAUTION]` in particular publishes as 연구축과 충돌 — act 4's
-natural shape when the three answers cost the decisions different things.
+available, and `> [!CAUTION]` in particular publishes as 질문을 흔든다 — act 4's
+natural shape when the three answers bear on the questions differently.
 
 ### 2-5. Length
 
@@ -354,7 +354,7 @@ pull requests build, and the last row as its own CI gate.
 | `probe-flow` `marks` and `blind` — compared papers only, each within its width, never both on one step (§3-3); `probe-timeline` payload — `span`, `unit`, `why`, values on the ruler, a row per paper at most once, a span's `style` and `level`, `cut_label` with `cuts` (§3-4) | `site/builder/mdext/probefence.py` |
 | At least one `probe-matrix`; the length ceiling; an unavailable fence in a comparison; `probe-matrix` in a rewrite (§2-4, §2-5) | `site/builder/render.py` |
 | Term anchor ↔ definition pairing, unclosed `**`, math published as literal text (R4, §2-7) | `site/builder/render.py`, shared with `analysis/` |
-| Every `D#` cited exists in the Decision Log | `linters/check-decision-refs.py` |
+| Every `D#` cited exists in a pillar's Open Questions | `linters/check-decision-refs.py` |
 
 `--check` reads front matter only; the fence and length rules run while the
 page renders, so the full build is the gate.

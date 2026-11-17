@@ -1,9 +1,9 @@
-"""Harvest the Decision Log so a bare `D<n>` in prose can carry its title.
+"""Harvest the open questions so a bare `D<n>` in prose can carry its title.
 
-The Decision Log lives per pillar in `context/P<m>.md`, one entry shaped
-`#### [D<n>] <title> (P<m>)` (context/CLAUDE.md "Decision-Log entry format"). The site
+The open questions live per pillar in `context/P<m>.md`, one entry shaped
+`#### [D<n>] <title> (P<m>)` (context/CLAUDE.md "Open-question entry format"). The site
 reads it to turn every `D<n>` citation in a rewrite into a tooltip naming the
-decision the opinion anchors to.
+question the citation bears on.
 
 `linters/check-decision-refs.py` lints the same citations across the whole repo
 and parses the log itself: it must run without the site's build dependencies,
@@ -16,9 +16,8 @@ import re
 
 from .corpus import REPO_ROOT
 
-# `#### [D<n>] <title> (P<m>)` — the title is everything up to the trailing
-# `(P<m>)` marker; an `— **OPEN**` suffix stays part of the title on purpose,
-# since an open decision should read as open in the tooltip too.
+# `#### [D<n>] <title> (P<m>)` — the title, a pillar's open question, is
+# everything up to the trailing `(P<m>)` marker.
 _HEADING = re.compile(
     r"^####\s*\[(D\d[A-Z]{2})\]\s*(.*?)\s*(?:\(P(\d)\))?\s*$",
     re.MULTILINE,
@@ -60,9 +59,9 @@ _CODE = re.compile(r"\bD\d[A-Z]{2}\b")
 def retired_decisions() -> set[str]:
     """The retired codes `context/MASTER.md` lists on its `Retired:` line.
 
-    A retired code is never re-issued and still appears in rewrites written
-    before it retired, so a reader of `corpus.json` meets it with no entry in
-    any pillar's Decision Log. Only the `D<digit><two capitals>` form is
+    A retired code is never re-issued, and `linters/check-decision-refs.py`
+    keeps it out of published documents; one that reaches a build anyway is
+    set aside here rather than weighed or listed as a live question. Only the `D<digit><two capitals>` form is
     returned: it is the only form the site's citation regex matches, so a
     numeric id on the line has nothing here to resolve.
     """
@@ -74,16 +73,13 @@ def retired_decisions() -> set[str]:
 # A pillar's optional Korean introduction: one blockquote in its file whose
 # first line opens `> **소개** —` (context/CLAUDE.md "Pillar introduction").
 _INTRO = re.compile(r"^> \*\*소개\*\* —[ \t]*(.*(?:\n>.*)*)", re.MULTILINE)
-_OPEN = re.compile(r"\s*—\s*\*\*OPEN\*\*\s*$")
 _OWNER = re.compile(r"\s*\(P\d\)\s*$")
 
 
 def pillar_cards() -> dict[str, dict]:
-    """{`P<m>`: {"intro": str, "decisions": [[id, title, open]]}} — what an
-    axis chip's popup says about its axis: the owner's introduction where the
-    file has one, and the titles of the decisions it owns, in file order. A
-    decision's chosen answer stays in the file; the popup lists the questions
-    the axis takes on, not how each was settled.
+    """{`P<m>`: {"intro": str, "decisions": [[id, title]]}} — what an axis
+    chip's popup says about its axis: the owner's introduction where the file
+    has one, and the open questions it keeps, in file order.
     """
     out: dict[str, dict] = {}
     for path in sorted((REPO_ROOT / "context").glob("P*.md")):
@@ -99,7 +95,6 @@ def pillar_cards() -> dict[str, dict]:
         decisions = []
         for h in _HEADING.finditer(text):
             title = (h.group(2) or "").strip()
-            decisions.append([h.group(1), _OWNER.sub("", _OPEN.sub("", title)),
-                              bool(_OPEN.search(title))])
+            decisions.append([h.group(1), _OWNER.sub("", title)])
         out[f"P{m.group(1)}"] = {"intro": intro_text, "decisions": decisions}
     return out

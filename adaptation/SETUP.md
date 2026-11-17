@@ -9,7 +9,7 @@ Google session and meters its generation.
 | | Adaptation routine |
 |---|---|
 | **Where** | Your own machine — the Google session lives in its browser profile |
-| **Reads** | The checkout: `analysis/<id>.md` through `site/query.py`, `context/MASTER.md` and the Decision Log |
+| **Reads** | The checkout: `analysis/<id>.md` through `site/query.py`, `context/MASTER.md` and the pillars' open questions |
 | **Sends** | The rewrite, the arXiv original's URL and `brief.md` — to NotebookLM, nothing else |
 | **Writes** | The folder `PROBE_ADAPT_DIR` names. No commit, no PR, no site |
 

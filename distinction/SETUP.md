@@ -82,9 +82,10 @@ code: <absolute path>                 optional; else the `code` symlink
 ## 6. 외부 발화 금지                  literal strings no output may carry
 ```
 
-A claim is one `####` heading and one bullet, like a Decision-Log entry
+A claim is one `####` heading and one bullet, like an open-question entry
 (`context/CLAUDE.md`): `#### [C1] <title>` then the claim, its 반증 조건 and
-the `D#` it implements. Three to five claims is the working range — the
+the `D#` — the open question — it answers. The pillar files keep the
+questions; the operator's answers to them live here and nowhere public. Three to five claims is the working range — the
 scoreboard has one row per claim, and more rows than the basket can fill leaves
 cells empty, while fewer blurs the differences the versus note needs.
 

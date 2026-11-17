@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-"""Check that D# decision citations in agent outputs resolve to the Decision Log.
+"""Check that D# citations in agent outputs resolve to the pillars' open questions.
 
-The Decision Log is allocated per pillar (a section of `context/P#.md`, entries shaped
-`#### [D<n>] <title> (P<m>)` — see context/CLAUDE.md "Decision-Log entry format"), and
-analysis / scouting outputs cite decisions constantly (`P1 / D9ZP`,
+The open questions are allocated per pillar (a section of `context/P#.md`, entries shaped
+`#### [D<n>] <title> (P<m>)` — see context/CLAUDE.md "Open-question entry format"), and
+analysis / scouting outputs cite them constantly (`P1 / D9ZP`,
 `[![D6JW]](…)`, "feeds P4 D9QJ"). A mistyped id, or a decision moved between
 pillars, is invisible on the page, so this lint runs three checks:
 
   1. EXISTENCE — every `D<n>` token cited in a scanned doc must exist in some
-     pillar's Decision Log, or be listed on `context/MASTER.md`'s `Retired:`
-     line.
+     pillar's open questions. An id on `context/MASTER.md`'s `Retired:` line is
+     named as retired: a folded question's citations are rewritten to the id
+     it folded into (`context/CLAUDE.md`), so none stays published.
   2. ALLOCATION — every explicit `P<m> / D<n>` pairing must agree with the
      owning pillar of `D<id>` (a `P1 / D9KS` tie is wrong when D9KS belongs to
      P3).
-  3. FORM — a numeric id (`D17`) is valid only when it is retired; any other
-     is a malformed citation.
+  3. FORM — a numeric id (`D17`) is a malformed citation; ids are `D` + digit
+     + two letters.
 
 Precision over recall (mirroring check-doc-links.py): a live id is `D` + digit
 + two capitals (a camera name like `D435` never matches, and neither does a
@@ -30,7 +31,7 @@ No PATH -> scan the default set: `analysis/*.md`, `scouting/P*/*.md` and
 `comparison/*.md` (templates and `AUTHORING.md` excluded — they carry
 `D<a>`-style placeholders and illustrative ids).
 
-Exit codes: 0 = clean / 1 = bad citation(s) found / 2 = no Decision Log or no
+Exit codes: 0 = clean / 1 = bad citation(s) found / 2 = no open questions or no
 `Retired:` line parsed.
 """
 from __future__ import annotations
@@ -42,18 +43,14 @@ import sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Decisions dropped from `context/` while documents citing them stay published,
-# in either id form — retirement is about the decision, not about how it is
-# written. A dated scouting report records what a run concluded, and a rewrite's
-# act 4 argues from the log as it stood; erasing the citation would rewrite the
-# conclusion rather than the reference. `context/MASTER.md` lists them on its
-# `Retired:` line (the same line `site/builder/decisions.py` reads); a retired
-# id resolves here and is never re-issued.
+# Ids of questions folded into others or dropped. `context/MASTER.md` lists
+# them on its `Retired:` line (the same line `site/builder/decisions.py` reads)
+# so none is re-issued; a citation of one is reported as retired rather than
+# unknown, since the fix is to cite the question it folded into.
 _RETIRED_LINE = re.compile(r"^Retired:(.*)$", re.MULTILINE)
 _RETIRED_CODE = re.compile(r"(?<![A-Za-z0-9_])(D\d[A-Z]{2}|D\d{1,2})(?![A-Za-z0-9])")
 
-# A live decision id is `D<digit><two capitals>`. The numeric form (`D17`) is
-# valid only for a retired id; any other numeric id is a malformed citation.
+# A live id is `D<digit><two capitals>`; the numeric form (`D17`) is malformed.
 _OLD_FORM = re.compile(r"(?<![A-Za-z0-9_])(D\d{1,2})(?![A-Za-z0-9])")
 
 _HEADING = re.compile(r"^####\s*\[(D\d[A-Z]{2})\]", re.MULTILINE)
@@ -125,16 +122,17 @@ def check_file(path: str, owners: dict[str, int],
             if _is_designator_label(line, m.start()):
                 continue
             n = m.group(1)
-            if n not in owners and n not in retired:
-                findings.append((lineno, f"{n} cited but not in any Decision Log"))
+            if n in retired:
+                findings.append((lineno, f"{n} is retired — cite the question it folded into"))
+            elif n not in owners:
+                findings.append((lineno, f"{n} cited but not in any pillar's open questions"))
         for m in _OLD_FORM.finditer(line):
             if _is_designator_label(line, m.start()):
                 continue
             n = m.group(1)
-            if n not in retired:
-                findings.append(
-                    (lineno, f"{n} is a numeric id, valid only when retired — ids are D + digit + two letters")
-                )
+            findings.append(
+                (lineno, f"{n} is {'retired' if n in retired else 'a numeric id'} — ids are D + digit + two letters")
+            )
         for m in _PAIR.finditer(line):
             if _is_designator_label(line, m.start()):
                 continue
@@ -170,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     args = (argv if argv is not None else sys.argv[1:])
     owners = harvest_decision_log()
     if not owners:
-        sys.stderr.write("[check-decision-refs] no Decision Log entries parsed from context/\n")
+        sys.stderr.write("[check-decision-refs] no open-question entries parsed from context/\n")
         return 2
     retired = harvest_retired()
     if retired is None:

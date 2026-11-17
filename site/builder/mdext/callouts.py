@@ -27,7 +27,7 @@ ROLES = {
     "note": ("co-key", "작동 원리"),
     "tip": ("co-win", "확인된 이득"),
     "warning": ("co-warn", "한계·비용"),
-    "caution": ("co-ten", "우리와 충돌"),
+    "caution": ("co-ten", "질문을 흔든다"),
     "important": ("co-ctx", "논문 밖 맥락"),
 }
 MARKER = re.compile(r"^\[!(\w+)\][ \t]*(.*)$")

@@ -48,7 +48,7 @@ redoing it. Same procedure; overwrite in place; commit with `update`.
 NAMING THE CANDIDATES — what an empty invocation answers with
 ────────────────────────────────────────────────────────────────────────
 
-THE UNIT IS A QUESTION, NOT A PAIR. Shared Decision-Log codes make a
+THE UNIT IS A QUESTION, NOT A PAIR. Shared open-question codes make a
 candidate; a question the papers answer differently makes a comparison. A
 pair you cannot phrase one for is dropped.
 
@@ -58,10 +58,10 @@ pair you cannot phrase one for is dropped.
          python3 site/query.py pairs --limit 12
 
   2. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the papers in the top five
-     or six pairs it prints — the layer where a rewrite argues with the Decision Log, and the only
+     or six pairs it prints — the layer where a rewrite reads a paper against the open questions, and the only
      prose read here. The question comes from a disagreement you can point at:
      one rewrite calling a choice necessary where another routes around it, two
-     citing one `D#` to opposite ends. The score only said where to look.
+     citing one `D#` for different threads. The score only said where to look.
 
   3. PRINT at most three, strongest first — the ids and aliases, the codes they
      share, the question in one line, the slug it suggests, and which `D#` the
@@ -178,8 +178,9 @@ PROCEDURE
 9. WRITE ACT 4 from `context/`. Read `context/MASTER.md` and the `context/P#.md`
    for the pillars in your front matter, and cite the `D#` these papers
    actually bear on. A comparison earns a kind of act 4 a rewrite cannot: not
-   "this paper supports D_n" three times over, but which of the three ways is
-   the one OUR decisions can receive, and what it would cost to take another.
+   "this paper argues a thread of D_n" three times over, but what setting the
+   threads against each other shows about the question that none shows alone,
+   and what it would cost to follow each.
 
 10. VERIFY:
 

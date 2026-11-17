@@ -291,16 +291,20 @@ def cmd_pairs(cat: dict, a, docs: dict) -> None:
       row and `/compare`'s candidate list already rank by — a second rule for
       that question would be a second answer to it.
     - `contrast` asks which pairs meet on a *narrow* open question from
-      *different* directions. Only a narrow code counts — one at most
-      `narrow_df` rewrites cite, since a code half the corpus argues about is
-      no meeting point — and its weight is discounted by how much the two
+      *different* directions. Only a narrow code counts — one among the
+      rarest third of the live codes by how many rewrites cite it, since a
+      code half the corpus bears on is no meeting point. The cut is relative
+      to the vocabulary rather than to the corpus size: a pillar file keeps a
+      few broad questions, so every code can be cited by many rewrites and
+      still be rarer than the rest — and its weight is discounted by how much the two
       papers' pillars already overlap (`1 - Jaccard`): two papers filed under
       the same axes reach the question the same way. A pair sharing no narrow
       code is not a contrast and is left out of this order.
     """
-    n = len(cat["papers"])
-    narrow_df = max(3, n // 8)
-    df = {d: v["rewrites"] for d, v in cat["decisions"].items()}
+    df = {d: v["rewrites"] for d, v in cat["decisions"].items()
+          if not v.get("retired")}
+    ranked = sorted(df.values())
+    narrow_df = max(3, ranked[len(ranked) // 3]) if ranked else 3
     done = {frozenset(p) for x in cat["comparisons"]
             for p in combinations(x["compares"], 2)}
     papers = cat["papers"]
@@ -331,7 +335,7 @@ def cmd_pairs(cat: dict, a, docs: dict) -> None:
     first, second = ("score", "contrast") if a.by == "score" else ("contrast", "score")
     rows.sort(key=lambda r: (-r[first], -r[second], r["row"][0], r["row"][2]))
     if not rows and a.by == "contrast":
-        sys.exit(f"query: no uncovered pair shares a Decision-Log code cited by "
+        sys.exit(f"query: no uncovered pair shares an open-question code cited by "
                  f"{narrow_df} rewrites or fewer — `--by score` ranks the rest")
     emit(
         [r["row"] + [r["score"], r["contrast"]] + r["tail"] for r in rows[:max(a.limit, 0)]],
@@ -341,9 +345,9 @@ def cmd_pairs(cat: dict, a, docs: dict) -> None:
 
 
 PAIRS_COLUMNS = """columns:
-  score             corpus.score — log(n/df) per shared live Decision-Log code + 1 per shared pillar
+  score             corpus.score — log(n/df) per shared live open-question code + 1 per shared pillar
   contrast          narrow codes' weight x (1 - pillar Jaccard); 0 when none is narrow
-  narrow_decisions  shared codes cited by at most max(3, n/8) rewrites, (df) beside each
+  narrow_decisions  shared codes among the rarest third of live codes, (df) beside each
   shared_decisions  every live code both cite, rarest first
   link              cites | mentions, when one rewrite already reaches the other
   shared_pillars    pillars both are filed under
@@ -384,7 +388,7 @@ def main() -> int:
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--act", type=int, help="the numbered part, 1–4")
     g.add_argument("--match", help="a substring of any H2–H4 heading; every hit prints")
-    p = command("decision", "a Decision-Log code and the rewrites citing it")
+    p = command("decision", "an open-question code and the rewrites citing it")
     p.add_argument("code")
     p = sub.add_parser("pairs", help="paper pairs no comparison covers yet",
                        parents=[common], epilog=PAIRS_COLUMNS,

@@ -9,13 +9,13 @@
 ## 🔑 참조 약어 풀이
 
 <!-- AUTHORING §3-1. Only the codes this report cites; pillar row first, then
-     decisions in order of first appearance. Meaning column in English.
+     questions in order of first appearance. Meaning column in English.
      Delete the section if the report cites no code. -->
 
 | Code | Meaning |
 |------|---------|
 | <a id="ref-<P#>"></a>![<P#>](https://img.shields.io/badge/<P#>-<hex>.svg) | <pillar name> (pillar) |
-| <a id="ref-<D#>"></a>![<D#>](https://img.shields.io/badge/<D#>-d97706.svg) | <decision title> — <concise gloss, ≤~12 words, commas not semicolons> |
+| <a id="ref-<D#>"></a>![<D#>](https://img.shields.io/badge/<D#>-d97706.svg) | <the question, glossed in English, ≤~12 words, commas not semicolons> |
 
 ---
 
@@ -32,7 +32,7 @@
 <!-- The score line — AUTHORING §5-1, §5-2. M, Real and Repro are the run
      file's 📐 row for this paper (§5-4, §8). -->
 
-### (a) 관련 Pillar / Decision
+### (a) 관련 Pillar / 질문
 <!-- Linked badges only — AUTHORING §3-1:
      [![P#](…)](#ref-P#) / [![D#](…)](#ref-D#) [![D#](…)](#ref-D#) -->
 
@@ -71,7 +71,7 @@
 
 **점수 <total>/15** · R<0–3> · N<0–3> · M<0–3> · Real<0–3> · Repro<0–3> — <evidence>
 
-### (a) 관련 Pillar / Decision
+### (a) 관련 Pillar / 질문
 ### (b) 논문 요지
 ### (c) 시사점
 ### (d) 먼저 확인할 점

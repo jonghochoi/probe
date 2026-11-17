@@ -116,7 +116,7 @@ PROCEDURE
      $PROBE_PRIVATE_DIR/MY-METHOD.md     all of it; §1 주장 and §4 알려진 약점 twice
      $PROBE_PRIVATE_DIR/BASKET.md     every row; the `active` ones are the run
      context/MASTER.md                §1 Identity, §4 Pillars
-     context/P<n>.md                  §1 Scope, §2 Decision Log — the pillars
+     context/P<n>.md                  §1 Scope, §2 Open Questions — the pillars
                                       the active basket papers carry
 
    Then the digest: run `sh <path>/codemap.sh` when it exists and read
@@ -163,7 +163,7 @@ PROCEDURE
 
      python3 site/query.py show <id>
      python3 site/query.py outline <id>
-     python3 site/query.py section <id> --act 4         # where it argues with D#
+     python3 site/query.py section <id> --act 4         # what it adds to which D#
      python3 site/query.py section <id> --match "<Term>" # the mechanism to set beside mine
      python3 site/query.py related <id>                 # with the kinds
 

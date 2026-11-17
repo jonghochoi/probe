@@ -34,10 +34,10 @@ file the row points at.
 |---|---|---|
 | `README.md` | human | Project front door — motivation, the pipeline, which track to run for what |
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only |
-| `context/P{0..4}.md` | human | One per pillar — its Decision Log, Tracked Literature and Anti-topics. A run reads one |
+| `context/P{0..4}.md` | human | One per pillar — its Open Questions, Tracked Literature and Anti-topics. A run reads one |
 | `context/EVENTS.md` | human · `/follow` | The venues followed (human) and their dates (the follow routine), which the site's first screen counts down to |
 | `context/_TEMPLATE.md` | human | The skeleton a new pillar is copied from — the pillar section spine |
-| `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the Decision-Log entry format, adding a pillar |
+| `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the open-question entry format, adding a pillar |
 | `scouting/` | agent | One run per date — a report per pillar, `P#/YYYY-MM-DD.md`, and the run file `runs/YYYY-MM-DD.md`, filling `scouting/templates/` — the site merges a run into one page |
 | `scouting/AUTHORING.md` | human | Format contract for scouting reports |
 | `scouting/SETUP.md` | human | Operator guide for the scheduled routines — scouting, and the follow routine (§5) |

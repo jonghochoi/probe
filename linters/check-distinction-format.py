@@ -27,7 +27,7 @@ Checks, grouped by the contract section they enforce:
              that parses, carries every key and, when it has `verified`,
              maps ids to dates.
   AUTHORING §3-4 every `###` idea carries the five labels in order, and a
-             `D#` it names exists in a pillar's Decision Log.
+             `D#` it names exists in a pillar's Open Questions.
   AUTHORING §3-5 the code note — `versus/<id>--<alias>--<scope>.md` names
              a paper with a rewrite, its H1 alias and six-field metadata
              line agree with the file name, the nine `##` headers verbatim and in
@@ -379,7 +379,7 @@ def _check_ideas(name: str, body: list[tuple[int, str]], cap: int, where: str,
                     findings.append((name, at, "§3-4 **움직이는 결정** names no `D#`"))
                 for code in codes:
                     if decisions and code not in decisions:
-                        findings.append((name, at, f"§3-4 {code} is in no pillar's Decision Log"))
+                        findings.append((name, at, f"§3-4 {code} is in no pillar's Open Questions"))
 
 
 def _check_forbidden(name: str, lines: list[str], forbidden: list[str], findings: list[Finding]) -> None:
