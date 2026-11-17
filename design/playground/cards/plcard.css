@@ -1,0 +1,116 @@
+/* Card drafts for the paper page. `data-pc` on <html>: a | b | c.
+   The list pages' card: translucent ground, soft border, a 1px shadow, 12px. */
+
+/* ── 안 A: 바탕만 맞추기 — 띠는 그대로, 바탕·테두리·그림자를 목록 카드에 ── */
+html[data-pc="a"] .g-hub, html[data-pc="a"] .g-narr, html[data-pc="a"] .g-act,
+html[data-pc="a"] .sp-card, html[data-pc="a"] .rel-item, html[data-pc="a"] .quiz,
+html[data-pc="a"] .tdef, html[data-pc="a"] details.fold, html[data-pc="a"] .table-wrap {
+  background: var(--card-bg); border-color: var(--border-soft); box-shadow: var(--shadow-sm);
+}
+html[data-pc="a"] .g-hub { border-top-color: var(--orange); }
+html[data-pc="a"] .g-narr { border-left-color: var(--violet); }
+html[data-pc="a"] .g-act[data-n="1"] { border-top-color: var(--act1); }
+html[data-pc="a"] .g-act[data-n="2"] { border-top-color: var(--act2); }
+html[data-pc="a"] .g-act[data-n="3"] { border-top-color: var(--act3); }
+html[data-pc="a"] .g-act[data-n="4"] { border-top-color: var(--act4); }
+html[data-pc="a"] .quiz, html[data-pc="a"] .tdef { border-left-color: var(--orange); }
+html[data-pc="a"] .callout.co-key, html[data-pc="a"] .callout.co-win, html[data-pc="a"] .callout.co-warn,
+html[data-pc="a"] .callout.co-ten, html[data-pc="a"] .callout.co-ctx {
+  border-top-color: var(--border-soft); border-right-color: var(--border-soft); border-bottom-color: var(--border-soft);
+  box-shadow: var(--shadow-sm);
+}
+html[data-pc="a"] .lineage, html[data-pc="a"] .scale, html[data-pc="a"] .parts,
+html[data-pc="a"] .flow, html[data-pc="a"] .code {
+  border-color: var(--border-soft); box-shadow: var(--shadow-sm);
+}
+html[data-pc="a"] .lineage, html[data-pc="a"] .scale, html[data-pc="a"] .parts { background: var(--card-bg); }
+html[data-pc="a"] .box-head { border-bottom-color: var(--border-soft); }
+
+/* ── 안 B: 띠 대신 칩 — 모든 틀을 목록 카드로, 종류는 알약 칩이 말함 ── */
+html[data-pc="b"] .g-hub, html[data-pc="b"] .g-narr, html[data-pc="b"] .g-act,
+html[data-pc="b"] .sp-card, html[data-pc="b"] .rel-item, html[data-pc="b"] .quiz, html[data-pc="b"] .tdef,
+html[data-pc="b"] details.fold, html[data-pc="b"] .table-wrap,
+html[data-pc="b"] .lineage, html[data-pc="b"] .scale, html[data-pc="b"] .parts, html[data-pc="b"] .flow,
+html[data-pc="b"] .callout.co-key, html[data-pc="b"] .callout.co-win, html[data-pc="b"] .callout.co-warn,
+html[data-pc="b"] .callout.co-ten, html[data-pc="b"] .callout.co-ctx {
+  border: 1px solid var(--border-soft); border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+html[data-pc="b"] .g-hub, html[data-pc="b"] .g-narr, html[data-pc="b"] .g-act, html[data-pc="b"] .sp-card,
+html[data-pc="b"] .rel-item, html[data-pc="b"] .quiz, html[data-pc="b"] .tdef, html[data-pc="b"] details.fold,
+html[data-pc="b"] .table-wrap, html[data-pc="b"] .lineage, html[data-pc="b"] .scale, html[data-pc="b"] .parts {
+  background: var(--card-bg);
+}
+html[data-pc="b"] .box-head { background: none; border-bottom-color: var(--border-soft); }
+/* the kind, as a pill in its own colour */
+html[data-pc="b"] .c-label, html[data-pc="b"] .q-label, html[data-pc="b"] .tdef .th,
+html[data-pc="b"] .gh-l, html[data-pc="b"] .gn-l, html[data-pc="b"] .ga-n {
+  display: inline-flex; align-items: center; gap: .35rem; width: max-content;
+  padding: .12rem .6rem; border-radius: var(--radius-pill); font-family: inherit;
+  font-size: var(--fs-2xs); font-weight: 700; line-height: 1.5;
+  background: color-mix(in oklab, currentColor 12%, transparent);
+}
+html[data-pc="b"] .c-label { margin-bottom: .5rem; }
+html[data-pc="b"] .tdef .th { margin-bottom: .4rem; }
+html[data-pc="b"] .gh-l { color: var(--orange-ink); }
+html[data-pc="b"] .g-act[data-n="1"] .ga-n { color: var(--act1); }
+html[data-pc="b"] .g-act[data-n="2"] .ga-n { color: var(--act2); }
+html[data-pc="b"] .g-act[data-n="3"] .ga-n { color: var(--act3); }
+html[data-pc="b"] .g-act[data-n="4"] .ga-n { color: var(--act4); }
+html[data-pc="b"] .g-act[data-n="1"] .ga-n::after { content: "문제"; }
+html[data-pc="b"] .g-act[data-n="2"] .ga-n::after { content: "방법"; }
+html[data-pc="b"] .g-act[data-n="3"] .ga-n::after { content: "검증"; }
+html[data-pc="b"] .g-act[data-n="4"] .ga-n::after { content: "시사점"; }
+html[data-pc="b"] .callout.co-key  { background: color-mix(in oklab, var(--wash-key) 60%, var(--card-bg)); }
+html[data-pc="b"] .callout.co-win  { background: color-mix(in oklab, var(--wash-win) 60%, var(--card-bg)); }
+html[data-pc="b"] .callout.co-warn { background: color-mix(in oklab, var(--wash-warn) 60%, var(--card-bg)); }
+html[data-pc="b"] .callout.co-ten  { background: color-mix(in oklab, var(--wash-ten) 60%, var(--card-bg)); }
+html[data-pc="b"] .callout.co-ctx  { background: color-mix(in oklab, var(--wash-ctx) 60%, var(--card-bg)); }
+html[data-pc="b"] .quiz .q-label { color: var(--orange-ink); }
+
+/* ── 안 C: 세 층 — 카드 · 곁 상자 · 가벼운 자료 ── */
+/* 1층 카드: 목록 카드 그대로, 띠 없음 */
+html[data-pc="c"] .g-hub, html[data-pc="c"] .g-narr, html[data-pc="c"] .g-act,
+html[data-pc="c"] .sp-card, html[data-pc="c"] .rel-item {
+  background: var(--card-bg); border: 1px solid var(--border-soft); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+html[data-pc="c"] .ga-n, html[data-pc="c"] .gh-l, html[data-pc="c"] .gn-l {
+  display: inline-flex; align-items: center; gap: .4rem; font-family: inherit; font-weight: 700;
+}
+html[data-pc="c"] .ga-n::before, html[data-pc="c"] .gh-l::before, html[data-pc="c"] .gn-l::before,
+html[data-pc="c"] .c-label::before, html[data-pc="c"] .q-label::before, html[data-pc="c"] .tdef .th::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none;
+}
+html[data-pc="c"] .gh-l { color: var(--orange-ink); }
+html[data-pc="c"] .g-act[data-n="1"] .ga-n { color: var(--act1); }
+html[data-pc="c"] .g-act[data-n="2"] .ga-n { color: var(--act2); }
+html[data-pc="c"] .g-act[data-n="3"] .ga-n { color: var(--act3); }
+html[data-pc="c"] .g-act[data-n="4"] .ga-n { color: var(--act4); }
+html[data-pc="c"] .g-act[data-n="1"] .ga-n::after { content: " 문제"; }
+html[data-pc="c"] .g-act[data-n="2"] .ga-n::after { content: " 방법"; }
+html[data-pc="c"] .g-act[data-n="3"] .ga-n::after { content: " 검증"; }
+html[data-pc="c"] .g-act[data-n="4"] .ga-n::after { content: " 시사점"; }
+/* 2층 곁 상자: 테두리 없이 옅은 바탕, 둥근 모서리, 점 하나가 종류 */
+html[data-pc="c"] .callout.co-key, html[data-pc="c"] .callout.co-win, html[data-pc="c"] .callout.co-warn,
+html[data-pc="c"] .callout.co-ten, html[data-pc="c"] .callout.co-ctx, html[data-pc="c"] .quiz, html[data-pc="c"] .tdef {
+  border: 0; border-radius: var(--radius); box-shadow: none;
+}
+html[data-pc="c"] .quiz, html[data-pc="c"] .tdef { background: color-mix(in oklab, var(--orange) 6%, var(--card-bg)); }
+html[data-pc="c"] .c-label, html[data-pc="c"] .q-label, html[data-pc="c"] .tdef .th { display: flex; align-items: center; gap: .4rem; }
+html[data-pc="c"] .q-label { display: inline-flex; }
+/* 3층 자료: 틀 없이 위아래 가는 선, 제목은 짧은 이름 */
+html[data-pc="c"] .lineage, html[data-pc="c"] .scale, html[data-pc="c"] .parts,
+html[data-pc="c"] .table-wrap, html[data-pc="c"] details.fold {
+  border: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  border-radius: 0; background: none; box-shadow: none;
+}
+html[data-pc="c"] .g-act .scale { border-bottom: 0; }
+html[data-pc="c"] .box-head {
+  background: none; border-bottom: 0; padding: .6rem 0 .1rem; color: var(--text); font-size: var(--fs-xs);
+}
+html[data-pc="c"] .box-body { padding: .5rem 0 .8rem; }
+html[data-pc="c"] details.fold[open] { border-color: var(--border); }
+html[data-pc="c"] details.fold > summary { padding-left: 0; }
+html[data-pc="c"] .fold-body { border-top: 0; padding-left: 0; padding-right: 0; }
+html[data-pc="c"] .flow { border: 0; }
+html[data-pc="c"] .code { border-color: var(--border-soft); }
