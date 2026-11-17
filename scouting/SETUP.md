@@ -1,8 +1,8 @@
-# Scouting Routine Setup
+# Scheduled Routines Setup
 
-Deploying the scheduled scouting routine — a cloud session that commits its
-own reports straight to `main`. The on-demand commands need none of this and
-runs from any Claude Code session.
+Deploying the scheduled routines — cloud sessions that commit straight to
+`main`: the scouting routine (§1–§4) and the follow routine (§5). The
+on-demand commands need none of this and run from any Claude Code session.
 
 | | Scheduled scouting routine |
 |---|---|
@@ -130,3 +130,77 @@ gates fired, and that the environment is sound:
 If anything fails, fix `.claude/prompts/scout.txt` (or `context/P1.md`),
 merge it and re-run — do not
 leave automation on with a bad prompt.
+
+## 5. Follow routine
+
+A second routine keeps the dates in `context/EVENTS.md` — the conference and
+submission dates the site's first screen counts down to — from each followed
+venue's own site.
+
+| | Follow routine |
+|---|---|
+| **Durable asset** | The prompt `.claude/prompts/follow.txt`. The venues it follows are the venues table in `context/EVENTS.md`, edited by hand |
+| **Retrieval** | `curl` to each venue's official site, and nothing else — no aggregator, no search |
+| **Output** | One commit, `events: update YYYY-MM-DD (+a -d ~c)`, pushed with `git push origin HEAD:main` — only in a week where a date was added, corrected or dropped. A quiet week commits nothing |
+
+### 5-1. Network allowlist
+
+Same environment as §2, with each venue's host added to **Network access →
+Custom**, one per line:
+
+```
+www.corl.org
+corl.org
+roboticsconference.org
+2027.ieee-icra.org
+2027.ieee-iros.org
+2026.ieee-humanoids.org
+neurips.cc
+iclr.cc
+icml.cc
+cvpr.thecvf.com
+www.ieee-ras.org
+```
+
+An edition's site often has a host of its own (`2028.ieee-icra.org`), so the
+list grows a line when a venue moves on. A pattern line (`*.ieee-icra.org`),
+where the settings page takes one, covers every edition at once.
+
+The routine does not wait to be refused. Each week it also tries the next
+edition's host for a venue whose edition has ended or ends within 60 days,
+and keeps every host it cannot reach in `context/EVENTS.md` under **Hosts to
+allow** — committed even in a week no date moved, and dropped the week the
+host answers. Its report, which the routine's push notification carries
+(§5-2), opens with `허용 주소 추가 필요: <host>` for each one. Add the host
+here, and the next run reads it.
+
+A site can refuse the routine on its own side as well — a bot challenge
+answers `403` with no `x-deny-reason`. The allowlist cannot fix that; the
+routine reports it as `unreachable:` and leaves that venue's rows to be
+entered by hand.
+
+### 5-2. Routine
+
+| Form field | Value |
+|---|---|
+| Name | `probe-follow` |
+| Prompt (Instructions) | `Read .claude/prompts/follow.txt and run it`. Model → **Sonnet** |
+| Repositories | This repo |
+| Environment | The one from §2, with §5-1's hosts |
+| Trigger | Weekly, Monday morning, Korea time |
+| Connectors | None |
+| Notifications | Push on — the run's report reaches the phone, and it leads with any host to add |
+| Permissions | Must allow pushing to `main`, as §3 |
+
+`/follow` (`.claude/commands/follow.md`) runs the same thing from an
+interactive session.
+
+### 5-3. First run
+
+Use **Run now** and open the transcript:
+
+- [ ] The format check in step 5 of the prompt ran and exited 0.
+- [ ] **Hosts to allow** in `context/EVENTS.md` is empty — a row there is a
+      §5-1 line missing, and the push notification named it.
+- [ ] Every added or corrected row's `출처` is a page on the venue's own site.
+- [ ] A run with nothing to change made no commit.

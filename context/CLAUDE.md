@@ -13,8 +13,15 @@ proposal the human acts on; it never edits `MASTER.md` or a `P#.md` itself.
 This file and the pillar template are contributor material rather than research
 input, and are edited like any other doc. `EVENTS.md` is neither: it holds the
 conference and submission dates the reading site's first screen counts down
-to, edited by hand like the rest of the folder and read only by the build
-(`site/builder/events.py`), never by a run.
+to, read by the build (`site/builder/events.py`) and never by a research run.
+
+`EVENTS.md` is also the boundary's one exception. The weekly follow routine
+(`.claude/prompts/follow.txt`) writes it — the rows of its dates table, the
+hosts it could not reach, and a venue's link when the venue moves to its next
+edition's site — and nothing else in the folder. What it may write is fixed there: only dates a venue's own
+site states, one commit straight to `main`. Which venues are followed stays
+the human's: a venue is added or dropped by hand, and a row a person added for
+a venue outside that list is never touched by the routine.
 
 Ownership inside the folder is just as fixed. The Decision Log, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;

@@ -1,14 +1,38 @@
 # EVENTS — Conference and Submission Dates
 
 > **Owns** the dates the reading site's first screen counts down to — the
-> conferences this project follows and their submission milestones. Human-owned
-> like the rest of `context/`: a row is added or corrected here and nowhere
-> else. Read by `site/builder/events.py`; no agent track reads or writes it.
+> conferences this project follows and their submission milestones. The venue
+> list is human-owned; the dates are kept by the weekly follow routine
+> (`.claude/prompts/follow.txt`), the one agent that writes into `context/`,
+> and a person may add or correct a row by hand as well. Read by
+> `site/builder/events.py`.
+
+## Venues
+
+The venues the routine follows, each by its official site. A person adds or
+drops a venue here; the routine only moves a link to the next edition's site
+when the listed page itself links to it. RA-L is a journal, followed for one
+date only: its deadline for a paper that also presents at ICRA or IROS.
+
+| 학회 | 공식 사이트 |
+|---|---|
+| CoRL | https://www.corl.org/ |
+| RSS | https://roboticsconference.org/ |
+| ICRA | https://2027.ieee-icra.org/ |
+| IROS | https://2027.ieee-iros.org/ |
+| Humanoids | https://2026.ieee-humanoids.org/ |
+| NeurIPS | https://neurips.cc/ |
+| ICLR | https://iclr.cc/ |
+| ICML | https://icml.cc/ |
+| CVPR | https://cvpr.thecvf.com/ |
+| RA-L | https://www.ieee-ras.org/publications/ra-l |
+
+## Dates
 
 Each row is one date or one span. A row is entered only once its official
 site states the date; a date known only from an aggregator waits. The site
-prints the rows whose end has not passed, nearest first, so a past row may
-stay or go.
+prints the rows whose end has not passed, nearest first, and the routine drops
+a row once it has ended.
 
 | 시작 | 끝 | 종류 | 이름 | 장소 | 출처 |
 |---|---|---|---|---|---|
@@ -24,3 +48,15 @@ stay or go.
 deadline — abstract, paper, rebuttal, camera-ready) and `발표` (a decision or
 an accepted-paper list going out). `장소` may be empty; a deadline's is its
 time zone. `출처` is the official page the date was read from.
+
+## Hosts to allow
+
+The hosts the routine needs and the environment's network allowlist does not
+let it reach — a venue's site it was refused, or the next edition's site it
+will need once the current edition ends. The routine keeps this list: it adds
+a host the week it finds one and drops it the week the host answers. A host
+listed here is the operator's to add (`scouting/SETUP.md` §5-1); until then,
+that venue's dates wait.
+
+| 주소 | 학회 | 이유 | 처음 본 날 |
+|---|---|---|---|

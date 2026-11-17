@@ -1,10 +1,13 @@
 """`context/EVENTS.md` — the conference and submission dates the first
 screen counts down to.
 
-The one table in that file, read row by row against the shape the file itself
-states: two ISO dates, a kind out of three, a name, an optional place and the
-official page the date came from. A row that breaks the shape is a problem the
-build reports rather than a date it guesses at. Standard library only.
+The dates table in that file — the one whose header opens `시작` — read row by
+row against the shape the file itself states: two ISO dates, a kind out of
+three, a name, an optional place and the official page the date came from. The
+venues table above it is the follow routine's input and is not read here. A
+row that breaks the shape is a problem the build reports rather than a date it
+guesses at. Standard library only, so the routine runs this check without the
+site's dependencies.
 """
 from __future__ import annotations
 
@@ -36,12 +39,17 @@ def discover(path: Path = PATH) -> tuple[list[Event], list[str]]:
     if not path.is_file():
         return [], []
     events, problems = [], []
+    in_dates = False
     for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         m = _ROW.match(line.strip())
         if not m:
+            in_dates = False
             continue
         cells = [c.strip() for c in m.group(1).split("|")]
-        if cells[0] == "시작" or set("".join(cells)) <= set("-: "):
+        if cells[0] == "시작":
+            in_dates = True
+            continue
+        if not in_dates or set("".join(cells)) <= set("-: "):
             continue
         where = f"{path.relative_to(REPO_ROOT)}:{n}"
         if len(cells) != 6:

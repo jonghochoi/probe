@@ -31,6 +31,8 @@ together, in Korean, on the reading site.
 
 `context/MASTER.md` holds what cuts across pillars, and each `context/P#.md`
 holds one pillar's decision log, tracked literature and anti-topics.
+`context/EVENTS.md` lists the venues you follow; a weekly routine keeps their
+dates from each venue's own site ([setup](scouting/SETUP.md) · `/follow`).
 
 | Track | You run in [Claude Code](https://claude.com/claude-code) | It writes |
 |:---:|---|---|

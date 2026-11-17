@@ -14,7 +14,7 @@ Accepted shapes:
   scout: report YYYY-MM-DD (P# …)      generated routine commits, formats per
   analysis: add|update <id> rewrite …  CLAUDE.md "generated routine commits"
   compare: add|update <slug>            (the scouting routine, /analyze,
-                                        /compare)
+  events: update YYYY-MM-DD (+a -d ~c)  /compare, the follow routine)
   run: record YYYY-MM-DD                the operator's commits of what
   versus: add|update <id> × <scope> …    /distinguish wrote in its private folder
 
@@ -45,6 +45,7 @@ _GENERATED = [
     # is nothing to say after it — a subject that keeps going is describing
     # the comparison, which the file already does.
     re.compile(r"^compare: (add|update) [a-z0-9]+(-[a-z0-9]+)*$"),
+    re.compile(r"^events: update \d{4}-\d{2}-\d{2} \(\+\d+ -\d+ ~\d+\)$"),
     re.compile(r"^run: record \d{4}-\d{2}-\d{2}$"),
     re.compile(r"^versus: (add|update) \d{4}\.\d{5} × [a-z0-9_]+( \(.+\))?$"),
 ]
