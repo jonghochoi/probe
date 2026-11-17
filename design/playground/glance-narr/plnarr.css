@@ -1,0 +1,49 @@
+/* 이야기 구분 drafts. Without `data-gn` the page is as built. */
+html[data-gn] .gn-move { --gn-c: var(--text-muted); position: relative; }
+html[data-gn] .gn-move + .gn-move { margin-top: 1.15rem; }
+html[data-gn] .gn-st p { margin: 0 0 .78rem; }
+html[data-gn] .gn-st p:last-child { margin-bottom: 0; }
+html[data-gn] .gn-mark {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .04em; color: var(--gn-c);
+}
+html[data-gn] .gn-mark::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--gn-c); }
+
+/* 이정표 — 왼쪽 여백 */
+@media (min-width: 561px) {
+  html[data-gn][data-gn-mark="side"] .gn-move { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0 .9rem; }
+  html[data-gn][data-gn-mark="side"] .gn-move > .gn-st { grid-column: 2; }
+  html[data-gn][data-gn-mark="side"] .gn-move > .gn-mark { grid-column: 1; align-self: start; padding-top: .3rem; position: sticky; top: calc(var(--nav-h) + var(--tabs-h, 0px) + .8rem); }
+}
+/* 이정표 — 연 위 머리 (and the side mark on a phone) */
+html[data-gn][data-gn-mark="kicker"] .gn-mark { margin-bottom: .45rem; }
+@media (max-width: 560px) { html[data-gn][data-gn-mark="side"] .gn-mark { margin-bottom: .45rem; } }
+html[data-gn][data-gn-mark="kicker"] .gn-mark::after, html[data-gn][data-gn-mark="side"] .gn-mark::after { content: none; }
+html[data-gn][data-gn-mark="kicker"] .gn-move { padding-top: .1rem; }
+html[data-gn][data-gn-mark="kicker"] .gn-move + .gn-move { border-top: 1px solid var(--border); padding-top: 1rem; }
+/* 이정표 — 세로 색줄 */
+html[data-gn][data-gn-mark="line"] .gn-move[data-m]:not([data-m="본문"]) { border-left: 2px solid var(--gn-c); padding-left: 1rem; }
+html[data-gn][data-gn-mark="line"] .gn-mark { margin-bottom: .35rem; }
+html[data-gn][data-gn-mark="line"] .gn-mark::before { display: none; }
+
+/* 한계 연 */
+html[data-gn][data-gn-limit="box"] .gn-move[data-m="한계"] {
+  background: color-mix(in oklab, var(--text-muted) 8%, var(--surface)); border-radius: var(--radius);
+  padding: .85rem 1rem; border-left: 0;
+}
+html[data-gn][data-gn-limit="box"][data-gn-mark="side"] .gn-move[data-m="한계"] { margin-left: -1rem; }
+@media (max-width: 560px) { html[data-gn][data-gn-limit="box"][data-gn-mark="side"] .gn-move[data-m="한계"] { margin-left: 0; } }
+html[data-gn][data-gn-limit="box"] .gn-move[data-m="한계"] .gn-st { color: var(--text-muted); }
+html[data-gn][data-gn-limit="rule"] .gn-move[data-m="한계"] { border-top: 1px dashed var(--border); padding-top: 1rem; }
+html[data-gn][data-gn-limit="rule"][data-gn-mark="kicker"] .gn-move[data-m="한계"] { border-top-style: dashed; }
+
+/* 연의 리듬 */
+html[data-gn][data-gn-rhythm="num"] .gn-st p { position: relative; padding-left: 1.7rem; }
+html[data-gn][data-gn-rhythm="num"] .gn-st p::before {
+  content: attr(data-i); position: absolute; left: 0; top: .2rem;
+  font: 600 var(--fs-2xs)/1.4 var(--mono); color: var(--text-muted);
+}
+html[data-gn][data-gn-rhythm="lead"] .gn-lead { font-weight: 650; color: var(--text); }
+
+/* 근거 카드 */
+html[data-gn][data-gn-acts="off"] .glance .g-acts { display: none; }
