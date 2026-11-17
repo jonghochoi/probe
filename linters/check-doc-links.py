@@ -81,6 +81,7 @@ _DEFAULT_ROOT_DOCS = [
     "distinction/SETUP.md",
     "adaptation/SETUP.md",
     "context/MASTER.md",
+    "context/EVENTS.md",
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"
 _FOLDER_RULE_GLOB = "*/CLAUDE.md"

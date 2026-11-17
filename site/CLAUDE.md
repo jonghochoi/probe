@@ -22,11 +22,10 @@ surface beyond the `D#` titles a tooltip prints, the dates of
 chip's popup prints: each pillar's optional introduction and the titles of
 the decisions it owns. A decision's chosen answer never reaches the site.
 
-**A scouting report is read as it was written.** `builder/scouting.py` reads
-each report in the form of its own day: a score line where the report has
-one, the `## 📊` heads of an earlier report otherwise. A report is the record
-of a run, so the build never asks one to be rewritten, and only a report that
-carries score lines is held to them. The page merges by arXiv id and orders
+**A scouting report is read, never rewritten.** `builder/scouting.py` reads
+each paper's scores off the score line under its header line, and a paper
+section without one is reported. A report is the record of a run, so the
+build never asks one to be rewritten. The page merges by arXiv id and orders
 by the scores without printing one: a reader gets the Real score in words
 (`scouting/AUTHORING.md` §5-3) and the rest stays in the reports.
 

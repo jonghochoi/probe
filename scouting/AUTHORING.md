@@ -801,13 +801,8 @@ each paper's own scores (§5-4).
 A run goes straight to `main` with no PR, so the routine runs
 `linters/check-scouting-format.py` on every file it wrote before committing
 (`.claude/prompts/scout.txt`) and CI re-runs it on every push to `main` as
-the backstop. The lint binds reports dated on or after its
-`_CONTRACT_EFFECTIVE`; the gate arithmetic binds from `_GATE_EFFECTIVE`, the
-medal, 📋 and retry rules from `_SHAPE_EFFECTIVE`, and the §2-1 section set,
-the bare medal header, the score line, the three-axis gate and the run file
-from `_SECTIONS_EFFECTIVE`, and the gate's Relevance-or-Novelty 3 with the 🔍
-rule that follows from it from `_FOCUS_EFFECTIVE`. A report dated earlier is the record of a run
-under the contract of its day and is read, never rewritten, in that form.
+the backstop. Every report in `scouting/` is held to this contract as it
+stands.
 
 | Rule | Checked by |
 |---|---|

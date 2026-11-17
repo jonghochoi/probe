@@ -9,11 +9,8 @@ run file names each paper; a date with no run file publishes the pillars it
 has.
 
 The reports' form is `scouting/AUTHORING.md`; this module reads it and owns
-none of it. A report carries its total on a score line under each paper's
-header line (§5-1), or, dated before that rule binds, in a `## 📊` section of
-bold heads in paper order — each report is read in its own form, never
-rewritten to fit the reader. Only a report that carries score lines can be
-wrong about them, so only those raise a problem.
+none of it. A report carries its scores on a score line under each paper's
+header line (§5-1), and a paper section without one is a problem.
 
 Standard library only, like every module the agent's `query.py` could reach.
 """
@@ -50,16 +47,10 @@ _BADGE_MD = re.compile(r"\[?!\[([A-Z0-9]+)\]\([^)]*\)\]?(?:\(#ref-[A-Za-z0-9]+\)
 _SCORE_LINE = re.compile(r"^\*\*점수 (?P<total>\d{1,2})/15\*\* · ")
 _SCORE_DIMS = re.compile(r"· R(?P<R>\d) · N(?P<N>\d) · M(?P<M>\d) · Real(?P<Real>\d) · "
                          r"Repro(?P<Repro>\d)\b")
-_SCORE_HEAD = re.compile(r"^\*\*(?P<name>[^*]+?)\s*\((?P<total>\d{1,2})/15[^*]*\)\*\*")
 _ROW_SCORES = re.compile(r"\d·\d·\d·\d")
-# The rubric's five, in the order every report prints them (AUTHORING §5). A
-# 📊 bullet of an earlier report names each in full, and calls Real Sim2Real.
+# The rubric's five, in the order every score line prints them (AUTHORING §5).
 DIMENSIONS = ("R", "N", "M", "Real", "Repro")
-_DIM_BULLET = re.compile(r"^- (?P<name>Relevance|Novelty|Methodology|Sim2Real|Real|Reproducibility)"
-                         r" (?P<score>\d)\b")
-_DIM_OF = {"Relevance": "R", "Novelty": "N", "Methodology": "M", "Sim2Real": "Real",
-           "Real": "Real", "Reproducibility": "Repro"}
-_CODE_LABELS = ("코드 공개 예정", "코드 미공개", "코드 공개")  # longest first
+_CODE_LABELS = ("코드 공개 예정", "코드 공개")  # longest first
 _ALIAS_ID = re.compile(r"\s*\(\d{4}\.\d{4,5}\)$")
 # The paper brief's labels, in order (AUTHORING §2-2), and one labelled
 # top-level bullet with whatever nests under it.
@@ -238,8 +229,6 @@ def _code(text: str) -> str:
 def parse(path: Path, pillar: str, problems: list[str]) -> Report:
     text = _COMMENT.sub("", path.read_text(encoding="utf-8"))
     report = Report(pillar=pillar, date=path.stem, path=path)
-    has_score_lines = "**점수 " in text
-    heads: list[dict] = []
     rows = 0
     for header, body in _sections(text):
         emoji = header[:1]
@@ -268,17 +257,10 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
                 pick.total = int(sm.group("total"))
                 if (dm := _SCORE_DIMS.search(score)):
                     pick.dims = {d: int(dm.group(d)) for d in DIMENSIONS}
-            elif has_score_lines:
+            else:
                 problems.append(f"{report.source}: {header} has no score line under its "
                                 f"header line (scouting/AUTHORING.md §5-1)")
             report.picks.append(pick)
-        elif emoji == "📊":
-            for line in body.splitlines():
-                if (h := _SCORE_HEAD.match(line.strip())):
-                    heads.append((_ALIAS_ID.sub("", h.group("name").strip()),
-                                  int(h.group("total")), {}))
-                elif heads and (d := _DIM_BULLET.match(line.strip())):
-                    heads[-1][2][_DIM_OF[d.group("name")]] = int(d.group("score"))
         elif emoji == ROW:
             for cells in _rows(body):
                 ident = next((i for c in cells if (i := _ID.search(c))), None)
@@ -297,15 +279,6 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
                     pillar=pillar, kind=ROW, rank=4 + rows, paper_id=ident.group(1),
                     alias=_ALIAS_ID.sub("", cells[0]), code=_code(" ".join(cells)),
                     total=total, gist=_plain(cells[-1]), dims=dims))
-    # A report with no score lines scores in its 📊 heads, which follow the
-    # paper sections in order. Fewer heads than sections leaves the last ones
-    # unscored rather than shifting every score by one.
-    if not has_score_lines:
-        sections = [p for p in report.picks if p.full]
-        for pick, (alias, total, dims) in zip(sections, heads):
-            pick.alias, pick.total = alias, total
-            if len(dims) == len(DIMENSIONS):
-                pick.dims = {d: dims[d] for d in DIMENSIONS}
     return report
 
 

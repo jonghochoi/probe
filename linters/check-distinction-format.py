@@ -30,7 +30,8 @@ Checks, grouped by the contract section they enforce:
              `D#` it names exists in a pillar's Decision Log.
   AUTHORING §3-5 the code note — `versus/<id>--<alias>--<scope>.md` names
              a paper with a rewrite, its H1 alias and six-field metadata
-             line agree with the file name, the nine `##` headers verbatim and in order; §1
+             line agree with the file name, the nine `##` headers verbatim and in
+             order; §1
              opens with its count line and every bullet with a verdict and
              a paper anchor, a quote anchor too unless `원문 없음`; §3 and
              §4 bullets carry their anchors; §5 holds a table whose scope
@@ -38,13 +39,17 @@ Checks, grouped by the contract section they enforce:
              bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a
              ```probe-chart only under §6, drawable by `site/builder/charts.py`
              with `source`, `why` and `omitted`.
-  AUTHORING §5   active rows <= 12, ideas per versus note <= 2 and per
-             code note <= 3, charts per code note <= 3, prose <= 7,000 characters outside fences in a
-             versus note and <= 20,000 in a code note.
+  AUTHORING §5   active rows <= 12, ideas per versus note <= 2, per code
+             note <= 3 and per report <= 3, charts per code note <= 3,
+             prose <= 7,000 characters outside fences in a versus note and
+             <= 20,000 in a code note.
+  AUTHORING §6   every output names our side rather than pointing at it — no
+             `이 방법`, `이 범위`, `내 방법` or `우리` outside a `##` header
+             or a `"…"` quote.
   AUTHORING §7   no `MY-METHOD.md` §6 string in any output.
   inputs         `BASKET.md` rows parse — id, role and status from their
-             sets, no duplicate id; `MY-METHOD.md` carries its spine and one
-             bullet per `#### [C#]`.
+             sets, no duplicate id; `MY-METHOD.md` carries a `name:` line, its
+             spine and one bullet per `#### [C#]`.
 
 Precision over recall, mirroring the repo's other gates: every check keys off
 a literal token the contract fixes. Whether a difference is a difference, and
@@ -148,7 +153,6 @@ _CFG_ANCHOR = re.compile(r"`cfg:[^`\s]+`")
 # A quote is the original's own words (AUTHORING §4): a section and at least a
 # clause of English. `원문 미확인` stands in only where the original is gone.
 _QUOTE_ANCHOR = re.compile(r'원문 §[^\s"]+ "[^"]*[A-Za-z][^"]{11,}"|원문 미확인')
-_CLAIM_TOKEN = re.compile(r"\bC(\d+)\b")
 _DECISION_TOKEN = re.compile(r"\bD\d[A-Z]{2}\b")
 _CLAIM_HEADING = re.compile(r"^#### \[(C\d+)\] \S")
 _DECISION_HEADING = re.compile(r"^#### \[(D\d[A-Z]{2})\]")
