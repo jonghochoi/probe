@@ -41,7 +41,7 @@ FENCES = (
 # so: one of these in the article is a section that ended up outside its `:::`
 # container, and highlighting it as code would publish the JSON as a code
 # block.
-SURFACE_FENCES = ("probe-hub", "probe-rail", "probe-act")
+SURFACE_FENCES = ("probe-hub", "probe-rail")
 
 # The comparison track's own fence, and the ones it may not use. A comparison
 # compares; anything that zooms into a single paper belongs to that paper's own
@@ -174,13 +174,16 @@ def quiz(data: dict, index: int, inline_md) -> str:
         f"{inline_md(str(opt).strip())}</button>"
         for i, opt in enumerate(options)
     )
+    # Folded to its question: one per section across fourteen sections is a
+    # check the reader opens when they want it, not a card that interrupts
+    # every section. `<details>` folds and opens with no script.
     return (
-        f'<section class="quiz" data-quiz="{index}">'
-        f'<span class="q-label">확인</span>'
-        f'<p class="qq">{inline_md(question)}</p>'
+        f'<details class="quiz" data-quiz="{index}">'
+        f'<summary class="q-sum"><span class="q-label">확인</span>'
+        f'<span class="qq">{inline_md(question)}</span></summary>'
         f'<div class="qopts">{choices}</div>'
         f'<div class="qwhy" hidden>{inline_md(why)}</div>'
-        f"</section>"
+        f"</details>"
     )
 
 

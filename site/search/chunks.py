@@ -146,8 +146,6 @@ def _glance_text(model) -> str:
         pairs(hub.get("facts"), "k", "v"),
         *model.narrative,
         pairs(model.rail, "k", "v", "note"),
-        *(" · ".join(filter(None, (a.get("title"), a.get("claim"),
-                                   a.get("caption")))) for a in model.acts),
     ]
     return "\n\n".join(b for b in (str(x).strip() for x in blocks) if b)
 

@@ -359,14 +359,14 @@ class Paper:
         """One line saying what the paper does, under the body's thesis H1.
 
         The thesis line is ours — a claim, often a metaphor — and on its own it
-        does not tell a reader which paper they are about to read. The page
-        header prints the paper's own title; this is the sentence between them.
+        does not tell a reader which paper they are about to read. This is the
+        sentence that does, under the paper's own title in the page header.
         """
         return self.front.get("tagline", "")
 
     @property
     def summary_md(self) -> str:
-        """The summary as authored — emphasis and math intact, for the page."""
+        """The summary as authored — emphasis and math intact, for search and `corpus.json`."""
         return self.front.get("summary", "")
 
     @property

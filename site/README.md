@@ -22,7 +22,7 @@ comment of the file that draws it.
 | `builder/render.py` | Markdown → HTML, the rule checks with no other home (its row in `analysis/AUTHORING.md` §5, and a comparison's fence and length rules), and the 재작성본 sibling marker |
 | `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, `probe-matrix` and `probe-figs` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
 | `builder/primers.py` | The background cards a comparison opens on (`primer:`) — a drawing and one line each |
-| `builder/glance.py` | The 요약 tab and its checks (G1–G7) |
+| `builder/glance.py` | The 요약 tab and its checks (G1–G6) |
 | `builder/comparisons.py` | Comparison discovery and validation (`comparison/AUTHORING.md`) |
 | `builder/events.py` | `context/EVENTS.md` read row by row for the first screen's 일정, a malformed row reported as a problem |
 | `builder/scoutfigs.py` | Each written-up scouted paper's overview figure, picked from its arXiv HTML edition under `--scout-figures` and kept as `scout-figures.json` under `.site-cache/` |

@@ -1,16 +1,16 @@
-"""The 요약 surface — AUTHORING §4 (G1–G7).
+"""The 요약 surface — AUTHORING §4 (G1–G6).
 
-One screen: the claim, a narrative, the conditions beside it, and the evidence
-in four cards. Parsing and validation live here rather than in `render.py`
+One screen: the claim, a narrative told in four moves, and the conditions
+beside it. Parsing and validation live here rather than in `render.py`
 because this surface has its own component vocabulary and its own failure
 modes, and because `--check` has to catch them without rendering anything.
 
 Two rules carry most of the weight and both are checked here:
 
-* the spine is fixed (G2). The reader's path is claim → story → conditions →
-  evidence, and a surface that reorders it delivers numbers before the reason
-  they matter.
-* our own view never appears (G7). Act 4 of the body is where a `D#` belongs;
+* the spine is fixed (G2). The reader's path is claim → story → conditions,
+  and a surface that reorders it delivers numbers before the reason they
+  matter.
+* our own view never appears (G6). Act 4 of the body is where a `D#` belongs;
   one card away from the paper's own figures it reads as something the paper
   claimed.
 """
@@ -30,7 +30,10 @@ STANZA_MIN, STANZA_MAX = 8, 10
 CHARS_MIN, CHARS_MAX = 750, 1350
 
 RAIL_MIN, RAIL_MAX = 5, 7
-ACTS = 4
+
+# G4's four moves, in reading order. Each opens on a stanza that starts with
+# its tag, `[문제] …`; the page prints the name in the margin beside the move.
+MOVES = ("문제", "방법", "결과", "한계")
 
 _FENCE = re.compile(r"^```(probe-[a-z]+)[ \t]*\n(.*?)^```[ \t]*$", re.M | re.S)
 _SPACE = re.compile(r"\s")
@@ -39,18 +42,19 @@ _SPACE = re.compile(r"\s")
 _DREF = re.compile(r"(?<![A-Za-z0-9_])D\d[A-Z]{2}(?![A-Za-z0-9])")
 _CONTEXT = re.compile(r"\bcontext/[A-Za-z0-9_]+\.md")
 _LISTY = re.compile(r"^\s*(?:[-*+•]\s|\d+[.)]\s|#{1,6}\s|>\s)")
+_MOVE = re.compile(r"^\[([^\]\s]{1,4})\]\s+")
 
 
 @dataclass
 class Glance:
     hub: dict = field(default_factory=dict)
-    narrative: list[str] = field(default_factory=list)
+    narrative: list[str] = field(default_factory=list)   # stanzas, tags stripped
+    moves: list[tuple[str, int]] = field(default_factory=list)  # (name, first stanza)
     rail: list[dict] = field(default_factory=list)
-    acts: list[dict] = field(default_factory=list)
 
 
 def parse(source: str) -> tuple[Glance, list[str]]:
-    """`(model, problems)` — everything G1–G7 can be checked without rendering."""
+    """`(model, problems)` — everything G1–G6 can be checked without rendering."""
     problems: list[str] = []
     model = Glance()
 
@@ -79,23 +83,21 @@ def parse(source: str) -> tuple[Glance, list[str]]:
         except probefence.FenceError as exc:
             problems.append(f"glance: {exc}")
 
-    known = {"probe-hub", "probe-rail", "probe-act", "prose"}
+    known = {"probe-hub", "probe-rail", "prose"}
     for kind in kinds:
         if kind not in known:
             problems.append(
                 f"glance: ```{kind} does not belong on this surface — the glance "
-                f"is probe-hub, prose, probe-rail and four probe-act (G2)"
+                f"is probe-hub, prose and probe-rail (G2)"
             )
 
     problems += _check_spine(kinds)
     model.hub, hub_problems = _hub(payloads.get("probe-hub", []))
     problems += hub_problems
-    model.narrative, narr_problems = _narrative(prose)
+    model.narrative, model.moves, narr_problems = _narrative(prose)
     problems += narr_problems
     model.rail, rail_problems = _rail(payloads.get("probe-rail", []))
     problems += rail_problems
-    model.acts, act_problems = _acts(payloads.get("probe-act", []))
-    problems += act_problems
     problems += _check_our_view(source)
     return model, problems
 
@@ -103,15 +105,15 @@ def parse(source: str) -> tuple[Glance, list[str]]:
 # ── G2 · the spine ──────────────────────────────────────────────────────────
 
 def _check_spine(kinds: list[str]) -> list[str]:
-    spine = [k for k in kinds if k in ("probe-hub", "prose", "probe-rail", "probe-act")]
+    spine = [k for k in kinds if k in ("probe-hub", "prose", "probe-rail")]
     shape = []
     for kind in spine:
         if not shape or shape[-1] != kind:
             shape.append(kind)
-    expected = ["probe-hub", "prose", "probe-rail", "probe-act"]
+    expected = ["probe-hub", "prose", "probe-rail"]
     if shape != expected:
         return [
-            "glance: the spine is 중심 주장 카드 → 내러티브 → 팩트 레일 → 4막 "
+            "glance: the spine is 중심 주장 카드 → 내러티브 → 팩트 레일 "
             f"(G2) — got {' → '.join(shape) or 'nothing'}"
         ]
     return []
@@ -142,12 +144,13 @@ def _hub(cards: list[dict]) -> tuple[dict, list[str]]:
 
 # ── G4 · the narrative ──────────────────────────────────────────────────────
 
-def _narrative(prose: list[str]) -> tuple[list[str], list[str]]:
+def _narrative(prose: list[str]) -> tuple[list[str], list[tuple[str, int]], list[str]]:
     if not prose:
-        return [], ["glance: no narrative between the hub card and the rail (G4)"]
+        return [], [], ["glance: no narrative between the hub card and the rail (G4)"]
     text = "\n\n".join(prose)
     stanzas = [s.strip() for s in re.split(r"\n\s*\n", text) if s.strip()]
-    problems = []
+    moves, stanzas, problems = _moves(stanzas)
+    text = "\n\n".join(stanzas)
     if not STANZA_MIN <= len(stanzas) <= STANZA_MAX:
         problems.append(
             f"glance: the narrative is {len(stanzas)} 연 — G4 asks for "
@@ -167,7 +170,39 @@ def _narrative(prose: list[str]) -> tuple[list[str], list[str]]:
             f"({', '.join(repr(x) for x in listy[:3])}) — G4 is flowing prose, and "
             f"a list here is a summary wearing prose clothes"
         )
-    return stanzas, problems
+    return stanzas, moves, problems
+
+
+def _moves(stanzas: list[str]) -> tuple[list[tuple[str, int]], list[str], list[str]]:
+    """`(moves, untagged stanzas, problems)` — G4's four moves, from their tags.
+
+    A move is the author's call, not the build's: where 방법 starts differs
+    from paper to paper and no keyword finds it. The build holds the tags to
+    their order and to the one boundary it can see, the close on 한계.
+    """
+    moves, plain = [], []
+    for i, stanza in enumerate(stanzas):
+        m = _MOVE.match(stanza)
+        if m:
+            moves.append((m.group(1), i))
+            stanza = stanza[m.end():]
+        plain.append(stanza)
+    names = [name for name, _ in moves]
+    problems = []
+    if names != list(MOVES):
+        problems.append(
+            f"glance: the narrative's moves are {' → '.join(names) or 'untagged'} — "
+            f"G4 asks for {' → '.join(f'[{m}]' for m in MOVES)}, each tag opening "
+            f"the stanza its move starts on"
+        )
+    elif moves[0][1] != 0:
+        problems.append("glance: the narrative must open on its [문제] stanza (G4)")
+    elif moves[-1][1] < len(stanzas) - 2:
+        problems.append(
+            "glance: [한계] starts more than two stanzas before the end — G4 closes "
+            "on the author-stated limits, not on a section of them"
+        )
+    return (moves if not problems else []), plain, problems
 
 
 # ── G5 · the fact rail ──────────────────────────────────────────────────────
@@ -191,55 +226,18 @@ def _rail(rails: list[dict]) -> tuple[list[dict], list[str]]:
     return items, problems
 
 
-# ── G6 · four evidence cards ────────────────────────────────────────────────
-
-def _acts(cards: list[dict]) -> tuple[list[dict], list[str]]:
-    problems = []
-    if len(cards) != ACTS:
-        problems.append(
-            f"glance: {len(cards)} ```probe-act — exactly {ACTS}, one per act (G6). "
-            f"A fifth card means this surface is becoming the body"
-        )
-    ordered = sorted(cards, key=lambda c: c.get("n", 0))
-    seen = []
-    for card in ordered:
-        n = card.get("n")
-        title = str(card.get("title", "")).strip()
-        if not isinstance(n, int) or not 1 <= n <= ACTS:
-            problems.append(f"glance: probe-act `n` must be 1–{ACTS}, got {n!r}")
-        elif n in seen:
-            problems.append(f"glance: two probe-act cards share `n`: {n}")
-        else:
-            seen.append(n)
-        if not title:
-            problems.append(f"glance: probe-act[{n!r}] is missing `title` (R2 applies)")
-        if not str(card.get("claim", "")).strip():
-            problems.append(f"glance: probe-act[{title[:24] or n!r}] is missing `claim`")
-        if not str(card.get("source", "")).strip():
-            problems.append(
-                f"glance: probe-act[{title[:24] or n!r}] is missing `source` — every "
-                f"number on this surface is traceable without leaving it (G6)"
-            )
-        if not any(card.get(k) for k in ("figure", "eq", "scale")):
-            problems.append(
-                f"glance: probe-act[{title[:24] or n!r}] carries no figure, equation "
-                f"or scale — a card of three prose lines is what G6 exists to prevent"
-            )
-    return ordered, problems
-
-
-# ── G7 · what may not appear ────────────────────────────────────────────────
+# ── G6 · what may not appear ────────────────────────────────────────────────
 
 def _check_our_view(source: str) -> list[str]:
     problems = []
     refs = sorted(set(_DREF.findall(source)))
     if refs:
         problems.append(
-            f"glance: our Decision Log appears here ({', '.join(refs)}) — G7 keeps "
+            f"glance: our Decision Log appears here ({', '.join(refs)}) — G6 keeps "
             f"this surface to the paper. Our view is act 4 of the body"
         )
     if _CONTEXT.search(source):
-        problems.append("glance: a `context/` reference appears here — G7 forbids it")
+        problems.append("glance: a `context/` reference appears here — G6 forbids it")
     return problems
 
 
@@ -260,7 +258,8 @@ def render(model: Glance, renderer, katex, figure_urls: dict[str, str]) -> str:
     fig = _figure(model.hub.get("figure"), model.hub.get("caption"), figure_urls)
     hub = (
         '<section class="g-hub">'
-        '<div class="gh-text"><span class="gh-l">중심 주장</span>'
+        + c.card_head("주장", "이 논문이 말하는 것")
+        + '<div class="gh-text">'
         f'<h2 class="gh-thesis">{md(str(model.hub.get("thesis", "")))}</h2>'
         f'<p class="gh-line">{md(str(model.hub.get("line", "")))}</p>'
         f'<div class="gh-facts">{facts}</div></div>'
@@ -268,7 +267,7 @@ def render(model: Glance, renderer, katex, figure_urls: dict[str, str]) -> str:
         + "</section>"
     )
 
-    stanzas = "".join(f"<p>{md(s)}</p>" for s in model.narrative)
+    stanzas = _render_moves(model, md)
     rail = "".join(
         f'<div class="g-rail-item"><span class="gr-k">{esc(i.get("k", ""))}</span>'
         f'<p class="gr-v">{md(str(i.get("v", "")))}</p>'
@@ -278,33 +277,63 @@ def render(model: Glance, renderer, katex, figure_urls: dict[str, str]) -> str:
     )
     narrative = (
         '<section class="g-narr">'
-        '<div class="g-narr-h"><span class="gn-l">한 번에 읽는 이야기</span></div>'
+        f'<div class="g-narr-h">{c.card_head("이야기", "한 번에 읽기")}</div>'
         f'<div class="g-narr-body">{stanzas}</div>'
         f'<aside class="g-rail">{rail}</aside>'
         "</section>"
     )
 
-    cards = ""
-    for card in model.acts:
-        body = ""
-        if card.get("eq"):
-            body += f'<div class="ga-eq">{katex.block(str(card["eq"]))}</div>'
-        if card.get("figure"):
-            body += _figure(card.get("figure"), card.get("caption"), figure_urls)
-        if isinstance(card.get("scale"), dict):
-            body += probefence.scale(
-                {"rows": card["scale"].get("rows", [])}, renderer.inline
-            )
-        cards += (
-            f'<article class="g-act" data-n="{esc(card.get("n", ""))}">'
-            f'<span class="ga-n">{esc(card.get("n", ""))}</span>'
-            f'<h3 class="ga-t">{md(str(card.get("title", "")))}</h3>'
-            f'<p class="ga-c">{md(str(card.get("claim", "")))}</p>'
-            f"{body}"
-            f'<p class="ga-s">{esc(card.get("source", ""))}</p>'
-            "</article>"
+    return f'<div class="glance">{hub}{narrative}</div>'
+
+
+def _render_moves(model: Glance, md) -> str:
+    """The stanzas grouped by move, each stanza's first sentence as its lead.
+
+    A rewrite whose tags fail G4 has no moves; its stanzas print ungrouped
+    rather than under a name that may be wrong.
+    """
+    para = lambda s: f"<p>{_lead(md(s))}</p>"
+    if not model.moves:
+        return "".join(para(s) for s in model.narrative)
+    out = []
+    bounds = [i for _, i in model.moves] + [len(model.narrative)]
+    for k, (name, start) in enumerate(model.moves):
+        body = "".join(para(s) for s in model.narrative[start:bounds[k + 1]])
+        out.append(
+            f'<section class="gn-move" data-move="{k + 1}">'
+            f'<span class="gn-mark">{c.esc(name)}</span>'
+            f'<div class="gn-st">{body}</div></section>'
         )
-    return f'<div class="glance">{hub}{narrative}<div class="g-acts">{cards}</div></div>'
+    return "".join(out)
+
+
+_TAG = re.compile(r"<(/?)([a-zA-Z][a-zA-Z0-9]*)\b[^>]*?(/?)>")
+_VOID = {"br", "img", "wbr", "hr", "input", "col", "source"}
+_STOP = re.compile(r"[.?!](?=\s)")
+_LAST = re.compile(r"[.?!](?=\s|$)")   # the stanza's own end closes it too
+
+
+def _lead(html: str) -> str:
+    """Wrap a stanza's first sentence in `.gn-lead`.
+
+    The sentence ends at the first `.`, `?` or `!` followed by a space that
+    stands outside every inline element — a period inside math or a bold run
+    is not the end of the sentence. A one-sentence stanza is its own lead.
+    """
+    depth, pos = 0, 0
+    for m in list(_TAG.finditer(html)) + [None]:
+        end = m.start() if m else len(html)
+        if depth == 0:
+            hit = (_LAST if m is None else _STOP).search(html, pos, end)
+            if hit:
+                cut = hit.end()
+                return f'<span class="gn-lead">{html[:cut]}</span>{html[cut:]}'
+        if m is None:
+            break
+        if m.group(2).lower() not in _VOID and not m.group(3):
+            depth = max(0, depth + (-1 if m.group(1) else 1))
+        pos = m.end()
+    return html
 
 
 def _figure(fid, caption, figure_urls: dict[str, str]) -> str:

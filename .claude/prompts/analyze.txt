@@ -146,11 +146,11 @@ PROCEDURE
        Does any flow list as consecutive steps what runs side by side
        (`lanes`), or end on a step that says it repeats (`loop`)? (R6)
      - Does `appendix:` list exactly the appendix sections you drew on? (R15)
-     - 요약 — is every number on it in the original, is each card's evidence
-       what its claim rests on, and do the four titles alone make the
-       argument? (G6)
+     - 요약 — is every number on it in the original, does each of the four
+       move tags open the stanza where that move's role starts, and do the
+       stanzas' first sentences alone tell the story? (G4)
      - 요약 — does the narrative read as one person talking and close on the
-       paper's OWN stated limit (G4), with none of our act-4 view in it? (G7)
+       paper's OWN stated limit (G4), with none of our act-4 view in it? (G6)
 
 9. COMMIT — one paper per commit:
        analysis: add <arxiv-id> rewrite (<alias>)

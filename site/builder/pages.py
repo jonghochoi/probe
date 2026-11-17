@@ -681,18 +681,14 @@ def not_found_page(papers: list[Paper]) -> str:
 
 # The tabs, in the order a reader meets them — the one-screen 요약 first,
 # because a reader arrives at a paper page not yet knowing whether the paper is
-# worth the long read, and that is the question the short surface answers. `en`
-# is printed beside the Korean label because the tab strip is also how a
-# contributor finds the rule set: 요약 is `analysis/AUTHORING.md` §4, 상세 is
-# §1–§3 and 비교 is `comparison/AUTHORING.md`.
+# worth the long read, and that is the question the short surface answers.
 #
-# 비교 is not a further reading of this paper and its label does not pretend
-# to be: BRIEF and FULL say how much of the paper a surface carries, COMPARED
-# says what happened to it. It is also the one tab that is not always there —
-# it appears only for a paper some comparison holds, and a tab that is empty
-# for most of the corpus is furniture.
-TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"),
-        ("cmp", "비교", "COMPARED"), ("lin", "계보", "LINEAGE"))
+# 비교 and 계보 are not further readings of this paper: 요약 and 상세 say how
+# much of the paper a surface carries, 비교 and 계보 what it stands among. They
+# are also the tabs that are not always there — each appears only when there
+# is something behind it, and a tab that is empty for most of the corpus is
+# furniture.
+TABS = (("glance", "요약"), ("full", "상세"), ("cmp", "비교"), ("lin", "계보"))
 # The tabs printed only when there is something behind them, each with its count.
 COUNTED_TABS = ("cmp", "lin")
 
@@ -728,7 +724,11 @@ def paper_page(paper: Paper, katex, decisions: dict,
         siblings={pid: p.title for pid, p in by_id.items()},
         self_id=paper.stem,
     )
-    renderer.lead_html = _lead(paper, renderer)
+    # The tagline prints in the header, not the body; it rides as the lead
+    # only so the body's literal-text checks (`analysis/AUTHORING.md` §3) read
+    # it too.
+    tagline = renderer.inline(paper.tagline) if paper.tagline else ""
+    renderer.lead_html = tagline
     rendered = renderer.render(paper.article or paper.body)
 
     urls = corpus.figure_urls(paper.body)
@@ -742,12 +742,13 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
     comps = comparisons or []
     lin_html, lin_n = _lin_panel(paper, graph)
-    body = f"""{_header(paper)}
-{_tabstrip({"cmp": len(comps), "lin": lin_n})}
+    body = f"""{_header(paper, tagline)}
+{_tabstrip({"cmp": len(comps), "lin": lin_n}, _src_group(paper) + _acts(paper))}
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
   {glance_html or _missing("요약")}
 </div>
 <div class="panel" id="p-full" role="tabpanel" aria-labelledby="t-full" hidden>
+  {_act_strip(renderer.toc)}
   <div class="shell">
     <aside class="toc">{_toc(renderer.toc)}</aside>
     <main class="article">
@@ -801,10 +802,16 @@ def _acts(paper: Paper) -> str:
 </div>"""
 
 
-def _tabstrip(counts: dict[str, int]) -> str:
-    """The tabs. Server-rendered and `hidden`-toggled, so the page is readable
-    with JavaScript off — the first panel stays open and the rest are reachable
-    by their anchors.
+def _tabstrip(counts: dict[str, int], tools: str = "") -> str:
+    """The tabs, and at the strip's right end the paper's links out and its
+    즐겨찾기 · 읽음 pair. Server-rendered and `hidden`-toggled, so the page is
+    readable with JavaScript off — the first panel stays open and the rest are
+    reachable by their anchors.
+
+    The links and the pair sit on the strip rather than on a line of their own
+    under the byline: the header is what the paper is, the strip is what a
+    reader does with it, and one line holds both the surface switch and the
+    controls.
 
     비교 and 계보 are printed only when there is something behind them, and
     each carries its count: the number is the whole reason to look, and a tab
@@ -812,18 +819,40 @@ def _tabstrip(counts: dict[str, int]) -> str:
     click to tell them nothing.
     """
     buttons = []
-    for i, (key, label, en) in enumerate(TABS):
+    for i, (key, label) in enumerate(TABS):
         if key in COUNTED_TABS and not counts.get(key):
             continue
         count = (f'<span class="cnt">{counts[key]}</span>' if key in COUNTED_TABS else "")
         buttons.append(
             f'<button type="button" class="tab" role="tab" id="t-{key}" '
             f'aria-controls="p-{key}" aria-selected="{"true" if i == 0 else "false"}" '
-            f'data-tab="{key}">{c.esc(label)} '
-            f'<span class="en">{c.esc(en)}</span>{count}</button>'
+            f'data-tab="{key}">{c.esc(label)}{count}</button>'
         )
-    return (f'<div class="tabs-wrap"><div class="tabs" role="tablist" '
-            f'aria-label="논문 보기 방식">{"".join(buttons)}</div></div>')
+    return (f'<div class="tabs-wrap"><div class="tabs">'
+            f'<div class="tab-list" role="tablist" aria-label="논문 보기 방식">{"".join(buttons)}</div>'
+            + (f'<div class="tab-tools">{tools}</div>' if tools else "")
+            + '</div></div>')
+
+
+def _act_strip(entries: list[dict]) -> str:
+    """The four acts as milestones on one line under the tab strip, where the
+    contents rail has no room — a tablet's width and below, or a wide screen
+    with no pointer to reach the rail with. It sticks under the tab strip,
+    fills the dot of the act being read, and ends in the 목차 button that opens
+    the whole contents from below; with no script the button is not printed
+    live and the links still jump.
+    """
+    acts = [e for e in entries if e.get("kind") == "act"]
+    if not acts:
+        return ""
+    links = "".join(
+        f'<a class="as-link" href="#act-{c.esc(e["n"])}">'
+        f'<i class="as-dot" aria-hidden="true"></i>{c.esc(e["label"])}</a>'
+        for e in acts
+    )
+    return (f'<nav class="actstrip" aria-label="막"><div class="actstrip-in">{links}'
+            '<button type="button" class="as-toc" data-toc-open hidden>'
+            f'{c.icon("list", 15)}<span>목차</span></button></div></nav>')
 
 
 def _missing(name: str) -> str:
@@ -1019,104 +1048,93 @@ def _cmp_card(paper: Paper, comp, papers_by_id: dict) -> str:
     )
 
 
-def _lead(paper: Paper, renderer: DocRenderer) -> str:
-    """`tagline` and `summary`, printed between the thesis line and act 1.
-
-    A reader arriving here needs to know what the next 400 lines will argue
-    before paragraph one starts arguing it, and the front matter already
-    carries that sentence. Both go through the inline renderer rather than
-    `esc()`: the emphasis in a summary is what makes it scannable, and a
-    summary that opens with math is common enough that escaping it would
-    publish backticks.
-    """
-    out = ""
-    if paper.tagline:
-        out += f'<p class="thesis-sub">{renderer.inline(paper.tagline)}</p>\n'
-    if paper.summary_md:
-        out += (
-            '<div class="tldr"><span class="tldr-label">한 문단 요약</span>'
-            f"<p>{renderer.inline(paper.summary_md)}</p></div>\n"
-        )
-    return f"\n{out}" if out else ""
-
-
 def _toc(entries: list[dict]) -> str:
-    """Table of contents, grouped under its acts and rendered server-side.
+    """The contents as milestones: each act a node on one line, its sections
+    the stops under it.
 
     Built from the renderer's own heading pass rather than scraped from the DOM
-    by `paper.js`: the act grouping and the English keyword line are structure
-    the renderer knows and the rendered HTML does not spell out. Server-side
-    also means the contents survive with JavaScript off, which for a document
-    this long is the difference between a page you can navigate and a scroll.
+    by `paper.js`: the act grouping is structure the renderer knows and the
+    rendered HTML does not spell out. An act prints its short noun, its
+    question in grey and how many sections it holds; a section prints its
+    number in the whole document and its Korean title — the English keyword
+    line stays on the heading in the body, where it has the width.
+
+    Server-side means the contents survive with JavaScript off, and then they
+    print whole. With a script, the rail on a wide screen shows the four acts
+    and only the section being read and the 책갈피 one, and the whole list
+    opens over the article when the reader reaches for it (`paper.js`).
     """
     if not entries:
         return ""
-    groups: list[str] = []
-    open_group = False
+    groups: list[tuple[dict | None, list[dict]]] = []
     for entry in entries:
         if entry.get("kind") == "act":
-            if open_group:
-                groups.append("</div>")
-            groups.append(
-                '<div class="toc-grp"><div class="toc-gh">'
-                f'<span class="toc-n">{c.esc(entry["n"])}</span>'
-                f'<span class="toc-gl">{c.esc(entry["label"])}</span></div>'
+            groups.append((entry, []))
+        else:
+            if not groups:
+                groups.append((None, []))
+            groups[-1][1].append(entry)
+    out: list[str] = []
+    num = 0
+    for act, rows in groups:
+        head = ""
+        if act:
+            head = (
+                f'<a class="ms-act" href="#act-{c.esc(act["n"])}">'
+                f'<span class="ms-node">{c.esc(act["n"])}</span>'
+                f'<span class="ms-at"><b>{c.esc(act["label"])}</b>'
+                + (f'<span>{c.esc(act["sub"])}</span>' if act.get("sub") else "")
+                + f'</span><span class="ms-cnt">{len(rows)}</span></a>'
             )
-            open_group = True
-            continue
-        # Each entry is wrapped rather than bare: `shelf.js` hangs the 책갈피
-        # button off the row, and a button inside the anchor would be both
-        # invalid and un-clickable without swallowing the link.
-        link = (
-            '<div class="toc-row">'
-            f'<a href="#{c.esc(entry["id"])}">'
-            f'<span class="toc-k">{c.esc(entry["label"])}</span>'
-            + (f'<span class="toc-e">{c.esc(entry["en"])}</span>' if entry.get("en") else "")
-            + "</a></div>"
-        )
-        if not open_group:
-            groups.append('<div class="toc-grp">')
-            open_group = True
-        groups.append(link)
-    if open_group:
-        groups.append("</div>")
-    return '<div class="toc-title">목차</div>' + "".join(groups)
+        items = []
+        for entry in rows:
+            num += 1
+            # Each entry is wrapped rather than bare: `shelf.js` hangs the
+            # 책갈피 button off the row, and a button inside the anchor would
+            # be both invalid and un-clickable without swallowing the link.
+            items.append(
+                '<div class="toc-row">'
+                f'<a class="ms-sec" href="#{c.esc(entry["id"])}">'
+                f'<span class="ms-num">{num}</span>'
+                f'<span class="ms-t">{c.esc(entry["label"])}</span>'
+                "</a></div>"
+            )
+        out.append(f'<div class="ms-g">{head}<div class="ms-rows">{"".join(items)}</div></div>')
+    return ('<div class="toc-title">목차</div>'
+            f'<nav class="ms" aria-label="목차">{"".join(out)}</nav>')
 
 
-def _header(paper: Paper) -> str:
-    """What the paper is, and the one line of things to do with it.
+def _header(paper: Paper, tagline: str = "") -> str:
+    """What the paper is: its axes, its number, its one result, its title, the
+    tagline that says what it does, and who wrote it.
 
-    Under the title there are exactly two kinds of thing — who wrote it, and a
-    bar of what a reader can press — and the bar is ruled off from the rest so
-    it reads as controls rather than as more facts. Everything in the bar is
-    one line at a phone's width whatever the paper declares, which is why the
-    header carries no headline number and no length: the number is the first
-    thing the 요약 tab directly below prints, with its context, and a chip of
-    variable length here was what decided where the links wrapped.
+    The axis chips open on the line where a breadcrumb would stand: the nav
+    already says which list this page belongs to, and the chips both name the
+    paper's axes and open each one's introduction (`assets/pillar.js`). The
+    arXiv id beside them links the abstract. The headline number is the
+    rewrite's `metric:` — the one result the paper is remembered by — and the
+    only date is the rewrite's own, at the line's far end: when the paper itself
+    appeared is already in its id.
 
-    The only date is the rewrite's own, on the breadcrumb line. When the paper
-    itself appeared is already in its arXiv id; when this corpus read it is
-    not recoverable from anything else on the page.
-
-    Where else on this site the paper is argued about is the 비교 tab's job:
-    the tab strip sits directly under this header and carries the count.
+    The title is the paper's own. The thesis heads the 요약 tab directly below,
+    and the links out and the 서재 pair sit at the right end of the tab strip.
     """
+    chips = c.pillar_chips([p for p in paper.filed if p != corpus.UNCLASSIFIED])
+    metric = (f'<span class="ph-metric">{c.esc(paper.metric)}</span>'
+              if paper.metric else "")
+    date = (f'<span class="ph-date">작성 {c.esc(paper.date)}</span>'
+            if paper.date else "")
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
-    <div class="crumb-row">
-      <div class="crumb">
-        <a href="../index.html">분석</a> ›
-        <a href="../index.html#p={c.esc(paper.primary)}">{c.esc(paper.primary)}</a> ›
-        {c.esc(paper.stem)}
-      </div>
-      {f'<span class="crumb-date">재작성 {c.esc(paper.date)}</span>' if paper.date else ""}
+    <div class="ph-line">
+      {chips}
+      <a class="ph-id" href="{_arxiv_href(paper.stem)}" target="_blank" rel="noopener">{c.esc(paper.stem)}</a>
+      {metric}
+      {date}
     </div>
     <h1 class="paper-title">{c.esc(paper.title)}</h1>
+    {f'<p class="paper-tagline">{tagline}</p>' if tagline else ""}
     {_authors(paper)}
-    <div class="actbar">
-      {_src_group(paper)}
-      {_acts(paper)}
-    </div>
   </div>
 </header>"""
 
