@@ -136,7 +136,7 @@ def build(args) -> int:
 
     # Before a page is rendered, because every asset URL a page prints carries
     # a token hashed over what this build ships (`assets_out.version`).
-    index_js = pages.corpus_index(papers, comps, pillar_cards())
+    index_js = pages.corpus_index(papers, comps, pillar_cards(), args.search_api)
     assets_out.register("corpus-index.js", index_js)
 
     rendered: dict[Path, str] = {}
@@ -176,7 +176,7 @@ def build(args) -> int:
 
     # The analysis list indexes whatever was built — with `--only`, a subset.
     rendered[out / "p" / "index.html"] = pages.analysis_page(
-        papers, katex, search_api=args.search_api, partial=bool(args.only),
+        papers, katex, partial=bool(args.only),
         graph=graph)
     # The first screen, at the root: what came in lately, the axes, the dates.
     import datetime as _dt
@@ -203,8 +203,7 @@ def build(args) -> int:
     # prints titles and taglines that no page's markup carries either — a paper
     # page names one paper and the index names them all — so the index counts
     # as asset text for the same reason.
-    extras = assets_out.OPTIONAL["search"] if args.search_api else ()
-    charset = set(assets_out.asset_text(extras)) | set(index_js)
+    charset = set(assets_out.asset_text()) | set(index_js)
     # Metadata — dates, ids, counts, labels — is set in the mono face as well
     # as code, so the subset always carries printable ASCII and the few
     # separators a readout uses, whether or not any `<pre>` happens to.
@@ -213,7 +212,7 @@ def build(args) -> int:
         charset |= set(_TEXT_ONLY.sub(" ", page_html))
         for body in _PRE_BLOCK.findall(page_html):
             mono_charset |= set(htmllib.unescape(_TAG.sub("", body)))
-    stats = assets_out.copy_all(out, charset, extras, mono_charset=mono_charset)
+    stats = assets_out.copy_all(out, charset, mono_charset=mono_charset)
     (out / "assets" / "corpus-index.js").write_text(index_js, encoding="utf-8")
     size = len(index_js.encode("utf-8"))
     if size > pages.INDEX_BUDGET:

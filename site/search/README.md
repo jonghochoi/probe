@@ -3,18 +3,21 @@
 Semantic search for the reading site — the index, the endpoint, and what has to
 be true for both to be safe.
 
-The site's filter (`builder/assets/filter.js`, labelled **글자**) matches
-substrings, and *"정책이 느려터진 거 해결한 논문"* shares none with the corpus.
+The ⌘K palette's letter match (`builder/assets/match.js`, its **글자** tab)
+matches substrings, and *"정책이 느려터진 거 해결한 논문"* shares none with the corpus.
 This folder (**의미**) answers that question from a vector index of the
 rewrites and hands back passages to open. It is an enhancement, never a
-dependency (`site/CLAUDE.md`): the remote block removes itself on any failure —
-offline, `file://`, a 502, an answer slower than 5 s.
+dependency (`site/CLAUDE.md`): on any failure — offline, `file://`, a 502, a
+slow answer — the remote part steps aside and the 글자 answer stands.
 
 ## When it asks
 
-Only on submit — `Enter`, the 검색 button, or a `#q=` link on arrival —
-since each ask costs a model call and an embedding. The page side is
-`builder/assets/semantic.js`.
+Only when the reader asks, since each ask costs a model call and an
+embedding. The page side is the ⌘K palette on every page
+(`builder/assets/palette.js`): the row at the foot of its 글자 list offers the
+question, and taking it opens the 의미 tab and asks. The palette reads the
+endpoint from `assets/corpus-index.js`, gives up after 10 s, and prints an
+excerpt's inline TeX as text.
 
 ## What is indexed
 

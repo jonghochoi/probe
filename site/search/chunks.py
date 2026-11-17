@@ -59,12 +59,26 @@ def plain(md: str) -> str:
 
     Badge images, link targets and heading marks are addressing, not content —
     an embedding that reads them spends dimensions on `img.shields.io`.
+
+    Inline math and code keep every character they were written with. An
+    underscore there is a subscript or part of a name — `\\mathbf{o}_t`,
+    `action_chunk` — and the excerpt a search hit prints is cut from this
+    text, so dropping it would print `ot` where the page prints `oₜ`. The
+    marks are stripped only from the prose around them.
     """
     text = re.sub(r"!\[[^\]]*\]\([^)]*\)", " ", md)          # badges and figures
     text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)     # links keep their label
-    text = re.sub(r"\$`([^`]*)`\$", r"\1", text)             # inline math, as written
+    kept: list[str] = []
+
+    def keep(m: re.Match) -> str:
+        kept.append(m.group(1))
+        return f"\x00{len(kept) - 1}\x00"
+
+    text = re.sub(r"\$`([^`]*)`\$", keep, text)              # inline math, as written
+    text = re.sub(r"`([^`\n]+)`", keep, text)                # code spans, as written
     text = re.sub(r"^[|>#*\-\s]*\|", " ", text, flags=re.M)  # table gutters
     text = re.sub(r"[`*_#]+", "", text)
+    text = re.sub(r"\x00(\d+)\x00", lambda m: kept[int(m.group(1))], text)
     text = re.sub(r"[ \t]+", " ", text)
     return re.sub(r"\n{2,}", "\n\n", text).strip()
 
