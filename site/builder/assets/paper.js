@@ -102,9 +102,11 @@
   // within the act being read. It is the only thing that moves as the page
   // scrolls: the rail marks it and nothing else, so reading is not watched by
   // a column that changes on every line.
-  var full = document.getElementById("p-full");
+  // A rewrite reads in its 상세 panel; a comparison has one surface, its
+  // argument under the fork.
+  var full = document.getElementById("p-full") || document.querySelector(".cmp-read");
   var strip = document.querySelector(".actstrip");
-  var article = document.querySelector("#p-full .article");
+  var article = full && full.querySelector(".article");
   if (!full || !article) return;
   var actLinks = strip ? [].slice.call(strip.querySelectorAll(".as-link")) : [];
   var acts = actLinks.map(function (a) {
@@ -117,7 +119,16 @@
              g: a.closest(".ms-g") };
   });
   var groups = tocEl ? [].slice.call(tocEl.querySelectorAll(".ms-g")) : [];
-  var hereId = null, hereG = null;
+  var hereId = null, hereG = null, hereAct = -1;
+  // The milestones scroll in their own box on a narrow strip; the one being
+  // read is brought into it, so the filled dot is never off the edge.
+  var linkBox = strip && strip.querySelector(".as-links");
+  function keepInView(a) {
+    if (!linkBox || !a || linkBox.scrollWidth <= linkBox.clientWidth) return;
+    var left = a.offsetLeft, right = left + a.offsetWidth, pad = 12;
+    if (left < linkBox.scrollLeft) linkBox.scrollLeft = left - pad;
+    else if (right > linkBox.scrollLeft + linkBox.clientWidth) linkBox.scrollLeft = right - linkBox.clientWidth + pad;
+  }
 
   var ticking = false;
   function follow() {
@@ -135,6 +146,7 @@
       if (i === Math.max(cur, 0)) a.setAttribute("aria-current", "true");
       else a.removeAttribute("aria-current");
     });
+    if (Math.max(cur, 0) !== hereAct) { hereAct = Math.max(cur, 0); keepInView(actLinks[hereAct]); }
     var g = groups[Math.max(cur, 0)] || null, id = "";
     secs.forEach(function (x) {
       if (x.el && x.g === g && x.el.getBoundingClientRect().top < top + 40) id = x.id;

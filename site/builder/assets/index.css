@@ -669,10 +669,13 @@ html.js .notfound-find { display: inline-block; }
 @media (max-width: 960px) { .card { flex-basis: calc((100% - 1rem) / 2); } }
 @media (max-width: 680px) { .card { flex-basis: 100%; padding: .9rem .95rem; gap: .35rem; } }
 
-/* A comparison as a card: the question, what the papers share, and under a
+/* A comparison as a card: the question, its thesis, what the papers share, and under a
    rule each paper's name with its stance on the question. */
 .card[hidden] { display: none; }
 .cmp-q h3 { font-size: var(--fs-lg); line-height: 1.4; }
+/* The thesis under the question: the answer reading the papers together
+   gives, a step under the question and above what they share. */
+.cmp-thesis { margin: 0; font-size: var(--fs-sm); line-height: 1.55; color: var(--text); text-wrap: pretty; }
 .cmp-common { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.55; }
 .cmp-common b { font-weight: 700; color: var(--text); margin-right: .35rem; }
 .cmp-sts { margin-top: auto; display: grid; gap: .35rem; padding-top: .55rem; border-top: 1px solid var(--border-soft); }

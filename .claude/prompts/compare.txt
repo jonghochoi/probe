@@ -165,9 +165,10 @@ PROCEDURE
    `probe-timeline` (§3-4) when they part over time. One of the two, not both,
    and only from values the papers state.
 
-   Last, the background (§2-1, `primer`): at most three cards, only for what a
-   reader outside the field cannot read the divergence without. A concept with
-   no card is said in plain words in the prose, not defined at length.
+   Last, the background (§2-1, `primer`): a card for each concept a reader
+   outside the field cannot read the divergence without, and none for what
+   they can. A concept with no card is said in plain words in the prose, not
+   defined at length.
 
 8. WRITE `comparison/<slug>.md` — slug and front matter per §2-1, the opening
    per §2-2. Write `problem` and `plain` LAST, once the axes say what each
