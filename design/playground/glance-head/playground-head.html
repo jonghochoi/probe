@@ -46,8 +46,10 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
   </div>
   <div class="grp"><h2>머리</h2>
     <div class="opt"><div class="seg" data-v="plan"></div><p class="plan" id="plan"></p></div>
-    <div class="opt"><b>카드 바탕</b><div class="seg" data-v="ground"></div></div>
-    <div class="opt"><b>근거 카드의 색</b><div class="seg" data-v="color"></div></div>
+    <div class="opt" id="glowopts"><b>번짐 모양</b><small>4 번짐에서만</small><div class="seg" data-v="gw"></div>
+      <b style="margin-top:.6rem">세기</b><div class="seg" data-v="gs"></div>
+      <b style="margin-top:.6rem">높이</b><small>위쪽 · 아치 · 위쪽+모서리에서</small><div class="seg" data-v="gt"></div></div>
+    <p class="plan">정해 둔 것 — 카드 바탕: 지금 그대로 · 근거 카드의 색: 막마다 넷</p>
   </div>
   <div class="grp"><h2>화면</h2>
     <div class="opt"><b>논문</b><div class="seg" data-v="paper"></div></div>
@@ -64,25 +66,26 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
 <script>
 (function () {
   "use strict";
-  var KEY = "probe.pg.ghead.v1";
-  var PLANS = [["sec", "1 묶음 제목"], ["bar", "2 머리 줄"], ["under", "3 밑줄 이름"], ["glow", "4 모서리 번짐"], ["num", "5 큰 번호"]];
+  var KEY = "probe.pg.ghead.v2";
+  var PLANS = [["sec", "1 묶음 제목"], ["bar", "2 머리 줄"], ["under", "3 밑줄 이름"], ["glow", "4 번짐"], ["num", "5 큰 번호"]];
   var DESC = {
     sec: "카드 밖에 첫 화면과 같은 묶음 제목(주장 · 이야기 · 근거, 회색 부제). 근거 카드 안에는 막 이름(문제 · 무엇이 막혔나)만.",
     bar: "카드 머리를 옅은 색 줄로 나눠 이름을 담음. 창의 제목 막대처럼 머리와 내용이 갈림.",
     under: "이름 아래에만 2px 색 밑줄 — 탭과 내비의 밑줄과 같은 결. 나머지는 장식 없음.",
-    glow: "카드 위 왼쪽 모서리에 은은한 색 번짐 — 페이지 바탕 번짐과 같은 결. 이름은 색 글자.",
+    glow: "카드 위쪽에 은은한 색 번짐 — 페이지 바탕 번짐과 같은 결. 이름은 색 글자. 아래에서 번짐 모양 · 세기 · 높이를 고릅니다.",
     num: "근거 카드는 막 번호를 크게(제목 서체, 옅은 색), 주장 · 이야기는 제목 서체 이름."
   };
   var OPTS = {
     mode: [["two", "나란히 (지금 | 안)"], ["flip", "번갈아 (한 화면)"]],
     plan: PLANS.map(function (p) { return [p[0], p[1]]; }),
-    ground: [["list", "목록 카드처럼"], ["now", "지금 그대로"]],
-    color: [["four", "막마다 넷"], ["one", "주색 하나"]],
+    gw: [["top", "위쪽 전체"], ["arc", "위쪽 아치"], ["topcorner", "위쪽 + 왼쪽 모서리 진하게"], ["corner", "왼쪽 모서리 (1차)"]],
+    gs: [["soft", "옅게"], ["mid", "보통"], ["strong", "진하게"]],
+    gt: [["short", "짧게"], ["mid", "보통"], ["long", "길게"]],
     paper: [["2607.10655", "AFP"], ["2610.16308", "PACE"], ["2606.15768", "LaWAM"]],
     vp: [["desk", "데스크톱", 1280], ["mobile", "휴대폰", 390]],
     theme: [["light", "밝게"], ["dark", "어둡게"]]
   };
-  var st = { mode: "two", plan: "sec", ground: "list", color: "four", paper: "2607.10655", tab: "glance", vp: "desk", theme: "light", showing: "after" };
+  var st = { mode: "two", plan: "glow", gw: "top", gs: "mid", gt: "mid", ground: "now", color: "four", paper: "2607.10655", tab: "glance", vp: "desk", theme: "light", showing: "after" };
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   st.tab = "glance";
   Object.keys(OPTS).forEach(function (k) { if (!OPTS[k].some(function (o) { return o[0] === st[k]; })) st[k] = OPTS[k][0][0]; });
@@ -106,7 +109,10 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
     document.getElementById("plan").textContent = DESC[st.plan];
     document.getElementById("flipwrap").hidden = st.mode !== "flip";
     document.getElementById("flip").textContent = "지금 보는 것: " + (st.showing === "after" ? label(st.plan) : "지금") + "  ·  바꾸기";
-    document.getElementById("sum").textContent = "내 설정 (요약 카드 머리)\n머리: " + label(st.plan) + "\n카드 바탕: " + opt("ground") + "\n근거 카드의 색: " + opt("color");
+    document.getElementById("glowopts").hidden = st.plan !== "glow";
+    document.getElementById("sum").textContent = "내 설정 (요약 카드 머리 2차)\n머리: " + label(st.plan) +
+      (st.plan === "glow" ? "\n번짐 모양: " + opt("gw") + "\n세기: " + opt("gs") + "\n높이: " + opt("gt") : "") +
+      "\n카드 바탕: 지금 그대로\n근거 카드의 색: 막마다 넷";
   }
   // each frame: the card drafts, the plan, the tab, the colour
   function dress(P, v) {
@@ -121,8 +127,10 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
       w.addEventListener("scroll", function () { sync(P); }, { passive: true });
     }
     var h = d.documentElement;
-    if (v === "now") { ["data-gh", "data-gm", "data-gc"].forEach(function (a) { h.removeAttribute(a); }); }
-    else { h.setAttribute("data-gh", v); h.setAttribute("data-gm", st.ground); h.setAttribute("data-gc", st.color); }
+    var A_ = ["data-gh", "data-gm", "data-gc", "data-gw", "data-gs", "data-gt"];
+    if (v === "now") { A_.forEach(function (a) { h.removeAttribute(a); }); }
+    else { h.setAttribute("data-gh", v); h.setAttribute("data-gm", "now"); h.setAttribute("data-gc", "four");
+           h.setAttribute("data-gw", st.gw); h.setAttribute("data-gs", st.gs); h.setAttribute("data-gt", st.gt); }
     d.documentElement.setAttribute("data-theme", st.theme);
     P.b.textContent = label(v);
   }
