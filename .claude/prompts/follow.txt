@@ -87,9 +87,13 @@ THE RUN
      deadline (초록 · 논문 · 반박 · 카메라 레디), `<VENUE> <YEAR> 결과 발표`
      or what the site calls the decision for a `발표`. `장소` for a `학회`
      is the city, and the venue after ` · ` when the site names it.
-   - RA-L is followed for its conference option alone: one `마감` row per
-     option the journal's site states, `RA-L <CONFERENCE> <YEAR> 옵션 마감`
-     (`RA-L ICRA 2028 옵션 마감`). No other RA-L date enters the table.
+   - A venue whose `범위` is `옵션 마감` is a journal followed for its
+     conference options alone: one `마감` row per option its site states for
+     a conference in the venues table, `<JOURNAL> <CONFERENCE> <YEAR> 옵션
+     마감` (`RA-L ICRA 2028 옵션 마감`) — the option's last day. An option
+     for a conference the table does not follow, and every other date of
+     the journal, stays out. A venue whose `범위` is `전체` is followed for
+     every date of the three kinds.
    - A row of a venue you read that its site no longer states (a date
      withdrawn, not moved) stays — say so in the report; a person decides.
    - Rows of a venue that is not in the venues table were added by hand:
