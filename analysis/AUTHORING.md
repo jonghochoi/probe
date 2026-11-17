@@ -149,7 +149,7 @@ to fill in.
 
 The page names each act by its number, not by the `##` text: a short noun and
 its question in grey — 문제 · 무엇이 막혔나, 방법 · 무엇을 바꿨나, 검증 · 정말 되는가,
-시사점 · 연구 축에 걸리는 것 (`ACT_NAMES` in `site/builder/render.py`).
+시사점 · 연구 축에 걸리는 것 (`ACT_NAMES` in `site/builder/components.py`).
 
 Section count varies per paper; the acts are always four. **Act 2 legitimately
 thins out** on a dataset, benchmark or survey paper — it then covers what was

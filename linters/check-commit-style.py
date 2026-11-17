@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Check a commit subject / PR title against the CLAUDE.md commit style.
 
-CLAUDE.md ("Commit message style") pins an exact subject grammar and calls the
-imperative-verb rule "the one that drifts most easily". This lint validates one or more subjects against the mechanical
-half of the rules (grammar shape, type set, casing, length, punctuation) plus
-a blocklist of the common non-imperative offenders. It cannot prove a verb is
+CLAUDE.md ("Commit message style") pins an exact subject grammar and calls
+the imperative-verb rule "the one that drifts most easily". This lint
+validates one or more subjects against the mechanical half of the rules
+(grammar shape, type and scope sets, casing, length, punctuation) plus a
+blocklist of the common non-imperative and vague first words. It cannot prove a verb is
 imperative; it catches the drift patterns the doc itself names.
 
 Accepted shapes:
@@ -18,10 +19,11 @@ Accepted shapes:
   run: record YYYY-MM-DD                the operator's commits of what
   versus: add|update <id> × <scope> …    /distinguish wrote in its private folder
 
-Checked for the human shapes: allowed type; description starts lowercase; no
-trailing period; ≤72 chars total; no manual "(#NN)" suffix (GitHub appends the
-PR number on squash-merge); first word not an obvious non-imperative
-(added/adding/updates/…).
+Checked for the human shapes: allowed type; a scope, when present, from the
+CLAUDE.md set; description starts lowercase; no trailing period; ≤72 chars
+total; no manual "(#NN)" suffix (GitHub appends the PR number on
+squash-merge); first word not an obvious non-imperative (added/adding/updates/…)
+and not the vague `update`.
 
 Usage:
     python3 linters/check-commit-style.py "<subject>" [...]
@@ -35,6 +37,11 @@ import re
 import sys
 
 _TYPES = "feat|fix|refactor|docs|chore|style|deps"
+
+_SCOPES = {
+    "site", "scouting", "analysis", "comparison", "distinction", "adaptation",
+    "context", "prompts", "assets", "linters", "ci", "config",
+}
 
 _HUMAN = re.compile(rf"^({_TYPES})(\(([^)\s]+)\))?: (.+)$")
 
@@ -56,7 +63,7 @@ _NON_IMPERATIVE = {
     "added", "adds", "adding",
     "fixed", "fixes", "fixing",
     "removed", "removes", "removing",
-    "updated", "updates", "updating", "update",
+    "updated", "updates", "updating",
     "changed", "changes", "changing",
     "renamed", "renames", "renaming",
     "moved", "moves", "moving",
@@ -64,6 +71,9 @@ _NON_IMPERATIVE = {
     "refactored", "refactoring",
     "new",
 }
+
+# Imperative, but too vague to say what changed (CLAUDE.md "Bad" examples).
+_VAGUE = {"update"}
 
 
 def check_subject(subject: str) -> list[str]:
@@ -83,6 +93,12 @@ def check_subject(subject: str) -> list[str]:
         ]
 
     desc = m.group(4)
+    scope = m.group(3)
+    if scope is not None and scope not in _SCOPES:
+        problems.append(
+            f'scope "{scope}" is not one of {", ".join(sorted(_SCOPES))} '
+            "(omit it for a repo-wide change)"
+        )
     if len(s) > 72:
         problems.append(f"subject is {len(s)} chars (limit 72)")
     if desc[0].isupper():
@@ -93,11 +109,16 @@ def check_subject(subject: str) -> list[str]:
         problems.append(
             "drop the manual (#NN) — GitHub appends the PR number on squash-merge"
         )
-    first = re.split(r"[\s:]", desc, 1)[0].lower()
+    first = re.split(r"[\s:]", desc, maxsplit=1)[0].lower()
     if first in _NON_IMPERATIVE:
         problems.append(
             f'first word "{first}" is not an imperative verb '
             "(use add/fix/remove/rename/move/refactor/… per CLAUDE.md)"
+        )
+    elif first in _VAGUE:
+        problems.append(
+            f'first word "{first}" is too vague — say what changed '
+            "(add/drop/rename/tighten/… per CLAUDE.md)"
         )
     return problems
 

@@ -5,7 +5,7 @@ The Decision Log is allocated per pillar (a section of `context/P#.md`, entries 
 `#### [D<n>] <title> (P<m>)` — see context/CLAUDE.md "Decision-Log entry format"), and
 analysis / scouting outputs cite decisions constantly (`P1 / D9ZP`,
 `[![D6JW]](…)`, "feeds P4 D9QJ"). A mistyped id, or a decision moved between
-pillars, is invisible on the page, so this lint runs two checks:
+pillars, is invisible on the page, so this lint runs three checks:
 
   1. EXISTENCE — every `D<n>` token cited in a scanned doc must exist in some
      pillar's Decision Log, or be listed on `context/MASTER.md`'s `Retired:`
@@ -13,9 +13,11 @@ pillars, is invisible on the page, so this lint runs two checks:
   2. ALLOCATION — every explicit `P<m> / D<n>` pairing must agree with the
      owning pillar of `D<id>` (a `P1 / D9KS` tie is wrong when D9KS belongs to
      P3).
+  3. FORM — a numeric id (`D17`) is valid only when it is retired; any other
+     is a malformed citation.
 
-Precision over recall (mirroring check-doc-links.py): only `D` + digit + two
-capitals counts (a camera name like `D435` never matches, and neither does a
+Precision over recall (mirroring check-doc-links.py): a live id is `D` + digit
++ two capitals (a camera name like `D435` never matches, and neither does a
 model name like `DINO`), and matches immediately preceded by figure/table/
 appendix designators (`Fig. D2`, `Appendix D1`) are skipped — those are
 paper-internal labels, not Decision citations — and so is anything inside an
@@ -131,7 +133,7 @@ def check_file(path: str, owners: dict[str, int],
             n = m.group(1)
             if n not in retired:
                 findings.append(
-                    (lineno, f"{n} is an old numeric id — ids are D + digit + two letters")
+                    (lineno, f"{n} is a numeric id, valid only when retired — ids are D + digit + two letters")
                 )
         for m in _PAIR.finditer(line):
             if _is_designator_label(line, m.start()):

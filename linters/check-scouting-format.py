@@ -2,8 +2,8 @@
 """Check that scouting reports and run files follow scouting/AUTHORING.md.
 
 The scouting track has no PR — a run's `scouting/P#/YYYY-MM-DD.md` reports and
-its `scouting/runs/YYYY-MM-DD.md` run file are written by a scheduled routine and pushed straight to `main` with nothing between the agent
-and the reader. The contract rules that drift under those conditions are the
+its `scouting/runs/YYYY-MM-DD.md` run file are written by a scheduled routine
+and pushed straight to `main` with nothing between the agent and the reader. The contract rules that drift under those conditions are the
 ones a reader cannot un-see: a `Papers scanned:` line that grows into a
 2,000-character query log, a Reproducibility score that contradicts its own
 rationale, a paper header that grows a grade beside its rank. This lint gates
@@ -20,28 +20,19 @@ Checks, grouped by the contract section they enforce:
             canonical set, `###` headers carry none, the `##` sections run in
             canonical order, each medal appears at most once, 📋 stands
             only under all three medals, a paper header carries nothing
-            after `논문 N` beyond the 🌱 tag, and from `_SECTIONS_EFFECTIVE`
-            the first bullet of (b) and (c) is a headline of at most
+            after `논문 N` beyond the 🌱 tag, 💡 / 🚫 / 📊 are not
+            sections, and the first bullet of (b) and (c) is a headline of at most
             `_HEADLINE_MAX` characters and (b) is the paper brief — its
             six labels each once, in order.
-  AUTHORING §5  scoring contract — every 📊 paper head lists all five dimensions
-            and its bullets sum to the total it states; the four gate
-            dimensions of a surfaced paper and of a 📋 row are each >= 2, and
-            a 🔍 row is
-            exactly one gate axis short, so neither table can hold a paper
-            that cleared the gate; a Reproducibility bullet scoring >= 2 may
-            not also plead that the signal is unconfirmed (the
-            self-contradiction that inflates the axis); every paper header
-            line carries one of the three code labels.
-  AUTHORING §5  from `_SECTIONS_EFFECTIVE` — the gate is Relevance, Novelty
-            and Methodology; every paper section carries a score line whose
+  AUTHORING §5  the gate is Relevance, Novelty and Methodology, each >= 2,
+            and Relevance or Novelty is 3 (the 🌱 pick needs no 3); every paper section carries a score line whose
             five scores sum to its total and clear the gate, each 📋 row's
             합계 is its scores' sum, every Reproducibility score agrees with
             its code label, and every report's Methodology, Real and
             Reproducibility equal its run file's 📐 row (§5-4).
-  AUTHORING §5  from `_FOCUS_EFFECTIVE` — a medal paper and a 📋 row also
-            score 3 on Relevance or Novelty (the 🌱 pick is exempt), and a
-            🔍 row would clear that gate were its one short axis 2.
+  AUTHORING §5  a 🔍 row is exactly one gate axis short and would clear the
+            gate were that axis 2; no Reproducibility score >= 2 pleads that
+            its signal is unconfirmed.
   AUTHORING §8  the run file — its H1, `Pillars:` and `Failed:` lines, the 📐
             section alone, a report for each pillar it lists and
             does not fail, and each 📐 row equal to the most recent earlier
@@ -62,21 +53,11 @@ literal token the contract fixes, so a report that reads oddly but obeys the
 contract passes. Render traps that need inline-context parsing (§4-6 tilde
 pairing, §4-8 bold-before-particle) are out of scope — review catches those.
 
-SCOPE. Each rule binds reports dated on or after the day the rule takes
-effect: `_CONTRACT_EFFECTIVE` for the metadata, emoji, label and table rules,
-`_GATE_EFFECTIVE` for the gate arithmetic, `_SHAPE_EFFECTIVE` for the medal,
-📋 and retry rules, `_SECTIONS_EFFECTIVE` for the section set, the bare
-medal header, the score line, the three-axis gate and the run file,
-`_FOCUS_EFFECTIVE` for the Relevance-or-Novelty 3 and its 🔍 rule. Earlier
-reports are the record of runs that happened under the contract of their day;
-they are evidence, not drafts, so the lint skips them rather than inviting a
-rewrite of history.
-
 Usage (repo root):
     python3 linters/check-scouting-format.py [PATH ...]
 
-No PATH -> scan `scouting/P*/*.md` and `scouting/runs/*.md` (templates excluded — they are skeletons of
-placeholders, not reports).
+No PATH -> scan `scouting/P*/*.md` and `scouting/runs/*.md` (templates
+excluded — they are skeletons of placeholders, not reports).
 
 Exit codes: 0 = clean / 1 = violations found / 2 = nothing to scan.
 """
@@ -91,27 +72,7 @@ import sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Reports dated before this are out of scope (see SCOPE in the docstring).
-_CONTRACT_EFFECTIVE = "2026-08-18"
-
-# The gate-arithmetic checks bind from here — the first scheduled run their
-# rules apply to.
-_GATE_EFFECTIVE = "2026-08-24"
-
-# The medal, 📋 and retry rules bind from here.
-_SHAPE_EFFECTIVE = "2026-09-27"
-
-# The section set of AUTHORING §2-1, the bare `## 🥇 논문 N` header, the score
-# line, the three-axis gate and the run file bind from here — the first run
-# of the single routine. Reports dated earlier carry 💡, 🚫 and 📊 and gate on
-# four axes under the contract of their day.
-_SECTIONS_EFFECTIVE = "2026-10-05"
-
-# From here the gate also asks Relevance or Novelty to score 3, and a 🔍 row
-# is one that would clear that gate were its one short axis 2 (AUTHORING §5-1,
-# §5-5). Methodology 2 is reached by nearly every paper once its own text is
-# read, so three 2s alone select almost nothing.
-_FOCUS_EFFECTIVE = "2026-10-13"
+# Sections an older report carried and the contract no longer has (AUTHORING §2-1).
 _OUT_OF_SET = {
     "💡": "a paper's decisions are its (a) badges, and `context/` edits are the human's",
     "🚫": "a dropped candidate is part of the 🔄 filter count, not a row",
@@ -125,17 +86,15 @@ _SCORE_LINE = re.compile(
 )
 
 # The label each Reproducibility score implies (AUTHORING §5-3). Repro 0
-# carries none; `코드 미공개` is how an earlier report printed it, and still reads.
+# carries none.
 _LABEL_OF_REPRO = {0: None, 1: "코드 공개 예정", 2: "코드 공개", 3: "코드 공개"}
 
 
 def _label_ok(repro: int, label: str | None) -> bool:
-    return label == _LABEL_OF_REPRO.get(repro) or (repro == 0 and label == "코드 미공개")
+    return label == _LABEL_OF_REPRO.get(repro)
 
 # The dimensions that describe the paper rather than the pillar, and the window
-# an earlier judgement of them is kept from (AUTHORING §5-4). A row's fourth
-# score is Real; reports dated before `_SECTIONS_EFFECTIVE` call it Sim2Real
-# and score the same thing, real-robot evidence.
+# an earlier judgement of them is kept from (AUTHORING §5-4).
 _SCORES = ("R", "N", "M", "Real", "Repro")
 _PAPER_DIMENSIONS = ("M", "Real", "Repro")
 _CARRY_WINDOW_DAYS = 56
@@ -154,13 +113,13 @@ _FINAL_FAILURE = "최종 실패"
 
 _H1 = re.compile(r"^# Probe 스카우트 리포트 — (\d{4}-\d{2}-\d{2}) · Pillar (P\d)\s*$")
 _SCANNED = re.compile(r"^\*\*Papers scanned:\*\*\s*(.*)$")
-_SURFACED = re.compile(r"^\*\*Papers surfaced \((?:4축 )?게이트 통과\):\*\*\s*(.*)$")
+_SURFACED = re.compile(r"^\*\*Papers surfaced \(게이트 통과\):\*\*\s*(.*)$")
 _BANNED_META = re.compile(r"^\*\*(Run date|Agent version):\*\*")
 _FILENAME_DATE = re.compile(r"(\d{4}-\d{2}-\d{2})\.md$")
 
 # Canonical `##` section order (AUTHORING §2-1). Sections must run non-decreasing
-# in rank, pinning 📋 → 📊 → 🔍 → 🔄. 💡 and 🚫 hold their rank for the reports
-# dated before `_SECTIONS_EFFECTIVE`.
+# in rank. 💡, 📊 and 🚫 keep a rank so a header opening with one is named as
+# out of the set (`_OUT_OF_SET`) rather than as carrying no emoji.
 _SECTION_RANK = {
     "🔑": 0, "🥇": 1, "🥈": 2, "🥉": 3, "🌱": 4, "📋": 5,
     "📊": 6, "🔍": 7, "💡": 8, "🔄": 9, "🚫": 10,
@@ -168,13 +127,10 @@ _SECTION_RANK = {
 
 _MEDALS = ("🥇", "🥈", "🥉")
 
-_RUBRIC_DIMENSIONS = ("Relevance", "Novelty", "Reproducibility", "Methodology", "Sim2Real")
-
-# The four that gate (AUTHORING §5-1) — Reproducibility is scored, shown and
-# ranked on, but never gates.
-_GATE_DIMENSIONS = ("Relevance", "Novelty", "Methodology", "Sim2Real")
-# From `_SECTIONS_EFFECTIVE` the gate is the first three (AUTHORING §5-1).
-_GATE_THREE = _GATE_DIMENSIONS[:3]
+# The three that gate, in the order a row's score cell prints them (AUTHORING
+# §5-1) — Real and Reproducibility are scored, shown and ranked on, but never
+# gate.
+_GATE = ("Relevance", "Novelty", "Methodology")
 
 _PAPER_SECTIONS = ("🥇", "🥈", "🥉", "🌱")
 
@@ -184,11 +140,9 @@ _EMOJI = re.compile(
     "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U00002B00-\U00002BFF\U0001F000-\U0001F2FF️]"
 )
 
-_CODE_LABELS = ("코드 공개 예정", "코드 미공개", "코드 공개")  # longest first
-
-# A 📊 paper head: `**HapTile (13/15)**`, optionally trailing commentary.
-_SCORE_HEAD = re.compile(r"^\*\*(?P<name>[^*]+?)\((?P<total>\d{1,2})/15[^*]*\)\*\*")
-_SCORE_BULLET = re.compile(r"^-\s*(?P<dim>[A-Za-z0-9]+)\s+(?P<score>\d)\s*—\s*(?P<why>.*)$")
+# Longest first. `코드 미공개` is read so that a Repro 0 paper printing it is
+# caught: Repro 0 carries no label (AUTHORING §5-3).
+_CODE_LABELS = ("코드 공개 예정", "코드 미공개", "코드 공개")
 
 # A Reproducibility rationale scoring >= 2 must not simultaneously plead that
 # the code signal was never confirmed — the evidence pass has already looked
@@ -218,8 +172,7 @@ def _emoji_of(header_text: str) -> str | None:
     return first if first in _SECTION_RANK else None
 
 
-def _check_metadata(lines: list[str], date_from_name: str, findings: list[tuple[int, str]],
-                    shape_rules: bool) -> None:
+def _check_metadata(lines: list[str], date_from_name: str, findings: list[tuple[int, str]]) -> None:
     if not lines or not _H1.match(lines[0].rstrip("\n")):
         findings.append((1, "H1 must read `# Probe 스카우트 리포트 — YYYY-MM-DD · Pillar P#` (AUTHORING §6)"))
     else:
@@ -255,7 +208,7 @@ def _check_metadata(lines: list[str], date_from_name: str, findings: list[tuple[
                 f"`Papers scanned:` is {len(value)} chars, over the {_SCANNED_MAX_CHARS}-char cap — "
                 "drop the funnel arithmetic and the retry narration (AUTHORING §6)",
             ))
-        if shape_rules and _RETRY.search(value) and _FINAL_FAILURE not in value:
+        if _RETRY.search(value) and _FINAL_FAILURE not in value:
             findings.append((
                 lineno,
                 "`Papers scanned:` narrates a retry that succeeded — only a call that ends in "
@@ -326,73 +279,12 @@ def _split_sections(lines: list[str]) -> list[tuple[str, str, int, list[str]]]:
     return out
 
 
-def _check_scoring(sections, findings: list[tuple[int, str]], gate_rules: bool) -> None:
-    for emoji, _header, start, body in sections:
-        if emoji != "📊":
-            continue
-        head: str | None = None
-        head_line = start
-        head_total = 0
-        seen: dict[str, int] = {}
-
-        def close(head_name, head_lineno, stated_total, dims):
-            if head_name is None:
-                return
-            missing = [d for d in _RUBRIC_DIMENSIONS if d not in dims]
-            if missing:
-                findings.append((
-                    head_lineno,
-                    f"📊 `{head_name}` is missing rubric bullet(s): {', '.join(missing)} — "
-                    "all five dimensions are always shown (AUTHORING §5)",
-                ))
-                return
-            if not gate_rules:
-                return
-            short = [f"{d} {dims[d]}" for d in _GATE_DIMENSIONS if dims[d] < 2]
-            if short:
-                findings.append((
-                    head_lineno,
-                    f"📊 `{head_name}` is surfaced with {', '.join(short)} — the four gate "
-                    "dimensions are each >= 2, and a paper short of one belongs in 🔍 "
-                    "(AUTHORING §5-1, §5-5)",
-                ))
-            bullet_total = sum(dims[d] for d in _RUBRIC_DIMENSIONS)
-            if bullet_total != stated_total:
-                findings.append((
-                    head_lineno,
-                    f"📊 `{head_name}` states {stated_total}/15 but its five bullets sum to "
-                    f"{bullet_total} (AUTHORING §5-1)",
-                ))
-
-        for offset, line in enumerate(body, start=start + 1):
-            m = _SCORE_HEAD.match(line.strip())
-            if m:
-                close(head, head_line, head_total, seen)
-                head, head_line, seen = m.group("name").strip(), offset, {}
-                head_total = int(m.group("total"))
-                continue
-            b = _SCORE_BULLET.match(line.strip())
-            if not b:
-                continue
-            dim = b.group("dim")
-            if dim in _RUBRIC_DIMENSIONS:
-                seen.setdefault(dim, int(b.group("score")))
-            if dim == "Reproducibility" and int(b.group("score")) >= 2 and _UNCONFIRMED.search(b.group("why")):
-                findings.append((
-                    offset,
-                    "Reproducibility scores >= 2 while its own rationale says the signal is unconfirmed — "
-                    "an absent signal scores 0 and is stated as absent (AUTHORING §5-2)",
-                ))
-        close(head, head_line, head_total, seen)
-
-
 def _lacks_focus(r: int, n: int) -> bool:
     """Neither Relevance nor Novelty scores 3 (AUTHORING §5-1)."""
     return max(r, n) < 3
 
 
-def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS,
-                     focus: bool = False) -> None:
+def _check_near_miss(sections, findings: list[tuple[int, str]]) -> None:
     """🔍 rows are exactly one gate axis short (AUTHORING §5-5)."""
     for emoji, _header, start, body in sections:
         if emoji != "🔍":
@@ -414,7 +306,7 @@ def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMEN
                 ))
                 continue
             scores = [int(v) for v in _NEAR_MISS_SCORES.fullmatch(score_cell).groups()]
-            short = [d for d, v in zip(gate, scores) if v < 2]
+            short = [d for d, v in zip(_GATE, scores) if v < 2]
             if not short:
                 findings.append((
                     offset,
@@ -427,8 +319,8 @@ def _check_near_miss(sections, findings: list[tuple[int, str]], gate=_GATE_DIMEN
                     f"🔍 row `{paper}` scores {score_cell}, short on {', '.join(short)} — 🔍 is "
                     "exactly one axis short, two or more is dropped (AUTHORING §5-5)",
                 ))
-            elif focus:
-                lifted = [2 if d in short else v for d, v in zip(gate, scores)]
+            else:
+                lifted = [2 if d in short else v for d, v in zip(_GATE, scores)]
                 if _lacks_focus(lifted[0], lifted[1]):
                     findings.append((
                         offset,
@@ -450,8 +342,7 @@ def _table_rows(body: list[str], start: int):
         yield offset, cells
 
 
-def _check_shape(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSIONS,
-                 focus: bool = False) -> None:
+def _check_shape(sections, findings: list[tuple[int, str]]) -> None:
     """The top three take the medals once each; the rest are 📋 rows that clear
     the gate (AUTHORING §5-1)."""
     seen: dict[str, int] = {}
@@ -484,14 +375,14 @@ def _check_shape(sections, findings: list[tuple[int, str]], gate=_GATE_DIMENSION
                 ))
                 continue
             scores = [int(v) for v in _NEAR_MISS_SCORES.fullmatch(score_cell).groups()]
-            short = [d for d, v in zip(gate, scores) if v < 2]
+            short = [d for d, v in zip(_GATE, scores) if v < 2]
             if short:
                 findings.append((
                     offset,
                     f"📋 row `{paper}` scores {score_cell}, short on {', '.join(short)} — a 📋 "
                     "row is a surfaced paper and clears the gate (AUTHORING §5-1, §5-5)",
                 ))
-            elif focus and _lacks_focus(scores[0], scores[1]):
+            elif _lacks_focus(scores[0], scores[1]):
                 findings.append((
                     offset,
                     f"📋 row `{paper}` scores {score_cell} — the gate asks Relevance or "
@@ -547,7 +438,7 @@ def _check_section_set(sections, findings: list[tuple[int, str]]) -> None:
 
 def _check_tables(sections, findings: list[tuple[int, str]]) -> None:
     for emoji, _header, start, body in sections:
-        if emoji not in ("🚫", "🔍", "📋"):
+        if emoji not in ("🔍", "📋"):
             continue
         for offset, line in enumerate(body, start=start + 1):
             stripped = line.strip()
@@ -663,7 +554,7 @@ def _scored(sections, near: bool = True) -> list[tuple[int, str, dict[str, int]]
     return out
 
 
-def _check_score_lines(sections, findings: list[tuple[int, str]], focus: bool = False) -> None:
+def _check_score_lines(sections, findings: list[tuple[int, str]]) -> None:
     """The score line under every paper header and the 📋 sums (AUTHORING §5-1 – §5-3)."""
     for emoji, _header, start, body in sections:
         if emoji not in _PAPER_SECTIONS:
@@ -693,7 +584,7 @@ def _check_score_lines(sections, findings: list[tuple[int, str]], focus: bool = 
             findings.append((lineno, f"surfaced with {', '.join(f'{k}{dims[k]}' for k in short)} — the "
                                      "three gate dimensions are each >= 2, and a paper short of one "
                                      "belongs in 🔍 (AUTHORING §5-1, §5-5)"))
-        elif focus and emoji in _MEDALS and _lacks_focus(dims["R"], dims["N"]):
+        elif emoji in _MEDALS and _lacks_focus(dims["R"], dims["N"]):
             findings.append((lineno, f"surfaced with R{dims['R']} · N{dims['N']} — the gate asks "
                                      "Relevance or Novelty to score 3, the 🌱 pick alone "
                                      "excepted (AUTHORING §5-1)"))
@@ -853,33 +744,19 @@ def check_file(path: str) -> list[tuple[int, str]]:
         return [(0, "filename must be `YYYY-MM-DD.md`")]
 
     findings: list[tuple[int, str]] = []
-    gate_rules = date_from_name >= _GATE_EFFECTIVE
-    shape_rules = date_from_name >= _SHAPE_EFFECTIVE
-    _check_metadata(lines, date_from_name, findings, shape_rules)
+    _check_metadata(lines, date_from_name, findings)
     _check_sections(lines, findings)
     sections = _split_sections(lines)
-    _check_scoring(sections, findings, gate_rules)
     _check_tables(sections, findings)
-    current = date_from_name >= _SECTIONS_EFFECTIVE
-    gate = _GATE_THREE if current else _GATE_DIMENSIONS
-    focus = date_from_name >= _FOCUS_EFFECTIVE
-    if gate_rules:
-        _check_near_miss(sections, findings, gate, focus)
-        _check_surfaced_count(lines, sections, findings)
-    if shape_rules:
-        _check_shape(sections, findings, gate, focus)
-    if current:
-        _check_section_set(sections, findings)
-        _check_score_lines(sections, findings, focus)
-        _check_headlines(sections, findings)
-        _check_brief(sections, findings)
-        _check_against_run(abs_path, date_from_name, sections, findings)
+    _check_near_miss(sections, findings)
+    _check_surfaced_count(lines, sections, findings)
+    _check_shape(sections, findings)
+    _check_section_set(sections, findings)
+    _check_score_lines(sections, findings)
+    _check_headlines(sections, findings)
+    _check_brief(sections, findings)
+    _check_against_run(abs_path, date_from_name, sections, findings)
     return sorted(findings)
-
-
-def _in_scope(path: str) -> bool:
-    date = _report_date(path)
-    return date is not None and date >= _CONTRACT_EFFECTIVE
 
 
 def _gather_default_reports() -> list[str]:
@@ -903,28 +780,16 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write("[check-scouting-format] nothing to scan\n")
         return 2
 
-    in_scope = [r for r in reports if _in_scope(r)]
-    skipped = len(reports) - len(in_scope)
-    if not in_scope:
-        print(
-            f"[check-scouting-format] clean — no report dated {_CONTRACT_EFFECTIVE} or later "
-            f"({skipped} earlier report(s) out of scope)"
-        )
-        return 0
-
     total = 0
-    for report in in_scope:
+    for report in reports:
         for lineno, message in check_file(report):
             total += 1
             print(f"{report}:{lineno}: {message}")
 
     if total:
-        print(f"\n[check-scouting-format] {total} violation(s) across {len(in_scope)} report(s)")
+        print(f"\n[check-scouting-format] {total} violation(s) across {len(reports)} report(s)")
         return 1
-    print(
-        f"[check-scouting-format] clean — {len(in_scope)} report(s) scanned"
-        + (f", {skipped} earlier report(s) out of scope" if skipped else "")
-    )
+    print(f"[check-scouting-format] clean — {len(reports)} report(s) scanned")
     return 0
 
 
