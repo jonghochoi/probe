@@ -1415,6 +1415,34 @@ def _figures(html_text: str) -> str:
                    for p in parts)
 
 
+# A list item that opens on a short label and an em dash — `VL 흐름 — …` —
+# is the shape most report bullets write as `**VL 흐름** — …`. The reports
+# are read as written, so the page gives the plain ones the same bold rather
+# than ask a report to change. A label is plain text (a figure mark may sit
+# in it) no wider than the labels the reports bold themselves, about 20
+# Hangul syllables; a Latin letter or a digit counts as about half of one,
+# so `Temporal Representation Bottleneck` is a label and a clause with a
+# dash in it is not.
+_LABEL_WIDTH = 22
+_LABEL_ITEM = re.compile(
+    r'(<li>(?:\s*<p>)?)((?:[^<\n—]|<b class="sc-fig">[^<]*</b>)+?) — ')
+_TAG = re.compile(r"<[^>]+>")
+
+
+def _label_width(text: str) -> float:
+    return sum(1 if "\u1100" <= ch <= "\u11ff" or "\u3000" <= ch <= "\ud7a3" else .55
+               for ch in text)
+
+
+def _label_items(html_text: str) -> str:
+    def sub(m: re.Match) -> str:
+        label = _TAG.sub("", m.group(2))
+        if _label_width(label) > _LABEL_WIDTH:
+            return m.group(0)
+        return f"{m.group(1)}<strong>{label}</strong> — "
+    return _LABEL_ITEM.sub(sub, html_text)
+
+
 def _bullets(md: str) -> list[str]:
     return [line[2:].strip() for line in md.splitlines() if line.startswith("- ")]
 
@@ -1500,8 +1528,8 @@ def _scout_row(paper, decisions: dict) -> str:
 # ── The detail ──────────────────────────────────────────────────────────────
 # The brief's six fields, read as four tabs of about one length each: three
 # fields to a tab would put three quarters of a write-up behind its first tab.
-# Every heading inside is the first screen's heading — a short bold noun, then
-# a grey line saying what the noun stands for.
+# Every heading inside is a short bold noun after an accent square, then a
+# grey line saying what the noun stands for (`scout.css`).
 _TAB_FIELDS = (("q", "문제", ("문제", "기존 한계")),
                ("m", "방법", ("핵심 방법", "차별점")),
                ("r", "결과", ("핵심 기여", "가치")))
@@ -1512,6 +1540,23 @@ _FIELD_NOUN = {"문제": ("질문", "이 논문이 푸는 것"), "기존 한계"
 # 주장하는 세 가지") says nothing the list does not, and is left out.
 _ANNOUNCE_MAX = 22
 _WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
+
+
+_CAP_MATH = re.compile(r"\$([^$]+)\$")
+
+
+def _caption(text: str, katex) -> str:
+    """An arXiv caption with its `$`-delimited TeX typeset, the rest escaped.
+
+    The caption is the paper's own English, read from LaTeXML's `alttext`, so
+    a `$` in it opens math and nothing else."""
+    out, at = [], 0
+    for m in _CAP_MATH.finditer(text):
+        out.append(c.esc(text[at:m.start()]))
+        tex = m.group(1).strip()
+        out.append(katex.inline(tex) if katex is not None else c.esc(tex))
+        at = m.end()
+    return "".join(out) + c.esc(text[at:])
 
 
 def _noun_head(noun: str, sub: str) -> str:
@@ -1537,23 +1582,35 @@ def _brief_field(label: str, md: str, gist_words: list[str], decisions: dict) ->
 
 
 def _scout_axes(paper, decisions: dict) -> str:
-    """Each pillar's reading: its chip and headline on one line, the rest of
-    what it wrote under them. A 📋 row has only its one line."""
+    """Each pillar's reading: its headline, then the rest of what it wrote
+    under it, in the shape of every other field.
+
+    Only a pillar that wrote the paper up has a reading. A 📋 row's one line
+    is a summary of the paper, not what it means for the pillar, and says
+    again what the other tabs say, so it is left out wherever a write-up
+    exists; a paper only 📋 rows carry shows those lines, as all there is.
+    Where more than one reading stands, a grey line over each names its
+    pillar and rank in plain text — the subtitle's voice, not the chip's,
+    so the field carries no mark the others lack."""
+    picks = [p for p in _scout_picks(paper) if p.full] or _scout_picks(paper)
     out = []
-    for pick in _scout_picks(paper):
+    for pick in picks:
         if pick.full:
             lines = _bullets(pick.implic) or [pick.implic]
             head, rest = lines[0], lines[1:]
         else:
             head, rest = pick.gist, []
         items = "".join(f"<li>{_figures(_scout_md(l, decisions, inline=True))}</li>" for l in rest)
-        out.append(f'<div class="dx-ax"><p class="dx-ax-h">{_scout_chip(pick)}'
-                   f'<span>{_figures(_scout_md(head, decisions, inline=True))}</span></p>'
+        who = (f'<p class="dx-axl">{c.esc(pick.pillar)} · {_PICK_LABEL[pick.kind]}</p>'
+               if len(picks) > 1 else "")
+        out.append(f'<div class="dx-ax">{who}<p class="dx-lead">'
+                   f'{_figures(_scout_md(head, decisions, inline=True))}</p>'
                    + (f"<ul>{items}</ul>" if items else "") + "</div>")
     return "".join(out)
 
 
-def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "") -> str:
+def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "",
+                  katex=None) -> str:
     """Everything the run says about one paper, as one article.
 
     `rewrite` is the address of the paper's own rewrite when the corpus has
@@ -1583,8 +1640,8 @@ def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "") -
                if paper.gist else "")
             + _scout_tags(paper) + "</header>")
     figure = (f'<figure class="sd-fig"><img src="{c.esc(fig["url"])}" alt="" loading="lazy" '
-              f'decoding="async"><figcaption>{c.esc(fig["caption"])}'
-              f'<span>{c.esc(fig["source"])}</span></figcaption></figure>' if fig else "")
+              f'decoding="async"><figcaption>{_caption(fig["caption"], katex)}'
+              f'<span class="sd-src">{c.esc(fig["source"])}</span></figcaption></figure>' if fig else "")
 
     gist_words = _WORD.findall(_md_plain(paper.gist))
     tabs: list[tuple[str, str, str, str]] = []   # key, name, count, body
@@ -1605,7 +1662,7 @@ def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "") -
              f'{_scout_axes(paper, decisions)}</section>')
     if lead.full and lead.check.strip():
         n = f" · {len(checks)}" if checks else ""
-        judge += (f'<section class="dx-ns dx-check"><h4 class="dx-nh">확인'
+        judge += (f'<section class="dx-ns"><h4 class="dx-nh">확인'
                   f'<span class="dx-nsub">먼저 볼 것{n}</span></h4>'
                   f'{_figures(_scout_md(lead.check, decisions))}</section>')
     tabs.append(("u", "판단", str(len(checks)) if checks else "", judge))
@@ -1619,8 +1676,8 @@ def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "") -
         f'<h3 class="dx-pt">{name}</h3>{body}</div>'
         for k, name, _, body in tabs)
     return (f'<article class="sd" id="p-{pid}" data-sd="{pid}">{head}{figure}'
-            f'<div class="dx"><div class="dx-tabbar" role="tablist">{bar}</div>{panes}</div>'
-            "</article>")
+            f'<div class="dx"><div class="dx-tabbar" role="tablist">{bar}</div>'
+            f'{_label_items(panes)}</div></article>')
 
 
 # ── The run picker ──────────────────────────────────────────────────────────
@@ -1702,7 +1759,7 @@ SCOUT_TITLE = "탐색, 읽을 논문을 먼저 고릅니다"
 
 
 def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
-                      figures: dict, *, depth: int) -> str:
+                      figures: dict, *, depth: int, katex=None) -> str:
     """One run: the date line, the recommended papers as cards, the rest of
     the written-up papers as a table, and each paper's detail.
 
@@ -1738,7 +1795,8 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
                  f'<ul class="tl">{rows}</ul>')
     details = "".join(
         _scout_detail(p, decisions, figures.get(p.paper_id),
-                      f"{up}p/{p.paper_id}/index.html" if p.paper_id in papers_by_id else "")
+                      f"{up}p/{p.paper_id}/index.html" if p.paper_id in papers_by_id else "",
+                      katex)
         for p in first + more)
 
     # A pillar's own 🔄 compares it with its earlier reports — the routine's

@@ -32,14 +32,13 @@ _NEG = ("success rate", "result", "comparison", "ablation", "performance", "plot
 _FIG_ID = re.compile(r"(?:^|\.)F(\d+)$")
 _SEC_ID = re.compile(r"^S(\d+)")
 _APPENDIX = re.compile(r"^A\d")
-_MATH = re.compile(r"\$([^$]*)\$")
 
 
 def _clean(caption: str) -> str:
-    """A caption as a reader reads it: inline TeX unwrapped, braces dropped,
-    and the colon LaTeXML leaves after the figure's number gone."""
-    text = _MATH.sub(lambda m: m.group(1).replace("{", "").replace("}", ""), caption)
-    return re.sub(r"^[\s:.]+", "", re.sub(r"\s+", " ", text))
+    """A caption on one line, without the colon LaTeXML leaves after the
+    figure's number. Its inline TeX stays `$`-delimited, as `arxiv.py` reads
+    it from `<math alttext>`, for the page to typeset."""
+    return re.sub(r"^[\s:.]+", "", re.sub(r"\s+", " ", caption))
 
 
 def _choose(paper: arxiv.Paper) -> dict | None:

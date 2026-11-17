@@ -96,7 +96,7 @@ html.js .sd-all { display: none; }
 .sd-fig { margin: 1rem 1.4rem .2rem; padding: .6rem; border: 1px solid var(--border-soft); border-radius: var(--radius); background: var(--surface); }
 .sd-fig img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: var(--fig-pad); border-radius: calc(var(--radius) - 5px); }
 .sd-fig figcaption { margin: .55rem .2rem 0; font-size: var(--fs-xs); line-height: 1.55; color: var(--text); }
-.sd-fig figcaption span { display: block; margin-top: .2rem; font-size: var(--fs-2xs); color: var(--text-muted); }
+.sd-fig .sd-src { display: block; margin-top: .2rem; font-size: var(--fs-2xs); color: var(--text-muted); }
 
 .dx { display: grid; padding: .4rem 1.4rem 2rem; font-size: var(--fs-sm); line-height: 1.65; }
 .dx ul { margin: .25rem 0 0; padding-left: 1.05rem; }
@@ -121,23 +121,22 @@ html.js .dx-tabbar { display: flex; }
 html.js .dx-pane[hidden] { display: none; }
 .dx-pt { margin: 1rem 0 0; font-size: var(--fs-xs); color: var(--orange-ink); }
 html.js .dx-pt { display: none; }
-/* Every heading inside is the first screen's: a short bold noun, a grey line. */
-.dx-ns { padding: .85rem 0; border-top: 1px solid var(--border-soft); }
-.dx-pt + .dx-ns, html.js .dx-pane > .dx-ns:first-of-type { border-top: 0; padding-top: .2rem; }
-.dx-nh { margin: 0 0 .35rem; display: flex; align-items: baseline; font-size: var(--fs-sm); font-weight: 700; color: var(--text); }
+/* Every heading inside is a short noun and a grey line saying what it stands
+   for. The tab above is the pane's title, so the noun stays under it — the
+   body's size, the text colour — and takes only a small accent square as its
+   scan anchor: a pill would read as one more chip or tag, and a bar on its
+   left edge as an aside. */
+.dx-ns { padding: 1rem 0; border-top: 1px solid var(--border-soft); }
+.dx-pt + .dx-ns, html.js .dx-pane > .dx-ns:first-of-type { border-top: 0; padding-top: .3rem; }
+.dx-nh { margin: 0 0 .4rem; display: flex; align-items: baseline; font-size: var(--fs-sm); font-weight: 700; color: var(--text); }
+.dx-nh::before {
+  content: ""; flex: none; align-self: center; width: .38rem; height: .38rem; margin-right: .45rem;
+  border-radius: 2px; background: var(--orange);
+}
 .dx-nsub { margin-left: .5rem; font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); }
 .dx-lead { color: var(--text); }
-.dx-ax { padding: .4rem 0; }
-.dx-ax-h { display: flex; align-items: baseline; gap: .55rem; }
-.dx-ax-h .chip { flex: none; }
-.dx-ax-h > span:last-child { font-weight: 700; color: var(--text); }
-.dx-check ul { list-style: none; padding: 0; }
-.dx-check li { position: relative; padding-left: 1.3rem; color: var(--text); }
-.dx-check li::before {
-  content: "!"; position: absolute; left: 0; top: .2em; display: grid; place-items: center; width: .95rem; height: .95rem;
-  border-radius: 50%; font-size: 10px; font-weight: 800; color: var(--surface);
-  background: color-mix(in srgb, var(--orange) 70%, var(--text));
-}
+.dx-ax + .dx-ax { margin-top: .8rem; }
+.dx-axl { margin-bottom: .1rem; font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted); }
 
 /* The drawer: from the right, a sheet from below on a phone, over the nav. */
 html.sd-on { overflow: hidden; }

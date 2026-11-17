@@ -163,9 +163,10 @@ def build(args) -> int:
         figs = scoutfigs.figures(ids, corpus.REPO_ROOT / ".site-cache", fetch=args.scout_figures)
         for run in runs:
             rendered[out / "s" / run.date / "index.html"] = pages.scouting_run_page(
-                run, runs, decisions, papers_by_id, figs, depth=2)
+                run, runs, decisions, papers_by_id, figs, depth=2, katex=katex)
         rendered[out / "s" / "index.html"] = (
-            pages.scouting_run_page(runs[0], runs, decisions, papers_by_id, figs, depth=1)
+            pages.scouting_run_page(runs[0], runs, decisions, papers_by_id, figs, depth=1,
+                                    katex=katex)
             if runs else pages.scouting_empty_page())
     problems += render_problems
 
