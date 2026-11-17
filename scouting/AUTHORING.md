@@ -120,11 +120,11 @@ place in every paper and the site can lay them out as one card:
 - **기존 한계** — 기존 로봇 사전학습 데이터의 전신 모션 커버리지 부족
   - 로봇 궤적만으로는 인간 모션의 다양성을 담지 못함
 - **핵심 방법** — 몸통·루트·손가락 주석을 하나의 공유 물리 액션 공간으로 통합해 생성형 비디오 사전학습에 액션 지도로 편입
-  - 1단계 — 부분 주석 비디오·모션 1,880.2시간으로 비디오와 액션을 함께 학습
-  - 2단계 — PICO 미드트레이닝과 순기구학 보조 지도로 로봇 과제에 적응
+  - **1단계** — 부분 주석 비디오·모션 1,880.2시간으로 비디오와 액션을 함께 학습
+  - **2단계** — PICO 미드트레이닝과 순기구학 보조 지도로 로봇 과제에 적응
 - **차별점** — 부분 주석 데이터를 버리지 않고 한 액션 공간에서 함께 학습
 - **핵심 기여** — 이종 주석을 함께 쓰는 전신 사전학습 레시피와 데이터셋
-  - WB-Datasets — 리타깃팅한 에고센트릭 인간 시연과 로봇 궤적을 함께 묶은 코퍼스
+  - **WB-Datasets** — 리타깃팅한 에고센트릭 인간 시연과 로봇 궤적을 함께 묶은 코퍼스
   - 시뮬레이션 HumanoidArena 81.9%, 실물 5개 과제 평균 성공률 84.0%
   - 과제 정합형 미드트레이닝이 실물 시연 필요량을 줄인다는 ablation
 - **가치** — 주석이 불완전한 인간 데이터를 전신 사전학습 자원으로 쓰는 경로 제시
@@ -303,6 +303,13 @@ not 합니다/됩니다 paragraphs.
 - **Labelled bullets.** Each item is a bold label + a terse phrase
   (`- **판단 근거** — …`); nest sub-bullets for hierarchy. A section is a
   short bullet list, not one or more paragraphs.
+- **A label is bold at every depth.** Whatever names the bullet before its
+  ` — ` — a stage, a component, a dataset, a benchmark — is wrapped in `**`,
+  in a nested sub-bullet as in a top-level one: `  - **1단계** — …`, never
+  `  - 1단계 — …`. A bullet that names nothing is a phrase with no dash, and
+  (b)'s and (c)'s headline bullets carry no label. The site prints a short
+  plain label bold as well, so the page reads one way whatever a report
+  wrote; that is the page's fallback, and a report still writes the bold.
 - **One claim per bullet.** No `— …하기 위해` trailing-purpose tails; no
   hedging padding (`~할 수 있을 것으로 보입니다`). Speculation stays speculative
   in nominal form (`저하 우려` / `불필요 가능`), assertions stay assertive
