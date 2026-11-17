@@ -164,6 +164,60 @@ def _md_plain(md: str) -> str:
     return re.sub(r"\]\([^)]*\)|[*`\[\]]", "", md)
 
 
+def _mascot(line: str, ordered: list[Paper], cmps: list, run, monday: str) -> str:
+    """The mascot and its line, with every other line it can say beside it.
+
+    The build prints one line per costume `home.js` can put on it, each but
+    the first `hidden`, and the script only swaps which one shows — so with
+    no script the reader gets the plain mark and where to start this week.
+    What it wears is the reader's business, not the build's: the dates a
+    costume turns on (`data-new`, `data-run`, the 일정 rows' own) are read
+    against the reader's own day and hour.
+
+    The four track lines are what the mark cycles through when nothing calls
+    for a costume: each names the newest thing on that track, and the
+    ideation line points at the memo, the one place the site keeps a
+    reader's own idea. `deadline` is printed empty; the script names the
+    date it found.
+    """
+    def say(key: str, html: str) -> str:
+        return f'<span data-say="{key}"{"" if key == "base" else " hidden"}>{html}</span>'
+
+    def link(href: str, text: str) -> str:
+        return f'<a href="{href}"><b>{c.esc(text)}</b></a>'
+
+    says = [say("base", line)]
+    newest = ""
+    if run:
+        when = f"{int(run.date[5:7])}월 {int(run.date[8:10])}일"
+        says.append(say("run", f"{link('s/index.html', when + ' 회차')}가 나왔어요. "
+                               "연구 축마다 이번 주 읽을 논문을 골랐어요."))
+        says.append(say("scout", f"{link('s/index.html', when + ' 회차')}에서 고른 논문 "
+                                 f"{len(run.papers)}편이 기다려요."))
+    if ordered:
+        n_week = sum(1 for p in ordered if p.date >= monday)
+        says.append(say("analysis", f"재작성본 {link('p/index.html', f'{len(ordered)}편')}이 쌓였어요."
+                                    + (f" 이번 주에만 {n_week}편." if n_week else "")))
+    if cmps:
+        x = cmps[0]
+        says.append(say("compare", f"비교 {link(f'c/{c.esc(x.slug)}/index.html', x.title)}. "
+                                   "갈리는 자리만 모았어요."))
+    says.append(say("idea", "읽다 떠오른 생각은 논문마다 메모로 남겨 둘 수 있어요."))
+    latest = max([(p.date, display_alias(p), f"p/{c.esc(p.stem)}/index.html") for p in ordered[:1]]
+                 + [(x.date, x.title, f"c/{c.esc(x.slug)}/index.html") for x in cmps[:1]],
+                 default=None)
+    if latest:
+        newest = latest[0]
+        says.append(say("new", f"새 글이 올라왔어요. {link(latest[2], latest[1])}"))
+    says.append(say("deadline", '<b data-dl-name></b>까지 <b data-dl-n></b>. 일정을 확인하세요.'))
+    if ordered:
+        says.append(say("night", f"늦었어요. 내일은 {link(f'p/{c.esc(ordered[0].stem)}/index.html', display_alias(ordered[0]))}부터 읽어요."))
+    attrs = (f' data-new="{newest}"' if newest else "") + (f' data-run="{run.date}"' if run else "")
+    return (f'<div class="hm-mascot" data-mascot{attrs}>'
+            f'<span class="hm-mk" aria-hidden="true">{c.mark(64, wardrobe=True)}</span>'
+            f'<p class="hm-bubble">{"".join(says)}</p></div>')
+
+
 def home_page(papers: list[Paper], comps: list, runs: list, events: list,
               today: str) -> str:
     """첫 화면 — one line from the mascot, then 최근 and 연구 축 side by
@@ -240,8 +294,7 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
         thesis = _thesis(p)
         line = (f'이번 주엔 <b>{c.esc(display_alias(p))}</b>부터 읽어 보세요.'
                 + (f" “{c.esc(_md_plain(thesis))}”" if thesis else ""))
-    mascot = (f'<div class="hm-mascot"><span class="hm-mk" aria-hidden="true">{c.mark(64)}</span>'
-              f'<p class="hm-bubble">{line}</p></div>' if line else "")
+    mascot = _mascot(line, ordered, cmps, run, monday) if line else ""
     n_axes = _COUNT_WORD.get(len(PILLAR_NAMES), str(len(PILLAR_NAMES)))
 
     body = f"""<main class="hm">

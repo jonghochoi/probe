@@ -8,7 +8,8 @@
 .hm-h { margin: 0; display: flex; align-items: baseline; gap: .5rem; font-size: var(--fs-sm); font-weight: 700; }
 .hm-sub { font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); }
 
-/* The mascot and its one line: where to start this week. */
+/* The mascot and its line: where to start this week, or what it is dressed
+   for today (`home.js`). */
 .hm-mascot { display: flex; align-items: center; gap: .8rem; }
 .hm-mk { flex: none; display: grid; place-items: center; width: 72px; height: 72px; }
 .hm-mk .probe-mark { width: 64px; height: 64px; }
@@ -22,6 +23,112 @@
   transform: translateY(-50%) rotate(45deg);
 }
 .hm-bubble b { color: var(--accent-ink); }
+.hm-bubble a:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.hm-bubble.is-swap { opacity: 0; }
+.hm-bubble { transition: opacity var(--dur-mid, .2s) ease; }
+
+/* The mark's wardrobe — `components.mark(wardrobe=True)` draws it and
+   `home.js` names one costume in `data-w`. A costume is the props it shows
+   and where it points the eyes; with no `data-w` the mark is the plain one.
+   A prop is placed or worn, never held (`assets/CLAUDE.md`), and its hues
+   are the README icons' own, so they hold one value in both themes, like
+   the eyes they sit beside. */
+.hm-mk {
+  --w-paper: var(--mark-iris); --w-ink: #B06749; --w-tweed: #8B6B4E; --w-tweed-d: #5E4430;
+  --w-scouter: #9141AC; --w-lens: #4FD08A; --w-signal: #2EA865; --w-bulb: #F5B700;
+  --w-alert: #E5484D; --w-drop: #5AAEE0; --w-stone: #3E9BE0; --w-screw: #9A8C84;
+}
+.hm-mk .probe-mark .w { opacity: 0; scale: .3; transform-box: fill-box; transform-origin: center;
+  transition: opacity .28s ease, scale .5s cubic-bezier(.34, 1.56, .64, 1); }
+.probe-mark[data-w="scout"] .w-scout,
+.probe-mark[data-w="analysis"] :is(.w-hat, .w-read, .w-bang),
+.probe-mark[data-w="compare"] .w-pages,
+.probe-mark[data-w="idea"] .w-bulb,
+.probe-mark[data-w="party"] .w-party,
+.probe-mark[data-w="deadline"] :is(.w-sweat, .w-cal),
+.probe-mark[data-w="sleep"] :is(.w-sleep, .w-zz) { opacity: 1; scale: 1; }
+
+/* A costume holds the eyes still: the mood swap and the pointer would pull
+   them off what it is looking at. Where a costume aims them, its rule leads
+   with `.hm-mk` to outrank this one. */
+.probe-mark[data-w]:not([data-w=""]) .pupil { animation: none; opacity: 1; translate: none !important;
+  transition: transform .45s cubic-bezier(.34, 1.4, .64, 1); }
+.probe-mark[data-w]:not([data-w=""]) .joy { animation: none; opacity: 0; }
+.hm-mk .probe-mark[data-w="analysis"] .pupil { transform: translate(0, 4.5px); }
+.hm-mk .probe-mark[data-w="idea"] .pupil     { transform: translate(2.5px, -4px); }
+.hm-mk .probe-mark[data-w="deadline"] .pupil { transform: translate(3px, 2px); }
+.hm-mk .probe-mark[data-w="compare"] .pupil  { animation: w-dart 2.6s ease-in-out infinite; }
+.hm-mk .probe-mark[data-w="party"] .pupil    { opacity: 0; }
+.hm-mk .probe-mark[data-w="party"] .joy      { opacity: 1; }
+.probe-mark[data-w="sleep"] .lid      { opacity: 0; }
+.probe-mark[data-w="sleep"] .rig      { animation-duration: 5.2s; }
+.probe-mark[data-w="party"] .rig      { animation: w-hop 1.1s cubic-bezier(.3, 1.5, .6, 1) infinite; }
+.probe-mark[data-w="deadline"] .rig   { animation: w-jitter .35s linear infinite; }
+/* A costume goes on with a squash, so the change reads as the mark's own. */
+.probe-mark.w-on { transform-origin: 50% 92%; animation: w-squash .55s cubic-bezier(.3, 1.6, .5, 1); }
+
+.probe-mark .w-flap  { fill: var(--w-tweed); stroke: var(--w-tweed-d); stroke-width: 1; }
+.probe-mark .w-cap   { fill: var(--w-tweed); }
+.probe-mark .w-tweed { fill: url(#w-tw); }
+.probe-mark .w-weave { stroke: var(--w-tweed-d); stroke-width: .7; opacity: .55; }
+.probe-mark .w-visor { fill: var(--w-tweed-d); }
+.probe-mark .w-page  { fill: var(--w-paper); stroke: var(--w-ink); stroke-width: 2; }
+.probe-mark .w-line  { fill: var(--w-ink); opacity: .3; }
+.probe-mark .w-bar   { fill: var(--w-ink); opacity: .55; }
+.probe-mark .w-mag   { fill: var(--w-ink); opacity: .85; }
+.probe-mark .w-stone { fill: var(--w-stone); fill-opacity: .22; stroke: var(--w-ink); stroke-width: 1.6; }
+.probe-mark .w-slide { animation: w-slide 3.2s ease-in-out infinite; }
+.probe-mark .w-bangt { fill: var(--w-alert); font: 900 17px system-ui, sans-serif;
+  transform-box: fill-box; transform-origin: center; animation: w-bang 3.2s ease-out infinite; }
+.probe-mark .w-ring  { fill: none; stroke: var(--w-alert); stroke-width: 2.4; stroke-dasharray: 100;
+  stroke-dashoffset: 100; animation: w-draw 2.6s ease-out infinite; }
+.probe-mark .w-mast  { fill: none; stroke: var(--w-scouter); stroke-width: 2.6; stroke-linecap: round; }
+.probe-mark .w-rim   { fill: var(--w-scouter); }
+.probe-mark .w-glass { fill: var(--w-lens); fill-opacity: .42; animation: w-alarm 3s linear infinite; }
+.probe-mark .w-shine { fill: var(--w-paper); opacity: .55; }
+.probe-mark .w-sig   { fill: var(--w-signal); }
+.probe-mark .w-wave  { fill: none; stroke: var(--w-signal); stroke-width: 2.2; stroke-linecap: round;
+  animation: w-sig 1.4s linear infinite; }
+.probe-mark .w-w2    { animation-delay: .25s; }
+.probe-mark .w-ray   { stroke: var(--w-bulb); stroke-width: 2.2; stroke-linecap: round; animation: w-rays 3.6s linear infinite; }
+.probe-mark .w-bulbglass { fill: var(--w-paper); stroke: var(--w-ink); stroke-width: 1.6; animation: w-glow 3.6s linear infinite; }
+.probe-mark .w-fil   { fill: none; stroke: var(--w-ink); stroke-width: 1.2; stroke-linecap: round; }
+.probe-mark .w-screw { fill: var(--w-screw); }
+.probe-mark .w-closed { fill: none; stroke: var(--mark-pupil); stroke-width: 3.4; stroke-linecap: round; }
+.probe-mark .w-z     { fill: var(--text-muted); font: 700 11px var(--mono); animation: w-z 2.8s ease-out infinite; }
+.probe-mark .w-z:nth-child(2) { font-size: 13px; animation-delay: .9s; }
+.probe-mark .w-z:nth-child(3) { font-size: 15px; animation-delay: 1.8s; }
+.probe-mark .w-drop  { fill: var(--w-drop); transform-box: fill-box; animation: w-drip 1.8s ease-in infinite; }
+.probe-mark .w-caltop { fill: var(--w-alert); }
+.probe-mark .w-calx  { stroke: var(--w-alert); stroke-width: 2; stroke-linecap: round; }
+.probe-mark .w-cf    { transform-box: fill-box; transform-origin: center; animation: w-fall 2.2s linear infinite; }
+.probe-mark .w-cf0 { fill: var(--accent); }
+.probe-mark .w-cf1 { fill: color-mix(in oklch, var(--accent), white 40%); animation-delay: .5s; }
+.probe-mark .w-cf2 { fill: var(--w-bulb); animation-delay: 1s; }
+.probe-mark .w-cf3 { fill: var(--w-signal); animation-delay: 1.5s; }
+
+@keyframes w-squash { 0% { scale: 1 1; } 30% { scale: 1.12 .84; } 60% { scale: .94 1.08; } 100% { scale: 1 1; } }
+@keyframes w-dart   { 0%, 30% { transform: translate(-4px, 2.6px); } 36%, 62% { transform: translate(4px, 2.6px); }
+                      68%, 76% { transform: translate(-4px, 2.6px); } 80%, 100% { transform: translate(0, 0); } }
+@keyframes w-hop    { 0%, 100% { translate: 0 0; } 35% { translate: 0 -7px; } 60% { translate: 0 0; } 75% { translate: 0 -2px; } }
+@keyframes w-jitter { 0%, 100% { translate: 0 0; } 25% { translate: -.6px 0; } 75% { translate: .6px 0; } }
+@keyframes w-slide  { 0%, 10% { translate: 0 0; } 60%, 90% { translate: 20px 0; } 100% { translate: 0 0; } }
+@keyframes w-bang   { 0%, 60% { opacity: 0; scale: .3; } 65% { opacity: 1; scale: 1.25; } 70%, 88% { opacity: 1; scale: 1; } 94%, 100% { opacity: 0; } }
+@keyframes w-draw   { 0%, 78% { stroke-dashoffset: 100; opacity: 0; } 79% { opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes w-alarm  { 0%, 55% { fill-opacity: .42; } 60%, 70% { fill-opacity: .85; } 65%, 75%, 100% { fill-opacity: .42; } }
+@keyframes w-sig    { 0%, 30% { opacity: 0; } 45%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes w-glow   { 0%, 25% { fill: var(--w-paper); } 27% { fill: var(--w-bulb); } 30% { fill: var(--w-paper); }
+                      34% { fill: var(--w-bulb); } 36% { fill: var(--w-paper); } 40%, 88% { fill: var(--w-bulb); } 92%, 100% { fill: var(--w-paper); } }
+@keyframes w-rays   { 0%, 39% { opacity: 0; } 40%, 88% { opacity: 1; } 92%, 100% { opacity: 0; } }
+@keyframes w-z      { 0% { opacity: 0; translate: 0 6px; } 30% { opacity: 1; } 100% { opacity: 0; translate: 8px -14px; } }
+@keyframes w-drip   { 0%, 20% { translate: 0 0; opacity: 1; } 90% { translate: 0 18px; opacity: 1; } 100% { translate: 0 20px; opacity: 0; } }
+@keyframes w-fall   { 0% { translate: 0 -10px; rotate: 0deg; opacity: 0; } 10% { opacity: 1; }
+                      100% { translate: 0 70px; rotate: 300deg; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hm-mk .probe-mark, .hm-mk .probe-mark * { animation: none !important; transition: none !important; }
+  .probe-mark .w-wave, .probe-mark .w-ray, .probe-mark .w-z, .probe-mark .w-ring { opacity: 1; stroke-dashoffset: 0; }
+  .probe-mark[data-w="idea"] .w-bulbglass { fill: var(--w-bulb); }
+}
 
 .hm-two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 2.2rem; }
 

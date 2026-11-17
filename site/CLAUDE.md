@@ -96,7 +96,11 @@ icons and who-writes-what picture redraw it with their animation inlined
 `favicon.svg`, and `favicon-32.png` and `apple-touch-icon.png` rendered from
 it, which are what a phone's home-screen shortcut shows — and as `og.png`, the
 1200×630 card a pasted link unfurls with. Change the mark here and bring all
-of those into step.
+of those into step. The first screen draws it with `wardrobe=True`: the
+README track icons' props plus three of its own (a deadline's sweat, a new
+post's confetti, the night's sleep), every one hidden until `home.js` names a
+costume, so the bare mark it draws is the one those copies redraw. A prop
+changed in a track icon is changed in the wardrobe too.
 
 **Three modules serve the prompts as well as the build.** `builder/arxiv.py`
 (its CLI: `site/README.md`) reads a paper's HTML edition, falling back to

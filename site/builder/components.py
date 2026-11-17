@@ -123,7 +123,87 @@ def icon(name: str, size: int = 16) -> str:
     )
 
 
-def mark(size: int) -> str:
+_SPROUT = ('<g class="sprout"><path class="stem" d="M48 26.5 V18.5"/>'
+           '<path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/>'
+           '<path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>')
+
+# The wardrobe — what the first screen's mark wears (`home.js` picks it,
+# `home.css` shows it). The track props are the README icons' own drawings
+# (`assets/probe-*.svg`), on the same 96-unit grid, so a prop moves in both
+# places or neither. Three layers, by where a prop sits in the stack: behind
+# the eyes (the deerstalker, which carries its own sprout so the sprout still
+# pokes through the cap), in front of them (what rides under the eyes or on
+# the hull), and off the bobbing body (what floats over the head or stands on
+# the ground). The tweed's pattern id is the page's only one, since the first
+# screen is the one page that draws the wardrobe.
+_WARDROBE_UNDER = (
+    '<defs><pattern id="w-tw" width="3.4" height="3.4" patternUnits="userSpaceOnUse">'
+    '<path class="w-weave" d="M0 0 H3.4 M0 0 V3.4"/></pattern></defs>'
+    '<g class="w w-hat">'
+    '<path class="w-flap" d="M18 33 C13 38, 14 46, 17.5 49 C21 47, 23.5 41, 23 34 Z"/>'
+    '<path class="w-flap" d="M78 33 C83 38, 82 46, 78.5 49 C75 47, 72.5 41, 73 34 Z"/>'
+    '<path class="w-cap" d="M18.5 38 C18.5 25, 31 17.5, 48 17.5 C65 17.5, 77.5 25, 77.5 38 Z"/>'
+    '<path class="w-tweed" d="M18.5 38 C18.5 25, 31 17.5, 48 17.5 C65 17.5, 77.5 25, 77.5 38 Z"/>'
+    '<path class="w-visor" d="M26 37 C34 43.5, 62 43.5, 70 37 Z"/>'
+    f"{_SPROUT}</g>"
+)
+_WARDROBE_OVER = (
+    '<g class="w w-sleep"><path class="w-closed" d="M30 52 q6 5 12 0"/>'
+    '<path class="w-closed" d="M54 52 q6 5 12 0"/></g>'
+    '<g class="w w-scout">'
+    '<path class="w-mast" d="M77.25 44 V29.6"/><circle class="w-sig" cx="77.25" cy="23.5" r="2.2"/>'
+    '<path class="w-wave" d="M74.01 18.69 A5.8 5.8 0 0 1 80.49 18.69"/>'
+    '<path class="w-wave w-w2" d="M71.66 15.21 A10 10 0 0 1 82.84 15.21"/>'
+    '<rect class="w-rim" x="73.5" y="41" width="7.5" height="19" rx="3.75"/>'
+    '<rect class="w-rim" x="72" y="49.4" width="5" height="4.6" rx="1.5"/>'
+    '<circle class="w-glass" cx="60" cy="52" r="12.6"/><circle class="w-mast" cx="60" cy="52" r="13.4"/>'
+    '<path class="w-shine" d="M51.2 47.2 a10 10 0 0 1 4.6 -4.6 l1 1.8 a8 8 0 0 0 -3.7 3.7 z"/></g>'
+    '<g class="w w-read"><g transform="rotate(-4 48 74.5)">'
+    '<rect class="w-page" x="27" y="66" width="42" height="17" rx="3"/>'
+    '<rect class="w-line" x="33" y="69.6" width="30" height="2.2" rx="1.1"/>'
+    '<rect class="w-line" x="33" y="73.4" width="30" height="2.2" rx="1.1"/>'
+    '<rect class="w-line" x="33" y="77.2" width="19" height="2.2" rx="1.1"/>'
+    '<g class="w-slide"><rect class="w-mag" x="32" y="71.2" width="12" height="4.2" rx="2.1"/>'
+    '<circle class="w-stone" cx="38" cy="73.3" r="7"/></g></g></g>'
+    '<g class="w w-pages">'
+    '<g transform="rotate(-6 33 86)"><rect class="w-page" x="21" y="60" width="24" height="26" rx="2.5"/>'
+    '<rect class="w-line" x="25.5" y="64" width="15" height="2.2" rx="1.1"/>'
+    '<rect class="w-bar" x="26" y="76" width="3.8" height="6" rx=".8"/>'
+    '<rect class="w-bar" x="31.6" y="72" width="3.8" height="10" rx=".8"/>'
+    '<rect class="w-bar" x="37.2" y="67" width="3.8" height="15" rx=".8"/>'
+    '<ellipse class="w-ring" cx="37.1" cy="74" rx="5.4" ry="10" transform="rotate(-10 37.1 74)" pathLength="100"/></g>'
+    '<g transform="rotate(6 63 86)"><rect class="w-page" x="51" y="60" width="24" height="26" rx="2.5"/>'
+    '<rect class="w-line" x="55.5" y="64" width="15" height="2.2" rx="1.1"/>'
+    '<rect class="w-bar" x="56" y="76" width="3.8" height="6" rx=".8"/>'
+    '<rect class="w-bar" x="61.6" y="72" width="3.8" height="10" rx=".8"/>'
+    '<rect class="w-bar" x="67.2" y="78" width="3.8" height="4" rx=".8"/>'
+    '<ellipse class="w-ring" cx="67.1" cy="74" rx="5.4" ry="10" transform="rotate(-10 67.1 74)" pathLength="100"/></g></g>'
+    '<g class="w w-sweat"><path class="w-drop" d="M82 33 C84.5 37, 85 39.5, 82 40.5 C79 39.5, 79.5 37, 82 33 Z"/></g>'
+)
+_WARDROBE_OUT = (
+    '<g class="w w-bulb">'
+    + "".join(f'<path class="w-ray" d="{d}"/>' for d in (
+        "M61.1 9.8 L57.8 8.6", "M64.6 5.2 L62.5 2.4", "M70 3.5 L70 0", "M75.4 5.2 L77.5 2.4",
+        "M78.9 9.8 L82.2 8.6", "M79.2 15.5 L82.6 16.4", "M60.8 15.5 L57.4 16.4"))
+    + '<path class="w-bulbglass" d="M70 4 C75 4, 78.5 7.6, 78.5 12.4 C78.5 16, 76 17.6, 74.6 20 L65.4 20 '
+      'C64 17.6, 61.5 16, 61.5 12.4 C61.5 7.6, 65 4, 70 4 Z"/>'
+      '<path class="w-fil" d="M67.4 19 L67.4 14.6 L69 12.4 L71 14.6 L72.6 12.4 L72.6 19"/>'
+      '<rect class="w-screw" x="65.6" y="20.6" width="8.8" height="2.6" rx="1"/>'
+      '<rect class="w-screw" x="66.4" y="23.8" width="7.2" height="2.4" rx="1"/></g>'
+      '<g class="w w-bang"><text class="w-bangt" x="76" y="20" text-anchor="middle">!</text></g>'
+      '<g class="w w-zz"><text class="w-z" x="70" y="22">z</text>'
+      '<text class="w-z" x="76" y="16">z</text><text class="w-z" x="83" y="9">Z</text></g>'
+      '<g class="w w-cal"><rect class="w-page" x="79" y="64" width="19" height="22" rx="2"/>'
+      '<rect class="w-caltop" x="79" y="64" width="19" height="5.5" rx="2"/>'
+      '<path class="w-calx" d="M84 74 l9 8 M93 74 l-9 8"/></g>'
+      '<g class="w w-party">'
+    + "".join(f'<rect class="w-cf w-cf{i % 4}" x="{x}" y="{y}" width="3.6" height="2.6"/>'
+              for i, (x, y) in enumerate(((14, 2), (30, -6), (64, -4), (82, 2), (6, -8), (90, -8))))
+    + "</g>"
+)
+
+
+def mark(size: int, wardrobe: bool = False) -> str:
     """The animated PROBE mark — a probe that looks back at the reader.
 
     One `viewBox` serves every size; the caller picks the pixel box. Geometry
@@ -137,6 +217,10 @@ def mark(size: int) -> str:
     cross-fade between them and each face holds half the cycle. Decorative — the
     logo names the site in text right next to it — so it stays out of the
     accessibility tree.
+
+    `wardrobe` adds the props the first screen dresses it in, every one hidden
+    until `data-w` names it, so the mark drawn with them looks exactly like
+    the mark drawn without.
     """
     eyes = "".join(
         f'<g class="eye {side}"><g class="lid">'
@@ -146,17 +230,16 @@ def mark(size: int) -> str:
         "</g></g>"
         for side, x in (("eL", 36), ("eR", 60))
     )
+    under, over, out = (_WARDROBE_UNDER, _WARDROBE_OVER, _WARDROBE_OUT) if wardrobe else ("", "", "")
     return (
         f'<svg class="probe-mark" width="{size}" height="{size}" '
         'viewBox="0 0 96 96" aria-hidden="true" focusable="false">'
         '<ellipse class="shadow" cx="48" cy="90" rx="20" ry="4"/>'
         '<g class="rig">'
-        '<g class="sprout"><path class="stem" d="M48 26.5 V18.5"/>'
-        '<path class="leaf" d="M48 20.5 C43 20.6, 39.4 17.6, 38.5 13.5 C43.2 13, 47.2 15.6, 48 20.5 Z"/>'
-        '<path class="leaf" d="M48 18.2 C53.2 17.6, 57.6 14, 58.5 9.5 C53.2 9.5, 48.8 13, 48 18.2 Z"/></g>'
+        f"{_SPROUT}"
         '<rect class="hull" x="17" y="27" width="62" height="54" rx="19"/>'
-        f"{eyes}"
-        "</g></svg>"
+        f"{under}{eyes}{over}"
+        f"</g>{out}</svg>"
     )
 
 
