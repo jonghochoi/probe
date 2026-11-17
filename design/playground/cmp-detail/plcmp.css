@@ -59,3 +59,12 @@ html[data-pc-cards="glow"] .cmp-primers-h {
 @media (max-width: 720px) {
   html[data-pc-cards="glow"] .has-trunk .cmp-card-row { border-left: 0; padding-left: 0; }
 }
+
+/* ── 읽기 전에 as act 0 ── */
+html[data-pc-primer="none"] .pc-ms0, html[data-pc-primer="none"] .pc-as0 { display: none; }
+.pc-pdiv0 { display: none; }
+html[data-pc-primer="act"] .pc-pdiv0 { display: flex; margin-top: .25rem; }
+html[data-pc-primer="act"] .view > .cmp-primers { max-width: none; padding: 1.6rem 0 0; margin: 0; }
+html[data-pc-primer="act"] .view > .cmp-primers .cmp-primers-h { display: none; }
+html[data-pc-primer="act"] .view > .cmp-primers ~ .pdiv:not(.pc-pdiv0) { scroll-margin-top: calc(var(--nav-h) + 1rem); }
+html[data-pc-toc="ms"] .shell > .pc-toc .pc-ms0 .ms-num { visibility: hidden; }

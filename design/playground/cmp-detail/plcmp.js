@@ -78,6 +78,51 @@ groups.forEach(function (g, i) {
 });
 var shell = q(".shell");
 shell.insertBefore(toc, shell.firstChild);
+
+/* ── 읽기 전에 as act 0: in the contents, and optionally in the article ── */
+var prim = q(".cmp-primers"), primHome = prim && prim.nextSibling;
+var prim0 = null, primDiv = null;
+if (prim) {
+  prim.id = "act-0";
+  var cards = qa(".primer", prim);
+  prim0 = el("div", "ms-g pc-ms0");
+  var a0 = el("a", "ms-act"); a0.href = "#act-0";
+  a0.appendChild(el("span", "ms-node", "0"));
+  var at0 = el("span", "ms-at"); at0.appendChild(el("b", "", "읽기 전에"));
+  at0.appendChild(el("span", "", "먼저 알아 둘 것")); a0.appendChild(at0);
+  a0.appendChild(el("span", "ms-cnt", String(cards.length)));
+  prim0.appendChild(a0);
+  var rows0 = el("div", "ms-rows");
+  cards.forEach(function (f, i) {
+    f.id = "pc-pr" + (i + 1);
+    var r = el("div", "toc-row"), s = el("a", "ms-sec"); s.href = "#" + f.id;
+    s.appendChild(el("span", "ms-num", "·"));
+    var b = q("figcaption b", f);
+    s.appendChild(el("span", "ms-t", b ? b.textContent : ""));
+    r.appendChild(s); rows0.appendChild(r);
+  });
+  prim0.appendChild(rows0);
+  ms.insertBefore(prim0, ms.firstChild);
+  primDiv = el("div", "pdiv pc-pdiv0");
+  primDiv.appendChild(el("span", "pn", "0"));
+  primDiv.appendChild(el("span", "pc-noun", "읽기 전에"));
+  primDiv.appendChild(el("span", "pt pc-q", "먼저 알아 둘 것"));
+}
+function placePrimers(mode) {
+  if (!prim) return;
+  if (mode === "act") {
+    var after = q(".view > header.lead");
+    var v = q(".view");
+    var ref = after ? after.nextSibling : v.firstChild;
+    v.insertBefore(primDiv, ref); v.insertBefore(prim, primDiv.nextSibling);
+    primDiv.id = "act-0"; prim.removeAttribute("id");
+  } else {
+    if (primDiv.parentNode) primDiv.parentNode.removeChild(primDiv);
+    primHome.parentNode.insertBefore(prim, primHome); prim.id = "act-0";
+  }
+}
+var s0 = el("a", "as-link pc-as0"); s0.href = "#act-0";
+s0.appendChild(el("i", "as-dot")); s0.appendChild(d.createTextNode("읽기 전에"));
 // opening a folded act from the contents
 toc.addEventListener("click", function (e) {
   var a = e.target.closest("a"); if (!a) return;
@@ -94,13 +139,15 @@ NOUN.slice(0, groups.length).forEach(function (w, i) {
   sin.appendChild(a);
 });
 shell.parentNode.insertBefore(strip, shell);
+if (prim) sin.insertBefore(s0, sin.firstChild);
 // follow the scroll, quietly: the act being read and its piece
 function follow() {
   if (H.getAttribute("data-pc-toc") !== "ms") return;
-  var y = 140, cur = 0;
-  groups.forEach(function (g, i) { if (g.host.getBoundingClientRect().top < y) cur = i; });
-  qa(".ms-g", ms).forEach(function (b, i) { b.classList.toggle("on", i === cur); });
-  qa(".as-link", sin).forEach(function (a, i) { a.setAttribute("aria-current", i === cur ? "true" : "false"); });
+  var y = 140, cur = 0, has0 = prim && H.getAttribute("data-pc-primer") !== "none";
+  groups.forEach(function (g, i) { if (g.host.getBoundingClientRect().top < y) cur = i + 1; });
+  if (!has0 && cur === 0) cur = 1;
+  qa(".ms-g", ms).forEach(function (b) { var k = b.classList.contains("pc-ms0") ? 0 : qa(".ms-g:not(.pc-ms0)", ms).indexOf(b) + 1; b.classList.toggle("on", k === cur); });
+  qa(".as-link", sin).forEach(function (a) { var k = a.classList.contains("pc-as0") ? 0 : qa(".as-link:not(.pc-as0)", sin).indexOf(a) + 1; a.setAttribute("aria-current", k === cur ? "true" : "false"); });
   var secs = qa(".ms-sec", ms), last = null;
   secs.forEach(function (s) { var t = d.getElementById(s.getAttribute("href").slice(1)); if (t && t.getBoundingClientRect().top < y + 60 && t.offsetParent) last = s; });
   secs.forEach(function (s) { s.setAttribute("aria-current", s === last ? "true" : "false"); });
@@ -114,14 +161,15 @@ toc.addEventListener("mouseleave", function () { clearTimeout(tOpen); tShut = se
 var pHead = q(".cmp-primers-h");
 
 window.pcApply = function (s) {
-  ["head", "thesis", "tldr", "toc", "fold", "act", "cards"].forEach(function (k) { H.removeAttribute("data-pc-" + k); });
+  ["head", "thesis", "tldr", "toc", "fold", "act", "cards", "primer"].forEach(function (k) { H.removeAttribute("data-pc-" + k); });
   H.removeAttribute("data-pc");
   var f = q("details.act-fold");
-  if (!s) { shell.classList.add("one"); if (f) f.open = false; return; }
+  if (!s) { shell.classList.add("one"); if (f) f.open = false; placePrimers("toc"); return; }
   H.setAttribute("data-pc", "");
   Object.keys(s).forEach(function (k) { H.setAttribute("data-pc-" + k, s[k]); });
   shell.classList.toggle("one", s.toc !== "ms");
   if (f) f.open = s.fold === "open";
+  placePrimers(s.primer);
   follow();
 };
 H.setAttribute("data-pc-ready", "");
