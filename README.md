@@ -12,13 +12,13 @@
 
 | Without PROBE | With PROBE |
 |---|---|
-| Skim a hundred titles, remember none | **Scouting** — a few scored papers, tied to your open decisions |
+| Skim a hundred titles, remember none | **Scouting** — a few scored papers, tied to your open questions |
 | "I'll read it later" → never | **Analysis** — a Korean page you finish in a sitting |
 | Three papers, the same claimed win | **Comparison** — only where they part |
 | "Surely someone has tried this" | **Ideation** — the untried idea, and how to refute it |
 
 Every rewrite starts from the arXiv original, not the abstract. Every judgement
-is made against your own pillars and Decision Log. All of it publishes
+is made against your own pillars and the questions they keep open. All of it publishes
 together, in Korean, on the reading site.
 
 </details>
@@ -30,7 +30,7 @@ together, in Korean, on the reading site.
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/own-dark.svg"><img src="assets/own.svg" width="880" alt="Who writes what: you write context/, and PROBE reads it and writes scouting/, analysis/ and comparison/. Changes to context/ come to you as proposals."></picture>
 
 `context/MASTER.md` holds what cuts across pillars, and each `context/P#.md`
-holds one pillar's decision log, tracked literature and anti-topics.
+holds one pillar's open questions, tracked literature and anti-topics.
 `context/EVENTS.md` lists the venues you follow; a weekly routine keeps their
 dates from each venue's own site ([setup](scouting/SETUP.md) · `/follow`).
 

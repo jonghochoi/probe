@@ -681,8 +681,8 @@ class DocRenderer:
         # Only text nodes are prose. A tag is collapsed to an empty pair rather
         # than deleted: that drops attribute values — which are not on the page
         # as text and carry markup of their own, so a `D#` tooltip quoting a
-        # Decision title that ends in `**OPEN**` is not a broken emphasis run —
-        # while leaving the `<`/`>` the pattern relies on to stop a match from
+        # title with emphasis in it is not a broken emphasis run — while
+        # leaving the `<`/`>` the pattern relies on to stop a match from
         # spanning two elements.
         prose = re.sub(r"<[^>]*>", "<>", prose)
         for stray in set(re.findall(r"\*\*[^*<>\n]{1,60}\*\*", prose)):

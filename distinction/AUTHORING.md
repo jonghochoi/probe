@@ -177,8 +177,10 @@ is the track working.
 
 A `###` under a versus note's §5, a report's §5 or a code note's §8 is one idea in five labels, each
 on its own line, bold, in this order. They follow `/ideate`'s idea shape with
-one difference: a versus note is a position against the Decision Log, so where
-`/ideate` asks what an idea opens, a versus note names the `D#` it moves.
+one difference: a versus note sets the operator's own method — the answers
+`MY-METHOD.md` holds — against a paper, so where `/ideate` asks what an idea
+opens, a versus note names the `D#`, the open question, whose answer it moves —
+the label **움직이는 결정** names the operator's own answer, never the pillar's.
 
 ```
 ### <아이디어 한 줄>
@@ -394,7 +396,7 @@ checks is in no checkout.
 | §3-1, §4 | per section, every bullet carries the anchors its row of the table requires, or is `- 없음` — a §3 and a §6 bullet carry a quote anchor or `원문 미확인`; a §4 bullet opens with a verdict; §7 holds a `cfg:` anchor |
 | §3-2 | the scoreboard's rows are `MY-METHOD.md`'s claims and its columns the active rewritten basket, each cell opening with a verdict |
 | §3-3 | the report's H1 date is the file's, the seven headers and an optional `8 감사` whose every bullet names a versus note id, at most three `###` under `5`, a closing `probe-state` block that parses and carries every key, its `verified` (when present) mapping ids to dates |
-| §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Decision Log |
+| §3-4 | every `###` idea carries the five labels in order; a `D#` it names exists in a pillar's Open Questions |
 | §3-5 | the code note's file name, H1 alias and six-field metadata line agree, `analysis/<id>.md` exists, the nine headers verbatim and in order; §1 opens with its count line and every bullet with a verdict, a paper anchor and — but for `원문 없음` — a quote anchor; §3 and §4 bullets carry their anchors; §5 holds a table whose scope cells carry an anchor or `없음`; §6 bullets a quote anchor; §7 bullets a verdict and a quote anchor; §9 a `cfg:` anchor; a ` ```probe-chart ` only under §6, each one drawable and carrying `source`, `why` and `omitted` |
 | §5 | active rows, ideas per versus note, per report and per code note, charts per code note, versus note and code note prose length |
 | §6 | no `이 방법`, `이 범위`, `내 방법` or `우리` in any output outside a `##` header or a `"…"` quote |

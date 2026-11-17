@@ -234,7 +234,7 @@ class Paper:
 
     @property
     def decisions(self) -> list[str]:
-        """The Decision-Log codes the rewrite cites anywhere in its source."""
+        """The open-question codes the rewrite cites anywhere in its source."""
         return sorted(set(DREF.findall(self.body)))
 
     @property
@@ -808,13 +808,13 @@ def figure_sources(body: str) -> dict[str, str]:
 
 # ── Neighbours ──────────────────────────────────────────────────────────────
 
-# A Decision-Log citation — `D`, one digit, two capitals, standing alone — the
+# An open-question citation — `D`, one digit, two capitals, standing alone — the
 # same token `check-decision-refs.py` and the page's tooltips read.
 DREF = re.compile(r"(?<![A-Za-z0-9_])D\d[A-Z]{2}(?![A-Za-z0-9])")
 
 
 def decision_weights(papers: list[Paper], retired=frozenset()) -> dict[str, float]:
-    """`{code: log(n / df)}` over the live Decision-Log codes the corpus cites.
+    """`{code: log(n / df)}` over the live open-question codes the corpus cites.
 
     What two rewrites share is only as specific as the rarest thing they
     share: a code most of the corpus argues about says two papers belong to
@@ -831,11 +831,11 @@ def decision_weights(papers: list[Paper], retired=frozenset()) -> dict[str, floa
 
 
 def score(a: Paper, b: Paper, weights: dict[str, float]) -> float:
-    """How near two rewrites sit — the shared Decision-Log codes, each weighed
+    """How near two rewrites sit — the shared open-question codes, each weighed
     by `decision_weights`, plus one per shared pillar.
 
-    The Decision Log is the one vocabulary here a human keeps: every code is a
-    choice the team wrote down, so two rewrites citing it argue about the same
+    The open questions are the one vocabulary here a human keeps: every code is a
+    question the team wrote down, so two rewrites citing it are about the same
     thing in the same words. A pillar is coarser — two papers sharing P1 may
     only both be policies — so it counts once and a rare code counts more.
 

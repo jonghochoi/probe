@@ -1,6 +1,6 @@
 # P<N> — <Pillar Name>
 
-> **Owns** the P<N> Decision Log, Anti-topics and Tracked
+> **Owns** the P<N> Open Questions, Anti-topics and Tracked
 > Literature. The thesis, the pillar overview, venue and
 > cross-pollination are `context/MASTER.md`'s — a fact in both files is one of
 > them going stale.
@@ -16,26 +16,31 @@
 
 ## 1. Scope [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Owns**: <the enumerable sub-axes this pillar tracks, **bold** on the axis
-names. One dense paragraph — what a paper must be about to land here.>
+**Owns**: <the questions this pillar asks, **bold** on the axis names. One
+dense paragraph — what a paper must be about to land here, stated as what is
+asked, not as an answer.>
 
-**Thesis tie**: <one line back to the `context/MASTER.md` §1 claim — the
+**Thesis tie** — the bet this axis tests: <one line back to the
+`context/MASTER.md` §1 claim — the
 sentence that makes a paper P<N>-relevant rather than merely adjacent.>
 
-**Tracked items**: <axis 1> (D<id>), <axis 2> (D<id>), … — one per Decision.
+**Questions**: <short form> (D<id>), <short form> (D<id>), … — one per question.
+
+**Premises** — <the setting the questions are asked in, stated as fact; leave
+this paragraph out when the pillar has none>.
 
 **Scouting lens** — three tiers, and a paper is placed on this ladder before
 it is scored:
 
 1. **<the north star>** — <what a paper must show to rank first>.
-2. **<the evidence pool>** — <what transfers to this pillar's decisions>.
+2. **<the evidence pool>** — <what transfers to this pillar's questions>.
 3. **<the outermost ring>** — <what is still surfaced, often as the
    comparison group>.
 
 Recall runs wide across all three; the ranking anchor stays tier 1.
 
 **Anti-topics** (noise filter — excluded unless an unusually strong tie to
-P<N> or a P<N> Decision):
+P<N> or a P<N> question):
 
 - <exclusion 1>
 - <exclusion 2>
@@ -43,14 +48,15 @@ P<N> or a P<N> Decision):
 
 ---
 
-## 2. Decision Log — P<N> [LIVING] [AGENT-INPUT]
+## 2. Open Questions — P<N> [LIVING] [AGENT-INPUT]
 
-The current choice per decision. The entry format and the allocation across
-pillars are `context/CLAUDE.md`'s.
+The questions this pillar keeps open. Each names what it turns on and the
+threads the corpus has followed so far; none is waiting to be closed, and a
+thread is added when a paper opens one.
 
-#### [D<id>] <Decision title> (P<N>)
-- **<the choice, in words>** — <what it commits to>. Tracked: <alternatives>. Deferred: <alternatives>. Reopens if: <condition>.
-#### [D<id>] <Decision title> (P<N>)
+#### [D<id>] <the question, in Korean> (P<N>)
+- <what the question turns on>. Threads: <thread>; <thread>; ….
+#### [D<id>] <the question, in Korean> (P<N>)
 - …
 
 ---
@@ -74,8 +80,8 @@ already says.
 ### 3-2. External pins — no rewrite yet
 
 > Hard cap 6. Rebalance quarterly; replace, don't append. A pin is a
-> **reference the decisions cite**, not a reading queue — it stays a pin for as
-> long as it anchors its decision. A pin that earns a rewrite moves to 3-1 and
+> **reference the questions cite**, not a reading queue — it stays a pin for as
+> long as it anchors its question. A pin that earns a rewrite moves to 3-1 and
 > frees its slot.
 > **Format rule**: every entry carries
 > `[arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX)` (DOI/official URL if no

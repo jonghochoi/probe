@@ -98,9 +98,12 @@ an abstract-based fallback would be indistinguishable on the page from a real
 one. A rewrite read from the source is one `--refresh` away from its figures
 once arXiv builds the HTML edition (R6).
 
-**Stance.** Facts are the paper's. Opinions are ours and must anchor to a `D#`
-that exists in the Decision Log — never invent a position `context/` does not
-hold. Where our context has no view, relay without one. Subjective judgements
+**Stance.** Facts are the paper's. What the paper means for us is said
+against a `D#` — one of the pillars' open questions — and is what the paper
+adds to it: a thread it argues, two threads it measures against each other, a
+thread it opens, or a premise it unsettles. `context/` holds questions, not
+positions, so a rewrite never argues for or against an answer; where the paper
+bears on no question, relay without one. Subjective judgements
 take a hedge (`~인 것 같아요`); a flat assertion of an opinion reads as AI.
 
 **Code is a second source, marked as code.** Where the paper's public code
@@ -111,22 +114,22 @@ Name the file, and the identifier when it helps. A code fact never enters
 요약 (G6).
 
 **A `D#` is an anchor, never the subject.** The token is a join key — the lint,
-the Decision Log and the site all resolve on it — not a name the reader knows.
-So the sentence says the decision in Korean and the `D#` rides along in
+the pillar files and the site all resolve on it — not a name the reader knows.
+So the sentence says the question in Korean and the `D#` rides along in
 parentheses:
 
-    디코더는 body/hand 라는 해부학 축으로 나뉩니다(D3GS).   ← 이렇게
-    D3GS 은 body/hand 라는 해부학 축입니다.                  ← 이렇게 말고
+    디코더를 어디서 나눌지에 구현 종류라는 갈래가 하나 더 생깁니다(D3GS).   ← 이렇게
+    D3GS 에 구현 종류라는 갈래가 더해집니다.                                ← 이렇게 말고
 
 This binds everywhere the reader reads a sentence: prose, callout bodies, a
 section heading's Korean half, and the Korean inside a fence — a `probe-quiz`
 question and its options, a `probe-term` body. It does
-**not** reach the four places the token *is* the key — a table's Decision
+**not** reach the four places the token *is* the key — a table's question
 cell, a heading's keyword slot, a `co-ten` label, and the `P# / D#` form naming
 an allocation — because there the reader is looking at a label.
 
-Anchor the decision once per paragraph or bullet, on its first mention; a
-second `(D3GS)` three lines down is noise. Naming the decision is also what
+Anchor the question once per paragraph or bullet, on its first mention; a
+second `(D3GS)` three lines down is noise. Naming the question is also what
 stops `D3AG 과 충돌한다` — a sentence that satisfies the anchor rule while
 telling the reader nothing.
 
@@ -144,7 +147,7 @@ to fill in.
 1 무엇이 문제인가   — the problem, and where existing approaches stop
 2 무엇을 바꿨나     — the core insight + the design. The paper's method
 3 정말 되는가       — experiments, numbers, ablations
-4 연구축에 무엇이 걸리나 — the axis layer: `D#` impact, and what it checks
+4 연구축에 무엇이 걸리나 — the axis layer: what the paper adds to which `D#`, and what it checks
 ```
 
 The page names each act by its number, not by the `##` text: a short noun and
@@ -155,8 +158,8 @@ Section count varies per paper; the acts are always four. **Act 2 legitimately
 thins out** on a dataset, benchmark or survey paper — it then covers what was
 built and the choices behind it (collection protocol, annotation, splits,
 filtering) and stays short. Say so plainly rather than inflating it; act 4 for
-such a paper leans on what it adds to our corpus rather than on Decision
-conflict.
+such a paper leans on what it adds to our corpus rather than on the threads
+it argues.
 
 ### 2-2. R2 — The heading spine
 
@@ -492,8 +495,8 @@ is used. Never write the `co-*` class by hand.
 |---|---|---|---|
 | `[!NOTE]` | `co-key` | 작동 원리 | explains why/how it works |
 | `[!TIP]` | `co-win` | 확인된 이득 | a measured result (numbers) |
-| `[!WARNING]` | `co-warn` | 한계·비용·조건 | a cost, failure mode, limit |
-| `[!CAUTION]` | `co-ten` | 연구축과 충돌 | a `D#`/`P#` shakes |
+| `[!WARNING]` | `co-warn` | 한계·비용 | a cost, failure mode, limit |
+| `[!CAUTION]` | `co-ten` | 질문을 흔든다 | a thread or premise of a `D#`/`P#` is shaken |
 | `[!IMPORTANT]` | `co-ctx` | 논문 밖 맥락 | lineage, background, corpus |
 
 - **`co-ten` is ACT-4 ONLY.** A problem the paper points out about itself is
@@ -817,7 +820,7 @@ rendering:
 
 | Rule | Enforced by |
 |---|---|
-| every `D#` cited exists in the Decision Log | `linters/check-decision-refs.py` |
+| every `D#` cited exists in a pillar's Open Questions | `linters/check-decision-refs.py` |
 
 A `D#` that does not resolve silently loses its tooltip and prints as plain
 text, so the build cannot see it as wrong.

@@ -11,24 +11,24 @@ code: <absolute path to the codebase — or leave this line out and put a `code`
 ## 0. 문제의식
 
 <`context/MASTER.md` §1 을 가리키는 한 줄. 그 다음은 공개할 수 없는 절반만 —
-어느 바구니 논문의 어느 빈자리를 치는가, 왜 지금인가, 이 논문이 없으면 어느
-D# 가 공중에 떠 있는가.>
+어느 바구니 논문의 어느 빈자리를 치는가, 왜 지금인가, 이 방법이 어느 D# 에
+어떤 답을 거는가.>
 
 ## 1. 주장
 
 <!-- One `####` heading and one bullet per claim. `C` + a number, unique,
      never re-issued. The bullet carries the claim, its 반증 조건 and the D#
-     it implements — these are what the versus note's §1 / §4 and the scoreboard rows
+     — the open question — it answers — these are what the versus note's §1 / §4 and the scoreboard rows
      hang off. -->
 
 #### [C1] <claim title>
-- <무엇이 참이면 방법이 작동하는가, 한 문장> · 반증: <무엇이 보이면 거짓인가> · 구현: D<id>
+- <무엇이 참이면 방법이 작동하는가, 한 문장> · 반증: <무엇이 보이면 거짓인가> · 답: D<id>
 #### [C2] <claim title>
 - …
 
 ## 2. 방법
 
-<아키텍처 · 학습 레시피 · 데이터 — 어느 D# 를 어떻게 구현했는지, 가능한 곳마다
+<아키텍처 · 학습 레시피 · 데이터 — 어느 D# 에 어떤 답을 어떻게 구현했는지, 가능한 곳마다
 `path:line` 또는 `cfg:key` 앵커와 함께 (`CODEMAP.md` 의 좌표).>
 
 ## 3. 측정

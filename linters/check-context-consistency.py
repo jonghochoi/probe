@@ -2,7 +2,7 @@
 """Check that `context/` keeps the shape its own documents promise.
 
 `context/_TEMPLATE.md` defines the pillar section spine, `context/MASTER.md`
-§4 states how many decisions each pillar holds and which sections MASTER owns,
+§4 states how many questions each pillar holds and which sections MASTER owns,
 and `context/CLAUDE.md` restates that ownership — every one of those is a claim
 some other file has to keep true, and nothing reads them back. This lint turns
 those claims into checks:
@@ -10,7 +10,7 @@ those claims into checks:
   1. SPINE — every `context/P<n>.md` carries the `## N.` sections
      `context/_TEMPLATE.md` defines. The spine is read from the template at run
      time, so a section added there is demanded everywhere with no code change.
-  2. COUNT — each row of MASTER §4's pillar table states a decision count equal
+  2. COUNT — each row of MASTER §4's pillar table states a question count equal
      to the number of `#### [D…]` headings in the pillar file the row names.
   3. SECTION — every section name a document claims MASTER owns resolves to a
      real `## ` heading in MASTER. The claims live in two closed forms: the
@@ -20,14 +20,13 @@ those claims into checks:
   4. PILLARSET — prose claims about how many pillars exist ("five pillars",
      "다섯 연구 축") match the number of `context/P<n>.md` files, and a `P<a>–P<b>`
      range token covers exactly that set.
-  5. SHAPE — every pillar file writes its decisions and its pins the one way
-     `context/CLAUDE.md` sets out. A decision heading is followed by exactly
-     one bullet, on one line, that opens with the bold choice — or, under an
-     `— **OPEN**` title, with `**Working, not settled** — ` and closes with a
-     `Settles on:` clause, which a settled decision never carries. The bullet
-     holds no option code (`(iii)`, `(F)`), no TeX and no emoji, and runs to
-     at most 420 characters. A row of the external-pins table opens its Role
-     with a bold tier and ends with the decisions it anchors in parentheses.
+  5. SHAPE — every pillar file writes its open questions and its pins the one
+     way `context/CLAUDE.md` sets out. A question heading carries a Korean
+     title and is followed by exactly one bullet, on one line, that names what
+     the question turns on and lists its `Threads:`. The bullet holds no bold,
+     no TeX and no emoji, and runs to at most 420 characters. A row of the
+     external-pins table opens its Role with a bold tier and ends with the
+     questions it anchors in parentheses.
 
 Precision over recall, mirroring the repo's other gates. SECTION resolves a
 claim by a deliberately small normalization — lowercase, drop a leading `the`,
@@ -85,12 +84,12 @@ _NUMBERED_HEADING = re.compile(r"^##\s+(\d+)\.\s+(.+?)\s*$")
 _ANY_H2 = re.compile(r"^##\s+(.+?)\s*$")
 _TRAILING_MARKERS = re.compile(r"\s*\[[^\]]*\]")
 # The per-pillar tag a section title carries in a pillar file or the template
-# (`## 2. Decision Log — P0`, `## 2. Decision Log — P<N>`).
+# (`## 2. Open Questions — P0`, `## 2. Open Questions — P<N>`).
 _PILLAR_TAG = re.compile(r"\s*[—-]\s*P(?:\d+|<N>)\s*$")
 
 _DECISION_HEADING = re.compile(r"^####\s+\[D")
 
-# MASTER §4's pillar table: a header row naming a `Decisions` cell and a `File`
+# MASTER §4's pillar table: a header row naming a `Questions` cell and a `File`
 # cell, then one row per pillar.
 _TABLE_ROW = re.compile(r"^\s*\|(.+)\|\s*$")
 _TABLE_RULE = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
@@ -166,7 +165,7 @@ def _line_at(line_of: list[int], offset: int) -> int:
 
 
 def _normalize_title(title: str) -> str:
-    """`## 2. Decision Log — P0 [LIVING]` -> `decision log`."""
+    """`## 2. Open Questions — P0 [LIVING]` -> `open questions`."""
     text = _TRAILING_MARKERS.sub("", title)
     text = _PILLAR_TAG.sub("", text)
     text = text.translate(_DASHES).strip().strip("*` ")
@@ -255,11 +254,8 @@ def check_spine(doc: str, lines: list[str], context_dir: str) -> list[tuple[int,
 # ── SHAPE ─────────────────────────────────────────────────────────────────
 
 _BULLET_MAX = 420
-_OPEN_TITLE = re.compile(r"—\s*\*\*OPEN\*\*\s*$")
-_WORKING = "- **Working, not settled** — **"
-# A letter or roman numeral in parentheses standing for an option on a menu
-# the file does not carry. Two letters or more is a word or an id, not a code.
-_OPTION_CODE = re.compile(r"(?<![\w`])\((?:i{1,3}|iv|v|vi{0,3}|[A-Za-zα-ω])\)")
+_HANGUL = re.compile("[\uac00-\ud7a3]")
+_TITLE = re.compile(r"^####\s+\[D[0-9A-Za-z]+\]\s+(.*?)\s*\(P\d\)\s*$")
 _EMOJI = re.compile("[\u2600-\u27bf\U0001f300-\U0001faff\ufe0f]")
 _PINS_HEADING = re.compile(r"^###\s+\d+-\d+\.\s+External pins")
 _ROLE_TIER = re.compile(r"^\*\*tier \d")
@@ -273,43 +269,30 @@ def check_shape(doc: str, lines: list[str]) -> list[tuple[int, str]]:
             continue
         heading = raw.strip()
         at = i + 2
+        m = _TITLE.match(heading)
+        if not m or not _HANGUL.search(m.group(1)):
+            findings.append((i + 1, f"SHAPE {heading!r} — a question's title is the "
+                                    "question, in Korean, then `(P<m>)`"))
         bullet = lines[i + 1].rstrip("\n") if i + 1 < len(lines) else ""
         if not bullet.startswith("- "):
-            findings.append((at, f"SHAPE {heading!r} — the line below a decision "
+            findings.append((at, f"SHAPE {heading!r} — the line below a question "
                                  "heading is its one bullet"))
             continue
         if i + 2 < len(lines) and lines[i + 2].strip() and not lines[i + 2].startswith("#"):
-            findings.append((at + 1, "SHAPE a decision bullet is one line — the line "
+            findings.append((at + 1, "SHAPE a question's bullet is one line — the line "
                                      "after it is neither blank nor a heading"))
-        is_open = bool(_OPEN_TITLE.search(heading))
-        if is_open:
-            if not bullet.startswith(_WORKING):
-                findings.append((at, "SHAPE an OPEN decision's bullet opens with "
-                                     "`**Working, not settled** — ` and the bold "
-                                     "working choice"))
-            if "Settles on:" not in bullet:
-                findings.append((at, "SHAPE an OPEN decision's bullet names what "
-                                     "closes it — `Settles on: …`"))
-        else:
-            if bullet.startswith("- **Working, not settled**"):
-                findings.append((at, "SHAPE `Working, not settled` under a title "
-                                     "with no `— **OPEN**`"))
-            elif not bullet.startswith("- **"):
-                findings.append((at, "SHAPE a decision bullet opens with the bold "
-                                     "choice, in words"))
-            if "Settles on:" in bullet:
-                findings.append((at, "SHAPE `Settles on:` on a settled decision"))
-        if _OPTION_CODE.search(bullet):
-            findings.append((at, "SHAPE option code "
-                                 f"{_OPTION_CODE.search(bullet).group(0)!r} — name "
-                                 "the choice in words"))
+        if "Threads:" not in bullet:
+            findings.append((at, "SHAPE a question's bullet lists its `Threads:`"))
+        if "**" in bullet:
+            findings.append((at, "SHAPE a question's bullet is plain — no bold marks "
+                                 "a thread as the preferred one"))
         if "$" in bullet or _EMOJI.search(bullet):
-            findings.append((at, "SHAPE a decision bullet is plain text — no TeX, "
+            findings.append((at, "SHAPE a question's bullet is plain text — no TeX, "
                                  "no emoji"))
         if len(bullet) > _BULLET_MAX:
-            findings.append((at, f"SHAPE decision bullet is {len(bullet)} characters "
-                                 f"— at most {_BULLET_MAX}; rationale lives outside "
-                                 "the log"))
+            findings.append((at, f"SHAPE question bullet is {len(bullet)} characters "
+                                 f"— at most {_BULLET_MAX}; an argument lives outside "
+                                 "the pillar file"))
 
     in_pins = False
     for lineno, raw in enumerate(lines, start=1):
@@ -330,7 +313,7 @@ def check_shape(doc: str, lines: list[str]) -> list[tuple[int, str]]:
                                      "bold tier (`**tier 1**`)"))
         if not _ROLE_REFS.search(role):
             findings.append((lineno, f"SHAPE pin {cells[0]!r} — Role ends with the "
-                                     "decisions it anchors, `(D…)`"))
+                                     "questions it anchors, `(D…)`"))
     return findings
 
 
@@ -360,8 +343,8 @@ def check_count(doc: str, lines: list[str], context_dir: str) -> list[tuple[int,
         if _TABLE_RULE.match(raw):
             continue
         lowered = [c.lower() for c in cells]
-        if "decisions" in lowered and "file" in lowered:
-            cols = {"count": lowered.index("decisions"), "file": lowered.index("file")}
+        if "questions" in lowered and "file" in lowered:
+            cols = {"count": lowered.index("questions"), "file": lowered.index("file")}
             continue
         if cols is None or max(cols.values()) >= len(cells):
             continue
@@ -388,7 +371,7 @@ def check_count(doc: str, lines: list[str], context_dir: str) -> list[tuple[int,
             continue
         if int(stated) != actual:
             findings.append(
-                (lineno, f"COUNT {pillar} row states {stated} decisions; "
+                (lineno, f"COUNT {pillar} row states {stated} questions; "
                          f"{_display(resolved)} holds {actual} "
                          f"`#### [D…]` heading(s)")
             )

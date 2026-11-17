@@ -24,95 +24,105 @@ write: only dates a venue's own site states, in one commit straight to
 dropped by hand, and a row a person added for a venue outside that list is
 never touched by the routine.
 
-Ownership inside the folder is just as fixed. The Decision Log, Tracked
+Ownership inside the folder is just as fixed. The Open Questions, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;
 `MASTER.md` holds only what crosses pillars — Identity, Purpose, Long-term
 Context, the P0–P4 overview, Venue, Cross-pollination. Edit the
 `P#.md` for pillar content and `MASTER.md` only for global content; the same
 fact in both is one of them going stale.
 
-## Decision-Log entry format
+## Open-question entry format
 
-Every entry in a `P#.md` Decision Log section has exactly this shape.
+A pillar is a set of open questions — what the axis keeps asking, and the
+threads the corpus has followed on each — not a record of answers. The
+operator's own answers, where they hold any, belong in the private method
+file the distinction track reads (`distinction/templates/MY-METHOD.md`),
+never here: an answer written into the pillar turns every paper a run reads
+into evidence for or against it.
+
+Every entry in a `P#.md` Open Questions section has exactly this shape.
 `linters/check-decision-refs.py`, `linters/check-context-consistency.py` and
 `site/builder/decisions.py` parse it, and every prompt that cites a `D#` reads
 it, so it is load-bearing, not cosmetic:
 
 ```
-#### [D<id>] <Decision title> (P<m>)
-- **<the choice, in words>** — <what it commits to>. Tracked: <alternatives>. Deferred: <alternatives>. Reopens if: <condition>.
+#### [D<id>] <the question, in Korean> (P<m>)
+- <what the question turns on>. Threads: <thread>; <thread>; ….
 ```
 
-One `####` heading and one bullet per decision, the bullet on one line. An
-`OPEN` decision appends ` — **OPEN**` to the title line, opens its bullet with
-`**Working, not settled** — ` before the working choice, and ends it with
-`Settles on: <the result that closes it>.`
+One `####` heading and one bullet per question, the bullet on one line.
 
-The bullet is read by a run deciding whether a paper bears on the choice, and
-by a reader of the site's axis popup, so every pillar writes it one way:
-
-1. **The choice comes first, bold, in words.** Never an option code from a
-   menu the file does not carry — `(iii) hybrid`, `(F) FiLM` say nothing to a
-   reader who has not seen (i) and (ii). A choice that is a policy — what to
-   scout, which license to prefer — is still stated as the stance taken, not
-   as an instruction.
-2. **After the em dash, what the choice commits to** — one or two sentences.
-   No rationale, evidence or results: those live in the rewrites and
-   comparisons that cite the decision. A paper is named only as a pointer to a
-   style or lineage (`VGGT-style`, `the DexWM lineage`).
-3. **Alternatives under fixed labels.** `Tracked:` is an alternative watched
-   because it could replace the choice; `Deferred:` is one set aside until
-   something changes. A label with nothing under it is left out.
-4. **`Reopens if:`** names the result that would put the decision back to
-   `OPEN`, where one is known. It is optional.
-5. **Plain text.** No TeX, no emoji, and at most 420 characters — a bullet
-   longer than that is carrying rationale.
+1. **The title is the question, in Korean.** The axis popup prints it to a
+   Korean reader, so it is written in their language; the rest of the
+   pillar file stays English. It asks; it never states an answer.
+2. **The bullet opens with what the question turns on** — one or two
+   sentences on why the axis keeps it open. No rationale for a choice, no
+   evidence or results: those live in the rewrites and comparisons that cite
+   the question.
+3. **`Threads:` lists the directions the corpus has followed**, separated by
+   semicolons, none marked as preferred. A paper is named only as a pointer to
+   where a thread is argued (`(XL-VLA)`). A thread is added when a paper opens
+   one and dropped when nothing in the corpus argues it any more; the question
+   itself is never closed.
+4. **A question stands whatever its siblings' threads turn out to be.** One
+   that only makes sense under one thread of another is folded into that one.
+5. **Plain text.** No bold, no TeX, no emoji, and at most 420 characters — a
+   bullet longer than that is carrying an argument.
 
 `linters/check-context-consistency.py` holds every pillar file to this shape.
 
 `<id>` is `D` + one digit + two letters (`I` and `O` excluded, so nothing
 reads as a `1` or a `0`) — drawn at random, unique across the repo, and
 **opaque**. It carries no pillar and no order: ownership comes from the file
-the decision is defined in, which is what `site/builder/decisions.py` already
+the question is defined in, which is what `site/builder/decisions.py` already
 reads, and a leading digit keeps a model name like `DINO` from matching. An
-id is never re-issued, so a decision that is dropped leaves no gap to fill and
-a pillar's set never has to be contiguous.
+id is never re-issued, so a question that is folded into another or dropped
+leaves no gap to fill. Its id goes on `context/MASTER.md`'s `Retired:` line so
+it is never re-issued, and every citation of it in `analysis/`, `comparison/`
+and `scouting/` is rewritten to the id it folded into, in the same change — or
+dropped, where the question became a premise rather than part of another.
 
-Superseding a choice rewrites the bullet in place. The log carries what is
-current and never a history of what it replaced — a version marker on a
-one-line answer is a second thing to keep in step, and `git log` already knows
-which choice a document argued with.
+Rephrasing a question or its threads rewrites the bullet in place. The file
+carries what is asked now and never a history of what it asked before —
+`git log` already knows which wording a document argued with.
 
-The allocation, which the lint reads back off these files:
+The allocation, kept in step with the files by hand:
 
-| Pillar | Decisions |
+| Pillar | Questions |
 |---|---|
-| P0. VLA Datasets & Benchmarks | D4ML, D1AL, D6SE, D8SD |
-| P1. Heterogeneous Body/Hand Action Expert | D3GS, D4QX, D1QT, D9ZP, D1MZ, D5SH, D6JW, D5DQ |
-| P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG, D9WZ |
-| P3. World Model | D3FQ, D8XB, D9KS, D6FM, D7VC |
-| P4. Pretraining for Data-Efficient Adaptation | D3RP, D5ZL, D3WV, D9QJ, D1WE |
+| P0. VLA Datasets & Benchmarks | D4ML, D1AL, D6SE |
+| P1. Heterogeneous Body/Hand Action Expert | D3GS, D1QT, D9ZP, D1MZ |
+| P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG |
+| P3. World Model | D3FQ, D8XB, D9KS, D6FM |
+| P4. Pretraining for Data-Efficient Adaptation | D3RP, D3WV, D9QJ, D6JW, D1WE |
 
 ## The other pillar sections
 
 `context/_TEMPLATE.md` is the skeleton; these are the shapes inside it that
 every pillar keeps the same, so five files read as one document:
 
-- **Tracked items** is one line, `**Tracked items**: <item> (D<id>), …` — every
-  decision of the pillar in log order, open or not. Which ones are `OPEN` is
-  the log's to say.
+- **Questions** is one line, `**Questions**: <short form> (D<id>), …` —
+  every question of the pillar in the order §2 lists them.
+- **Thesis tie** opens `**Thesis tie** — the bet this axis tests:` — the
+  stance the pillar's questions are asked from, not an answer they defend.
+  The threads that would refute it stay in the questions as the baselines it
+  is measured against, and **Anti-topics** never exclude a thread: they drop
+  papers that assert one without measuring it, never the thread itself.
+- **Premises** is one paragraph, `**Premises** — …`, and only where the
+  pillar has any: the setting its questions are asked in — the hand, a
+  lineage already in use, a usage bar — stated as fact, never as a question.
 - **Scouting lens** is a ladder of three numbered tiers, each a bold name and
   a sentence: tier 1 is the north star, tier 3 the outermost ring a run still
   surfaces. It closes on `Recall runs wide across all three; the ranking
   anchor stays tier 1.`
-- **The Decision Log opens with one sentence**: `The current choice per
-  decision. The entry format and the allocation across pillars are
-  `context/CLAUDE.md`'s.` — a range of ids says nothing, since ids carry no
-  order.
+- **The Open Questions section opens with one paragraph**: `The questions
+  this pillar keeps open. Each names what it turns on and the threads the
+  corpus has followed so far; none is waiting to be closed, and a thread is
+  added when a paper opens one.`
 - **An external pin's Role** opens with its bold tier on the §1 ladder
   (`**tier 1**`, or `**tier 1 · ego**` where a kind beside the tier helps),
-  then an em dash, what the paper is and what it anchors, and ends with the
-  decisions it anchors in parentheses (`(D8EJ, D9NB)`).
+  then an em dash, what the paper is and what it bears on, and ends with the
+  questions it anchors in parentheses (`(D8EJ, D9NB)`).
 
 ## Pillar introduction
 
@@ -127,8 +137,8 @@ exists it is one blockquote, anywhere in the file, whose first line opens
 > <continuation lines, each opening `>`>
 ```
 
-The site's axis-chip popup prints it above the titles of the pillar's
-decisions (`site/builder/decisions.py`); a run does not read it.
+The site's axis-chip popup prints it above the pillar's open questions
+(`site/builder/decisions.py`); a run does not read it.
 
 ## When adding a new pillar (P5+)
 
@@ -141,13 +151,13 @@ end to end; a half-added pillar silently drops out of the index and the lints:
       `linters/check-context-consistency.py` reads it back — and its
       `[STABLE]` / `[LIVING]` / `[AGENT-INPUT]` markers, which tell a run how
       to weigh each section (`context/MASTER.md` §0).
-- [ ] **Draw ids for its decisions** — `D` + digit + two letters, checked
+- [ ] **Draw ids for its questions** — `D` + digit + two letters, checked
       against every id already in the repo and against the `Retired:` line in
       `context/MASTER.md` (the build and `linters/check-decision-refs.py`
       both read it). Never reuse, renumber or re-issue.
       Record them in the allocation table above.
 - [ ] **Add a row** to `context/MASTER.md` §4's pillar table — what the pillar
-      owns in one line, its decision count, and its file. The scope itself
+      owns in one line, its question count, and its file. The scope itself
       belongs in the pillar file and is not restated there.
 - [ ] **Create `scouting/P<N>/`** and add `<N>` to the scouting routine's
       pillar argument (`scouting/SETUP.md` §3).

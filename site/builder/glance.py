@@ -233,7 +233,7 @@ def _check_our_view(source: str) -> list[str]:
     refs = sorted(set(_DREF.findall(source)))
     if refs:
         problems.append(
-            f"glance: our Decision Log appears here ({', '.join(refs)}) — G6 keeps "
+            f"glance: our open questions appear here ({', '.join(refs)}) — G6 keeps "
             f"this surface to the paper. Our view is act 4 of the body"
         )
     if _CONTEXT.search(source):

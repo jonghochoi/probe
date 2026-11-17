@@ -1,5 +1,5 @@
 /* 연구 축 — what an axis chip opens: the axis's introduction where its owner
- * wrote one, and the problems it takes on (the titles of the decisions its
+ * wrote one, and the open questions it keeps (the titles of the entries its
  * pillar file owns). A card under the chip on a desktop, a sheet from below on
  * a phone.
  *
@@ -29,9 +29,8 @@ let cur = null;
 
 function card(code) {
   const a = AXES[code];
-  const decs = a.decisions.map(([id, title, open]) =>
+  const decs = a.decisions.map(([id, title]) =>
     `<li><span class="axp-dt">${esc(title)}</span>` +
-    (open ? '<span class="axp-open">미결</span>' : "") +
     `<span class="axp-dc">${esc(id)}</span></li>`).join("");
   return `<div class="axp-p" role="dialog" aria-label="${esc(`${code} ${LABELS[code] || ""}`)}" ` +
     `style="--pc:var(--${code.toLowerCase()})">` +
@@ -39,7 +38,7 @@ function card(code) {
     `<div class="axp-names"><b>${esc(LABELS[code] || code)}</b><span>${esc(NAMES[code] || "")}</span></div>` +
     `<button type="button" class="axp-x" data-axp-close aria-label="닫기">${X}</button></header>` +
     (a.intro ? `<p class="axp-intro">${esc(a.intro)}</p>` : "") +
-    (decs ? `<section class="axp-decs"><h3>다루는 문제<span>${a.decisions.length}</span></h3><ul>${decs}</ul></section>` : "") +
+    (decs ? `<section class="axp-decs"><h3>열린 질문<span>${a.decisions.length}</span></h3><ul>${decs}</ul></section>` : "") +
     "</div>";
 }
 

@@ -1,7 +1,7 @@
 name: Deploy site
 
 # Build the reading site from analysis/, comparison/, scouting/ and the
-# context/ files it reads (the Decision Log, the pillar introductions and
+# context/ files it reads (the open questions, the pillar introductions and
 # EVENTS.md) and publish it to GitHub Pages. A scouting run's or the follow
 # routine's push to main lands here too, so what it wrote is published as it
 # lands.

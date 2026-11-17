@@ -5,7 +5,7 @@
 
 # Research Context — Hand-centric Dexterous Manipulation
 
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Decision Log, Tracked Literature, Anti-topics) is **owned by `context/P0–P4.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Identity, Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P4.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -13,7 +13,7 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P0–P4.md` are the **owners** of their pillar's Decision Log, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P0–P4.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
 - `[STABLE]`: changes rarely (identity, purpose, hardware)
@@ -22,7 +22,7 @@
 
 **Update protocol**
 - Identity / Purpose: change only with deliberate review (semantic shift, not phrasing)
-- Pillars: structure stable; tracked items within can evolve as evidence accumulates
+- Pillars: structure stable; the open questions and their threads evolve as evidence accumulates
 
 **Output formatting & authoring rules**
 Output format is one contract per track — `scouting/AUTHORING.md`, `analysis/AUTHORING.md`, `comparison/AUTHORING.md`. The agent reads its track's contract before producing any output. Do not duplicate formatting rules here; edit the contract instead.
@@ -63,10 +63,10 @@ owns what. Neither is restated here.
 This document serves *two coupled functions*:
 
 1. **Filter (outward)** — enables the retrieval agent and collaborators to surface external content (papers, methods, ideas) aligned with the maintainer's identity, and to reject the rest. Requires signal-density and structured fields.
-2. **Anchor (inward)** — records current commitments, open questions, and falsifiability conditions. Counters drift when external noise (trends, hype) pulls. Requires explicit decision rationale and revisit triggers.
+2. **Anchor (inward)** — keeps the open questions each pillar asks and the threads followed on each. Counters drift when external noise (trends, hype) pulls: a paper is read for what it adds to a question, not for whether it agrees with an answer.
 
 **Audience scope**: future-self + AI retrieval agent + future collaborators
-**Decision-log depth**: skeleton (key branchpoints recorded; not exhaustive)
+**Question depth**: skeleton (the questions that shape a pillar; not every sub-question)
 
 ---
 
@@ -76,10 +76,10 @@ This document serves *two coupled functions*:
 Build a holistic system for human-level dexterous manipulation. Full stack envisioned: hardware that expresses rich contact, data collection preserving human interaction, control minimizing intent-execution gap, models absorbing multimodal supervision at scale, evaluation infrastructure enabling scalable + reproducible iteration. *Current scope-of-work focuses on modeling at the VLA level.*
 
 ### 3.2 Scope of work
-**Body expert and hand expert both directly designed and trained at the VLA level.** No outsourcing of dexterity to a post-hoc correction module (which would be distribution-bounded by the VLA). Pretrained VLM/π weights are leveraged via a *deliberately composed pretraining recipe for data-efficient adaptation* (P4), with prior-preservation as one downstream lever. Every component learns at the VLA level, by imitation with flow matching.
+**The bet: body expert and hand expert both directly designed and trained at the VLA level.** No outsourcing of dexterity to a post-hoc correction module (which would be distribution-bounded by the VLA). Pretrained VLM/π weights are leveraged via a *deliberately composed pretraining recipe for data-efficient adaptation* (P4), with prior-preservation as one downstream lever. Every component learns at the VLA level, by imitation with flow matching. The pillars' open questions are where this bet is tested — it is the stance the questions are asked from, not an answer they defend.
 
 ### 3.3 Task philosophy
-**Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). Contact reaction stays inside the policy loop: no faster sub-loop runs beneath the Hand expert (P1 D5DQ). Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
+**Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
 
 ---
 
@@ -89,23 +89,25 @@ Build a holistic system for human-level dexterous manipulation. Full stack envis
 is the upstream supporting pillar; P3 (world model) is a later-phase
 capability bet.
 
-Each pillar file owns its own scope, scouting lens, anti-topics, Decision Log
+Each pillar file owns its own scope, scouting lens, anti-topics, open questions
 and tracked literature. This table is the index — what a pillar owns in one
-line, how many decisions it holds, and where the rest of it lives. The ids
+line, how many questions it holds, and where the rest of it lives. The ids
 themselves are mapped in `context/CLAUDE.md`. A pillar's scope restated here
 is a second copy to keep in step, so it is not restated.
 
-| Pillar | Owns | Decisions | File |
+| Pillar | Owns | Questions | File |
 |---|---|---|---|
-| P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them; data is upstream of method | 4 | `context/P0.md` |
-| P1 — Heterogeneous Body/Hand Action Expert | how the action decoder is split into more than one expert, on the anatomical seam and the temporal one | 8 | `context/P1.md` |
-| P2 — Structured Multimodal Observation Fusion | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder | 5 | `context/P2.md` |
-| P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 5 | `context/P3.md` |
-| P4 — Pretraining for Data-Efficient Adaptation | the choices upstream of deploy — lineage × corpus × recipe — and what they cost to protect afterwards | 5 | `context/P4.md` |
+| P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them; data is upstream of method | 3 | `context/P0.md` |
+| P1 — Heterogeneous Body/Hand Action Expert | how the action decoder is split into more than one expert, and the questions that stand split or not | 4 | `context/P1.md` |
+| P2 — Structured Multimodal Observation Fusion | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder | 4 | `context/P2.md` |
+| P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P3.md` |
+| P4 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P4.md` |
 
-Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**. A retired id is never
-re-issued; the build and `linters/check-decision-refs.py` resolve it so
-already-published citations keep working.
+Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**, **D4QX**, **D5SH**, **D5DQ**, **D8SD**, **D9WZ**, **D7VC**, **D5ZL**.
+A retired id is never re-issued. When a question folds into another, every
+citation of the retired id in `analysis/`, `comparison/` and `scouting/` is
+rewritten to the id it folded into — or dropped, where it became a premise
+rather than part of another question — so no published page points at it.
 
 ---
 

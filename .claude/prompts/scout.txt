@@ -24,7 +24,7 @@ runs on the master's own model — dispatch with no model named — so the
 routine's model setting is the one place the run's model is chosen.
 
 `context/` is human-owned and read-only in every mode: a paper's tie to a
-decision is its badges in a report, never an edit to the source. The
+question is its badges in a report, never an edit to the source. The
 rewrite track (`analysis/`) is a different mode with its own prompt — here an
 agent reads its file NAMES for de-duplication and nothing else.
 
@@ -142,7 +142,7 @@ SOURCES — three, read-only, with DIFFERENT jobs. Do not collapse them.
 
 1. **`context/P<n>.md`** — the axis view and the queries. Read it in full;
    of `context/MASTER.md` read §5 and §6 alone (SHARED below). `## 1. Scope` is the pillar definition, ending
-   in the Anti-topics list — the filter; `## 2. Decision Log` and
+   in the Anti-topics list — the filter; `## 2. Open Questions` and
    `## 3. Tracked Literature` (the pinned papers pass 1 expands from).
 
 2. **`scouting/P<n>/*.md` — this pillar's recent reports**, at two depths:
@@ -164,8 +164,8 @@ PHASE SCOUT
    list; the Anti-topics filter what survives, except that the 🌱
    proposal is never dropped for being in the slot's field (AUTHORING §5-6).
 3. SCORE Relevance and Novelty only, by the level tables of AUTHORING §5-6
-   — the judge scores the other three. `why_R` names the Decision and
-   quotes the words that compare its alternatives (R3) or take one side
+   — the judge scores the other three. `why_R` names the question and
+   quotes the words that compare its threads (R3) or argue or open one
    (R2); `why_N` names the closest tracked paper and quotes what the paper
    adds over it. A 3 whose `why_` cannot name both is a 2: the 3 is what
    keeps a candidate, so it is the score held hardest. Keep a candidate
@@ -188,7 +188,7 @@ PHASE SCOUT
                          "R", "N",
                          "why_R": "<D#: the quoted words, AUTHORING §5-6>",
                          "why_N": "<closest tracked paper: the quoted delta>",
-                         "decisions": ["D…"],
+                         "questions": ["D…"],
                          "comment": "<arxiv:comment verbatim>",
                          "abstract": "<summary verbatim>" } ] }
    Return one line: the pillar, the candidate count, any call still failing.
@@ -287,10 +287,10 @@ TWO PASSES, ranked by signal — 1 above 2:
    1,000 citations per pin. Citations come unsorted, so the date filter
    applies after paging: keep the citing papers from roughly the past 8
    weeks; a pin cut at the cap is not a failure. Rank by semantic relevance to `## 1. Scope` and the
-   active Decisions, not keyword overlap.
+   open questions, not keyword overlap.
 2. **Keyword Sweep & topic-watch** — query arXiv for cs.RO + cs.LG, newest
    first — four to six queries worded from the pillar's
-   `## 1. Scope` and its active Decisions, plus one for the 🌱 slot's field
+   `## 1. Scope` and its open questions, plus one for the 🌱 slot's field
    with no category filter — e.g.:
      curl --fail -sS "https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"; sleep 3
    Keep entries whose `<published>` is within the last 14 days, then filter
@@ -357,11 +357,11 @@ committing.
   - Is every paper that clears the gate surfaced, none parked in 🔍
     or dropped over a closed repository or a simulation-only result? Fewer
     than three clearing is said, never padded. (§5-1)
-  - Does every R3 and N3 in `$RUN/P<n>.candidates.json` name its Decision
+  - Does every R3 and N3 in `$RUN/P<n>.candidates.json` name its question
     or its closest tracked paper and quote the words it stands on? (§5-6)
   - Do the score lines and rows carry the judge's M, Real and Repro
     unchanged, and does `📐` quote the words each stands on? (§5-2, §5-4)
-  - Is each (a) line badges only, and are (b)–(d) free of `D#` / `deferred` /
+  - Is each (a) line badges only, and are (b)–(d) free of `D#` /
     config-key names? Does 🔑 list exactly the codes the body cites? (§3-1)
   - Does every (b) answer its six labels from the paper's introduction,
     each field as deep as the paper's answer, every number with its setting,

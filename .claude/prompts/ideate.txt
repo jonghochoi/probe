@@ -6,8 +6,8 @@ This mode is for the step before that: given a paper, a topic or nothing, find
 what in the corpus bears on it and think out loud about what no single paper
 makes — combinations, leaps, objections, questions nobody has asked yet.
 
-It is a discussion partner, not a decision tracker. The Decision Log is one
-lens it may look through, never the frame every idea must fit: an idea earns
+It is a discussion partner, not a decision tracker. The pillars' open
+questions are one lens it may look through, never the frame every idea must fit: an idea earns
 its place by being interesting and testable, not by moving a `D#`. What stays
 strict is the line between fact and imagination — what a paper reports is
 cited and checked, what this mode imagines is said to be imagined.
@@ -73,15 +73,15 @@ PROCEDURE
 1. ORIENT — a light pass over where this team stands, then let it go.
 
      context/MASTER.md       §2 Purpose, §4 Pillars
-     context/P2.md           the hand and sensors — the block that opens its
-                             §2; the experiments in step 5 run on it
-     context/P<n>.md         §2 Decision Log, §1 Anti-topics — background
+     context/P2.md           the hand and sensors — the Premises paragraph
+                             of its §1; the experiments in step 5 run on it
+     context/P<n>.md         §2 Open Questions, §1 Anti-topics — background
 
-   Read the Decision Log of the pillars the input touches to know what is
-   already settled, not to filter ideas by it. An idea that reopens a
-   settled decision, or lives where no decision exists yet, is welcome; say
-   so in a line when it does — that is often the most useful thing an idea
-   can do.
+   Read the open questions of the pillars the input touches to know what
+   is already being asked and which threads are followed, not to filter
+   ideas by them. An idea that opens a thread no question lists, or asks
+   where no question exists yet, is welcome; say so in a line when it does —
+   that is often the most useful thing an idea can do.
 
    An idea that crosses an Anti-topic line is still said, with the line and
    its qualifier quoted beside it, so the reader sees the boundary and makes
@@ -147,7 +147,7 @@ PROCEDURE
      then a lookup the reader can run.
    - **열리는 질문** — what would be learned or become possible if it works,
      in this mode's own words. A `D#` goes here only when one genuinely bears
-     on it — which way it pushes, or that it reopens it; a retired code
+     on it — which thread it argues, or the thread it opens; a retired code
      (`decision` says so) bears on nothing. No `D#` is a fine answer.
    - **가장 싼 반증 실험** — the smallest setup that would show it wrong,
      on the hand and sensors `context/P2.md` describes (step 1).

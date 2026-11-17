@@ -74,7 +74,7 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Sections outside the §2-1 set, each with where its content goes instead.
 _OUT_OF_SET = {
-    "💡": "a paper's decisions are its (a) badges, and `context/` edits are the human's",
+    "💡": "a paper's questions are its (a) badges, and `context/` edits are the human's",
     "🚫": "a dropped candidate is part of the 🔄 filter count, not a row",
     "📊": "each paper section carries its scores on its own score line (AUTHORING §5-1)",
 }

@@ -54,7 +54,7 @@ story — tie → what the paper is → what it means for us → what to check:
 
 | `###` header (verbatim) | Holds |
 |-------------------------|-------|
-| `### (a) 관련 Pillar / Decision` | The badge line only (§3-1) |
+| `### (a) 관련 Pillar / 질문` | The badge line only (§3-1) |
 | `### (b) 논문 요지` | The paper brief — a headline and the six labelled fields below |
 | `### (c) 시사점` | What it could mean for us, in plain terms (`공개 기준점 확보`, `도입 비용 낮음`) |
 | `### (d) 먼저 확인할 점` | The paper's own limits and the cheapest transfer caveat |
@@ -141,7 +141,7 @@ place in every paper and the site can lay them out as one card:
 #### Incorrect example
 ```markdown
 ## 논문 1 🥇                             ← emoji at end, wrong
-### 🎯 (a) 관련 Pillar / Decision         ← emoji on H3, wrong (## only)
+### 🎯 (a) 관련 Pillar / 질문             ← emoji on H3, wrong (## only)
 The policy achieved ✨ great results.     ← emoji in body text, wrong
 ```
 
@@ -167,7 +167,7 @@ The report opens with a **Reference Legend** — a one-line glossary of the
 `P#` / `D#` codes, so a reader who does not have the codes memorized can
 decode the report without opening `context/P#.md`.
 
-**Scope.** Only `P#` (Pillar) and `D#` (Decision) codes.
+**Scope.** Only `P#` (Pillar) and `D#` (open question) codes.
 **Only codes actually cited in this report.** Never list a code the body
 does not use; never list competitor codenames, Identity, or the falsifier.
 
@@ -175,7 +175,7 @@ does not use; never list competitor codenames, Identity, or the falsifier.
 top metadata block and before the first paper section — the report goes
 metadata → legend, with no boilerplate intro between them.
 
-**Format.** One compact table, the pillar row first and the decision rows in
+**Format.** One compact table, the pillar row first and the question rows in
 order of first appearance in the body — a `D#` id is opaque and carries no
 sort order. One row per distinct cited code. Each code renders as a **shields.io
 badge**, color-coded by category:
@@ -187,7 +187,7 @@ badge**, color-coded by category:
 | `P2` | `e2f5d5` (pale green) | pillar palette |
 | `P3` | `d5def5` (pale blue) | pillar palette |
 | `P4` | `e0d5f5` (pale purple) | pillar palette |
-| every `D#` | `d97706` (amber) | single shared decision color |
+| every `D#` | `d97706` (amber) | single shared question color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
 message).
@@ -198,7 +198,7 @@ message).
 | Code | Meaning |
 |------|---------|
 | <a id="ref-<P#>"></a>![<P#>](https://img.shields.io/badge/<P#>-<hex>.svg) | <pillar name> (pillar) |
-| <a id="ref-<D#>"></a>![<D#>](https://img.shields.io/badge/<D#>-d97706.svg) | <decision title> — <concise gloss> |
+| <a id="ref-<D#>"></a>![<D#>](https://img.shields.io/badge/<D#>-d97706.svg) | <the question, glossed in English> |
 ```
 
 If the body cites no such code (rare), omit the section entirely.
@@ -209,7 +209,7 @@ commas not `;`, ≤ ~12 words:
 | Code | Source in `context/P#.md` | Meaning string |
 |------|-----------------------------------|----------------|
 | `P#` | the pillar file's H1, `P# — <name>` | `<name>` + `(pillar)` |
-| `D#` | the Decision Log's `#### [D#] <title>` + its current default | `<title>` — concise gloss |
+| `D#` | the Open Questions' `#### [D#] <title>` — a Korean question | the question, glossed in English |
 
 **Anchors.** Each legend row carries `<a id="ref-<CODE>"></a>` before its
 badge, `<CODE>` verbatim (`P1`, `D9ZP`); the legend badge itself is not a link.
@@ -221,13 +221,13 @@ ones in that section stay plain. Codes in table cells and code blocks are not
 linked.
 
 **The (a) line is badges only** — `[![P2](…)](#ref-P2) / [![D3AG](…)](#ref-D3AG)
-[![D8EJ](…)](#ref-D8EJ)`: the pillar badge, ` / `, then the decision badges
+[![D8EJ](…)](#ref-D8EJ)`: the pillar badge, ` / `, then the question badges
 separated by single spaces, never followed by a Korean gloss.
 
 **Paper sections stay paper-focused.** (a) holds no body bullets. In (b)–(d)
-no `D#` codes, `deferred` or config-key / `*.yaml` names — a reader follows the
+no `D#` codes or config-key / `*.yaml` names — a reader follows the
 paper without asking "what is D3AG?". The (a) badges are the paper's whole
-tie to the Decision Log; no other section restates it. A paper's own name
+tie to the pillar's open questions; no other section restates it. A paper's own name
 shaped like a code (`D4RT`) goes in a code span, which the lint reads past.
 
 ---
@@ -276,6 +276,7 @@ shaped like a code (`D4RT`) goes in a code span, which the lint reads past.
 | Real-robot evidence | 실제 로봇 검증 |
 | Failure mode | 실패 모드 |
 | Decision implication | 의사결정 함의 |
+| Open question | 열린 질문 |
 | Citation-graph expansion | Citation-Graph 확장 |
 | Keyword Sweep | Keyword Sweep (키워드 스윕) |
 | System0 / System1 | System0 / System1 (저수준 안정화 / 고수준 정책 계층) |
@@ -419,7 +420,7 @@ rank order; the prompt owns how the evidence is fetched.
 
 | Dimension | Code | What it scores | Scored by |
 |---|---|---|---|
-| Relevance | `R` | What the paper does to one of the pillar's Decisions (§5-6) | the pillar |
+| Relevance | `R` | What the paper adds to one of the pillar's open questions (§5-6) | the pillar |
 | Novelty | `N` | What the paper adds over the pillar's Tracked Literature (§5-6) | the pillar |
 | Methodology | `M` | Experimental rigor (§5-2) | the run, once per paper |
 | Real-robot evidence | `Real` | How much of the result stands on real hardware (§5-2) | the run, once per paper |
@@ -442,8 +443,8 @@ The 3 is what makes the gate select. Methodology 2 is two baselines and an
 ablation, which most papers reach once their own text is read, so a gate of
 three 2s passes nearly every on-topic paper and the report stops being a short
 list. A paper that is only partly on a pillar and only partly new (`R2·N2`)
-is not worth a full read in a scanned document; one that touches a pillar's
-decision directly, or is genuinely new against its tracked work, is.
+is not worth a full read in a scanned document; one that measures a pillar's
+question directly, or is genuinely new against its tracked work, is.
 
 The 🌱 pick is the exception: its field is adjacent by definition, so it
 rarely scores 3 on a pillar's Relevance, and it clears with **Relevance,
@@ -641,19 +642,19 @@ Omit the section when it has no rows.
 ### 5-6. Relevance and Novelty are scored against the pillar's file
 
 Relevance and Novelty carry the gate's 3 (§5-1), so they are read off the
-pillar's own context file — its Decision Log and its Tracked Literature —
+pillar's own context file — its Open Questions and its Tracked Literature —
 with the same discipline as the paper's three (§5-2): each level names what
 the paper's text must show, and a level the text does not reach is not
 given. Both are scored from the abstract and the arXiv comment the pillar
 agent holds.
 
-**Relevance** — what the paper does to one of the pillar's Decisions.
+**Relevance** — what the paper adds to one of the pillar's open questions.
 
 | Score | Condition |
 |---|---|
-| 3 | The paper puts a Decision's alternatives against each other — it compares, ablates or measures the choice that Decision makes, so its result bears on which alternative holds |
-| 2 | The paper takes one side of a Decision — its method adopts or proposes one of that Decision's alternatives, without testing it against another |
-| 1 | Inside the pillar's Scope, on none of its Decisions — the area, not a choice |
+| 3 | The paper puts a question's threads against each other — it compares, ablates or measures two of them, so its result bears on what the question turns on |
+| 2 | The paper argues one thread of a question, or opens a thread the question does not list yet, without testing it against another |
+| 1 | Inside the pillar's Scope, on none of its questions — the area, not a question |
 | 0 | Outside the Scope, or an Anti-topic |
 
 **Novelty** — what the paper adds over the pillar's Tracked Literature.
@@ -669,16 +670,16 @@ agent holds.
 
 | Case | Reading |
 |---|---|
-| A paper that fits several Decisions | Relevance is its best single Decision, never a sum |
-| Ablations of the paper's own components, none of them a Decision's alternatives | Relevance 2 at most — a Decision is tested only when its own alternatives are the things compared |
-| A strong method on the pillar's topic that touches no Decision | Relevance 1, however good — Methodology and the total reward the quality, not Relevance |
+| A paper that bears on several questions | Relevance is its best single question, never a sum |
+| Ablations of the paper's own components, none of them a question's threads | Relevance 2 at most — a question is measured only when its own threads are the things compared |
+| A strong method on the pillar's topic that touches no question | Relevance 1, however good — Methodology and the total reward the quality, not Relevance |
 | No tracked paper close enough to name | Novelty is read against the Scope's sub-axes, and 3 still needs the new mechanism stated in the text |
-| The 🌱 proposal | Adjacent by design, so it sits outside the Scope and the Anti-topics do not drop it for being in the slot's field. Relevance reads whether its method would bear on a Decision if carried over: 2 with that Decision named, 1 otherwise, never 3 |
+| The 🌱 proposal | Adjacent by design, so it sits outside the Scope and the Anti-topics do not drop it for being in the slot's field. Relevance reads whether its method would bear on a question if carried over: 2 with that question named, 1 otherwise, never 3 |
 
-**Every 3 names its evidence.** A Relevance 3 names the Decision and the
-words that compare its alternatives; a Novelty 3 names the closest tracked
+**Every 3 names its evidence.** A Relevance 3 names the question and the
+words that compare its threads; a Novelty 3 names the closest tracked
 paper and what the text shows it does not account for. A 3 that cannot name
-both is a 2. The report prints neither reason — (a) carries the Decision
+both is a 2. The report prints neither reason — (a) carries the question
 badges and (b)–(d) argue from the paper — so the rule binds the scoring, and
 the routine's SELF-CHECK is where it is held (§9).
 
@@ -722,7 +723,7 @@ section governs what each `##` section is allowed to repeat.
 `## 🔄 직전 리포트 대비 종합` covers, one bullet each and only when the run has
 something to say: papers already covered (verdict first), contradictions with
 recent findings, filter health as a count, already-analyzed dedup count.
-It cites no `D#` — a paper's decisions are its (a) badges (§3-1).
+It cites no `D#` — a paper's questions are its (a) badges (§3-1).
 
 - **Filter health is the only trace of a dropped candidate.** A count and a
   reason (`5편 제외 — WAM 아키텍처 4편, Methodology 미달 1편`), never a
@@ -811,4 +812,4 @@ stands.
 | A score line on every paper section, its five scores summing to its total and to each 📋 row's 합계; each surfaced paper and 📋 row clears the gate, the 🌱 pick without the 3; each 🔍 row exactly one gate axis short and clearing it were that axis 2; no Reproducibility ≥ 2 that pleads an unconfirmed signal; a code label on every paper header with Reproducibility ≥ 1, agreeing with that score (§5) | lint |
 | The run file's form; a report for every pillar it lists and not `Failed:`; a 📐 row for every paper a report of the run scores, and Methodology, Real and Reproducibility in every report equal to that row; a 📐 row equal to an earlier report's three when one scored the paper in the window (§5-4, §8) | lint |
 | One paper per 🔍 / 📋 row (§7-2) | lint |
-| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); every Relevance or Novelty 3 naming its Decision or closest tracked paper (§5-6); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |
+| Links resolve and no id is fabricated (§3); the legend lists exactly the cited codes, with badges and anchors (§3-1); the header strings (§4-3); the 개조식 register (§4-4); the render traps (§4-6 – §4-8); the three paper scores standing on the evidence quoted for them (§5-2); every Relevance or Novelty 3 naming its question or closest tracked paper (§5-6); 🔄 discipline (§7-1) | the routine's SELF-CHECK and the reader — nothing parses them |

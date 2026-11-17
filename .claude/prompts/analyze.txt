@@ -36,8 +36,11 @@ Two, with DIFFERENT jobs. Do not collapse them.
    here.
 
 2. **`context/MASTER.md` + `context/P#.md` (read-only) — the source of OUR
-   VIEW.** The Decision Log is what act 4 is built from: which `D#` this paper
-   supports, strains or contradicts, and what we would check. Never edit any
+   VIEW.** The pillars' open questions are what act 4 is built from: which
+   `D#` this paper adds to — a thread it argues, threads it measures against
+   each other, a thread it opens, a premise it unsettles — and what we would
+   check. A question has no answer to defend, so act 4 never scores the paper
+   for or against one. Never edit any
    `context/` file — propose in the document, never in the source.
 
 A summary keeps a fraction of a paper's figures and drops what a rewrite
@@ -134,7 +137,7 @@ PROCEDURE
 8. SELF-CHECK — the rules no gate sees (AUTHORING §5). Answer honestly:
      - Could a reader who never opens the paper explain the mechanism? (R3)
      - Does every section title name something specific to THIS paper? (R2)
-     - Is every `co-ten` about one of OUR decisions, and do the author-stated
+     - Is every `co-ten` about a thread or premise of one of OUR questions, and do the author-stated
        limitations close Act 3, not Act 4? (R9)
      - Does `tagline:` say what the paper DOES without naming it? (§1)
      - Does every resource link name this paper on its own page — opened,

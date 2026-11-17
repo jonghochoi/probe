@@ -20,7 +20,7 @@ Nothing else in the repo reaches the site — `context/` is not a published
 surface beyond the `D#` titles a tooltip prints, the dates of
 `context/EVENTS.md`, which the first screen counts down to, and what an axis
 chip's popup prints: each pillar's optional introduction and the titles of
-the decisions it owns. A decision's chosen answer never reaches the site.
+its open questions.
 
 **A scouting report is read, never rewritten.** `builder/scouting.py` reads
 each paper's scores off the score line under its header line, and a paper
