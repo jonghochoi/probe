@@ -630,17 +630,17 @@ def _current(key: str, here: str) -> str:
     return ' aria-current="page"' if key and key == here else ""
 
 
-# The colours a reader can pick, in the card's order — round the hue wheel
-# from midnight: the name, the key `site.css` reads off `data-accent`
-# (midnight is the default and has none), and the swatch. The swatches are
-# the light fills. The card lays them three to a row, so the count stays a
-# multiple of three.
-ACCENTS = (("미드나잇", "", "oklch(41% 0.12 268)"),
-           ("코발트", "cobalt", "oklch(50% 0.16 262)"),
-           ("세이지", "sage", "oklch(52% 0.1 165)"),
-           ("세피아", "sepia", "oklch(49% 0.085 62)"),
-           ("테라코타", "terracotta", "oklch(67.2% 0.131 39)"),
-           ("플럼", "plum", "oklch(47% 0.13 322)"))
+# The colours a reader can pick, in the card's order: the name, and the key
+# `site.css` reads off `data-accent` (midnight is the default and has none).
+# A swatch is drawn by `site.css` from the same key, so a colour's hue and
+# chroma are written once, there. The card lays them three to a row, so the
+# count stays a multiple of three.
+ACCENTS = (("미드나잇", ""),
+           ("세이지", "sage"),
+           ("올리브", "olive"),
+           ("세피아", "sepia"),
+           ("테라코타", "terracotta"),
+           ("플럼", "plum"))
 
 
 def _seg(label: str, title: str, items: str, grid: bool = False) -> str:
@@ -683,8 +683,8 @@ def nav_island(up: str, here: str = "") -> str:
              f'aria-checked="false">{icon("moon", 14)}다크</button>')
     accents = "".join(
         f'<button type="button" class="isl-i" role="radio" data-accent-pick="{key}" '
-        f'aria-checked="false"><i class="isl-sw" style="background:{swatch}"></i>{name}</button>'
-        for name, key, swatch in ACCENTS)
+        f'aria-checked="false"><i class="isl-sw" data-sw="{key}"></i>{name}</button>'
+        for name, key in ACCENTS)
     return f"""<div class="isl" data-isl>
     <div class="isl-shell">
       <div class="isl-face isl-rest is-on" data-isl-face="rest">

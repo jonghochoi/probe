@@ -26,15 +26,27 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── Reader colour ──────────────────────────────────────────────────── */
+  /* Two numbers make the whole palette: the hue every ground, ink, nav,
+     band and code surface is tinted with, and the accent's chroma. A colour
+     the reader picks (`[data-accent]`, at the foot of this sheet) sets only
+     these two, so every colour reaches the same surfaces at the same
+     strength and differs in hue alone. Midnight is the default. The chroma
+     is not one number for all because sRGB holds less of some hues at the
+     accent's lightness: each colour takes the most its hue holds, up to
+     midnight's. */
+  --hue:         268;
+  --accent-c:    0.120;
+
   /* ── Ground and ink ─────────────────────────────────────────────────── */
-  --bg:          oklch(98.4% 0.007 268);
-  --surface:     oklch(99.8% 0.002 268);   /* card ground — warm, not #fff */
-  --surface-2:   oklch(95.6% 0.012 268);   /* tinted panel */
-  --surface-3:   oklch(92.6% 0.016 268);   /* hover / pressed ground */
-  --border:      oklch(86.5% 0.020 268);
-  --border-soft: oklch(92.0% 0.014 268);
-  --text:        oklch(22.0% 0.020 268);
-  --text-muted:  oklch(46.0% 0.025 268);
+  --bg:          oklch(98.4% 0.007 var(--hue));
+  --surface:     oklch(99.8% 0.002 var(--hue));   /* card ground, not #fff */
+  --surface-2:   oklch(95.6% 0.012 var(--hue));   /* tinted panel */
+  --surface-3:   oklch(92.6% 0.016 var(--hue));   /* hover / pressed ground */
+  --border:      oklch(86.5% 0.020 var(--hue));
+  --border-soft: oklch(92.0% 0.014 var(--hue));
+  --text:        oklch(22.0% 0.020 var(--hue));
+  --text-muted:  oklch(46.0% 0.025 var(--hue));
 
   /* ── Accent ─────────────────────────────────────────────────────────── */
   /* One accent, in two roles. `--accent` is the brand value: it draws the
@@ -47,27 +59,27 @@
      ink is the accent and there is nothing to keep in step. The pressed step
      of a filled button is mixed from the accent rather than named separately:
      one accent means one value to move when it moves. */
-  --accent:      oklch(41.0% 0.120 268);
-  --accent-ink:  oklch(39.0% 0.110 268);
+  --accent:      oklch(45.0% var(--accent-c) var(--hue));
+  --accent-ink:  oklch(41.0% calc(var(--accent-c) * .92) var(--hue));
   --on-accent:   #ffffff;
   /* A card is a little translucent so the page's edge glow reads through. */
   --card-bg:     rgba(255, 255, 255, .74);
   /* The nav is the one dark ground on a light page — the frame the reading
      sits in — and the band under each page title is a soft accent wash. */
-  --nav-bg:      oklch(25.0% 0.035 268);
-  --band-a:      oklch(95.0% 0.030 268);
-  --band-b:      oklch(97.5% 0.024 288);
+  --nav-bg:      oklch(25.0% 0.035 var(--hue));
+  --band-a:      oklch(95.0% 0.030 var(--hue));
+  --band-b:      oklch(97.5% 0.024 calc(var(--hue) + 20));
   /* Ink on the nav's dark ground, the same in both themes. */
-  --nav-ink:     oklch(86.0% 0.020 268);
-  --nav-ink-hi:  oklch(97.0% 0.010 268);
+  --nav-ink:     oklch(86.0% 0.020 var(--hue));
+  --nav-ink-hi:  oklch(97.0% 0.010 var(--hue));
   --nav-line:    rgba(255, 255, 255, .22);
-  --nav-mark:    oklch(78.0% 0.100 288);
+  --nav-mark:    oklch(78.0% calc(var(--accent-c) * .85) calc(var(--hue) + 20));
   /* The nav's pill (`components.nav_island()`): the bar's own ground lifted
      a step, so it reads as a raised part of the bar rather than a second
      colour. Mixed from `--nav-bg`, so every accent and the dark theme carry
      it without a value of their own. */
   --nav-pill:    color-mix(in oklch, var(--nav-bg), white 9%);
-  --accent-soft: oklch(95.0% 0.030 268);
+  --accent-soft: oklch(95.0% 0.030 var(--hue));
   --amber-soft:  var(--accent);
   --focus:       var(--accent-ink);
   /* The mark's eye. Both sit on the accent hull, which is bright in either
@@ -116,11 +128,11 @@
   --syn-error:   var(--red);
 
   /* ── Grounds that are not the page ──────────────────────────────────── */
-  --code-bg:     oklch(94.6% 0.005 60);
-  --code-bar:    oklch(90.4% 0.005 60);
-  --code-rule:   oklch(86.4% 0.005 60);
-  --code-ink:    oklch(46.5% 0.025 54);   /* muted ink, measured on the bar */
-  --scrim:       oklch(21.0% 0.018 50 / .34);
+  --code-bg:     oklch(94.6% 0.005 var(--hue));
+  --code-bar:    oklch(90.4% 0.005 var(--hue));
+  --code-rule:   oklch(86.4% 0.005 var(--hue));
+  --code-ink:    oklch(46.5% 0.025 var(--hue));   /* muted ink, measured on the bar */
+  --scrim:       oklch(21.0% 0.018 var(--hue) / .34);
   /* arXiv figures are white PNGs, so the pad matches the file's own ground
      rather than the page's — the one place pure white is the correct value. */
   --fig-pad:     #ffffff;
@@ -175,8 +187,8 @@
   --radius:      12px;
   --radius-pill: 999px;
   --shadow:      0 0 0 transparent;
-  --shadow-sm:   0 1px 0 oklch(21% 0.018 50 / .06);
-  --shadow-lg:   0 14px 40px oklch(21% 0.018 50 / .18), 0 0 0 1px oklch(21% 0.018 50 / .04);
+  --shadow-sm:   0 1px 0 oklch(21% 0.018 var(--hue) / .06);
+  --shadow-lg:   0 14px 40px oklch(21% 0.018 var(--hue) / .18), 0 0 0 1px oklch(21% 0.018 var(--hue) / .04);
 
   /* ── Motion ─────────────────────────────────────────────────────────── */
   /* One easing for entrances, one for state changes, and four durations.
@@ -224,19 +236,19 @@
 @supports (height: 100dvh) { :root { --vh-live: 100dvh; } }
 
 :root[data-theme="dark"] {
-  --bg:          oklch(17.5% 0.010 268);
-  --surface:     oklch(20.5% 0.012 268);
-  --surface-2:   oklch(23.5% 0.014 268);
-  --surface-3:   oklch(27.0% 0.016 268);
-  --border:      oklch(34.0% 0.018 268);
-  --border-soft: oklch(27.5% 0.014 268);
-  --text:        oklch(93.0% 0.010 268);
-  --text-muted:  oklch(72.0% 0.020 268);
+  --bg:          oklch(17.5% 0.010 var(--hue));
+  --surface:     oklch(20.5% 0.012 var(--hue));
+  --surface-2:   oklch(23.5% 0.014 var(--hue));
+  --surface-3:   oklch(27.0% 0.016 var(--hue));
+  --border:      oklch(34.0% 0.018 var(--hue));
+  --border-soft: oklch(27.5% 0.014 var(--hue));
+  --text:        oklch(93.0% 0.010 var(--hue));
+  --text-muted:  oklch(72.0% 0.020 var(--hue));
 
-  --accent:      oklch(75.0% 0.095 268);
-  --accent-ink:  oklch(79.0% 0.087 268);
-  --on-accent:   oklch(17.5% 0.010 268);
-  --accent-soft: oklch(27.0% 0.038 268);
+  --accent:      oklch(75.0% calc(var(--accent-c) * .85) var(--hue));
+  --accent-ink:  oklch(79.0% calc(var(--accent-c) * .78) var(--hue));
+  --on-accent:   oklch(17.5% 0.010 var(--hue));
+  --accent-soft: oklch(27.0% 0.040 var(--hue));
 
   --blue:        oklch(75.0% 0.113 257);
   --green:       oklch(77.3% 0.126 162);
@@ -253,12 +265,12 @@
   --act2:        oklch(71.6% 0.085 179);
   --act3:        oklch(76.7% 0.110 75);
 
-  --code-bg:     oklch(28.0% 0.020 264);
-  --code-bar:    oklch(32.8% 0.017 262);
-  --code-rule:   oklch(35.6% 0.017 267);
-  --code-ink:    oklch(72.0% 0.022 53);
-  --scrim:       oklch(10.0% 0.010 50 / .52);
-  --fig-pad:     oklch(94.9% 0.008 62);   /* pad the white PNG, don't invert it */
+  --code-bg:     oklch(28.0% 0.020 var(--hue));
+  --code-bar:    oklch(32.8% 0.017 var(--hue));
+  --code-rule:   oklch(35.6% 0.017 var(--hue));
+  --code-ink:    oklch(72.0% 0.022 var(--hue));
+  --scrim:       oklch(10.0% 0.010 var(--hue) / .52);
+  --fig-pad:     oklch(94.9% 0.008 var(--hue));   /* pad the white PNG, don't invert it */
 
   --p0: oklch(39.1% 0.047 19);  --p1: oklch(42.2% 0.042 72);
   --p2: oklch(42.2% 0.058 136); --p3: oklch(37.1% 0.056 268);
@@ -271,11 +283,11 @@
 
   --shadow:    0 0 0 transparent;
   --shadow-sm: 0 1px 0 oklch(0% 0 0 / .4);
-  --shadow-lg: 0 16px 44px oklch(0% 0 0 / .6), 0 0 0 1px oklch(30% 0.017 59 / .6);
-  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 268) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 268);
-  --band-a:      oklch(24.0% 0.027 268);
-  --band-b:      oklch(22.0% 0.022 288);
+  --shadow-lg: 0 16px 44px oklch(0% 0 0 / .6), 0 0 0 1px oklch(30% 0.017 var(--hue) / .6);
+  --card-bg:     color-mix(in srgb, var(--surface) 78%, transparent);
+  --nav-bg:      oklch(12.5% 0.015 var(--hue));
+  --band-a:      oklch(24.0% 0.027 var(--hue));
+  --band-b:      oklch(22.0% 0.022 calc(var(--hue) + 20));
 }
 
 html {
@@ -588,7 +600,8 @@ html.js .isl { display: block; }
 }
 .isl-i:hover, .isl-i[aria-checked="true"], .isl-i[aria-current="page"] { color: var(--text); }
 .isl-i[aria-current="page"] { font-weight: 700; }
-.isl-sw { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.isl-sw { --hue: 268; --accent-c: 0.120; width: 11px; height: 11px; border-radius: 50%; flex: none;
+          background: oklch(45.0% var(--accent-c) var(--hue)); }
 /* The colour row holds more picks than one line fits, so it wraps three to a
    line; the indicator then moves down as well as across. */
 .isl-grid { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); }
@@ -2687,209 +2700,16 @@ body::before {
 .row-title, .cmp-card-t, .rel-title { font-family: var(--t-display); font-weight: 700; letter-spacing: -.015em; }
 
 /* ── Reader colour ────────────────────────────────────────────────────── */
-/* The accent a reader picks from the nav's 색 테마 row (`theme.js`):
-   미드나잇, the `:root` above, or one of the blocks below. Each tints the
-   neutrals, the band and the nav with its own hue, as midnight does with
-   268, so a colour is a whole palette rather than a recoloured button.
-
-   A reader may sit with one of these for an hour, so each is chosen for the
-   eye before the brand: grounds stay near-neutral (chroma ≤ 0.016, sepia's
-   warm paper the one exception at 0.026), no accent passes chroma 0.16,
-   and every block is held to the same contrast floors as `:root`. 세피아 is
-   the low-glare one — a warm paper a step down from white, with ink eased
-   off black. */
-:root[data-accent="sage"] {
-  --bg:          oklch(98.4% 0.007 165);
-  --surface:     oklch(99.8% 0.002 165);
-  --surface-2:   oklch(95.6% 0.012 165);
-  --surface-3:   oklch(92.6% 0.016 165);
-  --border:      oklch(86.5% 0.020 165);
-  --border-soft: oklch(92.0% 0.014 165);
-  --text:        oklch(22.0% 0.020 165);
-  --text-muted:  oklch(46.0% 0.025 165);
-  --accent:      oklch(52.0% 0.100 165);
-  --accent-ink:  oklch(45.0% 0.090 165);
-  --on-accent:   #ffffff;
-  --accent-soft: oklch(95.0% 0.030 165);
-  --nav-bg:      oklch(25.0% 0.035 165);
-  --nav-ink:     oklch(86.0% 0.020 165);
-  --nav-ink-hi:  oklch(97.0% 0.010 165);
-  --nav-mark:    oklch(78.0% 0.120 187);
-  --band-a:      oklch(95.0% 0.030 165);
-  --band-b:      oklch(97.5% 0.024 187);
-}
-:root[data-accent="sage"][data-theme="dark"] {
-  --bg:          oklch(17.5% 0.010 165);
-  --surface:     oklch(20.5% 0.012 165);
-  --surface-2:   oklch(23.5% 0.014 165);
-  --surface-3:   oklch(27.0% 0.016 165);
-  --border:      oklch(34.0% 0.018 165);
-  --border-soft: oklch(27.5% 0.014 165);
-  --text:        oklch(93.0% 0.010 165);
-  --text-muted:  oklch(72.0% 0.020 165);
-  --accent:      oklch(75.0% 0.120 165);
-  --accent-ink:  oklch(79.0% 0.110 165);
-  --on-accent:   oklch(17.5% 0.010 165);
-  --accent-soft: oklch(27.0% 0.045 165);
-  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 165) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 165);
-  --band-a:      oklch(24.0% 0.027 165);
-  --band-b:      oklch(22.0% 0.022 187);
-}
-:root[data-accent="terracotta"] {
-  --bg:          oklch(98.4% 0.007 40);
-  --surface:     oklch(99.8% 0.002 40);
-  --surface-2:   oklch(95.6% 0.012 40);
-  --surface-3:   oklch(92.6% 0.016 40);
-  --border:      oklch(86.5% 0.020 40);
-  --border-soft: oklch(92.0% 0.014 40);
-  --text:        oklch(22.0% 0.020 40);
-  --text-muted:  oklch(46.0% 0.025 40);
-  --accent:      oklch(67.2% 0.131 39);
-  --accent-ink:  oklch(51.4% 0.155 41);
-  --on-accent:   oklch(21.0% 0.018 50);
-  --accent-soft: oklch(95.0% 0.030 40);
-  --nav-bg:      oklch(25.0% 0.035 40);
-  --nav-ink:     oklch(86.0% 0.020 40);
-  --nav-ink-hi:  oklch(97.0% 0.010 40);
-  --nav-mark:    oklch(78.0% 0.120 62);
-  --band-a:      oklch(95.0% 0.030 40);
-  --band-b:      oklch(97.5% 0.024 62);
-}
-:root[data-accent="terracotta"][data-theme="dark"] {
-  --bg:          oklch(17.5% 0.010 40);
-  --surface:     oklch(20.5% 0.012 40);
-  --surface-2:   oklch(23.5% 0.014 40);
-  --surface-3:   oklch(27.0% 0.016 40);
-  --border:      oklch(34.0% 0.018 40);
-  --border-soft: oklch(27.5% 0.014 40);
-  --text:        oklch(93.0% 0.010 40);
-  --text-muted:  oklch(72.0% 0.020 40);
-  --accent:      oklch(75.0% 0.120 40);
-  --accent-ink:  oklch(79.0% 0.110 40);
-  --on-accent:   oklch(17.5% 0.010 40);
-  --accent-soft: oklch(27.0% 0.045 40);
-  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 40) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 40);
-  --band-a:      oklch(24.0% 0.027 40);
-  --band-b:      oklch(22.0% 0.022 62);
-}
-
-:root[data-accent="sepia"] {
-  --bg:          oklch(97.0% 0.016 62);
-  --surface:     oklch(98.6% 0.010 62);
-  --surface-2:   oklch(94.4% 0.022 62);
-  --surface-3:   oklch(91.4% 0.026 62);
-  --border:      oklch(85.0% 0.030 62);
-  --border-soft: oklch(91.0% 0.022 62);
-  --text:        oklch(26.0% 0.022 62);
-  --text-muted:  oklch(45.0% 0.030 62);
-  --accent:      oklch(49.0% 0.085 62);
-  --accent-ink:  oklch(44.0% 0.080 62);
-  --on-accent:   #ffffff;
-  --accent-soft: oklch(95.0% 0.026 62);
-  --nav-bg:      oklch(25.0% 0.026 62);
-  --nav-ink:     oklch(86.0% 0.020 62);
-  --nav-ink-hi:  oklch(97.0% 0.010 62);
-  --nav-mark:    oklch(78.0% 0.081 80);
-  --band-a:      oklch(95.0% 0.026 62);
-  --band-b:      oklch(97.5% 0.021 80);
-}
-:root[data-accent="sepia"][data-theme="dark"] {
-  --bg:          oklch(17.5% 0.010 62);
-  --surface:     oklch(20.5% 0.012 62);
-  --surface-2:   oklch(23.5% 0.014 62);
-  --surface-3:   oklch(27.0% 0.016 62);
-  --border:      oklch(34.0% 0.018 62);
-  --border-soft: oklch(27.5% 0.014 62);
-  --text:        oklch(89.0% 0.020 62);
-  --text-muted:  oklch(72.0% 0.020 62);
-  --accent:      oklch(75.0% 0.080 62);
-  --accent-ink:  oklch(79.0% 0.074 62);
-  --on-accent:   oklch(17.5% 0.010 62);
-  --accent-soft: oklch(27.0% 0.032 62);
-  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 62) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 62);
-  --band-a:      oklch(24.0% 0.024 62);
-  --band-b:      oklch(22.0% 0.020 80);
-}
-
-:root[data-accent="cobalt"] {
-  --bg:          oklch(98.4% 0.007 262);
-  --surface:     oklch(99.8% 0.002 262);
-  --surface-2:   oklch(95.6% 0.012 262);
-  --surface-3:   oklch(92.6% 0.016 262);
-  --border:      oklch(86.5% 0.020 262);
-  --border-soft: oklch(92.0% 0.014 262);
-  --text:        oklch(22.0% 0.020 262);
-  --text-muted:  oklch(46.0% 0.025 262);
-  --accent:      oklch(50.0% 0.160 262);
-  --accent-ink:  oklch(45.0% 0.150 262);
-  --on-accent:   #ffffff;
-  --accent-soft: oklch(95.0% 0.030 262);
-  --nav-bg:      oklch(25.0% 0.035 262);
-  --nav-ink:     oklch(86.0% 0.020 262);
-  --nav-ink-hi:  oklch(97.0% 0.010 262);
-  --nav-mark:    oklch(78.0% 0.100 282);
-  --band-a:      oklch(95.0% 0.030 262);
-  --band-b:      oklch(97.5% 0.024 282);
-}
-:root[data-accent="cobalt"][data-theme="dark"] {
-  --bg:          oklch(17.5% 0.010 262);
-  --surface:     oklch(20.5% 0.012 262);
-  --surface-2:   oklch(23.5% 0.014 262);
-  --surface-3:   oklch(27.0% 0.016 262);
-  --border:      oklch(34.0% 0.018 262);
-  --border-soft: oklch(27.5% 0.014 262);
-  --text:        oklch(93.0% 0.010 262);
-  --text-muted:  oklch(72.0% 0.020 262);
-  --accent:      oklch(75.0% 0.110 262);
-  --accent-ink:  oklch(79.0% 0.101 262);
-  --on-accent:   oklch(17.5% 0.010 262);
-  --accent-soft: oklch(27.0% 0.044 262);
-  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 262) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 262);
-  --band-a:      oklch(24.0% 0.027 262);
-  --band-b:      oklch(22.0% 0.022 282);
-}
-:root[data-accent="plum"] {
-  --bg:          oklch(98.4% 0.007 322);
-  --surface:     oklch(99.8% 0.002 322);
-  --surface-2:   oklch(95.6% 0.012 322);
-  --surface-3:   oklch(92.6% 0.016 322);
-  --border:      oklch(86.5% 0.020 322);
-  --border-soft: oklch(92.0% 0.014 322);
-  --text:        oklch(22.0% 0.020 322);
-  --text-muted:  oklch(46.0% 0.025 322);
-  --accent:      oklch(47.0% 0.130 322);
-  --accent-ink:  oklch(44.0% 0.125 322);
-  --on-accent:   #ffffff;
-  --accent-soft: oklch(95.0% 0.030 322);
-  --nav-bg:      oklch(25.0% 0.035 322);
-  --nav-ink:     oklch(86.0% 0.020 322);
-  --nav-ink-hi:  oklch(97.0% 0.010 322);
-  --nav-mark:    oklch(78.0% 0.100 342);
-  --band-a:      oklch(95.0% 0.030 322);
-  --band-b:      oklch(97.5% 0.024 342);
-}
-:root[data-accent="plum"][data-theme="dark"] {
-  --bg:          oklch(17.5% 0.010 322);
-  --surface:     oklch(20.5% 0.012 322);
-  --surface-2:   oklch(23.5% 0.014 322);
-  --surface-3:   oklch(27.0% 0.016 322);
-  --border:      oklch(34.0% 0.018 322);
-  --border-soft: oklch(27.5% 0.014 322);
-  --text:        oklch(93.0% 0.010 322);
-  --text-muted:  oklch(72.0% 0.020 322);
-  --accent:      oklch(75.0% 0.105 322);
-  --accent-ink:  oklch(79.0% 0.097 322);
-  --on-accent:   oklch(17.5% 0.010 322);
-  --accent-soft: oklch(27.0% 0.042 322);
-  --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 322) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 322);
-  --band-a:      oklch(24.0% 0.027 322);
-  --band-b:      oklch(22.0% 0.022 342);
-}
+/* The colours a reader picks from the nav's 색 테마 row (`theme.js`). Each
+   sets the two numbers `:root` builds the palette from and nothing else, so
+   no colour can reach a surface another misses; midnight is `:root` itself.
+   Each colour's swatch on the card takes the same pair, and `.isl-sw`
+   carries midnight's. */
+:root[data-accent="sage"],       .isl-sw[data-sw="sage"]       { --hue: 165; --accent-c: 0.082; }
+:root[data-accent="olive"],      .isl-sw[data-sw="olive"]      { --hue: 125; --accent-c: 0.099; }
+:root[data-accent="sepia"],      .isl-sw[data-sw="sepia"]      { --hue: 62;  --accent-c: 0.090; }
+:root[data-accent="terracotta"], .isl-sw[data-sw="terracotta"] { --hue: 40;  --accent-c: 0.120; }
+:root[data-accent="plum"],       .isl-sw[data-sw="plum"]       { --hue: 322; --accent-c: 0.120; }
 
 /* ── 연구 축 popup ────────────────────────────────────────────────────── */
 /* What an axis chip opens (`pillar.js`): a card under the chip, a sheet from
