@@ -60,6 +60,7 @@ a row once it has ended.
 | 2027-05-14 | 2027-05-14 | 마감 | RSS 2027 카메라 레디 마감 | AoE | https://roboticsconference.org/ |
 | 2027-05-24 | 2027-05-28 | 학회 | ICRA 2027 | Seoul · COEX | https://2027.ieee-icra.org/ |
 | 2027-06-20 | 2027-06-25 | 학회 | CVPR 2027 | Seattle | https://cvpr.thecvf.com/ |
+| 2027-06-30 | 2027-06-30 | 마감 | RA-L Humanoids 2027 옵션 마감 | | https://www.ieee-ras.org/publications/ra-l/ |
 | 2027-07-06 | 2027-07-11 | 학회 | RSS 2027 | Athens | https://roboticsconference.org/ |
 | 2027-07-31 | 2027-08-06 | 학회 | ICML 2027 | Rio de Janeiro · Riocentro | https://icml.cc/ |
 | 2027-09-27 | 2027-10-01 | 학회 | IROS 2027 | Florence · Fortezza da Basso | https://2027.ieee-iros.org/ |
@@ -80,4 +81,3 @@ that venue's dates wait.
 
 | 주소 | 학회 | 이유 | 처음 본 날 |
 |---|---|---|---|
-| 2027.ieee-humanoids.org | Humanoids | 다음 회차 | 2026-11-17 |
