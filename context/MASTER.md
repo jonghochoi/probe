@@ -16,7 +16,7 @@
 - `context/P0–P4.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
-- `[STABLE]`: changes rarely (identity, purpose, hardware)
+- `[STABLE]`: changes rarely (identity, purpose, scope)
 - `[LIVING]`: updated as research progresses
 - `[AGENT-INPUT]`: retrieval agent conditions on this — keep signal-dense
 
@@ -33,28 +33,14 @@ Output format is one contract per track — `scouting/AUTHORING.md`, `analysis/A
 
 ## 1. Identity [STABLE] [AGENT-INPUT]
 
-> Dexterity is pursued two ways that do not reach it. A **monolithic action
-> decoder over vision-dominant observation** treats arm, torso and finger as
-> one homogeneous action space and takes sensing as a flat concat. A
-> **correction or residual module bolted onto a frozen VLA** is structurally
-> bounded by that VLA's own local output distribution and must be re-trained
-> whenever its motion pattern shifts, so it tracks the ceiling rather than
-> exceeding it. Dexterous **hand** manipulation is therefore tackled **at the
-> VLA level itself** — the decoder, the observation and the pretraining are
-> each designed rather than left to be learned incidentally. Task
-> specification stays goal-centric, arm and hand integrated.
+> PROBE scouts research on **hand-centric dexterous manipulation at the VLA
+> level** — how each part of a VLA is built, and what each choice buys and
+> costs on a dexterous, contact-rich task. The common default of a part is a
+> **thread to be measured against**, never a position to argue against.
 
-**Decomposition**
-- *Antagonist A*: a monolithic decoder over one homogeneous action space
-- *Antagonist B*: sensing taken as a flat concat of heterogeneous streams
-- *Antagonist C*: a correction/residual module on a frozen VLA —
-  distribution-bounded, re-trained on every motion-pattern shift
-- *Protagonist*: the decoder, the observation and the pretraining, each
-  designed at the VLA level
-- *Stays goal-centric*: task specification, arm and hand integrated
-
-Each pillar carries its own tie back to this claim, and §4 says which pillar
-owns what. Neither is restated here.
+The context holds questions, never an answer or a bet on one — where the
+operator's stance lives instead is `context/CLAUDE.md`'s rule. Each pillar
+says why its axis is asked, and §4 says which pillar owns what. Neither is restated here.
 
 ---
 
@@ -62,7 +48,7 @@ owns what. Neither is restated here.
 
 This document serves *two coupled functions*:
 
-1. **Filter (outward)** — enables the retrieval agent and collaborators to surface external content (papers, methods, ideas) aligned with the maintainer's identity, and to reject the rest. Requires signal-density and structured fields.
+1. **Filter (outward)** — enables the retrieval agent and collaborators to surface external content (papers, methods, ideas) that bears on the pillars' open questions, and to set the rest aside. Requires signal-density and structured fields.
 2. **Anchor (inward)** — keeps the open questions each pillar asks and the threads followed on each. Counters drift when external noise (trends, hype) pulls: a paper is read for what it adds to a question, not for whether it agrees with an answer.
 
 **Audience scope**: future-self + AI retrieval agent + future collaborators
@@ -72,22 +58,23 @@ This document serves *two coupled functions*:
 
 ## 3. Long-term Context [STABLE → semi-LIVING]
 
-### 3.1 Vision
-Build a holistic system for human-level dexterous manipulation. Full stack envisioned: hardware that expresses rich contact, data collection preserving human interaction, control minimizing intent-execution gap, models absorbing multimodal supervision at scale, evaluation infrastructure enabling scalable + reproducible iteration. *Current scope-of-work focuses on modeling at the VLA level.*
+### 3.1 Field
+Human-level dexterous manipulation spans a full stack — hardware that
+expresses rich contact, data collection that preserves human interaction,
+control, models that absorb multimodal supervision at scale, and evaluation
+that makes iteration reproducible. The research this repo scouts can sit
+anywhere on it.
 
 ### 3.2 Scope of work
-**The bet: body expert and hand expert both directly designed and trained at the VLA level.** No outsourcing of dexterity to a post-hoc correction module (which would be distribution-bounded by the VLA). Pretrained VLM/π weights are leveraged via a *deliberately composed pretraining recipe for data-efficient adaptation* (P4), with prior-preservation as one downstream lever. Every component learns at the VLA level, by imitation with flow matching. The pillars' open questions are where this bet is tested — it is the stance the questions are asked from, not an answer they defend.
-
-### 3.3 Task philosophy
-**Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
+The current scope is **modeling at the VLA level** — the five pillars of §4.
+The rest of the stack is read where it bears on a pillar question and is not
+scouted for its own sake.
 
 ---
 
 ## 4. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Five pillars (P0–P4).** P1, P2 and P4 are the architectural core; P0 (data)
-is the upstream supporting pillar; P3 (world model) is a later-phase
-capability bet.
+**Five pillars (P0–P4)**, none ranked above another.
 
 Each pillar file owns its own scope, scouting lens, anti-topics, open questions
 and tracked literature. This table is the index — what a pillar owns in one
@@ -97,8 +84,8 @@ is a second copy to keep in step, so it is not restated.
 
 | Pillar | Owns | Questions | File |
 |---|---|---|---|
-| P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them; data is upstream of method | 3 | `context/P0.md` |
-| P1 — Heterogeneous Body/Hand Action Expert | how the action decoder is split into more than one expert, and the questions that stand split or not | 4 | `context/P1.md` |
+| P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them | 3 | `context/P0.md` |
+| P1 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 4 | `context/P1.md` |
 | P2 — Structured Multimodal Observation Fusion | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder | 4 | `context/P2.md` |
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P4.md` |

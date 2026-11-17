@@ -65,15 +65,17 @@ adds a row: a new paper it finds citing a basket paper is a candidate under
 
 ### 2-2. `MY-METHOD.md`
 
-The private counterpart of `context/MASTER.md`. The public thesis is there and
-is pointed at from §0, not repeated. The spine, which the lint reads:
+The private counterpart of `context/MASTER.md`. MASTER and the pillar files
+state what the repo scouts and the questions it keeps open, and hold no bet; the stance — which
+default limits dexterity, and what the method bets on — is §0 here. The spine,
+which the lint reads:
 
 ```
 # METHOD — <working title>
 name: <short name>                    what every output calls this method
 code: <absolute path>                 optional; else the `code` symlink
 
-## 0. 문제의식                        the half that cannot be public
+## 0. 문제의식                        the stance and the bet — none of it public
 ## 1. 주장                            #### [C<n>] <title> + one bullet each
 ## 2. 방법                            architecture, recipe, data — with CODEMAP anchors
 ## 3. 측정                            benchmarks, metrics, current numbers

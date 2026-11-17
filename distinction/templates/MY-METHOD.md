@@ -4,15 +4,15 @@ name: <short name — what a versus note and a report call this method beside a 
 code: <absolute path to the codebase — or leave this line out and put a `code` symlink beside this file>
 
 <!-- Human-owned. The routine reads this file and never edits it. Section
-     spine and the claim entry format: `distinction/SETUP.md` §2-2. The public
-     half of the thesis is `context/MASTER.md` §1 and is pointed at, not
-     repeated — the same fact in both files is one of them going stale. -->
+     spine and the claim entry format: `distinction/SETUP.md` §2-2. The stance
+     lives here and only here: `context/MASTER.md` §1 states what the repo
+     scouts and holds no bet, so nothing in this file is repeated there. -->
 
 ## 0. 문제의식
 
-<`context/MASTER.md` §1 을 가리키는 한 줄. 그 다음은 공개할 수 없는 절반만 —
+<입장 — 어느 기본값이 손재주를 막는다고 보는가, 그래서 무엇에 거는가. 그 다음 —
 어느 바구니 논문의 어느 빈자리를 치는가, 왜 지금인가, 이 방법이 어느 D# 에
-어떤 답을 거는가.>
+어떤 답을 거는가. 공개 쪽 `context/` 는 질문만 든다 — 입장은 여기에만 쓴다.>
 
 ## 1. 주장
 

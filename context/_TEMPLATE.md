@@ -20,9 +20,10 @@
 dense paragraph — what a paper must be about to land here, stated as what is
 asked, not as an answer.>
 
-**Thesis tie** — the bet this axis tests: <one line back to the
-`context/MASTER.md` §1 claim — the
-sentence that makes a paper P<N>-relevant rather than merely adjacent.>
+**Thesis tie** — why this axis is asked: <what is open on this axis, in a
+line or two back to `context/MASTER.md` §1 — the sentence that makes a paper
+P<N>-relevant rather than merely adjacent. A tension the questions keep open,
+never a bet on how it resolves.>
 
 **Questions**: <short form> (D<id>), <short form> (D<id>), … — one per question.
 
