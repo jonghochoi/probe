@@ -59,9 +59,15 @@ THE RUN
    program or venue — on the hosts the source rule allows, and to the next
    edition's site when the current edition has ended. Read the HTML for the
    dates; a PDF linked from the site is a source too.
-   - `HTTP 403` with `x-deny-reason: host_not_allowed` is the session's
-     network allowlist, not the site: record `blocked: <host>` and go on.
-     The operator adds the host (`scouting/SETUP.md` §5-1).
+   - The session's network allowlist refuses a host in one of two ways:
+     `HTTP 403` with `x-deny-reason: host_not_allowed`, or the proxy
+     refusing the tunnel itself — curl exits 56 with `CONNECT tunnel
+     failed, response 403`. Either is the allowlist, not the site: record
+     `blocked: <host>` and go on. The operator adds the host
+     (`scouting/SETUP.md` §5-1).
+   - Once the tunnel is open, a failure is the site's own — a `403` with
+     `cf-mitigated: challenge` (a bot check), a TLS name mismatch on an
+     edition site not yet live, a 5xx. That is not a host to add.
    - LOOK AHEAD for every venue whose listed edition has ended, or ends
      within 60 days: the next edition's site is the one the routine will
      need. Take its host from a link on the listed page; failing that, try
@@ -95,9 +101,9 @@ THE RUN
      must be fetchable; if it is blocked, record it and still move the link.
    - The hosts-to-allow table: a `blocked:` host is a row with 이유 `막힘`,
      an `ahead:` host one with 이유 `다음 회차`; 처음 본 날 is the run date
-     the first time, and kept after. A listed host that answered this run is
-     dropped. A row is never re-dated, so the table says how long a host has
-     waited.
+     the first time, and kept after. A listed host the allowlist let through
+     this run is dropped, whatever the site then answered. A row is never
+     re-dated, so the table says how long a host has waited.
 
 5. CHECK the file against its own shape (standard library only):
      python3 -I -S -c "import sys; sys.path.insert(0, 'site'); from builder import events; e, p = events.discover(); print(len(e), 'rows'); [print(x) for x in p]; sys.exit(1 if p else 0)"
