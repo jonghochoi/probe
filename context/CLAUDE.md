@@ -18,10 +18,11 @@ to, read by the build (`site/builder/events.py`) and never by a research run.
 `EVENTS.md` is also the boundary's one exception. The weekly follow routine
 (`.claude/prompts/follow.txt`) writes it — the rows of its dates table, the
 hosts it could not reach, and a venue's link when the venue moves to its next
-edition's site — and nothing else in the folder. What it may write is fixed there: only dates a venue's own
-site states, one commit straight to `main`. Which venues are followed stays
-the human's: a venue is added or dropped by hand, and a row a person added for
-a venue outside that list is never touched by the routine.
+edition's site — and nothing else in the folder. That prompt fixes what it may
+write: only dates a venue's own site states, in one commit straight to
+`main`. Which venues are followed stays the human's: a venue is added or
+dropped by hand, and a row a person added for a venue outside that list is
+never touched by the routine.
 
 Ownership inside the folder is just as fixed. The Decision Log, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;
@@ -32,10 +33,10 @@ fact in both is one of them going stale.
 
 ## Decision-Log entry format
 
-Every entry in a `P#.md` Decision Log section has exactly this shape. The
-scouting and analyze prompts, `linters/check-decision-refs.py` and
-`site/builder/decisions.py` all pattern-match on it, so it is load-bearing,
-not cosmetic:
+Every entry in a `P#.md` Decision Log section has exactly this shape.
+`linters/check-decision-refs.py`, `linters/check-context-consistency.py` and
+`site/builder/decisions.py` parse it, and every prompt that cites a `D#` reads
+it, so it is load-bearing, not cosmetic:
 
 ```
 #### [D<id>] <Decision title> (P<m>)
@@ -131,15 +132,15 @@ decisions (`site/builder/decisions.py`); a run does not read it.
 
 ## When adding a new pillar (P5+)
 
-The pillars share one skeleton — owned by `context/_TEMPLATE.md` — and
-several surfaces key off
-the pillar set — none of them update automatically. Walk this list end to end;
-a half-added pillar silently drops out of the index and the lints:
+The pillars share one skeleton, owned by `context/_TEMPLATE.md`, and several
+surfaces key off the pillar set without updating on their own. Walk this list
+end to end; a half-added pillar silently drops out of the index and the lints:
 
 - [ ] **Copy `context/_TEMPLATE.md` to `context/P<N>.md`** and fill every
-      `<placeholder>`. Keep the template's section spine and its `[STABLE]` /
-      `[LIVING]` / `[AGENT-INPUT]` markers exactly — the pipeline
-      pattern-matches on them.
+      `<placeholder>`. Keep the template's section spine exactly —
+      `linters/check-context-consistency.py` reads it back — and its
+      `[STABLE]` / `[LIVING]` / `[AGENT-INPUT]` markers, which tell a run how
+      to weigh each section (`context/MASTER.md` §0).
 - [ ] **Draw ids for its decisions** — `D` + digit + two letters, checked
       against every id already in the repo and against the `Retired:` line in
       `context/MASTER.md` (the build and `linters/check-decision-refs.py`

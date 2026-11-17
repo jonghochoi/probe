@@ -69,11 +69,11 @@ _BACKTICK = re.compile(r"`([^`]+)`")
 
 # Default scan set: the structural index docs whose path references are meant
 # to point at real files — `CLAUDE.md`, `README.md`, the `SETUP.md` guides —
-# every per-folder `<dir>/CLAUDE.md`, and the `context/` files the scheduled
-# routine reads every run. The pillar files and the per-folder rule files are
-# globbed, not listed, so adding a pillar or a new `<dir>/CLAUDE.md` needs no
-# edit here; `context/_TEMPLATE.md` is skipped because it is a skeleton of
-# placeholders, not a doc whose paths resolve.
+# every per-folder `<dir>/CLAUDE.md` and folder `README.md`, and the `context/`
+# files the scheduled routine reads every run. The pillar files, the per-folder
+# rule files and the folder maps are globbed, not listed, so adding a pillar or
+# a folder doc needs no edit here; `context/_TEMPLATE.md` is skipped because it
+# is a skeleton of placeholders, not a doc whose paths resolve.
 _DEFAULT_ROOT_DOCS = [
     "CLAUDE.md",
     "README.md",
@@ -84,6 +84,7 @@ _DEFAULT_ROOT_DOCS = [
 ]
 _CONTEXT_PILLAR_GLOB = "context/P[0-9].md"
 _FOLDER_RULE_GLOB = "*/CLAUDE.md"
+_FOLDER_MAP_GLOBS = ("*/README.md", "*/*/README.md", ".claude/vendor/*/README.md")
 
 
 def _resolves(candidate: str, doc_dir: str) -> bool:
@@ -166,7 +167,7 @@ def check_file(path: str) -> list[tuple[int, str]]:
 
 def _gather_default_docs() -> list[str]:
     docs = [d for d in _DEFAULT_ROOT_DOCS if os.path.exists(os.path.join(_REPO_ROOT, d))]
-    for pattern in (_CONTEXT_PILLAR_GLOB, _FOLDER_RULE_GLOB):
+    for pattern in (_CONTEXT_PILLAR_GLOB, _FOLDER_RULE_GLOB, *_FOLDER_MAP_GLOBS):
         docs += sorted(
             os.path.relpath(p, _REPO_ROOT)
             for p in glob.glob(os.path.join(_REPO_ROOT, pattern))

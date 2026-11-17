@@ -4,7 +4,7 @@ name: Check context consistency
 # `context/_TEMPLATE.md` defines the pillar section spine and `context/MASTER.md`
 # declares which sections it owns, so every check here is an existing contract
 # read back rather than a new rule. The checks (SPINE, COUNT, SECTION,
-# PILLARSET) are listed in `linters/check-context-consistency.py`.
+# PILLARSET, SHAPE) are listed in `linters/check-context-consistency.py`.
 #
 # Paths mirror the linter's own default scan set (`_DEFAULT_ROOT_DOCS`,
 # `_CONTEXT_PILLAR_GLOB`, `_FOLDER_RULE_GLOB`); a doc it reads that this list
@@ -20,7 +20,7 @@ on:
       - 'CLAUDE.md'
       - '*/CLAUDE.md'
       - 'README.md'
-      - 'scouting/SETUP.md'
+      - '*/SETUP.md'
       - 'linters/check-context-consistency.py'
       - '.github/workflows/check-context-consistency.yml'
 

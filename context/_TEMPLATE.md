@@ -1,15 +1,15 @@
 # P<N> — <Pillar Name>
 
-> **Owns**: the P<N> Decision Log, Anti-topics and Tracked
-> Literature.
-> **Does not own**: the thesis, the pillar overview, hardware, venue and
-> cross-pollination — those are `context/MASTER.md`. A fact in both files is
-> one of them going stale.
-> **Agent usage**: *static* context, read-only. A scouting run reads this file
-> alone and writes `scouting/P<N>/YYYY-MM-DD.md`; `/analyze` and `/compare`
-> read it beside `context/MASTER.md`.
-> **Output format**: owned by the track — `scouting/AUTHORING.md`,
-> `analysis/AUTHORING.md`, `comparison/AUTHORING.md`. Never restated here.
+> **Owns** the P<N> Decision Log, Anti-topics and Tracked
+> Literature. The thesis, the pillar overview, venue and
+> cross-pollination are `context/MASTER.md`'s — a fact in both files is one of
+> them going stale.
+> **Static context, read-only.** A scouting run reads this file alone and
+> writes `scouting/P<N>/YYYY-MM-DD.md`; the on-demand commands (`/analyze`,
+> `/compare`, `/ideate`, `/distinguish`, `/adapt`) read it beside
+> `context/MASTER.md`. Output format is the track's own contract
+> (`scouting/AUTHORING.md`, `analysis/AUTHORING.md`,
+> `comparison/AUTHORING.md`), never restated here.
 
 ---
 

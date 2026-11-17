@@ -25,7 +25,7 @@
 - Pillars: structure stable; tracked items within can evolve as evidence accumulates
 
 **Output formatting & authoring rules**
-All formatting rules (emoji system, link format, Korean authoring principles) are consolidated in **`scouting/AUTHORING.md`** — the single source of truth. The agent must read `scouting/AUTHORING.md` before producing any output. Do not duplicate formatting rules here; edit `scouting/AUTHORING.md` instead.
+Output format is one contract per track — `scouting/AUTHORING.md`, `analysis/AUTHORING.md`, `comparison/AUTHORING.md`. The agent reads its track's contract before producing any output. Do not duplicate formatting rules here; edit the contract instead.
 
 **Audience**: maintainer (self, future-self) + AI retrieval agent + future collaborators. Keep terminology accessible without sacrificing precision.
 
@@ -90,10 +90,10 @@ is the upstream supporting pillar; P3 (world model) is a later-phase
 capability bet.
 
 Each pillar file owns its own scope, scouting lens, anti-topics, Decision Log
-and tracked literature. This table is the index — what a pillar owns in one line, how many
-decisions it holds, and where the rest of it lives. The ids themselves are
-mapped in `context/CLAUDE.md`. A pillar's
-scope restated here is a second copy to keep in step, so it is not restated.
+and tracked literature. This table is the index — what a pillar owns in one
+line, how many decisions it holds, and where the rest of it lives. The ids
+themselves are mapped in `context/CLAUDE.md`. A pillar's scope restated here
+is a second copy to keep in step, so it is not restated.
 
 | Pillar | Owns | Decisions | File |
 |---|---|---|---|
@@ -103,10 +103,9 @@ scope restated here is a second copy to keep in step, so it is not restated.
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 5 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the choices upstream of deploy — lineage × corpus × recipe — and what they cost to protect afterwards | 5 | `context/P4.md` |
 
-Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**. A retired number is
-never re-issued;
-`linters/check-decision-refs.py` resolves it so already-published citations
-keep working.
+Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**. A retired id is never
+re-issued; the build and `linters/check-decision-refs.py` resolve it so
+already-published citations keep working.
 
 ---
 
