@@ -55,7 +55,8 @@ except ImportError:
     )
     raise SystemExit(2)
 
-from builder import assets_out, catalog, comparisons, corpus, events, lineage, pages, scouting, scoutfigs
+from builder import (arxivtitles, assets_out, catalog, comparisons, corpus, events, lineage,
+                     pages, scouting, scoutfigs)
 from builder.decisions import harvest_decisions, pillar_cards, retired_decisions
 from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
 from builder.render import DocRenderer
@@ -174,10 +175,15 @@ def build(args) -> int:
             if runs else pages.scouting_empty_page())
     problems += render_problems
 
+    # The arXiv title of each paper 빈자리 prints, fetched when the build is
+    # asked to, from the cache either way.
+    gap_titles = arxivtitles.titles(
+        [node.id for node, _ in lineage.gaps(graph)[:pages.GAP_ROWS]],
+        corpus.REPO_ROOT / ".site-cache", fetch=args.gap_titles) if graph else {}
     # The analysis list indexes whatever was built — with `--only`, a subset.
     rendered[out / "p" / "index.html"] = pages.analysis_page(
         papers, katex, partial=bool(args.only),
-        graph=graph)
+        graph=graph, gap_titles=gap_titles)
     # The first screen, at the root: what came in lately, the axes, the dates.
     import datetime as _dt
     rendered[out / "index.html"] = pages.home_page(
@@ -347,6 +353,9 @@ def main() -> int:
     ap.add_argument("--strict", action="store_true", help="fail on any warning")
     ap.add_argument("--scout-figures", action="store_true",
                     help="fetch each scouted paper's overview figure from arXiv "
+                         "(cached in .site-cache/)")
+    ap.add_argument("--gap-titles", action="store_true",
+                    help="fetch the arXiv title of each paper 빈자리 names "
                          "(cached in .site-cache/)")
     ap.add_argument("--serve", action="store_true", help="serve --out after building")
     ap.add_argument("--port", type=int, default=8000)

@@ -107,7 +107,7 @@ jobs:
         # endpoint and the site makes no requests at all.
         env:
           PROBE_SEARCH_API: ${{ vars.PROBE_SEARCH_API }}
-        run: python3 site/build-site.py --out .site --strict --scout-figures
+        run: python3 site/build-site.py --out .site --strict --scout-figures --gap-titles
 
       - name: Refresh the search index
         # Only from main, and only once the project secrets exist — until then

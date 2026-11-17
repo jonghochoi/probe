@@ -116,9 +116,11 @@ scope.
 
 **The build reaches the network only when asked.** `--scout-figures` fetches
 the arXiv HTML of each written-up scouted paper to pick its overview figure,
-and every answer stays in `scout-figures.json` under `.site-cache/`; without
-the flag the build prints what that cache holds and a paper it lacks shows no
-figure. A paper arXiv cannot reach is not remembered, so the next fetch asks
+and every answer stays in `scout-figures.json` under `.site-cache/`;
+`--gap-titles` asks arXiv's metadata API for the title of each paper 빈자리
+prints, kept in `arxiv-titles.json` beside it. Without a flag the build prints
+what its cache holds: a paper it lacks shows no figure, or its rail name with
+no title. A paper arXiv cannot reach is not remembered, so the next fetch asks
 again.
 
 **Search is an enhancement.** A build without `--search-api` carries no
