@@ -26,9 +26,10 @@ the next scheduled run picks them up.
 
 ### 2-1. Network allowlist
 
-**Trusted** allows only package registries and GitHub. Everything else gets
-`HTTP 403` with `x-deny-reason: host_not_allowed`. Set **Network access →
-Custom** and list one host per line:
+**Trusted** allows only package registries and GitHub. Everything else is
+refused — `HTTP 403` with `x-deny-reason: host_not_allowed`, or the proxy
+refusing the tunnel outright (curl: `CONNECT tunnel failed, response 403`).
+Set **Network access → Custom** and list one host per line:
 
 ```
 export.arxiv.org
@@ -50,8 +51,8 @@ Same dialog, under **Environment variables**, `.env` format, no quotes.
 - There is no secret store — environment variables are readable by anyone who
   can edit the environment.
 
-> **Two different 403s.** `x-deny-reason: host_not_allowed` → network layer,
-> fix with the allowlist in §2-1. S2 403 *only when the key header is sent* →
+> **Two different 403s.** `x-deny-reason: host_not_allowed` or a refused
+> `CONNECT` → network layer, fix with the allowlist in §2-1. S2 403 *only when the key header is sent* →
 > API auth, fix by dropping the key.
 
 ### 2-3. Verify
@@ -87,7 +88,7 @@ reaches the next run with nothing re-pasted.
 | Environment | The one from §2 |
 | Trigger | A recurring cadence of your choosing (the form takes local time → UTC, min interval 1 h) |
 | Connectors | None — retrieval is `curl`, not a connector |
-| Permissions | Must allow pushing to `main` — the default `claude/`-branch-only push is not sufficient |
+| Permissions | Nothing to set. A run pushes where its prompt says — `main` here — and a routine's auto mode allows a push to the default branch; only a GitHub branch protection rule or ruleset on `main` can refuse it ([routines](https://code.claude.com/docs/en/routines)). Keep `main` open to the GitHub access you connected |
 
 - The session is the master: it dispatches one pillar agent per pillar in
   parallel, one paper judge, then the pillar agents again to write, and
@@ -174,10 +175,12 @@ host answers. Its report, which the routine's push notification carries
 (§5-2), opens with `허용 주소 추가 필요: <host>` for each one. Add the host
 here, and the next run reads it.
 
-A site can refuse the routine on its own side as well — a bot challenge
-answers `403` with no `x-deny-reason`. The allowlist cannot fix that; the
-routine reports it as `unreachable:` and leaves that venue's rows to be
-entered by hand.
+A site can refuse the routine on its own side as well, once the allowlist
+has let it through — a bot challenge (`403` with `cf-mitigated: challenge`),
+or an edition site whose certificate does not yet cover its name. The
+allowlist cannot fix that; the routine reports it as `unreachable:`, drops
+the host from **Hosts to allow**, and leaves that venue's rows to be entered
+by hand.
 
 ### 5-2. Routine
 
@@ -190,7 +193,7 @@ entered by hand.
 | Trigger | Weekly, Monday morning, Korea time |
 | Connectors | None |
 | Notifications | Push on — the run's report reaches the phone, and it leads with any host to add |
-| Permissions | Must allow pushing to `main`, as §3 |
+| Permissions | Nothing to set, as §3 |
 
 `/follow` (`.claude/commands/follow.md`) runs the same thing from an
 interactive session.
