@@ -5,13 +5,19 @@
    boot script in the document head; this marks which radio in each row is
    on, answers a pick and the shortcut, and stores the choice. `nav.js` moves
    each row's indicator when its mark changes, so this file never touches
-   layout. Indigo is the default colour and is stored as no key at all. */
+   layout. Midnight is the default colour and is stored as no key at all, and
+   a stored key that names no pick on the card falls back to it. */
 
 (function () {
   "use strict";
   var root = document.documentElement;
   var themes = document.querySelectorAll("[data-theme-set]");
   var accents = document.querySelectorAll("[data-accent-pick]");
+
+  // A key with no pick on the card is a colour the site does not draw, so
+  // the page wears the default and the key is forgotten.
+  var picked = root.getAttribute("data-accent");
+  if (picked && !document.querySelector('[data-accent-pick="' + picked + '"]')) setAccent("");
 
   function mark() {
     var t = root.getAttribute("data-theme") || "light";
