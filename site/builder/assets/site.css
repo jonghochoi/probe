@@ -507,7 +507,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 
 .icon-btn {
   border: 1px solid var(--border); background: var(--surface);
-  color: var(--text-muted); border-radius: var(--radius-sm);
+  color: var(--text-muted); border-radius: 50%;
   width: 32px; height: 32px; flex: none; display: grid; place-items: center;
   cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
@@ -716,33 +716,41 @@ html.js .isl { display: block; }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* ── Links out and the 서재 pair ───────────────────────────────────────── */
-/* At the right end of the tab strip: two joined groups — the links out, then
-   the 서재 pair — each one bordered box divided into cells. On a phone the
-   links drop their words and keep their marks, so the strip stays one line;
-   a paper with more links than fit scrolls its link group inside itself
-   rather than wrapping the strip. */
-.src-group, .paper-acts {
-  display: flex; border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--surface); overflow: hidden;
-}
+/* At the right end of the tab strip: the links out, a hairline, then the 서재
+   pair. Each control is a pill on a tinted ground with no border — the shape
+   the chips, the nav's pill and the floating buttons already have, so every
+   control on the site answers to one silhouette. A link is a pill with its
+   mark and word; a 서재 control is the same pill closed to a circle. Hover and
+   pressed share one answer, the accent's soft ground. On a phone the links
+   drop their words and close to circles too, so the strip stays one line; a
+   paper with more links than fit scrolls its link group inside itself rather
+   than wrapping the strip. */
+.src-group, .paper-acts { display: flex; align-items: center; gap: 4px; }
 .src-group { min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .src-group::-webkit-scrollbar { display: none; }
-.src-group a, .act-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .36rem;
-  height: 2.1rem; padding: 0 .7rem; white-space: nowrap;
-  font: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--text);
-  text-decoration: none; background: none; border: 0; cursor: pointer;
-  transition: color var(--dur-short) var(--ease-out),
-              background var(--dur-short) var(--ease-out);
+/* The two clusters are different kinds — where the paper lives, and what this
+   reader has done with it — so a hairline stands between them. */
+.src-group + .paper-acts::before {
+  content: ""; width: 1px; height: 18px; margin: 0 .3rem 0 .25rem;
+  background: var(--border); flex: none;
 }
-.src-group a + a, .act-btn + .act-btn { box-shadow: -1px 0 0 var(--border); }
+.src-group a, .act-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .38rem;
+  height: 2rem; padding: 0 .8rem 0 .7rem; white-space: nowrap; flex: none;
+  font: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--text);
+  text-decoration: none; cursor: pointer;
+  background: var(--surface-2); border: 1px solid transparent; border-radius: var(--radius-pill);
+  transition: color var(--dur-short) var(--ease-out),
+              background var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
 .src-group .src-mark { color: var(--text-muted); font-size: 1.1em; }
 .src-group a:hover, .act-btn:hover { color: var(--orange-ink); background: var(--orange-soft); }
 .src-group a:hover .src-mark { color: inherit; }
-/* The group clips its own overflow to keep its corners, so the shared focus
-   ring — painted outside an element — is cut off on its cells. Here alone the
-   ring turns inward. */
-.src-group a:focus-visible, .act-btn:focus-visible { outline-offset: -2px; }
+/* The link group scrolls, so it clips: the shared focus ring — painted outside
+   an element — would be cut off on its pills. Here alone the ring turns
+   inward. */
+.src-group a:focus-visible { outline-offset: -2px; }
 
 /* The mark set — `components.SRC_MARKS`. Sized in `em` so it tracks whatever
    text it sits beside, and painted with `currentColor` so it never needs a
@@ -758,9 +766,14 @@ html.js .isl { display: block; }
    without a script they are inert and the pair removes itself. */
 .paper-acts { display: none; }
 html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
-.act-btn { width: 2.5rem; padding: 0; color: var(--text-muted); }
+.act-btn { width: 2rem; padding: 0; color: var(--text-muted); }
 .act-btn .ico { width: 16px; height: 16px; }
-.act-btn[aria-pressed="true"] { color: var(--orange-ink); }
+/* On is the hover ground held, plus a rim in the accent: a pressed control
+   reads as pressed with the pointer elsewhere. */
+.act-btn[aria-pressed="true"] {
+  color: var(--orange-ink); background: var(--orange-soft);
+  border-color: color-mix(in oklab, var(--orange) 40%, transparent);
+}
 
 
 /* ── Related, under the article ───────────────────────────────────────── */
@@ -2047,24 +2060,24 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   display: flex; flex-wrap: wrap; gap: .4rem;
   padding: .75rem 1.15rem 1.15rem; border-top: 1px solid var(--border);
 }
+/* The header's pill (`.src-group a`), at the panel's text size: a tinted
+   ground, no border, the accent's soft ground under the pointer. The one
+   primary action is the same pill filled with the accent. */
 .memo-actions button, .memo-actions a {
+  display: inline-flex; align-items: center; height: 2rem; padding: 0 .95rem;
   font: inherit; font-size: var(--fs-2xs); font-weight: 600;
-  padding: .45rem .7rem; border-radius: var(--radius-sm); cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface-2);
+  border-radius: var(--radius-pill); cursor: pointer;
+  border: 1px solid transparent; background: var(--surface-2);
   color: var(--text); text-decoration: none;
   transition: color var(--dur-short) var(--ease-out),
-              background var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out);
+              background var(--dur-short) var(--ease-out);
 }
-.memo-actions button:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
-.memo-actions .primary {
-  background: var(--orange); border-color: var(--orange); color: var(--accent-ink);
-}
+.memo-actions button:hover { background: var(--orange-soft); color: var(--orange-ink); }
+.memo-actions .primary { background: var(--orange); color: var(--accent-ink); }
 .memo-actions .primary:hover {
-  background: color-mix(in oklab, var(--orange) 88%, var(--text));
-  border-color: color-mix(in oklab, var(--orange) 88%, var(--text));
+  background: color-mix(in oklab, var(--orange) 88%, var(--text)); color: var(--accent-ink);
 }
-.memo-actions .danger:hover { border-color: var(--red); color: var(--red); }
+.memo-actions .danger:hover { background: var(--wash-ten); color: var(--red); }
 .memo-actions .spacer { flex: 1; }
 
 .scrim {
@@ -2258,8 +2271,10 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   .tab { padding: .6rem .5rem .65rem; }
   .tab-tools { gap: .3rem; }
   .tab-tools .src-group span { display: none; }
-  .tab-tools .src-group a { padding: 0 .55rem; }
-  .tab-tools .act-btn { width: 2.1rem; }
+  .tab-tools .src-group, .tab-tools .paper-acts { gap: 3px; }
+  .tab-tools .src-group a { width: 1.875rem; height: 1.875rem; padding: 0; }
+  .tab-tools .act-btn { width: 1.875rem; height: 1.875rem; }
+  .src-group + .paper-acts::before { margin: 0 .2rem 0 .15rem; }
 }
 .tab:hover { color: var(--text); }
 .tab[aria-selected="true"] { color: var(--orange-ink); border-bottom-color: var(--orange-ink); }

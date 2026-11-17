@@ -787,10 +787,10 @@ def _acts(paper: Paper) -> str:
     only ever theirs: neither opening a page nor scrolling to the end of it is
     evidence that it was read, so nothing marks it on their behalf.
 
-    They are glyphs, one joined pair at the right end of the action bar: the
-    bar is one line on a phone only while nothing in it is a word it can do
-    without, and a star and a check are the two marks this site already draws
-    for these two states. What each does and which way it goes is the
+    They are glyphs, a pair of round buttons at the right end of the action
+    bar, past a hairline from the links: the bar is one line on a phone only
+    while nothing in it is a word it can do without, and a star and a check are
+    the two marks this site already draws for these two states. What each does and which way it goes is the
     button's accessible name, which `shelf.js` keeps in step with the state.
     """
     return f"""<div class="paper-acts" data-paper-acts
@@ -1165,12 +1165,12 @@ def _authors(paper: Paper) -> str:
 
 
 def _src_group(paper: Paper) -> str:
-    """Every link out of the site, as one joined group.
+    """Every link out of the site, as one group of pills.
 
-    One bordered box divided into cells, so the bar reads as two things — where
-    the paper lives, and the pair of 서재 controls — rather than as a row of
-    loose buttons. Empty when a rewrite declares no link, which R10 allows and
-    which is itself reproducibility information.
+    A hairline separates the group from the 서재 pair, so the bar reads as two
+    things — where the paper lives, and what this reader has done with it —
+    rather than as one run of buttons. Empty when a rewrite declares no link,
+    which R10 allows and which is itself reproducibility information.
     """
     if not paper.links:
         return ""
