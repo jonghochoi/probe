@@ -44,8 +44,7 @@ html[data-pc-toc="ms"] .pc-strip { display: none; }
 html[data-pc-toc="ms"] .pc-toc .ms-t { white-space: normal; }
 
 /* ── 카드 — 요약 카드처럼 밑줄 머리 + 위쪽 번짐 ── */
-html[data-pc-cards="glow"] .cmp-card,
-html[data-pc-cards="glow"] .primer {
+html[data-pc-cards="glow"] .cmp-card {
   background-image: linear-gradient(180deg, color-mix(in oklab, var(--orange) 18%, transparent) 0, transparent 7rem);
 }
 html[data-pc-cards="glow"] .cmp-card-n {

@@ -39,7 +39,7 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
 <body>
 <aside>
   <h1>비교 상세 조율실</h1>
-  <p class="sub">2차 — 고르신 설정이 처음 값입니다. 새로 넣은 것은 "읽기 전에 자리" 하나입니다. 비교 글 한 편을 통째로 놓고, 논문 페이지에 맞춘 시안을 지금과 견줍니다. 본문 안의 부품(그림 탭 · 비교 표 · 시간축)은 이미 같아서 건드리지 않습니다. 막 이름(질문 · 공통 · 갈림 · 시사점)은 시안용 임시 이름입니다.</p>
+  <p class="sub">3차 — 번짐은 밑줄 머리가 있는 논문 카드에만, 0번은 짧은 명사로. 비교 글 한 편을 통째로 놓고, 논문 페이지에 맞춘 시안을 지금과 견줍니다. 본문 안의 부품(그림 탭 · 비교 표 · 시간축)은 이미 같아서 건드리지 않습니다. 막 이름(질문 · 공통 · 갈림 · 시사점)은 시안용 임시 이름입니다.</p>
   <div class="grp"><h2>견주는 법</h2>
     <div class="opt"><b>보기</b><small>나란히는 두 화면이 함께 스크롤됩니다</small><div class="seg" data-v="mode"></div></div>
     <div class="opt" id="flipwrap"><button class="flip" type="button" id="flip"></button><small style="display:block;color:var(--muted);font-size:11.5px;margin-top:.35rem">스페이스바로도 바뀝니다</small></div>
@@ -52,6 +52,7 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
   <div class="grp"><h2>본문</h2>
     <div class="opt"><b>목차</b><small>이정표 줄: 휴대폰 · 태블릿</small><div class="seg" data-v="toc"></div></div>
     <div class="opt" id="o-primer"><b>읽기 전에 자리</b><small>0번 — 목차와 휴대폰 이정표 줄 맨 앞</small><div class="seg" data-v="primer"></div></div>
+    <div class="opt" id="o-n0"><b>0번 이름</b><small>다른 막처럼 짧은 명사 — 질문 · 공통 · 갈림 · 시사점 앞에</small><div class="seg" data-v="n0"></div></div>
     <div class="opt"><b>4막</b><div class="seg" data-v="fold"></div></div>
     <div class="opt"><b>막 머리</b><div class="seg" data-v="act"></div></div>
     <div class="opt"><b>논문 카드 · 읽기 전에</b><div class="seg" data-v="cards"></div></div>
@@ -71,7 +72,7 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
 <script>
 (function () {
   "use strict";
-  var KEY = "probe.pg.cmpd.v2";
+  var KEY = "probe.pg.cmpd.v3";
   var OPTS = {
     mode: [["two", "나란히 (지금 | 시안)"], ["flip", "번갈아 (한 화면)"]],
     head: [["paper", "논문 페이지처럼 한 줄"], ["now", "지금 그대로"]],
@@ -82,12 +83,13 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
     act: [["named", "이름 + 질문"], ["now", "번호 + 질문 (지금)"]],
     cards: [["glow", "밑줄 머리 + 번짐"], ["now", "지금 그대로"]],
     primer: [["toc", "목차 0번 (카드는 지금 자리)"], ["act", "본문 0막으로 옮김"], ["none", "목차에 없음"]],
+    n0: [["배경", "배경"], ["기초", "기초"], ["개념", "개념"]],
     paper: [["what-to-refresh-mid-chunk", "두 편 · 청크 중 다시 읽기"], ["fast-loop-without-vision", "세 편 · 시각 없는 빠른 루프"], ["where-dynamics-awareness-lives", "세 편 · 동역학 인식"]],
     vp: [["desk", "데스크톱", 1280], ["mobile", "휴대폰", 390]],
     theme: [["light", "밝게"], ["dark", "어둡게"]]
   };
 
-  var st = { mode: "two", head: "paper", thesis: "drop", tldr: "fold", toc: "ms", fold: "open", act: "named", cards: "glow", primer: "toc", paper: "what-to-refresh-mid-chunk", tab: "glance", vp: "desk", theme: "light", showing: "after" };
+  var st = { mode: "two", head: "paper", thesis: "drop", tldr: "fold", toc: "ms", fold: "open", act: "named", cards: "glow", primer: "toc", n0: "배경", paper: "what-to-refresh-mid-chunk", tab: "glance", vp: "desk", theme: "light", showing: "after" };
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   st.tab = "glance";
   Object.keys(OPTS).forEach(function (k) { if (!OPTS[k].some(function (o) { return o[0] === st[k]; })) st[k] = OPTS[k][0][0]; });
@@ -109,9 +111,10 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
       });
     });
     document.getElementById("o-primer").hidden = st.toc !== "ms";
+    document.getElementById("o-n0").hidden = st.toc !== "ms" || st.primer === "none";
     document.getElementById("flipwrap").hidden = st.mode !== "flip";
     document.getElementById("flip").textContent = "지금 보는 것: " + (st.showing === "after" ? "시안" : "지금") + "  ·  바꾸기";
-    var t = "내 설정 (비교 상세)\n머리 모양: " + opt("head") + "\n테제: " + opt("thesis") + "\n한 문단 요약: " + opt("tldr") + "\n목차: " + opt("toc") + "\n4막: " + opt("fold") + "\n막 머리: " + opt("act") + "\n논문 카드 · 읽기 전에: " + opt("cards") + (st.toc === "ms" ? "\n읽기 전에 자리: " + opt("primer") : "");
+    var t = "내 설정 (비교 상세)\n머리 모양: " + opt("head") + "\n테제: " + opt("thesis") + "\n한 문단 요약: " + opt("tldr") + "\n목차: " + opt("toc") + "\n4막: " + opt("fold") + "\n막 머리: " + opt("act") + "\n논문 카드 · 읽기 전에: " + opt("cards") + (st.toc === "ms" ? "\n읽기 전에 자리: " + opt("primer") + (st.primer !== "none" ? "\n0번 이름: " + opt("n0") : "") : "");
     document.getElementById("sum").textContent = t;
   }
   // each frame: the card drafts, the plan, the tab, the colour
@@ -128,7 +131,7 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
       d.addEventListener("keydown", key);
       w.addEventListener("scroll", function () { sync(P); }, { passive: true });
     }
-    if (w.pcApply) w.pcApply(v === "now" ? null : { head: st.head, thesis: st.thesis, tldr: st.tldr, toc: st.toc, fold: st.fold, act: st.act, cards: st.cards, primer: st.primer });
+    if (w.pcApply) w.pcApply(v === "now" ? null : { head: st.head, thesis: st.thesis, tldr: st.tldr, toc: st.toc, fold: st.fold, act: st.act, cards: st.cards, primer: st.primer, n0: st.n0 });
     d.documentElement.setAttribute("data-theme", st.theme);
     P.b.textContent = label(v);
   }

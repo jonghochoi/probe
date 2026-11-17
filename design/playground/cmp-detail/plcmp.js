@@ -88,7 +88,7 @@ if (prim) {
   prim0 = el("div", "ms-g pc-ms0");
   var a0 = el("a", "ms-act"); a0.href = "#act-0";
   a0.appendChild(el("span", "ms-node", "0"));
-  var at0 = el("span", "ms-at"); at0.appendChild(el("b", "", "읽기 전에"));
+  var at0 = el("span", "ms-at"); at0.appendChild(el("b", "pc-n0", "배경"));
   at0.appendChild(el("span", "", "먼저 알아 둘 것")); a0.appendChild(at0);
   a0.appendChild(el("span", "ms-cnt", String(cards.length)));
   prim0.appendChild(a0);
@@ -105,7 +105,7 @@ if (prim) {
   ms.insertBefore(prim0, ms.firstChild);
   primDiv = el("div", "pdiv pc-pdiv0");
   primDiv.appendChild(el("span", "pn", "0"));
-  primDiv.appendChild(el("span", "pc-noun", "읽기 전에"));
+  primDiv.appendChild(el("span", "pc-noun pc-n0", "배경"));
   primDiv.appendChild(el("span", "pt pc-q", "먼저 알아 둘 것"));
 }
 function placePrimers(mode) {
@@ -122,7 +122,7 @@ function placePrimers(mode) {
   }
 }
 var s0 = el("a", "as-link pc-as0"); s0.href = "#act-0";
-s0.appendChild(el("i", "as-dot")); s0.appendChild(d.createTextNode("읽기 전에"));
+s0.appendChild(el("i", "as-dot")); s0.appendChild(el("span", "pc-n0", "배경"));
 // opening a folded act from the contents
 toc.addEventListener("click", function (e) {
   var a = e.target.closest("a"); if (!a) return;
@@ -161,15 +161,19 @@ toc.addEventListener("mouseleave", function () { clearTimeout(tOpen); tShut = se
 var pHead = q(".cmp-primers-h");
 
 window.pcApply = function (s) {
-  ["head", "thesis", "tldr", "toc", "fold", "act", "cards", "primer"].forEach(function (k) { H.removeAttribute("data-pc-" + k); });
+  ["head", "thesis", "tldr", "toc", "fold", "act", "cards", "primer", "n0"].forEach(function (k) { H.removeAttribute("data-pc-" + k); });
   H.removeAttribute("data-pc");
   var f = q("details.act-fold");
-  if (!s) { shell.classList.add("one"); if (f) f.open = false; placePrimers("toc"); return; }
+  if (!s) { shell.classList.add("one"); if (f) f.open = false; placePrimers("toc"); var ph0 = q(".cmp-primers-h"); if (ph0) ph0.textContent = "읽기 전에"; return; }
   H.setAttribute("data-pc", "");
   Object.keys(s).forEach(function (k) { H.setAttribute("data-pc-" + k, s[k]); });
   shell.classList.toggle("one", s.toc !== "ms");
   if (f) f.open = s.fold === "open";
   placePrimers(s.primer);
+  // the act-0 noun, in the contents, the strip, the divider and the section head
+  var w = s.n0 || "배경";
+  qa(".pc-n0").forEach(function (e) { e.textContent = w; });
+  var ph = q(".cmp-primers-h"); if (ph) ph.textContent = s.toc === "ms" && s.primer !== "none" ? w : "읽기 전에";
   follow();
 };
 H.setAttribute("data-pc-ready", "");
