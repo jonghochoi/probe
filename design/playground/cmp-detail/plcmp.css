@@ -1,0 +1,61 @@
+/* 비교 상세 drafts. Without `data-pc` the page is as built. */
+.pc-line, .pc-thesis, .pc-noun, .pc-toc, .pc-strip { display: none; }
+
+/* ── 머리 — 논문 페이지처럼 ── */
+html[data-pc-head="paper"] .pc-line { display: flex; }
+html[data-pc-head="paper"] .paper-head-inner > .crumb-row,
+html[data-pc-head="paper"] .paper-head-inner > .chip-row,
+html[data-pc-head="paper"] .paper-head-inner > .metaline { display: none; }
+html[data-pc-head="paper"] .pc-line .ph-metric { color: var(--text-muted); background: none; padding: 0; }
+
+/* ── 테제 ── */
+html[data-pc-thesis="head"] .pc-thesis {
+  display: block; font-size: var(--fs-md); color: var(--text); font-weight: 500;
+  line-height: 1.55; margin: .1rem 0 .9rem; max-width: 62ch;
+}
+html[data-pc-thesis="head"] .view > header.lead :is(.eyebrow, .thesis),
+html[data-pc-thesis="drop"] .view > header.lead :is(.eyebrow, .thesis) { display: none; }
+html[data-pc-thesis="head"] .view > header.lead,
+html[data-pc-thesis="drop"] .view > header.lead { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+html[data-pc-tldr="none"] .view > header.lead .tldr { display: none; }
+html[data-pc-tldr="none"][data-pc-thesis="head"] .view > header.lead,
+html[data-pc-tldr="none"][data-pc-thesis="drop"] .view > header.lead { display: none; }
+html[data-pc-tldr="none"][data-pc-thesis="head"] .view > .pdiv:first-of-type,
+html[data-pc-tldr="none"][data-pc-thesis="drop"] .view > .pdiv:first-of-type { margin-top: .25rem; }
+
+/* ── 막 머리 — 이름 + 질문 ── */
+html[data-pc-act="named"] .view .pdiv { align-items: baseline; scroll-margin-top: calc(var(--nav-h) + 1rem); }
+html[data-pc-act="named"] .view .pdiv .pn { align-self: center; }
+html[data-pc-act="named"] .pc-noun {
+  display: inline; font-family: var(--t-display); font-size: var(--fs-lg); font-weight: 700;
+  letter-spacing: -.01em; color: var(--text);
+}
+html[data-pc-act="named"] .view .pdiv .pc-q { font-size: var(--fs-xs); font-weight: 400; letter-spacing: 0; color: var(--text-muted); }
+html[data-pc-act="named"] .view .pdiv::after { align-self: center; height: 1px; background: var(--border); opacity: 1; }
+
+/* ── 목차 — 막 이정표 ── */
+html[data-pc-toc="ms"] .shell > .pc-toc { display: block; }
+html[data-pc-toc="ms"] .pc-strip { display: none; }
+@media (max-width: 1024px), (hover: none) {
+  html[data-pc-toc="ms"] .pc-strip { display: block; top: var(--nav-h); }
+  html[data-pc-toc="ms"] .shell > .pc-toc { display: none; }
+  html[data-pc-toc="ms"] .view .pdiv { scroll-margin-top: calc(var(--nav-h) + 3.4rem); }
+}
+html[data-pc-toc="ms"] .pc-toc .ms-t { white-space: normal; }
+
+/* ── 카드 — 요약 카드처럼 밑줄 머리 + 위쪽 번짐 ── */
+html[data-pc-cards="glow"] .cmp-card,
+html[data-pc-cards="glow"] .primer {
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--orange) 18%, transparent) 0, transparent 7rem);
+}
+html[data-pc-cards="glow"] .cmp-card-n {
+  padding-bottom: .2rem; color: var(--orange-ink);
+  background: linear-gradient(var(--orange), var(--orange)) left bottom / 100% 2px no-repeat;
+}
+html[data-pc-cards="glow"] .cmp-primers-h {
+  display: inline-block; font-size: var(--fs-sm); font-weight: 700; color: var(--orange-ink);
+  padding-bottom: .2rem; background: linear-gradient(var(--orange), var(--orange)) left bottom / 100% 2px no-repeat;
+}
+@media (max-width: 720px) {
+  html[data-pc-cards="glow"] .has-trunk .cmp-card-row { border-left: 0; padding-left: 0; }
+}
