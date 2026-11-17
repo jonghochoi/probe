@@ -708,3 +708,10 @@
 
 옮긴 커밋: `claude/paper-compare-detail`의 `feat(analysis): tell the summary story in four tagged moves`.
 확인: 엄격 검사 · 빌드, 92편 1280 · 390px 넘침 없음 · 이동 넷, 문서 링크 · 결정 참조 · context 일관성 · 질의 도구 · 커밋 문체.
+
+### 11-8. 카드 번짐 (진행 중)
+
+사용자 질문: 이야기 카드 번짐을 뺀 뒤, 주장 카드 번짐까지 뺄지 — 둘 다 넣은 것과 둘 다 뺀 것을 비교하고 싶다.
+
+조율실 `playground/glance-glow/` — 왼쪽 "지금"은 사이트(주장만 번짐). 선택지: 둘 다 번짐 / 둘 다 뺌 / 주장만(지금).
+머리 밑줄은 모두 그대로.

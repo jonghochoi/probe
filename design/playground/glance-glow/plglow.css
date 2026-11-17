@@ -1,0 +1,5 @@
+/* 번짐 drafts — `data-gw` on <html>: both | hub (as built) | none. */
+html[data-gw="both"] .g-narr {
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--g-c) 18%, transparent) 0, transparent 7rem);
+}
+html[data-gw="none"] .g-hub { background-image: none; }
