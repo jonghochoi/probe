@@ -90,7 +90,8 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
      · the surfaced papers (the §5-1 gate), ranked per §5-3 — the
        first three are 🥇 🥈 🥉, the rest 📋 rows;
      · the 🌱 pick, when the pillar agent proposed one and it clears the
-       gate — one that does not is printed nowhere (§5-1);
+       🌱 gate (§5-1: R, N and M each ≥ 2) — one that does not is printed
+       nowhere;
      · the 🔍 rows per AUTHORING §5-5;
      · the filter count for 🔄 — `dropped` plus what this step drops, by
        reason;
@@ -168,8 +169,8 @@ PHASE SCOUT
    adds over it. A 3 whose `why_` cannot name both is a 2: the 3 is what
    keeps a candidate, so it is the score held hardest. Keep a candidate
    when one of R and N is 3 and the other is ≥ 1 — the only ones that can
-   surface or near-miss (AUTHORING §5-1, §5-5) — and the 🌱 proposal of
-   step 4, whose R and N are each ≥ 2. The rest are dropped. The gate and
+   surface or near-miss (AUTHORING §5-1, §5-5) — and the candidate
+   step 4 will propose as 🌱, whose R and N are each ≥ 2. The rest are dropped. The gate and
    the near-miss rule need the judge's Methodology before they can decide.
    Count the dropped, by reason, for 🔄 — step 2's de-duplication
    included.
@@ -292,8 +293,8 @@ TWO PASSES, ranked by signal — 1 above 2:
    Keep entries whose `<published>` is within the last 14 days, then filter
    against the Anti-topics. This is the noisiest source; weight it lowest.
 
-THE PAPER'S OWN TEXT. For every candidate that reaches scoring, fetch its
-arXiv record once per run — through the shared cache, so a paper two pillars
+THE ARXIV RECORD (abstract + comment). For every candidate that reaches
+scoring, fetch its arXiv record once per run — through the shared cache, so a paper two pillars
 keep is fetched once:
 
   RUN=<run directory>; f="$RUN/arxiv/<id>.xml"
@@ -306,8 +307,8 @@ with its pillar, `P<n>.`, so five agents never overwrite each other.
 Keep TWO fields verbatim in the candidate: `<arxiv:comment>` — where authors
 put "Code: https://github.com/…", "Project page: …", "will be released upon
 acceptance", and the venue ("Accepted to IROS 2026") — and `<summary>`, the
-abstract. The judge scores from these two strings and, for the candidates
-PART III step 3 names, the paper's own text; the venue on the paper header
+abstract. The judge scores from these two strings and, for every kept candidate
+(PART III step 3), the paper's own text; the venue on the paper header
 line comes from the comment.
 
 Never fabricate a citation or an arXiv ID; every link must come from an

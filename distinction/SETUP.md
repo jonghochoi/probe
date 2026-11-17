@@ -139,6 +139,7 @@ claude --add-dir "$PROBE_PRIVATE_DIR"
 /distinguish            # delta mode
 /distinguish <alias>    # one versus note
 /distinguish --all      # every active row
+/distinguish --audit    # audit every active versus note, rewrite none
 /distinguish <alias> --code <scope>   # one paper against one code scope
 ```
 

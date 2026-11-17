@@ -70,7 +70,8 @@ a row once it has ended.
 
 `종류` is one of `학회` (the conference itself), `마감` (a submission
 deadline — abstract, paper, rebuttal, camera-ready) and `발표` (a decision or
-an accepted-paper list going out). `장소` may be empty; a deadline's is its
+an accepted-paper list going out). `장소` may be empty; a conference's is its
+city, then ` · ` and the venue when the site names it; a deadline's is its
 time zone. `출처` is the official page the date was read from.
 
 ## Hosts to allow

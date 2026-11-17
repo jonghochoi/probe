@@ -57,8 +57,8 @@ pair you cannot phrase one for is dropped.
 
          python3 site/query.py pairs --limit 12
 
-  2. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the five or six that survive
-     — the layer where a rewrite argues with the Decision Log, and the only
+  2. READ act 4 (`## 4 연구축에 무엇이 걸리나`) of the papers in the top five
+     or six pairs it prints — the layer where a rewrite argues with the Decision Log, and the only
      prose read here. The question comes from a disagreement you can point at:
      one rewrite calling a choice necessary where another routes around it, two
      citing one `D#` to opposite ends. The score only said where to look.
@@ -143,7 +143,7 @@ PROCEDURE
    with an order a reader would agree on are `stops`; does / partly / does not
    is `mark`; numbers a reader would line up are `measure`, each cell naming
    its metric the same way for the same measure. An axis stays sentences only
-   when none of the three fits — and an axis that is only sentences is the
+   when none of the three shapes fits — and an axis that is only sentences is the
    one to check twice for being the easy one.
 
 6. FIND ACT 2 BEFORE YOU WRITE ACT 3. What do these papers SHARE — a

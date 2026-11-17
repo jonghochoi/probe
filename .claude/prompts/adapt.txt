@@ -95,15 +95,8 @@ PROCEDURE
    opens `PROBE_PRIVATE_DIR` or anything under it.
 
    Write `brief.md` in the kit's folder, one `##` per requested kind, each
-   body the instruction for that kind under `adaptation/AUTHORING.md` §3-1.
-   Per kind:
-
-     slide-deck   10–14 slides, one claim each, each drawn in NotebookLM's
-                  own pictures rather than pointed at the original's figures
-     infographic  the thesis, the mechanism in three steps, the headline
-                  numbers — one page, nothing the 요약 tab does not carry
-     audio        two voices, the 요약 tab's narrative first, the limits last
-     mind-map     the four acts as branches, Terms as leaves
+   body the instruction for that kind under `adaptation/AUTHORING.md` §3-1,
+   its per-kind shape included.
 
    Then the lint, before anything is sent:
 
@@ -124,8 +117,8 @@ PROCEDURE
      notebooklm source add "https://arxiv.org/html/<arxiv_html>" -n <notebook>
 
    When the arXiv HTML will not process — or the rewrite records `arxiv_src:`,
-   so there is no HTML edition to add — add `https://arxiv.org/pdf/<version>`
-   in its place. `notebooklm source list
+   so there is no HTML edition to add — add
+   `https://arxiv.org/pdf/<the arxiv_html or arxiv_src value>` in its place. `notebooklm source list
    -n <notebook> --json`, then `notebooklm source wait <source id> -n
    <notebook>` for each, until both are ready.
 
@@ -139,13 +132,13 @@ PROCEDURE
 
    `mind-map` has no `--wait`: run `notebooklm artifact list -n <notebook>
    --type mind-map --json` until it reads complete. Then download into the
-   kit's folder, `--latest` and `--force` on each:
+   kit's folder:
 
-     notebooklm download slide-deck <kit>/slides.pdf -n <notebook>
-     notebooklm download slide-deck <kit>/slides.pptx --format pptx -n <notebook>
-     notebooklm download infographic <kit>/infographic.png -n <notebook>
-     notebooklm download audio <kit>/audio.mp3 -n <notebook>
-     notebooklm download mind-map <kit>/mindmap.json -n <notebook>
+     notebooklm download slide-deck <kit>/slides.pdf --latest --force -n <notebook>
+     notebooklm download slide-deck <kit>/slides.pptx --format pptx --latest --force -n <notebook>
+     notebooklm download infographic <kit>/infographic.png --latest --force -n <notebook>
+     notebooklm download audio <kit>/audio.mp3 --latest --force -n <notebook>
+     notebooklm download mind-map <kit>/mindmap.json --latest --force -n <notebook>
 
    A quota, rate-limit or auth error → STOP: say which kind failed and that
    `notebooklm usage` shows the window. Files already downloaded stay; the
@@ -214,8 +207,9 @@ PROCEDURE
 WHAT THIS MODE NEVER DOES
 ════════════════════════════════════════════════════════════════════════
 
-- Sends NotebookLM anything but `analysis/<id>.md`, the arXiv original and a
-  `brief.md` the lint passed.
+- Sends NotebookLM anything but `analysis/<id>.md`, the arXiv original, a
+  `brief.md` the lint passed, and step 6's revision instructions — each
+  stating only what the original says.
 - Reads `PROBE_PRIVATE_DIR` or anything under it.
 - Runs `git add`, `git commit` or `git push`, or writes any file under the
   checkout, or outside `$PROBE_ADAPT_DIR`.

@@ -217,8 +217,9 @@ PROCEDURE
    answers. It carries exactly what step 7 gave in the chat: no idea, number
    or claim the chat answer does not hold.
 
-   Copy `.claude/prompts/ideate-page.html` into a directory outside the repo
-   — the session's scratchpad when it has one, else a fresh `mktemp -d` —
+   Copy `.claude/prompts/ideate-page.html` to `<dir>/page.html`, `<dir>` a
+   directory outside the repo — the session's scratchpad when it has one,
+   else a fresh `mktemp -d` —
    and fill every 「…」 in it. The page is a tree the runtime opens one level
    at a time, so each level answers one question:
 
@@ -249,9 +250,9 @@ PROCEDURE
    Each idea gets one `doc-ask`, its radios drawn from tracks that exist:
    `/compare <a> <b>` when both papers have rewrites, `/analyze <id>` when
    one does not, `/ideate <alias>` to start again from one paper, and 보류.
-   `checked` goes on what this mode recommends — the `/compare` step 9 would
-   name when there is one — so leaving the page as it is is a full answer. Control names are unique on the page (`next-1`,
-   `next-2`, …).
+   `checked` goes on what this mode recommends — the `/compare` that step 9
+   below names, when there is one — so leaving the page as it is is a full
+   answer. Control names are unique on the page (`next-1`, `next-2`, …).
 
    Pack it with the runtime the repo carries:
 

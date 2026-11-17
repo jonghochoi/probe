@@ -449,15 +449,16 @@ The 🌱 pick is the exception: its field is adjacent by definition, so it
 rarely scores 3 on a pillar's Relevance, and it clears with **Relevance,
 Novelty and Methodology each ≥ 2** alone.
 
-Both measure where a result stands rather than whether it is worth reading. A
+Real and Reproducibility both measure where a result stands rather than
+whether it is worth reading. A
 fresh preprint rarely has a public repository on the day it posts, and a paper
 can be sound, new and on-topic with every result in simulation — or with no
 simulation at all, entirely on hardware. A gate term for either measures the
 kind of paper, not its quality.
 
 **The gate binds in both directions.** A candidate that clears the gate is
-surfaced — never parked in 🔍 or dropped over a closed
-repository or a simulation-only result. Those cost the paper points in the
+surfaced — never parked in 🔍 or dropped over a closed repository or a
+simulation-only result. Those cost the paper points in the
 total and show in its code label (§5-3); they never remove it.
 
 **The gate decides whether a paper surfaces; its rank decides the shape.**
