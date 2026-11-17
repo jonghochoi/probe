@@ -368,7 +368,8 @@ def _gaps(graph: lineage.Graph | None, titles: dict[str, str]) -> str:
     items = "".join(
         f'<li class="tl-row"><span class="tl-id">{len(on)}편</span>'
         f'<span class="tl-main"><span class="tl-t">{c.esc(node.name)}'
-        + (f'<span class="gap-full">{c.esc(_gap_title(node.name, titles[node.id]))}</span>'
+        + (f'<span class="tl-full" title="{c.esc(titles[node.id])}">'
+           f'{c.esc(_gap_title(node.name, titles[node.id]))}</span>'
            if node.id in titles else '')
         + '</span>'
         f'<span class="tl-g gap-on" data-gapnames><span class="gap-names">' + " ".join(
@@ -1762,16 +1763,19 @@ def _scout_card(paper, decisions: dict, fig: dict | None) -> str:
 
 
 def _scout_row(paper, decisions: dict) -> str:
-    """A candidate in the analysis list's table: the arXiv id, the name over
-    its line, the axes with their ranks."""
+    """A candidate in the table under the cards: the arXiv id, the name with
+    its English title after it over its line, the axes with their ranks."""
     pid = c.esc(paper.paper_id)
     chips = "".join(_scout_chip(p) for p in _scout_picks(paper))
+    title = _scout_title(paper)
+    full = (f'<span class="tl-full" title="{c.esc(paper.title)}">{c.esc(title)}</span>'
+            if title else "")
     line = _scout_md(paper.gist, decisions, inline=True) if paper.gist else c.esc(paper.title)
     return (f'<li class="tl-row" data-open="{pid}">'
             f'<a class="tl-id" href="{_arxiv_href(paper.paper_id)}" target="_blank" '
             f'rel="noopener" title="arXiv 초록">{pid}</a>'
             f'<a class="tl-main" href="#p-{pid}" data-detail="{pid}" title="{c.esc(paper.title)}">'
-            f'<span class="tl-t">{c.esc(paper.alias)}</span><span class="tl-g">{line}</span></a>'
+            f'<span class="tl-t">{c.esc(paper.alias)}{full}</span><span class="tl-g">{line}</span></a>'
             f'<span class="tl-p">{chips}</span></li>')
 
 
