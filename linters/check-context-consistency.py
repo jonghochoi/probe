@@ -20,6 +20,14 @@ the four claims into checks:
   4. PILLARSET — prose claims about how many pillars exist ("five pillars",
      "다섯 루틴") match the number of `context/P<n>.md` files, and a `P<a>–P<b>`
      range token covers exactly that set.
+  5. SHAPE — every pillar file writes its decisions and its pins the one way
+     `context/CLAUDE.md` sets out. A decision heading is followed by exactly
+     one bullet, on one line, that opens with the bold choice — or, under an
+     `— **OPEN**` title, with `**Working, not settled** — ` and closes with a
+     `Settles on:` clause, which a settled decision never carries. The bullet
+     holds no option code (`(iii)`, `(F)`), no TeX and no emoji, and runs to
+     at most 420 characters. A row of the external-pins table opens its Role
+     with a bold tier and ends with the decisions it anchors in parentheses.
 
 Precision over recall, mirroring the repo's other gates. SECTION resolves a
 claim by a deliberately small normalization — lowercase, drop a leading `the`,
@@ -244,6 +252,88 @@ def check_spine(doc: str, lines: list[str], context_dir: str) -> list[tuple[int,
     return findings
 
 
+# ── SHAPE ─────────────────────────────────────────────────────────────────
+
+_BULLET_MAX = 420
+_OPEN_TITLE = re.compile(r"—\s*\*\*OPEN\*\*\s*$")
+_WORKING = "- **Working, not settled** — **"
+# A letter or roman numeral in parentheses standing for an option on a menu
+# the file does not carry. Two letters or more is a word or an id, not a code.
+_OPTION_CODE = re.compile(r"(?<![\w`])\((?:i{1,3}|iv|v|vi{0,3}|[A-Za-zα-ω])\)")
+_EMOJI = re.compile("[\u2600-\u27bf\U0001f300-\U0001faff\ufe0f]")
+_PINS_HEADING = re.compile(r"^###\s+\d+-\d+\.\s+External pins")
+_ROLE_TIER = re.compile(r"^\*\*tier \d")
+_ROLE_REFS = re.compile(r"\((?:D[0-9][A-Z]{2})(?:,\s*D[0-9][A-Z]{2})*\)\s*$")
+
+
+def check_shape(doc: str, lines: list[str]) -> list[tuple[int, str]]:
+    findings: list[tuple[int, str]] = []
+    for i, raw in enumerate(lines):
+        if not _DECISION_HEADING.match(raw):
+            continue
+        heading = raw.strip()
+        at = i + 2
+        bullet = lines[i + 1].rstrip("\n") if i + 1 < len(lines) else ""
+        if not bullet.startswith("- "):
+            findings.append((at, f"SHAPE {heading!r} — the line below a decision "
+                                 "heading is its one bullet"))
+            continue
+        if i + 2 < len(lines) and lines[i + 2].strip() and not lines[i + 2].startswith("#"):
+            findings.append((at + 1, "SHAPE a decision bullet is one line — the line "
+                                     "after it is neither blank nor a heading"))
+        is_open = bool(_OPEN_TITLE.search(heading))
+        if is_open:
+            if not bullet.startswith(_WORKING):
+                findings.append((at, "SHAPE an OPEN decision's bullet opens with "
+                                     "`**Working, not settled** — ` and the bold "
+                                     "working choice"))
+            if "Settles on:" not in bullet:
+                findings.append((at, "SHAPE an OPEN decision's bullet names what "
+                                     "closes it — `Settles on: …`"))
+        else:
+            if bullet.startswith("- **Working, not settled**"):
+                findings.append((at, "SHAPE `Working, not settled` under a title "
+                                     "with no `— **OPEN**`"))
+            elif not bullet.startswith("- **"):
+                findings.append((at, "SHAPE a decision bullet opens with the bold "
+                                     "choice, in words"))
+            if "Settles on:" in bullet:
+                findings.append((at, "SHAPE `Settles on:` on a settled decision"))
+        if _OPTION_CODE.search(bullet):
+            findings.append((at, "SHAPE option code "
+                                 f"{_OPTION_CODE.search(bullet).group(0)!r} — name "
+                                 "the choice in words"))
+        if "$" in bullet or _EMOJI.search(bullet):
+            findings.append((at, "SHAPE a decision bullet is plain text — no TeX, "
+                                 "no emoji"))
+        if len(bullet) > _BULLET_MAX:
+            findings.append((at, f"SHAPE decision bullet is {len(bullet)} characters "
+                                 f"— at most {_BULLET_MAX}; rationale lives outside "
+                                 "the log"))
+
+    in_pins = False
+    for lineno, raw in enumerate(lines, start=1):
+        if raw.startswith("#"):
+            in_pins = bool(_PINS_HEADING.match(raw))
+            continue
+        if not in_pins or _TABLE_RULE.match(raw):
+            continue
+        m = _TABLE_ROW.match(raw)
+        if not m:
+            continue
+        cells = _split_row(raw)
+        if len(cells) < 4 or cells[-1] == "Role":
+            continue
+        role = cells[-1]
+        if not _ROLE_TIER.match(role):
+            findings.append((lineno, f"SHAPE pin {cells[0]!r} — Role opens with its "
+                                     "bold tier (`**tier 1**`)"))
+        if not _ROLE_REFS.search(role):
+            findings.append((lineno, f"SHAPE pin {cells[0]!r} — Role ends with the "
+                                     "decisions it anchors, `(D…)`"))
+    return findings
+
+
 # ── COUNT ─────────────────────────────────────────────────────────────────
 
 
@@ -420,6 +510,7 @@ def check_file(path: str) -> tuple[list[tuple[int, str]], bool]:
     findings += check_section(path, lines, context_dir)
     if _PILLAR_FILE.match(name):
         findings += check_spine(path, lines, context_dir)
+        findings += check_shape(path, lines)
     if name == _MASTER_NAME:
         findings += check_count(path, lines, context_dir)
     return sorted(findings), True

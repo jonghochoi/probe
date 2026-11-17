@@ -39,12 +39,35 @@ not cosmetic:
 
 ```
 #### [D<id>] <Decision title> (P<m>)
-- <the current choice — **bold** the chosen alternative; tracked and deferred
-  alternatives named inline; an `OPEN` decision appends ` — **OPEN**` to the
-  title line and opens its bullet with `**Working, not settled** —`>
+- **<the choice, in words>** — <what it commits to>. Tracked: <alternatives>. Deferred: <alternatives>. Reopens if: <condition>.
 ```
 
-One `####` heading and one bullet per decision.
+One `####` heading and one bullet per decision, the bullet on one line. An
+`OPEN` decision appends ` — **OPEN**` to the title line, opens its bullet with
+`**Working, not settled** — ` before the working choice, and ends it with
+`Settles on: <the result that closes it>.`
+
+The bullet is read by a run deciding whether a paper bears on the choice, and
+by a reader of the site's axis popup, so every pillar writes it one way:
+
+1. **The choice comes first, bold, in words.** Never an option code from a
+   menu the file does not carry — `(iii) hybrid`, `(F) FiLM` say nothing to a
+   reader who has not seen (i) and (ii). A choice that is a policy — what to
+   scout, which license to prefer — is still stated as the stance taken, not
+   as an instruction.
+2. **After the em dash, what the choice commits to** — one or two sentences.
+   No rationale, evidence or results: those live in the rewrites and
+   comparisons that cite the decision. A paper is named only as a pointer to a
+   style or lineage (`VGGT-style`, `the DexWM lineage`).
+3. **Alternatives under fixed labels.** `Tracked:` is an alternative watched
+   because it could replace the choice; `Deferred:` is one set aside until
+   something changes. A label with nothing under it is left out.
+4. **`Reopens if:`** names the result that would put the decision back to
+   `OPEN`, where one is known. It is optional.
+5. **Plain text.** No TeX, no emoji, and at most 420 characters — a bullet
+   longer than that is carrying rationale.
+
+`linters/check-context-consistency.py` holds every pillar file to this shape.
 
 `<id>` is `D` + one digit + two letters (`I` and `O` excluded, so nothing
 reads as a `1` or a `0`) — drawn at random, unique across the repo, and
@@ -68,6 +91,27 @@ The allocation, which the lint reads back off these files:
 | P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG, D9WZ |
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM, D7VC |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D5ZL, D3WV, D9QJ, D1WE |
+
+## The other pillar sections
+
+`context/_TEMPLATE.md` is the skeleton; these are the shapes inside it that
+every pillar keeps the same, so five files read as one document:
+
+- **Tracked items** is one line, `**Tracked items**: <item> (D<id>), …` — every
+  decision of the pillar in log order, open or not. Which ones are `OPEN` is
+  the log's to say.
+- **Scouting lens** is a ladder of three numbered tiers, each a bold name and
+  a sentence: tier 1 is the north star, tier 3 the outermost ring a run still
+  surfaces. It closes on `Recall runs wide across all three; the ranking
+  anchor stays tier 1.`
+- **The Decision Log opens with one sentence**: `The current choice per
+  decision. The entry format and the allocation across pillars are
+  `context/CLAUDE.md`'s.` — a range of ids says nothing, since ids carry no
+  order.
+- **An external pin's Role** opens with its bold tier on the §1 ladder
+  (`**tier 1**`, or `**tier 1 · ego**` where a kind beside the tier helps),
+  then an em dash, what the paper is and what it anchors, and ends with the
+  decisions it anchors in parentheses (`(D8EJ, D9NB)`).
 
 ## Pillar introduction
 

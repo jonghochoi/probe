@@ -79,7 +79,7 @@ Build a holistic system for human-level dexterous manipulation. Full stack envis
 **Body expert and hand expert both directly designed and trained at the VLA level.** No outsourcing of dexterity to a post-hoc correction module (which would be distribution-bounded by the VLA). Pretrained VLM/π weights are leveraged via a *deliberately composed pretraining recipe for data-efficient adaptation* (P4), with prior-preservation as one downstream lever. Every component learns at the VLA level, by imitation with flow matching.
 
 ### 3.3 Task philosophy
-**Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). A contact-reaction sub-loop is a *further* low-level stabilization layer beneath the Hand expert, gated on only when contact retention demands sub-policy-loop reaction speed. Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
+**Hand expert as a stabilization layer on top of architectural grounding**, where grounding is body's grasp/arm intent + backbone's visual/task embeddings (with VLM prior preserved). Contact reaction stays inside the policy loop: no faster sub-loop runs beneath the Hand expert (P1 D5DQ). Hand-level contact elevation remains the **differentiation claim**; the **deliverable** is the integrated VLA system.
 
 ---
 
