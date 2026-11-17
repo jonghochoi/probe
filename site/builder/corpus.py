@@ -60,7 +60,7 @@ ALIAS_MAX = 24
 # axis.
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
-    "P1": "Heterogeneous Body/Hand Action Expert",
+    "P1": "Heterogeneous Action Expert Decomposition",
     "P2": "Structured Multimodal Observation Fusion",
     "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",

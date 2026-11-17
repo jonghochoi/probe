@@ -35,10 +35,10 @@ fact in both is one of them going stale.
 
 A pillar is a set of open questions — what the axis keeps asking, and the
 threads the corpus has followed on each — not a record of answers. The
-operator's own answers, where they hold any, belong in the private method
-file the distinction track reads (`distinction/templates/MY-METHOD.md`),
-never here: an answer written into the pillar turns every paper a run reads
-into evidence for or against it.
+operator's own answers and bets, where they hold any, belong in the private
+method file the distinction track reads (`distinction/templates/MY-METHOD.md`),
+never here or in `MASTER.md`: an answer written into the context turns every
+paper a run reads into evidence for or against it.
 
 Every entry in a `P#.md` Open Questions section has exactly this shape.
 `linters/check-decision-refs.py`, `linters/check-context-consistency.py` and
@@ -91,7 +91,7 @@ The allocation, kept in step with the files by hand:
 | Pillar | Questions |
 |---|---|
 | P0. VLA Datasets & Benchmarks | D4ML, D1AL, D6SE |
-| P1. Heterogeneous Body/Hand Action Expert | D3GS, D1QT, D9ZP, D1MZ |
+| P1. Heterogeneous Action Expert Decomposition | D3GS, D1QT, D9ZP, D1MZ |
 | P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG |
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D3WV, D9QJ, D6JW, D1WE |
@@ -103,14 +103,18 @@ every pillar keeps the same, so five files read as one document:
 
 - **Questions** is one line, `**Questions**: <short form> (D<id>), …` —
   every question of the pillar in the order §2 lists them.
-- **Thesis tie** opens `**Thesis tie** — the bet this axis tests:` — the
-  stance the pillar's questions are asked from, not an answer they defend.
-  The threads that would refute it stay in the questions as the baselines it
-  is measured against, and **Anti-topics** never exclude a thread: they drop
-  papers that assert one without measuring it, never the thread itself.
+- **Thesis tie** opens `**Thesis tie** — why this axis is asked:` — what is
+  open on the axis, stated as a tension the questions keep open and never as
+  a bet on how it resolves. Where the axis has a common default, it stays in
+  the questions as a thread, the baseline the others are measured against,
+  and **Anti-topics** never exclude a thread: they drop papers that assert
+  one without measuring it, or that fall outside the axis, never the thread
+  itself.
 - **Premises** is one paragraph, `**Premises** — …`, and only where the
-  pillar has any: the setting its questions are asked in — the hand, a
-  lineage already in use, a usage bar — stated as fact, never as a question.
+  pillar has any: the setting its questions are asked in — the class of hand,
+  a notation, a usage bar — stated as fact, never as a question. It names no
+  specific hardware or weights the operator uses; those are private, with the
+  stance.
 - **Scouting lens** is a ladder of three numbered tiers, each a bold name and
   a sentence: tier 1 is the north star, tier 3 the outermost ring a run still
   surfaces. It closes on `Recall runs wide across all three; the ranking

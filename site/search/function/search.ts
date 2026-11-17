@@ -45,7 +45,7 @@ const TERM_LEN = 40;
  * guards accept exactly its keys, so a pillar is one entry here. */
 const PILLARS: Record<string, string> = {
   P0: "datasets and benchmarks",
-  P1: "body/hand action experts",
+  P1: "action expert decomposition (by body part, skill, modality or rate)",
   P2: "multimodal observation fusion",
   P3: "world models",
   P4: "pretraining and data-efficient adaptation",
