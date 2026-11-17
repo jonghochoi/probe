@@ -110,6 +110,7 @@ html.js .pline {
 .pline .rail-item[data-p="P2"] .sw { background: var(--p2-ink); }
 .pline .rail-item[data-p="P3"] .sw { background: var(--p3-ink); }
 .pline .rail-item[data-p="P4"] .sw { background: var(--p4-ink); }
+.pline .rail-item[data-p="P5"] .sw { background: var(--p5-ink); }
 .pline .rail-item[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--on-accent); }
 .rail-item {
   font: inherit; font-size: var(--fs-2xs); width: 100%;

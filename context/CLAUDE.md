@@ -1,7 +1,7 @@
 # context/CLAUDE.md
 
 Rules for the human-owned research context. `context/MASTER.md` is the global
-anchor; `context/P{0..4}.md` are the pillars a run actually reads. Repo-wide
+anchor; `context/P{0..5}.md` are the pillars a run actually reads. Repo-wide
 rules — commits, contributor-doc style, the local checks — are in the root
 `CLAUDE.md`.
 
@@ -26,8 +26,8 @@ never touched by the routine.
 
 Ownership inside the folder is just as fixed. The Open Questions, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;
-`MASTER.md` holds only what crosses pillars — Identity, Purpose, Long-term
-Context, the P0–P4 overview, Venue, Cross-pollination. Edit the
+`MASTER.md` holds only what crosses pillars — Purpose, Long-term Context,
+the P0–P5 overview, Venue, Cross-pollination. Edit the
 `P#.md` for pillar content and `MASTER.md` only for global content; the same
 fact in both is one of them going stale.
 
@@ -95,11 +95,12 @@ The allocation, kept in step with the files by hand:
 | P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG |
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D3WV, D9QJ, D6JW, D1WE |
+| P5. Retargeting & Human-in-the-Loop Data Collection | D2KT, D7HF, D5VN, D8LC |
 
 ## The other pillar sections
 
 `context/_TEMPLATE.md` is the skeleton; these are the shapes inside it that
-every pillar keeps the same, so five files read as one document:
+every pillar keeps the same, so six files read as one document:
 
 - **Questions** is one line, `**Questions**: <short form> (D<id>), …` —
   every question of the pillar in the order §2 lists them.
@@ -160,7 +161,7 @@ end to end; a half-added pillar silently drops out of the index and the lints:
       `context/MASTER.md` (the build and `linters/check-decision-refs.py`
       both read it). Never reuse, renumber or re-issue.
       Record them in the allocation table above.
-- [ ] **Add a row** to `context/MASTER.md` §4's pillar table — what the pillar
+- [ ] **Add a row** to `context/MASTER.md` §3's pillar table — what the pillar
       owns in one line, its question count, and its file. The scope itself
       belongs in the pillar file and is not restated there.
 - [ ] **Create `scouting/P<N>/`** and add `<N>` to the scouting routine's

@@ -5,7 +5,7 @@ code: <absolute path to the codebase — or leave this line out and put a `code`
 
 <!-- Human-owned. The routine reads this file and never edits it. Section
      spine and the claim entry format: `distinction/SETUP.md` §2-2. The stance
-     lives here and only here: `context/MASTER.md` §1 states what the repo
+     lives here and only here: `context/MASTER.md` §2 states what the repo
      scouts and holds no bet, so nothing in this file is repeated there. -->
 
 ## 0. 문제의식

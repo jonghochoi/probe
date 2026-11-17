@@ -51,7 +51,7 @@ def split_surfaces(source: str) -> tuple[str, dict[str, str]]:
 METRIC_MAX = 40
 ALIAS_MAX = 24
 
-# Pillar names mirror context/MASTER.md §4. This dict is the pillar set for the
+# Pillar names mirror context/MASTER.md §3. This dict is the pillar set for the
 # whole build: the display order is its declaration order and the id pattern is
 # built from its keys, so adding a pillar is one entry here. An id outside it
 # lands the paper in 미분류. The names themselves are what the search box and
@@ -64,6 +64,7 @@ PILLAR_NAMES = {
     "P2": "Structured Multimodal Observation Fusion",
     "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",
+    "P5": "Retargeting & Human-in-the-Loop Data Collection",
 }
 # What every reader-facing surface prints for an axis — the axis-line chip and the
 # `연구 축별` separator. Short enough to sit on one line in a 13.5rem column,
@@ -76,6 +77,7 @@ PILLAR_LABELS = {
     "P2": "관측 설계",
     "P3": "월드 모델",
     "P4": "사전학습 · 적응",
+    "P5": "리타게팅 · 데이터 수집",
 }
 if PILLAR_LABELS.keys() != PILLAR_NAMES.keys():
     raise RuntimeError("PILLAR_LABELS and PILLAR_NAMES name different pillars")

@@ -90,7 +90,7 @@ PROCEDURE
 
 2. BRIEF. Read the rewrite's `::: glance` block (the 요약 tab — the thesis
    and its four-move story), `python3 site/query.py outline <id>`, `section <id>
-   --act 4`, `context/MASTER.md` §1, and the open-question entries act 4 names
+   --act 4`, `context/MASTER.md` §2, and the open-question entries act 4 names
    (`python3 site/query.py decision <D#>`). Nothing else: this mode never
    opens `PROBE_PRIVATE_DIR` or anything under it.
 

@@ -169,7 +169,7 @@ decode the report without opening `context/P#.md`.
 
 **Scope.** Only `P#` (Pillar) and `D#` (open question) codes.
 **Only codes actually cited in this report.** Never list a code the body
-does not use; never list competitor codenames, Identity, or the falsifier.
+does not use; never list competitor codenames or the falsifier.
 
 **Placement.** A single `## 🔑 참조 약어 풀이` section, immediately after the
 top metadata block and before the first paper section — the report goes
@@ -187,6 +187,7 @@ badge**, color-coded by category:
 | `P2` | `e2f5d5` (pale green) | pillar palette |
 | `P3` | `d5def5` (pale blue) | pillar palette |
 | `P4` | `e0d5f5` (pale purple) | pillar palette |
+| `P5` | `d5f2f0` (pale teal) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared question color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
@@ -593,7 +594,7 @@ other grade. Rank by Relevance, then by the /15 total, then by venue tier —
 this order assigns the medals and orders the 📋 rows (§5-1). Real and
 Reproducibility count toward the total, so between two equally relevant papers
 the one with more on hardware and an artifact to run ranks first.
-Venue tier comes from the Venue Priority table `context/MASTER.md` §5 owns,
+Venue tier comes from the Venue Priority table `context/MASTER.md` §4 owns,
 read from the arXiv comment field and recorded on the paper header line.
 Venue breaks ties only; it never gates and never overrides the rubric.
 

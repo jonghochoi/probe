@@ -49,6 +49,7 @@ const PILLARS: Record<string, string> = {
   P2: "multimodal observation fusion",
   P3: "world models",
   P4: "pretraining and data-efficient adaptation",
+  P5: "retargeting and human-in-the-loop data collection",
 };
 const PILLAR_IDS = Object.keys(PILLARS);
 
