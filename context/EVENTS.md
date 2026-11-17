@@ -36,13 +36,33 @@ a row once it has ended.
 
 | 시작 | 끝 | 종류 | 이름 | 장소 | 출처 |
 |---|---|---|---|---|---|
+| 2026-11-23 | 2026-11-23 | 마감 | CVPR 2027 보충 자료 마감 | AoE | https://cvpr.thecvf.com/Conferences/2027/Dates |
 | 2026-12-04 | 2026-12-04 | 마감 | RSS 2027 초록 마감 | AoE | https://roboticsconference.org/ |
 | 2026-12-06 | 2026-12-09 | 학회 | Humanoids 2026 | Santa Clara | https://2026.ieee-humanoids.org/ |
 | 2026-12-06 | 2026-12-12 | 학회 | NeurIPS 2026 | Sydney | https://neurips.cc/ |
+| 2026-12-16 | 2026-12-16 | 발표 | ICLR 2027 결과 발표 | | https://iclr.cc/Conferences/2027/Dates |
+| 2026-12-31 | 2026-12-31 | 마감 | RA-L ICRA 2027 옵션 마감 | | https://www.ieee-ras.org/publications/ra-l/ |
+| 2027-01-14 | 2027-01-14 | 마감 | ICML 2027 초록 마감 | AoE | https://icml.cc/Conferences/2027/Dates |
+| 2027-01-22 | 2027-01-22 | 마감 | ICML 2027 논문 마감 | AoE | https://icml.cc/Conferences/2027/Dates |
 | 2027-01-31 | 2027-01-31 | 발표 | ICRA 2027 결과 발표 | | https://2027.ieee-icra.org/ |
+| 2027-02-01 | 2027-02-01 | 마감 | CVPR 2027 반박 마감 | | https://cvpr.thecvf.com/Conferences/2027/Dates |
 | 2027-02-05 | 2027-02-05 | 발표 | RSS 2027 1단계 결과 | | https://roboticsconference.org/ |
+| 2027-02-12 | 2027-02-12 | 마감 | RSS 2027 반박 마감 | AoE | https://roboticsconference.org/ |
+| 2027-02-23 | 2027-02-23 | 발표 | ICML 2027 1단계 결과 | | https://icml.cc/Conferences/2027/Dates |
+| 2027-02-25 | 2027-02-25 | 발표 | CVPR 2027 결과 발표 | | https://cvpr.thecvf.com/Conferences/2027/Dates |
+| 2027-02-26 | 2027-02-26 | 발표 | RSS 2027 2단계 결과 | | https://roboticsconference.org/ |
+| 2027-04-16 | 2027-04-16 | 마감 | RSS 2027 논문 마감 | AoE | https://roboticsconference.org/ |
+| 2027-04-19 | 2027-04-19 | 마감 | RSS 2027 보충 자료 마감 | AoE | https://roboticsconference.org/ |
+| 2027-04-26 | 2027-04-30 | 학회 | ICLR 2027 | | https://iclr.cc/Conferences/2027/Dates |
+| 2027-04-30 | 2027-04-30 | 발표 | RSS 2027 결과 발표 | | https://roboticsconference.org/ |
+| 2027-04-30 | 2027-04-30 | 마감 | RA-L IROS 2027 옵션 마감 | | https://www.ieee-ras.org/publications/ra-l/ |
+| 2027-05-03 | 2027-05-03 | 발표 | ICML 2027 결과 발표 | | https://icml.cc/Conferences/2027/Dates |
+| 2027-05-14 | 2027-05-14 | 마감 | RSS 2027 카메라 레디 마감 | AoE | https://roboticsconference.org/ |
 | 2027-05-24 | 2027-05-28 | 학회 | ICRA 2027 | Seoul · COEX | https://2027.ieee-icra.org/ |
+| 2027-06-20 | 2027-06-25 | 학회 | CVPR 2027 | Seattle | https://cvpr.thecvf.com/ |
 | 2027-07-06 | 2027-07-11 | 학회 | RSS 2027 | Athens | https://roboticsconference.org/ |
+| 2027-07-31 | 2027-08-06 | 학회 | ICML 2027 | Rio de Janeiro · Riocentro | https://icml.cc/ |
+| 2027-09-27 | 2027-10-01 | 학회 | IROS 2027 | Florence · Fortezza da Basso | https://2027.ieee-iros.org/ |
 
 `종류` is one of `학회` (the conference itself), `마감` (a submission
 deadline — abstract, paper, rebuttal, camera-ready) and `발표` (a decision or
@@ -60,3 +80,4 @@ that venue's dates wait.
 
 | 주소 | 학회 | 이유 | 처음 본 날 |
 |---|---|---|---|
+| 2027.ieee-humanoids.org | Humanoids | 다음 회차 | 2026-11-17 |
