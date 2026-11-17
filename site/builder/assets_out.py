@@ -59,10 +59,10 @@ def _check_intact(before: str, after: str) -> list[str]:
     return problems
 
 
-ASSET_FILES = ("site.css", "index.css", "scout.css", "theme.js",
+ASSET_FILES = ("site.css", "index.css", "scout.css", "lineage.css", "theme.js",
                "brand.js", "nav.js", "paper.js", "compare.js", "memo.js", "shelf.js",
                "match.js", "palette.js", "filter.js", "hub.js", "scout.js", "cards.js",
-               "home.css", "home.js", "pillar.js")
+               "home.css", "home.js", "pillar.js", "lineage.js")
 # The icons `components.icon_links()` links. Shipped and hashed like everything else
 # but never scanned for characters: they carry no text the page renders, and
 # two of them are bytes that cannot be decoded as any. `favicon.svg` is the

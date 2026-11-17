@@ -6,7 +6,7 @@ build-time dependencies. The site publishes `analysis/<arxiv-id>.md`,
 nothing else.
 
 A paper's page carries the 요약 and 상세 tabs from its rewrite, plus 비교 when
-a comparison holds it. 탐색 (`s/<date>/`) is one
+a comparison holds it and 계보 when another paper stands on it or it on one. 탐색 (`s/<date>/`) is one
 page per run, every pillar's report merged by arXiv id, and `s/` prints the
 newest run with every date in a row above it. The corpus and its
 contracts stay at the repo root; the rules a change here must keep are in
@@ -27,6 +27,7 @@ comment of the file that draws it.
 | `builder/events.py` | `context/EVENTS.md` read row by row for the first screen's 일정, a malformed row reported as a problem |
 | `builder/scoutfigs.py` | Each written-up scouted paper's overview figure, picked from its arXiv HTML edition under `--scout-figures` and kept as `scout-figures.json` under `.site-cache/` |
 | `builder/scouting.py` | Scouting run discovery — each `scouting/P#/<date>.md` and its run file `scouting/runs/<date>.md` read against `scouting/AUTHORING.md` and merged by date into one row per arXiv id |
+| `builder/lineage.py`, `builder/assets/lineage.css`, `lineage.js` | 계보 — the graph read from each rewrite's `probe-lineage` rail and arXiv links, read one paper at a time for that paper's 계보 tab, and once over the whole corpus for 빈자리, the papers it stands on and has not rewritten, at the foot of the analysis list |
 | `builder/charts.py`, `builder/assets/charts.css` | The drawn results chart (`probe-chart`) as inline SVG, and the rules it is drawn with — borrowed by `distinction/render-distinction.py`, never linked by a site page |
 | `builder/pages.py`, `components.py` | Page assembly — the first screen at the root, 탐색 (`s/`), the analysis list (`p/`), 비교 (`c/`), 서재 (`shelf/`), the paper page and its tabs, and the mastheads each list page opens on |
 | `builder/decisions.py` | The `context/P*.md` Decision-Log parser behind the `D<n>` tooltips, and each pillar's introduction and decision titles for the axis-chip popup |
