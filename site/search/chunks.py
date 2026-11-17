@@ -43,9 +43,17 @@ class Chunk:
 
     @property
     def content_hash(self) -> str:
-        """What decides whether this chunk needs embedding again."""
+        """What decides whether this chunk is uploaded again.
+
+        The text decides the embedding, but the row also carries the paper's
+        axes and date, which the endpoint filters and ranks by. A rewrite
+        refiled under other axes changes no word of its text, so they are
+        hashed too — otherwise the row keeps the axes it was first indexed
+        under for as long as its text stands.
+        """
         return hashlib.sha256(
-            f"{self.title}\n{self.context}\n{self.text}".encode()
+            f"{self.title}\n{self.context}\n{self.text}\n"
+            f"{' '.join(self.pillars)}\n{self.date}".encode()
         ).hexdigest()[:16]
 
     def as_dict(self) -> dict:
