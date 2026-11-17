@@ -101,9 +101,9 @@ reaches the next run with nothing re-pasted.
   `… with pillars: 1 3` runs P1 and P3, and the run file lists only those.
 - `/scout 0 1 2 3 4` (`.claude/commands/scout.md`) runs the same thing from an
   interactive session.
-- The pillar agents never read `context/MASTER.md`, so its Venue Priority and
-  Cross-pollination Budget are inlined in the prompt's shared section. Keep
-  them in sync with `context/MASTER.md` §5–§6.
+- Of `context/MASTER.md` the run reads §5 Venue Priority and §6
+  Cross-pollination Budget alone, there, so an edit to either reaches the
+  next run with nothing else to change.
 
 ## 4. First run
 

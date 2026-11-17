@@ -64,8 +64,8 @@ but for their third bar, the pupils and the hull turning from one to the
 other faster each time, until a red pen ring draws itself round the same
 spot on both pages, the probe hops and both pupils shrink), and
 `probe-ideation.svg` has an idea (pupils up at a bulb over the head that
-flickers like a tired tube, catches, and glows so bright the probe squints). A new track needs a
-new outline, not a variation on one of these.
+flickers like a tired tube, catches, and glows so bright the probe squints).
+A new track needs a new outline, not a variation on one of these.
 
 **Every track icon builds to one beat.** The scouter's dial is the model:
 something mounts over the cycle and a single beat releases it — the flash,

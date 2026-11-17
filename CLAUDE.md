@@ -54,6 +54,7 @@ file the row points at.
 | `adaptation/SETUP.md` | human | Operator guide for `/adapt` — the Google account, the `notebooklm` CLI and the folder |
 | `.claude/prompts/**` | human | The agent prompts — one per slash command. Each owns a **procedure** and delegates every format rule to its track's `AUTHORING.md` |
 | `.claude/commands/**` | human | Slash-command wrappers pointing each command at its prompt |
+| `.claude/settings.json` | human | The edit allowlist the agent tracks write under, and the html-plan plugin a local session enables |
 | `.claude/prompts/ideate-page.html` | human | The page skeleton `/ideate` fills and packs outside the repo — ideation has no track folder, so its page format lives here and in `ideate.txt` |
 | `.claude/vendor/html-plan/` | human | The html-plan runtime that packs `/ideate`'s page. Folder map: `.claude/vendor/html-plan/README.md` |
 | `assets/` | human | The README images and `build-art.py` |
@@ -185,8 +186,8 @@ one logical area or needs context to be reviewable. When present:
 ## Local checks
 
 CI runs each of these on the PR except `build-art.py --check`, the
-`render-distinction.py` draw and the distinction and adaptation lints. Run the ones your change touches before
-pushing.
+`render-distinction.py` draw and the distinction and adaptation lints. Run
+the ones your change touches before pushing.
 
 | Change touches | Command |
 |---|---|
@@ -203,8 +204,10 @@ pushing.
 | `assets/build-art.py` | `python3 assets/build-art.py --check` |
 | `site/search/function/` | `npx esbuild@0.28.2 site/search/function/search.ts --loader:.ts=ts --outfile=/dev/null` |
 
-The site build is the only one with dependencies:
-`pip install -r site/requirements.txt`.
+The site build is the only one with dependencies — `pip install -r
+site/requirements.txt`, and for the full build the Node packages
+`site/README.md` installs. It orders the corpus by git history, so on a
+shallow clone `--strict` fails until `git fetch --unshallow`.
 
 ## Document Markdown style
 

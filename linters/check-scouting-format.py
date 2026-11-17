@@ -72,7 +72,7 @@ import sys
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Sections an older report carried and the contract no longer has (AUTHORING §2-1).
+# Sections outside the §2-1 set, each with where its content goes instead.
 _OUT_OF_SET = {
     "💡": "a paper's decisions are its (a) badges, and `context/` edits are the human's",
     "🚫": "a dropped candidate is part of the 🔄 filter count, not a row",
