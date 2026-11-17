@@ -17,7 +17,7 @@ comment of the file that draws it.
 
 | Path | Role |
 |---|---|
-| `build-site.py` | Build entry point — `--out`, `--only <id>`, `--check`, `--strict`, `--serve`, `--index <file>`, `--search-api <url>`, `--scout-figures` (see `--help`). A full build also writes `corpus.json` and `llms.txt` at the root; `--only` writes neither |
+| `build-site.py` | Build entry point — `--out`, `--only <id>`, `--check`, `--strict`, `--serve`, `--index <file>`, `--search-api <url>`, `--scout-figures`, `--gap-titles` (see `--help`). A full build also writes `corpus.json` and `llms.txt` at the root; `--only` writes neither |
 | `builder/corpus.py` | Rewrite discovery and order (by the commit that landed each rewrite), front-matter validation, pillar names, the analysis list's haystacks, and `score` — the one neighbour rule every surface ranks by |
 | `builder/render.py` | Markdown → HTML, the rule checks with no other home (its row in `analysis/AUTHORING.md` §5, and a comparison's fence and length rules), and the 재작성본 sibling marker |
 | `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, `probe-matrix` and `probe-figs` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
@@ -25,6 +25,7 @@ comment of the file that draws it.
 | `builder/glance.py` | The 요약 tab and its checks (G1–G6) |
 | `builder/comparisons.py` | Comparison discovery and validation (`comparison/AUTHORING.md`) |
 | `builder/events.py` | `context/EVENTS.md` read row by row for the first screen's 일정, a malformed row reported as a problem |
+| `builder/arxivtitles.py` | The arXiv title of each paper 빈자리 prints, from arXiv's metadata API under `--gap-titles` and kept as `arxiv-titles.json` under `.site-cache/` |
 | `builder/scoutfigs.py` | Each written-up scouted paper's overview figure, picked from its arXiv HTML edition under `--scout-figures` and kept as `scout-figures.json` under `.site-cache/` |
 | `builder/scouting.py` | Scouting run discovery — each `scouting/P#/<date>.md` and its run file `scouting/runs/<date>.md` read against `scouting/AUTHORING.md` and merged by date into one row per arXiv id |
 | `builder/lineage.py`, `builder/assets/lineage.css`, `lineage.js` | 계보 — the graph read from each rewrite's `probe-lineage` rail and arXiv links, read one paper at a time for that paper's 계보 tab, and once over the whole corpus for 빈자리, the papers it stands on and has not rewritten, at the foot of the analysis list |

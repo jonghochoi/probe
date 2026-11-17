@@ -269,13 +269,22 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
 GAP_ROWS = 12
 
 
-def _gaps(graph: lineage.Graph | None) -> str:
+def _gap_title(name: str, title: str) -> str:
+    """`title` less a leading `name:` — the row prints the name just before it."""
+    head, sep, rest = title.partition(":")
+    return rest.strip() if sep and head.strip().casefold() == name.casefold() else title
+
+
+def _gaps(graph: lineage.Graph | None, titles: dict[str, str]) -> str:
     """빈자리 — under the list of what the corpus holds, what it leans on and
     does not hold (`lineage.gaps`).
 
     A row is the paper, how many rewrites stand on it, and those rewrites by
     name — each a link to its own 계보 tab, where the paper sits among that
-    rewrite's ancestors. The names are printed whole, so a browser with no
+    rewrite's ancestors. The paper is the name its rails give it with its
+    arXiv title after it (`titles`, from `arxivtitles`), less a leading
+    `name:` the title repeats; a paper the cache has no title for prints the
+    name alone. The rewrites' names are printed whole, so a browser with no
     script reads every one; `filter.js` folds them to one line and a `+N`
     chip, whose tooltip names the rest and whose click opens them.
     A partial build has no graph and prints none.
@@ -285,7 +294,10 @@ def _gaps(graph: lineage.Graph | None) -> str:
         return ""
     items = "".join(
         f'<li class="tl-row"><span class="tl-id">{len(on)}편</span>'
-        f'<span class="tl-main"><span class="tl-t">{c.esc(node.name)}</span>'
+        f'<span class="tl-main"><span class="tl-t">{c.esc(node.name)}'
+        + (f'<span class="gap-full">{c.esc(_gap_title(node.name, titles[node.id]))}</span>'
+           if node.id in titles else '')
+        + '</span>'
         f'<span class="tl-g gap-on" data-gapnames><span class="gap-names">' + " ".join(
             f'<span class="gap-n"><a href="{c.esc(n.id)}/index.html#lin">'
             f'{c.esc(n.name)}</a></span>' for n in on)
@@ -302,7 +314,8 @@ def _gaps(graph: lineage.Graph | None) -> str:
 
 
 def analysis_page(papers: list[Paper], katex=None,
-                 partial: bool = False, graph: lineage.Graph | None = None) -> str:
+                 partial: bool = False, graph: lineage.Graph | None = None,
+                 gap_titles: dict[str, str] | None = None) -> str:
     """The corpus index — one line of axes over one row per paper, newest first.
 
     The page opens on the list itself: the axes as a line over it (the only
@@ -387,7 +400,7 @@ def analysis_page(papers: list[Paper], katex=None,
     <p class="corpus-empty" data-empty hidden>
       조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
     </p>
-    {_gaps(graph)}
+    {_gaps(graph, gap_titles or {})}
   </main>
 </div>
 """
