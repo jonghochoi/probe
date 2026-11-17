@@ -103,14 +103,9 @@ iframe { border: 0; width: 100%; height: 100%; background: #fff; }
     document.getElementById("o-mark").hidden = st.split !== "marked";
     document.getElementById("flipwrap").hidden = st.mode !== "flip";
     document.getElementById("flip").textContent = "지금 보는 것: " + (st.showing === "after" ? "시안" : "지금") + "  ·  바꾸기";
-    var t = "내 설정 (이야기 구분)
-구분 방식: " + opt("split");
-    if (st.split === "marked") t += "
-단계 이정표 모양: " + opt("mark");
-    t += "
-한계 연: " + opt("limit") + "
-연의 리듬: " + opt("rhythm") + "
-근거 카드: " + opt("acts");
+    var t = "내 설정 (이야기 구분)\n구분 방식: " + opt("split");
+    if (st.split === "marked") t += "\n단계 이정표 모양: " + opt("mark");
+    t += "\n한계 연: " + opt("limit") + "\n연의 리듬: " + opt("rhythm") + "\n근거 카드: " + opt("acts");
     document.getElementById("sum").textContent = t;
   }
   // each frame: the card drafts, the plan, the tab, the colour
