@@ -280,13 +280,18 @@ html.js .rowstar, html.js .lh-star { display: block; }
 .row-links, .row-links-m { display: inline-flex; gap: .2rem; vertical-align: .1em; white-space: nowrap; }
 .row-links { position: relative; z-index: 1; margin-left: .45rem; }
 .row-links-m { display: none; }
+/* The paper header's link pill closed to a circle: the same tinted ground and
+   the same accent answer under the pointer, at the row's scale. */
 .row-link {
   display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem;
-  border-radius: 50%; border: 1px solid var(--border-soft); background: var(--card-bg);
+  border-radius: 50%; background: var(--surface-2);
   color: var(--text-muted);
-  transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+  transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
-.row-link:hover { color: var(--orange-ink); border-color: var(--orange); }
+/* A row under the pointer takes the links' own ground, so they step one shade
+   darker to stay circles. */
+.row:hover .row-link { background: var(--surface-3); }
+.row .row-link:hover { color: var(--orange-ink); background: var(--orange-soft); }
 .row-link .src-mark { width: .8rem; height: .8rem; }
 .row-tagline {
   display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted);
