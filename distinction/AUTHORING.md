@@ -301,13 +301,13 @@ they are the one check the lint can make that the facts were looked at.
 | method | `` `METHOD §<n>` `` | that section of `MY-METHOD.md` |
 | code | `` `<path>:<line>` `` | a line of the codebase, as `CODEMAP.md` lists it |
 | config | `` `cfg:<key>` `` | a key `CODEMAP.md` lists under its config section |
-| quote | `원문 §<section> "<verbatim English>"` — at least a clause, copied byte for byte; a table row is quoted whole under `§TABLE-<n>` | `cd site && python3 -m builder.arxiv <id> --grep "<a phrase of it>"` prints it under that section, a table row under `Table TABLE <n>:` |
+| quote | `원문 §<section> "<verbatim English>"` — at least a clause, copied byte for byte; a table row is quoted whole under `§TABLE-<n>` | `python3 site/builder/arxiv.py <id> --grep "<a phrase of it>"` prints it under that section, a table row under `Table TABLE <n>:` |
 
 Which sections need which is §3-1's table. Four further rules:
 
 - **A number is confirmed in the original before a versus note states it.** The
   rewrites are a map, not the source of fact (`.claude/prompts/ideate.txt`,
-  step 4): `cd site && python3 -m builder.arxiv <id> --grep "<pattern>"`
+  step 4): `python3 site/builder/arxiv.py <id> --grep "<pattern>"`
   prints the lines of the original that carry it, with their section. A §6
   threat rests on a number, so a §6 bullet without that check is written as
   the rewrite's number and says so.
@@ -329,15 +329,19 @@ Which sections need which is §3-1's table. Four further rules:
 
 ### 4-1. Evidence grades
 
-Every paper-side statement in a versus note has one of three grades, and the grade
-decides where it may stand. The verify pass (prompt step 6, or D4 for a
-code note) assigns them.
+Every paper-side statement in a versus note or a code note has one of three
+grades, and the grade decides where it may stand. The verify pass (prompt
+step 6, or D4 for a code note) assigns them.
 
-| Grade | Means | May carry |
-|---|---|---|
-| `원문` | the original says it — a quote anchor or a confirmed number proves it | anything: §1–§3, a §6 threat, any scoreboard verdict |
-| `재작성본` | the rewrite says it, the original does not | §1 and §2 context, written as the rewrite's reading |
-| `추론` | the versus note's own inference from either | §2 and §5 only, written as a reading |
+| Grade | Means | May carry in a versus note | May carry in a code note |
+|---|---|---|---|
+| `원문` | the original says it — a quote anchor or a confirmed number proves it | anything: §1–§3, a §6 threat, any scoreboard verdict | anything in §2–§7 |
+| `재작성본` | the rewrite says it, the original does not | §1 and §2 context, written as the rewrite's reading | §2 and §3 context, written as the rewrite's reading |
+| `추론` | the note's own inference from either | §2 and §5 only, written as a reading | §4 and §8 only, written as a reading |
+
+A code note's §1 grades the rewrite itself, so it carries verdicts rather than
+grades; what it grades `틀림` or `원문 없음` stands nowhere later as the
+paper's (§3-5).
 
 ## 5. Caps
 

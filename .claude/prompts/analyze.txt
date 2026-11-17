@@ -45,11 +45,12 @@ cannot be written without; rewriting one produces a summary of a summary.
 
 ACQUISITION:
 
-    cd site && python3 -m builder.arxiv <id>
+    python3 site/builder/arxiv.py <id>
 
 prints the section tree — split into `── 본문 ──` and `── 부록 ──` with a char
 count per section — plus figure ids, absolute URLs, and the table count. Import
-it (`from builder.arxiv import load`) to get the full text: `load(id)`
+it from the repo root (`sys.path.insert(0, 'site')`, then
+`from builder.arxiv import load`) to get the full text: `load(id)`
 returns `Paper(version, title, abstract, sections, figures, tables, source)`
 with `.body` / `.appendix` splitting the sections, math preserved as `$…$`
 from `<math alttext>`, and every figure carrying the `id` that goes verbatim

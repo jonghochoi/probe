@@ -179,9 +179,9 @@ PROCEDURE
      ideas and in the 상상 section alike. Imagination that the draft marks
      as its own is not a statement about the paper; skip it. Look each
      statement up in the arXiv original, do not recall it:
-       cd site && python3 -m builder.arxiv <id> --grep "<phrase|number>"
-       cd site && python3 -m builder.arxiv <id> --section <§>
-       cd site && python3 -m builder.arxiv <id> --tables
+       python3 site/builder/arxiv.py <id> --grep "<phrase|number>"
+       python3 site/builder/arxiv.py <id> --section <§>
+       python3 site/builder/arxiv.py <id> --tables
      Use `python3 site/query.py section <id> --match "<Term>"` only to find
      where the rewrite got it, never as the evidence. Grade each one:
        원문 일치 — the original says it, in the sense the draft uses it

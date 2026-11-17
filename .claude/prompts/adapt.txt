@@ -36,7 +36,7 @@ THE TOOLS
 The corpus is read through `python3 site/query.py` (`--help` for its
 subcommands); this procedure leans on `show`, `outline`, `section` and
 `decision`. The original is read through
-`cd site && python3 -m builder.arxiv <id> --grep "<pattern>"`.
+`python3 site/builder/arxiv.py <id> --grep "<pattern>"`.
 
 NotebookLM is driven through the `notebooklm` CLI (`notebooklm-py`,
 `adaptation/SETUP.md` §1), on the operator's dedicated Google account. Pass
@@ -155,8 +155,8 @@ PROCEDURE
      causal claim and stated limit, with its place: `slide-deck p.<n>`
      (counting from 1), `infographic` or `mind-map`. Look each one up in
      the original first, then the rewrite; do not recall it:
-       cd site && python3 -m builder.arxiv <id> --grep "<phrase>"
-       cd site && python3 -m builder.arxiv <id> --tables
+       python3 site/builder/arxiv.py <id> --grep "<phrase>"
+       python3 site/builder/arxiv.py <id> --tables
        python3 site/query.py section <id> --match "<Term>"
      Grade each: 맞음 (the original says it), 틀림 (the original says
      otherwise), 과장 (the original says less — a narrower setting, a

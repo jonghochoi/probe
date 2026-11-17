@@ -205,8 +205,8 @@ PHASE WRITE
    (a), (c) and (d) argue from the abstract and comment you kept. (b) — the
    paper brief, AUTHORING §2-2 — argues from the paper's introduction as
    well, for every 🥇 🥈 🥉 🌱 paper:
-     cd site && python3 -m builder.arxiv <id>          # the section tree
-     cd site && python3 -m builder.arxiv <id> --section <intro anchor>
+     python3 site/builder/arxiv.py <id>          # the section tree
+     python3 site/builder/arxiv.py <id> --section <intro anchor>
    The introduction is usually `S1`; read the tree rather than assume it.
    On `Unavailable` the paper has no HTML edition: brief it from the
    abstract and open (d) with the line AUTHORING §2-2 gives for that case.
@@ -241,7 +241,7 @@ score Relevance or Novelty, and you never commit.
    stands on. Every candidate a pillar agent keeps can surface or near-miss
    (PART II step 3), so search each paper's own text as well, one fetch per
    paper, before scoring:
-     cd site && python3 -m builder.arxiv <id> --grep '(?i)github|\bcode\b|release|real[- ](world|robot)|hardware|success rate|baseline|ablat' | head -60; sleep 3
+     python3 site/builder/arxiv.py <id> --grep '(?i)github|\bcode\b|release|real[- ](world|robot)|hardware|success rate|baseline|ablat' | head -60; sleep 3
    Each hit prints with its section; a score it supports quotes it as
    `§<n> "…"`. On `Unavailable` the abstract and comment are all there is. A
    level the text does not reach is not given; an absent signal scores 0

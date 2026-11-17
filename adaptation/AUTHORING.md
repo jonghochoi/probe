@@ -130,7 +130,7 @@ the only state in which the kit is ready to show as it is.
 
 A quote anchor is `원문 §<section> "<verbatim English>"` — at least a clause,
 copied byte for byte, a table row quoted whole under `§TABLE-<n>` — and
-resolves through `cd site && python3 -m builder.arxiv <id> --grep "<a phrase
+resolves through `python3 site/builder/arxiv.py <id> --grep "<a phrase
 of it>"`, as `distinction/AUTHORING.md` §4 defines it.
 
 ## 5. Caps
