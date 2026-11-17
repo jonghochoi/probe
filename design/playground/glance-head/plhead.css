@@ -1,0 +1,75 @@
+/* 요약 card-head drafts. Without `data-gh` the page is as built. */
+.pg-head, .pg-sec { display: none; }
+html[data-gh] .gh-l, html[data-gh] .gn-l, html[data-gh] .ga-n { display: none; }
+
+/* every draft: no bands */
+html[data-gh] .g-hub, html[data-gh] .g-act { border-top-width: 1px; border-top-color: var(--border); }
+html[data-gh] .g-narr { border-left-width: 1px; border-left-color: var(--border); border-radius: var(--radius); }
+
+/* card ground: as built, or the list pages' card */
+html[data-gm="list"] .g-hub, html[data-gm="list"] .g-narr, html[data-gm="list"] .g-act {
+  background: var(--card-bg); border-color: var(--border-soft); box-shadow: var(--shadow-sm);
+}
+
+/* act colour: four, or the accent alone */
+html[data-gh] .g-hub, html[data-gh] .g-narr { --pg: var(--orange); --pg-ink: var(--orange-ink); }
+html[data-gh] .g-act[data-n="1"] { --pg: var(--act1); --pg-ink: var(--act1); }
+html[data-gh] .g-act[data-n="2"] { --pg: var(--act2); --pg-ink: var(--act2); }
+html[data-gh] .g-act[data-n="3"] { --pg: var(--act3); --pg-ink: var(--act3); }
+html[data-gh] .g-act[data-n="4"] { --pg: var(--act4); --pg-ink: var(--orange-ink); }
+html[data-gh][data-gc="one"] .g-act { --pg: var(--orange); --pg-ink: var(--orange-ink); }
+
+/* the head pair, shared */
+html[data-gh] .pg-head { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.pg-head b { font-weight: 700; font-size: var(--fs-sm); color: var(--text); }
+.pg-head span { font-size: var(--fs-2xs); color: var(--text-muted); }
+.pg-num { display: none; font-style: normal; }
+html[data-gh] .g-narr-h { margin-bottom: .2rem; }
+html[data-gh] .g-hub > .pg-head { grid-column: 1 / -1; margin-bottom: -.6rem; }
+html[data-gh="sec"] .g-narr-h { display: none; }
+
+/* ── 1. 묶음 제목: 카드 밖에 첫 화면과 같은 제목, 카드 안은 짧은 명사 ── */
+html[data-gh="sec"] .pg-sec {
+  display: flex; align-items: baseline; gap: .5rem; margin: 1.6rem 0 .6rem;
+}
+html[data-gh="sec"] .glance > .pg-sec:first-child { margin-top: 0; }
+.pg-sec b { font-family: var(--t-display); font-size: var(--fs-lg); font-weight: 700; color: var(--text); }
+.pg-sec span { font-size: var(--fs-xs); color: var(--text-muted); }
+html[data-gh="sec"] .g-hub .pg-head, html[data-gh="sec"] .g-narr .pg-head { display: none; }
+html[data-gh="sec"] .g-act .pg-head b { color: var(--pg-ink); }
+
+/* ── 2. 머리 줄: 카드 머리를 옅은 색 줄로 나눔 ── */
+html[data-gh="bar"] .pg-head {
+  margin: -.95rem -.95rem .2rem; padding: .55rem .95rem;
+  background: color-mix(in oklab, var(--pg) 9%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--pg) 22%, var(--border));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+html[data-gh="bar"] .g-hub > .pg-head { margin: -1.15rem -1.35rem -.2rem; padding: .6rem 1.35rem; }
+html[data-gh="bar"] .g-narr .pg-head { margin: -1.15rem -1.35rem .4rem; padding: .6rem 1.35rem; }
+html[data-gh="bar"] .g-hub { align-items: start; }
+html[data-gh="bar"] .pg-head b { color: var(--pg-ink); }
+
+/* ── 3. 밑줄 라벨: 탭과 같은 2px 밑줄을 이름 아래에만 ── */
+html[data-gh="under"] .pg-head b {
+  padding-bottom: .2rem;
+  background: linear-gradient(var(--pg), var(--pg)) left bottom / 100% 2px no-repeat;
+}
+html[data-gh="under"] .pg-head { margin-bottom: .25rem; }
+
+/* ── 4. 모서리 번짐: 위 왼쪽 모서리에 바탕 번짐과 같은 은은한 빛 ── */
+html[data-gh="glow"] .g-hub, html[data-gh="glow"] .g-narr, html[data-gh="glow"] .g-act {
+  background-image: radial-gradient(120% 70% at 0% 0%, color-mix(in oklab, var(--pg) 18%, transparent) 0%, transparent 62%);
+}
+html[data-gh="glow"] .pg-head b { color: var(--pg-ink); }
+
+/* ── 5. 큰 번호: 근거 카드에 막 번호를 크게, 주장 · 이야기는 제목 서체 이름 ── */
+html[data-gh="num"] .pg-num {
+  display: inline; font-family: var(--t-display); font-size: 2rem; line-height: 1; font-weight: 700;
+  color: color-mix(in oklab, var(--pg) 55%, transparent); margin-right: .15rem; align-self: center;
+}
+html[data-gh="num"] .pg-head { align-items: center; }
+html[data-gh="num"] .pg-head b { font-family: var(--t-display); font-size: var(--fs-md); }
+html[data-gh="num"] .g-act .pg-head { display: grid; grid-template-columns: auto 1fr; column-gap: .6rem; }
+html[data-gh="num"] .g-act .pg-num { grid-row: span 2; }
+html[data-gh="num"] .g-act .pg-head span { grid-column: 2; }
