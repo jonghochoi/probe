@@ -66,10 +66,48 @@
 .lt-who { display: flex; align-items: center; gap: .5rem; font-family: var(--t-display); font-size: var(--fs-lg); font-weight: 700; line-height: 1.3; }
 .lt-tag { margin: .45rem 0 0; font-size: var(--fs-xs); line-height: 1.6; }
 .lt-meta { display: flex; flex-wrap: wrap; gap: .3rem .8rem; margin: .55rem 0 0; font-size: var(--fs-2xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
-/* A phone has no room for three columns: the lines leave, and the older
-   papers, the paper and the newer ones stack in that order. */
+/* The buttons over the strip a phone swipes through; a wider screen has the
+   three columns side by side and no use for them. */
+.lt-tabs { display: none; }
+
+/* A phone has no room for three columns, and the drawing shrunk to fit
+   prints its names too small to read: the lines and the paper's own card
+   leave, and the older and the newer papers become two panes of one strip,
+   each a screen wide, which `lineage.js` keeps as tall as the pane in
+   view. */
 @media (max-width: 760px) {
-  .lt { min-width: 0; grid-template-columns: minmax(0, 1fr); row-gap: .9rem; padding: .9rem; }
+  .lt-tabs {
+    display: flex; gap: .3rem; padding: .45rem; scroll-margin-top: 4.5rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .lt-tabs button {
+    flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 0;
+    min-height: 2.5rem; padding: .3rem .5rem; font: inherit; font-size: var(--fs-xs); font-weight: 700;
+    color: var(--text-muted); background: none; border: 0; border-radius: var(--radius-sm); cursor: pointer;
+  }
+  .lt-tabs button > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lt-tabs button b {
+    min-width: 1.3rem; padding: .05rem .35rem; border-radius: var(--radius-pill); font-size: var(--fs-3xs);
+    color: var(--text-muted); background: var(--border-soft);
+  }
+  .lt-tabs button[aria-current="true"] { color: var(--orange-ink); background: var(--orange-soft); }
+  .lt-tabs button[aria-current="true"] b { color: var(--accent-ink); background: var(--orange); }
+  .lt-tabs button:disabled { opacity: .45; cursor: default; }
+
+  .lt {
+    min-width: 0; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 100%;
+    align-items: start; column-gap: 0; padding: .9rem 0;
+    overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    scrollbar-width: none; transition: height .25s ease;
+  }
+  .lt::-webkit-scrollbar { display: none; }
+  .lt > * { scroll-snap-align: start; scroll-snap-stop: always; }
   .lt > svg { display: none; }
-  .lt-col { padding-top: 1.9rem; }
+  .lt-col { align-self: start; padding: 0 .9rem; }
+  .lt-col.is-empty { display: none; }
+  .lt-h { display: none; }
+  .lt-me { display: none; }
+}
+@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+  .lt { transition: none; }
 }
