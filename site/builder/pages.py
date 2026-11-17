@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import re
 from collections import Counter
@@ -841,6 +842,10 @@ def _act_strip(entries: list[dict]) -> str:
     fills the dot of the act being read, and ends in the 목차 button that opens
     the whole contents from below; with no script the button is not printed
     live and the links still jump.
+
+    The milestones scroll in a box of their own and the button stands outside
+    it, a glyph alone: a comparison's five acts outrun a phone's width, and a
+    button scrolled off the edge is one the reader never learns is there.
     """
     acts = [e for e in entries if e.get("kind") == "act"]
     if not acts:
@@ -850,9 +855,10 @@ def _act_strip(entries: list[dict]) -> str:
         f'<i class="as-dot" aria-hidden="true"></i>{c.esc(e["label"])}</a>'
         for e in acts
     )
-    return (f'<nav class="actstrip" aria-label="막"><div class="actstrip-in">{links}'
-            '<button type="button" class="as-toc" data-toc-open hidden>'
-            f'{c.icon("list", 15)}<span>목차</span></button></div></nav>')
+    return (f'<nav class="actstrip" aria-label="막"><div class="actstrip-in">'
+            f'<div class="as-links">{links}</div>'
+            '<button type="button" class="as-toc" data-toc-open hidden '
+            f'aria-label="목차" title="목차">{c.icon("list", 17)}</button></div></nav>')
 
 
 def _missing(name: str) -> str:
@@ -1088,14 +1094,17 @@ def _toc(entries: list[dict]) -> str:
             )
         items = []
         for entry in rows:
-            num += 1
+            # Act 0's cards are not stops in the argument, so they take no
+            # number and the argument's own count starts at 1.
+            if not entry.get("nonum"):
+                num += 1
             # Each entry is wrapped rather than bare: `shelf.js` hangs the
             # 책갈피 button off the row, and a button inside the anchor would
             # be both invalid and un-clickable without swallowing the link.
             items.append(
                 '<div class="toc-row">'
                 f'<a class="ms-sec" href="#{c.esc(entry["id"])}">'
-                f'<span class="ms-num">{num}</span>'
+                f'<span class="ms-num">{"" if entry.get("nonum") else num}</span>'
                 f'<span class="ms-t">{c.esc(entry["label"])}</span>'
                 "</a></div>"
             )
@@ -1178,13 +1187,15 @@ def _src_group(paper: Paper) -> str:
 def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
                     problems: list[str] | None = None) -> str:
     """One comparison — the question, the fork drawn as the papers' cards, then
-    the argument.
+    the argument under the same contents a rewrite's 상세 has.
 
     The first screen is the comparison's shape rather than its prose: the
-    question, the tagline under it, and the fork — `common:` as the trunk and
-    one card per paper as its branches, each card naming the paper by its
-    alias and its `stances:` line. A reader knows what the papers share and
-    where each one goes before a paragraph starts arguing it.
+    question, the problem the papers share under it, and the fork — `common:`
+    as the trunk and one card per paper as its branches, each card naming the
+    paper by its alias and its `stances:` line. A reader knows what the papers
+    share and where each one goes before a paragraph starts arguing it. The
+    thesis is not on this page: it is the answer the 비교 list's card gives,
+    and here the fork already draws it.
 
     The card row is where the track's constraint pays off. Every compared paper
     is guaranteed to have a rewrite, so the page can state what the papers
@@ -1195,15 +1206,15 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
     matrix column, and `compare.js` lights one paper across the page while the
     reader points at any of its places.
 
-    That is what lets the contract forbid the prose from introducing anybody:
-    the introduction is already on the page, so the first sentence of act 1 can
-    go straight at the divergence, and a reader who wants one paper's detail
-    has a door to it rather than a paragraph about it.
+    The argument reads like a rewrite's 상세: the acts as named milestones on a
+    contents rail, act 0 the background cards when the comparison names any,
+    and each act's rows the drawn pieces it carries — a comparison has few
+    sections and its tables and figures are what a reader comes back for.
 
     None of the 서재 layer is here — 즐겨찾기, 읽음, 책갈피 and 메모 are all keyed
     by arXiv id, and a comparison has a slug. Rather than ship controls that
-    cannot resolve, the page ships none: `paper.js` alone, for the term anchors
-    a shared vocabulary panel needs.
+    cannot resolve, the page ships none: `paper.js` alone, for the contents
+    and the term anchors a shared vocabulary panel needs.
     """
     papers = [papers_by_id[pid] for pid in comp.paper_ids]
     heads = [(p.stem, _alias(p), f"../../p/{p.stem}/index.html", c.paper_mark(i))
@@ -1218,18 +1229,23 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
                            matrix_heads=heads, figures=figures,
                            siblings={pid: p.title
                                      for pid, p in papers_by_id.items()})
-    renderer.lead_html = _cmp_lead(comp, renderer)
     rendered = renderer.render(comp.body)
     if problems is not None:
         problems.extend(f"comparison/{comp.slug}.md: {p}" for p in renderer.problems)
 
-    body = f"""{_cmp_header(comp, renderer)}
+    background, bg_entries = _cmp_background(comp)
+    rendered, entries = _cmp_contents(rendered, renderer.toc)
+    entries = bg_entries + entries
+    body = f"""{_cmp_header(comp)}
 {_cmp_cards(comp, papers)}
-{_cmp_primers(comp)}
-<div class="shell one">
-  <main class="article">
-    <section class="view">{rendered}</section>
-  </main>
+<div class="cmp-read">
+  {_act_strip(entries)}
+  <div class="shell">
+    <aside class="toc">{_toc(entries)}</aside>
+    <main class="article">
+      <section class="view">{background}{rendered}</section>
+    </main>
+  </div>
 </div>
 """
     return c.page(
@@ -1241,6 +1257,69 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
         scripts=["paper.js", "compare.js"],
         extra_head=f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/comparison/{comp.slug}.md">',
     )
+
+
+# The drawn pieces a comparison's contents list under each act, by the title
+# each prints: a figure tab's question, a timeline's or flow's title, a
+# matrix's head. A comparison's `###` sections are optional and usually absent,
+# so these are what a reader returning to the page looks for.
+_CMP_MARKS = re.compile(
+    r'<div class="pdiv pdiv-named" id="act-(?P<act>[^"]+)">'
+    r'|<h2 class="h-sec" id="(?P<sec>[^"]+)"'
+    r'|<(?P<tag>p|div) class="(?P<cls>figs-q|flow-title|box-head)">(?P<title>.*?)</(?P=tag)>',
+    re.S)
+
+
+def _cmp_contents(rendered: str, toc: list[dict]) -> tuple[str, list[dict]]:
+    """`(rendered, entries)` — the acts, their sections and their drawn pieces,
+    in reading order, each piece's title given an anchor to land on."""
+    acts = {e["n"]: e for e in toc if e.get("kind") == "act"}
+    secs = {e["id"]: e for e in toc if e.get("kind") == "sec"}
+    entries: list[dict] = []
+    seq = 0
+
+    def mark(m: re.Match) -> str:
+        nonlocal seq
+        if m.group("act"):
+            if m.group("act") in acts:
+                entries.append(acts[m.group("act")])
+            return m.group(0)
+        if m.group("sec"):
+            if m.group("sec") in secs:
+                entries.append(secs[m.group("sec")])
+            return m.group(0)
+        seq += 1
+        anchor = f"piece-{seq}"
+        label = html.unescape(re.sub(r"<[^>]+>", "", m.group("title"))).strip()
+        entries.append({"kind": "sec", "id": anchor, "label": label})
+        return (f'<{m.group("tag")} class="{m.group("cls")}" id="{anchor}">'
+                f'{m.group("title")}</{m.group("tag")}>')
+
+    return _CMP_MARKS.sub(mark, rendered), entries
+
+
+def _cmp_background(comp) -> tuple[str, list[dict]]:
+    """Act 0 — the background cards the comparison names, before act 1.
+
+    A drawing and one line each (`builder/primers.py`): the background a
+    reader outside the field needs before the divergence reads, given as
+    pictures rather than paragraphs. In the contents the act lists the cards
+    by name, unnumbered — the numbers count the argument's own stops. Unknown
+    ids were reported at discovery and are left out here.
+    """
+    ids = [pid for pid in comp.primer if pid in primers.PRIMERS]
+    if not ids:
+        return "", []
+    noun = c.CMP_ACT_NAMES["0"]
+    cards = "".join(primers.card(pid, anchor=f"bg-{pid}") for pid in ids)
+    entries = [{"kind": "act", "n": "0", "label": noun, "sub": c.CMP_BACKGROUND_Q}]
+    entries += [{"kind": "sec", "id": f"bg-{pid}", "label": primers.PRIMERS[pid][0],
+                 "nonum": True} for pid in ids]
+    return ('<div class="pdiv pdiv-named" id="act-0"><span class="pn">0</span>'
+            f'<span class="pt">{c.esc(noun)}</span>'
+            f'<span class="ps">{c.esc(c.CMP_BACKGROUND_Q)}</span></div>\n'
+            f'<div class="primer-row" data-n="{min(len(ids), 3)}">{cards}</div>\n',
+            entries)
 
 
 def _alias(paper: Paper) -> str:
@@ -1325,50 +1404,35 @@ def _fork(comp, papers_by_id: dict, mark: str = "") -> str:
     )
 
 
-def _cmp_header(comp, renderer: DocRenderer) -> str:
-    """The question, its pillars and date, and one line under it.
+def _cmp_header(comp) -> str:
+    """The question, and the problem the papers share under it.
 
-    That line is `problem:` — what every compared paper is up against, in plain
-    words — because a reader meeting the question needs the problem before any
-    answer to it. A comparison that has not written one prints its tagline
-    there instead, the comparison's own one-line answer.
+    One line above the question carries what the comparison is filed under:
+    its axes, how many papers it holds, and its date at the far end — the same
+    line a rewrite's header opens on. Under the question, `problem:` — what
+    every compared paper is up against, in plain words — because a reader
+    meeting the question needs the problem before any answer to it. A
+    comparison that has not written one prints its tagline there instead, the
+    comparison's own one-line answer.
     """
-    pillars = c.pillar_chips(comp.pillars)
     if comp.problem:
-        tagline = (f'<p class="cmp-tagline cmp-problem"><span class="cmp-problem-l">'
-                   f'같이 붙든 문제</span>{c.esc(comp.problem)}</p>')
+        under = (f'<p class="cmp-tagline cmp-problem"><span class="cmp-problem-l">'
+                 f'같이 붙든 문제</span>{c.esc(comp.problem)}</p>')
     elif comp.tagline:
-        tagline = f'<p class="cmp-tagline">{renderer.inline(comp.tagline)}</p>'
+        under = f'<p class="cmp-tagline">{c.esc(corpus._plain(comp.tagline))}</p>'
     else:
-        tagline = ""
+        under = ""
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
-    <div class="crumb-row">
-      <div class="crumb">
-        <a href="../index.html">비교</a> › {c.esc(comp.slug)}
-      </div>
+    <div class="ph-line">
+      {c.pillar_chips(comp.pillars)}
+      <span class="ph-count">논문 {len(comp.paper_ids)}편</span>
+      <span class="ph-date">작성 {c.esc(comp.date)}</span>
     </div>
     <h1 class="paper-title">{c.esc(comp.title)}</h1>
-    {f'<div class="chip-row head-facts">{pillars}</div>' if pillars else ""}
-    <div class="metaline"><span class="mi">{c.esc(comp.date)}</span><span class="mi">논문 {len(comp.paper_ids)}편</span></div>
-    {tagline}
+    {under}
   </div>
 </header>"""
-
-
-def _cmp_lead(comp, renderer: DocRenderer) -> str:
-    """The one-paragraph summary under the thesis, folded.
-
-    On a comparison page the fork and the cards above already say what the
-    summary says in prose, so it waits for a reader who wants the sentences.
-    """
-    out = ""
-    if comp.summary_md:
-        out += (
-            '<details class="tldr tldr-fold"><summary class="tldr-label">한 문단 요약</summary>'
-            f"<p>{renderer.inline(comp.summary_md)}</p></details>\n"
-        )
-    return f"\n{out}" if out else ""
 
 
 def _cmp_cards(comp, papers: list[Paper]) -> str:
@@ -1413,29 +1477,14 @@ def _cmp_cards(comp, papers: list[Paper]) -> str:
     )
 
 
-def _cmp_primers(comp) -> str:
-    """읽기 전에 — the background cards the comparison names, under the fork.
-
-    A drawing and one line each, at most three (`builder/primers.py`): the
-    background a reader outside the field needs before the divergence reads,
-    given as pictures rather than paragraphs. Unknown ids were reported at
-    discovery and are left out here.
-    """
-    cards = "".join(primers.card(pid) for pid in comp.primer if pid in primers.PRIMERS)
-    if not cards:
-        return ""
-    return ('<section class="cmp-primers" aria-label="읽기 전에">'
-            '<h2 class="cmp-primers-h">읽기 전에</h2>'
-            f'<div class="primer-row">{cards}</div></section>')
-
-
 def comparison_index_page(comps: list, papers_by_id: dict) -> str:
     """비교 — every comparison, newest first, as cards under the axis line.
 
     A card is one question: its axes and date on top, the question, what the
     papers share, and under a rule each paper's name with what it does about
-    the question. The tagline is not printed here — it is the same thought as
-    prose, and it prints under the H1 on the comparison's own page. The axis
+    the question. Under the question, the thesis — the answer reading them
+    together gives, which the comparison's own page leaves to its fork. The
+    tagline is not printed here: it is the same thought again. The axis
     line above is the analysis list's: pressing an axis keeps its comparisons
     (`cards.js`).
     """
@@ -1468,7 +1517,9 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
                     f'data-pillars="{" ".join(x.pillars)}">'
                     f'<div class="card-top"><p class="card-chips">{c.pillar_chips(x.pillars)}</p>'
                     f'<span class="card-id">{c.esc(_md_date(x.date))}</span></div>'
-                    f'<h3>{c.esc(x.title)}</h3>{common}<div class="cmp-sts">{sides}</div></a>')
+                    f'<h3>{c.esc(x.title)}</h3>'
+                    + (f'<p class="cmp-thesis">{c.esc(x.thesis)}</p>' if x.thesis else "")
+                    + f'{common}<div class="cmp-sts">{sides}</div></a>')
 
         # Three across at most, as many columns as keep the rows even.
         cols = -(-len(ordered) // -(-len(ordered) // 3))

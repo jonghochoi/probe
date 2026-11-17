@@ -33,14 +33,8 @@ from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.token import Comment, Generic, Keyword, Number, Operator, Text
 from pygments.util import ClassNotFound
 
-from .components import ACT_NAMES, glue_units
+from .components import ACT_NAMES, CMP_ACT_NAMES, glue_units
 from .mdext import callouts, ghmath, probefence
-
-# Printed above the thesis line, one per document kind: the reader has arrived
-# from an index and needs to know in one glance what this page is. A rewrite is
-# our re-telling of one paper, not the paper; a comparison retells none of its
-# papers — it sets them side by side and keeps only where they part.
-EYEBROW = {"compare": "같이 읽기 · 갈리는 자리만 원문에서 확인"}
 
 # `Figure 3 — <한글 캡션>` → ("Figure 3", "<한글 캡션>")
 _FIG_ALT = re.compile(r"^\s*(Figure\s*\d+|Fig\.?\s*\d+)\s*[—–-]\s*(.*)$", re.I)
@@ -112,9 +106,6 @@ _ACT_NUM = re.compile(r"^\s*(\d{1,2})[.)]?\s+(.*)$")
 # ceiling warns rather than fails; what it counts and why is
 # `comparison/AUTHORING.md` §2-5.
 COMPARE_CHARS_MAX = 7000
-
-# The comparison act that prints folded (`comparison/AUTHORING.md` §2-3).
-COMPARE_FOLD_ACT = "4"
 
 
 def _split_act(text: str) -> tuple[str, str]:
@@ -273,28 +264,24 @@ class DocRenderer:
                 inline.children = []
                 inline.content = ""
 
-        if level == 1 and self.kind == "paper":
-            # A rewrite's thesis heads its 요약 tab and the first screen, not
-            # its body: the page header already names the paper, and 상세
-            # starts at act 1.
+        if level == 1:
+            # The thesis prints outside the body: a rewrite's heads its 요약
+            # tab, a comparison's its card on the 비교 list. The page header
+            # already names the document, and the body starts at act 1.
             take_inline()
             self._pending_close = ""
             return ""
-
-        if level == 1:
-            # The thesis line, its tagline and the one-paragraph summary are one
-            # masthead, closed by a rule: everything above it is what the
-            # rewrite claims, everything below is the argument for it.
-            self._pending_close = "</h1>\n" + self.lead_html + "</header>\n"
-            return ('<header class="lead">'
-                    f'<p class="eyebrow">{EYEBROW[self.kind]}</p>'
-                    '<h1 class="thesis">')
 
         if level == 2:
             number, act = _split_act(label)
             self._acts_seen += 1
             n = html.escape(number or str(self._acts_seen))
-            name = ACT_NAMES.get(n) if self.kind == "paper" else None
+            if self.kind == "paper":
+                name = ACT_NAMES.get(n)
+            else:
+                # A comparison's question is its own heading; the noun is fixed.
+                noun = CMP_ACT_NAMES.get(n)
+                name = (noun, act) if noun else None
             self.toc.append({"kind": "act", "n": n, "label": name[0] if name else act,
                              "sub": name[1] if name else ""})
             take_inline()
@@ -304,21 +291,8 @@ class DocRenderer:
                     f'<div class="pdiv pdiv-named" id="act-{n}">'
                     f'<span class="pn">{n}</span>'
                     f'<span class="pt">{html.escape(name[0])}</span>'
-                    f'<span class="ps">{html.escape(name[1])}</span>'
+                    f'<span class="ps">{self._inline(name[1])}</span>'
                     "</div>\n"
-                )
-            if self.kind == "compare" and n == COMPARE_FOLD_ACT:
-                # A comparison's last act is the research-axis layer — what the
-                # divergence costs this project's open decisions. It reads only
-                # after the divergence itself has landed, so it prints closed
-                # and runs to the end of the document (`render()` closes it).
-                self._fold_open = True
-                return (
-                    '<details class="act-fold"><summary class="pdiv">'
-                    f'<span class="pn">{n}</span>'
-                    f'<span class="pt">{self._inline(act)}</span>'
-                    '<span class="act-fold-hint">펼쳐 보기</span>'
-                    "</summary>\n"
                 )
             return (
                 '<div class="pdiv">'
@@ -832,13 +806,10 @@ class DocRenderer:
         self._context_kinds = set()
         self._sections_without_keywords = []
         self._matrices = 0
-        self._fold_open = False
         self._printed_chars = len(_printed(source))
         masked = ghmath.mask_source(source)
         self._prescan_terms(masked)
         out = self.md.render(masked)
-        if self._fold_open:
-            out += "</details>\n"
         self._close_section()
         self._check()
         self._check_stray_emphasis(self.lead_html + out)

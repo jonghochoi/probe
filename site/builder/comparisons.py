@@ -52,6 +52,12 @@ class Comparison:
         return self.front.get("tagline", "")
 
     @property
+    def thesis(self) -> str:
+        """The body's `#` line, as plain text — printed on the 비교 list's card."""
+        m = re.search(r"^#[ \t]+(.+?)[ \t]*$", self.body, re.M)
+        return corpus._plain(m.group(1)) if m else ""
+
+    @property
     def paper_ids(self) -> list[str]:
         return frontmatter.as_list(self.front.get("compares", ""))
 
@@ -305,14 +311,8 @@ def _check_plain(name: str, ids: list[str], problem: str, plain: list[str]) -> l
 
 
 def _check_primer(name: str, primer: list[str]) -> list[str]:
-    """`primer` names at most three background cards, each one that exists."""
+    """`primer` names background cards that exist, each once."""
     problems = []
-    if len(primer) > primers.PRIMER_MAX:
-        problems.append(
-            f"comparison/{name}: `primer` names {len(primer)} cards — at most "
-            f"{primers.PRIMER_MAX}; past that the background is a lesson, and the "
-            f"comparison has stopped comparing"
-        )
     for pid in primer:
         if pid not in primers.PRIMERS:
             problems.append(

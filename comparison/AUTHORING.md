@@ -60,12 +60,12 @@ summary: >
 | `stances` | **One per entry of `compares`, in the same order** — what that paper does about the question, in 20 characters or fewer (`끝까지 푼다`, `토큰으로 접는다`). The divergence in its shortest form. A stance that needs a clause of mechanism to land is not a stance — that clause belongs in a `probe-matrix` cell |
 | `common` | One line, 30 characters or fewer: **the commitment all of them share** (`셋 다 이미지 평면에서 끝낸다`) — act 2 in its shortest form (§2-3). Required |
 | `problem` | One line, 60 characters or fewer: **the problem every compared paper is up against**, in words a reader outside the field follows. It prints under the question, in the tagline's place. Write it |
-| `primer` | **At most three** background cards, by id, from `site/builder/primers.py` — `vla` · `chunk` · `denoise` · `fk` · `latent` · `compress` · `retarget` · `taxel` · `proprio` · `track` · `frozen` · `history` · `edit-obs` · `speedup`. Each is a drawing and one plain line, printed under the paper cards as 읽기 전에. Name only what a reader outside the field cannot read the divergence without; a card cannot be defined in the document |
+| `primer` | Background cards, by id, from `site/builder/primers.py` — `vla` · `chunk` · `denoise` · `fk` · `latent` · `compress` · `retarget` · `taxel` · `proprio` · `track` · `frozen` · `history` · `edit-obs` · `speedup`. Each is a drawing and one plain line, printed as act 0, 배경, before act 1 and listed by name in the contents. There is no count: name every concept a reader outside the field cannot read the divergence without, and nothing they can. A card cannot be defined in the document |
 | `plain` | **One per entry of `compares`, in the same order**, 40 characters or fewer: what that paper does, said in everyday Korean — **no Latin script and no math**, so no acronym, no paper name, no symbol. An analogy is the usual shape (`손마다 통역사를 붙여 공통어로 말하게 한다`). It prints on the paper's card under its stance. Write it |
 | `pillars` | Ours, comma-separated. Which pillars this question sits in |
 | `generated` | `YYYY-MM-DD HH:MM` — the clock as you write |
 | `generator` | Literal `compare/v1` |
-| `summary` | 2–3 sentences read cold. Markdown and `` $`math`$ `` render |
+| `summary` | 2–3 sentences read cold. Not printed on the page — the fork says it in structure. Flattened for the page's `<meta>` description and `corpus.json` |
 
 **Two registers, one thought.** `tagline` is prose and prints on the
 comparison's own page, under the question — unless `problem` is written, which
@@ -115,12 +115,16 @@ Act 1 starts at the question that puts these papers on one table.
 ```
 
 `#` is the thesis: what emerges from reading them together, in one sentence.
-Not a title, and not a summary of any one paper.
+Not a title, and not a summary of any one paper. It prints on the comparison's
+card on the 비교 list, under the question — not on the comparison's own page,
+where the fork under the question already draws it.
 
-Act 4 prints **folded** — its divider is the line a reader opens. The
-research-axis layer reads only after the divergence itself has landed, so a
-first read of the page ends at act 3, and act 4 must not carry anything act 3
-needs.
+Each act prints as a short noun beside its heading — 질문 · 공통 · 갈림 ·
+시사점 — and the contents list the acts the same way, with the drawn pieces
+each act carries (a figure tab's question, a timeline's or flow's title, a
+matrix's head) as its stops. Write those titles as what a reader returning to
+the page would look for. The background cards, when the comparison names any,
+print before act 1 as act 0, 배경.
 
 Act 2 is load-bearing and is the act most often skipped. Papers that share
 nothing cannot diverge — they are merely different, and act 3 degenerates into
@@ -344,7 +348,7 @@ pull requests build, and the last row as its own CI gate.
 | `problem` and `plain` within their widths, `plain` parallel to `compares` and free of Latin script and math (§2-1) | `site/builder/comparisons.py` |
 | `probe-matrix` payload — axis count, `k`, a cell per paper, `of` known and unique, `v` present; a typed axis's own keys (§3-1) | `site/builder/mdext/probefence.py` |
 | `probe-figs` payload — `q`, a figure from at least two papers, `fig` declared by that paper's rewrite, `look` within its width (§3-2) | `site/builder/mdext/probefence.py` |
-| `primer` — at most three ids, each a card that exists (§2-1) | `site/builder/comparisons.py` |
+| `primer` — each id a card that exists, none named twice (§2-1) | `site/builder/comparisons.py` |
 | `probe-flow` `marks` and `blind` — compared papers only, each within its width, never both on one step (§3-3); `probe-timeline` payload — `span`, `unit`, `why`, values on the ruler, a row per paper at most once, a span's `style` and `level`, `cut_label` with `cuts` (§3-4) | `site/builder/mdext/probefence.py` |
 | At least one `probe-matrix`; the length ceiling; an unavailable fence in a comparison; `probe-matrix` in a rewrite (§2-4, §2-5) | `site/builder/render.py` |
 | Term anchor ↔ definition pairing, unclosed `**`, math published as literal text (R4, §2-7) | `site/builder/render.py`, shared with `analysis/` |

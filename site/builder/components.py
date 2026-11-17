@@ -241,6 +241,15 @@ def src_mark(kind: str) -> str:
 ACT_NAMES = {"1": ("문제", "무엇이 막혔나"), "2": ("방법", "무엇을 바꿨나"),
              "3": ("검증", "정말 되는가"), "4": ("시사점", "연구 축에 걸리는 것")}
 
+# A comparison's acts, by the same rule: a short noun beside the question the
+# act's own heading asks, so the two kinds of page read with one set of
+# landmarks. Its question is the author's heading, not fixed here — the
+# comparison contract names the four, and a heading reworded for two papers
+# rather than three still prints as written. Act 0 is the background cards,
+# which the page prints before act 1 when the comparison names any.
+CMP_ACT_NAMES = {"0": "배경", "1": "질문", "2": "공통", "3": "갈림", "4": "시사점"}
+CMP_BACKGROUND_Q = "먼저 알아 둘 것"
+
 
 def card_head(noun: str, sub: str = "") -> str:
     """A 요약 card's head: its short noun, underlined, and a grey line."""

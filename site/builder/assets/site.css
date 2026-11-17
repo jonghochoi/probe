@@ -651,11 +651,6 @@ html.js .isl { display: block; }
   mask-image: linear-gradient(180deg, #000 25%, transparent 100%);
 }
 .paper-head-inner { max-width: 1240px; margin: 0 auto; padding: 2rem 1.25rem 0; }
-/* A comparison's breadcrumb keeps to one line — an id is recoverable from the
-   address bar. */
-.crumb-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .6rem; }
-.crumb-row .crumb { flex: 1 1 auto; min-width: 0; margin-bottom: 0; overflow: hidden;
-                    text-overflow: ellipsis; white-space: nowrap; }
 /* A paper's first line: its axis chips, its arXiv id, its one result, and the
    rewrite's date at the far end. It wraps rather than scrolls — the date drops
    to the next line on a phone before anything is cut. */
@@ -681,9 +676,8 @@ html.js .isl { display: block; }
   font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.6;
   max-width: 80ch; margin-bottom: .7rem; text-wrap: pretty;
 }
-.crumb { font-size: var(--fs-2xs); color: var(--text-muted); margin-bottom: .6rem; }
-.crumb a { color: var(--text-muted); text-decoration: none; }
-.crumb a:hover { color: var(--orange-ink); }
+/* A comparison's count of papers, in the same line's quiet register. */
+.ph-count { font-size: var(--fs-2xs); color: var(--text-muted); margin-left: .15rem; }
 
 .paper-title {
   font-size: clamp(1.35rem, 3.2vw, 1.95rem);
@@ -697,7 +691,6 @@ html.js .isl { display: block; }
 /* Names, then affiliations on their own line and a step quieter. */
 .paper-authors .au-n, .paper-authors .au-a { display: block; }
 .paper-authors .au-a { font-size: var(--fs-2xs); opacity: .85; margin-top: .1rem; }
-.chip-row { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; margin-bottom: .9rem; }
 
 .chip {
   display: inline-flex; align-items: center; gap: .3rem;
@@ -758,17 +751,6 @@ html.js .isl { display: block; }
   width: 1em; height: 1em; flex: none;
   fill: none; stroke: currentColor; stroke-width: 1.7;
   stroke-linecap: round; stroke-linejoin: round;
-}
-
-/* Dates and length: read, not pressed. Monospace, and the separator rides on
-   the item ahead of it so a wrapped line never opens with a stray `·`. */
-.metaline {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .55rem;
-  font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
-  font-variant-numeric: tabular-nums; margin-bottom: .9rem;
-}
-.metaline .mi:not(:last-child)::after {
-  content: "·"; opacity: .4; margin-left: .55rem; display: inline-block;
 }
 
 /* ── 서재: the header's two controls ──────────────────────────────────── */
@@ -873,7 +855,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 }
 /* The bracket, in borders: a stub down from the trunk, a rail across the card
    centres, a tick down into each card. Drawn only where the cards stand in a
-   row; stacked, a left rule says the same thing. */
+   row; stacked, the trunk line above them says it alone. */
 .has-trunk .cmp-card-row { padding-top: 1.5rem; margin-top: .55rem; }
 .has-trunk .cmp-card-row::before, .has-trunk .cmp-card-row::after {
   content: ""; position: absolute; border-color: var(--amber-soft); border-style: solid;
@@ -898,8 +880,14 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 }
 .cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
 .cmp-card-h { display: flex; align-items: center; gap: .45rem; }
-.cmp-card-n { font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; line-height: 1.3; }
-.cmp-card:hover .cmp-card-n { color: var(--orange-ink); }
+/* Named like the 요약 cards: the alias underlined in the accent, and the
+   accent rising from the card's top edge. */
+.cmp-card { background-image: linear-gradient(180deg, color-mix(in oklab, var(--orange) 18%, transparent) 0, transparent 7rem); }
+.cmp-card-n {
+  font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; line-height: 1.3;
+  color: var(--orange-ink); padding-bottom: .2rem;
+  background: linear-gradient(var(--orange), var(--orange)) left bottom / 100% 2px no-repeat;
+}
 .cmp-card-s { font-size: var(--fs-base); font-weight: 600; line-height: 1.5; color: var(--text); }
 .cmp-card-t {
   font-size: var(--fs-2xs); line-height: 1.5; color: var(--text-muted);
@@ -917,7 +905,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 @media (max-width: 720px) {
   .cmp-trunk { justify-content: flex-start; text-align: left; }
   .cmp-card-row { grid-template-columns: minmax(0, 1fr); }
-  .has-trunk .cmp-card-row { padding: 0 0 0 .7rem; margin-top: .6rem; border-left: 2px solid var(--amber-soft); }
+  .has-trunk .cmp-card-row { padding: 0; margin-top: .6rem; }
   .has-trunk .cmp-card-row::before, .has-trunk .cmp-card-row::after, .has-trunk .cmp-card::before { display: none; }
 }
 
@@ -931,32 +919,21 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
    louder than it. */
 .cmp-card-plain { font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted); }
 
-/* The summary under a comparison's thesis prints folded: the fork above has
-   already said it in structure. Its label is the control. */
-.tldr-fold > summary { cursor: pointer; list-style: none; margin-bottom: 0; }
-.tldr-fold > summary::-webkit-details-marker { display: none; }
-.tldr-fold > summary::after { content: " · 펼쳐 보기"; color: var(--text-muted); font-weight: 600; letter-spacing: 0; }
-.tldr-fold[open] > summary { margin-bottom: .45rem; }
-.tldr-fold[open] > summary::after { content: ""; }
-.tldr-fold > summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
-
-/* ── 읽기 전에 ───────────────────────────────────────────────────────── */
-/* The background cards under the fork (`builder/primers.py`): a drawing and
-   one line each, all one size and one hand, so a row of them reads as one
-   set rather than three pictures competing. */
-.cmp-primers { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.5rem 0; }
-.cmp-primers-h {
-  font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
-  margin: 0 0 .6rem;
-}
-/* Three columns whatever the count, so two cards stay the size of three
-   rather than stretching their drawings across half the page each. */
-.primer-row { display: grid; gap: .7rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* ── 배경 — act 0 ────────────────────────────────────────────────────── */
+/* The background cards (`builder/primers.py`): a drawing and one line each,
+   all one size and one hand, so a row of them reads as one set rather than
+   pictures competing. Three to a row, wrapping past that; two share the
+   column rather than leave a third of it empty, and one keeps a card's
+   width. */
+.primer-row { display: grid; gap: .7rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1.6rem 0 0; }
+.primer-row[data-n="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.primer-row[data-n="1"] { grid-template-columns: minmax(0, 1fr); max-width: 22rem; }
+.primer { scroll-margin-top: calc(var(--nav-h) + 1rem); }
 /* On a phone the cards stay one row the reader swipes through, rather than
-   three screens of pictures before the argument starts. */
+   screens of pictures before the argument starts. */
 @media (max-width: 720px) {
-  .cmp-primers { padding: 1.2rem .9rem 0; }
-  .primer-row {
+  .primer-row, .primer-row[data-n] {
+    max-width: none;
     grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%;
     overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: .3rem;
   }
@@ -1056,25 +1033,6 @@ table.mx td, table.mx thead th { transition: opacity var(--dur-short) var(--ease
 @media (prefers-reduced-motion: reduce) {
   .cmp-card, table.mx td, table.mx thead th { transition: none; }
 }
-
-/* The research-axis act prints folded: its divider is the summary, and the
-   hint says the act is there to open. */
-.act-fold > summary { list-style: none; cursor: pointer; }
-/* Opened, the folded act's content sits in the details' own box, where no
-   margin collapses into the divider's, so the divider keeps its space and
-   the step below it is written out: the same 2.8rem every act divider
-   leaves (see `.pdiv`). */
-.act-fold > summary.pdiv { margin-bottom: 0; }
-.act-fold > summary.pdiv + * { margin-top: 2.8rem; }
-.act-fold > summary.pdiv + h2.h-sec { margin-top: 2.2rem; }
-.act-fold > summary::-webkit-details-marker { display: none; }
-.act-fold-hint {
-  order: 3; flex: 0 0 auto; font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
-  border: 1px solid var(--border); border-radius: var(--radius-pill); padding: .05rem .55rem;
-}
-.act-fold > summary::after { order: 2; }
-.act-fold[open] .act-fold-hint { display: none; }
-.act-fold > summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
 
 /* ── ```probe-matrix ──────────────────────────────────────────────────── */
 /* One question per row, one paper per column. Three columns of Korean
@@ -1184,9 +1142,6 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 
 /* ── Layout ───────────────────────────────────────────────────────────── */
-/* A comparison has no table of contents — it is short by contract — so its
-   shell is one column rather than the rewrite's rail-and-article pair. */
-.shell.one { grid-template-columns: minmax(0, 1fr); max-width: 900px; }
 .shell {
   max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 6rem;
   display: grid; grid-template-columns: var(--toc-w) minmax(0, 1fr); gap: 2.6rem;
@@ -1326,23 +1281,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 .mark-fab[aria-pressed="true"] svg { fill: currentColor; }
 .article { min-width: 0; }
 
-/* ── Masthead ─────────────────────────────────────────────────────────── */
-/* Thesis, tagline and summary are one unit, closed by the orange rule: above
-   it is what this rewrite claims, below it the argument. */
-.lead { border-bottom: 2px solid var(--orange); padding-bottom: 1.4rem; margin-bottom: 1rem; }
-.eyebrow {
-  font-size: var(--fs-2xs); font-weight: 700;
-  color: var(--orange-ink); margin-bottom: .7rem;
-}
-
 /* ── Prose ────────────────────────────────────────────────────────────── */
-/* A comparison's body H1 is its thesis, not the papers' titles — the page
-   header above already printed those. It is the largest thing on the page
-   because it is the one sentence a reader should leave with. */
-.article h1.thesis {
-  font-size: clamp(1.6rem, 3.4vw, 2.15rem); font-weight: 800;
-  letter-spacing: -.02em; line-height: 1.32; margin: .25rem 0 1.4rem;
-}
 
 /* An act divider, not a heading: it names which of the four questions the
    sections below answer and has no content of its own. */
@@ -1373,6 +1312,12 @@ table.mx thead th[scope="col"] { width: 26%; }
 .pdiv-named .ps { font-size: var(--fs-xs); color: var(--text-muted); }
 .pdiv-named::after { align-self: center; height: 1px; background: var(--border); opacity: 1; }
 .view > .pdiv:first-child { margin-top: .25rem; }
+/* A comparison's drawn pieces are its contents' stops: their titles are what
+   the rail links to. */
+.view :is(.figs-q, .flow-title, .box-head)[id] { scroll-margin-top: calc(var(--nav-h) + 1rem); }
+@media (max-width: 1024px), (hover: none) {
+  .view :is(.figs-q, .flow-title, .box-head)[id], .primer { scroll-margin-top: calc(var(--nav-h) + 3.4rem); }
+}
 
 /* A hairline over every section. Nine sections down a long page, the gap
    alone stopped reading as a boundary — the eye needs the line to know a new
@@ -1407,25 +1352,8 @@ table.mx thead th[scope="col"] { width: 26%; }
   color: var(--orange-ink);
 }
 
-/* ── A comparison's one-paragraph summary (front matter `summary`) ─────── */
-/* One family: every card whose signal is a 3px left border squares off on
-   that edge. Rounding it bent the accent into a curve and each such card read
-   as a slightly different component. `.tdef` and the five callouts already
-   did this; `.tldr` and `.quiz` were the two that did not. */
-.tldr {
-  border: 1px solid var(--border); border-left: 3px solid var(--orange);
-  border-radius: 0 var(--radius) var(--radius) 0; background: var(--surface);
-  /* No bottom margin: `.lead` already reserves the space down to its rule, and
-     stacking the two put a paragraph of air between the summary and act 1. */
-  padding: 1rem 1.15rem; margin: 1.4rem 0 0;
-}
-.tldr-label {
-  display: block; font-size: var(--fs-2xs); font-weight: 800;
-  color: var(--orange-ink); margin-bottom: .45rem;
-}
-.tldr p { margin: 0; font-size: var(--fs-base); line-height: 1.75; }
 /* Prose margins belong to PROSE, and the selectors say where prose is: the
-   article's own flow — a comparison's folded act 4 included — and the two
+   article's own flow and the two
    containers that hold markdown bodies.
    `.article p` / `.article li` are (0,1,1) and beat every component's own
    (0,1,0) spacing rule, so each one silently inherited body-paragraph margins
@@ -1434,16 +1362,16 @@ table.mx thead th[scope="col"] { width: 26%; }
    were pushed apart by 12.8px twice over, and the equation reading line sat a
    full paragraph gap above its formula. Every component in this file owns its
    internal spacing; nothing may reach in from out here. */
-.view > p, .act-fold > p, .c-body > p, .fold-body > p { margin: .8rem 0; }
+.view > p, .c-body > p, .fold-body > p { margin: .8rem 0; }
 /* A paragraph's last line keeps at least two words: one word alone under a
    full line reads as a stray line rather than the end of the thought. */
-.view > p, .act-fold > p, .c-body > p, .fold-body > p,
-.tldr p, .g-narr-body p { text-wrap: pretty; }
-.view > ul, .view > ol, .act-fold > ul, .act-fold > ol,
+.view > p, .c-body > p, .fold-body > p,
+.g-narr-body p { text-wrap: pretty; }
+.view > ul, .view > ol,
 .c-body ul, .c-body ol, .fold-body ul, .fold-body ol {
   margin: .8rem 0 .8rem 1.2rem;
 }
-.view > ul li, .view > ol li, .act-fold > ul li, .act-fold > ol li,
+.view > ul li, .view > ol li,
 .c-body li, .fold-body li { margin: .35rem 0; }
 .view li > ul, .view li > ol,
 .c-body li > ul, .fold-body li > ul { margin: .3rem 0 .3rem 1rem; }
@@ -2177,12 +2105,16 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   .article h2.h-sec, .pdiv-named { scroll-margin-top: calc(var(--nav-h) + var(--tabs-h, 0px) + 3.4rem); }
 }
 .actstrip-in {
-  max-width: 1180px; margin: 0 auto; padding: 0 .9rem;
-  display: flex; align-items: stretch; gap: .1rem;
+  max-width: 1180px; margin: 0 auto; padding: 0 .35rem 0 .9rem;
+  display: flex; align-items: stretch;
+}
+/* The milestones scroll; the 목차 button beside them does not. */
+.as-links {
+  position: relative; flex: 1 1 auto; min-width: 0; display: flex; align-items: stretch; gap: .1rem;
   overflow-x: auto; scrollbar-width: none;
 }
-.actstrip-in::-webkit-scrollbar { display: none; }
-/* Four milestones joined by a line; the act being read has its dot filled. */
+.as-links::-webkit-scrollbar { display: none; }
+/* The milestones joined by a line; the act being read has its dot filled. */
 .as-link {
   display: inline-flex; align-items: center; gap: .3rem; white-space: nowrap;
   padding: .6rem .1rem; font-size: var(--fs-xs); font-weight: 500;
@@ -2199,9 +2131,9 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .as-link[aria-current="true"] { color: var(--orange-ink); font-weight: 700; }
 .as-link[aria-current="true"] .as-dot { background: var(--orange); border-color: var(--orange); }
 .as-toc {
-  margin-left: auto; display: inline-flex; align-items: center; gap: .3rem;
-  border: 0; background: none; font: inherit; font-size: var(--fs-xs);
-  color: var(--text-muted); cursor: pointer; padding: .5rem .3rem; white-space: nowrap;
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  margin-left: .3rem; padding: 0 .55rem; border: 0; border-left: 1px solid var(--border);
+  background: none; color: var(--text-muted); cursor: pointer;
 }
 .as-toc[hidden] { display: none; }
 .as-toc:hover { color: var(--orange-ink); }
@@ -2705,7 +2637,7 @@ body::before {
 @media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 
 /* Every page title and list title in the display face at one weight. */
-.paper-title, .mast h1, .article h1.thesis, .article h2.h-sec, .gh-thesis,
+.paper-title, .mast h1, .article h2.h-sec, .gh-thesis,
 .row-title, .cmp-card-t, .rel-title { font-family: var(--t-display); font-weight: 700; letter-spacing: -.015em; }
 
 /* ── Reader colour ────────────────────────────────────────────────────── */

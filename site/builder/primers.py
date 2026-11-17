@@ -2,8 +2,8 @@
 
 A comparison holds papers a reader may not have the background for, and the
 answer is not a paragraph of definitions: a card is a drawing and one plain
-line, and a page shows at most three (`comparison/AUTHORING.md` §2-1,
-`primer`). The cards live here, drawn once, so every comparison that needs
+line, and a page shows the ones the comparison names (`comparison/AUTHORING.md`
+§2-1, `primer`). The cards live here, drawn once, so every comparison that needs
 "행동 청크" shows the same picture of it rather than redefining it in prose.
 
 Each drawing is inline SVG in a 260 × 150 box, coloured only through the
@@ -274,12 +274,11 @@ PRIMERS: dict[str, tuple[str, str, object]] = {
     "speedup": ("실행 속도", "같은 동작을 더 짧은 시간에 해내게 한다", _speedup),
 }
 
-PRIMER_MAX = 3
-
-
-def card(pid: str) -> str:
-    """One card as markup — the drawing over its title and line."""
+def card(pid: str, anchor: str = "") -> str:
+    """One card as markup — the drawing over its title and line, with `anchor`
+    as its id when the page's contents link to it."""
     title, line, draw = PRIMERS[pid]
-    return (f'<figure class="primer"><svg viewBox="0 0 {_W} {_H}" role="img" '
+    ident = f' id="{html.escape(anchor)}"' if anchor else ""
+    return (f'<figure class="primer"{ident}><svg viewBox="0 0 {_W} {_H}" role="img" '
             f'aria-label="{html.escape(title)} — {html.escape(line)}">{draw()}</svg>'
             f'<figcaption><b>{html.escape(title)}</b>{html.escape(line)}</figcaption></figure>')
