@@ -33,7 +33,7 @@ PAGE_DEFAULT = 10
 # page can afford to carry. It is fetched once and cached across the whole site,
 # so the ceiling is generous — but it grows with the corpus and nothing else
 # here does, so the build says something rather than letting it drift.
-INDEX_BUDGET = 100 * 1024
+CORPUS_INDEX_BUDGET = 100 * 1024
 
 
 def corpus_index(papers: list[Paper], comps: list | None = None,
@@ -190,7 +190,7 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
                 f'<span class="hm-k">{kind}<small>{c.esc(when)}</small></span>'
                 f'<b>{c.esc(title)}</b>{sub}</a></li>')
 
-    feed = ([("분석", p.date, f"p/{c.esc(p.stem)}/index.html", _alias(p), p.tagline) for p in ordered[:3]]
+    feed = ([("분석", p.date, f"p/{c.esc(p.stem)}/index.html", display_alias(p), p.tagline) for p in ordered[:3]]
             + [("탐색", run.date, f"s/index.html#p-{c.esc(p.paper_id)}", p.alias, _md_plain(p.gist))
                for p in tops[:2]]
             + [("비교", x.date, f"c/{c.esc(x.slug)}/index.html", x.title, "") for x in cmps[:1]])
@@ -238,7 +238,7 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
     if ordered:
         p = ordered[0]
         thesis = _thesis(p)
-        line = (f'이번 주엔 <b>{c.esc(_alias(p))}</b>부터 읽어 보세요.'
+        line = (f'이번 주엔 <b>{c.esc(display_alias(p))}</b>부터 읽어 보세요.'
                 + (f" “{c.esc(_md_plain(thesis))}”" if thesis else ""))
     mascot = (f'<div class="hm-mascot"><span class="hm-mk" aria-hidden="true">{c.mark(64)}</span>'
               f'<p class="hm-bubble">{line}</p></div>' if line else "")
@@ -260,7 +260,7 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
         body=body,
         depth=0,
         description="손 조작 연구를 고르고, 풀어 쓰고, 나란히 놓는 곳 — 최근 글과 연구 축, 학회 일정",
-        scripts=["home.js"],
+        scripts=["brand.js", "home.js"],
         extra_head=f'<link rel="stylesheet" href="{c.asset("assets/home.css")}">',
         body_attrs="data-home",
     )
@@ -774,8 +774,9 @@ def _acts(paper: Paper) -> str:
     They are glyphs, a pair of round buttons at the right end of the action
     bar, past a hairline from the links: the bar is one line on a phone only
     while nothing in it is a word it can do without, and a star and a check are
-    the two marks this site already draws for these two states. What each does and which way it goes is the
-    button's accessible name, which `shelf.js` keeps in step with the state.
+    the two marks this site already draws for these two states. What each does is the button's
+    accessible name, and `shelf.js` keeps its `aria-pressed` in step with the
+    state.
     """
     return f"""<div class="paper-acts" data-paper-acts
      data-paper-id="{c.esc(paper.stem)}" data-paper-title="{c.esc(paper.title)}">
@@ -1201,7 +1202,7 @@ def comparison_page(comp, papers_by_id: dict, katex, decisions: dict,
     and the term anchors a shared vocabulary panel needs.
     """
     papers = [papers_by_id[pid] for pid in comp.paper_ids]
-    heads = [(p.stem, _alias(p), f"../../p/{p.stem}/index.html", c.paper_mark(i))
+    heads = [(p.stem, display_alias(p), f"../../p/{p.stem}/index.html", c.paper_mark(i))
              for i, p in enumerate(papers)]
 
     figures = {}
@@ -1306,7 +1307,7 @@ def _cmp_background(comp) -> tuple[str, list[dict]]:
             entries)
 
 
-def _alias(paper: Paper) -> str:
+def display_alias(paper: Paper) -> str:
     """The paper's short name, wherever a title does not fit.
 
     `alias:` is the rewrite's own answer, resolved against the paper's original
@@ -1371,7 +1372,7 @@ def _fork(comp, papers_by_id: dict, mark: str = "") -> str:
         )
     branches = "".join(
         f'<span class="fork-n{" is-self" if pid == mark else ""}">'
-        f'{c.esc(_alias(papers_by_id[pid]) if pid in papers_by_id else pid)}</span>'
+        f'{c.esc(display_alias(papers_by_id[pid]) if pid in papers_by_id else pid)}</span>'
         f'<span class="fork-id">{c.esc(pid)}</span>'
         f'<span class="fork-s">{c.esc(stance)}</span>'
         for pid, stance in zip(comp.paper_ids, stances)
@@ -1403,7 +1404,7 @@ def _cmp_header(comp) -> str:
         under = (f'<p class="cmp-tagline cmp-problem"><span class="cmp-problem-l">'
                  f'같이 붙든 문제</span>{c.esc(comp.problem)}</p>')
     elif comp.tagline:
-        under = f'<p class="cmp-tagline">{c.esc(corpus._plain(comp.tagline))}</p>'
+        under = f'<p class="cmp-tagline">{c.esc(corpus.plain_text(comp.tagline))}</p>'
     else:
         under = ""
     return f"""<header class="paper-head">
@@ -1441,7 +1442,7 @@ def _cmp_cards(comp, papers: list[Paper]) -> str:
         f'<a class="cmp-card" data-paper="{c.esc(p.stem)}" '
         f'href="../../p/{c.esc(p.stem)}/index.html">'
         f'<span class="cmp-card-h">{c.paper_mark(i, 12)}'
-        f'<span class="cmp-card-n">{c.esc(_alias(p))}</span></span>'
+        f'<span class="cmp-card-n">{c.esc(display_alias(p))}</span></span>'
         + (f'<span class="cmp-card-s">{c.esc(stance)}</span>' if stance else "")
         + (f'<span class="cmp-card-plain">{c.esc(line)}</span>' if line else "")
         + f'<span class="cmp-card-t">{c.esc(p.title)}</span>'
@@ -1490,7 +1491,7 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
             f' · 최근 {c.esc(ordered[0].date)}</span></div>')
 
         def card(x) -> str:
-            names = [_alias(papers_by_id[pid]) if pid in papers_by_id else pid
+            names = [display_alias(papers_by_id[pid]) if pid in papers_by_id else pid
                      for pid in x.paper_ids]
             stances = x.stances if len(x.stances) == len(names) else [""] * len(names)
             sides = "".join(f'<p class="cmp-st"><b>{c.esc(n)}</b><span>{c.esc(s)}</span></p>'

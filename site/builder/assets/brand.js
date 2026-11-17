@@ -1,5 +1,5 @@
-/* The mark's pupils follow the pointer. Loaded on every page, since the nav
-   carries the mark everywhere; the idle bob, the blink, the mood swap and the
+/* The mark's pupils follow the pointer. Loaded on the first screen, the one
+   page that carries the mark; the idle bob, the blink, the mood swap and the
    sprout's sway are pure CSS and run without this file. */
 
 (function () {

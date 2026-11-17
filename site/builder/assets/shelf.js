@@ -256,8 +256,6 @@ function paint(root = document) {
     // On and off are one path filled or not (`index.css`), so nothing here
     // rewrites markup to answer a click.
     el.setAttribute("aria-pressed", on ? "true" : "false");
-    const label = el.querySelector("[data-star-text]");
-    if (label) label.textContent = on ? "즐겨찾기 됨" : "즐겨찾기";
   });
   root.querySelectorAll("[data-read-of]").forEach((el) => {
     const id = el.dataset.readOf;

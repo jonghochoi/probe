@@ -257,17 +257,10 @@ def card_head(noun: str, sub: str = "") -> str:
             + (f'<span>{esc(sub)}</span>' if sub else "") + "</div>")
 
 
-def chip(label: str, cls: str = "", *, href: str = "", data: dict | None = None,
-         mark: str = "") -> str:
+def chip(label: str, cls: str = "", *, data: dict | None = None) -> str:
     attrs = "".join(f' data-{k}="{esc(v)}"' for k, v in (data or {}).items())
-    inner = f"{mark}{esc(label)}"
     classes = f"chip {cls}".strip()
-    if href:
-        return (
-            f'<a class="{classes} link" href="{esc(href)}" target="_blank" '
-            f'rel="noopener"{attrs}>{inner}</a>'
-        )
-    return f'<span class="{classes}"{attrs}>{inner}</span>'
+    return f'<span class="{classes}"{attrs}>{esc(label)}</span>'
 
 
 def pillar_chips(pillars: list[str]) -> str:
@@ -430,7 +423,7 @@ def page(
     # a render. Shared state goes on `window.ProbeMemo` instead of exports.
     #
     # The unconditional ones are the ones every page carries: theme.js drives
-    # the nav card's 화면 and 색 테마 rows, brand.js the mark beside it, nav.js
+    # the nav card's 화면 and 색 테마 rows, nav.js
     # the pill and the card it grows into, and the ⌘K palette is
     # reachable from anywhere — so its index, its matching rule and the script
     # itself ride along too, and so does `pillar.js`, since an axis chip on any
@@ -438,7 +431,7 @@ def page(
     # what lets `filter.js` further down the list read `match.js`.
     script_tags = "".join(
         f'<script src="{asset(f"{up}assets/{s}")}" defer></script>'
-        for s in ["theme.js", "brand.js", "nav.js", "corpus-index.js",
+        for s in ["theme.js", "nav.js", "corpus-index.js",
                   "match.js", "palette.js", "pillar.js", *(scripts or [])]
     )
     return f"""<!DOCTYPE html>
@@ -644,7 +637,7 @@ def nav(up: str, here: str = "") -> str:
         for key, href, label in DESTINATIONS)
     return f"""<nav class="site-nav">
   <div class="nav-inner">
-    <a class="nav-logo" href="{up}index.html">{mark(19)}<span class="nav-word">PROBE</span></a>
+    <a class="nav-logo" href="{up}index.html"><span class="nav-word">PROBE</span></a>
     <span class="nav-spacer"></span>
     <ul class="nav-links">{links}</ul>
     <span class="nav-rule"></span>

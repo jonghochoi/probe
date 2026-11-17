@@ -107,12 +107,13 @@ there is neither — `/analyze`'s stop condition — and
 called by hand from a run, so keep them importable without the rest of the
 build. The build's one use of `arxiv.py` is `builder/scoutfigs.py`.
 
-**Four pieces are borrowed by the distinction track.** `distinction/render-distinction.py`
-draws the private versus notes, reports and code notes with `builder/charts.py`,
-`builder/decisions.py`, the `:root` blocks of `assets/site.css` and the whole of
-`assets/charts.css`. It runs on the standard library and its pages never reach
-the site, so keep those two modules free of a third-party import at module
-scope.
+**The distinction track draws with four pieces of this folder.**
+`distinction/render-distinction.py` draws the private versus notes, reports
+and code notes with `builder/charts.py` and `assets/charts.css`, which exist
+for it alone and no site page links, and with `builder/decisions.py` and the
+`:root` blocks of `assets/site.css`, which it shares with the site. It runs on
+the standard library and its pages never reach the site, so keep those two
+modules free of a third-party import at module scope.
 
 **The build reaches the network only when asked.** `--scout-figures` fetches
 the arXiv HTML of each written-up scouted paper to pick its overview figure,
@@ -131,10 +132,10 @@ is run by hand and never in CI.
 **`corpus.json` carries front matter and relations, never bodies.** It exists
 to fit one context window beside an agent's question, so a record points at the
 raw Markdown (`source`) rather than holding it, and the build refuses the file
-past `catalog.BUDGET`. From `context/` it carries only what the pages already
-print in a `D#` tooltip — the code, its pillar and its title. Relations stay
-one kind per field; only `neighbours` is a score, and it is `corpus.score`, the
-rule the page's own neighbour row ranks by.
+past `catalog.CORPUS_JSON_BUDGET`. From `context/` it carries only what the
+pages already print in a `D#` tooltip — the code, its pillar and its title.
+Relations stay one kind per field; only `neighbours` is a score, and it is
+`corpus.score`, the rule the page's own neighbour row ranks by.
 
 **Section files are the page's own headings, never a second parser.** A full
 build writes each rewrite's H3s as `p/<id>/s/<anchor>.md` with

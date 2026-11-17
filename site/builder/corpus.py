@@ -372,7 +372,7 @@ class Paper:
     @property
     def preview(self) -> str:
         """The summary flattened for the page's `<meta>` description."""
-        return _plain(self.front.get("summary", ""))
+        return plain_text(self.front.get("summary", ""))
 
     @property
     def search_key(self) -> str:
@@ -456,7 +456,7 @@ def tex_to_text(tex: str) -> str:
     return tex.replace("{", "").replace("}", "").replace("\\", "").strip()
 
 
-def _plain(md: str, limit: int = 240) -> str:
+def plain_text(md: str, limit: int = 240) -> str:
     """Strip markup for a plain-text card preview."""
     text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", md)
     text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
@@ -515,7 +515,7 @@ def _fragments(paper: "Paper") -> list[str]:
         *paper.filed,
         *(PILLAR_NAMES[p] for p in paper.filed if p in PILLAR_NAMES),
         *(PILLAR_LABELS[p] for p in paper.filed if p in PILLAR_LABELS),
-        _plain(paper.summary_md, limit=10_000),
+        plain_text(paper.summary_md, limit=10_000),
     ]
     # Headings carry both languages — `### 한글 제목 | English · Subtitle` — and
     # the English half is often the only place the paper's own term appears.
@@ -536,7 +536,7 @@ def _haystack(fragments: list[str]) -> str:
     seen: set[str] = set()
     kept: list[str] = []
     for frag in fragments:
-        piece = compact(_plain(frag, limit=2_000))
+        piece = compact(plain_text(frag, limit=2_000))
         if not piece or piece in seen:
             continue
         seen.add(piece)

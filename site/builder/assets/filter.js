@@ -1,4 +1,6 @@
-/* Analysis-list filter, pager and deep-link state.
+/* The analysis list's behaviour: the filter, the pager and the deep-link
+ * state; a row's figure on a resting pointer; and 빈자리's folded name line
+ * (its own block at the end).
  *
  * The rows are already in the DOM — this only toggles `hidden` and reorders
  * nodes inside the one list container. Nothing is fetched and nothing is

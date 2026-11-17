@@ -19,22 +19,22 @@
 .sn-dline .rail-item { gap: .35rem; text-decoration: none; }
 .sn-dline .rail-item b { font-variant-numeric: tabular-nums; }
 .sn-dline .rail-item:hover { background: var(--surface-2); }
-.sn-dline .rail-item[aria-current="page"] { background: var(--orange); }
+.sn-dline .rail-item[aria-current="page"] { background: var(--accent); }
 .sn-dline .rail-item[aria-current="page"] b,
-.sn-dline .rail-item[aria-current="page"] .rn { color: var(--accent-ink); opacity: 1; }
+.sn-dline .rail-item[aria-current="page"] .rn { color: var(--on-accent); opacity: 1; }
 
 /* The calendar cell is the calendar's button: a native disclosure, so it
    opens with no script; `scout.js` closes it on a click elsewhere. */
 .sn-calw { flex: none; display: flex; }
 .sn-lab {
   display: grid; place-items: center; width: 2.9rem; cursor: pointer; list-style: none;
-  background: var(--orange-soft); color: var(--orange-ink);
+  background: var(--accent-soft); color: var(--accent-ink);
   border-radius: calc(var(--radius) - 1px) 0 0 calc(var(--radius) - 1px);
   transition: background var(--dur-short) var(--ease-out);
 }
 .sn-lab::-webkit-details-marker { display: none; }
-.sn-lab:hover, .sn-calw[open] > .sn-lab { background: color-mix(in srgb, var(--orange) 18%, var(--orange-soft)); }
-.sn-lab:focus-visible { outline: 2px solid var(--orange); outline-offset: -3px; }
+.sn-lab:hover, .sn-calw[open] > .sn-lab { background: color-mix(in srgb, var(--accent) 18%, var(--accent-soft)); }
+.sn-lab:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
 .sn-cal {
   position: absolute; left: 0; top: calc(100% + .4rem); z-index: var(--z-raised); width: 21rem; max-width: calc(100vw - 1.8rem);
   display: grid; gap: 1rem; padding: .9rem .9rem .8rem; border-radius: var(--radius); background: var(--surface);
@@ -48,7 +48,7 @@
   background: transparent; color: var(--text); cursor: pointer; font-size: 1.1rem; line-height: 1;
 }
 html.js .sn-nav { display: block; }
-.sn-nav:hover:not(:disabled) { border-color: var(--orange); color: var(--orange-ink); }
+.sn-nav:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-ink); }
 .sn-nav:disabled { opacity: .3; cursor: default; }
 html.js .sn-month[hidden] { display: none; }
 .sn-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
@@ -59,11 +59,11 @@ html.js .sn-month[hidden] { display: none; }
 }
 .sn-day.is-pad { visibility: hidden; }
 .sn-dn { font-size: var(--fs-2xs); font-variant-numeric: tabular-nums; }
-.sn-day.has-run { background: var(--orange-soft); }
-.sn-day.has-run:hover { border-color: var(--orange); }
-.sn-day.is-sel { background: var(--orange); }
-.sn-day.is-sel .sn-dn, .sn-day.is-sel .sn-cnt { color: var(--accent-ink); }
-.sn-cnt { font-size: 10px; font-weight: 700; color: var(--orange-ink); line-height: 1; }
+.sn-day.has-run { background: var(--accent-soft); }
+.sn-day.has-run:hover { border-color: var(--accent); }
+.sn-day.is-sel { background: var(--accent); }
+.sn-day.is-sel .sn-dn, .sn-day.is-sel .sn-cnt { color: var(--on-accent); }
+.sn-cnt { font-size: 10px; font-weight: 700; color: var(--accent-ink); line-height: 1; }
 
 .chip.sn-rk i { font-style: normal; opacity: .55; margin: 0 .2rem; }
 
@@ -73,7 +73,7 @@ html.js .sn-month[hidden] { display: none; }
 .sn .tl-head + .tl { margin-top: -1.2rem; }
 
 .sc-sources { margin: 1rem 0 0; font-size: var(--fs-2xs); color: var(--text-muted); }
-.sn .sc-sources a { color: var(--orange-ink); }
+.sn .sc-sources a { color: var(--accent-ink); }
 
 /* ── The detail ───────────────────────────────────────────────────────── */
 /* With no script every article stands in a column at the page's foot, its
@@ -86,7 +86,7 @@ html.js .sd-all { display: none; }
 .sd-top { display: flex; align-items: center; gap: .6rem; }
 .sd-top .card-chips { flex: 1; }
 /* A paper the corpus has already rewritten links that reading beside arXiv. */
-.sd-top .sd-rw { color: var(--orange-ink); font-weight: 700; }
+.sd-top .sd-rw { color: var(--accent-ink); font-weight: 700; }
 .sd-top .sd-rw:hover { text-decoration: underline; text-underline-offset: 2px; }
 .sd-h h2 { margin: .55rem 0 .15rem; font-family: var(--t-display); font-size: var(--fs-2xl); line-height: 1.25; }
 .sd-t { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.5; }
@@ -112,14 +112,14 @@ html.js .dx-tabbar { display: flex; }
 }
 .dx-tabbar button:hover { color: var(--text); }
 .dx-tabbar button[aria-selected="true"] {
-  color: var(--orange-ink); font-weight: 700;
-  background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat;
+  color: var(--accent-ink); font-weight: 700;
+  background: linear-gradient(var(--accent), var(--accent)) center bottom / 100% 2px no-repeat;
 }
 .dx-tc { margin-left: .35rem; font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.dx-tabbar button[aria-selected="true"] .dx-tc { color: var(--orange-ink); }
+.dx-tabbar button[aria-selected="true"] .dx-tc { color: var(--accent-ink); }
 .dx-pane { padding-top: .5rem; }
 html.js .dx-pane[hidden] { display: none; }
-.dx-pt { margin: 1rem 0 0; font-size: var(--fs-xs); color: var(--orange-ink); }
+.dx-pt { margin: 1rem 0 0; font-size: var(--fs-xs); color: var(--accent-ink); }
 html.js .dx-pt { display: none; }
 /* Every heading inside is a short noun and a grey line saying what it stands
    for. The tab above is the pane's title, so the noun stays under it — the
@@ -131,7 +131,7 @@ html.js .dx-pt { display: none; }
 .dx-nh { margin: 0 0 .4rem; display: flex; align-items: baseline; font-size: var(--fs-sm); font-weight: 700; color: var(--text); }
 .dx-nh::before {
   content: ""; flex: none; align-self: center; width: .38rem; height: .38rem; margin-right: .45rem;
-  border-radius: 2px; background: var(--orange);
+  border-radius: 2px; background: var(--accent);
 }
 .dx-nsub { margin-left: .5rem; font-size: var(--fs-2xs); font-weight: 500; color: var(--text-muted); }
 .dx-lead { color: var(--text); }
@@ -152,7 +152,7 @@ html.sd-on { overflow: hidden; }
   flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; cursor: pointer;
   border: 1px solid var(--border-soft); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-muted);
 }
-.sd-x:hover { color: var(--orange-ink); border-color: var(--orange); }
+.sd-x:hover { color: var(--accent-ink); border-color: var(--accent); }
 @keyframes sd-fade { from { opacity: 0; } }
 @keyframes sd-in { from { transform: translateX(24px); opacity: .4; } }
 @keyframes sd-up { from { transform: translateY(40px); opacity: .4; } }

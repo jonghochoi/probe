@@ -42,7 +42,7 @@ RAW = c.RAW_URL
 # to the question, so it has a ceiling the way `corpus-index.js` does; past it,
 # the fields to move out are `summary` and `keywords`, the two largest, not the
 # budget.
-BUDGET = 256 * 1024
+CORPUS_JSON_BUDGET = 256 * 1024
 
 # How many scored neighbours a record lists. More than the page's three, since
 # an agent reads the scores and a reader reads only the row.
@@ -236,7 +236,7 @@ def records(papers: list[Paper], comps: list, decisions: dict,
             "authors": p.authors,
             "pillars": p.pillars,
             "metric": p.metric,
-            "summary": corpus._plain(p.summary_md, limit=10_000),
+            "summary": corpus.plain_text(p.summary_md, limit=10_000),
             "keywords": keywords(p),
             "published": p.published,
             "date": p.date,
@@ -277,7 +277,7 @@ def records(papers: list[Paper], comps: list, decisions: dict,
                 "stances": x.stances,
                 "common": x.common,
                 "pillars": x.pillars,
-                "summary": corpus._plain(x.summary_md, limit=10_000),
+                "summary": corpus.plain_text(x.summary_md, limit=10_000),
                 "date": x.date,
                 "page": f"{SITE}c/{x.slug}/",
                 "source": f"{RAW}/comparison/{x.slug}.md",

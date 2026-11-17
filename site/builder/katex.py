@@ -123,8 +123,7 @@ class KatexRenderer:
             )
         except FileNotFoundError as exc:
             raise KatexUnavailable(
-                f"node not found ({self.node}). Install Node 20+, or build with "
-                f"--katex=client."
+                f"node not found ({self.node}). Install Node 20+."
             ) from exc
         except subprocess.CalledProcessError as exc:
             raise KatexUnavailable(
@@ -147,12 +146,11 @@ class KatexRenderer:
         return _PLACEHOLDER.sub(sub, html)
 
 
-class ClientRenderer:
-    """`--katex=client` fallback: emit data attributes, render in the browser.
-
-    Uses an explicit `katex.render(el.dataset.tex, el)` initializer over the
-    emitted elements — never `auto-render.js`, which would re-scan prose for
-    `$` delimiters.
+class TocOnlyRenderer:
+    """A stand-in for `KatexRenderer` when only a document's headings are
+    wanted — the section files and the search chunks cut a rewrite at its
+    H3s and never publish its math. Each formula becomes an empty element
+    carrying its TeX, so nothing runs Node.
     """
 
     def __init__(self, *_args, **_kwargs):
