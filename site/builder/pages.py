@@ -8,6 +8,7 @@ from collections import Counter
 
 from . import components as c
 from . import corpus, primers, scouting, glance as glance_mod
+from . import lineage
 from .corpus import PILLAR_LABELS, PILLAR_NAMES, PILLAR_ORDER, Paper, main_figure
 from .render import DocRenderer, _decorate_refs
 
@@ -258,8 +259,39 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
     )
 
 
+GAP_ROWS = 12
+
+
+def _gaps(graph: lineage.Graph | None) -> str:
+    """빈자리 — under the list of what the corpus holds, what it leans on and
+    does not hold (`lineage.gaps`).
+
+    A row is the paper, how many rewrites stand on it, and those rewrites by
+    name — each a link to its own 계보 tab, where the paper sits among that
+    rewrite's ancestors. Printed whole and all links, so it needs no script.
+    A partial build has no graph and prints none.
+    """
+    rows = lineage.gaps(graph)[:GAP_ROWS] if graph else []
+    if not rows:
+        return ""
+    items = "".join(
+        f'<li class="tl-row"><span class="tl-id">{len(on)}편</span>'
+        f'<span class="tl-main"><span class="tl-t">{c.esc(node.name)}</span>'
+        f'<span class="tl-g">' + " · ".join(
+            f'<a href="{c.esc(n.id)}/index.html#lin">{c.esc(n.name)}</a>' for n in on)
+        + '</span></span>'
+        f'<a class="tl-id" href="https://arxiv.org/abs/{node.id}" target="_blank" '
+        f'rel="noopener noreferrer">arXiv {node.id}</a></li>'
+        for node, on in rows)
+    return (
+        '<section class="gaps"><h2 class="gaps-h">빈자리'
+        '<span>선행인데 재작성본이 없는 논문</span></h2>'
+        '<div class="tl-head"><span>후속</span><span>논문 · 후속 재작성본</span>'
+        f'<span>원문</span></div><ol class="tl">{items}</ol></section>')
+
+
 def analysis_page(papers: list[Paper], katex=None, search_api: str = "",
-                 partial: bool = False) -> str:
+                 partial: bool = False, graph: lineage.Graph | None = None) -> str:
     """The corpus index — one line of axes over one row per paper, newest first.
 
     The page opens on the list itself: the axes as a line over it (the only
@@ -346,6 +378,7 @@ def analysis_page(papers: list[Paper], katex=None, search_api: str = "",
     <p class="corpus-empty" data-empty hidden>
       조건에 맞는 논문이 없습니다. <button type="button" class="linkish" data-reset>필터를 지워</button> 보세요.
     </p>
+    {_gaps(graph)}
   </main>
 </div>
 """
@@ -659,8 +692,9 @@ def not_found_page(papers: list[Paper]) -> str:
 # it appears only for a paper some comparison holds, and a tab that is empty
 # for most of the corpus is furniture.
 TABS = (("glance", "요약", "BRIEF"), ("full", "상세", "FULL"),
-        ("cmp", "비교", "COMPARED"))
-CMP_TAB = "cmp"
+        ("cmp", "비교", "COMPARED"), ("lin", "계보", "LINEAGE"))
+# The tabs printed only when there is something behind them, each with its count.
+COUNTED_TABS = ("cmp", "lin")
 
 
 def paper_page(paper: Paper, katex, decisions: dict,
@@ -668,7 +702,8 @@ def paper_page(paper: Paper, katex, decisions: dict,
                neighbours: list[Paper] | None = None,
                comparisons: list | None = None,
                papers_by_id: dict | None = None,
-               citers: list[Paper] | None = None) -> str:
+               citers: list[Paper] | None = None,
+               graph: lineage.Graph | None = None) -> str:
     """One paper's rewrite — two tabs cut from one source file.
 
     The brief and the body are two readings of the same paper for two
@@ -682,6 +717,10 @@ def paper_page(paper: Paper, katex, decisions: dict,
     surface the section does not belong to — while the tab strip is on screen
     from the first pixel and carries its own count, so the answer to "has this
     been argued against anything" arrives before the read rather than after it.
+
+    계보 is the fourth for the same reason: what the paper stands on and what
+    stands on it is a question a reader brings to the paper, not one they
+    reach the foot of 상세 to ask.
     """
     by_id = papers_by_id or {}
     renderer = DocRenderer(
@@ -702,8 +741,9 @@ def paper_page(paper: Paper, katex, decisions: dict,
         )
 
     comps = comparisons or []
+    lin_html, lin_n = _lin_panel(paper, graph)
     body = f"""{_header(paper)}
-{_tabstrip(len(comps))}
+{_tabstrip({"cmp": len(comps), "lin": lin_n})}
 <div class="panel wide" id="p-glance" role="tabpanel" aria-labelledby="t-glance">
   {glance_html or _missing("요약")}
 </div>
@@ -718,6 +758,7 @@ def paper_page(paper: Paper, katex, decisions: dict,
   </div>
 </div>
 {_cmp_panel(paper, comps, by_id)}
+{lin_html}
 {c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
@@ -727,10 +768,12 @@ def paper_page(paper: Paper, katex, decisions: dict,
         description=paper.preview,
         body=body,
         depth=2,
-        scripts=["paper.js", "memo.js", "shelf.js"],
+        scripts=["paper.js", "memo.js", "shelf.js"] + (["lineage.js"] if lin_n else []),
         # The source an agent should read instead of this page's markup.
         extra_head=(
-            f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/analysis/{paper.stem}.md">'),
+            f'<link rel="alternate" type="text/markdown" href="{c.RAW_URL}/analysis/{paper.stem}.md">'
+            + (f'\n<link rel="stylesheet" href="{c.asset("../../assets/lineage.css")}">'
+               if lin_n else "")),
     )
 
 
@@ -758,21 +801,21 @@ def _acts(paper: Paper) -> str:
 </div>"""
 
 
-def _tabstrip(cmp_n: int = 0) -> str:
+def _tabstrip(counts: dict[str, int]) -> str:
     """The tabs. Server-rendered and `hidden`-toggled, so the page is readable
     with JavaScript off — the first panel stays open and the rest are reachable
     by their anchors.
 
-    비교 is printed only when there is something behind it, and it carries its
-    count: the number is the whole reason to look, and a tab that made the
-    reader click to find out it says zero would have spent their click to tell
-    them nothing.
+    비교 and 계보 are printed only when there is something behind them, and
+    each carries its count: the number is the whole reason to look, and a tab
+    that made the reader click to find out it says zero would have spent their
+    click to tell them nothing.
     """
     buttons = []
     for i, (key, label, en) in enumerate(TABS):
-        if key == CMP_TAB and not cmp_n:
+        if key in COUNTED_TABS and not counts.get(key):
             continue
-        count = (f'<span class="cnt">{cmp_n}</span>' if key == CMP_TAB else "")
+        count = (f'<span class="cnt">{counts[key]}</span>' if key in COUNTED_TABS else "")
         buttons.append(
             f'<button type="button" class="tab" role="tab" id="t-{key}" '
             f'aria-controls="p-{key}" aria-selected="{"true" if i == 0 else "false"}" '
@@ -794,6 +837,86 @@ def _missing(name: str) -> str:
             f'없습니다 — <code>/analyze &lt;id&gt; --refresh</code> 로 다시 씁니다.</p>')
 
 
+
+
+def _node_href(up: str, frag: str = ""):
+    """Where a 계보 node goes: the rewrite's page, or arXiv for a paper without
+    one. `frag` names the tab a rewrite's page should open on."""
+    def href(node: lineage.Node) -> str:
+        if node.paper:
+            return f"{up}p/{node.id}/index.html{frag}"
+        return f"https://arxiv.org/abs/{node.id}"
+    return href
+
+
+def _lineage_data(graph: lineage.Graph, middle: str, href) -> str:
+    """One paper and the papers it is joined to, as `assets/lineage.js` reads
+    them: each neighbour with which side it stands on and whether a rail or
+    only the prose joins it. Only `middle` carries its tagline — the middle
+    card is the one place a tagline prints.
+    """
+    def record(nid: str, **more) -> dict:
+        node = graph.nodes[nid]
+        out = {"id": nid, "n": node.name, "l": node.lane, "h": href(node), **more}
+        if node.paper is None:
+            out["x"] = 1
+        return out
+    me = record(middle, t=graph.nodes[middle].paper.tagline)
+    sides = [[record(n, r=int(edges[n] == lineage.RAIL)) for n in ids]
+             for ids, edges in ((graph.parents(middle), graph.up.get(middle, {})),
+                                (graph.children(middle), graph.down.get(middle, {})))]
+    blob = json.dumps({"me": me, "before": sides[0], "after": sides[1]},
+                      ensure_ascii=False, separators=(",", ":"))
+    return blob.replace("</", "<\\/")
+
+
+# An arrow leaving a box: the paper has no page here and the cell goes to arXiv.
+_EXT_ICON = ('<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" '
+             'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+             '<path d="M6.5 3.5H3.5v9h9V9.5"/><path d="M9.5 3h3.5v3.5M13 3 7.5 8.5"/></svg>')
+
+
+def _key_line(cls: str) -> str:
+    """One of the two lines the 계보 tab draws, as its key prints it — the
+    same stroke and arrowhead `lineage.css` gives the drawing's own."""
+    return (f'<svg class="k-line{cls}" viewBox="0 0 34 10" width="34" height="10" aria-hidden="true">'
+            '<path d="M1 5H26"/><path class="k-head" d="M25 1.5 32 5 25 8.5Z"/></svg>')
+
+
+def _lin_panel(paper: Paper, graph: lineage.Graph | None) -> tuple[str, int]:
+    """계보 — `(the panel, how many papers it joins this one to)`.
+
+    The older papers this one is joined to on the left, the newer on the
+    right, and nothing further out. The panel arrives as `lineage.near_svg`,
+    every node a link; `assets/lineage.js` swaps in the same three columns as
+    cells, which set the rail's papers apart from the ones only mentioned. A
+    cell goes to that paper's own 계보, or to arXiv when the paper has no
+    rewrite. The key over the drawing is the drawing's own marks in two
+    groups — what a cell is, what a line is — so nothing in the tab is
+    explained in a sentence. A paper with no edge, and any paper in a partial build, has
+    no tab.
+    """
+    if not graph or paper.stem not in graph.nodes:
+        return "", 0
+    count = len(graph.parents(paper.stem)) + len(graph.children(paper.stem))
+    svg = lineage.near_svg(graph, paper.stem, _node_href("../../", "#lin"))
+    if not svg:
+        return "", 0
+    data = _lineage_data(graph, paper.stem, _node_href("../../", "#lin"))
+    key = (
+        '<div class="lin-key" aria-label="범례">'
+        '<p><span><span class="lt-ax">P#</span>재작성본</span>'
+        f'<span><span class="lt-ext">{_EXT_ICON}</span>arXiv 원문</span></p>'
+        f'<p><span>{_key_line("")}계보</span><span>{_key_line(" is-text")}언급</span></p>'
+        '</div>')
+    return f"""<div class="panel wide" id="p-lin" role="tabpanel" aria-labelledby="t-lin" hidden>
+  <section class="lin-tab" data-walk>
+    {key}
+    <div class="near-frame" data-walk-still>{svg}</div>
+    <div class="lt-frame" hidden><div class="lt" id="lin-tree"></div></div>
+    <script type="application/json" id="lin-data">{data}</script>
+  </section>
+</div>""", count
 
 
 def _related(neighbours: list[Paper]) -> str:

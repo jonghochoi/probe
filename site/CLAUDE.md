@@ -47,6 +47,15 @@ the title either repeats the list under the band or argues for it, and the
 list makes its own case one scroll down. The four bands are one height, so
 moving between them in the nav moves nothing but the words.
 
+**계보 is read, never written.** `builder/lineage.py` draws only what the
+rewrites already say — a `probe-lineage` rail entry and an arXiv link in the
+prose — so no file exists to keep in step with the corpus. It is a tab of a
+paper's page — what that paper stands on and what stands on it — and one list
+at the foot of the analysis list, 빈자리: the papers several rewrites stand on
+that the corpus has no rewrite of. There is no page of the whole graph and no
+ranking of what to read. A partial build (`--only`) prints neither, since a
+corner of the corpus shows every paper's ancestors as missing.
+
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
 under `assets/shelf.js` and `assets/memo.js`; the analysis list's page size

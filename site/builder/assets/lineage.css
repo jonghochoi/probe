@@ -1,0 +1,75 @@
+/* 계보 — the fourth tab of a paper's page (`pages._lin_panel`). The drawing
+   the tab holds before the script runs is `site.css`'s, which also gives a
+   node its axis ink (`--lane`, from `data-lane`). Everything here is the walk
+   `assets/lineage.js` puts in its place. */
+
+/* The key: two groups, each the drawing's own marks — what a cell is (a
+   rewrite, by its axis; a paper only arXiv holds) and what a line is (a rail,
+   a mention). */
+.lin-key { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .8rem; }
+.lin-key p {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 1rem; margin: 0; padding: .35rem .8rem;
+  font-size: var(--fs-2xs); color: var(--text); background: var(--surface);
+  border: 1px solid var(--border-soft); border-radius: var(--radius-pill);
+}
+.lin-key span { display: inline-flex; align-items: center; gap: .4rem; }
+.k-line path { fill: none; stroke: var(--text); stroke-width: 1.6; }
+.k-line .k-head { fill: var(--text); stroke: none; }
+.k-line.is-text path { stroke: var(--text-muted); stroke-dasharray: 2 3; }
+.k-line.is-text .k-head { fill: var(--text-muted); stroke-dasharray: none; }
+
+/* What a cell is: the axis a rewrite is filed under, or the way out to arXiv. */
+.lt-ax, .lt-ext {
+  flex: none; display: inline-grid; place-items: center; min-width: 1.7rem; height: 1.15rem; padding: 0 .3rem;
+  border-radius: var(--radius-pill); font-size: var(--fs-3xs); font-weight: 700; line-height: 1;
+}
+.lt-ax { color: var(--lane, var(--text-muted)); background: color-mix(in srgb, var(--lane, var(--text-muted)) 14%, var(--surface)); }
+.lt-ext { color: var(--text-muted); box-shadow: inset 0 0 0 1px var(--border); }
+
+/* The walk: the older papers, the paper, the newer ones. */
+.lt-frame {
+  overflow-x: auto; background: var(--card-bg, var(--surface));
+  border: 1px solid var(--border-soft); border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+.lt {
+  position: relative; display: grid; align-items: center; min-width: 720px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  column-gap: 2.75rem; padding: 1rem 1.1rem 1.3rem;
+}
+.lt > svg { position: absolute; inset: 0; pointer-events: none; }
+.lt-edge { fill: none; stroke: var(--text); stroke-width: 1.4; opacity: .7; }
+.lt-edge.is-text { stroke: var(--text-muted); stroke-dasharray: 2 3; }
+.lt-head { fill: var(--text); opacity: .7; }
+.lt-head.is-text { fill: var(--text-muted); }
+.lt-col { position: relative; z-index: 1; align-self: stretch; display: flex; flex-direction: column; justify-content: center; gap: .35rem; padding-top: 2rem; min-width: 0; }
+.lt-h {
+  position: absolute; top: 0; left: 0; display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap;
+  font-family: var(--t-display); font-size: var(--fs-sm); font-weight: 700; color: var(--orange-ink);
+}
+.lt-h b { min-width: 1.4rem; padding: .05rem .4rem; border-radius: var(--radius-pill); text-align: center;
+          font-size: var(--fs-3xs); background: var(--orange); color: var(--accent-ink); }
+.lt-n {
+  display: flex; align-items: center; gap: .45rem; width: 100%; min-width: 0; padding: .22rem .55rem;
+  font: inherit; font-size: var(--fs-xs); text-align: left; color: var(--text); cursor: pointer; text-decoration: none;
+  background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+}
+.lt-n > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lt-n:hover { border-color: var(--orange); }
+.lt-sub { display: flex; align-items: center; gap: .4rem; margin: .55rem 0 0 .1rem; font-size: var(--fs-3xs); font-weight: 700; color: var(--text-muted); }
+.lt-h + .lt-sub { margin-top: 0; }
+.lt-n.is-out { color: var(--text-muted); }
+
+.lt-me {
+  position: relative; z-index: 1; padding: .85rem 1rem; background: var(--surface);
+  border: 1.5px solid var(--orange); border-radius: var(--radius); box-shadow: 0 0 0 3px var(--orange-soft);
+}
+.lt-who { display: flex; align-items: center; gap: .5rem; font-family: var(--t-display); font-size: var(--fs-lg); font-weight: 700; line-height: 1.3; }
+.lt-tag { margin: .45rem 0 0; font-size: var(--fs-xs); line-height: 1.6; }
+.lt-meta { display: flex; flex-wrap: wrap; gap: .3rem .8rem; margin: .55rem 0 0; font-size: var(--fs-2xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+/* A phone has no room for three columns: the lines leave, and the older
+   papers, the paper and the newer ones stack in that order. */
+@media (max-width: 760px) {
+  .lt { min-width: 0; grid-template-columns: minmax(0, 1fr); row-gap: .9rem; padding: .9rem; }
+  .lt > svg { display: none; }
+  .lt-col { padding-top: 1.9rem; }
+}
