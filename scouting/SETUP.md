@@ -146,26 +146,12 @@ venue's own site.
 
 ### 5-1. Network allowlist
 
-Same environment as §2, with each venue's host added to **Network access →
-Custom**, one per line:
-
-```
-www.corl.org
-corl.org
-roboticsconference.org
-2027.ieee-icra.org
-2027.ieee-iros.org
-2026.ieee-humanoids.org
-neurips.cc
-iclr.cc
-icml.cc
-cvpr.thecvf.com
-www.ieee-ras.org
-```
-
-An edition's site often has a host of its own (`2028.ieee-icra.org`), so the
-list grows a line when a venue moves on. A pattern line (`*.ieee-icra.org`),
-where the settings page takes one, covers every edition at once.
+Same environment as §2, with **Network access → Custom** listing the host of
+every link in the venues table of `context/EVENTS.md`, one per line — the
+table is the list, and this guide does not copy it. An edition's site often
+has a host of its own (`<year>.ieee-icra.org`), so the list grows a line when
+a venue moves on. A pattern line (`*.ieee-icra.org`), where the settings page
+takes one, covers every edition at once.
 
 The routine does not wait to be refused. Each week it also tries the next
 edition's host for a venue whose edition has ended or ends within 60 days,
@@ -190,7 +176,7 @@ by hand.
 | Prompt (Instructions) | `Read .claude/prompts/follow.txt and run it`. Model → **Sonnet** |
 | Repositories | This repo |
 | Environment | The one from §2, with §5-1's hosts |
-| Trigger | Weekly, Monday morning, Korea time |
+| Trigger | Weekly, on a fixed morning in your time zone — dates move slowly, and a deadline a week away is caught in time |
 | Connectors | None |
 | Notifications | Push on — the run's report reaches the phone, and it leads with any host to add |
 | Permissions | Nothing to set, as §3 |

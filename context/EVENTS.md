@@ -9,23 +9,26 @@
 
 ## Venues
 
-The venues the routine follows, each by its official site. A person adds or
-drops a venue here; the routine only moves a link to the next edition's site
-when the listed page itself links to it. RA-L is a journal, followed for one
-date only: its deadline for a paper that also presents at ICRA or IROS.
+The venues the routine follows, each by its official site and what it is
+followed for. A person adds or drops a venue here; the routine only moves a
+link to the next edition's site when the listed page itself links to it.
 
-| 학회 | 공식 사이트 |
-|---|---|
-| CoRL | https://www.corl.org/ |
-| RSS | https://roboticsconference.org/ |
-| ICRA | https://2027.ieee-icra.org/ |
-| IROS | https://2027.ieee-iros.org/ |
-| Humanoids | https://2026.ieee-humanoids.org/ |
-| NeurIPS | https://neurips.cc/ |
-| ICLR | https://iclr.cc/ |
-| ICML | https://icml.cc/ |
-| CVPR | https://cvpr.thecvf.com/ |
-| RA-L | https://www.ieee-ras.org/publications/ra-l |
+`범위` is `전체` for a conference — every date of the three kinds below — or
+`옵션 마감` for a journal followed for one kind of date only: its deadline
+for a paper that also presents at a conference in this table.
+
+| 학회 | 공식 사이트 | 범위 |
+|---|---|---|
+| CoRL | https://www.corl.org/ | 전체 |
+| RSS | https://roboticsconference.org/ | 전체 |
+| ICRA | https://2027.ieee-icra.org/ | 전체 |
+| IROS | https://2027.ieee-iros.org/ | 전체 |
+| Humanoids | https://2026.ieee-humanoids.org/ | 전체 |
+| NeurIPS | https://neurips.cc/ | 전체 |
+| ICLR | https://iclr.cc/ | 전체 |
+| ICML | https://icml.cc/ | 전체 |
+| CVPR | https://cvpr.thecvf.com/ | 전체 |
+| RA-L | https://www.ieee-ras.org/publications/ra-l | 옵션 마감 |
 
 ## Dates
 
