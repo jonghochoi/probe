@@ -67,7 +67,7 @@ html.js .mast-count { display: none; }
 
 .linkish {
   font: inherit; font-size: inherit; background: none; border: none;
-  color: var(--orange-ink); cursor: pointer; padding: 0;
+  color: var(--accent-ink); cursor: pointer; padding: 0;
   text-decoration: underline; text-underline-offset: 2px;
 }
 
@@ -89,12 +89,12 @@ html.js .pline {
 }
 .pline-ic {
   flex: none; display: grid; place-items: center; width: 2.9rem;
-  background: var(--orange-soft); color: var(--orange-ink);
+  background: var(--accent-soft); color: var(--accent-ink);
 }
 .pline-items {
   flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .2rem;
   padding: .55rem .6rem;
-  border-left: 1px solid color-mix(in srgb, var(--orange) 25%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
 }
 .pline-stat {
   flex: none; align-self: center; padding: 0 1rem;
@@ -110,7 +110,7 @@ html.js .pline {
 .pline .rail-item[data-p="P2"] .sw { background: var(--p2-ink); }
 .pline .rail-item[data-p="P3"] .sw { background: var(--p3-ink); }
 .pline .rail-item[data-p="P4"] .sw { background: var(--p4-ink); }
-.pline .rail-item[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--accent-ink); }
+.pline .rail-item[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--on-accent); }
 .rail-item {
   font: inherit; font-size: var(--fs-2xs); width: 100%;
   display: flex; align-items: center; gap: .4rem;
@@ -141,10 +141,10 @@ html.js .pline {
 .rail-item .rl::before { content: "· "; opacity: .5; }
 .rail-item.pillar b { flex: none; }
 .rail-item:hover { background: var(--surface-2); color: var(--text); }
-.rail-item[aria-pressed="true"] { background: var(--orange); }
+.rail-item[aria-pressed="true"] { background: var(--accent); }
 .rail-item[aria-pressed="true"] b,
-.rail-item[aria-pressed="true"] .rn { color: var(--accent-ink); opacity: 1; }
-.rail-item[aria-pressed="true"] .rl { color: var(--accent-ink); opacity: .85; }
+.rail-item[aria-pressed="true"] .rn { color: var(--on-accent); opacity: 1; }
+.rail-item[aria-pressed="true"] .rl { color: var(--on-accent); opacity: .85; }
 .rail-item[hidden] { display: none; }
 
 /* ── 책갈피: one line back to where the reader stopped ────────────────── */
@@ -156,13 +156,13 @@ html.js .pline {
   display: flex; align-items: center; gap: .4rem;
   padding: .42rem .5rem .42rem .7rem; margin-bottom: .9rem;
   border: 1px solid var(--amber-soft); border-radius: var(--radius);
-  background: var(--orange-soft);
+  background: var(--accent-soft);
 }
 .resume[hidden] { display: none; }
 .resume-k {
   flex: none; margin-right: .15rem;
   font-size: var(--fs-2xs); font-weight: 800;
-  color: var(--orange-ink);
+  color: var(--accent-ink);
 }
 /* The chips give up width before the row gives up its one line: each shrinks
    to a floor that still fits an arXiv id, and past that — a phone — the rail
@@ -189,10 +189,10 @@ html.js .pline {
   text-decoration: none; color: inherit; font-size: var(--fs-2xs);
   transition: border-color var(--dur-short) var(--ease-out);
 }
-.resume-chip:hover { border-color: var(--orange); }
+.resume-chip:hover { border-color: var(--accent); }
 .resume-chip b {
   flex: none; font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
-  color: var(--orange-ink); font-variant-numeric: tabular-nums;
+  color: var(--accent-ink); font-variant-numeric: tabular-nums;
 }
 .resume-chip span {
   color: var(--text-muted); overflow: hidden;
@@ -200,7 +200,7 @@ html.js .pline {
 }
 .resume-all {
   flex: none; margin-left: auto; padding: 0 .2rem 0 .45rem;
-  font-size: var(--fs-2xs); font-weight: 600; color: var(--orange-ink); text-decoration: none;
+  font-size: var(--fs-2xs); font-weight: 600; color: var(--accent-ink); text-decoration: none;
 }
 .resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
@@ -217,7 +217,7 @@ html.js .pline {
 .rowstar:hover {
   color: var(--amber-soft); transform: scale(1.12);
 }
-.rowstar[aria-pressed="true"] { color: var(--orange-ink); }
+.rowstar[aria-pressed="true"] { color: var(--accent-ink); }
 
 /* ── The list ─────────────────────────────────────────────────────────── */
 .listhead, .row {
@@ -254,12 +254,12 @@ html.js .rowstar, html.js .lh-star { display: block; }
   content: "✓"; color: var(--green); font-weight: 700; margin-right: .28rem;
 }
 .row[data-fresh="1"] .row-when::before {
-  content: "●"; color: var(--orange-ink); font-size: .62em;
+  content: "●"; color: var(--accent-ink); font-size: .62em;
   vertical-align: .15em; margin-right: .3rem;
 }
 /* A row under the pointer takes the accent as a tick on its leading edge. */
 .row { transition: background var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out); }
-.row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
+.row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accent); }
 /* Dates and ids in the figure face, so the columns line up digit for digit. */
 .row-when, .row-id {
   font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
@@ -276,7 +276,7 @@ html.js .rowstar, html.js .lh-star { display: block; }
 }
 .row-go { color: inherit; text-decoration: none; }
 .row-go::after { content: ""; position: absolute; inset: 0; }
-.row-main:hover .row-go { color: var(--orange-ink); }
+.row-main:hover .row-go { color: var(--accent-ink); }
 .row-links, .row-links-m { display: inline-flex; gap: .2rem; vertical-align: .1em; white-space: nowrap; }
 .row-links { position: relative; z-index: 1; margin-left: .45rem; }
 .row-links-m { display: none; }
@@ -291,7 +291,7 @@ html.js .rowstar, html.js .lh-star { display: block; }
 /* A row under the pointer takes the links' own ground, so they step one shade
    darker to stay circles. */
 .row:hover .row-link { background: var(--surface-3); }
-.row .row-link:hover { color: var(--orange-ink); background: var(--orange-soft); }
+.row .row-link:hover { color: var(--accent-ink); background: var(--accent-soft); }
 .row-link .src-mark { width: .8rem; height: .8rem; }
 .row-tagline {
   display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted);
@@ -327,14 +327,14 @@ html.js .pager[hidden] { display: none; }
               box-shadow var(--dur-short) var(--ease-out);
 }
 .pgn { min-width: 1.9rem; text-align: center; }
-.pgn:hover, .pgstep:not(:disabled):hover { color: var(--orange-ink); }
+.pgn:hover, .pgstep:not(:disabled):hover { color: var(--accent-ink); }
 /* The page you are on is marked by a rule under it, not a filled pill: the
    strip has no card to fill, and the underline is the one mark that sits on
    the ground the rest of the controls sit on. It is drawn inside the box so
    nothing in the row shifts when it moves. */
 .pgn[aria-current="page"] {
-  color: var(--orange-ink); border-radius: 0;
-  background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat;
+  color: var(--accent-ink); border-radius: 0;
+  background: linear-gradient(var(--accent), var(--accent)) center bottom / 100% 2px no-repeat;
 }
 .pgn[hidden] { display: none; }
 /* 이전 and 다음 go dim rather than away: they hold the two ends of the strip,
@@ -352,7 +352,7 @@ html.js .pager[hidden] { display: none; }
   font: inherit; font-size: var(--fs-2xs); font-weight: 600; color: var(--text-muted);
   font-variant-numeric: tabular-nums; user-select: none;
 }
-.psize-cur:hover, .psize-cur[aria-expanded="true"] { color: var(--orange-ink); background: var(--orange-soft); }
+.psize-cur:hover, .psize-cur[aria-expanded="true"] { color: var(--accent-ink); background: var(--accent-soft); }
 .psize-caret { font-size: .8em; }
 .psize-menu {
   position: absolute; right: 0; bottom: calc(100% + .35rem); z-index: var(--z-raised);
@@ -367,7 +367,7 @@ html.js .pager[hidden] { display: none; }
   background: none; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums;
 }
 .psize-menu button:hover { background: var(--surface-2); }
-.psize-menu button[aria-pressed="true"] { color: var(--orange-ink); background: var(--orange-soft); }
+.psize-menu button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent-soft); }
 
 .corpus-empty {
   text-align: center; color: var(--text-muted); font-size: var(--fs-sm);
@@ -396,12 +396,12 @@ html.js .pager[hidden] { display: none; }
 .sh-tabs > button b { font-weight: 600; }
 .sh-tabs > button:hover { color: var(--text); }
 .sh-tabs > button[aria-selected="true"] {
-  color: var(--orange-ink);
-  background: linear-gradient(var(--orange), var(--orange)) center bottom / 100% 2px no-repeat;
+  color: var(--accent-ink);
+  background: linear-gradient(var(--accent), var(--accent)) center bottom / 100% 2px no-repeat;
 }
 .sh-tabs > button[aria-selected="true"] b { font-weight: 700; }
 .sh-tabs .tab-n { font-size: var(--fs-2xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.sh-tabs > button[aria-selected="true"] .tab-n { color: var(--orange-ink); }
+.sh-tabs > button[aria-selected="true"] .tab-n { color: var(--accent-ink); }
 /* Nothing behind the ⋯ works without a script — both exports are built in the
    browser and the import is read there — so it leaves rather than sitting
    inert. The page's `noscript` line is what an unscripted reader gets. */
@@ -411,7 +411,7 @@ html.js .sh-more { display: block; }
   display: grid; place-items: center; width: 2.2rem; height: 2.2rem; padding: 0; cursor: pointer;
   border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-muted);
 }
-.sh-more-b:hover, .sh-more-b[aria-expanded="true"] { color: var(--orange-ink); background: var(--orange-soft); }
+.sh-more-b:hover, .sh-more-b[aria-expanded="true"] { color: var(--accent-ink); background: var(--accent-soft); }
 .sh-more-b .ico circle { fill: currentColor; }
 .sh-menu {
   position: absolute; right: 0; top: calc(100% + .35rem); z-index: var(--z-raised); display: flex; flex-direction: column;
@@ -426,7 +426,7 @@ html.js .sh-more { display: block; }
 }
 .sh-menu button:hover, .sh-menu-i:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
 .sh-menu button[disabled] { opacity: .45; cursor: not-allowed; background: none; }
-.hub-status { margin: 0; font-size: var(--fs-2xs); color: var(--orange-ink); }
+.hub-status { margin: 0; font-size: var(--fs-2xs); color: var(--accent-ink); }
 .hub-status:empty { display: none; }
 .sh-tag {
   display: inline-block; margin-left: .45rem; padding: .05rem .45rem; border-radius: var(--radius-pill);
@@ -434,8 +434,8 @@ html.js .sh-more { display: block; }
   background: var(--surface-2); border: 1px solid var(--border-soft);
 }
 .tl-p .sh-tag { margin-left: 0; }
-.sh-tag.is-pub { color: var(--orange-ink); background: var(--orange-soft); border-color: transparent; }
-.sh-mk { display: inline-flex; align-items: center; gap: .3rem; color: var(--orange-ink); }
+.sh-tag.is-pub { color: var(--accent-ink); background: var(--accent-soft); border-color: transparent; }
+.sh-mk { display: inline-flex; align-items: center; gap: .3rem; color: var(--accent-ink); }
 .sh-mk svg { fill: currentColor; }
 .tl-g.sh-memo { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
 /* A star or a memo outlives the rewrite it points at. The row stays, without a
@@ -452,7 +452,7 @@ html.js .sh-more { display: block; }
 }
 
 .notfound { text-align: center; padding: 6rem 1.25rem; }
-.notfound h1 { font-size: var(--fs-display); font-weight: 800; color: var(--orange-ink); }
+.notfound h1 { font-size: var(--fs-display); font-weight: 800; color: var(--accent-ink); }
 .notfound p { color: var(--text-muted); margin-top: .6rem; }
 .notfound-acts {
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .6rem 1.2rem;
@@ -461,10 +461,10 @@ html.js .sh-more { display: block; }
 .notfound-find {
   display: none; font: inherit; font-size: var(--fs-sm); font-weight: 700;
   padding: .5rem 1rem; border-radius: var(--radius-sm); cursor: pointer;
-  background: var(--orange); border: 1px solid var(--orange); color: var(--accent-ink);
+  background: var(--accent); border: 1px solid var(--accent); color: var(--on-accent);
 }
 html.js .notfound-find { display: inline-block; }
-.notfound-find:hover { background: color-mix(in oklab, var(--orange) 88%, var(--text)); }
+.notfound-find:hover { background: color-mix(in oklab, var(--accent) 88%, var(--text)); }
 .notfound-h {
   margin: 3rem auto .7rem; max-width: 34rem; text-align: left;
   font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted);
@@ -477,7 +477,7 @@ html.js .notfound-find { display: inline-block; }
   display: block; padding: .6rem .2rem; border-bottom: 1px solid var(--border);
   color: var(--text); text-decoration: none; font-size: var(--fs-sm); font-weight: 600;
 }
-.notfound-list a:hover { color: var(--orange-ink); }
+.notfound-list a:hover { color: var(--accent-ink); }
 
 @media (max-width: 680px) {
   .mast-inner { padding: 1.2rem .9rem 1rem; }
@@ -524,15 +524,15 @@ html.js .notfound-find { display: inline-block; }
   background: var(--card-bg, var(--surface)); border: 1px solid var(--border-soft); border-radius: var(--radius);
   box-shadow: var(--shadow-sm); transition: border-color var(--dur-short), box-shadow var(--dur-short);
 }
-.card:hover, .card.is-open { border-color: color-mix(in srgb, var(--orange) 45%, var(--border-soft)); }
-.card.is-open { box-shadow: 0 0 0 3px var(--orange-soft); }
+.card:hover, .card.is-open { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-soft)); }
+.card.is-open { box-shadow: 0 0 0 3px var(--accent-soft); }
 .card-top { display: flex; align-items: center; gap: .5rem; }
 .card-top .card-chips { flex: 1; min-width: 0; }
 .card-chips { margin: 0; display: inline-flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
 .card-id { flex: none; text-decoration: none; font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.card-id:hover { color: var(--orange-ink); }
+.card-id:hover { color: var(--accent-ink); }
 .card h3 { margin: .1rem 0 0; font-family: var(--t-display); font-size: var(--fs-xl); line-height: 1.3; }
-.card h3 a:hover, a.card:hover h3 { color: var(--orange-ink); }
+.card h3 a:hover, a.card:hover h3 { color: var(--accent-ink); }
 .card-fig {
   height: 150px; margin: .15rem 0 .1rem; overflow: hidden;
   background: var(--fig-pad); border: 1px solid var(--border-soft); border-radius: calc(var(--radius) - 4px);
@@ -584,16 +584,16 @@ html.js .notfound-find { display: inline-block; }
   transition: background var(--dur-short), box-shadow var(--dur-short);
 }
 .tl-row[data-open] { cursor: pointer; }
-.tl-row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--orange); }
-.tl-row.is-open { background: var(--orange-soft); box-shadow: inset 2px 0 0 var(--orange); }
+.tl-row:hover { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accent); }
+.tl-row.is-open { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
 .tl-id {
   font-family: var(--num); font-size: var(--fs-2xs); color: var(--text); opacity: .8;
   font-variant-numeric: tabular-nums; white-space: nowrap; text-decoration: none;
 }
-a.tl-id:hover { color: var(--orange-ink); opacity: 1; }
+a.tl-id:hover { color: var(--accent-ink); opacity: 1; }
 .tl-main { display: block; min-width: 0; color: inherit; text-decoration: none; }
 .tl-t { display: block; font-size: var(--fs-sm); font-weight: 700; line-height: 1.45; letter-spacing: -.01em; }
-a.tl-main:hover .tl-t { color: var(--orange-ink); }
+a.tl-main:hover .tl-t { color: var(--accent-ink); }
 .tl-g { display: block; font-size: var(--fs-xs); line-height: 1.55; color: var(--text-muted); margin-top: .1rem; }
 .tl-p { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem; align-self: center; }
 @media (max-width: 680px) {
@@ -616,13 +616,13 @@ a.tl-main:hover .tl-t { color: var(--orange-ink); }
 }
 .gaps-h span { font-family: var(--ko); font-size: var(--fs-2xs); font-weight: 400; letter-spacing: 0; color: var(--text-muted); }
 .gaps .tl-row > .tl-id:first-child { font-weight: 700; opacity: 1; }
-.gaps .tl-t { color: var(--orange-ink); }
+.gaps .tl-t { color: var(--accent-ink); }
 .gap-full {
   margin-left: .6rem; padding-left: .6rem; border-left: 1px solid var(--border);
   font-weight: 400; letter-spacing: 0; color: var(--text-muted);
 }
 .gaps .tl-g a { color: inherit; text-decoration: none; }
-.gaps .tl-g a:hover { color: var(--orange-ink); text-decoration: underline; }
+.gaps .tl-g a:hover { color: var(--accent-ink); text-decoration: underline; }
 /* A name and the dot after it wrap as one piece; a name longer than the line
    wraps inside its own box. */
 .gap-n { display: inline-block; max-width: 100%; }
@@ -638,7 +638,7 @@ html.js .gap-on.is-open .gap-names { max-height: none; }
   color: var(--text-muted); background: var(--surface); border: 1px solid var(--border);
   transition: color var(--dur-short), border-color var(--dur-short);
 }
-.gap-more:hover, .gap-more[aria-expanded="true"] { color: var(--orange-ink); border-color: var(--orange); }
+.gap-more:hover, .gap-more[aria-expanded="true"] { color: var(--accent-ink); border-color: var(--accent); }
 .gap-more[hidden] { display: none; }
 
 /* ── A row's figure ───────────────────────────────────────────────────── */

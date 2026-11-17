@@ -55,7 +55,7 @@ class Comparison:
     def thesis(self) -> str:
         """The body's `#` line, as plain text — printed on the 비교 list's card."""
         m = re.search(r"^#[ \t]+(.+?)[ \t]*$", self.body, re.M)
-        return corpus._plain(m.group(1)) if m else ""
+        return corpus.plain_text(m.group(1)) if m else ""
 
     @property
     def paper_ids(self) -> list[str]:
@@ -100,7 +100,7 @@ class Comparison:
 
     @property
     def preview(self) -> str:
-        return corpus._plain(self.front.get("summary", ""))
+        return corpus.plain_text(self.front.get("summary", ""))
 
     @property
     def generated_at(self) -> str:

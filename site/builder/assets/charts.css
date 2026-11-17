@@ -16,8 +16,8 @@
    them is what carries identity. Zero specificity, so a frame that needs
    another ink can point them at it. */
 :where(.pc-frame) {
-  --pc-us: var(--orange);
-  --pc-ink: var(--orange-ink);
+  --pc-us: var(--accent);
+  --pc-ink: var(--accent-ink);
   --pc-ref: var(--text-muted);
   --pc-ctx: color-mix(in oklch, var(--text-muted) 48%, var(--surface));
 }

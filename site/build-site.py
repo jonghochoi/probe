@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Build the PROBE reading site.
 
-Renders every `analysis/<id>.md` and `comparison/<slug>.md` into a static
-page tree under `--out`, and beside the
-pages what an agent reads instead — `corpus.json`, `llms.txt`, and per-paper
-`sections.json` with one Markdown file per section.
-Build-time dependencies only — the published site ships no runtime Python, no
-CDN request, and (with the default `--katex=server`) no math JavaScript.
+Renders every published track — `analysis/<id>.md`, `comparison/<slug>.md`
+and each scouting run — with the first screen, 서재 and the 404 page into a
+static page tree under `--out`, and beside the pages what an agent reads
+instead — `corpus.json`, `llms.txt`, and per-paper `sections.json` with one
+Markdown file per section. Build-time dependencies only — the published site
+ships no runtime Python, no CDN request and no math JavaScript.
 
     python3 site/build-site.py --out .site           # full build
     python3 site/build-site.py --only 2607.06559     # one rewrite
@@ -16,8 +16,8 @@ CDN request, and (with the default `--katex=server`) no math JavaScript.
     python3 site/build-site.py --index chunks.jsonl  # search index, no pages
 
 Requires `pip install -r site/requirements.txt`, plus Node with
-`npm install --no-save --prefix site/builder katex@0.16.22` for
-server-side math (`--katex=client` renders in the browser instead).
+`npm install --no-save --prefix site/builder katex@0.16.22` for the math,
+rendered at build time.
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ except ImportError:
 from builder import (arxivtitles, assets_out, catalog, comparisons, corpus, events, lineage,
                      pages, scouting, scoutfigs)
 from builder.decisions import harvest_decisions, pillar_cards, retired_decisions
-from builder.katex import ClientRenderer, KatexRenderer, KatexUnavailable
+from builder.katex import KatexRenderer, KatexUnavailable, TocOnlyRenderer
 from builder.render import DocRenderer
 
 
@@ -106,10 +106,10 @@ def build(args) -> int:
         cat = catalog.records(papers, comps, decisions, cited, retired)
         agent_json = json.dumps(cat, ensure_ascii=False, separators=(",", ":"))
         agent_size = len(agent_json.encode("utf-8"))
-        if agent_size > catalog.BUDGET:
+        if agent_size > catalog.CORPUS_JSON_BUDGET:
             problems.append(
                 f"corpus.json: {agent_size / 1024:.0f} KB, over the "
-                f"{catalog.BUDGET // 1024} KB budget — it exists to fit one "
+                f"{catalog.CORPUS_JSON_BUDGET // 1024} KB budget — it exists to fit one "
                 f"context window, so move `summary` or `keywords` out of "
                 f"`catalog.records` rather than raising the budget"
             )
@@ -132,8 +132,7 @@ def build(args) -> int:
         shutil.rmtree(out)
     out.mkdir(parents=True)
 
-    cache = corpus.REPO_ROOT / ".site-cache" if args.katex == "server" else None
-    katex = KatexRenderer(cache) if args.katex == "server" else ClientRenderer()
+    katex = KatexRenderer(corpus.REPO_ROOT / ".site-cache")
 
     # Before a page is rendered, because every asset URL a page prints carries
     # a token hashed over what this build ships (`assets_out.version`).
@@ -147,7 +146,7 @@ def build(args) -> int:
     # that come later in the loop as often as earlier ones.
     # A partial build holds a corner of the corpus, and a 계보 drawn from it
     # would show most of every paper's ancestors as missing.
-    graph = None if args.only else lineage.build(papers, pages._alias)
+    graph = None if args.only else lineage.build(papers, pages.display_alias)
     for paper in papers:
         rendered[out / "p" / paper.stem / "index.html"] = pages.paper_page(
             paper, katex, decisions, render_problems,
@@ -221,11 +220,11 @@ def build(args) -> int:
     stats = assets_out.copy_all(out, charset, mono_charset=mono_charset)
     (out / "assets" / "corpus-index.js").write_text(index_js, encoding="utf-8")
     size = len(index_js.encode("utf-8"))
-    if size > pages.INDEX_BUDGET:
+    if size > pages.CORPUS_INDEX_BUDGET:
         problems.append(
             f"assets/corpus-index.js: {size / 1024:.0f} KB for {len(papers)} "
             f"rewrite(s) and {len(comps)} comparison(s), over the "
-            f"{pages.INDEX_BUDGET // 1024} KB budget — "
+            f"{pages.CORPUS_INDEX_BUDGET // 1024} KB budget — "
             f"every page carries it, so drop a field from `pages.corpus_index` "
             f"or raise the budget on purpose"
         )
@@ -237,7 +236,7 @@ def build(args) -> int:
     # has only the site. The anchors come from the renderer the page is built
     # with, which is what lets a search hit name its section's file.
     for paper in papers:
-        renderer = DocRenderer(ClientRenderer())
+        renderer = DocRenderer(TocOnlyRenderer())
         renderer.render(paper.article or paper.body)
         secs = catalog.section_files(paper, renderer.toc)
         if not secs:
@@ -296,7 +295,7 @@ def write_index(path: Path, papers, problems: list[str]) -> int:
 
     out = []
     for paper in papers:
-        renderer = DocRenderer(ClientRenderer())
+        renderer = DocRenderer(TocOnlyRenderer())
         renderer.render(paper.article or paper.body)
         out += chunk_mod.from_rewrite(paper, renderer.toc)
 
@@ -359,7 +358,6 @@ def main() -> int:
                          "(cached in .site-cache/)")
     ap.add_argument("--serve", action="store_true", help="serve --out after building")
     ap.add_argument("--port", type=int, default=8000)
-    ap.add_argument("--katex", choices=("server", "client"), default="server")
     ap.add_argument("--search-api", default=os.environ.get("PROBE_SEARCH_API", ""),
                     metavar="URL",
                     help="semantic-search endpoint; omitted, the site makes no requests")

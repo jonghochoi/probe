@@ -50,14 +50,12 @@ class Fail(SystemExit):
 
 
 def _call(url: str, *, token: str, method: str = "GET", body=None,
-          headers: dict | None = None, retries: int = 4):
+          retries: int = 4):
     """One JSON call, with backoff on the failures that pass by themselves."""
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method)
     req.add_header("Authorization", f"Bearer {token}")
     req.add_header("Content-Type", "application/json")
-    for key, value in (headers or {}).items():
-        req.add_header(key, value)
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(req, timeout=120) as res:

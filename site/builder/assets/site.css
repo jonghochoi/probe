@@ -12,9 +12,8 @@
    Contrast: every pair that carries text clears WCAG 4.5:1 against every
    ground it can land on, `--surface-3` — the hover ground — included, since
    that is the darkest of them and so sets the floor. The accent is two tokens
-   for this reason: `--orange` is the brand value, which fills, strokes and
-   marks — nothing is read off it but the wordmark, which is a landmark rather
-   than a line of text; `--orange-ink` is the accent wherever it does carry
+   for this reason: `--accent` is the brand value, which fills, strokes and
+   marks, and nothing is read off it; `--accent-ink` is the accent wherever it does carry
    something to read, deep enough to clear the floor. No neutral is pure
    grey — a zero-chroma neutral reads flat next to warm paper — and no ground
    is pure white.
@@ -38,30 +37,19 @@
   --text-muted:  oklch(46.0% 0.025 277);
 
   /* ── Accent ─────────────────────────────────────────────────────────── */
-  /* One accent, in two roles. `--orange` is the brand value: it draws the
+  /* One accent, in two roles. `--accent` is the brand value: it draws the
      rules and marks and fills the badges, numerals and primary buttons —
-     which carry `--accent-ink`, the dark ink, in both themes, because a
-     bright fill is a light surface either way. `--orange-ink` is the same
+     which carry `--on-accent`, the ink that clears that fill: white on the
+     deep light-theme accent, dark on the bright dark-theme one. `--accent-ink` is the same
      accent where it has to be *read* — every link, label and accented
      numeral — because a fill only has to be seen and text has to clear 4.5:1
      against paper. In dark the brand value already clears that floor, so the
      ink is the accent and there is nothing to keep in step. The pressed step
      of a filled button is mixed from the accent rather than named separately:
      one accent means one value to move when it moves. */
-  --orange:      oklch(51.0% 0.210 277);
-  --orange-ink:  oklch(46.0% 0.200 277);
-  /* The wordmark's two stops. They are named rather than borrowed from the
-     pair above because the pair collapses in dark — there `--orange-ink` *is*
-     `--orange`, and a gradient between them is a flat fill. Both stops stay on
-     the accent's hue so the lockup reads as one colour deepening across five
-     letters rather than as two colours meeting. */
-  --wm-a:        oklch(46.0% 0.200 277);
-  --wm-b:        oklch(72.0% 0.130 299);
-  --accent-ink:  #ffffff;
-  /* The accent's second stop: the band, the wordmark and the current tab
-     lean from the accent toward it, so a ground can carry colour without a
-     second hue competing for meaning. */
-  --sec:         oklch(72.0% 0.130 299);
+  --accent:      oklch(51.0% 0.210 277);
+  --accent-ink:  oklch(46.0% 0.200 277);
+  --on-accent:   #ffffff;
   /* A card is a little translucent so the page's edge glow reads through. */
   --card-bg:     rgba(255, 255, 255, .74);
   /* The nav is the one dark ground on a light page — the frame the reading
@@ -79,9 +67,9 @@
      colour. Mixed from `--nav-bg`, so every accent and the dark theme carry
      it without a value of their own. */
   --nav-pill:    color-mix(in oklch, var(--nav-bg), white 9%);
-  --orange-soft: oklch(95.0% 0.030 277);
-  --amber-soft:  var(--orange);
-  --focus:       var(--orange-ink);
+  --accent-soft: oklch(95.0% 0.030 277);
+  --amber-soft:  var(--accent);
+  --focus:       var(--accent-ink);
   /* The mark's eye. Both sit on the accent hull, which is bright in either
      theme, so they hold their one value across the pair. */
   --mark-iris:   oklch(98.8% 0.007 53);
@@ -103,15 +91,15 @@
   --wash-ten:    oklch(98.2% 0.007 17);
   --wash-ctx:    oklch(97.7% 0.009 299);
 
-  /* ── Act cards ──────────────────────────────────────────────────────── */
-  /* The four act cards on 요약, cool to warm in the order the acts run, so
-     the row reads as a sequence rather than four categories. Deliberately not
-     the callout roles' colours: a reader who learned red = 우리와 충돌 on 상세
-     should not meet a red card that means 문제. */
+  /* ── Act colours ────────────────────────────────────────────────────── */
+  /* The first three acts on 상세 and the three coloured moves on 요약, cool
+     to warm in the order they run, so they read as a sequence rather than
+     three categories; the fourth (한계) is grey. Deliberately not the callout
+     roles' colours: a reader who learned red = 우리와 충돌 on 상세 should not
+     meet a red stage that means 문제. */
   --act1:        oklch(49.0% 0.059 247);
   --act2:        oklch(48.0% 0.080 180);
   --act3:        oklch(49.5% 0.113 73);
-  --act4:        var(--orange);
 
   /* ── Syntax roles ───────────────────────────────────────────────────── */
   /* The code block is the page's one cool surface, so its colours are
@@ -245,12 +233,10 @@
   --text:        oklch(93.0% 0.010 277);
   --text-muted:  oklch(72.0% 0.020 277);
 
-  --orange:      oklch(75.0% 0.120 277);
-  --orange-ink:  oklch(79.0% 0.110 277);
-  --wm-a:        oklch(79.0% 0.110 277);
-  --wm-b:        oklch(78.0% 0.110 299);
-  --accent-ink:  oklch(17.5% 0.010 277);
-  --orange-soft: oklch(27.0% 0.045 277);
+  --accent:      oklch(75.0% 0.120 277);
+  --accent-ink:  oklch(79.0% 0.110 277);
+  --on-accent:   oklch(17.5% 0.010 277);
+  --accent-soft: oklch(27.0% 0.045 277);
 
   --blue:        oklch(75.0% 0.113 257);
   --green:       oklch(77.3% 0.126 162);
@@ -286,7 +272,6 @@
   --shadow:    0 0 0 transparent;
   --shadow-sm: 0 1px 0 oklch(0% 0 0 / .4);
   --shadow-lg: 0 16px 44px oklch(0% 0 0 / .6), 0 0 0 1px oklch(30% 0.017 59 / .6);
-  --sec:         oklch(78.0% 0.110 299);
   --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 277) 78%, transparent);
   --nav-bg:      oklch(12.5% 0.015 277);
   --band-a:      oklch(24.0% 0.027 277);
@@ -329,7 +314,7 @@ body {
   overflow-x: clip;
 }
 
-a { color: var(--orange-ink); }
+a { color: var(--accent-ink); }
 
 /* One focus ring for the whole site, on `:focus-visible` so it answers the
    keyboard and not the mouse. It appears instantly — a ring that fades in is
@@ -346,7 +331,7 @@ a { color: var(--orange-ink); }
    a toll on every page. */
 .skip {
   position: absolute; left: 1rem; top: -3rem; z-index: var(--z-cmdk);
-  padding: .5rem .9rem; background: var(--surface); color: var(--orange-ink);
+  padding: .5rem .9rem; background: var(--surface); color: var(--accent-ink);
   border: 1px solid var(--border); border-radius: var(--radius);
   font-size: var(--fs-sm); font-weight: 700; text-decoration: none;
 }
@@ -362,7 +347,7 @@ button:active:not(:disabled), .chip:active, [role="tab"]:active,
 /* Long titles are the one string on the page with no break opportunity of its
    own — a hyphenated English paper title at 320px overflows unless the engine
    is allowed to break inside the word. */
-h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
+h1, h2, .paper-title, .row-title, .rel-title {
   overflow-wrap: anywhere; min-width: 0;
 }
 
@@ -377,47 +362,32 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
   max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;
   width: 100%; display: flex; align-items: center; gap: 1rem;
 }
-/* The wordmark is the one accent text that keeps the brand value: it sits
-   against the mark's own hull, and the two read as one lockup rather than as
-   a drawing with a caption. It is a landmark, not something a reader has to
-   make out. Every other accent on the page carries a meaning — the axis a
-   paper sits under, the filter that is on — and takes `--orange-ink`; this
-   one is the brand itself, so it takes the brand value.
-   
-   It takes it as a gradient across the five letters, deep to bright, which is
-   the mark's own hull lit from one side. `color` is set first and the clip is
-   layered over it, so a browser that cannot paint text from a background —
-   or a reader in forced-colours, where the background is dropped — still gets
-   a solid accent rather than transparent letters. */
+/* On the dark nav the wordmark is plain light ink: an accent there would
+   compete with the current-tab mark, the one accent the bar carries. The
+   robot mark stays off the bar — the first screen's greeting is where it
+   stands. */
 .nav-logo {
   font-family: var(--t-display);
   font-weight: 800; font-size: var(--fs-md); letter-spacing: -.01em;
   color: var(--nav-ink-hi); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
 }
-/* On the dark nav the wordmark is plain light ink: a gradient there would
-   compete with the current-tab mark, the one accent the bar carries. The
-   robot mark stays off the bar — the first screen's greeting is where it
-   stands. */
-.nav-logo .probe-mark { display: none; }
-@media (forced-colors: active) {
-  .nav-word { background: none; color: currentColor; }
-}
 
 /* ── The mark ─────────────────────────────────────────────────────────── */
-/* A probe that looks back. It sits in the nav on every page, so it lives
-   here rather than in `index.css`. Geometry is in `components.mark()`;
+/* A probe that looks back, on the first screen's greeting. It lives here
+   rather than in `home.css` so `components.mark()` draws it the same on any
+   page that carries it. Geometry is in `components.mark()`;
    `brand.js` steers the pupil after the pointer.
    Every part paints from a token, so the mark follows the theme with the rest
    of the page and the 16 px favicon stays a separate, static drawing. */
 .probe-mark { display: block; flex: none; overflow: visible; }
-.probe-mark .hull   { fill: var(--orange); }
+.probe-mark .hull   { fill: var(--accent); }
 .probe-mark .iris   { fill: var(--mark-iris); }
 .probe-mark .pupil  { fill: var(--mark-pupil); transition: translate var(--dur-mid) var(--ease-track); }
 .probe-mark .joy    { fill: none; stroke: var(--mark-pupil); stroke-width: 3.4; stroke-linecap: round; }
-.probe-mark .stem   { fill: none; stroke: var(--orange); stroke-width: 3.6; stroke-linecap: round; }
-.probe-mark .leaf   { fill: var(--orange); }
-.probe-mark .shadow { fill: var(--orange); opacity: .55; }
+.probe-mark .stem   { fill: none; stroke: var(--accent); stroke-width: 3.6; stroke-linecap: round; }
+.probe-mark .leaf   { fill: var(--accent); }
+.probe-mark .shadow { fill: var(--accent); opacity: .55; }
 
 .probe-mark .rig    { animation: mark-bob 3.4s ease-in-out infinite; }
 /* The sprout sways about the point where its stem meets the hull, so the
@@ -482,7 +452,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
 .nav-badge {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 1.15rem; height: 1.15rem; margin-left: .3rem; padding: 0 .3rem;
-  border-radius: var(--radius-pill); background: var(--orange); color: var(--accent-ink);
+  border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent);
   font-size: var(--fs-3xs); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums;
 }
 .nav-badge[hidden] { display: none; }
@@ -514,7 +484,7 @@ h1, h2, .paper-title, .lead-title, .row-title, .rel-title {
               border-color var(--dur-short) var(--ease-out),
               transform var(--dur-short) var(--ease-out);
 }
-.icon-btn:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: var(--lift); }
+.icon-btn:hover { color: var(--accent-ink); border-color: var(--amber-soft); transform: var(--lift); }
 /* On the dark bar the controls are outlines in the bar's own ink. */
 .site-nav .icon-btn {
   background: transparent; border-color: var(--nav-line); color: var(--nav-ink-hi);
@@ -662,10 +632,10 @@ html.js .isl { display: block; }
   font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted);
   text-decoration: none; margin-left: .15rem; font-variant-numeric: tabular-nums;
 }
-.ph-id:hover { color: var(--orange-ink); text-decoration: underline; }
+.ph-id:hover { color: var(--accent-ink); text-decoration: underline; }
 .ph-metric {
-  font-size: var(--fs-2xs); font-weight: 600; color: var(--orange-ink);
-  background: var(--orange-soft); border-radius: var(--radius-pill); padding: .18rem .6rem;
+  font-size: var(--fs-2xs); font-weight: 600; color: var(--accent-ink);
+  background: var(--accent-soft); border-radius: var(--radius-pill); padding: .18rem .6rem;
   margin-left: .15rem;
 }
 .ph-date {
@@ -712,7 +682,6 @@ html.js .isl { display: block; }
 .chip.pillar[data-p="P2"] { --pi: var(--p2-ink); background: color-mix(in oklab, var(--p2) 50%, var(--surface)); }
 .chip.pillar[data-p="P3"] { --pi: var(--p3-ink); background: color-mix(in oklab, var(--p3) 50%, var(--surface)); }
 .chip.pillar[data-p="P4"] { --pi: var(--p4-ink); background: color-mix(in oklab, var(--p4) 50%, var(--surface)); }
-.chip.link:hover { border-color: var(--amber-soft); color: var(--orange-ink); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* ── Links out and the 서재 pair ───────────────────────────────────────── */
@@ -745,7 +714,7 @@ html.js .isl { display: block; }
               border-color var(--dur-short) var(--ease-out);
 }
 .src-group .src-mark { color: var(--text-muted); font-size: 1.1em; }
-.src-group a:hover, .act-btn:hover { color: var(--orange-ink); background: var(--orange-soft); }
+.src-group a:hover, .act-btn:hover { color: var(--accent-ink); background: var(--accent-soft); }
 .src-group a:hover .src-mark { color: inherit; }
 /* The link group scrolls, so it clips: the shared focus ring — painted outside
    an element — would be cut off on its pills. Here alone the ring turns
@@ -771,8 +740,8 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 /* On is the hover ground held, plus a rim in the accent: a pressed control
    reads as pressed with the pointer elsewhere. */
 .act-btn[aria-pressed="true"] {
-  color: var(--orange-ink); background: var(--orange-soft);
-  border-color: color-mix(in oklab, var(--orange) 40%, transparent);
+  color: var(--accent-ink); background: var(--accent-soft);
+  border-color: color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
 
@@ -798,7 +767,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   color: var(--text-muted);
 }
 .rel-title { font-size: var(--fs-sm); font-weight: 700; letter-spacing: -.01em; line-height: 1.45; }
-.rel-item:hover .rel-title { color: var(--orange-ink); }
+.rel-item:hover .rel-title { color: var(--accent-ink); }
 .rel-size {
   font-size: var(--fs-2xs); color: var(--text-muted); white-space: nowrap;
   font-variant-numeric: tabular-nums; grid-row: 2; grid-column: 2;
@@ -830,7 +799,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .near-node circle { fill: var(--lane, var(--text-muted)); stroke: var(--surface); stroke-width: 1.5; }
 .near-node.is-out circle { fill: var(--surface); stroke: var(--text-muted); }
 .near-node.is-out text { fill: var(--text-muted); }
-.near-node:hover text, .near-node:focus-visible text { fill: var(--orange-ink); }
+.near-node:hover text, .near-node:focus-visible text { fill: var(--accent-ink); }
 .near-me circle { fill: var(--lane, var(--text)); stroke: var(--text); stroke-width: 2; }
 
 /* ── Comparisons ──────────────────────────────────────────────────────── */
@@ -895,11 +864,11 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .cmp-card-h { display: flex; align-items: center; gap: .45rem; }
 /* Named like the 요약 cards: the alias underlined in the accent, and the
    accent rising from the card's top edge. */
-.cmp-card { background-image: linear-gradient(180deg, color-mix(in oklab, var(--orange) 18%, transparent) 0, transparent 7rem); }
+.cmp-card { background-image: linear-gradient(180deg, color-mix(in oklab, var(--accent) 18%, transparent) 0, transparent 7rem); }
 .cmp-card-n {
   font-size: var(--fs-md); font-weight: 800; letter-spacing: -.01em; line-height: 1.3;
-  color: var(--orange-ink); padding-bottom: .2rem;
-  background: linear-gradient(var(--orange), var(--orange)) left bottom / 100% 2px no-repeat;
+  color: var(--accent-ink); padding-bottom: .2rem;
+  background: linear-gradient(var(--accent), var(--accent)) left bottom / 100% 2px no-repeat;
 }
 .cmp-card-s { font-size: var(--fs-base); font-weight: 600; line-height: 1.5; color: var(--text); }
 .cmp-card-t {
@@ -914,7 +883,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.cmp-card-m { font-size: var(--fs-2xs); color: var(--orange-ink); font-weight: 600; }
+.cmp-card-m { font-size: var(--fs-2xs); color: var(--accent-ink); font-weight: 600; }
 @media (max-width: 720px) {
   .cmp-trunk { justify-content: flex-start; text-align: left; }
   .cmp-card-row { grid-template-columns: minmax(0, 1fr); }
@@ -926,7 +895,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
    ground rather than its answer. */
 .cmp-problem-l {
   display: block; font-size: var(--fs-2xs); font-weight: 700;
-  color: var(--orange-ink); margin-bottom: .2rem;
+  color: var(--accent-ink); margin-bottom: .2rem;
 }
 /* The stance in everyday words — a second register under the stance, never
    louder than it. */
@@ -962,14 +931,14 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .primer figcaption b { color: var(--text); font-size: var(--fs-sm); }
 .primer svg text { fill: var(--text); font-family: var(--ko); }
 .primer svg .pr-m { fill: var(--text-muted); }
-.primer svg .pr-k { fill: var(--orange-ink); }
+.primer svg .pr-k { fill: var(--accent-ink); }
 .primer svg .pr-mono { font-family: var(--mono); }
 .pr-box { fill: var(--surface); stroke: var(--text-muted); stroke-width: 1.4; }
 .pr-soft { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.2; }
-.pr-key { fill: var(--orange-soft); stroke: var(--orange); stroke-width: 1.5; }
+.pr-key { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
 .pr-ice { fill: var(--wash-key); stroke: var(--act1); stroke-width: 1.5; }
 .pr-mask { fill: var(--text-muted); opacity: .55; }
-.pr-on { fill: var(--orange); }
+.pr-on { fill: var(--accent); }
 .pr-dot { fill: var(--text-muted); opacity: .45; }
 .pr-ring { fill: none; stroke: var(--text-muted); stroke-width: 2; }
 .pr-line { fill: none; stroke: var(--text-muted); stroke-width: 1.5; }
@@ -977,8 +946,8 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .pr-arm { fill: none; stroke: var(--border); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
 .pr-joint { fill: var(--surface); stroke: var(--text-muted); stroke-width: 2; }
 .pr-curve { fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linejoin: round; }
-.pr-curve-on { fill: none; stroke: var(--orange); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
-.pr-trail { fill: none; stroke: var(--orange); stroke-width: 2; stroke-linecap: round; }
+.pr-curve-on { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.pr-trail { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
 
 /* ── ```probe-timeline ──────────────────────────────────────────────── */
 /* The compared papers on one ruler. A row's colour is its paper's mark hue;
@@ -1003,8 +972,8 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 .tl-faint { fill: var(--border); }
 .tl-over { fill: currentColor; }
 .tl-every { stroke: currentColor; stroke-width: 2; }
-.tl-cut { stroke: var(--orange); stroke-width: 1.6; stroke-dasharray: 4 4; }
-.timeline .tl-cutl { font-size: 11.5px; font-weight: 700; fill: var(--orange-ink); }
+.tl-cut { stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.timeline .tl-cutl { font-size: 11.5px; font-weight: 700; fill: var(--accent-ink); }
 
 /* ── ```probe-figs ───────────────────────────────────────────────────── */
 /* One frame, one paper's own figure at the column's full width; the tabs
@@ -1020,7 +989,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   padding: .45rem .75rem .5rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
 }
 .figs-tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); }
-.figs-tabs button:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.figs-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .figs-panels { display: grid; gap: 1.4rem; }
 .figs.is-live .figs-panels { gap: 0; }
 .figs-panel { margin: 0; display: grid; gap: .6rem; }
@@ -1078,7 +1047,7 @@ table.mx thead th a {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
   overflow: hidden;
 }
-table.mx thead th a:hover { color: var(--orange-ink); }
+table.mx thead th a:hover { color: var(--accent-ink); }
 table.mx thead th .pmark { margin-right: .35rem; }
 /* Typed axes (`comparison/AUTHORING.md` §3-1). A mark leads its sentence as a
    word with a dot whose fill is the claim; `–` is drawn fainter than `○`, so
@@ -1191,14 +1160,14 @@ table.mx thead th[scope="col"] { width: 26%; }
   font-family: var(--num); font-size: var(--fs-3xs); font-weight: 800;
   background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border);
 }
-.ms-g.on .ms-node { border-color: var(--orange); color: var(--orange-ink); }
+.ms-g.on .ms-node { border-color: var(--accent); color: var(--accent-ink); }
 .ms-at { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: .4rem; }
 .ms-at b { font-size: var(--fs-sm); font-weight: 700; }
 .ms-at span {
   font-size: var(--fs-3xs); color: var(--text-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.ms-act:hover .ms-at b { color: var(--orange-ink); }
+.ms-act:hover .ms-at b { color: var(--accent-ink); }
 .ms-cnt { font-family: var(--num); font-size: var(--fs-3xs); color: var(--text-muted); }
 .ms-rows { display: grid; padding: .05rem 0 .2rem; }
 .ms-sec {
@@ -1206,14 +1175,14 @@ table.mx thead th[scope="col"] { width: 26%; }
   padding: .22rem .2rem .22rem 1.6rem; border-radius: var(--radius-sm);
   color: var(--text-muted); text-decoration: none; line-height: 1.4;
 }
-.ms-sec:hover { color: var(--text); background: var(--orange-soft); }
+.ms-sec:hover { color: var(--text); background: var(--accent-soft); }
 .ms-sec::before {
   content: ""; position: absolute; left: .62rem; top: .9em; z-index: 1;
   width: 7px; height: 7px; border-radius: 50%; transform: translate(-50%, -50%);
   background: var(--surface); border: 1.5px solid var(--border);
 }
-.ms-sec[aria-current="true"] { color: var(--orange-ink); font-weight: 600; }
-.ms-sec[aria-current="true"]::before { background: var(--orange); border-color: var(--orange); }
+.ms-sec[aria-current="true"] { color: var(--accent-ink); font-weight: 600; }
+.ms-sec[aria-current="true"]::before { background: var(--accent); border-color: var(--accent); }
 .ms-num { flex: none; min-width: 1.1em; font-family: var(--num); font-size: var(--fs-3xs); opacity: .75; }
 /* Titles print whole: the rail holds only the acts and a section or two, and
    the whole list is opened to be read. */
@@ -1259,8 +1228,8 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .toc-mark svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .toc-row:hover .toc-mark, .toc-mark:focus-visible { opacity: 1; }
-.toc-mark:hover { color: var(--orange-ink); }
-.toc-mark[aria-pressed="true"] { opacity: 1; color: var(--orange-ink); }
+.toc-mark:hover { color: var(--accent-ink); }
+.toc-mark[aria-pressed="true"] { opacity: 1; color: var(--accent-ink); }
 .toc-mark[aria-pressed="true"] svg { fill: currentColor; }
 /* A finger is not a cursor. There is nothing to reach with, so the flag is lit
    from the start rather than faint, and its column widens to the 44px a thumb
@@ -1289,8 +1258,8 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 .mark-fab[hidden] { display: none; }
 .mark-fab svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
-.mark-fab:hover { color: var(--orange-ink); border-color: var(--amber-soft); transform: translateY(-1px); }
-.mark-fab[aria-pressed="true"] { color: var(--orange-ink); border-color: var(--amber-soft); }
+.mark-fab:hover { color: var(--accent-ink); border-color: var(--amber-soft); transform: translateY(-1px); }
+.mark-fab[aria-pressed="true"] { color: var(--accent-ink); border-color: var(--amber-soft); }
 .mark-fab[aria-pressed="true"] svg { fill: currentColor; }
 .article { min-width: 0; }
 
@@ -1303,15 +1272,15 @@ table.mx thead th[scope="col"] { width: 26%; }
   margin: 3.9rem 0 -1rem; padding-bottom: .5rem;
 }
 .pdiv::after {
-  content: ""; flex: 1; height: 2px; background: var(--orange); opacity: .28;
+  content: ""; flex: 1; height: 2px; background: var(--accent); opacity: .28;
 }
 .pdiv .pn {
-  font-size: var(--fs-2xs); font-weight: 800; color: var(--accent-ink); background: var(--orange);
+  font-size: var(--fs-2xs); font-weight: 800; color: var(--on-accent); background: var(--accent);
   border-radius: var(--radius-xs); padding: .08rem .45rem;
 }
 .pdiv .pt {
   font-size: var(--fs-xs); font-weight: 800; letter-spacing: .02em;
-  color: var(--orange-ink);
+  color: var(--accent-ink);
 }
 /* A rewrite's act: its short noun in the display face, the question it
    answers in grey beside it, and a hairline rather than the coloured bar —
@@ -1333,7 +1302,7 @@ table.mx thead th[scope="col"] { width: 26%; }
 }
 
 /* A hairline over every section. Nine sections down a long page, the gap
-   alone stopped reading as a boundary — the eye needs the line to know a new
+   alone does not read as a boundary — the eye needs the line to know a new
    question started. The act divider already draws one, so a section opening an
    act does not draw a second. */
 .article h2.h-sec {
@@ -1362,7 +1331,7 @@ table.mx thead th[scope="col"] { width: 26%; }
    above it rather than as the opening of the one below. */
 .article h3, .article h4.h-sub {
   font-size: var(--fs-md); font-weight: 700; margin: 2rem 0 .5rem;
-  color: var(--orange-ink);
+  color: var(--accent-ink);
 }
 
 /* Prose margins belong to PROSE, and the selectors say where prose is: the
@@ -1399,7 +1368,7 @@ table.mx thead th[scope="col"] { width: 26%; }
    level instead of folding the two into one bold. */
 em {
   font-style: normal;
-  text-emphasis: filled dot var(--orange);
+  text-emphasis: filled dot var(--accent);
   text-emphasis-position: over right;
 }
 
@@ -1408,7 +1377,7 @@ em {
 .article code {
   font-family: var(--mono);
   font-size: .855em;
-  background: var(--orange-soft); color: var(--orange-ink);
+  background: var(--accent-soft); color: var(--accent-ink);
   padding: .1em .38em; border-radius: var(--radius-xs);
   word-break: break-word;
 }
@@ -1494,7 +1463,7 @@ figure.fig img {
 figure.fig figcaption {
   margin-top: .5rem; font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.55;
 }
-.fig-num { font-weight: 800; color: var(--orange-ink); }
+.fig-num { font-weight: 800; color: var(--accent-ink); }
 .fig-src { font-style: normal; text-emphasis: none; color: var(--text-muted); }
 
 /* ── Tables ───────────────────────────────────────────────────────────── */
@@ -1545,11 +1514,11 @@ abbr.dref {
   margin-left: .25em; padding: .04em .38em;
   font-family: var(--num); font-size: max(.8em, var(--fs-2xs)); vertical-align: .08em;
   white-space: nowrap; text-decoration: none;
-  color: var(--orange-ink); background: var(--orange-soft);
-  border: 1px solid var(--orange); border-radius: var(--radius-pill);
+  color: var(--accent-ink); background: var(--accent-soft);
+  border: 1px solid var(--accent); border-radius: var(--radius-pill);
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
-.sib:hover, .sib:focus-visible { color: var(--bg); background: var(--orange-ink); }
+.sib:hover, .sib:focus-visible { color: var(--bg); background: var(--accent-ink); }
 
 /* ── Readable layer: inline term anchors (R4) ─────────────────────────── */
 /* Dotted, at full accent strength. A 1px dash in the pale `--amber-soft` was
@@ -1557,14 +1526,14 @@ abbr.dref {
    nothing, and a term whose marker is invisible is a term nobody opens. */
 .tref {
   font: inherit; background: none; border: none; padding: 0; cursor: pointer;
-  color: inherit; border-bottom: 1.5px dotted var(--orange);
+  color: inherit; border-bottom: 1.5px dotted var(--accent);
   transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
 .tref:hover, .tref[aria-expanded="true"] {
-  color: var(--orange-ink); border-bottom-color: var(--orange-ink);
-  background: var(--orange-soft);
+  color: var(--accent-ink); border-bottom-color: var(--accent-ink);
+  background: var(--accent-soft);
 }
-.tref .ti { font-size: .72em; vertical-align: .3em; margin-left: .1em; color: var(--orange-ink); }
+.tref .ti { font-size: .72em; vertical-align: .3em; margin-left: .1em; color: var(--accent-ink); }
 
 /* The panel opens where the word is, inside the paragraph, so `.tbox` is an
    inline wrapper and only the card inside it becomes a block. */
@@ -1573,7 +1542,7 @@ abbr.dref {
   display: block; margin: .7rem 0;
   padding: .75rem .95rem; font-size: var(--fs-sm); line-height: 1.68;
   background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--orange);
+  border-left: 3px solid var(--accent);
   border-radius: 0 var(--radius) var(--radius) 0;
   animation: tdef-in var(--dur-mid) var(--ease-out);
 }
@@ -1583,7 +1552,7 @@ abbr.dref {
    emphasis. */
 .tdef .th {
   display: block; font-weight: 800; font-size: var(--fs-xs);
-  color: var(--orange-ink); margin-bottom: .15rem;
+  color: var(--accent-ink); margin-bottom: .15rem;
 }
 .tdef .tbody b, .tdef .tbody strong { display: inline; font-weight: 700; color: var(--text); }
 
@@ -1591,7 +1560,7 @@ abbr.dref {
 .quiz {
   margin: 1.6rem 0; padding: .55rem .95rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--orange);
+  border-left: 3px solid var(--accent);
   border-radius: 0 var(--radius) var(--radius) 0;
 }
 .quiz[open] { padding-bottom: .95rem; }
@@ -1608,10 +1577,10 @@ abbr.dref {
 }
 .quiz[open] > .q-sum { margin-bottom: .6rem; }
 .quiz[open] > .q-sum::after { transform: rotate(90deg); }
-.q-sum:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+.q-sum:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 /* Labelled, because an unlabelled bold question mid-article reads as the
    author asking rhetorically rather than as a section boundary to answer at. */
-.q-label { flex: none; font-size: var(--fs-2xs); font-weight: 800; color: var(--orange-ink); }
+.q-label { flex: none; font-size: var(--fs-2xs); font-weight: 800; color: var(--accent-ink); }
 .quiz .qq { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .quiz[open] .qq { white-space: normal; font-weight: 700; font-size: var(--fs-sm); color: var(--text); }
 .qopts { display: flex; flex-direction: column; gap: .33rem; }
@@ -1624,7 +1593,7 @@ abbr.dref {
   font: inherit; font-size: var(--fs-sm); color: var(--text);
   transition: background var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
 }
-.qopt:hover { border-color: var(--orange); }
+.qopt:hover { border-color: var(--accent); }
 /* Answered state is driven by an attribute on the section, so both the chosen
    wrong option and the right one can be marked at once. */
 .quiz[data-answered] .qopt { cursor: default; }
@@ -1640,7 +1609,7 @@ abbr.dref {
 }
 .qwhy {
   margin-top: .6rem; padding-left: .75rem; font-size: var(--fs-sm); line-height: 1.65;
-  border-left: 2px solid var(--orange); color: var(--text-muted);
+  border-left: 2px solid var(--accent); color: var(--text-muted);
 }
 .qwhy[hidden] { display: none; }
 
@@ -1652,19 +1621,19 @@ details.fold {
 /* Open state takes the accent border — with the fold shut and open looking
    alike, a reader scrolling back could not tell which ones they had already
    pulled. */
-details.fold[open] { border-color: var(--orange); }
+details.fold[open] { border-color: var(--accent); }
 details.fold > summary {
   padding: .65rem .95rem; cursor: pointer; font-size: var(--fs-sm); font-weight: 700;
-  color: var(--orange-ink); list-style: none; user-select: none;
+  color: var(--accent-ink); list-style: none; user-select: none;
 }
-details.fold > summary:hover { background: var(--orange-soft); }
+details.fold > summary:hover { background: var(--accent-soft); }
 details.fold > summary::-webkit-details-marker { display: none; }
 /* The disclosure triangle is drawn rather than inherited so it can rotate
    with the open state and match the flow connector's chevron. */
 details.fold > summary::before {
   content: ""; display: inline-block; width: 6px; height: 6px;
   margin-right: .5rem; vertical-align: .12em;
-  border-right: 2px solid var(--orange); border-bottom: 2px solid var(--orange);
+  border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
   transform: rotate(-45deg); transition: transform var(--dur-short) var(--ease-out);
 }
 details.fold[open] > summary::before { transform: rotate(45deg); }
@@ -1678,7 +1647,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    under it, and a second frame would compete with the formula for the eye. */
 .eqread {
   font-size: var(--fs-sm); color: var(--text-muted);
-  border-left: 2px solid var(--orange); padding-left: .75rem; margin: 0 0 .2rem;
+  border-left: 2px solid var(--accent); padding-left: .75rem; margin: 0 0 .2rem;
 }
 .eqread em { color: var(--text); font-weight: 600; text-emphasis: none; }
 .eqblock .math-display { margin: .5rem 0; }
@@ -1766,7 +1735,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-sm); font-size: var(--fs-sm);
 }
-.fg-step.hot { border-color: var(--orange-ink); background: var(--orange-soft); }
+.fg-step.hot { border-color: var(--accent-ink); background: var(--accent-soft); }
 .fs-label { display: block; font-weight: 700; }
 .fs-note { display: block; color: var(--text-muted); font-size: var(--fs-xs); margin-top: .12rem; }
 /* In a comparison a step can carry the papers that act on it: each paper's
@@ -1780,14 +1749,14 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   transition: opacity var(--dur-short) var(--ease-out);
 }
 .fs-mark .pmark { align-self: center; }
-.fg-step.is-contested { border-color: var(--orange-ink); background: var(--orange-soft); }
+.fg-step.is-contested { border-color: var(--accent-ink); background: var(--accent-soft); }
 .fg-step.is-blind { border: 1.5px dashed var(--amber); background: var(--wash-warn); }
 .fs-blind { display: block; margin-top: .3rem; font-size: var(--fs-xs); font-weight: 700; color: var(--amber); }
 .flow-verdict { margin: -.2rem 0 .7rem; font-size: var(--fs-xs); }
 .flow-tag {
   display: inline-block; margin-right: .45rem; padding: .02rem .45rem;
-  font-size: var(--fs-2xs); font-weight: 800; color: var(--accent-ink);
-  background: var(--orange-ink); border-radius: var(--radius-xs);
+  font-size: var(--fs-2xs); font-weight: 800; color: var(--on-accent);
+  background: var(--accent-ink); border-radius: var(--radius-xs);
 }
 /* The wire into a row: down the gap to the box, with its head on the box. */
 .fg-in::before, .fg-lanes.fg-split::before {
@@ -1876,7 +1845,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .ln-when {
   font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 800;
-  color: var(--orange-ink); font-variant-numeric: tabular-nums; white-space: nowrap;
+  color: var(--accent-ink); font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .ln-text { display: block; font-size: var(--fs-sm); line-height: 1.62; }
 .ln-what { display: block; font-weight: 700; font-size: var(--fs-sm); margin-bottom: .12rem; }
@@ -1886,10 +1855,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    only: the date column is the rail the eye runs down, and tinting it breaks
    the rail exactly where the reader is meant to be looking. */
 .ln-item.cur .ln-text {
-  background: var(--orange-soft); border-radius: var(--radius-xs);
+  background: var(--accent-soft); border-radius: var(--radius-xs);
   padding: .35rem .4rem; margin: 0 -.4rem;
 }
-.ln-item.cur .ln-what { color: var(--orange-ink); }
+.ln-item.cur .ln-what { color: var(--accent-ink); }
 
 /* 숫자의 지형 — one number against the others of its kind. */
 .sc-row {
@@ -1911,7 +1880,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-variant-numeric: tabular-nums;
 }
 .sc-row.us .sc-label, .sc-row.us .sc-v { font-weight: 700; color: var(--text); }
-.sc-row.us .sc-bar i { background: var(--orange); opacity: 1; }
+.sc-row.us .sc-bar i { background: var(--accent); opacity: 1; }
 
 /* 대조 — held apart in the layout, not in consecutive paragraphs. */
 .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
@@ -1939,13 +1908,13 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    callout interrupting the flow, which is the opposite of holding two things
    side by side. A card inside a multi-card grid is keyed by its heading. */
 /* One card at most wears a color, and it is the site's own accent — the same
-   orange that marks this paper's row in 숫자의 지형 and the reader's place in
+   accent that marks this paper's row in 숫자의 지형 and the reader's place in
    계보, so one page says "여기가 이 논문의 자리" with one color everywhere. The
    other cards stay plain: they are peers, and a second color on a peer says
    there are two positions. Keeping it to one slot is also what lets a
    contrast grow a card without the palette repeating itself. */
 .sp-us { border-color: var(--amber-soft); }
-.sp-us .sp-head { color: var(--orange-ink); }
+.sp-us .sp-head { color: var(--accent-ink); }
 
 /* One object decomposed into named regions. */
 /* Rows run edge to edge and divide themselves: the regions are one object cut
@@ -1996,9 +1965,6 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   border-radius: var(--radius); font-size: var(--fs-sm);
   background: var(--surface-2); border: 1px solid var(--border);
 }
-.callout .ci { font-size: var(--fs-md); line-height: 1.4; flex-shrink: 0; }
-.callout.warn { background: color-mix(in srgb, var(--amber) 10%, transparent); border-color: color-mix(in srgb, var(--amber) 32%, transparent); }
-.callout.na   { background: color-mix(in srgb, var(--red) 8%, transparent);   border-color: color-mix(in srgb, var(--red) 26%, transparent); }
 .callout code { font-size: .82em; }
 
 /* ── Memo: floating button + slide panel ──────────────────────────────── */
@@ -2015,12 +1981,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
               border-color var(--dur-mid) var(--ease-out),
               transform var(--dur-mid) var(--ease-out);
 }
-.memo-fab:hover { border-color: var(--amber-soft); color: var(--orange-ink); transform: translateY(-1px); }
-.memo-fab[data-has-memo="1"] { color: var(--orange-ink); border-color: var(--amber-soft); }
+.memo-fab:hover { border-color: var(--amber-soft); color: var(--accent-ink); transform: translateY(-1px); }
+.memo-fab[data-has-memo="1"] { color: var(--accent-ink); border-color: var(--amber-soft); }
 .memo-fab .count {
   display: none; position: absolute; top: -4px; right: -4px;
   min-width: 18px; height: 18px; padding: 0 5px;
-  border-radius: var(--radius-pill); background: var(--orange); color: var(--accent-ink);
+  border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent);
   font-size: var(--fs-3xs); font-weight: 800; line-height: 18px; text-align: center;
 }
 .memo-fab[data-has-memo="1"] .count { display: inline-block; }
@@ -2044,7 +2010,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   font-size: var(--fs-2xs); color: var(--text-muted);
   padding: .5rem 1.15rem 0;
 }
-.memo-anchor a { color: var(--orange-ink); text-decoration: none; }
+.memo-anchor a { color: var(--accent-ink); text-decoration: none; }
 .memo textarea {
   flex: 1; margin: .75rem 1.15rem; padding: .8rem;
   font: inherit; font-size: var(--fs-sm); line-height: 1.7;
@@ -2072,10 +2038,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   transition: color var(--dur-short) var(--ease-out),
               background var(--dur-short) var(--ease-out);
 }
-.memo-actions button:hover { background: var(--orange-soft); color: var(--orange-ink); }
-.memo-actions .primary { background: var(--orange); color: var(--accent-ink); }
+.memo-actions button:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.memo-actions .primary { background: var(--accent); color: var(--on-accent); }
 .memo-actions .primary:hover {
-  background: color-mix(in oklab, var(--orange) 88%, var(--text)); color: var(--accent-ink);
+  background: color-mix(in oklab, var(--accent) 88%, var(--text)); color: var(--on-accent);
 }
 .memo-actions .danger:hover { background: var(--wash-ten); color: var(--red); }
 .memo-actions .spacer { flex: 1; }
@@ -2141,15 +2107,15 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   border: 1.5px solid var(--border); background: var(--surface);
 }
 .as-link:hover { color: var(--text); }
-.as-link[aria-current="true"] { color: var(--orange-ink); font-weight: 700; }
-.as-link[aria-current="true"] .as-dot { background: var(--orange); border-color: var(--orange); }
+.as-link[aria-current="true"] { color: var(--accent-ink); font-weight: 700; }
+.as-link[aria-current="true"] .as-dot { background: var(--accent); border-color: var(--accent); }
 .as-toc {
   flex: none; display: inline-flex; align-items: center; justify-content: center;
   margin-left: .3rem; padding: 0 .55rem; border: 0; border-left: 1px solid var(--border);
   background: none; color: var(--text-muted); cursor: pointer;
 }
 .as-toc[hidden] { display: none; }
-.as-toc:hover { color: var(--orange-ink); }
+.as-toc:hover { color: var(--accent-ink); }
 
 /* The contents, from below. */
 .toc-sheet {
@@ -2277,7 +2243,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   .src-group + .paper-acts::before { margin: 0 .2rem 0 .15rem; }
 }
 .tab:hover { color: var(--text); }
-.tab[aria-selected="true"] { color: var(--orange-ink); border-bottom-color: var(--orange-ink); }
+.tab[aria-selected="true"] { color: var(--accent-ink); border-bottom-color: var(--accent-ink); }
 /* 비교 carries its count in the tab, because the number is the whole reason to
    look. Filled rather than outlined: it is the one thing in the strip that
    says how much is behind a tab, and an outline at this size reads as a second
@@ -2288,7 +2254,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   background: var(--surface-3); color: var(--text-muted);
   border-radius: var(--radius-pill); padding: 0 .34rem;
 }
-.tab[aria-selected="true"] .cnt { background: var(--orange); color: var(--accent-ink); }
+.tab[aria-selected="true"] .cnt { background: var(--accent); color: var(--on-accent); }
 .panel.wide { max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.25rem 5rem; }
 
 /* ── 비교 — the comparisons holding this paper ─────────────────────────── */
@@ -2319,7 +2285,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   font-size: var(--fs-md); font-weight: 700; line-height: 1.45; letter-spacing: -.015em;
   text-wrap: balance;
 }
-.incmp-item:hover .incmp-t { color: var(--orange-ink); }
+.incmp-item:hover .incmp-t { color: var(--accent-ink); }
 /* A comparison with no `stances:` to draw prints its ids instead — the ids
    rather than the titles, since three titles do not fit on a line and three
    ids always do. */
@@ -2365,7 +2331,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
    declaration that does nothing is one a reader has to disprove. */
 .fork-l {
   flex: 0 0 auto; font-size: var(--fs-2xs); font-weight: 700;
-  color: var(--orange-ink); white-space: nowrap;
+  color: var(--accent-ink); white-space: nowrap;
 }
 /* `currentColor` on the path, so the bracket is one declaration here rather
    than a stroke repeated in every generated <svg>. */
@@ -2378,7 +2344,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   grid-auto-rows: 22px; align-items: center; column-gap: .55rem;
 }
 .fork-n { font-size: var(--fs-2xs); font-weight: 700; color: var(--text); }
-.fork-n.is-self { color: var(--orange-ink); }
+.fork-n.is-self { color: var(--accent-ink); }
 .fork-id {
   font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   font-variant-numeric: tabular-nums;
@@ -2413,7 +2379,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
    grey line beside it — and the accent rises from the card's top edge as a
    glow, the way the page's own ground does. No band: a band says "aside", and
    these two are the surface itself. */
-.g-hub, .g-narr { --g-c: var(--orange); --g-ink: var(--orange-ink); }
+.g-hub, .g-narr { --g-c: var(--accent); --g-ink: var(--accent-ink); }
 .g-hub, .g-narr {
   background-image: linear-gradient(180deg, color-mix(in oklab, var(--g-c) 18%, transparent) 0, transparent 7rem);
 }
@@ -2442,7 +2408,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
 .gh-line { font-size: var(--fs-sm); color: var(--text-muted); }
 .gh-facts { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: .9rem; }
 .gh-k { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); display: block; }
-.gh-v { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: var(--fs-md); font-weight: 700; color: var(--orange-ink); }
+.gh-v { font-family: var(--num); font-variant-numeric: tabular-nums; font-size: var(--fs-md); font-weight: 700; color: var(--accent-ink); }
 .gh-fig .fig { margin: 0; }
 
 /* The narrative and its rail are one card: the rail answers the questions the
@@ -2457,7 +2423,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
 .g-narr-h { grid-column: 1 / -1; }
 .g-narr-body p { margin: 0 0 .78rem; }
 .g-narr-body p:last-child { margin-bottom: 0; }
-.g-narr-body strong { color: var(--orange-ink); }
+.g-narr-body strong { color: var(--accent-ink); }
 /* The four moves. Each move's name stands in the margin beside it and rides
    down with the move while it is read, in the act colour the 상세 tab gives
    the same stage; 한계 is grey, the paper speaking against itself. A
@@ -2487,7 +2453,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
 }
 .gr-k { font-family: var(--num); font-size: var(--fs-2xs); color: var(--text-muted); }
 .gr-v { font-size: var(--fs-xs); line-height: 1.55; }
-.gr-v strong, .gr-v b { font-family: var(--num); color: var(--orange-ink); }
+.gr-v strong, .gr-v b { font-family: var(--num); color: var(--accent-ink); }
 .gr-n { font-size: var(--fs-2xs); color: var(--text-muted); line-height: 1.5; }
 
 
@@ -2535,7 +2501,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   font-family: var(--mono); font-size: var(--fs-3xs); padding: .18rem .4rem;
   cursor: pointer;
 }
-.cmdk-esc:hover { color: var(--orange-ink); border-color: var(--amber-soft); }
+.cmdk-esc:hover { color: var(--accent-ink); border-color: var(--amber-soft); }
 .cmdk-esc .x { display: none; }
 
 .cmdk-list { list-style: none; overflow-y: auto; overscroll-behavior: contain; padding: .35rem; }
@@ -2559,7 +2525,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
 .cmdk-marks { display: flex; align-items: center; gap: .25rem; }
 /* A result row's 즐겨찾기 mark is a statement, not a control — nothing here
    toggles it — so the star arrives already filled. */
-.cmdk-star { color: var(--orange-ink); display: inline-flex; }
+.cmdk-star { color: var(--accent-ink); display: inline-flex; }
 .cmdk-star .ico { width: 12px; height: 12px; fill: currentColor; }
 .cmdk-read {
   font-size: var(--fs-3xs); font-weight: 700; color: var(--green);
@@ -2579,7 +2545,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
    rather than the 읽음 green: it is not a mark the reader put there, it is what
    the row is. */
 .cmdk-kind {
-  font-size: var(--fs-2xs); font-weight: 700; color: var(--orange-ink);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--accent-ink);
   border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
 }
@@ -2608,17 +2574,17 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   padding: .12rem .65rem; cursor: pointer;
 }
 .cmdk-tab[aria-pressed="true"] {
-  color: var(--orange-ink); border-color: var(--amber-soft); background: var(--orange-soft); font-weight: 700;
+  color: var(--accent-ink); border-color: var(--amber-soft); background: var(--accent-soft); font-weight: 700;
 }
-.cmdk-tab:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.cmdk-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cmdk-tab-n { font-family: var(--num); font-variant-numeric: tabular-nums; margin-left: .3rem; }
 .cmdk-tab-n:empty { display: none; }
 .cmdk-tab-key { margin-left: auto; font-size: var(--fs-3xs); color: var(--text-muted); }
 
 /* The row that puts the question to the index: in the accent, since it is
    the one row that does something other than open a page. */
-.cmdk-ask .cmdk-title { color: var(--orange-ink); }
-.cmdk-ask .cmdk-hit { color: var(--orange-ink); border-color: var(--amber-soft); }
+.cmdk-ask .cmdk-title { color: var(--accent-ink); }
+.cmdk-ask .cmdk-hit { color: var(--accent-ink); border-color: var(--amber-soft); }
 /* What kind of passage a hit is — 섹션, 용어, 그림, 논문 — in the marks column
    a passage row has in place of the shelf's. */
 .cmdk-hit {
@@ -2706,7 +2672,7 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%,
-              color-mix(in srgb, var(--orange) 7%, transparent) 100%);
+              color-mix(in srgb, var(--accent) 7%, transparent) 100%);
   animation: edge-breathe 12s ease-in-out infinite alternate;
 }
 @keyframes edge-breathe { to { opacity: .55; } }
@@ -2730,13 +2696,10 @@ body::before {
   --border-soft: oklch(92.0% 0.014 165);
   --text:        oklch(22.0% 0.020 165);
   --text-muted:  oklch(46.0% 0.025 165);
-  --orange:      oklch(52.0% 0.100 165);
-  --orange-ink:  oklch(45.0% 0.090 165);
-  --wm-a:        oklch(45.0% 0.090 165);
-  --wm-b:        oklch(72.0% 0.130 187);
-  --accent-ink:  #ffffff;
-  --sec:         oklch(72.0% 0.130 187);
-  --orange-soft: oklch(95.0% 0.030 165);
+  --accent:      oklch(52.0% 0.100 165);
+  --accent-ink:  oklch(45.0% 0.090 165);
+  --on-accent:   #ffffff;
+  --accent-soft: oklch(95.0% 0.030 165);
   --nav-bg:      oklch(25.0% 0.035 165);
   --nav-ink:     oklch(86.0% 0.020 165);
   --nav-ink-hi:  oklch(97.0% 0.010 165);
@@ -2753,13 +2716,10 @@ body::before {
   --border-soft: oklch(27.5% 0.014 165);
   --text:        oklch(93.0% 0.010 165);
   --text-muted:  oklch(72.0% 0.020 165);
-  --orange:      oklch(75.0% 0.120 165);
-  --orange-ink:  oklch(79.0% 0.110 165);
-  --wm-a:        oklch(79.0% 0.110 165);
-  --wm-b:        oklch(78.0% 0.110 187);
-  --accent-ink:  oklch(17.5% 0.010 165);
-  --orange-soft: oklch(27.0% 0.045 165);
-  --sec:         oklch(78.0% 0.110 187);
+  --accent:      oklch(75.0% 0.120 165);
+  --accent-ink:  oklch(79.0% 0.110 165);
+  --on-accent:   oklch(17.5% 0.010 165);
+  --accent-soft: oklch(27.0% 0.045 165);
   --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 165) 78%, transparent);
   --nav-bg:      oklch(12.5% 0.015 165);
   --band-a:      oklch(24.0% 0.027 165);
@@ -2774,13 +2734,10 @@ body::before {
   --border-soft: oklch(92.0% 0.014 40);
   --text:        oklch(22.0% 0.020 40);
   --text-muted:  oklch(46.0% 0.025 40);
-  --orange:      oklch(67.2% 0.131 39);
-  --orange-ink:  oklch(51.4% 0.155 41);
-  --wm-a:        oklch(51.4% 0.155 41);
-  --wm-b:        oklch(72.0% 0.130 62);
-  --accent-ink:  oklch(21.0% 0.018 50);
-  --sec:         oklch(72.0% 0.130 62);
-  --orange-soft: oklch(95.0% 0.030 40);
+  --accent:      oklch(67.2% 0.131 39);
+  --accent-ink:  oklch(51.4% 0.155 41);
+  --on-accent:   oklch(21.0% 0.018 50);
+  --accent-soft: oklch(95.0% 0.030 40);
   --nav-bg:      oklch(25.0% 0.035 40);
   --nav-ink:     oklch(86.0% 0.020 40);
   --nav-ink-hi:  oklch(97.0% 0.010 40);
@@ -2797,13 +2754,10 @@ body::before {
   --border-soft: oklch(27.5% 0.014 40);
   --text:        oklch(93.0% 0.010 40);
   --text-muted:  oklch(72.0% 0.020 40);
-  --orange:      oklch(75.0% 0.120 40);
-  --orange-ink:  oklch(79.0% 0.110 40);
-  --wm-a:        oklch(79.0% 0.110 40);
-  --wm-b:        oklch(78.0% 0.110 62);
-  --accent-ink:  oklch(17.5% 0.010 40);
-  --orange-soft: oklch(27.0% 0.045 40);
-  --sec:         oklch(78.0% 0.110 62);
+  --accent:      oklch(75.0% 0.120 40);
+  --accent-ink:  oklch(79.0% 0.110 40);
+  --on-accent:   oklch(17.5% 0.010 40);
+  --accent-soft: oklch(27.0% 0.045 40);
   --card-bg:     color-mix(in srgb, oklch(20.5% 0.012 40) 78%, transparent);
   --nav-bg:      oklch(12.5% 0.015 40);
   --band-a:      oklch(24.0% 0.027 40);
@@ -2815,7 +2769,7 @@ body::before {
    below on a phone. The chips become controls only where the script runs. */
 html.axp-on .chip.pillar[data-p] { cursor: pointer; position: relative; z-index: 2; }
 html.axp-on .chip.pillar[data-p]:hover,
-html.axp-on .chip.pillar[data-p]:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pi, var(--orange)) 35%, transparent); }
+html.axp-on .chip.pillar[data-p]:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pi, var(--accent)) 35%, transparent); }
 html.axp-lock { overflow: hidden; }
 .axp { position: fixed; inset: 0; z-index: var(--z-panel); pointer-events: none; }
 .axp[hidden] { display: none; }
@@ -2846,7 +2800,7 @@ html.axp-lock { overflow: hidden; }
   flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; cursor: pointer;
   border: 1px solid var(--border-soft); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-muted);
 }
-.axp-x:hover { color: var(--orange-ink); border-color: var(--orange); }
+.axp-x:hover { color: var(--accent-ink); border-color: var(--accent); }
 .axp-intro { margin: .2rem 1.1rem .9rem; }
 .axp-decs { margin: 0 1.1rem .9rem; padding-top: .8rem; border-top: 1px solid var(--border-soft); }
 .axp-intro + .axp-decs { margin-top: 0; }
@@ -2858,4 +2812,4 @@ html.axp-lock { overflow: hidden; }
 .axp-decs li:last-child { border-bottom: 0; }
 .axp-dt { font-size: var(--fs-xs); }
 .axp-dc { font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.axp-open { font-size: var(--fs-3xs); font-weight: 700; padding: .02rem .4rem; border-radius: var(--radius-pill); background: var(--orange-soft); color: var(--orange-ink); }
+.axp-open { font-size: var(--fs-3xs); font-weight: 700; padding: .02rem .4rem; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--accent-ink); }

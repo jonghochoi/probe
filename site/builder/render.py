@@ -186,7 +186,6 @@ class DocRenderer:
         self._terms_used: set[str] = set()
         self._quiz_seq = 0
         self._quiz_in_section = 0
-        self._sections_seen = 0
         self._sections_without_quiz: list[str] = []
         self._current_section = ""
         self._term_panels: dict[str, str] = {}

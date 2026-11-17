@@ -53,12 +53,10 @@ _GOWUN = _MODULES / "@fontsource" / "gowun-dodum" / "files"
 RUNTIME_CHARS = "저장됨입력중삭제발행가져옴실패공간이가득찼습니다개편"
 
 
-def _face(family: str, url: str, weight: str, fmt: str = "woff2",
-          unicode_range: str = "") -> str:
-    rng = f"unicode-range:{unicode_range};" if unicode_range else ""
+def _face(family: str, url: str, weight: str, fmt: str = "woff2") -> str:
     return (
         f"@font-face{{font-family:'{family}';"
-        f"src:url({url}) format('{fmt}');{rng}"
+        f"src:url({url}) format('{fmt}');"
         f"font-weight:{weight};font-style:normal;font-display:swap}}"
     )
 

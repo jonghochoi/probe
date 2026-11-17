@@ -65,5 +65,5 @@ function inAny(fragments, term) {
   return fragments.some((f) => inFragment(f, term));
 }
 
-window.ProbeMatch = { compact, bare, parse, inFragment, inAny };
+window.ProbeMatch = { compact, parse, inFragment, inAny };
 })();

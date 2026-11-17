@@ -19,8 +19,9 @@ comment of the file that draws it.
 |---|---|
 | `build-site.py` | Build entry point — `--out`, `--only <id>`, `--check`, `--strict`, `--serve`, `--index <file>`, `--search-api <url>`, `--scout-figures`, `--gap-titles` (see `--help`). A full build also writes `corpus.json` and `llms.txt` at the root; `--only` writes neither |
 | `builder/corpus.py` | Rewrite discovery and order (by the commit that landed each rewrite), front-matter validation, pillar names, the analysis list's haystacks, and `score` — the one neighbour rule every surface ranks by |
+| `builder/frontmatter.py` | The flat `---` front-matter parser rewrites and comparisons are read with — no PyYAML |
 | `builder/render.py` | Markdown → HTML, the rule checks with no other home (its row in `analysis/AUTHORING.md` §5, and a comparison's fence and length rules), and the 재작성본 sibling marker |
-| `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, `probe-matrix` and `probe-figs` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
+| `builder/mdext/` | `probefence.py` (the ` ```probe-* ` fences and their schemas, the comparison fences `probe-matrix`, `probe-figs` and `probe-timeline` included), `callouts.py` (R9 GFM alerts → `co-*`), `ghmath.py` (the `` $`x`$ `` dialect) |
 | `builder/primers.py` | The background cards a comparison opens on (`primer:`) — a drawing and one line each |
 | `builder/glance.py` | The 요약 tab and its checks (G1–G6) |
 | `builder/comparisons.py` | Comparison discovery and validation (`comparison/AUTHORING.md`) |
