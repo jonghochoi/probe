@@ -269,7 +269,9 @@ def _gaps(graph: lineage.Graph | None) -> str:
 
     A row is the paper, how many rewrites stand on it, and those rewrites by
     name — each a link to its own 계보 tab, where the paper sits among that
-    rewrite's ancestors. Printed whole and all links, so it needs no script.
+    rewrite's ancestors. The names are printed whole, so a browser with no
+    script reads every one; `filter.js` folds them to one line and a `+N`
+    chip, whose tooltip names the rest and whose click opens them.
     A partial build has no graph and prints none.
     """
     rows = lineage.gaps(graph)[:GAP_ROWS] if graph else []
@@ -278,16 +280,18 @@ def _gaps(graph: lineage.Graph | None) -> str:
     items = "".join(
         f'<li class="tl-row"><span class="tl-id">{len(on)}편</span>'
         f'<span class="tl-main"><span class="tl-t">{c.esc(node.name)}</span>'
-        f'<span class="tl-g">' + " · ".join(
-            f'<a href="{c.esc(n.id)}/index.html#lin">{c.esc(n.name)}</a>' for n in on)
-        + '</span></span>'
+        f'<span class="tl-g gap-on" data-gapnames><span class="gap-names">' + " ".join(
+            f'<span class="gap-n"><a href="{c.esc(n.id)}/index.html#lin">'
+            f'{c.esc(n.name)}</a></span>' for n in on)
+        + '</span><button type="button" class="gap-more" aria-expanded="false" hidden>'
+        '</button></span></span>'
         f'<a class="tl-id" href="https://arxiv.org/abs/{node.id}" target="_blank" '
         f'rel="noopener noreferrer">arXiv {node.id}</a></li>'
         for node, on in rows)
     return (
         '<section class="gaps"><h2 class="gaps-h">빈자리'
-        '<span>선행인데 재작성본이 없는 논문</span></h2>'
-        '<div class="tl-head"><span>후속</span><span>논문 · 후속 재작성본</span>'
+        '<span>아직 안 쓴 선행 논문</span></h2>'
+        '<div class="tl-head"><span>후속</span><span>논문</span>'
         f'<span>원문</span></div><ol class="tl">{items}</ol></section>')
 
 
