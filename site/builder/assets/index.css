@@ -740,6 +740,23 @@ a.tl-main:hover .tl-t { color: var(--orange-ink); }
 .gaps .tl-row > .tl-id:first-child { font-weight: 700; opacity: 1; }
 .gaps .tl-g a { color: inherit; text-decoration: none; }
 .gaps .tl-g a:hover { color: var(--orange-ink); text-decoration: underline; }
+/* A name and the dot after it wrap as one piece; a name longer than the line
+   wraps inside its own box. */
+.gap-n { display: inline-block; max-width: 100%; }
+.gap-n:not(:last-child)::after { content: "\00a0·"; }
+/* With a script the names fold to their first line; the chip says how many
+   are folded away and opens them. */
+html.js .gap-on { display: flex; align-items: flex-start; gap: .6rem; }
+html.js .gap-names { flex: 1 1 auto; min-width: 0; max-height: 1.55em; overflow: hidden; }
+html.js .gap-on.is-open .gap-names { max-height: none; }
+.gap-more {
+  flex: none; margin-top: .1em; padding: .05rem .5rem; border-radius: 999px; cursor: pointer;
+  font-family: var(--num); font-size: var(--fs-2xs); line-height: 1.4; font-variant-numeric: tabular-nums;
+  color: var(--text-muted); background: var(--surface); border: 1px solid var(--border);
+  transition: color var(--dur-short), border-color var(--dur-short);
+}
+.gap-more:hover, .gap-more[aria-expanded="true"] { color: var(--orange-ink); border-color: var(--orange); }
+.gap-more[hidden] { display: none; }
 
 /* ── A row's figure ───────────────────────────────────────────────────── */
 /* The preview card under a resting pointer: the figure on its own white, its

@@ -512,3 +512,38 @@ if (shelf) shelf.Corpus.sync(cards.map((card) => card.dataset.id));
 readHash();
 refresh();
 })();
+
+/* 빈자리 names its stood-on papers' rewrites in one folded line. What fits on
+ * the line shows; the chip counts the rest, names them in its tooltip, and
+ * opens or closes the row. Which names fit depends on the width, so it is
+ * measured again on resize. */
+(function () {
+"use strict";
+const rows = [...document.querySelectorAll("[data-gapnames]")];
+if (!rows.length) return;
+function fit(row) {
+  const btn = row.querySelector(".gap-more");
+  const names = [...row.querySelectorAll(".gap-n")];
+  const top = names[0].offsetTop;
+  const folded = names.filter((n) => n.offsetTop > top + 2);
+  const open = row.classList.contains("is-open");
+  btn.hidden = !folded.length && !open;
+  btn.textContent = open ? "접기" : `+${folded.length}`;
+  btn.title = open ? "" : folded.map((n) => n.textContent).join(" · ");
+  btn.setAttribute("aria-label", open ? "접기" : `${folded.length}편 더 보기`);
+}
+rows.forEach((row) => {
+  const btn = row.querySelector(".gap-more");
+  btn.addEventListener("click", () => {
+    const open = row.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", String(open));
+    fit(row);
+  });
+  fit(row);
+});
+const refit = () => rows.forEach((row) => { if (!row.classList.contains("is-open")) fit(row); });
+// A web font that lands after the first measure moves the line's end.
+if (document.fonts) document.fonts.ready.then(refit);
+let t;
+addEventListener("resize", () => { clearTimeout(t); t = setTimeout(refit, 120); });
+})();
