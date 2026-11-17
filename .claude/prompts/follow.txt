@@ -119,13 +119,26 @@ THE RUN
    below — a run whose only change is the hosts-to-allow table commits too,
    so the list in the repository is always this week's.
 
-7. REPORT, as your final message, in Korean and short — it is what the
-   operator's phone shows. Lead with what the operator must do, if anything:
-   `허용 주소 추가 필요: <host> (<학회>, 막힘|다음 회차)` for every row of the
-   hosts-to-allow table, newest first. Then what was added, corrected and
-   dropped, each with its `출처`; any row its site no longer states; and any
-   `unreachable:` line. With nothing for the operator to do and nothing
-   changed, the whole report is `변경 없음`.
+7. REPORT, as your final message, in Korean. The routine's push
+   notification shows its first lines and nothing else, so the message is
+   this shape and only this shape — no preface, no closing remark, nothing
+   about the run itself (notifications, branches, how it went):
+
+     추가 <n> · 수정 <n> · 삭제 <n>
+     허용 주소 추가 필요: <host> (<학회>, 막힘|다음 회차)
+     + <이름> <시작>–<끝> <출처>
+     ~ <이름> <old> → <new> <출처>
+     - <이름>
+     사이트에 없음: <이름>
+     접속 불가: <url> <code>
+
+   The first line is always there, with the counts the commit subject
+   carries. Every other line is one per item, in that order, and appears only
+   when there is one: a host-to-add line for each row of the hosts-to-allow
+   table, newest first; the added, corrected and dropped rows; a row whose
+   site no longer states its date; and each `unreachable:`. A run with
+   nothing to change and nothing for the operator to do is the first line
+   alone, `추가 0 · 수정 0 · 삭제 0`.
 
 
 ════════════════════════════════════════════════════════════════════════
