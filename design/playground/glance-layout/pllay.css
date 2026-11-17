@@ -1,0 +1,44 @@
+/* 요약 layout drafts. Without `data-gl` the page is as built (the frame is inert). */
+.gl-wrap { display: contents; }
+.gl-side, .gl-strip, .gl-hubrail { display: none; }
+
+@media (min-width: 941px) {
+  html[data-gl] .gl-wrap {
+    display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1.2rem; align-items: start; margin-bottom: 1.2rem;
+  }
+  html[data-gl][data-gl-right="acts"] .gl-wrap, html[data-gl][data-gl-right="both"] .gl-wrap { grid-template-columns: minmax(0, 1fr) 24rem; }
+  html[data-gl] .gl-side { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+  html[data-gl][data-gl-stick="on"] .gl-side {
+    position: sticky; top: calc(var(--nav-h) + var(--tabs-h, 0px) + 1rem);
+    max-height: calc(100vh - var(--nav-h) - var(--tabs-h, 0px) - 2rem); overflow-y: auto;
+    scrollbar-width: thin; padding-right: .2rem;
+  }
+  /* the story is one column now */
+  html[data-gl] .g-narr { grid-template-columns: minmax(0, 1fr); margin-bottom: 0; }
+  /* the rail in the right column: a card of its own */
+  html[data-gl] .gl-side > .g-rail {
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+    padding: 1rem 1.1rem; gap: .85rem;
+  }
+  /* the cards in the right column: one per row */
+  html[data-gl] .gl-side > .g-acts { grid-template-columns: 1fr; gap: .8rem; }
+}
+/* the rail laid across: under the story, or under the claim */
+html[data-gl] .gl-strip:not(:empty), html[data-gl] .gl-hubrail:not(:empty) { display: block; }
+html[data-gl] .gl-strip > .g-rail, html[data-gl] .gl-hubrail > .g-rail {
+  border-left: 0; padding-left: 0; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: .9rem 1.4rem;
+}
+html[data-gl] .gl-strip { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: .4rem; }
+html[data-gl] .gl-hubrail { margin: -.4rem 0 1.2rem; padding: 0 .2rem; }
+
+/* brief cards: head, title, claim; the evidence opens on a click */
+html[data-gl][data-gl-look="brief"] .g-act { cursor: pointer; }
+html[data-gl][data-gl-look="brief"] .g-act:not(.gl-open) > :is(.fig, .scale, .ga-eq, .ga-s) { display: none; }
+html[data-gl][data-gl-look="brief"] .g-act:not(.gl-open) .g-head::after {
+  content: "근거 보기 ›"; margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
+}
+html[data-gl][data-gl-look="brief"] .g-act.gl-open .g-head::after {
+  content: "접기 ‹"; margin-left: auto; font-size: var(--fs-2xs); color: var(--text-muted);
+}
+html[data-gl] .g-act:hover { transform: none; }

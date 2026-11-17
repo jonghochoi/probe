@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>요약 배치 조율실</title>
+<style>
+:root { --bg: #f6f6fb; --panel: #ffffff; --ink: #1d1f2e; --muted: #6a6d82; --line: #e1e2ec; --acc: oklch(51% 0.21 277); --acc-soft: oklch(95% 0.03 277); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #14151d; --panel: #1b1d28; --ink: #ecedf5; --muted: #a2a5ba; --line: #2c2f3e; --acc: oklch(75% 0.12 277); --acc-soft: oklch(27% 0.045 277); color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 "Pretendard Variable", system-ui, sans-serif; display: grid; grid-template-columns: 19rem minmax(0, 1fr); }
+aside { height: 100vh; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 1rem 1rem 3rem; }
+h1 { font-size: 1.05rem; margin: 0 0 .2rem; }
+.sub { margin: 0 0 1rem; color: var(--muted); font-size: 12px; }
+.grp h2 { font-size: 11px; letter-spacing: .06em; color: var(--muted); margin: 1.2rem 0 .5rem; }
+.opt { margin: 0 0 .85rem; }
+.opt > b { display: block; font-size: 13px; margin-bottom: .1rem; }
+.opt > small { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: .35rem; }
+.seg { display: flex; flex-wrap: wrap; gap: .3rem; }
+.seg button, .flip { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: .32rem .7rem; font: inherit; font-size: 12.5px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: #fff; }
+.flip { width: 100%; padding: .55rem .8rem; font-weight: 700; background: var(--acc-soft); border-color: var(--acc); color: var(--ink); }
+.flip:focus-visible, .seg button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.plan { font-size: 12px; color: var(--muted); margin: .4rem 0 0; padding: .55rem .7rem; border: 1px dashed var(--line); border-radius: 8px; }
+.sum { margin-top: 1rem; padding: .7rem .8rem; border-radius: 10px; background: var(--acc-soft); font-size: 12px; white-space: pre-wrap; }
+.copy { margin-top: .5rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: .3rem .8rem; font: inherit; font-size: 12px; cursor: pointer; }
+main { position: relative; overflow: hidden; height: 100vh; display: grid; gap: 10px; padding: 10px; }
+main.two { grid-template-columns: 1fr 1fr; }
+.pane { position: relative; overflow: hidden; min-width: 0; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); background: var(--panel); }
+.pane[hidden] { display: none; }
+.badge { position: absolute; z-index: 2; bottom: 10px; left: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.25); font-size: 12px; font-weight: 700; padding: .2rem .65rem; border-radius: 999px; background: var(--ink); color: var(--panel); pointer-events: none; }
+.box { position: absolute; left: 50%; top: 0; transform-origin: top center; }
+iframe { border: 0; width: 100%; height: 100%; background: #fff; }
+@media (max-width: 860px) { body { grid-template-columns: 1fr; grid-template-rows: auto 70vh; } aside { height: auto; max-height: 45vh; } main { height: 70vh; } }
+</style>
+</head>
+<body>
+<aside>
+  <h1>요약 배치 조율실</h1>
+  <p class="sub">요약 탭의 배치만 바꿉니다. 카드 머리(번짐 + 밑줄)는 이미 사이트에 들어간 그대로입니다. 이야기를 왼쪽에 두고, 오른쪽 열에 무엇을 둘지 고릅니다. 화면 폭 940px 이하(휴대폰)에서는 모두 세로로 쌓입니다.</p>
+  <div class="grp"><h2>견주는 법</h2>
+    <div class="opt"><b>보기</b><small>나란히는 두 화면이 함께 스크롤됩니다</small><div class="seg" data-v="mode"></div></div>
+    <div class="opt" id="flipwrap"><button class="flip" type="button" id="flip"></button><small style="display:block;color:var(--muted);font-size:11.5px;margin-top:.35rem">스페이스바로도 바뀝니다</small></div>
+  </div>
+  <div class="grp"><h2>배치</h2>
+    <div class="opt"><b>이야기 오른쪽 열</b><div class="seg" data-v="right"></div></div>
+    <div class="opt" id="o-rail"><b>조건 칸 자리</b><small>오른쪽 열에 없을 때</small><div class="seg" data-v="rail"></div></div>
+    <div class="opt"><b>근거 카드 모양</b><div class="seg" data-v="look"></div></div>
+    <div class="opt"><b>오른쪽 열</b><small>스크롤할 때</small><div class="seg" data-v="stick"></div></div>
+  </div>
+  <div class="grp"><h2>화면</h2>
+    <div class="opt"><b>논문</b><div class="seg" data-v="paper"></div></div>
+    <div class="opt"><b>폭</b><div class="seg" data-v="vp"></div></div>
+    <div class="opt"><b>색</b><div class="seg" data-v="theme"></div></div>
+  </div>
+  <div class="sum" id="sum"></div>
+  <button class="copy" type="button" id="copy">내 설정 복사</button>
+</aside>
+<main id="main">
+  <div class="pane" id="pa"><span class="badge" id="ba"></span><div class="box"><iframe title="지금" id="fa"></iframe></div></div>
+  <div class="pane" id="pb"><span class="badge" id="bb"></span><div class="box"><iframe title="안" id="fb"></iframe></div></div>
+</main>
+<script>
+(function () {
+  "use strict";
+  var KEY = "probe.pg.glay.v1";
+  var OPTS = {
+    mode: [["two", "나란히 (지금 | 시안)"], ["flip", "번갈아 (한 화면)"]],
+    right: [["acts", "근거 카드 넷"], ["both", "조건 칸 + 근거 카드"], ["rail", "조건 칸만 (넓게)"]],
+    rail: [["strip", "이야기 아래 가로줄"], ["hub", "주장 카드 아래 가로줄"]],
+    look: [["brief", "간추림 — 누르면 그림 · 막대"], ["full", "전체"]],
+    stick: [["on", "따라옴"], ["off", "그대로"]],
+    paper: [["2607.10655", "AFP"], ["2610.16308", "PACE"], ["2606.15768", "LaWAM"]],
+    vp: [["desk", "데스크톱", 1280], ["mobile", "휴대폰", 390]],
+    theme: [["light", "밝게"], ["dark", "어둡게"]]
+  };
+
+  var st = { mode: "two", right: "acts", rail: "strip", look: "brief", stick: "on", paper: "2607.10655", tab: "glance", vp: "desk", theme: "light", showing: "after" };
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  st.tab = "glance";
+  Object.keys(OPTS).forEach(function (k) { if (!OPTS[k].some(function (o) { return o[0] === st[k]; })) st[k] = OPTS[k][0][0]; });
+  var main = document.getElementById("main");
+  var A = { pane: document.getElementById("pa"), f: document.getElementById("fa"), b: document.getElementById("ba") };
+  var B = { pane: document.getElementById("pb"), f: document.getElementById("fb"), b: document.getElementById("bb") };
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function label(v) { return v === "now" ? "지금" : "시안"; }
+  function opt(k) { return OPTS[k].filter(function (o) { return o[0] === st[k]; })[0][1]; }
+
+  function draw() {
+    document.querySelectorAll("[data-v]").forEach(function (el) {
+      var k = el.getAttribute("data-v"); el.innerHTML = "";
+      OPTS[k].forEach(function (o) {
+        var b = document.createElement("button"); b.type = "button"; b.textContent = o[1];
+        b.setAttribute("aria-pressed", String(st[k] === o[0]));
+        b.addEventListener("click", function () { st[k] = o[0]; if (k !== "mode" && k !== "paper" && k !== "vp" && k !== "theme") st.showing = "after"; save(); draw(); update(k); });
+        el.appendChild(b);
+      });
+    });
+    document.getElementById("o-rail").hidden = st.right !== "acts";
+    document.getElementById("flipwrap").hidden = st.mode !== "flip";
+    document.getElementById("flip").textContent = "지금 보는 것: " + (st.showing === "after" ? "시안" : "지금") + "  ·  바꾸기";
+    var t = "내 설정 (요약 배치)\n이야기 오른쪽 열: " + opt("right");
+    if (st.right === "acts") t += "\n조건 칸 자리: " + opt("rail");
+    t += "\n근거 카드 모양: " + opt("look") + "\n오른쪽 열: " + opt("stick");
+    document.getElementById("sum").textContent = t;
+  }
+  // each frame: the card drafts, the plan, the tab, the colour
+  function dress(P, v) {
+    var w = P.f.contentWindow, d; try { d = P.f.contentDocument; } catch (e) { return; }
+    if (!d || !d.body) return;
+    if (!d.querySelector("[data-pc-css]")) {
+      var l = d.createElement("link"); l.rel = "stylesheet"; l.href = new URL("site/assets/pllay.css", location.href).href;
+      l.setAttribute("data-pc-css", ""); d.head.appendChild(l);
+      var sc = d.createElement("script"); sc.src = new URL("site/assets/pllay.js", location.href).href;
+      sc.onload = function () { dress(P, P === A && st.mode === "two" ? "now" : (P === A ? current() : "after")); };
+      d.body.appendChild(sc);
+      var s = d.createElement("style"); s.textContent = ".memo-fab,.mark-fab{display:none!important}"; d.head.appendChild(s);
+      d.addEventListener("keydown", key);
+      w.addEventListener("scroll", function () { sync(P); }, { passive: true });
+    }
+    if (w.glApply) w.glApply(v === "now" ? null : { right: st.right, rail: st.rail, look: st.look, stick: st.stick });
+    d.documentElement.setAttribute("data-theme", st.theme);
+    P.b.textContent = label(v);
+  }
+  function tab(P) {
+    var d; try { d = P.f.contentDocument; } catch (e) { return; }
+    var b = d && d.getElementById(st.tab === "full" ? "t-full" : "t-glance"); if (b) b.click();
+  }
+  // the two panes scroll together, by proportion
+  function sync(from) {
+    if (st.mode !== "two" || Date.now() < (from.quiet || 0)) return;
+    var to = from === A ? B : A;
+    var fw = from.f.contentWindow, tw = to.f.contentWindow;
+    var fd = fw.document.documentElement, td = tw.document.documentElement;
+    var r = fw.scrollY / Math.max(1, fd.scrollHeight - fw.innerHeight);
+    // the scroll this causes in the other pane must not echo back
+    to.quiet = Date.now() + 150;
+    tw.scrollTo(0, r * Math.max(0, td.scrollHeight - tw.innerHeight));
+  }
+  function current() { return st.mode === "two" ? "now" : (st.showing === "after" ? "after" : "now"); }
+  function update(k) {
+    main.classList.toggle("two", st.mode === "two");
+    B.pane.hidden = st.mode !== "two";
+    if (k === "vp" || k === "mode") fit();
+    if (st.mode === "two") { dress(A, "now"); dress(B, "after"); }
+    else dress(A, current());
+    if (k === "paper") { [A, B].forEach(function (P) { P.f.src = "site/p/" + st.paper + "/index.html"; }); }
+  }
+  function flip() { st.showing = st.showing === "after" ? "before" : "after"; save(); draw(); update(); }
+  function key(e) {
+    if (st.mode !== "flip" || e.key !== " " || /INPUT|TEXTAREA/.test((e.target || {}).tagName || "")) return;
+    e.preventDefault(); flip();
+  }
+  document.getElementById("flip").addEventListener("click", flip);
+  document.addEventListener("keydown", key);
+  function fit() {
+    var W = OPTS.vp.filter(function (v) { return v[0] === st.vp; })[0][2];
+    [A, B].forEach(function (P) {
+      var box = P.f.parentNode, aw = P.pane.clientWidth || main.clientWidth / 2, ah = P.pane.clientHeight || main.clientHeight;
+      var k = Math.min(1, aw / W);
+      box.style.width = W + "px"; box.style.height = (ah / k) + "px";
+      box.style.transform = "translateX(-50%) scale(" + k + ")";
+    });
+  }
+  [A, B].forEach(function (P) {
+    P.f.addEventListener("load", function () { setTimeout(function () { update(); tab(P); }, 80); });
+    P.f.src = "site/p/" + st.paper + "/index.html";
+  });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(main); else addEventListener("resize", fit);
+  document.getElementById("copy").addEventListener("click", function () {
+    var t = document.getElementById("sum").textContent, b = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = "복사함"; }, function () { b.textContent = "위 칸을 직접 복사해 주세요"; });
+    setTimeout(function () { b.textContent = "내 설정 복사"; }, 1800);
+  });
+  draw(); main.classList.toggle("two", st.mode === "two"); B.pane.hidden = st.mode !== "two"; fit();
+})();
+</script>
+</body>
+</html>
