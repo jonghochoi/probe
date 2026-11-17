@@ -4,8 +4,9 @@
 > Literature. The thesis, the pillar overview, venue and
 > cross-pollination are `context/MASTER.md`'s — a fact in both files is one of
 > them going stale.
-> **Static context, read-only.** A scouting run reads this file alone and
-> writes `scouting/P<N>/YYYY-MM-DD.md`; the on-demand commands (`/analyze`,
+> **Static context, read-only.** A scouting run reads this file, and of
+> `context/MASTER.md` §5 and §6 alone, and writes
+> `scouting/P<N>/YYYY-MM-DD.md`; the on-demand commands (`/analyze`,
 > `/compare`, `/ideate`, `/distinguish`, `/adapt`) read it beside
 > `context/MASTER.md`. Output format is the track's own contract
 > (`scouting/AUTHORING.md`, `analysis/AUTHORING.md`,

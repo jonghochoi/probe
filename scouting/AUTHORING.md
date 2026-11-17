@@ -197,8 +197,8 @@ message).
 
 | Code | Meaning |
 |------|---------|
-| <a id="ref-P2"></a>![P2](https://img.shields.io/badge/P2-e2f5d5.svg) | Structured Multimodal Observation Fusion (pillar) |
-| <a id="ref-D9ZP"></a>![D9ZP](https://img.shields.io/badge/D9ZP-d97706.svg) | Body↔Hand information sharing — FiLM, cross-attn/hidden-state deferred |
+| <a id="ref-<P#>"></a>![<P#>](https://img.shields.io/badge/<P#>-<hex>.svg) | <pillar name> (pillar) |
+| <a id="ref-<D#>"></a>![<D#>](https://img.shields.io/badge/<D#>-d97706.svg) | <decision title> — <concise gloss> |
 ```
 
 If the body cites no such code (rare), omit the section entirely.
@@ -592,9 +592,9 @@ other grade. Rank by Relevance, then by the /15 total, then by venue tier —
 this order assigns the medals and orders the 📋 rows (§5-1). Real and
 Reproducibility count toward the total, so between two equally relevant papers
 the one with more on hardware and an artifact to run ranks first.
-Venue tier comes from the Venue Priority table `context/MASTER.md` §5 owns (the prompt
-carries a copy), read from the arXiv comment field and recorded on the paper header line. Venue
-breaks ties only; it never gates and never overrides the rubric.
+Venue tier comes from the Venue Priority table `context/MASTER.md` §5 owns,
+read from the arXiv comment field and recorded on the paper header line.
+Venue breaks ties only; it never gates and never overrides the rubric.
 
 ### 5-4. One paper, one judgement of what does not depend on the pillar
 

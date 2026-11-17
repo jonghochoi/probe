@@ -2,7 +2,7 @@
 
 <!-- AUTHORING §8. `Failed:` only when a pillar the run was asked for has no
      report, with the error that stopped it verbatim. -->
-**Pillars:** P0 P1 P2 P3 P4
+**Pillars:** <P# …, as the run was asked>
 **Failed:** P# — <error, verbatim>
 
 ---
@@ -14,4 +14,4 @@
 
 | Paper | Link | M | Real | Repro | 근거 |
 |---|---|---|---|---|---|
-| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | 2 | 2 | 1 | M: "<quote>" · Real: "<quote>" · Repro: "<quote>" |
+| <alias> | [arXiv:XXXX.XXXXX](https://arxiv.org/abs/XXXX.XXXXX) | <0–3> | <0–3> | <0–3> | M: "<quote>" · Real: "<quote>" · Repro: "<quote>" |

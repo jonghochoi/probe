@@ -104,7 +104,11 @@ of those into step.
 there is neither — `/analyze`'s stop condition — and
 `builder/mdext/probefence.py` owns the ` ```probe-* ` fences. All three are
 called by hand from a run, so keep them importable without the rest of the
-build. The build's one use of `arxiv.py` is `builder/scoutfigs.py`.
+build. `arxiv.py` also runs from the repo root as
+`python3 site/builder/arxiv.py`, and its `__main__` block calls
+`builder.arxiv`'s own `_main`: run as a second module, it would raise an
+`Unavailable` its handler cannot catch. The build's one use of `arxiv.py` is
+`builder/scoutfigs.py`.
 
 **The distinction track draws with four pieces of this folder.**
 `distinction/render-distinction.py` draws the private versus notes, reports

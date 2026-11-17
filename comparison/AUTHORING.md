@@ -35,21 +35,23 @@ Flat keys, parsed by `site/builder/frontmatter.py` — the same minimal parser
 `analysis/` uses. `summary` is the only block scalar.
 
 ```yaml
-compares: [2603.10158, 2606.10683, 2608.14028]
-sources: [2603.10158v2, 2606.10683v1, 2608.14028v1]
-title: "손이 여러 개일 때 행동 공간을 하나로 만드는 세 가지 방법"
-tagline: 배우게 할 것인가, 토큰으로 자를 것인가, 손으로 배정할 것인가
-stances: [잠재 벡터로 묶는다, 토큰으로 접는다, 표를 그려 꽂는다]
-common: 셋 다 손대지 않는 자리가 있다
-problem: 로봇 손마다 관절 수와 순서가 달라, 정책이 관절 각도를 바로 내면 그 손 전용이 된다
-plain: [손마다 통역사를 붙여 공통어로 말하게 한다, 모든 손을 22칸 표준 양식에 옮겨 적는다, 사람이 손가락 자리표를 그려 꽂는다]
-primer: [fk, latent, retarget]
-pillars: P1, P4
-generated: 2026-08-21 14:30
+compares: [<arxiv-id>, <arxiv-id>, <arxiv-id>]       # 2–3, the column order
+sources: [<arxiv-id>v<n>, <arxiv-id>v<n>, <arxiv-id>v<n>]
+title: "<the question, in Korean>"
+tagline: <one line: what reading these together tells you>
+stances: [<stance>, <stance>, <stance>]                # ≤ 20 characters each
+common: <the commitment all of them share>             # ≤ 30 characters
+problem: <the problem every paper is up against>       # ≤ 60 characters
+plain: [<everyday Korean>, <everyday Korean>, <everyday Korean>]   # ≤ 40 each
+primer: [<primer id>, <primer id>]
+pillars: P<a>, P<b>
+generated: YYYY-MM-DD HH:MM
 generator: compare/v1
 summary: >
   2–3 sentences, read cold.
 ```
+
+`comparison/action-space-alignment.md` is one filled in.
 
 | Key | Rule |
 |---|---|
