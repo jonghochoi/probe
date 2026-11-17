@@ -58,6 +58,8 @@ a -> out
   <doc-ask id="next-1">
     <p>이 조합으로 다음에 무엇을 할까요?</p>
     <label><input type="radio" name="next-1" value="compare" checked> <code>/compare 「A」 「B」</code> <small>「추천하는 이유」</small></label>
+    <!-- when one of the two papers has no rewrite, offer /analyze in /compare's place -->
+    <!-- <label><input type="radio" name="next-1" value="analyze" checked> <code>/analyze 「id」</code> <small>「재작성본이 없는 쪽」</small></label> -->
     <label><input type="radio" name="next-1" value="ideate"> <code>/ideate 「A」</code> <small>이 논문에서 다시 출발</small></label>
     <label><input type="radio" name="next-1" value="hold"> 보류</label>
   </doc-ask>

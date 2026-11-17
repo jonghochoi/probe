@@ -103,6 +103,13 @@ that exists in the Decision Log — never invent a position `context/` does not
 hold. Where our context has no view, relay without one. Subjective judgements
 take a hedge (`~인 것 같아요`); a flat assertion of an opinion reads as AI.
 
+**Code is a second source, marked as code.** Where the paper's public code
+settles what the original leaves open, the fact enters marked as the code's,
+never as the paper's claim: `공개 코드(\`<file>\`)에서 보면 …` inline, or a
+`논문 대 공개 코드` table in a `::: details` when the differences are several.
+Name the file, and the identifier when it helps. A code fact never enters
+요약 (G6).
+
 **A `D#` is an anchor, never the subject.** The token is a join key — the lint,
 the Decision Log and the site all resolve on it — not a name the reader knows.
 So the sentence says the decision in Korean and the `D#` rides along in
@@ -778,6 +785,8 @@ worse than no rail.
   from the paper's own numbers.
 - **No number that is not in the original.** Nothing is computed for effect;
   a ratio the paper does not state is not ours to print.
+- **No code fact.** What the public code settles stays in the body, marked as
+  the code's (§1 "Code is a second source").
 
 ---
 

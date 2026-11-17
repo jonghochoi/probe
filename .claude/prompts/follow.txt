@@ -17,7 +17,8 @@ everywhere — never open one.
 THE FORMAT LIVES IN `context/EVENTS.md`
 ════════════════════════════════════════════════════════════════════════
 
-The file states its own shape: the two tables, the six cells of a row, the
+The file states its own shape: its three tables (venues, dates, hosts to
+allow), the six cells of a date row, the
 three kinds and what each covers, what goes in `장소` and `출처`. Read it to
 the end before changing a cell. This prompt owns the PROCEDURE: where a date
 may come from, how a row is matched, how to check and commit.
@@ -85,8 +86,8 @@ THE RUN
    - Stated and unmatched → add a row. Name it like the rows already there:
      `<VENUE> <YEAR>` for the conference, `<VENUE> <YEAR> <무엇> 마감` for a
      deadline (초록 · 논문 · 반박 · 카메라 레디), `<VENUE> <YEAR> 결과 발표`
-     or what the site calls the decision for a `발표`. `장소` for a `학회`
-     is the city, and the venue after ` · ` when the site names it.
+     or what the site calls the decision for a `발표`. `장소` is the file's
+     to define.
    - A venue whose `범위` is `옵션 마감` is a journal followed for its
      conference options alone: one `마감` row per option its site states for
      a conference in the venues table, `<JOURNAL> <CONFERENCE> <YEAR> 옵션
@@ -158,7 +159,8 @@ Three steps, each its OWN Bash call — never chained with `&&`, `;` or a loop:
 The body lists every change as `+ <name> <시작>–<끝> <출처>`, `- <name>` or
 `~ <name> <old> → <new> <출처>`, then the hosts-to-allow table's rows and any
 `unreachable:` line.
-The counts in the subject are those lines' counts; a zero is written `+0`.
+The counts in the subject are the counts of the `+`, `-` and `~` lines; each
+zero keeps its sign: `(+0 -0 ~0)`.
 
 Step 2 is the persistence and redeploys the site. Step 3 re-points the
 harness's dev branch (`git branch --show-current` names it) at the same

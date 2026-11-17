@@ -4,7 +4,9 @@ The runtime of the `html-plan` plugin from
 [anthropics/claude-plugins-community](https://github.com/anthropics/claude-plugins-community/tree/main/html-plan),
 copied at upstream commit `06ec7b6`. `/ideate` packs its answer page with it
 (`.claude/prompts/ideate.txt` step 8); a cloud session loads no plugin, so the
-repo carries the files. The plugin's skill text is not here — what goes on the
+repo carries the files. `.claude/settings.json` also enables the upstream
+plugin for local sessions, where its own skill is at hand; `/ideate` packs
+with the copy here either way. The plugin's skill text is not here — what goes on the
 page is `ideate.txt`'s and `.claude/prompts/ideate-page.html`'s.
 
 | File | Role |

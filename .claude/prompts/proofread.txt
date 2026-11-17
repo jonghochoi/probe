@@ -30,7 +30,7 @@ SOURCES
    and `from builder.arxiv import load` for the text. Re-read it every round —
    a round that proofreads the rewrite against itself only polishes prose.
    `arxiv.Unavailable` → stop the loop and say so. A rewrite read from the
-   source whose paper has since gained an HTML edition is not proofread
+   LaTeX source (`arxiv_src:`) whose paper has since gained an HTML edition is not proofread
    into it — it is redone with `/analyze <id> --refresh`; say so and stop.
 
 2. **The public code — a second source of fact, for what the paper leaves
@@ -70,11 +70,8 @@ all six:
      length, word order, one point per paragraph, parallel lists. Never
      trade a precise term for a vague one to make a sentence flow.
   F. CODE — what the code settles that the original does not, written in
-     where it changes what the reader understands. Mark it as code, never
-     as the paper's claim, in the corpus's own form: `공개 코드(\`<file>\`)에서
-     보면 …` inline, a `논문 대 공개 코드` table in a `::: details` when the
-     differences are several. Name the file (and the identifier when it
-     helps). A code fact never enters the 요약 surface.
+     where it changes what the reader understands, in the form AUTHORING §1
+     ("Code is a second source") sets.
 
 Each round leads with ONE lens so consecutive rounds do not re-read the same
 way, in this order and then again from A: round 1 → A, 2 → B and C, 3 → D
@@ -134,6 +131,6 @@ SCOPE
 ════════════════════════════════════════════════════════════════════════
 
 One rewrite per loop. Never edit `context/`, another rewrite, or any
-comparison or talk built on this one — name a comparison or talk that a fix
-makes stale (`python3 site/query.py related <id>`) in the closing summary,
-and leave it to the human.
+comparison built on this one — name a comparison that a fix makes stale
+(`python3 site/query.py related <id>`) in the closing summary, and leave it
+to the human.

@@ -12,8 +12,9 @@ file first, then the prompt, then the lint.
 
 **Only public material goes to NotebookLM.** The sources are the rewrite
 `analysis/<id>.md` and the arXiv original at the version the rewrite read
-(its `arxiv_html:` or `arxiv_src:`), and the instructions sent are `brief.md`, written from
-the rewrite and `context/` alone. Nothing of the operator's private folder
+(its `arxiv_html:` or `arxiv_src:`), and the instructions sent are `brief.md`
+and the slide revisions, written from the rewrite, the original and
+`context/` alone. Nothing of the operator's private folder
 (`distinction/SETUP.md` §2) is read, uploaded or quoted into a brief, and a
 kit says nothing about the operator's own method.
 
@@ -79,6 +80,15 @@ kind's prompt, verbatim. The body:
 - closes on the paper's own stated limits and the `D#` its act 4 argues
   with, each `D#` beside the paper's fact that bears on it and no reading
   of ours added to it.
+
+Per kind, the body asks for this shape:
+
+| Kind | Shape |
+|---|---|
+| `slide-deck` | 10–14 slides, one claim each, each drawn in NotebookLM's own pictures rather than pointed at the original's figures |
+| `infographic` | the thesis, the mechanism in three steps, the headline numbers — one page, nothing the 요약 tab does not carry |
+| `audio` | two voices, the 요약 tab's narrative first, the limits last |
+| `mind-map` | the four acts as branches, Terms as leaves |
 
 It carries no anchor of the private side — no `C#`, `METHOD §n`, `cfg:` or
 `path:line` — because it is the one text that leaves the machine.

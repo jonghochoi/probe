@@ -113,14 +113,16 @@ PROCEDURE
 
 1. ORIENT — what the human wants, before what the papers say.
 
-     $PROBE_PRIVATE_DIR/MY-METHOD.md     all of it; §1 주장 and §4 약점 twice
+     $PROBE_PRIVATE_DIR/MY-METHOD.md     all of it; §1 주장 and §4 알려진 약점 twice
      $PROBE_PRIVATE_DIR/BASKET.md     every row; the `active` ones are the run
      context/MASTER.md                §1 Identity, §4 Pillars
      context/P<n>.md                  §1 Scope, §2 Decision Log — the pillars
                                       the active basket papers carry
 
-   Then the digest: run `sh <path>/codemap.sh` when it exists
-   and read `$PROBE_PRIVATE_DIR/CODEMAP.md`. Compute the three input hashes —
+   Then the digest: run `sh <path>/codemap.sh` when it exists and read
+   `$PROBE_PRIVATE_DIR/CODEMAP.md`. Without `codemap.sh`, read the
+   `CODEMAP.md` there and note its age under `3 방법론 변화`; without
+   either, STOP and say so. Compute the three input hashes —
    `sha256sum` of `MY-METHOD.md`, `CODEMAP.md` and `BASKET.md`, first seven hex
    digits each — and hold them.
 
@@ -244,15 +246,16 @@ PROCEDURE
    the versus notes it did not rewrite.
 
    WHICH: delta mode audits half the active versus notes, rounded up
-   (AUTHORING §5), minus the ones this run rewrote — those were verified in
-   step 6. Take them oldest first by the previous block's `verified[<id>]`;
+   (AUTHORING §5), chosen from those this run did not rewrite — those were
+   verified in step 6. Take them oldest first by the previous block's `verified[<id>]`;
    a versus note with no date there is the oldest. `--audit` takes every active
    versus note. A single-paper or `--all` run skips this step.
 
    For each, three checks:
 
      - PAPER: one fresh agent per versus note, launched together, with step 6's
-       inputs and its instruction verbatim — not the agent that graded it
+       inputs (the saved `versus/` path in place of the draft's) and its
+       instruction verbatim — not the agent that graded it
        last time, and not this run's notes.
      - CODE: every `path:line` and `cfg:` anchor resolves in today's
        `CODEMAP.md`, or by `grep -n` in `code/`, to a line that still says
@@ -387,7 +390,9 @@ D4. VERIFY — two readers, launched together, neither of which saw the
 
      - PAPER: one agent with the draft's path under `.scratch/`, the id
        and alias, the path of `MY-METHOD.md`, and step 6's instruction
-       verbatim, with "§1, §2, §3 and §6" read as "§2 to §7".
+       verbatim, with "§1, §2, §3 and §6" read as "§2 to §7" and its §6
+       threat check replaced by: every §6 pair is comparable on the
+       condition it names.
      - CODE: one agent with the draft's path, the path of `code/` and the
        digest's path, and this instruction verbatim:
 
@@ -414,7 +419,7 @@ D5. LINT + SELF-CHECK. Write the draft to `versus/<id>--<alias>--<scope>.md` —
      - Did anything §1 graded 틀림 or 원문 없음 come back as the paper's?
      - Was every row from D2 and D4 applied?
    Then draw the page:
-   `python3 distinction/render-distinction.py "$PROBE_PRIVATE_DIR/versus/<id>--<alias>--<scope>.md"`.
+   `python3 distinction/render-distinction.py <path>/versus/<id>--<alias>--<scope>.md`.
    A non-zero exit names the chart it cannot draw; fix the fence and draw
    again.
 
