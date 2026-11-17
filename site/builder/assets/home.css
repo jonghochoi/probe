@@ -139,6 +139,7 @@
 .hm-k { grid-row: span 2; font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); padding-top: .15rem; }
 .hm-k small { display: block; font-weight: 500; font-size: 10px; margin-top: .1rem; font-variant-numeric: tabular-nums; }
 .hm-s { font-size: var(--fs-sm); color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.hm-s .hm-a { font-weight: 700; color: var(--text); }
 .hm-x { display: none; }
 
 /* 연구 축 */

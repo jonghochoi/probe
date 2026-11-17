@@ -218,6 +218,24 @@ def _mascot(line: str, ordered: list[Paper], cmps: list, run, monday: str) -> st
             f'<p class="hm-bubble">{"".join(says)}</p></div>')
 
 
+def _cmp_line(comp, papers_by_id: dict) -> str:
+    """A comparison's fork on one line, as HTML — each paper's alias and its stance.
+
+    The 최근 row under a rewrite says what that paper does, so the row under a
+    comparison says what each of its papers does about the question: the
+    divergence the title asks about. The alias is set apart from the stance,
+    the way the fork's branch name is, so the line reads as papers and not as
+    one sentence. A comparison whose stances cannot pair with its papers prints
+    its problem line instead.
+    """
+    if len(comp.stances) != len(comp.paper_ids):
+        return c.esc(comp.problem or comp.tagline)
+    return " · ".join(
+        f'<span class="hm-a">{c.esc(display_alias(papers_by_id[pid]) if pid in papers_by_id else pid)}</span> '
+        f"{c.esc(stance)}"
+        for pid, stance in zip(comp.paper_ids, comp.stances))
+
+
 def home_page(papers: list[Paper], comps: list, runs: list, events: list,
               today: str) -> str:
     """첫 화면 — one line from the mascot, then 최근 and 연구 축 side by
@@ -237,17 +255,19 @@ def home_page(papers: list[Paper], comps: list, runs: list, events: list,
     run = runs[0] if runs else None
     first, more = scout_split(run) if run else ([], [])
     tops = [p for p in first + more if p.lead.full]
+    by_id = {p.stem: p for p in papers}
 
     def li(kind: str, when: str, href: str, title: str, sub: str, extra: bool) -> str:
-        sub = f'<span class="hm-s">{c.esc(sub)}</span>' if sub else ""
+        sub = f'<span class="hm-s">{sub}</span>' if sub else ""
         return (f'<li{" class=\"hm-x\"" if extra else ""}><a href="{href}">'
                 f'<span class="hm-k">{kind}<small>{c.esc(when)}</small></span>'
                 f'<b>{c.esc(title)}</b>{sub}</a></li>')
 
-    feed = ([("분석", p.date, f"p/{c.esc(p.stem)}/index.html", display_alias(p), p.tagline) for p in ordered[:3]]
-            + [("탐색", run.date, f"s/index.html#p-{c.esc(p.paper_id)}", p.alias, _md_plain(p.gist))
+    feed = ([("분석", p.date, f"p/{c.esc(p.stem)}/index.html", display_alias(p), c.esc(p.tagline)) for p in ordered[:3]]
+            + [("탐색", run.date, f"s/index.html#p-{c.esc(p.paper_id)}", p.alias, c.esc(_md_plain(p.gist)))
                for p in tops[:2]]
-            + [("비교", x.date, f"c/{c.esc(x.slug)}/index.html", x.title, "") for x in cmps[:1]])
+            + [("비교", x.date, f"c/{c.esc(x.slug)}/index.html", x.title, _cmp_line(x, by_id))
+               for x in cmps[:1]])
     feed.sort(key=lambda f: f[1], reverse=True)
     lean = [next(f for f in feed if f[0] == k) for k in ("분석", "탐색", "비교")
             if any(f[0] == k for f in feed)]
