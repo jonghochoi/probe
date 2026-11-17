@@ -242,8 +242,10 @@ score Relevance or Novelty, and you never commit.
    stands on. Every candidate a pillar agent keeps can surface or near-miss
    (PART II step 3), so search each paper's own text as well, one fetch per
    paper, before scoring:
-     python3 site/builder/arxiv.py <id> --grep '(?i)github|\bcode\b|release|real[- ](world|robot)|hardware|success rate|baseline|ablat' | head -60; sleep 3
-   Each hit prints with its section; a score it supports quotes it as
+     python3 site/builder/arxiv.py <id> --grep '(?i)github|\bcode\b|release|real[- ](world|robot)|hardware|success rate|baseline|ablat|seeds?\b|variance|std\b|standard deviation|±|\\pm|confidence interval|limitation|failure' | head -80; sleep 3
+   The terms after `ablat` find what Methodology 3 asks for — repeated
+   seeds or variance, a stated limit or failure mode (AUTHORING §5-2). Each
+   hit prints with its section; a score it supports quotes it as
    `§<n> "…"`. On `Unavailable` the abstract and comment are all there is. A
    level the text does not reach is not given; an absent signal scores 0
    and says so.
