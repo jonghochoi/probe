@@ -1,8 +1,10 @@
 name: Deploy site
 
-# Build the reading site from analysis/, comparison/ and scouting/ and publish
-# it to GitHub Pages. A scouting run's push to main lands here too, so the
-# run's page is published as it lands.
+# Build the reading site from analysis/, comparison/, scouting/ and the
+# context/ files it reads (the Decision Log, the pillar introductions and
+# EVENTS.md) and publish it to GitHub Pages. A scouting run's or the follow
+# routine's push to main lands here too, so what it wrote is published as it
+# lands.
 #
 # The generated HTML is NOT committed — a page-per-rewrite bot commit on every
 # merge would bury the history this repo is read through. The artifact is built
@@ -21,6 +23,7 @@ on:
       - 'analysis/**'
       - 'scouting/**'
       - 'comparison/**'
+      - 'context/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   pull_request:
@@ -28,6 +31,7 @@ on:
       - 'analysis/**'
       - 'scouting/**'
       - 'comparison/**'
+      - 'context/**'
       - 'site/**'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
@@ -99,7 +103,6 @@ jobs:
           key: site-cache-${{ hashFiles('analysis/*.md', 'scouting/**/*.md') }}
           restore-keys: |
             site-cache-
-            katex-
 
       - name: Build
         # `PROBE_SEARCH_API` is a repository *variable*, not a secret: it is the

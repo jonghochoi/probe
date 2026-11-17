@@ -183,8 +183,8 @@ one logical area or needs context to be reviewable. When present:
 
 ## Local checks
 
-CI runs each of these on the PR except `build-art.py --check` and the
-distinction and adaptation lints. Run the ones your change touches before
+CI runs each of these on the PR except `build-art.py --check`, the
+`render-distinction.py` draw and the distinction and adaptation lints. Run the ones your change touches before
 pushing.
 
 | Change touches | Command |

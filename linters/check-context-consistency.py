@@ -5,7 +5,7 @@
 §4 states how many decisions each pillar holds and which sections MASTER owns,
 and `context/CLAUDE.md` restates that ownership — every one of those is a claim
 some other file has to keep true, and nothing reads them back. This lint turns
-the four claims into checks:
+those claims into checks:
 
   1. SPINE — every `context/P<n>.md` carries the `## N.` sections
      `context/_TEMPLATE.md` defines. The spine is read from the template at run
@@ -18,7 +18,7 @@ the four claims into checks:
      the ownership sentence in `context/CLAUDE.md` ("`MASTER.md` holds only
      what crosses pillars — …").
   4. PILLARSET — prose claims about how many pillars exist ("five pillars",
-     "다섯 루틴") match the number of `context/P<n>.md` files, and a `P<a>–P<b>`
+     "다섯 연구 축") match the number of `context/P<n>.md` files, and a `P<a>–P<b>`
      range token covers exactly that set.
   5. SHAPE — every pillar file writes its decisions and its pins the one way
      `context/CLAUDE.md` sets out. A decision heading is followed by exactly
@@ -35,7 +35,7 @@ drop the `## N.` number and the trailing `[STABLE]`-style markers, then accept
 an exact match or a word-prefix of a heading (`Venue` → `Venue Priority`) —
 plus two aliases for the names MASTER files under a different heading, listed
 in `_SECTION_ALIASES`. PILLARSET only fires on a number word directly
-qualifying pillar/routine, so "six gates" and "five helpers" are left alone.
+qualifying a pillar, so "six gates" and "five helpers" are left alone.
 
 Usage (repo root):
     python3 linters/check-context-consistency.py [PATH ...]
@@ -119,8 +119,8 @@ _NUMBER_WORDS = {
     "five": 5, "six": 6, "seven": 7,
     "다섯": 5, "여섯": 6, "일곱": 7,
 }
-_PILLAR_COUNT_EN = re.compile(r"\b(five|six|seven)\s+(pillars?|routines?)\b", re.I)
-_PILLAR_COUNT_KO = re.compile(r"(다섯|여섯|일곱)\s*(?:개(?:의)?\s*)?(필러|루틴)")
+_PILLAR_COUNT_EN = re.compile(r"\b(five|six|seven)\s+(pillars?)\b", re.I)
+_PILLAR_COUNT_KO = re.compile(r"(다섯|여섯|일곱)\s*(?:개(?:의)?\s*)?(필러|연구\s*축)")
 _PILLAR_RANGE = re.compile(r"\bP(\d)\s*[–—-]\s*P(\d)")
 
 _DASHES = str.maketrans({"–": "-", "—": "-"})
