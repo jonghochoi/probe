@@ -86,7 +86,9 @@ above the track's name, the name holds the cell open.
 carries no external stylesheet, so every motion lives in the file's own
 `<style>`, and `prefers-reduced-motion` stops all of it. The character is
 `site/builder/components.py`'s `mark()` redrawn: change `mark()` and these
-change with it.
+change with it. The site's first screen dresses `mark()` in the four track
+icons' props — the same drawings on the same grid — so a prop changed here
+is changed in its wardrobe too.
 
 ## The hero
 
