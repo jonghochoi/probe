@@ -630,19 +630,26 @@ def _current(key: str, here: str) -> str:
     return ' aria-current="page"' if key and key == here else ""
 
 
-# The colours a reader can pick, in the card's order: the name, the key
-# `site.css` reads off `data-accent` (indigo is the default and has none),
-# and the swatch. The swatches are the light fills.
-ACCENTS = (("인디고", "", "oklch(51% 0.21 277)"),
+# The colours a reader can pick, in the card's order — round the hue wheel
+# from midnight: the name, the key `site.css` reads off `data-accent`
+# (midnight is the default and has none), and the swatch. The swatches are
+# the light fills. The card lays them three to a row, so the count stays a
+# multiple of three.
+ACCENTS = (("미드나잇", "", "oklch(41% 0.12 268)"),
+           ("코발트", "cobalt", "oklch(50% 0.16 262)"),
            ("세이지", "sage", "oklch(52% 0.1 165)"),
-           ("테라코타", "terracotta", "oklch(67.2% 0.131 39)"))
+           ("세피아", "sepia", "oklch(49% 0.085 62)"),
+           ("테라코타", "terracotta", "oklch(67.2% 0.131 39)"),
+           ("플럼", "plum", "oklch(47% 0.13 322)"))
 
 
-def _seg(label: str, title: str, items: str) -> str:
+def _seg(label: str, title: str, items: str, grid: bool = False) -> str:
     """One row of the card that picks one of several: a track, the items,
-    and the indicator `nav.js` slides under whichever item is marked."""
+    and the indicator `nav.js` slides under whichever item is marked. `grid`
+    wraps the items three to a line, for a pick with more than fit in one."""
     tip = f' title="{title}"' if title else ""
-    return (f'<div class="isl-seg" role="radiogroup" aria-label="{label}"{tip}>'
+    cls = "isl-seg isl-grid" if grid else "isl-seg"
+    return (f'<div class="{cls}" role="radiogroup" aria-label="{label}"{tip}>'
             f'<span class="isl-blob" aria-hidden="true"></span>{items}</div>')
 
 
@@ -694,7 +701,7 @@ def nav_island(up: str, here: str = "") -> str:
         <nav class="isl-sec isl-go" aria-label="이동"><span class="isl-h">이동</span>
           <div class="isl-seg">{'<span class="isl-blob" aria-hidden="true"></span>'}{go}</div></nav>
         <div class="isl-sec"><span class="isl-h">화면</span>{_seg("화면", "다크 모드 전환 (Ctrl+Shift+L)", theme)}</div>
-        <div class="isl-sec"><span class="isl-h">색 테마</span>{_seg("색 테마", "", accents)}</div>
+        <div class="isl-sec"><span class="isl-h">색 테마</span>{_seg("색 테마", "", accents, grid=True)}</div>
         <a class="isl-out" href="{REPO_URL}" target="_blank" rel="noopener noreferrer">{_github(15)}GitHub 저장소<span class="isl-arr" aria-hidden="true">↗</span></a>
       </div>
     </div>

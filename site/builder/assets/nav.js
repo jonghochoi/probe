@@ -107,15 +107,23 @@
   // shortcut with the card shut, in which case it moves without sliding.
   isl.querySelectorAll(".isl-seg").forEach((seg) => {
     const blob = seg.querySelector(".isl-blob");
-    const bx = spring(SLIDE, (v) => { blob.style.transform = `translateX(${v}px)`; });
+    // A row that wraps (`.isl-grid`) moves the indicator down as well as
+    // across, so the offset is two springs and the size two more.
+    let x = 0, y = 0;
+    const move = () => { blob.style.transform = `translate(${x}px, ${y}px)`; };
+    const bx = spring(SLIDE, (v) => { x = v; move(); });
+    const by = spring(SLIDE, (v) => { y = v; move(); });
     const bw = spring(SLIDE, (v) => { blob.style.width = `${v}px`; });
+    const bh = spring(SLIDE, (v) => { blob.style.height = `${v}px`; });
     let placed = false;
     function place(jump) {
       const it = seg.querySelector('[aria-checked="true"], [aria-current="page"]');
       if (!it || !it.offsetWidth) { blob.style.opacity = "0"; placed = false; return; }
       const how = jump || !placed || !open ? "set" : "to";
       bx[how](it.offsetLeft);
+      by[how](it.offsetTop);
       bw[how](it.offsetWidth);
+      bh[how](it.offsetHeight);
       blob.style.opacity = "1";
       placed = true;
     }
