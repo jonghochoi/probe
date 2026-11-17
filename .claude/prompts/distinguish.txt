@@ -181,7 +181,7 @@ PROCEDURE
    anchor. Silence is not a gap. A §6 threat rests on a number, and the
    number is confirmed in the original before the versus note states it:
 
-     cd site && python3 -m builder.arxiv <id> --grep "<pattern>"
+     python3 site/builder/arxiv.py <id> --grep "<pattern>"
 
    The method's side is `MY-METHOD.md` and `CODEMAP.md`, cited by anchor. A code
    anchor the digest lacks is found by `grep -n` in `code/` or not written;
@@ -222,7 +222,7 @@ PROCEDURE
      §1, §2, §3 and §6, and the paper half of each idea's
      "왜 어느 쪽도 혼자 못 하나" — as 원문, 재작성본 or 추론
      (distinction/AUTHORING.md §4-1). Look it up, do not recall it:
-       cd site && python3 -m builder.arxiv <id> --grep "<phrase>"
+       python3 site/builder/arxiv.py <id> --grep "<phrase>"
        python3 site/query.py section <id> --match "<Term>"
      For every quote anchor, check that the original carries it byte for
      byte under the section it names and that it says what the bullet
@@ -352,9 +352,9 @@ D2. ERRATA — before a word is written on the rewrite. The rewrite is the
      limit. In act 4, only the statements about the paper; the rewrite's
      own argument with the research context is not yours to grade. Look
      each one up in the original, do not recall it:
-       cd site && python3 -m builder.arxiv <id> --grep "<phrase>"
-       cd site && python3 -m builder.arxiv <id> --tables
-       cd site && python3 -m builder.arxiv <id> --section <n>
+       python3 site/builder/arxiv.py <id> --grep "<phrase>"
+       python3 site/builder/arxiv.py <id> --tables
+       python3 site/builder/arxiv.py <id> --section <n>
      Grade each: 맞음 (the original says it), 틀림 (the original says
      otherwise), 과장 (the original says less — a narrower setting, a
      hedge dropped, an average presented as a minimum), 원문 없음 (the
@@ -390,7 +390,8 @@ D4. VERIFY — two readers, launched together, neither of which saw the
 
      - PAPER: one agent with the draft's path under `.scratch/`, the id
        and alias, the path of `MY-METHOD.md`, and step 6's instruction
-       verbatim, with "§1, §2, §3 and §6" read as "§2 to §7" and its §6
+       verbatim, with "§1, §2, §3 and §6" read as "§2 to §7", the grade
+       limits read from AUTHORING §4-1's code-note column, and its §6
        threat check replaced by: every §6 pair is comparable on the
        condition it names.
      - CODE: one agent with the draft's path, the path of `code/` and the

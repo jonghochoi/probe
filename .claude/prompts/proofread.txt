@@ -25,9 +25,10 @@ SOURCES
    LaTeX source for a rewrite whose front matter records `arxiv_src:`. Fetch
    it the same way:
 
-       cd site && python3 -m builder.arxiv <id>
+       python3 site/builder/arxiv.py <id>
 
-   and `from builder.arxiv import load` for the text. Re-read it every round —
+   and, from the repo root, `sys.path.insert(0, 'site')` then
+   `from builder.arxiv import load` for the text. Re-read it every round —
    a round that proofreads the rewrite against itself only polishes prose.
    `arxiv.Unavailable` → stop the loop and say so. A rewrite read from the
    LaTeX source (`arxiv_src:`) whose paper has since gained an HTML edition is not proofread

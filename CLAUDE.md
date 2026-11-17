@@ -149,10 +149,11 @@ versus: add <arxiv-id> × <scope> (<alias>)      # one code note
 `/adapt` writes into its own folder and commits nothing, and that folder has
 no commit format.
 
-`update` replaces `add` when redoing an existing rewrite or comparison. The
-trailing `(<alias>)` is the rewrite's own `alias:` front-matter value, whose
-resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that resolves to no
-alias there carries none here either, and the subject ends at `rewrite`.
+`update` replaces `add` when redoing an existing rewrite, comparison or code
+note. The trailing `(<alias>)` is the rewrite's own `alias:` front-matter
+value, whose resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that
+resolves to no alias there carries none here either, and the subject ends at
+`rewrite` or at `<scope>`.
 
 ### Body
 

@@ -16,7 +16,9 @@ main() {
     exit 1
   fi
 
-  # The private folder's git ignores this log.
+  # The private folder's git ignores this log. `runs/` is the routine's to
+  # fill, but the log goes there before the routine has run once.
+  mkdir -p "$PROBE_PRIVATE_DIR/runs"
   exec >>"$PROBE_PRIVATE_DIR/runs/distinguish.log" 2>&1
   echo "── run-distinguish $(date -Iseconds) ──"
 
@@ -34,7 +36,7 @@ main() {
   # commit or push. Agent is the verify pass (prompt step 6).
   claude -p "/distinguish" \
     --add-dir "$PROBE_PRIVATE_DIR" \
-    --allowedTools "Read,Write,Edit,Glob,Grep,Agent,Bash(printenv *),Bash(test *),Bash(date *),Bash(python3 *),Bash(git log *),Bash(git rev-parse *),Bash(grep *),Bash(sha256sum *),Bash(sh *),Bash(cd *)"
+    --allowedTools "Read,Write,Edit,Glob,Grep,Agent,Bash(printenv *),Bash(test *),Bash(date *),Bash(python3 *),Bash(git log *),Bash(git rev-parse *),Bash(grep *),Bash(sha256sum *),Bash(sh *)"
 }
 
 main "$@"

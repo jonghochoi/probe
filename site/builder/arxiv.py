@@ -485,7 +485,7 @@ def find_sections(paper: Paper, anchor: str) -> list[Section]:
 
 
 def _main(argv: list[str]) -> int:
-    """`python3 -m builder.arxiv <arxiv-id> [--grep REGEX] [--tables] [--section <anchor> ...] [--bib]`
+    """`python3 site/builder/arxiv.py <arxiv-id> [--grep REGEX] [--tables] [--section <anchor> ...] [--bib]`
 
     Bare, it prints the index: the section tree (body and appendix apart),
     then every figure with the URL it hotlinks from — read from the page's own
@@ -501,7 +501,7 @@ def _main(argv: list[str]) -> int:
     """
     import argparse
 
-    ap = argparse.ArgumentParser(prog="python3 -m builder.arxiv",
+    ap = argparse.ArgumentParser(prog="python3 site/builder/arxiv.py",
                                  description=_main.__doc__.split("\n")[0])
     ap.add_argument("paper_id")
     ap.add_argument("--grep", metavar="REGEX",
@@ -589,5 +589,17 @@ def _main(argv: list[str]) -> int:
     return 0
 
 
-if __name__ == "__main__":  # `python3 -m builder.arxiv <arxiv-id> [--grep …] [--tables] [--section …] [--bib]`
-    sys.exit(_main(sys.argv[1:]))
+if __name__ == "__main__":  # `python3 site/builder/arxiv.py <arxiv-id> [--grep …] [--tables] [--section …] [--bib]`
+    # Run from the repo root, so a prompt never has to `cd` into `site/` and
+    # leave the next command in the wrong folder. The CLI runs as
+    # `builder.arxiv`, not as `__main__`: `builder.arxivsrc` imports
+    # `builder.arxiv`, and a second copy of this module would raise an
+    # `Unavailable` the first copy's handler cannot catch.
+    # A reader piping into `head` closes the pipe early; that ends the output,
+    # it is not an error.
+    import os
+    import signal
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from builder.arxiv import _main as main
+    sys.exit(main(sys.argv[1:]))

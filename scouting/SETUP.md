@@ -71,7 +71,7 @@ through Python's `urllib`, which has to trust the environment's proxy CA as
 `curl` does:
 
 ```bash
-cd site && python3 -m builder.arxiv 2410.24164 | head
+python3 site/builder/arxiv.py 2410.24164 | head
 ```
 
 ## 3. Routine
@@ -120,7 +120,7 @@ gates fired, and that the environment is sound:
 - [ ] The `Papers scanned:` header discloses **no** `curl` 403 / network-block
       error. One there means the Custom allowlist is missing.
 - [ ] The per-paper briefs come from the paper's introduction — the
-      transcript shows `python3 -m builder.arxiv` fetching each 🥇 🥈 🥉 🌱
+      transcript shows `site/builder/arxiv.py` fetching each 🥇 🥈 🥉 🌱
       paper's section tree, and no (d) opens on `HTML 원문 없음` for a paper
       that has an HTML edition.
 - [ ] The Anti-topics filter fired — 🔄 reports a filter count. A run that
