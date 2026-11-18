@@ -11,9 +11,24 @@ cannot disagree.
 
 **Front matter and relations only — never bodies.** A record is what a paper
 *is* and what it touches; the argument lives in the rewrite, and the record
-points at the raw Markdown of it (`source`) rather than carrying it. That keeps
-the whole corpus inside one context window, which is the point: an agent reads
-every record, shortlists, and only then opens two or three sources.
+points at the raw Markdown of it (`source`) rather than carrying it.
+
+**Published in tiers, read top down.** An agent reads every paper, shortlists,
+and only then opens two or three — so the site serves each step its own file,
+and only the first has to fit one context window whatever the corpus grows to:
+
+1. `corpus.json` — every paper and comparison, without the per-paper prose
+   (`CARD_FIELDS`) and with each URL a template on the root (`URLS`), which
+   is what keeps a record near one kilobyte;
+2. `p/<id>/card.json` — that prose for one paper: `summary`, `keywords` and
+   the scored `neighbours`;
+3. `p/<id>/sections.json` and `p/<id>/s/<anchor>.md` — the body, one H3 at
+   a time (`section_files`);
+4. the raw Markdown, whole.
+
+`records` still builds the one complete record set; `tiers` cuts it at
+publish time, so `site/query.py`, which calls `records` in a checkout, keeps
+every field in one place and never reads a tier.
 
 **Every kind of link keeps its own field.** A citation, a sibling named by
 alias, a comparison that already set two papers side by side and the
@@ -40,9 +55,24 @@ RAW = c.RAW_URL
 
 # How large `corpus.json` may get. It exists to fit in one context window next
 # to the question, so it has a ceiling the way `corpus-index.js` does; past it,
-# the fields to move out are `summary` and `keywords`, the two largest, not the
-# budget.
+# what moves is a field — out of the index and into the card — not the budget.
 CORPUS_JSON_BUDGET = 256 * 1024
+
+# The per-paper fields `corpus.json` leaves to `p/<id>/card.json` — the
+# largest ones, read only once a paper is on the shortlist.
+CARD_FIELDS = ("summary", "keywords", "neighbours")
+
+# Each record's URLs, written once on the root of `corpus.json` instead of on
+# every record: `{id}` is the paper's arXiv id, `{slug}` a comparison's slug.
+URLS = {
+    "page": f"{SITE}p/{{id}}/",
+    "card": f"{SITE}p/{{id}}/card.json",
+    "sections": f"{SITE}p/{{id}}/sections.json",
+    "source": f"{RAW}/analysis/{{id}}.md",
+    "comparison_page": f"{SITE}c/{{slug}}/",
+    "comparison_source": f"{RAW}/comparison/{{slug}}.md",
+}
+_URL_KEYS = ("page", "sections", "source")
 
 # How many scored neighbours a record lists. More than the page's three, since
 # an agent reads the scores and a reader reads only the row.
@@ -287,6 +317,25 @@ def records(papers: list[Paper], comps: list, decisions: dict,
     }
 
 
+def tiers(cat: dict) -> tuple[dict, dict[str, dict]]:
+    """`(index, cards)` — `records` cut into what the site publishes.
+
+    `index` is `corpus.json`: every record without `CARD_FIELDS`, and without
+    the URLs `URLS` rebuilds from an id or a slug. `cards` maps each paper's id
+    to its `p/<id>/card.json`, which carries the id again so a card read on its
+    own still says whose it is.
+    """
+    papers, cards = [], {}
+    for r in cat["papers"]:
+        papers.append({k: v for k, v in r.items()
+                       if k not in CARD_FIELDS and k not in _URL_KEYS})
+        cards[r["id"]] = {"id": r["id"]} | {k: r[k] for k in CARD_FIELDS}
+    comps = [{k: v for k, v in x.items() if k not in ("page", "source")}
+             for x in cat["comparisons"]]
+    head = {k: v for k, v in cat.items() if k not in ("papers", "comparisons")}
+    return head | {"urls": URLS, "papers": papers, "comparisons": comps}, cards
+
+
 def llms_txt(cat: dict, search_api: str = "") -> str:
     """`llms.txt` — the one URL an agent is handed, saying where the rest is.
 
@@ -312,20 +361,27 @@ def llms_txt(cat: dict, search_api: str = "") -> str:
         "",
         "## Data",
         "",
-        f"- [corpus.json]({site}corpus.json): every paper and comparison as one "
-        "record — front matter, English keywords, pillars, and the five "
-        "relations kept apart: `neighbours` (scored by the open-question codes both "
-        "cite, rarer codes weighing more, plus shared pillars), "
+        "Read the data top down — each step is its own file, and only the "
+        "first holds the whole corpus:",
+        "",
+        f"1. [corpus.json]({site}corpus.json): every paper and comparison as one "
+        "record — front matter, pillars, and the relations kept apart: "
         "`cites` / `cited_by` (arXiv links), "
         "`mentions` / `mentioned_by` (named by alias without a link), "
-        "`compared_in` and `decisions`. No bodies.",
-        f"- Raw Markdown of any paper: `{RAW}/analysis/<arxiv-id>.md`; of a "
-        f"comparison: `{RAW}/comparison/<slug>.md`. A record's `source` is that "
-        "URL. Far lighter than the HTML page.",
-        f"- One section at a time: `{site}p/<arxiv-id>/sections.json` lists a "
-        "rewrite's H3 sections — act, Korean heading, English keywords, anchor — "
-        "and each is `" + site + "p/<arxiv-id>/s/<anchor>.md`, a few KB instead "
-        "of the whole rewrite. A record's `sections` is that list's URL.",
+        "`compared_in` and `decisions`. Each URL is a template under `urls`, "
+        "filled with a record's `id` (or a comparison's `slug`). No bodies. "
+        "Shortlist from it.",
+        f"2. `{site}p/<arxiv-id>/card.json`: one paper's `summary`, English "
+        "`keywords` (its section glosses) and `neighbours`, scored by the "
+        "open-question codes both cite, rarer codes weighing more, plus shared "
+        "pillars. Open it for each paper on the shortlist.",
+        f"3. `{site}p/<arxiv-id>/sections.json`: the rewrite's H3 sections — "
+        "act, Korean heading, English keywords, anchor — and each is `" + site
+        + "p/<arxiv-id>/s/<anchor>.md`, a few KB instead of the whole rewrite.",
+        f"4. Raw Markdown of any paper: `{RAW}/analysis/<arxiv-id>.md`; of a "
+        f"comparison: `{RAW}/comparison/<slug>.md`. Far lighter than the HTML "
+        "page.",
+        "",
         f"- Research context the `## 4` parts argue against — pillars, the "
         f"open questions, anti-topics: {src}/tree/main/context",
         f"- In a checkout, `python3 site/query.py --help` answers the same "

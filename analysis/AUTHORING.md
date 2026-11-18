@@ -49,7 +49,7 @@ figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
 appendix: [<A>, <B.2>, <G>]      # appendix sections drawn on, or `none`
 terms: <n>                       # count of inline term anchors
 metric: <the headline number>    # optional — omit rather than invent one
-summary: >                       # 한 문단 요약 — <meta>, search, corpus.json
+summary: >                       # 한 문단 요약 — <meta>, search, card.json
   …
 ---
 ```
@@ -60,7 +60,7 @@ summary: >                       # 한 문단 요약 — <meta>, search, corpus.
 | `title` | required. The paper's title, as the card and the page header print it |
 | `alias` | **optional.** The paper's own codename, for surfaces with no room for a title — a reader sees `T-Rex` where an id says nothing. `comparison/` names every compared paper by it (`comparison/AUTHORING.md` §2-1), and a rewrite's commit subject carries it as `(<alias>)`. Resolved by the ladder below; under 24 characters |
 | `tagline` | required. **One line naming what the paper does**, printed under the paper's title in the page header and under the title on the analysis list. The H1 is our thesis, often a metaphor, and does not say which paper this is; the tagline is the sentence that does, under the paper's own title. **It never restates the paper's name** — `<코드명> — <무엇을 하는가>` under a title reading `<코드명>: <…>` spends its one line on the word directly above it. Open with what the paper does; the build reports the echo |
-| `summary` | required. 2–3 sentences, read cold. Not printed on the page — the 요약 tab says it at length. Flattened for the page's `<meta>` description, the semantic index and `corpus.json`. Authored as markdown — `**강조**` and `` $`math`$ `` are stripped there, and bold still marks the three or four phrases that carry the argument for a reader of the source (§3-2 applies) |
+| `summary` | required. 2–3 sentences, read cold. Not printed on the page — the 요약 tab says it at length. Flattened for the page's `<meta>` description, the semantic index and the paper's `p/<id>/card.json`. Authored as markdown — `**강조**` and `` $`math`$ `` are stripped there, and bold still marks the three or four phrases that carry the argument for a reader of the source (§3-2 applies) |
 | `authors` | one line, as printed |
 | `pillars` | **ours**, not the paper's — read `context/P#.md` and pick honestly, **most relevant first**. The site files the paper under the **first two** only: the chips its row prints, the axes the analysis list's axis line counts it in, and what a click on those counts returns. A third is harmless and does not publish. The paper page's header prints the same two as its axis chips; empty → 미분류, which beats a wrong pillar |
 | `links` | `kind\|url` pairs — kinds and sourcing rules in R10 |

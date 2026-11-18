@@ -138,11 +138,15 @@ is run by hand and never in CI.
 
 **`corpus.json` carries front matter and relations, never bodies.** It exists
 to fit one context window beside an agent's question, so a record points at the
-raw Markdown (`source`) rather than holding it, and the build refuses the file
-past `catalog.CORPUS_JSON_BUDGET`. From `context/` it carries only what the
-pages already print in a `D#` tooltip — the code, its pillar and its title.
-Relations stay one kind per field; only `neighbours` is a score, and it is
-`corpus.score`, the rule the page's own neighbour row ranks by.
+raw Markdown rather than holding it, and the build refuses the file past
+`catalog.CORPUS_JSON_BUDGET`. It is the first of the tiers `catalog.tiers` cuts
+`catalog.records` into: the per-paper prose (`catalog.CARD_FIELDS` — summary,
+keywords, neighbours) goes to `p/<id>/card.json`, and every URL is a template
+on the root, so the index grows by about a kilobyte a paper. Past the budget, a
+field moves down a tier; the budget does not move. From `context/` it carries
+only what the pages already print in a `D#` tooltip — the code, its pillar and
+its title. Relations stay one kind per field; only `neighbours` is a score, and
+it is `corpus.score`, the rule the page's own neighbour row ranks by.
 
 **Section files are the page's own headings, never a second parser.** A full
 build writes each rewrite's H3s as `p/<id>/s/<anchor>.md` with

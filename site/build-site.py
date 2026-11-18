@@ -4,8 +4,8 @@
 Renders every published track — `analysis/<id>.md`, `comparison/<slug>.md`
 and each scouting run — with the first screen, 서재 and the 404 page into a
 static page tree under `--out`, and beside the pages what an agent reads
-instead — `corpus.json`, `llms.txt`, and per-paper `sections.json` with one
-Markdown file per section. Build-time dependencies only — the published site
+instead — `llms.txt`, the `corpus.json` index, and per paper a `card.json`
+and a `sections.json` with one Markdown file per section. Build-time dependencies only — the published site
 ships no runtime Python, no CDN request and no math JavaScript.
 
     python3 site/build-site.py --out .site           # full build
@@ -102,16 +102,18 @@ def build(args) -> int:
     weights = corpus.decision_weights(papers, retired)
     cited = corpus.citations(papers)
     agent_json = ""
+    cards: dict[str, dict] = {}
     if not args.only:
         cat = catalog.records(papers, comps, decisions, cited, retired)
-        agent_json = json.dumps(cat, ensure_ascii=False, separators=(",", ":"))
+        index, cards = catalog.tiers(cat)
+        agent_json = json.dumps(index, ensure_ascii=False, separators=(",", ":"))
         agent_size = len(agent_json.encode("utf-8"))
         if agent_size > catalog.CORPUS_JSON_BUDGET:
             problems.append(
                 f"corpus.json: {agent_size / 1024:.0f} KB, over the "
                 f"{catalog.CORPUS_JSON_BUDGET // 1024} KB budget — it exists to fit one "
-                f"context window, so move `summary` or `keywords` out of "
-                f"`catalog.records` rather than raising the budget"
+                f"context window, so move a field into the per-paper card "
+                f"(`catalog.CARD_FIELDS`) rather than raising the budget"
             )
 
     if args.check:
@@ -232,6 +234,10 @@ def build(args) -> int:
         (out / "corpus.json").write_text(agent_json + "\n", encoding="utf-8")
         (out / "llms.txt").write_text(catalog.llms_txt(cat, args.search_api),
                                       encoding="utf-8")
+        for stem, card in cards.items():
+            (out / "p" / stem).mkdir(parents=True, exist_ok=True)
+            (out / "p" / stem / "card.json").write_text(
+                json.dumps(card, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     # Every built rewrite, cut at its H3s beside its page for an agent that
     # has only the site. The anchors come from the renderer the page is built
     # with, which is what lets a search hit name its section's file.
