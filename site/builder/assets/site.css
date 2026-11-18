@@ -138,14 +138,15 @@
   --fig-pad:     #ffffff;
 
   /* ── Pillar palette — scouting/AUTHORING.md §3-1 ────────────────────── */
-  --p0: oklch(90.0% 0.036 18);  --p1: oklch(93.8% 0.030 81);
-  --p2: oklch(94.8% 0.047 133); --p3: oklch(90.1% 0.033 269);
-  --p4: oklch(89.2% 0.045 301); --p5: oklch(92.5% 0.040 195);
+  --p0: oklch(91.0% 0.040 20);  --p1: oklch(91.5% 0.050 60);
+  --p2: oklch(95.0% 0.055 96);  --p3: oklch(93.5% 0.050 145);
+  --p4: oklch(91.0% 0.035 250); --p5: oklch(90.0% 0.042 305);
   /* Each pillar's ink: its tint's hue at text strength, for the chip's frame
-     and label. */
-  --p0-ink: oklch(50% 0.13 18);  --p1-ink: oklch(52% 0.10 81);
-  --p2-ink: oklch(50% 0.12 140); --p3-ink: oklch(50% 0.12 262);
-  --p4-ink: oklch(50% 0.13 304); --p5-ink: oklch(50% 0.10 195);
+     and label. P0 to P5 run the rainbow in order — red, orange, yellow,
+     green, blue, violet. */
+  --p0-ink: oklch(50% 0.14 20);  --p1-ink: oklch(52% 0.12 60);
+  --p2-ink: oklch(51% 0.10 96);  --p3-ink: oklch(50% 0.13 145);
+  --p4-ink: oklch(50% 0.13 250); --p5-ink: oklch(50% 0.14 305);
   --pna:  oklch(91.0% 0.009 56);
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
@@ -272,12 +273,12 @@
   --scrim:       oklch(10.0% 0.010 var(--hue) / .52);
   --fig-pad:     oklch(94.9% 0.008 var(--hue));   /* pad the white PNG, don't invert it */
 
-  --p0: oklch(39.1% 0.047 19);  --p1: oklch(42.2% 0.042 72);
-  --p2: oklch(42.2% 0.058 136); --p3: oklch(37.1% 0.056 268);
-  --p4: oklch(36.9% 0.067 304); --p5: oklch(38.5% 0.050 195);
-  --p0-ink: oklch(78% 0.10 18);  --p1-ink: oklch(82% 0.09 81);
-  --p2-ink: oklch(80% 0.11 140); --p3-ink: oklch(78% 0.09 262);
-  --p4-ink: oklch(78% 0.10 304); --p5-ink: oklch(80% 0.09 195);
+  --p0: oklch(39.5% 0.055 20);  --p1: oklch(42.0% 0.062 60);
+  --p2: oklch(43.0% 0.055 96);  --p3: oklch(41.0% 0.058 145);
+  --p4: oklch(37.5% 0.055 250); --p5: oklch(37.0% 0.065 305);
+  --p0-ink: oklch(78% 0.10 20);  --p1-ink: oklch(81% 0.11 60);
+  --p2-ink: oklch(84% 0.11 96);  --p3-ink: oklch(80% 0.12 145);
+  --p4-ink: oklch(78% 0.10 250); --p5-ink: oklch(78% 0.11 305);
   --pna:  oklch(32.7% 0.013 58);
   --dref: oklch(76.5% 0.139 73);
 
@@ -2750,7 +2751,9 @@ html.axp-lock { overflow: hidden; }
   border: 1px solid var(--border-soft); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-muted);
 }
 .axp-x:hover { color: var(--accent-ink); border-color: var(--accent); }
-.axp-intro { margin: .2rem 1.1rem .9rem; }
+/* The introduction stands as far from the band as from the rule below it,
+   and the rule as far again from the list's heading. */
+.axp-intro { margin: .8rem 1.1rem; }
 .axp-decs { margin: 0 1.1rem .9rem; padding-top: .8rem; border-top: 1px solid var(--border-soft); }
 .axp-intro + .axp-decs { margin-top: 0; }
 /* Under the band the list's heading stands as far from it as one row stands
