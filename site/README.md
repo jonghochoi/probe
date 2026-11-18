@@ -17,7 +17,7 @@ comment of the file that draws it.
 
 | Path | Role |
 |---|---|
-| `build-site.py` | Build entry point — `--out`, `--only <id>`, `--check`, `--strict`, `--serve`, `--index <file>`, `--search-api <url>`, `--scout-figures`, `--gap-titles` (see `--help`). A full build also writes `corpus.json` and `llms.txt` at the root; `--only` writes neither |
+| `build-site.py` | Build entry point — `--out`, `--only <id>`, `--check`, `--strict`, `--serve`, `--index <file>`, `--search-api <url>`, `--scout-figures`, `--gap-titles` (see `--help`). A full build also writes `corpus.json` and `llms.txt` at the root and a `card.json` beside each paper page; `--only` writes none of them |
 | `builder/corpus.py` | Rewrite discovery and order (by the commit that landed each rewrite), front-matter validation, pillar names, the analysis list's haystacks, and `score` — the one neighbour rule every surface ranks by |
 | `builder/frontmatter.py` | The flat `---` front-matter parser rewrites and comparisons are read with — no PyYAML |
 | `builder/render.py` | Markdown → HTML, the rule checks with no other home (its row in `analysis/AUTHORING.md` §5, and a comparison's fence and length rules), and the 재작성본 sibling marker |
@@ -33,14 +33,14 @@ comment of the file that draws it.
 | `builder/charts.py`, `builder/assets/charts.css` | The drawn results chart (`probe-chart`) as inline SVG, and the rules it is drawn with — borrowed by `distinction/render-distinction.py`, never linked by a site page |
 | `builder/pages.py`, `components.py` | Page assembly — the first screen at the root, 탐색 (`s/`), the analysis list (`p/`), 비교 (`c/`), 서재 (`shelf/`), the paper page and its tabs, and the mastheads each list page opens on |
 | `builder/decisions.py` | The `context/P*.md` open-questions parser behind the `D<n>` tooltips, and each pillar's introduction and question titles for the axis-chip popup |
-| `builder/catalog.py` | The corpus as data for an agent — `corpus.json`, `llms.txt` and the per-section Markdown under `p/<id>/s/` |
+| `builder/catalog.py` | The corpus as data for an agent, in tiers read top down — `llms.txt`, the `corpus.json` index, each paper's `p/<id>/card.json`, and its per-section Markdown under `p/<id>/s/` |
 | `builder/arxiv.py` | LaTeXML extraction of an arXiv original, for the prompts: `python3 site/builder/arxiv.py <id>` from the repo root prints the section tree, figures and table captions; `--grep <regex>` the matching lines with their §, `--tables` every table as Markdown, `--section <anchor>` one section's text, `--bib` the bibliography with each arXiv id's first-version month |
 | `builder/arxivsrc.py` | The LaTeX source arXiv serves, read in memory into the same `Paper` when a paper has no HTML edition — `builder.arxiv` falls back to it, so every flag above works on either |
 | `builder/katex.py`, `katex-render.mjs` | Server-side math, cached by `sha256(tex\|display)` under `.site-cache/` |
 | `builder/fonts.py` | Webfont subsetting — Gowun Dodum merged from its range pieces, Pretendard behind it, JetBrains Mono for code |
 | `builder/assets_out.py`, `builder/assets/` | The site's CSS, JS and icons, copied into the output tree. Each script opens on a comment stating what it owns |
 | `search/` | Semantic search over the rewrites. Folder map: `site/search/README.md` |
-| `query.py` | The same records as `corpus.json`, from a checkout and on the standard library alone — `python3 site/query.py --help` |
+| `query.py` | The same records as `corpus.json` and the cards together, from a checkout and on the standard library alone — `python3 site/query.py --help` |
 | `requirements.txt` | Build-time Python dependencies |
 
 ## Building locally

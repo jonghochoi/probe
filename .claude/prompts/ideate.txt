@@ -36,7 +36,8 @@ repo root:
 
     python3 site/query.py --help
 
-It reads the records the site publishes as `corpus.json`. Learn its
+It reads the records the site publishes as `corpus.json` and each paper's
+`card.json`, together. Learn its
 subcommands from `--help`, not from this prompt.
 
 READ THROUGH IT, NOT AROUND IT. A rewrite is 50–90 KB; the whole corpus is

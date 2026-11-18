@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Query the PROBE corpus from a checkout — for an agent, standard library only.
 
-Reads the same records the build publishes as `corpus.json`
-(`builder/catalog.py`), so an answer here and the file on the site agree.
+Reads the same records the build publishes as `corpus.json` and the per-paper
+`card.json` (`builder/catalog.py`), whole and in one place, so an answer here
+and the files on the site agree.
 Tab-separated rows under a `# column` header line by default; `--json` prints
 one JSON object per line, the same keys on every line of one command.
 
