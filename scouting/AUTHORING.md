@@ -182,12 +182,12 @@ badge**, color-coded by category:
 
 | Category | Color | Source |
 |----------|-------|--------|
-| `P0` | `f5d5d5` (pale red) | pillar palette — this table is the palette's source of truth |
-| `P1` | `f5e9d5` (pale orange) | pillar palette |
-| `P2` | `e2f5d5` (pale green) | pillar palette |
-| `P3` | `d5def5` (pale blue) | pillar palette |
-| `P4` | `e0d5f5` (pale purple) | pillar palette |
-| `P5` | `d5f2f0` (pale teal) | pillar palette |
+| `P0` | `fbd7d6` (pale red) | pillar palette — this table is the palette's source of truth |
+| `P1` | `fddcc2` (pale orange) | pillar palette |
+| `P2` | `f9efc6` (pale yellow) | pillar palette |
+| `P3` | `d6f3d5` (pale green) | pillar palette |
+| `P4` | `d0e4f8` (pale blue) | pillar palette |
+| `P5` | `e4d8f5` (pale violet) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared question color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
