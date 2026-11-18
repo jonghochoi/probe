@@ -81,7 +81,7 @@ is a second copy to keep in step, so it is not restated.
 |---|---|---|---|
 | P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them | 3 | `context/P0.md` |
 | P1 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 4 | `context/P1.md` |
-| P2 — Structured Multimodal Observation Fusion | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder | 4 | `context/P2.md` |
+| P2 — Observation Design | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder, where in the view the policy reads | 5 | `context/P2.md` |
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P4.md` |
 | P5 — Retargeting & Human-in-the-Loop Data Collection | how human motion becomes robot training data — the retargeting map, its yield, the human-in-the-loop handover, where operator time goes | 4 | `context/P5.md` |

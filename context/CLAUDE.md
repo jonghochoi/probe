@@ -92,7 +92,7 @@ The allocation, kept in step with the files by hand:
 |---|---|
 | P0. VLA Datasets & Benchmarks | D4ML, D1AL, D6SE |
 | P1. Heterogeneous Action Expert Decomposition | D3GS, D1QT, D9ZP, D1MZ |
-| P2. Structured Multimodal Observation Fusion | D8EJ, D9NB, D2DV, D3AG |
+| P2. Observation Design | D8EJ, D9NB, D2DV, D3AG, D1SX |
 | P3. World Model | D3FQ, D8XB, D9KS, D6FM |
 | P4. Pretraining for Data-Efficient Adaptation | D3RP, D3WV, D9QJ, D6JW, D1WE |
 | P5. Retargeting & Human-in-the-Loop Data Collection | D2KT, D7HF, D5VN, D8LC |

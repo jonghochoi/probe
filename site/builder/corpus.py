@@ -61,7 +61,7 @@ ALIAS_MAX = 24
 PILLAR_NAMES = {
     "P0": "VLA Datasets & Benchmarks",
     "P1": "Heterogeneous Action Expert Decomposition",
-    "P2": "Structured Multimodal Observation Fusion",
+    "P2": "Observation Design",
     "P3": "World Model",
     "P4": "Pretraining for Data-Efficient Adaptation",
     "P5": "Retargeting & Human-in-the-Loop Data Collection",

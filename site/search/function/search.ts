@@ -46,7 +46,7 @@ const TERM_LEN = 40;
 const PILLARS: Record<string, string> = {
   P0: "datasets and benchmarks",
   P1: "action expert decomposition (by body part, skill, modality or rate)",
-  P2: "multimodal observation fusion",
+  P2: "observation design (view registration, vision encoder, modality fusion, hand-sensing tokens, where in the view the policy reads)",
   P3: "world models",
   P4: "pretraining and data-efficient adaptation",
   P5: "retargeting and human-in-the-loop data collection",
