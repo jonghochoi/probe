@@ -59,12 +59,12 @@ ALIAS_MAX = 24
 # `PILLAR_LABELS` — so a query in the paper's own English still finds its
 # axis.
 PILLAR_NAMES = {
-    "P0": "VLA Datasets & Benchmarks",
-    "P1": "Heterogeneous Action Expert Decomposition",
-    "P2": "Observation Design",
-    "P3": "World Model",
-    "P4": "Pretraining for Data-Efficient Adaptation",
-    "P5": "Retargeting & Human-in-the-Loop Data Collection",
+    "P0": "Retargeting & Human-in-the-Loop Data Collection",
+    "P1": "VLA Datasets & Benchmarks",
+    "P2": "Pretraining for Data-Efficient Adaptation",
+    "P3": "Observation Design",
+    "P4": "World Model",
+    "P5": "Heterogeneous Action Expert Decomposition",
     "P6": "Action Timing & Motion Quality",
 }
 # What every reader-facing surface prints for an axis — the axis-line chip and the
@@ -73,12 +73,12 @@ PILLAR_NAMES = {
 # it. Its keys are PILLAR_NAMES's; the build refuses to start on a mismatch, so
 # a pillar cannot be added to one and forgotten in the other.
 PILLAR_LABELS = {
-    "P0": "데이터셋 · 벤치마크",
-    "P1": "행동 전문가 분해",
-    "P2": "관측 설계",
-    "P3": "월드 모델",
-    "P4": "사전학습 · 적응",
-    "P5": "리타게팅 · 데이터 수집",
+    "P0": "리타게팅 · 데이터 수집",
+    "P1": "데이터셋 · 벤치마크",
+    "P2": "사전학습 · 적응",
+    "P3": "관측 설계",
+    "P4": "월드 모델",
+    "P5": "행동 전문가 분해",
     "P6": "실행 타이밍 · 모션 품질",
 }
 if PILLAR_LABELS.keys() != PILLAR_NAMES.keys():
@@ -840,7 +840,7 @@ def score(a: Paper, b: Paper, weights: dict[str, float]) -> float:
 
     The open questions are the one vocabulary here a human keeps: every code is a
     question the team wrote down, so two rewrites citing it are about the same
-    thing in the same words. A pillar is coarser — two papers sharing P1 may
+    thing in the same words. A pillar is coarser — two papers sharing P5 may
     only both be policies — so it counts once and a rare code counts more.
 
     The one ranking rule for "which papers are near this one": the page's

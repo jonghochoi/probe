@@ -7,9 +7,9 @@ and the files on the site agree.
 Tab-separated rows under a `# column` header line by default; `--json` prints
 one JSON object per line, the same keys on every line of one command.
 
-    python3 site/query.py catalog [--pillar P2] [--decision D9NB]
+    python3 site/query.py catalog [--pillar P3] [--decision D9NB]
                                   [--match "지연|latency"]
-    python3 site/query.py search "정책이 느린 걸 해결한 논문" [--pillar P1] [--limit 12]
+    python3 site/query.py search "정책이 느린 걸 해결한 논문" [--pillar P5] [--limit 12]
     python3 site/query.py show <id|alias|comparison slug>
     python3 site/query.py related <id|alias>
     python3 site/query.py outline <id|alias|slug>

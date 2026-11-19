@@ -44,12 +44,12 @@ const TERM_LEN = 40;
  * that needs a pillar id reads this object: the prompt lists it, and the two
  * guards accept exactly its keys, so a pillar is one entry here. */
 const PILLARS: Record<string, string> = {
-  P0: "datasets and benchmarks",
-  P1: "action expert decomposition (by body part, skill, modality or rate)",
-  P2: "observation design (view registration, vision encoder, modality fusion, hand-sensing tokens, where in the view the policy reads)",
-  P3: "world models",
-  P4: "pretraining and data-efficient adaptation",
-  P5: "retargeting and human-in-the-loop data collection",
+  P0: "retargeting and human-in-the-loop data collection",
+  P1: "datasets and benchmarks",
+  P2: "pretraining and data-efficient adaptation",
+  P3: "observation design (view registration, vision encoder, modality fusion, hand-sensing tokens, where in the view the policy reads)",
+  P4: "world models",
+  P5: "action expert decomposition (by body part, skill, modality or rate)",
   P6: "action timing and motion quality (control rate, execution speed, retiming, chunk-boundary smoothness)",
 };
 const PILLAR_IDS = Object.keys(PILLARS);
@@ -229,7 +229,7 @@ export default async function (req: Request): Promise<Response> {
     anonKey: Deno.env.get("ANON_KEY"),
   }).database;
 
-  // The filter is part of the question. Narrowed to P1 the same words are a
+  // The filter is part of the question. Narrowed to P5 the same words are a
   // different answer, so the key carries the pillars the reader set — keying
   // on the words alone would hand the next reader someone else's filter, and
   // skipping the cache whenever a filter is set would pay the model for every

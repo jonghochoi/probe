@@ -394,7 +394,7 @@ def llms_txt(cat: dict, search_api: str = "") -> str:
             "",
             f"Semantic search over the rewrites' sections, terms and figure captions "
             f"(comparisons are not indexed), Korean or English: `POST {search_api}` "
-            "with JSON `{\"q\": \"...\", \"limit\": 12, \"pillars\": [\"P1\"]}` "
+            "with JSON `{\"q\": \"...\", \"limit\": 12, \"pillars\": [\"P5\"]}` "
             "(`limit` at most 24, `pillars` optional). It answers `{\"hits\": [...], "
             "\"expanded\": [...]}`; a hit carries `paperId`, `kind`, `title`, "
             "`anchor` and a 240-character `snippet` — passages to open, not the "

@@ -7,7 +7,7 @@ stances: [보정 없이 학습이 잇는다, 보정값을 토큰에 건넨다]
 common: 둘 다 3D 타깃 홀로는 이득을 못 낸다
 problem: 카메라 자리가 바뀌면 같은 장면이 사진에 달리 찍혀, 로봇 정책이 엉뚱한 곳으로 손을 뻗는다
 plain: [두 자리에서 찍은 사진을 같은 장면이라 외우며 물체 위치를 맞힌다, 카메라마다 붙은 설치 정보를 사진 조각마다 읽혀 서로 잇는다]
-pillars: P2
+pillars: P3
 generated: 2026-10-29 13:56
 generator: compare/v1
 summary: >

@@ -60,7 +60,7 @@ _KNOWN_EXTENSIONS = (
 # en dash used in range placeholders (`context/P0–P4.md`).
 _SKIP_CHARS = set("*<>{}#|=+$%@:` …–")
 
-# Date/id placeholder segments (`scouting/P0/YYYY-MM-DD.md`, `arXiv:XXXX.XXXXX`)
+# Date/id placeholder segments (`scouting/P1/YYYY-MM-DD.md`, `arXiv:XXXX.XXXXX`)
 # mark a pattern, not a concrete file — skip tokens carrying them.
 _PLACEHOLDER_SEGMENTS = re.compile(r"YYYY|XXXX")
 

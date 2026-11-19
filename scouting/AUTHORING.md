@@ -214,7 +214,7 @@ commas not `;`, ≤ ~12 words:
 | `D#` | the Open Questions' `#### [D#] <title>` — a Korean question | the question, glossed in English |
 
 **Anchors.** Each legend row carries `<a id="ref-<CODE>"></a>` before its
-badge, `<CODE>` verbatim (`P1`, `D9ZP`); the legend badge itself is not a link.
+badge, `<CODE>` verbatim (`P5`, `D9ZP`); the legend badge itself is not a link.
 
 **In-body links — first occurrence per `##` section.** The first occurrence of
 each code in a `##` section is a linked badge
@@ -222,7 +222,7 @@ each code in a `##` section is a linked badge
 ones in that section stay plain. Codes in table cells and code blocks are not
 linked.
 
-**The (a) line is badges only** — `[![P2](…)](#ref-P2) / [![D3AG](…)](#ref-D3AG)
+**The (a) line is badges only** — `[![P3](…)](#ref-P3) / [![D3AG](…)](#ref-D3AG)
 [![D8EJ](…)](#ref-D8EJ)`: the pillar badge, ` / `, then the question badges
 separated by single spaces, never followed by a Korean gloss.
 
@@ -245,7 +245,7 @@ shaped like a code (`D4RT`) goes in a code span, which the lint reads past.
 | Technical terms | First occurrence: Korean term + English in parentheses. Subsequent: Korean only |
 | Config / code names | Keep verbatim (`env_cfg.py`, `ObservationManager`, etc.) |
 | Formulas / numbers | Keep verbatim (`ε = 0.1`, `±2σ`, `< 15%`, etc.) |
-| P#, D# tags | Keep verbatim (`P2`, `D3AG`, etc.). |
+| P#, D# tags | Keep verbatim (`P3`, `D3AG`, etc.). |
 | Reference Legend | Meaning column in **English** (mirrors the English code definitions — no Korean); codes + `<a id="ref-…">` anchors verbatim |
 | Anchor / intra-doc links | Keep `id=` and `[…](#ref-…)` verbatim — links resolve within the file |
 | arXiv links | Keep verbatim |
@@ -566,7 +566,7 @@ file quotes all three (§8):
 The quote names its source, `arXiv comment "…"`, `초록 "…"`, or the section of
 the paper's text it came from, `§4.2 "…"`. A
 Reproducibility kept from an earlier report (§5-4) reads
-`<pillar> <date> 판정 유지` in its place (`… · Repro1 — P1 2026-10-01 판정 유지`).
+`<pillar> <date> 판정 유지` in its place (`… · Repro1 — P5 2026-10-01 판정 유지`).
 
 ### 5-3. The Reproducibility label and the rank order
 
@@ -775,7 +775,7 @@ each paper's own scores (§5-4).
 # Probe 스카우트 회차 — YYYY-MM-DD
 
 **Pillars:** P0 P1 P2 P3 P4
-**Failed:** P2 — arXiv API HTTP 503 최종 실패
+**Failed:** P3 — arXiv API HTTP 503 최종 실패
 
 ---
 

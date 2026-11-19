@@ -128,7 +128,7 @@ gates fired, and that the environment is sound:
 - [ ] Implications are concrete — (c) names a specific cost, number or
       transfer caveat in plain terms, not "tune DR wider".
 
-If anything fails, fix `.claude/prompts/scout.txt` (or `context/P1.md`),
+If anything fails, fix `.claude/prompts/scout.txt` (or `context/P5.md`),
 merge it and re-run — do not
 leave automation on with a bad prompt.
 

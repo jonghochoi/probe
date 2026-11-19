@@ -69,7 +69,12 @@ stance lives instead is `context/CLAUDE.md`'s rule.
 
 ## 3. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Seven pillars (P0–P6)**, none ranked above another.
+**Seven pillars (P0–P6)**, numbered along one flow — a human's motion
+collected as robot data (P0), the corpora and benchmarks it joins (P1),
+pretraining on them (P2), then the policy itself: what it observes (P3),
+what it predicts of the world (P4), how its decoder acts (P5) and the
+timing of the action (P6). A number places a pillar on that flow; none is
+ranked above another.
 
 Each pillar file owns its own scope, scouting lens, anti-topics, open questions
 and tracked literature. This table is the index — what a pillar owns in one
@@ -79,12 +84,12 @@ is a second copy to keep in step, so it is not restated.
 
 | Pillar | Owns | Questions | File |
 |---|---|---|---|
-| P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them | 3 | `context/P0.md` |
-| P1 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 3 | `context/P1.md` |
-| P2 — Observation Design | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder, where in the view the policy reads | 5 | `context/P2.md` |
-| P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P3.md` |
-| P4 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P4.md` |
-| P5 — Retargeting & Human-in-the-Loop Data Collection | how human motion becomes robot training data — the retargeting map, its yield, the human-in-the-loop handover, where operator time goes | 4 | `context/P5.md` |
+| P0 — Retargeting & Human-in-the-Loop Data Collection | how human motion becomes robot training data — the retargeting map, its yield, the human-in-the-loop handover, where operator time goes | 4 | `context/P0.md` |
+| P1 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them | 3 | `context/P1.md` |
+| P2 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P2.md` |
+| P3 — Observation Design | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder, where in the view the policy reads | 5 | `context/P3.md` |
+| P4 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P4.md` |
+| P5 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 3 | `context/P5.md` |
 | P6 — Action Timing & Motion Quality | the action's time axis — the rate signals arrive and actions leave at, where execution speed is set, how chunks join | 3 | `context/P6.md` |
 
 Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**, **D4QX**, **D5SH**, **D5DQ**, **D8SD**, **D9WZ**, **D7VC**, **D5ZL**.
@@ -113,9 +118,9 @@ rather than part of another question — so no published page points at it.
 slot is a 14-day block counted from Monday 2026-01-05, numbered
 `n = ⌊days since 2026-01-05 ÷ 14⌋`; its field is A–D by `n mod 4` (A at 0), so
 the four fields cycle in eight weeks. Rotating:
-- **Slot A**: continual learning / catastrophic forgetting / PEFT (P4 adjacency)
+- **Slot A**: continual learning / catastrophic forgetting / PEFT (P2 adjacency)
 - **Slot B**: VLA architecture advances broadly (π, OpenVLA, self-improving VLA)
-- **Slot C**: spatial-geometric / multimodal fusion representation (P2 adjacency)
+- **Slot C**: spatial-geometric / multimodal fusion representation (P3 adjacency)
 - **Slot D**: tactile sensing in prosthetics / neuroscience
 
 ---

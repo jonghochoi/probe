@@ -74,7 +74,7 @@ PROCEDURE
 1. ORIENT — a light pass over where this team stands, then let it go.
 
      context/MASTER.md       §1 Purpose, §3 Pillars
-     context/P2.md           the hand and sensors — the Premises paragraph
+     context/P3.md           the hand and sensors — the Premises paragraph
                              of its §1; the experiments in step 5 run on it
      context/P<n>.md         §2 Open Questions, §1 Anti-topics — background
 
@@ -151,7 +151,7 @@ PROCEDURE
      on it — which thread it argues, or the thread it opens; a retired code
      (`decision` says so) bears on nothing. No `D#` is a fine answer.
    - **가장 싼 반증 실험** — the smallest setup that would show it wrong,
-     on the hand and sensors `context/P2.md` describes (step 1).
+     on the hand and sensors `context/P3.md` describes (step 1).
    - **이미 있는 것** — the comparison or rewrite that comes closest, so the
      reader sees what is new.
 
