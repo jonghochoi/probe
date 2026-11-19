@@ -63,7 +63,7 @@ PILLAR_NAMES = {
     "P1": "VLA Datasets & Benchmarks",
     "P2": "Pretraining for Data-Efficient Adaptation",
     "P3": "Observation Design",
-    "P4": "World Model",
+    "P4": "Forward Prediction",
     "P5": "Heterogeneous Action Expert Decomposition",
     "P6": "Action Timing & Motion Quality",
 }
@@ -77,7 +77,7 @@ PILLAR_LABELS = {
     "P1": "데이터셋 · 벤치마크",
     "P2": "사전학습 · 적응",
     "P3": "관측 설계",
-    "P4": "월드 모델",
+    "P4": "미래 예측",
     "P5": "행동 전문가 분해",
     "P6": "실행 타이밍 · 모션 품질",
 }
