@@ -28,6 +28,7 @@ ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 # `generated:` — the day a rewrite was written, and optionally the clock time
 # that separates two written on the same day.
 _GENERATED = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}))?")
+_PROOFREAD = re.compile(r"^(?:none|[1-9]\d*)$")
 UNCLASSIFIED = "미분류"
 
 _FENCE = re.compile(r"^```.*?^```", re.S | re.M)
@@ -116,8 +117,9 @@ LINK_KINDS = {
 # their files landed on `main` — not the clock `generated:` recorded. A rewrite
 # written on Monday and merged on Friday shows up after everything merged
 # before it, and the analysis list has to agree with what the reader watched
-# happen. History here is squash-merged, so the commit that lands
-# `analysis/<id>.md` is one commit and git's own walk order is the merge order.
+# happen. History here is rebase-merged, so it is linear: the commit that
+# lands `analysis/<id>.md` sits where the merge put it, and git's own walk
+# order is the merge order.
 #
 # A rewrite redone lands again: `analysis: update <id> rewrite (<alias>)` is a
 # new paper to a returning reader, so it takes the newest slot. Which is why a
@@ -331,6 +333,18 @@ class Paper:
         one invented for it.
         """
         return self.front.get("metric", "").strip()
+
+    @property
+    def proofread(self) -> int | None:
+        """How many `/proofread` rounds this version has been through, or None.
+
+        `proofread: none` is a rewrite as `/analyze` left it. The page header
+        prints either, so a reader knows which they are reading, and
+        `corpus.json` carries it for `/compare` and `/ideate`, which read
+        rewrites as their sources.
+        """
+        value = self.front.get("proofread", "").strip()
+        return int(value) if value.isdigit() else None
 
     @property
     def term_count(self) -> int:
@@ -605,6 +619,15 @@ def discover(partial: bool = False) -> tuple[list[Paper], list[str]]:
                 f"analysis/{path.name}: `generated` is "
                 f"{front.get('generated', '')!r} — write it as "
                 f"`YYYY-MM-DD HH:MM`, the clock as you write the rewrite"
+            )
+        # Like `appendix:`, a declaration the build cannot verify, so it is
+        # required rather than defaulted: "never proofread" has to be said as
+        # `none`, or a rewrite nobody checked reads like one somebody did.
+        if not _PROOFREAD.match(front.get("proofread", "").strip()):
+            problems.append(
+                f"analysis/{path.name}: `proofread` is "
+                f"{front.get('proofread', '')!r} — write the number of "
+                f"`/proofread` rounds this version has been through, or `none`"
             )
         problems += _source_coverage(path.name, front, body)
 

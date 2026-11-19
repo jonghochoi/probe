@@ -86,7 +86,10 @@ characteristic failure, so they are stated separately.
    the centre, which numbers it reports, what it admits it cannot do.
 
    They are a map and nothing more. Do not quote them, and do not let one of
-   them decide an axis on its own.
+   them decide an axis on its own. A rewrite whose front matter reads
+   `proofread: none` is the map as `/analyze` drew it, never checked against
+   its paper since: name it in the run's closing report, so the human knows
+   which side of the comparison stood on an unchecked reading.
 
 2. **The arXiv originals — the SOURCE OF FACT.**
    Every number, mechanism and stated limitation that ends up in a cell is

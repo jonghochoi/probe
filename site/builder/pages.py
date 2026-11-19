@@ -1183,7 +1183,8 @@ def _header(paper: Paper, tagline: str = "") -> str:
     arXiv id beside them links the abstract. The headline number is the
     rewrite's `metric:` — the one result the paper is remembered by — and the
     only date is the rewrite's own, at the line's far end: when the paper itself
-    appeared is already in its id.
+    appeared is already in its id. Beside it, how many `/proofread` rounds the
+    rewrite has been through, or 교정 전 — a reader is told which they read.
 
     The title is the paper's own. The thesis heads the 요약 tab directly below,
     and the links out and the 서재 pair sit at the right end of the tab strip.
@@ -1191,8 +1192,9 @@ def _header(paper: Paper, tagline: str = "") -> str:
     chips = c.pillar_chips([p for p in paper.filed if p != corpus.UNCLASSIFIED])
     metric = (f'<span class="ph-metric">{c.esc(paper.metric)}</span>'
               if paper.metric else "")
-    date = (f'<span class="ph-date">작성 {c.esc(paper.date)}</span>'
-            if paper.date else "")
+    checked = f"교정 {paper.proofread}회" if paper.proofread else "교정 전"
+    date = (f'<span class="ph-date">작성 {c.esc(paper.date)} · {checked}</span>'
+            if paper.date else f'<span class="ph-date">{checked}</span>')
     return f"""<header class="paper-head">
   <div class="paper-head-inner">
     <div class="ph-line">

@@ -43,6 +43,7 @@ links: [arxiv|<url>, code|<url>]
 published: YYYY-MM-DD            # the paper's date, from arXiv
 generated: YYYY-MM-DD HH:MM      # yours — the clock as you write it
 generator: analyze/v3
+proofread: none                  # `/proofread` rounds this version has been through
 arxiv_html: <arxiv-id>v<n>       # the exact version read — `arxiv_src:` when it was the LaTeX source
 arxiv_fetched: YYYY-MM-DD
 figures: [<fig-id>, <fig-id>]    # verbatim ids of the figures cited
@@ -71,6 +72,7 @@ summary: >                       # 한 문단 요약 — <meta>, search, card.js
 | `terms` | count of inline term anchors |
 | `metric` | **optional.** The one result the paper is remembered by, as a printable fragment — `<지표> <전> → <후> <단위>` for a number the paper moved, `<수치> <단위> · <함께 성립한 조건>` for one it holds under a constraint. A card cannot pull a number out of `summary`'s prose, so it is stated once here and printed in the foot of a comparison's paper card and in `corpus.json`. Under 40 characters (the build reports longer), no verb, no claim the paper does not make. A paper whose contribution is not a single number **omits the key** — an invented headline number is worse than none |
 | `generator` | `analyze/v3` |
+| `proofread` | required. How many `/proofread` rounds this version has been through, or `none`. `/analyze` writes `none` — on a redo too, since a redone rewrite is a new version nobody has checked — and `/proofread` writes the count when its loop ends, adding its rounds to any count already there. The page header prints it beside the date (교정 n회, or 교정 전) and `corpus.json` carries it, so a reader and a run that reads rewrites as sources both know which they have. `none` is an honest answer and never a defect: the key states whether the rewrite was checked, and requires no check |
 
 **The `alias` ladder.** Take the first rung that yields a name:
 
@@ -804,7 +806,7 @@ means "a strict build fails".
 
 | Rule | Enforced by |
 |---|---|
-| Front matter required keys, `analysis_of` == file name, `tagline` not echoing the title, `alias:` and `metric:` within their widths (§1), `appendix:` present (R15), the `::: glance` container present (§4) | `site/builder/corpus.py` |
+| Front matter required keys, `proofread:` a count or `none` (§1), `analysis_of` == file name, `tagline` not echoing the title, `alias:` and `metric:` within their widths (§1), `appendix:` present (R15), the `::: glance` container present (§4) | `site/builder/corpus.py` |
 | `figures:` ↔ every `probe-figure` and `probe-hub` figure id across both surfaces, and every 요약 figure id declared by a body `probe-figure` (R6, G3) | `site/builder/corpus.py` |
 | `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), raw HTML published as text (R13), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, the nine-row ceiling, `loop.to` resolving to one earlier step and the `lanes` · `loop` · `hot` limits, R6), lineage, scale, split (at most one `us`), parts (all-or-none `state`, four-state ceiling, R5) | `site/builder/mdext/probefence.py` |

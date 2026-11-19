@@ -65,7 +65,7 @@ file the row points at.
 | `site/search/` | human | Semantic search over the rewrites. Folder map: `site/search/README.md` |
 | `site/search/SETUP.md` | human | Operator guide for redeploying the search function after a merge — upload, empty the query cache, verify |
 | `linters/` | human | One gate per rule set — each script's docstring says what it checks; "Local checks" below says when to run it |
-| `.github/workflows/` | human | Every lint on PRs (`check-commit-style` reads the **PR title**, the squash-merge subject), `check-scouting-format` also on `push` to `main`, and `deploy-site.yml` — PR build, Pages deploy, semantic re-index |
+| `.github/workflows/` | human | Every lint on PRs (`check-commit-style` reads **every commit subject** the PR carries, since a rebase merge lands each as written), `check-scouting-format` also on `push` to `main`, and `deploy-site.yml` — PR build, Pages deploy, semantic re-index |
 
 ## Commit message style
 
@@ -102,8 +102,9 @@ Hard rules:
 4. **Description** — lowercase first letter (after the colon), no trailing
    period, ≲ 72 chars including the type/scope prefix. State *what* the commit
    does, not why (the why goes in the body).
-5. **Do NOT include `(#NN)` in the local commit subject** — GitHub appends the
-   PR number automatically on squash-merge; adding it manually duplicates it.
+5. **Do NOT include `(#NN)` in the commit subject** — PROBE rebase-merges, so
+   the subject lands on `main` as written, and the PR number is not known when
+   it is written.
 6. **Write the commit message in English** — subject *and* body — even when
    describing Korean-authored content, so `git log` stays uniformly grep-able.
 
@@ -151,6 +152,20 @@ versus: add <arxiv-id> × <scope> (<alias>)      # one code note
 `/adapt` writes into its own folder and commits nothing, and that folder has
 no commit format.
 
+A commit that lands a proofread rewrite carries the rounds' findings in its
+body, one fix per line under a `Proofread:` line, so `python3 site/query.py
+proofread` can count which kinds of fix recur across rewrites:
+
+```
+Proofread: <n> rounds against <arxiv version>[ and <owner>/<repo>]
+
+- <lens>/<rule> — <what was wrong> → <what settled it>
+```
+
+`<lens>` is one of `/proofread`'s six lenses (`A`–`F`), `<rule>` the
+`analysis/AUTHORING.md` rule the fix restores (`R3`, `G4`, `§1`). A rewrite
+`/proofread` never ran on carries no such block.
+
 `update` replaces `add` when redoing an existing rewrite, comparison or code
 note. The trailing `(<alias>)` is the rewrite's own `alias:` front-matter
 value, whose resolution ladder `analysis/AUTHORING.md` §1 owns — a paper that
@@ -196,7 +211,7 @@ the ones your change touches before pushing.
 | `analysis/`, `scouting/`, `comparison/`, `context/` | `python3 linters/check-decision-refs.py` |
 | `context/`, any `CLAUDE.md`, `README.md` or `SETUP.md` | `python3 linters/check-context-consistency.py` |
 | `scouting/` | `python3 linters/check-scouting-format.py` |
-| anything (the PR title is the landing subject) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
+| anything (every commit subject lands as written) | `git log --format=%s main..HEAD \| python3 linters/check-commit-style.py -` |
 | `analysis/`, `comparison/`, `scouting/` or `site/` | `python3 site/build-site.py --check --strict`, then `python3 site/build-site.py --strict --out /tmp/probe-check` — what each sees: `site/CLAUDE.md` |
 | the private folder `/distinguish` writes | `python3 linters/check-distinction-format.py` with `PROBE_PRIVATE_DIR` set |
 | the folder `/adapt` writes | `python3 linters/check-adaptation-format.py` with `PROBE_ADAPT_DIR` set |

@@ -113,18 +113,33 @@ A ROUND
 
 7. LOG the round in chat, in Korean, short:
      - `교정 k/N — 주 렌즈 <X>`
-     - fixes by lens, one line each: where, what was wrong, what settled it
-       (원문 §… or 공개 코드 `<file>`)
+     - fixes, one line each, opening on `<lens>/<rule>` — the lens that found
+       it (`A`–`F`) and the AUTHORING rule it restores (`R3`, `G4`, `§1`) —
+       then where, what was wrong, what settled it (원문 §… or 공개 코드
+       `<file>`). The tag is what CLOSE counts with, so every fix has one
      - open questions still unsettled
    Then decide the loop:
      - `k < N` → schedule the next round at the minimum delay; nothing
        external is being waited on.
      - `k ≥ N` and this round found nothing substantive (lenses A–C and F
-       found nothing; D–E only taste) → end the loop and close with a
-       summary of all rounds: what changed by lens, what the code added,
-       and the questions still open.
+       found nothing; D–E only taste) → CLOSE.
      - `k ≥ N` and still finding substance → one more round, up to `2N`
-       rounds in all; at `2N`, end the loop and say what is still open.
+       rounds in all; at `2N`, CLOSE and say what is still open.
+
+8. CLOSE — once, when the loop ends:
+     a. Set `proofread:` in the front matter to the rounds this loop ran,
+        plus the count already there when it is a number (`none` adds
+        nothing). Verify as in step 5 and commit as in step 6.
+     b. Print the message the rewrite lands under, in a fenced block, in
+        English, per the root `CLAUDE.md` ("Generated routine commits"):
+        the subject — `add` when `main` does not carry `analysis/<id>.md`
+        yet, `update` when it does — a short paragraph on what the rounds
+        settled, the `Proofread:` line, and every fix from the round logs
+        as one `- <lens>/<rule> — …` line, a fix two rounds touched listed
+        once. The operator squashes the loop's commits under it, so it is
+        the only record of the rounds that reaches `main`.
+     c. Close in Korean: what changed by lens, what the code added, and the
+        questions still open.
 
 
 ════════════════════════════════════════════════════════════════════════
