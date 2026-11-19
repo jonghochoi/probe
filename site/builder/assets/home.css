@@ -166,7 +166,7 @@
   border-radius: var(--radius-pill); background: var(--surface-2); font-variant-numeric: tabular-nums;
 }
 .hm-ev.deadline .hm-dd { background: color-mix(in oklab, var(--p0) 60%, var(--surface)); color: var(--p0-ink); }
-.hm-ev.conf .hm-dd { background: color-mix(in oklab, var(--p4) 60%, var(--surface)); color: var(--p4-ink); }
+.hm-ev.conf .hm-dd { background: color-mix(in oklab, var(--p5) 60%, var(--surface)); color: var(--p5-ink); }
 .hm-ev.notice .hm-dd { background: color-mix(in oklab, var(--p3) 60%, var(--surface)); color: var(--p3-ink); }
 
 /* A desktop fills with more of each; a phone keeps the first few. */

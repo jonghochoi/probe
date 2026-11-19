@@ -50,6 +50,7 @@ const PILLARS: Record<string, string> = {
   P3: "world models",
   P4: "pretraining and data-efficient adaptation",
   P5: "retargeting and human-in-the-loop data collection",
+  P6: "action timing and motion quality (control rate, execution speed, retiming, chunk-boundary smoothness)",
 };
 const PILLAR_IDS = Object.keys(PILLARS);
 

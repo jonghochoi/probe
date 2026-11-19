@@ -140,13 +140,17 @@
   /* ── Pillar palette — scouting/AUTHORING.md §3-1 ────────────────────── */
   --p0: oklch(91.0% 0.040 20);  --p1: oklch(91.5% 0.050 60);
   --p2: oklch(95.0% 0.055 96);  --p3: oklch(93.5% 0.050 145);
-  --p4: oklch(91.0% 0.035 250); --p5: oklch(90.0% 0.042 305);
+  --p4: oklch(92.0% 0.040 198); --p5: oklch(91.0% 0.035 250);
+  --p6: oklch(90.0% 0.042 305);
   /* Each pillar's ink: its tint's hue at text strength, for the chip's frame
-     and label. P0 to P5 run the rainbow in order — red, orange, yellow,
-     green, blue, violet. */
+     and label. P0 to P6 run the rainbow in order — red, orange, yellow,
+     green, teal, blue, violet — at 36–55° steps of hue; the yellow tint
+     sits lighter and the teal ink less chromatic, so every ink holds about
+     5:1 on its chip and stays inside sRGB. */
   --p0-ink: oklch(50% 0.14 20);  --p1-ink: oklch(52% 0.12 60);
   --p2-ink: oklch(51% 0.10 96);  --p3-ink: oklch(50% 0.13 145);
-  --p4-ink: oklch(50% 0.13 250); --p5-ink: oklch(50% 0.14 305);
+  --p4-ink: oklch(50% 0.084 198); --p5-ink: oklch(50% 0.13 250);
+  --p6-ink: oklch(50% 0.14 305);
   --pna:  oklch(91.0% 0.009 56);
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
@@ -275,10 +279,12 @@
 
   --p0: oklch(39.5% 0.055 20);  --p1: oklch(42.0% 0.062 60);
   --p2: oklch(43.0% 0.055 96);  --p3: oklch(41.0% 0.058 145);
-  --p4: oklch(37.5% 0.055 250); --p5: oklch(37.0% 0.065 305);
+  --p4: oklch(39.0% 0.055 198); --p5: oklch(37.5% 0.055 250);
+  --p6: oklch(37.0% 0.065 305);
   --p0-ink: oklch(78% 0.10 20);  --p1-ink: oklch(81% 0.11 60);
   --p2-ink: oklch(84% 0.11 96);  --p3-ink: oklch(80% 0.12 145);
-  --p4-ink: oklch(78% 0.10 250); --p5-ink: oklch(78% 0.11 305);
+  --p4-ink: oklch(80% 0.10 198); --p5-ink: oklch(78% 0.10 250);
+  --p6-ink: oklch(78% 0.11 305);
   --pna:  oklch(32.7% 0.013 58);
   --dref: oklch(76.5% 0.139 73);
 
@@ -701,6 +707,7 @@ html.js .isl { display: block; }
 .chip.pillar[data-p="P3"] { --pi: var(--p3-ink); background: color-mix(in oklab, var(--p3) 50%, var(--surface)); }
 .chip.pillar[data-p="P4"] { --pi: var(--p4-ink); background: color-mix(in oklab, var(--p4) 50%, var(--surface)); }
 .chip.pillar[data-p="P5"] { --pi: var(--p5-ink); background: color-mix(in oklab, var(--p5) 50%, var(--surface)); }
+.chip.pillar[data-p="P6"] { --pi: var(--p6-ink); background: color-mix(in oklab, var(--p6) 50%, var(--surface)); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* ── Links out and the 서재 pair ───────────────────────────────────────── */
@@ -807,6 +814,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 [data-lane="P3"] { --lane: var(--p3-ink); }
 [data-lane="P4"] { --lane: var(--p4-ink); }
 [data-lane="P5"] { --lane: var(--p5-ink); }
+[data-lane="P6"] { --lane: var(--p6-ink); }
 .near-frame {
   overflow-x: auto; background: var(--surface);
   border: 1px solid var(--border-soft); border-radius: var(--radius);
