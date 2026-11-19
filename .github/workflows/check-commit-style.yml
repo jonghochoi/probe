@@ -1,15 +1,16 @@
 name: Check commit style
 
-# Validate the PR title against the CLAUDE.md commit grammar. PROBE
-# squash-merges, so the PR title IS the commit subject that lands on main —
-# linting it here enforces the style CLAUDE.md itself calls the most
+# Validate every commit subject a PR carries against the CLAUDE.md commit
+# grammar. PROBE rebase-merges, so each commit lands on main exactly as it was
+# written and the PR title lands nowhere — the subjects are what `git log`
+# is read through, and the gate holds the style CLAUDE.md calls the most
 # drift-prone ("always start the description with an imperative verb").
 #
-# Runs on title edits too, so fixing the title re-runs the gate without a push.
+# Merge commits are skipped: a rebase merge replays the branch without them.
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: read
@@ -23,10 +24,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Check PR title against CLAUDE.md commit style
+      - name: Check the PR's commit subjects against CLAUDE.md commit style
         env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: python3 linters/check-commit-style.py "$PR_TITLE"
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git log --no-merges --format=%s "$BASE..$HEAD" \
+            | python3 linters/check-commit-style.py -

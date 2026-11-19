@@ -47,7 +47,7 @@ nothing on the page says so:
 
 1. **Merge** the change to `main`.
 2. **Wait for the deploy.** Open the repo's **Actions** tab, the `Deploy site`
-   run for the merge commit, and wait for a green check. Its step
+   run for that push, and wait for a green check. Its step
    `Refresh the search index` is the one that matters: it rewrites every
    chunk whose paper changed and, by writing, empties the cache once.
 3. **Upload** the function — §4.

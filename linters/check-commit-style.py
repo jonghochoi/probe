@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a commit subject / PR title against the CLAUDE.md commit style.
+"""Check commit subjects against the CLAUDE.md commit style.
 
 CLAUDE.md ("Commit message style") pins an exact subject grammar and calls
 the imperative-verb rule "the one that drifts most easily". This lint
@@ -21,8 +21,8 @@ Accepted shapes:
 
 Checked for the human shapes: allowed type; a scope, when present, from the
 CLAUDE.md set; description starts lowercase; no trailing period; ≤72 chars
-total; no manual "(#NN)" suffix (GitHub appends the PR number on
-squash-merge); first word not an obvious non-imperative (added/adding/updates/…)
+total; no manual "(#NN)" suffix (a rebase merge lands the subject as
+written, and the number is not known when it is); first word not an obvious non-imperative (added/adding/updates/…)
 and not the vague `update`.
 
 Usage:
@@ -107,7 +107,7 @@ def check_subject(subject: str) -> list[str]:
         problems.append("no trailing period")
     if re.search(r"\(#\d+\)\s*$", desc):
         problems.append(
-            "drop the manual (#NN) — GitHub appends the PR number on squash-merge"
+            "drop the manual (#NN) — the subject lands on main as written"
         )
     first = re.split(r"[\s:]", desc, maxsplit=1)[0].lower()
     if first in _NON_IMPERATIVE:

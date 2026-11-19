@@ -210,9 +210,10 @@ PROCEDURE
      - 확인 불가 → kept, marked as unchecked.
    An idea whose gap is no longer 원문 일치 on either side has lost its
    ground: drop it, or move it to 상상 and say why. Then give the answer,
-   closing with a **원문 감사** block — per paper, how many statements were
-   checked, and every one that was corrected, recast or cut, in a line
-   each. Nothing changed is a line too.
+   closing with a **원문 감사** block — per paper, the rewrite's `proofread:`
+   state (교정 n회, or 교정 전), how many statements were checked, and every
+   one that was corrected, recast or cut, in a line each. Nothing changed is
+   a line too.
 
 8. PAGE — the revised answer as one page the human opens, picks from and
    answers. It carries exactly what step 7 gave in the chat: no idea, number

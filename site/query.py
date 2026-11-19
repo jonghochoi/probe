@@ -16,6 +16,7 @@ one JSON object per line, the same keys on every line of one command.
     python3 site/query.py section <id|alias|slug> (--act 1-4 | --match "Flow Matching")
     python3 site/query.py decision <D#>
     python3 site/query.py pairs [--with <id|alias>] [--by score|contrast] [--limit 20]
+    python3 site/query.py proofread [--by tag|rule|lens] [--min 2]
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ import json
 import os
 import re
 import signal
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -355,6 +357,57 @@ PAIRS_COLUMNS = """columns:
 pairs a comparison already holds are never listed."""
 
 
+# The `Proofread:` block a proofread rewrite lands with (root `CLAUDE.md`,
+# "Generated routine commits"): one `- <lens>/<rule> — …` line per fix.
+_LANDS = re.compile(r"^analysis: (?:add|update) (\d{4}\.\d{4,5})\b")
+_FIX = re.compile(r"^- ([A-F])/(R\d{1,2}|G\d|§\d(?:-\d+)?)\s+—", re.M)
+
+
+def cmd_proofread(cat: dict, a) -> None:
+    """Which kinds of fix `/proofread` keeps making, read from `git log`.
+
+    Each `analysis:` commit's `Proofread:` block is one rewrite's rounds. A
+    kind counts the rewrites it was found in, not its lines: one paper fixed
+    six times for one slip is one paper's habit, and a kind found across
+    several rewrites is what `/analyze` gets wrong — the row to read when
+    deciding what to promote into `analysis/AUTHORING.md` or `analyze.txt`.
+    """
+    root = Path(__file__).resolve().parent.parent
+    try:
+        if subprocess.run(["git", "-C", str(root), "rev-parse", "--is-shallow-repository"],
+                          capture_output=True, text=True, timeout=30).stdout.strip() == "true":
+            sys.exit("query: the clone is shallow, so the proofread history is not "
+                     "in it — run `git fetch --unshallow`")
+        out = subprocess.run(
+            ["git", "-C", str(root), "log", "--format=%x1e%h%x1f%s%x1f%b",
+             "--grep=^analysis: "],
+            capture_output=True, text=True, timeout=60, check=True).stdout
+    except (OSError, subprocess.SubprocessError) as exc:
+        sys.exit(f"query: git could not be read ({exc})")
+
+    names = {r["id"]: name(r) for r in cat["papers"]}
+    found: dict[str, dict[str, int]] = {}
+    blocks = 0
+    for rec in out.split("\x1e")[1:]:
+        _, subject, body = (rec.split("\x1f") + ["", ""])[:3]
+        m = _LANDS.match(subject)
+        if not m or "\nProofread:" not in "\n" + body:
+            continue
+        blocks += 1
+        for lens, rule in _FIX.findall(body):
+            key = {"tag": f"{lens}/{rule}", "rule": rule, "lens": lens}[a.by]
+            seen = found.setdefault(key, {})
+            seen[m.group(1)] = seen.get(m.group(1), 0) + 1
+    if not blocks:
+        sys.exit("query: no `analysis:` commit carries a `Proofread:` block yet")
+
+    rows = sorted(((k, v) for k, v in found.items() if len(v) >= a.min),
+                  key=lambda kv: (-len(kv[1]), -sum(kv[1].values()), kv[0]))
+    emit([[k, len(v), sum(v.values()), sorted(names.get(i, i) for i in v)]
+          for k, v in rows],
+         a.json, [a.by, "rewrites", "fixes", "papers"])
+
+
 def main() -> int:
     # A pipe closed early (`| head`) ends the listing, not the program with a trace.
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -397,6 +450,10 @@ def main() -> int:
     p.add_argument("--with", dest="with_", metavar="PAPER")
     p.add_argument("--by", choices=("score", "contrast"), default="score")
     p.add_argument("--limit", type=int, default=20)
+    p = command("proofread", "kinds of fix /proofread keeps making, from git log")
+    p.add_argument("--by", choices=("tag", "rule", "lens"), default="tag",
+                   help="tag is lens/rule together")
+    p.add_argument("--min", type=int, default=1, help="rewrites a kind is found in")
     a = ap.parse_args()
 
     cat, by_id = load()
@@ -405,7 +462,7 @@ def main() -> int:
          "related": cmd_related}[a.cmd](cat, a, by_id)
     else:
         {"catalog": cmd_catalog, "search": cmd_search, "show": cmd_show,
-         "decision": cmd_decision}[a.cmd](cat, a)
+         "decision": cmd_decision, "proofread": cmd_proofread}[a.cmd](cat, a)
     return 0
 
 
