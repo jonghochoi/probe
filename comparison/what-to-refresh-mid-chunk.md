@@ -8,7 +8,7 @@ common: 둘 다 시각의 낡음을 고치지 않고 배분한다
 problem: 행동 묶음을 실행하는 동안 새로 들어온 감각을, 이미 만든 행동은 반영하지 못한다
 plain: [손끝 눌림을 다섯 동작마다 다시 보고 바로 다음 동작에만 알려 준다, 관절 감각은 매 순간 새로 읽고 눈은 몇 박자 늦은 줄 알고 쓴다]
 primer: [chunk, proprio, taxel]
-pillars: P6, P2
+pillars: P6, P3
 generated: 2026-10-28 23:52
 generator: compare/v1
 summary: >

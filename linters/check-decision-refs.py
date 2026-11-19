@@ -3,8 +3,8 @@
 
 The open questions are allocated per pillar (a section of `context/P#.md`, entries shaped
 `#### [D<n>] <title> (P<m>)` — see context/CLAUDE.md "Open-question entry format"), and
-analysis / scouting outputs cite them constantly (`P1 / D9ZP`,
-`[![D6JW]](…)`, "feeds P4 D9QJ"). A mistyped id, or a decision moved between
+analysis / scouting outputs cite them constantly (`P5 / D9ZP`,
+`[![D6JW]](…)`, "feeds P2 D9QJ"). A mistyped id, or a decision moved between
 pillars, is invisible on the page, so this lint runs three checks:
 
   1. EXISTENCE — every `D<n>` token cited in a scanned doc must exist in some
@@ -12,8 +12,8 @@ pillars, is invisible on the page, so this lint runs three checks:
      named as retired: a folded question's citations are rewritten to the id
      it folded into (`context/CLAUDE.md`), so none stays published.
   2. ALLOCATION — every explicit `P<m> / D<n>` pairing must agree with the
-     owning pillar of `D<id>` (a `P1 / D9KS` tie is wrong when D9KS belongs to
-     P3).
+     owning pillar of `D<id>` (a `P5 / D9KS` tie is wrong when D9KS belongs to
+     P4).
   3. FORM — a numeric id (`D17`) is a malformed citation; ids are `D` + digit
      + two letters.
 
@@ -58,7 +58,7 @@ _PILLAR_FILE = re.compile(r"^P(\d)\.md$")
 
 # A citation: D + one digit + two capitals, not embedded in a longer alphanumeric token.
 _DREF = re.compile(r"(?<![A-Za-z0-9_])(D\d[A-Z]{2})(?![A-Za-z0-9])")
-# An explicit pillar/decision tie: `P1 / D9ZP`, `P4 D9QJ`, `P1 · D9ZP` — the middle
+# An explicit pillar/decision tie: `P5 / D9ZP`, `P2 D9QJ`, `P5 · D9ZP` — the middle
 # dot is the separator the Korean output actually uses (badge pairs are covered
 # by the existence check on their D token).
 _PAIR = re.compile(r"(?<![A-Za-z0-9_])P(\d)\s*(?:[/·]\s*)?(D\d[A-Z]{2})(?![A-Za-z0-9])")

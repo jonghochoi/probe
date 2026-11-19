@@ -8,7 +8,7 @@ common: 셋 다 빠른 루프에서 시각을 끊는다
 problem: 접촉은 밀리초 단위로 바뀌는데, 이미지를 읽는 큰 모델은 그 속도로 돌지 못한다
 plain: [반쯤 만든 행동을 넘겨받아 촉각으로 마저 다듬는다, 다 만든 행동 위에 촉각 보정을 얇게 덧칠한다, 자를 때마다 행동을 새로 짜고 남은 뒤쪽만 쓴다]
 primer: [chunk, denoise, taxel]
-pillars: P6, P2
+pillars: P6, P3
 generated: 2026-10-28 23:52
 generator: compare/v1
 summary: >

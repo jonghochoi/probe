@@ -85,7 +85,7 @@ _NUMBERED_HEADING = re.compile(r"^##\s+(\d+)\.\s+(.+?)\s*$")
 _ANY_H2 = re.compile(r"^##\s+(.+?)\s*$")
 _TRAILING_MARKERS = re.compile(r"\s*\[[^\]]*\]")
 # The per-pillar tag a section title carries in a pillar file or the template
-# (`## 2. Open Questions — P0`, `## 2. Open Questions — P<N>`).
+# (`## 2. Open Questions — P1`, `## 2. Open Questions — P<N>`).
 _PILLAR_TAG = re.compile(r"\s*[—-]\s*P(?:\d+|<N>)\s*$")
 
 _DECISION_HEADING = re.compile(r"^####\s+\[D")
@@ -164,7 +164,7 @@ def _line_at(line_of: list[int], offset: int) -> int:
 
 
 def _normalize_title(title: str) -> str:
-    """`## 2. Open Questions — P0 [LIVING]` -> `open questions`."""
+    """`## 2. Open Questions — P1 [LIVING]` -> `open questions`."""
     text = _TRAILING_MARKERS.sub("", title)
     text = _PILLAR_TAG.sub("", text)
     text = text.translate(_DASHES).strip().strip("*` ")

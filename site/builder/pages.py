@@ -1642,7 +1642,7 @@ def _scout_md(text: str, decisions: dict, *, inline: bool = False) -> str:
 
 
 def _scout_chip(pick) -> str:
-    """The axis and the rank it gave the paper, in one pill — `P2 · 1위`.
+    """The axis and the rank it gave the paper, in one pill — `P3 · 1위`.
     The same chip on a card, a row and the detail, so a rank reads the same
     wherever the paper is."""
     return (f'<span class="chip pillar sn-rk" data-p="{c.esc(pick.pillar)}">'
