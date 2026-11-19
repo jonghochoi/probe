@@ -176,10 +176,11 @@ end to end; a half-added pillar silently drops out of the index and the lints:
       to name the same set; the §3-1 palette table in
       `scouting/AUTHORING.md` (the palette's source of truth); `PILLARS` in
       `site/search/function/search.ts` (a deployed function imports nothing
-      from the build — its prompt and both pillar guards read this object, and
-      an id missing here filters a search to nothing); and the `--p<n>` token
-      pair plus its `[data-p]` rules in `site/builder/assets/site.css` and
-      `index.css` (plain CSS cannot loop). The lints need no edit — they glob
-      the pillar files.
+      from the build — its prompt and both pillar guards read this object, an
+      id missing here is dropped as a filter, and the live copy changes only
+      when it is uploaded again by hand: `site/search/SETUP.md`); and the
+      `--p<n>` token pair plus its `[data-p]` rules in
+      `site/builder/assets/site.css` and `index.css` (plain CSS cannot loop).
+      The lints need no edit — they glob the pillar files.
 - [ ] **Run `python3 linters/check-doc-links.py`** — the new file's path
       references, and every doc now referencing it, must resolve.

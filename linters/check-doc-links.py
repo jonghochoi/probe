@@ -80,6 +80,7 @@ _DEFAULT_ROOT_DOCS = [
     "scouting/SETUP.md",
     "distinction/SETUP.md",
     "adaptation/SETUP.md",
+    "site/search/SETUP.md",
     "context/MASTER.md",
     "context/EVENTS.md",
 ]

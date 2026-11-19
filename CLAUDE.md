@@ -63,6 +63,7 @@ file the row points at.
 | `site/query.py` | human | The agent's standard-library query CLI over a checkout |
 | `site/CLAUDE.md` | human | Rules for `site/` — the invariants a build change must not break |
 | `site/search/` | human | Semantic search over the rewrites. Folder map: `site/search/README.md` |
+| `site/search/SETUP.md` | human | Operator guide for redeploying the search function after a merge — upload, empty the query cache, verify |
 | `linters/` | human | One gate per rule set — each script's docstring says what it checks; "Local checks" below says when to run it |
 | `.github/workflows/` | human | Every lint on PRs (`check-commit-style` reads the **PR title**, the squash-merge subject), `check-scouting-format` also on `push` to `main`, and `deploy-site.yml` — PR build, Pages deploy, semantic re-index |
 

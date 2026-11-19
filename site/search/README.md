@@ -54,6 +54,7 @@ rebuilding from nothing rather than the cost of a merge.
 | `indexer.py` | Embeds and uploads. Stdlib only. Re-runs cost one embedding per changed chunk, because every chunk carries a `content_hash` |
 | `function/search.ts` | The endpoint: read the query into search terms, embed, call `probe_search`, return the list. The model writes terms and nothing else — it does not summarise and does not rank |
 | `verify.py` | Asks a connected project the seven questions nothing else can answer, in dependency order. Stdlib only, run by hand |
+| `SETUP.md` | Operator guide for redeploying the function after a merge — upload, empty the cache, verify |
 
 ## Running it
 
@@ -85,7 +86,9 @@ python3 site/build-site.py --search-api https://<project>.functions.insforge.app
 2. **Deploy the function** as `search`, with `OPENROUTER_API_KEY`,
    `INSFORGE_BASE_URL` and `ANON_KEY` in its environment, plus
    `PROBE_REWRITE_MODEL` if the query-reading step below is wanted. The
-   OpenRouter key is the one InsForge provisions.
+   OpenRouter key is the one InsForge provisions. CI never uploads it: after
+   every merge that changes `function/search.ts`, upload it again and empty
+   the query cache — `SETUP.md` walks the steps.
 3. **Index** — the two commands above, once by hand.
 4. **Wire CI** — `deploy-site.yml` already carries the step. Add the repository
    secrets `INSFORGE_URL` and `INSFORGE_API_KEY`, and the repository *variable*
