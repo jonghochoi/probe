@@ -133,8 +133,10 @@ _SPROUT = ('<g class="sprout"><path class="stem" d="M48 26.5 V18.5"/>'
 # places or neither. Three layers, by where a prop sits in the stack: behind
 # the eyes (the deerstalker, which carries its own sprout so the sprout still
 # pokes through the cap), in front of them (what rides under the eyes or on
-# the hull), and off the bobbing body (what floats over the head or stands on
-# the ground). The tweed's pattern id is the page's only one, since the first
+# the hull — the party hat sits at a tilt on the hull's shoulder, clear of
+# the sprout, with a glint in each eye), and off the bobbing body (what
+# floats over the head or stands on the ground — the confetti drifts down
+# the two sides, never across the face). The tweed's pattern id is the page's only one, since the first
 # screen is the one page that draws the wardrobe.
 _WARDROBE_UNDER = (
     '<defs><pattern id="w-tw" width="3.4" height="3.4" patternUnits="userSpaceOnUse">'
@@ -178,6 +180,14 @@ _WARDROBE_OVER = (
     '<rect class="w-bar" x="61.6" y="72" width="3.8" height="10" rx=".8"/>'
     '<rect class="w-bar" x="67.2" y="78" width="3.8" height="4" rx=".8"/>'
     '<ellipse class="w-ring" cx="67.1" cy="74" rx="5.4" ry="10" transform="rotate(-10 67.1 74)" pathLength="100"/></g></g>'
+    '<g class="w w-party"><g transform="rotate(-18 31 28)">'
+    '<path class="w-cone" d="M22 28 L31 6 L40 28 Z"/>'
+    '<path class="w-band" d="M24.05 23 L37.95 23 L36.73 20 L25.27 20 Z"/>'
+    '<path class="w-band" d="M26.91 16 L35.09 16 L33.86 13 L28.14 13 Z"/>'
+    '<ellipse class="w-brim" cx="31" cy="28" rx="10.5" ry="2.2"/>'
+    '<circle class="w-pom" cx="31" cy="5.4" r="3.2"/></g>'
+    '<circle class="w-glint" cx="38.4" cy="49.6" r="1.9"/><circle class="w-glint" cx="62.4" cy="49.6" r="1.9"/>'
+    '<circle class="w-glint" cx="34.2" cy="54.6" r=".9"/><circle class="w-glint" cx="58.2" cy="54.6" r=".9"/></g>'
     '<g class="w w-sweat"><path class="w-drop" d="M82 33 C84.5 37, 85 39.5, 82 40.5 C79 39.5, 79.5 37, 82 33 Z"/></g>'
 )
 _WARDROBE_OUT = (
@@ -197,8 +207,10 @@ _WARDROBE_OUT = (
       '<rect class="w-caltop" x="79" y="64" width="19" height="5.5" rx="2"/>'
       '<path class="w-calx" d="M84 74 l9 8 M93 74 l-9 8"/></g>'
       '<g class="w w-party">'
-    + "".join(f'<rect class="w-cf w-cf{i % 4}" x="{x}" y="{y}" width="3.6" height="2.6"/>'
-              for i, (x, y) in enumerate(((14, 2), (30, -6), (64, -4), (82, 2), (6, -8), (90, -8))))
+    + "".join(f'<rect class="w-cf w-cf{i % 4}" x="{x}" y="{y}" width="5" height="3.4" rx=".6" '
+              f'transform="rotate({r} {x + 2.5} {y + 1.7})"/>'
+              for i, (x, y, r) in enumerate(((5, 14, 20), (86, 20, -25), (9, 40, -35), (84, 46, 30),
+                                             (4, 64, 15), (88, 70, -15), (62, 6, 40), (74, 12, -10))))
     + "</g>"
 )
 

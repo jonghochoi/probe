@@ -172,7 +172,8 @@ def _mascot(line: str, ordered: list[Paper], cmps: list, run, monday: str) -> st
     no script the reader gets the plain mark and where to start this week.
     What it wears is the reader's business, not the build's: the dates a
     costume turns on (`data-new`, `data-run`, the 일정 rows' own) are read
-    against the reader's own day and hour.
+    against the reader's own day and hour, and `data-new-key` — the newest
+    piece's own path — against the one this browser last celebrated.
 
     The four track lines are what the mark cycles through when nothing calls
     for a costume: each names the newest thing on that track, and the
@@ -187,7 +188,7 @@ def _mascot(line: str, ordered: list[Paper], cmps: list, run, monday: str) -> st
         return f'<a href="{href}"><b>{c.esc(text)}</b></a>'
 
     says = [say("base", line)]
-    newest = ""
+    new_attrs = ""
     if run:
         when = f"{int(run.date[5:7])}월 {int(run.date[8:10])}일"
         says.append(say("run", f"{link('s/index.html', when + ' 회차')}가 나왔어요. "
@@ -207,12 +208,12 @@ def _mascot(line: str, ordered: list[Paper], cmps: list, run, monday: str) -> st
                  + [(x.date, x.title, f"c/{c.esc(x.slug)}/index.html") for x in cmps[:1]],
                  default=None)
     if latest:
-        newest = latest[0]
+        new_attrs = f' data-new="{latest[0]}" data-new-key="{latest[2]}"'
         says.append(say("new", f"새 글이 올라왔어요. {link(latest[2], latest[1])}"))
     says.append(say("deadline", '<b data-dl-name></b>까지 <b data-dl-n></b>. 일정을 확인하세요.'))
     if ordered:
         says.append(say("night", f"늦었어요. 내일은 {link(f'p/{c.esc(ordered[0].stem)}/index.html', display_alias(ordered[0]))}부터 읽어요."))
-    attrs = (f' data-new="{newest}"' if newest else "") + (f' data-run="{run.date}"' if run else "")
+    attrs = new_attrs + (f' data-run="{run.date}"' if run else "")
     return (f'<div class="hm-mascot" data-mascot{attrs}>'
             f'<span class="hm-mk" aria-hidden="true">{c.mark(64, wardrobe=True)}</span>'
             f'<p class="hm-bubble">{"".join(says)}</p></div>')
