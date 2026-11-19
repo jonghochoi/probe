@@ -138,19 +138,24 @@
   --fig-pad:     #ffffff;
 
   /* ── Pillar palette — scouting/AUTHORING.md §3-1 ────────────────────── */
-  --p0: oklch(91.0% 0.040 20);  --p1: oklch(91.5% 0.050 60);
-  --p2: oklch(95.0% 0.055 96);  --p3: oklch(93.5% 0.050 145);
-  --p4: oklch(92.0% 0.040 198); --p5: oklch(91.0% 0.035 250);
-  --p6: oklch(90.0% 0.042 305);
+  /* P0 to P6 run the rainbow in order — red, orange, yellow, green, teal,
+     blue, violet — at 36–55° steps of hue. Every chip lands on one lightness
+     and one chroma, so the seven differ by hue alone: each tint is solved
+     back from its chip, oklch(95.2% 0.0225 <hue>) at 50% over --surface,
+     which cancels the surface's own blue cast. 0.0225 sits just under what
+     the red and blue tints hold inside sRGB at that lightness. */
+  --p0: oklch(90.6% 0.046 22);  --p1: oklch(90.6% 0.047 61);
+  --p2: oklch(90.6% 0.047 96);  --p3: oklch(90.6% 0.046 143);
+  --p4: oklch(90.6% 0.044 196); --p5: oklch(90.6% 0.043 249);
+  --p6: oklch(90.6% 0.043 307);
   /* Each pillar's ink: its tint's hue at text strength, for the chip's frame
-     and label. P0 to P6 run the rainbow in order — red, orange, yellow,
-     green, teal, blue, violet — at 36–55° steps of hue; the yellow tint
-     sits lighter and the teal ink less chromatic, so every ink holds about
-     5:1 on its chip and stays inside sRGB. */
-  --p0-ink: oklch(50% 0.14 20);  --p1-ink: oklch(52% 0.12 60);
-  --p2-ink: oklch(51% 0.10 96);  --p3-ink: oklch(50% 0.13 145);
-  --p4-ink: oklch(50% 0.084 198); --p5-ink: oklch(50% 0.13 250);
-  --p6-ink: oklch(50% 0.14 305);
+     and label. Its lightness is solved for 5.2:1 on its chip, so every
+     label reads alike; the teal and orange inks run less chromatic to stay
+     inside sRGB. */
+  --p0-ink: oklch(51.6% 0.140 20);  --p1-ink: oklch(50.8% 0.115 60);
+  --p2-ink: oklch(50.1% 0.100 96);  --p3-ink: oklch(48.9% 0.130 145);
+  --p4-ink: oklch(49.3% 0.083 198); --p5-ink: oklch(50.1% 0.130 250);
+  --p6-ink: oklch(51.5% 0.140 305);
   --pna:  oklch(91.0% 0.009 56);
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
@@ -277,14 +282,17 @@
   --scrim:       oklch(10.0% 0.010 var(--hue) / .52);
   --fig-pad:     oklch(94.9% 0.008 var(--hue));   /* pad the white PNG, don't invert it */
 
-  --p0: oklch(39.5% 0.055 20);  --p1: oklch(42.0% 0.062 60);
-  --p2: oklch(43.0% 0.055 96);  --p3: oklch(41.0% 0.058 145);
-  --p4: oklch(39.0% 0.055 198); --p5: oklch(37.5% 0.055 250);
-  --p6: oklch(37.0% 0.065 305);
-  --p0-ink: oklch(78% 0.10 20);  --p1-ink: oklch(81% 0.11 60);
-  --p2-ink: oklch(84% 0.11 96);  --p3-ink: oklch(80% 0.12 145);
-  --p4-ink: oklch(80% 0.10 198); --p5-ink: oklch(78% 0.10 250);
-  --p6-ink: oklch(78% 0.11 305);
+  /* The same solve as the light pillars: every chip lands on
+     oklch(30.2% 0.030 <hue>), the darker surface's stronger cast pulling the
+     tints' hues further, and every ink holds 7:1 on its chip. */
+  --p0: oklch(39.9% 0.065 30);  --p1: oklch(39.9% 0.071 65);
+  --p2: oklch(39.9% 0.072 95);  --p3: oklch(39.9% 0.067 136);
+  --p4: oklch(39.9% 0.057 187); --p5: oklch(39.9% 0.049 246);
+  --p6: oklch(39.9% 0.051 313);
+  --p0-ink: oklch(79.8% 0.100 20);  --p1-ink: oklch(79.5% 0.110 60);
+  --p2-ink: oklch(78.9% 0.110 96);  --p3-ink: oklch(78.1% 0.120 145);
+  --p4-ink: oklch(78.2% 0.100 198); --p5-ink: oklch(78.9% 0.100 250);
+  --p6-ink: oklch(79.8% 0.110 305);
   --pna:  oklch(32.7% 0.013 58);
   --dref: oklch(76.5% 0.139 73);
 
