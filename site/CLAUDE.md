@@ -58,8 +58,10 @@ corner of the corpus shows every paper's ancestors as missing.
 **Reader state never reaches the build.** 즐겨찾기, the 읽음 mark, 책갈피, memos
 and the ids this browser has been shown live in that browser's `localStorage`
 under `assets/shelf.js` and `assets/memo.js`; the analysis list's page size
-— a view setting rather than a mark on a paper — under `probe.view.v1`; and
-the reader's colour under `probe.accent`. Both marks are set by the reader and
+— a view setting rather than a mark on a paper — under `probe.view.v1`;
+the reader's colour under `probe.accent`; and the newest piece and the
+scouting run the first screen's mascot has already announced under
+`probe.home.seen.v1` and `probe.home.run.v1` (`assets/home.js`). Both marks are set by the reader and
 never inferred: neither opening a page nor scrolling to its end is evidence it
 was read.
 
