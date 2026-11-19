@@ -5,7 +5,7 @@
 
 # Research Context — Hand-centric Dexterous Manipulation
 
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P5.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P6.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -13,7 +13,7 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P0–P5.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P0–P6.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
 - `[STABLE]`: changes rarely (purpose, scope)
@@ -56,7 +56,7 @@ anywhere on it.
 The current scope is **hand-centric dexterous manipulation at the VLA level** —
 how each part of a VLA is built, what each choice buys and costs on a
 dexterous, contact-rich task, and the human-to-robot data collection it learns
-from: the six pillars of §3.
+from: the seven pillars of §3.
 The rest of the stack is read where it bears on a pillar question and is not
 scouted for its own sake.
 
@@ -69,7 +69,7 @@ stance lives instead is `context/CLAUDE.md`'s rule.
 
 ## 3. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Six pillars (P0–P5)**, none ranked above another.
+**Seven pillars (P0–P6)**, none ranked above another.
 
 Each pillar file owns its own scope, scouting lens, anti-topics, open questions
 and tracked literature. This table is the index — what a pillar owns in one
@@ -80,11 +80,12 @@ is a second copy to keep in step, so it is not restated.
 | Pillar | Owns | Questions | File |
 |---|---|---|---|
 | P0 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them | 3 | `context/P0.md` |
-| P1 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 4 | `context/P1.md` |
+| P1 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 3 | `context/P1.md` |
 | P2 — Observation Design | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder, where in the view the policy reads | 5 | `context/P2.md` |
 | P3 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P3.md` |
 | P4 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P4.md` |
 | P5 — Retargeting & Human-in-the-Loop Data Collection | how human motion becomes robot training data — the retargeting map, its yield, the human-in-the-loop handover, where operator time goes | 4 | `context/P5.md` |
+| P6 — Action Timing & Motion Quality | the action's time axis — the rate signals arrive and actions leave at, where execution speed is set, how chunks join | 3 | `context/P6.md` |
 
 Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**, **D4QX**, **D5SH**, **D5DQ**, **D8SD**, **D9WZ**, **D7VC**, **D5ZL**.
 A retired id is never re-issued. When a question folds into another, every

@@ -186,8 +186,9 @@ badge**, color-coded by category:
 | `P1` | `fddcc2` (pale orange) | pillar palette |
 | `P2` | `f9efc6` (pale yellow) | pillar palette |
 | `P3` | `d6f3d5` (pale green) | pillar palette |
-| `P4` | `d0e4f8` (pale blue) | pillar palette |
-| `P5` | `e4d8f5` (pale violet) | pillar palette |
+| `P4` | `c7edee` (pale teal) | pillar palette |
+| `P5` | `d0e4f8` (pale blue) | pillar palette |
+| `P6` | `e4d8f5` (pale violet) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared question color |
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no

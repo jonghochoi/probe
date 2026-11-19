@@ -8,7 +8,7 @@ common: 셋 다 기억의 크기를 이력 길이에서 떼어 낸다
 problem: 로봇이 지금 화면 한 장만 보면, 이미 한 일과 아직 할 일을 가리지 못한다
 plain: [손목에 느낀 힘을 처음부터 적어 짧은 쪽지로 접어 둔다, 방금 일 초 동안 무엇이 어떻게 움직였는지만 떠올린다, 본 것을 전부 머릿속 배선에 바로 새겨 넣는다]
 primer: [history, frozen]
-pillars: P2, P1
+pillars: P2, P6
 generated: 2026-10-28 23:52
 generator: compare/v1
 summary: >
