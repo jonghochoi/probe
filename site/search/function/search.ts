@@ -48,7 +48,7 @@ const PILLARS: Record<string, string> = {
   P1: "datasets and benchmarks",
   P2: "pretraining and data-efficient adaptation",
   P3: "observation design (view registration, vision encoder, modality fusion, hand-sensing tokens, where in the view the policy reads)",
-  P4: "world models",
+  P4: "forward prediction (world models; future video, latents, touch or wrench; action-conditioned dynamics)",
   P5: "action expert decomposition (by body part, skill, modality or rate)",
   P6: "action timing and motion quality (control rate, execution speed, retiming, chunk-boundary smoothness)",
 };

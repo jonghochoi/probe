@@ -88,7 +88,7 @@ is a second copy to keep in step, so it is not restated.
 | P1 — VLA Datasets & Benchmarks | the corpora and the instruments that measure on them | 3 | `context/P1.md` |
 | P2 — Pretraining for Data-Efficient Adaptation | the questions upstream of deploy — corpus × recipe × adaptation — and what they cost to protect afterwards | 5 | `context/P2.md` |
 | P3 — Observation Design | what happens to sensing before it reaches the policy — spatial registration, per-finger contact attribution, the encoder, where in the view the policy reads | 5 | `context/P3.md` |
-| P4 — World Model | how a predictive model of dynamics folds into the stack — role, integration, prediction space, conditioning | 4 | `context/P4.md` |
+| P4 — Forward Prediction | how a predictive model of dynamics folds into the stack — role, integration, prediction space (latents and pixels to touch and wrench), conditioning | 4 | `context/P4.md` |
 | P5 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 3 | `context/P5.md` |
 | P6 — Action Timing & Motion Quality | the action's time axis — the rate signals arrive and actions leave at, where execution speed is set, how chunks join | 3 | `context/P6.md` |
 

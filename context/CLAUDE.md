@@ -94,7 +94,7 @@ The allocation, kept in step with the files by hand:
 | P1. VLA Datasets & Benchmarks | D4ML, D1AL, D6SE |
 | P2. Pretraining for Data-Efficient Adaptation | D3RP, D3WV, D9QJ, D6JW, D1WE |
 | P3. Observation Design | D8EJ, D9NB, D2DV, D3AG, D1SX |
-| P4. World Model | D3FQ, D8XB, D9KS, D6FM |
+| P4. Forward Prediction | D3FQ, D8XB, D9KS, D6FM |
 | P5. Heterogeneous Action Expert Decomposition | D3GS, D1QT, D9ZP |
 | P6. Action Timing & Motion Quality | D1MZ, D3MR, D0BZ |
 
