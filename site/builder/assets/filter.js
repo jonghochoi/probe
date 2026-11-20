@@ -414,8 +414,8 @@ addEventListener("keydown", (e) => {
   img.addEventListener("load", () => { if (cur && !card.hidden) place(cur); });
 })();
 
-/* On a phone the axis line scrolls sideways; its fade says so until the end
- * is in view. */
+/* The axis line scrolls sideways once its axes outrun it; its fade says so
+ * until the end is in view. */
 const plineItems = document.querySelector("[data-pline]");
 if (plineItems) {
   const edge = () => bar.classList.toggle("at-end",
