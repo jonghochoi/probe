@@ -39,8 +39,8 @@ bar.addEventListener("click", (e) => {
   apply();
 });
 
-/* On a phone the line scrolls sideways; its fade says so until the end is in
- * view. */
+/* The line scrolls sideways once its axes outrun it; its fade says so until
+ * the end is in view. */
 const items = bar.querySelector("[data-pline]");
 if (items) {
   const edge = () => bar.classList.toggle("at-end",

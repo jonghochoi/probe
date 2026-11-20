@@ -388,6 +388,20 @@ def _gaps(graph: lineage.Graph | None, titles: dict[str, str]) -> str:
         f'<span>원문</span></div><ol class="tl">{items}</ol></section>')
 
 
+def _axis_chip(key: str, n: int) -> str:
+    """One axis on the analysis and comparison lines — swatch, code, count.
+
+    The axis name rides in the tooltip and the accessible name rather than the
+    chip, so the line holds every axis on one row at any width.
+    """
+    label = PILLAR_LABELS.get(key, "축 미지정")
+    return (f'<button type="button" class="rail-item pillar" data-p="{c.esc(key)}" '
+            f'data-facet-pillar="{c.esc(key)}" aria-pressed="false" '
+            f'title="{c.esc(f"{key} · {label}")}" aria-label="{c.esc(f"{key} {label} {n}편")}">'
+            f'<span class="sw"></span><b>{c.esc(key)}</b>'
+            f'<span class="rn">{n}</span></button>')
+
+
 def analysis_page(papers: list[Paper], katex=None,
                  partial: bool = False, graph: lineage.Graph | None = None,
                  gap_titles: dict[str, str] | None = None) -> str:
@@ -429,11 +443,7 @@ def analysis_page(papers: list[Paper], katex=None,
     filed = Counter(p for paper in ordered for p in paper.filed)
 
     rail_pillars = "".join(
-        f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
-        f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
-        f'<span class="sw"></span><b>{c.esc(k)}</b>'
-        f'<span class="rl">{c.esc(PILLAR_LABELS.get(k, "축 미지정"))}</span>'
-        f'<span class="rn">{filed[k]}</span></button>'
+        _axis_chip(k, filed[k])
         for k in PILLAR_ORDER if filed.get(k)
     )
 
@@ -1554,11 +1564,7 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
     if ordered:
         counts = Counter(p for x in ordered for p in x.pillars)
         items = "".join(
-            f'<button type="button" class="rail-item pillar" data-p="{c.esc(k)}" '
-            f'data-facet-pillar="{c.esc(k)}" aria-pressed="false">'
-            f'<span class="sw"></span><b>{c.esc(k)}</b>'
-            f'<span class="rl">{c.esc(PILLAR_LABELS.get(k, "축 미지정"))}</span>'
-            f'<span class="rn">{counts[k]}</span></button>'
+            _axis_chip(k, counts[k])
             for k in PILLAR_ORDER if counts.get(k))
         line = (
             '<div class="pline" data-filters role="group" aria-label="연구 축으로 거르기">'

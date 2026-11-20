@@ -74,7 +74,10 @@ html.js .mast-count { display: none; }
 /* ── Deck: the axis line over the list ────────────────────────────── */
 .deck { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; }
 /* One card over the list: a tinted icon cell names it, the axes follow as
-   pills, and the count the filter leaves sits at the right end. The edge is a
+   pills on one row, and the count the filter leaves sits at the right end. A
+   pill is its code and count — the name is its tooltip — so a growing axis
+   set lengthens the row instead of stacking a second one; past the card's
+   width the row scrolls sideways under the fade. The edge is a
    firm hairline and one thin shadow — a wide soft shadow melts into the page's
    glow and the card loses its border. It stands above the band's fade, which
    reaches below the title. With no script the axes would be inert, so the
@@ -104,7 +107,9 @@ html.js .pline {
                     font-size: var(--fs-xs); color: var(--text); align-items: baseline; }
 .pline .rail-item .sw { align-self: center; }
 .pline .rail-item .rn { font-size: var(--fs-2xs); }
-.pline .rail-item .rl { color: var(--text-muted); }
+html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.pline[data-filters] .pline-items::-webkit-scrollbar { display: none; }
+.pline[data-filters] .rail-item { flex: none; }
 .pline .rail-item[data-p="P0"] .sw { background: var(--p0-ink); }
 .pline .rail-item[data-p="P1"] .sw { background: var(--p1-ink); }
 .pline .rail-item[data-p="P2"] .sw { background: var(--p2-ink); }
@@ -496,10 +501,7 @@ html.js .notfound-find { display: inline-block; }
   .row-pillars { display: inline-flex; gap: .2rem; vertical-align: middle; }
   .row-links { display: none; }
   .row-links-m { display: inline-flex; margin-left: .3rem; }
-  html.js .pline-items { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .pline-items::-webkit-scrollbar { display: none; }
-  .pline .rail-item { flex: none; }
-  .pline .rail-item .rl, .pline-stat { display: none; }
+  .pline-stat { display: none; }
   .pline-ic { width: 2.5rem; }
   /* The block row has no column to keep the star in, so it goes to the corner
      the thumb reaches for and the text makes room for it. */
@@ -667,12 +669,10 @@ html.js .gap-on.is-open .gap-names { max-height: none; }
 .figpeek-c { margin: .55rem .25rem 0; font-size: var(--fs-xs); line-height: 1.55; color: var(--text); }
 .figpeek-s { margin: .2rem .25rem 0; font-size: var(--fs-2xs); color: var(--text-muted); }
 @media (hover: none), (max-width: 720px) { .figpeek { display: none !important; } }
-@media (max-width: 680px) {
-  /* The axis line's edge fades while more of it is off to the right. */
-  html.js .pline::after {
-    content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 2.6rem; pointer-events: none;
-    background: linear-gradient(90deg, transparent, var(--surface) 75%);
-    border-radius: 0 var(--radius) var(--radius) 0; transition: opacity var(--dur-mid) var(--ease-out);
-  }
-  html.js .pline.at-end::after { opacity: 0; }
+/* The axis row's right edge fades while more of it is off to the right —
+   a mask on the row itself, so the fade ends where the axes end, at the
+   count on a wide screen and at the card's edge on a phone. */
+html.js .pline[data-filters]:not(.at-end) .pline-items {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.6rem), transparent);
+          mask-image: linear-gradient(90deg, #000 calc(100% - 2.6rem), transparent);
 }
