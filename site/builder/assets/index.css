@@ -117,6 +117,7 @@ html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto;
 .pline .rail-item[data-p="P4"] .sw { background: var(--p4-ink); }
 .pline .rail-item[data-p="P5"] .sw { background: var(--p5-ink); }
 .pline .rail-item[data-p="P6"] .sw { background: var(--p6-ink); }
+.pline .rail-item[data-p="P7"] .sw { background: var(--p7-ink); }
 .pline .rail-item[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--on-accent); }
 .rail-item {
   font: inherit; font-size: var(--fs-2xs); width: 100%;

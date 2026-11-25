@@ -138,24 +138,29 @@
   --fig-pad:     #ffffff;
 
   /* ── Pillar palette — scouting/AUTHORING.md §3-1 ────────────────────── */
-  /* P0 to P6 run the rainbow in order — red, orange, yellow, green, teal,
-     blue, violet — at 36–55° steps of hue. Every chip lands on one lightness
-     and one chroma, so the seven differ by hue alone: each tint is solved
-     back from its chip, oklch(95.2% 0.0225 <hue>) at 50% over --surface,
-     which cancels the surface's own blue cast. 0.0225 sits just under what
-     the red and blue tints hold inside sRGB at that lightness. */
-  --p0: oklch(90.6% 0.046 22);  --p1: oklch(90.6% 0.047 61);
-  --p2: oklch(90.6% 0.047 96);  --p3: oklch(90.6% 0.046 143);
-  --p4: oklch(90.6% 0.044 196); --p5: oklch(90.6% 0.043 249);
-  --p6: oklch(90.6% 0.043 307);
+  /* P0 to P7 run the rainbow in order — red, orange, yellow, green, teal,
+     blue, violet, magenta — at 45° steps of chip hue from 20°. Every chip
+     lands on one lightness and one chroma, so the eight differ by hue alone:
+     each tint is solved back from its chip, oklch(95.2% 0.0225 <hue>) at 50%
+     over --surface, which cancels the surface's own blue cast. 0.0225 sits
+     just under what the red and blue tints hold inside sRGB at that
+     lightness.
+     P2 is the one exception. Yellow at that chroma reads as khaki, so its
+     chip holds 2.4× the chroma at 100° rather than 110°, 35° from orange and
+     55° from green; and since no yellow reaches 5.2:1 on a light chip, its
+     ink sits at 90°, an ochre kept 25° clear of orange's brown. */
+  --p0: oklch(90.6% 0.046 22);  --p1: oklch(90.6% 0.047 66);
+  --p2: oklch(90.6% 0.110 100); --p3: oklch(90.6% 0.046 153);
+  --p4: oklch(90.6% 0.044 198); --p5: oklch(90.6% 0.043 244);
+  --p6: oklch(90.6% 0.043 291); --p7: oklch(90.6% 0.044 337);
   /* Each pillar's ink: its tint's hue at text strength, for the chip's frame
      and label. Its lightness is solved for 5.2:1 on its chip, so every
-     label reads alike; the teal and orange inks run less chromatic to stay
-     inside sRGB. */
-  --p0-ink: oklch(51.6% 0.140 20);  --p1-ink: oklch(50.8% 0.115 60);
-  --p2-ink: oklch(50.1% 0.100 96);  --p3-ink: oklch(48.9% 0.130 145);
-  --p4-ink: oklch(49.3% 0.083 198); --p5-ink: oklch(50.1% 0.130 250);
-  --p6-ink: oklch(51.5% 0.140 305);
+     label reads alike; an ink takes chroma 0.140 where sRGB holds it at
+     that lightness, and the most it holds where it does not. */
+  --p0-ink: oklch(51.6% 0.140 20);  --p1-ink: oklch(50.7% 0.112 65);
+  --p2-ink: oklch(50.2% 0.101 90);  --p3-ink: oklch(48.8% 0.119 155);
+  --p4-ink: oklch(49.3% 0.082 200); --p5-ink: oklch(49.9% 0.124 245);
+  --p6-ink: oklch(51.2% 0.140 290); --p7-ink: oklch(51.6% 0.140 335);
   --pna:  oklch(91.0% 0.009 56);
   --dref: oklch(49.5% 0.131 58);   /* D# amber */
 
@@ -284,15 +289,16 @@
 
   /* The same solve as the light pillars: every chip lands on
      oklch(30.2% 0.030 <hue>), the darker surface's stronger cast pulling the
-     tints' hues further, and every ink holds 7:1 on its chip. */
-  --p0: oklch(39.9% 0.065 30);  --p1: oklch(39.9% 0.071 65);
-  --p2: oklch(39.9% 0.072 95);  --p3: oklch(39.9% 0.067 136);
-  --p4: oklch(39.9% 0.057 187); --p5: oklch(39.9% 0.049 246);
-  --p6: oklch(39.9% 0.051 313);
-  --p0-ink: oklch(79.8% 0.100 20);  --p1-ink: oklch(79.5% 0.110 60);
-  --p2-ink: oklch(78.9% 0.110 96);  --p3-ink: oklch(78.1% 0.120 145);
-  --p4-ink: oklch(78.2% 0.100 198); --p5-ink: oklch(78.9% 0.100 250);
-  --p6-ink: oklch(79.8% 0.110 305);
+     tints' hues further, and every ink holds 7:1 on its chip. P2's chip
+     takes the most chroma sRGB holds at its lightness, its ink the same 90°. */
+  --p0: oklch(39.9% 0.065 30);  --p1: oklch(39.9% 0.071 69);
+  --p2: oklch(39.9% 0.081 98);  --p3: oklch(39.9% 0.066 145);
+  --p4: oklch(39.9% 0.057 189); --p5: oklch(39.9% 0.049 240);
+  --p6: oklch(39.9% 0.049 295); --p7: oklch(39.9% 0.056 346);
+  --p0-ink: oklch(79.8% 0.100 20);  --p1-ink: oklch(79.5% 0.110 65);
+  --p2-ink: oklch(79.1% 0.110 90);  --p3-ink: oklch(78.1% 0.110 155);
+  --p4-ink: oklch(78.2% 0.110 200); --p5-ink: oklch(78.8% 0.110 245);
+  --p6-ink: oklch(79.6% 0.110 290); --p7-ink: oklch(80.0% 0.110 335);
   --pna:  oklch(32.7% 0.013 58);
   --dref: oklch(76.5% 0.139 73);
 
@@ -716,6 +722,7 @@ html.js .isl { display: block; }
 .chip.pillar[data-p="P4"] { --pi: var(--p4-ink); background: color-mix(in oklab, var(--p4) 50%, var(--surface)); }
 .chip.pillar[data-p="P5"] { --pi: var(--p5-ink); background: color-mix(in oklab, var(--p5) 50%, var(--surface)); }
 .chip.pillar[data-p="P6"] { --pi: var(--p6-ink); background: color-mix(in oklab, var(--p6) 50%, var(--surface)); }
+.chip.pillar[data-p="P7"] { --pi: var(--p7-ink); background: color-mix(in oklab, var(--p7) 50%, var(--surface)); }
 .chip.na { background: color-mix(in srgb, var(--red) 12%, transparent); border-color: transparent; }
 
 /* ── Links out and the 서재 pair ───────────────────────────────────────── */
@@ -823,6 +830,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
 [data-lane="P4"] { --lane: var(--p4-ink); }
 [data-lane="P5"] { --lane: var(--p5-ink); }
 [data-lane="P6"] { --lane: var(--p6-ink); }
+[data-lane="P7"] { --lane: var(--p7-ink); }
 .near-frame {
   overflow-x: auto; background: var(--surface);
   border: 1px solid var(--border-soft); border-radius: var(--radius);

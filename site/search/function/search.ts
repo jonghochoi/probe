@@ -51,6 +51,7 @@ const PILLARS: Record<string, string> = {
   P4: "forward prediction (world models; future video, latents, touch or wrench; action-conditioned dynamics)",
   P5: "action expert decomposition (by body part, skill, modality or rate)",
   P6: "action timing and motion quality (control rate, execution speed, retiming, chunk-boundary smoothness)",
+  P7: "memory and long-horizon structure (observation history, subtask decomposition, task progress, recovery from a slip)",
 };
 const PILLAR_IDS = Object.keys(PILLARS);
 

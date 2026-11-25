@@ -5,7 +5,7 @@
 
 # Research Context — Hand-centric Dexterous Manipulation
 
-> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P6.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
+> **Agent usage**: This file is the *static, cross-cutting* **global anchor** — Purpose, Long-term Context, the Pillars overview, and cross-pillar references. Per-pillar working context (Open Questions, Tracked Literature, Anti-topics) is **owned by `context/P0–P7.md`**, which the retrieval agent reads (never writes). Findings go to `scouting/P#/YYYY-MM-DD.md` (one file per run, per pillar).
 
 ---
 
@@ -13,7 +13,7 @@
 
 **What lives where**
 - This document (`MASTER.md`) is the **global anchor**: cross-cutting content that is not specific to one pillar. It is *not* a superset of the pillar files.
-- `context/P0–P6.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
+- `context/P0–P7.md` are the **owners** of their pillar's Open Questions, Tracked Literature and Anti-topics. Edit the pillar file for pillar content; edit this anchor only for cross-cutting content.
 
 **Section markers**
 - `[STABLE]`: changes rarely (purpose, scope)
@@ -55,10 +55,12 @@ anywhere on it.
 ### 2.2 Scope of work
 The current scope is **hand-centric dexterous manipulation at the VLA level** —
 how each part of a VLA is built, what each choice buys and costs on a
-dexterous, contact-rich task, and the human-to-robot data collection it learns
-from: the seven pillars of §3.
+dexterous, contact-rich task, what it carries across a long task, and the
+human-to-robot data collection it learns from: the eight pillars of §3.
 The rest of the stack is read where it bears on a pillar question and is not
-scouted for its own sake.
+scouted for its own sake. Reinforcement learning from scratch, and policies
+trained in simulation and transferred to hardware, with no pretrained VLA or
+imitation policy in the loop, are outside it.
 
 The context holds questions about this scope, never an answer or a bet on
 one: the common default of a VLA part is a **thread to be measured
@@ -69,11 +71,12 @@ stance lives instead is `context/CLAUDE.md`'s rule.
 
 ## 3. Pillars [STABLE structure, LIVING content] [AGENT-INPUT]
 
-**Seven pillars (P0–P6)**, numbered along one flow — a human's motion
+**Eight pillars (P0–P7)**, numbered along one flow — a human's motion
 collected as robot data (P0), the corpora and benchmarks it joins (P1),
 pretraining on them (P2), then the policy itself: what it observes (P3),
-what it predicts of the world (P4), how its decoder acts (P5) and the
-timing of the action (P6). A number places a pillar on that flow; none is
+what it predicts of the world (P4), how its decoder acts (P5), the
+timing of the action (P6) and, across a whole task, what it carries from
+step to step and how the task is staged (P7). A number places a pillar on that flow; none is
 ranked above another.
 
 Each pillar file owns its own scope, scouting lens, anti-topics, open questions
@@ -91,6 +94,7 @@ is a second copy to keep in step, so it is not restated.
 | P4 — Forward Prediction | how a predictive model of dynamics folds into the stack — role, integration, prediction space (latents and pixels to touch and wrench), conditioning | 4 | `context/P4.md` |
 | P5 — Heterogeneous Action Expert Decomposition | how the action decoder is split into more than one expert, and the questions that stand split or not | 3 | `context/P5.md` |
 | P6 — Action Timing & Motion Quality | the action's time axis — the rate signals arrive and actions leave at, where execution speed is set, how chunks join | 3 | `context/P6.md` |
+| P7 — Memory & Long-Horizon Structure | what a policy carries across steps and how a long task is staged — memory, decomposition, progress, recovery | 4 | `context/P7.md` |
 
 Retired: **D17**, **D18**, **D6ZD**, **D4NT**, **D5QT**, **D4QX**, **D5SH**, **D5DQ**, **D8SD**, **D9WZ**, **D7VC**, **D5ZL**.
 A retired id is never re-issued. When a question folds into another, every

@@ -1,7 +1,7 @@
 # context/CLAUDE.md
 
 Rules for the human-owned research context. `context/MASTER.md` is the global
-anchor; `context/P{0..6}.md` are the pillars a run actually reads. Repo-wide
+anchor; `context/P{0..7}.md` are the pillars a run actually reads. Repo-wide
 rules — commits, contributor-doc style, the local checks — are in the root
 `CLAUDE.md`.
 
@@ -27,7 +27,7 @@ never touched by the routine.
 Ownership inside the folder is just as fixed. The Open Questions, Tracked
 Literature and Anti-topics are **owned by the relevant `P#.md`**;
 `MASTER.md` holds only what crosses pillars — Purpose, Long-term Context,
-the P0–P6 overview, Venue, Cross-pollination. Edit the
+the P0–P7 overview, Venue, Cross-pollination. Edit the
 `P#.md` for pillar content and `MASTER.md` only for global content; the same
 fact in both is one of them going stale.
 
@@ -97,6 +97,7 @@ The allocation, kept in step with the files by hand:
 | P4. Forward Prediction | D3FQ, D8XB, D9KS, D6FM |
 | P5. Heterogeneous Action Expert Decomposition | D3GS, D1QT, D9ZP |
 | P6. Action Timing & Motion Quality | D1MZ, D3MR, D0BZ |
+| P7. Memory & Long-Horizon Structure | D5GY, D3HN, D7KC, D4WB |
 
 ## The other pillar sections
 

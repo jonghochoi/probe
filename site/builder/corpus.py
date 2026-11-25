@@ -67,6 +67,7 @@ PILLAR_NAMES = {
     "P4": "Forward Prediction",
     "P5": "Heterogeneous Action Expert Decomposition",
     "P6": "Action Timing & Motion Quality",
+    "P7": "Memory & Long-Horizon Structure",
 }
 # What every reader-facing surface prints for an axis — the axis-line chip and the
 # `연구 축별` separator. Short enough to sit on one line in a 13.5rem column,
@@ -81,6 +82,7 @@ PILLAR_LABELS = {
     "P4": "미래 예측",
     "P5": "행동 전문가 분해",
     "P6": "실행 타이밍 · 모션 품질",
+    "P7": "기억 · 장기 과제",
 }
 if PILLAR_LABELS.keys() != PILLAR_NAMES.keys():
     raise RuntimeError("PILLAR_LABELS and PILLAR_NAMES name different pillars")
