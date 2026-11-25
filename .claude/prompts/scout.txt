@@ -12,7 +12,7 @@ The run is three kinds of agent, and this file holds all three parts:
             Parses the pillars, dispatches the others, plans each report from
             their results, writes the run file, commits once.
   PART II   A PILLAR AGENT — one per pillar, dispatched by the master. Each
-            reads ONE pillar's context, so no agent carries seven pillars in
+            reads ONE pillar's context, so no agent carries eight pillars in
             its window. Two phases: SCOUT, then WRITE.
   PART III  THE PAPER JUDGE — one agent, dispatched by the master. Scores
             Methodology, Real and Reproducibility once per paper for every
@@ -45,7 +45,7 @@ hand off, and how to commit.
 PART I — THE MASTER
 ════════════════════════════════════════════════════════════════════════
 
-INPUT: the pillars, as numbers — `0 1 2 3 4 5 6`, `1 3`, or `P1 P3`. With none
+INPUT: the pillars, as numbers — `0 1 2 3 4 5 6 7`, `1 3`, or `P1 P3`. With none
 given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
 
 1. RESOLVE, once, before any network call:

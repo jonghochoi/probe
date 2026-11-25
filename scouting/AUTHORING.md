@@ -182,14 +182,18 @@ badge**, color-coded by category:
 
 | Category | Color | Source |
 |----------|-------|--------|
-| `P0` | `fbd7d6` (pale red) | pillar palette — this table is the palette's source of truth |
-| `P1` | `fddcc2` (pale orange) | pillar palette |
-| `P2` | `f9efc6` (pale yellow) | pillar palette |
-| `P3` | `d6f3d5` (pale green) | pillar palette |
-| `P4` | `c7edee` (pale teal) | pillar palette |
-| `P5` | `d0e4f8` (pale blue) | pillar palette |
-| `P6` | `e4d8f5` (pale violet) | pillar palette |
+| `P0` | `fdd5d2` (pale red) | pillar palette — this table is the palette's source of truth |
+| `P1` | `f6dbc0` (pale orange) | pillar palette |
+| `P2` | `f1e28a` (pale yellow) | pillar palette |
+| `P3` | `cae9d2` (pale green) | pillar palette |
+| `P4` | `bfeaea` (pale teal) | pillar palette |
+| `P5` | `c9e4fb` (pale blue) | pillar palette |
+| `P6` | `dfdcfb` (pale violet) | pillar palette |
+| `P7` | `f4d5eb` (pale magenta) | pillar palette |
 | every `D#` | `d97706` (amber) | single shared question color |
+
+A pillar's hex is its light `--p<n>` tint in `site/builder/assets/site.css`,
+written in sRGB, so a badge on GitHub and a chip on the site are one color.
 
 Badge URL: `https://img.shields.io/badge/<CODE>-<hex>.svg` (label-only, no
 message).

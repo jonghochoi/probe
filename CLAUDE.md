@@ -34,7 +34,7 @@ file the row points at.
 |---|---|---|
 | `README.md` | human | Project front door — motivation, the pipeline, which track to run for what |
 | `context/MASTER.md` | human | Global anchor — cross-cutting content only |
-| `context/P{0..6}.md` | human | One per pillar — its Open Questions, Tracked Literature and Anti-topics. A run reads one |
+| `context/P{0..7}.md` | human | One per pillar — its Open Questions, Tracked Literature and Anti-topics. A run reads one |
 | `context/EVENTS.md` | human · `/follow` | The venues followed (human) and their dates (the follow routine), which the site's first screen counts down to |
 | `context/_TEMPLATE.md` | human | The skeleton a new pillar is copied from — the pillar section spine |
 | `context/CLAUDE.md` | human | Rules for `context/` — the read-only boundary, the open-question entry format, adding a pillar |
