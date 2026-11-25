@@ -293,6 +293,14 @@ TWO PASSES, ranked by signal — 1 above 2:
    `## 1. Scope` and its open questions, plus one for the 🌱 slot's field
    with no category filter — e.g.:
      curl --fail -sS "https://export.arxiv.org/api/query?search_query=%28cat:cs.RO+OR+cat:cs.LG%29+AND+<keywords>&sortBy=submittedDate&sortOrder=descending&max_results=80"; sleep 3
+   Every pillar also reads one sweep anchored on the hand rather than on
+   its own wording — cs.RO alone, newest first, fetched once per run into
+   the shared run directory. A two-week window holds about 40–70 of
+   these, so one page covers it, and a release that no question's wording
+   names and no pin cites still reaches scoring:
+     RUN=<run directory>; f="$RUN/field.xml"
+     [ -s "$f" ] || { curl --fail -sS "https://export.arxiv.org/api/query?search_query=cat:cs.RO+AND+%28abs:dexterous+OR+abs:%22multi-fingered%22+OR+abs:%22multi-finger%22+OR+abs:%22robot+hand%22+OR+abs:%22robotic+hand%22%29&sortBy=submittedDate&sortOrder=descending&max_results=100" -o "$f"; sleep 3; }
+   A failed fetch leaves no file, so the next pillar fetches again.
    Keep entries whose `<published>` is within the last 14 days, then filter
    against the Anti-topics. This is the noisiest source; weight it lowest.
 
