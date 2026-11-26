@@ -24,17 +24,34 @@ API = "https://export.arxiv.org/api/query"
 CACHE_NAME = "arxiv-titles.json"
 _ATOM = "{http://www.w3.org/2005/Atom}"
 _ABS_ID = re.compile(r"arxiv\.org/abs/(\d{4}\.\d{4,5})(?:v\d+)?$")
-# Inline TeX in a title: `$\pi_0$`, `$π_{0.5}$`. Printed as plain text, the
-# dollars, a subscript's braces and a command's backslash go; the letters stay.
-_TEX_CMD = {r"\pi": "π", r"\alpha": "α", r"\beta": "β", r"\mu": "μ", r"\tau": "τ"}
+# Inline TeX in a title: `$\pi_0$`, `$π_{0.5}$`, `M$^{2}$`. Printed as plain
+# text, the dollars and a command's backslash go and the letters stay. A
+# subscript keeps its characters on the line (`π0.5`, as the corpus writes
+# it); a superscript of digits, signs or parentheses rises to Unicode (`M²`),
+# and one that has no Unicode form stays on the line too.
+_TEX_CMD = {r"\pi": "π", r"\alpha": "α", r"\beta": "β", r"\gamma": "γ",
+            r"\delta": "δ", r"\epsilon": "ε", r"\lambda": "λ", r"\mu": "μ",
+            r"\sigma": "σ", r"\tau": "τ", r"\phi": "φ", r"\omega": "ω",
+            r"\Delta": "Δ", r"\times": "×", r"\cdot": "·", r"\dagger": "†"}
+_SUPER = str.maketrans("0123456789+-=()n", "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿ")
+_STYLE = re.compile(r"\\(?:math[a-z]+|text[a-z]*|operatorname|boldsymbol)\{([^{}]*)\}")
 
 
-def _plain(title: str) -> str:
+def _rise(body: str) -> str:
+    raised = body.translate(_SUPER)
+    return raised if all(ch != o for ch, o in zip(raised, body)) else body
+
+
+def plain_title(title: str) -> str:
+    """A paper title with its inline TeX printed as plain text."""
     text = " ".join(title.split())
-    for cmd, char in _TEX_CMD.items():
-        text = text.replace(cmd, char)
-    text = re.sub(r"[_^]\{([^{}]*)\}", r"\1", text)
-    text = re.sub(r"[_^](\w)", r"\1", text)
+    text = _STYLE.sub(r"\1", text)
+    for cmd, char in sorted(_TEX_CMD.items(), key=lambda kv: -len(kv[0])):
+        text = re.sub(re.escape(cmd) + r"(?![A-Za-z])", char, text)
+    text = re.sub(r"\^\{([^{}]*)\}", lambda m: _rise(m.group(1)), text)
+    text = re.sub(r"\^([0-9n])", lambda m: _rise(m.group(1)), text)
+    text = re.sub(r"_\{([^{}]*)\}", r"\1", text)
+    text = re.sub(r"_(\w)", r"\1", text)
     return text.replace("$", "").replace("\\", "")
 
 
@@ -50,7 +67,7 @@ def _fetch(ids: list[str]) -> dict[str, str]:
     out = {}
     for entry in root.iter(f"{_ATOM}entry"):
         m = _ABS_ID.search(entry.findtext(f"{_ATOM}id", ""))
-        title = _plain(entry.findtext(f"{_ATOM}title", ""))
+        title = plain_title(entry.findtext(f"{_ATOM}title", ""))
         if m and title:
             out[m.group(1)] = title
     return out

@@ -22,6 +22,7 @@ import textwrap
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .arxivtitles import plain_title
 from .corpus import PILLAR_NAMES, REPO_ROOT
 
 SCOUTING = REPO_ROOT / "scouting"
@@ -239,8 +240,8 @@ def parse(path: Path, pillar: str, problems: list[str]) -> Report:
             if ident is None:
                 problems.append(f"{report.source}: {header} carries no arXiv link line")
                 continue
-            title = next((t.group(1) for l in lines[:at]
-                          if (t := _TITLE.match(l.strip()))), "")
+            title = plain_title(next((t.group(1) for l in lines[:at]
+                                      if (t := _TITLE.match(l.strip()))), ""))
             link = lines[at].strip()
             subs = _subsections(body)
             pick = Pick(
