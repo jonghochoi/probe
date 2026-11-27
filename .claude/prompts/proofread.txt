@@ -32,7 +32,7 @@ SOURCES
    a round that proofreads the rewrite against itself only polishes prose.
    `arxiv.Unavailable` → stop the loop and say so. A rewrite read from the
    LaTeX source (`arxiv_src:`) whose paper has since gained an HTML edition is not proofread
-   into it — it is redone with `/analyze <id> --refresh`; say so and stop.
+   into it — it is redone with `/analyze <id>`; say so and stop.
 
 2. **The public code — a second source of fact, for what the paper leaves
    unstated.** Only a repository that passes AUTHORING R10 — the one

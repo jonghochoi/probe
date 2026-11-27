@@ -72,7 +72,7 @@ given, every pillar with a `context/P#.md` (`_TEMPLATE.md` aside), in order.
       uses it with `RUN=/tmp/probe-scout/<date>;`. You are agent <i> of
       <k>: wait <i×20> seconds before your first network call, inside
       that same Bash call."
-   The stagger and the shared `$RUN/arxiv/` cache keep five
+   The stagger and the shared `$RUN/arxiv/` cache keep the pillar
    agents from tripping the APIs' rate limits together. Each returns one
    status line and leaves `$RUN/P<n>.candidates.json`. When all have
    returned, run `ls "$RUN"/P*.candidates.json`: a pillar with no file there
@@ -313,7 +313,7 @@ keep is fetched once:
 
 `$RUN/arxiv/` holds only the `<id>.xml` files this curl writes; search
 responses are not cached. Every other file an agent writes in `$RUN` starts
-with its pillar, `P<n>.`, so five agents never overwrite each other.
+with its pillar, `P<n>.`, so the pillar agents never overwrite each other.
 
 Keep TWO fields verbatim in the candidate: `<arxiv:comment>` — where authors
 put "Code: https://github.com/…", "Project page: …", "will be released upon

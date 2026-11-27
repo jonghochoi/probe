@@ -40,7 +40,7 @@ It reads the records the site publishes as `corpus.json` and each paper's
 `card.json`, together. Learn its
 subcommands from `--help`, not from this prompt.
 
-READ THROUGH IT, NOT AROUND IT. A rewrite is 50–90 KB; the whole corpus is
+READ THROUGH IT, NOT AROUND IT. A rewrite is 50–120 KB; the whole corpus is
 far past one context window. `section` hands you the one part an argument
 rests on. Open a whole body only when `outline` shows the part you need is
 spread across it.

@@ -14,10 +14,11 @@ The paper is the invocation argument: a bare arXiv id (`YYMM.NNNNN`), an
 arXiv URL, or a versioned id (`YYMM.NNNNNv2`). Normalize to the bare id.
 If the argument is empty or unparseable, stop and ask — do not pick a paper.
 
-Optional flag — `--refresh`: `analysis/<id>.md` already exists and you are
-redoing it. Same procedure; overwrite in place. A rewrite whose front matter
-records `arxiv_src:` is redone this way once arXiv has built the HTML edition
-— that run reads the HTML and gains the figures the source could not link.
+When `analysis/<id>.md` already exists, the run redoes it: same procedure,
+overwritten in place, committed with `update` (step 9). A rewrite whose front
+matter records `arxiv_src:` is redone this way once arXiv has built the HTML
+edition — that run reads the HTML and gains the figures the source could not
+link.
 
 THE FORMAT CONTRACT is `analysis/AUTHORING.md` — every rule about what the
 file looks like lives there and nowhere in this prompt. This prompt owns the
@@ -70,7 +71,7 @@ TWO LISTS IT PRINTS THAT ARE CHECKLISTS, NOT MENUS:
     AUTHORING R6.
 
 **NO HTML EDITION → THE LATEX SOURCE.** When arXiv has no HTML build for the
-paper (~4% of this corpus), `load` reads the LaTeX source arXiv serves for the
+paper (rare in this corpus), `load` reads the LaTeX source arXiv serves for the
 same version instead — in memory, nothing extracted — and the index opens on
 `── no HTML edition: read from the LaTeX source → arxiv_src: ──`. Same
 commands, same checklists, with three differences, all AUTHORING's:
@@ -191,5 +192,5 @@ the set of rewrites that exist, so writing one is what puts that paper on the
 site at all.
 
 If asked to "do all of them", say no and explain the cost: each rewrite reads
-a 300 KB original and produces 600–1,100 lines. The value is in the papers the
+a 300 KB original and produces 650–1,300 lines. The value is in the papers the
 human actually wants to re-read.

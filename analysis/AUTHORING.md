@@ -97,7 +97,7 @@ text the authors submitted, which the HTML edition is generated from, so it
 carries every section, table and equation the HTML would have. A paper with
 neither — a PDF-only submission — gets **no rewrite**, and nothing stands in:
 an abstract-based fallback would be indistinguishable on the page from a real
-one. A rewrite read from the source is one `--refresh` away from its figures
+one. A rewrite read from the source is one `/analyze` re-run away from its figures
 once arXiv builds the HTML edition (R6).
 
 **Stance.** Facts are the paper's. What the paper means for us is said
