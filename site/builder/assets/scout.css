@@ -3,7 +3,7 @@
    Loaded after `index.css`, whose axis line (`.pline`) and `.rail-item` the
    date line borrows so the two lines stand at the same place and size. */
 
-.sn { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; display: grid; gap: 1.2rem; min-width: 0; }
+.sn { max-width: 1240px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.2rem; min-width: 0; }
 .sn a { color: inherit; text-decoration: none; }
 
 /* ── The date line ────────────────────────────────────────────────────── */
@@ -63,7 +63,7 @@ html.js .sn-month[hidden] { display: none; }
 .sn-day.has-run:hover { border-color: var(--accent); }
 .sn-day.is-sel { background: var(--accent); }
 .sn-day.is-sel .sn-dn, .sn-day.is-sel .sn-cnt { color: var(--on-accent); }
-.sn-cnt { font-size: 10px; font-weight: 700; color: var(--accent-ink); line-height: 1; }
+.sn-cnt { font-size: var(--fs-2xs); font-weight: 700; color: var(--accent-ink); line-height: 1; }
 
 .chip.sn-rk i { font-style: normal; opacity: .55; margin: 0 .2rem; }
 

@@ -37,6 +37,7 @@
      midnight's. */
   --hue:         268;
   --accent-c:    0.120;
+  color-scheme: light;
 
   /* ── Ground and ink ─────────────────────────────────────────────────── */
   --bg:          oklch(98.4% 0.007 var(--hue));
@@ -167,7 +168,11 @@
   /* ── Type ───────────────────────────────────────────────────────────── */
   /* Gowun Dodum sets the reading and the titles alike; Pretendard stays
      behind it for any glyph the Gowun subset lacks, so a rare symbol falls to
-     a matching sans rather than to the system. */
+     a matching sans rather than to the system. Gowun ships one weight
+     (400): a 500 draws as the 400 cut, and every weight from 600 up as one
+     bold the browser synthesizes from it, so the steps these sheets name
+     reach the screen as two. The names keep the intended hierarchy for a
+     face that holds the weights. */
   --ko: 'Gowun Dodum', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
         'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif;
   --t-display: var(--ko);
@@ -251,6 +256,7 @@
 @supports (height: 100dvh) { :root { --vh-live: 100dvh; } }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;   /* scrollbars and form controls follow the ground */
   --bg:          oklch(17.5% 0.010 var(--hue));
   --surface:     oklch(20.5% 0.012 var(--hue));
   --surface-2:   oklch(23.5% 0.014 var(--hue));
@@ -358,6 +364,9 @@ a { color: var(--accent-ink); }
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+/* The nav is the one dark ground in the light theme, where the accent ink
+   sits under 2:1 against it; the nav's own bright ink clears it in both. */
+.site-nav :focus-visible { outline-color: var(--nav-ink-hi); }
 
 /* The first stop for a keyboard: off-screen until it takes focus, then the
    one thing above the nav, so the eight links in it are a choice rather than
