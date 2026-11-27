@@ -939,7 +939,7 @@ def _missing(name: str) -> str:
     rewrite is incomplete, not because the page broke.
     """
     return (f'<p class="corpus-empty">이 재작성본에는 아직 {c.esc(name)} 섹션이 '
-            f'없습니다 — <code>/analyze &lt;id&gt; --refresh</code> 로 다시 씁니다.</p>')
+            f'없습니다 — <code>/analyze &lt;id&gt;</code> 로 다시 씁니다.</p>')
 
 
 

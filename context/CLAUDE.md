@@ -102,7 +102,7 @@ The allocation, kept in step with the files by hand:
 ## The other pillar sections
 
 `context/_TEMPLATE.md` is the skeleton; these are the shapes inside it that
-every pillar keeps the same, so seven files read as one document:
+every pillar keeps the same, so the pillar files read as one document:
 
 - **Questions** is one line, `**Questions**: <short form> (D<id>), …` —
   every question of the pillar in the order §2 lists them.
