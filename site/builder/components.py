@@ -407,7 +407,7 @@ def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) 
   {icon("pencil")}<span class="count"></span>
 </button>
 <div class="scrim" data-scrim data-open="0"></div>
-<aside class="memo" data-memo-root data-open="0"
+<aside class="memo" data-memo-root data-open="0" inert
        data-paper-id="{esc(paper_id)}"
        data-paper-title="{esc(title)}"
        data-paper-url="{esc(paper_url)}"

@@ -167,10 +167,16 @@ if (root) {
   });
 
   /* Open / close */
+  // Closed, the panel sits off-screen but would still hold four tab stops;
+  // `inert` (set in the markup too) takes them out until it opens. Focus that
+  // was inside goes back to the button that opened it.
   function open(v) {
+    const had = root.contains(document.activeElement);
     root.dataset.open = v ? "1" : "0";
+    root.inert = !v;
     if (scrim) scrim.dataset.open = v ? "1" : "0";
     if (v) input.focus();
+    else if (had && fab) fab.focus();
   }
   if (fab) fab.addEventListener("click", () => open(root.dataset.open !== "1"));
   if (scrim) scrim.addEventListener("click", () => open(false));

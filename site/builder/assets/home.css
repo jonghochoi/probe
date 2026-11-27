@@ -146,10 +146,12 @@
 .hm-feed a { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: .1rem .8rem; padding: .8rem .2rem; border-bottom: 1px solid var(--border-soft); }
 .hm-feed a:hover b { color: var(--accent-ink); }
 .hm-k { grid-row: span 2; font-size: var(--fs-2xs); font-weight: 700; color: var(--text-muted); padding-top: .15rem; }
-.hm-k small { display: block; font-weight: 500; font-size: 10px; margin-top: .1rem; font-variant-numeric: tabular-nums; }
+.hm-k small { display: block; font-weight: 500; font-size: var(--fs-2xs); margin-top: .1rem; font-variant-numeric: tabular-nums; }
 .hm-s { font-size: var(--fs-sm); color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .hm-s .hm-a { font-weight: 700; color: var(--text); }
-.hm-x { display: none; }
+/* Two classes, so it outweighs `.hm-ev { display: grid }` further down,
+   which would otherwise show every event on a phone. */
+.hm-feed .hm-x, .hm-evs .hm-x { display: none; }
 
 /* 연구 축 */
 .hm-pl li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: .7rem; align-items: center; padding: .65rem .2rem; border-bottom: 1px solid var(--border-soft); }
