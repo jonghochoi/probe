@@ -628,7 +628,9 @@ def parts(data: dict, inline_md) -> str:
     A schedule split into front/interior/tail, a loss into its terms, a
     pipeline into its stages. The `label` is set in mono because it is the
     paper's own name for the region, `range` carries the math that bounds it,
-    and `state` names the condition it is in. That vocabulary belongs to the
+    and `state` names the condition it is in. All three take inline markdown:
+    a region the paper names with a symbol (`S^L`, `A^R_h`) is that symbol,
+    and escaped text would print its TeX source instead. That vocabulary belongs to the
     rewrite — each paper cuts its object into the conditions that paper argues
     about — so the fence takes the words rather than supplying a fixed set.
 
@@ -666,9 +668,9 @@ def parts(data: dict, inline_md) -> str:
         rng = str(row.get("range", "")).strip()
         out += (
             f'<div class="pt-row pt-s{slots.get(state, 0)}">'
-            f'<div class="pt-label"><code>{_esc(row["label"])}</code>'
+            f'<div class="pt-label"><code>{inline_md(str(row["label"]))}</code>'
             + (f'<span class="pt-range">{inline_md(rng)}</span>' if rng else "")
-            + (f'<span class="pt-state">{_esc(state)}</span>' if state else "")
+            + (f'<span class="pt-state">{inline_md(state)}</span>' if state else "")
             + "</div>"
             f'<div class="pt-body">{inline_md(str(row["body"]))}</div>'
             "</div>"

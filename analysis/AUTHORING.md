@@ -315,7 +315,9 @@ reader should see the stub.
 
 `probe-split` for a contrast (2–3 cards), including a corpus paper that
 prescribed something different for the same problem; `probe-parts` for one
-thing cut into named regions.
+thing cut into named regions. Every `probe-parts` field is inline markdown, so
+a region the paper names with a symbol is written as math — `` $`S^{L}`$ ``,
+`` 신원 $`e^{L}`$ `` — never as bare `S^L`, which prints its caret.
 
 **`us` marks 이 논문의 자리** — the one card holding the position this paper
 takes, and the only card with a color (like `us` on a `probe-scale` row and
