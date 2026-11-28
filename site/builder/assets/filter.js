@@ -27,6 +27,11 @@
  * union it returns reads as no filter at all. Pressing the axis that is
  * already on turns it off.
  *
+ * A change of filter is played rather than swapped (see "What a filter did"):
+ * the rows on screen slide to where the new order puts them, and the count
+ * rolls over. A query the address carries stands in the axis line as a token
+ * whose × drops it.
+ *
  * Filter state lives in the URL hash (`#q=<query>&p=P<n>`) so a view can be
  * bookmarked and shared, and `replaceState` keeps it out of the back-button
  * history — Back should leave the page, not undo a keystroke. So do the page
@@ -55,6 +60,18 @@ const whenEl = document.querySelector("[data-corpus-when]");
 // only through the address (`#q=`), and the box is read when a page has one.
 const input = document.querySelector("[data-q]");
 const resetBtns = [...document.querySelectorAll("[data-reset]")];
+const plineItems = document.querySelector("[data-pline]");
+const statEl = countEl && countEl.parentNode;
+
+/* The query an address carries filters the list as much as an axis does, so it
+ * is said where the axes are: the first item of the axis line, with the × that
+ * drops it. The build prints nothing for it — with no script there is no query
+ * to show — so the script makes the one button it needs. */
+const qtok = document.createElement("button");
+qtok.type = "button"; qtok.className = "rail-item pline-q"; qtok.hidden = true;
+qtok.setAttribute("data-q-clear", "");
+qtok.innerHTML = '<b></b><span class="pline-x" aria-hidden="true">×</span>';
+if (plineItems) plineItems.prepend(qtok);
 
 const pager = root.querySelector("[data-pager]");
 const sizeBtns = [...document.querySelectorAll("[data-size]")];
@@ -125,11 +142,20 @@ function writeHash() {
 function syncControls() {
   if (input && input.value !== state.q) input.value = state.q;
   document.querySelectorAll("[data-facet-pillar]").forEach((b) => {
-    b.setAttribute("aria-pressed", b.dataset.facetPillar === state.pillar ? "true" : "false");
+    const pressed = b.dataset.facetPillar === state.pillar ? "true" : "false";
+    if (b.getAttribute("aria-pressed") === pressed) return;
+    // The fill changes in the same frame as the label (index.css `is-snap`).
+    b.classList.add("is-snap");
+    b.setAttribute("aria-pressed", pressed);
+    requestAnimationFrame(() => requestAnimationFrame(() => b.classList.remove("is-snap")));
   });
   sizeBtns.forEach((b) => b.setAttribute(
     "aria-pressed", +b.dataset.size === state.size ? "true" : "false"));
   if (sizeLabel) sizeLabel.textContent = String(state.size);
+  qtok.hidden = !state.q;
+  qtok.querySelector("b").textContent = `‘${state.q}’`;
+  qtok.title = state.q;
+  qtok.setAttribute("aria-label", `검색어 ‘${state.q}’ 지우기`);
 }
 
 /* ── Query normalisation ──────────────────────────────────────────────── */
@@ -274,6 +300,168 @@ function paintPager(total, pageCount, from, size) {
   });
 }
 
+/* ── What a filter did ────────────────────────────────────────────────── */
+/* A filter re-sorts the list in one frame, and a list that is simply different
+ * reads as a page that reloaded rather than an answer to the click. So around
+ * a change the rows on screen are measured, the change is applied, and each is
+ * played from where it stood: a row that stays slides to its new place, one
+ * that leaves fades where it was, one that arrives rises into its slot, and the
+ * count at the line's end rolls over to the new number with a moment of the
+ * accent. Leaving is quicker than arriving — what goes is already understood.
+ *
+ * Only what was or is on screen plays: a row below the fold has no place the
+ * reader saw. Paging and the page size are not filter changes — the whole page
+ * is replaced, and paging scrolls to it — so those swap. Every timing is a
+ * token from `site.css`, read back here so the two cannot drift.
+ *
+ * Reduced motion keeps the news and drops the travel: nothing slides, arrivals
+ * and the count fade in quickly, the count still takes the accent, and the
+ * query token still comes and goes. A browser without `el.animate` swaps. */
+const still = matchMedia("(prefers-reduced-motion: reduce)");
+const canPlay = typeof Element.prototype.animate === "function";
+const tok = getComputedStyle(document.documentElement);
+const ms = (name, fallback) => parseFloat(tok.getPropertyValue(name)) || fallback;
+const EASE = tok.getPropertyValue("--ease-out").trim() || "cubic-bezier(.16,1,.3,1)";
+const T_MOVE = ms("--dur-long", 280), T_IN = ms("--dur-mid", 200), T_OUT = ms("--dur-micro", 120);
+// Arrivals wait until what leaves is half gone from their slot, then follow
+// one another down the list — but the last starts no more than a beat after
+// the first: a longer stagger is a wait.
+const STEP = 24, STAGGER_CAP = 96;
+
+let playing = [], ghosts = [];
+
+function play(el, frames, opts) {
+  const a = el.animate(frames, Object.assign({ easing: EASE }, opts));
+  playing.push(a);
+  return a;
+}
+
+/* What left is gone from the layout the moment the change lands, so it fades
+ * as a stand-in: a copy that holds nothing a script or a reader can reach,
+ * laid over the spot the original held. */
+function ghost(copy, rect, host) {
+  const box = host.getBoundingClientRect();
+  copy.removeAttribute("id"); copy.hidden = false;
+  [copy, ...copy.querySelectorAll("*")].forEach((el) => {
+    [...el.attributes].forEach((at) => { if (at.name.startsWith("data-")) el.removeAttribute(at.name); });
+  });
+  copy.classList.add("is-leaving");
+  copy.setAttribute("aria-hidden", "true");
+  copy.inert = true;
+  Object.assign(copy.style, {
+    left: `${rect.left - box.left}px`, top: `${rect.top - box.top}px`,
+    width: `${rect.width}px`, height: `${rect.height}px`,
+  });
+  host.appendChild(copy);
+  ghosts.push(copy);
+  return copy;
+}
+
+function played(change) {
+  if (!canPlay) { change(); return; }
+  const reduce = still.matches;
+  const vh = innerHeight;
+  const seen = (r) => r.height > 0 && r.bottom > 0 && r.top < vh;
+
+  // Before: measured mid-flight if a previous change is still playing, so a
+  // second click carries each row on from where it is, not from where it was
+  // headed.
+  const was = new Map();
+  cards.forEach((card) => {
+    if (card.hidden) return;
+    const r = card.getBoundingClientRect();
+    if (seen(r)) was.set(card, r);
+  });
+  const statWas = statEl && { text: statEl.textContent, when: whenEl && whenEl.hidden,
+                              rect: statEl.getBoundingClientRect(), copy: statEl.cloneNode(true) };
+  const tokWas = !qtok.hidden && { rect: qtok.getBoundingClientRect(), copy: qtok.cloneNode(true) };
+  // What stands under the list — the pager, 빈자리 — rides on its length, so
+  // it travels with the rows instead of jumping to where a shorter list ends.
+  const below = [];
+  for (let el = list.nextElementSibling; el; el = el.nextElementSibling) below.push(el);
+  const belowWas = below.map((el) => el.getBoundingClientRect().top);
+  const pills = plineItems ? [...plineItems.children].filter((el) => el !== qtok) : [];
+  const pillsWas = pills.map((el) => el.getBoundingClientRect().left);
+
+  playing.forEach((a) => a.cancel()); playing = [];
+  ghosts.forEach((g) => g.remove()); ghosts = [];
+
+  change();
+
+  // The rows, in the order they now stand.
+  let arriving = 0;
+  [...list.children].forEach((card) => {
+    if (card.hidden || !card.hasAttribute("data-card")) return;
+    const r = card.getBoundingClientRect();
+    const from = was.get(card);
+    if (from) {
+      was.delete(card);
+      const dy = from.top - r.top;
+      if (!reduce && Math.abs(dy) > 1) {
+        play(card, [{ transform: `translateY(${dy}px)` }, { transform: "none" }], { duration: T_MOVE });
+      }
+    } else if (seen(r)) {
+      // Without the leavers' fade there is nothing to cover, so the arrivals
+      // start part-way in rather than leave the list blank for a frame.
+      if (reduce) play(card, [{ opacity: .4 }, { opacity: 1 }], { duration: T_OUT });
+      else play(card, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
+                { duration: T_IN, delay: T_OUT / 2 + Math.min(arriving++ * STEP, STAGGER_CAP), fill: "backwards" });
+    }
+  });
+  if (!reduce) below.forEach((el, i) => {
+    const r = el.getBoundingClientRect(), dy = belowWas[i] - r.top;
+    if (Math.abs(dy) > 1 && (seen(r) || (belowWas[i] < vh && belowWas[i] + r.height > 0))) {
+      play(el, [{ transform: `translateY(${dy}px)` }, { transform: "none" }], { duration: T_MOVE });
+    }
+  });
+  // What is left in `was` was on screen and is now off the page.
+  if (!reduce) was.forEach((r, card) => {
+    const g = ghost(card.cloneNode(true), r, list);
+    play(g, [{ opacity: 1 }, { opacity: 0 }], { duration: T_OUT, fill: "forwards" })
+      .onfinish = () => g.remove();
+  });
+
+  // The count rolls: the old reading lifts away where it stood while the new
+  // one rises into place, tinted with the accent for a moment.
+  if (statWas && (statWas.text !== statEl.textContent || statWas.when !== (whenEl && whenEl.hidden))) {
+    if (!reduce) {
+      const g = ghost(statWas.copy, statWas.rect, bar);
+      play(g, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }],
+           { duration: T_OUT, fill: "forwards" }).onfinish = () => g.remove();
+      play(statEl, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }],
+           { duration: T_IN, delay: T_OUT / 2, fill: "backwards" });
+    } else {
+      play(statEl, [{ opacity: 0 }, { opacity: 1 }], { duration: T_OUT });
+    }
+    const ink = getComputedStyle(document.documentElement).getPropertyValue("--accent-ink").trim();
+    const rest = getComputedStyle(countEl).color;
+    if (ink) play(countEl, [{ color: ink }, { color: rest }], { duration: T_MOVE });
+  }
+
+  // The query token: it arrives in its slot and the axes make room for it, or
+  // it fades where it was and the axes close the gap.
+  const tokNow = !qtok.hidden;
+  if (!!tokWas !== tokNow) {
+    if (tokNow) {
+      play(qtok, reduce ? [{ opacity: 0 }, { opacity: 1 }]
+                        : [{ opacity: 0, transform: "scale(.9)" }, { opacity: 1, transform: "none" }],
+           { duration: reduce ? T_OUT : T_IN });
+    } else if (!reduce) {
+      const g = ghost(tokWas.copy, tokWas.rect, bar);
+      play(g, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.9)" }],
+           { duration: T_OUT, fill: "forwards" }).onfinish = () => g.remove();
+    }
+    // Closing the gap waits until the token is half gone, so the two do not
+    // cross.
+    const wait = tokNow ? 0 : T_OUT / 2;
+    if (!reduce) pills.forEach((el, i) => {
+      const dx = pillsWas[i] - el.getBoundingClientRect().left;
+      if (Math.abs(dx) > 1) play(el, [{ transform: `translateX(${dx}px)` }, { transform: "none" }],
+                                 { duration: T_IN, delay: wait, fill: "backwards" });
+    });
+  }
+}
+
 const SMOOTH = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
 function toPage(n) {
@@ -286,9 +474,12 @@ function toPage(n) {
 }
 
 /* Every control that routes through here — an axis, a page, a page size —
- * changes the state the address carries, so it is written back. */
-function refresh() {
-  syncControls(); shelf && shelf.paint(); apply(); writeHash();
+ * changes the state the address carries, so it is written back. A change of
+ * filter is played; the rest swap. */
+function refresh(filtered) {
+  const paint = () => { syncControls(); shelf && shelf.paint(); apply(); };
+  if (filtered) played(paint); else paint();
+  writeHash();
 }
 
 /* ── Wiring ───────────────────────────────────────────────────────────── */
@@ -330,7 +521,7 @@ document.addEventListener("click", (e) => {
     const k = p.dataset.facetPillar;
     state.pillar = state.pillar === k ? "" : k;
     state.page = 1;
-    refresh();
+    refresh(true);
   }
   else if (pageBtn) { toPage(+pageBtn.dataset.page); }
   else if (stepBtn) { toPage(state.page + +stepBtn.dataset.pageRel); }
@@ -347,12 +538,17 @@ document.addEventListener("click", (e) => {
   }
   else if (e.target.closest("[data-reset]")) {
     state.q = ""; state.pillar = ""; state.page = 1;
-    refresh();
+    refresh(true);
+  }
+  // The query token's ×: the query goes, the axis stays.
+  else if (e.target.closest("[data-q-clear]")) {
+    state.q = ""; state.page = 1;
+    refresh(true);
   }
 });
 
 addEventListener("hashchange", () => {
-  readHash(); syncControls(); apply();
+  played(() => { readHash(); syncControls(); apply(); });
   // A `t=` that `readHash` folded into the query leaves the address with it.
   if (new URLSearchParams(location.hash.replace(/^#/, "")).has("t")) writeHash();
 });
@@ -416,7 +612,6 @@ addEventListener("keydown", (e) => {
 
 /* The axis line scrolls sideways once its axes outrun it; its fade says so
  * until the end is in view. */
-const plineItems = document.querySelector("[data-pline]");
 if (plineItems) {
   const edge = () => bar.classList.toggle("at-end",
     plineItems.scrollLeft + plineItems.clientWidth >= plineItems.scrollWidth - 4);

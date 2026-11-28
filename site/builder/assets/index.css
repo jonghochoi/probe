@@ -150,10 +150,34 @@ html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto;
 .rail-item.pillar b { flex: none; }
 .rail-item:hover { background: var(--surface-2); color: var(--text); }
 .rail-item[aria-pressed="true"] { background: var(--accent); }
+/* Pressing and releasing land at once (`filter.js` sets `is-snap` for the
+   frame the state changes): the label's colour switches with the state, so a
+   fill fading in or out under it would leave light text on a pale ground, or
+   dark text on the accent, for the length of the fade. The hover tint keeps
+   its transition. */
+.rail-item.is-snap { transition: none; }
 .rail-item[aria-pressed="true"] b,
 .rail-item[aria-pressed="true"] .rn { color: var(--on-accent); opacity: 1; }
 .rail-item[aria-pressed="true"] .rl { color: var(--on-accent); opacity: .85; }
 .rail-item[hidden] { display: none; }
+/* The query a `#q=` address carries, as the line's first item (`filter.js`
+   makes it): the list is filtered by it as much as by an axis, so it is said
+   where the axes are, and its × is the way to drop it short of an empty
+   result. It wears the accent's tint rather than its fill — a filter that is
+   on, but not one of the axes the line offers. */
+.pline .pline-q {
+  align-items: center; gap: .3rem; margin-right: .2rem;
+  background: var(--accent-soft); color: var(--accent-ink);
+}
+.pline .pline-q b { color: var(--accent-ink); max-width: 14em; }
+.pline .pline-q .pline-x { font-size: var(--fs-xs); line-height: 1; opacity: .7; }
+.pline .pline-q:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-ink); }
+.pline .pline-q:hover .pline-x { opacity: 1; }
+/* A row, the count or the token a filter change took away, fading where it
+   stood while the list settles (`filter.js`): laid over its old spot, out of
+   the flow and out of reach. Scoped to the list's frame so it outranks the
+   row's own `position: relative`. */
+.corpus .is-leaving { position: absolute; margin: 0; pointer-events: none; box-sizing: border-box; }
 
 /* ── 책갈피: one line back to where the reader stopped ────────────────── */
 /* The reader's own unfinished business, over the list: it is only there at
@@ -228,6 +252,8 @@ html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto;
 .rowstar[aria-pressed="true"] { color: var(--accent-ink); }
 
 /* ── The list ─────────────────────────────────────────────────────────── */
+/* The rows' box anchors the rows a filter change is fading out. */
+.rows { position: relative; }
 .listhead, .row {
   display: grid; align-items: baseline;
   grid-template-columns: 4.2rem 5.6rem minmax(0, 1fr) 7.8rem;
