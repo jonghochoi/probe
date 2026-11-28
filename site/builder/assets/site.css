@@ -2297,6 +2297,42 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
 }
 .tab:hover { color: var(--text); }
 .tab[aria-selected="true"] { color: var(--accent-ink); border-bottom-color: var(--accent-ink); }
+/* With a script the strip has one mark that slides from the tab left to the
+   tab chosen (`paper.js` sets its transform), so a switch says which way the
+   reader turned; the selected tab's own border is the mark without one. A 1px
+   bar scaled to the tab's width, so the slide moves only a transform. */
+.tab-list { position: relative; }
+.tab-list.has-ink .tab[aria-selected="true"] { border-bottom-color: transparent; }
+.tab-ink {
+  position: absolute; left: 0; bottom: 0; width: 1px; height: 2px;
+  background: var(--accent-ink); transform-origin: 0 0; pointer-events: none;
+  transition: transform var(--dur-mid) var(--ease-out);
+}
+/* The panels change under a nav and strip that stay where they are: while a
+   switch runs (`html.is-turning`, set by `paper.js`) each is a layer of its
+   own in the browser's view transition, shown live, so the mark slides inside
+   the strip rather than fading between two places. The header is such a layer
+   when both sides show it in one place. A strip that docks or undocks because
+   the new side sits at another scroll goes straight to its new place: gliding
+   there would draw it across the header it is leaving.
+   The old side leaves at once and the new one rises from the page's own
+   ground. A cross-fade lays two columns of text over each other, and with
+   the old side leaving faster than the new one arrives the page dims between
+   them; one fade from the ground does neither. */
+html.is-turning .site-nav { view-transition-name: probe-nav; }
+html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
+::view-transition { background: var(--bg); }
+::view-transition-group(*) { animation-duration: var(--dur-short); }
+::view-transition-group(probe-nav), ::view-transition-group(probe-tabs),
+::view-transition-group(probe-head) { animation: none; }
+::view-transition-old(*) { display: none; }
+::view-transition-new(probe-nav), ::view-transition-new(probe-tabs),
+::view-transition-new(probe-head) { animation: none; }
+::view-transition-new(root) { animation: vt-in var(--dur-short) var(--ease-out) both; }
+@keyframes vt-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+}
 /* 비교 carries its count in the tab, because the number is the whole reason to
    look. Filled rather than outlined: it is the one thing in the strip that
    says how much is behind a tab, and an outline at this size reads as a second
