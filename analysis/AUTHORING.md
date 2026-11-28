@@ -633,6 +633,20 @@ operators, set and interval notation). The discriminating signal is a Greek
 letter, a LaTeX macro, a math operator or an equation `=` — never `×` / `·` /
 `_` alone, which occur in shapes and specs too.
 
+**Notation outside math prints as typed.** A superscript, a braced subscript or
+a LaTeX command written bare — `S^L`, `x_{t+1}`, `\lambda` — publishes its
+caret, braces and backslash, and a one-letter subscript `x_t` publishes its
+underscore. Every field that renders Markdown takes inline math, so there the
+symbol goes in `` $`…`$ ``, and a formula goes in one span rather than a span
+per symbol (`` $`z = P_{h} u_{h}`$ ``): prose, table cells, callouts, a term or
+quiz body, a symbol `note`, a `probe-parts` row, a `probe-flow` step, a split
+card's `title`, `body` and `note`, a scale `label`. A plain-text field takes no
+math — a caption (§2-6), a `probe-eq` `read` line, a term `title`, a split
+`tag`, the heading's English keyword, a `::: details` summary — so there a
+superscript is written as its Unicode character or in words (`pᵈ`, `Tʳᵉᶠ`,
+`yᴸ`) and a subscript keeps its underscore (`s_min`, `P_i`). The build reports
+the first five of each page.
+
 KaTeX renders server-side at build time, so a macro that works in KaTeX works
 here. There is no macro whitelist to memorize.
 
@@ -810,7 +824,7 @@ means "a strict build fails".
 |---|---|
 | Front matter required keys, `proofread:` a count or `none` (§1), `analysis_of` == file name, `tagline` not echoing the title, `alias:` and `metric:` within their widths (§1), `appendix:` present (R15), the `::: glance` container present (§4) | `site/builder/corpus.py` |
 | `figures:` ↔ every `probe-figure` and `probe-hub` figure id across both surfaces, and every 요약 figure id declared by a body `probe-figure` (R6, G3) | `site/builder/corpus.py` |
-| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), raw HTML published as text (R13), unclosed `**` (§3-2), math published as literal text (§3-1) | `site/builder/render.py` |
+| `###` keyword line (R2), planted-context component (R5), one quiz per section (R11), term anchor ↔ definition pairing (R4), code fence without a caption (R8), raw HTML published as text (R13), unclosed `**` (§3-2), math published as literal text and notation outside math (§3-1) | `site/builder/render.py` |
 | `probe-*` fence schemas — term, eq, figure, flow (incl. its required `why`, the nine-row ceiling, `loop.to` resolving to one earlier step and the `lanes` · `loop` · `hot` limits, R6), lineage, scale, split (at most one `us`), parts (all-or-none `state`, four-state ceiling, R5) | `site/builder/mdext/probefence.py` |
 | GFM alert → `co-*` role mapping and the 400-character body ceiling (R9) | `site/builder/mdext/callouts.py` |
 | The three accepted math forms (§3-1) | `site/builder/mdext/ghmath.py` |

@@ -749,6 +749,10 @@ class DocRenderer:
                 "outside-dollar form `` `$X$` ``; the backticks go INSIDE the dollars"
             )
 
+        # A `probe-parts` label is set in a code tag for its mono face, but it
+        # is inline markdown (paper notation), so it is scanned like prose.
+        prose = re.sub(r'(<div class="pt-label">)<code>(.*?)</code>', r"\1\2",
+                       prose, flags=re.S)
         prose = re.sub(r"<code\b[^>]*>.*?</code>", "", prose, flags=re.S)
         checks = (
             (r"\$\$", "a `$$` block that did not render — it must sit at column 0, "
@@ -762,6 +766,29 @@ class DocRenderer:
                 self.problems.append(
                     f"math published as literal text: {found.group(0)[:60]!r} — {why}"
                 )
+        self._check_bare_notation(prose)
+
+    def _check_bare_notation(self, prose: str) -> None:
+        """Paper notation typed outside math (§3-1) — `S^L`, `x_{t+1}`, `x_t`.
+
+        Runs on the HTML before KaTeX splices in, so a rendered formula is
+        still its `<!--K:…-->` placeholder and code is already gone. A caret,
+        a braced subscript and a LaTeX command are wrong in every field; a bare
+        one-letter subscript only where math was available, so the plain-text
+        fields are cut out for that one.
+        """
+        text = re.sub(r"<!--.*?-->", "", prose, flags=re.S)
+        hits = [m.group(0) for m in _BARE_ANYWHERE.finditer(_tags_to_text(text))]
+        hits += [m.group(0) for m in _BARE_SUBSCRIPT.finditer(
+            _tags_to_text(_PLAIN_FIELDS.sub(" ", text)))]
+        hits = list(dict.fromkeys(h.strip() for h in hits))
+        if hits:
+            shown = ", ".join(repr(h) for h in hits[:5])
+            more = f" and {len(hits) - 5} more" if len(hits) > 5 else ""
+            self.problems.append(
+                f"notation outside math: {shown}{more} — write it as $`…`$, or in "
+                "a plain-text field as its Unicode character (§3-1)"
+            )
 
     # ── entry point ─────────────────────────────────────────────────────
     _TERM_FENCE = re.compile(r"^```probe-term[ \t]*\n(.*?)\n```[ \t]*$", re.M | re.S)
@@ -823,6 +850,33 @@ _RAW_TAG = re.compile(
     r"&lt;/?(?:br|b|i|u|em|strong|span|div|p|sub|sup|font|small|mark|hr|img|a"
     r"|details|summary|center)(?:\s[^&]*)?/?&gt;"
 )
+
+# Notation outside math (§3-1). A caret, a braced subscript or a LaTeX command
+# prints wrong in any field; a one-letter subscript only where math was
+# available. Each match carries the run of characters around it, so the report
+# names the symbol rather than its operator.
+_GREEK = "α-ωΑ-Ω"
+_BARE_ANYWHERE = re.compile(
+    rf"[^\s<>]{{0,10}}(?:[A-Za-z0-9{_GREEK})\]}}'′*]\^[{{A-Za-z0-9{_GREEK}\\(+\-−*]"
+    r"|_\{|\\[A-Za-z]{2,})[^\s<>]{0,10}"
+)
+_BARE_SUBSCRIPT = re.compile(
+    rf"(?<![A-Za-z0-9_])[A-Za-z{_GREEK}][̀-ͯ]?_[A-Za-z0-9{_GREEK}](?![A-Za-z0-9_])"
+)
+# The fields `probefence`, `glance` and the heading print escaped — math is not
+# available there, so a subscript keeps its underscore (§3-1).
+_PLAIN_FIELDS = re.compile(
+    r'<figcaption\b.*?</figcaption>|<p class="eqread">.*?</p>'
+    r'|<p class="flow-why">.*?</p>|<p class="(?:flow-title|figs-q)">[^<]*</p>'
+    r'|<span class="(?:th|sp-tag|en|ln-when|sc-v|mx-id|gh-k|gh-v|gr-k)">[^<]*</span>'
+    r'|<div class="box-head">[^<]*</div>|<summary>[^<]*</summary>',
+    re.S,
+)
+
+
+def _tags_to_text(fragment: str) -> str:
+    return html.unescape(re.sub(r"""<(?:[^>"']|"[^"]*"|'[^']*')*>""", " ", fragment))
+
 
 # Code is exempt from the leaked-math scan: a document *about* the trap quotes
 # the broken forms on purpose, and `$` is ordinary shell syntax.
