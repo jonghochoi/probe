@@ -1636,22 +1636,30 @@ def comparison_index_page(comps: list, papers_by_id: dict) -> str:
 # the rank is a fact a short label states as well.
 _PICK_LABEL = {"🥇": "1위", "🥈": "2위", "🥉": "3위", "🌱": "인접", "📋": "추가"}
 
-_SCOUT_MD = None
+_SCOUT_MD: dict = {}
 
 
-def _scout_md(text: str, decisions: dict, *, inline: bool = False) -> str:
+def _scout_md(text: str, decisions: dict, *, inline: bool = False, katex=None) -> str:
     """A report's Markdown, with each `D#` given the tooltip a rewrite's gets.
 
     The reports are not rewrites: none of `DocRenderer`'s rules binds them,
     and its checks would fire on prose they were never written to. The one
     thing they share with the rewrites is the decision codes, so the codes are
-    decorated the same way and nothing else is borrowed.
+    decorated the same way — and the math dialect, which `scouting/AUTHORING.md`
+    shares with GitHub: given `katex`, `` $`X`$ `` typesets as on a rewrite.
     """
-    global _SCOUT_MD
-    if _SCOUT_MD is None:
+    md = _SCOUT_MD.get(id(katex))
+    if md is None:
         from markdown_it import MarkdownIt
-        _SCOUT_MD = MarkdownIt("commonmark", {"html": False})
-    out = _SCOUT_MD.renderInline(text) if inline else _SCOUT_MD.render(text)
+        from .mdext import ghmath
+        md = MarkdownIt("commonmark", {"html": False})
+        if katex is not None:
+            ghmath.install(md, katex.inline, katex.block)
+        _SCOUT_MD[id(katex)] = md
+    if katex is not None:
+        from .mdext import ghmath
+        text = ghmath.mask_source(text)
+    out = md.renderInline(text) if inline else md.render(text)
     return _decorate_refs(out, decisions)
 
 
@@ -1755,7 +1763,7 @@ def _arxiv_href(paper_id: str) -> str:
     return f"https://arxiv.org/abs/{c.esc(paper_id)}"
 
 
-def _scout_card(paper, decisions: dict, fig: dict | None) -> str:
+def _scout_card(paper, decisions: dict, fig: dict | None, katex=None) -> str:
     """A recommended paper: its axes and rank, its arXiv id, its name, the
     overview figure, the English title, one line, the two tags. The whole
     card opens the detail; the id is the one link out."""
@@ -1764,7 +1772,7 @@ def _scout_card(paper, decisions: dict, fig: dict | None) -> str:
     title = _scout_title(paper)
     figure = (f'<div class="card-fig"><img src="{c.esc(fig["url"])}" alt="" loading="lazy" '
               f'decoding="async"></div>' if fig else "")
-    gist = (f'<p class="card-gist">{_scout_md(paper.gist, decisions, inline=True)}</p>'
+    gist = (f'<p class="card-gist">{_scout_md(paper.gist, decisions, inline=True, katex=katex)}</p>'
             if paper.gist else "")
     return (f'<article class="card" data-open="{pid}">'
             f'<div class="card-top"><p class="card-chips">{chips}</p>'
@@ -1776,7 +1784,7 @@ def _scout_card(paper, decisions: dict, fig: dict | None) -> str:
             + f'{gist}{_scout_tags(paper)}</article>')
 
 
-def _scout_row(paper, decisions: dict) -> str:
+def _scout_row(paper, decisions: dict, katex=None) -> str:
     """A candidate in the table under the cards: the arXiv id, the name with
     its English title after it over its line, the axes with their ranks."""
     pid = c.esc(paper.paper_id)
@@ -1784,7 +1792,7 @@ def _scout_row(paper, decisions: dict) -> str:
     title = _scout_title(paper)
     full = (f'<span class="tl-full" title="{c.esc(paper.title)}">{c.esc(title)}</span>'
             if title else "")
-    line = _scout_md(paper.gist, decisions, inline=True) if paper.gist else c.esc(paper.title)
+    line = _scout_md(paper.gist, decisions, inline=True, katex=katex) if paper.gist else c.esc(paper.title)
     return (f'<li class="tl-row" data-open="{pid}">'
             f'<a class="tl-id" href="{_arxiv_href(paper.paper_id)}" target="_blank" '
             f'rel="noopener" title="arXiv 초록">{pid}</a>'
@@ -1831,7 +1839,8 @@ def _noun_head(noun: str, sub: str) -> str:
     return f'<h4 class="dx-nh">{c.esc(noun)}<span class="dx-nsub">{c.esc(sub)}</span></h4>'
 
 
-def _brief_field(label: str, md: str, gist_words: list[str], decisions: dict) -> str:
+def _brief_field(label: str, md: str, gist_words: list[str], decisions: dict,
+                 katex=None) -> str:
     """One field under its noun heading: its first line, then its list.
 
     The first line is dropped when it only announces the list, or when it
@@ -1843,13 +1852,13 @@ def _brief_field(label: str, md: str, gist_words: list[str], decisions: dict) ->
     announce = bool(rest.strip()) and len(plain) < _ANNOUNCE_MAX
     repeat = bool(gist_words) and shared >= max(2, -(-len(gist_words) // 2))
     body = ("" if announce or repeat
-            else f'<p class="dx-lead">{_figures(_scout_md(lead, decisions, inline=True))}</p>')
+            else f'<p class="dx-lead">{_figures(_scout_md(lead, decisions, inline=True, katex=katex))}</p>')
     if rest.strip():
-        body += _figures(_scout_md(rest, decisions))
+        body += _figures(_scout_md(rest, decisions, katex=katex))
     return f'<section class="dx-ns">{_noun_head(*_FIELD_NOUN[label])}{body}</section>'
 
 
-def _scout_axes(paper, decisions: dict) -> str:
+def _scout_axes(paper, decisions: dict, katex=None) -> str:
     """Each pillar's reading: its headline, then the rest of what it wrote
     under it, in the shape of every other field.
 
@@ -1868,11 +1877,11 @@ def _scout_axes(paper, decisions: dict) -> str:
             head, rest = lines[0], lines[1:]
         else:
             head, rest = pick.gist, []
-        items = "".join(f"<li>{_figures(_scout_md(l, decisions, inline=True))}</li>" for l in rest)
+        items = "".join(f"<li>{_figures(_scout_md(l, decisions, inline=True, katex=katex))}</li>" for l in rest)
         who = (f'<p class="dx-axl">{c.esc(pick.pillar)} · {_PICK_LABEL[pick.kind]}</p>'
                if len(picks) > 1 else "")
         out.append(f'<div class="dx-ax">{who}<p class="dx-lead">'
-                   f'{_figures(_scout_md(head, decisions, inline=True))}</p>'
+                   f'{_figures(_scout_md(head, decisions, inline=True, katex=katex))}</p>'
                    + (f"<ul>{items}</ul>" if items else "") + "</div>")
     return "".join(out)
 
@@ -1904,7 +1913,7 @@ def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "",
             f'<h2>{c.esc(paper.alias)}</h2>'
             + (f'<p class="sd-t">{c.esc(title)}</p>' if title else "")
             + (f'<p class="sd-by">{by}</p>' if by else "")
-            + (f'<p class="sd-g">{_scout_md(paper.gist, decisions, inline=True)}</p>'
+            + (f'<p class="sd-g">{_scout_md(paper.gist, decisions, inline=True, katex=katex)}</p>'
                if paper.gist else "")
             + _scout_tags(paper) + "</header>")
     figure = (f'<figure class="sd-fig"><img src="{c.esc(fig["url"])}" alt="" loading="lazy" '
@@ -1917,22 +1926,22 @@ def _scout_detail(paper, decisions: dict, fig: dict | None, rewrite: str = "",
         fields = dict(lead.brief)
         for key, name, labels in _TAB_FIELDS:
             tabs.append((key, name, "", "".join(
-                _brief_field(l, fields[l], gist_words, decisions) for l in labels)))
+                _brief_field(l, fields[l], gist_words, decisions, katex) for l in labels)))
     elif lead.full:
         # A report written before the brief has one block of prose on what
         # the paper is; it reads as one tab.
         what = _after_headline(lead.contrib)
         if what:
             tabs.append(("w", "요지", "", f'<section class="dx-ns">{_noun_head("요지", "무엇인가")}'
-                                         f'{_figures(_scout_md(what, decisions))}</section>'))
+                                         f'{_figures(_scout_md(what, decisions, katex=katex))}</section>'))
     checks = _bullets(lead.check) if lead.full else []
     judge = (f'<section class="dx-ns">{_noun_head("시사점", "연구 축별")}'
-             f'{_scout_axes(paper, decisions)}</section>')
+             f'{_scout_axes(paper, decisions, katex)}</section>')
     if lead.full and lead.check.strip():
         n = f" · {len(checks)}" if checks else ""
         judge += (f'<section class="dx-ns"><h4 class="dx-nh">확인'
                   f'<span class="dx-nsub">먼저 볼 것{n}</span></h4>'
-                  f'{_figures(_scout_md(lead.check, decisions))}</section>')
+                  f'{_figures(_scout_md(lead.check, decisions, katex=katex))}</section>')
     tabs.append(("u", "판단", str(len(checks)) if checks else "", judge))
 
     bar = "".join(
@@ -2052,12 +2061,12 @@ def scouting_run_page(run, runs: list, decisions: dict, papers_by_id: dict,
     # As many columns as keep the rows even — five cards are three and two,
     # never four and one — and a short row's cards widen to fill it.
     cols = -(-len(first) // -(-len(first) // 4)) if first else 1
-    cards = "".join(_scout_card(p, decisions, figures.get(p.paper_id)) for p in first)
+    cards = "".join(_scout_card(p, decisions, figures.get(p.paper_id), katex) for p in first)
     cards = (f'<div class="cards" style="--cols:{cols}">{cards}</div>' if cards
              else '<p class="corpus-empty">이 회차에 게이트를 통과한 논문이 없습니다.</p>')
     table = ""
     if more:
-        rows = "".join(_scout_row(p, decisions) for p in more)
+        rows = "".join(_scout_row(p, decisions, katex) for p in more)
         table = ('<div class="tl-head" aria-hidden="true"><span>arXiv</span>'
                  '<span>논문 · 한 줄</span><span>연구 축</span></div>'
                  f'<ul class="tl">{rows}</ul>')
