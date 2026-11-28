@@ -180,6 +180,8 @@ if (root) {
   }
   if (fab) fab.addEventListener("click", () => open(root.dataset.open !== "1"));
   if (scrim) scrim.addEventListener("click", () => open(false));
+  const shut = root.querySelector("[data-memo-close]");
+  if (shut) shut.addEventListener("click", () => open(false));
   addEventListener("keydown", (e) => { if (e.key === "Escape") open(false); });
 
   /* Actions */

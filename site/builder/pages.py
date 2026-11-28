@@ -71,7 +71,9 @@ def corpus_index(papers: list[Paper], comps: list | None = None,
     `axes` is what an axis chip's popup says (`decisions.pillar_cards()`, read
     by `pillar.js`): each pillar's introduction and the titles of its open
     questions. It rides here because every page has chips and every
-    page already carries this file.
+    page already carries this file. A paper's `d` is the `D#` codes it cites,
+    which is how a `D#` card lists the other rewrites that cite the same
+    question; a paper that cites none carries no key.
 
     `searchApi` is the semantic-search endpoint, present only when the build
     was given one: the palette's 의미 tab asks it, and every page carries the
@@ -85,7 +87,8 @@ def corpus_index(papers: list[Paper], comps: list | None = None,
         "axes": axes or {},
         "papers": [
             {"id": p.stem, "title": p.title, "tagline": p.tagline,
-             "pillars": p.filed, "date": p.date}
+             "pillars": p.filed, "date": p.date,
+             **({"d": p.decisions} if p.decisions else {})}
             for p in ordered
         ],
         "comparisons": [
@@ -830,7 +833,6 @@ def paper_page(paper: Paper, katex, decisions: dict,
 </div>
 {_cmp_panel(paper, comps, by_id)}
 {lin_html}
-{c.mark_fab()}
 {c.memo_panel(paper.stem, paper.title, f"{BLOB}/analysis/{paper.stem}.md", DISCUSSIONS_NEW)}
 """
     return c.page(
@@ -849,19 +851,19 @@ def paper_page(paper: Paper, katex, decisions: dict,
 
 
 def _acts(paper: Paper) -> str:
-    """즐겨찾기 and 읽음, for this paper, in this browser.
+    """즐겨찾기 and 읽음, then 책갈피 and 메모, for this paper, in this browser.
 
     Both are server-rendered in their empty state and corrected by `shelf.js`
     on load — the build cannot know either one. 읽음 is the reader's claim and
     only ever theirs: neither opening a page nor scrolling to the end of it is
     evidence that it was read, so nothing marks it on their behalf.
 
-    They are glyphs, a pair of round buttons at the right end of the action
-    bar, past a hairline from the links: the bar is one line on a phone only
-    while nothing in it is a word it can do without, and a star and a check are
-    the two marks this site already draws for these two states. What each does is the button's
-    accessible name, and `shelf.js` keeps its `aria-pressed` in step with the
-    state.
+    They are glyphs, round buttons at the right end of the action bar, past a
+    hairline from the links: a star and a check are the two marks this site
+    already draws for these two states, and a second hairline sets off the two
+    that act on a place in the text and on the reader's notes. What each does
+    is the button's accessible name, and `shelf.js` and `memo.js` keep its state
+    in step. On a phone the stylesheet docks the group at the bottom centre.
     """
     return f"""<div class="paper-acts" data-paper-acts
      data-paper-id="{c.esc(paper.stem)}" data-paper-title="{c.esc(paper.title)}">
@@ -870,6 +872,9 @@ def _acts(paper: Paper) -> str:
           aria-label="즐겨찾기" title="즐겨찾기">{c.icon("star", 16)}</button>
   <button type="button" class="act-btn" data-read-toggle aria-pressed="false"
           aria-label="읽음으로 표시" title="읽음으로 표시">{c.icon("check", 16)}</button>
+  <span class="acts-rule" aria-hidden="true"></span>
+  {c.mark_button()}
+  {c.memo_button()}
 </div>"""
 
 

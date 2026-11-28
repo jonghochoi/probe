@@ -25,9 +25,15 @@
  * next one counts from there. A costume that outranks a news costume leaves
  * its value unkept, so the news waits for a quieter visit rather than being
  * spent behind a deadline.
+ *
+ * The first screen settles in as it opens once a session; this marks the
+ * session (`probe.home.entered`, sessionStorage) so the head's boot script
+ * opens it still on the next visit.
  */
 (function () {
 "use strict";
+
+try { sessionStorage.setItem("probe.home.entered", "1"); } catch (e) { /* every visit animates */ }
 
 const pad = (n) => String(n).padStart(2, "0");
 const now = new Date();

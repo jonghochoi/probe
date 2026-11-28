@@ -187,7 +187,7 @@ html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto;
 .resume {
   display: flex; align-items: center; gap: .4rem;
   padding: .42rem .5rem .42rem .7rem; margin-bottom: .9rem;
-  border: 1px solid var(--amber-soft); border-radius: var(--radius);
+  border: 1px solid var(--accent-line); border-radius: var(--radius);
   background: var(--accent-soft);
 }
 .resume[hidden] { display: none; }
@@ -237,19 +237,20 @@ html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto;
 .resume-all:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* ── 즐겨찾기 ─────────────────────────────────────────────────────────── */
-/* Empty until it is the reader's: an unstarred star is drawn in the border
-   colour, so a list of forty papers reads as forty rows rather than forty
-   controls. Only the pressed one takes the accent. */
+/* The paper header's 즐겨찾기 control at the list's scale: a ghost circle
+   whose glyph rests in `--control-quiet` — faint enough that forty rows read
+   as rows, strong enough to be found as a control — and which answers the
+   pointer the way every control does, with the accent's soft ground. Pressed,
+   the ground stays and the star fills. */
 .rowstar {
-  line-height: 0; padding: .1rem .15rem;
-  background: none; border: none; cursor: pointer; color: var(--border);
+  width: 1.75rem; height: 1.75rem; margin: -.3rem 0 -.3rem -.35rem; padding: 0;
+  align-self: start; place-items: center; border-radius: var(--radius-pill);
+  background: none; border: none; cursor: pointer; color: var(--control-quiet);
   transition: color var(--dur-short) var(--ease-out),
-              transform var(--dur-short) var(--ease-out);
+              background-color var(--dur-short) var(--ease-out);
 }
-.rowstar:hover {
-  color: var(--amber-soft); transform: scale(1.12);
-}
-.rowstar[aria-pressed="true"] { color: var(--accent-ink); }
+.rowstar:hover { color: var(--accent-ink); background: var(--accent-soft); }
+.rowstar[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent-soft); }
 
 /* ── The list ─────────────────────────────────────────────────────────── */
 /* The rows' box anchors the rows a filter change is fading out. */
@@ -277,9 +278,10 @@ html.js .pline[data-filters] .pline-items { flex-wrap: nowrap; overflow-x: auto;
    takes its column with it — the four-column list is unchanged there. */
 .rowstar, .lh-star { display: none; }
 html.js .listhead, html.js .row {
-  grid-template-columns: 1.2rem 4.2rem 5.6rem minmax(0, 1fr) 7.8rem;
+  grid-template-columns: 1.4rem 4.2rem 5.6rem minmax(0, 1fr) 7.8rem;
 }
-html.js .rowstar, html.js .lh-star { display: block; }
+html.js .rowstar { display: grid; }
+html.js .lh-star { display: block; }
 /* 읽음 is a tick in front of the date rather than a chip of its own: the row
    has its columns already, and the state is a footnote to the paper, not a
    fact about it. 새 글 takes the same slot — the two cannot both hold, since
@@ -317,7 +319,7 @@ html.js .rowstar, html.js .lh-star { display: block; }
 /* The paper header's link pill closed to a circle: the same tinted ground and
    the same accent answer under the pointer, at the row's scale. */
 .row-link {
-  display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem;
+  display: inline-grid; place-items: center; width: var(--ctl-sm); height: var(--ctl-sm);
   border-radius: 50%; background: var(--surface-2);
   color: var(--text-muted);
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
@@ -358,10 +360,12 @@ html.js .pager[hidden] { display: none; }
   background: none; border: none;
   color: var(--text-muted); font-variant-numeric: tabular-nums;
   transition: color var(--dur-short) var(--ease-out),
-              box-shadow var(--dur-short) var(--ease-out);
+              background-color var(--dur-short) var(--ease-out);
 }
-.pgn { min-width: 1.9rem; text-align: center; }
-.pgn:hover, .pgstep:not(:disabled):hover { color: var(--accent-ink); }
+.pgn { min-width: var(--ctl-md); text-align: center; }
+.pgn:not([aria-current="page"]):hover, .pgstep:not(:disabled):hover {
+  color: var(--accent-ink); background-color: var(--accent-soft);
+}
 /* The page you are on is marked by a rule under it, not a filled pill: the
    strip has no card to fill, and the underline is the one mark that sits on
    the ground the rest of the controls sit on. It is drawn inside the box so
@@ -371,10 +375,10 @@ html.js .pager[hidden] { display: none; }
   background: linear-gradient(var(--accent), var(--accent)) center bottom / 100% 2px no-repeat;
 }
 .pgn[hidden] { display: none; }
-/* 이전 and 다음 go dim rather than away: they hold the two ends of the strip,
-   and ends that move as you walk it are ends you have to re-aim at on every
-   click. */
-.pgstep:disabled { opacity: .4; cursor: default; }
+/* 이전 and 다음 at an end of the list have nowhere to go, so they go unseen —
+   but keep their box: they hold the two ends of the strip, and ends that move
+   as you walk it are ends you have to re-aim at on every click. */
+.pgstep:disabled { visibility: hidden; }
 .pggap { color: var(--text-muted); padding: 0 .1rem; }
 .pggap[hidden] { display: none; }
 /* 한 쪽에 몇 편 at the strip's end: the current count only, the three
@@ -391,16 +395,15 @@ html.js .pager[hidden] { display: none; }
 .psize-menu {
   position: absolute; right: 0; bottom: calc(100% + .35rem); z-index: var(--z-raised);
   display: flex; flex-direction: column; min-width: 5.2rem; padding: .25rem;
-  border-radius: var(--radius-sm); background: var(--surface);
-  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  border-radius: var(--radius); background: var(--surface);
+  box-shadow: var(--shadow-overlay); transform-origin: bottom right;
 }
-.psize-menu[hidden] { display: none; }
 .psize-menu button {
   font: inherit; font-size: var(--fs-xs); font-weight: 600; text-align: left;
-  padding: .4rem .65rem; border: 0; border-radius: var(--radius-xs);
+  padding: .4rem .65rem; border: 0; border-radius: var(--radius-sm);
   background: none; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums;
 }
-.psize-menu button:hover { background: var(--surface-2); }
+.psize-menu button:hover { background: var(--accent-soft); color: var(--accent-ink); }
 .psize-menu button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent-soft); }
 
 .corpus-empty {
@@ -409,11 +412,14 @@ html.js .pager[hidden] { display: none; }
 }
 
 /* Says the bar dropped from "every term" to "any term". It sits above the rows
-   rather than replacing them: the rows are the answer, this is the caveat. */
+   rather than replacing them: the rows are the answer, this is the caveat —
+   an aside on a ground of its own, so it takes the aside's 3px band and
+   squares off on that edge. */
 .corpus-partial {
   color: var(--text-muted); font-size: var(--fs-xs);
   padding: .55rem .75rem; margin: 0 0 .5rem;
-  border-left: 2px solid var(--amber-soft); background: var(--surface-2);
+  border-left: 3px solid var(--accent); background: var(--surface-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 .corpus-partial b { color: var(--text); font-weight: 600; }
 
@@ -442,24 +448,34 @@ html.js .pager[hidden] { display: none; }
 .sh-more { position: relative; display: none; align-self: center; }
 html.js .sh-more { display: block; }
 .sh-more-b {
-  display: grid; place-items: center; width: 2.2rem; height: 2.2rem; padding: 0; cursor: pointer;
+  display: grid; place-items: center; width: var(--ctl-md); height: var(--ctl-md); padding: 0; cursor: pointer;
   border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-muted);
 }
 .sh-more-b:hover, .sh-more-b[aria-expanded="true"] { color: var(--accent-ink); background: var(--accent-soft); }
 .sh-more-b .ico circle { fill: currentColor; }
 .sh-menu {
   position: absolute; right: 0; top: calc(100% + .35rem); z-index: var(--z-raised); display: flex; flex-direction: column;
-  min-width: 10rem; padding: .3rem; border-radius: var(--radius-sm); background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 14%, transparent);
+  min-width: 10rem; padding: .3rem; border-radius: var(--radius); background: var(--surface);
+  box-shadow: var(--shadow-overlay); transform-origin: top right;
 }
-.sh-menu[hidden] { display: none; }
+/* The two menus grow out of the button that opened them and shrink back
+   into it, closing a little quicker than they open (`--dur-pop-*`). */
+.sh-menu, .psize-menu {
+  transition: opacity var(--dur-pop-in) var(--ease-out), transform var(--dur-pop-in) var(--ease-out),
+              display var(--dur-pop-in) allow-discrete;
+}
+@starting-style { .sh-menu, .psize-menu { opacity: 0; transform: scale(.96); } }
+.sh-menu[hidden], .psize-menu[hidden] {
+  display: none; opacity: 0; transform: scale(.96);
+  transition: opacity var(--dur-pop-out) ease-in, transform var(--dur-pop-out) ease-in,
+              display var(--dur-pop-out) allow-discrete;
+}
 .sh-menu button, .sh-menu-i {
-  text-align: left; padding: .5rem .7rem; border: 0; border-radius: calc(var(--radius-sm) - 2px);
+  text-align: left; padding: .5rem .7rem; border: 0; border-radius: var(--radius-sm);
   background: none; color: var(--text); font: inherit; font-size: var(--fs-xs); cursor: pointer;
 }
-.sh-menu button:hover, .sh-menu-i:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
-.sh-menu button[disabled] { opacity: .45; cursor: not-allowed; background: none; }
+.sh-menu button:hover, .sh-menu-i:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.sh-menu button[disabled] { opacity: .5; cursor: not-allowed; background: none; color: var(--text); }
 .hub-status { margin: 0; font-size: var(--fs-2xs); color: var(--accent-ink); }
 .hub-status:empty { display: none; }
 .sh-tag {
@@ -533,7 +549,7 @@ html.js .notfound-find { display: inline-block; }
   /* The block row has no column to keep the star in, so it goes to the corner
      the thumb reaches for and the text makes room for it. */
   .row { padding-right: 1.7rem; }
-  html.js .rowstar { position: absolute; top: .7rem; right: .1rem; }
+  html.js .rowstar { position: absolute; top: .45rem; right: 0; margin: 0; }
   /* A phone fits one chip and a bit of the next, which is what says the rail
      swipes. Hiding the others would make `외 N개` a lie about what is there. */
   .resume { padding-left: .55rem; gap: .3rem; }
@@ -685,8 +701,7 @@ html.js .gap-on.is-open .gap-names { max-height: none; }
 .figpeek {
   position: absolute; z-index: var(--z-raised); width: min(640px, calc(100vw - 32px));
   padding: .55rem .55rem .6rem; border-radius: var(--radius); background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
-  box-shadow: var(--shadow-lg); pointer-events: none;
+  box-shadow: var(--shadow-overlay); pointer-events: none;
 }
 .figpeek[hidden] { display: none; }
 .figpeek img {

@@ -739,7 +739,7 @@ report. The body argues; this talks.
 | | |
 |---|---|
 | Length | **8–10 연**, 900–1,100 printed characters (about 1 분 40 초 읽기). The build reports outside **8–10 연 / 750–1,350 자** — "roughly" is the author's business, "a paragraph" and "the body again" are the build's |
-| Shape | stanzas of 2–4 sentences, one beat per stanza: 무슨 일 → 그 결과 → 이유. The stanza's **first sentence carries it** — the page sets it bold, so a reader skimming the bold reads the story |
+| Shape | stanzas of 2–4 sentences, one beat per stanza: 무슨 일 → 그 결과 → 이유. The stanza's **first sentence carries it** — the page marks it with a highlighter band, so a reader skimming the marked sentences reads the story |
 | Moves | four, in order — **문제** (what was blocked, and why) → **방법** (what the paper changes) → **결과** (what the experiments show) → **한계** (the authors' own limits). The stanza a move starts on opens with its tag: `[문제] …`, `[방법] …`, `[결과] …`, `[한계] …` |
 | Register | 폴라이트-캐주얼 종결 (`~요` / `~ㅂ니다`), 괄호 방백 허용, 감탄은 진짜일 때만 |
 | Closing | the last stanza is a **한 줄 토** built from the paper's own stated limits, inside `[한계]` |
@@ -831,4 +831,4 @@ Everything in §1–§4 not in the tables above is enforced by review — the
 prompt's self-check. The rules code cannot see decide whether 요약 is worth
 having: whether the narrative sounds like a person, whether it relays an
 opinion of ours without naming a `D#`, whether each move starts where its
-role does, and whether the bold first sentences alone tell the story.
+role does, and whether the marked first sentences alone tell the story.

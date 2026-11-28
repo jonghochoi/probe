@@ -28,13 +28,25 @@
       accents[j].setAttribute("aria-checked", String(accents[j].getAttribute("data-accent-pick") === a));
   }
 
+  // Every token changes at once, so every transition that names a colour
+  // would start at once too and finish a beat after the page. The class
+  // (`site.css`) holds them off for the frame the change lands in.
+  function still() {
+    root.classList.add("theme-switching");
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { root.classList.remove("theme-switching"); });
+    });
+  }
+
   function setTheme(mode) {
     try { localStorage.setItem("probe.theme", mode); } catch (e) {}
+    still();
     root.setAttribute("data-theme", mode);
     mark();
   }
 
   function setAccent(key) {
+    still();
     if (key) root.setAttribute("data-accent", key); else root.removeAttribute("data-accent");
     try { if (key) localStorage.setItem("probe.accent", key); else localStorage.removeItem("probe.accent"); } catch (e) {}
     mark();
