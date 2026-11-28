@@ -31,16 +31,15 @@
 
 :root {
   /* ── Reader colour ──────────────────────────────────────────────────── */
-  /* Two numbers make the whole palette: the hue every ground, ink, nav,
-     band and code surface is tinted with, and the accent's chroma. A colour
-     the reader picks (`[data-accent]`, at the foot of this sheet) sets only
-     these two, so every colour reaches the same surfaces at the same
-     strength and differs in hue alone. Midnight is the default. The chroma
-     is not one number for all because sRGB holds less of some hues at the
-     accent's lightness: each colour takes the most its hue holds, up to
-     midnight's. */
+  /* Two numbers make the whole palette: the hue every ground, ink, band and
+     code surface is tinted with, and the accent's chroma. An accent the
+     reader picks (`[data-accent]`, at the foot of this sheet) sets only these
+     two, so every accent reaches the same surfaces at the same strength.
+     인디고 is the default. The chroma is held low — a dusty accent — so the
+     accent never reads as one of the semantic colours (the callouts, the
+     axes, a `D#`), which keep the saturated end of the scale to themselves. */
   --hue:         268;
-  --accent-c:    0.120;
+  --accent-c:    0.066;
   color-scheme: light;
 
   /* ── Ground and ink ─────────────────────────────────────────────────── */
@@ -51,6 +50,10 @@
   --border:      oklch(86.5% 0.020 var(--hue));
   --border-soft: oklch(89.0% 0.016 var(--hue));
   --text:        oklch(22.0% 0.020 var(--hue));
+  /* Page and section titles. The same as the body on a light ground; on a
+     dark one the body is held back from the brightest ink and the titles
+     keep it. */
+  --text-strong: var(--text);
   --text-muted:  oklch(46.0% 0.025 var(--hue));
   --control-quiet: oklch(64.0% 0.020 var(--hue));
 
@@ -284,7 +287,11 @@
   --surface-3:   oklch(27.0% 0.016 var(--hue));
   --border:      oklch(34.0% 0.018 var(--hue));
   --border-soft: oklch(31.0% 0.016 var(--hue));
-  --text:        oklch(93.0% 0.010 var(--hue));
+  /* Body ink at 12.8:1 rather than the brightest the ground allows: very
+     bright strokes on a dark ground bloom, and a rewrite is read for minutes
+     at a time. Titles keep the brighter ink. */
+  --text:        oklch(87.0% 0.012 var(--hue));
+  --text-strong: oklch(93.0% 0.010 var(--hue));
   --text-muted:  oklch(72.0% 0.020 var(--hue));
   --control-quiet: oklch(52.0% 0.020 var(--hue));
 
@@ -646,12 +653,48 @@ html.js .isl { display: block; }
 }
 .isl-i:hover, .isl-i[aria-checked="true"], .isl-i[aria-current="page"] { color: var(--text); }
 .isl-i[aria-current="page"] { font-weight: 700; }
-.isl-sw { --hue: 268; --accent-c: 0.120; width: 11px; height: 11px; border-radius: 50%; flex: none;
+.isl-sw { --hue: 268; --accent-c: 0.066; width: 11px; height: 11px; border-radius: 50%; flex: none;
           background: oklch(45.0% var(--accent-c) var(--hue)); }
 /* The colour row holds more picks than one line fits, so it wraps three to a
    line; the indicator then moves down as well as across. */
-.isl-grid { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); }
+.isl-grid { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); }
 .isl-grid .isl-i { justify-content: flex-start; padding: 0 .55rem; }
+/* A ground is picked by what it looks like: each tile is a few lines of a
+   page on that ground, its first line in the live accent, so the two rows
+   preview each other. */
+.isl-grid .isl-tile { height: auto; flex-direction: column; align-items: stretch; gap: .3rem; padding: .4rem; }
+.isl-pv {
+  display: grid; gap: 4px; align-content: start; height: 2.1rem; padding: 7px 8px; border-radius: var(--radius-sm);
+  background: var(--pv-bg); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--pv-ink) 25%, transparent);
+}
+.isl-pv b { display: block; height: 3px; border-radius: 2px; background: var(--pv-ink); }
+.isl-pv b:first-child { width: 45%; background: var(--accent); }
+.isl-pv b:nth-child(2) { width: 90%; } .isl-pv b:nth-child(3) { width: 65%; }
+.isl-pv[data-pv="light"] { --pv-bg: oklch(98.4% 0.007 268); --pv-ink: oklch(70% 0.02 268); }
+.isl-pv[data-pv="paper"] { --pv-bg: oklch(95.5% 0.022 80);  --pv-ink: oklch(62% 0.03 60); }
+.isl-pv[data-pv="dark"]  { --pv-bg: oklch(17.5% 0.010 268); --pv-ink: oklch(58% 0.012 268); }
+.isl-pv[data-pv="dim"]   { --pv-bg: oklch(25.0% 0.012 268); --pv-ink: oklch(62% 0.012 268); }
+.isl-tile > span { padding-left: .15rem; }
+/* 고대비 is on or off, so it is a switch rather than a row of picks. */
+.isl-switch {
+  display: flex; align-items: center; justify-content: space-between; width: 100%; height: var(--ctl-md);
+  padding: 0 .55rem; border: 0; border-radius: var(--radius-sm); background: none; cursor: pointer;
+  font: inherit; font-size: var(--fs-xs); color: var(--text-muted);
+}
+.isl-switch:hover { background: var(--surface-2); color: var(--text); }
+.isl-track {
+  position: relative; width: 30px; height: 18px; border-radius: var(--radius-pill); flex: none;
+  background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--border);
+  transition: background-color var(--dur-short) var(--ease-out);
+}
+.isl-track::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--surface); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+  transition: translate var(--dur-short) var(--ease-out);
+}
+.isl-switch[aria-checked="true"] { color: var(--text); }
+.isl-switch[aria-checked="true"] .isl-track { background: var(--accent); box-shadow: none; }
+.isl-switch[aria-checked="true"] .isl-track::after { translate: 12px 0; }
 .isl-go { display: none; }
 .isl-go .nav-badge { margin-left: .2rem; }
 .isl-out {
@@ -1584,12 +1627,16 @@ figure.fig figcaption {
 .math-error { color: var(--red); }
 
 /* ── D# citations ─────────────────────────────────────────────────────── */
-/* Amber and dotted, a citation of an open question. Without a script it keeps
-   its `title`; with one, `pillar.js` opens a card on it instead. */
+/* A citation of an open question is a small amber tag in the figure face —
+   shaped as well as coloured, so it never reads as an accent run or a link
+   whatever accent the reader picked. Without a script it keeps its `title`;
+   with one, `pillar.js` opens a card on it instead. */
 abbr.dref {
-  text-decoration: none; cursor: help;
-  font-weight: 700; color: var(--dref);
-  border-bottom: 1px dotted var(--dref);
+  text-decoration: none; cursor: help; white-space: nowrap;
+  font-family: var(--mono); font-size: .8em; font-weight: 700; color: var(--dref);
+  padding: 0 .3em; border-radius: var(--radius-xs);
+  border: 1px solid color-mix(in oklab, var(--dref) 45%, transparent);
+  background: color-mix(in oklab, var(--dref) 10%, transparent);
 }
 
 /* ── Sibling rewrites ─────────────────────────────────────────────────── */
@@ -2794,6 +2841,10 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
 /* A desktop reads at 17px with open leading; a phone, held closer, at 15.5px
    with tighter leading so a paragraph is not a column of three words. */
 @media (max-width: 720px) { body { font-size: 15.5px; line-height: 1.7; } }
+/* Light text on a dark ground reads tighter than the same text on paper, so
+   a dark ground opens the leading a step. */
+:root[data-theme="dark"] body { line-height: 1.95; }
+@media (max-width: 720px) { :root[data-theme="dark"] body { line-height: 1.8; } }
 /* A still light falls from above the title, so a page is never flat white
    and the first thing lit is the thing to read first. It belongs to the top
    of the document and scrolls away with it; the reading further down sits on
@@ -2807,18 +2858,115 @@ body::before {
 /* Every page title and list title in the display face at one weight. */
 .paper-title, .mast h1, .article h2.h-sec, .gh-thesis,
 .row-title, .cmp-card-t, .rel-title { font-family: var(--t-display); font-weight: 700; letter-spacing: -.015em; }
+.paper-title, .mast h1, .article h2.h-sec, .gh-thesis { color: var(--text-strong); }
 
 /* ── Reader colour ────────────────────────────────────────────────────── */
-/* The colours a reader picks from the nav's 색 테마 row (`theme.js`). Each
-   sets the two numbers `:root` builds the palette from and nothing else, so
-   no colour can reach a surface another misses; midnight is `:root` itself.
-   Each colour's swatch on the card takes the same pair, and `.isl-sw`
-   carries midnight's. */
-:root[data-accent="sage"],       .isl-sw[data-sw="sage"]       { --hue: 165; --accent-c: 0.082; }
-:root[data-accent="olive"],      .isl-sw[data-sw="olive"]      { --hue: 125; --accent-c: 0.099; }
-:root[data-accent="sepia"],      .isl-sw[data-sw="sepia"]      { --hue: 62;  --accent-c: 0.090; }
-:root[data-accent="terracotta"], .isl-sw[data-sw="terracotta"] { --hue: 40;  --accent-c: 0.120; }
-:root[data-accent="plum"],       .isl-sw[data-sw="plum"]       { --hue: 322; --accent-c: 0.120; }
+/* What a reader picks on the nav's card (`theme.js`), on two axes. The
+   ground is how the page reads — 라이트, 종이, 다크, 딤 — and 고대비 sharpens
+   whichever ground is on; the accent is a matter of taste. A ground is
+   `data-theme` (light or dark, which every dark rule keys on) plus
+   `data-ground` for the two variants of it; `data-contrast="high"` is the
+   switch. Each block below sets only tokens, and the variants measure against
+   the same floors as `:root`: body text over 10:1, quiet text over 4.5:1 on
+   the hover ground, hairlines at 1.35:1 on the card. */
+
+/* 종이 — a warm sheet for long reading: 14.5:1 body text, the grounds and
+   hairlines on the paper's own hue rather than the accent's. */
+:root[data-ground="paper"] {
+  --bg:          oklch(95.5% 0.022 80);
+  --surface:     oklch(97.6% 0.014 80);
+  --surface-2:   oklch(92.6% 0.026 78);
+  --surface-3:   oklch(89.6% 0.030 76);
+  --border:      oklch(83.5% 0.032 72);
+  --border-soft: oklch(85.5% 0.030 74);
+  --text:        oklch(24.0% 0.025 60);
+  --text-muted:  oklch(45.0% 0.030 60);
+  --control-quiet: oklch(62.0% 0.030 65);
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, var(--surface));
+  --card-bg:     oklch(97.6% 0.014 80 / .8);
+  --band-a:      oklch(92.5% 0.035 75);
+  --band-b:      oklch(94.5% 0.028 85);
+  --code-bg:     oklch(92.0% 0.020 78);
+  --code-bar:    oklch(88.5% 0.022 76);
+  --code-rule:   oklch(84.0% 0.024 74);
+  --code-ink:    oklch(45.0% 0.030 60);
+}
+/* 딤 — a dark ground lifted to L 25%, for a lit room or eyes that find black
+   too stark: 10.8:1 body text. The washes and code surface sit above the
+   ground, as they do on 다크. */
+:root[data-ground="dim"] {
+  --bg:          oklch(25.0% 0.012 var(--hue));
+  --surface:     oklch(28.0% 0.014 var(--hue));
+  --surface-2:   oklch(31.0% 0.015 var(--hue));
+  --surface-3:   oklch(34.0% 0.016 var(--hue));
+  --border:      oklch(42.5% 0.018 var(--hue));
+  --border-soft: oklch(39.0% 0.016 var(--hue));
+  --text-muted:  oklch(73.0% 0.020 var(--hue));
+  --control-quiet: oklch(56.0% 0.020 var(--hue));
+  --accent-soft: oklch(34.0% 0.045 var(--hue));
+  --card-bg:     color-mix(in srgb, var(--surface) 80%, transparent);
+  --band-a:      oklch(30.0% 0.025 var(--hue));
+  --band-b:      oklch(28.0% 0.020 calc(var(--hue) + 20));
+  --wash-key:    oklch(30.0% 0.022 258);
+  --wash-win:    oklch(30.0% 0.022 163);
+  --wash-warn:   oklch(30.5% 0.020 75);
+  --wash-ten:    oklch(30.5% 0.024 33);
+  --wash-ctx:    oklch(30.0% 0.026 304);
+  --code-bg:     oklch(32.0% 0.020 var(--hue));
+  --code-bar:    oklch(36.0% 0.017 var(--hue));
+  --code-rule:   oklch(39.0% 0.017 var(--hue));
+  --code-ink:    oklch(74.0% 0.022 var(--hue));
+}
+/* 고대비 — for low vision and glare: black on white (or white on black),
+   hairlines strong enough to read as edges (4.9:1), quiet text at 10:1. It
+   overrides any ground, so 종이 or 딤 under it reads as plain light or dark. */
+:root[data-contrast="high"] {
+  --bg:          oklch(100% 0 0);
+  --surface:     oklch(100% 0 0);
+  --surface-2:   oklch(96.0% 0 0);
+  --surface-3:   oklch(92.0% 0 0);
+  --border:      oklch(55.0% 0 0);
+  --border-soft: oklch(65.0% 0 0);
+  --text:        oklch(0% 0 0);
+  --text-strong: oklch(0% 0 0);
+  --text-muted:  oklch(32.0% 0 0);
+  --control-quiet: oklch(45.0% 0 0);
+  --card-bg:     oklch(100% 0 0);
+  --band-a:      oklch(96.0% 0 0);
+  --band-b:      oklch(100% 0 0);
+}
+:root[data-theme="dark"][data-contrast="high"] {
+  --bg:          oklch(0% 0 0);
+  --surface:     oklch(10.0% 0 0);
+  --surface-2:   oklch(16.0% 0 0);
+  --surface-3:   oklch(22.0% 0 0);
+  --border:      oklch(60.0% 0 0);
+  --border-soft: oklch(48.0% 0 0);
+  --text:        oklch(100% 0 0);
+  --text-strong: oklch(100% 0 0);
+  --text-muted:  oklch(80.0% 0 0);
+  --control-quiet: oklch(62.0% 0 0);
+  --card-bg:     oklch(10.0% 0 0);
+  --band-a:      oklch(16.0% 0 0);
+  --band-b:      oklch(0% 0 0);
+}
+
+/* The accents. Each sets the two numbers `:root` builds the palette from and
+   nothing else; 인디고 is `:root` itself, and each pick's swatch on the card
+   takes the same pair (`.isl-sw` carries 인디고's). 잉크 has no hue at all:
+   the accent is the ink, and colour is left to what means something. */
+:root[data-accent="sage"],       .isl-sw[data-sw="sage"]       { --hue: 165; --accent-c: 0.045; }
+:root[data-accent="terracotta"], .isl-sw[data-sw="terracotta"] { --hue: 40;  --accent-c: 0.066; }
+:root[data-accent="ink"] {
+  --accent:      oklch(30.0% 0.012 var(--hue));
+  --accent-ink:  oklch(28.0% 0.012 var(--hue));
+  --accent-soft: color-mix(in oklab, var(--accent) 12%, var(--surface));
+}
+:root[data-accent="ink"][data-theme="dark"] {
+  --accent:      oklch(86.0% 0.010 var(--hue));
+  --accent-ink:  oklch(90.0% 0.010 var(--hue));
+}
+.isl-sw[data-sw="ink"] { background: oklch(30.0% 0.012 268); }
 
 /* ── 연구 축 popup ────────────────────────────────────────────────────── */
 /* What an axis chip opens (`pillar.js`): a card under the chip, a sheet from

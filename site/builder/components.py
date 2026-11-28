@@ -551,17 +551,20 @@ def page(
 <link rel="stylesheet" href="{asset(f"{up}assets/site.css")}">
 {extra_head}
 <script>
-/* Runs before first paint. Three jobs: set the theme and the reader's colour
-   (otherwise a dark-mode reader gets a white flash on every navigation), mark
+/* Runs before first paint. Three jobs: set the reader's ground, accent and
+   contrast (otherwise a dark-mode reader gets a white flash on every
+   navigation) — a stored 종이 or 딤 is a light or dark theme plus its ground —, mark
    the document as scripted, so JS-only controls can hide themselves in CSS instead of
    appearing and then vanishing once a deferred script loads, and mark a
    session that has already seen the first screen open, so it opens still. */
 (function(){{document.documentElement.classList.add('js');
 try{{if(sessionStorage.getItem('probe.home.entered'))document.documentElement.classList.add('hm-entered');}}catch(e){{}}
-try{{var t=localStorage.getItem('probe.theme');
+try{{var r=document.documentElement,t=localStorage.getItem('probe.theme');
 if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
-document.documentElement.setAttribute('data-theme',t);
-var a=localStorage.getItem('probe.accent');if(a)document.documentElement.setAttribute('data-accent',a);}}catch(e){{}}}})();
+r.setAttribute('data-theme',t==='dark'||t==='dim'?'dark':'light');
+if(t==='paper'||t==='dim')r.setAttribute('data-ground',t);
+if(localStorage.getItem('probe.contrast')==='high')r.setAttribute('data-contrast','high');
+var a=localStorage.getItem('probe.accent');if(a)r.setAttribute('data-accent',a);}}catch(e){{}}}})();
 </script>
 </head>
 <body{" " + body_attrs if body_attrs else ""}>
@@ -652,23 +655,28 @@ def _current(key: str, here: str) -> str:
     return ' aria-current="page"' if key and key == here else ""
 
 
-# The colours a reader can pick, in the card's order: the name, and the key
-# `site.css` reads off `data-accent` (midnight is the default and has none).
-# A swatch is drawn by `site.css` from the same key, so a colour's hue and
-# chroma are written once, there. The card lays them three to a row, so the
-# count stays a multiple of three.
-ACCENTS = (("미드나잇", ""),
+# The accents a reader can pick, in the card's order: the name, and the key
+# `site.css` reads off `data-accent` (인디고 is the default and has none).
+# A swatch is drawn by `site.css` from the same key, so an accent's hue and
+# chroma are written once, there. The card lays them two to a row, so the
+# count stays even.
+ACCENTS = (("인디고", ""),
            ("세이지", "sage"),
-           ("올리브", "olive"),
-           ("세피아", "sepia"),
            ("테라코타", "terracotta"),
-           ("플럼", "plum"))
+           ("잉크", "ink"))
+# The grounds a reader can read on: two light, two dark. `theme.js` stores the
+# key under `probe.theme`, and the head's boot script turns it into
+# `data-theme` (light or dark) plus `data-ground` for 종이 and 딤.
+GROUNDS = (("라이트", "light"),
+           ("종이", "paper"),
+           ("다크", "dark"),
+           ("딤", "dim"))
 
 
 def _seg(label: str, title: str, items: str, grid: bool = False) -> str:
     """One row of the card that picks one of several: a track, the items,
     and the indicator `nav.js` slides under whichever item is marked. `grid`
-    wraps the items three to a line, for a pick with more than fit in one."""
+    wraps the items two to a line, for a pick with more than fit in one."""
     tip = f' title="{title}"' if title else ""
     cls = "isl-seg isl-grid" if grid else "isl-seg"
     return (f'<div class="{cls}" role="radiogroup" aria-label="{label}"{tip}>'
@@ -688,8 +696,8 @@ def nav_island(up: str, here: str = "") -> str:
     The card is the pill grown in place rather than a box dropped under it, so
     the thing that opened is visibly the thing that was pressed. `nav.js`
     animates the grow and the indicator in each row; `theme.js` owns what the
-    화면 and 색 테마 rows set. Every control in it is printed here, so the
-    script only moves what already exists.
+    바탕 and 강조 rows and the 고대비 switch set. Every control in it is
+    printed here, so the script only moves what already exists.
 
     None of it works without a script, so `site.css` keeps the whole pill off
     an unscripted page, which falls back to the row of links and
@@ -699,10 +707,11 @@ def nav_island(up: str, here: str = "") -> str:
         f'<a class="isl-i" href="{up}{href}"{_current(key, here)}>'
         f'{label}{_badge(key)}</a>'
         for key, href, label in DESTINATIONS)
-    theme = (f'<button type="button" class="isl-i" role="radio" data-theme-set="light" '
-             f'aria-checked="false">{icon("sun", 14)}라이트</button>'
-             f'<button type="button" class="isl-i" role="radio" data-theme-set="dark" '
-             f'aria-checked="false">{icon("moon", 14)}다크</button>')
+    grounds = "".join(
+        f'<button type="button" class="isl-i isl-tile" role="radio" data-theme-set="{key}" '
+        f'aria-checked="false"><i class="isl-pv" data-pv="{key}" aria-hidden="true">'
+        f'<b></b><b></b><b></b></i><span>{name}</span></button>'
+        for name, key in GROUNDS)
     accents = "".join(
         f'<button type="button" class="isl-i" role="radio" data-accent-pick="{key}" '
         f'aria-checked="false"><i class="isl-sw" data-sw="{key}"></i>{name}</button>'
@@ -722,8 +731,9 @@ def nav_island(up: str, here: str = "") -> str:
           <button type="button" class="isl-x" data-isl-close aria-label="닫기">{icon("close", 14)}</button></div>
         <nav class="isl-sec isl-go" aria-label="이동"><span class="isl-h">이동</span>
           <div class="isl-seg">{'<span class="isl-blob" aria-hidden="true"></span>'}{go}</div></nav>
-        <div class="isl-sec"><span class="isl-h">화면</span>{_seg("화면", "다크 모드 전환 (Ctrl+Shift+L)", theme)}</div>
-        <div class="isl-sec"><span class="isl-h">색 테마</span>{_seg("색 테마", "", accents, grid=True)}</div>
+        <div class="isl-sec"><span class="isl-h">바탕</span>{_seg("바탕", "라이트·다크 전환 (Ctrl+Shift+L)", grounds, grid=True)}</div>
+        <div class="isl-sec"><span class="isl-h">강조</span>{_seg("강조", "", accents, grid=True)}</div>
+        <button type="button" class="isl-switch" role="switch" aria-checked="false" data-contrast-toggle>고대비<i class="isl-track" aria-hidden="true"></i></button>
         <a class="isl-out" href="{REPO_URL}" target="_blank" rel="noopener noreferrer">{_github(15)}GitHub 저장소<span class="isl-arr" aria-hidden="true">↗</span></a>
       </div>
     </div>

@@ -59,7 +59,8 @@ corner of the corpus shows every paper's ancestors as missing.
 and the ids this browser has been shown live in that browser's `localStorage`
 under `assets/shelf.js` and `assets/memo.js`; the analysis list's page size
 — a view setting rather than a mark on a paper — under `probe.view.v1`;
-the reader's colour under `probe.accent`; and the newest piece and the
+the reader's ground under `probe.theme`, accent under `probe.accent` and
+high-contrast switch under `probe.contrast`; and the newest piece and the
 scouting run the first screen's mascot has already announced under
 `probe.home.seen.v1` and `probe.home.run.v1` (`assets/home.js`), with
 `probe.home.entered` in `sessionStorage` marking a session that has watched
