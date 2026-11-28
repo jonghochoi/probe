@@ -51,18 +51,101 @@
     return document.getElementById(tab.getAttribute("aria-controls"));
   }
 
-  function showSurface(key, push) {
+  // The tabs are sides of one paper, so a switch reads as turning it over
+  // rather than as loading a page: the mark under the tab slides to the one
+  // chosen, the panels cross-fade under a strip and header that stay put, and
+  // each side keeps the place it was read to.
+  var still = matchMedia("(prefers-reduced-motion: reduce)");
+  var tabList = document.querySelector(".tab-list");
+  var tabsWrap = document.querySelector(".tabs-wrap");
+  var current = "";
+  // Where each side was left, for this page view only: a reader who checks
+  // 요약 from line 400 of 상세 comes back to line 400, not to the top.
+  var leftAt = {};
+
+  // One mark for the whole strip, drawn only with a script; without one the
+  // selected tab's own border stands in. A 1px bar scaled to the tab's width,
+  // so the slide moves only a transform.
+  var ink = null;
+  if (tabList && tabs.length) {
+    ink = document.createElement("i");
+    ink.className = "tab-ink";
+    ink.setAttribute("aria-hidden", "true");
+    tabList.appendChild(ink);
+    tabList.classList.add("has-ink");
+  }
+  function placeInk(glide) {
+    var tab = tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0];
+    if (!ink || !tab) return;
+    if (!glide) ink.style.transition = "none";
+    ink.style.transform = "translateX(" + tab.offsetLeft + "px) scaleX(" + tab.offsetWidth + ")";
+    if (!glide) { void ink.offsetWidth; ink.style.transition = ""; }
+  }
+
+  // Where a side's top meets the docked strip: the first sight of a side the
+  // reader has not opened yet starts there, rather than wherever the last
+  // side's scroll happens to fall inside it.
+  function dockY(panel) {
+    if (!tabsWrap || !panel) return 0;
+    var bars = (parseFloat(getComputedStyle(tabsWrap).top) || 0) + tabsWrap.offsetHeight;
+    return Math.max(0, panel.getBoundingClientRect().top + scrollY - bars);
+  }
+
+  function swap(key, push) {
+    if (key === current) return;
+    if (current) leftAt[current] = scrollY;
     tabs.forEach(function (tab) {
       var on = tab.dataset.tab === key;
       tab.setAttribute("aria-selected", on ? "true" : "false");
       var panel = panelOf(tab);
       if (panel) panel.hidden = !on;
     });
+    var from = current;
+    current = key;
+    if (from) {
+      var shown = tabs.filter(function (t) { return t.dataset.tab === key; })[0];
+      // Instant: the page is smooth-scrolled for links, and a side that slid into
+      // place would read as travel along one long page.
+      scrollTo({ top: key in leftAt ? leftAt[key] : Math.min(scrollY, dockY(shown && panelOf(shown))), behavior: "instant" });
+    }
     // The surface belongs in the URL: a link to one surface of a paper is a
     // thing people send each other, and the back button should undo a switch.
     if (push && history.replaceState) {
       history.replaceState(null, "", key === "glance" ? location.pathname : "#" + key);
     }
+    placeInk(!!from && !still.matches);
+  }
+
+  // `push` is a reader's click on a tab. A switch that follows a link is
+  // instant, since the link's target is scrolled to straight after it.
+  // The fade is the browser's view transition, which snapshots the page
+  // before and after the swap; where there is none, or the reader asked for
+  // less motion, the swap is instant and only the tab's colour moves.
+  // The nav and the strip are layers of their own while it runs (`is-turning`
+  // in site.css), and so is the header when the new side shows it where the
+  // old one did: those stay still while the panels under them change.
+  var paperHead = document.querySelector(".paper-head");
+  var turn = 0;
+  function showSurface(key, push) {
+    if (key === current) return;
+    if (!push || !current || still.matches || !document.startViewTransition) { swap(key, push); return; }
+    var root = document.documentElement, mine = ++turn;
+    var r = paperHead && paperHead.getBoundingClientRect();
+    var headAt = r && r.bottom > 0 && r.top < innerHeight ? r.top : null;
+    root.classList.add("is-turning");
+    if (headAt !== null) paperHead.style.viewTransitionName = "probe-head";
+    var vt = document.startViewTransition(function () {
+      swap(key, push);
+      // A header the new side shows elsewhere, or not at all, goes with the
+      // old side and rises with the new one rather than jumping to its place.
+      if (headAt !== null && paperHead.getBoundingClientRect().top !== headAt) paperHead.style.viewTransitionName = "";
+    });
+    vt.finished.then(function () {
+      // A later click has started its own transition; the names are its now.
+      if (mine !== turn) return;
+      root.classList.remove("is-turning");
+      if (paperHead) paperHead.style.viewTransitionName = "";
+    });
   }
 
   if (tabs.length) {
@@ -95,6 +178,11 @@
     // Changing only the fragment does not reload the document, so the same
     // link followed from this page has to be handled rather than waited for.
     addEventListener("hashchange", surfaceForHash);
+    // The mark follows the tab's box, which moves as the web font arrives and
+    // as a narrow strip gives its labels less room.
+    if (tabList && window.ResizeObserver) new ResizeObserver(function () { placeInk(false); }).observe(tabList);
+    else addEventListener("resize", function () { placeInk(false); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { placeInk(false); });
   }
 
   /* ── Where the reader is: the contents and the act strip ───────────── */
