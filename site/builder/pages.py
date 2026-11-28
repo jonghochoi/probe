@@ -1189,24 +1189,22 @@ def _toc(entries: list[dict]) -> str:
 
 
 def _header(paper: Paper, tagline: str = "") -> str:
-    """What the paper is: its axes, its number, its one result, its title, the
-    tagline that says what it does, and who wrote it.
+    """What the paper is: its axes, its number, its title, the tagline that
+    says what it does, and who wrote it.
 
     The axis chips open on the line where a breadcrumb would stand: the nav
     already says which list this page belongs to, and the chips both name the
     paper's axes and open each one's introduction (`assets/pillar.js`). The
-    arXiv id beside them links the abstract. The headline number is the
-    rewrite's `metric:` — the one result the paper is remembered by — and the
-    only date is the rewrite's own, at the line's far end: when the paper itself
-    appeared is already in its id. Beside it, how many `/proofread` rounds the
+    arXiv id beside them links the abstract. The rewrite's `metric:` is not
+    here: the 요약 below it states the result in its own words. The only date
+    is the rewrite's own, at the line's far end: when the paper itself appeared
+    is already in its id. Beside it, how many `/proofread` rounds the
     rewrite has been through, or 교정 전 — a reader is told which they read.
 
     The title is the paper's own. The thesis heads the 요약 tab directly below,
     and the links out and the 서재 pair sit at the right end of the tab strip.
     """
     chips = c.pillar_chips([p for p in paper.filed if p != corpus.UNCLASSIFIED])
-    metric = (f'<span class="ph-metric">{c.esc(paper.metric)}</span>'
-              if paper.metric else "")
     checked = f"교정 {paper.proofread}회" if paper.proofread else "교정 전"
     date = (f'<span class="ph-date">작성 {c.esc(paper.date)} · {checked}</span>'
             if paper.date else f'<span class="ph-date">{checked}</span>')
@@ -1215,7 +1213,6 @@ def _header(paper: Paper, tagline: str = "") -> str:
     <div class="ph-line">
       {chips}
       <a class="ph-id" href="{_arxiv_href(paper.stem)}" target="_blank" rel="noopener">{c.esc(paper.stem)}</a>
-      {metric}
       {date}
     </div>
     <h1 class="paper-title">{c.esc(paper.title)}</h1>

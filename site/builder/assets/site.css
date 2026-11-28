@@ -684,9 +684,8 @@ html.js .isl { display: block; }
   mask-image: linear-gradient(180deg, #000 25%, transparent 100%);
 }
 .paper-head-inner { max-width: 1240px; margin: 0 auto; padding: 2rem 1.25rem 0; }
-/* A paper's first line: its axis chips, its arXiv id, its one result, and the
-   rewrite's date at the far end. It wraps rather than scrolls, so nothing on
-   it is cut; a phone reorders it (the 640px block below). */
+/* A paper's first line: its axis chips, its arXiv id, and the rewrite's date
+   at the far end. It wraps rather than scrolls, so nothing on it is cut. */
 .ph-line {
   display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .45rem;
   margin-bottom: .7rem;
@@ -696,11 +695,6 @@ html.js .isl { display: block; }
   text-decoration: none; margin-left: .15rem; font-variant-numeric: tabular-nums;
 }
 .ph-id:hover { color: var(--accent-ink); text-decoration: underline; }
-.ph-metric {
-  font-size: var(--fs-2xs); font-weight: 600; color: var(--accent-ink);
-  background: var(--accent-soft); border-radius: var(--radius-pill); padding: .18rem .6rem;
-  margin-left: .15rem;
-}
 .ph-date {
   margin-left: auto; font-family: var(--num); font-size: var(--fs-2xs);
   color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap;
@@ -2228,11 +2222,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   body { font-size: 14.5px; }
   .shell { padding: 1.25rem .9rem 5rem; }
   .paper-head-inner { padding: 1rem .9rem 0; }
-  /* At a phone's width the metric pill pushes the date onto a third line of
-     its own. The chips, the id and the date fit one line, so the metric
-     follows them on the second and the header's first block is two lines. */
   .ph-line { margin-bottom: .5rem; }
-  .ph-metric { order: 1; margin-left: 0; }
   /* A phone is not wide enough for the name, four destinations and the
      pill on one line. What goes is the four destinations: they move into the
      card the pill's ☰ opens, and the name stays on the row — the mark beside
