@@ -72,7 +72,7 @@ def glue_units(text: str) -> str:
 # named constant rather than a line in the set, and a move here is a move there.
 _STAR_D = ("m8 1.9 1.85 3.75 4.15.6-3 2.93.71 4.13L8 11.4l-3.71 "
            "1.91.71-4.13-3-2.93 4.15-.6Z")
-# 책갈피, the same way: `mark_fab()` presses it, and `assets/shelf.js` and
+# 책갈피, the same way: `mark_button()` presses it, and `assets/shelf.js` and
 # `assets/hub.js` carry the same points for the rows they build at runtime.
 _FLAG_D = "M3.6 1.7h8.8v12.6L8 11.1l-4.4 3.2z"
 
@@ -379,7 +379,7 @@ def paper_mark(i: int, size: int = 11) -> str:
             f'focusable="false">{_PAPER_MARKS[i]}</svg>')
 
 
-def mark_fab() -> str:
+def mark_button() -> str:
     """책갈피 for the section on screen, without going back to the contents.
 
     The contents are the exact surface — a flag per section — but they sit at
@@ -388,24 +388,31 @@ def mark_fab() -> str:
     same one-per-paper toggle: pressing it on a section already marked takes
     the mark off.
 
-    Ships `hidden` and stays out of the page without a script. It belongs to
-    상세 — 요약 is one screen and has no sections to stand in — so `shelf.js`
-    shows it only while that surface is open.
+    One of the reader's controls at the tab strip's right end. Ships
+    `hidden`; it belongs to 상세 — 요약 is one screen and has no sections to
+    stand in — so `shelf.js` shows it only while that surface is open, and the
+    stylesheet keeps its slot meanwhile.
     """
     return (
-        '<button class="mark-fab" data-mark-fab hidden aria-pressed="false" '
+        '<button type="button" class="act-btn" data-mark-fab hidden aria-pressed="false" '
         'aria-label="여기에 책갈피" title="여기에 책갈피">'
-        '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" '
+        '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" '
         f'focusable="false"><path d="{_FLAG_D}"/></svg>'
         "</button>"
     )
 
 
+def memo_button() -> str:
+    """The control that opens the memo panel, beside 책갈피 in the reader's
+    group; `memo.js` lights it and counts the draft."""
+    return (
+        '<button type="button" class="act-btn" data-memo-fab data-has-memo="0" '
+        f'aria-label="메모 열기" title="메모">{icon("pencil", 16)}<span class="count"></span></button>'
+    )
+
+
 def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) -> str:
     return f"""
-<button class="memo-fab" data-memo-fab data-has-memo="0" aria-label="메모 열기" title="메모">
-  {icon("pencil")}<span class="count"></span>
-</button>
 <div class="scrim" data-scrim data-open="0"></div>
 <aside class="memo" data-memo-root data-open="0" inert
        data-paper-id="{esc(paper_id)}"
@@ -416,6 +423,7 @@ def memo_panel(paper_id: str, title: str, paper_url: str, discussions_new: str) 
   <div class="memo-head">
     <h3>메모</h3>
     <span class="memo-status" data-memo-status aria-live="polite"></span>
+    <button type="button" class="memo-x" data-memo-close aria-label="메모 닫기" title="닫기">{icon("close", 16)}</button>
   </div>
   <p class="memo-anchor" data-memo-anchor hidden></p>
   <textarea data-memo-input placeholder="읽다가 생긴 의문·확인할 것을 적어두세요."></textarea>
@@ -543,11 +551,13 @@ def page(
 <link rel="stylesheet" href="{asset(f"{up}assets/site.css")}">
 {extra_head}
 <script>
-/* Runs before first paint. Two jobs: set the theme and the reader's colour
-   (otherwise a dark-mode reader gets a white flash on every navigation) and
-   mark the document as scripted, so JS-only controls can hide themselves in CSS instead of
-   appearing and then vanishing once a deferred script loads. */
+/* Runs before first paint. Three jobs: set the theme and the reader's colour
+   (otherwise a dark-mode reader gets a white flash on every navigation), mark
+   the document as scripted, so JS-only controls can hide themselves in CSS instead of
+   appearing and then vanishing once a deferred script loads, and mark a
+   session that has already seen the first screen open, so it opens still. */
 (function(){{document.documentElement.classList.add('js');
+try{{if(sessionStorage.getItem('probe.home.entered'))document.documentElement.classList.add('hm-entered');}}catch(e){{}}
 try{{var t=localStorage.getItem('probe.theme');
 if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);

@@ -19,9 +19,13 @@
    is pure white.
 
    Separation: the grounds are far enough apart that a card reads as a card on
-   a desktop panel, not only on a bright phone screen. `--border` carries that
-   edge and is measured too: it clears 1.35:1 against both the page and the
-   card, which is what keeps a hairline visible at desktop viewing distance. */
+   a desktop panel, not only on a bright phone screen. `--border` and
+   `--border-soft` carry that edge and are measured too: both clear 1.35:1
+   against the card, which is what keeps a hairline visible at desktop viewing
+   distance — `--border` is the rule that frames, `--border-soft` the one that
+   divides rows inside a frame. A control that is nothing but its glyph — a
+   list row's star — takes `--control-quiet`, the faintest ink that still
+   clears the 3:1 a control needs against the page. */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -45,9 +49,10 @@
   --surface-2:   oklch(95.6% 0.012 var(--hue));   /* tinted panel */
   --surface-3:   oklch(92.6% 0.016 var(--hue));   /* hover / pressed ground */
   --border:      oklch(86.5% 0.020 var(--hue));
-  --border-soft: oklch(92.0% 0.014 var(--hue));
+  --border-soft: oklch(89.0% 0.016 var(--hue));
   --text:        oklch(22.0% 0.020 var(--hue));
   --text-muted:  oklch(46.0% 0.025 var(--hue));
+  --control-quiet: oklch(64.0% 0.020 var(--hue));
 
   /* ── Accent ─────────────────────────────────────────────────────────── */
   /* One accent, in two roles. `--accent` is the brand value: it draws the
@@ -63,25 +68,17 @@
   --accent:      oklch(45.0% var(--accent-c) var(--hue));
   --accent-ink:  oklch(41.0% calc(var(--accent-c) * .92) var(--hue));
   --on-accent:   #ffffff;
-  /* A card is a little translucent so the page's edge glow reads through. */
+  /* A card is a little translucent so the page's top glow reads through. */
   --card-bg:     rgba(255, 255, 255, .74);
-  /* The nav is the one dark ground on a light page — the frame the reading
-     sits in — and the band under each page title is a soft accent wash. */
-  --nav-bg:      oklch(25.0% 0.035 var(--hue));
+  /* The band under each page title is a soft accent wash. */
   --band-a:      oklch(95.0% 0.030 var(--hue));
   --band-b:      oklch(97.5% 0.024 calc(var(--hue) + 20));
-  /* Ink on the nav's dark ground, the same in both themes. */
-  --nav-ink:     oklch(86.0% 0.020 var(--hue));
-  --nav-ink-hi:  oklch(97.0% 0.010 var(--hue));
-  --nav-line:    rgba(255, 255, 255, .22);
-  --nav-mark:    oklch(78.0% calc(var(--accent-c) * .85) calc(var(--hue) + 20));
-  /* The nav's pill (`components.nav_island()`): the bar's own ground lifted
-     a step, so it reads as a raised part of the bar rather than a second
-     colour. Mixed from `--nav-bg`, so every accent and the dark theme carry
-     it without a value of their own. */
-  --nav-pill:    color-mix(in oklch, var(--nav-bg), white 9%);
   --accent-soft: oklch(95.0% 0.030 var(--hue));
-  --amber-soft:  var(--accent);
+  /* The accent as a line — a focused field's edge, a connector, a hit's rim
+     — mixed toward the border so it sits a step under the brand value and
+     never competes with the 2px focus ring, while still clearing 3:1 on the
+     card and on the tinted panel. */
+  --accent-line: color-mix(in oklab, var(--accent) 65%, var(--border));
   --focus:       var(--accent-ink);
   /* The mark's eye. Both sit on the accent hull, which is bright in either
      theme, so they hold their one value across the pair. */
@@ -201,7 +198,7 @@
   /* ── Shape ──────────────────────────────────────────────────────────── */
   /* Cards round at 12px and chips are pills. A surface sits on the page by
      its hairline and a faint shadow; `--shadow-lg` is for what really is
-     above the page — an overlay, a drawer, a card lifted under the pointer. */
+     above the page — an overlay or a drawer — and nothing else. */
   --radius-xs:   4px;
   --radius-sm:   8px;
   --radius:      12px;
@@ -210,8 +207,29 @@
   --shadow-sm:   0 1px 0 oklch(21% 0.018 var(--hue) / .06);
   --shadow-lg:   0 14px 40px oklch(21% 0.018 var(--hue) / .18), 0 0 0 1px oklch(21% 0.018 var(--hue) / .04);
 
+  /* ── Overlays ───────────────────────────────────────────────────────── */
+  /* Everything that floats above the page — a popover, a menu, a drawer, a
+     sheet, the palette — is drawn one way: no border of its own but a ring
+     mixed from the ink, so it weighs the same on either ground, over
+     `--shadow-lg`. A popover or menu rounds at `--radius`; a sheet from the
+     bottom of a phone rounds its top at `--radius-sheet`. */
+  --overlay-ring:   color-mix(in oklab, var(--text) 12%, transparent);
+  --shadow-overlay: 0 0 0 1px var(--overlay-ring), var(--shadow-lg);
+  --radius-sheet:   16px;
+
+  /* ── Control sizes ──────────────────────────────────────────────────── */
+  /* Every control is one of three boxes: a link circle inside a list row,
+     the ordinary control, and the one a thumb aims at. A close button, a
+     link pill and a pager step are all `--ctl-md`, so the same kind of
+     control is the same size wherever it stands. */
+  --ctl-sm:      24px;
+  --ctl-md:      32px;
+  --ctl-lg:      44px;
+
   /* ── Motion ─────────────────────────────────────────────────────────── */
-  /* One easing for entrances, one for state changes, and four durations.
+  /* One easing for entrances, one for state changes, and the durations
+     below; a timing outside them belongs only to the mascot's acting and to
+     a loop that waits, which keep their own clocks.
      A transition names the properties it moves: `all` also animates whatever
      the next rule adds, which is how a hover ends up fading its own border
      colour a frame after the background. */
@@ -222,9 +240,12 @@
   --dur-short:   150ms;
   --dur-mid:     200ms;
   --dur-long:    280ms;
-  /* A card that is a link rises this far under the pointer, so the thing
-     that will open is the thing that moved. */
-  --lift:        translateY(-2px);
+  /* A popover or menu opens a beat slower than it closes: arriving, the eye
+     has to find it; leaving, it only has to get out of the way. */
+  --dur-pop-in:  150ms;
+  --dur-pop-out: 100ms;
+  /* How long a first screen takes to settle as it opens. */
+  --dur-enter:   400ms;
 
   /* ── Layers ─────────────────────────────────────────────────────────── */
   /* The nav out-paints in-page sticky elements, so a docked filter bar or a
@@ -262,9 +283,10 @@
   --surface-2:   oklch(23.5% 0.014 var(--hue));
   --surface-3:   oklch(27.0% 0.016 var(--hue));
   --border:      oklch(34.0% 0.018 var(--hue));
-  --border-soft: oklch(27.5% 0.014 var(--hue));
+  --border-soft: oklch(31.0% 0.016 var(--hue));
   --text:        oklch(93.0% 0.010 var(--hue));
   --text-muted:  oklch(72.0% 0.020 var(--hue));
+  --control-quiet: oklch(52.0% 0.020 var(--hue));
 
   --accent:      oklch(75.0% calc(var(--accent-c) * .85) var(--hue));
   --accent-ink:  oklch(79.0% calc(var(--accent-c) * .78) var(--hue));
@@ -312,7 +334,6 @@
   --shadow-sm: 0 1px 0 oklch(0% 0 0 / .4);
   --shadow-lg: 0 16px 44px oklch(0% 0 0 / .6), 0 0 0 1px oklch(30% 0.017 var(--hue) / .6);
   --card-bg:     color-mix(in srgb, var(--surface) 78%, transparent);
-  --nav-bg:      oklch(12.5% 0.015 var(--hue));
   --band-a:      oklch(24.0% 0.027 var(--hue));
   --band-b:      oklch(22.0% 0.022 calc(var(--hue) + 20));
 }
@@ -364,9 +385,6 @@ a { color: var(--accent-ink); }
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
-/* The nav is the one dark ground in the light theme, where the accent ink
-   sits under 2:1 against it; the nav's own bright ink clears it in both. */
-.site-nav :focus-visible { outline-color: var(--nav-ink-hi); }
 
 /* The first stop for a keyboard: off-screen until it takes focus, then the
    one thing above the nav, so the eight links in it are a choice rather than
@@ -381,8 +399,8 @@ a { color: var(--accent-ink); }
 
 /* Pressed: every control sinks a pixel while it is held, which is the only
    answer a touch screen gets — it has no hover. `translate` rather than
-   `transform`, so it composes with the lift a hover already applies instead
-   of replacing it. */
+   `transform`, so it composes with any transform the control already has
+   instead of replacing it. */
 button:active:not(:disabled), .chip:active, [role="tab"]:active,
 .src-group a:active { translate: 0 1px; }
 
@@ -396,7 +414,12 @@ h1, h2, .paper-title, .row-title, .rel-title {
 /* ── Nav ──────────────────────────────────────────────────────────────── */
 .site-nav {
   position: sticky; top: 0; z-index: var(--z-nav);
-  background: var(--nav-bg);
+  /* The bar is the page's own ground, frosted, so the chrome stays quieter
+     than the title under it and reads the same in either theme; the hairline
+     is what separates it once the page scrolls beneath. */
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
   height: var(--nav-h);
   display: flex; align-items: center;
 }
@@ -404,14 +427,13 @@ h1, h2, .paper-title, .row-title, .rel-title {
   max-width: 1240px; margin: 0 auto; padding: 0 1.25rem;
   width: 100%; display: flex; align-items: center; gap: 1rem;
 }
-/* On the dark nav the wordmark is plain light ink: an accent there would
-   compete with the current-tab mark, the one accent the bar carries. The
-   robot mark stays off the bar — the first screen's greeting is where it
-   stands. */
+/* The wordmark is plain ink: an accent there would compete with the
+   current-tab mark, the one accent the bar carries. The robot mark stays off
+   the bar — the first screen's greeting is where it stands. */
 .nav-logo {
   font-family: var(--t-display);
   font-weight: 800; font-size: var(--fs-md); letter-spacing: -.01em;
-  color: var(--nav-ink-hi); white-space: nowrap; text-decoration: none;
+  color: var(--text); white-space: nowrap; text-decoration: none;
   display: inline-flex; align-items: center; gap: .45rem;
 }
 
@@ -470,13 +492,13 @@ h1, h2, .paper-title, .row-title, .rel-title {
    of 32px boxes with three labels sitting in it rather than two rows of
    different things that happen to be vertically centred together. */
 .nav-links a {
-  text-decoration: none; color: var(--nav-ink);
+  text-decoration: none; color: var(--text-muted);
   font-size: var(--fs-xs); font-weight: 500;
   display: flex; align-items: center; height: 32px;
   padding: 0 .6rem; border-radius: var(--radius-sm); white-space: nowrap;
   transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out);
 }
-.nav-links a:hover { color: var(--nav-ink-hi); background: rgba(255, 255, 255, .08); }
+.nav-links a:hover { color: var(--accent-ink); background: var(--accent-soft); }
 /* Where the reader is, marked the way the pagination strip marks it: a rule
    under the label, not a filled pill. The nav has no card to fill, and the
    underline is the one mark that sits on the ground the rest of the row sits
@@ -486,8 +508,8 @@ h1, h2, .paper-title, .row-title, .rel-title {
    The rule is a background stripe rather than an inset shadow: some engines
    leave a shadow's edge as a hairline down the box's side. */
 .nav-links a[aria-current="page"] {
-  color: var(--nav-ink-hi); font-weight: 600; border-radius: 0;
-  background: linear-gradient(var(--nav-mark), var(--nav-mark)) center bottom / 100% 2px no-repeat;
+  color: var(--text); font-weight: 600; border-radius: 0;
+  background: linear-gradient(var(--accent), var(--accent)) center bottom / 100% 2px no-repeat;
 }
 .nav-links a[aria-current="page"]:hover { background: none; }
 /* 서재's star count: a small filled pill after the word, in the accent. */
@@ -504,7 +526,7 @@ h1, h2, .paper-title, .row-title, .rel-title {
    without a boundary the seam between an unboxed label and a bordered 32px
    button reads as a control that lost its border rather than as the end of
    one kind and the start of another. It goes wherever the destinations go. */
-.nav-rule { width: 1px; height: 18px; background: var(--nav-line); flex: none; }
+.nav-rule { width: 1px; height: 18px; background: var(--border); flex: none; }
 
 /* ── The icon set ─────────────────────────────────────────────────────── */
 /* Every control's glyph is one of `components.icon()`'s paths: no fill, 1.6px
@@ -520,18 +542,12 @@ h1, h2, .paper-title, .row-title, .rel-title {
 .icon-btn {
   border: 1px solid var(--border); background: var(--surface);
   color: var(--text-muted); border-radius: 50%;
-  width: 32px; height: 32px; flex: none; display: grid; place-items: center;
+  width: var(--ctl-md); height: var(--ctl-md); flex: none; display: grid; place-items: center;
   cursor: pointer;
   transition: color var(--dur-short) var(--ease-out),
-              border-color var(--dur-short) var(--ease-out),
-              transform var(--dur-short) var(--ease-out);
+              background-color var(--dur-short) var(--ease-out);
 }
-.icon-btn:hover { color: var(--accent-ink); border-color: var(--amber-soft); transform: var(--lift); }
-/* On the dark bar the controls are outlines in the bar's own ink. */
-.site-nav .icon-btn {
-  background: transparent; border-color: var(--nav-line); color: var(--nav-ink-hi);
-}
-.site-nav .icon-btn:hover { color: var(--nav-ink-hi); border-color: var(--nav-ink); }
+.icon-btn:hover { color: var(--accent-ink); background: var(--accent-soft); }
 
 /* The way out to the repository on an unscripted page, where there is no
    pill and no card to carry it. A scripted page has it as the card's last
@@ -553,13 +569,13 @@ html.js .isl { display: block; }
 .isl.is-open { z-index: var(--z-panel); }
 .isl-shell {
   position: absolute; top: 0; right: 0; width: 100%; height: 100%; overflow: hidden;
-  border-radius: var(--radius-pill); background: var(--nav-pill);
-  box-shadow: inset 0 0 0 1px var(--nav-line);
+  border-radius: var(--radius-pill); background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border);
   transition: background-color var(--dur-long) var(--ease-out),
               box-shadow var(--dur-long) var(--ease-out);
 }
-/* Open, the dark pill turns into a card of the page's own ground: the card
-   holds text to read and choices to make, which is what that ground is for. */
+/* Open, the pill grows into a card on the same ground and lifts off the bar:
+   the card holds text to read and choices to make. */
 .isl.is-open .isl-shell {
   background: var(--surface);
   box-shadow: inset 0 0 0 1px var(--border), var(--shadow-lg);
@@ -576,21 +592,21 @@ html.js .isl { display: block; }
   transition-delay: calc(var(--dur-micro) / 2);
 }
 
-.isl-rest { display: flex; align-items: center; height: 36px; padding: 0 3px; color: var(--nav-ink-hi); }
+.isl-rest { display: flex; align-items: center; height: 36px; padding: 0 2px; color: var(--text); }
 .isl-q, .isl-b {
-  height: 30px; border: 0; background: none; color: inherit; cursor: pointer;
+  height: var(--ctl-md); border: 0; background: none; color: inherit; cursor: pointer;
   border-radius: var(--radius-pill); display: inline-flex; align-items: center; justify-content: center;
   transition: background var(--dur-short) var(--ease-out);
 }
 .isl-q { gap: .45rem; padding: 0 .55rem; }
-.isl-b { width: 30px; }
-.isl-q:hover, .isl-b:hover { background: rgba(255, 255, 255, .1); }
+.isl-b { width: var(--ctl-md); }
+.isl-q:hover, .isl-b:hover { background: var(--accent-soft); color: var(--accent-ink); }
 .isl-q kbd {
   font-family: var(--mono); font-size: var(--fs-3xs); line-height: 1;
-  padding: .2rem .35rem; border: 1px solid var(--nav-line); border-radius: var(--radius-xs);
-  color: var(--nav-ink);
+  padding: .2rem .35rem; border: 1px solid var(--border); border-radius: var(--radius-xs);
+  color: var(--text-muted);
 }
-.isl-sep { width: 1px; height: 16px; background: var(--nav-line); margin: 0 3px; flex: none; }
+.isl-sep { width: 1px; height: 16px; background: var(--border); margin: 0 3px; flex: none; }
 .isl-b .ico-menu { display: none; }
 
 .isl-card {
@@ -602,10 +618,10 @@ html.js .isl { display: block; }
   height: 2rem; padding-left: .5rem; font-size: var(--fs-xs); font-weight: 700;
 }
 .isl-x {
-  width: 30px; height: 30px; border: 0; background: none; cursor: pointer;
+  width: var(--ctl-md); height: var(--ctl-md); border: 0; background: none; cursor: pointer;
   border-radius: var(--radius-pill); color: var(--text-muted); display: grid; place-items: center;
 }
-.isl-x:hover { background: var(--surface-2); color: var(--text); }
+.isl-x:hover { background: var(--accent-soft); color: var(--accent-ink); }
 .isl-sec { display: grid; gap: .35rem; padding: .35rem .1rem; }
 .isl-h { font-size: var(--fs-3xs); color: var(--text-muted); padding-left: .4rem; }
 /* A row that picks one of several is a track with a light indicator under
@@ -651,7 +667,7 @@ html.js .isl { display: block; }
 @media (max-width: 640px) {
   .isl-q kbd, .isl-b .ico-sliders { display: none; }
   .isl-b .ico-menu { display: block; }
-  .isl-q { width: 30px; padding: 0; }
+  .isl-q { width: var(--ctl-md); padding: 0; }
   .isl-go { display: grid; }
   .isl-card { width: min(19rem, calc(100vw - 1.8rem)); }
 }
@@ -755,7 +771,7 @@ html.js .isl { display: block; }
 }
 .src-group a, .act-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .38rem;
-  height: 2rem; padding: 0 .8rem 0 .7rem; white-space: nowrap; flex: none;
+  height: var(--ctl-md); padding: 0 .8rem 0 .7rem; white-space: nowrap; flex: none;
   font: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--text);
   text-decoration: none; cursor: pointer;
   background: var(--surface-2); border: 1px solid transparent; border-radius: var(--radius-pill);
@@ -780,13 +796,48 @@ html.js .isl { display: block; }
   stroke-linecap: round; stroke-linejoin: round;
 }
 
-/* ── 서재: the header's two controls ──────────────────────────────────── */
-/* Both controls write to this browser's localStorage and nowhere else, so
-   without a script they are inert and the pair removes itself. */
+/* ── The reader's controls ────────────────────────────────────────────── */
+/* What this reader has done with the paper, in one group at the strip's right
+   end: 즐겨찾기 and 읽음, a hairline, then 책갈피 and 메모. All four write to
+   this browser's localStorage and nowhere else, so without a script they are
+   inert and the group removes itself. One place for the four means nothing
+   floats over the article, and a reader learns one spot. */
 .paper-acts { display: none; }
 html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
-.act-btn { width: 2rem; padding: 0; color: var(--text-muted); }
+.act-btn { position: relative; width: var(--ctl-md); padding: 0; color: var(--text-muted); }
 .act-btn .ico { width: 16px; height: 16px; }
+.acts-rule { width: 1px; height: 18px; margin: 0 .3rem 0 .25rem; background: var(--border); flex: none; }
+/* 책갈피 is a place in 상세; on 요약 it keeps its slot and goes unseen, so the
+   links beside it never shift when the reader changes tab. */
+.act-btn[data-mark-fab][hidden] { display: inline-flex; visibility: hidden; }
+.act-btn[data-mark-fab] svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
+.act-btn[data-mark-fab][aria-pressed="true"] svg { fill: currentColor; }
+/* A memo in progress lights the pencil and puts its count in the corner. */
+.act-btn[data-has-memo="1"] { color: var(--accent-ink); }
+.act-btn .count {
+  display: none; position: absolute; top: -4px; right: -4px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent);
+  font-size: var(--fs-3xs); font-weight: 800; line-height: 16px; text-align: center;
+}
+.act-btn[data-has-memo="1"] .count { display: inline-block; }
+/* A phone's strip has no room for eight controls and a thumb lives at the
+   bottom of the screen, so there the group leaves the strip for a dock at the
+   bottom centre — the same four, in the same order. */
+@media (max-width: 720px) {
+  html.js .paper-acts {
+    position: fixed; left: 50%; translate: -50% 0; z-index: var(--z-raised);
+    bottom: calc(.9rem + env(safe-area-inset-bottom, 0px));
+    padding: 4px; gap: 2px; border-radius: var(--radius-pill);
+    background: var(--surface); box-shadow: 0 0 0 1px var(--border-soft), var(--shadow-lg);
+  }
+  html.js .paper-acts .act-btn { width: var(--ctl-lg); height: var(--ctl-lg); background: none; }
+  /* The dock has no tab beside it to keep aligned, so an unused slot closes. */
+  html.js .paper-acts .act-btn[data-mark-fab][hidden] { display: none; }
+  html.js .paper-acts .act-btn[aria-pressed="true"] { background: var(--accent-soft); }
+  .src-group + .paper-acts::before { display: none; }
+  html.js body:has(.paper-acts) { padding-bottom: 4.5rem; }
+}
 /* On is the hover ground held, plus a rim in the accent: a pressed control
    reads as pressed with the pointer elsewhere. */
 .act-btn[aria-pressed="true"] {
@@ -808,10 +859,12 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: .7rem .9rem;
   text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-mid) var(--ease-out),
-              transform var(--dur-mid) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
 }
-.rel-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
+/* A card that opens answers the pointer the way a list row does — a deeper
+   ground, a warmer edge and its title in the accent — rather than rising:
+   `--shadow-lg` belongs to what really is above the page. */
+.rel-item:hover { border-color: color-mix(in oklab, var(--accent) 45%, var(--border)); background-color: var(--surface-2); }
 .rel-p {
   grid-column: 1 / -1; font-size: var(--fs-2xs); font-weight: 700;
   color: var(--text-muted);
@@ -893,7 +946,7 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
    row; stacked, the trunk line above them says it alone. */
 .has-trunk .cmp-card-row { padding-top: 1.5rem; margin-top: .55rem; }
 .has-trunk .cmp-card-row::before, .has-trunk .cmp-card-row::after {
-  content: ""; position: absolute; border-color: var(--amber-soft); border-style: solid;
+  content: ""; position: absolute; border-color: var(--accent-line); border-style: solid;
 }
 .has-trunk .cmp-card-row::after { left: 50%; top: 0; height: .75rem; border-width: 0 0 0 1.5px; }
 .has-trunk .cmp-card-row::before {
@@ -906,14 +959,14 @@ html.js .paper-acts { display: flex; flex: none; margin-left: auto; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: .85rem .95rem .8rem;
   text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-mid) var(--ease-out),
-              transform var(--dur-mid) var(--ease-out), opacity var(--dur-short) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out),
+              opacity var(--dur-short) var(--ease-out);
 }
 .has-trunk .cmp-card::before {
   content: ""; position: absolute; left: 50%; top: -.75rem; height: .75rem;
-  border-left: 1.5px solid var(--amber-soft);
+  border-left: 1.5px solid var(--accent-line);
 }
-.cmp-card:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
+.cmp-card:hover { border-color: color-mix(in oklab, var(--accent) 45%, var(--border)); background-color: var(--surface-2); }
 .cmp-card-h { display: flex; align-items: center; gap: .45rem; }
 /* Named like the 요약 cards: the alias underlined in the accent, and the
    accent rising from the card's top edge. */
@@ -1251,8 +1304,8 @@ table.mx thead th[scope="col"] { width: 26%; }
   html.js .shell > .toc.is-open .ms {
     position: absolute; left: -.9rem; top: -.6rem; width: 22rem;
     max-height: calc(100vh - var(--nav-h) - var(--tabs-h, 0px) - 2rem); overflow-y: auto;
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--shadow-lg); padding: .85rem .9rem .6rem;
+    background: var(--surface); border-radius: var(--radius);
+    box-shadow: var(--shadow-overlay); padding: .85rem .9rem .6rem;
   }
 }
 
@@ -1293,27 +1346,6 @@ table.mx thead th[scope="col"] { width: 26%; }
   .toc-mark { opacity: 1; min-height: 2.75rem; }
 }
 
-/* ── 책갈피, where the reader is ──────────────────────────────────────── */
-/* Above the memo button, in the corner a thumb already goes to. The contents
-   answer "mark that section"; this answers "mark here", which is the question
-   a reader who stops reading actually has — and it is the only one of the two
-   that needs no scrolling back to the top of the article. Filled while the
-   section on screen is the marked one, so pressing it again takes it off. */
-.mark-fab {
-  position: fixed; right: 1.5rem; bottom: 4.6rem; z-index: var(--z-raised);
-  width: 44px; height: 44px; display: grid; place-items: center;
-  background: var(--surface); color: var(--text-muted);
-  border: 1px solid var(--border); border-radius: 50%;
-  box-shadow: var(--shadow-lg); cursor: pointer; touch-action: manipulation;
-  transition: color var(--dur-mid) var(--ease-out),
-              border-color var(--dur-mid) var(--ease-out),
-              transform var(--dur-mid) var(--ease-out);
-}
-.mark-fab[hidden] { display: none; }
-.mark-fab svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
-.mark-fab:hover { color: var(--accent-ink); border-color: var(--amber-soft); transform: translateY(-1px); }
-.mark-fab[aria-pressed="true"] { color: var(--accent-ink); border-color: var(--amber-soft); }
-.mark-fab[aria-pressed="true"] svg { fill: currentColor; }
 .article { min-width: 0; }
 
 /* ── Prose ────────────────────────────────────────────────────────────── */
@@ -1551,7 +1583,9 @@ figure.fig figcaption {
 .katex { font-size: 1.04em; }
 .math-error { color: var(--red); }
 
-/* ── D# tooltips ──────────────────────────────────────────────────────── */
+/* ── D# citations ─────────────────────────────────────────────────────── */
+/* Amber and dotted, a citation of an open question. Without a script it keeps
+   its `title`; with one, `pillar.js` opens a card on it instead. */
 abbr.dref {
   text-decoration: none; cursor: help;
   font-weight: 700; color: var(--dref);
@@ -1574,9 +1608,9 @@ abbr.dref {
 .sib:hover, .sib:focus-visible { color: var(--bg); background: var(--accent-ink); }
 
 /* ── Readable layer: inline term anchors (R4) ─────────────────────────── */
-/* Dotted, at full accent strength. A 1px dash in the pale `--amber-soft` was
-   the same weight as an underline artefact — under 15px Korean it read as
-   nothing, and a term whose marker is invisible is a term nobody opens. */
+/* Dotted, 1.5px, at full accent strength: a lighter or thinner dash is the
+   weight of an underline artefact and under 15px Korean reads as nothing, and
+   a term whose marker is invisible is a term nobody opens. */
 .tref {
   font: inherit; background: none; border: none; padding: 0; cursor: pointer;
   color: inherit; border-bottom: 1.5px dotted var(--accent);
@@ -1966,7 +2000,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    other cards stay plain: they are peers, and a second color on a peer says
    there are two positions. Keeping it to one slot is also what lets a
    contrast grow a card without the palette repeating itself. */
-.sp-us { border-color: var(--amber-soft); }
+.sp-us { border-color: var(--accent-line); }
 .sp-us .sp-head { color: var(--accent-ink); }
 
 /* One object decomposed into named regions. */
@@ -2020,35 +2054,12 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .callout code { font-size: .82em; }
 
-/* ── Memo: floating button + slide panel ──────────────────────────────── */
-/* The same 44px round icon target as 책갈피 above it, at every width: the pair
-   reads as one stack of controls, and covers as little of the line under them
-   as the thumb allows. The word lives in `aria-label` and `title`. */
-.memo-fab {
-  position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: var(--z-raised);
-  width: 44px; height: 44px; display: grid; place-items: center; padding: 0;
-  background: var(--surface); color: var(--text-muted);
-  border: 1px solid var(--border); border-radius: 50%;
-  box-shadow: var(--shadow-lg); cursor: pointer; touch-action: manipulation;
-  transition: color var(--dur-mid) var(--ease-out),
-              border-color var(--dur-mid) var(--ease-out),
-              transform var(--dur-mid) var(--ease-out);
-}
-.memo-fab:hover { border-color: var(--amber-soft); color: var(--accent-ink); transform: translateY(-1px); }
-.memo-fab[data-has-memo="1"] { color: var(--accent-ink); border-color: var(--amber-soft); }
-.memo-fab .count {
-  display: none; position: absolute; top: -4px; right: -4px;
-  min-width: 18px; height: 18px; padding: 0 5px;
-  border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent);
-  font-size: var(--fs-3xs); font-weight: 800; line-height: 18px; text-align: center;
-}
-.memo-fab[data-has-memo="1"] .count { display: inline-block; }
+/* ── Memo: the slide panel ────────────────────────────────────────────── */
 
 .memo {
   position: fixed; top: 0; right: 0; z-index: var(--z-panel);
   width: min(420px, 100vw); height: 100dvh;
-  background: var(--surface); border-left: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
+  background: var(--surface); box-shadow: var(--shadow-overlay);
   display: flex; flex-direction: column;
   transform: translateX(100%); transition: transform var(--dur-long) var(--ease-in-out);
 }
@@ -2059,6 +2070,14 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 .memo-head h3 { font-size: var(--fs-base); font-weight: 700; }
 .memo-status { font-size: var(--fs-2xs); color: var(--text-muted); margin-left: auto; }
+/* Every panel that covers the page closes from its own corner, not only from
+   Escape or a tap on the scrim — a touch screen has no Escape. */
+.memo-x {
+  flex: none; display: grid; place-items: center; width: var(--ctl-md); height: var(--ctl-md); padding: 0;
+  margin-right: -.4rem; border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-muted); cursor: pointer;
+  transition: color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+.memo-x:hover { color: var(--accent-ink); background: var(--accent-soft); }
 .memo-anchor {
   font-size: var(--fs-2xs); color: var(--text-muted);
   padding: .5rem 1.15rem 0;
@@ -2071,7 +2090,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   border: 1px solid var(--border); border-radius: var(--radius);
   resize: none; outline: none;
 }
-.memo textarea:focus { border-color: var(--amber-soft); }
+.memo textarea:focus { border-color: var(--accent-line); }
 .memo-note {
   font-size: var(--fs-2xs); color: var(--text-muted); padding: 0 1.15rem .5rem; line-height: 1.5;
 }
@@ -2083,7 +2102,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
    ground, no border, the accent's soft ground under the pointer. The one
    primary action is the same pill filled with the accent. */
 .memo-actions button, .memo-actions a {
-  display: inline-flex; align-items: center; height: 2rem; padding: 0 .95rem;
+  display: inline-flex; align-items: center; height: var(--ctl-md); padding: 0 .95rem;
   font: inherit; font-size: var(--fs-2xs); font-weight: 600;
   border-radius: var(--radius-pill); cursor: pointer;
   border: 1px solid transparent; background: var(--surface-2);
@@ -2096,12 +2115,15 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .memo-actions .primary:hover {
   background: color-mix(in oklab, var(--accent) 88%, var(--text)); color: var(--on-accent);
 }
+/* 삭제 is red at rest, not only under a pointer a touch screen does not have,
+   and it stands apart at the far end; its undo window is the safety net. */
+.memo-actions .danger { background: none; color: var(--red); }
 .memo-actions .danger:hover { background: var(--wash-ten); color: var(--red); }
 .memo-actions .spacer { flex: 1; }
 
 .scrim {
   position: fixed; inset: 0; z-index: var(--z-scrim);
-  background: var(--scrim); backdrop-filter: blur(1px);
+  background: var(--scrim);
   opacity: 0; pointer-events: none; transition: opacity var(--dur-long) var(--ease-out);
 }
 .scrim[data-open="1"] { opacity: 1; pointer-events: auto; }
@@ -2114,8 +2136,6 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
     border: 1px solid var(--border); border-radius: var(--radius);
     background: var(--surface); padding: .85rem 1rem;
   }
-  .memo-fab { right: 1rem; bottom: 1rem; }
-  .mark-fab { right: 1rem; bottom: 4.1rem; }
 }
 
 /* ── The act strip, where the contents rail has no room ──────────────── */
@@ -2178,7 +2198,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 .toc-sheet[hidden] { display: none; }
 .toc-sheet-in {
   width: 100%; max-height: 78vh; overflow-y: auto; overscroll-behavior: contain;
-  background: var(--surface); border-radius: 16px 16px 0 0; box-shadow: var(--shadow-lg);
+  background: var(--surface); border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; box-shadow: var(--shadow-overlay);
   padding: 0 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
 }
 .toc-sheet-h {
@@ -2188,9 +2208,10 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
   padding: .8rem 0 .6rem; font-weight: 700; font-size: var(--fs-sm);
 }
 .toc-sheet-x {
-  width: 2.2rem; height: 2.2rem; display: grid; place-items: center;
-  border: 0; background: none; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm);
+  width: var(--ctl-md); height: var(--ctl-md); display: grid; place-items: center;
+  border: 0; background: none; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-pill);
 }
+.toc-sheet-x:hover { background: var(--accent-soft); color: var(--accent-ink); }
 .toc-sheet .toc {
   position: static; max-height: none; overflow: visible;
   border: 0; padding: 0; background: none;
@@ -2248,7 +2269,7 @@ details.fold[open] > summary::before { transform: rotate(45deg); }
 }
 
 @media print {
-  nav, .memo, .memo-fab, .mark-fab, .scrim, .toc,
+  nav, .memo, .scrim, .toc,
   .paper-acts { display: none !important; }
   .shell { grid-template-columns: 1fr; }
 }
@@ -2291,8 +2312,7 @@ html:has(.tabs-wrap) { --tabs-h: 3.3rem; }
   .tab-tools { gap: .3rem; }
   .tab-tools .src-group span { display: none; }
   .tab-tools .src-group, .tab-tools .paper-acts { gap: 3px; }
-  .tab-tools .src-group a { width: 1.875rem; height: 1.875rem; padding: 0; }
-  .tab-tools .act-btn { width: 1.875rem; height: 1.875rem; }
+  .tab-tools .src-group a { width: var(--ctl-md); height: var(--ctl-md); padding: 0; }
   .src-group + .paper-acts::before { margin: 0 .2rem 0 .15rem; }
 }
 .tab:hover { color: var(--text); }
@@ -2362,10 +2382,9 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
   display: grid; gap: .3rem; padding: 1rem 1.1rem;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); text-decoration: none; color: inherit;
-  transition: border-color var(--dur-short) var(--ease-out),
-              box-shadow var(--dur-mid) var(--ease-out), transform var(--dur-mid) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
 }
-.incmp-item:hover { border-color: var(--amber-soft); box-shadow: var(--shadow-lg); transform: var(--lift); }
+.incmp-item:hover { border-color: color-mix(in oklab, var(--accent) 45%, var(--border)); background-color: var(--surface-2); }
 .incmp-when {
   font-family: var(--mono); font-size: var(--fs-3xs); color: var(--text-muted);
   letter-spacing: .04em;
@@ -2424,7 +2443,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
 }
 /* `currentColor` on the path, so the bracket is one declaration here rather
    than a stroke repeated in every generated <svg>. */
-.fork-br { flex: 0 0 auto; color: var(--amber-soft); display: block; }
+.fork-br { flex: 0 0 auto; color: var(--accent-line); display: block; }
 /* One grid for every branch, not a row each: the alias column is as wide as
    the widest name, so the ids and the stances line up down the card. */
 .fork-branches {
@@ -2455,7 +2474,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
   .fork-branches {
     grid-template-columns: max-content minmax(0, 1fr); grid-auto-rows: auto;
     row-gap: .15rem; padding-left: .6rem;
-    border-left: 2px solid var(--amber-soft);
+    border-left: 2px solid var(--accent-line);
   }
   /* Room is the scarce thing here, not lines: a stance wraps rather than being
      clipped, and the id steps aside for it. */
@@ -2483,9 +2502,16 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
 .g-hub {
   background-color: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 1.15rem 1.35rem; margin-bottom: 1.2rem;
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 1.4rem; align-items: center;
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr);
+  gap: 1.4rem; align-items: start;
 }
+/* The claim is the card's subject and the figure its witness: the claim takes
+   the wider track and stands right under its head, and the figure sits beside
+   it at a size that cannot push the claim down. A figure too fine to read at
+   that size opens whole from itself (`glance._figure`). */
+.gh-text, .gh-fig { min-width: 0; }
+.gh-fig a { display: block; cursor: zoom-in; color: inherit; text-decoration: none; }
+.gh-fig a:hover .fig img { outline: 2px solid var(--accent-line); outline-offset: 2px; }
 @media (max-width: 820px) { .g-hub { grid-template-columns: 1fr; } }
 /* A hub with no figure is one column: an empty figure track wraps the line at
    half the card. The line then takes the tagline's measure and the facts
@@ -2516,8 +2542,8 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
 /* The four moves. Each move's name stands in the margin beside it and rides
    down with the move while it is read, in the act colour the 상세 tab gives
    the same stage; 한계 is grey, the paper speaking against itself. A
-   stanza's first sentence carries the weight, so a reader skimming the bold
-   gets the story. On a phone the name sits above its move. */
+   stanza's first sentence carries the weight, so a reader skimming the
+   marked sentences gets the story. On a phone the name sits above its move. */
 .gn-move { --gn-c: var(--text-muted); display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 0 .9rem; }
 .gn-move + .gn-move { margin-top: 1.15rem; }
 .gn-move[data-move="1"] { --gn-c: var(--act1); }
@@ -2530,7 +2556,14 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
   font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .04em; color: var(--gn-c);
 }
 .gn-mark::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--gn-c); flex: none; }
-.gn-lead { font-weight: 650; }
+/* The lead is marked, not thickened: the reading face ships one weight, and
+   a bold the browser smears out of it fills the counters of every syllable
+   it touches. A band of the accent under the lower part of the line, broken
+   with the line, marks the sentence at the face's own weight. */
+.gn-lead {
+  padding: 0 .1em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background: linear-gradient(transparent 58%, color-mix(in oklab, var(--accent) 22%, transparent) 58%);
+}
 @media (max-width: 560px) {
   .gn-move { display: block; }
   .gn-mark { position: static; display: flex; padding-top: 0; margin-bottom: .45rem; }
@@ -2555,7 +2588,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
 .cmdk { position: fixed; inset: 0; z-index: var(--z-cmdk); }
 .cmdk-scrim {
   position: absolute; inset: 0;
-  background: var(--scrim); backdrop-filter: blur(2px);
+  background: var(--scrim);
   animation: cmdk-in var(--dur-short) var(--ease-out);
 }
 .cmdk-box {
@@ -2564,8 +2597,8 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
   /* Held above centre: a dialog that grows downward from a fixed top edge does
      not move under the reader as results arrive. */
   margin: min(12vh, 6rem) auto 0;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  background: var(--surface);
+  border-radius: var(--radius); box-shadow: var(--shadow-overlay);
   display: flex; flex-direction: column; overflow: hidden;
   max-height: min(38rem, calc(var(--vh-live) - min(12vh, 6rem) - 1.6rem));
   animation: cmdk-rise var(--dur-mid) var(--ease-out);
@@ -2590,7 +2623,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
   font-family: var(--mono); font-size: var(--fs-3xs); padding: .18rem .4rem;
   cursor: pointer;
 }
-.cmdk-esc:hover { color: var(--accent-ink); border-color: var(--amber-soft); }
+.cmdk-esc:hover { color: var(--accent-ink); background: var(--accent-soft); }
 .cmdk-esc .x { display: none; }
 
 .cmdk-list { list-style: none; overflow-y: auto; overscroll-behavior: contain; padding: .35rem; }
@@ -2635,7 +2668,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
    the row is. */
 .cmdk-kind {
   font-size: var(--fs-2xs); font-weight: 700; color: var(--accent-ink);
-  border: 1px solid var(--amber-soft); border-radius: var(--radius-pill);
+  border: 1px solid var(--accent-line); border-radius: var(--radius-pill);
   padding: 0 .3rem; line-height: 1.5; white-space: nowrap;
 }
 .cmdk-meta { display: flex; align-items: center; gap: .3rem; }
@@ -2663,7 +2696,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
   padding: .12rem .65rem; cursor: pointer;
 }
 .cmdk-tab[aria-pressed="true"] {
-  color: var(--accent-ink); border-color: var(--amber-soft); background: var(--accent-soft); font-weight: 700;
+  color: var(--accent-ink); border-color: var(--accent-line); background: var(--accent-soft); font-weight: 700;
 }
 .cmdk-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cmdk-tab-n { font-family: var(--num); font-variant-numeric: tabular-nums; margin-left: .3rem; }
@@ -2673,7 +2706,7 @@ html.is-turning .tabs-wrap { view-transition-name: probe-tabs; }
 /* The row that puts the question to the index: in the accent, since it is
    the one row that does something other than open a page. */
 .cmdk-ask .cmdk-title { color: var(--accent-ink); }
-.cmdk-ask .cmdk-hit { color: var(--accent-ink); border-color: var(--amber-soft); }
+.cmdk-ask .cmdk-hit { color: var(--accent-ink); border-color: var(--accent-line); }
 /* What kind of passage a hit is — 섹션, 용어, 그림, 논문 — in the marks column
    a passage row has in place of the shelf's. */
 .cmdk-hit {
@@ -2740,9 +2773,14 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
   .cmdk-keys, .cmdk-tab-key { display: none; }
 }
 
+/* A theme or colour change repaints every token at once, and a control whose
+   hover transition happens to name `background` would fade there a beat after
+   the page — a light pill left on a dark ground. `theme.js` holds this class
+   for the frame the change lands in. */
+.theme-switching *, .theme-switching *::before, .theme-switching *::after { transition: none !important; }
+
 /* Everything above moves; this is where all of it stops. */
 @media (prefers-reduced-motion: reduce) {
-  :root { --lift: none; }
   html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 1ms !important;
@@ -2752,20 +2790,19 @@ html.cmdk-on, html.cmdk-on body { overflow: hidden; }
   }
 }
 
-/* ── Reading size and the page's edge glow ────────────────────────────── */
+/* ── Reading size and the page's top glow ─────────────────────────────── */
 /* A desktop reads at 17px with open leading; a phone, held closer, at 15.5px
    with tighter leading so a paragraph is not a column of three words. */
 @media (max-width: 720px) { body { font-size: 15.5px; line-height: 1.7; } }
-/* The accent pools faintly at the window's edges and breathes, so a page
-   is never flat white; the reading column in the middle stays clear. */
+/* A still light falls from above the title, so a page is never flat white
+   and the first thing lit is the thing to read first. It belongs to the top
+   of the document and scrolls away with it; the reading further down sits on
+   the plain ground. Strong enough to show on the dark ground too. */
 body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%,
-              color-mix(in srgb, var(--accent) 7%, transparent) 100%);
-  animation: edge-breathe 12s ease-in-out infinite alternate;
+  content: ""; position: absolute; inset: 0 0 auto; height: 40rem; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 90% 55% at 50% -10%,
+              color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%);
 }
-@keyframes edge-breathe { to { opacity: .55; } }
-@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 
 /* Every page title and list title in the display face at one weight. */
 .paper-title, .mast h1, .article h2.h-sec, .gh-thesis,
@@ -2790,22 +2827,42 @@ html.axp-on .chip.pillar[data-p] { cursor: pointer; position: relative; z-index:
 html.axp-on .chip.pillar[data-p]:hover,
 html.axp-on .chip.pillar[data-p]:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pi, var(--accent)) 35%, transparent); }
 html.axp-lock { overflow: hidden; }
-.axp { position: fixed; inset: 0; z-index: var(--z-panel); pointer-events: none; }
+/* It grows out of the chip — `pillar.js` puts the transform origin on the
+   chip's edge, above or below — and shrinks back into it on the way out: the
+   layer keeps its box until the card has left (`allow-discrete`), so closing
+   is a motion too, a little quicker than opening. A sheet rises from the
+   bottom and sinks back. An engine without discrete transitions opens and
+   closes at once. */
+.axp {
+  position: fixed; inset: 0; z-index: var(--z-panel); pointer-events: none;
+  transition: display var(--dur-long) allow-discrete;
+}
 .axp[hidden] { display: none; }
 .axp-bg { position: absolute; inset: 0; pointer-events: auto; }
-.axp-sheet .axp-bg { background: var(--scrim); animation: axp-fade .18s ease-out; }
+.axp-peek .axp-bg { pointer-events: none; }
+.axp-sheet .axp-bg { background: var(--scrim); transition: opacity var(--dur-mid) var(--ease-out); }
 .axp-p {
   position: absolute; pointer-events: auto; overflow-y: auto; overscroll-behavior: contain;
   background: var(--surface); color: var(--text); font-size: var(--fs-sm); line-height: 1.6;
-  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent); border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius); box-shadow: var(--shadow-overlay);
+  transform-origin: var(--ox, 0) var(--oy, 0);
+  transition: opacity var(--dur-pop-in) var(--ease-out), transform var(--dur-pop-in) var(--ease-out);
 }
-.axp-pop .axp-p { width: min(26rem, calc(100vw - 24px)); max-height: min(70vh, 34rem); animation: axp-in .16s ease-out; }
-.axp-sheet .axp-p { left: 0; right: 0; bottom: 0; max-height: 82vh; border-radius: 16px 16px 0 0; animation: axp-up .22s ease-out; }
-@keyframes axp-fade { from { opacity: 0; } }
-@keyframes axp-in { from { opacity: 0; transform: translateY(-4px); } }
-@keyframes axp-up { from { transform: translateY(40px); opacity: .4; } }
-@media (prefers-reduced-motion: reduce) { .axp-p, .axp-bg { animation: none; } }
+.axp-pop .axp-p { width: min(26rem, calc(100vw - 24px)); max-height: min(70vh, 34rem); }
+.axp-sheet .axp-p {
+  left: 0; right: 0; bottom: 0; max-height: 82vh; border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  transition-duration: var(--dur-long);
+}
+@starting-style {
+  .axp-pop .axp-p { opacity: 0; transform: scale(.96); }
+  .axp-sheet .axp-p { transform: translateY(40px); }
+  .axp-sheet .axp-bg { opacity: 0; }
+}
+.axp[hidden] .axp-p { transition-duration: var(--dur-pop-out); transition-timing-function: ease-in; }
+.axp-pop[hidden] .axp-p { opacity: 0; transform: scale(.96); }
+.axp-sheet[hidden] .axp-p { transform: translateY(100%); transition-duration: var(--dur-mid); }
+.axp-sheet[hidden] .axp-bg { opacity: 0; }
+.axp-pop[hidden] { transition-duration: var(--dur-pop-out); }
 /* the head carries the axis's own colour, fading into the card */
 .axp-h {
   position: sticky; top: 0; z-index: 1; display: flex; align-items: flex-start; gap: .7rem; padding: 1rem 1rem .8rem 1.1rem;
@@ -2816,10 +2873,10 @@ html.axp-lock { overflow: hidden; }
 .axp-names b { font-family: var(--t-display); font-size: var(--fs-lg); line-height: 1.3; }
 .axp-names span { font-size: var(--fs-2xs); color: var(--text-muted); }
 .axp-x {
-  flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; cursor: pointer;
-  border: 1px solid var(--border-soft); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-muted);
+  flex: none; display: grid; place-items: center; width: var(--ctl-md); height: var(--ctl-md); padding: 0; cursor: pointer;
+  border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-muted);
 }
-.axp-x:hover { color: var(--accent-ink); border-color: var(--accent); }
+.axp-x:hover { color: var(--accent-ink); background: var(--accent-soft); }
 /* The introduction stands as far from the band as from the rule below it,
    and the rule as far again from the list's heading. */
 .axp-intro { margin: .8rem 1.1rem; }
@@ -2834,4 +2891,12 @@ html.axp-lock { overflow: hidden; }
 .axp-decs li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .45rem; padding: .4rem 0; border-bottom: 1px dashed var(--border-soft); }
 .axp-decs li:last-child { border-bottom: 0; }
 .axp-dt { font-size: var(--fs-xs); }
+/* A `D#` card: the axis chip and code over the question, then the rewrites
+   that cite it — narrower than an axis card, since it holds one question. */
+.axp-pop .axp-d { width: min(22rem, calc(100vw - 24px)); }
+.axp-d .axp-names b { font-size: var(--fs-md); }
+.axp-code { font-size: var(--fs-2xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.axp-d .axp-decs a { font-size: var(--fs-xs); color: var(--text); text-decoration: none; }
+.axp-d .axp-decs a:hover { color: var(--accent-ink); text-decoration: underline; }
+abbr.dref[data-d] { cursor: pointer; }
 .axp-dc { font-size: var(--fs-3xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }

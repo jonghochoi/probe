@@ -341,7 +341,9 @@ def _figure(fid, caption, figure_urls: dict[str, str]) -> str:
 
     Citing by id rather than by URL is what keeps one figure one hotlink: the
     body already declared where it lives, and a second URL here could drift
-    from it silently.
+    from it silently. The image links to itself: beside the claim it stands
+    at the narrow track's size, and an overview drawn finer than that opens
+    whole in its own tab.
     """
     if not fid:
         return ""
@@ -350,8 +352,10 @@ def _figure(fid, caption, figure_urls: dict[str, str]) -> str:
         return ""
     cap = c.esc(caption or "")
     return (
+        f'<a href="{c.esc(url)}" target="_blank" rel="noopener noreferrer" '
+        'title="원본 크기로 보기">'
         f'<figure class="fig"><img src="{c.esc(url)}" alt="{cap}" '
         f'loading="lazy" decoding="async" referrerpolicy="no-referrer">'
         + (f"<figcaption>{cap}</figcaption>" if cap else "")
-        + "</figure>"
+        + "</figure></a>"
     )

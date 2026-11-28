@@ -17,7 +17,7 @@ contract must say.
 
 **Only `analysis/`, `comparison/` and `scouting/` publish.**
 Nothing else in the repo reaches the site — `context/` is not a published
-surface beyond the `D#` titles a tooltip prints, the dates of
+surface beyond the title and pillar a `D#` card prints, the dates of
 `context/EVENTS.md`, which the first screen counts down to, and what an axis
 chip's popup prints: each pillar's optional introduction and the titles of
 its open questions.
@@ -61,7 +61,9 @@ under `assets/shelf.js` and `assets/memo.js`; the analysis list's page size
 — a view setting rather than a mark on a paper — under `probe.view.v1`;
 the reader's colour under `probe.accent`; and the newest piece and the
 scouting run the first screen's mascot has already announced under
-`probe.home.seen.v1` and `probe.home.run.v1` (`assets/home.js`). Both marks are set by the reader and
+`probe.home.seen.v1` and `probe.home.run.v1` (`assets/home.js`), with
+`probe.home.entered` in `sessionStorage` marking a session that has watched
+the first screen open. Both marks are set by the reader and
 never inferred: neither opening a page nor scrolling to its end is evidence it
 was read.
 
@@ -75,7 +77,10 @@ forbids an author to write, `builder/assets/site.css` keeps:
   (`probe-split`) is keyed by its heading color, never a band. The 요약
   cards are the surface, not asides: each is named by an underlined head
   and a glow from its top edge, and carries no band. Inside the story a
-  move is named in the margin beside it, never by a band either.
+  move is named in the margin beside it, never by a band either. A 2px
+  accent rule with no ground behind it is an annotation bound to what it
+  sits beside — a quiz's reasoning, an equation's reading line; anything on
+  a ground of its own is an aside and takes the 3px band.
 - Every component owns its internal spacing; body paragraph and list margins
   apply only to the article flow, a callout body and a `::: details` body.
 - A `###` section keeps its `id` (contents, scroll-spy and memo anchor resolve
@@ -146,7 +151,7 @@ raw Markdown rather than holding it, and the build refuses the file past
 keywords, neighbours) goes to `p/<id>/card.json`, and every URL is a template
 on the root, so the index grows by about a kilobyte a paper. Past the budget, a
 field moves down a tier; the budget does not move. From `context/` it carries
-only what the pages already print in a `D#` tooltip — the code, its pillar and
+only what the pages already print in a `D#` card — the code, its pillar and
 its title. Relations stay one kind per field; only `neighbours` is a score, and
 it is `corpus.score`, the rule the page's own neighbour row ranks by.
 

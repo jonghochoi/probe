@@ -38,18 +38,19 @@
 .sn-cal {
   position: absolute; left: 0; top: calc(100% + .4rem); z-index: var(--z-raised); width: 21rem; max-width: calc(100vw - 1.8rem);
   display: grid; gap: 1rem; padding: .9rem .9rem .8rem; border-radius: var(--radius); background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-overlay);
 }
 .sn-cal-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
 .sn-cal-h h2 { margin: 0; font-size: var(--fs-md); font-weight: 700; }
 .sn-nav {
-  display: none; width: 2rem; height: 2rem; border-radius: var(--radius-sm); border: 1px solid var(--border-soft);
+  display: none; width: var(--ctl-md); height: var(--ctl-md); border-radius: var(--radius-pill); border: 0;
   background: transparent; color: var(--text); cursor: pointer; font-size: 1.1rem; line-height: 1;
 }
 html.js .sn-nav { display: block; }
-.sn-nav:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-ink); }
-.sn-nav:disabled { opacity: .3; cursor: default; }
+.sn-nav:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent-ink); }
+/* A month at either end of the runs has nowhere to step to: the arrow keeps
+   its box, so the month title does not slide, and goes unseen. */
+.sn-nav:disabled { visibility: hidden; }
 html.js .sn-month[hidden] { display: none; }
 .sn-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
 .sn-dow { text-align: center; font-size: var(--fs-3xs); color: var(--text-muted); padding: .2rem 0 .3rem; }
@@ -145,14 +146,14 @@ html.sd-on { overflow: hidden; }
 .sd-bg { position: absolute; inset: 0; background: var(--scrim); animation: sd-fade var(--dur-short) ease-out; }
 .sd-p {
   position: absolute; top: 0; right: 0; bottom: 0; width: min(46rem, 92vw); overflow-y: auto; overscroll-behavior: contain;
-  background: var(--bg); box-shadow: var(--shadow-lg); animation: sd-in .22s ease-out;
+  background: var(--bg); box-shadow: var(--shadow-overlay); animation: sd-in var(--dur-long) var(--ease-out);
 }
 .sd-p .sd-h { position: sticky; top: 0; z-index: 1; border-radius: 0; }
 .sd-x {
-  flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; cursor: pointer;
-  border: 1px solid var(--border-soft); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-muted);
+  flex: none; display: grid; place-items: center; width: var(--ctl-md); height: var(--ctl-md); padding: 0; cursor: pointer;
+  border: 0; border-radius: var(--radius-pill); background: none; color: var(--text-muted);
 }
-.sd-x:hover { color: var(--accent-ink); border-color: var(--accent); }
+.sd-x:hover { color: var(--accent-ink); background: var(--accent-soft); }
 @keyframes sd-fade { from { opacity: 0; } }
 @keyframes sd-in { from { transform: translateX(24px); opacity: .4; } }
 @keyframes sd-up { from { transform: translateY(40px); opacity: .4; } }
@@ -174,7 +175,7 @@ html.sd-on { overflow: hidden; }
   .card-fig { height: 130px; }
   .card .card-title, .card .card-tags { display: none; }
   .sn .tl-head + .tl { margin-top: 0; }
-  .sd-p { top: 8vh; left: 0; width: auto; border-radius: 16px 16px 0 0; animation-name: sd-up; }
+  .sd-p { top: 8vh; left: 0; width: auto; border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; animation-name: sd-up; }
   .sd-p .sd-h { border-radius: 16px 16px 0 0; padding: .9rem 1.1rem .8rem; }
   .sd-fig { margin: .8rem 1.1rem .2rem; }
   .sd-fig img { max-height: 300px; }

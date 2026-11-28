@@ -92,13 +92,13 @@
   }
   .lt-tabs button[aria-current="true"] { color: var(--accent-ink); background: var(--accent-soft); }
   .lt-tabs button[aria-current="true"] b { color: var(--on-accent); background: var(--accent); }
-  .lt-tabs button:disabled { opacity: .45; cursor: default; }
+  .lt-tabs button:disabled { opacity: .5; cursor: default; }
 
   .lt {
     min-width: 0; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 100%;
     align-items: start; column-gap: 0; padding: .9rem 0;
     overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
-    scrollbar-width: none; transition: height .25s ease;
+    scrollbar-width: none; transition: height var(--dur-long) var(--ease-in-out);
   }
   .lt::-webkit-scrollbar { display: none; }
   .lt > * { scroll-snap-align: start; scroll-snap-stop: always; }
